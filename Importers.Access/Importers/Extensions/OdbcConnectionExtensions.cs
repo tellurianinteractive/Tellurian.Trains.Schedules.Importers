@@ -3,16 +3,17 @@ using System.Data.Odbc;
 using System.Globalization;
 
 
-namespace TimetablePlanning.Importers.Access.Tests.Extensions;
+namespace TimetablePlanning.Importers.Access.Extensions;
 
-internal static class OdbcConnectionExtensions
+public static class OdbcConnectionExtensions
 {
-    public static IDbConnection CreateMicrosoftAccessDbConnection(string databaseFilePath)
-    {
-        const string driver = "{Microsoft Access Driver (*.mdb, *.accdb)}";
-        var connectionString = string.Format(CultureInfo.InvariantCulture, "Driver={0};DBQ={1}", driver, databaseFilePath);
-        return new OdbcConnection(connectionString);
-    }
+    const string driver = "{Microsoft Access Driver (*.mdb, *.accdb)}";
+
+    public static string ConnectionString(this string databaseFilePath) =>
+        string.Format(CultureInfo.InvariantCulture, "Driver={0};DBQ={1}", driver, databaseFilePath);
+
+    public static IDbConnection CreateMicrosoftAccessDbConnection(string databaseFilePath) => 
+        new OdbcConnection(ConnectionString(databaseFilePath));
 
     public static IDataReader ExecuteReader(this IDbConnection connection, IDbCommand command)
     {

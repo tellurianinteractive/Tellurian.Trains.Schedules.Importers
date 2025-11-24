@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using TimetablePlanning.Importers.Model;
 
-namespace TimetablePlanning.Importers.Model.Tests;
+namespace Tellurian.Trains.Models.Planning.Tests;
 
 [TestClass]
 public class VehicleScheduleTests
@@ -21,10 +21,9 @@ public class VehicleScheduleTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void AddsNullTrainPartThrows()
     {
-        Target.Add(null);
+        Assert.Throws<ArgumentNullException>(() => Target.Add(null));
     }
 
     [TestMethod]

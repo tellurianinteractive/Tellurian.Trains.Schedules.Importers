@@ -1,4 +1,6 @@
-﻿namespace TimetablePlanning.Importers.Model.Xpln;
+﻿using TimetablePlanning.Importers.Model;
+
+namespace TimetablePlanning.Importers.Xpln;
 
 public sealed partial class XplnDataImporter
 {

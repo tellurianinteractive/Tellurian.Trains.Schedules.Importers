@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.MemoryMappedFiles;
+using TimetablePlanning.Importers.Access.Extensions;
 using TimetablePlanning.Importers.Model;
 using TimetablePlanning.Importers.Xpln.DataSetProviders;
 
@@ -55,7 +56,13 @@ public class XplnImporterTests
         Import("Magdeburg_v_DB33_DSB32_WTB11", "de-DE", 142, 58, 77, 119, 0, 40);
     }
 
-    [DataTestMethod()]
+    [TestMethod]
+    public void ImportsGivskudModern2025()
+    {
+        Import("Givskud-Modern-2025", "da-DK", 125, 32, 50, 73, 1, 0);
+    }
+
+    [TestMethod()]
     [DataRow("Montan2023H0e", "de-DE", 32, 3, 28, 3, 0)]
     [DataRow("Barmstedt2022", "de-DE", 61, 18, 36, 45, 2)]
     [DataRow("Givskud2021", "da-DK", 32, 3, 28, 3, 0, 7)]
@@ -77,14 +84,11 @@ public class XplnImporterTests
 
     public void Import(string scheduleName, string? culture, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedDuties, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
     {
-        if (string.IsNullOrWhiteSpace(scheduleName)) throw new ArgumentNullException(nameof(scheduleName));
         culture ??= "sv-SE";
         CultureInfo.CurrentCulture = new CultureInfo(culture);
         CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
-        var files = TestDocumentsDirectory!.EnumerateFiles(scheduleName + FileSuffix);
-        if (files.Any())
+        if (IsScheduleFileExisting(scheduleName , out var file))
         {
-            var file = files.First();
             var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
             using var importer = new XplnDataImporter(file, dataSetProvider, NullLogger<XplnDataImporter>.Instance);
             var result = importer.ImportSchedule(scheduleName);
@@ -96,10 +100,10 @@ public class XplnImporterTests
             else
             {
                 var timetable = result.Item.Timetable;
-                Assert.AreEqual(expectedTrains, timetable.Trains.Count, "Trains");
-                Assert.AreEqual(expectedLocos, result.Item.LocoSchedules.Count, "Locos");
-                Assert.AreEqual(expectedTrainsets, result.Item.TrainsetSchedules.Count, "Trainsets");
-                Assert.AreEqual(expectedDuties, result.Item.DriverDuties.Count, "Duties");
+                Assert.HasCount(expectedTrains, timetable.Trains, "Trains");
+                Assert.HasCount(expectedLocos, result.Item.LocoSchedules, "Locos");
+                Assert.HasCount(expectedTrainsets, result.Item.TrainsetSchedules, "Trainsets");
+                Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
                 var validationErrors = result.Item.GetValidationErrors(ValidationOptions);
                 WriteLines(result.Messages.ToStrings().Concat(validationErrors.ToStrings()), file);
@@ -120,5 +124,30 @@ public class XplnImporterTests
         writer.WriteLine($"Validation at {DateTime.Now}");
         foreach (var message in messages) writer.WriteLine(message);
         writer.WriteLine("Validation completed.");
+    }
+
+    private bool IsScheduleFileExisting(string name, [NotNullWhen(true)] out FileInfo? file)
+    {
+        if (string.IsNullOrWhiteSpace(name)) { file = null; return false; }
+        var filePathName = Path.Combine(TestDocumentsDirectory?.FullName ?? "", name + FileSuffix);
+        if (!File.Exists(filePathName)) { file = null; return false; }
+        file = new FileInfo(filePathName);
+        return true;
+    }
+
+    [TestMethod, Ignore("Only used for special cases.")]
+    public void ImportsGivskudModern2025ToDatabase() => ImportToDatabase("Givskud-Modern-2025", "C:\\Users\\Stefan\\OneDrive\\Modelljärnväg\\Träffar\\2025\\2025-04 Givskud\\Timetable.accdb");
+
+    public void ImportToDatabase(string scheduleName, string databaseFilePath)
+    {
+        if (IsScheduleFileExisting(scheduleName, out var file))
+        {
+            var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
+            using var importer = new XplnDataImporter(file, dataSetProvider, NullLogger<XplnDataImporter>.Instance);
+            var result = importer.ImportSchedule(scheduleName);
+            if (result.IsSuccess) {
+                result.Item.SaveToDatabase(databaseFilePath.ConnectionString());
+            }
+        }
     }
 }

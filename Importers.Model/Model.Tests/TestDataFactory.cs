@@ -1,4 +1,6 @@
-﻿namespace TimetablePlanning.Importers.Model.Tests;
+﻿using TimetablePlanning.Importers.Model;
+
+namespace Tellurian.Trains.Models.Planning.Tests;
 
 internal static class TestDataFactory
 {

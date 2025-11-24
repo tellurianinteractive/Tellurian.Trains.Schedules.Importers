@@ -6,7 +6,7 @@ using TimetablePlanning.Importers.Interfaces;
 using TimetablePlanning.Importers.Model;
 using TimetablePlanning.Importers.Xpln.DataSetProviders;
 using TimetablePlanning.Importers.Xpln.Extensions;
-using static TimetablePlanning.Importers.Model.Xpln.XplnDataImporter;
+using static TimetablePlanning.Importers.Xpln.XplnDataImporter;
 
 namespace TimetablePlanning.Importers.Xpln;
 public sealed partial class XplnDataImporter : IImportService, IDisposable
@@ -39,7 +39,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         var result = new DataSetConfiguration("Test");
         result.Add(new WorksheetConfiguration("StationTrack", 8));
         result.Add(new WorksheetConfiguration("Routes", 11));
-        result.Add(new WorksheetConfiguration("Trains", 11));
+        result.Add(new WorksheetConfiguration("Trains", 18));
         return result;
     }
 
@@ -307,6 +307,8 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         const int Type = 8;
         const int Remark = 10;
         const int MinLength = 10;
+        const int ArrivalAlternative = 16;
+        const int DepartureAlternative = 17;
 
         var messages = new List<Message>();
 
@@ -364,7 +366,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                     var track = layout.Track(fields[Station], fields[Track]);
                                     if (track.IsNone)
                                     {
-                                        messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.RowMessage,rowNumber,track.Message)));
+                                        messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.RowMessage, rowNumber, track.Message)));
                                     }
                                     else
                                     {
@@ -377,7 +379,8 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
 
                         case "locomotive":
                             {
-                                if (current is null) continue;
+                                if (current.IsNullOrHasNoCalls()) continue;
+
                                 if (fields[Object].HasValue())
                                 {
                                     var note = new Note()
@@ -391,13 +394,14 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                     };
                                     var train = result.Trains.SingleOrDefault(t => t.Equals(current));
                                     train?.Calls.First().Notes.Add(note);
-                                };
+                                }
+                                ;
                             }
                             break;
 
                         case "trainset":
                             {
-                                if (current is null) continue;
+                                if (current.IsNullOrHasNoCalls()) continue;
                                 if (fields[Remark].HasValue())
                                 {
                                     var note = new Note()
@@ -408,7 +412,8 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
 
                                     };
                                     current.Calls.First().Notes.Add(note);
-                                };
+                                }
+                                ;
 
                             }
                             break;
@@ -428,12 +433,12 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         {
             if (train.Calls.Count == 0)
             {
-                return new[] { Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TrainHasNoCalls, rowNumber, train)) };
+                return [Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TrainHasNoCalls, rowNumber, train))];
             }
             else
             {
                 timetable.Add(train.WithFixedSingleCallTrain().WithFixedFirstAndLastCall());
-                return Enumerable.Empty<Message>();
+                return [];
             }
 
         }
@@ -444,13 +449,16 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                 Category = fields[Object].TrainCategory(),
             };
 
-        static StationCall CreateCall(string[] fields, StationTrack track) =>
-            new(track, fields[Arrival].AsTime(), fields[Departure].AsTime())
+        static StationCall CreateCall(string[] fields, StationTrack track)
+        {
+            //var arrivalTime = fields[Arrival].IsEmpty() ? fields[ArrivalAlternative]: fields[Arrival];
+            return new(track, fields[Arrival].AsTime(), fields[Departure].AsTime())
             {
                 IsArrival = true,
                 IsDeparture = true,
 
             };
+        }
 
         static Message[] ValidateRow(string[] fields, int rowNumber)
         {
@@ -520,7 +528,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             {
                 var itemMessages = new List<Message>();
                 var fields = row.GetRowFields();
-                if (fields.IsEmptyFields()) { if (locoSchedules.Count > 0 || trainsetSchedules.Count >0 || driverDuties.Count > 0) break; else continue; }
+                if (fields.IsEmptyFields()) { if (locoSchedules.Count > 0 || trainsetSchedules.Count > 0 || driverDuties.Count > 0) break; else continue; }
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
@@ -678,9 +686,9 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             var messages = new List<Message>();
             if (fields.Length < MinLength)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.NotAllFieldsArePresent, rowNumber, MinLength, fields.Length)));
-            if (!fields[Arrival].IsTime())
+            if (!fields[Arrival].IsTime(fields[Type] == "timetable"))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Arrival", fields[Arrival])));
-            if (!fields[Departure].IsTime())
+            if (!fields[Departure].IsTime(fields[Type] == "timetable"))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Departure", fields[Arrival])));
             else if (!fields[Type].IsAny("Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.UnsupportedType, rowNumber, fields[Type])));

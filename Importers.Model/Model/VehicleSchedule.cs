@@ -9,7 +9,7 @@ public abstract record VehicleSchedule
     protected VehicleSchedule(string number)
     {
         Number = number;
-        Parts = new List<TrainPart>();
+        Parts = [];
     }
 
     public override string ToString() => Number;

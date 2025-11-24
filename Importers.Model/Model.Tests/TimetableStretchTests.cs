@@ -1,8 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using TimetablePlanning.Importers.Model;
 
-
-namespace TimetablePlanning.Importers.Model.Tests;
+namespace Tellurian.Trains.Models.Planning.Tests;
 
 [TestClass]
 public class TimetableStretchTests
@@ -17,11 +15,10 @@ public class TimetableStretchTests
         Target = new TimetableStretch("10", "Ten");
     }
 
-    [ExpectedException(typeof(ArgumentNullException))]
     [TestMethod]
     public void NullNumberThrows()
     {
-        Target = new TimetableStretch(null);
+        Assert.Throws<ArgumentNullException>(() => new TimetableStretch(null));
     }
 
     [TestMethod]

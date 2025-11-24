@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>TimetablePlanning.Importers.Model</AssemblyName>
     <RootNamespace>TimetablePlanning.Importers.Model</RootNamespace>
     <PackageId>TimetablePlanning.Importers.Model</PackageId>

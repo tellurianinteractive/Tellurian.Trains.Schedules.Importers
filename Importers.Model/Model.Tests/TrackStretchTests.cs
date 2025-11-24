@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
-
-namespace TimetablePlanning.Importers.Model.Tests;
+﻿namespace Tellurian.Trains.Models.Planning.Tests;
 
 [TestClass]
 public class TrackStretchTests

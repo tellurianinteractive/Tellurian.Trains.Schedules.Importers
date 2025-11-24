@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using TimetablePlanning.Importers.Model;
 
-namespace TimetablePlanning.Importers.Model.Tests;
+namespace Tellurian.Trains.Models.Planning.Tests;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.Serialization;
 
@@ -63,6 +63,8 @@ public static class TrainExtensions
         }
         return call;
     }
+
+    public static bool IsNullOrHasNoCalls([NotNullWhen(true)] this Train? train) => train is null || train.Calls.Count == 0;
 
     public static Train WithFixedFirstAndLastCall(this Train train)
     {

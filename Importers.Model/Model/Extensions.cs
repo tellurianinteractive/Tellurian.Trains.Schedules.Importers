@@ -21,6 +21,7 @@ public static class StringExtensions
 public static class ObjectExtensions
 {
     public static bool HasValue([NotNullWhen(true)] this object? value) => value is not null;
+    public static bool HasValueExcept([NotNullWhen(true)] this object? value, object except ) => value is not null && !value.Equals(except);
     public static T ValueOrException<T>([AllowNull] this T? value, string parameterName) where T : class =>
         value ?? throw new ArgumentNullException(parameterName);
 

@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data;
-using System.IO.MemoryMappedFiles;
 using TimetablePlanning.Importers.Xpln.DataSetProviders;
 
 namespace TimetablePlanning.Importers.Xpln.Tests;

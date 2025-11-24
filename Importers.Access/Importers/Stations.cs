@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Data.Odbc;
-using TimetablePlanning.Importers.Access.Tests.Extensions;
+using TimetablePlanning.Importers.Access.Extensions;
 using TimetablePlanning.Importers.Model;
 
 namespace TimetablePlanning.Importers.Access;

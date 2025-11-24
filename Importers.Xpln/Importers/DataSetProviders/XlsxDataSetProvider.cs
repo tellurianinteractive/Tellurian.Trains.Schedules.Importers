@@ -31,7 +31,8 @@ public sealed class XlsxDataSetProvider(ILogger logger) : IDataSetProvider
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error when reading {file}.", configuration.Name);
+            if(Logger.IsEnabled(LogLevel.Error))
+                Logger.LogError(ex, "Error when reading {file}.", configuration.Name);
             throw;
         }
     }

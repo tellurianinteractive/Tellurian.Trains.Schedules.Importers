@@ -1,11 +1,12 @@
 <Project>
 	<PropertyGroup>
+		<TargetFrameworks>net10.0</TargetFrameworks>
 		<Product>Tellurian Trains</Product>
-		<Company>Tellurian Interactive AB</Company>
-		<Copyright>© Stefan Fjällemark 2023</Copyright>
+		<Company>Tellurian Interactive</Company>
+		<Copyright>© Stefan Fjällemark 2023-2025</Copyright>
 		<Authors>Stefan Fjällemark</Authors>
-		<Version>1.1.0</Version>
-		<AssemblyVersion>1.1.0.0</AssemblyVersion>
+		<Version>1.2.0</Version>
+		<AssemblyVersion>1.2.0.0</AssemblyVersion>
 		<NeutralLanguage>en-GB</NeutralLanguage>
 		<Platforms>AnyCPU</Platforms>
 		<ImplicitUsings>true</ImplicitUsings>

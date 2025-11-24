@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TimetablePlanning.Importers.Xpln.Extensions;
+﻿using TimetablePlanning.Importers.Xpln.Extensions;
 
 namespace TimetablePlanning.Importers.Xpln.Tests;
 
@@ -24,11 +23,13 @@ public class StringExtensionsTests
     [TestMethod]
     public void IsTime()
     {
-        Assert.IsTrue("12:34".IsTime());
-        Assert.IsTrue("1899-12-31 12:34:00".IsTime());
-        Assert.IsTrue("0,22222222222646".IsTime());
-        Assert.IsFalse("12.60".IsTime());
-        Assert.IsFalse("X".IsTime());
+        Assert.IsTrue("12:34".IsTime(), "12:34");
+        Assert.IsTrue("1899-12-31 12:34:00".IsTime(), "1899-12-31 12:34:00");
+        Assert.IsTrue("0,22222222222646".IsTime(), "0,22222222222646");
+        Assert.IsFalse("12.60".IsTime(), "12:60");
+        Assert.IsFalse("X".IsTime(), "X");
+        Assert.IsTrue("0".IsTime(), "0");
+        Assert.IsFalse("0".IsTime(true), "0");
     }
 }
 

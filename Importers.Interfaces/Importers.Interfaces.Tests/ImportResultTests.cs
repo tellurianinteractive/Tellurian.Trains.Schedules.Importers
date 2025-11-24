@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using TimetablePlanning.Importers.Model;
 using TimetablePlanning.Importers.Xpln;
 using TimetablePlanning.Importers.Xpln.DataSetProviders;

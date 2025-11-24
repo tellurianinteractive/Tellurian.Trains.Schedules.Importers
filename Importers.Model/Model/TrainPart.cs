@@ -12,6 +12,7 @@ public sealed record TrainPart : IEquatable<TrainPart>
     public int Id { get; init; }
     public StationCall From { get; init; }
     public StationCall To { get; init; }
+    public string? ExternalKey {  get; init; }
 
     public TrainPart(StationCall from, StationCall to)
     {

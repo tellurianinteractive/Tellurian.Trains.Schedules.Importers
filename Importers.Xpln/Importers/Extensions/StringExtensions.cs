@@ -33,12 +33,11 @@ namespace TimetablePlanning.Importers.Xpln.Extensions
             DateTime.TryParse(value, CultureInfo.InvariantCulture, out var dateTime) ? Time.FromTimeSpan(dateTime.TimeOfDay) :
             Time.FromDays(double.Parse(value.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture));
 
-        public static bool IsTime(this string? value) =>
-            value.HasValue() &&
+        public static bool IsTime(this string? value, bool isZeroInvalid = false) =>
+            (isZeroInvalid && value.HasValueExcept("0") || !isZeroInvalid && value.HasValue()) &&
                 (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var _) ||
                 DateTime.TryParse(value, CultureInfo.InvariantCulture, out var _) ||
                 double.TryParse(value.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, out var t) && t >= 0.0 && t <= 1.0);
-
 
         public static bool IsTrackNumber(this string? value) =>
             value is not null && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _);

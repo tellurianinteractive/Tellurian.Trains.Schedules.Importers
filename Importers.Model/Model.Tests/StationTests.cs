@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using TimetablePlanning.Importers.Model;
 
-namespace TimetablePlanning.Importers.Model.Tests;
+namespace Tellurian.Trains.Models.Planning.Tests;
 
 [TestClass]
 public class StationTests
