@@ -307,8 +307,6 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         const int Type = 8;
         const int Remark = 10;
         const int MinLength = 10;
-        const int ArrivalAlternative = 16;
-        const int DepartureAlternative = 17;
 
         var messages = new List<Message>();
 
@@ -411,7 +409,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                         Text = fields[Remark]
 
                                     };
-                                    current.Calls.First().Notes.Add(note);
+                                    current?.Calls.First().Notes.Add(note);
                                 }
                                 ;
 

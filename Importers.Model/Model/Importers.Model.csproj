@@ -2,9 +2,12 @@
   <PropertyGroup>
     <AssemblyName>TimetablePlanning.Importers.Model</AssemblyName>
     <RootNamespace>TimetablePlanning.Importers.Model</RootNamespace>
-    <PackageId>TimetablePlanning.Importers.Model</PackageId>
+    <PackageId>$(AssemblyName)</PackageId>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
+    <Title>$(AssemblyName)</Title>
+    <RepositoryType />
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
@@ -27,8 +30,14 @@
       </CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
   <Target Condition="'$(Configuration)' == 'Release'" Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="C:\NuGets\" />
-    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="C:\NuGets\" />
+    <Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="C:\NuGets\" />
+    <Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="C:\NuGets\" />
   </Target>
 </Project>

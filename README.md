@@ -8,10 +8,10 @@ The objetc model can then be mapped to storage in databases or files.**
 
 ## Output
 This project produces four NuGet packages:
-- **TimetablePlanning.Importers.Interfaces** defining import operations
-- **TimetablePlanning.Importers.Model** defining the object model.
-- **TimetablePlanning.Importers.Access** with logic to read the prototype's Access database.
-- **TimetablePlanning.Importers.Xpln** with logic to read XPLN .ODS-files.
+- **TimetablePlanning.Importers.Interfaces** defining import operations ([README](Importers.Interfaces/Importers.Interfaces/README.md))
+- **TimetablePlanning.Importers.Model** defining the object model ([README](Importers.Model/Model/README.md))
+- **TimetablePlanning.Importers.Access** with logic to read the prototype's Access database ([README](Importers.Access/Importers/README.md))
+- **TimetablePlanning.Importers.Xpln** with logic to read XPLN .ODS-files ([README](Importers.Xpln/Importers/README.md))
 
 ## Access Importer
 Validates and imports timetable data from the [timetable prototype app](https://github.com/fjallemark/TimetablePlanningApp).

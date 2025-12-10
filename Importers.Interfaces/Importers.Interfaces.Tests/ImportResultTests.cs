@@ -16,7 +16,6 @@ public class ImportResultTests
         var json = target.Json();
         Assert.IsNotNull(json);
         var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
-        Assert.IsNotNull(result);
         Assert.AreEqual(4, result.Messages.Length);
         Assert.IsTrue(result.IsSuccess);
     }
@@ -28,18 +27,16 @@ public class ImportResultTests
             {
                 "name":"files",
                 "messages":[
-                    {"text":"Läser arbetsblad StationTrack...","severity":1},
-                    {"text":"Läser arbetsblad Routes...","severity":1},
-                    {"text":"Läser arbetsblad Trains:traindef,timetable,remarks...","severity":1},
-                    {"text":"Läser arbetsblad Trains:locomotive,trainset,job,remarks...","severity":1}],
+                    {"text":"Lï¿½ser arbetsblad StationTrack...","severity":1},
+                    {"text":"Lï¿½ser arbetsblad Routes...","severity":1},
+                    {"text":"Lï¿½ser arbetsblad Trains:traindef,timetable,remarks...","severity":1},
+                    {"text":"Lï¿½ser arbetsblad Trains:locomotive,trainset,job,remarks...","severity":1}],
                 "isSuccess":true
             }
             """;
         var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
-        Assert.IsNotNull(result);
         Assert.AreEqual(4, result.Messages.Length);
         Assert.IsTrue(result.IsSuccess);
-
     }
 
     static JsonSerializerOptions JsonSerializerOptions => new() { PropertyNameCaseInsensitive=true };

@@ -2,7 +2,10 @@
   <PropertyGroup>
     <AssemblyName>TimetablePlanning.Importers.Interfaces</AssemblyName>
     <RootNamespace>TimetablePlanning.Importers.Interfaces</RootNamespace>
-    <PackageId>TimetablePlanning.Importers.Interfaces</PackageId>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType />
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
@@ -13,8 +16,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Importers.Model\Model\Importers.Model.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
   <Target Condition="'$(Configuration)' == 'Release'" Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="C:\NuGets\" />
-    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="C:\NuGets\" />
+    <Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="C:\NuGets\" />
+    <Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="C:\NuGets\" />
   </Target>
 </Project>

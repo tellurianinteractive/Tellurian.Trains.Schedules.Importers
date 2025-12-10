@@ -3,10 +3,10 @@
 		<TargetFrameworks>net10.0</TargetFrameworks>
 		<Product>Tellurian Trains</Product>
 		<Company>Tellurian Interactive</Company>
-		<Copyright>© Stefan Fjällemark 2023-2025</Copyright>
+		<Copyright>© Stefan Fjällemark 2023-2026</Copyright>
 		<Authors>Stefan Fjällemark</Authors>
-		<Version>1.2.0</Version>
-		<AssemblyVersion>1.2.0.0</AssemblyVersion>
+		<Version>1.2.1</Version>
+		<AssemblyVersion>1.2.1.0</AssemblyVersion>
 		<NeutralLanguage>en-GB</NeutralLanguage>
 		<Platforms>AnyCPU</Platforms>
 		<ImplicitUsings>true</ImplicitUsings>
@@ -15,7 +15,7 @@
 	<PropertyGroup>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<PackageTags>model-trains scheduling timetables</PackageTags>
+		<PackageTags>model-trains scheduling timetables FREMO XPLN</PackageTags>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -30,5 +30,8 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+		<NoWarn>$(NoWarn);MSTEST0001;MSTEST0037</NoWarn>
 	</PropertyGroup>
 </Project>
