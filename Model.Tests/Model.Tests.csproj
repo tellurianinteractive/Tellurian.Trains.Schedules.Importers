@@ -1,0 +1,14 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Timetables.Importers.Model.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Timetables.Importers.Model.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="TestRepository.cs" />
+    <Compile Remove="TimetableTests.cs" />
+    <Compile Remove="TrackLayoutTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model\Model.csproj" />
+  </ItemGroup>
+</Project>

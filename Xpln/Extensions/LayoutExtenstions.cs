@@ -1,0 +1,19 @@
+﻿using System.Globalization;
+using Tellurian.Trains.Timetables.Importers.Model;
+
+namespace Tellurian.Trains.Timetables.Importers.Xpln.Extensions
+{
+    public static class LayoutExtenstions
+    {
+        public static Maybe<StationTrack> Track(this Layout me, string stationSignature, string trackNumber)
+        {
+            var station = me.Station(stationSignature);
+            if (station.IsNone) 
+                return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ThereIsNoStation, stationSignature));
+            var track = station.Value.Tracks.SingleOrDefault(t => t.Number.Equals(trackNumber, StringComparison.OrdinalIgnoreCase));
+            if (track is null) 
+                return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TheTrackIsItNotInStation, trackNumber, stationSignature));
+            return new Maybe<StationTrack>(track);
+        }
+    }
+}

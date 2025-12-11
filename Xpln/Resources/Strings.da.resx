@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CannotReadScheduleDueToErrorsInTimetable" xml:space="preserve">
+    <value>Kan ikke indlæse tjenesterne grundet fejl i køreplanen.</value>
+  </data>
+  <data name="CannotReadTimetableDueToErrorsInLayout" xml:space="preserve">
+    <value>Kan ikke indlæse køreplanen grundet fejl i banelayoutet.</value>
+  </data>
+  <data name="FeatureIsNotSupported" xml:space="preserve">
+    <value>Funktion {0} er ikke supporteret.</value>
+  </data>
+  <data name="ObjectAtStationWithArrivalDoNotRefersToAnExistingTimeInTrain" xml:space="preserve">
+    <value>Række {0}: Objekt '{1}' ved station {2} ank {3} refererer til en tid der ikke findes i tog {4}.</value>
+  </data>
+  <data name="ObjectAtStationWithDepartureDoNotRefersToAnExistingTimeInTrain" xml:space="preserve">
+    <value>Række {0}: Objekt '{1}' ved station {2} afg {3} refererer til en tid der ikke findes i tog {4}.</value>
+  </data>
+  <data name="ObjectInTrainHasWrongTimingEndStartionIsBeforeStartStation" xml:space="preserve">
+    <value>Række {0}: Objekt '{1}' i tog {2} har tider i forkert rækkefølge. Afgang {3} er inden ankomst {4}.</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Advarsel</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Fejl</value>
+  </data>
+  <data name="TrainHasNoCallsAtStation" xml:space="preserve">
+    <value>Række {0}: Tog {1} passerer ikke station {2}.</value>
+  </data>
+  <data name="WorksheetNotFound" xml:space="preserve">
+    <value>Arbejdsark {0} blev ikke fundet.</value>
+  </data>
+  <data name="UnsupportedType" xml:space="preserve">
+    <value>Række {0}: Type {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
+  </data>
+  <data name="NotAllFieldsArePresent" xml:space="preserve">
+    <value>Række {0}: Ikke alle felter er til stede, forventet antal er {1}, faktisk antal er {2}.</value>
+  </data>
+  <data name="UseLoco" xml:space="preserve">
+    <value>Brug lok {0}.</value>
+  </data>
+  <data name="UseLocoClasses" xml:space="preserve">
+    <value>Brug lok {0}, type {1}.</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="TrainHasOverlappingTimesAtStation" xml:space="preserve">
+    <value>Række {0}: Tog {1} har overlappende tider ved {2}.</value>
+  </data>
+  <data name="ColumnMustHaveAValue" xml:space="preserve">
+    <value>Række {0}: Kolonne {1} skal indeholde en værdi.</value>
+  </data>
+  <data name="UnsupportedSubType" xml:space="preserve">
+    <value>Række {0}: SubType {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
+  </data>
+  <data name="ColumnMustBeANumber" xml:space="preserve">
+    <value>Række {0}: Kolonne {1} skal indeholde et tal, den aktuelle værdi er '{2}'.</value>
+  </data>
+  <data name="ColumnIsNotSpecified" xml:space="preserve">
+    <value>Række {0}: Kolonne {1} er ikke angivet.</value>
+  </data>
+  <data name="ColumnMustBeATime" xml:space="preserve">
+    <value>Række {0}: Kolonne {1} skal være et tidspunkt, den aktuelle værdi er '{2}'.</value>
+  </data>
+  <data name="TrainHasNoCalls" xml:space="preserve">
+    <value>Række {0}: Tog {1} har ingen tidspunkter på stationer.</value>
+  </data>
+  <data name="StationNotFoundInLayout" xml:space="preserve">
+    <value>Række {0}: Station '{1}' blev ikke fundet i det aktuelle layout.</value>
+  </data>
+  <data name="RouteNotFoundInLayout" xml:space="preserve">
+    <value>Række {0}: Rute '{1}' blev ikke fundet i det aktuelle layout.</value>
+  </data>
+  <data name="RouteNumberIsMissingUsingDefault" xml:space="preserve">
+    <value>Række {0}: Rutenummer mangler, bruger standardværdi '{1}'.</value>
+  </data>
+  <data name="ReadingWorksheet" xml:space="preserve">
+    <value>Læser arbejdsark {0}...</value>
+  </data>
+  <data name="RowMessage" xml:space="preserve">
+    <value>Række {0}: {1}.</value>
+  </data>
+  <data name="ThereIsNoStation" xml:space="preserve">
+    <value>Der er ingen station '{0}'.</value>
+  </data>
+  <data name="TheTrackIsItNotInStation" xml:space="preserve">
+    <value>Sporet '{0}' er ikke på stationen '{1}'.</value>
+  </data>
+</root>
