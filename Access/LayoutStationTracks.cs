@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.Odbc;
 
-namespace Tellurian.Trains.Timetables.Importers.Access;
+namespace Tellurian.Trains.Schedules.Importers.Access;
 
 internal static class LayoutStationTracks
 {

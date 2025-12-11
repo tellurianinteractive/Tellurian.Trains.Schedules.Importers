@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 #pragma warning disable CS0649
 
-namespace Tellurian.Trains.Timetables.Importers.Model;
+namespace Tellurian.Trains.Schedules.Importers.Model;
 
 [DataContract(IsReference = true)]
 public sealed record StationTrack : IEquatable<StationTrack>

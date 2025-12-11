@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Extensions
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
 {
     public static partial class StringExtensions
     {

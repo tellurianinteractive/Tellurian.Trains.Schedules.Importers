@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using Tellurian.Trains.Timetables.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
 
-namespace Tellurian.Trains.Timetables.Importers.Model;
+namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public readonly struct Maybe<T> : IEquatable<Maybe<T>> where T : class
 {

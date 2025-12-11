@@ -1,8 +1,8 @@
 ﻿using System.Data.Odbc;
 using System.Diagnostics;
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 internal static class ScheduleExtensions
 {
     public static void SaveToDatabase(this Schedule me, string targetconnectionString)

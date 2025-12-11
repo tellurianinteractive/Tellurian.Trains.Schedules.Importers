@@ -1,4 +1,4 @@
-# Tellurian.Trains.Timetables.Importers.Model
+# Tellurian.Trains.Schedules.Importers.Model
 
 Core domain model for railway timetable planning and scheduling.
 
@@ -20,13 +20,13 @@ Core domain model for railway timetable planning and scheduling.
 ## Installation
 
 ```
-dotnet add package Tellurian.Trains.Timetables.Importers.Model
+dotnet add package Tellurian.Trains.Schedules.Importers.Model
 ```
 
 ## Usage
 
 ```csharp
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Model;
 
 // Create a layout with stations
 var layout = new Layout { Name = "MyLayout" };

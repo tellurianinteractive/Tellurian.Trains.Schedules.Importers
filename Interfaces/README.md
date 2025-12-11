@@ -1,11 +1,11 @@
-# Tellurian.Trains.Timetables.Importers.Interfaces
+# Tellurian.Trains.Schedules.Importers.Interfaces
 
 Abstraction layer defining the contract for timetable import services.
 
 ## Installation
 
 ```
-dotnet add package Tellurian.Trains.Timetables.Importers.Interfaces
+dotnet add package Tellurian.Trains.Schedules.Importers.Interfaces
 ```
 
 ## The IImportService Interface
@@ -49,8 +49,8 @@ else
 ## Implementing a Custom Importer
 
 ```csharp
-using Tellurian.Trains.Timetables.Importers.Interfaces;
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Interfaces;
+using Tellurian.Trains.Schedules.Importers.Model;
 
 public class MyImporter : IImportService
 {

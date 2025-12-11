@@ -3,7 +3,7 @@ using System.Data.Odbc;
 using System.Globalization;
 
 
-namespace Tellurian.Trains.Timetables.Importers.Access.Extensions;
+namespace Tellurian.Trains.Schedules.Importers.Access.Extensions;
 
 public static class OdbcConnectionExtensions
 {

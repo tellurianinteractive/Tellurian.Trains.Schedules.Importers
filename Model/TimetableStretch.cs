@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 
-namespace Tellurian.Trains.Timetables.Importers.Model;
+namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public sealed record TimetableStretch : IEquatable<TimetableStretch>
 {

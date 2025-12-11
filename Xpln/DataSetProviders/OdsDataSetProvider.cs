@@ -3,10 +3,10 @@ using System.Data;
 using System.Globalization;
 using System.IO.Compression;
 using System.Xml;
-using Tellurian.Trains.Timetables.Importers.Model;
-using Tellurian.Trains.Timetables.Importers.Xpln.Extensions;
+using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDataSetProvider
 {

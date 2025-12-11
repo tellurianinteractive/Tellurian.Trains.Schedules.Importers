@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Tellurian.Trains.Timetables.Importers.Model;
+namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public sealed record StationCall : IEquatable<StationCall>, IComparable<StationCall>
 {

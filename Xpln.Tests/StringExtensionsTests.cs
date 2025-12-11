@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Timetables.Importers.Xpln.Extensions;
+﻿using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 
 [TestClass]
 public class StringExtensionsTests

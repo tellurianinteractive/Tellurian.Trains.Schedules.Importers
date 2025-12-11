@@ -2,11 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.MemoryMappedFiles;
-using Tellurian.Trains.Timetables.Importers.Access.Extensions;
-using Tellurian.Trains.Timetables.Importers.Model;
-using Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Access.Extensions;
+using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 
 [TestClass]
 public class XplnImporterTests

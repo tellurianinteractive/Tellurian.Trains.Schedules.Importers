@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Extensions;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 internal static class DataSetExtensions
 {
     public static string[] GetRowFields(this DataRow row)

@@ -1,4 +1,4 @@
-# Tellurian.Trains.Timetables.Importers.Access
+# Tellurian.Trains.Schedules.Importers.Access
 
 Import and export railway schedules from Microsoft Access databases via ODBC.
 
@@ -7,7 +7,7 @@ Import and export railway schedules from Microsoft Access databases via ODBC.
 ## Installation
 
 ```
-dotnet add package Tellurian.Trains.Timetables.Importers.Access
+dotnet add package Tellurian.Trains.Schedules.Importers.Access
 ```
 
 ## Requirements
@@ -20,7 +20,7 @@ dotnet add package Tellurian.Trains.Timetables.Importers.Access
 ### Import a Layout
 
 ```csharp
-using Tellurian.Trains.Timetables.Importers.Access;
+using Tellurian.Trains.Schedules.Importers.Access;
 using Microsoft.Extensions.Logging;
 
 var logger = LoggerFactory.Create(b => b.AddConsole())

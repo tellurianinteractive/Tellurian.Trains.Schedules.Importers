@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Timetables.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Model.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
 [TestClass]
 public class StationTests

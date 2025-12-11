@@ -1,4 +1,4 @@
-# Tellurian.Trains.Timetables.Importers.Xpln
+# Tellurian.Trains.Schedules.Importers.Xpln
 
 Import railway schedules from XPLN spreadsheet files (ODS/XLSX format).
 
@@ -7,7 +7,7 @@ XPLN is a timetable planning tool used in the model railway community, particula
 ## Installation
 
 ```
-dotnet add package Tellurian.Trains.Timetables.Importers.Xpln
+dotnet add package Tellurian.Trains.Schedules.Importers.Xpln
 ```
 
 ## File Format
@@ -27,8 +27,8 @@ The spreadsheet must contain these worksheets:
 ## Usage
 
 ```csharp
-using Tellurian.Trains.Timetables.Importers.Xpln;
-using Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Xpln;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Microsoft.Extensions.Logging;
 
 // Create logger (or use ILoggerFactory)

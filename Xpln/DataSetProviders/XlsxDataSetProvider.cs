@@ -1,9 +1,9 @@
 ﻿using ExcelDataReader;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using Tellurian.Trains.Timetables.Importers.Xpln.Extensions;
+using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 public sealed class XlsxDataSetProvider(ILogger logger) : IDataSetProvider
 {

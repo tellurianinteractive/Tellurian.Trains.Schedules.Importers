@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Timetables.Importers.Model.Tests;
+﻿namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
 [TestClass]
 public class TrackStretchTests

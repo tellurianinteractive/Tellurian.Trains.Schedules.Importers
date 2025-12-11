@@ -1,7 +1,7 @@
 <Project Sdk="MSTest.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Timetables.Importers.Access.Tests</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Timetables.Importers.Access.Tests</RootNamespace>
+    <AssemblyName>Tellurian.Trains.Schedules.Importers.Access.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Importers.Access.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.Odbc" Version="10.0.1" />

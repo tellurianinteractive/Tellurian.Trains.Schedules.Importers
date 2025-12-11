@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Tellurian.Trains.Timetables.Importers.Model.Resources {
+namespace Tellurian.Trains.Schedules.Importers.Model.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Tellurian.Trains.Timetables.Importers.Model.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tellurian.Trains.Timetables.Importers.Model.Resources.Strings", typeof(Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Tellurian.Trains.Schedules.Importers.Model.Resources.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

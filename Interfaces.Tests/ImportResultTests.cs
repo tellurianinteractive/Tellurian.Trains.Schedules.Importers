@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
-using Tellurian.Trains.Timetables.Importers.Model;
-using Tellurian.Trains.Timetables.Importers.Xpln;
-using Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Xpln;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
-namespace Tellurian.Trains.Timetables.Importers.Interfaces.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Interfaces.Tests;
 
 [TestClass]
 public class ImportResultTests

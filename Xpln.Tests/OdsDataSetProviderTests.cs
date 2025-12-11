@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using System.Data;
-using Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 
 [TestClass]
 public class OdsDataSetProviderTests

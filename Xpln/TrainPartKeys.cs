@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Timetables.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln;
+namespace Tellurian.Trains.Schedules.Importers.Xpln;
 
 public sealed partial class XplnDataImporter
 {

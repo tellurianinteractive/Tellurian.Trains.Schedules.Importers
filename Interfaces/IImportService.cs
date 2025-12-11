@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Timetables.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Interfaces;
+namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
 public interface IImportService
 {

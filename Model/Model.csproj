@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Timetables.Importers.Model</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Timetables.Importers.Model</RootNamespace>
+    <AssemblyName>Tellurian.Trains.Schedules.Importers.Model</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Importers.Model</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

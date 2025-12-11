@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Timetables.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Model.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 

@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Timetables.Importers.Model;
+﻿namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public class ValidationOptions
 {

@@ -1,7 +1,7 @@
 <Project Sdk="MSTest.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Timetables.Importers.Model.Tests</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Timetables.Importers.Model.Tests</RootNamespace>
+    <AssemblyName>Tellurian.Trains.Schedules.Importers.Model.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Importers.Model.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="TestRepository.cs" />

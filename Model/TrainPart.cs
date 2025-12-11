@@ -2,7 +2,7 @@
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-namespace Tellurian.Trains.Timetables.Importers.Model;
+namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public sealed record TrainPart : IEquatable<TrainPart>
 {

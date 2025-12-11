@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Tellurian.Trains.Timetables.Importers.Access.Tests
+namespace Tellurian.Trains.Schedules.Importers.Access.Tests
 {
     [TestClass]
     public class ReadDatabaseTests

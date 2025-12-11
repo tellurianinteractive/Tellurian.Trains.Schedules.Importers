@@ -3,13 +3,13 @@ using System.Data;
 using System.Data.Odbc;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using Tellurian.Trains.Timetables.Importers.Access.Extensions;
-using Tellurian.Trains.Timetables.Importers.Interfaces;
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Access.Extensions;
+using Tellurian.Trains.Schedules.Importers.Interfaces;
+using Tellurian.Trains.Schedules.Importers.Model;
 
-[assembly: InternalsVisibleTo("Tellurian.Trains.Timetables.Importers.Access.Tests")]
+[assembly: InternalsVisibleTo("Tellurian.Trains.Schedules.Importers.Access.Tests")]
 
-namespace Tellurian.Trains.Timetables.Importers.Access;
+namespace Tellurian.Trains.Schedules.Importers.Access;
 
 public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> logger) : IImportService
 {

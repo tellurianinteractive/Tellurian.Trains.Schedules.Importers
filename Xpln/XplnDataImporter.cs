@@ -2,13 +2,13 @@
 using System.Data;
 using System.Globalization;
 using System.Text;
-using Tellurian.Trains.Timetables.Importers.Interfaces;
-using Tellurian.Trains.Timetables.Importers.Model;
-using Tellurian.Trains.Timetables.Importers.Xpln.DataSetProviders;
-using Tellurian.Trains.Timetables.Importers.Xpln.Extensions;
-using static Tellurian.Trains.Timetables.Importers.Xpln.XplnDataImporter;
+using Tellurian.Trains.Schedules.Importers.Interfaces;
+using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
+using static Tellurian.Trains.Schedules.Importers.Xpln.XplnDataImporter;
 
-namespace Tellurian.Trains.Timetables.Importers.Xpln;
+namespace Tellurian.Trains.Schedules.Importers.Xpln;
 public sealed partial class XplnDataImporter : IImportService, IDisposable
 {
     private readonly Stream InputStream;

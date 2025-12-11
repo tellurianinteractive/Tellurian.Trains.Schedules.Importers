@@ -1,9 +1,9 @@
 ﻿using System.Data;
 using System.Data.Odbc;
 using System.Globalization;
-using Tellurian.Trains.Timetables.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Model;
 
-namespace Tellurian.Trains.Timetables.Importers.Access;
+namespace Tellurian.Trains.Schedules.Importers.Access;
 
 internal static class TrackStretches
 {
