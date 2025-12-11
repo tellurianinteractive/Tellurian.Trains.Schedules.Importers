@@ -32,6 +32,6 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test Model.Tests --configuration Release --no-build --verbosity normal
-          dotnet test Interfaces.Tests --configuration Release --no-build --verbosity normal
-          dotnet test Xpln.Tests --configuration Release --no-build --verbosity normal
+          dotnet test --project Model.Tests --configuration Release --no-build --verbosity normal
+          dotnet test --project Interfaces.Tests --configuration Release --no-build --verbosity normal
+          dotnet test --project Xpln.Tests --configuration Release --no-build --verbosity normal
