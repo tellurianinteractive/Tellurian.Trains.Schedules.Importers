@@ -1,0 +1,14 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Timetables.Importers.Interfaces.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Timetables.Importers.Interfaces.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Xpln\Xpln.csproj" />
+    <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Test data\" />
+  </ItemGroup>
+</Project>
