@@ -9,6 +9,6 @@
     <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Test data\" />
+    <None Include="Test data\**\*.ods" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>
