@@ -10,13 +10,16 @@ public class DriverDuty : IEquatable<DriverDuty>
     public DriverDuty(string identity)
     {
         Identity = identity.TextOrException(nameof(identity));
-        Parts = new List<TrainPart>();
-        Notes = new List<Note>();
+        Parts = [];
+        Notes = [];
+        Schedule = default!; // Set by Schedule.Add()
     }
 
     [DataMember(IsRequired = false, Order = 1, Name = "Id")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+#pragma warning disable CS0649 // Field is assigned by EF/deserialization
     private int _Id;
+#pragma warning restore CS0649
 
     public int Id => _Id;
 
@@ -40,7 +43,9 @@ public class DriverDuty : IEquatable<DriverDuty>
         string.Format(CultureInfo.CurrentCulture,
             "{0}: {1} - {2}", Identity, Parts.First().Departure, Parts.Last().Arrival);
 
+#pragma warning disable CS8618 // Properties initialized by EF/deserialization
     private DriverDuty() { } // Required for deserialization and EF.
+#pragma warning restore CS8618
 }
 
 public static class DriverDutyExtensions
