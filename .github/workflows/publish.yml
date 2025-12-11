@@ -40,7 +40,10 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: |
+          dotnet test Model.Tests --configuration Release --no-build --verbosity normal
+          dotnet test Interfaces.Tests --configuration Release --no-build --verbosity normal
+          dotnet test Xpln.Tests --configuration Release --no-build --verbosity normal
 
       - name: Pack
         run: dotnet pack --configuration Release --no-build --output ./nupkgs
