@@ -2,8 +2,6 @@
 using System.Globalization;
 using System.Runtime.Serialization;
 
-#pragma warning disable CS0649, CS8618, IDE0044, RCS1169
-
 namespace Tellurian.Trains.Schedules.Importers.Model;
 
 [DataContract(IsReference = true)]
