@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Access.Tests/Access.Tests.csproj" />
+  <Project Path="Access/Access.csproj" />
+  <Project Path="Interfaces.Tests/Interfaces.Tests.csproj" />
+  <Project Path="Interfaces/Interfaces.csproj" />
+  <Project Path="Model.Tests/Model.Tests.csproj" />
+  <Project Path="Model/Model.csproj" />
+  <Project Path="Xpln.Tests/Xpln.Tests.csproj" />
+  <Project Path="Xpln/Xpln.csproj" />
+</Solution>
