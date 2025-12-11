@@ -26,7 +26,7 @@ dotnet add package Tellurian.Trains.Schedules.Importers.Xpln
 
 ## File Format
 
-XPLN exports schedules as **ODS** (OpenDocument Spreadsheet) files.
+XPLN saves schedules as **ODS** (OpenDocument Spreadsheet) files.
 
 ## Required Worksheets
 
@@ -36,7 +36,7 @@ The spreadsheet must contain these worksheets:
 |-----------|---------|
 | `StationTrack` | Stations and their tracks |
 | `Routes` | Track stretches between stations |
-| `Trains` | Train definitions, timetables, and assignments |
+| `Trains` | Train definitions, timetables, and assignments to loco schedules, trainsets and duties|
 
 ## Usage
 
@@ -78,8 +78,22 @@ else
 ## Validation
 
 The importer performs two-phase validation:
-1. **Referential integrity** - stations, tracks, and routes exist
-2. **Scheduling conflicts** - timing and sequence errors
+1. **Referential integrity** - verifies that all references between objects are valid
+   (stations, tracks, routes, loco schedules, etc. exist and are correctly linked).
+   Errors in this phase must be fixed in the XPLN file before import can succeed.
+2. **Scheduling conflicts** - checks for timing issues, track conflicts, and sequence errors.
+   These are reported as warnings/information messages.
+
+A successful import (`result.IsSuccess == true`) means the data is consistent and can be used.
+However, there may still be warning messages indicating potential scheduling issues worth reviewing:
+
+```csharp
+// Check for warnings after successful import
+foreach (var msg in result.Messages.Where(m => m.Severity == Severity.Information))
+    Console.WriteLine(msg);
+```
+
+See the [Model README](../Model/README.md#validation) for details on which scheduling checks are performed.
 
 Error messages include row numbers and are available in multiple languages (English, German, Danish, Norwegian, Swedish).
 

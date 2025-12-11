@@ -21,3 +21,12 @@ It us currently only experimental and incomplete.
 Validates and imports .ODS-files containing XPLN planning data.
 XPLN is the defacto tool within the FREMO community to create model railway schedules.
 See the [Xpln README](Xpln/README.md) for detailed information.
+
+## Validation
+The importers perform extensive validation in two phases:
+1. **Referential integrity** - ensures all references between objects are valid before import.
+2. **Scheduling conflicts** - detects potential issues like track occupation conflicts,
+   single-track collisions, unrealistic train speeds, and overlapping vehicle assignments.
+
+Validation messages are available in English, German, Danish, Norwegian, and Swedish.
+See the [Model README](Model/README.md#validation) for details on all validation checks.

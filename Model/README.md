@@ -48,11 +48,48 @@ var schedule = Schedule.Create("Schedule2024", timetable);
 
 ## Validation
 
-The model includes a message system for validation feedback:
+The model includes comprehensive validation to detect scheduling conflicts and data inconsistencies.
+Validation is performed after data has been successfully imported with referential integrity intact.
+
+### Validation Options
+
+Validation can be configured using `ValidationOptions`:
 
 ```csharp
-// Messages have severity levels
-Message.Error("Track not found");
-Message.Warning("Using default route");
-Message.Information("Reading worksheet...");
+var options = new ValidationOptions
+{
+    ValidateStationCalls = true,      // Check arrival/departure times
+    ValidateStationTracks = true,     // Check track occupation conflicts
+    ValidateStretches = true,         // Check single-track conflicts
+    ValidateTrainSpeed = true,        // Check speed limits
+    ValidateLocoSchedules = true,     // Check loco assignment overlaps
+    MinTrainSpeedMetersPerClockMinute = 0.3,
+    MaxTrainSpeedMetersPerClockMinute = 10
+};
+
+var messages = schedule.GetValidationErrors(options);
 ```
+
+### Validation Checks
+
+| Check | Description |
+|-------|-------------|
+| **Station calls** | Arrival time must be before or equal to departure time |
+| **Station tracks** | Detects conflicts where different trains occupy the same track at overlapping times |
+| **Track stretches** | Detects conflicts on single-track sections where trains would collide |
+| **Train time sequence** | Ensures calls within a train are in chronological order |
+| **Train speed** | Warns if train speed between stations is too slow or too fast |
+| **Loco schedules** | Detects overlapping train parts assigned to the same locomotive |
+
+### Message Severity
+
+Validation results are returned as `Message` objects with severity levels:
+
+```csharp
+Message.Error("...");       // Critical errors preventing import
+Message.Warning("...");     // Issues that should be reviewed
+Message.Information("..."); // Scheduling conflicts and warnings
+```
+
+After a successful import (no errors), there may still be information messages
+indicating potential scheduling issues that are non-critical but worth reviewing.
