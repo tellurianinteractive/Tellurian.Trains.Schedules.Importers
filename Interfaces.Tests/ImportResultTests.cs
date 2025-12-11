@@ -12,7 +12,7 @@ public class ImportResultTests
     [TestMethod]
     public void SerializeAndDeserialize()
     {
-        var target = ImportResult(@"..\..\..\Test data\Montan2023H0e.ods");
+        var target = ImportResult(Path.Combine("Test data", "Montan2023H0e.ods"));
         var json = target.Json();
         Assert.IsNotNull(json);
         var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
