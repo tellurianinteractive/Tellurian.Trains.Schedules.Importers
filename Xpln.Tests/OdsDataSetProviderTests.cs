@@ -10,7 +10,7 @@ public class OdsDataSetProviderTests
     [TestMethod]
     public void ReadsFile()
     {
-        const string path = "Test data\\Montan2023H0e.ods";
+        var path = Path.Combine("Test data", "Montan2023H0e.ods");
         var target = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
         using var stream = File.OpenRead(path);
         var dataSet = target.ImportSchedule(stream, DataSetConfiguration());
