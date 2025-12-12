@@ -3,7 +3,7 @@
 **This repository contains features to validate and import schedule data into an object model.
 The objetc model can then be mapped to storage in databases or files.**
 
-> NOTE: This software only reads data into an object model in menory and has no logic for storing data.
+> NOTE: This software only reads data into an object model in memory and has no logic for storing data.
 > That have to be implemented elsewhere. This separation of reading and writing is flexible in choosing storage format.
 
 ## Output
