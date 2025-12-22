@@ -16,9 +16,9 @@ public record Schedule
     {
         Name = name;
         Timetable = timetable;
-        LocoSchedules = new List<LocoSchedule>();
-        TrainsetSchedules = new List<TrainsetSchedule>();
-        DriverDuties = new List<DriverDuty>();
+        LocoSchedules = [];
+        TrainsetSchedules = [];
+        DriverDuties = [];
     }
     public override string ToString() => Name;
 }

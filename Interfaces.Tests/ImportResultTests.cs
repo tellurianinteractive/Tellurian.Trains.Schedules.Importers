@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
@@ -10,9 +11,9 @@ namespace Tellurian.Trains.Schedules.Importers.Interfaces.Tests;
 public class ImportResultTests
 {
     [TestMethod]
-    public void SerializeAndDeserialize()
+    public async Task SerializeAndDeserialize()
     {
-        var target = ImportResult(Path.Combine("Test data", "Montan2023H0e.ods"));
+        var target = await ImportResult(Path.Combine("Test data", "Montan2023H0e.ods"));
         var json = target.Json();
         Assert.IsNotNull(json);
         var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
@@ -21,7 +22,7 @@ public class ImportResultTests
     }
 
     [TestMethod]
-    public void DeserializesJson()
+    public async Task DeserializesJson()
     {
         var json = $$"""
             {
@@ -41,16 +42,18 @@ public class ImportResultTests
 
     static JsonSerializerOptions JsonSerializerOptions => new() { PropertyNameCaseInsensitive = true };
 
-    static ImportResult<Schedule> ImportResult(string testFilePath)
+    static Task<ImportResult<Schedule>> ImportResult(string testFilePath)
     {
         var file = new FileInfo(testFilePath);
         if (file.Exists)
         {
             var provider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            using var importer = new XplnDataImporter(file, provider, NullLogger<XplnDataImporter>.Instance);
+            var operatingCompainesService = new OperatingCompaniesFromJsonService();
+
+            using var importer = new XplnDataImporter(file, provider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
             return importer.ImportSchedule(Path.GetFileNameWithoutExtension(testFilePath));
         }
-        return ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found."));
+        return Task.FromResult(ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found.")));
     }
 }
 

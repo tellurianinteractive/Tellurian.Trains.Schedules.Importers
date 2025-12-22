@@ -6,11 +6,11 @@ namespace Tellurian.Trains.Schedules.Importers.Access.Tests
     public class ReadDatabaseTests
     {
         [TestMethod]
-        public void ReadsLayoutStations()
+        public async Task ReadsLayoutStations()
         {
             var file = new FileInfo(@"Test data\Timetable.accdb");
             var repository = new AccessRepository(file, NullLogger<AccessRepository>.Instance);
-            var schedule = repository.ImportSchedule("Grimslöv H0");
+            var schedule = await repository.ImportSchedule("Grimslöv H0");
             Assert.IsTrue(schedule.IsSuccess);
             Assert.AreEqual(16, schedule.Item.Timetable.Layout.Stations.Count);
             Assert.AreEqual(62, schedule.Item.Timetable.Layout.Stations.Sum(s => s.Tracks.Count));

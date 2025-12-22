@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Tellurian.Trains.Schedules.Importers.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
+
 internal static class ScheduleExtensions
 {
     public static void SaveToDatabase(this Schedule me, string targetconnectionString)
@@ -55,7 +56,7 @@ internal static class ScheduleExtensions
             saveTrainsCommand.ExecuteNonQuery();
             var getTrainCommand = new OdbcCommand($"SELECT Id FROM TRAIN WHERE Layout = {layoutId} AND Number = {train.Number} ") { Connection = connection };
             var trainId = (int?)getTrainCommand.ExecuteScalar();
-            if (train.Number == "30") Debugger.Break();
+            if (train.Number == 30) Debugger.Break();
             try
             {
                 if (trainId.HasValue)
@@ -100,11 +101,9 @@ internal static class ScheduleExtensions
         var scheduleNumber = 1;
         foreach (var loco in me.LocoSchedules)
         {
-            var t = loco.Number.Split(' ');
-            
-            var locoOperator = t.Length > 0 ? t[0] : string.Empty;
-            var locoNumber = t.Length > 1 ? int.Parse(t[^1]) : 0;
-            var locoClass = t.Length > 2 ? t[1] : string.Empty;
+            var locoOperator = loco.Company;
+            var locoNumber = loco.Number;
+            var locoClass = loco.Class;
             var homeStationId = 641;
 
             var sql1 = $"""
@@ -114,7 +113,7 @@ internal static class ScheduleExtensions
             var saveScheduleCommand = new OdbcCommand(sql1, connection);
             count = saveScheduleCommand.ExecuteNonQuery();
 
-            var sql2 = $"SELECT [Id] FROM [LocoSchedule] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{loco.Number}'" ;
+            var sql2 = $"SELECT [Id] FROM [LocoSchedule] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{loco.Number}'";
             var getScheduleCommand = new OdbcCommand(sql2, connection);
             int scheduleId = (int?)getScheduleCommand.ExecuteScalar() ?? 0;
 

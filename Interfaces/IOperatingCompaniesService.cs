@@ -2,8 +2,7 @@
 
 namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
-public interface IImportService
+public interface IOperatingCompaniesService
 {
-    Task<ImportResult<Schedule>> ImportSchedule(string name);
-
+    Task<IEnumerable<OperatingCompany>> GetAllOperatingCompaies();
 }

@@ -2,8 +2,7 @@
 
 namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
-public interface IImportService
+public interface ITrainCategoriesService
 {
-    Task<ImportResult<Schedule>> ImportSchedule(string name);
-
+    IEnumerable<TrainCategory> GetAllTrainCategories();
 }

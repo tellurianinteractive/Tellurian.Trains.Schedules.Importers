@@ -21,12 +21,13 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
             var namespaceMananger = InitializeXmlNamespaceManager(document);
             var dataSet = new DataSet(dataSetConfiguration.Name);
             var tables = GetDataTables(document, dataSetConfiguration, namespaceMananger);
-            dataSet.Tables.AddRange(tables.ToArray());
+            dataSet.Tables.AddRange([.. tables]);
             return dataSet;
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error when reading {stream}.", inputStream.ToString());
+            if (Logger.IsEnabled(LogLevel.Error))
+                Logger.LogError(ex, "Error when reading {stream}.", inputStream.ToString());
             throw;
         }
     }
@@ -34,7 +35,8 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
     private IEnumerable<DataTable> GetDataTables(XmlDocument document, DataSetConfiguration configuration, XmlNamespaceManager namespaceManager)
     {
         var tableNodes = TableNodes(document, namespaceManager);
-        Logger.LogInformation("{count} table nodes in document.", tableNodes?.Count ?? 0);
+        if (Logger.IsEnabled(LogLevel.Information))
+            Logger.LogInformation("{count} table nodes in document.", tableNodes?.Count ?? 0);
         if (tableNodes is not null)
         {
             foreach (XmlNode tableNode in tableNodes)
@@ -43,7 +45,8 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
                 var worksheetConfiguration = configuration.WorksheetConfiguration(nameAttribute?.Value);
                 if (worksheetConfiguration is not null)
                 {
-                    Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
+                    if (Logger.IsEnabled(LogLevel.Information))
+                        Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
                     var table = GetDataTable(tableNode, worksheetConfiguration, namespaceManager);
                     if (table is null) continue;
                     yield return table;
@@ -143,7 +146,8 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         foreach (var ns in Namespaces)
         {
             manager.AddNamespace(ns.Key, ns.Value);
-        };
+        }
+        ;
         return manager;
     }
 

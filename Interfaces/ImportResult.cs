@@ -6,27 +6,27 @@ namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
 public readonly struct ImportResult<T>
 {
-    public static ImportResult<T> Success() => new(Array.Empty<T>(), Array.Empty<Message>(), true);
-    public static ImportResult<T> Success(T item) => new(new[] { item }, Array.Empty<Message>(), true);
-    public static ImportResult<T> Success(T item, Message message) => new(new[] { item }, new[] { message }, true);
-    public static ImportResult<T> Success(T item, IEnumerable<Message> messages) => new(new[] { item }, messages, true);
-    public static ImportResult<T> Success(IEnumerable<T> items) => new(items, Array.Empty<Message>(), true);
+    public static ImportResult<T> Success() => new([], [], true);
+    public static ImportResult<T> Success(T item) => new([item], [], true);
+    public static ImportResult<T> Success(T item, Message message) => new([item], [message], true);
+    public static ImportResult<T> Success(T item, IEnumerable<Message> messages) => new([item], messages, true);
+    public static ImportResult<T> Success(IEnumerable<T> items) => new(items, [], true);
     public static ImportResult<T> Success(IEnumerable<T> items, IEnumerable<Message> messages) => new(items, messages, true);
-    public static ImportResult<T> Success(IEnumerable<T> items, Message message) => new(items, new[] { message }, true);
-    public static ImportResult<T> Failure(Message message) => new(Array.Empty<T>(), new[] { message }, false);
-    public static ImportResult<T> Failure(IEnumerable<Message> messages) => new(Array.Empty<T>(), messages, false);
+    public static ImportResult<T> Success(IEnumerable<T> items, Message message) => new(items, [message], true);
+    public static ImportResult<T> Failure(Message message) => new([], [message], false);
+    public static ImportResult<T> Failure(IEnumerable<Message> messages) => new([], messages, false);
     public static ImportResult<T> SuccessIfNoErrorMessagesOtherwiseFailure(T? item, IEnumerable<Message> messages) => new(item is null ? [] : new[] { item }, messages, !messages.Any(m => m.Severity > Severity.Warning));
 
     [JsonConstructor]
     public ImportResult()
     {
-        Items = Enumerable.Empty<T>();
+        Items = [];
         Messages = [];
     }
     public ImportResult(IEnumerable<T> items, IEnumerable<Message> messages, bool isSuccess)
     {
         Items = items;
-        Messages = messages.ToArray();
+        Messages = [.. messages];
         IsSuccess = isSuccess;
     }
     public string? Name { get; init; }

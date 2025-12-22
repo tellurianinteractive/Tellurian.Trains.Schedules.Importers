@@ -1,18 +1,25 @@
 ﻿using System.Data;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
+
 internal static class DataSetExtensions
 {
-    public static string[] GetRowFields(this DataRow row)
+    extension(DataRow row)
     {
-        var items = row.ItemArray;
-        if (items is null) return [];
-        return items.Select(i => i is null ? string.Empty : i.ToString()).ToArray()!;
+        public string[] GetRowFields()
+        {
+            var items = row.ItemArray;
+            if (items is null) return [];
+            return items.Select(i => i is null ? string.Empty : i.ToString()).ToArray()!;
+        }
+        public bool IsBlankRow() =>
+            row.GetRowFields().IsEmptyFields();
+
     }
 
-    public static bool IsEmptyFields(this IEnumerable<string> fields) =>
-        fields.All(i => i.IsEmpty());
-
-    public static bool IsBlankRow(this DataRow row) =>
-        row.GetRowFields().IsEmptyFields();
+    extension(IEnumerable<string> fields)
+    {
+        public bool IsEmptyFields() =>
+            fields.All(i => i.IsEmpty());
+    }
 }

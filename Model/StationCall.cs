@@ -18,13 +18,17 @@ public sealed record StationCall : IEquatable<StationCall>, IComparable<StationC
     public bool IsStop => IsArrival || IsDeparture;
     public Time SortTime => IsDeparture ? Departure : Arrival;
 
-    public StationCall(StationTrack track, Time arrival, Time departure)
+    public StationCall(StationTrack track, Time arrival, Time departure, string? remark = null)
     {
         Track = track.ValueOrException(nameof(track));
         Track.Add(this);
         Arrival = arrival;
         Departure = departure;
-        Notes = new List<Note>();
+        Notes = [];
+        if (!string.IsNullOrWhiteSpace(remark))
+        {
+            Notes.Add(new Note() { IsDriverNote = true, IsShuntingNote = true, IsStationNote = true, Text = remark });
+        }
     }
 
     public bool Equals(StationCall? other) =>

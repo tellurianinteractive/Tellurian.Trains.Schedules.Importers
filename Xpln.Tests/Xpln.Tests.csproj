@@ -15,6 +15,7 @@
     <ProjectReference Include="..\Access\Access.csproj" />
     <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
     <ProjectReference Include="..\Xpln\Xpln.csproj" />
   </ItemGroup>
   <ItemGroup>

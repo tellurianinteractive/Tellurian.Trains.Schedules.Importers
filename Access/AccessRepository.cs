@@ -21,26 +21,26 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         foreach (var message in messages)
         {
             if (message.Severity == Severity.None) return;
-            if (message.Severity == Severity.Error) Logger.LogError("Error {ErrorMessage}", message.ToString());
-            else if (message.Severity == Severity.Warning) Logger.LogWarning("Warning {WarningMessage}", message.ToString());
-            else if (message.Severity == Severity.Information) Logger.LogInformation("Information {InformationMessage}", message.ToString());
-            else if (message.Severity == Severity.System) Logger.LogCritical("Critical {CriticalMessage}", message.ToString());
+            if (message.Severity == Severity.Error && Logger.IsEnabled(LogLevel.Error)) Logger.LogError("Error {ErrorMessage}", message.ToString());
+            else if (message.Severity == Severity.Warning && Logger.IsEnabled(LogLevel.Warning)) Logger.LogWarning("Warning {WarningMessage}", message.ToString());
+            else if (message.Severity == Severity.Information && Logger.IsEnabled(LogLevel.Information)) Logger.LogInformation("Information {InformationMessage}", message.ToString());
+            else if (message.Severity == Severity.System && Logger.IsEnabled(LogLevel.Critical)) Logger.LogCritical("Critical {CriticalMessage}", message.ToString());
         }
     }
 
-    public ImportResult<Schedule> ImportSchedule(string name)
+    public Task<ImportResult<Schedule>> ImportSchedule(string name)
     {
         var layout = GetLayout(name);
         if (layout.IsFailure)
         {
             var result = new ImportResult<Schedule>() { Messages = layout.Messages };
             LogMessages(result.Messages);
-            return result;
+            return Task.FromResult(result);
         }
         var timetable = new Timetable(name, layout.Item);
         var importResult = ImportResult<Schedule>.SuccessIfNoErrorMessagesOtherwiseFailure(Schedule.Create(name, timetable), layout.Messages);
         LogMessages(importResult.Messages);
-        return importResult;
+        return Task.FromResult(importResult);
     }
 
     private ImportResult<Layout> GetLayout(string name)
@@ -78,7 +78,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         var timetable = new Timetable(name, layout);
         GetTrains(timetable);
 
-        return new ImportResult<Timetable>() { Items = new[] { timetable }, Messages = [] };
+        return new ImportResult<Timetable>() { Items = [timetable], Messages = [] };
     }
 
     private void ReadLayoutStations(Layout layout)

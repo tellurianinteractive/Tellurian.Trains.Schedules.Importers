@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO.MemoryMappedFiles;
 using Tellurian.Trains.Schedules.Importers.Access.Extensions;
 using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
@@ -36,13 +37,14 @@ public class XplnImporterTests
     }
 
     [TestMethod]
-    public void ImportsMemoryMappedFile()
+    public async Task ImportsMemoryMappedFile()
     {
         using var m = MemoryMappedFile.CreateFromFile(Path.Combine(TestDocumentsDirectory!.FullName, "Montan2023H0e.ods"));
         var inputStream = m.CreateViewStream();
         var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-        using var importer = new XplnDataImporter(inputStream, dataSetProvider, NullLogger<XplnDataImporter>.Instance);
-        var result = importer.ImportSchedule("Montan2023H0e");
+        var operatingCompainesService = new OperatingCompaniesFromJsonService();
+        using var importer = new XplnDataImporter(inputStream, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+        var result = await importer.ImportSchedule("Montan2023H0e");
         if (result.IsFailure)
         {
             Assert.Fail();
@@ -51,15 +53,15 @@ public class XplnImporterTests
     }
 
     [TestMethod]
-    public void Imports()
+    public async Task Imports()
     {
-        Import("Magdeburg_v_DB33_DSB32_WTB11", "de-DE", 142, 58, 77, 119, 0, 40);
+        await Import("Magdeburg_v_DB33_DSB32_WTB11", "de-DE", 142, 58, 77, 119, 0, 40);
     }
 
     [TestMethod]
-    public void ImportsGivskudModern2025()
+    public async Task ImportsGivskudModern2025()
     {
-        Import("Givskud-Modern-2025", "da-DK", 125, 32, 50, 73, 1, 0);
+        await Import("Givskud-Modern-2025", "da-DK", 125, 32, 50, 73, 1, 0);
     }
 
     [TestMethod()]
@@ -82,16 +84,18 @@ public class XplnImporterTests
     [DataRow("LTK2020", "de-DE", 15, 4, 22, 4, 25, 18)]
     [DataRow("FREMODERN-2023-Final-1-1", "da-DK", 142, 58, 77, 119, 0, 0)]
 
-    public void Import(string scheduleName, string? culture, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedDuties, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
+    public async Task Import(string scheduleName, string? culture, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedDuties, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
     {
         culture ??= "sv-SE";
         CultureInfo.CurrentCulture = new CultureInfo(culture);
         CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
-        if (IsScheduleFileExisting(scheduleName , out var file))
+        if (IsScheduleFileExisting(scheduleName, out var file))
         {
             var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            using var importer = new XplnDataImporter(file, dataSetProvider, NullLogger<XplnDataImporter>.Instance);
-            var result = importer.ImportSchedule(scheduleName);
+            var operatingCompainesService = new OperatingCompaniesFromJsonService();
+            using var importer = new XplnDataImporter(file, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+
+            var result = await importer.ImportSchedule(scheduleName);
             if (result.IsFailure)
             {
                 WriteLines(result.Messages.ToStrings(), file);
@@ -136,16 +140,20 @@ public class XplnImporterTests
     }
 
     [TestMethod, Ignore("Only used for special cases.")]
-    public void ImportsGivskudModern2025ToDatabase() => ImportToDatabase("Givskud-Modern-2025", "C:\\Users\\Stefan\\OneDrive\\Modelljärnväg\\Träffar\\2025\\2025-04 Givskud\\Timetable.accdb");
+    public async Task ImportsGivskudModern2025ToDatabase() =>
+        await ImportToDatabase("Givskud-Modern-2025", "C:\\Users\\Stefan\\OneDrive\\Modelljärnväg\\Träffar\\2025\\2025-04 Givskud\\Timetable.accdb");
 
-    public void ImportToDatabase(string scheduleName, string databaseFilePath)
+    public async Task ImportToDatabase(string scheduleName, string databaseFilePath)
     {
         if (IsScheduleFileExisting(scheduleName, out var file))
         {
             var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            using var importer = new XplnDataImporter(file, dataSetProvider, NullLogger<XplnDataImporter>.Instance);
-            var result = importer.ImportSchedule(scheduleName);
-            if (result.IsSuccess) {
+            var operatingCompainesService = new OperatingCompaniesFromJsonService();
+
+            using var importer = new XplnDataImporter(file, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+            var result = await importer.ImportSchedule(scheduleName);
+            if (result.IsSuccess)
+            {
                 result.Item.SaveToDatabase(databaseFilePath.ConnectionString());
             }
         }

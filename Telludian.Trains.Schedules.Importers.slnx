@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="README.md" />
+    <File Path="UNIFIED_MODEL.md" />
   </Folder>
   <Project Path="Access.Tests/Access.Tests.csproj" />
   <Project Path="Access/Access.csproj" />
@@ -9,6 +11,8 @@
   <Project Path="Interfaces/Interfaces.csproj" />
   <Project Path="Model.Tests/Model.Tests.csproj" />
   <Project Path="Model/Model.csproj" />
+  <Project Path="Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
+  <Project Path="Services/Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
   <Project Path="Xpln.Tests/Xpln.Tests.csproj" />
   <Project Path="Xpln/Xpln.csproj" />
 </Solution>

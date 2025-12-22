@@ -12,9 +12,9 @@ public sealed record Layout
 
     public Layout()
     {
-        Stations = new List<Station>();
-        TrackStretches = new List<TrackStretch>();
-        TimetableStretches = new List<TimetableStretch>();
+        Stations = [];
+        TrackStretches = [];
+        TimetableStretches = [];
     }
     public override string ToString() => Name;
 }
@@ -30,7 +30,7 @@ public static class LayoutStationsExtensions
        new(me?.Stations.SingleOrDefault(s => s.Signature.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase) || s.Name.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase)),
            Resources.Strings.ThereIsNoStationWithNameOrSignature, nameOrSignature);
 
-    public static IEnumerable<StationTrack> StationTracks(this Layout me) => me is null ? Array.Empty<StationTrack>() : me.Stations.SelectMany(s => s.Tracks);
+    public static IEnumerable<StationTrack> StationTracks(this Layout me) => me is null ? [] : me.Stations.SelectMany(s => s.Tracks);
 
     public static Station Add(this Layout layout, Station station)
     {
@@ -115,8 +115,8 @@ public static class LayoutTracksExtensions
 
     private static IEnumerable<TrackStretch> Between(this Layout me, string fromStationNameOrSignature, string? toStationNameOrSignature = null)
         => me.TrackStretches.Where(ts =>
-            (ts.Start.Name.EqualsIgnoreCase(fromStationNameOrSignature)
-            || ts.Start.Signature.EqualsIgnoreCase(fromStationNameOrSignature))
-            && (ts.End.Name.EqualsIgnoreCase(toStationNameOrSignature)
-            || ts.End.Signature.EqualsIgnoreCase(toStationNameOrSignature)));
+            (ts.Start.Name.EqualsCaseInsensitive(fromStationNameOrSignature)
+            || ts.Start.Signature.EqualsCaseInsensitive(fromStationNameOrSignature))
+            && (ts.End.Name.EqualsCaseInsensitive(toStationNameOrSignature)
+            || ts.End.Signature.EqualsCaseInsensitive(toStationNameOrSignature)));
 }

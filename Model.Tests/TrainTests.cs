@@ -7,18 +7,20 @@ public class TrainTests
 {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     private Train Target;
+    private static TrainCategory Category => new() { Id = 1, Prefix = "G", ResourceName = "FreightTrain" };
 
     [TestInitialize]
     public void TestInitialize()
     {
-        Target = new Train("G1234") { Category = "Godståg" };
+
+        Target = new(11, OperatingCompany.None, Category, 1234, "");
     }
 
     [TestMethod]
     public void PropertiesAreSet()
     {
-        Assert.AreEqual("Godståg", Target.Category);
-        Assert.AreEqual("G1234", Target.Number);
+        Assert.AreEqual(Category, Target.Category);
+        Assert.AreEqual(1234, Target.Number);
         Assert.AreEqual("", Target.ExtenalId);
     }
 

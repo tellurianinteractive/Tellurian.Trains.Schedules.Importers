@@ -14,7 +14,7 @@ internal static class TestDataFactory
 
     public static void Init()
     {
-        Stations = new[] { CreateStation1(), CreateStation2(), CreateStation3() };
+        Stations = [CreateStation1(), CreateStation2(), CreateStation3()];
     }
 
     public static IEnumerable<Station> Stations;
@@ -45,27 +45,28 @@ internal static class TestDataFactory
         return station;
     }
 
-    public static IEnumerable<Train> CreateTrains(string category, Time startTime)
+    public static IEnumerable<Train> CreateTrains(string prefix, Time startTime)
     {
-        return new[] {
-            CreateTrainInForwardDirection(category, "1", startTime)
-        };
+        var category = new TrainCategory() { Id = 1, Prefix = prefix, ResourceName = prefix };
+        return [
+            CreateTrainInForwardDirection(category, 1, startTime)
+        ];
     }
 
-    public static Train CreateTrainInForwardDirection(string category, string number, Time startTime)
+    public static Train CreateTrainInForwardDirection(TrainCategory category, int number, Time startTime)
     {
         var stations = Stations.ToArray();
-        var train = new Train(number) { Category = category };
+        var train = new Train(number, OperatingCompany.None, category, number) { Category = category };
         _ = train.Add(new StationCall(stations[0]["3"], startTime, startTime));
         _ = train.Add(new StationCall(stations[1]["2"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
         _ = train.Add(new StationCall(stations[2]["1"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
         return train;
     }
 
-    public static Train CreateTrainInOppositeDirection(string category, string number, Time startTime)
+    public static Train CreateTrainInOppositeDirection(TrainCategory category, int number, Time startTime)
     {
         var stations = Stations.ToArray();
-        var train = new Train(number) { Category = category };
+        var train = new Train(number, OperatingCompany.None, category, number) { Category = category };
         _ = train.Add(new StationCall(stations[2]["2"], startTime, startTime));
         _ = train.Add(new StationCall(stations[1]["1"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
         _ = train.Add(new StationCall(stations[0]["3"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
@@ -74,12 +75,12 @@ internal static class TestDataFactory
 
     public static Train CreateTrain1()
     {
-        return CreateTrainInForwardDirection("Godståg", "1234", Time.FromHourAndMinute(12, 00));
+        return CreateTrainInForwardDirection(new() { Id = 21, ResourceName = "FreightTrain", Prefix = "G" }, 4321, Time.FromHourAndMinute(12, 00));
     }
 
     public static Train CreateTrain2()
     {
-        return CreateTrainInOppositeDirection("Persontåg", "4321", Time.FromHourAndMinute(12, 00));
+        return CreateTrainInForwardDirection(new() { Id = 22, ResourceName = "PassengerTrain", Prefix = "G" }, 1234, Time.FromHourAndMinute(12, 00));
     }
 
     public static Timetable CreateTimetable()

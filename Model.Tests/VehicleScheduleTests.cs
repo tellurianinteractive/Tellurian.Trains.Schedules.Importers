@@ -11,13 +11,13 @@ public class VehicleScheduleTests
     [TestInitialize]
     public void TestInitialize()
     {
-        Target = new LocoSchedule("W1");
+        Target = new LocoSchedule(1);
     }
 
     [TestMethod]
     public void ConstructorSetsProperties()
     {
-        Assert.AreEqual("W1", Target.Number);
+        Assert.AreEqual(1, Target.Number);
     }
 
     [TestMethod]

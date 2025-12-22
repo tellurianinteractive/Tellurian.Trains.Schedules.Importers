@@ -3,25 +3,34 @@
 public abstract record VehicleSchedule
 {
     public int Id { get; init; }
-    public string Number { get; init; } = string.Empty;
+    public int Number { get; init; }
+
+    public string Class { get; init; } = string.Empty;
+    public OperatingCompany Company { get; init; } = OperatingCompany.None;
+    public string? Remark { get; init; }
     public ICollection<TrainPart> Parts { get; }
 
-    protected VehicleSchedule(string number)
+    protected VehicleSchedule(OperatingCompany company, int number, string? remark = null)
     {
+        Company = company;
         Number = number;
+        Remark = remark;
         Parts = [];
     }
 
-    public override string ToString() => Number;
+    public override string ToString() => $"{Company.Signature} {Number}";
 }
 
 public sealed record LocoSchedule : VehicleSchedule
 {
-    public LocoSchedule(string number) : base(number) { }
+    public LocoSchedule(int number, string? remark = null) : this(OperatingCompany.None, number, remark) { }
+    public LocoSchedule(OperatingCompany company, int number, string? remark = null) : base(company, number, remark) { }
 }
 public sealed record TrainsetSchedule : VehicleSchedule
 {
-    public TrainsetSchedule(string number) : base(number) { }
+    public TrainsetSchedule(int number, string? remark = null) : this(OperatingCompany.None, number, remark) { }
+
+    public TrainsetSchedule(OperatingCompany company, int number, string? remark = null) : base(company, number, remark) { }
 }
 
 public static class VehicleScheduleExtensions

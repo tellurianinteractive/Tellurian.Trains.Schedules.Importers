@@ -11,7 +11,7 @@ public sealed record Timetable
     {
         Name = name;
         Layout = layout;
-        Trains = new List<Train>();
+        Trains = [];
     }
 
     public override string ToString() => Name;

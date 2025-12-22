@@ -50,16 +50,19 @@ public class DriverDuty : IEquatable<DriverDuty>
 
 public static class DriverDutyExtensions
 {
-    public static Maybe<TrainPart> Add(this DriverDuty duty, TrainPart part)
+    extension(DriverDuty duty)
     {
-        duty = duty.ValueOrException(nameof(duty));
-        part = part.ValueOrException(nameof(part));
-        if (!duty.Parts.Contains(part))
+        public Maybe<TrainPart> Add(TrainPart part)
         {
-            if (part.IsOverlapping(duty.Parts)) return new Maybe<TrainPart>($"Part {part} overlaps existing parts in driver duty '{duty.Identity}'");
-            part.Duty = duty;
-            duty.Parts.Add(part);
+            duty = duty.ValueOrException(nameof(duty));
+            part = part.ValueOrException(nameof(part));
+            if (!duty.Parts.Contains(part))
+            {
+                if (part.IsOverlapping(duty.Parts)) return new Maybe<TrainPart>($"Part {part} overlaps existing parts in driver duty '{duty.Identity}'");
+                part.Duty = duty;
+                duty.Parts.Add(part);
+            }
+            return new Maybe<TrainPart>(part);
         }
-        return new Maybe<TrainPart>(part);
     }
 }

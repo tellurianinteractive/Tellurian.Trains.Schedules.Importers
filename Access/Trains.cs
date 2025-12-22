@@ -6,7 +6,8 @@ namespace Tellurian.Trains.Schedules.Importers.Access;
 
 internal static class Trains
 {
-    private static readonly IDictionary<int, Train?> CachedTrains = new Dictionary<int, Train?>();
+    private static readonly Dictionary<int, Train?> CachedTrains = [];
+    private static readonly Dictionary<int, TrainCategory> CachedTrainCategories = [];
 
     internal static void Add(int layoutId, Train train, AccessRepository repository)
     {
@@ -44,17 +45,23 @@ internal static class Trains
     {
         var currentTrain = timetable.Trains.LastOrDefault();
         var key = Environment.CurrentManagedThreadId;
-        var number = record.GetString(record.GetOrdinal("TrainNumber"));
-        var category = record.GetString(record.GetOrdinal("Product"));
+        var trainIdentity = record.GetString(record.GetOrdinal("TrainNumber"));
+        var procuct = record.GetString(record.GetOrdinal("Product"));
+        if (!CachedTrainCategories.TryGetValue(procuct.GetHashCode(), out var trainCategory))
+        {
+            trainCategory = new TrainCategory() { ResourceName = procuct };
+            CachedTrainCategories.Add(procuct.GetHashCode(), trainCategory);
+        }
+
         if (currentTrain == null)
         {
-            currentTrain = new Train(number, number) { Category = category };
+            currentTrain = new Train(trainIdentity.NumberOrZero, OperatingCompany.None, trainCategory, trainIdentity.NumberOrZero);
             CachedTrains[key] = currentTrain;
         }
-        if (currentTrain.Number != number)
+        if (currentTrain.Number != trainIdentity.NumberOrZero)
         {
             timetable.Add(currentTrain);
-            currentTrain = new Train(number, number) { Category = category };
+            currentTrain = new Train(trainIdentity.NumberOrZero, OperatingCompany.None, trainCategory, trainIdentity.NumberOrZero);
             CachedTrains[key] = currentTrain;
         }
         currentTrain.Add(GetCall(record, timetable));

@@ -2,21 +2,22 @@
 
 namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 [TestClass]
 public class StationTrackTests
 {
-    private StationTrack Target;
-    private Train Train1;
-    private Train Train2;
+    private StationTrack Target = default!;
+    private Train Train1 = default!;
+    private Train Train2 = default!;
 
     [TestInitialize]
     public void TestInitialize()
     {
+        var category1 = new TrainCategory() { Id = 10, Prefix = "G", ResourceName = "FreightTrain" };
+        var category2 = new TrainCategory() { Id = 11, Prefix = "P", ResourceName = "PassengerTrain" };
         Target = TestDataFactory.CreateStationTrack();
-        Train1 = new Train("1234") { Category = "Godståg" };
-        Train2 = new Train("22") { Category = "Persontåg" };
+        Train1 = new Train(1, OperatingCompany.None, category1, 4321);
+        Train2 = new Train(1, OperatingCompany.None, category2, 1234);
     }
 
     [TestMethod]
@@ -32,7 +33,7 @@ public class StationTrackTests
     {
         Train1.Add(new StationCall(Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
         Train2.Add(new StationCall(Target, Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
-        var validationErrors = Target.GetValidationErrors(new List<LocoSchedule>());
+        var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
     }
@@ -43,7 +44,7 @@ public class StationTrackTests
         Train1.Add(new StationCall(Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
         Train2.Add(new StationCall(Target, Time.FromHourAndMinute(12, 31), Time.FromHourAndMinute(12, 45)));
         Assert.AreEqual(2, Target.Calls.Count);
-        var validationErrors = Target.GetValidationErrors(new List<LocoSchedule>());
+        var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
     }

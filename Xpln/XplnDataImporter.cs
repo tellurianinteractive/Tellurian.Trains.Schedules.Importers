@@ -6,31 +6,39 @@ using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
-using static Tellurian.Trains.Schedules.Importers.Xpln.XplnDataImporter;
+using static Tellurian.Trains.Schedules.Importers.Model.TrainExtensions;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln;
-public sealed partial class XplnDataImporter : IImportService, IDisposable
+
+public sealed class XplnDataImporter : IImportService, IDisposable
 {
-    private readonly Stream InputStream;
-    private readonly IDataSetProvider DataSetProvider;
-    private readonly ILogger Logger;
+    internal record TrainPartKeys(Maybe<StationCall> FromCall, Maybe<StationCall> ToCall, IEnumerable<Message> Messages);
+
+    private readonly Stream _inputStream;
+    private readonly IDataSetProvider _dataSetProvider;
+    private readonly ILogger _logger;
+    private readonly IOperatingCompaniesService _operatingCompaniesService;
+    private IEnumerable<OperatingCompany> _operatingCompanies = [];
     private DataSet? DataSet;
 
-    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ILogger<XplnDataImporter> logger)
+    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ILogger<XplnDataImporter> logger)
     {
-        InputStream = inputStream;
-        DataSetProvider = dataSetProvider;
-        Logger = logger;
+        _inputStream = inputStream;
+        _dataSetProvider = dataSetProvider;
+        _operatingCompaniesService = operatingCompaniesService;
+        _logger = logger;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
-    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, ILogger<XplnDataImporter> logger) :
-        this(File.OpenRead(inputFile.FullName), dataSetProvider, logger)
+
+    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ILogger<XplnDataImporter> logger) :
+        this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, logger)
     { }
 
 
-    public ImportResult<Schedule> ImportSchedule(string name)
+    public async Task<ImportResult<Schedule>> ImportSchedule(string name)
     {
-        DataSet = DataSetProvider.ImportSchedule(InputStream, DataSetConfiguration()) ?? throw new IOException("Stream cannot be read.");
+        _operatingCompanies = await _operatingCompaniesService.GetAllOperatingCompaies();
+        DataSet = _dataSetProvider.ImportSchedule(_inputStream, DataSetConfiguration()) ?? throw new IOException("Stream cannot be read.");
         return GetResult(name);
     }
 
@@ -48,10 +56,10 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         foreach (var message in messages)
         {
             if (message.Severity == Severity.None) return;
-            if (message.Severity == Severity.Error) Logger.LogError("{ErrorMessage}", message.ToString());
-            else if (message.Severity == Severity.Warning) Logger.LogWarning("{WarningMessage}", message.ToString());
-            else if (message.Severity == Severity.Information) Logger.LogInformation("{InformationMessage}", message.ToString());
-            else if (message.Severity == Severity.System) Logger.LogCritical("{CriticalMessage}", message.ToString());
+            if (message.Severity == Severity.Error && _logger.IsEnabled(LogLevel.Error)) _logger.LogError("{ErrorMessage}", message.ToString());
+            else if (message.Severity == Severity.Warning && _logger.IsEnabled(LogLevel.Warning)) _logger.LogWarning("{WarningMessage}", message.ToString());
+            else if (message.Severity == Severity.Information && _logger.IsEnabled(LogLevel.Information)) _logger.LogInformation("{InformationMessage}", message.ToString());
+            else if (message.Severity == Severity.System && _logger.IsEnabled(LogLevel.Critical)) _logger.LogCritical("{CriticalMessage}", message.ToString());
         }
     }
 
@@ -171,9 +179,9 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             new(fields[TrackName])
             {
                 IsMain = fields[SubType].Is("Main"),
-                IsScheduled = fields[SubType].IsAny("Main", "Depot"),
+                IsScheduled = fields[SubType].IsAny(["Main", "Depot"]),
                 Usage = fields[Remark],
-                DisplayOrder = fields[1].NumberOrZero(),
+                DisplayOrder = fields[1].NumberOrZero,
             };
 
         static Message[] ValidateRow(string[] fields, int rowNumber)
@@ -181,7 +189,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             var messages = new List<Message>();
             if (fields.Length < MinLength)
                 messages.Add(Message.Error(Resources.Strings.NotAllFieldsArePresent, rowNumber, MinLength, fields.Length));
-            if (!fields[Type].ValueOrEmpty().IsAny("Station", "Track"))
+            if (!fields[Type].ValueOrEmpty().IsAny(["Station", "Track"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedType, rowNumber, fields[Type]));
             return [.. messages];
         }
@@ -191,7 +199,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             var messages = new List<Message>();
             if (fields[Signature].IsEmpty())
                 messages.Add(Message.Error(Resources.Strings.ColumnMustHaveAValue, rowNumber, "Name"));
-            if (!fields[SubType].ValueOrEmpty().IsAny("Station", "Block"))
+            if (!fields[SubType].ValueOrEmpty().IsAny(["Station", "Block"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedSubType, rowNumber, fields[SubType]));
             return [.. messages];
         }
@@ -203,7 +211,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                 messages.Add(Message.Error(Resources.Strings.ColumnMustHaveAValue, rowNumber, "TrackName"));
             if (!fields[Lenght].IsEmpty() && !fields[Lenght].IsNumber())
                 messages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, "Length", fields[Lenght]));
-            if (!fields[SubType].ValueOrEmpty().IsAny("Main", "Side", "Siding", "Depot", "Goods"))
+            if (!fields[SubType].ValueOrEmpty().IsAny(["Main", "Side", "Siding", "Depot", "Goods"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedSubType, rowNumber, fields[SubType]));
             return [.. messages];
         }
@@ -308,7 +316,8 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         const int Remark = 10;
         const int MinLength = 10;
 
-        var messages = new List<Message>();
+        List<Message> messages = [];
+        Dictionary<string, TrainCategory> trainCategories = [];
 
         var trains = DataSet?.Tables[WorkSheetName];
         if (trains is null)
@@ -348,7 +357,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                 var validationMessages = ValidateTrain(fields, rowNumber);
                                 if (validationMessages.HasNoStoppingErrors())
                                 {
-                                    current = CreateTrain(fields);
+                                    current = CreateTrain(rowNumber, fields, trainCategories);
                                 }
                                 messages.AddRange(validationMessages);
                             }
@@ -368,7 +377,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                     }
                                     else
                                     {
-                                        current.Add(CreateCall(fields, track.Value));
+                                        current.Add(CreateCall(rowNumber, fields, track.Value));
                                     }
                                 }
                                 messages.AddRange(validationMessages);
@@ -441,20 +450,30 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
 
         }
 
-        static Train CreateTrain(string[] fields) =>
-            new(fields[Object].TrainNumber(), fields[Object])
-            {
-                Category = fields[Object].TrainCategory(),
-            };
-
-        static StationCall CreateCall(string[] fields, StationTrack track)
+        static Train CreateTrain(int rowNumber, string[] fields, IDictionary<string, TrainCategory> trainCategories)
         {
-            //var arrivalTime = fields[Arrival].IsEmpty() ? fields[ArrivalAlternative]: fields[Arrival];
-            return new(track, fields[Arrival].AsTime(), fields[Departure].AsTime())
+            var trainCategoryPrefix = fields[Object].TrainCategory;
+            if (!trainCategories.TryGetValue(trainCategoryPrefix, out TrainCategory? trainCategory))
             {
+                trainCategory = new TrainCategory
+                {
+                    Prefix = trainCategoryPrefix,
+                    ResourceName = trainCategoryPrefix,
+                };
+                trainCategories.Add(trainCategoryPrefix, trainCategory);
+            }
+            return new(rowNumber, OperatingCompany.None, trainCategory, fields[Object].NumberOrZero, fields[Object]) { Remark = fields[Remark] };
+        }
+
+
+
+        static StationCall CreateCall(int rowNumber, string[] fields, StationTrack track)
+        {
+            return new(track, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Remark])
+            {
+                Id = rowNumber,
                 IsArrival = true,
                 IsDeparture = true,
-
             };
         }
 
@@ -467,7 +486,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Arrival", fields[Arrival])));
             if (!fields[Departure].IsTime())
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Departure", fields[Departure])));
-            else if (!fields[Type].IsAny("Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"))
+            else if (!fields[Type].IsAny(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.UnsupportedType, rowNumber, fields[Type])));
             return [.. messages];
         }
@@ -502,6 +521,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
         const int Type = 8;
         const int TrainName = 9;
         const int MinLength = 9;
+        const int LocoClass = 9;
 
         var messages = new List<Message>();
         var locoSchedules = new Dictionary<string, LocoSchedule>(100);
@@ -557,7 +577,11 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                 {
                                     var locoId = fields[Object];
                                     if (!locoSchedules.ContainsKey(locoId))
-                                        locoSchedules.Add(locoId, new LocoSchedule(locoId));
+                                    {
+                                        var locoOperatorSingature = fields[Object].LocoOperatingCompanySignature;
+
+                                        locoSchedules.Add(locoId, new LocoSchedule(locoId.NumberOrZero) { Id = rowNumber, Company = OperatingCompany.None, Class = fields[LocoClass] });
+                                    }
                                     if (locoSchedules.TryGetValue(locoId, out var loco))
                                     {
                                         var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
@@ -581,7 +605,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                                 {
                                     var trainsetId = fields[Object].OrElse(fields[TrainName]);
                                     if (!trainsetSchedules.ContainsKey(trainsetId))
-                                        trainsetSchedules.Add(trainsetId, new TrainsetSchedule(trainsetId));
+                                        trainsetSchedules.Add(trainsetId, new TrainsetSchedule(trainsetId.NumberOrZero));
                                     if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))
                                     {
                                         var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
@@ -688,7 +712,7 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Arrival", fields[Arrival])));
             if (!fields[Departure].IsTime(fields[Type] == "timetable"))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Departure", fields[Arrival])));
-            else if (!fields[Type].IsAny("Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"))
+            else if (!fields[Type].IsAny(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.UnsupportedType, rowNumber, fields[Type])));
             return [.. messages];
         }
@@ -727,8 +751,8 @@ public sealed partial class XplnDataImporter : IImportService, IDisposable
             {
 
                 DataSet?.Dispose();
-                if (DataSetProvider is IDisposable disposable) disposable.Dispose();
-                InputStream?.Dispose();
+                if (_dataSetProvider is IDisposable disposable) disposable.Dispose();
+                _inputStream?.Dispose();
             }
             IsDisposed = true;
         }

@@ -5,15 +5,18 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
 {
     public static class LayoutExtenstions
     {
-        public static Maybe<StationTrack> Track(this Layout me, string stationSignature, string trackNumber)
+        extension(Layout me)
         {
-            var station = me.Station(stationSignature);
-            if (station.IsNone) 
-                return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ThereIsNoStation, stationSignature));
-            var track = station.Value.Tracks.SingleOrDefault(t => t.Number.Equals(trackNumber, StringComparison.OrdinalIgnoreCase));
-            if (track is null) 
-                return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TheTrackIsItNotInStation, trackNumber, stationSignature));
-            return new Maybe<StationTrack>(track);
+            public Maybe<StationTrack> Track(string stationSignature, string trackNumber)
+            {
+                var station = me.Station(stationSignature);
+                if (station.IsNone)
+                    return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ThereIsNoStation, stationSignature));
+                var track = station.Value.Tracks.SingleOrDefault(t => t.Number.Equals(trackNumber, StringComparison.OrdinalIgnoreCase));
+                if (track is null)
+                    return Maybe<StationTrack>.NoneWithReason(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TheTrackIsItNotInStation, trackNumber, stationSignature));
+                return new Maybe<StationTrack>(track);
+            }
         }
     }
 }
