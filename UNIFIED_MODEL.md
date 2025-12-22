@@ -1,5 +1,49 @@
 # Unified Domain Model Analysis and Plan
 
+---
+
+## Implementation Status
+
+> **Last Updated:** 2025-12-22
+
+### ✅ Completed
+
+| Item | Description |
+|------|-------------|
+| **Three-Layer Structure** | Layout → Timetable → Schedule hierarchy fully implemented |
+| **Layout Layer** | `Layout`, `Station`, `StationTrack`, `TrackStretch`, `TimetableStretch` |
+| **Timetable Layer** | `Timetable`, `Train`, `TrainCategory`, `StationCall`, `Time` |
+| **Schedule Layer** | `Schedule`, `VehicleSchedule`, `LocoSchedule`, `TrainsetSchedule`, `DriverDuty`, `TrainPart` |
+| **TrainCategory Class** | New class with `Prefix`, `Suffix`, `ResourceName`, `Color`, `DisplayOrder` |
+| **OperatingSessions Class** | Session management with factory properties (`OnDemand`, `AllSessions`, etc.) |
+| **Train Refactored** | Changed from string-based to `int Number` + `TrainCategory Category` |
+| **OperatingCompany Refactored** | Proper record with `Id`, `Name`, `Signature`, `CountryCode` |
+| **Services Layer** | New `Services` project with `IOperatingCompaniesService`, `ITrainCategoriesService` |
+| **Operating Companies Data** | JSON dataset with ~9,700+ railway operators |
+| **All Tests Passing** | 54 tests pass across Model.Tests, Interfaces.Tests, Xpln.Tests, Services.Tests |
+
+### 🔄 In Progress / Remaining
+
+| Phase | Item | Description |
+|-------|------|-------------|
+| **Phase 2** | XPLN composite identity parsing | Parse "Gt1234" → prefix="Gt", number=1234 |
+| **Phase 2** | TrainCategory creation from XPLN | Auto-create categories from unique prefixes |
+| **Phase 2** | Deterministic ID generation | Implement `IdGenerator` utility for reproducible IDs |
+| **Phase 2** | Three-step import orchestration | Explicit Layout → Timetable → Schedule in `XplnDataImporter` |
+| **Phase 2** | Operating sessions mapping | Map XPLN session columns to `OperatingSessions` |
+| **Phase 2** | Access importer alignment | Update Access importer to use new model classes |
+
+### 📋 Future Phases
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Phase 3** | Extract model to separate `Tellurian.Trains.Model` NuGet package | Not started |
+| **Phase 4** | Dispatch integration with state extensions | Not started |
+| **Phase 5** | Import-to-Dispatch adapter | Not started |
+| **Phase 6** | Broker integration | Not started |
+
+---
+
 ## Executive Summary
 
 This document analyzes the domain models in **Schedule.Importers/Model** and **Dispatch/Trains+Layout** folders with the goal of creating a unified base model that can be shared between both projects.
@@ -1007,89 +1051,92 @@ In such cases, each importer maintains responsibility for its own ID assignment.
 
 The migration follows a safe, incremental approach: refactor in place first, validate with existing tests, then extract to a separate package.
 
-### Phase 1: Refactor Existing Model In Place
+### Phase 1: Refactor Existing Model In Place ✅ COMPLETED
 
 Refactor `Tellurian.Trains.Schedules.Importers.Model` to align with the three-layer unified model design:
 
-1. **Verify three-layer structure exists**:
+1. ✅ **Verify three-layer structure exists**:
    - `Layout` → Infrastructure (Stations, TrackStretches, TimetableStretches)
    - `Timetable` → Trains (references Layout, contains Trains)
    - `Schedule` → Equipment + Crew (references Timetable, contains LocoSchedules, TrainsetSchedules, DriverDuties)
 
-2. **Verify Layout contains only infrastructure**:
+2. ✅ **Verify Layout contains only infrastructure**:
    - `Station`, `StationTrack`, `TrackStretch`, `TimetableStretch`
    - No train-related collections
 
-3. **Verify Timetable references Layout and contains only trains**:
+3. ✅ **Verify Timetable references Layout and contains only trains**:
    - `Layout` reference (required for validation)
    - `Trains` collection
    - No vehicle schedules or driver duties
 
-4. **Verify Schedule references Timetable and contains assignments**:
+4. ✅ **Verify Schedule references Timetable and contains assignments**:
    - `Timetable` reference (required for validation)
    - `LocoSchedules`, `TrainsetSchedules`, `DriverDuties` collections
 
-5. **Add OperatingSessions class** (if not exists):
+5. ✅ **Add OperatingSessions class**:
    - Class with `Id` and `IList<int>` of session numbers (1-14)
    - Static factory properties: `OnDemand`, `AllSessions`, `OddSessions`, `EvenSessions`
    - Extension methods for `OperatingDaysResourceKey` (localization support)
 
-6. **Add TrainCategory class** with:
+6. ✅ **Add TrainCategory class** with:
    - `Prefix`, `Suffix` for identity display
    - `ResourceName` for localization (e.g., "Passenger", "Freight")
    - `Color` for timetable graphs
 
-### Phase 2: Update Importers and Validate
+### Phase 2: Update Importers and Validate 🔄 IN PROGRESS
 
 Update Access and XPLN importers to work with three-layer model:
 
 1. **Update XPLN importer**:
-   - Parse composite train identity (e.g., "Gt1234") into category + number
-   - Create `TrainCategory` for each unique prefix/suffix
-   - Generate deterministic IDs for all entities
-   - Implement three-step import: Layout → Timetable → Schedule
+   - ⬜ Parse composite train identity (e.g., "Gt1234") into category + number
+   - ⬜ Create `TrainCategory` for each unique prefix/suffix
+   - ⬜ Generate deterministic IDs for all entities (implement `IdGenerator` utility)
+   - ⬜ Implement three-step import: Layout → Timetable → Schedule
+   - ⬜ Map XPLN session columns to `OperatingSessions`
 
 2. **Update Access importer**:
-   - Use actual database IDs
-   - Map existing database structure to three-layer model
+   - ⬜ Use actual database IDs
+   - ⬜ Map existing database structure to three-layer model
+   - ⬜ Align with new `TrainCategory` and `OperatingSessions` classes
 
-3. **Run all tests** and fix any failures:
-   - `dotnet test Model.Tests`
-   - `dotnet test Interfaces.Tests`
-   - `dotnet test Xpln.Tests`
+3. ✅ **Run all tests** and fix any failures:
+   - `dotnet test Model.Tests` ✅
+   - `dotnet test Interfaces.Tests` ✅
+   - `dotnet test Xpln.Tests` ✅
+   - `dotnet test Services.Tests` ✅ (new)
 
-4. **Iterate** until all tests pass
+4. **Iterate** until all importer updates are complete
 
-### Phase 3: Extract Model to Separate Solution
+### Phase 3: Extract Model to Separate Solution 📋 NOT STARTED
 
 Once tests pass and importers work correctly:
 
-1. **Create new solution** `Tellurian.Trains.Model`:
+1. ⬜ **Create new solution** `Tellurian.Trains.Model`:
    - Move model classes from `Tellurian.Trains.Schedules.Importers.Model`
    - Move corresponding tests to `Tellurian.Trains.Model.Tests`
 
-2. **Create NuGet package** `Tellurian.Trains.Model`:
+2. ⬜ **Create NuGet package** `Tellurian.Trains.Model`:
    - Configure package metadata
    - Publish to NuGet.org
 
-3. **Update Schedule.Importers**:
+3. ⬜ **Update Schedule.Importers**:
    - Remove local model project
    - Add NuGet reference to `Tellurian.Trains.Model`
    - Verify all tests still pass
 
-### Phase 4: Refactor Dispatch Model (Future)
+### Phase 4: Refactor Dispatch Model 📋 NOT STARTED
 
-1. Add NuGet reference to `Tellurian.Trains.Model`
-2. Create Dispatch-specific extensions of base model:
+1. ⬜ Add NuGet reference to `Tellurian.Trains.Model`
+2. ⬜ Create Dispatch-specific extensions of base model:
    - `DispatchStation : Station` (adds IsManned, Dispatcher, PreferredLanguage)
    - `SignalControlledPlace` (Dispatch-specific location type)
    - `OtherPlace` (Dispatch-specific location type)
-3. Create state extension classes:
+3. ⬜ Create state extension classes:
    - `DispatchTrain` extending or wrapping `Train`
    - `StationCallState` wrapping `StationCall` with observed times
-4. Keep Dispatch-specific classes: `TrainSection`, `DispatchStretch`
+4. ⬜ Keep Dispatch-specific classes: `TrainSection`, `DispatchStretch`
 
-### Phase 5: Create Import-to-Dispatch Adapter (Future)
+### Phase 5: Create Import-to-Dispatch Adapter 📋 NOT STARTED
 
 ```csharp
 namespace Tellurian.Trains.Dispatch.Import;
@@ -1117,11 +1164,11 @@ public class ScheduleImportAdapter
 }
 ```
 
-### Phase 6: Integrate with Broker (Future)
+### Phase 6: Integrate with Broker 📋 NOT STARTED
 
-1. Broker accepts imported data through adapters (all three layers)
-2. State provider persists only state deltas (TrainState, DispatchState, observed times)
-3. On reload, base data is re-imported and state is reapplied
+1. ⬜ Broker accepts imported data through adapters (all three layers)
+2. ⬜ State provider persists only state deltas (TrainState, DispatchState, observed times)
+3. ⬜ On reload, base data is re-imported and state is reapplied
 
 ---
 
@@ -1160,6 +1207,8 @@ public class ScheduleImportAdapter
 
 ## 7. Conclusion
 
+> **Current Status:** Phase 1 is complete. Phase 2 (importer updates) is in progress. The model classes are implemented and all tests pass.
+
 The unified model uses a **three-layer hierarchy** that establishes clear boundaries:
 
 | Layer | Content | Purpose |
@@ -1185,8 +1234,13 @@ This separation enables:
 - **State persistence** stores only runtime deltas; planned data can always be re-imported
 - **Multiple consumers** can use the same planned data for different purposes
 
-The migration can be done incrementally:
-1. Verify existing three-layer structure in `Tellurian.Trains.Model`
-2. Refactor Schedule.Importers to produce all three layers
-3. Refactor Dispatch to consume them and add its state layer
-4. Future consumers (publishing, simulation) follow the same pattern
+The migration is being done incrementally:
+1. ✅ Phase 1: Three-layer structure implemented in `Tellurian.Trains.Model`
+2. 🔄 Phase 2: Update XPLN and Access importers to use new model classes
+3. 📋 Phase 3: Extract model to separate NuGet package
+4. 📋 Phase 4-6: Dispatch integration, adapters, and broker integration
+
+**Next Steps:** Complete Phase 2 by implementing:
+- Composite train identity parsing in XPLN importer
+- `IdGenerator` utility for deterministic IDs
+- Operating sessions mapping from XPLN columns

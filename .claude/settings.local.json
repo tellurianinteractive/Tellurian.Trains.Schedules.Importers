@@ -4,7 +4,8 @@
       "Bash(dotnet build:*)",
       "mcp__microsoft-learn__microsoft_docs_search",
       "mcp__microsoft-learn__microsoft_docs_fetch",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(ls:*)"
     ]
   }
 }
