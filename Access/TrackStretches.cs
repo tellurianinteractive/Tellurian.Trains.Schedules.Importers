@@ -23,7 +23,7 @@ internal static class TrackStretches
         new OdbcCommand
         {
             CommandType = CommandType.Text,
-            CommandText = $"SELECT FromStation, ToStation, Distance, TracksCount FROM LayoutTrackStretches WHERE Name = '{layoutName}'"
+            CommandText = $"SELECT Id, FromStation, ToStation, Distance, TracksCount FROM LayoutTrackStretches WHERE Name = '{layoutName}'"
         };
 
     public static IDbCommand CreateInsertCommand(int layoutId, int fromStationId, int toStationId)
@@ -42,10 +42,11 @@ internal static class TrackStretches
 
     public static void RecordHandler(IDataRecord record, Layout layout)
     {
+        var id = record.GetInt32(record.GetOrdinal("Id"));
         var from = record.GetString(record.GetOrdinal("FromStation"));
         var to = record.GetString(record.GetOrdinal("ToStation"));
         var trackCount = record.GetInt32(record.GetOrdinal("TracksCount"));
         var distance = record.GetDouble(record.GetOrdinal("Distance"));
-        layout.Add(from, to, distance, trackCount);
+        layout.Add(id, from, to, distance, trackCount);
     }
 }

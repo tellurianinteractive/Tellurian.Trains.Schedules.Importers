@@ -1,16 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Tellurian.Trains.Schedules.Importers.Model;
 
-[DataContract(IsReference = true)]
 public class TrackStretch : IEquatable<TrackStretch>
 {
-    public TrackStretch(Station start, Station end, double distance) : this(start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
-    public TrackStretch(Station start, Station end, double distance, int tracksCount) : this(start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
-    public TrackStretch(Station start, Station end, double distance, int tracksCount, int speed, int time)
+    public TrackStretch(int id, Station start, Station end, double distance) : this(id, start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
+    public TrackStretch(int id, Station start, Station end, double distance, int tracksCount) : this(id, start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
+    public TrackStretch(int id, Station start, Station end, double distance, int tracksCount, int speed, int time)
     {
+        Id = id;
         Start = start.ValueOrException(nameof(start));
         End = end.ValueOrException(nameof(end));
         (!Start.Layout.Equals(end.Layout)).IfTrueThrows(nameof(end), $"Both {start} and {end} must be in the same layout.");
@@ -21,11 +20,7 @@ public class TrackStretch : IEquatable<TrackStretch>
         Layout = Start.Layout;
     }
 
-    [DataMember(IsRequired = false, Order = 1, Name = "Id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int _Id = 0;
-
-    public int Id => _Id;
+    public int Id { get; init; }
 
     [DataMember(IsRequired = true, Order = 2)]
     public Station Start { get; }

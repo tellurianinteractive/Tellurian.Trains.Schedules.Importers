@@ -8,7 +8,7 @@ namespace Tellurian.Trains.Schedules.Importers.Access.Tests
         [TestMethod]
         public async Task ReadsLayoutStations()
         {
-            var file = new FileInfo(@"Test data\Timetable.accdb");
+            var file = new FileInfo(Path.Combine("Test data", "Timetable.accdb"));
             var repository = new AccessRepository(file, NullLogger<AccessRepository>.Instance);
             var schedule = await repository.ImportSchedule("Grimslöv H0");
             Assert.IsTrue(schedule.IsSuccess);

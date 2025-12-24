@@ -61,11 +61,12 @@ internal static class TimetableStretches
 
     public static void RecordHandler(IDataRecord record, Layout layout)
     {
+        var id = record.GetInt32(record.GetOrdinal("Id"));
         var number = record.GetString(record.GetOrdinal("Number"));
         var name = record.GetString(record.GetOrdinal("Name"));
         var fromStationSignature = record.GetString(record.GetOrdinal("FromStation"));
         var toStationSignature = record.GetString(record.GetOrdinal("ToStation"));
-        if (!layout.HasTimetableStretch(number)) layout.Add(new TimetableStretch(number, name));
+        if (!layout.HasTimetableStretch(number)) layout.Add(new TimetableStretch(id, number, name));
         var currentTimetableStretch = layout.TimetableStretch(number).Value;
         var trackStretch = layout.TrackStretch(fromStationSignature, toStationSignature);
         currentTimetableStretch.AddLast(trackStretch.Value);

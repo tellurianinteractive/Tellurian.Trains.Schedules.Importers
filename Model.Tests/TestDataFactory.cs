@@ -96,8 +96,8 @@ internal static class TestDataFactory
         var layout = new Layout { Name = "Test" };
         foreach (var s in Stations) layout.Add(s);
         var stations = layout.Stations.ToArray();
-        for (var i = 0; i < stations.Length - 1; i++) layout.Add(new TrackStretch(stations[i], stations[i + 1], 10));
-        var stretch = new TimetableStretch("1");
+        for (var i = 0; i < stations.Length - 1; i++) layout.Add(new TrackStretch(1, stations[i], stations[i + 1], 10));
+        var stretch = new TimetableStretch(1, "1");
         foreach (var ts in layout.TrackStretches) stretch.AddLast(ts);
         layout.Add(stretch);
         return layout;

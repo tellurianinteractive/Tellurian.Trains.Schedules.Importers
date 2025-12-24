@@ -169,7 +169,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         var validationMessages = ValidateStation(fields, rowNumber);
                         if (validationMessages.HasNoStoppingErrors())
                         {
-                            current = CreateStation(fields);
+                            current = CreateStation(rowNumber, fields);
                         }
                         itemMessages.AddRange(validationMessages);
                     }
@@ -198,9 +198,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static bool IsRepeatedHeader(DataRow row) =>
             row[0].Equals("Name") && row[1].Equals("Enum");
 
-        static Station CreateStation(string[] fields) =>
+        static Station CreateStation(int rowNumber, string[] fields) =>
             new()
             {
+                Id = rowNumber,
                 Type = fields[Type],
                 Name = fields[Name],
                 Signature = fields[Signature],
@@ -302,7 +303,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     }
                     if (!layout.HasTimetableStretch(routeNumber))
                     {
-                        timetableStretch = new TimetableStretch(routeNumber);
+                        timetableStretch = new TimetableStretch(rowNumber, routeNumber);
                         layout.Add(timetableStretch);
                     }
                     else
@@ -320,7 +321,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     if (itemMessages.HasNoStoppingErrors())
                     {
                         var distance = Math.Abs(fields[EndPosition].ToDouble() - fields[StartPosition].ToDouble());
-                        var stretch = new TrackStretch(start.Value, end.Value, distance, fields[Tracks].ToInteger(), fields[Speed].ToInteger(), fields[Time].ToInteger());
+                        var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToInteger(), fields[Speed].ToInteger(), fields[Time].ToInteger());
                         stretch = timetableStretch!.AddLast(stretch);
                         layout.Add(stretch);
                     }
@@ -350,7 +351,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int MinLength = 10;
 
         List<Message> messages = [];
-        List<TrainCategory> trainCategories = [];
 
         var trains = DataSet?.Tables[WorkSheetName];
         if (trains is null)
@@ -570,6 +570,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int TrainName = 9;
         const int MinLength = 9;
         const int LocoClass = 9;
+        const int TrainsetClass = 9;
 
         var messages = new List<Message>();
         var locoSchedules = new Dictionary<string, LocoSchedule>(100);
@@ -653,7 +654,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 {
                                     var trainsetId = fields[Object].OrElse(fields[TrainName]);
                                     if (!trainsetSchedules.ContainsKey(trainsetId))
-                                        trainsetSchedules.Add(trainsetId, new TrainsetSchedule(trainsetId.NumberOrZero));
+                                        trainsetSchedules.Add(trainsetId, new TrainsetSchedule(trainsetId.NumberOrZero) { Id = rowNumber, Class = fields[TrainsetClass], Remark = fields[Object] });
                                     if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))
                                     {
                                         var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
@@ -677,7 +678,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 {
                                     var jobId = fields[Object].OrElse(fields[TrainNumber]);
                                     if (!driverDuties.ContainsKey(jobId))
-                                        driverDuties.Add(jobId, new DriverDuty(jobId));
+                                        driverDuties.Add(jobId, new DriverDuty(rowNumber, jobId) { });
                                     if (driverDuties.TryGetValue(jobId, out var duty))
                                     {
                                         var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
@@ -691,13 +692,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
                                 }
                                 messages.AddRange(dutyMessages);
-                            }
-                            break;
-                        case "group":
-                            {
-                                if (currentTrain is null) break;
-                                // Grouping of trains
-
                             }
                             break;
                     }

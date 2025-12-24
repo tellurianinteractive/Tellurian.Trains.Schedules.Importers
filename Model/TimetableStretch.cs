@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Tellurian.Trains.Schedules.Importers.Model;
 
@@ -10,35 +9,30 @@ public sealed record TimetableStretch : IEquatable<TimetableStretch>
     public string Description { get; }
     public ICollection<TrackStretch> Stretches { get; }
 
-    public TimetableStretch(string? number)
+    public TimetableStretch(int id, string? number)
     {
+        Id = id;
         Number = number.TextOrException(nameof(number), string.Format(CultureInfo.CurrentCulture, Resources.Strings.NumberOfObjectIsRequired, Resources.Strings.TimetableStretch));
         Description = string.Empty;
-        Stretches = new List<TrackStretch>();
+        Stretches = [];
     }
 
-    public TimetableStretch(string? number, string description) : this(number)
+    public TimetableStretch(int id, string? number, string description) : this(id, number)
     {
         Description = description;
     }
 
-    [NotMapped]
     public Station Starts => Stretches.First().Start;
 
-    [NotMapped]
     public Station Ends => Stretches.Last().End;
 
-    [NotMapped]
-    public IEnumerable<Station> Stations => Stretches.Select(s => s.Start).Concat(new[] { Stretches.Last().End });
+    public IEnumerable<Station> Stations => Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
 
     public bool Equals(TimetableStretch? other) => other != null && Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase);
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
 
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0}: {1}", Number, this.GetDescription());
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    private TimetableStretch() { } // For deserialization.
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 }
 
 public static class TimetableStretchExtensions

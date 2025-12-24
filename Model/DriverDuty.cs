@@ -1,38 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
-using System.Runtime.Serialization;
+﻿using System.Globalization;
 
 namespace Tellurian.Trains.Schedules.Importers.Model;
 
-[DataContract(IsReference = true)]
-public class DriverDuty : IEquatable<DriverDuty>
+public class DriverDuty(int id, string identity) : IEquatable<DriverDuty>
 {
-    public DriverDuty(string identity)
-    {
-        Identity = identity.TextOrException(nameof(identity));
-        Parts = [];
-        Notes = [];
-        Schedule = default!; // Set by Schedule.Add()
-    }
+    public int Id { get; init; } = id;
 
-    [DataMember(IsRequired = false, Order = 1, Name = "Id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-#pragma warning disable CS0649 // Field is assigned by EF/deserialization
-    private int _Id;
-#pragma warning restore CS0649
+    public string Identity { get; } = identity.TextOrException(nameof(identity));
 
-    public int Id => _Id;
+    public ICollection<TrainPart> Parts { get; } = [];
 
-    [DataMember(IsRequired = true, Order = 2)]
-    public string Identity { get; }
+    public ICollection<Note> Notes { get; } = [];
 
-    [DataMember(IsRequired = true, Order = 3)]
-    public ICollection<TrainPart> Parts { get; }
-
-    [DataMember(IsRequired = true, Order = 4)]
-    public ICollection<Note> Notes { get; }
-
-    public Schedule Schedule { get; internal set; }
+    public Schedule Schedule { get; internal set; } = default!; // Set by Schedule.Add()
 
     public bool Equals(DriverDuty? other) => Identity.Equals(other?.Identity, StringComparison.OrdinalIgnoreCase);
     public override bool Equals(object? obj) => obj is DriverDuty other && Equals(other);
@@ -43,9 +23,6 @@ public class DriverDuty : IEquatable<DriverDuty>
         string.Format(CultureInfo.CurrentCulture,
             "{0}: {1} - {2}", Identity, Parts.First().Departure, Parts.Last().Arrival);
 
-#pragma warning disable CS8618 // Properties initialized by EF/deserialization
-    private DriverDuty() { } // Required for deserialization and EF.
-#pragma warning restore CS8618
 }
 
 public static class DriverDutyExtensions

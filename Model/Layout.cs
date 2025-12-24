@@ -55,11 +55,11 @@ public static class LayoutStationsExtensions
         return stretch;
     }
 
-    public static TrackStretch Add(this Layout layout, string fromStationName, string toStationName, double distance, int tracksCount)
+    public static TrackStretch Add(this Layout layout, int id, string fromStationName, string toStationName, double distance, int tracksCount)
     {
         var fromStation = layout.Stations.Single(s => s.Name == fromStationName);
         var toStation = layout.Stations.Single(s => s.Name == toStationName);
-        var trackStretch = new TrackStretch(fromStation, toStation, distance, tracksCount);
+        var trackStretch = new TrackStretch(id, fromStation, toStation, distance, tracksCount);
         layout.Add(trackStretch);
         return trackStretch;
     }
@@ -89,12 +89,12 @@ public static class LayoutExtensions
 
 public static class LayoutTracksExtensions
 {
-    public static Maybe<TrackStretch> Add(this Layout layout, string fromStationName, string toStationName, double distance, int tracksCount, int speed, int time)
+    public static Maybe<TrackStretch> Add(this Layout layout, int id, string fromStationName, string toStationName, double distance, int tracksCount, int speed, int time)
     {
         var from = layout.Station(fromStationName);
         var to = layout.Station(toStationName);
         if (from.HasValue && to.HasValue)
-            return new Maybe<TrackStretch>(layout.Add(new TrackStretch(from.Value, to.Value, distance, tracksCount, speed, time)));
+            return new Maybe<TrackStretch>(layout.Add(new TrackStretch(id, from.Value, to.Value, distance, tracksCount, speed, time)));
         return new Maybe<TrackStretch>($"From {from} to {to}");
     }
 

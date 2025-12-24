@@ -1,6 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Importers.Model;
-
-namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
+﻿namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
 [TestClass]
 public class TimetableStretchTests
@@ -12,13 +10,13 @@ public class TimetableStretchTests
     public void TestInitialize()
     {
         TestDataFactory.Init();
-        Target = new TimetableStretch("10", "Ten");
+        Target = new TimetableStretch(10, "10", "Ten");
     }
 
     [TestMethod]
     public void NullNumberThrows()
     {
-        Assert.Throws<ArgumentNullException>(() => new TimetableStretch(null));
+        Assert.Throws<ArgumentNullException>(() => new TimetableStretch(1, null));
     }
 
     [TestMethod]
@@ -31,7 +29,7 @@ public class TimetableStretchTests
     [TestMethod]
     public void EqualsWithSameNumber()
     {
-        var other = new TimetableStretch("10");
+        var other = new TimetableStretch(10, "10");
         Assert.AreEqual(Target, other);
     }
 }

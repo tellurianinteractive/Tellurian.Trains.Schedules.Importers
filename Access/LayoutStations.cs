@@ -10,7 +10,7 @@ internal static class LayoutStations
        new OdbcCommand
        {
            CommandType = CommandType.Text,
-           CommandText = $"SELECT FullName, Signature FROM LayoutStations WHERE LayoutName = '{layoutName}'"
+           CommandText = $"SELECT LayoutStationId, FullName, Signature FROM LayoutStations WHERE LayoutName = '{layoutName}'"
        };
 
     public static OdbcCommand CreateInsertCommand(int layoutId, int stationId)

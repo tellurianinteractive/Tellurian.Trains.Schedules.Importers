@@ -30,7 +30,7 @@
 | **Phase 2** | TrainCategory creation from XPLN | Auto-create categories from unique prefixes |
 | **Phase 2** | Deterministic ID generation | Implement `IdGenerator` utility for reproducible IDs |
 | **Phase 2** | Three-step import orchestration | Explicit Layout → Timetable → Schedule in `XplnDataImporter` |
-| **Phase 2** | Operating sessions mapping | Map XPLN session columns to `OperatingSessions` |
+| **Phase 2** | ~~Operating sessions mapping~~ | N/A - XPLN has no session columns; schedules are single-session |
 | **Phase 2** | Access importer alignment | Update Access importer to use new model classes |
 
 ### 📋 Future Phases
@@ -1092,7 +1092,7 @@ Update Access and XPLN importers to work with three-layer model:
    - ⬜ Create `TrainCategory` for each unique prefix/suffix
    - ⬜ Generate deterministic IDs for all entities (implement `IdGenerator` utility)
    - ⬜ Implement three-step import: Layout → Timetable → Schedule
-   - ⬜ Map XPLN session columns to `OperatingSessions`
+   - N/A ~~Map XPLN session columns to `OperatingSessions`~~ - XPLN has no session columns; schedules are single-session
 
 2. **Update Access importer**:
    - ⬜ Use actual database IDs
@@ -1243,4 +1243,4 @@ The migration is being done incrementally:
 **Next Steps:** Complete Phase 2 by implementing:
 - Composite train identity parsing in XPLN importer
 - `IdGenerator` utility for deterministic IDs
-- Operating sessions mapping from XPLN columns
+- Three-step import orchestration (Layout → Timetable → Schedule)
