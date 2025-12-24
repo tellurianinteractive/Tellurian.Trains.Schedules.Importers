@@ -4,7 +4,7 @@
 
 ## Implementation Status
 
-> **Last Updated:** 2025-12-22
+> **Last Updated:** 2025-12-24
 
 ### ✅ Completed
 
@@ -26,12 +26,12 @@
 
 | Phase | Item | Description |
 |-------|------|-------------|
-| **Phase 2** | XPLN composite identity parsing | Parse "Gt1234" → prefix="Gt", number=1234 |
-| **Phase 2** | TrainCategory creation from XPLN | Auto-create categories from unique prefixes |
-| **Phase 2** | Deterministic ID generation | Implement `IdGenerator` utility for reproducible IDs |
-| **Phase 2** | Three-step import orchestration | Explicit Layout → Timetable → Schedule in `XplnDataImporter` |
+| **Phase 2** | ✅ XPLN composite identity parsing | Parse "Gt1234" → prefix="Gt", number=1234 |
+| **Phase 2** | ✅ TrainCategory creation from XPLN | Auto-create categories from unique prefixes + background color |
+| **Phase 2** | ✅ Deterministic ID generation | Using rowNumber for reproducible IDs |
+| **Phase 2** | ✅ Three-step import orchestration | Explicit Layout → Timetable → Schedule in `XplnDataImporter` |
 | **Phase 2** | ~~Operating sessions mapping~~ | N/A - XPLN has no session columns; schedules are single-session |
-| **Phase 2** | Access importer alignment | Update Access importer to use new model classes |
+| **Phase 2** | ⬜ Access importer alignment | Update Access importer to use new model classes |
 
 ### 📋 Future Phases
 
@@ -1088,10 +1088,10 @@ Refactor `Tellurian.Trains.Schedules.Importers.Model` to align with the three-la
 Update Access and XPLN importers to work with three-layer model:
 
 1. **Update XPLN importer**:
-   - ⬜ Parse composite train identity (e.g., "Gt1234") into category + number
-   - ⬜ Create `TrainCategory` for each unique prefix/suffix
-   - ⬜ Generate deterministic IDs for all entities (implement `IdGenerator` utility)
-   - ⬜ Implement three-step import: Layout → Timetable → Schedule
+   - ✅ Parse composite train identity (e.g., "Gt1234") into category + number
+   - ✅ Create `TrainCategory` for each unique prefix/suffix (+ background color extraction)
+   - ✅ Generate deterministic IDs using rowNumber
+   - ✅ Implement three-step import: Layout → Timetable → Schedule
    - N/A ~~Map XPLN session columns to `OperatingSessions`~~ - XPLN has no session columns; schedules are single-session
 
 2. **Update Access importer**:
@@ -1240,7 +1240,7 @@ The migration is being done incrementally:
 3. 📋 Phase 3: Extract model to separate NuGet package
 4. 📋 Phase 4-6: Dispatch integration, adapters, and broker integration
 
-**Next Steps:** Complete Phase 2 by implementing:
-- Composite train identity parsing in XPLN importer
-- `IdGenerator` utility for deterministic IDs
-- Three-step import orchestration (Layout → Timetable → Schedule)
+**Next Steps:**
+- Phase 2 XPLN importer updates are complete
+- Remaining: Update Access importer to use new model classes (can be deferred)
+- Ready for Phase 3: Extract model to separate NuGet package
