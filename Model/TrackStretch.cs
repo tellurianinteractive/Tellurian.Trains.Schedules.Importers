@@ -5,9 +5,9 @@ namespace Tellurian.Trains.Schedules.Importers.Model;
 
 public class TrackStretch : IEquatable<TrackStretch>
 {
-    public TrackStretch(int id, Station start, Station end, double distance) : this(id, start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
-    public TrackStretch(int id, Station start, Station end, double distance, int tracksCount) : this(id, start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
-    public TrackStretch(int id, Station start, Station end, double distance, int tracksCount, int speed, int time)
+    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance) : this(id, start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
+    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance, int tracksCount) : this(id, start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
+    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance, int tracksCount, int speed, int time)
     {
         Id = id;
         Start = start.ValueOrException(nameof(start));
@@ -23,10 +23,10 @@ public class TrackStretch : IEquatable<TrackStretch>
     public int Id { get; init; }
 
     [DataMember(IsRequired = true, Order = 2)]
-    public Station Start { get; }
+    public OperationLocation Start { get; }
 
     [DataMember(IsRequired = true, Order = 3)]
-    public Station End { get; }
+    public OperationLocation End { get; }
 
     [DataMember(IsRequired = true, Order = 4)]
     public double Distance { get; }

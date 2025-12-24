@@ -8,7 +8,7 @@ internal static class TestDataFactory
     public static StationTrack CreateStationTrack()
     {
         var result = StationTrack.Example;
-        result.Station = new Station("Ytterby", "Yb");
+        result.Station = new OperationLocation(2, "Ytterby", "Yb");
         return result;
     }
 
@@ -17,11 +17,11 @@ internal static class TestDataFactory
         Stations = [CreateStation1(), CreateStation2(), CreateStation3()];
     }
 
-    public static IEnumerable<Station> Stations;
+    public static IEnumerable<OperationLocation> Stations;
 
-    internal static Station CreateStation1()
+    internal static OperationLocation CreateStation1()
     {
-        var station = new Station("Göteborg", "G");
+        var station = new OperationLocation(3, "Göteborg", "G");
         station.Add(new StationTrack("1"));
         station.Add(new StationTrack("2"));
         station.Add(new StationTrack("3"));
@@ -29,17 +29,17 @@ internal static class TestDataFactory
         return station;
     }
 
-    private static Station CreateStation2()
+    private static OperationLocation CreateStation2()
     {
-        var station = new Station("Ytterby", "Yb");
+        var station = new OperationLocation(2, "Ytterby", "Yb");
         station.Add(new StationTrack("1"));
         station.Add(new StationTrack("2"));
         return station;
     }
 
-    private static Station CreateStation3()
+    private static OperationLocation CreateStation3()
     {
-        var station = new Station("Stenungsund", "Snu");
+        var station = new OperationLocation(1, "Stenungsund", "Snu");
         station.Add(new StationTrack("1"));
         station.Add(new StationTrack("2"));
         return station;

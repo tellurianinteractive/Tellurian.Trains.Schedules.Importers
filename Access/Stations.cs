@@ -29,14 +29,14 @@ internal static class Stations
             CommandText = "SELECT Id, FullName, Signature, Owner, IsShadow FROM Station"
         };
 
-    public static IDbCommand CreateInsertCommand(Station station) =>
+    public static IDbCommand CreateInsertCommand(OperationLocation station) =>
         new OdbcCommand
         {
             CommandType = CommandType.Text,
             CommandText = $"INSERT INTO Station (FullName, Signature) VALUES ('{station.Name}', '{station.Signature}')"
         };
 
-    public static bool AddOrUpdateStation(int layoutId, Station station, IDbConnection connection)
+    public static bool AddOrUpdateStation(int layoutId, OperationLocation station, IDbConnection connection)
     {
         var stationId = (int?)OdbcConnectionExtensions.ExecuteScalar(connection, CreateGetIdCommand(station.Name));
         if (!stationId.HasValue)
@@ -64,7 +64,7 @@ internal static class Stations
 
     public static void RecordHandler(IDataRecord record, Layout layout)
     {
-        var result = new Station(record.GetString(record.GetOrdinal("FullName")), record.GetString(record.GetOrdinal("Signature")));
+        var result = new OperationLocation(record.GetInt32(record.GetOrdinal("LayoutStationId")), record.GetString(record.GetOrdinal("FullName")), record.GetString(record.GetOrdinal("Signature")));
         layout.Add(result);
     }
 }

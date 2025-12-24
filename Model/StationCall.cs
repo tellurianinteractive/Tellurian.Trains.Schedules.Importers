@@ -8,7 +8,7 @@ public sealed record StationCall : IEquatable<StationCall>, IComparable<StationC
     internal Train? Train { get; set; }
 
     public int Id { get; init; }
-    public Station Station => Track.Station;
+    public OperationLocation Station => Track.Station;
     public StationTrack Track { get; init; }
     public Time Arrival { get; init; }
     public Time Departure { get; init; }

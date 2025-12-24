@@ -24,8 +24,8 @@ public static class TimetableExtensions
     public static int EndHour(this Timetable me) =>
         (me?.Trains.Select(t => t.Calls.Max(c => c.Arrival)).Max(tt => tt).Hours() + 1) ?? 24;
 
-    public static IEnumerable<Station> Stations(this Timetable me) =>
-        me is null ? Array.Empty<Station>() : me.Layout.Stations;
+    public static IEnumerable<OperationLocation> Stations(this Timetable me) =>
+        me is null ? Array.Empty<OperationLocation>() : me.Layout.Stations;
 
     public static Maybe<Train> Train(this Timetable me, string externalId) =>
         new(me?.Trains.Where(t => t.ExtenalId == externalId), $"Train with external id '{externalId}' not found.");

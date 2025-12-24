@@ -41,14 +41,14 @@ public sealed record StationTrack : IEquatable<StationTrack>
     [DataMember(IsRequired = true, Order = 6)]
     public int DisplayOrder { get; init; }
 
-    public Station Station { get; internal set; }
+    public OperationLocation Station { get; internal set; }
 
     public ICollection<StationCall> Calls { get; }
 
     public bool Equals(StationTrack? other) => Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase) && Station.Equals(other?.Station);
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
     public override string ToString() => Number;
-    public static StationTrack Example { get { return new StationTrack("1") { Station = Station.Example }; } }
+    public static StationTrack Example { get { return new StationTrack("1") { Station = OperationLocation.Example }; } }
     private StationTrack() { } // Only for deserialization.
     public void SetId(int id) => _Id = id;
 }

@@ -1,6 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Importers.Model;
-
-namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
+﻿namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
 
 [TestClass]
 public class StationTests
@@ -8,7 +6,7 @@ public class StationTests
     [TestMethod]
     public void PropertiesAreSet()
     {
-        var target = new Station("Stora Höga", "Sth");
+        var target = new OperationLocation(2, "Stora Höga", "Sth");
         Assert.AreEqual("Stora Höga", target.Name);
         Assert.AreEqual("Sth", target.Signature);
     }

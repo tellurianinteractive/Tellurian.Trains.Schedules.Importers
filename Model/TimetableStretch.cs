@@ -22,11 +22,11 @@ public sealed record TimetableStretch : IEquatable<TimetableStretch>
         Description = description;
     }
 
-    public Station Starts => Stretches.First().Start;
+    public OperationLocation Starts => Stretches.First().Start;
 
-    public Station Ends => Stretches.Last().End;
+    public OperationLocation Ends => Stretches.Last().End;
 
-    public IEnumerable<Station> Stations => Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
+    public IEnumerable<OperationLocation> Stations => Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
 
     public bool Equals(TimetableStretch? other) => other != null && Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase);
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
@@ -39,15 +39,15 @@ public static class TimetableStretchExtensions
 {
     public static string GetDescription(this TimetableStretch me) => me is null ? string.Empty : me.Description.TextOrDefault($"{me.Starts} - {me.Ends}");
 
-    public static Maybe<Station> GetStation(this TimetableStretch me, Station station) =>
+    public static Maybe<OperationLocation> GetStation(this TimetableStretch me, OperationLocation station) =>
         new(me?.Stations.SingleOrDefault(s => s.Equals(station)), $"Station {station} is not in timetable stretch {me}.");
-    public static Station Starts(this TimetableStretch me) =>
+    public static OperationLocation Starts(this TimetableStretch me) =>
         me?.Stretches.Count > 0 ? me.Stretches.First().Start : throw new InvalidOperationException($"No stretch in {me}.");
 
-    public static Station Ends(this TimetableStretch me) =>
+    public static OperationLocation Ends(this TimetableStretch me) =>
        me?.Stretches.Count > 0 ? me.Stretches.Last().End : throw new InvalidOperationException($"No stretch in {me}.");
 
-    public static double? DistanceToStation(this TimetableStretch me, Station station)
+    public static double? DistanceToStation(this TimetableStretch me, OperationLocation station)
     {
         var to = me.GetStation(station);
         if (to.IsNone) return null;

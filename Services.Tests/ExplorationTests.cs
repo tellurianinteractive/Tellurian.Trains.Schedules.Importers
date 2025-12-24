@@ -7,7 +7,7 @@ using Tellurian.Trains.Schedules.Importers.Model;
 namespace Services.Tests;
 
 [TestClass]
-public sealed class ExprorationTests
+public sealed class ExplorationTests
 {
     private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {

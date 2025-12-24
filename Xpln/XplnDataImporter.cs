@@ -147,7 +147,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
         messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ReadingWorksheet, WorkSheetName)));
         var rowNumber = 1;
-        Station? current = null;
+        OperationLocation? current = null;
         foreach (DataRow station in stations.Rows)
         {
             if (rowNumber > 1)
@@ -198,13 +198,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static bool IsRepeatedHeader(DataRow row) =>
             row[0].Equals("Name") && row[1].Equals("Enum");
 
-        static Station CreateStation(int rowNumber, string[] fields) =>
-            new()
+        static OperationLocation CreateStation(int rowNumber, string[] fields) =>
+            new(rowNumber, fields[Name], fields[Signature])
             {
-                Id = rowNumber,
                 Type = fields[Type],
-                Name = fields[Name],
-                Signature = fields[Signature],
                 IsShadow = fields[SubType].Is("Depot")
             };
 

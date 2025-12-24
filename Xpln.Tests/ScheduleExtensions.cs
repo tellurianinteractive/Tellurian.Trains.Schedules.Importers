@@ -155,7 +155,7 @@ internal static class ScheduleExtensions
         }
     }
 
-    private static List<Station> GetStations(int layoutId, string connectionString)
+    private static List<OperationLocation> GetStations(int layoutId, string connectionString)
     {
         using var connection = new OdbcConnection(connectionString);
         var command = new OdbcCommand($"SELECT * FROM XplnGetStations WHERE LayoutId = {layoutId};")
@@ -164,8 +164,8 @@ internal static class ScheduleExtensions
         };
         command.Connection.Open();
         var reader = command.ExecuteReader();
-        var result = new List<Station>();
-        Station? station = null;
+        var result = new List<OperationLocation>();
+        OperationLocation? station = null;
         var lastStationId = 0;
         while (reader.Read())
         {
@@ -175,12 +175,12 @@ internal static class ScheduleExtensions
                 if (stationId != lastStationId)
                 {
                     result.Add(station);
-                    station = new Station() { Id = stationId, Signature = reader.GetString(reader.GetOrdinal("Signature")) };
+                    station = new OperationLocation(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
                 }
             }
             else
             {
-                station = new Station() { Id = stationId, Signature = reader.GetString(reader.GetOrdinal("Signature")) };
+                station = new OperationLocation(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
 
             }
             var track = new StationTrack(reader.GetString(reader.GetOrdinal("TrackNumber")), true, true);

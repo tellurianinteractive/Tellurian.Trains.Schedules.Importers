@@ -6,7 +6,7 @@ public sealed record Layout
 {
     public int Id { get; init; }
     public string Name { get; init; } = string.Empty;
-    public ICollection<Station> Stations { get; init; }
+    public ICollection<OperationLocation> Stations { get; init; }
     public ICollection<TrackStretch> TrackStretches { get; init; }
     public ICollection<TimetableStretch> TimetableStretches { get; init; }
 
@@ -21,18 +21,18 @@ public sealed record Layout
 
 public static class LayoutStationsExtensions
 {
-    public static bool HasStation(this Layout me, Station station) => me?.Stations.Any(s => s.Equals(station)) ?? false;
+    public static bool HasStation(this Layout me, OperationLocation station) => me?.Stations.Any(s => s.Equals(station)) ?? false;
     public static bool HasTrack(this Layout me, StationTrack track) => me?.StationTracks().Any(t => t.Equals(track)) ?? false;
 
 
 
-    public static Maybe<Station> Station(this Layout me, string nameOrSignature) =>
+    public static Maybe<OperationLocation> Station(this Layout me, string nameOrSignature) =>
        new(me?.Stations.SingleOrDefault(s => s.Signature.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase) || s.Name.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase)),
            Resources.Strings.ThereIsNoStationWithNameOrSignature, nameOrSignature);
 
     public static IEnumerable<StationTrack> StationTracks(this Layout me) => me is null ? [] : me.Stations.SelectMany(s => s.Tracks);
 
-    public static Station Add(this Layout layout, Station station)
+    public static OperationLocation Add(this Layout layout, OperationLocation station)
     {
         layout = layout.ValueOrException(nameof(layout));
         station = station.ValueOrException(nameof(station));
@@ -98,7 +98,7 @@ public static class LayoutTracksExtensions
         return new Maybe<TrackStretch>($"From {from} to {to}");
     }
 
-    public static Maybe<TrackStretch> TrackStretch(this Layout trackLayout, Station from, Station to)
+    public static Maybe<TrackStretch> TrackStretch(this Layout trackLayout, OperationLocation from, OperationLocation to)
         => new(trackLayout?.TrackStretches.SingleOrDefault(ts =>
             (ts.Start.Equals(from) && ts.End.Equals(to)) ||
             (ts.Start.Equals(to) && ts.End.Equals(from))),
