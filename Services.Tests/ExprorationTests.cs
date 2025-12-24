@@ -80,7 +80,7 @@ public sealed class ExprorationTests
 
         static string? ValueOfMaxLengthOrNull(string line, int maxLength)
         {
-            var x = line.Trim().UntilOrEmpty(" ");
+            var x = line.Trim().UntilOrEmpty([' ']);
             var y = x.Length <= maxLength ? x.ToUpperInvariant() : line[..maxLength].ToUpperInvariant();
             if (y.All(c => char.IsLetter(c) || char.IsNumber(c) || c == '-')) return y;
             return null;

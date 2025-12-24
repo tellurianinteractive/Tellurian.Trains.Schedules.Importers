@@ -55,13 +55,13 @@ internal static class Trains
 
         if (currentTrain == null)
         {
-            currentTrain = new Train(trainIdentity.NumberOrZero, OperatingCompany.None, trainCategory, trainIdentity.NumberOrZero);
+            currentTrain = new Train(trainIdentity.NumberOrZero, trainCategory, trainIdentity.NumberOrZero);
             CachedTrains[key] = currentTrain;
         }
         if (currentTrain.Number != trainIdentity.NumberOrZero)
         {
             timetable.Add(currentTrain);
-            currentTrain = new Train(trainIdentity.NumberOrZero, OperatingCompany.None, trainCategory, trainIdentity.NumberOrZero);
+            currentTrain = new Train(trainIdentity.NumberOrZero, trainCategory, trainIdentity.NumberOrZero);
             CachedTrains[key] = currentTrain;
         }
         currentTrain.Add(GetCall(record, timetable));

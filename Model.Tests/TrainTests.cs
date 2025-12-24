@@ -13,7 +13,7 @@ public class TrainTests
     public void TestInitialize()
     {
 
-        Target = new(11, OperatingCompany.None, Category, 1234, "");
+        Target = new(11, Category, 1234, "");
     }
 
     [TestMethod]

@@ -4,5 +4,5 @@ namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
 public interface ITrainCategoriesService
 {
-    IEnumerable<TrainCategory> GetAllTrainCategories();
+    Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync();
 }

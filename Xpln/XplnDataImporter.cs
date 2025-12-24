@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 using static Tellurian.Trains.Schedules.Importers.Model.TrainExtensions;
@@ -18,33 +19,64 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private readonly IDataSetProvider _dataSetProvider;
     private readonly ILogger _logger;
     private readonly IOperatingCompaniesService _operatingCompaniesService;
-    private IEnumerable<OperatingCompany> _operatingCompanies = [];
+    private readonly ITrainCategoriesService _trainCategoriesService;
+    private readonly DataSetConfiguration _dataSetConfiguration = CreateDataSetConfiguration();
+    private List<OperatingCompany> _operatingCompanies = [];
+    private List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
 
-    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ILogger<XplnDataImporter> logger)
+    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
     {
         _inputStream = inputStream;
         _dataSetProvider = dataSetProvider;
         _operatingCompaniesService = operatingCompaniesService;
+        _trainCategoriesService = trainCategoriesService; ;
         _logger = logger;
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ILogger<XplnDataImporter> logger) :
-        this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, logger)
+    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger) :
+        this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger)
     { }
+
+    private OperatingCompany FindOrCreateCompany(string? companySignature)
+    {
+        if (companySignature.HasValue())
+        {
+            _ = _operatingCompanies.TryGetFirstValue(oc => oc.Signature.EqualsCaseInsensitive(companySignature), out var company);
+            if (company is not null) return company;
+            var newCompany = OperatingCompany.FromSignature(companySignature);
+            _operatingCompanies.Add(newCompany);
+            return newCompany;
+        }
+        return OperatingCompany.None;
+    }
+
+    private TrainCategory FindOrCreateCategory(string? trainPrefix, string? backgroundColor)
+    {
+        _ = _trainCategories.TryGetFirstValue(tc => tc.Prefix.EqualsCaseInsensitive(trainPrefix), out var category);
+        if (category is not null) return category;
+        if (trainPrefix.HasValue())
+        {
+            var newCategory = new TrainCategory() { ResourceName = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
+            _trainCategories.Add(newCategory);
+            return newCategory;
+        }
+        return TrainCategory.Unknown;
+    }
 
 
     public async Task<ImportResult<Schedule>> ImportSchedule(string name)
     {
-        _operatingCompanies = await _operatingCompaniesService.GetAllOperatingCompaies();
-        DataSet = _dataSetProvider.ImportSchedule(_inputStream, DataSetConfiguration()) ?? throw new IOException("Stream cannot be read.");
+        _operatingCompanies = [.. await _operatingCompaniesService.GetAllOperatingCompaies()];
+        _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
+        DataSet = _dataSetProvider.ImportSchedule(_inputStream, _dataSetConfiguration) ?? throw new IOException("Stream cannot be read.");
         return GetResult(name);
     }
 
-    private static DataSetConfiguration DataSetConfiguration()
+    private static DataSetConfiguration CreateDataSetConfiguration()
     {
-        var result = new DataSetConfiguration("Test");
+        var result = new DataSetConfiguration("Xpln");
         result.Add(new WorksheetConfiguration("StationTrack", 8));
         result.Add(new WorksheetConfiguration("Routes", 11));
         result.Add(new WorksheetConfiguration("Trains", 18));
@@ -311,13 +343,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int Track = 3;
         const int Arrival = 4;
         const int Departure = 5;
+        const int Wheel = 6;
         const int Object = 7;
         const int Type = 8;
         const int Remark = 10;
         const int MinLength = 10;
 
         List<Message> messages = [];
-        Dictionary<string, TrainCategory> trainCategories = [];
+        List<TrainCategory> trainCategories = [];
 
         var trains = DataSet?.Tables[WorkSheetName];
         if (trains is null)
@@ -357,7 +390,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 var validationMessages = ValidateTrain(fields, rowNumber);
                                 if (validationMessages.HasNoStoppingErrors())
                                 {
-                                    current = CreateTrain(rowNumber, fields, trainCategories);
+                                    var trainCategoryPrefix = fields[Object].TrainCategoryPrefix;
+                                    var category = FindOrCreateCategory(trainCategoryPrefix, row.BackgroundColor(_dataSetConfiguration.BackgroundColorColumIndex(WorkSheetName)));
+                                    current = CreateTrain(rowNumber, fields, category);
                                 }
                                 messages.AddRange(validationMessages);
                             }
@@ -396,13 +431,17 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         IsStationNote = true,
                                         LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
                                         Text = fields[Remark].HasValue() ?
-                                        string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
+                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
                                             string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object])
                                     };
                                     var train = result.Trains.SingleOrDefault(t => t.Equals(current));
-                                    train?.Calls.First().Notes.Add(note);
+                                    if (train is not null)
+                                    {
+                                        train.Calls.First().Notes.Add(note);
+                                        var companySignature = fields[Object].LocoOperatingCompanySignature;
+                                        train.Company = FindOrCreateCompany(companySignature);
+                                    }
                                 }
-                                ;
                             }
                             break;
 
@@ -415,7 +454,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                     {
                                         IsDriverNote = true,
                                         LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                                        Text = fields[Remark]
+                                        Text = $"{fields[Object]} {fields[Remark]}",
 
                                     };
                                     current?.Calls.First().Notes.Add(note);
@@ -423,6 +462,26 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 ;
 
                             }
+                            break;
+                        case "wheel":
+                            {
+                                if (current is null) break;
+                                if (int.TryParse(fields[Wheel], out var axles) && axles > 0)
+                                {
+                                    current.Length = TrainLenght.AxlesOnly(axles);
+                                }
+                            }
+                            break;
+                        case "group":
+                            if (current is null) break;
+                            var group = fields[Object] switch
+                            {
+                                "G_Zug" => "Freight",
+                                "P_Zug" => "Passenger",
+                                var value when value.HasValue() => value,
+                                _ => null,
+                            };
+                            if (group.HasValue()) current.Groups.Add(group);
                             break;
                     }
                 }
@@ -450,22 +509,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
         }
 
-        static Train CreateTrain(int rowNumber, string[] fields, IDictionary<string, TrainCategory> trainCategories)
+        static Train CreateTrain(int rowNumber, string[] fields, TrainCategory category)
         {
-            var trainCategoryPrefix = fields[Object].TrainCategory;
-            if (!trainCategories.TryGetValue(trainCategoryPrefix, out TrainCategory? trainCategory))
-            {
-                trainCategory = new TrainCategory
-                {
-                    Prefix = trainCategoryPrefix,
-                    ResourceName = trainCategoryPrefix,
-                };
-                trainCategories.Add(trainCategoryPrefix, trainCategory);
-            }
-            return new(rowNumber, OperatingCompany.None, trainCategory, fields[Object].NumberOrZero, fields[Object]) { Remark = fields[Remark] };
+            return new(rowNumber, category, fields[Object].NumberOrZero, fields[Object])
+            { Remark = fields[Remark] };
         }
-
-
 
         static StationCall CreateCall(int rowNumber, string[] fields, StationTrack track)
         {
@@ -578,9 +626,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                     var locoId = fields[Object];
                                     if (!locoSchedules.ContainsKey(locoId))
                                     {
-                                        var locoOperatorSingature = fields[Object].LocoOperatingCompanySignature;
-
-                                        locoSchedules.Add(locoId, new LocoSchedule(locoId.NumberOrZero) { Id = rowNumber, Company = OperatingCompany.None, Class = fields[LocoClass] });
+                                        var operatorSignature = fields[Object].LocoOperatingCompanySignature;
+                                        var company = FindOrCreateCompany(operatorSignature);
+                                        locoSchedules.Add(locoId, new LocoSchedule(locoId.NumberOrZero) { Id = rowNumber, Company = company, Class = fields[LocoClass] });
                                     }
                                     if (locoSchedules.TryGetValue(locoId, out var loco))
                                     {
@@ -643,13 +691,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
                                 }
                                 messages.AddRange(dutyMessages);
-                            }
-                            break;
-                        case "wheel":
-                            {
-                                if (currentTrain is null) break;
-                                // Length in axles
-
                             }
                             break;
                         case "group":

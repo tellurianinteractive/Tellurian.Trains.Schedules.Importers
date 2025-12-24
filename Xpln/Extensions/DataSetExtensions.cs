@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 
@@ -15,6 +16,10 @@ internal static class DataSetExtensions
         public bool IsBlankRow() =>
             row.GetRowFields().IsEmptyFields();
 
+        public string? BackgroundColor(int? columnIndex) =>
+            columnIndex.HasValue && row.Table.Columns.Contains($"Column{columnIndex}")
+                ? row[columnIndex.Value] as string
+                : null;
     }
 
     extension(IEnumerable<string> fields)

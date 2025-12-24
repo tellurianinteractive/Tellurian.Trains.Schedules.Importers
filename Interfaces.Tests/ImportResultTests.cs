@@ -49,8 +49,9 @@ public class ImportResultTests
         {
             var provider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
             var operatingCompainesService = new OperatingCompaniesFromJsonService();
+            var trainCategoriesService = new TrainCategoriesFromCsvService();
 
-            using var importer = new XplnDataImporter(file, provider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+            using var importer = new XplnDataImporter(file, provider, operatingCompainesService, trainCategoriesService, NullLogger<XplnDataImporter>.Instance);
             return importer.ImportSchedule(Path.GetFileNameWithoutExtension(testFilePath));
         }
         return Task.FromResult(ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found.")));

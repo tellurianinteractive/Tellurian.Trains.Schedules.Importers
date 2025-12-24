@@ -100,7 +100,7 @@ Error messages include row numbers and are available in multiple languages (Engl
 ## What Gets Imported
 
 - Track layout (stations, tracks, routes)
-- Train timetables with station calls
+- Train timetables with station calls. Colour of `traindef` row is supported.
 - Locomotive assignments
 - Trainset assignments
 - Driver duties

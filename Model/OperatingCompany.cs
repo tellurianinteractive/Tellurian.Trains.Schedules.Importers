@@ -12,5 +12,8 @@ public static class OperatingCompanyExtensions
 
         public static OperatingCompany None =>
             new(0, "", "", "");
+
+        public static OperatingCompany FromSignature(string signature) =>
+            new(0, signature, signature, "");
     }
 }

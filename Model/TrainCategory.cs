@@ -26,10 +26,6 @@ public record TrainCategory
     /// </summary>
     public string Color { get; init; } = "#000000";
 
-    /// <summary>
-    /// Display order for sorting categories in UI.
-    /// </summary>
-    public int DisplayOrder { get; init; }
 
     public override string ToString() => ResourceName;
 }
@@ -48,7 +44,6 @@ public static class TrainCategoryExtensions
             Suffix = "",
             ResourceName = "Unknown",
             Color = "#808080",
-            DisplayOrder = int.MaxValue
         };
     }
 }

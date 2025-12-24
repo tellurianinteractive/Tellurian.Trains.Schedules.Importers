@@ -1,18 +1,26 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.MemoryMappedFiles;
 using Tellurian.Trains.Schedules.Importers.Access.Extensions;
+using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Model;
-using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 
 [TestClass]
-public class XplnImporterTests
+public class XplnDataImporterTests
 {
     const string FileSuffix = ".ods";
+
+    private readonly IServiceProvider _serviceProvider = IServiceCollection.CreateTestsServiceProvider();
+    private IDataSetProvider DataSetProvider => _serviceProvider.GetRequiredService<IDataSetProvider>();
+    private IOperatingCompaniesService OperatingCompaniesService => _serviceProvider.GetRequiredService<IOperatingCompaniesService>();
+    private ITrainCategoriesService TrainCategoriesService => _serviceProvider.GetRequiredService<ITrainCategoriesService>();
+    private ILogger<XplnDataImporter> Logger => _serviceProvider.GetRequiredService<ILogger<XplnDataImporter>>();
+
     private DirectoryInfo? TestDocumentsDirectory;
     private readonly ValidationOptions ValidationOptions = new()
     {
@@ -41,9 +49,8 @@ public class XplnImporterTests
     {
         using var m = MemoryMappedFile.CreateFromFile(Path.Combine(TestDocumentsDirectory!.FullName, "Montan2023H0e.ods"));
         var inputStream = m.CreateViewStream();
-        var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-        var operatingCompainesService = new OperatingCompaniesFromJsonService();
-        using var importer = new XplnDataImporter(inputStream, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+
+        using var importer = new XplnDataImporter(inputStream, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
         var result = await importer.ImportSchedule("Montan2023H0e");
         if (result.IsFailure)
         {
@@ -91,9 +98,7 @@ public class XplnImporterTests
         CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
         if (IsScheduleFileExisting(scheduleName, out var file))
         {
-            var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            var operatingCompainesService = new OperatingCompaniesFromJsonService();
-            using var importer = new XplnDataImporter(file, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+            using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
 
             var result = await importer.ImportSchedule(scheduleName);
             if (result.IsFailure)
@@ -147,10 +152,7 @@ public class XplnImporterTests
     {
         if (IsScheduleFileExisting(scheduleName, out var file))
         {
-            var dataSetProvider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            var operatingCompainesService = new OperatingCompaniesFromJsonService();
-
-            using var importer = new XplnDataImporter(file, dataSetProvider, operatingCompainesService, NullLogger<XplnDataImporter>.Instance);
+            using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
             var result = await importer.ImportSchedule(scheduleName);
             if (result.IsSuccess)
             {

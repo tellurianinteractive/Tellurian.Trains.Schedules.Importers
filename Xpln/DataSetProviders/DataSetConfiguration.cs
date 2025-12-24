@@ -1,4 +1,5 @@
 ﻿namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+
 public record DataSetConfiguration(string Name)
 {
     private readonly List<WorksheetConfiguration> _WorksheetConfigurations = [];
@@ -28,5 +29,19 @@ public record WorksheetConfiguration(string WorksheetName, int MaxReadColumns)
     /// I a row is repeaded more than this number, reading worksheet will stop. This indicates empty rows.
     /// </summary>
     public int MaxRowRepetitions { get; init; } = 10;
+    public int BackgroundColorColumIndex => MaxReadColumns + 1;
 };
+
+public static class DataSetConfigurationExtensions
+{
+    extension(DataSetConfiguration configuration)
+    {
+        public int? BackgroundColorColumIndex(string worksheetName)
+        {
+            var worksheetConfiguration = configuration.WorksheetConfiguration(worksheetName);
+            if (worksheetConfiguration is null) return null;
+            return worksheetConfiguration.BackgroundColorColumIndex;
+        }
+    }
+}
 

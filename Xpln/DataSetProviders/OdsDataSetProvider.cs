@@ -11,6 +11,7 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDataSetProvider
 {
     private readonly ILogger Logger = logger;
+    public const string BackgroundColorColumnName = "BackgroundColor";
 
     public DataSet? ImportSchedule(Stream inputStream, DataSetConfiguration dataSetConfiguration)
     {
@@ -18,9 +19,10 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         {
             using var archive = GetZipArchive(inputStream);
             var document = GetContentXmlFile(archive);
-            var namespaceMananger = InitializeXmlNamespaceManager(document);
+            var namespaceManager = InitializeXmlNamespaceManager(document);
+            var styleColors = GetStyleBackgroundColors(document, namespaceManager);
             var dataSet = new DataSet(dataSetConfiguration.Name);
-            var tables = GetDataTables(document, dataSetConfiguration, namespaceMananger);
+            var tables = GetDataTables(document, dataSetConfiguration, namespaceManager, styleColors);
             dataSet.Tables.AddRange([.. tables]);
             return dataSet;
         }
@@ -32,7 +34,35 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         }
     }
 
-    private IEnumerable<DataTable> GetDataTables(XmlDocument document, DataSetConfiguration configuration, XmlNamespaceManager namespaceManager)
+
+    private static Dictionary<string, string> GetStyleBackgroundColors(XmlDocument document, XmlNamespaceManager namespaceManager)
+    {
+        var colors = new Dictionary<string, string>();
+
+        var styleNodes = document.SelectNodes(
+            "/office:document-content/office:automatic-styles/style:style[@style:family='table-cell']",
+            namespaceManager);
+
+        if (styleNodes is not null)
+        {
+            foreach (XmlNode styleNode in styleNodes)
+            {
+                var styleName = styleNode.Attributes?["style:name"]?.Value;
+                if (styleName is null) continue;
+
+                var cellProps = styleNode.SelectSingleNode("style:table-cell-properties", namespaceManager);
+                var bgColor = cellProps?.Attributes?["fo:background-color"]?.Value;
+
+                if (bgColor is not null && !bgColor.Equals("transparent", StringComparison.OrdinalIgnoreCase))
+                {
+                    colors[styleName] = bgColor;
+                }
+            }
+        }
+        return colors;
+    }
+
+    private IEnumerable<DataTable> GetDataTables(XmlDocument document, DataSetConfiguration configuration, XmlNamespaceManager namespaceManager, Dictionary<string, string> styleColors)
     {
         var tableNodes = TableNodes(document, namespaceManager);
         if (Logger.IsEnabled(LogLevel.Information))
@@ -47,7 +77,7 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
                 {
                     if (Logger.IsEnabled(LogLevel.Information))
                         Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
-                    var table = GetDataTable(tableNode, worksheetConfiguration, namespaceManager);
+                    var table = GetDataTable(tableNode, worksheetConfiguration, namespaceManager, styleColors);
                     if (table is null) continue;
                     yield return table;
                 }
@@ -60,23 +90,24 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         return document.SelectNodes("/office:document-content/office:body/office:spreadsheet/table:table", namespaceManager);
     }
 
-    private static DataTable? GetDataTable(XmlNode tableNode, WorksheetConfiguration configuration, XmlNamespaceManager namespaceManager)
+    private static DataTable? GetDataTable(XmlNode tableNode, WorksheetConfiguration configuration, XmlNamespaceManager namespaceManager, Dictionary<string, string> styleColors)
     {
         var nameAttribute = tableNode.Attributes?["table:name"];
         if (nameAttribute is null) return null;
 
         DataTable dataTable = new DataTable(nameAttribute.Value);
+
         var rowNodes = tableNode.SelectNodes("table:table-row", namespaceManager);
         if (rowNodes is not null)
         {
             int rowIndex = 0;
             foreach (XmlNode rowNode in rowNodes)
             {
-                var isRead = GetRow(rowNode, dataTable, namespaceManager, configuration, ref rowIndex);
-                if (!isRead) break; ;
+                var isRead = GetRow(rowNode, dataTable, namespaceManager, configuration, styleColors, ref rowIndex);
+                if (!isRead) break;
             }
         }
-        if (dataTable.Rows.Count == 0)
+        if (dataTable.Rows.Count == 0) // Just adds an empty row with one column of no data is found.
         {
             dataTable.Rows.Add(dataTable.NewRow());
             dataTable.Columns.Add();
@@ -84,7 +115,7 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         return dataTable;
     }
 
-    private static bool GetRow(XmlNode rowNode, DataTable dataTable, XmlNamespaceManager namespaceManager, WorksheetConfiguration configuration, ref int rowIndex)
+    private static bool GetRow(XmlNode rowNode, DataTable dataTable, XmlNamespaceManager namespaceManager, WorksheetConfiguration configuration, Dictionary<string, string> styleColors, ref int rowIndex)
     {
         var rowsRepeated = rowNode.Attributes?["table:number-rows-repeated"];
         var repeat = rowsRepeated is null ? 1 : Convert.ToInt32(rowsRepeated.Value, CultureInfo.InvariantCulture);
@@ -92,16 +123,27 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         for (var i = 0; i < repeat; i++)
         {
             var row = dataTable.NewRow();
-            while (dataTable.Columns.Count < configuration.MaxReadColumns)
+            while (dataTable.Columns.Count <= configuration.MaxReadColumns + 1)
                 dataTable.Columns.Add();
 
             var cellNodes = rowNode.SelectNodes("table:table-cell", namespaceManager);
             int cellIndex = 0;
+            bool isFirstCell = true;
             foreach (XmlNode cellNode in cellNodes!)
             {
+                if (isFirstCell)
+                {
+                    var styleName = cellNode.Attributes?["table:style-name"]?.Value;
+                    if (styleName is not null && styleColors.TryGetValue(styleName, out var backgroundColor))
+                    {
+                        row[configuration.BackgroundColorColumIndex] = backgroundColor;
+                    }
+                    isFirstCell = false;
+                }
                 GetCell(cellNode, row, configuration.MaxReadColumns, ref cellIndex);
                 if (cellIndex >= configuration.MaxReadColumns) break;
             }
+
             if (HasValue(row)) dataTable.Rows.Add(row);
             rowIndex++;
         }

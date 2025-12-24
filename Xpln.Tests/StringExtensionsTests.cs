@@ -17,8 +17,8 @@ public class StringExtensionsTests
     [TestMethod]
     public void ParsesTrainCategory()
     {
-        Assert.AreEqual("GT", "054738.GT CN54738".TrainCategory);
-        Assert.AreEqual("Snt", "000100.Snt100".TrainCategory);
+        Assert.AreEqual("GT", "054738.GT CN54738".TrainCategoryPrefix);
+        Assert.AreEqual("Snt", "000100.Snt100".TrainCategoryPrefix);
     }
 
     [TestMethod]

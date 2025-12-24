@@ -56,7 +56,7 @@ internal static class TestDataFactory
     public static Train CreateTrainInForwardDirection(TrainCategory category, int number, Time startTime)
     {
         var stations = Stations.ToArray();
-        var train = new Train(number, OperatingCompany.None, category, number) { Category = category };
+        var train = new Train(number, category, number) { Category = category };
         _ = train.Add(new StationCall(stations[0]["3"], startTime, startTime));
         _ = train.Add(new StationCall(stations[1]["2"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
         _ = train.Add(new StationCall(stations[2]["1"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
@@ -66,7 +66,7 @@ internal static class TestDataFactory
     public static Train CreateTrainInOppositeDirection(TrainCategory category, int number, Time startTime)
     {
         var stations = Stations.ToArray();
-        var train = new Train(number, OperatingCompany.None, category, number) { Category = category };
+        var train = new Train(number, category, number) { Category = category };
         _ = train.Add(new StationCall(stations[2]["2"], startTime, startTime));
         _ = train.Add(new StationCall(stations[1]["1"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
         _ = train.Add(new StationCall(stations[0]["3"], startTime.AddMinutes(55), startTime.AddMinutes(55)));

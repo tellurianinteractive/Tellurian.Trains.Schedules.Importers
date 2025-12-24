@@ -11,8 +11,10 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
 
         extension(string value)
         {
-            public string LocoOperatingCompanySignature => value.UntilOrEmpty("_");
-            public string TrainCategory
+            public string LocoOperatingCompanySignature =>
+                value.UntilOrEmpty(['_', '-', '.', ' ']);
+
+            public string TrainCategoryPrefix
             {
                 get
                 {

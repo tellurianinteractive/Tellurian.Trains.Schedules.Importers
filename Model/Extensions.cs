@@ -21,9 +21,9 @@ public static class StringExtensions
         public bool EqualsCaseInsensitive(string? text) =>
             textOrNullOrWhiteSpace is not null && text is not null && textOrNullOrWhiteSpace.Equals(text, StringComparison.OrdinalIgnoreCase);
 
-        public string UntilOrEmpty(string stopAt = "-")
+        public string UntilOrEmpty(char[] stopAt)
         {
-            if (textOrNullOrWhiteSpace.HasText())
+            if (stopAt.Length > 0 && textOrNullOrWhiteSpace.HasText())
             {
                 int endIndex = textOrNullOrWhiteSpace.IndexOf(stopAt, StringComparison.Ordinal);
                 if (endIndex > 0)

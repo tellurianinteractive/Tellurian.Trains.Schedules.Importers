@@ -4,16 +4,18 @@ using System.Globalization;
 namespace Tellurian.Trains.Schedules.Importers.Model;
 
 [method: SetsRequiredMembers]
-public class Train(int id, OperatingCompany @operator, TrainCategory category, int number, string externalId = "") : IEquatable<Train>
+public class Train(int id, TrainCategory category, int number, string externalId = "") : IEquatable<Train>
 {
     [method: SetsRequiredMembers]
-    public Train(int id, string identity) : this(id, OperatingCompany.None, TrainCategory.Unknown, identity.NumberOrZero, identity) { }
+    public Train(int id, string identity) : this(id, TrainCategory.Unknown, identity.NumberOrZero, identity) { }
     public required int Id { get; init; } = id;
     public required int Number { get; init; } = number;
     public string ExtenalId { get; } = externalId;
     public string? Remark { get; init; }
-    public required OperatingCompany Operator { get; init; } = @operator;
+    public TrainLenght Length { get; set; }
+    public OperatingCompany Company { get; set; } = OperatingCompany.None;
     public required TrainCategory Category { get; init; } = category;
+    public IList<string> Groups { get; init; } = [];
     public Timetable? Timetable { get; internal set; }
     public IList<StationCall> Calls { get; } = [];
     public StationCall this[int index] => Calls[index];
@@ -22,12 +24,12 @@ public class Train(int id, OperatingCompany @operator, TrainCategory category, i
     public TrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
 
     public bool Equals(Train? other) =>
-        other is not null && Operator.Equals(other.Operator) &&
+        other is not null && Company.Equals(other.Company) &&
         Number == other.Number &&
         ExtenalId.Equals(other?.ExtenalId, StringComparison.OrdinalIgnoreCase);
 
     public override bool Equals(object? obj) => obj is Train other && Equals(other);
-    public override int GetHashCode() => HashCode.Combine(Operator, Number, ExtenalId);
+    public override int GetHashCode() => HashCode.Combine(Company, Number, ExtenalId);
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0} {1}", Category, Number);
 }
 
