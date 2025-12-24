@@ -48,6 +48,6 @@ public static class ImportResultExtensions
 
     public static void Write<T>(this ImportResult<T> me)
     {
-        File.WriteAllText($"C:\\Temp\\{me.Item}.json", me.Json());
+        File.WriteAllText(Path.Combine(Path.GetTempPath(), $"{me.Item}.json"), me.Json());
     }
 }

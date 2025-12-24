@@ -7,7 +7,7 @@ namespace Tellurian.Trains.Schedules.Importers.Services;
 
 public class OperatingCompaniesFromJsonService(string? path = null) : IOperatingCompaniesService
 {
-    private readonly string _path = path ?? "..\\..\\..\\..\\Services\\JSON\\OperatingCompanies.json";
+    private readonly string _path = path ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "JSON", "OperatingCompanies.json");
     public async Task<IEnumerable<OperatingCompany>> GetAllOperatingCompaies()
     {
         var json = File.ReadAllText(_path);

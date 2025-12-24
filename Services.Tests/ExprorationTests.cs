@@ -20,7 +20,7 @@ public sealed class ExprorationTests
     {
         List<OperatingCompany> _operatingCompanies = new(2000);
         var encoding = Encoding.GetEncoding("iso-8859-1");
-        const string fileName = "..\\..\\..\\CompanyCodes_20231117_1049.txt";
+        var fileName = Path.Combine("..", "..", "..", "CompanyCodes_20231117_1049.txt");
         using var streamReader = new StreamReader(fileName, encoding, true);
         string? line;
         using var streamWriter = new StreamWriter("OperatingCompanies.csv", false, encoding);
