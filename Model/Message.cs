@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record Message : IEquatable<Message>
 {
@@ -49,5 +50,5 @@ public static class ErrorMessageExtensions
 internal static class SeverityExtensions
 {
     public static string ToLanguageString(this Severity me, CultureInfo culture) =>
-        Resources.Strings.ResourceManager.GetString(me.ToString(), culture) ?? string.Empty;
+        Strings.ResourceManager.GetString(me.ToString(), culture) ?? string.Empty;
 }

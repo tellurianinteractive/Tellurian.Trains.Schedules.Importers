@@ -1,6 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Importers.Model;
-
-namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
+﻿namespace Tellurian.Trains.Schedules.Model.Tests;
 
 [TestClass]
 public class TimeTests

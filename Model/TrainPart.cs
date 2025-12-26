@@ -1,8 +1,9 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Model;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record TrainPart : IEquatable<TrainPart>
 {
@@ -12,7 +13,7 @@ public sealed record TrainPart : IEquatable<TrainPart>
     public int Id { get; init; }
     public StationCall From { get; init; }
     public StationCall To { get; init; }
-    public string? ExternalKey {  get; init; }
+    public string? ExternalKey { get; init; }
 
     public TrainPart(StationCall from, StationCall to)
     {

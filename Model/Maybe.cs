@@ -1,14 +1,14 @@
 ﻿using System.Globalization;
 using Tellurian.Trains.Schedules.Importers.Model.Resources;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public readonly struct Maybe<T> : IEquatable<Maybe<T>> where T : class
 {
     //public static Maybe<T> ItemIfOne(IEnumerable<T> values, )
 
     public static Maybe<T> None => new(Strings.NoValue);
-    public static Maybe<T> NoneWithReason(string  reason) => new(reason);
+    public static Maybe<T> NoneWithReason(string reason) => new(reason);
     public Maybe(T? value) { _Value = value; Message = string.Empty; }
     public Maybe(string message) { _Value = null; Message = message; }
     public Maybe(IEnumerable<string> messages) { _Value = null; Message = string.Join(", ", messages); }

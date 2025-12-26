@@ -1,5 +1,5 @@
 ﻿
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public readonly struct TrainLenght
 {

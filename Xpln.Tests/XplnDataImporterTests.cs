@@ -7,6 +7,8 @@ using Tellurian.Trains.Schedules.Importers.Access.Extensions;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 

@@ -7,7 +7,8 @@ using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
-using static Tellurian.Trains.Schedules.Importers.Model.TrainExtensions;
+using Tellurian.Trains.Schedules.Model;
+using static Tellurian.Trains.Schedules.Model.TrainExtensions;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln;
 

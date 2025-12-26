@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 

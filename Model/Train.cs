@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 [method: SetsRequiredMembers]
 public class Train(int id, TrainCategory category, int number, string externalId = "") : IEquatable<Train>
@@ -15,6 +16,7 @@ public class Train(int id, TrainCategory category, int number, string externalId
     public TrainLenght Length { get; set; }
     public OperatingCompany Company { get; set; } = OperatingCompany.None;
     public required TrainCategory Category { get; init; } = category;
+    public required Sessions Sessions { get; set; } = Sessions.All;
     public IList<string> Groups { get; init; } = [];
     public Timetable? Timetable { get; internal set; }
     public IList<StationCall> Calls { get; } = [];

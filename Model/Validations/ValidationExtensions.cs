@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model.Validations;
 
 public static class ValidationExtensions
 {
@@ -40,7 +42,7 @@ public static class ValidationExtensions
             {
                 var t = track;
                 if (!me.Layout.HasTrack(t))
-                    result.Add(Message.Information(Resources.Strings.TrackInStationReferredInTrainIsNotInLayout, track, track.Station, train));
+                    result.Add(Message.Information(Strings.TrackInStationReferredInTrainIsNotInLayout, track, track.Station, train));
             }
         }
         return result;
@@ -51,7 +53,7 @@ public static class ValidationExtensions
     #region StationTrack
     public static IEnumerable<Message> GetValidationErrors(this StationTrack me, IEnumerable<LocoSchedule> locos) =>
         me is null ? Array.Empty<Message>() :
-        me.GetConflicts(locos).Select(c => Message.Information(Resources.Strings.CallAtStationHasConflictsWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another));
+        me.GetConflicts(locos).Select(c => Message.Information(Strings.CallAtStationHasConflictsWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another));
 
     private static IEnumerable<(StationCall one, StationCall another)> GetConflicts(this StationTrack me, IEnumerable<LocoSchedule> locos)
     {
@@ -93,7 +95,7 @@ public static class ValidationExtensions
         stationCall = stationCall.ValueOrException(nameof(stationCall));
         var result = new List<Message>();
         if (stationCall.Arrival > stationCall.Departure)
-            result.Add(Message.Information(Resources.Strings.ArrivalIsAfterDeparture, stationCall.Track.Station.Name, stationCall.Arrival.HHMM(), stationCall.Departure.HHMM()));
+            result.Add(Message.Information(Strings.ArrivalIsAfterDeparture, stationCall.Track.Station.Name, stationCall.Arrival.HHMM(), stationCall.Departure.HHMM()));
         return result;
     }
     #endregion
@@ -108,7 +110,7 @@ public static class ValidationExtensions
             var first = passings[i];
             var second = passings[i + me.TracksCount];
             if (first.To.Train!.Number != second.To.Train!.Number && first.To.Arrival > second.From.Departure)
-                result.Add(Message.Information(Resources.Strings.TrainBetweenPassingIsConflictingWithTrainBetweenPassing, first.From.Train!.Number, first, second.To.Train!.Number, second));
+                result.Add(Message.Information(Strings.TrainBetweenPassingIsConflictingWithTrainBetweenPassing, first.From.Train!.Number, first, second.To.Train!.Number, second));
         }
         return result;
     }
@@ -153,9 +155,9 @@ public static class ValidationExtensions
                 var speed = time.TotalMinutes == 0 ? 0 : length / time.TotalMinutes;
                 if (speed == 0) continue;
                 if (speed < minTrainSpeedMetersPerClockMinute)
-                    result.Add(Message.Information(Resources.Strings.TrainSpeedBetweenCallsIsTooSlow, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length));
+                    result.Add(Message.Information(Strings.TrainSpeedBetweenCallsIsTooSlow, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length));
                 if (speed > maxTrainSpeedMetersPerClockMinute)
-                    result.Add(Message.Information(Resources.Strings.TrainSpeedBetweenCallsIsTooFast, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length));
+                    result.Add(Message.Information(Strings.TrainSpeedBetweenCallsIsTooFast, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length));
             }
         }
         return result;
@@ -166,13 +168,13 @@ public static class ValidationExtensions
         var result = new List<Message>();
         if (me.Calls.Count < 1)
         {
-            result.Add(Message.Information(Resources.Strings.TrainMustHaveMinimumTwoCalls, me));
+            result.Add(Message.Information(Strings.TrainMustHaveMinimumTwoCalls, me));
         }
         else
         {
             var conflicts = me.GetConflicts();
             if (conflicts.Count > 0)
-                result.AddRange(conflicts.Select(c => Message.Information(Resources.Strings.TrainHasConflictingCalls, me, c.one, c.another)));
+                result.AddRange(conflicts.Select(c => Message.Information(Strings.TrainHasConflictingCalls, me, c.one, c.another)));
         }
         return result;
     }
@@ -223,7 +225,7 @@ public static class ValidationExtensions
             {
                 var p1 = parts[i];
                 var p2 = parts[j];
-                if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival) messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.VehicleScheduleContainsOverlappingTrainParts, me.Number, p1, p2)));
+                if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival) messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, me.Number, p1, p2)));
             }
         }
         return messages;

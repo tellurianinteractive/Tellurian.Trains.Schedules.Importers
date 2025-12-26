@@ -1,12 +1,13 @@
 ﻿using System.Globalization;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public class DriverDuty(int id, string identity) : IEquatable<DriverDuty>
 {
     public int Id { get; init; } = id;
 
     public string Identity { get; } = identity.TextOrException(nameof(identity));
+    public Sessions Sessions { get; set; } = Sessions.All;
 
     public ICollection<TrainPart> Parts { get; } = [];
 

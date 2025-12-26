@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record OperationLocation : IEquatable<OperationLocation>
 {
@@ -15,9 +17,9 @@ public sealed record OperationLocation : IEquatable<OperationLocation>
     public OperationLocation(int id, string name, string signature)
     {
         Id = id;
-        name = name.TextOrException(nameof(name), string.Format(CultureInfo.CurrentCulture, Resources.Strings.NameOfObjectIsRequired, Resources.Strings.Station.ToLowerInvariant()));
+        name = name.TextOrException(nameof(name), string.Format(CultureInfo.CurrentCulture, Strings.NameOfObjectIsRequired, Strings.Station.ToLowerInvariant()));
         Name = name.Replace("_", " ", StringComparison.OrdinalIgnoreCase);
-        Signature = signature.TextOrException(nameof(signature), string.Format(CultureInfo.CurrentCulture, Resources.Strings.SignatureOfStationIsRequired));
+        Signature = signature.TextOrException(nameof(signature), string.Format(CultureInfo.CurrentCulture, Strings.SignatureOfStationIsRequired));
         Tracks = [];
     }
 
@@ -37,7 +39,7 @@ public static class StationExtensions
        me is null ? [] : me.Tracks.SelectMany(t => t.Calls);
     public static Maybe<StationTrack> Track(this OperationLocation? station, string number)
          => new(station?.Tracks.SingleOrDefault(t => t.Number == number),
-             string.Format(CultureInfo.CurrentCulture, Resources.Strings.StationHasNotTrackNumber, station?.Name, number));
+             string.Format(CultureInfo.CurrentCulture, Strings.StationHasNotTrackNumber, station?.Name, number));
 
     public static bool HasTrack(this OperationLocation me, string number)
         => me?.Tracks.Any(t => t.Number == number) ?? false;

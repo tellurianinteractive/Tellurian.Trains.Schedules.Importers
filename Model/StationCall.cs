@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record StationCall : IEquatable<StationCall>, IComparable<StationCall>
 {
@@ -41,7 +42,7 @@ public sealed record StationCall : IEquatable<StationCall>, IComparable<StationC
     public override int GetHashCode() => HashCode.Combine(Arrival, Departure, Track, Train);
 
     public override string ToString() =>
-        string.Format(CultureInfo.CurrentCulture, Resources.Strings.CallAtStationTrackDuringTimes, Station, Track, Arrival.HHMM(), Departure.HHMM());
+        string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackDuringTimes, Station, Track, Arrival.HHMM(), Departure.HHMM());
 
     public int CompareTo([AllowNull] StationCall other) =>
         other is null ? 1 : SortTime.CompareTo(other.SortTime);

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Schedules.Importers.Model</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Schedules.Importers.Model</RootNamespace>
+    <AssemblyName>Tellurian.Trains.Schedules.Model</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
@@ -16,6 +16,11 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Resources\Days.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Days.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -23,6 +28,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Update="Resources\Days.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Days.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>

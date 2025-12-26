@@ -1,9 +1,10 @@
-﻿namespace Tellurian.Trains.Schedules.Importers.Model;
+﻿namespace Tellurian.Trains.Schedules.Model;
 
 public abstract record VehicleSchedule
 {
     public int Id { get; init; }
     public int Number { get; init; }
+    public Sessions Sessions { get; set; } = Sessions.All;
 
     public string Class { get; init; } = string.Empty;
     public OperatingCompany Company { get; init; } = OperatingCompany.None;

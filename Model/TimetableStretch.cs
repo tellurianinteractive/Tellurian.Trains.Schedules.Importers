@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record TimetableStretch : IEquatable<TimetableStretch>
 {
@@ -12,7 +14,7 @@ public sealed record TimetableStretch : IEquatable<TimetableStretch>
     public TimetableStretch(int id, string? number)
     {
         Id = id;
-        Number = number.TextOrException(nameof(number), string.Format(CultureInfo.CurrentCulture, Resources.Strings.NumberOfObjectIsRequired, Resources.Strings.TimetableStretch));
+        Number = number.TextOrException(nameof(number), string.Format(CultureInfo.CurrentCulture, Strings.NumberOfObjectIsRequired, Strings.TimetableStretch));
         Description = string.Empty;
         Stretches = [];
     }

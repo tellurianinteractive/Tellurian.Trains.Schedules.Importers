@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Interfaces.Tests;
 

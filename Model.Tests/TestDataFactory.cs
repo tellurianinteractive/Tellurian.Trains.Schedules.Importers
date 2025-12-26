@@ -1,6 +1,6 @@
-﻿using Tellurian.Trains.Schedules.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
+namespace Tellurian.Trains.Schedules.Model.Tests;
 
 internal static class TestDataFactory
 {

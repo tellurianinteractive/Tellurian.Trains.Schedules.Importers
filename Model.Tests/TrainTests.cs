@@ -1,6 +1,7 @@
-﻿using Tellurian.Trains.Schedules.Importers.Model;
+﻿using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Validations;
 
-namespace Tellurian.Trains.Schedules.Importers.Model.Tests;
+namespace Tellurian.Trains.Schedules.Model.Tests;
 
 [TestClass]
 public class TrainTests

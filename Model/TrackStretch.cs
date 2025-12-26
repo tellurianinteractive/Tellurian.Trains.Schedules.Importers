@@ -1,7 +1,9 @@
 ﻿using System.Globalization;
 using System.Runtime.Serialization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public class TrackStretch : IEquatable<TrackStretch>
 {
@@ -46,7 +48,7 @@ public class TrackStretch : IEquatable<TrackStretch>
     public bool Equals(TrackStretch? other) => other != null && Start.Equals(other.Start) && End.Equals(other.End);
     public override bool Equals(object? obj) => obj is TrackStretch other && Equals(other);
     public override int GetHashCode() => Start.GetHashCode() ^ End.GetHashCode();
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, Resources.Strings.StretchToString, Start, End);
+    public override string ToString() => string.Format(CultureInfo.CurrentCulture, Strings.StretchToString, Start, End);
 }
 
 public static class TrackStretchExtensions

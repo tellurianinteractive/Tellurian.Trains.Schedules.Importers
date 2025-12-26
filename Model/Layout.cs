@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Importers.Model.Resources;
 
-namespace Tellurian.Trains.Schedules.Importers.Model;
+namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record Layout
 {
@@ -28,7 +29,7 @@ public static class LayoutStationsExtensions
 
     public static Maybe<OperationLocation> Station(this Layout me, string nameOrSignature) =>
        new(me?.Stations.SingleOrDefault(s => s.Signature.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase) || s.Name.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase)),
-           Resources.Strings.ThereIsNoStationWithNameOrSignature, nameOrSignature);
+           Strings.ThereIsNoStationWithNameOrSignature, nameOrSignature);
 
     public static IEnumerable<StationTrack> StationTracks(this Layout me) => me is null ? [] : me.Stations.SelectMany(s => s.Tracks);
 
@@ -102,7 +103,7 @@ public static class LayoutTracksExtensions
         => new(trackLayout?.TrackStretches.SingleOrDefault(ts =>
             (ts.Start.Equals(from) && ts.End.Equals(to)) ||
             (ts.Start.Equals(to) && ts.End.Equals(from))),
-            string.Format(CultureInfo.CurrentCulture, Resources.Strings.MoreThanOneStretchBetweenStations, from, to));
+            string.Format(CultureInfo.CurrentCulture, Strings.MoreThanOneStretchBetweenStations, from, to));
 
     public static Maybe<TrackStretch> TrackStretch(this Layout me, string fromStationNameOrSignature, string toStationNameOrSignature)
     {
@@ -110,7 +111,7 @@ public static class LayoutTracksExtensions
         return new Maybe<TrackStretch>(
             me.Between(fromStationNameOrSignature, toStationNameOrSignature).Concat(
             me.Between(toStationNameOrSignature, fromStationNameOrSignature)).SingleOrDefault(),
-            string.Format(CultureInfo.CurrentCulture, Resources.Strings.ThereIsNoStretchBetweenStation1AndStation2, fromStationNameOrSignature, toStationNameOrSignature));
+            string.Format(CultureInfo.CurrentCulture, Strings.ThereIsNoStretchBetweenStation1AndStation2, fromStationNameOrSignature, toStationNameOrSignature));
     }
 
     private static IEnumerable<TrackStretch> Between(this Layout me, string fromStationNameOrSignature, string? toStationNameOrSignature = null)

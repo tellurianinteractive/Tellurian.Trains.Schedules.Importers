@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Xml;
 using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
+using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 

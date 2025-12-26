@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Schedules.Importers.Model;
+﻿namespace Tellurian.Trains.Schedules.Model;
 
 public record OperatingCompany(int Id, string Name, string Signature, string CountryCode);
 
