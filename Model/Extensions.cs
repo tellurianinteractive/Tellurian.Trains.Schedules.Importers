@@ -5,10 +5,12 @@ namespace Tellurian.Trains.Schedules.Model;
 
 public static class StringExtensions
 {
-    public static bool HasText([NotNullWhen(true)] this string? text) => !string.IsNullOrWhiteSpace(text);
 
-    extension(string? textOrNullOrWhiteSpace)
+    extension([NotNullWhen(true)] string? textOrNullOrWhiteSpace)
     {
+        public bool HasText() =>
+            !string.IsNullOrWhiteSpace(textOrNullOrWhiteSpace);
+
         public string TextOrEmpty() =>
             textOrNullOrWhiteSpace.TextOrDefault(string.Empty);
 

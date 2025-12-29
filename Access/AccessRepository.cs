@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Tellurian.Trains.Schedules.Importers.Access.Extensions;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Model;
 
 [assembly: InternalsVisibleTo("Tellurian.Trains.Schedules.Importers.Access.Tests")]

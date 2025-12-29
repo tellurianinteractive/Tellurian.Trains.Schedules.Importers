@@ -2,17 +2,13 @@
 
 namespace Tellurian.Trains.Schedules.Model;
 
-public class DriverDuty(int id, string identity) : IEquatable<DriverDuty>
+public class DriverDuty(int id, string? identity) : IEquatable<DriverDuty>
 {
     public int Id { get; init; } = id;
-
-    public string Identity { get; } = identity.TextOrException(nameof(identity));
+    public string Identity { get; } = identity.HasValue() ? identity : id.ToString();
     public Sessions Sessions { get; set; } = Sessions.All;
-
     public ICollection<TrainPart> Parts { get; } = [];
-
     public ICollection<Note> Notes { get; } = [];
-
     public Schedule Schedule { get; internal set; } = default!; // Set by Schedule.Add()
 
     public bool Equals(DriverDuty? other) => Identity.Equals(other?.Identity, StringComparison.OrdinalIgnoreCase);

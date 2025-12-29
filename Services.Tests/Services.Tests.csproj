@@ -1,15 +1,15 @@
 ﻿<Project Sdk="MSTest.Sdk/4.0.2">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<AssemblyName>Tellurian.Trains.Schedules.Importers.Services.Tests</AssemblyName>
+		<RootNamespace>Tellurian.Trains.Schedules.Importers.Services.Tests</RootNamespace>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Model\Model.csproj" />
-  </ItemGroup>
+		<TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Model\Model.csproj" />
+		<ProjectReference Include="..\Services\Services.csproj" />
+	</ItemGroup>
 
 </Project>

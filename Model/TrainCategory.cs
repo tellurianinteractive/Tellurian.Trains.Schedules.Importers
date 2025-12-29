@@ -15,6 +15,9 @@ public record TrainCategory
     /// </summary>
     public string Suffix { get; init; } = string.Empty;
 
+    public bool IsPassenger { get; init; }
+    public bool IsFreight { get; init; }
+
     /// <summary>
     /// Type of train (e.g., "Passenger", "Freight", "HighSpeed") used for translations.
     /// </summary>

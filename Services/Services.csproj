@@ -26,6 +26,9 @@
 	  <ProjectReference Include="..\Model\Model.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Update="CSV\TrainCategories.csv">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="JSON\OperatingCompanies.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

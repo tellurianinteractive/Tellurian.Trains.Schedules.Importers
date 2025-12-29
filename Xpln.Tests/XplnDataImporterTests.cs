@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO.MemoryMappedFiles;
 using Tellurian.Trains.Schedules.Importers.Access.Extensions;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Validations;
@@ -19,7 +18,7 @@ public class XplnDataImporterTests
 
     private readonly IServiceProvider _serviceProvider = IServiceCollection.CreateTestsServiceProvider();
     private IDataSetProvider DataSetProvider => _serviceProvider.GetRequiredService<IDataSetProvider>();
-    private IOperatingCompaniesService OperatingCompaniesService => _serviceProvider.GetRequiredService<IOperatingCompaniesService>();
+    private ICompaniesService OperatingCompaniesService => _serviceProvider.GetRequiredService<ICompaniesService>();
     private ITrainCategoriesService TrainCategoriesService => _serviceProvider.GetRequiredService<ITrainCategoriesService>();
     private ILogger<XplnDataImporter> Logger => _serviceProvider.GetRequiredService<ILogger<XplnDataImporter>>();
 

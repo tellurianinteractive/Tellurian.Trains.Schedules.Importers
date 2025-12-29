@@ -133,20 +133,38 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to On demand.
+        ///   Looks up a localized string similar to On order.
         /// </summary>
-        internal static string OnDemand {
+        internal static string OnOrder {
             get {
-                return ResourceManager.GetString("OnDemand", resourceCulture);
+                return ResourceManager.GetString("OnOrder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to On demand.
+        ///   Looks up a localized string similar to Order.
         /// </summary>
-        internal static string OnDemandShort {
+        internal static string OnOrderShort {
             get {
-                return ResourceManager.GetString("OnDemandShort", resourceCulture);
+                return ResourceManager.GetString("OnOrderShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to On request.
+        /// </summary>
+        internal static string OnRequest {
+            get {
+                return ResourceManager.GetString("OnRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request.
+        /// </summary>
+        internal static string OnRequestShort {
+            get {
+                return ResourceManager.GetString("OnRequestShort", resourceCulture);
             }
         }
         

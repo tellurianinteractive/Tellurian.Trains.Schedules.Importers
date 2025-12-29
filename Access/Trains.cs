@@ -71,6 +71,7 @@ internal static class Trains
     {
         var signature = record.GetString(record.GetOrdinal("Signature"));
         var trackNumber = record.GetString(record.GetOrdinal("TrackNumber"));
+        var trackId = record.GetInt32(record.GetOrdinal("TrackId"));
         var station = timetable.Layout.Station(signature);
         var stationTrack = station.Value.Track(trackNumber);
         Time arrivalTime;
@@ -97,7 +98,7 @@ internal static class Trains
             var dep = record.GetDateTime(d);
             departureTime = Time.FromHourAndMinute(dep.Hour, dep.Minute);
         }
-        return new StationCall(stationTrack.Value, arrivalTime, departureTime);
+        return new StationCall(trackId, stationTrack.Value, arrivalTime, departureTime);
     }
 
     public static void FinalHandler(Timetable timetable)

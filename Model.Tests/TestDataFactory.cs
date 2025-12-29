@@ -22,26 +22,26 @@ internal static class TestDataFactory
     internal static OperationLocation CreateStation1()
     {
         var station = new OperationLocation(3, "Göteborg", "G");
-        station.Add(new StationTrack("1"));
-        station.Add(new StationTrack("2"));
-        station.Add(new StationTrack("3"));
-        station.Add(new StationTrack("4"));
+        station.Add(new StationTrack(1, "1"));
+        station.Add(new StationTrack(2, "2"));
+        station.Add(new StationTrack(3, "3"));
+        station.Add(new StationTrack(4, "4"));
         return station;
     }
 
     private static OperationLocation CreateStation2()
     {
         var station = new OperationLocation(2, "Ytterby", "Yb");
-        station.Add(new StationTrack("1"));
-        station.Add(new StationTrack("2"));
+        station.Add(new StationTrack(1, "1"));
+        station.Add(new StationTrack(2, "2"));
         return station;
     }
 
     private static OperationLocation CreateStation3()
     {
         var station = new OperationLocation(1, "Stenungsund", "Snu");
-        station.Add(new StationTrack("1"));
-        station.Add(new StationTrack("2"));
+        station.Add(new StationTrack(1, "1"));
+        station.Add(new StationTrack(2, "2"));
         return station;
     }
 
@@ -57,9 +57,9 @@ internal static class TestDataFactory
     {
         var stations = Stations.ToArray();
         var train = new Train(number, category, number) { Category = category };
-        _ = train.Add(new StationCall(stations[0]["3"], startTime, startTime));
-        _ = train.Add(new StationCall(stations[1]["2"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
-        _ = train.Add(new StationCall(stations[2]["1"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
+        _ = train.Add(new StationCall(1, stations[0]["3"], startTime, startTime));
+        _ = train.Add(new StationCall(2, stations[1]["2"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
+        _ = train.Add(new StationCall(3, stations[2]["1"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
         return train;
     }
 
@@ -67,9 +67,9 @@ internal static class TestDataFactory
     {
         var stations = Stations.ToArray();
         var train = new Train(number, category, number) { Category = category };
-        _ = train.Add(new StationCall(stations[2]["2"], startTime, startTime));
-        _ = train.Add(new StationCall(stations[1]["1"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
-        _ = train.Add(new StationCall(stations[0]["3"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
+        _ = train.Add(new StationCall(1, stations[2]["2"], startTime, startTime));
+        _ = train.Add(new StationCall(2, stations[1]["1"], startTime.AddMinutes(25), startTime.AddMinutes(30)));
+        _ = train.Add(new StationCall(3, stations[0]["3"], startTime.AddMinutes(55), startTime.AddMinutes(55)));
         return train;
     }
 

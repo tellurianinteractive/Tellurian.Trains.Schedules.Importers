@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 

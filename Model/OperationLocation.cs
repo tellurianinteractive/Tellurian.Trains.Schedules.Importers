@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -13,6 +13,7 @@ public sealed record OperationLocation : IEquatable<OperationLocation>
     public string Type { get; init; } = string.Empty;
     public string Signature { get; init; }
     public bool IsShadow { get; init; }
+    public bool IsManned { get; init; } = true;
     public ICollection<StationTrack> Tracks { get; }
     public OperationLocation(int id, string name, string signature)
     {

@@ -2,10 +2,9 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Model;
 
-namespace Services.Tests;
+namespace Tellurian.Trains.Schedules.Importers.Services.Tests;
 
 [TestClass]
 public sealed class ExplorationTests
@@ -19,7 +18,7 @@ public sealed class ExplorationTests
     [TestMethod] //, Ignore("This thest converted UIC data in CompanyCodes_20231117_1049.txt to JSON/CSV")]
     public async Task ConvertOperatingCompaniesToSimplerFormat()
     {
-        List<OperatingCompany> _operatingCompanies = new(2000);
+        List<Company> _operatingCompanies = new(2000);
         var encoding = Encoding.GetEncoding("iso-8859-1");
         var fileName = Path.Combine("..", "..", "..", "CompanyCodes_20231117_1049.txt");
         using var streamReader = new StreamReader(fileName, encoding, true);
@@ -77,7 +76,7 @@ public sealed class ExplorationTests
 
         }
         await using var jsonStream = File.Create("OperatingCompanies.json");
-        await JsonSerializer.SerializeAsync<IEnumerable<OperatingCompany>>(jsonStream, _operatingCompanies, _jsonSerializerOptions, TestContext.CancellationToken);
+        await JsonSerializer.SerializeAsync<IEnumerable<Company>>(jsonStream, _operatingCompanies, _jsonSerializerOptions, TestContext.CancellationToken);
 
         static string? ValueOfMaxLengthOrNull(string line, int maxLength)
         {

@@ -3,7 +3,6 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
@@ -19,14 +18,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private readonly Stream _inputStream;
     private readonly IDataSetProvider _dataSetProvider;
     private readonly ILogger _logger;
-    private readonly IOperatingCompaniesService _operatingCompaniesService;
+    private readonly ICompaniesService _operatingCompaniesService;
     private readonly ITrainCategoriesService _trainCategoriesService;
     private readonly DataSetConfiguration _dataSetConfiguration = CreateDataSetConfiguration();
-    private List<OperatingCompany> _operatingCompanies = [];
+    private List<Company> _operatingCompanies = [];
     private List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
 
-    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
+    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
     {
         _inputStream = inputStream;
         _dataSetProvider = dataSetProvider;
@@ -36,21 +35,21 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, IOperatingCompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger) :
+    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger) :
         this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger)
     { }
 
-    private OperatingCompany FindOrCreateCompany(string? companySignature)
+    private Company FindOrCreateCompany(string? companySignature)
     {
         if (companySignature.HasValue())
         {
             _ = _operatingCompanies.TryGetFirstValue(oc => oc.Signature.EqualsCaseInsensitive(companySignature), out var company);
             if (company is not null) return company;
-            var newCompany = OperatingCompany.FromSignature(companySignature);
+            var newCompany = Company.FromSignature(companySignature);
             _operatingCompanies.Add(newCompany);
             return newCompany;
         }
-        return OperatingCompany.None;
+        return Company.None;
     }
 
     private TrainCategory FindOrCreateCategory(string? trainPrefix, string? backgroundColor)
@@ -69,7 +68,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
     public async Task<ImportResult<Schedule>> ImportSchedule(string name)
     {
-        _operatingCompanies = [.. await _operatingCompaniesService.GetAllOperatingCompaies()];
+        _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
         _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
         DataSet = _dataSetProvider.ImportSchedule(_inputStream, _dataSetConfiguration) ?? throw new IOException("Stream cannot be read.");
         return GetResult(name);
@@ -180,7 +179,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         var validationMessages = ValidateTrack(fields, rowNumber);
                         if (validationMessages.HasNoStoppingErrors())
                         {
-                            current.Add(CreateTrack(fields));
+                            current.Add(CreateTrack(rowNumber, fields));
                         }
                         itemMessages.AddRange(validationMessages);
                     }
@@ -206,8 +205,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 IsShadow = fields[SubType].Is("Depot")
             };
 
-        static StationTrack CreateTrack(string[] fields) =>
-            new(fields[TrackName])
+        static StationTrack CreateTrack(int rowNumber, string[] fields) =>
+            new(rowNumber, fields[TrackName])
             {
                 IsMain = fields[SubType].Is("Main"),
                 IsScheduled = fields[SubType].IsAny(["Main", "Depot"]),
@@ -515,9 +514,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
         static StationCall CreateCall(int rowNumber, string[] fields, StationTrack track)
         {
-            return new(track, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Remark])
+            return new(rowNumber, track, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Remark])
             {
-                Id = rowNumber,
                 IsArrival = true,
                 IsDeparture = true,
             };

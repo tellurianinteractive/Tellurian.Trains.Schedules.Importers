@@ -14,7 +14,7 @@ public class Train(int id, TrainCategory category, int number, string externalId
     public string ExtenalId { get; } = externalId;
     public string? Remark { get; init; }
     public TrainLenght Length { get; set; }
-    public OperatingCompany Company { get; set; } = OperatingCompany.None;
+    public Company Company { get; set; } = Company.None;
     public required TrainCategory Category { get; init; } = category;
     public required Sessions Sessions { get; set; } = Sessions.All;
     public IList<string> Groups { get; init; } = [];
@@ -54,20 +54,23 @@ public static class TrainExtensions
 
     extension(Train train)
     {
+        public string Identity => train.Category.TrainIdentity(train.Number);
+
         public StationCall Add(StationCall call)
         {
             train = train.ValueOrException(nameof(train));
             call = call.ValueOrException(nameof(call));
             if (!train.Calls.Contains(call))
             {
-                call.Train = train;
+                call.SetTrain(train);
                 train.Calls.Add(call);
             }
             return call;
         }
     }
 
-    public static bool IsNullOrHasNoCalls([NotNullWhen(true)] this Train? train) => train is null || train.Calls.Count == 0;
+    public static bool IsNullOrHasNoCalls([NotNullWhen(true)] this Train? train)
+        => train is null || train.Calls.Count == 0;
 
     public static Train WithFixedFirstAndLastCall(this Train train)
     {
@@ -75,14 +78,15 @@ public static class TrainExtensions
         train.Calls.Last().IsDeparture = false;
         return train;
     }
+
     public static Train WithFixedSingleCallTrain(this Train train)
     {
         if (train.Calls.Count == 1)
         {
             var departure = train.Calls[0];
             departure.Track.Calls.Remove(departure);
-            var arrival = new StationCall(departure.Track, departure.Arrival, departure.Arrival);
-            departure = new StationCall(departure.Track, departure.Departure, departure.Departure);
+            var arrival = new StationCall(departure.Id, departure.Track, departure.Arrival, departure.Arrival);
+            departure = new StationCall(departure.Id + 1, departure.Track, departure.Departure, departure.Departure);
             train.Calls.Clear();
             train.Add(arrival);
             train.Add(departure);

@@ -20,7 +20,7 @@ internal static class ServiceColletionExtensions
                 config.AddFilter("Microsoft", LogLevel.Warning); // Filter for specific namespace
             });
             services.AddSingleton<IDataSetProvider, OdsDataSetProvider>();
-            services.AddSingleton<IOperatingCompaniesService, OperatingCompaniesFromJsonService>();
+            services.AddSingleton<ICompaniesService, CompaniesFromJsonService>();
             services.AddSingleton<ITrainCategoriesService, TrainCategoriesFromCsvService>();
             return services;
         }

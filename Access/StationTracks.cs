@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Data.Odbc;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Access;
@@ -37,7 +36,7 @@ internal static class StationTracks
     public static void RecordHandler(IDataRecord record, Layout layout)
     {
         var station = layout.Station(record.GetString(record.GetOrdinal("Signature")));
-        var track = new StationTrack(record.GetString(record.GetOrdinal("Number")));
+        var track = new StationTrack(record.GetInt32(record.GetOrdinal("TrackId")), record.GetString(record.GetOrdinal("Number")));
         station.Value.Add(track);
     }
 }

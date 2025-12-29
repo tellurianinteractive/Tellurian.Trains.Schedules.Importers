@@ -29,7 +29,7 @@ public class TrainTests
     public void AddsFirstTimetableCall()
     {
         var station = TestDataFactory.CreateStation1();
-        var call = new StationCall(station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45));
+        var call = new StationCall(1, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45));
         Target.Add(call);
         Assert.IsFalse(Target.CheckTrainTimeSequence().Any());
     }
@@ -38,8 +38,8 @@ public class TrainTests
     public void WhenSecondTimetableCallIsBeforeLastThenValidationErrors()
     {
         var station = TestDataFactory.CreateStation1();
-        Target.Add(new StationCall(station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
-        Target.Add(new StationCall(station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
+        Target.Add(new StationCall(1, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
+        Target.Add(new StationCall(2, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
         var validationErrors = Target.GetValidationErrors(new ValidationOptions());
         Assert.AreEqual(1, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
@@ -49,8 +49,8 @@ public class TrainTests
     public void WhenSecondTimetableCallIsAfterLastThenThrows()
     {
         var station = TestDataFactory.CreateStation1();
-        var call1 = new StationCall(station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45));
-        var call2 = new StationCall(station.Tracks.First(), Time.FromHourAndMinute(12, 50), Time.FromHourAndMinute(12, 55));
+        var call1 = new StationCall(1, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45));
+        var call2 = new StationCall(2, station.Tracks.First(), Time.FromHourAndMinute(12, 50), Time.FromHourAndMinute(12, 55));
         Target.Add(call1);
         Target.Add(call2);
     }

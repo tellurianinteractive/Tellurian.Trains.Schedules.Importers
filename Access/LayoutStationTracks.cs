@@ -9,6 +9,6 @@ internal static class LayoutStationTracks
         new OdbcCommand
         {
             CommandType = CommandType.Text,
-            CommandText = $"SELECT Signature, Number FROM LayoutStationTracks WHERE LayoutName = '{layoutName}'"
+            CommandText = $"SELECT TrackId, Signature, Number FROM LayoutStationTracks WHERE LayoutName = '{layoutName}'"
         };
 }

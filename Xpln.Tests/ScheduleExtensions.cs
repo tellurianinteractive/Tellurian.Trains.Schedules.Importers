@@ -1,6 +1,5 @@
 ﻿using System.Data.Odbc;
 using System.Diagnostics;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
@@ -184,8 +183,7 @@ internal static class ScheduleExtensions
                 station = new OperationLocation(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
 
             }
-            var track = new StationTrack(reader.GetString(reader.GetOrdinal("TrackNumber")), true, true);
-            track.SetId(reader.GetInt32(reader.GetOrdinal("TrackId")));
+            var track = new StationTrack(reader.GetInt32(reader.GetOrdinal("TrackId")), reader.GetString(reader.GetOrdinal("TrackNumber")), true, true);
             station.Add(track);
             lastStationId = stationId;
 

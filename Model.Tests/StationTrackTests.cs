@@ -24,7 +24,7 @@ public class StationTrackTests
     [TestMethod]
     public void WhenNoCallsThenTimeslotIsFree()
     {
-        Train1.Add(new StationCall(Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        Train1.Add(new StationCall(1, Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
         Assert.AreEqual(1, Target.Calls.Count);
         Assert.AreEqual(Train1.Calls[0], Target.Calls.First());
     }
@@ -32,8 +32,8 @@ public class StationTrackTests
     [TestMethod]
     public void WhenArrival1IsSameTimeAsDeparture2ThenNotConflict()
     {
-        Train1.Add(new StationCall(Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
-        Train2.Add(new StationCall(Target, Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
+        Train1.Add(new StationCall(1, Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        Train2.Add(new StationCall(2, Target, Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
         var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
@@ -42,8 +42,8 @@ public class StationTrackTests
     [TestMethod]
     public void WhenCallsNotOverlapsThenTimeslotIsFree()
     {
-        Train1.Add(new StationCall(Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
-        Train2.Add(new StationCall(Target, Time.FromHourAndMinute(12, 31), Time.FromHourAndMinute(12, 45)));
+        Train1.Add(new StationCall(1, Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        Train2.Add(new StationCall(2, Target, Time.FromHourAndMinute(12, 31), Time.FromHourAndMinute(12, 45)));
         Assert.AreEqual(2, Target.Calls.Count);
         var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());

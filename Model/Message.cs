@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -44,7 +44,7 @@ public static class ErrorMessageExtensions
     public static bool HasStoppingErrors(this IEnumerable<Message> me) => me.Any(m => m.Severity >= Severity.Error);
     public static bool Contains(this IEnumerable<Message> me, string text) => me.Any(m => m.Text.Contains(text, StringComparison.OrdinalIgnoreCase));
     public static IEnumerable<string> ToStrings(this IEnumerable<Message> me) =>
-        me is null ? Array.Empty<string>() : me.Select(m => m.ToString());
+        me is null ? [] : me.Select(m => m.ToString());
 }
 
 internal static class SeverityExtensions

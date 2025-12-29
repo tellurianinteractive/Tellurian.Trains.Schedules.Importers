@@ -141,11 +141,11 @@
   <data name="NoneShort" xml:space="preserve">
     <value>Ingen</value>
   </data>
-  <data name="OnDemand" xml:space="preserve">
-    <value>Ved behov</value>
+  <data name="OnRequest" xml:space="preserve">
+    <value>På forespørsel</value>
   </data>
-  <data name="OnDemandShort" xml:space="preserve">
-    <value>Behov</value>
+  <data name="OnRequestShort" xml:space="preserve">
+    <value>Foresp</value>
   </data>
   <data name="Saturday" xml:space="preserve">
     <value>Lørdag</value>

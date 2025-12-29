@@ -16,7 +16,7 @@ public class SessionsTests
     [TestMethod]
     public void IsOddSessions()
     {
-        var target = new Sessions() { Flags = CommonSessionPatterns.Odd };
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
         var actual = target.Numbers;
         Assert.HasCount(7, actual);
         Assert.AreEqual(1, actual[0]);
@@ -26,7 +26,7 @@ public class SessionsTests
     [TestMethod]
     public void IsEvenSessions()
     {
-        var target = new Sessions() { Flags = CommonSessionPatterns.Even };
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Even);
         var actual = target.Numbers;
         Assert.HasCount(7, actual);
         Assert.AreEqual(2, actual[0]);
@@ -36,8 +36,8 @@ public class SessionsTests
     [TestMethod]
     public void TwoSessionsWithDifferentDaysCombinedIsNoDays()
     {
-        var odd = new Sessions() { Flags = CommonSessionPatterns.Odd };
-        var even = new Sessions() { Flags = CommonSessionPatterns.Even };
+        var odd = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        var even = Sessions.FromBitPattern(CommonSessionPatterns.Even);
         var target = odd.And(even);
         var actual = target.Numbers;
         Assert.HasCount(0, actual);
@@ -46,8 +46,8 @@ public class SessionsTests
     [TestMethod]
     public void TwoSessionsWithComplementaryDaysCombinedIsAllDays()
     {
-        var odd = new Sessions() { Flags = CommonSessionPatterns.Odd };
-        var even = new Sessions() { Flags = CommonSessionPatterns.Even };
+        var odd = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        var even = Sessions.FromBitPattern(CommonSessionPatterns.Even);
         var target = odd.Or(even);
         var actual = target.Numbers;
         Assert.HasCount(14, actual);
@@ -58,7 +58,7 @@ public class SessionsTests
     [TestMethod]
     public void IsOnDemand()
     {
-        var target = new Sessions() { Flags = (ushort)(CommonSessionPatterns.Even | CommonSessionPatterns.OnDemand) };
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Even | CommonSessionPatterns.OnDemand);
         var actual = target.Numbers;
         Assert.HasCount(7, actual);
         Assert.AreEqual(2, actual[0]);
@@ -69,7 +69,7 @@ public class SessionsTests
     [TestMethod]
     public void Daily()
     {
-        var target = new Sessions() { Flags = CommonDayPatterns.Daily };
+        var target = Sessions.FromBitPattern(CommonDayPatterns.Daily);
         var actual = target.Days;
         Assert.HasCount(7, actual);
         Assert.AreEqual(Days.Monday, actual[0], "First day in week is Monday");
@@ -79,7 +79,7 @@ public class SessionsTests
     [TestMethod]
     public void MondayWednesdayFridaySunday()
     {
-        var target = new Sessions() { Flags = CommonSessionPatterns.Odd };
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
         var actual = target.Days;
         Assert.HasCount(4, actual);
         Assert.AreEqual(Days.Monday, actual[0], "First day is Monday");
@@ -89,7 +89,7 @@ public class SessionsTests
     [TestMethod]
     public void TuesdayThursdaySaturday()
     {
-        var target = new Sessions() { Flags = CommonSessionPatterns.Even };
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Even);
         var actual = target.Days;
         Assert.HasCount(3, actual);
         Assert.AreEqual(Days.Tuesday, actual[0], "First day is Tuesday");
@@ -99,7 +99,7 @@ public class SessionsTests
     [TestMethod]
     public void ConstructorSetsCorrectDays()
     {
-        var target = new Sessions(Days.Monday | Days.Friday);
+        var target = Sessions.FromDays(Days.Monday | Days.Friday);
         var actual = target.Numbers;
         Assert.HasCount(4, actual);
         var expected = new byte[] { 1, 5, 8, 12 };
@@ -109,7 +109,7 @@ public class SessionsTests
     [TestMethod]
     public void ConstructorSetsCorrectSessions()
     {
-        var target = new Sessions([1, 5, 8, 12]);
+        var target = Sessions.FromSessionNumbers([1, 5, 8, 12]);
         var actual = target.Numbers;
         Assert.HasCount(4, actual);
         var expected = new byte[] { 1, 5, 8, 12 };
@@ -119,7 +119,7 @@ public class SessionsTests
     [TestMethod]
     public void DayResourceNameIsConsequtive()
     {
-        var target = new Sessions(Days.Tuesday | Days.Wednesday | Days.Thursday);
+        var target = Sessions.FromDays(Days.Tuesday | Days.Wednesday | Days.Thursday);
         var actual = target.DaysResourceKey;
         Assert.AreEqual("Tuesday-Thursday", actual);
     }

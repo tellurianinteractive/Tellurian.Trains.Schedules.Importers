@@ -118,63 +118,63 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Daily" xml:space="preserve">
-    <value>Dagligen</value>
+    <value>Täglich</value>
   </data>
   <data name="DailyShort" xml:space="preserve">
-    <value>Dagl</value>
+    <value>Tägl</value>
   </data>
   <data name="Friday" xml:space="preserve">
-    <value>Fredag</value>
+    <value>Freitag</value>
   </data>
   <data name="FridayShort" xml:space="preserve">
-    <value>F</value>
+    <value>Fr</value>
   </data>
   <data name="Monday" xml:space="preserve">
-    <value>Måndag</value>
+    <value>Montag</value>
   </data>
   <data name="MondayShort" xml:space="preserve">
-    <value>M</value>
+    <value>Mo</value>
   </data>
   <data name="None" xml:space="preserve">
-    <value>Inga kördagar</value>
+    <value>Keine Tage</value>
   </data>
   <data name="NoneShort" xml:space="preserve">
-    <value>Kör ej</value>
+    <value>Keine</value>
   </data>
   <data name="OnRequest" xml:space="preserve">
-    <value>På begäran</value>
+    <value>Auf Anfrage</value>
   </data>
   <data name="OnRequestShort" xml:space="preserve">
-    <value>Begäran</value>
-  </data>
-  <data name="Saturday" xml:space="preserve">
-    <value>Lördag</value>
-  </data>
-  <data name="SaturdayShort" xml:space="preserve">
-    <value>L</value>
-  </data>
-  <data name="Sunday" xml:space="preserve">
-    <value>Söndag</value>
-  </data>
-  <data name="SundayShort" xml:space="preserve">
-    <value>S</value>
-  </data>
-  <data name="Thursday" xml:space="preserve">
-    <value>Torsdag</value>
-  </data>
-  <data name="ThursdayShort" xml:space="preserve">
-    <value>To</value>
-  </data>
-  <data name="Tuesday" xml:space="preserve">
-    <value>Tisdag</value>
-  </data>
-  <data name="TuesdayShort" xml:space="preserve">
-    <value>Ti</value>
+    <value>Anfrage</value>
   </data>
   <data name="Wednesday" xml:space="preserve">
-    <value>Onsdag</value>
+    <value>Mittwoch</value>
   </data>
   <data name="WednesdayShort" xml:space="preserve">
-    <value>O</value>
+    <value>Mi</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Donnerstag</value>
+  </data>
+  <data name="ThursdayShort" xml:space="preserve">
+    <value>Do</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Sonntag</value>
+  </data>
+  <data name="SundayShort" xml:space="preserve">
+    <value>So</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Samstag</value>
+  </data>
+  <data name="SaturdayShort" xml:space="preserve">
+    <value>Sa</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Dienstag</value>
+  </data>
+  <data name="TuesdayShort" xml:space="preserve">
+    <value>Di</value>
   </data>
 </root>

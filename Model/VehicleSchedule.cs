@@ -7,11 +7,11 @@ public abstract record VehicleSchedule
     public Sessions Sessions { get; set; } = Sessions.All;
 
     public string Class { get; init; } = string.Empty;
-    public OperatingCompany Company { get; init; } = OperatingCompany.None;
+    public Company Company { get; init; } = Company.None;
     public string? Remark { get; init; }
     public ICollection<TrainPart> Parts { get; }
 
-    protected VehicleSchedule(OperatingCompany company, int number, string? remark = null)
+    protected VehicleSchedule(Company company, int number, string? remark = null)
     {
         Company = company;
         Number = number;
@@ -24,14 +24,14 @@ public abstract record VehicleSchedule
 
 public sealed record LocoSchedule : VehicleSchedule
 {
-    public LocoSchedule(int number, string? remark = null) : this(OperatingCompany.None, number, remark) { }
-    public LocoSchedule(OperatingCompany company, int number, string? remark = null) : base(company, number, remark) { }
+    public LocoSchedule(int number, string? remark = null) : this(Company.None, number, remark) { }
+    public LocoSchedule(Company company, int number, string? remark = null) : base(company, number, remark) { }
 }
 public sealed record TrainsetSchedule : VehicleSchedule
 {
-    public TrainsetSchedule(int number, string? remark = null) : this(OperatingCompany.None, number, remark) { }
+    public TrainsetSchedule(int number, string? remark = null) : this(Company.None, number, remark) { }
 
-    public TrainsetSchedule(OperatingCompany company, int number, string? remark = null) : base(company, number, remark) { }
+    public TrainsetSchedule(Company company, int number, string? remark = null) : base(company, number, remark) { }
 }
 
 public static class VehicleScheduleExtensions

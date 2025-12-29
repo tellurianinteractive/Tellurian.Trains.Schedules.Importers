@@ -141,11 +141,11 @@
   <data name="NoneShort" xml:space="preserve">
     <value>None</value>
   </data>
-  <data name="OnDemand" xml:space="preserve">
-    <value>On demand</value>
+  <data name="OnRequest" xml:space="preserve">
+    <value>On request</value>
   </data>
-  <data name="OnDemandShort" xml:space="preserve">
-    <value>On demand</value>
+  <data name="OnRequestShort" xml:space="preserve">
+    <value>Request</value>
   </data>
   <data name="Saturday" xml:space="preserve">
     <value>Saturday</value>

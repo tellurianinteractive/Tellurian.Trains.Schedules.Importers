@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Runtime.Serialization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -43,7 +43,7 @@ public class TrackStretch : IEquatable<TrackStretch>
     public int Time { get; }
     public Layout Layout { get; }
 
-    public IEnumerable<StretchPassing> Passings => this.GetStretchPassings().ToList();
+    public IEnumerable<StretchPassing> Passings => [.. this.GetStretchPassings()];
 
     public bool Equals(TrackStretch? other) => other != null && Start.Equals(other.Start) && End.Equals(other.End);
     public override bool Equals(object? obj) => obj is TrackStretch other && Equals(other);
@@ -62,8 +62,8 @@ public static class TrackStretchExtensions
             var calls = train.Calls.ToArray();
             for (int i = 0; i < calls.Length - 1; i++)
             {
-                if (calls[i].Station.Equals(me.Start) && calls[i + 1].Station.Equals(me.End)) result.Add(new StretchPassing(calls[i], calls[i + 1], true));
-                if (calls[i].Station.Equals(me.End) && calls[i + 1].Station.Equals(me.Start)) result.Add(new StretchPassing(calls[i], calls[i + 1], false));
+                if (calls[i].Station.Equals(me.Start) && calls[i + 1].Station.Equals(me.End)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
+                if (calls[i].Station.Equals(me.End) && calls[i + 1].Station.Equals(me.Start)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
             }
         }
         return result;

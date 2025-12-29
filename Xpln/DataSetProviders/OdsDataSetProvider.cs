@@ -3,7 +3,6 @@ using System.Data;
 using System.Globalization;
 using System.IO.Compression;
 using System.Xml;
-using Tellurian.Trains.Schedules.Importers.Model;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 using Tellurian.Trains.Schedules.Model;
 

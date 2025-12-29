@@ -6,10 +6,23 @@ public readonly struct TrainLenght
     public int? Axles { get; init; }
     public int? Meters { get; init; }
     public override string ToString() =>
-        Axles.HasValue && Meters.HasValue ? $"{Axles.Value}ʘ {Meters.Value}m" :
-        Axles.HasValue ? $"{Axles.Value}ʘ" :
-        Meters.HasValue ? $"{Meters.Value}m" :
-        string.Empty;
+        $"{this.MaxAxles} {this.MaxMeters}";
+}
 
-    public static TrainLenght AxlesOnly(int axles) => new() { Axles = axles };
+public static class TrainLengthExtensions
+{
+    extension(TrainLenght lenght)
+    {
+        public static TrainLenght AxlesOnly(int axles) =>
+            new() { Axles = axles };
+
+        public static TrainLenght MetersOnly(int meters) =>
+            new() { Meters = meters };
+
+        public static TrainLenght AxlesAndMeters(int axles, int meters) =>
+            new() { Axles = axles, Meters = meters };
+
+        internal string MaxAxles => lenght.Axles.HasValue ? $"{lenght.Axles.Value}ʘ" : string.Empty;
+        internal string MaxMeters => lenght.Meters.HasValue ? $"{lenght.Meters.Value}m" : string.Empty;
+    }
 }

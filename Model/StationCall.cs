@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 public sealed record StationCall : IEquatable<StationCall>, IComparable<StationCall>
 {
-    internal Train? Train { get; set; }
-
+    public Train Train { get => _train; init => _train = value; }
+    private Train _train = default!;
     public int Id { get; init; }
     public OperationLocation Station => Track.Station;
     public StationTrack Track { get; init; }
@@ -18,9 +18,11 @@ public sealed record StationCall : IEquatable<StationCall>, IComparable<StationC
     public ICollection<Note> Notes { get; }
     public bool IsStop => IsArrival || IsDeparture;
     public Time SortTime => IsDeparture ? Departure : Arrival;
+    internal void SetTrain(Train train) => _train = train;
 
-    public StationCall(StationTrack track, Time arrival, Time departure, string? remark = null)
+    public StationCall(int id, StationTrack track, Time arrival, Time departure, string? remark = null)
     {
+        Id = id;
         Track = track.ValueOrException(nameof(track));
         Track.Add(this);
         Arrival = arrival;

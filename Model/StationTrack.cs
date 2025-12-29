@@ -1,56 +1,35 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
+﻿namespace Tellurian.Trains.Schedules.Model;
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-#pragma warning disable CS0649
 
-namespace Tellurian.Trains.Schedules.Model;
-
-[DataContract(IsReference = true)]
 public sealed record StationTrack : IEquatable<StationTrack>
 {
-    public StationTrack(string number) : this(number, true, true) { }
+    public StationTrack(int id, string number) : this(id, number, true, true) { }
 
-    public StationTrack(string number, bool isMain, bool isScheduled)
+    public StationTrack(int id, string number, bool isMain, bool isScheduled)
     {
+        Id = id;
         Number = number;
         IsMain = isMain;
         IsScheduled = isScheduled;
-        Calls = new List<StationCall>();
+        Calls = [];
     }
 
-    [DataMember(IsRequired = false, Order = 1, Name = "Id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int _Id;
-
-    public int Id => _Id;
-
-    [DataMember(IsRequired = true, Order = 1)]
+    public int Id { get; init; }
     public string Number { get; }
-
-    [DataMember(IsRequired = true, Order = 2)]
-    public bool IsScheduled { get; init; } = true;
-
-    [DataMember(IsRequired = true, Order = 3)]
-    public bool IsMain { get; init; }
-
-    [DataMember(IsRequired = true, Order = 4)]
-    public double Length { get; init; }
-    [DataMember(IsRequired = true, Order = 5)]
-    public string Usage { get; init; } = string.Empty;
-    [DataMember(IsRequired = true, Order = 6)]
     public int DisplayOrder { get; init; }
+    public bool IsScheduled { get; init; } = true;
+    public bool IsMain { get; init; }
+    public double Length { get; init; }
+    public string Usage { get; init; } = string.Empty;
 
-    public OperationLocation Station { get; internal set; }
+    public OperationLocation Station { get; set; } = default!;
 
     public ICollection<StationCall> Calls { get; }
 
     public bool Equals(StationTrack? other) => Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase) && Station.Equals(other?.Station);
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
     public override string ToString() => Number;
-    public static StationTrack Example { get { return new StationTrack("1") { Station = OperationLocation.Example }; } }
-    private StationTrack() { } // Only for deserialization.
-    public void SetId(int id) => _Id = id;
+    public static StationTrack Example { get { return new StationTrack(1, "1") { Station = OperationLocation.Example }; } }
 }
 
 public static class StationTrackExtensions

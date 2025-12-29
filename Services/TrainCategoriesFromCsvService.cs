@@ -7,10 +7,38 @@ public class TrainCategoriesFromCsvService(string? path = null) : ITrainCategori
 {
     private readonly string _path = path ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CSV", "TrainCategories.csv");
 
-    public Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync()
+    public async Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync()
     {
-        // Returns empty enumerable for now - categories will be created on-the-fly during import
-        // Future: load predefined categories from CSV file if it exists
-        return Task.FromResult<IEnumerable<TrainCategory>>([]);
+        var categories = new List<TrainCategory>(50);
+        bool isHeaderLine = true;
+        await foreach (var line in File.ReadLinesAsync(_path))
+        {
+            if (isHeaderLine) { isHeaderLine = false; continue; }
+            categories.Add(FromCsvLine(line));
+        }
+        return categories;
     }
+
+    private static TrainCategory FromCsvLine(string line)
+    {
+        var fields = line.Split(',');
+        var resourceName = fields[0];
+        var prefix = fields[1];
+        var suffix = fields[2];
+        bool isPassenger = bool.Parse(fields[3]);
+        bool isFreight = bool.Parse(fields[4]);
+        string color = fields[5];
+        return new TrainCategory()
+        {
+            Id = NextId,
+            ResourceName = resourceName,
+            Prefix = prefix,
+            Suffix = suffix,
+            IsPassenger = isPassenger,
+            IsFreight = isFreight,
+            Color = color
+        };
+    }
+    static int _nextId = -1000;
+    private static int NextId => Interlocked.Decrement(ref _nextId);
 }

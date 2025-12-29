@@ -5,12 +5,12 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Services;
 
-public class OperatingCompaniesFromJsonService(string? path = null) : IOperatingCompaniesService
+public class CompaniesFromJsonService(string? path = null) : ICompaniesService
 {
     private readonly string _path = path ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "JSON", "OperatingCompanies.json");
-    public async Task<IEnumerable<OperatingCompany>> GetAllOperatingCompaies()
+    public async Task<IEnumerable<Company>> GetAllCompaiesAsync()
     {
         var json = File.ReadAllText(_path);
-        return JsonSerializer.Deserialize<IEnumerable<OperatingCompany>>(json) ?? [];
+        return JsonSerializer.Deserialize<IEnumerable<Company>>(json) ?? [];
     }
 }

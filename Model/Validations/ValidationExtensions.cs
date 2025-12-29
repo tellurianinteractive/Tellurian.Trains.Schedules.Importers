@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
-using Tellurian.Trains.Schedules.Importers.Model.Resources;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
 
@@ -52,12 +52,12 @@ public static class ValidationExtensions
 
     #region StationTrack
     public static IEnumerable<Message> GetValidationErrors(this StationTrack me, IEnumerable<LocoSchedule> locos) =>
-        me is null ? Array.Empty<Message>() :
+        me is null ? [] :
         me.GetConflicts(locos).Select(c => Message.Information(Strings.CallAtStationHasConflictsWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another));
 
     private static IEnumerable<(StationCall one, StationCall another)> GetConflicts(this StationTrack me, IEnumerable<LocoSchedule> locos)
     {
-        if (me.Calls.Count < 2) return Array.Empty<(StationCall, StationCall)>();
+        if (me.Calls.Count < 2) return [];
         var result = GetConflicts(me.Calls.First(), me.Calls.Skip(1), locos);
         return result.Distinct();
     }
@@ -163,7 +163,7 @@ public static class ValidationExtensions
         return result;
     }
 
-    internal static IEnumerable<Message> CheckTrainTimeSequence(this Train me)
+    public static IEnumerable<Message> CheckTrainTimeSequence(this Train me)
     {
         var result = new List<Message>();
         if (me.Calls.Count < 1)
@@ -225,7 +225,8 @@ public static class ValidationExtensions
             {
                 var p1 = parts[i];
                 var p2 = parts[j];
-                if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival) messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, me.Number, p1, p2)));
+                if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
+                    messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, me.Number, p1, p2)));
             }
         }
         return messages;
