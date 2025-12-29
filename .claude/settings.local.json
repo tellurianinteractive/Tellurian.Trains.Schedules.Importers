@@ -5,7 +5,8 @@
       "mcp__microsoft-learn__microsoft_docs_search",
       "mcp__microsoft-learn__microsoft_docs_fetch",
       "Bash(dotnet test:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\\\\Model\" /b)"
     ]
   }
 }

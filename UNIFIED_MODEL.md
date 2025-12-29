@@ -1205,7 +1205,737 @@ public class ScheduleImportAdapter
 
 ---
 
-## 7. Conclusion
+## 7. EF Core and JSON Serialization Compatibility Analysis
+
+> **Last Updated:** 2025-12-29
+
+This section analyzes what adaptations are required to make the Model suitable for:
+1. **Entity Framework Core** (EF Core) for database read/save operations
+2. **JSON serialization** (System.Text.Json) for API/storage purposes
+
+### 7.1 Executive Summary
+
+**Key Finding: NOT Mutually Exclusive**
+
+EF Core and JSON serialization requirements are **compatible** and can coexist in the same model with minimal modifications. The model can be adapted to support both without requiring DTOs or separate mapping layers.
+
+| Aspect | Compatibility | Notes |
+|--------|---------------|-------|
+| Core design patterns | ✅ Compatible | Both work with modern C# features |
+| Nullable reference types | ✅ Same semantics | Both use nullability for required/optional |
+| Constructors | ✅ Compatible | Private parameterless constructor works for both |
+| Required properties | ✅ Compatible | C# `required` modifier works for both |
+| Circular references | ⚠️ Config required | EF natural, JSON needs `ReferenceHandler` |
+| Foreign keys | ⚠️ Additive change | EF prefers explicit FK properties |
+
+---
+
+### 7.2 Current Model Patterns Analysis
+
+The current model uses several patterns that affect EF Core and JSON compatibility:
+
+#### **Pattern: Primary Constructors with Required Properties**
+```csharp
+// Current: Train.cs
+[method: SetsRequiredMembers]
+public class Train(int id, TrainCategory category, int number, string externalId = "")
+{
+    public required int Id { get; init; } = id;
+    public required TrainCategory Category { get; init; } = category;
+}
+```
+
+| Framework | Compatibility | Notes |
+|-----------|---------------|-------|
+| EF Core | ⚠️ Works | EF Core 7+ can bind constructor params to properties |
+| JSON | ✅ Works | `[JsonConstructor]` or primary constructor supported |
+
+#### **Pattern: Parent Reference with `= default!`**
+```csharp
+// Current: OperationLocation.cs
+public Layout Layout { get; internal set; } = default!;
+
+// Current: TrainPart.cs
+#pragma warning disable CS8618
+public VehicleSchedule Schedule { get; internal set; }
+```
+
+| Framework | Compatibility | Notes |
+|-----------|---------------|-------|
+| EF Core | ⚠️ Works | EF sets after construction; requires configuration |
+| JSON | ⚠️ Works | Needs `[JsonInclude]` for internal setters |
+
+#### **Pattern: Private Backing Field with Public Property**
+```csharp
+// Current: StationCall.cs
+public Train Train { get => _train; init => _train = value; }
+private Train _train = default!;
+internal void SetTrain(Train train) => _train = train;
+```
+
+| Framework | Compatibility | Notes |
+|-----------|---------------|-------|
+| EF Core | ⚠️ Config | Use `.HasField("_train")` in model builder |
+| JSON | ⚠️ Works | Property with init setter is serializable |
+
+#### **Pattern: Navigation-Only Relationships (No FK Properties)**
+```csharp
+// Current: Train.cs - no TimetableId property
+public Timetable? Timetable { get; internal set; }
+
+// Current: StationCall.cs - no TrackId property
+public StationTrack Track { get; init; }
+```
+
+| Framework | Compatibility | Notes |
+|-----------|---------------|-------|
+| EF Core | ⚠️ Shadow FK | EF creates shadow FK; explicit preferred |
+| JSON | ✅ Works | Navigations serialize fine |
+
+---
+
+### 7.3 Entity Framework Core Requirements
+
+#### **7.3.1 Constructor Requirements**
+
+EF Core can instantiate entities via:
+1. **Parameterless constructor** (preferred) - public, protected, or private
+2. **Parameterized constructor** - if params match property names exactly
+
+**Current Issue:** Primary constructors with `required` properties work but are complex.
+
+**Recommendation:** Add private parameterless constructor for EF Core:
+```csharp
+public class Train : IEquatable<Train>
+{
+    // EF Core constructor (private)
+    private Train() { }
+
+    // Application constructor
+    [method: SetsRequiredMembers]
+    public Train(int id, TrainCategory category, int number, string externalId = "")
+    {
+        Id = id;
+        Category = category;
+        Number = number;
+        ExternalId = externalId;
+    }
+
+    public required int Id { get; init; }
+    // ... rest unchanged
+}
+```
+
+#### **7.3.2 Foreign Key Properties**
+
+EF Core **strongly prefers** explicit FK properties alongside navigation properties:
+- Enables more efficient queries
+- Required for serialization round-trips
+- Makes relationships explicit in code
+
+**Current Issue:** Model uses navigation-only relationships.
+
+**Recommendation:** Add FK properties for key relationships:
+```csharp
+public class Train
+{
+    public int? TimetableId { get; set; }          // FK property (added)
+    public Timetable? Timetable { get; set; }      // Navigation property
+}
+
+public sealed record StationCall
+{
+    public int TrackId { get; init; }              // FK property (added)
+    public StationTrack Track { get; init; }       // Navigation property
+
+    public int TrainId { get; init; }              // FK property (added)
+    public Train Train { get; init; }              // Navigation property
+}
+
+public sealed record TrainPart
+{
+    public int ScheduleId { get; init; }           // FK property (added)
+    public VehicleSchedule Schedule { get; set; }  // Navigation property
+
+    public int FromId { get; init; }               // FK property (added)
+    public StationCall From { get; init; }         // Navigation property
+
+    public int ToId { get; init; }                 // FK property (added)
+    public StationCall To { get; init; }           // Navigation property
+}
+```
+
+#### **7.3.3 Navigation Property Setters**
+
+EF Core requires writable navigation properties (can be private/internal):
+```csharp
+// ✅ Good - has setter
+public Timetable? Timetable { get; internal set; }
+
+// ❌ Bad - init-only doesn't work for EF change tracking
+public Timetable? Timetable { get; init; }
+```
+
+**Current Issue:** Some properties use `init` that EF Core can't update after construction.
+
+**Recommendation:** Change `init` to `set` (or `internal set`) for FK/navigation properties:
+```csharp
+public StationTrack Track { get; set; }  // Changed from init
+```
+
+#### **7.3.4 Record Types Consideration**
+
+| Type | EF Core Suitability | Notes |
+|------|---------------------|-------|
+| `class` | ✅ Preferred | Reference equality, mutable state |
+| `record` | ⚠️ Works | Value equality can confuse change tracking |
+| `record struct` | ❌ Poor | Not recommended for entities |
+
+**Current State:** Mix of `class` and `record` types.
+
+**Recommendation:** Consider converting core entities to `class`:
+- `Train` - already a class ✅
+- `StationCall` - currently a record, consider `class`
+- `OperationLocation` - currently a record, consider `class`
+- `TrainPart` - currently a record, consider `class`
+
+Records are fine for value objects like `Time`, `Company`, `TrainCategory`.
+
+#### **7.3.5 Required EF Core Model Configuration**
+
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Configure backing fields where needed
+    modelBuilder.Entity<StationCall>()
+        .Property(e => e.Train)
+        .HasField("_train");
+
+    // Configure internal setters
+    modelBuilder.Entity<OperationLocation>()
+        .Property(e => e.Layout)
+        .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+    // Configure relationships with FKs
+    modelBuilder.Entity<Train>()
+        .HasOne(t => t.Timetable)
+        .WithMany(tt => tt.Trains)
+        .HasForeignKey(t => t.TimetableId);
+
+    // Configure inheritance for VehicleSchedule
+    modelBuilder.Entity<VehicleSchedule>()
+        .HasDiscriminator<string>("ScheduleType")
+        .HasValue<LocoSchedule>("Loco")
+        .HasValue<TrainsetSchedule>("Trainset");
+}
+```
+
+---
+
+### 7.4 JSON Serialization Requirements (System.Text.Json)
+
+#### **7.4.1 Constructor Support**
+
+System.Text.Json supports:
+1. **Parameterless constructor** (default)
+2. **Single parameterized constructor** (auto-detected for classes)
+3. **`[JsonConstructor]` attribute** for multiple constructors
+4. **Records** with primary constructors (excellent support)
+
+**Current State:** Primary constructors work well.
+
+**Recommendation:** Add `[JsonConstructor]` where multiple constructors exist:
+```csharp
+public class Train
+{
+    private Train() { }  // EF Core - not used by JSON
+
+    [JsonConstructor]
+    public Train(int id, TrainCategory category, int number, string externalId = "")
+    { }
+}
+```
+
+#### **7.4.2 Circular Reference Handling**
+
+**Problem:** Bidirectional relationships cause infinite serialization loops:
+```
+Train → Timetable → Trains → Train → ...
+StationCall → Train → Calls → StationCall → ...
+```
+
+**Solution Options:**
+
+| Option | Pros | Cons |
+|--------|------|------|
+| `ReferenceHandler.Preserve` | Full round-trip fidelity | Adds `$id`/`$ref` metadata |
+| `ReferenceHandler.IgnoreCycles` | Clean JSON, no metadata | Nulls circular refs (data loss) |
+| `[JsonIgnore]` on parent refs | Clean JSON, explicit control | Manual maintenance |
+
+**Recommendation:** Use `[JsonIgnore]` on parent navigation properties:
+```csharp
+public sealed record StationCall
+{
+    [JsonIgnore]
+    public Train Train { get; init; }   // Parent - ignore to break cycle
+
+    public int TrainId { get; init; }   // FK - include for relationships
+}
+
+public class Train
+{
+    [JsonIgnore]
+    public Timetable? Timetable { get; set; }  // Parent - ignore
+
+    public int? TimetableId { get; set; }       // FK - include
+}
+
+public sealed record TrainPart
+{
+    [JsonIgnore]
+    public VehicleSchedule Schedule { get; set; }  // Parent - ignore
+
+    public int ScheduleId { get; init; }           // FK - include
+}
+```
+
+This pattern:
+- Serializes FK values for relationship reconstruction
+- Avoids circular reference issues
+- Keeps JSON payload clean
+- Parent references can be restored during deserialization
+
+#### **7.4.3 Internal Setter Support**
+
+Properties with `internal set` need `[JsonInclude]` for serialization:
+```csharp
+public sealed record OperationLocation
+{
+    [JsonInclude]
+    public Layout Layout { get; internal set; } = default!;
+}
+```
+
+**Alternatively**, change to private set with JsonSerializer options:
+```csharp
+var options = new JsonSerializerOptions
+{
+    IncludeFields = false,
+    PropertyNameCaseInsensitive = true
+};
+```
+
+#### **7.4.4 Required Properties**
+
+Both C# `required` and `[JsonRequired]` work:
+```csharp
+public required int Id { get; init; }                    // ✅ Works
+[JsonRequired] public int Number { get; init; }           // ✅ Also works
+```
+
+In .NET 9+, set `RespectRequiredConstructorParameters = true` for constructor params.
+
+#### **7.4.5 Polymorphism (Inheritance)**
+
+For `VehicleSchedule` → `LocoSchedule`/`TrainsetSchedule`:
+```csharp
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(LocoSchedule), "loco")]
+[JsonDerivedType(typeof(TrainsetSchedule), "trainset")]
+public abstract record VehicleSchedule
+{
+    // ...
+}
+```
+
+---
+
+### 7.5 Nullable Reference Types Impact
+
+C# nullable reference types work consistently for both frameworks:
+
+| Declaration | EF Core | JSON | Database |
+|-------------|---------|------|----------|
+| `string Name` | Non-nullable column | Required in JSON | NOT NULL |
+| `string? Name` | Nullable column | Optional in JSON | NULL |
+| `Train Train` | Required relationship | Required in JSON | FK NOT NULL |
+| `Train? Train` | Optional relationship | Optional in JSON | FK NULL |
+
+**The model's current nullable annotations are correct and work for both.**
+
+---
+
+### 7.6 Comparison: DTOs vs Direct Model Usage
+
+#### **Option A: Direct Model Usage (Recommended)**
+
+Modify the Model classes to work with both EF Core and JSON:
+
+| Pros | Cons |
+|------|------|
+| No mapping code | Model has framework-specific attributes |
+| Single source of truth | Slightly more complex model |
+| Less maintenance | EF Core and JSON concerns mixed |
+| Better performance | |
+
+**Required Changes:**
+1. Add FK properties alongside navigation properties
+2. Add private parameterless constructors
+3. Add `[JsonIgnore]` on parent navigation properties
+4. Add `[JsonInclude]` on internal-set properties
+5. Consider converting some records to classes
+
+#### **Option B: Separate DTOs**
+
+Create separate DTO classes for JSON serialization:
+
+| Pros | Cons |
+|------|------|
+| Clean separation of concerns | Mapping overhead |
+| Model stays framework-agnostic | Duplicate type definitions |
+| Different shapes for different uses | More maintenance |
+| | Potential sync issues |
+
+**Not recommended** for this model because:
+- The domain model IS the data contract
+- Mapping adds complexity without clear benefit
+- The modifications needed are minimal
+
+---
+
+### 7.7 Recommended Model Modifications
+
+#### **7.7.1 Example: Modified Train Class**
+
+```csharp
+public class Train : IEquatable<Train>
+{
+    // Private constructor for EF Core
+    private Train()
+    {
+        Calls = new List<StationCall>();
+        Groups = new List<string>();
+    }
+
+    // Application constructor
+    [SetsRequiredMembers]
+    [JsonConstructor]
+    public Train(int id, TrainCategory category, int number, string externalId = "")
+    {
+        Id = id;
+        Category = category;
+        Number = number;
+        ExternalId = externalId;
+        Calls = new List<StationCall>();
+        Groups = new List<string>();
+    }
+
+    public required int Id { get; init; }
+    public required int Number { get; init; }
+    public string ExternalId { get; init; } = "";
+    public string? Remark { get; init; }
+    public TrainLenght Length { get; set; }
+    public Company Company { get; set; } = Company.None;
+    public required TrainCategory Category { get; init; }
+    public required Sessions Sessions { get; set; } = Sessions.All;
+    public IList<string> Groups { get; init; }
+
+    // FK property for EF Core
+    public int? TimetableId { get; set; }
+
+    // Navigation property - ignored in JSON to prevent cycles
+    [JsonIgnore]
+    public Timetable? Timetable { get; set; }
+
+    // Child collection - included in JSON
+    public IList<StationCall> Calls { get; }
+
+    // ... rest unchanged
+}
+```
+
+#### **7.7.2 Example: Modified StationCall Class**
+
+```csharp
+public class StationCall : IEquatable<StationCall>, IComparable<StationCall>
+{
+    // Private constructor for EF Core
+    private StationCall()
+    {
+        Notes = new List<Note>();
+    }
+
+    // Application constructor
+    [JsonConstructor]
+    public StationCall(int id, int trackId, Time arrival, Time departure, string? remark = null)
+    {
+        Id = id;
+        TrackId = trackId;
+        Arrival = arrival;
+        Departure = departure;
+        Notes = new List<Note>();
+        // ... remark handling
+    }
+
+    public int Id { get; init; }
+
+    // FK properties
+    public int TrackId { get; init; }
+    public int TrainId { get; set; }
+
+    // Navigation properties - parent ignored for JSON
+    [JsonIgnore]
+    public StationTrack Track { get; set; } = null!;
+
+    [JsonIgnore]
+    public Train Train { get; set; } = null!;
+
+    // Computed property - not persisted
+    [JsonIgnore]
+    [NotMapped]
+    public OperationLocation Station => Track.Station;
+
+    public Time Arrival { get; init; }
+    public Time Departure { get; init; }
+    public bool IsArrival { get; set; }
+    public bool IsDeparture { get; set; }
+    public ICollection<Note> Notes { get; }
+
+    // ... rest unchanged
+}
+```
+
+---
+
+### 7.8 Summary: Compatibility Matrix
+
+| Current Pattern | EF Core Change | JSON Change |
+|-----------------|----------------|-------------|
+| Primary constructor | Add private parameterless ctor | Add `[JsonConstructor]` if needed |
+| `init` properties | Change to `set` for FKs/navs | ✅ No change |
+| `= default!` | Configure backing field access | Add `[JsonInclude]` |
+| `internal set` | ✅ No change | Add `[JsonInclude]` |
+| Navigation-only | Add FK properties | Add FK properties |
+| Bidirectional refs | ✅ Natural | Add `[JsonIgnore]` on parents |
+| Records | Consider `class` for entities | ✅ No change |
+| Nullable types | ✅ No change | ✅ No change |
+| Required modifier | ✅ No change | ✅ No change |
+| Abstract base (`VehicleSchedule`) | Configure discriminator | Add `[JsonPolymorphic]` |
+
+---
+
+### 7.9 Conclusion
+
+**The Model can support both EF Core and JSON serialization without DTOs or mapping layers.**
+
+Key modifications:
+1. **Add FK properties** - Essential for both EF Core efficiency and JSON relationship preservation
+2. **Add private parameterless constructors** - Required for EF Core instantiation
+3. **Use `[JsonIgnore]` on parent references** - Breaks circular reference chains
+4. **Use `[JsonInclude]` for internal setters** - Enables JSON serialization of internal properties
+5. **Consider `class` over `record`** - For entities that EF Core tracks
+
+These changes are **additive** and **non-breaking** for existing import functionality.
+
+---
+
+### 7.10 Impact on XplnImporter and AccessRepository
+
+This section analyzes how the proposed model modifications affect the existing importers.
+
+#### **7.10.1 Current Import Patterns**
+
+Both importers follow a similar pattern:
+
+| Pattern | XplnImporter | AccessRepository |
+|---------|--------------|------------------|
+| Constructor calls | Parameterized constructors | Parameterized constructors |
+| Relationship setup | Extension methods (`timetable.Add(train)`) | Extension methods |
+| Property setting | Object initializers | Object initializers |
+| FK values | Not used (navigations only) | Not used (navigations only) |
+
+**Example: Current Train Creation (XplnDataImporter.cs:509-512)**
+```csharp
+static Train CreateTrain(int rowNumber, string[] fields, TrainCategory category)
+{
+    return new(rowNumber, category, fields[Object].NumberOrZero, fields[Object])
+    { Remark = fields[Remark] };
+}
+```
+
+**Example: Current Relationship Setup (TimetableExtensions.cs:35-45)**
+```csharp
+public static Train Add(this Timetable timetable, Train train)
+{
+    train.Timetable = timetable;  // Sets navigation property
+    timetable.Trains.Add(train);
+    return train;
+}
+```
+
+#### **7.10.2 Impact of Each Proposed Change**
+
+##### **Adding FK Properties (`TimetableId`, `TrackId`, etc.)**
+
+**Impact: MINIMAL - Optional use only**
+
+The FK properties would be:
+- **Optional during import** - Navigation properties handle relationships
+- **Auto-populated by EF Core** when saving (if using EF Core)
+- **Useful for JSON round-trips** - Can serialize/deserialize relationships
+
+Current code continues to work unchanged:
+```csharp
+timetable.Add(train);  // Sets train.Timetable = timetable (FK not required)
+```
+
+##### **Adding Private Parameterless Constructors**
+
+**Impact: NONE**
+
+```csharp
+public class Train
+{
+    private Train() { }  // EF Core only - importers never call this
+
+    // Importers continue using this constructor:
+    public Train(int id, TrainCategory category, int number, string externalId = "")
+    { ... }
+}
+```
+
+Importers don't need to change - they use the existing public constructors.
+
+##### **Changing `init` to `set` for Navigation Properties**
+
+**Impact: NONE or POSITIVE**
+
+Current patterns already work because relationships are established via extension methods.
+Changing `init` to `set` actually **helps** because some properties need modification after
+initial creation (e.g., `Train.Company` is set later during locomotive processing in XplnImporter).
+
+##### **Adding `[JsonIgnore]` / `[JsonInclude]` Attributes**
+
+**Impact: NONE**
+
+These attributes only affect JSON serialization. Import code doesn't use reflection or care about attributes.
+
+##### **Converting Records to Classes**
+
+**Impact: MINIMAL - Test adjustments may be needed**
+
+| Entity | Change | Import Impact |
+|--------|--------|---------------|
+| `StationCall` | record → class | None - same constructor |
+| `OperationLocation` | record → class | None - same constructor |
+| `TrainPart` | record → class | None - same constructor |
+
+**Potential test impact:** If tests rely on value equality for records, they may need adjustment.
+However, the model already implements `IEquatable<T>` on most types, so impact should be minimal.
+
+#### **7.10.3 Required Changes Summary**
+
+##### **XplnImporter**
+
+| File | Required Changes |
+|------|------------------|
+| `XplnDataImporter.cs` | **None** |
+| All extension files | **None** |
+
+##### **AccessRepository**
+
+| File | Required Changes |
+|------|------------------|
+| `AccessRepository.cs` | **None** for import |
+| `Stations.cs` | **None** |
+| `Trains.cs` | **None** |
+| All other files | **None** |
+
+#### **7.10.4 Required: Populate FK Properties for JSON Serialization**
+
+**Important:** If the model will be serialized to JSON (with `[JsonIgnore]` on navigation properties
+to break circular references), then FK properties **MUST** be set during import.
+
+**Why this is required:**
+
+When serializing to JSON with `[JsonIgnore]` on parent navigation properties:
+- Navigation properties are excluded from JSON output
+- Only FK properties (e.g., `TimetableId`) are serialized
+- If FKs are not set, they default to `0` or `null`
+- Deserialization cannot reconstruct relationships without FK values
+
+**Example problem without FK assignment:**
+```json
+{
+  "id": 1,
+  "number": 101,
+  "timetableId": 0,    // ❌ NOT SET - relationship lost!
+  "calls": [...]
+}
+```
+
+**Required extension method updates:**
+
+```csharp
+// Timetable.cs - REQUIRED change
+public static Train Add(this Timetable timetable, Train train)
+{
+    train.Timetable = timetable;
+    train.TimetableId = timetable.Id;  // ✅ REQUIRED for JSON round-trip
+    timetable.Trains.Add(train);
+    return train;
+}
+
+// Train.cs - REQUIRED change
+public static StationCall Add(this Train train, StationCall call)
+{
+    call.SetTrain(train);
+    call.TrainId = train.Id;           // ✅ REQUIRED for JSON round-trip
+    train.Calls.Add(call);
+    return call;
+}
+```
+
+**Complete list of extension methods requiring FK assignment:**
+
+| Extension Method | File | FK Property to Set |
+|------------------|------|-------------------|
+| `Layout.Add(OperationLocation)` | Layout.cs | `station.LayoutId = layout.Id` |
+| `OperationLocation.Add(StationTrack)` | OperationLocation.cs | `track.StationId = station.Id` |
+| `Timetable.Add(Train)` | Timetable.cs | `train.TimetableId = timetable.Id` |
+| `Train.Add(StationCall)` | Train.cs | `call.TrainId = train.Id` |
+| `StationCall` constructor | StationCall.cs | `TrackId = track.Id` (in constructor) |
+| `VehicleSchedule.Add(TrainPart)` | VehicleSchedule.cs | `part.ScheduleId = schedule.Id` |
+| `DriverDuty.Add(TrainPart)` | DriverDuty.cs | `part.DutyId = duty.Id` |
+| `Schedule.AddLocoSchedule()` | Schedule.cs | `loco.ScheduleId = schedule.Id` |
+| `Schedule.AddTrainsetSchedule()` | Schedule.cs | `trainset.ScheduleId = schedule.Id` |
+| `Schedule.AddDriverDuty()` | Schedule.cs | `duty.ScheduleId = schedule.Id` |
+| `TrainPart` constructor | TrainPart.cs | `FromId = from.Id`, `ToId = to.Id` |
+
+**Note:** These changes apply to both XplnImporter and AccessRepository since both use the
+same extension methods in the Model project.
+
+#### **7.10.5 Conclusion: Importer Compatibility**
+
+| Change Category | Importer Impact | Action Required |
+|-----------------|-----------------|-----------------|
+| Add FK properties | Low | Update extension methods |
+| Private parameterless ctor | None | None |
+| `init` → `set` | Positive | None |
+| JSON attributes | None | None |
+| Records → Classes | Minimal | Test review |
+| **FK assignment in extensions** | **Required** | **Update all Add() methods** |
+
+**Summary:**
+- The model modifications themselves are backward-compatible
+- **However**, if JSON serialization is required, the extension methods in the Model project
+  **must be updated** to set FK properties alongside navigation properties
+- This is a **one-time change** in the Model project that benefits all importers
+- Without this change, JSON serialization would lose relationship information
+
+---
+
+## 8. Conclusion
 
 > **Current Status:** Phase 1 is complete. Phase 2 (importer updates) is in progress. The model classes are implemented and all tests pass.
 
