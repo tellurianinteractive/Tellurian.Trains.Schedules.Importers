@@ -5,8 +5,9 @@ namespace Tellurian.Trains.Schedules.Model;
 
 public readonly struct Sessions
 {
-    public Sessions(Days days) => Flags = (ushort)((ushort)days | ((ushort)days) << 7);
-    public Sessions(params int[] sessions) => Flags = sessions.ToFlags;
+    internal Sessions(Days days) => Flags = (ushort)((ushort)days | ((ushort)days) << 7);
+    internal Sessions(params int[] sessionNumbers) => Flags = sessionNumbers.ToFlags;
+    internal Sessions(int bitPattern) => Flags = (ushort)bitPattern;
     internal ushort Flags { get; init; }
 }
 
@@ -23,37 +24,42 @@ public enum Days
     Sunday = 1 << 6,
 }
 
-internal static class CommonSessionPatterns
+public static class CommonSessionPatterns
 {
-    public static ushort All = 0b______00_1111111_1111111;
-    public static ushort Odd = 0b______00_0101010_1010101;
-    public static ushort Even = 0b_____00_1010101_0101010;
-    public static ushort Third1 = 0b___00_0100100_1001001;
-    public static ushort Third2 = 0b___00_1001001_0010010;
-    public static ushort Third3 = 0b___00_0010010_0100100;
-    public static ushort OnDemand = 0b_01_0000000_0000000;
+    public const ushort All = 0b______00_1111111_1111111;
+    public const ushort Odd = 0b______00_0101010_1010101;
+    public const ushort Even = 0b_____00_1010101_0101010;
+    public const ushort Third1 = 0b___00_0100100_1001001;
+    public const ushort Third2 = 0b___00_1001001_0010010;
+    public const ushort Third3 = 0b___00_0010010_0100100;
+    public const ushort OnDemand = 0b_01_0000000_0000000;
 }
 
-internal static class CommonDayPatterns
+public static class CommonDayPatterns
 {
-    public static ushort Daily = 0b_____00_1111111_1111111;
-    public static ushort Monday = 0b____00_0000001_0000001;
-    public static ushort Thuesday = 0b__00_0000010_0000010;
-    public static ushort Wednesday = 0b_00_0000100_0000100;
-    public static ushort Thursday = 0b__00_0001000_0001000;
-    public static ushort Friday = 0b____00_0010000_0010000;
-    public static ushort Saturday = 0b__00_0100000_0100000;
-    public static ushort Sunday = 0b____00_1000000_1000000;
+    public const ushort Daily = 0b_____00_1111111_1111111;
+    public const ushort Monday = 0b____00_0000001_0000001;
+    public const ushort Thuesday = 0b__00_0000010_0000010;
+    public const ushort Wednesday = 0b_00_0000100_0000100;
+    public const ushort Thursday = 0b__00_0001000_0001000;
+    public const ushort Friday = 0b____00_0010000_0010000;
+    public const ushort Saturday = 0b__00_0100000_0100000;
+    public const ushort Sunday = 0b____00_1000000_1000000;
 }
 
 public static class SessionsExtensions
 {
-
     extension(Sessions sessions)
     {
+        public static Sessions FromDays(Days days) => new(days);
+        public static Sessions FromSessionNumbers(params int[] sessionsNumbers) => new(sessionsNumbers);
+        public static Sessions FromBitPattern(int bitPattern) => new(bitPattern);
+        public static Sessions All => FromBitPattern(CommonSessionPatterns.All);
+
         public Sessions And(Sessions other) => new() { Flags = sessions.Flags.And(other.Flags) };
         public Sessions Or(Sessions other) => new() { Flags = sessions.Flags.Or(other.Flags) };
         public bool IsOnDemand => (sessions.Flags & CommonSessionPatterns.OnDemand) > 0;
+        public string OnDemand => sessions.IsOnDemand ? "OnDemand" : string.Empty;
 
         public byte[] Numbers =>
             [.. new BitArray([sessions.Flags])
@@ -115,17 +121,13 @@ public static class SessionsExtensions
                 var days = sessions.Days;
                 return days.Length switch
                 {
-                    0 => Resources.Days.None,
-                    7 => Resources.Days.Daily,
-                    _ when sessions.IsConsequtiveDays => $"{days.First().Translated}-{days.Last().Translated}",
-                    _ => string.Join(",", days.Select(s => s.Translated)),
+                    0 => nameof(Days.None),
+                    7 => "Daily",
+                    _ when sessions.IsConsequtiveDays => $"{days.First()}-{days.Last()}",
+                    _ => string.Join(",", days.Select(s => s.ToString())),
                 };
             }
         }
-
-        public string OnDemand => sessions.IsOnDemand ? "OnDemand" : string.Empty;
-
-        public static Sessions All => new() { Flags = CommonSessionPatterns.All };
     }
 
     extension(ushort flags)
@@ -187,5 +189,15 @@ public static class DaysExtensions
         {5, Days.Friday },
         {6, Days.Saturday },
         {7, Days.Sunday },
+    };
+    private static readonly Dictionary<int, Days> _SundayToSaturday = new()
+    {
+        {1, Days.Sunday },
+        {2, Days.Monday },
+        {3, Days.Tuesday },
+        {4, Days.Wednesday },
+        {5, Days.Thursday },
+        {6, Days.Friday },
+        {7, Days.Saturday },
     };
 }

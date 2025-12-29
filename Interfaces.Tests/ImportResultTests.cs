@@ -13,7 +13,9 @@ public class ImportResultTests
     [TestMethod]
     public async Task SerializeAndDeserialize()
     {
-        var target = await ImportResult(Path.Combine("Test data", "Montan2023H0e.ods"));
+        var filePath = Path.Combine("Test data", "Montan2023H0e.ods");
+        if (!File.Exists(filePath)) throw new FileNotFoundException(filePath);
+        var target = await ImportResult(filePath);
         var json = target.Json();
         Assert.IsNotNull(json);
         var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
@@ -42,19 +44,19 @@ public class ImportResultTests
 
     static JsonSerializerOptions JsonSerializerOptions => new() { PropertyNameCaseInsensitive = true };
 
-    static Task<ImportResult<Schedule>> ImportResult(string testFilePath)
+    static async Task<ImportResult<Schedule>> ImportResult(string testFilePath)
     {
         var file = new FileInfo(testFilePath);
         if (file.Exists)
         {
             var provider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
-            var operatingCompainesService = new OperatingCompaniesFromJsonService();
+            var operatingCompainesService = new CompaniesFromJsonService();
             var trainCategoriesService = new TrainCategoriesFromCsvService();
 
             using var importer = new XplnDataImporter(file, provider, operatingCompainesService, trainCategoriesService, NullLogger<XplnDataImporter>.Instance);
-            return importer.ImportSchedule(Path.GetFileNameWithoutExtension(testFilePath));
+            return await importer.ImportSchedule(Path.GetFileNameWithoutExtension(testFilePath));
         }
-        return Task.FromResult(ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found.")));
+        return ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found."));
     }
 }
 
