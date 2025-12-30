@@ -1,32 +1,52 @@
 ﻿using System.Globalization;
 using Tellurian.Trains.Schedules.Model;
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-
 namespace Tellurian.Trains.Schedules.Model;
 
-public sealed record TrainPart : IEquatable<TrainPart>
+public sealed class TrainPart : IEquatable<TrainPart>
 {
-    public VehicleSchedule Schedule { get; internal set; }
-    public DriverDuty Duty { get; internal set; }
-
-    public int Id { get; init; }
-    public StationCall From { get; init; }
-    public StationCall To { get; init; }
-    public string? ExternalKey { get; init; }
+    // Private parameterless constructor for EF Core
+    private TrainPart()
+    {
+        From = default!;
+        To = default!;
+    }
 
     public TrainPart(StationCall from, StationCall to)
     {
         From = from.ValueOrException(nameof(from));
         To = to.ValueOrException(nameof(to));
+        FromId = from.Id;
+        ToId = to.Id;
         From.Train.IfNotEqualsThrow(To.Train, $"Departure {from} is not same train as arrival {to}.");
     }
+
+    public int Id { get; set; }
+
+    // FK property for EF Core
+    public int? ScheduleId { get; set; }
+    public VehicleSchedule? Schedule { get; set; }
+
+    // FK property for EF Core
+    public int? DutyId { get; set; }
+    public DriverDuty? Duty { get; set; }
+
+    // FK property for EF Core
+    public int FromId { get; set; }
+    public StationCall From { get; set; }
+
+    // FK property for EF Core
+    public int ToId { get; set; }
+    public StationCall To { get; set; }
+
+    public string? ExternalKey { get; set; }
 
     public Train Train => From.Train!;
     public Time? Departure => From.Departure;
     public Time? Arrival => To.Arrival;
 
     public bool Equals(TrainPart? other) => other != null && From.Equals(other.From) && To.Equals(other.To);
+    public override bool Equals(object? obj) => obj is TrainPart other && Equals(other);
     public override int GetHashCode() => HashCode.Combine(From.GetHashCode(), To.GetHashCode());
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", Train, From.Station, From.Departure.HHMM(), To.Station, To.Arrival.HHMM());
 }

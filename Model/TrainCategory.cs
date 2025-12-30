@@ -39,14 +39,5 @@ public static class TrainCategoryExtensions
     {
         public string TrainIdentity(int trainNumber) =>
             $"{category.Prefix} {trainNumber} {category.Suffix}".Trim();
-
-        public static TrainCategory Unknown => new()
-        {
-            Id = 0,
-            Prefix = "",
-            Suffix = "",
-            ResourceName = "Unknown",
-            Color = "#808080",
-        };
     }
 }

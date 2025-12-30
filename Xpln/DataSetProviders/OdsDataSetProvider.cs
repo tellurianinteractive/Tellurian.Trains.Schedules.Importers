@@ -149,7 +149,7 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         }
         return true;
 
-        static bool HasValue(DataRow row) => row.GetRowFields().Any(f => f.HasText());
+        static bool HasValue(DataRow row) => row.GetRowFields().Any(f => f.HasValue);
     }
 
     private static void GetCell(XmlNode cellNode, DataRow row, int columns, ref int cellIndex)

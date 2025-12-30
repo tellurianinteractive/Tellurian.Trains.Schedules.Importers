@@ -3,21 +3,50 @@ using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
-public sealed record Layout
+public sealed class Layout : IEquatable<Layout>
 {
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public ICollection<OperationLocation> Stations { get; init; }
-    public ICollection<TrackStretch> TrackStretches { get; init; }
-    public ICollection<TimetableStretch> TimetableStretches { get; init; }
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public ICollection<Company> Companies { get; set; }
+    public ICollection<OperationLocation> Stations { get; set; }
+    public ICollection<TrackStretch> TrackStretches { get; set; }
+    public ICollection<TimetableStretch> TimetableStretches { get; set; }
 
     public Layout()
     {
+        Companies = [];
         Stations = [];
         TrackStretches = [];
         TimetableStretches = [];
     }
+
+    public bool Equals(Layout? other) => other is not null && Id == other.Id;
+    public override bool Equals(object? obj) => obj is Layout other && Equals(other);
+    public override int GetHashCode() => Id.GetHashCode();
     public override string ToString() => Name;
+}
+
+public static class LayoutCompanyExtensions
+{
+    public static bool HasCompany(this Layout? layout, Company company) => layout?.Companies.Any(c => c.Equals(company)) ?? false;
+    public static bool HasCompany(this Layout? layout, string signature) => layout?.Companies.Any(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)) ?? false;
+
+    public static Maybe<Company> Company(this Layout me, string signature) =>
+        new(me?.Companies.SingleOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
+            $"Company with signature '{signature}' not found.");
+
+    public static Company Add(this Layout layout, Company company)
+    {
+        layout = layout.ValueOrException(nameof(layout));
+        company = company.ValueOrException(nameof(company));
+        if (!layout.HasCompany(company))
+        {
+            company.Layout = layout;
+            company.LayoutId = layout.Id;
+            layout.Companies.Add(company);
+        }
+        return company;
+    }
 }
 
 public static class LayoutStationsExtensions
@@ -40,6 +69,7 @@ public static class LayoutStationsExtensions
         if (!layout.HasStation(station))
         {
             station.Layout = layout;
+            station.LayoutId = layout.Id;
             layout.Stations.Add(station);
         }
         return station;

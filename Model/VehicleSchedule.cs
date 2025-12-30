@@ -1,37 +1,61 @@
 ﻿namespace Tellurian.Trains.Schedules.Model;
 
-public abstract record VehicleSchedule
+public abstract class VehicleSchedule : IEquatable<VehicleSchedule>
 {
-    public int Id { get; init; }
-    public int Number { get; init; }
-    public Sessions Sessions { get; set; } = Sessions.All;
+    // Protected parameterless constructor for EF Core
+    protected VehicleSchedule()
+    {
+        Parts = [];
+    }
 
-    public string Class { get; init; } = string.Empty;
-    public Company Company { get; init; } = Company.None;
-    public string? Remark { get; init; }
-    public ICollection<TrainPart> Parts { get; }
-
-    protected VehicleSchedule(Company company, int number, string? remark = null)
+    protected VehicleSchedule(Company? company, int number, string? remark = null)
     {
         Company = company;
+        CompanyId = company?.Id;
         Number = number;
         Remark = remark;
         Parts = [];
     }
 
-    public override string ToString() => $"{Company.Signature} {Number}";
+    public int Id { get; set; }
+    public int Number { get; set; }
+    public Sessions Sessions { get; set; } = Sessions.All;
+
+    public string Class { get; set; } = string.Empty;
+
+    // FK property for EF Core
+    public int? CompanyId { get; set; }
+    public Company? Company { get; set; }
+
+    // FK property for EF Core - owning Schedule
+    public int? ScheduleId { get; set; }
+    public Schedule? Schedule { get; set; }
+
+    public string? Remark { get; set; }
+    public ICollection<TrainPart> Parts { get; set; }
+
+    public bool Equals(VehicleSchedule? other) => other is not null && Id == other.Id;
+    public override bool Equals(object? obj) => obj is VehicleSchedule other && Equals(other);
+    public override int GetHashCode() => Id.GetHashCode();
+    public override string ToString() => $"{Company?.Signature} {Number}".Trim();
 }
 
-public sealed record LocoSchedule : VehicleSchedule
+public sealed class LocoSchedule : VehicleSchedule
 {
-    public LocoSchedule(int number, string? remark = null) : this(Company.None, number, remark) { }
-    public LocoSchedule(Company company, int number, string? remark = null) : base(company, number, remark) { }
-}
-public sealed record TrainsetSchedule : VehicleSchedule
-{
-    public TrainsetSchedule(int number, string? remark = null) : this(Company.None, number, remark) { }
+    // Private parameterless constructor for EF Core
+    private LocoSchedule() : base() { }
 
-    public TrainsetSchedule(Company company, int number, string? remark = null) : base(company, number, remark) { }
+    public LocoSchedule(int number, string? remark = null) : this(null, number, remark) { }
+    public LocoSchedule(Company? company, int number, string? remark = null) : base(company, number, remark) { }
+}
+
+public sealed class TrainsetSchedule : VehicleSchedule
+{
+    // Private parameterless constructor for EF Core
+    private TrainsetSchedule() : base() { }
+
+    public TrainsetSchedule(int number, string? remark = null) : this(null, number, remark) { }
+    public TrainsetSchedule(Company? company, int number, string? remark = null) : base(company, number, remark) { }
 }
 
 public static class VehicleScheduleExtensions
@@ -40,6 +64,7 @@ public static class VehicleScheduleExtensions
     {
         if (me == null || part is null) throw new ArgumentNullException(nameof(part));
         part.Schedule = me;
+        part.ScheduleId = me.Id;
         if (!me.Parts.Contains(part))
         {
             me.Parts.Add(part);

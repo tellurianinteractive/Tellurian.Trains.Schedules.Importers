@@ -4,34 +4,53 @@ using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
-public sealed record StationCall : IEquatable<StationCall>, IComparable<StationCall>
+public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCall>
 {
-    public Train Train { get => _train; init => _train = value; }
-    private Train _train = default!;
-    public int Id { get; init; }
-    public OperationLocation Station => Track.Station;
-    public StationTrack Track { get; init; }
-    public Time Arrival { get; init; }
-    public Time Departure { get; init; }
-    public bool IsArrival { get; set; }
-    public bool IsDeparture { get; set; }
-    public ICollection<Note> Notes { get; }
-    public bool IsStop => IsArrival || IsDeparture;
-    public Time SortTime => IsDeparture ? Departure : Arrival;
-    internal void SetTrain(Train train) => _train = train;
+    // Private parameterless constructor for EF Core
+    private StationCall()
+    {
+        Track = default!;
+        Notes = [];
+    }
 
     public StationCall(int id, StationTrack track, Time arrival, Time departure, string? remark = null)
     {
         Id = id;
         Track = track.ValueOrException(nameof(track));
+        TrackId = track.Id;
         Track.Add(this);
         Arrival = arrival;
         Departure = departure;
         Notes = [];
         if (!string.IsNullOrWhiteSpace(remark))
         {
-            Notes.Add(new Note() { IsDriverNote = true, IsShuntingNote = true, IsStationNote = true, Text = remark });
+            Notes.Add(new TextCallNote(remark) { IsDriverNote = true, IsShuntingNote = true, IsStationNote = true });
         }
+    }
+
+    public int Id { get; set; }
+
+    // FK property for EF Core
+    public int TrackId { get; set; }
+    public StationTrack Track { get; set; }
+
+    // FK property for EF Core
+    public int TrainId { get; set; }
+    public Train Train { get; set; } = default!;
+
+    public OperationLocation Station => Track.Station;
+    public Time Arrival { get; set; }
+    public Time Departure { get; set; }
+    public bool IsArrival { get; set; }
+    public bool IsDeparture { get; set; }
+    public ICollection<CallNote> Notes { get; set; }
+    public bool IsStop => IsArrival || IsDeparture;
+    public Time SortTime => IsDeparture ? Departure : Arrival;
+
+    internal void SetTrain(Train train)
+    {
+        Train = train;
+        TrainId = train.Id;
     }
 
     public bool Equals(StationCall? other) =>
@@ -41,6 +60,7 @@ public sealed record StationCall : IEquatable<StationCall>, IComparable<StationC
          Track.Equals(other.Track) &&
          Train?.Equals(other.Train) == true;
 
+    public override bool Equals(object? obj) => obj is StationCall other && Equals(other);
     public override int GetHashCode() => HashCode.Combine(Arrival, Departure, Track, Train);
 
     public override string ToString() =>

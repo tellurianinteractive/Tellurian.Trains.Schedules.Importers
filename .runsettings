@@ -2,5 +2,12 @@
 <RunSettings>
   <RunConfiguration>
     <ResultsDirectory>.\TestResults</ResultsDirectory>
+    <!-- Explicitly omit MaxCpuCount - Microsoft Testing Platform uses TestingPlatformParallelEnabled instead -->
   </RunConfiguration>
+  <MSTest>
+    <Parallelize>
+      <Workers>0</Workers>
+      <Scope>MethodLevel</Scope>
+    </Parallelize>
+  </MSTest>
 </RunSettings>

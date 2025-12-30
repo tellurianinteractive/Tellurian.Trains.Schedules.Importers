@@ -4,17 +4,28 @@ using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
-public sealed record OperationLocation : IEquatable<OperationLocation>
+public sealed class OperationLocation : IEquatable<OperationLocation>
 {
-    public Layout Layout { get; internal set; } = default!;
+    // FK property for EF Core
+    public int LayoutId { get; set; }
+    public Layout Layout { get; set; } = default!;
 
-    public int Id { get; init; }
-    public string Name { get; init; }
-    public string Type { get; init; } = string.Empty;
-    public string Signature { get; init; }
-    public bool IsShadow { get; init; }
-    public bool IsManned { get; init; } = true;
-    public ICollection<StationTrack> Tracks { get; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public string Signature { get; set; }
+    public bool IsShadow { get; set; }
+    public bool IsManned { get; set; } = true;
+    public ICollection<StationTrack> Tracks { get; set; }
+
+    // Private parameterless constructor for EF Core
+    private OperationLocation()
+    {
+        Name = string.Empty;
+        Signature = string.Empty;
+        Tracks = [];
+    }
+
     public OperationLocation(int id, string name, string signature)
     {
         Id = id;
@@ -26,6 +37,7 @@ public sealed record OperationLocation : IEquatable<OperationLocation>
 
     public StationTrack this[string number] => Tracks.SingleOrDefault(t => t.Number == number) ?? throw new InvalidOperationException($"Station {Name} has no track '{number}'");
     public bool Equals(OperationLocation? other) => Signature.Equals(other?.Signature, StringComparison.OrdinalIgnoreCase);
+    public override bool Equals(object? obj) => obj is OperationLocation other && Equals(other);
     public override int GetHashCode() => Signature.GetHashCode(StringComparison.OrdinalIgnoreCase);
     public override string ToString() => Name;
     public static OperationLocation Example => new(1, "Ytterby", "Yb");
@@ -34,7 +46,7 @@ public sealed record OperationLocation : IEquatable<OperationLocation>
 public static class StationExtensions
 {
     public static IEnumerable<Train> Trains(this OperationLocation? me) =>
-        me is null ? [] : me.Calls().Where(c => c.Train.HasValue()).Select(c => c.Train!).Distinct();
+        me is null ? [] : me.Calls().Where(c => c.Train.HasValue).Select(c => c.Train!).Distinct();
 
     public static IEnumerable<StationCall> Calls(this OperationLocation me) =>
        me is null ? [] : me.Tracks.SelectMany(t => t.Calls);
@@ -49,7 +61,9 @@ public static class StationExtensions
     {
         stationTrack = stationTrack.ValueOrException(nameof(stationTrack));
         ArgumentNullException.ThrowIfNull(stationTrack);
-        stationTrack.Station = station.ValueOrException(nameof(station));
+        station = station.ValueOrException(nameof(station));
+        stationTrack.Station = station;
+        stationTrack.StationId = station.Id;
         station.Tracks.Add(stationTrack);
         return stationTrack;
     }

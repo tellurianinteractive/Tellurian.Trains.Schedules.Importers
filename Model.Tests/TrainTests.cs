@@ -22,7 +22,7 @@ public class TrainTests
     {
         Assert.AreEqual(Category, Target.Category);
         Assert.AreEqual(1234, Target.Number);
-        Assert.AreEqual("", Target.ExtenalId);
+        Assert.AreEqual("", Target.ExternalId);
     }
 
     [TestMethod]

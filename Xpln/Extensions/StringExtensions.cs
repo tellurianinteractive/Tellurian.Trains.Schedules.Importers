@@ -42,18 +42,13 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
         extension(string? value)
         {
             public bool IsTime(bool isZeroInvalid = false) =>
-                (isZeroInvalid && value.HasValueExcept("0") || !isZeroInvalid && value.HasValue()) &&
+                (isZeroInvalid && value.HasValueExcept("0") || !isZeroInvalid && value.HasValue) &&
                     (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var _) ||
                     DateTime.TryParse(value, CultureInfo.InvariantCulture, out var _) ||
                     double.TryParse(value.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, out var t) && t >= 0.0 && t <= 1.0);
 
             public bool IsTrackNumber() =>
                 value is not null && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _);
-
-            public bool Is(string? expectedValue) =>
-                        value is not null &&
-                        expectedValue is not null &&
-                        value.Equals(expectedValue, StringComparison.OrdinalIgnoreCase);
 
             public bool IsAny(params string[] values) =>
                   value is not null &&
@@ -80,11 +75,6 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
 
             public double ToDouble() =>
                 double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ? number : 0.0;
-
-            public string OrElse(string? other) =>
-                !string.IsNullOrWhiteSpace(value) ? value :
-                !string.IsNullOrWhiteSpace(other) ? other :
-                throw new ArgumentException("Must be a non whitespace string.", nameof(other));
         }
 
         extension(string? filename)

@@ -24,6 +24,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private List<Company> _operatingCompanies = [];
     private List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
+    private Layout _currentLayout = default!;
 
     public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
     {
@@ -39,30 +40,38 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger)
     { }
 
-    private Company FindOrCreateCompany(string? companySignature)
+    private Company? FindOrCreateCompany(string? companySignature)
     {
-        if (companySignature.HasValue())
+        if (companySignature.HasValue)
         {
             _ = _operatingCompanies.TryGetFirstValue(oc => oc.Signature.EqualsCaseInsensitive(companySignature), out var company);
-            if (company is not null) return company;
+            if (company is not null)
+            {
+                if (!_currentLayout.HasCompany(company))
+                {
+                    _currentLayout.Add(company);
+                }
+                return company;
+            }
             var newCompany = Company.FromSignature(companySignature);
             _operatingCompanies.Add(newCompany);
+            _currentLayout?.Add(newCompany);
             return newCompany;
         }
-        return Company.None;
+        return null;
     }
 
-    private TrainCategory FindOrCreateCategory(string? trainPrefix, string? backgroundColor)
+    private TrainCategory? FindOrCreateCategory(string? trainPrefix, string? backgroundColor)
     {
         _ = _trainCategories.TryGetFirstValue(tc => tc.Prefix.EqualsCaseInsensitive(trainPrefix), out var category);
         if (category is not null) return category;
-        if (trainPrefix.HasValue())
+        if (trainPrefix.HasValue)
         {
             var newCategory = new TrainCategory() { ResourceName = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
             _trainCategories.Add(newCategory);
             return newCategory;
         }
-        return TrainCategory.Unknown;
+        return null;
     }
 
 
@@ -71,7 +80,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
         _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
         DataSet = _dataSetProvider.ImportSchedule(_inputStream, _dataSetConfiguration) ?? throw new IOException("Stream cannot be read.");
-        return GetResult(name);
+        return GetImportResult(name);
     }
 
     private static DataSetConfiguration CreateDataSetConfiguration()
@@ -94,29 +103,28 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             else if (message.Severity == Severity.System && _logger.IsEnabled(LogLevel.Critical)) _logger.LogCritical("{CriticalMessage}", message.ToString());
         }
     }
-
-    private ImportResult<Schedule> GetResult(string name)
+    private ImportResult<Schedule> GetImportResult(string name)
     {
-        var layout = GetLayout(name);
-        if (layout.IsFailure)
+        var layoutResult = GetLayout(name);
+        if (layoutResult.IsFailure)
         {
-            var result = new ImportResult<Schedule>() { Name = name, Messages = layout.Messages };
+            var result = new ImportResult<Schedule>() { Name = name, Messages = layoutResult.Messages };
             LogMessages(result.Messages);
             return result;
         }
-        var timetable = GetTimetable(name, layout.Item);
-        if (timetable.IsFailure)
+        _currentLayout = layoutResult.Item; // Store layout for company linking
+        var timetableResult = GetTimetable(name, layoutResult.Item);
+        if (timetableResult.IsFailure)
         {
-            var result = new ImportResult<Schedule>() { Name = name, Messages = [.. layout.Messages, .. timetable.Messages] };
+            var result = new ImportResult<Schedule>() { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages] };
             LogMessages(result.Messages);
             return result;
         }
-        var schedule = GetSchedule(name, timetable.Item);
-        var ImportResult = schedule with { Name = name, Messages = [.. layout.Messages, .. timetable.Messages, .. schedule.Messages] };
+        var schedule = GetSchedule(name, timetableResult.Item);
+        var ImportResult = schedule with { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages, .. schedule.Messages] };
         LogMessages(ImportResult.Messages);
         return ImportResult;
     }
-
 
     private ImportResult<Layout> GetLayout(string name)
     {
@@ -126,7 +134,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (stations.IsFailure) return stations;
         var routes = AddRoutes(result, messages);
         return routes;
-
     }
 
     private ImportResult<Layout> AddStations(Layout layout, List<Message> messages)
@@ -293,7 +300,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 if (itemMessages.HasNoStoppingErrors())
                 {
                     TimetableStretch? timetableStretch = null;
-                    var routeNumber = fields[Route].HasText() ? fields[Route] : DefaultRoute;
+                    var routeNumber = fields[Route].HasValue ? fields[Route] : DefaultRoute;
                     if (fields[Route].IsEmpty())
                     {
                         itemMessages.Add(Message.Warning(Resources.Strings.RouteNumberIsMissingUsingDefault, rowNumber, routeNumber));
@@ -420,16 +427,16 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                             {
                                 if (current.IsNullOrHasNoCalls()) continue;
 
-                                if (fields[Object].HasValue())
+                                if (fields[Object].HasValue)
                                 {
-                                    var note = new Note()
+                                    var note = new TextCallNote(fields[Remark].HasValue ?
+                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
+                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object]))
                                     {
                                         IsDriverNote = true,
                                         IsStationNote = true,
-                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                                        Text = fields[Remark].HasValue() ?
-                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
-                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object])
+                                        IsForDeparture = true,
+                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName
                                     };
                                     var train = result.Trains.SingleOrDefault(t => t.Equals(current));
                                     if (train is not null)
@@ -445,18 +452,16 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         case "trainset":
                             {
                                 if (current.IsNullOrHasNoCalls()) continue;
-                                if (fields[Remark].HasValue())
+                                if (fields[Remark].HasValue)
                                 {
-                                    var note = new Note()
+                                    var note = new TextCallNote($"{fields[Object]} {fields[Remark]}")
                                     {
                                         IsDriverNote = true,
-                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                                        Text = $"{fields[Object]} {fields[Remark]}",
-
+                                        IsForDeparture = true,
+                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName
                                     };
                                     current?.Calls.First().Notes.Add(note);
                                 }
-                                ;
 
                             }
                             break;
@@ -475,10 +480,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                             {
                                 "G_Zug" => "Freight",
                                 "P_Zug" => "Passenger",
-                                var value when value.HasValue() => value,
+                                var value when value.HasValue => value,
                                 _ => null,
                             };
-                            if (group.HasValue()) current.Groups.Add(group);
+                            if (group.HasValue) current.Groups.Add(group);
                             break;
                     }
                 }
@@ -500,16 +505,21 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             }
             else
             {
-                timetable.Add(train.WithFixedSingleCallTrain().WithFixedFirstAndLastCall());
+                timetable.Add(train.WithFixedSingleCallTrain().WithFirstCallDepartureOnlyAndLastCallArrivalOnly());
                 return [];
             }
 
         }
 
-        static Train CreateTrain(int rowNumber, string[] fields, TrainCategory category)
+        static Train CreateTrain(int rowNumber, string[] fields, TrainCategory? category)
         {
-            return new(rowNumber, category, fields[Object].NumberOrZero, fields[Object])
-            { Remark = fields[Remark] };
+            var train = new Train(rowNumber, fields[Object].NumberOrZero, fields[Object])
+            {
+                Remark = fields[Remark],
+                Category = category,
+                CategoryId = category?.Id
+            };
+            return train;
         }
 
         static StationCall CreateCall(int rowNumber, string[] fields, StationTrack track)
@@ -728,7 +738,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             return new TrainPartKeys(fromCall, toCall, messages);
         }
 
-        static string ObjectDescription(string[] fields) => fields[Object].HasText() ? $"{fields[Type]}:{fields[Object]}".Trim() : fields[Type];
+        static string ObjectDescription(string[] fields) => fields[Object].HasValue ? $"{fields[Type]}:{fields[Object]}".Trim() : fields[Type];
 
 
         static (string from, string to, Time departure, Time arrival) GetTrainPartFields(string[] fields) =>

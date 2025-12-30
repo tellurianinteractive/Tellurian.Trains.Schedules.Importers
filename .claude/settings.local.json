@@ -6,7 +6,11 @@
       "mcp__microsoft-learn__microsoft_docs_fetch",
       "Bash(dotnet test:*)",
       "Bash(ls:*)",
-      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\\\\Model\" /b)"
+      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\\\\Model\" /b)",
+      "Bash(mkdir:*)",
+      "Bash(copy:*)",
+      "Bash(findstr:*)",
+      "WebFetch(domain:www.nuget.org)"
     ]
   }
 }

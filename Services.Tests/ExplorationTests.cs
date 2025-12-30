@@ -55,7 +55,7 @@ public sealed class ExplorationTests
             }
             else if (lineCount == 4)
             {
-                if (number.HasText() && signature.HasText() && name.HasText() && country.HasText())
+                if (number.HasValue && signature.HasValue && name.HasValue && country.HasValue)
                 {
                     _operatingCompanies.Add(new(number.NumberOrZero, name, signature, country));
                 }

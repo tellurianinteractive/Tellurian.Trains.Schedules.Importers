@@ -33,5 +33,9 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
 		<NoWarn>$(NoWarn);MSTEST0001;MSTEST0037</NoWarn>
+		<!-- Microsoft Testing Platform parallelism (replaces runsettings MaxCpuCount) -->
+		<TestingPlatformParallelEnabled>true</TestingPlatformParallelEnabled>
+		<!-- Suppress runsettings compatibility warnings -->
+		<TestingPlatformShowPlatformModeCompatibilityWarnings>false</TestingPlatformShowPlatformModeCompatibilityWarnings>
 	</PropertyGroup>
 </Project>
