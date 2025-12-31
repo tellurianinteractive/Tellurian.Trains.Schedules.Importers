@@ -28,7 +28,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         }
     }
 
-    public Task<ImportResult<Schedule>> ImportSchedule(string name)
+    public Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         var layout = GetLayout(name);
         if (layout.IsFailure)

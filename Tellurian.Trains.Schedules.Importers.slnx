@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/publish.yml" />
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="README.md" />
@@ -9,10 +11,10 @@
   <Project Path="Access/Access.csproj" />
   <Project Path="Interfaces.Tests/Interfaces.Tests.csproj" />
   <Project Path="Interfaces/Interfaces.csproj" />
-  <Project Path="Model.EntityFramework/Model.EntityFramework.csproj" />
-  <Project Path="Model.EntityFramework.Tests/Model.EntityFramework.Tests.csproj" />
-  <Project Path="Model.Planning/Model.Planning.csproj" />
+  <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
+  <Project Path="Model.Databases/Model.Databases.csproj" />
   <Project Path="Model.Planning.Tests/Model.Planning.Tests.csproj" />
+  <Project Path="Model.Planning/Model.Planning.csproj" />
   <Project Path="Model.Tests/Model.Tests.csproj" />
   <Project Path="Model/Model.csproj" />
   <Project Path="Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />

@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCall>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private StationCall()
     {
         Track = default!;

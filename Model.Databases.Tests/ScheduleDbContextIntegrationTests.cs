@@ -5,14 +5,15 @@ using System.Globalization;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Model.EntityFramework.Tests;
+namespace Tellurian.Trains.Schedules.Model.Databases.Tests;
 
 [TestClass]
 public class ScheduleDbContextIntegrationTests
 {
     public TestContext TestContext { get; set; } = null!;
-    private CancellationToken CancellationToken => TestContext.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => TestContext.CancellationToken;
 
     private IServiceProvider _serviceProvider = null!;
     private IDataSetProvider DataSetProvider => _serviceProvider.GetRequiredService<IDataSetProvider>();
@@ -123,7 +124,7 @@ public class ScheduleDbContextIntegrationTests
 
         // Act - Import from ODS
         using var importer = new XplnDataImporter(odsFile, DataSetProvider, CompaniesService, TrainCategoriesService, Logger);
-        var importResult = await importer.ImportSchedule(scheduleName);
+        var importResult = await importer.ImportScheduleAsync(scheduleName);
 
         // Assert - Verify import succeeded and has expected data
         Assert.IsTrue(importResult.IsSuccess, $"Import failed: {string.Join(", ", importResult.Messages.Select(m => m.ToString()))}");
@@ -143,43 +144,36 @@ public class ScheduleDbContextIntegrationTests
     [TestMethod]
     public async Task ImportsXplnAndSavesToSqlite()
     {
+        // Arrange
         var scheduleName = "Barmstedt2022";
         var odsFile = new FileInfo(Path.Combine("Test data", $"{scheduleName}.ods"));
 
         using var importer = new XplnDataImporter(odsFile, DataSetProvider, CompaniesService, TrainCategoriesService, Logger);
-        var importResult = await importer.ImportSchedule(scheduleName);
+        var importResult = await importer.ImportScheduleAsync(scheduleName);
         Assert.IsTrue(importResult.IsSuccess);
 
         var schedule = importResult.Item;
 
-        // Use physical file for debugging - file is created in test output directory
         var dbPath = Path.Combine(TestContext.TestRunResultsDirectory ?? ".", $"{scheduleName}.db");
-        var options = new DbContextOptionsBuilder<ScheduleDbContext>()
-            .UseSqlite($"DataSource={dbPath}")
-            .Options;
-
-        // Delete existing file to start fresh
         if (File.Exists(dbPath)) File.Delete(dbPath);
 
-        await using var context = new ScheduleDbContext(options);
-        await context.Database.EnsureCreatedAsync(CancellationToken);
+        // Create service provider with export service configured for this database
+        using var exportServiceProvider = new ServiceCollection()
+            .AddDatabaseExportService(dbPath)
+            .BuildServiceProvider();
+
+        // Act
+        var exportService = exportServiceProvider.GetRequiredService<IExportService>();
+        var exportResult = await exportService.ExportScheduleAsync(schedule);
+
+        // Assert
+        Assert.IsTrue(exportResult.IsSuccess, $"Export failed: {string.Join(", ", exportResult.Messages)}");
         Console.WriteLine($"SQLite database created at: {dbPath}");
 
-        // Clear stretches to avoid unique constraint issues
-        schedule.Timetable.Layout.TrackStretches.Clear();
-        schedule.Timetable.Layout.TimetableStretches.Clear();
-
-        var categories = schedule.Timetable.Trains
-            .Where(t => t.Category is not null)
-            .Select(t => t.Category!)
-            .DistinctBy(c => c.Id)
-            .ToList();
-        context.TrainCategories.AddRange(categories);
-
-        context.Schedules.Add(schedule);
-        await context.SaveChangesAsync(CancellationToken);
-
+        var options = exportServiceProvider.GetRequiredService<DbContextOptions<ScheduleDbContext>>();
+        await using var context = new ScheduleDbContext(options);
         var savedSchedule = await context.Schedules.FirstAsync(CancellationToken);
         Assert.IsNotNull(savedSchedule);
+        Assert.AreEqual(scheduleName, savedSchedule.Name);
     }
 }

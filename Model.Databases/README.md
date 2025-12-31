@@ -5,7 +5,7 @@ Entity Framework Core support for the `Tellurian.Trains.Schedules.Model` domain 
 ## Installation
 
 ```bash
-dotnet add package Tellurian.Trains.Schedules.Model.EntityFramework
+dotnet add package Tellurian.Trains.Schedules.Model.Database
 ```
 
 This will also install `Tellurian.Trains.Schedules.Model` as a transitive dependency.

@@ -54,7 +54,7 @@ public class ImportResultTests
             var trainCategoriesService = new TrainCategoriesFromCsvService();
 
             using var importer = new XplnDataImporter(file, provider, operatingCompainesService, trainCategoriesService, NullLogger<XplnDataImporter>.Instance);
-            return await importer.ImportSchedule(Path.GetFileNameWithoutExtension(testFilePath));
+            return await importer.ImportScheduleAsync(Path.GetFileNameWithoutExtension(testFilePath));
         }
         return ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found."));
     }

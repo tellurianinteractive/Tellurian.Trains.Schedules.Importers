@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
 
@@ -18,7 +19,8 @@ public sealed class OperationLocation : IEquatable<OperationLocation>
     public bool IsManned { get; set; } = true;
     public ICollection<StationTrack> Tracks { get; set; }
 
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private OperationLocation()
     {
         Name = string.Empty;

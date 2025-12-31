@@ -75,7 +75,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     }
 
 
-    public async Task<ImportResult<Schedule>> ImportSchedule(string name)
+    public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
         _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];

@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(TextCallNote), typeDiscriminator: "TextCallNote")]
 public abstract class CallNote : IEquatable<CallNote>
 {
-    // Protected parameterless constructor for EF Core
+    // Protected parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     protected CallNote() { }
 
     public int Id { get; set; }

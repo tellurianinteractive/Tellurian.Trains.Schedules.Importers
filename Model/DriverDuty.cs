@@ -1,10 +1,12 @@
 ﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 public class DriverDuty : IEquatable<DriverDuty>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private DriverDuty()
     {
         Identity = string.Empty;

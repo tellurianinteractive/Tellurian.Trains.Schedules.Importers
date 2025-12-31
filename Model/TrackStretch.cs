@@ -1,12 +1,14 @@
 ﻿using System.Globalization;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 public class TrackStretch : IEquatable<TrackStretch>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private TrackStretch()
     {
         Start = default!;

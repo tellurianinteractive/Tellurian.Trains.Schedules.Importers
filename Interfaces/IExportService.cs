@@ -2,7 +2,7 @@
 
 namespace Tellurian.Trains.Schedules.Importers.Interfaces;
 
-public interface IImportService
+public interface IExportService
 {
-    Task<ImportResult<Schedule>> ImportScheduleAsync(string name);
+    Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule);
 }

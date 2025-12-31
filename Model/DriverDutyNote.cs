@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model;
 
 public class DriverDutyNote : IEquatable<DriverDutyNote>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private DriverDutyNote() => Text = string.Empty;
 
     public DriverDutyNote(string text)

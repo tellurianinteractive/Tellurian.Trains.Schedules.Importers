@@ -1,9 +1,12 @@
-﻿namespace Tellurian.Trains.Schedules.Model;
+﻿using System.Text.Json.Serialization;
+
+namespace Tellurian.Trains.Schedules.Model;
 
 
 public sealed class StationTrack : IEquatable<StationTrack>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private StationTrack()
     {
         Number = string.Empty;

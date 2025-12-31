@@ -52,7 +52,7 @@ public class XplnDataImporterTests
         var inputStream = m.CreateViewStream();
 
         using var importer = new XplnDataImporter(inputStream, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
-        var result = await importer.ImportSchedule("Montan2023H0e");
+        var result = await importer.ImportScheduleAsync("Montan2023H0e");
         if (result.IsFailure)
         {
             Assert.Fail();
@@ -101,7 +101,7 @@ public class XplnDataImporterTests
         {
             using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
 
-            var result = await importer.ImportSchedule(scheduleName);
+            var result = await importer.ImportScheduleAsync(scheduleName);
             if (result.IsFailure)
             {
                 WriteLines(result.Messages.ToStrings(), file);
@@ -154,7 +154,7 @@ public class XplnDataImporterTests
         if (IsScheduleFileExisting(scheduleName, out var file))
         {
             using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
-            var result = await importer.ImportSchedule(scheduleName);
+            var result = await importer.ImportScheduleAsync(scheduleName);
             if (result.IsSuccess)
             {
                 result.Item.SaveToDatabase(databaseFilePath.ConnectionString());

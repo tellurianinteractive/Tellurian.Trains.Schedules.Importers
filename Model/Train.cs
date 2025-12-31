@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Model;
@@ -13,7 +14,8 @@ namespace Tellurian.Trains.Schedules.Model;
 /// and Timetable. Some properties are required for correct instantiation and operation.</remarks>
 public class Train : IEquatable<Train>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private Train()
     {
         ExternalId = string.Empty;

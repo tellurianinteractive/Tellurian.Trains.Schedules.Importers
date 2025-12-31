@@ -1,8 +1,14 @@
-﻿namespace Tellurian.Trains.Schedules.Model;
+﻿using System.Text.Json.Serialization;
 
+namespace Tellurian.Trains.Schedules.Model;
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(LocoSchedule), typeDiscriminator: "LocoSchedule")]
+[JsonDerivedType(typeof(TrainsetSchedule), typeDiscriminator: "TrainsetSchedule")]
 public abstract class VehicleSchedule : IEquatable<VehicleSchedule>
 {
-    // Protected parameterless constructor for EF Core
+    // Protected parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     protected VehicleSchedule()
     {
         Parts = [];
@@ -42,7 +48,8 @@ public abstract class VehicleSchedule : IEquatable<VehicleSchedule>
 
 public sealed class LocoSchedule : VehicleSchedule
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private LocoSchedule() : base() { }
 
     public LocoSchedule(int number, string? remark = null) : this(null, number, remark) { }
@@ -51,7 +58,8 @@ public sealed class LocoSchedule : VehicleSchedule
 
 public sealed class TrainsetSchedule : VehicleSchedule
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private TrainsetSchedule() : base() { }
 
     public TrainsetSchedule(int number, string? remark = null) : this(null, number, remark) { }

@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Tellurian.Trains.Schedules.Model.EntityFramework;
+namespace Tellurian.Trains.Schedules.Model.Databases;
 
-public class ScheduleDbContext : DbContext
+public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : DbContext(options)
 {
-    public ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : base(options) { }
 
     // Layout layer
     public DbSet<Layout> Layouts => Set<Layout>();

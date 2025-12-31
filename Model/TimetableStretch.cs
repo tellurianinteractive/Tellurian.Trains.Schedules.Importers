@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
 
@@ -6,7 +7,8 @@ namespace Tellurian.Trains.Schedules.Model;
 
 public sealed class TimetableStretch : IEquatable<TimetableStretch>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private TimetableStretch()
     {
         Number = string.Empty;

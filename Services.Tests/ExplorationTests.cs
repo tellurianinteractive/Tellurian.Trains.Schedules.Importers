@@ -15,12 +15,12 @@ public sealed class ExplorationTests
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    [TestMethod] //, Ignore("This thest converted UIC data in CompanyCodes_20231117_1049.txt to JSON/CSV")]
+    [TestMethod, Ignore("This test converted UIC data in CompanyCodes_20231117_1049.txt to JSON/CSV")]
     public async Task ConvertOperatingCompaniesToSimplerFormat()
     {
         List<Company> _operatingCompanies = new(2000);
         var encoding = Encoding.GetEncoding("iso-8859-1");
-        var fileName = Path.Combine("..", "..", "..", "CompanyCodes_20231117_1049.txt");
+        var fileName = Path.Combine("..", "..", "..", "Test data", "CompanyCodes_20231117_1049.txt");
         using var streamReader = new StreamReader(fileName, encoding, true);
         string? line;
         using var streamWriter = new StreamWriter("OperatingCompanies.csv", false, encoding);

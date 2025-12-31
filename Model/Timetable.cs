@@ -1,4 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Model;
+﻿using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -11,7 +11,8 @@ public sealed class Timetable : IEquatable<Timetable>
     public string Name { get; set; } = string.Empty;
     public ICollection<Train> Trains { get; set; }
 
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private Timetable()
     {
         Layout = default!;

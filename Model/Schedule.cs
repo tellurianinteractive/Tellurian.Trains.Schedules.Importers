@@ -1,8 +1,11 @@
-﻿namespace Tellurian.Trains.Schedules.Model;
+﻿using System.Text.Json.Serialization;
+
+namespace Tellurian.Trains.Schedules.Model;
 
 public class Schedule : IEquatable<Schedule>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private Schedule()
     {
         Name = string.Empty;

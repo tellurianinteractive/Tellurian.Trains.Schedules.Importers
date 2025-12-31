@@ -1,11 +1,13 @@
 ﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 public sealed class TrainPart : IEquatable<TrainPart>
 {
-    // Private parameterless constructor for EF Core
+    // Private parameterless constructor for EF Core and JSON deserialization
+    [JsonConstructor]
     private TrainPart()
     {
         From = default!;
