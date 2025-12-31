@@ -42,7 +42,7 @@ public class TrainTests
         Target.Add(new StationCall(2, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
         var validationErrors = Target.GetValidationErrors(new ValidationOptions());
         Assert.AreEqual(1, validationErrors.Count());
-        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
+        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
     }
 
     [TestMethod]

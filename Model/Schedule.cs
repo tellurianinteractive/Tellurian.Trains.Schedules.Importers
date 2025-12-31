@@ -10,8 +10,8 @@ public class Schedule : IEquatable<Schedule>
     {
         Name = string.Empty;
         Timetable = default!;
-        LocoSchedules = [];
-        TrainsetSchedules = [];
+        Vehicles = [];
+        VehicleSchedules = [];
         DriverDuties = [];
     }
 
@@ -20,8 +20,8 @@ public class Schedule : IEquatable<Schedule>
         Name = name;
         Timetable = timetable;
         TimetableId = timetable.Id;
-        LocoSchedules = [];
-        TrainsetSchedules = [];
+        Vehicles = [];
+        VehicleSchedules = [];
         DriverDuties = [];
     }
 
@@ -35,8 +35,8 @@ public class Schedule : IEquatable<Schedule>
     public int TimetableId { get; set; }
     public Timetable Timetable { get; set; }
 
-    public ICollection<LocoSchedule> LocoSchedules { get; set; }
-    public ICollection<TrainsetSchedule> TrainsetSchedules { get; set; }
+    public ICollection<Vehicle> Vehicles { get; set; }
+    public ICollection<VehicleSchedule> VehicleSchedules { get; set; }
     public ICollection<DriverDuty> DriverDuties { get; set; }
 
     public bool Equals(Schedule? other) => other is not null && Id == other.Id;
@@ -47,30 +47,30 @@ public class Schedule : IEquatable<Schedule>
 
 public static class ScheduleExtensions
 {
-    public static VehicleSchedule AddLocoSchedule(this Schedule me, LocoSchedule locoSchedule)
+    public static Vehicle AddVehicle(this Schedule me, Vehicle vehicle)
     {
         me = me.ValueOrException(nameof(me));
-        locoSchedule = locoSchedule.ValueOrException(nameof(locoSchedule));
-        if (!me.LocoSchedules.Contains(locoSchedule))
+        vehicle = vehicle.ValueOrException(nameof(vehicle));
+        if (!me.Vehicles.Contains(vehicle))
         {
-            locoSchedule.Schedule = me;
-            locoSchedule.ScheduleId = me.Id;
-            me.LocoSchedules.Add(locoSchedule);
+            vehicle.Schedule = me;
+            vehicle.ScheduleId = me.Id;
+            me.Vehicles.Add(vehicle);
         }
-        return locoSchedule;
+        return vehicle;
     }
 
-    public static VehicleSchedule AddTrainsetSchedule(this Schedule me, TrainsetSchedule trainsetSchedule)
+    public static VehicleSchedule AddVehicleSchedule(this Schedule me, VehicleSchedule vehicleSchedule)
     {
         me = me.ValueOrException(nameof(me));
-        trainsetSchedule = trainsetSchedule.ValueOrException(nameof(trainsetSchedule));
-        if (!me.TrainsetSchedules.Contains(trainsetSchedule))
+        vehicleSchedule = vehicleSchedule.ValueOrException(nameof(vehicleSchedule));
+        if (!me.VehicleSchedules.Contains(vehicleSchedule))
         {
-            trainsetSchedule.Schedule = me;
-            trainsetSchedule.ScheduleId = me.Id;
-            me.TrainsetSchedules.Add(trainsetSchedule);
+            vehicleSchedule.Schedule = me;
+            vehicleSchedule.ScheduleId = me.Id;
+            me.VehicleSchedules.Add(vehicleSchedule);
         }
-        return trainsetSchedule;
+        return vehicleSchedule;
     }
 
     public static DriverDuty AddDriverDuty(this Schedule schedule, DriverDuty driverDuty)

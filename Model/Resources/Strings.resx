@@ -240,4 +240,16 @@
   <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
     <value>Train {0} between {1} is conflicting with train {2} between {3}.</value>
   </data>
+  <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
+    <value>Train {0} has no locomotive assigned.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageGap" xml:space="preserve">
+    <value>Train {0} has a locomotive coverage gap between {1} and {2}.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageOverlap" xml:space="preserve">
+    <value>Train {0} has overlapping locomotive assignments: {1} and {2}.</value>
+  </data>
+  <data name="VehicleIsDoubleBooked" xml:space="preserve">
+    <value>Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}.</value>
+  </data>
 </root>

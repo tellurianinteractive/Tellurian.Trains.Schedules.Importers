@@ -99,25 +99,28 @@ internal static class ScheduleExtensions
 
         var count = 0;
         var scheduleNumber = 1;
-        foreach (var loco in me.LocoSchedules)
+        foreach (var vehicle in me.Vehicles.Where(v => v.VehicleType == VehicleType.Locomotive))
         {
-            var locoOperator = loco.Company;
-            var locoNumber = loco.Number;
-            var locoClass = loco.Class;
+            var vehicleSchedule = vehicle.ScheduleAssignments.FirstOrDefault()?.VehicleSchedule;
+            if (vehicleSchedule is null) continue;
+
+            var locoOperator = vehicle.Company;
+            var locoNumber = vehicle.Number;
+            var locoClass = vehicle.Class;
             var homeStationId = 641;
 
             var sql1 = $"""
                     INSERT INTO [LocoSchedule] ([Layout], [Number], [ExternalKey])
-                    VALUES ({layoutId}, {scheduleNumber}, '{loco.Number}') 
+                    VALUES ({layoutId}, {scheduleNumber}, '{vehicle.Number}')
                     """;
             var saveScheduleCommand = new OdbcCommand(sql1, connection);
             count = saveScheduleCommand.ExecuteNonQuery();
 
-            var sql2 = $"SELECT [Id] FROM [LocoSchedule] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{loco.Number}'";
+            var sql2 = $"SELECT [Id] FROM [LocoSchedule] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{vehicle.Number}'";
             var getScheduleCommand = new OdbcCommand(sql2, connection);
             int scheduleId = (int?)getScheduleCommand.ExecuteScalar() ?? 0;
 
-            foreach (var part in loco.Parts)
+            foreach (var part in vehicleSchedule.Parts)
             {
                 var sql31 = $"SELECT [CallId] FROM [StationDepartures] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.From.Station.Signature}'";
                 var sql32 = $"SELECT [CallId] FROM [StationArrivals] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.To.Station.Signature}'";
@@ -136,12 +139,12 @@ internal static class ScheduleExtensions
 
             var sql4 = $"""
                 INSERT INTO [Loco] ([Layout], [Number], [Operator], [Class], [HomeStation], [Note], [ExternalKey])
-                VALUES ({layoutId}, {locoNumber}, '{locoOperator}', '{locoClass}', {homeStationId}, '', '{loco.Number}' )
+                VALUES ({layoutId}, {locoNumber}, '{locoOperator}', '{locoClass}', {homeStationId}, '', '{vehicle.Number}' )
                 """;
             var saveLocoCommand = new OdbcCommand(sql4, connection);
             count = saveLocoCommand.ExecuteNonQuery();
 
-            var sql5 = $"SELECT [Id] FROM [Loco] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{loco.Number}'";
+            var sql5 = $"SELECT [Id] FROM [Loco] WHERE [Layout] = {layoutId} AND [ExternalKey] = '{vehicle.Number}'";
             var getLocoCommand = new OdbcCommand(sql5, connection);
             var locoId = (int?)getLocoCommand.ExecuteScalar() ?? 0;
 

@@ -240,4 +240,16 @@
   <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
     <value>Tog {0} mellom {1} er i konflikt med tog {2} mellom {3}.</value>
   </data>
+  <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
+    <value>Tog {0} har ingen lokomotiv tildelt.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageGap" xml:space="preserve">
+    <value>Tog {0} har et hull i lokomotivdekning mellom {1} og {2}.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageOverlap" xml:space="preserve">
+    <value>Tog {0} har overlappende lokomotivtildelinger: {1} og {2}.</value>
+  </data>
+  <data name="VehicleIsDoubleBooked" xml:space="preserve">
+    <value>Kjøretøy {0} er dobbeltbooket: sesjoner {1} overlapper med sesjoner {2}.</value>
+  </data>
 </root>

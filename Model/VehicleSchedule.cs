@@ -2,68 +2,33 @@
 
 namespace Tellurian.Trains.Schedules.Model;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(LocoSchedule), typeDiscriminator: "LocoSchedule")]
-[JsonDerivedType(typeof(TrainsetSchedule), typeDiscriminator: "TrainsetSchedule")]
-public abstract class VehicleSchedule : IEquatable<VehicleSchedule>
+public sealed class VehicleSchedule : IEquatable<VehicleSchedule>
 {
-    // Protected parameterless constructor for EF Core and JSON deserialization
+    // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
-    protected VehicleSchedule()
+    private VehicleSchedule()
     {
         Parts = [];
     }
 
-    protected VehicleSchedule(Company? company, int number, string? remark = null)
+    public VehicleSchedule(int id)
     {
-        Company = company;
-        CompanyId = company?.Id;
-        Number = number;
-        Remark = remark;
+        Id = id;
         Parts = [];
     }
 
     public int Id { get; set; }
-    public int Number { get; set; }
-    public Sessions Sessions { get; set; } = Sessions.All;
 
-    public string Class { get; set; } = string.Empty;
+    // FK property for EF Core - owning Schedule (required)
+    public int ScheduleId { get; set; }
+    public Schedule Schedule { get; set; } = default!;
 
-    // FK property for EF Core
-    public int? CompanyId { get; set; }
-    public Company? Company { get; set; }
-
-    // FK property for EF Core - owning Schedule
-    public int? ScheduleId { get; set; }
-    public Schedule? Schedule { get; set; }
-
-    public string? Remark { get; set; }
     public ICollection<TrainPart> Parts { get; set; }
 
     public bool Equals(VehicleSchedule? other) => other is not null && Id == other.Id;
     public override bool Equals(object? obj) => obj is VehicleSchedule other && Equals(other);
     public override int GetHashCode() => Id.GetHashCode();
-    public override string ToString() => $"{Company?.Signature} {Number}".Trim();
-}
-
-public sealed class LocoSchedule : VehicleSchedule
-{
-    // Private parameterless constructor for EF Core and JSON deserialization
-    [JsonConstructor]
-    private LocoSchedule() : base() { }
-
-    public LocoSchedule(int number, string? remark = null) : this(null, number, remark) { }
-    public LocoSchedule(Company? company, int number, string? remark = null) : base(company, number, remark) { }
-}
-
-public sealed class TrainsetSchedule : VehicleSchedule
-{
-    // Private parameterless constructor for EF Core and JSON deserialization
-    [JsonConstructor]
-    private TrainsetSchedule() : base() { }
-
-    public TrainsetSchedule(int number, string? remark = null) : this(null, number, remark) { }
-    public TrainsetSchedule(Company? company, int number, string? remark = null) : base(company, number, remark) { }
+    public override string ToString() => $"VehicleSchedule {Id}";
 }
 
 public static class VehicleScheduleExtensions

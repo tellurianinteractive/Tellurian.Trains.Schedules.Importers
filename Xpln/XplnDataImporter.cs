@@ -22,7 +22,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private readonly ITrainCategoriesService _trainCategoriesService;
     private readonly DataSetConfiguration _dataSetConfiguration = CreateDataSetConfiguration();
     private List<Company> _operatingCompanies = [];
-    private List<TrainCategory> _trainCategories = [];
+    private readonly List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
     private Layout _currentLayout = default!;
 
@@ -78,7 +78,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
-        _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
+        //_trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
         DataSet = _dataSetProvider.ImportSchedule(_inputStream, _dataSetConfiguration) ?? throw new IOException("Stream cannot be read.");
         return GetImportResult(name);
     }
@@ -157,16 +157,17 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         OperationLocation? current = null;
         foreach (DataRow station in stations.Rows)
         {
+
             if (rowNumber > 1)
             {
                 if (IsRepeatedHeader(station)) continue;
                 var itemMessages = new List<Message>();
                 var fields = station.GetRowFields();
-                if (fields.IsEmptyFields()) { if (layout.Stations.Count > 0) break; else continue; }
+                if (fields.AreAllEmpty) { if (layout.Stations.Count > 0) break; else continue; }
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
-                    if (fields[5].Is("Station"))
+                    if (fields[Type].Is("Station"))
                     {
                         if (current is not null)
                         {
@@ -180,7 +181,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         }
                         itemMessages.AddRange(validationMessages);
                     }
-                    else if (fields[5].Is("Track"))
+                    else if (fields[Type].Is("Track"))
                     {
                         if (current is null) continue;
                         var validationMessages = ValidateTrack(fields, rowNumber);
@@ -205,18 +206,20 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static bool IsRepeatedHeader(DataRow row) =>
             row[0].Equals("Name") && row[1].Equals("Enum");
 
-        static OperationLocation CreateStation(int rowNumber, string[] fields) =>
-            new(rowNumber, fields[Name], fields[Signature])
+        static OperationLocation CreateStation(int rowNumber, string[] fields)
+        {
+            return new(rowNumber, fields[Name], fields[Signature])
             {
                 Type = fields[Type],
                 IsShadow = fields[SubType].Is("Depot")
             };
+        }
 
         static StationTrack CreateTrack(int rowNumber, string[] fields) =>
             new(rowNumber, fields[TrackName])
             {
                 IsMain = fields[SubType].Is("Main"),
-                IsScheduled = fields[SubType].IsAny(["Main", "Depot"]),
+                IsScheduled = fields[SubType].IsAnyOf(["Main", "Depot"]),
                 Usage = fields[Remark],
                 DisplayOrder = fields[1].NumberOrZero,
             };
@@ -226,7 +229,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             var messages = new List<Message>();
             if (fields.Length < MinLength)
                 messages.Add(Message.Error(Resources.Strings.NotAllFieldsArePresent, rowNumber, MinLength, fields.Length));
-            if (!fields[Type].ValueOrEmpty().IsAny(["Station", "Track"]))
+            if (!fields[Type].OrEmpty.IsAnyOf(["Station", "Track"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedType, rowNumber, fields[Type]));
             return [.. messages];
         }
@@ -234,9 +237,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static Message[] ValidateStation(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Signature].IsEmpty())
+            if (fields[Signature].IsEmpty)
                 messages.Add(Message.Error(Resources.Strings.ColumnMustHaveAValue, rowNumber, "Name"));
-            if (!fields[SubType].ValueOrEmpty().IsAny(["Station", "Block"]))
+            if (!fields[SubType].OrEmpty.IsAnyOf(["Station", "Block"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedSubType, rowNumber, fields[SubType]));
             return [.. messages];
         }
@@ -244,11 +247,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static Message[] ValidateTrack(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[TrackName].IsEmpty())
+            if (fields[TrackName].IsEmpty)
                 messages.Add(Message.Error(Resources.Strings.ColumnMustHaveAValue, rowNumber, "TrackName"));
-            if (!fields[Lenght].IsEmpty() && !fields[Lenght].IsNumber())
+            if (!fields[Lenght].IsEmpty && !fields[Lenght].IsNumber)
                 messages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, "Length", fields[Lenght]));
-            if (!fields[SubType].ValueOrEmpty().IsAny(["Main", "Side", "Siding", "Depot", "Goods"]))
+            if (!fields[SubType].OrEmpty.IsAnyOf(["Main", "Side", "Siding", "Depot", "Goods"]))
                 messages.Add(Message.Error(Resources.Strings.UnsupportedSubType, rowNumber, fields[SubType]));
             return [.. messages];
         }
@@ -280,8 +283,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             {
                 var itemMessages = new List<Message>();
                 var fields = route.GetRowFields();
-                if (fields.IsEmptyFields()) { if (layout.Stations.Count > 0) break; else continue; }
-                if (fields[StartStation].IsZeroOrEmpty() && fields[EndStation].IsZeroOrEmpty()) continue;
+                if (fields.AreAllEmpty) { if (layout.Stations.Count > 0) break; else continue; }
+                if (fields[StartStation].IsZeroesOrEmpty && fields[EndStation].IsZeroesOrEmpty) continue;
 
                 var start = layout.Station(fields[StartStation]);
                 var end = layout.Station(fields[EndStation]);
@@ -289,19 +292,19 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     itemMessages.Add(Message.Error(Resources.Strings.StationNotFoundInLayout, rowNumber, fields[StartStation]));
                 if (end.IsNone)
                     itemMessages.Add(Message.Error(Resources.Strings.StationNotFoundInLayout, rowNumber, fields[EndStation]));
-                if (!fields[Tracks].IsNumber())
+                if (!fields[Tracks].IsNumber)
                     itemMessages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, nameof(Tracks), fields[Tracks]));
-                if (!fields[Speed].IsNumber())
+                if (!fields[Speed].IsNumber)
                     itemMessages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, nameof(Speed), fields[Speed]));
-                if (!fields[Time].IsNumber())
+                if (!fields[Time].IsNumber)
                     itemMessages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, nameof(Time), fields[Time]));
-                if (!fields[EndPosition].IsNumber())
+                if (!fields[EndPosition].IsNumber)
                     itemMessages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, nameof(EndPosition), fields[EndPosition]));
                 if (itemMessages.HasNoStoppingErrors())
                 {
                     TimetableStretch? timetableStretch = null;
                     var routeNumber = fields[Route].HasValue ? fields[Route] : DefaultRoute;
-                    if (fields[Route].IsEmpty())
+                    if (fields[Route].IsEmpty)
                     {
                         itemMessages.Add(Message.Warning(Resources.Strings.RouteNumberIsMissingUsingDefault, rowNumber, routeNumber));
                     }
@@ -324,8 +327,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     }
                     if (itemMessages.HasNoStoppingErrors())
                     {
-                        var distance = Math.Abs(fields[EndPosition].ToDouble() - fields[StartPosition].ToDouble());
-                        var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToInteger(), fields[Speed].ToInteger(), fields[Time].ToInteger());
+                        var distance = Math.Abs(fields[EndPosition].ToDoubleOrZero - fields[StartPosition].ToDoubleOrZero);
+                        var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToIntOrZero, fields[Speed].ToIntOrZero, fields[Time].ToIntOrZero);
                         stretch = timetableStretch!.AddLast(stretch);
                         layout.Add(stretch);
                     }
@@ -349,6 +352,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int Arrival = 4;
         const int Departure = 5;
         const int Wheel = 6;
+        const int Group = 6;
         const int Object = 7;
         const int Type = 8;
         const int Remark = 10;
@@ -375,7 +379,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             {
                 var itemMessages = new List<Message>();
                 var fields = row.GetRowFields();
-                if (fields.IsEmptyFields()) { if (result.Trains.Count > 0) break; else continue; }
+                if (fields.AreAllEmpty) { if (result.Trains.Count > 0) break; else continue; }
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
@@ -454,7 +458,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 if (current.IsNullOrHasNoCalls()) continue;
                                 if (fields[Remark].HasValue)
                                 {
-                                    var note = new TextCallNote($"{fields[Object]} {fields[Remark]}")
+                                    var note = new TextCallNote($"{fields[Group]}: {fields[Object]} {fields[Remark]}")
                                     {
                                         IsDriverNote = true,
                                         IsForDeparture = true,
@@ -540,7 +544,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Arrival", fields[Arrival])));
             if (!fields[Departure].IsTime())
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Departure", fields[Departure])));
-            else if (!fields[Type].IsAny(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
+            else if (!fields[Type].IsAnyOf(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.UnsupportedType, rowNumber, fields[Type])));
             return [.. messages];
         }
@@ -548,7 +552,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static Message[] ValidateTrain(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Object].IsEmpty())
+            if (fields[Object].IsEmpty)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustHaveAValue, rowNumber, "Object")));
             return [.. messages];
         }
@@ -556,7 +560,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static Message[] ValidateCall(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Track].IsEmpty())
+            if (fields[Track].IsEmpty)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustHaveAValue, rowNumber, "Track")));
             return [.. messages];
         }
@@ -571,16 +575,18 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int To = 3;
         const int Arrival = 4;
         const int Departure = 5;
+        const int Group = 6;
         const int Object = 7;
         const int Type = 8;
         const int TrainName = 9;
         const int MinLength = 9;
         const int LocoClass = 9;
         const int TrainsetClass = 9;
+        const int Remark = 10;
 
         var messages = new List<Message>();
-        var locoSchedules = new Dictionary<string, LocoSchedule>(100);
-        var trainsetSchedules = new Dictionary<string, TrainsetSchedule>(200);
+        var locoSchedules = new Dictionary<string, VehicleSchedule>(100);
+        var trainsetSchedules = new Dictionary<string, VehicleSchedule>(200);
         var driverDuties = new Dictionary<string, DriverDuty>();
 
         var trains = DataSet?.Tables[WorkSheetName];
@@ -601,7 +607,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             {
                 var itemMessages = new List<Message>();
                 var fields = row.GetRowFields();
-                if (fields.IsEmptyFields()) { if (locoSchedules.Count > 0 || trainsetSchedules.Count > 0 || driverDuties.Count > 0) break; else continue; }
+                if (fields.AreAllEmpty) { if (locoSchedules.Count > 0 || trainsetSchedules.Count > 0 || driverDuties.Count > 0) break; else continue; }
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
@@ -635,7 +641,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                     {
                                         var operatorSignature = fields[Object].LocoOperatingCompanySignature;
                                         var company = FindOrCreateCompany(operatorSignature);
-                                        locoSchedules.Add(locoId, new LocoSchedule(locoId.NumberOrZero) { Id = rowNumber, Company = company, Class = fields[LocoClass] });
+                                        var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
+                                            id: rowNumber,
+                                            vehicleType: VehicleType.Locomotive,
+                                            number: locoId.NumberOrZero,
+                                            vehicleClass: fields[LocoClass],
+                                            company: company,
+                                            externalId: locoId);
+                                        locoSchedules.Add(locoId, vehicleSchedule);
                                     }
                                     if (locoSchedules.TryGetValue(locoId, out var loco))
                                     {
@@ -658,18 +671,35 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 trainsetMessages.AddRange(ValidateTrainset(fields, rowNumber));
                                 if (trainsetMessages.HasNoStoppingErrors())
                                 {
-                                    var trainsetId = fields[Object].OrElse(fields[TrainName]);
-                                    if (!trainsetSchedules.ContainsKey(trainsetId))
-                                        trainsetSchedules.Add(trainsetId, new TrainsetSchedule(trainsetId.NumberOrZero) { Id = rowNumber, Class = fields[TrainsetClass], Remark = fields[Object] });
-                                    if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))
+                                    var trainsetId = fields[Object];
+                                    if (trainsetId.HasValue) // This is a trainset with schedule
                                     {
-                                        var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
-                                        trainsetMessages.AddRange(keys.Messages);
-                                        if (trainsetMessages.HasNoStoppingErrors())
+                                        if (!trainsetSchedules.ContainsKey(trainsetId))
                                         {
-                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value);
-                                            trainset.Add(trainPart);
+                                            var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
+                                                id: rowNumber,
+                                                vehicleType: VehicleType.Trainset,
+                                                number: trainsetId.NumberOrZero,
+                                                vehicleClass: fields[TrainsetClass],
+                                                externalId: trainsetId,
+                                                remark: fields[Object]);
+                                            trainsetSchedules.Add(trainsetId, vehicleSchedule);
                                         }
+                                        if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))
+                                        {
+                                            var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
+                                            trainsetMessages.AddRange(keys.Messages);
+                                            if (trainsetMessages.HasNoStoppingErrors())
+                                            {
+                                                TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value);
+                                                trainset.Add(trainPart);
+                                            }
+                                        }
+                                    }
+                                    else // This is a wagon group
+                                    {
+                                        var wagonGroup = currentTrain.CreateWagonGroup(rowNumber, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Group].ToIntOrZero, fields[Remark]);
+                                        currentTrain.Add(wagonGroup);
                                     }
                                 }
                                 messages.AddRange(trainsetMessages);
@@ -707,8 +737,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             rowNumber++;
         }
         if (messages.HasStoppingErrors()) return ImportResult<Schedule>.Failure(messages);
-        foreach (var loco in locoSchedules.Values) schedule.AddLocoSchedule(loco);
-        foreach (var trainset in trainsetSchedules.Values) schedule.AddTrainsetSchedule(trainset);
+        // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
         return ImportResult<Schedule>.Success(schedule, messages);
 
@@ -753,7 +782,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Arrival", fields[Arrival])));
             if (!fields[Departure].IsTime(fields[Type] == "timetable"))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustBeATime, rowNumber, "Departure", fields[Arrival])));
-            else if (!fields[Type].IsAny(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
+            else if (!fields[Type].IsAnyOf(["Traindef", "Timetable", "Locomotive", "Trainset", "Job", "Wheel", "Group"]))
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.UnsupportedType, rowNumber, fields[Type])));
             return [.. messages];
         }
@@ -761,21 +790,21 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static Message[] ValidateLoco(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Object].IsEmpty())
+            if (fields[Object].IsEmpty)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustHaveAValue, rowNumber, "Object")));
             return [.. messages];
         }
         static Message[] ValidateJob(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Object].OrElse(fields[TrainNumber]).IsEmpty())
+            if (fields[Object].OrElse(fields[TrainNumber]).IsEmpty)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustHaveAValue, rowNumber, "Object|TrainNumber")));
             return [.. messages];
         }
         static Message[] ValidateTrainset(string[] fields, int rowNumber)
         {
             var messages = new List<Message>();
-            if (fields[Object].IsEmpty() && fields[TrainName].IsEmpty())
+            if (fields[Object].IsEmpty && fields[TrainName].IsEmpty)
                 messages.Add(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ColumnMustHaveAValue, rowNumber, "Object|TrainName")));
             return [.. messages];
         }

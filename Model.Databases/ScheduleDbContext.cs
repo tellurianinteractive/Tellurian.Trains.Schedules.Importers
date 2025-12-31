@@ -19,12 +19,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     public DbSet<TrainCategory> TrainCategories => Set<TrainCategory>();
     public DbSet<Train> Trains => Set<Train>();
     public DbSet<StationCall> StationCalls => Set<StationCall>();
+    public DbSet<WagonGroup> WagonGroups => Set<WagonGroup>();
 
     // Schedule layer
     public DbSet<Schedule> Schedules => Set<Schedule>();
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<VehicleScheduleAssignment> VehicleScheduleAssignments => Set<VehicleScheduleAssignment>();
     public DbSet<VehicleSchedule> VehicleSchedules => Set<VehicleSchedule>();
-    public DbSet<LocoSchedule> LocoSchedules => Set<LocoSchedule>();
-    public DbSet<TrainsetSchedule> TrainsetSchedules => Set<TrainsetSchedule>();
     public DbSet<DriverDuty> DriverDuties => Set<DriverDuty>();
     public DbSet<TrainPart> TrainParts => Set<TrainPart>();
 
@@ -224,6 +225,28 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.Tracks);
             entity.Ignore(e => e.Layout);
             entity.Ignore(e => e.AsTrainPart);
+
+            entity.HasMany(e => e.WagonGroups)
+                  .WithOne(e => e.Train)
+                  .HasForeignKey(e => e.TrainId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // WagonGroup
+        modelBuilder.Entity<WagonGroup>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Remark).HasMaxLength(500);
+
+            entity.HasOne(e => e.FromStationCall)
+                  .WithMany()
+                  .HasForeignKey(e => e.FromStationCallId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ToStationCall)
+                  .WithMany()
+                  .HasForeignKey(e => e.ToStationCallId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // StationCall
@@ -262,12 +285,12 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey(e => e.TimetableId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasMany(e => e.LocoSchedules)
+            entity.HasMany(e => e.Vehicles)
                   .WithOne(e => e.Schedule)
                   .HasForeignKey(e => e.ScheduleId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(e => e.TrainsetSchedules)
+            entity.HasMany(e => e.VehicleSchedules)
                   .WithOne(e => e.Schedule)
                   .HasForeignKey(e => e.ScheduleId)
                   .OnDelete(DeleteBehavior.Cascade);
@@ -278,23 +301,42 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // VehicleSchedule (TPH inheritance)
-        modelBuilder.Entity<VehicleSchedule>(entity =>
+        // Vehicle
+        modelBuilder.Entity<Vehicle>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Class).HasMaxLength(50);
             entity.Property(e => e.Remark).HasMaxLength(500);
-
-            entity.HasDiscriminator<string>("ScheduleType")
-                  .HasValue<LocoSchedule>("Loco")
-                  .HasValue<TrainsetSchedule>("Trainset");
-
-            entity.Property(e => e.Sessions).HasConversion(sessionsConverter);
+            entity.Property(e => e.ExternalId).HasMaxLength(100);
 
             entity.HasOne(e => e.Company)
                   .WithMany()
                   .HasForeignKey(e => e.CompanyId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.ScheduleAssignments)
+                  .WithOne(e => e.Vehicle)
+                  .HasForeignKey(e => e.VehicleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // VehicleScheduleAssignment
+        modelBuilder.Entity<VehicleScheduleAssignment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Sessions).HasConversion(sessionsConverter);
+
+            entity.HasOne(e => e.VehicleSchedule)
+                  .WithMany()
+                  .HasForeignKey(e => e.VehicleScheduleId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // VehicleSchedule
+        modelBuilder.Entity<VehicleSchedule>(entity =>
+        {
+            entity.HasKey(e => e.Id);
 
             entity.HasMany(e => e.Parts)
                   .WithOne(e => e.Schedule)

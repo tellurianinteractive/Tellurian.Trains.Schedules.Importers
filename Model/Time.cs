@@ -4,6 +4,11 @@ namespace Tellurian.Trains.Schedules.Model;
 
 public readonly struct Time : IComparable<Time?>, IEquatable<Time>
 {
+    public static Time Zero => new(TimeSpan.Zero);
+
+    public static Time Min(Time a, Time b) => a < b ? a : b;
+    public static Time Max(Time a, Time b) => a > b ? a : b;
+
     public static Time FromString(string time)
     {
         if (TimeSpan.TryParse(time, out var value)) return new(value);

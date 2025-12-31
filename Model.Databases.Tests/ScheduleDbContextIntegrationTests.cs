@@ -63,9 +63,9 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsNotNull(context.Trains);
         Assert.IsNotNull(context.StationCalls);
         Assert.IsNotNull(context.Schedules);
+        Assert.IsNotNull(context.Vehicles);
+        Assert.IsNotNull(context.VehicleScheduleAssignments);
         Assert.IsNotNull(context.VehicleSchedules);
-        Assert.IsNotNull(context.LocoSchedules);
-        Assert.IsNotNull(context.TrainsetSchedules);
         Assert.IsNotNull(context.DriverDuties);
         Assert.IsNotNull(context.TrainParts);
         Assert.IsNotNull(context.CallNotes);
@@ -136,9 +136,10 @@ public class ScheduleDbContextIntegrationTests
 
         // Verify expected counts from Barmstedt2022
         Assert.AreEqual(61, schedule.Timetable.Trains.Count, "Expected 61 trains");
-        Assert.AreEqual(18, schedule.LocoSchedules.Count, "Expected 18 loco schedules");
-        Assert.AreEqual(36, schedule.TrainsetSchedules.Count, "Expected 36 trainset schedules");
+        Assert.AreEqual(18, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Locomotive), "Expected 18 loco schedules");
+        Assert.AreEqual(21, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Trainset), "Expected 21 trainset schedules");
         Assert.AreEqual(45, schedule.DriverDuties.Count, "Expected 45 driver duties");
+        Assert.AreEqual(19, schedule.Timetable.Trains.Sum(t => t.WagonGroups.Count), "Expected 19 wagon groups");
     }
 
     [TestMethod]

@@ -13,6 +13,7 @@ public static class TrainLengthExtensions
 {
     extension(TrainLenght lenght)
     {
+        public static TrainLenght Unspecified => new();
         public static TrainLenght AxlesOnly(int axles) =>
             new() { Axles = axles };
 

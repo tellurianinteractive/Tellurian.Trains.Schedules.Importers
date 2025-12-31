@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
@@ -22,6 +23,7 @@ public class Train : IEquatable<Train>
         Timetable = default!;
         Groups = [];
         Calls = [];
+        WagonGroups = [];
     }
 
     [SetsRequiredMembers]
@@ -33,6 +35,7 @@ public class Train : IEquatable<Train>
         Timetable = default!;
         Groups = [];
         Calls = [];
+        WagonGroups = [];
     }
 
     [SetsRequiredMembers]
@@ -65,6 +68,7 @@ public class Train : IEquatable<Train>
     public Timetable Timetable { get; set; }
 
     public IList<StationCall> Calls { get; set; }
+    public IList<WagonGroup> WagonGroups { get; set; }
     public Time DriverStartTime => this[0].Arrival;
     public Time DriverEndTime => this[^1].Departure;
     public StationCall this[Index index] => Calls[index];
@@ -102,7 +106,66 @@ public static class TrainExtensions
 
     extension(Train train)
     {
-        public string Identity => train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString();
+        public string Identity =>
+            train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString();
+
+        public StationCall StationCall(Time time)
+        {
+            try
+            {
+                foreach (var call in train.Calls)
+                {
+                    if (time == call.Arrival || time == call.Departure) return call;
+                }
+                foreach (var call in train.Calls)
+                {
+                    if (time >= call.Arrival && time <= call.Departure) return call;
+                }
+                StationCall? previous = default;
+                foreach (var call in train.Calls)
+                {
+                    if (previous is not null && call.Station.Id == previous.Station.Id)
+                    {
+                        if (time >= previous.Arrival || time <= call.Departure) return call;
+                    }
+                    previous = call;
+                }
+                throw new ArgumentNullException(nameof(time));
+
+            }
+            catch (Exception)
+            {
+                Debugger.Break();
+                throw;
+            }
+        }
+
+        public WagonGroup CreateWagonGroup(int id, Time from, Time to, int positionInTrain, string? remark = null)
+        {
+            var fromCall = train.StationCall(from).ValueOrException(nameof(from));
+            var toCall = train.StationCall(to).ValueOrException(nameof(to));
+            return new()
+            {
+                Id = id,
+                FromStationCall = fromCall,
+                FromStationCallId = fromCall.Id,
+                ToStationCall = toCall,
+                ToStationCallId = toCall.Id,
+                PositionInTrain = positionInTrain,
+                Remark = remark
+            };
+        }
+
+        public WagonGroup? Add(WagonGroup? wagonGroup)
+        {
+            if (wagonGroup is not null && !train.WagonGroups.Contains(wagonGroup))
+            {
+                wagonGroup.Train = train;
+                wagonGroup.TrainId = train.Id;
+                train.WagonGroups.Add(wagonGroup);
+            }
+            return wagonGroup;
+        }
 
         public StationCall Add(StationCall call)
         {
@@ -121,6 +184,7 @@ public static class TrainExtensions
             }
             return call;
         }
+
         public Train WithFixedSingleCallTrain()
         {
             if (train.Calls.Count == 1)

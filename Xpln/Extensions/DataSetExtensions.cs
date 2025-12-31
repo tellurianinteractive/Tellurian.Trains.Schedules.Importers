@@ -14,7 +14,7 @@ internal static class DataSetExtensions
             return items.Select(i => i is null ? string.Empty : i.ToString()).ToArray()!;
         }
         public bool IsBlankRow() =>
-            row.GetRowFields().IsEmptyFields();
+            row.GetRowFields().AreAllEmpty;
 
         public string? BackgroundColor(int? columnIndex) =>
             columnIndex.HasValue && row.Table.Columns.Contains($"Column{columnIndex}")
@@ -24,7 +24,7 @@ internal static class DataSetExtensions
 
     extension(IEnumerable<string> fields)
     {
-        public bool IsEmptyFields() =>
-            fields.All(i => i.IsEmpty());
+        //public bool IsEmptyFields() =>
+        //    fields.All(i => i.IsEmpty);
     }
 }

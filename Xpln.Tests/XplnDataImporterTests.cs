@@ -28,14 +28,12 @@ public class XplnDataImporterTests
         MaxTrainSpeedMetersPerClockMinute = 8.0,
         MinTrainSpeedMetersPerClockMinute = 0.3,
         ValidateDriverDuties = true,
-        ValidateLocoSchedules = true,
+        ValidateVehicleSchedules = true,
         ValidateStationCalls = true,
         ValidateStationTracks = true,
         ValidateStretches = true,
-        ValidateTrainsetSchedules = true,
         ValidateTrainSpeed = true,
         ValidateTrainNumbers = true,
-
     };
 
 
@@ -63,36 +61,37 @@ public class XplnDataImporterTests
     [TestMethod]
     public async Task Imports()
     {
-        await Import("Magdeburg_v_DB33_DSB32_WTB11", "de-DE", 142, 58, 77, 119, 0, 40);
+        await Import("Magdeburg_v_DB33_DSB32_WTB11", "de-DE", 142, 58, 77, 0, 119, 0, 40);
     }
 
     [TestMethod]
     public async Task ImportsGivskudModern2025()
     {
-        await Import("Givskud-Modern-2025", "da-DK", 125, 32, 50, 73, 1, 0);
+        await Import("Givskud-Modern-2025", "da-DK", 125, 32, 8, 54, 73, 1, 0);
     }
 
     [TestMethod()]
-    [DataRow("Montan2023H0e", "de-DE", 32, 3, 28, 3, 0)]
-    [DataRow("Barmstedt2022", "de-DE", 61, 18, 36, 45, 2)]
-    [DataRow("Givskud2021", "da-DK", 32, 3, 28, 3, 0, 7)]
-    [DataRow("Kolding_Epoke_III_2022", "da-DK", 60, 16, 32, 38, 6)]
-    [DataRow("Langhurst 2019", "de-DE", 15, 4, 22, 4, 25)]
-    [DataRow("Kolding2022", "da-DK", 73, 26, 55, 55, 0)]
-    [DataRow("Kolding202009", "da-DK", 38, 14, 36, 28, 0)]
-    [DataRow("KoldingNorge2019", "no-NO", 56, 16, 0, 56, 1)]
-    [DataRow("Värnamo2017", "sv-SE", 40, 12, 0, 29, 0)]
-    [DataRow("Värnamo2016", "sv-SE", 40, 13, 0, 27, 0)]
-    [DataRow("Rotebro2016", "sv-SE", 32, 12, 0, 24, 0)]
-    [DataRow("Rotebro2015", "sv-SE", 39, 15, 0, 31, 1)]
-    [DataRow("Timmele2015", "sv-SE", 37, 13, 0, 33, 4)]
-    [DataRow("Hellerup2015", "da-DK", 60, 24, 57, 20, 0)]
-    [DataRow("DreamTrack2015", null, 62, 24, 0, 40, 0)]
-    [DataRow("H0e-Schutterwald2013", "de-DE", 26, 6, 20, 25, 6)]
-    [DataRow("LTK2020", "de-DE", 15, 4, 22, 4, 25, 18)]
-    [DataRow("FREMODERN-2023-Final-1-1", "da-DK", 142, 58, 77, 119, 0, 0)]
+    [DataRow("Barmstedt2022", "de-DE", 61, 18, 21, 19, 45, 2)]
+    [DataRow("DreamTrack2015", null, 62, 24, 0, 0, 40, 0)]
+    [DataRow("FREMODERN-2023-Final-1-1", "da-DK", 142, 58, 37, 40, 119, 5, 0)]
+    [DataRow("FREMODERN-2023-Norge", "nb-NO", 41, 13, 0, 0, 20, 0, 0)]
+    [DataRow("Givskud2021", "da-DK", 32, 3, 0, 28, 3, 5, 7)]
+    [DataRow("H0e-Schutterwald2013", "de-DE", 26, 6, 0, 24, 25, 6)]
+    [DataRow("Hellerup2015", "da-DK", 60, 24, 0, 87, 20, 2)]
+    [DataRow("Kolding_Epoke_III_2022", "da-DK", 60, 16, 15, 25, 38, 10)]
+    [DataRow("Kolding202009", "da-DK", 38, 14, 2, 38, 28, 0)]
+    [DataRow("Kolding2022", "da-DK", 73, 26, 6, 70, 55, 0)]
+    [DataRow("KoldingNorge2019", "nb-NO", 56, 16, 0, 0, 56, 1)]
+    [DataRow("Langhurst 2019", "de-DE", 15, 4, 7, 26, 4, 25)]
+    [DataRow("LTK2020", "de-DE", 15, 4, 0, 22, 4, 25, 18)]
+    [DataRow("Montan2023H0e", "de-DE", 32, 3, 4, 24, 3, 0)]
+    [DataRow("Rotebro2015", "sv-SE", 39, 15, 0, 0, 31, 1)]
+    [DataRow("Rotebro2016", "sv-SE", 32, 12, 0, 0, 24, 0)]
+    [DataRow("Timmele2015", "sv-SE", 37, 13, 0, 0, 33, 6)]
+    [DataRow("Värnamo2016", "sv-SE", 40, 13, 0, 0, 27, 0)]
+    [DataRow("Värnamo2017", "sv-SE", 40, 12, 0, 0, 29, 0)]
 
-    public async Task Import(string scheduleName, string? culture, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedDuties, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
+    public async Task Import(string scheduleName, string? culture, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedWagonGroups, int expectedDuties, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
     {
         culture ??= "sv-SE";
         CultureInfo.CurrentCulture = new CultureInfo(culture);
@@ -111,8 +110,9 @@ public class XplnDataImporterTests
             {
                 var timetable = result.Item.Timetable;
                 Assert.HasCount(expectedTrains, timetable.Trains, "Trains");
-                Assert.HasCount(expectedLocos, result.Item.LocoSchedules, "Locos");
-                Assert.HasCount(expectedTrainsets, result.Item.TrainsetSchedules, "Trainsets");
+                Assert.HasCount(expectedLocos, result.Item.Vehicles.Where(v => v.VehicleType == VehicleType.Locomotive), "Locos");
+                Assert.HasCount(expectedTrainsets, result.Item.Vehicles.Where(v => v.VehicleType == VehicleType.Trainset), "Trainsets");
+                Assert.AreEqual(expectedWagonGroups, timetable.Trains.Sum(t => t.WagonGroups.Count));
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
                 var validationErrors = result.Item.GetValidationErrors(ValidationOptions);

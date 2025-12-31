@@ -428,5 +428,41 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
                 return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no locomotive assigned..
+        /// </summary>
+        internal static string TrainHasNoLocomotiveAssigned {
+            get {
+                return ResourceManager.GetString("TrainHasNoLocomotiveAssigned", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has a locomotive coverage gap between {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageGap {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageGap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has overlapping locomotive assignments: {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageOverlap {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageOverlap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}..
+        /// </summary>
+        internal static string VehicleIsDoubleBooked {
+            get {
+                return ResourceManager.GetString("VehicleIsDoubleBooked", resourceCulture);
+            }
+        }
     }
 }

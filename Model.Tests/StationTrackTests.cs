@@ -36,7 +36,7 @@ public class StationTrackTests
         Train2.Add(new StationCall(2, Target, Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
         var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());
-        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
+        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
     }
 
     [TestMethod]
@@ -47,6 +47,6 @@ public class StationTrackTests
         Assert.AreEqual(2, Target.Calls.Count);
         var validationErrors = Target.GetValidationErrors([]);
         Assert.AreEqual(0, validationErrors.Count());
-        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Text)));
+        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
     }
 }

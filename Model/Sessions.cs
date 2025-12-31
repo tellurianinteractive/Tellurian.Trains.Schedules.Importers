@@ -58,6 +58,7 @@ public static class SessionsExtensions
 
         public Sessions And(Sessions other) => new() { Flags = sessions.Flags.And(other.Flags) };
         public Sessions Or(Sessions other) => new() { Flags = sessions.Flags.Or(other.Flags) };
+        public bool Overlaps(Sessions other) => sessions.And(other).Flags > 0;
         public bool IsOnDemand => (sessions.Flags & CommonSessionPatterns.OnDemand) > 0;
         public string OnDemand => sessions.IsOnDemand ? "OnDemand" : string.Empty;
 
