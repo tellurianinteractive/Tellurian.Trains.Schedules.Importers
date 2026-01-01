@@ -22,7 +22,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private readonly ITrainCategoriesService _trainCategoriesService;
     private readonly DataSetConfiguration _dataSetConfiguration = CreateDataSetConfiguration();
     private List<Company> _operatingCompanies = [];
-    private readonly List<TrainCategory> _trainCategories = [];
+    private List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
     private Layout _currentLayout = default!;
 
@@ -78,7 +78,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
-        //_trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
+        _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
         DataSet = _dataSetProvider.ImportSchedule(_inputStream, _dataSetConfiguration) ?? throw new IOException("Stream cannot be read.");
         return GetImportResult(name);
     }
@@ -167,7 +167,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
-                    if (fields[Type].Is("Station"))
+                    if (fields[Type].IsExpected("Station"))
                     {
                         if (current is not null)
                         {
@@ -181,7 +181,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         }
                         itemMessages.AddRange(validationMessages);
                     }
-                    else if (fields[Type].Is("Track"))
+                    else if (fields[Type].IsExpected("Track"))
                     {
                         if (current is null) continue;
                         var validationMessages = ValidateTrack(fields, rowNumber);
@@ -211,14 +211,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             return new(rowNumber, fields[Name], fields[Signature])
             {
                 Type = fields[Type],
-                IsShadow = fields[SubType].Is("Depot")
+                IsShadow = fields[SubType].IsExpected("Depot")
             };
         }
 
         static StationTrack CreateTrack(int rowNumber, string[] fields) =>
             new(rowNumber, fields[TrackName])
             {
-                IsMain = fields[SubType].Is("Main"),
+                IsMain = fields[SubType].IsExpected("Main"),
                 IsScheduled = fields[SubType].IsAnyOf(["Main", "Depot"]),
                 Usage = fields[Remark],
                 DisplayOrder = fields[1].NumberOrZero,
@@ -458,7 +458,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 if (current.IsNullOrHasNoCalls()) continue;
                                 if (fields[Remark].HasValue)
                                 {
-                                    var note = new TextCallNote($"{fields[Group]}: {fields[Object]} {fields[Remark]}")
+                                    var note = new TextCallNote($"{fields[Group]}: {fields[Object].WithQuotationMarksRemoved} {fields[Remark].WithQuotationMarksRemoved}")
                                     {
                                         IsDriverNote = true,
                                         IsForDeparture = true,
@@ -671,7 +671,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 trainsetMessages.AddRange(ValidateTrainset(fields, rowNumber));
                                 if (trainsetMessages.HasNoStoppingErrors())
                                 {
-                                    var trainsetId = fields[Object];
+                                    var trainsetId = fields[Object].WithQuotationMarksRemoved;
                                     if (trainsetId.HasValue) // This is a trainset with schedule
                                     {
                                         if (!trainsetSchedules.ContainsKey(trainsetId))
@@ -682,7 +682,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                                 number: trainsetId.NumberOrZero,
                                                 vehicleClass: fields[TrainsetClass],
                                                 externalId: trainsetId,
-                                                remark: fields[Object]);
+                                                remark: fields[Object].WithQuotationMarksRemoved);
                                             trainsetSchedules.Add(trainsetId, vehicleSchedule);
                                         }
                                         if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))
@@ -696,8 +696,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                             }
                                         }
                                     }
-                                    else // This is a wagon group
+                                    else // This might be a wagon group
                                     {
+                                        if (fields[Object].IsEmpty && fields[Remark].IsEmpty) continue; // No information about wagon group, despite a row in the data.
                                         var wagonGroup = currentTrain.CreateWagonGroup(rowNumber, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Group].ToIntOrZero, fields[Remark]);
                                         currentTrain.Add(wagonGroup);
                                     }

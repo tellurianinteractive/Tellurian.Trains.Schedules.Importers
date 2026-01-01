@@ -14,7 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Tellurian.Utilities" Version="1.2.2" />
+    <PackageReference Include="Tellurian.Utilities" Version="1.2.4" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Resources\Days.Designer.cs">

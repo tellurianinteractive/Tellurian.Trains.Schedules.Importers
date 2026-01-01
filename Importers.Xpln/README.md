@@ -1,22 +1,16 @@
 # Tellurian.Trains.Schedules.Importers.Xpln
 
-Import railway schedules from XPLN spreadsheet files (ODS format).
+Import railway schedules from XPLN spreadsheet files (ODS format) into a validated, strongly-typed object model.
 
-## About XPLN
-XPLN is the defacto tool within the FREMO community to
-create model railway schedules and printed media for module meetings.
-It is developed based on *OpenOffice Calc*, with scripting and forms.
-With this tool most aspects of model railway scheduling can be made.
+## Features
 
-Unlike databases, spreadsheet files like XPLN-files cannot guarantee consistent data.
-In XPLN, a user has the option to run macros to help achieve consistency,
-but any cell can be modified without automatic check of consistence.
-
-Because it lacks the data integrity of a real database, it requires users to
-follow a strict workflow to not end up with inconsistent data.
-
-Therefore it is essential that XPLN-documents can be read and validated for formal data consistency
-before they can be imported into a database.
+- **Native ODS reading** - Reads XPLN files directly without conversion or external dependencies
+- **Complete data import** - Extracts layout, trains, schedules, vehicles, and driver duties
+- **Comprehensive validation** - Two-phase validation catches data integrity issues and scheduling conflicts
+- **Multi-language messages** - Error and warning messages in English, German, Danish, Norwegian, and Swedish
+- **Reference data integration** - Automatic lookup of operating companies and train categories from bundled data
+- **Cell styling support** - Extracts background colors from traindef rows for train category coloring
+- **Flexible time parsing** - Handles multiple time formats (HH:mm, HH:mm:ss, decimal day fractions)
 
 ## Installation
 
@@ -24,9 +18,54 @@ before they can be imported into a database.
 dotnet add package Tellurian.Trains.Schedules.Importers.Xpln
 ```
 
-## File Format
+## About XPLN
 
-XPLN saves schedules as **ODS** (OpenDocument Spreadsheet) files.
+XPLN is the de facto tool within the FREMO community for creating model railway schedules and printed media for module meetings. It is developed based on *OpenOffice Calc*, with scripting and forms.
+
+Unlike databases, spreadsheet files cannot guarantee consistent data. In XPLN, users can run macros to help achieve consistency, but any cell can be modified without automatic validation. This makes proper validation essential before using XPLN data.
+
+## What Gets Imported
+
+### Layout (from StationTrack worksheet)
+
+| Type | Model Object | Description |
+|------|--------------|-------------|
+| `station` | `OperationLocation` | Name, signature, subtype (Station/Block), shadow/depot flag |
+| `track` | `StationTrack` | Track number, subtype (Main, Side, Siding, Depot, Goods), display order, usage notes |
+
+### Routes (from Routes worksheet)
+
+| Model Object | Description |
+|--------------|-------------|
+| `TrackStretch` | Start/end stations, distance, number of tracks, speed limit, travel time |
+| `TimetableStretch` | Named route groupings for timetable display |
+
+### Trains (from Trains worksheet)
+
+| Tag | Model Object | Description |
+|-----|--------------|-------------|
+| `traindef` | `Train` | Number, category (extracted from *Name* and color from row background color) |
+| `timetable` | `StationCall` | Station, track, arrival/departure times, remarks |
+| `locomotive` | `TextCallNote` | Adds loco info as driver/station note on first call; sets train's operating company |
+| `trainset` | `TextCallNote` | Adds trainset info as driver note on first call |
+| `wheel` | `Train.Length` | Max train length in axles (meters not set) |
+| `group` | `Train.Groups` | Train classification (e.g., *P_Zug* = Passenger, *G_Zug* = Freight or else actual value) |
+
+### Vehicle Schedules (from Trains worksheet)
+
+| Tag | Model Object | Description |
+|-----|--------------|-------------|
+| `locomotive` | `Vehicle`, `VehicleSchedule` | All `locomotive` rows with same *Object Id* are combined into one locomotive with a vehicle schedule that runs all sessions  |
+| `trainset` | `VehicleSchedule` | All `trainset` rows with same *Object Id* are combined into one trainset with a vehicle schedule that runs all sessions  |
+| `trainset` | `WagonGroup` | When no *object ID* but a *remark* is given, a wagon group is created |
+| `trainset` | **Ignored** | When object ID and a remark are empty cells |
+
+
+### Driver Duties (from Trains worksheet)
+
+| Tag | Model Object | Description |
+|-----|--------------|-------------|
+| `job` | `DriverDuty` | All train parts with same *Object Id* are combined into one duty |
 
 ## Required Worksheets
 
@@ -36,95 +75,127 @@ The spreadsheet must contain these worksheets:
 |-----------|---------|
 | `StationTrack` | Stations and their tracks |
 | `Routes` | Track stretches between stations |
-| `Trains` | Train definitions, timetables, and assignments to loco schedules, trainsets and duties|
+| `Trains` | Train definitions, timetables, and assignments |
 
 ## Usage
 
 ```csharp
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
+using Tellurian.Trains.Schedules.Importers.Services;
 using Microsoft.Extensions.Logging;
 
-// Create logger (or use ILoggerFactory)
-var logger = LoggerFactory.Create(b => b.AddConsole())
-    .CreateLogger<XplnDataImporter>();
+// Create services
+var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+var companiesService = new CompaniesFromJsonService();
+var categoriesService = new TrainCategoriesFromCsvService();
 
 // Import from ODS file
 var file = new FileInfo("schedule.ods");
 using var importer = new XplnDataImporter(
     file,
-    new OdsDataSetProvider(),
-    logger);
+    new OdsDataSetProvider(loggerFactory.CreateLogger<OdsDataSetProvider>()),
+    companiesService,
+    categoriesService,
+    loggerFactory.CreateLogger<XplnDataImporter>());
 
-var result = importer.ImportSchedule("MySchedule");
+var result = await importer.ImportScheduleAsync("MySchedule");
 
 if (result.IsSuccess)
 {
     var schedule = result.Item;
 
-    // Access the data
+    // Access the imported data
     Console.WriteLine($"Stations: {schedule.Timetable.Layout.Stations.Count}");
     Console.WriteLine($"Trains: {schedule.Timetable.Trains.Count}");
-    Console.WriteLine($"Loco schedules: {schedule.LocoSchedules.Count}");
+    Console.WriteLine($"Vehicles: {schedule.Vehicles.Count}");
     Console.WriteLine($"Driver duties: {schedule.DriverDuties.Count}");
 }
-else
+
+// Check and display messages
+if (result.Messages.HasStoppingErrors())
 {
-    foreach (var msg in result.Messages.Where(m => m.Severity >= Severity.Error))
-        Console.WriteLine(msg);
+    Console.WriteLine("Import failed with errors:");
+}
+foreach (var message in result.Messages)
+{
+    Console.WriteLine(message);  // Includes severity prefix
 }
 ```
 
 ## Validation
 
-The importer performs two-phase validation:
-1. **Referential integrity** - verifies that all references between objects are valid
-   (stations, tracks, routes, loco schedules, etc. exist and are correctly linked).
-   Errors in this phase must be fixed in the XPLN file before import can succeed.
-2. **Scheduling conflicts** - checks for timing issues, track conflicts, and sequence errors.
-   These are reported as warnings/information messages.
+### Import Validation
 
-A successful import (`result.IsSuccess == true`) means the data is consistent and can be used.
-However, there may still be warning messages indicating potential scheduling issues worth reviewing:
+The importer validates **referential integrity** during import, ensuring all references are valid
+(stations, tracks, routes, loco schedules, etc. exist and are correctly linked).
+Errors in this phase must be fixed in the XPLN file before import can succeed.
+
+Import messages are returned in `result.Messages` with severity levels:
+- **Error** - Blocks import (e.g., missing station, invalid track reference)
+- **Warning** - Issues that should be reviewed
+- **Information** - Progress and informational messages
 
 ```csharp
-// Check for warnings after successful import
-foreach (var msg in result.Messages.Where(m => m.Severity == Severity.Information))
-    Console.WriteLine(msg);
+// Check if import has errors
+if (result.Messages.HasStoppingErrors())
+{
+    // Handle errors...
+}
+
+// Display all messages (each includes severity prefix)
+foreach (var message in result.Messages)
+    Console.WriteLine(message);
 ```
 
-See the [Model README](../Model/README.md#validation) for details on which scheduling checks are performed.
+### Import Message Features
 
-Error messages include row numbers and are available in multiple languages (English, German, Danish, Norwegian, Swedish).
+- Row numbers indicate exact location of issues in the XPLN file
+- Available in multiple languages (English, German, Danish, Norwegian, Swedish)
 
-## What Gets Imported
+### Schedule Validation
 
-- Track layout (stations, tracks, routes)
-- Train timetables with station calls. Colour of `traindef` row is supported.
-- Locomotive assignments
-- Trainset assignments
-- Driver duties
+After a successful import, you can run additional **schedule validation** to detect
+timing conflicts and scheduling issues using the `ValidationError` type:
 
-The *wheel* and *group* tags are currently not read.
-- *Wheels* denotes train length in axles. It will be added in a forthcoming release.
-- *Group* is only for internal purposes in XPLN.
+```csharp
+if (result.IsSuccess)
+{
+    var options = new ValidationOptions
+    {
+        ValidateStationTracks = true,      // Track occupation conflicts
+        ValidateStretches = true,          // Single-track conflicts
+        ValidateVehicleSchedules = true,   // Vehicle schedule overlaps
+        ValidateLocomotiveCoverage = true  // Locomotive coverage gaps
+    };
 
-## The Story of Reading XPLN Files
-XPLN is stored in ODS-files, an *Open Document* format.
-Despite it is open, it is tricky to read.
-- First, I used Excel COM-objects, which make reading dependent having Microsoft Excel installed.
-Excel can open ODS-files directly. This was easiest to start with, but not a solution that can run in the cloud or be distributed.
-- In the second effort, I found the **ExcelDataReader** package, that removed the dependency of Microsoft Excel.
-But it required the ODS-files to be converted to .XLSX before reading.
-Although there are free online converters, it forces the user to make a conversion.
-- Finally, I found a 10+ year old codebase for reading ODS-files directly.
-After some tweaking, I made it work. And it had much better performance than the initial Excel-solution.
+    var errors = result.Item.GetValidationErrors(options);
+    foreach (var error in errors)
+    {
+        Console.WriteLine($"{error.ErrorType}: {error.Message}");
+        // error.FromTrack, error.ToTrack - conflict location
+        // error.FromTime, error.ToTime - conflict time span
+        // error.Trains - trains involved
+    }
+}
+```
 
-## How is this Software Tested?
-Not two planners use XPLN exactly the same way, validating one XPLN-file isn't enough.
-The only way to test is to have a large number of XPLN-files to read and validate.
-Therefore, the tests of this software use a set of XPLN files from different origins.
+See the [Model README](../Model/README.md#validation) for details on `ValidationError` types and options.
 
-All of the tested XPLN-files had some kind of data integrity issue that required correction of the XPLN-file
-before it could be successfully validated.
-This clearly demonstrates the problems with using a spreadsheet for complex data storage.
+## How ODS Reading Works
+
+XPLN files are stored in ODS format (OpenDocument Spreadsheet). The importer:
+
+1. Opens the ODS file as a ZIP archive
+2. Parses the `content.xml` file using XML namespaces
+3. Extracts cell values and background colors from automatic styles
+4. Handles repeated rows and columns efficiently
+5. Converts data to a DataSet for processing
+
+This approach has no external dependencies beyond the standard .NET libraries.
+
+## Testing
+
+The importer has been tested with XPLN files from different planners and events.
+All tested files had some form of data integrity issue that required correction,
+demonstrating the value of automated validation for spreadsheet-based scheduling.

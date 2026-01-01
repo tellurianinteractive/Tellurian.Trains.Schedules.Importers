@@ -14,7 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
-    <PackageReference Include="Tellurian.Utilities" Version="1.2.2" />
+    <PackageReference Include="Tellurian.Utilities" Version="1.2.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />

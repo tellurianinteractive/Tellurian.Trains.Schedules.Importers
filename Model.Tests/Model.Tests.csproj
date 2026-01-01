@@ -3,6 +3,9 @@
     <AssemblyName>Tellurian.Trains.Schedules.Model.Tests</AssemblyName>
     <RootNamespace>Tellurian.Trains.Schedules.Model.Tests</RootNamespace>
   </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Tellurian.Utilities" Version="1.2.4" />
+	</ItemGroup>
   <ItemGroup>
     <Compile Remove="TestRepository.cs" />
     <Compile Remove="TimetableTests.cs" />

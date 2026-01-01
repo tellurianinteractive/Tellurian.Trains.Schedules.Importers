@@ -1,6 +1,6 @@
 # Tellurian.Trains.Schedules.Importers.Interfaces
 
-Abstraction layer defining the contract for timetable import services.
+Contracts for schedule import/export services and supporting data services.
 
 ## Installation
 
@@ -8,18 +8,55 @@ Abstraction layer defining the contract for timetable import services.
 dotnet add package Tellurian.Trains.Schedules.Importers.Interfaces
 ```
 
-## The IImportService Interface
+## Interfaces
 
-All importers implement this interface:
+### IImportService
+
+The main interface for importing schedules from external sources:
 
 ```csharp
 public interface IImportService
 {
-    ImportResult<Schedule> ImportSchedule(string name);
+    Task<ImportResult<Schedule>> ImportScheduleAsync(string name);
 }
 ```
 
-## The ImportResult Type
+### IExportService
+
+Interface for exporting schedules to external formats:
+
+```csharp
+public interface IExportService
+{
+    Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule);
+}
+```
+
+### ICompaniesService
+
+Service for retrieving railway company data:
+
+```csharp
+public interface ICompaniesService
+{
+    Task<IEnumerable<Company>> GetAllCompaniesAsync();
+}
+```
+
+### ITrainCategoriesService
+
+Service for retrieving train category definitions:
+
+```csharp
+public interface ITrainCategoriesService
+{
+    Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync();
+}
+```
+
+## Result Types
+
+### ImportResult&lt;T&gt;
 
 A rich result type that captures both data and validation messages:
 
@@ -30,6 +67,9 @@ var result = ImportResult<Schedule>.Success(schedule, messages);
 
 // Failed import
 var result = ImportResult<Schedule>.Failure(Message.Error("File not found"));
+
+// Success only if no error messages
+var result = ImportResult<Schedule>.SuccessIfNoErrorMessagesOtherwiseFailure(schedule, messages);
 
 // Check result
 if (result.IsSuccess)
@@ -46,15 +86,32 @@ else
 }
 ```
 
+### ExportResult&lt;T&gt;
+
+A simpler result type for export operations:
+
+```csharp
+// Successful export
+var result = ExportResult<Schedule>.Success(schedule);
+
+// Failed export
+var result = ExportResult<Schedule>.Failure("Export failed", "Reason...");
+
+if (result.IsSuccess)
+{
+    // Export succeeded
+}
+```
+
 ## Implementing a Custom Importer
 
 ```csharp
 using Tellurian.Trains.Schedules.Importers.Interfaces;
-using Tellurian.Trains.Schedules.Importers.Model;
+using Tellurian.Trains.Schedules.Model;
 
 public class MyImporter : IImportService
 {
-    public ImportResult<Schedule> ImportSchedule(string name)
+    public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         try
         {
@@ -78,8 +135,11 @@ public class MyImporter : IImportService
 
 ## JSON Serialization
 
-Results can be serialized to JSON:
+Import results can be serialized to JSON:
 
 ```csharp
 string json = result.Json();
+
+// Or write to temp file
+result.Write();
 ```

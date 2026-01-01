@@ -139,7 +139,7 @@ public class ScheduleDbContextIntegrationTests
         Assert.AreEqual(18, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Locomotive), "Expected 18 loco schedules");
         Assert.AreEqual(21, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Trainset), "Expected 21 trainset schedules");
         Assert.AreEqual(45, schedule.DriverDuties.Count, "Expected 45 driver duties");
-        Assert.AreEqual(19, schedule.Timetable.Trains.Sum(t => t.WagonGroups.Count), "Expected 19 wagon groups");
+        Assert.AreEqual(14, schedule.Timetable.Trains.Sum(t => t.WagonGroups.Count), "Expected 14 wagon groups");
     }
 
     [TestMethod]

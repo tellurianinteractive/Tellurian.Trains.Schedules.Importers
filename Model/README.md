@@ -26,10 +26,10 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | Type | Description |
 |------|-------------|
 | `Timetable` | Trains within a track layout |
-| `Train` | train with station calls, category, and optional wagon groups |
+| `Train` | Train with calls at operation locations, category, and optional wagon groups |
 | `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
-| `StationCall` | Scheduled stop at a track with arrival/departure times |
-| `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train   |
+| `StationCall` | Scheduled stop at an operation locattion at a specific track with arrival/departure times |
+| `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train |
 | `Sessions` | Representing which sessions/days a train runs |
 
 ### Schedule (Resource Assignments)
@@ -101,34 +101,61 @@ var options = new ValidationOptions
     MaxTrainSpeedMetersPerClockMinute = 10
 };
 
-var messages = schedule.GetValidationErrors(options);
+var errors = schedule.GetValidationErrors(options);
 ```
 
-### Validation Checks
+### ValidationError
 
-| Check | Description |
-|-------|-------------|
-| **Station calls** | Arrival time must be before or equal to departure time |
-| **Station tracks** | Detects conflicts where different trains occupy the same track at overlapping times |
-| **Track stretches** | Detects conflicts on single-track sections where trains would collide |
-| **Train time sequence** | Ensures calls within a train are in chronological order |
-| **Train speed** | Warns if train speed between stations is too slow or too fast |
-| **Vehicle schedules** | Detects overlapping train parts assigned to the same vehicle schedule |
-| **Locomotive coverage** | Ensures every train has complete locomotive coverage without gaps all sessions |
-| **Vehicle double booking** | Detects vehicles assigned to overlapping schedules in same sessions |
-
-### Message Severity
-
-Validation results are returned as `Message` objects with severity levels:
+Validation returns `ValidationError` objects containing location and time information for highlighting conflicts in a graphical timetable:
 
 ```csharp
-Message.Error("...");       // Critical errors preventing import
-Message.Warning("...");     // Issues that should be reviewed
-Message.Information("..."); // Scheduling conflicts and warnings
+foreach (var error in errors)
+{
+    Console.WriteLine(error.Message);           // Localized message
+    Console.WriteLine(error.ErrorType);         // Error category
+    Console.WriteLine(error.Trains);            // Trains involved
+    Console.WriteLine(error.FromTrack);         // Conflict start location
+    Console.WriteLine(error.ToTrack);           // Conflict end location
+    Console.WriteLine(error.FromTime.HHMM());   // Conflict start time
+    Console.WriteLine(error.ToTime.HHMM());     // Conflict end time
+}
+
+// Check conflict type
+if (error.IsStationConflict)  // FromTrack == ToTrack
+    // Conflict is at a single station track
+if (error.IsStretchConflict)  // FromTrack != ToTrack
+    // Conflict spans a track stretch between stations
 ```
 
-After a successful import (no errors), there may still be information messages
-indicating potential scheduling issues that are non-critical but worth reviewing.
+### Validation Error Types
+
+| ErrorType | Description |
+|-----------|-------------|
+| `MissingTrackReference` | Station track is referenced but not in layout |
+| `StationCallTiming` | Station call has arrival after departure |
+| `StationTrackConflict` | Two trains conflict on the same station track |
+| `TrackStretchConflict` | Two trains conflict on a track stretch |
+| `TrainTimeSequence` | Train calls are not in correct time sequence |
+| `TrainSpeedTooSlow` | Train speed is too slow between calls |
+| `TrainSpeedTooFast` | Train speed is too fast between calls |
+| `TrainTooFewCalls` | Train must have at least two station calls |
+| `VehicleScheduleOverlap` | Vehicle schedule has overlapping train parts |
+| `LocomotiveCoverageGap` | Train has a gap in locomotive coverage |
+| `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
+| `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
+
+### Validation Checks by Option
+
+| Option | Checks Performed |
+|--------|------------------|
+| `ValidateStationCalls` | `StationCallTiming` |
+| `ValidateStationTracks` | `StationTrackConflict` |
+| `ValidateStretches` | `TrackStretchConflict` |
+| `ValidateTrainSpeed` | `TrainSpeedTooSlow`, `TrainSpeedTooFast` |
+| `ValidateVehicleSchedules` | `VehicleScheduleOverlap`, `VehicleDoubleBooked` |
+| `ValidateLocomotiveCoverage` | `LocomotiveCoverageGap`, `LocomotiveCoverageOverlap` |
+
+Note: `MissingTrackReference`, `TrainTimeSequence`, and `TrainTooFewCalls` are always checked.
 
 ## Localization
 
