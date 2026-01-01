@@ -10,36 +10,37 @@ dotnet add package Tellurian.Trains.Schedules.Model
 
 ## Key Types
 
-### Schedule & Timetable
-
-| Type | Description |
-|------|-------------|
-| `Schedule` | Complete schedule with timetable, vehicles, vehicle schedules, and driver duties |
-| `Timetable` | Collection of trains within a track layout |
-| `Train` | Individual train with station calls and category |
-| `TrainPart` | A portion of a train between two station calls (used in vehicle schedules) |
-| `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
-| `Sessions` | Bit flags representing which sessions/days a train runs |
-
-### Layout & Infrastructure
+### Layout (Physical Infrastructure)
 
 | Type | Description |
 |------|-------------|
 | `Layout` | Physical track layout with stations, companies, and stretches |
-| `OperationLocation` | Railway station or stop with tracks (formerly Station) |
+| `OperationLocation` | Railway station or stop with tracks |
 | `StationTrack` | Track within a station |
-| `StationCall` | Scheduled stop with arrival/departure times |
 | `TrackStretch` | Physical connection between two stations with distance and track count |
 | `TimetableStretch` | A named sequence of track stretches for timetable display |
 | `Company` | Railway company operating vehicles |
 
-### Vehicles & Assignments
+### Timetable (Train Operations)
 
 | Type | Description |
 |------|-------------|
+| `Timetable` | Collection of trains within a track layout |
+| `Train` | Individual train with station calls, category, and wagon groups |
+| `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
+| `StationCall` | Scheduled stop at a track with arrival/departure times |
+| `WagonGroup` | A group of wagons within a train, with position and run segment |
+| `Sessions` | Bit flags representing which sessions/days a train runs |
+
+### Schedule (Resource Assignments)
+
+| Type | Description |
+|------|-------------|
+| `Schedule` | Complete schedule with vehicles, vehicle schedules, and driver duties |
 | `Vehicle` | Locomotive or trainset with type, number, and company |
-| `VehicleSchedule` | A schedule containing train parts that a vehicle runs |
+| `VehicleSchedule` | A schedule containing train parts for locomotives and trainsets (not wagon groups) |
 | `VehicleScheduleAssignment` | Links a vehicle to a vehicle schedule for specific sessions |
+| `TrainPart` | A portion of a train between two station calls (used in vehicle schedules) |
 | `DriverDuty` | Driver shift assignments |
 
 ## Usage
