@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tellurian.Trains.Schedules.Importers is a .NET 10.0 library for validating and importing railway schedule data into an object model. It reads data from XPLN spreadsheets (ODS/XLSX) and Microsoft Access databases without storing it, allowing downstream storage flexibility.
+Tellurian.Trains.Schedules is a .NET 10.0 solution for validating and importing railway schedule data into an object model. It reads data from XPLN spreadsheets (ODS/XLSX) and Microsoft Access databases, with optional Entity Framework Core support for persistence.
 
 ## Build Commands
 
@@ -28,23 +28,26 @@ dotnet test --filter "FullyQualifiedName~TrainTests"
 dotnet pack --configuration Release --output ./nupkgs
 ```
 
-Note: Access.Tests is excluded from CI/CD pipeline (requires Windows ODBC driver).
+Note: Access.Tests and Model.Databases.Tests are excluded from CI (require Windows-specific drivers).
 
 ## Architecture
 
 ```
-Interfaces/     → Contracts: IImportService, ImportResult<T>
+Interfaces/         → Contracts: IImportService, ImportResult<T>
     ↓
-Model/          → Domain model: Schedule, Timetable, Train, Layout, Station, etc.
+Model/              → Domain model: Schedule, Timetable, Train, Layout, Station, etc.
     ↓
-Xpln/           → XPLN ODS/XLSX importer (published to NuGet)
-Access/         → Microsoft Access importer (experimental, Windows-only)
+├─ Xpln/            → XPLN ODS/XLSX importer (published to NuGet)
+├─ Access/          → Microsoft Access importer (experimental, Windows-only)
+├─ Services/        → Shared import services (JSON/CSV data files)
+├─ Model.Planning/  → Planning utilities for creating layouts and schedules
+└─ Model.Databases/ → Entity Framework Core support (ScheduleDbContext)
 ```
 
 ### Key Patterns
 
 - **Rich Results**: `ImportResult<T>` encapsulates success/failure with detailed validation messages
-- **Two-Phase Validation**: First referential integrity, then scheduling conflicts
+- **Two-Phase Validation**: First referential integrity, then scheduling conflicts (see VALIDATION.md)
 - **Provider Pattern**: `IDataSetProvider` abstracts spreadsheet formats (OdsDataSetProvider, XlsxDataSetProvider)
 - **Multi-Language Validation**: Messages in English, German, Danish, Norwegian, Swedish via .resx resources
 - **Severity Levels**: None, Information, Warning, Error, System
@@ -67,12 +70,12 @@ Access/         → Microsoft Access importer (experimental, Windows-only)
 
 ## Testing
 
-Test projects use MSTest.Sdk with Microsoft.Testing.Platform runner. Test data includes real-world XPLN files with intentional data integrity issues to demonstrate validation.
+Test projects use MSTest.Sdk with Microsoft.Testing.Platform runner (parallel execution enabled). Test data includes real-world XPLN files with intentional data integrity issues to demonstrate validation.
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): Runs on push/PR to master, builds and tests on Ubuntu
-- **Publish** (`.github/workflows/publish.yml`): Publishes Model, Interfaces, and Xpln packages to NuGet.org on release
+- **CI** (`.github/workflows/ci.yml`): Runs on push/PR to master, builds and tests Model.Tests, Interfaces.Tests, Xpln.Tests on Ubuntu
+- **Publish** (`.github/workflows/publish.yml`): Publishes packages to NuGet.org on release
 
 ## Language & Framework
 
