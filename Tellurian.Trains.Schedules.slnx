@@ -8,18 +8,18 @@
     <File Path="UNIFIED_MODEL.md" />
     <File Path="VALIDATION.md" />
   </Folder>
-  <Project Path="Access.Tests/Access.Tests.csproj" />
-  <Project Path="Access/Access.csproj" />
-  <Project Path="Interfaces.Tests/Interfaces.Tests.csproj" />
-  <Project Path="Interfaces/Interfaces.csproj" />
+  <Project Path="Importers.Access.Tests/Access.Tests.csproj" />
+  <Project Path="Importers.Access/Access.csproj" />
+  <Project Path="Importers.Interfaces.Tests/Interfaces.Tests.csproj" />
+  <Project Path="Importers.Interfaces/Interfaces.csproj" />
   <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
   <Project Path="Model.Databases/Model.Databases.csproj" />
   <Project Path="Model.Planning.Tests/Model.Planning.Tests.csproj" />
   <Project Path="Model.Planning/Model.Planning.csproj" />
   <Project Path="Model.Tests/Model.Tests.csproj" />
   <Project Path="Model/Model.csproj" />
-  <Project Path="Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
-  <Project Path="Services/Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
-  <Project Path="Xpln.Tests/Xpln.Tests.csproj" />
-  <Project Path="Xpln/Xpln.csproj" />
+  <Project Path="Importers.Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
+  <Project Path="Importers.Services/Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
+  <Project Path="Importers.Xpln.Tests/Xpln.Tests.csproj" />
+  <Project Path="Importers.Xpln/Xpln.csproj" />
 </Solution>

@@ -7,7 +7,7 @@
     <PackageReference Include="System.Data.Odbc" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Access\Access.csproj" />
+    <ProjectReference Include="..\Importers.Access\Access.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Test data\Timetable.accdb">

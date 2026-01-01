@@ -22,7 +22,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Interfaces\Interfaces.csproj" />
+	  <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
 	  <ProjectReference Include="..\Model\Model.csproj" />
 	</ItemGroup>
 	<ItemGroup>

@@ -33,15 +33,15 @@ Note: Access.Tests and Model.Databases.Tests are excluded from CI (require Windo
 ## Architecture
 
 ```
-Interfaces/         → Contracts: IImportService, ImportResult<T>
+Importers.Interfaces/  → Contracts: IImportService, ImportResult<T>
     ↓
-Model/              → Domain model: Schedule, Timetable, Train, Layout, Station, etc.
+Model/                 → Domain model: Schedule, Timetable, Train, Layout, Station, etc.
     ↓
-├─ Xpln/            → XPLN ODS/XLSX importer (published to NuGet)
-├─ Access/          → Microsoft Access importer (experimental, Windows-only)
-├─ Services/        → Shared import services (JSON/CSV data files)
-├─ Model.Planning/  → Planning utilities for creating layouts and schedules
-└─ Model.Databases/ → Entity Framework Core support (ScheduleDbContext)
+├─ Importers.Xpln/     → XPLN ODS/XLSX importer (published to NuGet)
+├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
+├─ Importers.Services/ → Shared import services (JSON/CSV data files)
+├─ Model.Planning/     → Planning utilities for creating layouts and schedules
+└─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```
 
 ### Key Patterns
@@ -62,7 +62,7 @@ Model/              → Domain model: Schedule, Timetable, Train, Layout, Statio
 - `LocoSchedule` / `TrainsetSchedule` - Equipment assignments (implement `VehicleSchedule`)
 - `ValidationOptions` - Configurable validation parameters
 
-### XPLN Importer (in Xpln/)
+### XPLN Importer (in Importers.Xpln/)
 
 - `XplnDataImporter` - Main import orchestrator
 - `DataSetProviders/` - Spreadsheet reading abstraction
@@ -74,7 +74,7 @@ Test projects use MSTest.Sdk with Microsoft.Testing.Platform runner (parallel ex
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): Runs on push/PR to master, builds and tests Model.Tests, Interfaces.Tests, Xpln.Tests on Ubuntu
+- **CI** (`.github/workflows/ci.yml`): Runs on push/PR to master, builds and tests Model.Tests, Importers.Interfaces.Tests, Importers.Xpln.Tests on Ubuntu
 - **Publish** (`.github/workflows/publish.yml`): Publishes packages to NuGet.org on release
 
 ## Language & Framework
