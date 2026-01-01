@@ -15,33 +15,33 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | Type | Description |
 |------|-------------|
 | `Layout` | Physical track layout with stations, companies, and stretches |
-| `OperationLocation` | Railway station or stop with tracks |
-| `StationTrack` | Track within a station |
-| `TrackStretch` | Physical connection between two stations with distance and track count |
+| `OperationLocation` | Manned station, junction, signal controlled location or other location |
+| `StationTrack` | Track within an operation location |
+| `TrackStretch` | Physical connection between two stations with distance and number of parallel tracks |
 | `TimetableStretch` | A named sequence of track stretches for timetable display |
-| `Company` | Railway company operating vehicles |
+| `Company` | Railway company operating trains, vehicles and/or duties |
 
 ### Timetable (Train Operations)
 
 | Type | Description |
 |------|-------------|
-| `Timetable` | Collection of trains within a track layout |
-| `Train` | Individual train with station calls, category, and wagon groups |
+| `Timetable` | Trains within a track layout |
+| `Train` | train with station calls, category, and optional wagon groups |
 | `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
 | `StationCall` | Scheduled stop at a track with arrival/departure times |
-| `WagonGroup` | A group of wagons within a train, with position and run segment |
-| `Sessions` | Bit flags representing which sessions/days a train runs |
+| `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train   |
+| `Sessions` | Representing which sessions/days a train runs |
 
 ### Schedule (Resource Assignments)
 
 | Type | Description |
 |------|-------------|
-| `Schedule` | Complete schedule with vehicles, vehicle schedules, and driver duties |
+| `Schedule` | Holds vehicles, vehicle schedules, and driver duties |
 | `Vehicle` | Locomotive or trainset with type, number, and company |
 | `VehicleSchedule` | A schedule containing train parts for locomotives and trainsets (not wagon groups) |
-| `VehicleScheduleAssignment` | Links a vehicle to a vehicle schedule for specific sessions |
-| `TrainPart` | A portion of a train between two station calls (used in vehicle schedules) |
-| `DriverDuty` | Driver shift assignments |
+| `VehicleScheduleAssignment` | Links a vehicle to a vehicle schedule for specific sessions (usually all session) |
+| `TrainPart` | A portion of a train between two station calls (used in vehicle schedules), default is a train part for the whole train |
+| `DriverDuty` | Driver shift assignments to train parts |
 
 ## Usage
 
@@ -114,7 +114,7 @@ var messages = schedule.GetValidationErrors(options);
 | **Train time sequence** | Ensures calls within a train are in chronological order |
 | **Train speed** | Warns if train speed between stations is too slow or too fast |
 | **Vehicle schedules** | Detects overlapping train parts assigned to the same vehicle schedule |
-| **Locomotive coverage** | Ensures every train has complete locomotive coverage without gaps |
+| **Locomotive coverage** | Ensures every train has complete locomotive coverage without gaps all sessions |
 | **Vehicle double booking** | Detects vehicles assigned to overlapping schedules in same sessions |
 
 ### Message Severity
