@@ -17,22 +17,22 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | `Layout` | Physical track layout with stations, companies, and stretches |
 | `OperationLocation` | Abstract base class for locations where trains can stop or pass |
 | `Station` | A manned operation location (dispatcher present) |
-| `SignalControlledLocation` | An unmanned location controlled by signals from another station |
-| `OtherLocation` | An unmanned location without signal control |
+| `SignalControlledLocation` | An unmanned location controlled by another station |
+| `OtherLocation` | An unmanned location without signal control, for example a halt |
 | `StationTrack` | Track within an operation location |
-| `TrackStretch` | Physical connection between two operation locations with distance and track count |
+| `TrackStretch` | Physical connection between two operation locations with distance and track count. i.e. single or double track |
 | `TimetableStretch` | A named sequence of track stretches for timetable display |
-| `DispatchStretch` | A stretch between two manned stations (for dispatch planning) |
+| `DispatchStretch` | A stretch between two adjacent stations where trains are dispatcheds |
 | `Company` | Railway company operating trains, vehicles and/or duties |
 
 ### Timetable (Train Operations)
 
 | Type | Description |
 |------|-------------|
-| `Timetable` | Trains within a track layout |
+| `Timetable` | Holds a collection of trains running on the layout |
 | `Train` | Train with calls at operation locations, category, and optional wagon groups |
 | `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
-| `StationCall` | Scheduled stop at an operation locattion at a specific track with arrival/departure times |
+| `StationCall` | Scheduled stop at an operation location at a specific track with arrival/departure times |
 | `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train |
 | `Sessions` | Representing which sessions/days a train runs |
 
@@ -46,6 +46,9 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | `VehicleScheduleAssignment` | Links a vehicle to a vehicle schedule for specific sessions (usually all session) |
 | `TrainPart` | A portion of a train between two station calls (used in vehicle schedules), default is a train part for the whole train |
 | `DriverDuty` | Driver shift assignments to train parts |
+
+`Remark` The concept with **VehicleSchedule**s containing **TrainPart**s is to make it possible to change
+locomotives and wagonsets at a station between the train's first and last station call.
 
 ## Usage
 

@@ -57,7 +57,8 @@ Model/                 → Domain model: Schedule, Timetable, Train, Layout, Sta
 - `Schedule` - Complete schedule with timetables, equipment assignments, driver duties
 - `Timetable` - Collection of trains within a track layout
 - `Train` / `TrainPart` - Train with station calls and locomotive/trainset assignments
-- `Layout` / `Station` / `TrackStretch` - Physical railway infrastructure
+- `Layout` / `TrackStretch` / `DispatchStretch` - Physical railway infrastructure
+- `OperationLocation` (abstract) - Base class for locations; subclasses: `Station`, `SignalControlledLocation`, `OtherLocation`
 - `StationCall` - Scheduled stop with arrival/departure times
 - `LocoSchedule` / `TrainsetSchedule` - Equipment assignments (implement `VehicleSchedule`)
 - `ValidationOptions` - Configurable validation parameters
@@ -74,8 +75,11 @@ Test projects use MSTest.Sdk with Microsoft.Testing.Platform runner (parallel ex
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): Runs on push/PR to master, builds and tests Model.Tests, Importers.Interfaces.Tests, Importers.Xpln.Tests on Ubuntu
-- **Publish** (`.github/workflows/publish.yml`): Publishes packages to NuGet.org on release
+Single workflow (`.github/workflows/ci.yml`) with three jobs:
+
+1. **build** - Always runs: checkout, restore, build, upload artifacts
+2. **test** - Always runs after build: runs Model.Tests, Importers.Interfaces.Tests, Importers.Xpln.Tests
+3. **publish** - Only runs when version in Directory.Build.props is bumped: packs and publishes to NuGet.org
 
 ## Language & Framework
 

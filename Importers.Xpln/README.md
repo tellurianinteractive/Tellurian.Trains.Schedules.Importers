@@ -39,11 +39,9 @@ The XPLN SubType field determines which `OperationLocation` subclass is created:
 
 | SubType | Model Class | Description |
 |---------|-------------|-------------|
-| `Station` (or empty) | `Station` | A manned operation location with dispatcher |
-| `Block` | `SignalControlledLocation` | An unmanned location controlled by another station's signals |
+| `Station` | `Station` | An operation location with a dispatcher function (either manned or delegated to locomotive driver) |
+| `Block` | `SignalControlledLocation` | An unmanned location controlled by another station or automatic |
 | Other values | `OtherLocation` | An unmanned location without signal control |
-
-For `SignalControlledLocation`, the controlling station can be specified using the `Controlled` field.
 
 ### Routes (from Routes worksheet)
 
@@ -51,6 +49,7 @@ For `SignalControlledLocation`, the controlling station can be specified using t
 |--------------|-------------|
 | `TrackStretch` | Start/end stations, distance, number of tracks, speed limit, travel time |
 | `TimetableStretch` | Named route groupings for timetable display |
+| `DispatchStretch` | Stretch between adjacent stations that carry out train dispatch between them |
 
 ### Trains (from Trains worksheet)
 

@@ -1,10 +1,11 @@
-name: CI Build
+name: CI
 
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -13,6 +14,77 @@ env:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_changed: ${{ steps.version.outputs.changed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Check version
+        id: version
+        run: |
+          CURRENT_VERSION=$(grep -oP '(?<=<Version>)[^<]+' Directory.Build.props)
+          echo "Current version: $CURRENT_VERSION"
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+          # For workflow_dispatch or PRs, don't trigger publish
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger - will publish"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Pull request - won't publish"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if version changed from previous commit
+          git show HEAD~1:Directory.Build.props > /tmp/prev_props.xml 2>/dev/null || true
+          if [ -f /tmp/prev_props.xml ]; then
+            PREVIOUS_VERSION=$(grep -oP '(?<=<Version>)[^<]+' /tmp/prev_props.xml || echo "")
+            echo "Previous version: $PREVIOUS_VERSION"
+
+            if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+              echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "Version unchanged"
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No previous version found - will publish"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            **/bin/Release/
+            **/obj/Release/
+          retention-days: 1
+
+  test:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -24,14 +96,63 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Test Model
+        run: dotnet test Model.Tests/Model.Tests.csproj --configuration Release --no-build --verbosity normal
 
-      - name: Test
+      - name: Test Importers.Interfaces
+        run: dotnet test Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test Importers.Xpln
+        run: dotnet test Importers.Xpln.Tests/Importers.Xpln.Tests.csproj --configuration Release --no-build --verbosity normal
+
+  publish:
+    needs: [build, test]
+    if: needs.build.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: nuget
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build --output ./nupkgs
+
+      - name: Publish to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet test --project Model.Tests --configuration Release --no-build --verbosity normal
-          dotnet test --project Importers.Interfaces.Tests --configuration Release --no-build --verbosity normal
-          dotnet test --project Importers.Xpln.Tests --configuration Release --no-build --verbosity normal
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Model.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Interfaces.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Services.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Model.Databases.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Xpln.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Summary
+        run: |
+          echo "## Published packages v${{ needs.build.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Importers.Interfaces" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Importers.Services" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model.Databases" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Importers.Xpln" >> $GITHUB_STEP_SUMMARY
