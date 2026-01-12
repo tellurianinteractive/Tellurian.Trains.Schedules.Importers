@@ -3,37 +3,160 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Tellurian.Trains.Schedules.Model.Databases;
 
+/// <summary>
+/// Entity Framework Core database context for persisting railway schedule data.
+/// </summary>
+/// <remarks>
+/// This context provides access to all schedule-related entities organized into three layers:
+/// <list type="bullet">
+/// <item><description>Layout layer: Physical infrastructure (layouts, stations, tracks, stretches)</description></item>
+/// <item><description>Timetable layer: Train scheduling (timetables, trains, station calls)</description></item>
+/// <item><description>Schedule layer: Operational planning (schedules, vehicles, driver duties)</description></item>
+/// </list>
+/// </remarks>
+/// <param name="options">The options to be used by this <see cref="DbContext"/>.</param>
 public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : DbContext(options)
 {
+    #region Layout Layer
 
-    // Layout layer
+    /// <summary>
+    /// Gets the set of railway layouts in the database.
+    /// </summary>
     public DbSet<Layout> Layouts => Set<Layout>();
+
+    /// <summary>
+    /// Gets the set of railway companies in the database.
+    /// </summary>
     public DbSet<Company> Companies => Set<Company>();
+
+    /// <summary>
+    /// Gets the set of operation locations (stations) in the database.
+    /// </summary>
     public DbSet<OperationLocation> OperationLocations => Set<OperationLocation>();
+
+    /// <summary>
+    /// Gets the set of stations in the database.
+    /// </summary>
+    public DbSet<Station> Stations => Set<Station>();
+
+    /// <summary>
+    /// Gets the set of signal controlled locations in the database.
+    /// </summary>
+    public DbSet<SignalControlledLocation> SignalControlledLocations => Set<SignalControlledLocation>();
+
+    /// <summary>
+    /// Gets the set of other locations in the database.
+    /// </summary>
+    public DbSet<OtherLocation> OtherLocations => Set<OtherLocation>();
+
+    /// <summary>
+    /// Gets the set of dispatch stretches in the database.
+    /// </summary>
+    public DbSet<DispatchStretch> DispatchStretches => Set<DispatchStretch>();
+
+    /// <summary>
+    /// Gets the set of station tracks in the database.
+    /// </summary>
     public DbSet<StationTrack> StationTracks => Set<StationTrack>();
+
+    /// <summary>
+    /// Gets the set of track stretches between stations in the database.
+    /// </summary>
     public DbSet<TrackStretch> TrackStretches => Set<TrackStretch>();
+
+    /// <summary>
+    /// Gets the set of timetable stretches (logical groupings of track stretches) in the database.
+    /// </summary>
     public DbSet<TimetableStretch> TimetableStretches => Set<TimetableStretch>();
 
-    // Timetable layer
+    #endregion
+
+    #region Timetable Layer
+
+    /// <summary>
+    /// Gets the set of timetables in the database.
+    /// </summary>
     public DbSet<Timetable> Timetables => Set<Timetable>();
+
+    /// <summary>
+    /// Gets the set of train categories in the database.
+    /// </summary>
     public DbSet<TrainCategory> TrainCategories => Set<TrainCategory>();
+
+    /// <summary>
+    /// Gets the set of trains in the database.
+    /// </summary>
     public DbSet<Train> Trains => Set<Train>();
+
+    /// <summary>
+    /// Gets the set of station calls (scheduled stops) in the database.
+    /// </summary>
     public DbSet<StationCall> StationCalls => Set<StationCall>();
+
+    /// <summary>
+    /// Gets the set of wagon groups in the database.
+    /// </summary>
     public DbSet<WagonGroup> WagonGroups => Set<WagonGroup>();
 
-    // Schedule layer
+    #endregion
+
+    #region Schedule Layer
+
+    /// <summary>
+    /// Gets the set of schedules in the database.
+    /// </summary>
     public DbSet<Schedule> Schedules => Set<Schedule>();
+
+    /// <summary>
+    /// Gets the set of vehicles (locomotives and trainsets) in the database.
+    /// </summary>
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+
+    /// <summary>
+    /// Gets the set of vehicle schedule assignments in the database.
+    /// </summary>
     public DbSet<VehicleScheduleAssignment> VehicleScheduleAssignments => Set<VehicleScheduleAssignment>();
+
+    /// <summary>
+    /// Gets the set of vehicle schedules in the database.
+    /// </summary>
     public DbSet<VehicleSchedule> VehicleSchedules => Set<VehicleSchedule>();
+
+    /// <summary>
+    /// Gets the set of driver duties in the database.
+    /// </summary>
     public DbSet<DriverDuty> DriverDuties => Set<DriverDuty>();
+
+    /// <summary>
+    /// Gets the set of train parts in the database.
+    /// </summary>
     public DbSet<TrainPart> TrainParts => Set<TrainPart>();
 
-    // Supporting entities
+    #endregion
+
+    #region Supporting Entities
+
+    /// <summary>
+    /// Gets the set of call notes in the database.
+    /// </summary>
     public DbSet<CallNote> CallNotes => Set<CallNote>();
+
+    /// <summary>
+    /// Gets the set of text call notes in the database.
+    /// </summary>
     public DbSet<TextCallNote> TextCallNotes => Set<TextCallNote>();
+
+    /// <summary>
+    /// Gets the set of driver duty notes in the database.
+    /// </summary>
     public DbSet<DriverDutyNote> DriverDutyNotes => Set<DriverDutyNote>();
 
+    #endregion
+
+    /// <summary>
+    /// Configures the entity model for the database context.
+    /// </summary>
+    /// <param name="modelBuilder">The builder being used to construct the model for this context.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -58,7 +181,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .IsRequired()
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(e => e.Stations)
+            entity.HasMany(e => e.OperationLocations)
                   .WithOne(e => e.Layout)
                   .HasForeignKey(e => e.LayoutId)
                   .OnDelete(DeleteBehavior.Cascade);
@@ -84,13 +207,12 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
         });
 
-        // OperationLocation (Station)
+        // OperationLocation (Station) - TPH inheritance
         modelBuilder.Entity<OperationLocation>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Signature).HasMaxLength(10).IsRequired();
-            entity.Property(e => e.Type).HasMaxLength(50);
 
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
 
@@ -98,6 +220,38 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne(e => e.Station)
                   .HasForeignKey(e => e.StationId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // TPH discriminator for OperationLocation hierarchy
+            entity.HasDiscriminator<string>("LocationType")
+                  .HasValue<Station>("Station")
+                  .HasValue<SignalControlledLocation>("SignalControlled")
+                  .HasValue<OtherLocation>("Other");
+        });
+
+        // Register derived types
+        modelBuilder.Entity<Station>();
+        modelBuilder.Entity<SignalControlledLocation>(entity =>
+        {
+            entity.HasOne(e => e.ControlledBy)
+                  .WithMany()
+                  .HasForeignKey("ControlledByStationId")
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .IsRequired(false);
+        });
+        modelBuilder.Entity<OtherLocation>();
+
+        // DispatchStretch
+        modelBuilder.Entity<DispatchStretch>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.From)
+                  .WithMany()
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.To)
+                  .WithMany()
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // StationTrack

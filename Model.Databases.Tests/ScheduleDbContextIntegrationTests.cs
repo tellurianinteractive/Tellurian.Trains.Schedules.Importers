@@ -90,7 +90,7 @@ public class ScheduleDbContextIntegrationTests
         var company = new Company(1, "Test Company", "TST", "DE");
         layout.Add(company);
 
-        var station = new OperationLocation(1, "Test Station", "TS");
+        var station = new Station(1, "Test Station", "TS");
         layout.Add(station);
 
         var track = new StationTrack(1, "1");
@@ -102,16 +102,16 @@ public class ScheduleDbContextIntegrationTests
         // Assert - Query back
         var savedLayout = await context.Layouts
             .Include(l => l.Companies)
-            .Include(l => l.Stations)
+            .Include(l => l.OperationLocations)
             .ThenInclude(s => s.Tracks)
             .FirstAsync(CancellationToken);
 
         Assert.AreEqual("Test Layout", savedLayout.Name);
         Assert.AreEqual(1, savedLayout.Companies.Count);
         Assert.AreEqual("Test Company", savedLayout.Companies.First().Name);
-        Assert.AreEqual(1, savedLayout.Stations.Count);
-        Assert.AreEqual("Test Station", savedLayout.Stations.First().Name);
-        Assert.AreEqual(1, savedLayout.Stations.First().Tracks.Count);
+        Assert.AreEqual(1, savedLayout.OperationLocations.Count);
+        Assert.AreEqual("Test Station", savedLayout.OperationLocations.First().Name);
+        Assert.AreEqual(1, savedLayout.OperationLocations.First().Tracks.Count);
     }
 
     [TestMethod]

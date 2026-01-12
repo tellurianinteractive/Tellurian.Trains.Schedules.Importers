@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
@@ -18,7 +19,8 @@ public class ImportResultTests
         var target = await ImportResult(filePath);
         var json = target.Json();
         Assert.IsNotNull(json);
-        var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
+        // Use matching options with ReferenceHandler.Preserve since that's what Json() uses
+        var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptionsWithReferenceHandler);
         Assert.AreEqual(4, result.Messages.Length);
         Assert.IsTrue(result.IsSuccess);
     }
@@ -43,6 +45,12 @@ public class ImportResultTests
     }
 
     static JsonSerializerOptions JsonSerializerOptions => new() { PropertyNameCaseInsensitive = true };
+
+    static JsonSerializerOptions JsonSerializerOptionsWithReferenceHandler => new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReferenceHandler = ReferenceHandler.Preserve
+    };
 
     static async Task<ImportResult<Schedule>> ImportResult(string testFilePath)
     {

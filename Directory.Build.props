@@ -5,18 +5,19 @@
 		<Company>Tellurian Interactive</Company>
 		<Copyright>© Stefan Fjällemark 2023-2026</Copyright>
 		<Authors>Stefan Fjällemark</Authors>
-		<Version>2.0.1</Version>
-		<AssemblyVersion>2.0.1.0</AssemblyVersion>
+		<Version>2.1.0</Version>
+		<AssemblyVersion>2.1.0.0</AssemblyVersion>
 		<NeutralLanguage>en-GB</NeutralLanguage>
 		<Platforms>AnyCPU</Platforms>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 	<PropertyGroup>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageTags>model-trains scheduling timetables FREMO XPLN</PackageTags>
-		<PackageReleaseNotes></PackageReleaseNotes>
+		<PackageReleaseNotes>2.1.0: OperationLocation is now abstract with Station, SignalControlledLocation, and OtherLocation subclasses. Added DispatchStretch for dispatch planning. See RELEASENOTES.md for details.</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -32,7 +33,8 @@
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 	<PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-		<NoWarn>$(NoWarn);MSTEST0001;MSTEST0037</NoWarn>
+		<NoWarn>$(NoWarn);MSTEST0001;MSTEST0037;CS1591</NoWarn>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<!-- Microsoft Testing Platform parallelism (replaces runsettings MaxCpuCount) -->
 		<TestingPlatformParallelEnabled>true</TestingPlatformParallelEnabled>
 		<!-- Suppress runsettings compatibility warnings -->

@@ -30,8 +30,20 @@ Unlike databases, spreadsheet files cannot guarantee consistent data. In XPLN, u
 
 | Type | Model Object | Description |
 |------|--------------|-------------|
-| `station` | `OperationLocation` | Name, signature, subtype (Station/Block), shadow/depot flag |
+| `station` | `Station`, `SignalControlledLocation`, or `OtherLocation` | Name, signature, shadow/depot flag. The subtype determines the class (see below). |
 | `track` | `StationTrack` | Track number, subtype (Main, Side, Siding, Depot, Goods), display order, usage notes |
+
+#### Station SubTypes
+
+The XPLN SubType field determines which `OperationLocation` subclass is created:
+
+| SubType | Model Class | Description |
+|---------|-------------|-------------|
+| `Station` (or empty) | `Station` | A manned operation location with dispatcher |
+| `Block` | `SignalControlledLocation` | An unmanned location controlled by another station's signals |
+| Other values | `OtherLocation` | An unmanned location without signal control |
+
+For `SignalControlledLocation`, the controlling station can be specified using the `Controlled` field.
 
 ### Routes (from Routes worksheet)
 
@@ -106,7 +118,7 @@ if (result.IsSuccess)
     var schedule = result.Item;
 
     // Access the imported data
-    Console.WriteLine($"Stations: {schedule.Timetable.Layout.Stations.Count}");
+    Console.WriteLine($"Locations: {schedule.Timetable.Layout.OperationLocations.Count}");
     Console.WriteLine($"Trains: {schedule.Timetable.Trains.Count}");
     Console.WriteLine($"Vehicles: {schedule.Vehicles.Count}");
     Console.WriteLine($"Driver duties: {schedule.DriverDuties.Count}");

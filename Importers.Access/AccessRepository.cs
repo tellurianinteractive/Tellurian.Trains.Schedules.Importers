@@ -11,6 +11,15 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Access;
 
+/// <summary>
+/// Repository for importing and persisting railway schedule data from Microsoft Access databases.
+/// </summary>
+/// <remarks>
+/// This class provides functionality to read layouts, timetables, trains, and related railway
+/// schedule data from Microsoft Access database files using ODBC connections.
+/// </remarks>
+/// <param name="databaseFile">The Microsoft Access database file to connect to.</param>
+/// <param name="logger">The logger instance for recording import operations and messages.</param>
 public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> logger) : IImportService
 {
     private readonly FileInfo DatabaseFile = databaseFile;
@@ -28,6 +37,11 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         }
     }
 
+    /// <summary>
+    /// Imports a complete schedule from the Access database.
+    /// </summary>
+    /// <param name="name">The name of the schedule/layout to import.</param>
+    /// <returns>An import result containing the schedule if successful, or error messages if the import failed.</returns>
     public Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         var layout = GetLayout(name);
@@ -129,6 +143,15 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         finalHandler?.Invoke(container);
     }
 
+    /// <summary>
+    /// Saves a layout to the Access database.
+    /// </summary>
+    /// <param name="layout">The layout to save.</param>
+    /// <returns>An import result indicating success or failure with appropriate messages.</returns>
+    /// <remarks>
+    /// Only new layouts can be saved; updating existing layouts is not supported.
+    /// The layout including stations, station tracks, track stretches, and timetable stretches will be persisted.
+    /// </remarks>
     public ImportResult<Layout> Save(Layout layout)
     {
         var existing = ReadLayout(layout.Name);
@@ -140,7 +163,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         var layoutId = (int?)ExecuteScalar(CreateCommand("SELECT Id FROM Layout WHERE [Name] = '" + layout.Name + "'"));
         if (layoutId.HasValue)
         {
-            foreach (var station in layout.Stations) Stations.AddOrUpdateStation(layoutId.Value, station, CreateConnection());
+            foreach (var station in layout.OperationLocations) Stations.AddOrUpdateStation(layoutId.Value, station, CreateConnection());
             foreach (var stretch in layout.TrackStretches) TrackStretches.AddTrackStretches(layoutId.Value, stretch, CreateConnection());
             foreach (var stretch in layout.TimetableStretches) TimetableStretches.AddTimetableStretches(layoutId.Value, stretch, CreateConnection());
             return ImportResult<Layout>.Success();
@@ -149,6 +172,15 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         return ImportResult<Layout>.Failure(Message.Error(string.Format(CultureInfo.CurrentCulture, "Layout {0} does not exist.", layout.Name)));
     }
 
+    /// <summary>
+    /// Saves a timetable to the Access database.
+    /// </summary>
+    /// <param name="timetable">The timetable to save.</param>
+    /// <returns>An import result indicating success or failure with appropriate messages.</returns>
+    /// <remarks>
+    /// Only new timetables can be saved; updating existing timetables is not supported.
+    /// The timetable's layout will also be saved if it does not already exist.
+    /// </remarks>
     public ImportResult<Timetable> Save(Timetable timetable)
     {
         var existing = ReadLayout(timetable.Name);

@@ -20,10 +20,21 @@ services.AddDbContext<ScheduleDbContext>(options =>
 ```
 
 The context includes DbSets for all domain entities:
-- Layout, Company, OperationLocation, StationTrack, TrackStretch, TimetableStretch
+- Layout, Company, StationTrack, TrackStretch, TimetableStretch, DispatchStretch
+- OperationLocation with TPH inheritance: Station, SignalControlledLocation, OtherLocation
 - Timetable, TrainCategory, Train, StationCall
 - Schedule, VehicleSchedule (LocoSchedule, TrainsetSchedule), DriverDuty, TrainPart
 - Note
+
+### OperationLocation Inheritance
+
+The `OperationLocation` hierarchy uses Table-Per-Hierarchy (TPH) mapping with a `LocationType` discriminator column:
+
+| Type | Discriminator Value |
+|------|---------------------|
+| `Station` | "Station" |
+| `SignalControlledLocation` | "SignalControlled" |
+| `OtherLocation` | "Other" |
 
 ## Database Provider
 

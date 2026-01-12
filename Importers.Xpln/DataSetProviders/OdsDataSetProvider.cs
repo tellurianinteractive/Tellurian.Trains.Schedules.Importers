@@ -8,11 +8,31 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
+/// <summary>
+/// Provides functionality to read schedule data from ODS (OpenDocument Spreadsheet) files.
+/// This provider parses the XML structure within the ODS ZIP archive and extracts
+/// worksheet data including cell values and background colors.
+/// </summary>
+/// <param name="logger">Logger for recording import progress and errors.</param>
 public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDataSetProvider
 {
     private readonly ILogger Logger = logger;
+
+    /// <summary>
+    /// The column name used to store background color information extracted from cells.
+    /// </summary>
     public const string BackgroundColorColumnName = "BackgroundColor";
 
+    /// <summary>
+    /// Imports schedule data from an ODS (OpenDocument Spreadsheet) stream.
+    /// </summary>
+    /// <param name="inputStream">The input stream containing the ODS file data.</param>
+    /// <param name="dataSetConfiguration">Configuration specifying which worksheets to read.</param>
+    /// <returns>
+    /// A <see cref="DataSet"/> containing the imported data tables with cell values and background colors,
+    /// or throws an exception if the file cannot be read.
+    /// </returns>
+    /// <exception cref="Exception">Thrown when an error occurs while reading the ODS file.</exception>
     public DataSet? ImportSchedule(Stream inputStream, DataSetConfiguration dataSetConfiguration)
     {
         try

@@ -8,7 +8,7 @@ internal static class TestDataFactory
     public static StationTrack CreateStationTrack()
     {
         var result = StationTrack.Example;
-        result.Station = new OperationLocation(2, "Ytterby", "Yb");
+        result.Station = new Station(2, "Ytterby", "Yb");
         return result;
     }
 
@@ -21,7 +21,7 @@ internal static class TestDataFactory
 
     internal static OperationLocation CreateStation1()
     {
-        var station = new OperationLocation(3, "Göteborg", "G");
+        var station = new Station(3, "Göteborg", "G");
         station.Add(new StationTrack(1, "1"));
         station.Add(new StationTrack(2, "2"));
         station.Add(new StationTrack(3, "3"));
@@ -31,7 +31,7 @@ internal static class TestDataFactory
 
     private static OperationLocation CreateStation2()
     {
-        var station = new OperationLocation(2, "Ytterby", "Yb");
+        var station = new Station(2, "Ytterby", "Yb");
         station.Add(new StationTrack(1, "1"));
         station.Add(new StationTrack(2, "2"));
         return station;
@@ -39,7 +39,7 @@ internal static class TestDataFactory
 
     private static OperationLocation CreateStation3()
     {
-        var station = new OperationLocation(1, "Stenungsund", "Snu");
+        var station = new Station(1, "Stenungsund", "Snu");
         station.Add(new StationTrack(1, "1"));
         station.Add(new StationTrack(2, "2"));
         return station;
@@ -95,7 +95,7 @@ internal static class TestDataFactory
     {
         var layout = new Layout { Name = "Test" };
         foreach (var s in Stations) layout.Add(s);
-        var stations = layout.Stations.ToArray();
+        var stations = layout.OperationLocations.ToArray();
         for (var i = 0; i < stations.Length - 1; i++) layout.Add(new TrackStretch(1, stations[i], stations[i + 1], 10));
         var stretch = new TimetableStretch(1, "1");
         foreach (var ts in layout.TrackStretches) stretch.AddLast(ts);

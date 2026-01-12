@@ -3,10 +3,18 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Services;
 
+/// <summary>
+/// Service for retrieving train category data from a CSV file.
+/// </summary>
+/// <param name="path">Optional path to the CSV file containing train category data. If not specified, defaults to 'CSV/TrainCategories.csv' in the application base directory.</param>
 public class TrainCategoriesFromCsvService(string? path = null) : ITrainCategoriesService
 {
     private readonly string _path = path ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CSV", "TrainCategories.csv");
 
+    /// <summary>
+    /// Retrieves all train categories from the configured CSV file asynchronously.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable collection of train categories.</returns>
     public async Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync()
     {
         var categories = new List<TrainCategory>(50);

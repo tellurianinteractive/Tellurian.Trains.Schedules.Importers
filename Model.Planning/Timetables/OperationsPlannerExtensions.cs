@@ -1,5 +1,8 @@
 ﻿namespace Tellurian.Trains.Schedules.Model.Planning.Timetables;
 
+/// <summary>
+/// Provides extension methods for the <see cref="OperationsPlanner"/> class to support train creation and scheduling operations.
+/// </summary>
 public static class OperationsPlannerExtensions
 {
     extension(OperationsPlanner planner)

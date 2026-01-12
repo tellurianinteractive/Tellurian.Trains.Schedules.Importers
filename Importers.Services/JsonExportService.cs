@@ -5,6 +5,10 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Services;
 
+/// <summary>
+/// Service for exporting schedule data to JSON files.
+/// </summary>
+/// <param name="destination">The destination file where the JSON output will be written.</param>
 public class JsonExportService(FileInfo destination) : IExportService
 {
     private readonly FileInfo _destination = destination;

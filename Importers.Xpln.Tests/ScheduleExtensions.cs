@@ -178,12 +178,12 @@ internal static class ScheduleExtensions
                 if (stationId != lastStationId)
                 {
                     result.Add(station);
-                    station = new OperationLocation(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
+                    station = new Station(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
                 }
             }
             else
             {
-                station = new OperationLocation(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
+                station = new Station(stationId, reader.GetString(reader.GetOrdinal("Signature")), reader.GetString(reader.GetOrdinal("FullName")));
 
             }
             var track = new StationTrack(reader.GetInt32(reader.GetOrdinal("TrackId")), reader.GetString(reader.GetOrdinal("TrackNumber")), true, true);

@@ -11,7 +11,8 @@
       "Bash(copy:*)",
       "Bash(findstr:*)",
       "WebFetch(domain:www.nuget.org)",
-      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\" /b)"
+      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\" /b)",
+      "Bash(done)"
     ]
   }
 }

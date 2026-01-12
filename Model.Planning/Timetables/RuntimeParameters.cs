@@ -1,5 +1,12 @@
 ﻿namespace Tellurian.Trains.Schedules.Model.Planning.Timetables;
 
+/// <summary>
+/// Represents configuration parameters for calculating train runtimes and scheduling operations.
+/// </summary>
+/// <remarks>
+/// These parameters are used to convert between scale speeds and real speeds, and to determine
+/// minimum stop durations, clearance times, and other scheduling-related timings.
+/// </remarks>
 public record RuntimeParameters
 {
     /// <summary>
@@ -18,8 +25,8 @@ public record RuntimeParameters
     public TimeSpan MinimumStoppingDuration { get; set; }
 
     /// <summary>
-    /// The default real (not fast) time for reversing a loco at a station. 
-    /// This can be overridden for each <see cref="OperationPlace"/>.
+    /// The default real (not fast) time for reversing a loco at a station.
+    /// This can be overridden for each <see cref="Model.OperationLocation"/>.
     /// </summary>
     public TimeSpan LocoReversingRealDuration { get; set; }
 
@@ -39,6 +46,15 @@ public record RuntimeParameters
     /// </summary>
     public double SpeedFactor => MaxRealSpeed / MaxScaleSpeed;
 
+    /// <summary>
+    /// Gets the default runtime parameters with commonly used values for model railway operations.
+    /// </summary>
+    /// <value>
+    /// A <see cref="RuntimeParameters"/> instance configured with default values:
+    /// MaxRealSpeed of 0.3 m/s, MaxScaleSpeed of 130 km/h, MinimumStoppingDuration of 3 minutes,
+    /// LocoReversingRealDuration of 5 minutes, TrainClearanceRealDuration of 1 minute, and
+    /// ExpectedFastClockSpeed of 5.
+    /// </value>
     public static RuntimeParameters Default => new()
     {
         MaxRealSpeed = 0.3,

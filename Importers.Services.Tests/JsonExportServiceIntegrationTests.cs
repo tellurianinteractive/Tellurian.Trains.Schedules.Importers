@@ -135,14 +135,14 @@ public class JsonExportServiceIntegrationTests
             // Assert - Verify key properties match
             Assert.AreEqual(originalSchedule.Name, importedSchedule.Name, "Schedule name mismatch");
             Assert.AreEqual(originalSchedule.Timetable.Trains.Count, importedSchedule.Timetable.Trains.Count, "Train count mismatch");
-            Assert.AreEqual(originalSchedule.Timetable.Layout.Stations.Count, importedSchedule.Timetable.Layout.Stations.Count, "Station count mismatch");
+            Assert.AreEqual(originalSchedule.Timetable.Layout.OperationLocations.Count, importedSchedule.Timetable.Layout.OperationLocations.Count, "Station count mismatch");
             Assert.AreEqual(originalSchedule.Vehicles.Count, importedSchedule.Vehicles.Count, "Vehicles count mismatch");
             Assert.AreEqual(originalSchedule.VehicleSchedules.Count, importedSchedule.VehicleSchedules.Count, "VehicleSchedules count mismatch");
             Assert.AreEqual(originalSchedule.DriverDuties.Count, importedSchedule.DriverDuties.Count, "DriverDuties count mismatch");
 
             Console.WriteLine($"Round-trip JSON export/import completed successfully");
             Console.WriteLine($"  Trains: {importedSchedule.Timetable.Trains.Count}");
-            Console.WriteLine($"  Stations: {importedSchedule.Timetable.Layout.Stations.Count}");
+            Console.WriteLine($"  Stations: {importedSchedule.Timetable.Layout.OperationLocations.Count}");
             Console.WriteLine($"  Vehicles: {importedSchedule.Vehicles.Count}");
             Console.WriteLine($"  VehicleSchedules: {importedSchedule.VehicleSchedules.Count}");
             Console.WriteLine($"  DriverDuties: {importedSchedule.DriverDuties.Count}");

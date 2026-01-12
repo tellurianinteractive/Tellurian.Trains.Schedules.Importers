@@ -5,6 +5,7 @@
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="README.md" />
+    <File Path="RELEASENOTES.md" />
     <File Path="UNIFIED_MODEL.md" />
     <File Path="VALIDATION.md" />
   </Folder>

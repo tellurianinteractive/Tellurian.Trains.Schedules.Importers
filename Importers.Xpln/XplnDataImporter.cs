@@ -11,6 +11,19 @@ using static Tellurian.Trains.Schedules.Model.TrainExtensions;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln;
 
+/// <summary>
+/// Imports railway schedule data from XPLN spreadsheet files (ODS/XLSX format).
+/// This importer reads station tracks, routes, trains, locomotives, trainsets, and driver duties
+/// from the XPLN data format and converts them into a complete schedule model.
+/// </summary>
+/// <remarks>
+/// The importer processes three main worksheets from the XPLN file:
+/// <list type="bullet">
+/// <item><description>StationTrack - Contains station and track definitions</description></item>
+/// <item><description>Routes - Contains track stretches between stations</description></item>
+/// <item><description>Trains - Contains train definitions, timetables, locomotive and trainset assignments, and driver duties</description></item>
+/// </list>
+/// </remarks>
 public sealed class XplnDataImporter : IImportService, IDisposable
 {
     internal record TrainPartKeys(Maybe<StationCall> FromCall, Maybe<StationCall> ToCall, IEnumerable<Message> Messages);
@@ -26,6 +39,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private DataSet? DataSet;
     private Layout _currentLayout = default!;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="XplnDataImporter"/> class with a stream input.
+    /// </summary>
+    /// <param name="inputStream">The input stream containing the XPLN spreadsheet data.</param>
+    /// <param name="dataSetProvider">The provider for reading spreadsheet data (ODS or XLSX).</param>
+    /// <param name="operatingCompaniesService">Service for retrieving operating company information.</param>
+    /// <param name="trainCategoriesService">Service for retrieving train category information.</param>
+    /// <param name="logger">Logger for recording import progress and errors.</param>
     public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
     {
         _inputStream = inputStream;
@@ -36,6 +57,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="XplnDataImporter"/> class with a file input.
+    /// </summary>
+    /// <param name="inputFile">The file containing the XPLN spreadsheet data.</param>
+    /// <param name="dataSetProvider">The provider for reading spreadsheet data (ODS or XLSX).</param>
+    /// <param name="operatingCompaniesService">Service for retrieving operating company information.</param>
+    /// <param name="trainCategoriesService">Service for retrieving train category information.</param>
+    /// <param name="logger">Logger for recording import progress and errors.</param>
     public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger) :
         this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger)
     { }
@@ -75,6 +104,15 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     }
 
 
+    /// <summary>
+    /// Imports a complete schedule from the XPLN data source.
+    /// </summary>
+    /// <param name="name">The name to assign to the imported schedule.</param>
+    /// <returns>
+    /// An <see cref="ImportResult{Schedule}"/> containing the imported schedule if successful,
+    /// or validation messages describing any errors encountered during import.
+    /// </returns>
+    /// <exception cref="IOException">Thrown when the input stream cannot be read.</exception>
     public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
     {
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
@@ -133,7 +171,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         var stations = AddStations(result, messages);
         if (stations.IsFailure) return stations;
         var routes = AddRoutes(result, messages);
-        return routes;
+        result.DispatchStretches = result.CreateDispatchStretches();
+        if (routes.IsFailure) return routes;
+        return ImportResult<Layout>.Success(result, messages);
     }
 
     private ImportResult<Layout> AddStations(Layout layout, List<Message> messages)
@@ -155,6 +195,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ReadingWorksheet, WorkSheetName)));
         var rowNumber = 1;
         OperationLocation? current = null;
+        Station? last = null;
         foreach (DataRow station in stations.Rows)
         {
 
@@ -163,11 +204,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 if (IsRepeatedHeader(station)) continue;
                 var itemMessages = new List<Message>();
                 var fields = station.GetRowFields();
-                if (fields.AreAllEmpty) { if (layout.Stations.Count > 0) break; else continue; }
+                if (fields.AreAllEmpty) { if (layout.OperationLocations.Count > 0) break; else continue; }
                 itemMessages.AddRange(ValidateRow(fields, rowNumber));
                 if (itemMessages.HasNoStoppingErrors())
                 {
-                    if (fields[Type].IsExpected("Station"))
+                    if (fields[Type].IsAnyOf("Station,Block"))
                     {
                         if (current is not null)
                         {
@@ -177,7 +218,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         var validationMessages = ValidateStation(fields, rowNumber);
                         if (validationMessages.HasNoStoppingErrors())
                         {
-                            current = CreateStation(rowNumber, fields);
+                            current = CreateOperationLocation(rowNumber, fields, last);
+                            last = current is Station s ? s : null;
                         }
                         itemMessages.AddRange(validationMessages);
                     }
@@ -206,12 +248,13 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         static bool IsRepeatedHeader(DataRow row) =>
             row[0].Equals("Name") && row[1].Equals("Enum");
 
-        static OperationLocation CreateStation(int rowNumber, string[] fields)
+        static OperationLocation CreateOperationLocation(int rowNumber, string[] fields, Station? last)
         {
-            return new(rowNumber, fields[Name], fields[Signature])
+            return fields[SubType].ToUpperInvariant() switch
             {
-                Type = fields[Type],
-                IsShadow = fields[SubType].IsExpected("Depot")
+                "STATION" => new Station(rowNumber, fields[Name], fields[Signature]),
+                "BLOCK" => new SignalControlledLocation(rowNumber, fields[Name], fields[Signature]) { ControlledBy = last },
+                _ => new OtherLocation(rowNumber, fields[Name], fields[Signature])
             };
         }
 
@@ -283,7 +326,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             {
                 var itemMessages = new List<Message>();
                 var fields = route.GetRowFields();
-                if (fields.AreAllEmpty) { if (layout.Stations.Count > 0) break; else continue; }
+                if (fields.AreAllEmpty) { if (layout.OperationLocations.Count > 0) break; else continue; }
                 if (fields[StartStation].IsZeroesOrEmpty && fields[EndStation].IsZeroesOrEmpty) continue;
 
                 var start = layout.Station(fields[StartStation]);
@@ -829,6 +872,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         }
     }
 
+    /// <summary>
+    /// Releases all resources used by the <see cref="XplnDataImporter"/>.
+    /// </summary>
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

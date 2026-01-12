@@ -64,7 +64,7 @@ internal static class Stations
 
     public static void RecordHandler(IDataRecord record, Layout layout)
     {
-        var result = new OperationLocation(record.GetInt32(record.GetOrdinal("LayoutStationId")), record.GetString(record.GetOrdinal("FullName")), record.GetString(record.GetOrdinal("Signature")));
+        var result = new Station(record.GetInt32(record.GetOrdinal("LayoutStationId")), record.GetString(record.GetOrdinal("FullName")), record.GetString(record.GetOrdinal("Signature")));
         layout.Add(result);
     }
 }

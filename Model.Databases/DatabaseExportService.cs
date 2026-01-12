@@ -3,6 +3,14 @@ using Tellurian.Trains.Schedules.Importers.Interfaces;
 
 namespace Tellurian.Trains.Schedules.Model.Databases;
 
+/// <summary>
+/// Provides services for exporting schedule data to a database using Entity Framework Core.
+/// </summary>
+/// <remarks>
+/// This service implements <see cref="IExportService"/> to persist schedule data
+/// to any database supported by Entity Framework Core.
+/// </remarks>
+/// <param name="options">The database context options used to create the <see cref="ScheduleDbContext"/>.</param>
 public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) : IExportService
 {
     private readonly DbContextOptions<ScheduleDbContext> _options = options;

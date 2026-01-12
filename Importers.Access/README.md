@@ -36,7 +36,7 @@ if (result.IsSuccess)
     var schedule = result.Item;
     var layout = schedule.Timetable.Layout;
 
-    Console.WriteLine($"Stations: {layout.Stations.Count}");
+    Console.WriteLine($"Locations: {layout.OperationLocations.Count}");
     Console.WriteLine($"Track stretches: {layout.TrackStretches.Count}");
 }
 ```

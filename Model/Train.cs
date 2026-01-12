@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json.Serialization;
@@ -9,10 +9,12 @@ namespace Tellurian.Trains.Schedules.Model;
 /// <summary>
 /// Represents a train, including its identification, category, company, timetable, and operational details.
 /// </summary>
-/// <remarks>The Train class models a scheduled train and its associated data, such as its number, operator,
-/// timetable, and route calls. It supports equality comparison based on company, number, and external identifier. This
-/// class is designed for use with Entity Framework Core and includes properties for related entities such as Company
-/// and Timetable. Some properties are required for correct instantiation and operation.</remarks>
+/// <remarks>
+/// The Train class models a scheduled train and its associated data, such as its number, operator,
+/// timetable, and route calls. It supports equality comparison based on company, number, and external identifier.
+/// This class is designed for use with Entity Framework Core and includes properties for related entities such as Company
+/// and Timetable. Some properties are required for correct instantiation and operation.
+/// </remarks>
 public class Train : IEquatable<Train>
 {
     // Private parameterless constructor for EF Core and JSON deserialization
@@ -26,6 +28,12 @@ public class Train : IEquatable<Train>
         WagonGroups = [];
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="Train"/> with the specified id, number, and optional external identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier for the train.</param>
+    /// <param name="number">The train number.</param>
+    /// <param name="externalId">An optional external identifier for the train.</param>
     [SetsRequiredMembers]
     public Train(int id, int number, string externalId = "")
     {
@@ -38,6 +46,13 @@ public class Train : IEquatable<Train>
         WagonGroups = [];
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="Train"/> with the specified id, category, number, and optional external identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier for the train.</param>
+    /// <param name="category">The category of the train.</param>
+    /// <param name="number">The train number.</param>
+    /// <param name="externalId">An optional external identifier for the train.</param>
     [SetsRequiredMembers]
     public Train(int id, TrainCategory category, int number, string externalId = "")
         : this(id, number, externalId)
@@ -46,69 +61,172 @@ public class Train : IEquatable<Train>
         CategoryId = category.Id;
     }
 
+    /// <summary>
+    /// Gets or sets the unique identifier for this train.
+    /// </summary>
     public required int Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the train number.
+    /// </summary>
     public required int Number { get; set; }
+
+    /// <summary>
+    /// Gets or sets the external identifier for this train.
+    /// </summary>
     public string ExternalId { get; set; }
+
+    /// <summary>
+    /// Gets or sets an optional remark about this train.
+    /// </summary>
     public string? Remark { get; set; }
+
+    /// <summary>
+    /// Gets or sets the length restrictions for this train.
+    /// </summary>
     public TrainLenght Length { get; set; }
 
-    // FK property for EF Core - optional, company must exist in database
+    /// <summary>
+    /// Gets or sets the foreign key to the operating company. Optional.
+    /// </summary>
     public int? CompanyId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the company operating this train.
+    /// </summary>
     public Company? Company { get; set; }
 
-    // FK property for EF Core - optional, category must exist in database when set
+    /// <summary>
+    /// Gets or sets the foreign key to the train category. Optional.
+    /// </summary>
     public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the category of this train.
+    /// </summary>
     public TrainCategory? Category { get; set; }
 
+    /// <summary>
+    /// Gets or sets the sessions during which this train operates.
+    /// </summary>
     public required Sessions Sessions { get; set; } = Sessions.All;
+
+    /// <summary>
+    /// Gets or sets the groups this train belongs to.
+    /// </summary>
     public IList<string> Groups { get; set; }
 
-    // FK property for EF Core - required
+    /// <summary>
+    /// Gets or sets the foreign key to the timetable. Required.
+    /// </summary>
     public int TimetableId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timetable this train belongs to.
+    /// </summary>
     public Timetable Timetable { get; set; }
 
+    /// <summary>
+    /// Gets or sets the collection of station calls for this train.
+    /// </summary>
     public IList<StationCall> Calls { get; set; }
+
+    /// <summary>
+    /// Gets or sets the collection of wagon groups in this train.
+    /// </summary>
     public IList<WagonGroup> WagonGroups { get; set; }
+
+    /// <summary>
+    /// Gets the driver's start time (arrival time of first call).
+    /// </summary>
     public Time DriverStartTime => this[0].Arrival;
+
+    /// <summary>
+    /// Gets the driver's end time (departure time of last call).
+    /// </summary>
     public Time DriverEndTime => this[^1].Departure;
+
+    /// <summary>
+    /// Gets the station call at the specified index.
+    /// </summary>
+    /// <param name="index">The index of the call to retrieve.</param>
+    /// <returns>The station call at the specified index.</returns>
     public StationCall this[Index index] => Calls[index];
+
+    /// <summary>
+    /// Gets the distinct tracks used by this train, ordered by arrival time.
+    /// </summary>
     internal IEnumerable<StationTrack> Tracks => Calls.OrderBy(c => c.Arrival.Value).Select(c => c.Track).Distinct();
+
+    /// <summary>
+    /// Gets the layout from the first station call.
+    /// </summary>
     public Layout Layout => Calls[0].Station.Layout;
+
+    /// <summary>
+    /// Gets this train as a train part covering all station calls.
+    /// </summary>
     public TrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
 
+    /// <inheritdoc/>
     public bool Equals(Train? other) =>
         other is not null &&
         (Company?.Equals(other.Company) ?? other.Company is null) &&
         Number == other.Number &&
         ExternalId.Equals(other.ExternalId, StringComparison.OrdinalIgnoreCase);
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Train other && Equals(other);
+
+    /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(CompanyId, Number, ExternalId);
+
+    /// <inheritdoc/>
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0} {1}", Category, Number);
 }
 
+/// <summary>
+/// Provides extension methods for <see cref="Train"/>.
+/// </summary>
 public static class TrainExtensions
 {
 
     extension(string value)
     {
+        /// <summary>
+        /// Gets the letter prefix from a train identifier string.
+        /// </summary>
         public string Prefix =>
             string.IsNullOrWhiteSpace(value) ? "" :
             new([.. value.TakeWhile(c => char.IsLetter(c))]);
 
+        /// <summary>
+        /// Gets the numeric part from a train identifier string.
+        /// </summary>
         public string NumberPart =>
             string.IsNullOrWhiteSpace(value) ? "" :
             new([.. value.SkipWhile(c => char.IsLetter(c) || char.IsWhiteSpace(c)).TakeWhile(c => char.IsDigit(c))]);
 
+        /// <summary>
+        /// Parses the number part of the string, returning 0 if parsing fails.
+        /// </summary>
         public int NumberOrZero =>
             int.TryParse(value.NumberPart, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number) ? number : 0;
     }
 
     extension(Train train)
     {
+        /// <summary>
+        /// Gets the full identity string for the train (category prefix + number + suffix).
+        /// </summary>
         public string Identity =>
             train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString();
 
+        /// <summary>
+        /// Finds the station call at the specified time.
+        /// </summary>
+        /// <param name="time">The time to search for.</param>
+        /// <returns>The matching station call.</returns>
         public StationCall StationCall(Time time)
         {
             try
@@ -140,6 +258,15 @@ public static class TrainExtensions
             }
         }
 
+        /// <summary>
+        /// Creates a wagon group for this train between two times.
+        /// </summary>
+        /// <param name="id">The unique identifier for the wagon group.</param>
+        /// <param name="from">The departure time.</param>
+        /// <param name="to">The arrival time.</param>
+        /// <param name="positionInTrain">The position of the wagon group in the train.</param>
+        /// <param name="remark">An optional remark.</param>
+        /// <returns>The created wagon group.</returns>
         public WagonGroup CreateWagonGroup(int id, Time from, Time to, int positionInTrain, string? remark = null)
         {
             var fromCall = train.StationCall(from).ValueOrException(nameof(from));
@@ -156,6 +283,11 @@ public static class TrainExtensions
             };
         }
 
+        /// <summary>
+        /// Adds a wagon group to the train.
+        /// </summary>
+        /// <param name="wagonGroup">The wagon group to add.</param>
+        /// <returns>The added wagon group, or null if input was null.</returns>
         public WagonGroup? Add(WagonGroup? wagonGroup)
         {
             if (wagonGroup is not null && !train.WagonGroups.Contains(wagonGroup))
@@ -167,6 +299,11 @@ public static class TrainExtensions
             return wagonGroup;
         }
 
+        /// <summary>
+        /// Adds a station call to the train.
+        /// </summary>
+        /// <param name="call">The station call to add.</param>
+        /// <returns>The added station call.</returns>
         public StationCall Add(StationCall call)
         {
             train = train.ValueOrException(nameof(train));
@@ -185,6 +322,10 @@ public static class TrainExtensions
             return call;
         }
 
+        /// <summary>
+        /// Fixes a train that has only one call by duplicating it as arrival and departure.
+        /// </summary>
+        /// <returns>The train with fixed calls.</returns>
         public Train WithFixedSingleCallTrain()
         {
             if (train.Calls.Count == 1)
@@ -200,6 +341,10 @@ public static class TrainExtensions
             return train;
         }
 
+        /// <summary>
+        /// Sets the first call as departure only and the last call as arrival only.
+        /// </summary>
+        /// <returns>The train with adjusted call flags.</returns>
         public Train WithFirstCallDepartureOnlyAndLastCallArrivalOnly()
         {
             train.SetFirstCallDepartureOnly();
@@ -207,10 +352,22 @@ public static class TrainExtensions
             return train;
         }
 
+        /// <summary>
+        /// Sets the first call to be departure only (no arrival).
+        /// </summary>
         public void SetFirstCallDepartureOnly() => train.Calls.First().IsArrival = false;
+
+        /// <summary>
+        /// Sets the last call to be arrival only (no departure).
+        /// </summary>
         public void SetLastCallArrivalOnly() => train.Calls.Last().IsDeparture = false;
     }
 
+    /// <summary>
+    /// Determines whether the train is null or has no station calls.
+    /// </summary>
+    /// <param name="train">The train to check.</param>
+    /// <returns><c>true</c> if the train is null or has no calls; otherwise, <c>false</c>.</returns>
     public static bool IsNullOrHasNoCalls([NotNullWhen(false)] this Train? train)
         => train is null || train.Calls.Count == 0;
 }

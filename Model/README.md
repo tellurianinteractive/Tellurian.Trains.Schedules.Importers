@@ -15,10 +15,14 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | Type | Description |
 |------|-------------|
 | `Layout` | Physical track layout with stations, companies, and stretches |
-| `OperationLocation` | Manned station, junction, signal controlled location or other location |
+| `OperationLocation` | Abstract base class for locations where trains can stop or pass |
+| `Station` | A manned operation location (dispatcher present) |
+| `SignalControlledLocation` | An unmanned location controlled by signals from another station |
+| `OtherLocation` | An unmanned location without signal control |
 | `StationTrack` | Track within an operation location |
-| `TrackStretch` | Physical connection between two stations with distance and number of parallel tracks |
+| `TrackStretch` | Physical connection between two operation locations with distance and track count |
 | `TimetableStretch` | A named sequence of track stretches for timetable display |
+| `DispatchStretch` | A stretch between two manned stations (for dispatch planning) |
 | `Company` | Railway company operating trains, vehicles and/or duties |
 
 ### Timetable (Train Operations)
@@ -50,7 +54,7 @@ using Tellurian.Trains.Schedules.Model;
 
 // Create a layout with stations
 var layout = new Layout { Name = "MyLayout" };
-var station = new OperationLocation(1, "Central", "C");
+var station = new Station(1, "Central", "C");
 station.Add(new StationTrack("1") { IsMain = true });
 layout.Add(station);
 

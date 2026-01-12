@@ -6,7 +6,7 @@ public class StationTests
     [TestMethod]
     public void PropertiesAreSet()
     {
-        var target = new OperationLocation(2, "Stora Höga", "Sth");
+        var target = new Station(2, "Stora Höga", "Sth");
         Assert.AreEqual("Stora Höga", target.Name);
         Assert.AreEqual("Sth", target.Signature);
     }

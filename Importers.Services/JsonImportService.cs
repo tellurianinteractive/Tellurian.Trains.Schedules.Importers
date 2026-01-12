@@ -5,6 +5,10 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Importers.Services;
 
+/// <summary>
+/// Service for importing schedule data from JSON files.
+/// </summary>
+/// <param name="source">The source file containing the JSON data to import.</param>
 public class JsonImportService(FileInfo source) : IImportService
 {
     private readonly FileInfo _source = source;
