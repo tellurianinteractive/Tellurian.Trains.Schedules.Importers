@@ -1,0 +1,28 @@
+"FromPlaceFullName";"FromPlaceSignature";"ToPlaceFullName";"ToPlaceSignature";"Distance";"TracksCount";"DispatchStretchId"
+"Lysekil";"Lys";"Göransberg";"Gbg";4,00;1;139
+"Göransberg";"Gbg";"Furudalen";"Fda";9,00;1;124
+"Tosselilla";"Tsl";"Ryr timmer";"Ryt";5,00;1;126
+"Furudalen";"Fda";"Kristineberg";"Kbg";8,00;1;125
+"Kristineberg";"Kbg";"Kristineberg västra";"Kbv";5,00;1;
+"Kristineberg västra";"Kbv";"Sura by";"Sub";3,00;1;
+"Ryr timmer";"Ryt";"Munkeröd";"Mkd";17,00;1;126
+"Kristineberg";"Kbg";"Munkeröd";"Mkd";9,00;1;125
+"Munkeröd";"Mkd";"Kyrkeby Östra";"Kkö";7,00;2;127
+"Kyrkeby Östra";"Kkö";"Devsjö";"Djö";12,00;2;127
+"Devsjö";"Djö";"Lekby";"Lek";7,00;2;128
+"Lekby";"Lek";"Rotebro";"R";14,00;2;129
+"Rotebro";"R";"Malmö";"M";8,00;2;130
+"Kyrkeby Östra";"Kkö";"Kyrkeby Strand";"Kys";2,00;1;131
+"Gården";"Gdn";"Mohult";"Mot";11,00;1;131
+"Mohult";"Mot";"Loudden";"Lou";8,00;1;132
+"Loudden";"Lou";"Växjö";"Vö";6,00;1;133
+"Mohult";"Mot";"Krutträsk";"Krt";7,00;1;
+"Bergsgården";"Bgd";"Wilma lp";"Wil";5,00;1;
+"Wilma lp";"Wil";"Hammarlind";"Hld";2,00;1;
+"Rise";"Ris";"Froland";"Fro";7,00;1;135
+"Bjørkåsen";"Bjå";"Rise";"Ris";8,00;1;134
+"Rise";"Ris";"Ørmen";"Ømn";7,00;1;137
+"Ørmen";"Ømn";"Steinsnes";"Sns";9,00;1;137
+"Kyrkeby Strand";"Kys";"Gården";"Gdn";3,00;1;131
+"Froland";"Fro";"Gården";"Gdn";4,00;1;136
+"Krutträsk";"Krt";"Bergsgården";"Bgd";2,00;1;

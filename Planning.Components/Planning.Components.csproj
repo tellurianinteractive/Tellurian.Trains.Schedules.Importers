@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Planning.Components</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Planning.Components</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>Blazor UI components for model railway timetable planning.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Planning\Planning.csproj" />
+  </ItemGroup>
+</Project>
