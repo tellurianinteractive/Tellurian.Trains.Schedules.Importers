@@ -14,8 +14,8 @@ public class StationTrackTests
     [TestInitialize]
     public void TestInitialize()
     {
-        var category1 = new TrainCategory() { Id = 10, Prefix = "G", ResourceName = "FreightTrain" };
-        var category2 = new TrainCategory() { Id = 11, Prefix = "P", ResourceName = "PassengerTrain" };
+        var category1 = new TrainCategory() { Id = 10, Prefix = "G", Name = "FreightTrain" };
+        var category2 = new TrainCategory() { Id = 11, Prefix = "P", Name = "PassengerTrain" };
         Target = TestDataFactory.CreateStationTrack();
         Train1 = new Train(1, category1, 4321);
         Train2 = new Train(1, category2, 1234);

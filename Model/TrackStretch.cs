@@ -25,7 +25,7 @@ public class TrackStretch : IEquatable<TrackStretch>
     /// <param name="id">The unique identifier for the track stretch.</param>
     /// <param name="start">The starting station.</param>
     /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in kilometers.</param>
+    /// <param name="distance">The distance in metres.</param>
     public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance) : this(id, start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class TrackStretch : IEquatable<TrackStretch>
     /// <param name="id">The unique identifier for the track stretch.</param>
     /// <param name="start">The starting station.</param>
     /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in kilometers.</param>
+    /// <param name="distance">The distance in metres.</param>
     /// <param name="tracksCount">The number of tracks in the stretch.</param>
     public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance, int tracksCount) : this(id, start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
 
@@ -44,7 +44,7 @@ public class TrackStretch : IEquatable<TrackStretch>
     /// <param name="id">The unique identifier for the track stretch.</param>
     /// <param name="start">The starting station.</param>
     /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in kilometers.</param>
+    /// <param name="distance">The distance in metres.</param>
     /// <param name="tracksCount">The number of tracks in the stretch.</param>
     /// <param name="speed">The maximum speed in km/h.</param>
     /// <param name="time">The travel time in minutes.</param>

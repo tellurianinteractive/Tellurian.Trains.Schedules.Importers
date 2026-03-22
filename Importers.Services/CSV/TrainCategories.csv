@@ -1,4 +1,4 @@
-ResourceName,Prefix,Suffix,IsPassenger,IsFreight,Color
+Name,Prefix,Suffix,IsPassenger,IsFreight,Color
 PassengerTrain,Pt,,true,false,#ff4000
 LocalTrain,Lt,,true,false,#ff0000
 RegionalTrain,RE,,true,false,#ff0000

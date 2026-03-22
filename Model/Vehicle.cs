@@ -5,7 +5,7 @@ namespace Tellurian.Trains.Schedules.Model;
 /// <summary>
 /// Represents a railway vehicle (locomotive or trainset) that can be assigned to trains.
 /// </summary>
-public class Vehicle
+public class Vehicle : IEquatable<Vehicle>
 {
     /// <summary>
     /// Gets or sets the unique identifier for this vehicle.
@@ -71,6 +71,18 @@ public class Vehicle
     /// Gets or sets the collection of schedule assignments for this vehicle.
     /// </summary>
     public ICollection<VehicleScheduleAssignment> ScheduleAssignments { get; set; }
+
+    /// <inheritdoc/>
+    public bool Equals(Vehicle? other) =>
+        other is not null &&
+        (Company?.Equals(other.Company) ?? other.Company is null) &&
+        Number == other.Number;
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => obj is Vehicle other && Equals(other);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(CompanyId, Number);
 
     [JsonConstructor]
     private Vehicle()

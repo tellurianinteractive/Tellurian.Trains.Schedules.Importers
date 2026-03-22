@@ -30,7 +30,7 @@ public class TrainCategoriesFromCsvService(string? path = null) : ITrainCategori
     private static TrainCategory FromCsvLine(string line)
     {
         var fields = line.Split(',');
-        var resourceName = fields[0];
+        var name = fields[0];
         var prefix = fields[1];
         var suffix = fields[2];
         bool isPassenger = bool.Parse(fields[3]);
@@ -39,7 +39,7 @@ public class TrainCategoriesFromCsvService(string? path = null) : ITrainCategori
         return new TrainCategory()
         {
             Id = NextId,
-            ResourceName = resourceName,
+            Name = name,
             Prefix = prefix,
             Suffix = suffix,
             IsPassenger = isPassenger,

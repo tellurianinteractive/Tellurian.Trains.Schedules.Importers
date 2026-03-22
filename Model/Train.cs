@@ -127,6 +127,18 @@ public class Train : IEquatable<Train>
     public Timetable Timetable { get; set; }
 
     /// <summary>
+    /// Gets or sets the train that this train continues as at its final destination.
+    /// Used when a train reverses direction, e.g. an odd-numbered train arriving at a terminus
+    /// continues as an even-numbered train in the opposite direction.
+    /// </summary>
+    public Train? ContinuesAs { get; set; }
+
+    /// <summary>
+    /// Gets or sets the train that this train is a continuation of.
+    /// </summary>
+    public Train? ContinuesFrom { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of station calls for this train.
     /// </summary>
     public IList<StationCall> Calls { get; set; }
@@ -172,14 +184,13 @@ public class Train : IEquatable<Train>
     public bool Equals(Train? other) =>
         other is not null &&
         (Company?.Equals(other.Company) ?? other.Company is null) &&
-        Number == other.Number &&
-        ExternalId.Equals(other.ExternalId, StringComparison.OrdinalIgnoreCase);
+        Number == other.Number;
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Train other && Equals(other);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(CompanyId, Number, ExternalId);
+    public override int GetHashCode() => HashCode.Combine(CompanyId, Number);
 
     /// <inheritdoc/>
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0} {1}", Category, Number);

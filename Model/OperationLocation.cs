@@ -42,9 +42,17 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
 
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public bool IsSignal { get; set; }
+
+    /// <summary>
+    /// Gets whether a train can change direction at this location,
+    /// which typically requires a loco runaround.
+    /// Always false for <see cref="OtherLocation"/>; configurable for
+    /// <see cref="Station"/> and <see cref="SignalControlledLocation"/>.
+    /// </summary>
+    public virtual bool IsChangingTrainDirectionPossible { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of tracks at this operation location.
@@ -141,6 +149,15 @@ public class OtherLocation : OperationLocation
     /// </summary>
     [JsonConstructor]
     protected OtherLocation() : base() { }
+
+    /// <summary>
+    /// Always false for other locations, as they lack the infrastructure for loco runaround.
+    /// </summary>
+    public override bool IsChangingTrainDirectionPossible
+    {
+        get => false;
+        set { } // Ignore attempts to set
+    }
 }
 
 

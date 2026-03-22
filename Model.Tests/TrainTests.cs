@@ -8,7 +8,7 @@ public class TrainTests
 {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     private Train Target;
-    private static TrainCategory Category => new() { Id = 1, Prefix = "G", ResourceName = "FreightTrain" };
+    private static TrainCategory Category => new() { Id = 1, Prefix = "G", Name = "FreightTrain" };
 
     [TestInitialize]
     public void TestInitialize()

@@ -340,7 +340,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Prefix).HasMaxLength(10);
             entity.Property(e => e.Suffix).HasMaxLength(10);
-            entity.Property(e => e.ResourceName).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Name).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Color).HasMaxLength(20);
         });
 

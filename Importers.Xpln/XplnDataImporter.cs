@@ -96,7 +96,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (category is not null) return category;
         if (trainPrefix.HasValue)
         {
-            var newCategory = new TrainCategory() { ResourceName = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
+            var newCategory = new TrainCategory() { Name = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
             _trainCategories.Add(newCategory);
             return newCategory;
         }

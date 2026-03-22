@@ -32,9 +32,9 @@ public record TrainCategory
     public bool IsFreight { get; init; }
 
     /// <summary>
-    /// Gets or initializes the type of train (e.g., "Passenger", "Freight", "HighSpeed") used for translations.
+    /// Gets or initializes the name of this train category.
     /// </summary>
-    public required string ResourceName { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// Gets or initializes the color used when drawing timetable graphs and schematic train lines.
@@ -42,9 +42,8 @@ public record TrainCategory
     /// </summary>
     public string Color { get; init; } = "#000000";
 
-
     /// <inheritdoc/>
-    public override string ToString() => ResourceName;
+    public override string ToString() => Name;
 }
 
 /// <summary>

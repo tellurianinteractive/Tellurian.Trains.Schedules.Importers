@@ -47,7 +47,7 @@ internal static class TestDataFactory
 
     public static IEnumerable<Train> CreateTrains(string prefix, Time startTime)
     {
-        var category = new TrainCategory() { Id = 1, Prefix = prefix, ResourceName = prefix };
+        var category = new TrainCategory() { Id = 1, Prefix = prefix, Name = prefix };
         return [
             CreateTrainInForwardDirection(category, 1, startTime)
         ];
@@ -75,12 +75,12 @@ internal static class TestDataFactory
 
     public static Train CreateTrain1()
     {
-        return CreateTrainInForwardDirection(new() { Id = 21, ResourceName = "FreightTrain", Prefix = "G" }, 4321, Time.FromHourAndMinute(12, 00));
+        return CreateTrainInForwardDirection(new() { Id = 21, Name = "FreightTrain", Prefix = "G" }, 4321, Time.FromHourAndMinute(12, 00));
     }
 
     public static Train CreateTrain2()
     {
-        return CreateTrainInForwardDirection(new() { Id = 22, ResourceName = "PassengerTrain", Prefix = "G" }, 1234, Time.FromHourAndMinute(12, 00));
+        return CreateTrainInForwardDirection(new() { Id = 22, Name = "PassengerTrain", Prefix = "G" }, 1234, Time.FromHourAndMinute(12, 00));
     }
 
     public static Timetable CreateTimetable()

@@ -49,7 +49,7 @@ internal static class Trains
         var procuct = record.GetString(record.GetOrdinal("Product"));
         if (!CachedTrainCategories.TryGetValue(procuct.GetHashCode(), out var trainCategory))
         {
-            trainCategory = new TrainCategory() { ResourceName = procuct };
+            trainCategory = new TrainCategory() { Name = procuct };
             CachedTrainCategories.Add(procuct.GetHashCode(), trainCategory);
         }
 
