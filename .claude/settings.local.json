@@ -1,18 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet build:*)",
-      "mcp__microsoft-learn__microsoft_docs_search",
-      "mcp__microsoft-learn__microsoft_docs_fetch",
-      "Bash(dotnet test:*)",
-      "Bash(ls:*)",
-      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\\\\Model\" /b)",
-      "Bash(mkdir:*)",
-      "Bash(copy:*)",
-      "Bash(findstr:*)",
-      "WebFetch(domain:www.nuget.org)",
-      "Bash(dir \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedule.Importers\" /b)",
-      "Bash(done)"
+      "Bash(iconv:*)",
+      "mcp__microsoft-learn__microsoft_code_sample_search",
+      "Skill(update-config)",
+      "Bash(find C:UtvecklingGithubTellurian.TrainsTellurian.Trains.SchedulesModel -maxdepth 1 -type f \\\\\\(-name *oco* -o -name *rainset* \\\\\\))",
+      "Bash(dotnet package:*)",
+      "Read(//c/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules/$HOME/.claude/**)"
     ]
   }
 }

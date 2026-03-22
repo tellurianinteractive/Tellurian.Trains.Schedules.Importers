@@ -73,7 +73,7 @@ var service = new TrainCategoriesFromCsvService("/path/to/categories.csv");
 ```
 
 Each category includes:
-- `ResourceName` - for localized display names
+- `Name` - the category name (unique within a layout)
 - `Prefix` / `Suffix` - for train number formatting (e.g., "IC 123")
 - `IsPassenger` / `IsFreight` - classification flags
 - `Color` - for timetable graph display

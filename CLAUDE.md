@@ -40,7 +40,7 @@ Model/                 → Domain model: Schedule, Timetable, Train, Layout, Sta
 ├─ Importers.Xpln/     → XPLN ODS/XLSX importer (published to NuGet)
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
 ├─ Importers.Services/ → Shared import services (JSON/CSV data files)
-├─ Model.Planning/     → Planning utilities for creating layouts and schedules
+├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```
 

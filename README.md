@@ -22,7 +22,7 @@ The following packages are not yet published (experimental):
 | Package | Description |
 |---------|-------------|
 | [Tellurian.Trains.Schedules.Importers.Access](Importers.Access/README.md) | Microsoft Access database importer (Windows-only) |
-| [Tellurian.Trains.Schedules.Model.Planning](Model.Planning/README.md) | Planning utilities for creating layouts and schedules |
+| [Tellurian.Trains.Schedules.Planning](Planning/README.md) | Planning utilities for creating layouts and schedules |
 
 ## Import Data
 

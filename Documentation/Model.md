@@ -8,7 +8,7 @@
 - [x] Layout layer: `Layout`, `OperationLocation`, `StationTrack`, `TrackStretch`, `TimetableStretch`
 - [x] Timetable layer: `Timetable`, `Train`, `TrainCategory`, `StationCall`, `Time`
 - [x] Schedule layer: `Schedule`, `VehicleSchedule`, `LocoSchedule`, `TrainsetSchedule`, `DriverDuty`, `TrainPart`
-- [x] `TrainCategory` class with `Prefix`, `Suffix`, `ResourceName`, `Color`, `DisplayOrder`
+- [x] `TrainCategory` class with `Prefix`, `Suffix`, `Name`, `Color`, `DisplayOrder`
 - [x] `Sessions` class (replaces obsolete `OperatingSessions`) with factory properties
 - [x] `Company` record with `Id`, `Name`, `Signature`, `CountryCode`
 - [x] Train uses `int Number` + `TrainCategory Category` (not string-based identity)
@@ -30,7 +30,7 @@
 ### Model Improvements
 
 - [ ] **Access importer alignment** - Update Access importer to use new model classes with FK properties
-- [ ] **Model.Planning** - Implement planning functionality (project created, placeholder only)
+- [ ] **Planning** - Implement planning functionality (project created, placeholder only)
 
 ### Future Phases
 
