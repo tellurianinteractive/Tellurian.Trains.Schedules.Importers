@@ -22,8 +22,8 @@ public static class OperationsPlannerExtensions
         /// <exception cref="NotImplementedException">The method is not yet implemented.</exception>
         public Train Create(OperationLocation from, OperationLocation to, Time startTime, TimeSpan preparationTime)
         {
-            // TODO: Find shortest path for train in the Layout and calculate run times and stop times 
-            // using the RuntimeParameters.
+            // TODO: Find shortest path for train in the Layout and calculate run times and stop times
+            // using the TimetableSettings.
             throw new NotImplementedException();
         }
 

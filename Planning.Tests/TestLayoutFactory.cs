@@ -182,7 +182,7 @@ internal static class TestLayoutFactory
     }
 
     public static OperationsPlanner CreatePlanner() =>
-        new(CreateSchedule(), RuntimeParameters.Default);
+        new(CreateSchedule(), TimetableSettings.Default);
 
     private static Station AddStation(Layout layout, int id, string name, string signature, string[] trackNumbers, bool canChangeDirection = false)
     {

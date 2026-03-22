@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Schedules.Planning.Timetables;
+namespace Tellurian.Trains.Schedules.Planning.Timetables;
 
 /// <summary>
 /// Represents configuration parameters for calculating train runtimes and scheduling operations.
@@ -7,15 +7,28 @@
 /// These parameters are used to convert between scale speeds and real speeds, and to determine
 /// minimum stop durations, clearance times, and other scheduling-related timings.
 /// </remarks>
-public record RuntimeParameters
+public record TimetableSettings
 {
     /// <summary>
-    /// The real max speed om trains in meters/second, usually between 0.1 to 0,4.
+    /// Gets the default timetable settings with commonly used values for model railway operations.
+    /// </summary>
+    public static TimetableSettings Default => new()
+    {
+        MaxRealSpeed = 0.3,
+        MaxScaleSpeed = 130,
+        MinimumStoppingDuration = TimeSpan.FromMinutes(3),
+        LocoReversingRealDuration = TimeSpan.FromMinutes(5),
+        TrainClearanceRealDuration = TimeSpan.FromMinutes(1),
+        ExpectedFastClockSpeed = 5,
+    };
+
+    /// <summary>
+    /// The real max speed of trains in meters/second, usually between 0.1 to 0.4.
     /// </summary>
     public double MaxRealSpeed { get; set; }
 
     /// <summary>
-    /// This speed should be the km/h speed that corresponds to the <see cref="MaxRealSpeed"/>
+    /// This speed should be the km/h speed that corresponds to the <see cref="MaxRealSpeed"/>.
     /// </summary>
     public int MaxScaleSpeed { get; set; }
 
@@ -26,12 +39,11 @@ public record RuntimeParameters
 
     /// <summary>
     /// The default real (not fast) time for reversing a loco at a station.
-    /// This can be overridden for each <see cref="OperationLocation"/>.
     /// </summary>
     public TimeSpan LocoReversingRealDuration { get; set; }
 
     /// <summary>
-    /// If the strech is controlled by manual dispatch, e.g. making phone calls for clearance,
+    /// If the stretch is controlled by manual dispatch, e.g. making phone calls for clearance,
     /// this is the default real (not fast) time that should be added to the stop time at the station.
     /// </summary>
     public TimeSpan TrainClearanceRealDuration { get; set; }
@@ -44,8 +56,6 @@ public record RuntimeParameters
     /// <summary>
     /// When true, train paths must follow a consistent direction through the layout's track stretches:
     /// forward (Start→End) for odd-numbered trains, backward (End→Start) for even-numbered trains.
-    /// This enables train chaining where a forward train continues as a backward train (and vice versa)
-    /// at a terminus, typically requiring a loco runaround.
     /// </summary>
     public bool UseStrictTrainDirections { get; set; }
 
@@ -53,27 +63,4 @@ public record RuntimeParameters
     /// Speed multiplied with this value gets real speed in meters per second.
     /// </summary>
     public double SpeedFactor => MaxRealSpeed / MaxScaleSpeed;
-
-    /// <summary>
-    /// Gets the default runtime parameters with commonly used values for model railway operations.
-    /// </summary>
-    /// <value>
-    /// A <see cref="RuntimeParameters"/> instance configured with default values:
-    /// MaxRealSpeed of 0.3 m/s, MaxScaleSpeed of 130 km/h, MinimumStoppingDuration of 3 minutes,
-    /// LocoReversingRealDuration of 5 minutes, TrainClearanceRealDuration of 1 minute, and
-    /// ExpectedFastClockSpeed of 5.
-    /// </value>
-    public static RuntimeParameters Default => new()
-    {
-        MaxRealSpeed = 0.3,
-        MaxScaleSpeed = 130,
-        MinimumStoppingDuration = TimeSpan.FromMinutes(3),
-        LocoReversingRealDuration = TimeSpan.FromMinutes(5),
-        TrainClearanceRealDuration = TimeSpan.FromMinutes(1),
-        ExpectedFastClockSpeed = 5,
-    };
 }
-
-
-
-
