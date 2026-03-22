@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Schedules.Model.Planning</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Schedules.Model.Planning</RootNamespace>
+    <AssemblyName>Tellurian.Trains.Schedules.Planning</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Planning</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
@@ -10,7 +10,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

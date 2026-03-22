@@ -1,11 +1,11 @@
-# Tellurian.Trains.Schedules.Model.Planning
+# Tellurian.Trains.Schedules.Planning
 
 Planning utilities for creating layouts, timetables and schedules for model railway operations.
 
 ## Installation
 
 ```bash
-dotnet add package Tellurian.Trains.Schedules.Model.Planning
+dotnet add package Tellurian.Trains.Schedules.Planning
 ```
 
 This will also install `Tellurian.Trains.Schedules.Model` as a transitive dependency.
@@ -22,7 +22,7 @@ It serves as the foundation for planning applications that create and manage mod
 ## Usage
 
 ```csharp
-using Tellurian.Trains.Schedules.Model.Planning;
+using Tellurian.Trains.Schedules.Planning;
 
 // Planning utilities will be documented here as they are developed
 ```

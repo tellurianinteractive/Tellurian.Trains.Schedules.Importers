@@ -1,6 +1,7 @@
-﻿using Tellurian.Trains.Schedules.Model.Planning.Timetables;
+﻿using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Planning.Timetables;
 
-namespace Tellurian.Trains.Schedules.Model.Planning;
+namespace Tellurian.Trains.Schedules.Planning;
 
 /// <summary>
 /// Represents a planner that provides functionality for creating and modify timetables and schedules.

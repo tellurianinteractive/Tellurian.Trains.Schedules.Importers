@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Schedules.Model.Planning.Timetables;
+﻿namespace Tellurian.Trains.Schedules.Planning.Timetables;
 
 /// <summary>
 /// Represents configuration parameters for calculating train runtimes and scheduling operations.
@@ -26,7 +26,7 @@ public record RuntimeParameters
 
     /// <summary>
     /// The default real (not fast) time for reversing a loco at a station.
-    /// This can be overridden for each <see cref="Model.OperationLocation"/>.
+    /// This can be overridden for each <see cref="OperationLocation"/>.
     /// </summary>
     public TimeSpan LocoReversingRealDuration { get; set; }
 
@@ -40,6 +40,14 @@ public record RuntimeParameters
     /// The expected fast clock speed determines the timings of trains.
     /// </summary>
     public int ExpectedFastClockSpeed { get; set; }
+
+    /// <summary>
+    /// When true, train paths must follow a consistent direction through the layout's track stretches:
+    /// forward (Start→End) for odd-numbered trains, backward (End→Start) for even-numbered trains.
+    /// This enables train chaining where a forward train continues as a backward train (and vice versa)
+    /// at a terminus, typically requiring a loco runaround.
+    /// </summary>
+    public bool UseStrictTrainDirections { get; set; }
 
     /// <summary>
     /// Speed multiplied with this value gets real speed in meters per second.
