@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="top-bar">
+        <h1 class="app-title">Timetable Planner</h1>
+    </header>
+
+    <nav class="tab-bar">
+        <NavLink class="tab" href="" Match="NavLinkMatch.All">Settings</NavLink>
+        <NavLink class="tab" href="layout">Layout</NavLink>
+        <NavLink class="tab" href="stretches">Stretches</NavLink>
+        <NavLink class="tab" href="categories">Train Categories</NavLink>
+        <NavLink class="tab" href="trains">Trains</NavLink>
+        <NavLink class="tab" href="graphical-timetable">Graphical Timetable</NavLink>
+        <NavLink class="tab" href="vehicle-schedules">Vehicle Schedules</NavLink>
+        <NavLink class="tab" href="vehicle-owners">Vehicle Owners</NavLink>
+    </nav>
+
+    <main class="content">
+        @Body
+    </main>
+</div>
