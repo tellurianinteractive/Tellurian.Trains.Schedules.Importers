@@ -1,0 +1,75 @@
+.hour {
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+    .hour.horizontal {
+        text-anchor: middle;
+    }
+
+    .hour.vertical {
+        text-anchor: start;
+    }
+
+.minute {
+    font-size: 6pt;
+    font-weight: bold;
+    color: black;
+}
+
+    .minute.horizontal {
+    }
+
+    .minute.vertical {
+    }
+
+.timeline {
+    stroke: lightgray;
+}
+
+.distance {
+}
+
+.track {
+    stroke: lightgray;
+}
+
+.number {
+    font-weight: normal;
+    font-size: 6pt;
+}
+
+    .number.horizontal {
+        text-anchor: end;
+    }
+
+    .number.vertical {
+        text-anchor: middle;
+    }
+
+.stationname {
+    font-weight: bold;
+    font-size: 12pt;
+}
+
+    .stationname.horizontal {
+        text-anchor: start;
+    }
+
+    .stationname.vertical {
+        text-anchor: middle;
+    }
+
+.stationkm {
+    font-weight: normal;
+    font-size: 7pt;
+    text-anchor: middle;
+}
+
+    .stationkm.horizontal {
+        text-anchor: end;
+    }
+
+    .stationkm.vertical {
+        text-anchor: middle;
+    }
