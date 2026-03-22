@@ -1,0 +1,15 @@
+# Auto detect text files and normalise line endings to LF in the repo
+* text=auto eol=lf
+
+# Windows-specific files that must keep CRLF
+*.sln        text eol=crlf
+*.slnx       text eol=crlf
+
+# Binary files
+*.accdb      binary
+*.ods        binary
+*.xlsx       binary
+*.png        binary
+*.jpg        binary
+*.gif        binary
+*.ico        binary
