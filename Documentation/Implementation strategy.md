@@ -15,6 +15,7 @@ for the Timetable Planning System.
 **Primary platform: Blazor WebAssembly (AOT-compiled) as a Progressive Web App (PWA).**
 
 Optional future additions:
+
 - A SignalR-based backend for multi-user collaboration.
 - A MAUI Blazor Hybrid desktop app if richer native integration is needed.
 
@@ -24,15 +25,16 @@ The choice is driven by the project's core design principle: **local-first, onli
 
 Three hosting models were evaluated:
 
-| Concern | Blazor WASM PWA | Blazor Interactive Server | MAUI Blazor Hybrid |
-|---|---|---|---|
-| Drag-and-drop performance | Excellent (local execution) | Good on LAN; degrades over WAN | Excellent (local execution) |
-| Offline capability | Full (service worker caches app) | Requires self-hosted Kestrel exe | Full (native app) |
-| File read/write | All browsers (upload + download) | Full (server-side) | Full (native APIs) |
-| Deployment | URL — nothing to install | URL or installable exe | Installable (MSIX/ClickOnce) |
-| Updates | Automatic on next visit | Manual for installed exe | Manual |
-| Multi-user collaboration | Needs added SignalR service | Built-in SignalR | Needs added SignalR service |
-| Cross-platform | Any modern browser | Any modern browser | Windows only (no Linux) |
+
+| Concern                   | Blazor WASM PWA                  | Blazor Interactive Server        | MAUI Blazor Hybrid           |
+| --------------------------- | ---------------------------------- | ---------------------------------- | ------------------------------ |
+| Drag-and-drop performance | Excellent (local execution)      | Good on LAN; degrades over WAN   | Excellent (local execution)  |
+| Offline capability        | Full (service worker caches app) | Requires self-hosted Kestrel exe | Full (native app)            |
+| File read/write           | All browsers (upload + download) | Full (server-side)               | Full (native APIs)           |
+| Deployment                | URL — nothing to install        | URL or installable exe           | Installable (MSIX/ClickOnce) |
+| Updates                   | Automatic on next visit          | Manual for installed exe         | Manual                       |
+| Multi-user collaboration  | Needs added SignalR service      | Built-in SignalR                 | Needs added SignalR service  |
+| Cross-platform            | Any modern browser               | Any modern browser               | Windows only (no Linux)      |
 
 **Blazor WASM PWA wins on deployment simplicity and offline capability** while
 delivering the local execution performance needed for drag-and-drop-intensive
@@ -55,6 +57,7 @@ interpreted mode. AOT provides roughly 2–5x better CPU performance, which
 benefits the rendering pipeline and event handling for interactive UI.
 
 Trade-offs:
+
 - **Download size** increases to approximately 30–50 MB (vs 5–15 MB interpreted).
   .NET 9+ supports **partial AOT** — compiling only performance-critical paths
   while leaving the rest interpreted — as a practical middle ground.
@@ -104,34 +107,36 @@ foreign keys in the data model.
 
 #### Natural keys by entity
 
-| Entity | Natural key | Notes |
-|---|---|---|
-| Company | Signature | Case-insensitive |
-| OperationLocation (Station etc.) | Signature | Case-insensitive |
-| Train | Company + Number | ExternalId excluded — it is an XPLN import artefact, not relevant in the planning app |
-| TrackStretch | Start station + End station | Derived from station signatures |
-| TimetableStretch | Number | Case-insensitive |
-| StationTrack | Station + Number | Case-insensitive on number |
-| StationCall | Train + Track + Arrival + Departure | Composite — fully identifies a call |
-| TrainPart | From call + To call | Derived from station call keys |
-| DriverDuty | Identity | Case-insensitive |
-| TrainCategory | Name | Despite being a record type, only name defines uniqueness |
-| Vehicle | Company + Number | |
-| VehicleSchedule | Sequence of trains | The actual train sequence defines the schedule's identity |
-| Wagon | Company + Number | |
-| WagonGroup | Company + Number | |
-| Timetable | Name | Single per layout in practice |
-| Schedule | Name | Top-level container |
+
+| Entity                           | Natural key                         | Notes                                                                                  |
+| ---------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Company                          | Signature                           | Case-insensitive                                                                       |
+| OperationLocation (Station etc.) | Signature                           | Case-insensitive                                                                       |
+| Train                            | Company + Number                    | ExternalId excluded — it is an XPLN import artefact, not relevant in the planning app |
+| TrackStretch                     | Start station + End station         | Derived from station signatures                                                        |
+| TimetableStretch                 | Number                              | Case-insensitive                                                                       |
+| StationTrack                     | Station + Number                    | Case-insensitive on number                                                             |
+| StationCall                      | Train + Track + Arrival + Departure | Composite — fully identifies a call                                                   |
+| TrainPart                        | From call + To call                 | Derived from station call keys                                                         |
+| DriverDuty                       | Identity                            | Case-insensitive                                                                       |
+| TrainCategory                    | Name                                | Despite being a record type, only name defines uniqueness                              |
+| Vehicle                          | Company + Number                    |                                                                                        |
+| VehicleSchedule                  | Sequence of trains                  | The actual train sequence defines the schedule's identity                              |
+| Wagon                            | Company + Number                    |                                                                                        |
+| WagonGroup                       | Company + Number                    |                                                                                        |
+| Timetable                        | Name                                | Single per layout in practice                                                          |
+| Schedule                         | Name                                | Top-level container                                                                    |
 
 ### 2.2 File Operations
 
 Standard browser mechanisms cover all requirements:
 
-| Operation | Mechanism | Browser support |
-|---|---|---|
-| Open/import a file | `<input type="file">` or drag-and-drop onto page | All browsers |
-| Save/export a file | Browser download (blob URL) — effectively "Save As" | All browsers |
-| Save back to same file (no dialog) | File System Access API | Chromium only (Chrome, Edge) |
+
+| Operation                          | Mechanism                                            | Browser support              |
+| ------------------------------------ | ------------------------------------------------------ | ------------------------------ |
+| Open/import a file                 | `<input type="file">` or drag-and-drop onto page     | All browsers                 |
+| Save/export a file                 | Browser download (blob URL) — effectively "Save As" | All browsers                 |
+| Save back to same file (no dialog) | File System Access API                               | Chromium only (Chrome, Edge) |
 
 The Chromium-only File System Access API provides a more desktop-like save
 experience but is **not essential**. The app must work with the standard
@@ -142,11 +147,12 @@ upload/download flow on all browsers.
 SQLite-in-WASM persists data via the Origin Private File System (OPFS) or
 IndexedDB. Storage limits are governed by the browser:
 
-| Browser | Quota |
-|---|---|
-| Chrome / Edge | Up to 60% of total disc space |
-| Firefox | Up to 10% of total disc space (max 10 GB per origin) |
-| Safari | ~1 GB before prompting; can grow with permission |
+
+| Browser       | Quota                                                |
+| --------------- | ------------------------------------------------------ |
+| Chrome / Edge | Up to 60% of total disc space                        |
+| Firefox       | Up to 10% of total disc space (max 10 GB per origin) |
+| Safari        | ~1 GB before prompting; can grow with permission     |
 
 For timetable planning data (kilobytes to low megabytes), these limits are not
 a practical concern. The app should request **persistent storage**
@@ -230,13 +236,14 @@ generated. This ensures each round of contributions can only be merged once.
 
 To make merging predictable, entities have an implicit ownership scope:
 
-| Entity type | Owned by |
-|---|---|
-| Layout, stations, stretches | Planner 1 (master) |
-| Trains operating within a single stretch | Stretch planner |
-| Cross-stretch trains | Planner 1 (after merge) |
+
+| Entity type                                       | Owned by                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| Layout, stations, stretches                       | Planner 1 (master)                                         |
+| Trains operating within a single stretch          | Stretch planner                                            |
+| Cross-stretch trains                              | Planner 1 (after merge)                                    |
 | Vehicle schedules, vehicles, wagons, wagon groups | Stretch planner (initially), Planner 1 adjusts after merge |
-| Driver duties | Planner 1 |
+| Driver duties                                     | Planner 1                                                  |
 
 This ownership is a convention enforced by the merge UI, not a hard access
 control mechanism. The merge function should display a clear summary of
@@ -330,6 +337,7 @@ throws during activation
 ([dotnet/aspnetcore #39016](https://github.com/dotnet/aspnetcore/issues/39016)).
 
 **Mitigations:**
+
 - Host on a static file server that does not rewrite response bodies.
 - If using a CDN, disable integrity checks via
   `<BlazorCacheBootResources>false</BlazorCacheBootResources>`.
@@ -358,3 +366,169 @@ as it can break in-flight sessions.
   in a real browser, not just via `dotnet run`.
 - **Track the upstream issues** listed above; several are under active
   development and may be resolved in .NET 10 servicing updates or .NET 11.
+
+---
+
+## 5. Selective Data Import
+
+### 5.1 Problem
+
+The planning app needs to import **specific slices** of data — not just full
+schedules. Typical scenarios:
+
+- Import train categories from an earlier plan or a shared reference file.
+- Import companies from a web service providing official railway operator data.
+- Import a layout (stations and stretches) from a previous plan and build a
+  new timetable on top of it.
+- Import trains from one timetable stretch in an earlier plan into the current
+  plan.
+
+Data sources fall into two categories:
+
+
+| Source type     | Examples                                        | Access method                                      |
+| ----------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| **Document**    | Earlier plan (JSON), XPLN file, SQLite database | Read the full document, extract the relevant slice |
+| **Web service** | Company registry API, shared category service   | Query with filters, map response to model objects  |
+
+### 5.2 Per-Type Import Interfaces
+
+The existing `ICompaniesService` and `ITrainCategoriesService` already follow
+this pattern — one interface per importable data type. The concept extends this
+to all data types a user might want to import selectively:
+
+```
+ICompaniesService              → IEnumerable<Company>
+ITrainCategoriesService        → IEnumerable<TrainCategory>
+ILayoutService                 → Layout (stations, tracks, stretches)
+ITrainsService                 → IEnumerable<Train> (with station calls)
+IVehicleSchedulesService       → IEnumerable<VehicleSchedule>
+```
+
+Each interface returns model objects directly. The implementation handles
+source-specific details (file parsing, API calls, field mapping) internally.
+
+### 5.3 Data Source Abstraction
+
+A **data source** combines a user-visible identity with the set of import
+capabilities it provides:
+
+```csharp
+interface IDataSource
+{
+    string Name { get; }              // Shown in UI dropdown
+    string Description { get; }       // Tooltip or detail text
+    DataSourceKind Kind { get; }      // Document or WebService
+
+    // Which data types can this source provide?
+    bool CanProvide<T>();
+}
+
+enum DataSourceKind { Document, WebService }
+```
+
+Each data source implements one or more of the per-type interfaces. For
+example, a JSON document source implements all of them (it contains a full
+schedule), while a company registry web service implements only
+`ICompaniesService`.
+
+```
+JsonDocumentSource : IDataSource, ICompaniesService, ITrainCategoriesService,
+                     ILayoutService, ITrainsService, IVehicleSchedulesService
+
+CompanyRegistryApiSource : IDataSource, ICompaniesService
+
+SharedCategoriesApiSource : IDataSource, ITrainCategoriesService
+```
+
+### 5.4 Document Sources — Partial Extraction
+
+For document-based sources (JSON, XPLN, SQLite), the import reads the full
+document into memory and extracts only the requested data type. This reuses
+existing import infrastructure:
+
+- **JSON files** — deserialise the `Schedule` object, then return only the
+  requested collection (e.g. `schedule.Timetable.Trains`).
+- **XPLN files** — use the existing `XplnDataImporter` to import the full
+  schedule, then extract the relevant slice.
+- **SQLite databases** — query only the relevant tables.
+
+The key difference from a full import is that the extracted entities are
+**not wired into the current schedule's object graph**. They are returned as
+detached objects that the user can review, filter, and selectively add to
+the current plan. During addition, surrogate IDs are reassigned (same
+mechanism as the merge workflow in §3.2).
+
+### 5.5 Web Service Sources
+
+Web service sources need additional considerations:
+
+- **Filtering** — the interface methods may accept filter parameters (e.g.
+  country code for companies, stretch name for trains) to avoid downloading
+  unnecessary data.
+- **Mapping** — the service implementation maps the API response format to
+  model objects. This mapping is encapsulated within the source class.
+- **Caching** — results can be cached locally (IndexedDB) to support offline
+  use after first fetch.
+- **Authentication** — if required, credentials are configured per source
+  in the app settings.
+
+### 5.6 Source Registration and UI
+
+Data sources are registered at application startup via dependency injection.
+The UI presents them as follows:
+
+1. User opens an **Import** panel and selects **what** to import (e.g.
+   "Train categories", "Layout", "Trains").
+2. The panel shows a dropdown of **available sources** — filtered to only
+   those sources that can provide the selected data type.
+3. For document sources, the user selects or uploads a file. For web
+   services, the source is pre-configured.
+4. The app fetches the data and presents it in a **review list** where the
+   user can select which items to import.
+5. Selected items are added to the current plan with new surrogate IDs.
+
+```
+┌─────────────────────────────────────────────┐
+│  Import                                     │
+│                                             │
+│  What:   [ Train categories      ▾ ]        │
+│  From:   [ Earlier plan (JSON)   ▾ ]        │
+│          [ Browse... ]                      │
+│                                             │
+│  ┌─ Available ─────────────────────────┐    │
+│  │ ☑ PassengerTrain   Pt   #ff4000    |    │
+│  │ ☑ LocalTrain       Lt   #ff0000    │    │
+│  │ ☐ FreightTrain     G    #0040ff     │    │
+│  │ ☑ InterCity        IC   #ff4000    │    │
+│  └─────────────────────────────────────┘    │
+│                                             │
+│  [ Import selected ]                        │
+└─────────────────────────────────────────────┘
+```
+
+### 5.7 Conflict Handling on Selective Import
+
+When importing entities that already exist in the current plan (matched by
+natural key — see §2.2), the UI should:
+
+- **Highlight duplicates** in the review list.
+- Let the user choose per item: **skip**, **replace**, or **keep both**
+  (the latter assigns a new natural key, e.g. a different train number).
+- For layout elements (stations, stretches), warn that replacing may affect
+  existing trains and station calls.
+
+### 5.8 Relationship to Existing Interfaces
+
+The per-type import interfaces complement — not replace — the existing
+`IImportService` and `IExportService` interfaces:
+
+
+| Interface           | Purpose               | Scope                                |
+| --------------------- | ----------------------- | -------------------------------------- |
+| `IImportService`    | Full schedule import  | Whole document →`Schedule`          |
+| `IExportService`    | Full schedule export  | `Schedule` → whole document         |
+| Per-type interfaces | Selective data import | Specific entity type from any source |
+
+Full import remains the primary path for opening a plan. Selective import
+is used for **enriching** an existing plan with data from other sources.
