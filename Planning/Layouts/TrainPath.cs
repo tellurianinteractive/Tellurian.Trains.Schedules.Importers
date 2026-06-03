@@ -9,7 +9,9 @@ namespace Tellurian.Trains.Schedules.Planning.Layouts;
 /// </summary>
 public enum TrainPathDirection
 {
+    /// <summary>Travelling from <see cref="TrackStretch.Start"/> to <see cref="TrackStretch.End"/>.</summary>
     Forward,
+    /// <summary>Travelling from <see cref="TrackStretch.End"/> to <see cref="TrackStretch.Start"/>.</summary>
     Backward
 }
 

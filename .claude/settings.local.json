@@ -11,7 +11,23 @@
       "Bash(grep -r \"IResourceProvider\\\\|IResourceProviderGroup\\\\|MarkdownResourceProvider\" C:EntwickingGithubTellurian.TrainsTellurian.Trains.Schedules --include=*.cs)",
       "Bash(grep -r \"IResourceProvider\\\\|IResourceProviderGroup\\\\|LanguageService\" C:EntwickingGithubTellurian.TrainsTellurian.Trains.Schedules --include=*.cs)",
       "Bash(xargs grep:*)",
-      "Bash(dotnet ildasm:*)"
+      "Bash(dotnet ildasm:*)",
+      "Bash(dotnet workload *)",
+      "Bash(rm -rf ./publish-aot)",
+      "Bash(dotnet publish *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Read(//tmp/**)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(dotnet tool *)",
+      "Bash(dotnet serve *)",
+      "Bash(dotnet pack *)",
+      "Read(//c/NuGets/**)",
+      "Bash(grep -oiE \"[^\\\\\\\\\\\\\\\\]+\\\\.cs\")",
+      "Bash(dotnet msbuild *)",
+      "Bash(dotnet build-server *)",
+      "Bash(grep -oiE \"Schedules\\\\\\\\\\\\\\\\[^:]+\\\\.cs\")",
+      "Bash(git rev-list *)",
+      "Bash(git commit *)"
     ]
   }
 }

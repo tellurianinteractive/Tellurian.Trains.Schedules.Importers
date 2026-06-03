@@ -1,7 +1,6 @@
-using Tellurian.Trains.Schedules.Planning.Schedules;
 using Tellurian.Trains.Schedules.Planning.Timetables;
 
-namespace Tellurian.Trains.Schedules.Planning;
+namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
 /// <summary>
 /// Combined settings for timetable planning, including both timetable parameters and graph display settings.

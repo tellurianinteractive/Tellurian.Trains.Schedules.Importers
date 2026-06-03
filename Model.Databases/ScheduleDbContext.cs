@@ -299,8 +299,6 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasMany(e => e.Stretches)
                   .WithMany();
 
-            entity.Ignore(e => e.Starts);
-            entity.Ignore(e => e.Ends);
             entity.Ignore(e => e.Stations);
         });
     }

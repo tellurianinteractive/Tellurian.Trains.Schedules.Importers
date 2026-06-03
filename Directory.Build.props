@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<TargetFrameworks>net10.0</TargetFrameworks>
+		<TargetFramework>net10.0</TargetFramework>
 		<Product>Tellurian Trains</Product>
 		<Company>Tellurian Interactive</Company>
 		<Copyright>© Stefan Fjällemark 2023-2026</Copyright>
@@ -33,11 +33,17 @@
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 	<PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+		<IsPackable>false</IsPackable>
 		<NoWarn>$(NoWarn);MSTEST0001;MSTEST0037;CS1591</NoWarn>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<!-- Microsoft Testing Platform parallelism (replaces runsettings MaxCpuCount) -->
 		<TestingPlatformParallelEnabled>true</TestingPlatformParallelEnabled>
 		<!-- Suppress runsettings compatibility warnings -->
 		<TestingPlatformShowPlatformModeCompatibilityWarnings>false</TestingPlatformShowPlatformModeCompatibilityWarnings>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(MSBuildProjectName)' == 'Planning.App' OR '$(MSBuildProjectName)' == 'Planning.Components'">
+		<!-- Executable app and internal UI/graph components: not documented public APIs. -->
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 	</PropertyGroup>
 </Project>

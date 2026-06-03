@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Planning.Schedules;
+namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
 public struct Offset(int x, int y)
 {

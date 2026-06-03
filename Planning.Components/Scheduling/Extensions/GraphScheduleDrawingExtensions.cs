@@ -1,5 +1,4 @@
 using Tellurian.Trains.Schedules.Model;
-using Tellurian.Trains.Schedules.Planning.Schedules;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling.Extensions;
 

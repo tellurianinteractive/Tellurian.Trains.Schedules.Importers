@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
 using System.IO.Compression;
+using System.Text;
 using System.Xml;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 using Tellurian.Trains.Schedules.Model;
@@ -10,8 +11,9 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 
 /// <summary>
 /// Provides functionality to read schedule data from ODS (OpenDocument Spreadsheet) files.
-/// This provider parses the XML structure within the ODS ZIP archive and extracts
-/// worksheet data including cell values and background colors.
+/// This provider streams the XML structure within the ODS ZIP archive with a forward-only
+/// <see cref="XmlReader"/> (no DOM, no XPath) and extracts worksheet data including cell values
+/// and background colors.
 /// </summary>
 /// <param name="logger">Logger for recording import progress and errors.</param>
 public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDataSetProvider
@@ -22,6 +24,11 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
     /// The column name used to store background color information extracted from cells.
     /// </summary>
     public const string BackgroundColorColumnName = "BackgroundColor";
+
+    private const string TableNs = "urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+    private const string OfficeNs = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+    private const string StyleNs = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+    private const string FoNs = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
 
     /// <summary>
     /// Imports schedule data from an ODS (OpenDocument Spreadsheet) stream.
@@ -37,13 +44,34 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
     {
         try
         {
-            using var archive = GetZipArchive(inputStream);
-            var document = GetContentXmlFile(archive);
-            var namespaceManager = InitializeXmlNamespaceManager(document);
-            var styleColors = GetStyleBackgroundColors(document, namespaceManager);
+            using var archive = new ZipArchive(inputStream);
+            var entry = archive.GetEntry("content.xml") ?? throw new FileNotFoundException("content.xml");
+            using var stream = entry.Open();
+            var settings = new XmlReaderSettings
+            {
+                IgnoreComments = true,
+                IgnoreProcessingInstructions = true,
+                IgnoreWhitespace = true,
+                DtdProcessing = DtdProcessing.Prohibit,
+            };
+            using var reader = XmlReader.Create(stream, settings);
+
             var dataSet = new DataSet(dataSetConfiguration.Name);
-            var tables = GetDataTables(document, dataSetConfiguration, namespaceManager, styleColors);
-            dataSet.Tables.AddRange([.. tables]);
+            var styleColors = new Dictionary<string, string>();
+
+            while (reader.Read())
+            {
+                if (reader.NodeType != XmlNodeType.Element) continue;
+                if (reader.LocalName == "automatic-styles" && reader.NamespaceURI == OfficeNs)
+                {
+                    ReadStyleBackgroundColors(reader, styleColors);
+                }
+                else if (reader.LocalName == "table" && reader.NamespaceURI == TableNs)
+                {
+                    var table = ReadTable(reader, dataSetConfiguration, styleColors);
+                    if (table is not null) dataSet.Tables.Add(table);
+                }
+            }
             return dataSet;
         }
         catch (Exception ex)
@@ -54,80 +82,62 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         }
     }
 
-
-    private static Dictionary<string, string> GetStyleBackgroundColors(XmlDocument document, XmlNamespaceManager namespaceManager)
+    private static void ReadStyleBackgroundColors(XmlReader outer, Dictionary<string, string> colors)
     {
-        var colors = new Dictionary<string, string>();
-
-        var styleNodes = document.SelectNodes(
-            "/office:document-content/office:automatic-styles/style:style[@style:family='table-cell']",
-            namespaceManager);
-
-        if (styleNodes is not null)
+        using var reader = outer.ReadSubtree();
+        reader.Read(); // position on <office:automatic-styles>
+        string? currentStyleName = null;
+        var currentIsCellStyle = false;
+        while (reader.Read())
         {
-            foreach (XmlNode styleNode in styleNodes)
+            if (reader.NodeType != XmlNodeType.Element) continue;
+            if (reader.LocalName == "style" && reader.NamespaceURI == StyleNs)
             {
-                var styleName = styleNode.Attributes?["style:name"]?.Value;
-                if (styleName is null) continue;
-
-                var cellProps = styleNode.SelectSingleNode("style:table-cell-properties", namespaceManager);
-                var bgColor = cellProps?.Attributes?["fo:background-color"]?.Value;
-
-                if (bgColor is not null && !bgColor.Equals("transparent", StringComparison.OrdinalIgnoreCase))
+                currentStyleName = reader.GetAttribute("name", StyleNs);
+                currentIsCellStyle = reader.GetAttribute("family", StyleNs) == "table-cell";
+            }
+            else if (reader.LocalName == "table-cell-properties" && reader.NamespaceURI == StyleNs)
+            {
+                if (currentIsCellStyle && currentStyleName is not null)
                 {
-                    colors[styleName] = bgColor;
+                    var bgColor = reader.GetAttribute("background-color", FoNs);
+                    if (bgColor is not null && !bgColor.Equals("transparent", StringComparison.OrdinalIgnoreCase))
+                        colors[currentStyleName] = bgColor;
                 }
             }
         }
-        return colors;
     }
 
-    private IEnumerable<DataTable> GetDataTables(XmlDocument document, DataSetConfiguration configuration, XmlNamespaceManager namespaceManager, Dictionary<string, string> styleColors)
+    private DataTable? ReadTable(XmlReader outer, DataSetConfiguration configuration, Dictionary<string, string> styleColors)
     {
-        var tableNodes = TableNodes(document, namespaceManager);
+        var name = outer.GetAttribute("name", TableNs);
+        var worksheetConfiguration = configuration.WorksheetConfiguration(name);
+        using var reader = outer.ReadSubtree();
+        reader.Read(); // position on <table:table>
+        if (worksheetConfiguration is null)
+        {
+            while (reader.Read()) { } // skip unconfigured worksheet
+            return null;
+        }
         if (Logger.IsEnabled(LogLevel.Information))
-            Logger.LogInformation("{count} table nodes in document.", tableNodes?.Count ?? 0);
-        if (tableNodes is not null)
+            Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
+
+        var dataTable = new DataTable(name);
+        while (reader.Read())
         {
-            foreach (XmlNode tableNode in tableNodes)
+            if (reader.NodeType != XmlNodeType.Element) continue;
+            if (reader.LocalName == "table-row" && reader.NamespaceURI == TableNs)
             {
-                var nameAttribute = tableNode.Attributes?["table:name"];
-                var worksheetConfiguration = configuration.WorksheetConfiguration(nameAttribute?.Value);
-                if (worksheetConfiguration is not null)
+                bool keepReading;
+                using (var rowReader = reader.ReadSubtree())
                 {
-                    if (Logger.IsEnabled(LogLevel.Information))
-                        Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
-                    var table = GetDataTable(tableNode, worksheetConfiguration, namespaceManager, styleColors);
-                    if (table is null) continue;
-                    yield return table;
+                    rowReader.Read(); // position on <table:table-row>
+                    keepReading = ReadRow(rowReader, dataTable, worksheetConfiguration, styleColors);
                 }
+                if (!keepReading) break;
             }
         }
-    }
-
-    private static XmlNodeList? TableNodes(XmlDocument document, XmlNamespaceManager namespaceManager)
-    {
-        return document.SelectNodes("/office:document-content/office:body/office:spreadsheet/table:table", namespaceManager);
-    }
-
-    private static DataTable? GetDataTable(XmlNode tableNode, WorksheetConfiguration configuration, XmlNamespaceManager namespaceManager, Dictionary<string, string> styleColors)
-    {
-        var nameAttribute = tableNode.Attributes?["table:name"];
-        if (nameAttribute is null) return null;
-
-        DataTable dataTable = new DataTable(nameAttribute.Value);
-
-        var rowNodes = tableNode.SelectNodes("table:table-row", namespaceManager);
-        if (rowNodes is not null)
-        {
-            int rowIndex = 0;
-            foreach (XmlNode rowNode in rowNodes)
-            {
-                var isRead = GetRow(rowNode, dataTable, namespaceManager, configuration, styleColors, ref rowIndex);
-                if (!isRead) break;
-            }
-        }
-        if (dataTable.Rows.Count == 0) // Just adds an empty row with one column of no data is found.
+        if (dataTable.Rows.Count == 0) // Just add an empty row with one column if no data was found.
         {
             dataTable.Rows.Add(dataTable.NewRow());
             dataTable.Columns.Add();
@@ -135,118 +145,78 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
         return dataTable;
     }
 
-    private static bool GetRow(XmlNode rowNode, DataTable dataTable, XmlNamespaceManager namespaceManager, WorksheetConfiguration configuration, Dictionary<string, string> styleColors, ref int rowIndex)
+    private static bool ReadRow(XmlReader reader, DataTable dataTable, WorksheetConfiguration configuration, Dictionary<string, string> styleColors)
     {
-        var rowsRepeated = rowNode.Attributes?["table:number-rows-repeated"];
-        var repeat = rowsRepeated is null ? 1 : Convert.ToInt32(rowsRepeated.Value, CultureInfo.InvariantCulture);
+        var rowsRepeated = reader.GetAttribute("number-rows-repeated", TableNs);
+        var repeat = rowsRepeated is null ? 1 : Convert.ToInt32(rowsRepeated, CultureInfo.InvariantCulture);
         if (repeat > configuration.MaxRowRepetitions) return false;
+
+        while (dataTable.Columns.Count <= configuration.MaxReadColumns + 1)
+            dataTable.Columns.Add();
+
+        var (cells, backgroundColor) = ReadRowCells(reader, configuration, styleColors);
+
         for (var i = 0; i < repeat; i++)
         {
             var row = dataTable.NewRow();
-            while (dataTable.Columns.Count <= configuration.MaxReadColumns + 1)
-                dataTable.Columns.Add();
-
-            var cellNodes = rowNode.SelectNodes("table:table-cell", namespaceManager);
-            int cellIndex = 0;
-            bool isFirstCell = true;
-            foreach (XmlNode cellNode in cellNodes!)
-            {
-                if (isFirstCell)
-                {
-                    var styleName = cellNode.Attributes?["table:style-name"]?.Value;
-                    if (styleName is not null && styleColors.TryGetValue(styleName, out var backgroundColor))
-                    {
-                        row[configuration.BackgroundColorColumIndex] = backgroundColor;
-                    }
-                    isFirstCell = false;
-                }
-                GetCell(cellNode, row, configuration.MaxReadColumns, ref cellIndex);
-                if (cellIndex >= configuration.MaxReadColumns) break;
-            }
-
-            if (HasValue(row)) dataTable.Rows.Add(row);
-            rowIndex++;
+            for (var c = 0; c < configuration.MaxReadColumns; c++)
+                if (cells[c] is not null) row[c] = cells[c];
+            if (backgroundColor is not null) row[configuration.BackgroundColorColumIndex] = backgroundColor;
+            if (row.GetRowFields().Any(f => f.HasValue)) dataTable.Rows.Add(row);
         }
         return true;
-
-        static bool HasValue(DataRow row) => row.GetRowFields().Any(f => f.HasValue);
     }
 
-    private static void GetCell(XmlNode cellNode, DataRow row, int columns, ref int cellIndex)
+    private static (string?[] cells, string? backgroundColor) ReadRowCells(XmlReader reader, WorksheetConfiguration configuration, Dictionary<string, string> styleColors)
     {
-        var cellRepeated = cellNode.Attributes?["table:number-columns-repeated"];
-        var repeat = cellRepeated is null ? 1 : Convert.ToInt32(cellRepeated.Value, CultureInfo.InvariantCulture);
-        for (int i = 0; i < repeat; i++)
+        var cells = new string?[configuration.MaxReadColumns];
+        string? backgroundColor = null;
+        var cellIndex = 0;
+        var isFirstCell = true;
+
+        while (reader.Read())
         {
-            if (cellIndex >= columns) break;
-            row[cellIndex] = ReadCellValue(cellNode);
-            cellIndex++;
+            if (reader.NodeType != XmlNodeType.Element) continue;
+            if (reader.LocalName != "table-cell" || reader.NamespaceURI != TableNs) continue;
+
+            var styleName = isFirstCell ? reader.GetAttribute("style-name", TableNs) : null;
+            var cellRepeated = reader.GetAttribute("number-columns-repeated", TableNs);
+            var value = ReadCellValue(reader);
+
+            if (isFirstCell)
+            {
+                if (styleName is not null && styleColors.TryGetValue(styleName, out var color))
+                    backgroundColor = color;
+                isFirstCell = false;
+            }
+
+            var repeat = cellRepeated is null ? 1 : Convert.ToInt32(cellRepeated, CultureInfo.InvariantCulture);
+            for (var i = 0; i < repeat && cellIndex < configuration.MaxReadColumns; i++)
+            {
+                cells[cellIndex] = value;
+                cellIndex++;
+            }
+            // Continue consuming the rest of the (subtree-bounded) row even once full,
+            // so the reader is left positioned at the end of the row.
         }
-    }
-    private static string? ReadCellValue(XmlNode cell)
-    {
-        var cellVal = cell.Attributes?["office:value"];
-        if (cellVal is null)
-            return string.IsNullOrEmpty(cell.InnerText) ? null : cell.InnerText;
-        else
-            return cellVal.Value;
+        return (cells, backgroundColor);
     }
 
-    private static XmlDocument GetContentXmlFile(ZipArchive archive)
+    private static string? ReadCellValue(XmlReader reader)
     {
-        const string entryName = "content.xml";
-        var entry = archive.GetEntry(entryName) ?? throw new FileNotFoundException(entryName);
-        using var stream = entry.Open();
-        XmlDocument document = new XmlDocument();
-        document.Load(stream);
-        return document;
-    }
+        // A typed cell carries its value in the office:value attribute; otherwise use the element text.
+        var officeValue = reader.GetAttribute("value", OfficeNs);
+        if (reader.IsEmptyElement) return officeValue;
 
-    private static XmlNamespaceManager InitializeXmlNamespaceManager(XmlDocument xmlDocument)
-    {
-        var manager = new XmlNamespaceManager(xmlDocument.NameTable);
-        foreach (var ns in Namespaces)
+        var depth = reader.Depth;
+        StringBuilder? text = null;
+        while (reader.Read())
         {
-            manager.AddNamespace(ns.Key, ns.Value);
+            if (reader.NodeType == XmlNodeType.EndElement && reader.Depth == depth) break;
+            if (reader.NodeType is XmlNodeType.Text or XmlNodeType.CDATA or XmlNodeType.SignificantWhitespace)
+                (text ??= new StringBuilder()).Append(reader.Value);
         }
-        ;
-        return manager;
+        if (officeValue is not null) return officeValue;
+        return text is null || text.Length == 0 ? null : text.ToString();
     }
-
-    private static ZipArchive GetZipArchive(Stream stream)
-    {
-        return new ZipArchive(stream);
-    }
-
-    private static readonly Dictionary<string, string> Namespaces = new()
-    {
-        { "table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0" },
-        { "office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0" },
-        { "style", "urn:oasis:names:tc:opendocument:xmlns:style:1.0" },
-        { "text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0" },
-        { "draw", "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" },
-        { "fo", "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" },
-        { "dc", "http://purl.org/dc/elements/1.1/" },
-        { "meta", "urn:oasis:names:tc:opendocument:xmlns:meta:1.0" },
-        { "number", "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" },
-        { "presentation", "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" },
-        { "svg", "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" },
-        { "chart", "urn:oasis:names:tc:opendocument:xmlns:chart:1.0" },
-        { "dr3d", "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" },
-        { "math", "http://www.w3.org/1998/Math/MathML" },
-        { "form", "urn:oasis:names:tc:opendocument:xmlns:form:1.0" },
-        { "script", "urn:oasis:names:tc:opendocument:xmlns:script:1.0" },
-        { "ooo", "http://openoffice.org/2004/office" },
-        { "ooow", "http://openoffice.org/2004/writer" },
-        { "oooc", "http://openoffice.org/2004/calc" },
-        { "dom", "http://www.w3.org/2001/xml-events" },
-        { "xforms", "http://www.w3.org/2002/xforms" },
-        { "xsd", "http://www.w3.org/2001/XMLSchema" },
-        { "xsi", "http://www.w3.org/2001/XMLSchema-instance" },
-        { "rpt", "http://openoffice.org/2005/report" },
-        { "of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2" },
-        { "rdfa", "http://docs.oasis-open.org/opendocument/meta/rdfa#" },
-        { "config", "urn:oasis:names:tc:opendocument:xmlns:config:1.0" }
-    };
-
 }

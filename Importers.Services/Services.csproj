@@ -36,9 +36,4 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="CSV\" />
-	</ItemGroup>
-	<Target Condition="'$(Configuration)' == 'Release'" Name="CopyPackage" AfterTargets="Pack">
-		<Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="C:\NuGets\" />
-		<Copy SourceFiles="$(OutputPath)\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="C:\NuGets\" />
-	</Target>
-</Project>
+	</ItemGroup></Project>

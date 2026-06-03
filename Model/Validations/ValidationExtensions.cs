@@ -4,8 +4,17 @@ using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
 
+/// <summary>
+/// Provides validation extension methods for schedules, timetables, trains, station tracks and station calls.
+/// </summary>
 public static class ValidationExtensions
 {
+    /// <summary>
+    /// Validates a complete schedule, including its timetable, vehicle schedules and locomotive coverage.
+    /// </summary>
+    /// <param name="schedule">The schedule to validate.</param>
+    /// <param name="options">The options controlling which validations run.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> GetValidationErrors(this Schedule schedule, ValidationOptions options)
     {
         schedule = schedule.ValueOrException(nameof(schedule));
@@ -18,6 +27,13 @@ public static class ValidationExtensions
         return result;
     }
 
+    /// <summary>
+    /// Validates a timetable within its schedule (station tracks, station calls, stretches and train speed).
+    /// </summary>
+    /// <param name="timetable">The timetable to validate.</param>
+    /// <param name="schedule">The schedule the timetable belongs to.</param>
+    /// <param name="options">The options controlling which validations run.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationOptions options)
     {
         timetable = timetable.ValueOrException(nameof(timetable));
@@ -53,6 +69,12 @@ public static class ValidationExtensions
     #endregion
 
     #region StationTrack
+    /// <summary>
+    /// Validates a station track for conflicting calls, using the schedule's vehicle schedules to tell whether conflicting calls share a vehicle.
+    /// </summary>
+    /// <param name="me">The station track to validate.</param>
+    /// <param name="vehicleSchedules">The vehicle schedules used to determine whether conflicting calls share a vehicle.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> GetValidationErrors(this StationTrack me, IEnumerable<VehicleSchedule> vehicleSchedules) =>
         me is null ? [] :
         me.GetConflicts(vehicleSchedules).Select(c =>
@@ -96,6 +118,11 @@ public static class ValidationExtensions
     #endregion
 
     #region StationCall
+    /// <summary>
+    /// Validates a station call's timing (that arrival is not after departure).
+    /// </summary>
+    /// <param name="stationCall">The station call to validate.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> GetValidationErrors(this StationCall stationCall)
     {
         stationCall = stationCall.ValueOrException(nameof(stationCall));
@@ -131,6 +158,12 @@ public static class ValidationExtensions
     #endregion
 
     #region Train
+    /// <summary>
+    /// Validates a single train's speed and call time sequence.
+    /// </summary>
+    /// <param name="train">The train to validate.</param>
+    /// <param name="options">The options controlling the speed thresholds.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> GetValidationErrors(this Train train, ValidationOptions options)
     {
         train = train.ValueOrException(nameof(train));
@@ -182,6 +215,11 @@ public static class ValidationExtensions
         return result;
     }
 
+    /// <summary>
+    /// Checks that a train's station calls form a valid, non-decreasing time sequence.
+    /// </summary>
+    /// <param name="me">The train to check.</param>
+    /// <returns>The validation errors found.</returns>
     public static IEnumerable<ValidationError> CheckTrainTimeSequence(this Train me)
     {
         var result = new List<ValidationError>();

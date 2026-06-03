@@ -12,7 +12,10 @@ namespace Tellurian.Trains.Schedules.Model;
 [JsonDerivedType(typeof(TextCallNote), typeDiscriminator: "TextCallNote")]
 public abstract class CallNote : IEquatable<CallNote>
 {
-    // Protected parameterless constructor for EF Core and JSON deserialization
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CallNote"/> class.
+    /// Parameterless constructor for EF Core and JSON deserialization.
+    /// </summary>
     [JsonConstructor]
     protected CallNote() { }
 

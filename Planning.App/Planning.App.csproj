@@ -3,10 +3,15 @@
   <PropertyGroup>
     <AssemblyName>Tellurian.Trains.Schedules.Planning.App</AssemblyName>
     <RootNamespace>Tellurian.Trains.Schedules.Planning.App</RootNamespace>
+    <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    <!-- Ahead-of-time compile the WebAssembly on publish for faster CPU-bound work (e.g. ODS import).
+         Only applied by `dotnet publish` (Release); `dotnet build`/`run` stay interpreted for fast dev.
+         Requires the wasm-tools workload: `dotnet workload install wasm-tools`. -->
+    <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,20 @@
+<Project>
+  <!-- Auto-copy packed packages to the local NuGet feed (C:\NuGets) on developer machines.
+       CI-safe: skipped on CI, only for packable projects, and only when the package actually
+       exists (so `dotnet publish` of the app does not fail when libraries pack transitively). -->
+  <PropertyGroup>
+    <LocalNuGetFeed>C:\NuGets\</LocalNuGetFeed>
+    <IsCiBuild Condition="'$(CI)' == 'true' OR '$(GITHUB_ACTIONS)' == 'true' OR '$(TF_BUILD)' == 'true'">true</IsCiBuild>
+  </PropertyGroup>
+  <Target Name="CopyPackageToLocalFeed" AfterTargets="Pack"
+          Condition="'$(IsCiBuild)' != 'true' AND '$(IsPackable)' != 'false' AND '$(Configuration)' == 'Release' AND Exists('$(LocalNuGetFeed)')">
+    <ItemGroup>
+      <_LocalFeedPackage Include="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg"
+                         Condition="Exists('$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg')" />
+      <_LocalFeedPackage Include="$(PackageOutputPath)$(PackageId).$(PackageVersion).snupkg"
+                         Condition="Exists('$(PackageOutputPath)$(PackageId).$(PackageVersion).snupkg')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_LocalFeedPackage)" DestinationFolder="$(LocalNuGetFeed)" SkipUnchangedFiles="true"
+          Condition="'@(_LocalFeedPackage)' != ''" />
+  </Target>
+</Project>

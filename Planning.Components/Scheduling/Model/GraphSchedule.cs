@@ -1,5 +1,4 @@
 using Tellurian.Trains.Schedules.Model;
-using Tellurian.Trains.Schedules.Planning.Schedules;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -30,7 +29,7 @@ public class GraphSchedule
     public Timetable Timetable { get; }
     public GraphSettings GraphSettings { get; }
     public TimeAxisDirection AxisDirection => GraphSettings.AxisDirection;
-    public string Description => TimetableStretch.GetDescription();
+    public string Description => TimetableStretch.FullDescription;
     public OperationLocation[] Stations { get; }
     public TrackStretch[] TrackStretches { get; }
     public Train[] Trains { get; }

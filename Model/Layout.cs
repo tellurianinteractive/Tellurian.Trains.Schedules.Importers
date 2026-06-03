@@ -96,9 +96,7 @@ public static class LayoutCompanyExtensions
 
         /// <summary>
         /// Finds a company by its signature.
-        /// </summary>
-        /// <param name="me">The layout to search.</param>
-        /// <param name="signature">The company signature to find.</param>
+        /// </summary>        /// <param name="signature">The company signature to find.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the company if found.</returns>
         public Maybe<Company> Company(string signature) =>
             new(layout?.Companies.SingleOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
@@ -139,21 +137,16 @@ public static class LayoutOperationLocationExtensions
         public bool HasStation(OperationLocation station) =>
             layout?.OperationLocations.Any(s => s.Equals(station)) ?? false;
 
-
         /// <summary>
         /// Determines whether the layout contains the specified track.
-        /// </summary>
-        /// <param name="me">The layout to check.</param>
-        /// <param name="track">The track to look for.</param>
+        /// </summary>        /// <param name="track">The track to look for.</param>
         /// <returns><c>true</c> if the track exists in the layout; otherwise, <c>false</c>.</returns>
         public bool HasTrack(StationTrack track) =>
             layout?.StationTracks().Any(t => t.Equals(track)) ?? false;
 
         /// <summary>
         /// Finds a station by its name or signature.
-        /// </summary>
-        /// <param name="me">The layout to search.</param>
-        /// <param name="nameOrSignature">The station name or signature to find.</param>
+        /// </summary>        /// <param name="nameOrSignature">The station name or signature to find.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the station if found.</returns>
         public Maybe<OperationLocation> Station(string nameOrSignature) =>
            new(layout?.OperationLocations.SingleOrDefault(s => s.Signature.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase) || s.Name.Equals(nameOrSignature, StringComparison.OrdinalIgnoreCase)),
@@ -161,9 +154,7 @@ public static class LayoutOperationLocationExtensions
 
         /// <summary>
         /// Gets all station tracks from all stations in the layout.
-        /// </summary>
-        /// <param name="me">The layout.</param>
-        /// <returns>A collection of all station tracks.</returns>
+        /// </summary>        /// <returns>A collection of all station tracks.</returns>
         public IEnumerable<StationTrack> StationTracks() => layout is null ? [] : layout.OperationLocations.SelectMany(s => s.Tracks);
 
         /// <summary>

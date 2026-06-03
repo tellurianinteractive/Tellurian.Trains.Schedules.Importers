@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
-using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
@@ -68,16 +67,6 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public ICollection<TrackStretch> Stretches { get; set; }
 
     /// <summary>
-    /// Gets the starting station of this timetable stretch.
-    /// </summary>
-    public OperationLocation Starts => Stretches.First().Start;
-
-    /// <summary>
-    /// Gets the ending station of this timetable stretch.
-    /// </summary>
-    public OperationLocation Ends => Stretches.Last().End;
-
-    /// <summary>
     /// Gets all stations along this timetable stretch in order.
     /// </summary>
     public IEnumerable<OperationLocation> Stations => Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
@@ -92,7 +81,7 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0}: {1}", Number, this.GetDescription());
+    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0}", this.FullDescription);
 }
 
 /// <summary>
@@ -100,67 +89,67 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
 /// </summary>
 public static class TimetableStretchExtensions
 {
-    /// <summary>
-    /// Gets the description of the timetable stretch, or generates one from start/end stations.
-    /// </summary>
-    /// <param name="me">The timetable stretch.</param>
-    /// <returns>The description or a generated description.</returns>
-    public static string GetDescription(this TimetableStretch me) => me is null ? string.Empty : me.Description.OrElse($"{me.Starts} - {me.Ends}");
-
-    /// <summary>
-    /// Finds a station along the timetable stretch.
-    /// </summary>
-    /// <param name="me">The timetable stretch.</param>
-    /// <param name="station">The station to find.</param>
-    /// <returns>A <see cref="Maybe{T}"/> containing the station if found.</returns>
-    public static Maybe<OperationLocation> GetStation(this TimetableStretch me, OperationLocation station) =>
-        new(me?.Stations.SingleOrDefault(s => s.Equals(station)), $"Station {station} is not in timetable stretch {me}.");
-
-    /// <summary>
-    /// Gets the starting station of the timetable stretch.
-    /// </summary>
-    /// <param name="me">The timetable stretch.</param>
-    /// <returns>The starting station.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
-    public static OperationLocation Starts(this TimetableStretch me) =>
-        me?.Stretches.Count > 0 ? me.Stretches.First().Start : throw new InvalidOperationException($"No stretch in {me}.");
-
-    /// <summary>
-    /// Gets the ending station of the timetable stretch.
-    /// </summary>
-    /// <param name="me">The timetable stretch.</param>
-    /// <returns>The ending station.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
-    public static OperationLocation Ends(this TimetableStretch me) =>
-       me?.Stretches.Count > 0 ? me.Stretches.Last().End : throw new InvalidOperationException($"No stretch in {me}.");
-
-    /// <summary>
-    /// Calculates the distance from the start of the timetable stretch to the specified station.
-    /// </summary>
-    /// <param name="me">The timetable stretch.</param>
-    /// <param name="station">The target station.</param>
-    /// <returns>The distance in kilometers, or null if the station is not found.</returns>
-    public static double? DistanceToStation(this TimetableStretch me, OperationLocation station)
+    extension(TimetableStretch stretch)
     {
-        var to = me.GetStation(station);
-        if (to.IsNone) return null;
-        if (to.Value.Equals(me.Starts)) return 0.0;
-        return me.Stretches.Where(s => !s.Start.Equals(to.Value)).Sum(s => s.Distance);
-    }
+        /// <summary>
+        /// Includes stretch number, start and end station and an optional additional description.
+        /// </summary>
+        public string FullDescription => $"{stretch.Number} {stretch.Starts}-{stretch.Ends} {stretch.Description}".Trim();
+        /// <summary>
+        /// Finds a station along the timetable stretch.
+        /// </summary>
+        /// <param name="station">The station to find.</param>
+        /// <returns>A <see cref="Maybe{T}"/> containing the station if found.</returns>
+        public Maybe<OperationLocation> GetStation(OperationLocation station) =>
+            new(stretch?.Stations.SingleOrDefault(s => s.Equals(station)), $"Station {station} is not in timetable stretch {stretch}.");
 
-    /// <summary>
-    /// Adds a track stretch to the end of the timetable stretch.
-    /// </summary>
-    /// <param name="timetableStretch">The timetable stretch to add to.</param>
-    /// <param name="trackStretch">The track stretch to add.</param>
-    /// <returns>The added track stretch.</returns>
-    public static TrackStretch AddLast(this TimetableStretch timetableStretch, TrackStretch trackStretch)
-    {
-        var me = timetableStretch.ValueOrException(nameof(timetableStretch));
-        ArgumentNullException.ThrowIfNull(trackStretch);
+        /// <summary>
+        /// Gets the starting station of the timetable stretch.
+        /// </summary>
+        /// <returns>The starting station.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
+        public OperationLocation Starts =>
+            stretch?.Stretches.Count > 0 ? stretch.Stretches.First().Start : throw new InvalidOperationException($"No stretch in {stretch}.");
+
+        /// <summary>
+        /// Gets the ending station of the timetable stretch.
+        /// </summary>
+        /// <returns>The ending station.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
+        public OperationLocation Ends =>
+           stretch?.Stretches.Count > 0 ? stretch.Stretches.Last().End : throw new InvalidOperationException($"No stretch in {stretch}.");
+
+        /// <summary>
+        /// Calculates the distance from the start of the timetable stretch to the specified station.
+        /// </summary>
+        /// <param name="station">The target station.</param>
+        /// <returns>The distance in kilometers, or null if the station is not found.</returns>
+        public double? DistanceToStation(OperationLocation station)
         {
-            me.Stretches.Add(trackStretch);
-            return trackStretch;
+            var to = stretch.GetStation(station);
+            if (to.IsNone) return null;
+            if (to.Value.Equals(stretch.Starts)) return 0.0;
+            return stretch.Stretches.Where(s => !s.Start.Equals(to.Value)).Sum(s => s.Distance);
+        }
+        /// <summary>
+        /// Adds a track stretch to the end of the timetable stretch.
+        /// </summary>
+        /// <param name="trackStretch">The track stretch to add.</param>
+        /// <returns>The added track stretch.</returns>
+        public TrackStretch AddLast(TrackStretch trackStretch)
+        {
+            var timetableStretch = stretch.ValueOrException(nameof(TimetableStretch));
+            ArgumentNullException.ThrowIfNull(trackStretch);
+            {
+                stretch.Stretches.Add(trackStretch);
+                return trackStretch;
+            }
         }
     }
 }
+
+
+
+
+
+
