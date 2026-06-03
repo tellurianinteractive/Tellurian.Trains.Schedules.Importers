@@ -3,7 +3,6 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
-using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 using Tellurian.Trains.Schedules.Model;
@@ -319,7 +318,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         else
             messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ReadingWorksheet, WorkSheetName)));
 
+        // Choose the line-grouping strategy for this file. When the Routeid column (A) is shared by
+        // two or more rows it identifies the line; otherwise (e.g. Routeid unique per segment, as in
+        // some files) a new timetable stretch begins where the start position (column D) resets to zero.
+        var groupByRouteId = UsesRouteIdGrouping(routes, Route, StartStation, EndStation);
+
         var rowNumber = 1;
+        TimetableStretch? currentStretch = null;
+        var stretchNumber = 0;
         foreach (DataRow route in routes.Rows)
         {
             if (rowNumber > 1)
@@ -345,34 +351,40 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     itemMessages.Add(Message.Error(Resources.Strings.ColumnMustBeANumber, rowNumber, nameof(EndPosition), fields[EndPosition]));
                 if (itemMessages.HasNoStoppingErrors())
                 {
-                    TimetableStretch? timetableStretch = null;
-                    var routeNumber = fields[Route].HasValue ? fields[Route] : DefaultRoute;
-                    if (fields[Route].IsEmpty)
+                    if (groupByRouteId)
                     {
-                        itemMessages.Add(Message.Warning(Resources.Strings.RouteNumberIsMissingUsingDefault, rowNumber, routeNumber));
-                    }
-                    if (!layout.HasTimetableStretch(routeNumber))
-                    {
-                        timetableStretch = new TimetableStretch(rowNumber, routeNumber);
-                        layout.Add(timetableStretch);
-                    }
-                    else
-                    {
-                        var ts = layout.TimetableStretch(routeNumber);
-                        if (ts.IsNone)
+                        var routeNumber = fields[Route].HasValue ? fields[Route] : DefaultRoute;
+                        if (fields[Route].IsEmpty)
+                            itemMessages.Add(Message.Warning(Resources.Strings.RouteNumberIsMissingUsingDefault, rowNumber, routeNumber));
+                        if (!layout.HasTimetableStretch(routeNumber))
                         {
-                            itemMessages.Add(Message.Error(Resources.Strings.RouteNotFoundInLayout, rowNumber, routeNumber));
+                            currentStretch = new TimetableStretch(rowNumber, routeNumber);
+                            layout.Add(currentStretch);
                         }
                         else
                         {
-                            timetableStretch = ts.Value;
+                            var ts = layout.TimetableStretch(routeNumber);
+                            if (ts.IsNone)
+                                itemMessages.Add(Message.Error(Resources.Strings.RouteNotFoundInLayout, rowNumber, routeNumber));
+                            else
+                                currentStretch = ts.Value;
+                        }
+                    }
+                    else
+                    {
+                        var startsNewStretch = currentStretch is null || (fields[StartPosition].IsNumber && fields[StartPosition].ToDoubleOrZero == 0);
+                        if (startsNewStretch)
+                        {
+                            stretchNumber++;
+                            currentStretch = new TimetableStretch(rowNumber, stretchNumber.ToString(CultureInfo.CurrentCulture));
+                            layout.Add(currentStretch);
                         }
                     }
                     if (itemMessages.HasNoStoppingErrors())
                     {
                         var distance = Math.Abs(fields[EndPosition].ToDoubleOrZero - fields[StartPosition].ToDoubleOrZero);
                         var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToIntOrZero, fields[Speed].ToIntOrZero, fields[Time].ToIntOrZero);
-                        stretch = timetableStretch!.AddLast(stretch);
+                        stretch = currentStretch!.AddLast(stretch);
                         layout.Add(stretch);
                     }
                 }
@@ -384,6 +396,65 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             return ImportResult<Layout>.Failure(messages);
         else
             return ImportResult<Layout>.Success(layout, messages);
+    }
+
+    /// <summary>
+    /// Determines whether the Routes worksheet uses the Routeid column to group track stretches into lines.
+    /// This is the case when at least two route rows share the same non-empty Routeid; otherwise the
+    /// Routeid is a per-segment identifier and lines must be derived from the start position instead.
+    /// </summary>
+    private static bool UsesRouteIdGrouping(DataTable routes, int routeColumn, int startStationColumn, int endStationColumn)
+    {
+        var routeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var rowNumber = 1;
+        foreach (DataRow route in routes.Rows)
+        {
+            if (rowNumber > 1)
+            {
+                var fields = route.GetRowFields();
+                if (fields.AreAllEmpty) break;
+                if (!(fields[startStationColumn].IsZeroesOrEmpty && fields[endStationColumn].IsZeroesOrEmpty)
+                    && fields[routeColumn].HasValue && !routeIds.Add(fields[routeColumn]))
+                    return true;
+            }
+            rowNumber++;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Merges locomotive/trainset pairs that share the same identifier into a single railcar.
+    /// In XPLN a self-propelled railcar (e.g. the Swedish X2000) is listed under both the locomotive
+    /// and the trainset section with the same identifier, but represents one physical vehicle.
+    /// </summary>
+    private static void MergeRailcars(Schedule schedule)
+    {
+        var railcarGroups = schedule.Vehicles
+            .Where(v => v.ExternalId.HasValue && (v.VehicleType == VehicleType.Locomotive || v.VehicleType == VehicleType.Trainset))
+            .GroupBy(v => v.ExternalId!, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Any(v => v.VehicleType == VehicleType.Locomotive) && g.Any(v => v.VehicleType == VehicleType.Trainset))
+            .ToList();
+
+        foreach (var group in railcarGroups)
+        {
+            var members = group.ToList();
+            var railcar = members[0];
+            railcar.VehicleType = VehicleType.Railcar;
+            var primarySchedule = railcar.ScheduleAssignments.Select(a => a.VehicleSchedule).FirstOrDefault();
+
+            foreach (var duplicate in members.Skip(1))
+            {
+                foreach (var assignment in duplicate.ScheduleAssignments)
+                {
+                    var duplicateSchedule = assignment.VehicleSchedule;
+                    if (primarySchedule is null || duplicateSchedule is null || duplicateSchedule.Id == primarySchedule.Id) continue;
+                    foreach (var part in duplicateSchedule.Parts.ToList())
+                        if (!primarySchedule.Parts.Contains(part)) primarySchedule.Add(part);
+                    schedule.VehicleSchedules.Remove(duplicateSchedule);
+                }
+                schedule.Vehicles.Remove(duplicate);
+            }
+        }
     }
 
     private ImportResult<Timetable> GetTimetable(string name, Layout layout)
@@ -687,7 +758,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
                                             id: rowNumber,
                                             vehicleType: VehicleType.Locomotive,
-                                            number: locoId.NumberOrZero,
+                                            number: locoId.LocoNumber,
                                             vehicleClass: fields[LocoClass],
                                             company: company,
                                             externalId: locoId);
@@ -722,7 +793,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                             var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
                                                 id: rowNumber,
                                                 vehicleType: VehicleType.Trainset,
-                                                number: trainsetId.NumberOrZero,
+                                                number: trainsetId.LocoNumber,
                                                 vehicleClass: fields[TrainsetClass],
                                                 externalId: trainsetId,
                                                 remark: fields[Object].WithQuotationMarksRemoved);
@@ -783,6 +854,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (messages.HasStoppingErrors()) return ImportResult<Schedule>.Failure(messages);
         // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
+        MergeRailcars(schedule);
         return ImportResult<Schedule>.Success(schedule, messages);
 
         static TrainPartKeys GetTrainPartKeys(string[] fields, Train currentTrain, int rowNumber)

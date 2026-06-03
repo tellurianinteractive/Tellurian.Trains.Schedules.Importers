@@ -270,9 +270,9 @@ public static class ValidationExtensions
     {
         var errors = new List<ValidationError>();
 
-        // Get all locomotive vehicle schedules (via assignments from locomotives)
+        // Get all traction vehicle schedules (locomotives and self-propelled railcars)
         var locomotiveSchedules = schedule.Vehicles
-            .Where(v => v.VehicleType == VehicleType.Locomotive)
+            .Where(v => v.VehicleType is VehicleType.Locomotive or VehicleType.Railcar)
             .SelectMany(v => v.ScheduleAssignments)
             .Select(a => a.VehicleSchedule)
             .Distinct()
@@ -281,10 +281,13 @@ public static class ValidationExtensions
         // Group by train
         foreach (var train in schedule.Timetable.Trains)
         {
-            // Get all train parts for this train from locomotive schedules
+            // Get all train parts for this specific train run from locomotive schedules.
+            // Match by Id, not value equality: several runs can share the same category and number
+            // (e.g. a clock-face service), and value equality would merge their parts and emit the
+            // same gap/overlap warnings once per run.
             var locomotiveParts = locomotiveSchedules
                 .SelectMany(ls => ls.Parts)
-                .Where(p => p.Train.Equals(train))
+                .Where(p => p.Train.Id == train.Id)
                 .OrderBy(p => p.From.Departure.Value)
                 .ToList();
 

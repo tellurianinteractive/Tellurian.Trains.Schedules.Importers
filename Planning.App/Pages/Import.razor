@@ -1,0 +1,83 @@
+@page "/import"
+@using Tellurian.Trains.Schedules.Importers.Interfaces
+@inject ScheduleImportService ImportService
+@inject ScheduleState ScheduleState
+
+<div class="import-row">
+    <span class="import-label">Open schedule:</span>
+    <InputFile OnChange="OnFileSelected" accept=".json,.ods,.xlsx" />
+    @if (_isImporting)
+    {
+        <span class="status-importing">Importing...</span>
+    }
+</div>
+
+@if (ScheduleState.HasSchedule)
+{
+    <div class="schedule-summary">
+        <span><strong>@ScheduleState.Schedule!.Name</strong></span>
+        <span>@(ScheduleState.Schedule.Timetable?.Trains?.Count ?? 0) trains</span>
+        <span>@ScheduleState.TimetableStretches.Count stretches</span>
+        <span>@(ScheduleState.Schedule.Timetable?.Layout?.OperationLocations?.Count ?? 0) stations</span>
+    </div>
+}
+
+@if (_messages.Count > 0)
+{
+    <details class="import-messages" open="@_hasErrors">
+        <summary>Import messages (@_messages.Count)</summary>
+        <ul>
+            @foreach (var message in _messages)
+            {
+                <li class="msg-@message.Severity.ToString().ToLowerInvariant()">
+                    @message.Text
+                </li>
+            }
+        </ul>
+    </details>
+}
+
+@code {
+    private bool _isImporting;
+    private List<Message> _messages = [];
+    private bool _hasErrors;
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        _messages.Clear();
+        _hasErrors = false;
+        _isImporting = true;
+        StateHasChanged();
+
+        try
+        {
+            var file = e.File;
+            var maxSize = 50 * 1024 * 1024; // 50 MB
+            await using var stream = file.OpenReadStream(maxSize);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            var result = file.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                ? await ImportService.ImportFromJsonAsync(ms, file.Name)
+                : await ImportService.ImportFromXplnAsync(ms, file.Name);
+
+            _messages = [.. result.Messages];
+            _hasErrors = result.IsFailure;
+
+            if (result.IsSuccess)
+            {
+                ScheduleState.Schedule = result.Item;
+            }
+        }
+        catch (Exception ex)
+        {
+            _messages.Add(Message.System($"Unexpected error: {ex.Message}"));
+            _hasErrors = true;
+        }
+        finally
+        {
+            _isImporting = false;
+        }
+    }
+}

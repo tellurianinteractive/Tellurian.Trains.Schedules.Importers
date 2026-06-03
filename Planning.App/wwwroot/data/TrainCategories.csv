@@ -1,0 +1,15 @@
+Name,Prefix,Suffix,IsPassenger,IsFreight,Color
+PassengerTrain,Pt,,true,false,#ff4000
+LocalTrain,Lt,,true,false,#ff0000
+RegionalTrain,RE,,true,false,#ff0000
+FreightTrain,G,,false,true,#0040ff
+SpecialFreightTrain,Gt,,false,true,#6600ff
+FreightExpressTrain,Gxt,,false,true,#0000ff
+LocalFreightTrain,Lgt,,false,true,#668cff
+MailTrain,P,,false,true,#00ffbf
+InterCity,IC,,true,false,#ff4000
+InterRegio,IR,,true,false,#ff4000
+OreTrain,Mt,,false,true,#4000ff
+LocomotorTrain,Z,,false,true,#c2c2c2
+EuroCity,EC,,true,false,#cc0066
+EuroNight,EN,,true,false,#993366

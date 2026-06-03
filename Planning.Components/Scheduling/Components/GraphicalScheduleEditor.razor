@@ -9,16 +9,12 @@
 }
 else
 {
-    <div>
-        <h3>@Current.Description</h3>
-        <input id="toggleAxis" type="checkbox" @onchange="ToggleAxis" />
-        <label for="toggleAxis">Check to vertical time axis</label>
-        <input id="toggleDepartureMinutes" type="checkbox" @onchange="ToggleDepartureMinutes" />
-        <label for="toggleDepartureMinutes">Check to show departure minutes</label>
-        <input id="toggleArrivalMinutes" type="checkbox" @onchange="ToggleArrivalMinutes" />
-        <label for="toggleArrivalMinutes">Check to show arrival minutes</label>
+    <div class="graph-toolbar">
+        <label><input type="checkbox" @onchange="ToggleAxis" /> Vertical time axis</label>
+        <label><input type="checkbox" checked="@Current.GraphSettings.ShowDepartureMinutes" @onchange="ToggleDepartureMinutes" /> Departure min.</label>
+        <label><input type="checkbox" checked="@Current.GraphSettings.ShowArrivalMinutes" @onchange="ToggleArrivalMinutes" /> Arrival min.</label>
     </div>
-    <div>
+    <div class="graph-container">
         <svg style="border: 1pt solid black " height="@Current.Height()" width="@Current.Width()" @onclick="OnClick" @onmousedown="OnMouseDown">
             <defs>
                 <filter x="0" y="0" width="1" height="1" id="solid">

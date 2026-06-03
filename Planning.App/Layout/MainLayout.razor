@@ -1,22 +1,117 @@
 @inherits LayoutComponentBase
+@using System.Globalization
+@using Tellurian.Localization
+@inject PaneState PaneState
+@implements IDisposable
 
 <div class="page">
     <header class="top-bar">
-        <h1 class="app-title">Timetable Planner</h1>
+        <h1 class="app-title">Timetable Planner <span class="app-version">@AppVersion</span></h1>
+        <div class="top-bar-actions">
+            @if (PaneState.HasPinnedTab)
+            {
+                <button class="header-btn" @onclick="PaneState.ToggleOrientation"
+                        title="Toggle split direction">
+                    @(PaneState.SplitOrientation == SplitOrientation.Horizontal
+                        ? "Split \u2195"
+                        : "Split \u2194")
+                </button>
+                <button class="header-btn" @onclick="PaneState.UnpinTab"
+                        title="Unpin tab">
+                    Unpin
+                </button>
+            }
+            <button class="header-btn" @onclick="ToggleAbout">About</button>
+        </div>
     </header>
 
+    @if (_showAbout)
+    {
+        <div class="about" @onclick="ToggleAbout">
+            <div class="panel" @onclick:stopPropagation>
+                <button class="close" @onclick="ToggleAbout">&times;</button>
+                @((MarkupString)_aboutHtml)
+            </div>
+        </div>
+    }
+
     <nav class="tab-bar">
-        <NavLink class="tab" href="" Match="NavLinkMatch.All">Settings</NavLink>
-        <NavLink class="tab" href="layout">Layout</NavLink>
-        <NavLink class="tab" href="stretches">Stretches</NavLink>
-        <NavLink class="tab" href="categories">Train Categories</NavLink>
-        <NavLink class="tab" href="trains">Trains</NavLink>
-        <NavLink class="tab" href="graphical-timetable">Graphical Timetable</NavLink>
-        <NavLink class="tab" href="vehicle-schedules">Vehicle Schedules</NavLink>
-        <NavLink class="tab" href="vehicle-owners">Vehicle Owners</NavLink>
+        @foreach (var tab in TabRegistry.Tabs)
+        {
+            <div class="tab-item @(PaneState.PinnedTabHref == tab.Href ? "pinned" : "")">
+                <NavLink class="tab" href="@tab.Href"
+                         Match="@(tab.Href == "" ? NavLinkMatch.All : NavLinkMatch.Prefix)">
+                    @tab.Label
+                </NavLink>
+                <button class="pin-btn" @onclick="() => PaneState.PinTab(tab.Href)"
+                        title="@(PaneState.PinnedTabHref == tab.Href ? "Unpin" : "Pin to side")">
+                    @(PaneState.PinnedTabHref == tab.Href ? "\u25a0" : "\u25a1")
+                </button>
+            </div>
+        }
     </nav>
 
     <main class="content">
-        @Body
+        @if (PaneState.HasPinnedTab)
+        {
+            <SplitPane Orientation="PaneState.SplitOrientation"
+                       Ratio="PaneState.SplitRatio"
+                       RatioChanged="OnRatioChanged">
+                <First>
+                    <div class="pane-content">
+                        <DynamicComponent Type="PinnedComponentType" />
+                    </div>
+                </First>
+                <Second>
+                    <div class="pane-content">
+                        @Body
+                    </div>
+                </Second>
+            </SplitPane>
+        }
+        else
+        {
+            @Body
+        }
     </main>
 </div>
+
+@code {
+    private const string AppVersion = "0.1";
+    private bool _showAbout;
+    private string _aboutHtml = "";
+
+    [Inject(Key = "Markdown")]
+    public IResourceProvider MarkdownProvider { get; set; } = default!;
+
+    private Type? PinnedComponentType =>
+        PaneState.PinnedTabHref is not null
+            ? TabRegistry.GetComponentType(PaneState.PinnedTabHref)
+            : null;
+
+    protected override void OnInitialized()
+    {
+        PaneState.OnChanged += StateHasChanged;
+    }
+
+    private async Task ToggleAbout()
+    {
+        _showAbout = !_showAbout;
+        if (_showAbout && string.IsNullOrEmpty(_aboutHtml))
+        {
+            var content = await MarkdownProvider.GetTranslationAsync(
+                "About", CultureInfo.CurrentUICulture);
+            _aboutHtml = Markdig.Markdown.ToHtml(content.Text);
+        }
+    }
+
+    private void OnRatioChanged(double ratio)
+    {
+        PaneState.SplitRatio = ratio;
+    }
+
+    public void Dispose()
+    {
+        PaneState.OnChanged -= StateHasChanged;
+    }
+}

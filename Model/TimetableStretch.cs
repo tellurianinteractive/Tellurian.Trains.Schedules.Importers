@@ -31,7 +31,7 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public TimetableStretch(int id, string? number)
     {
         Id = id;
-        Number = number.TextOrException(nameof(number), string.Format(CultureInfo.CurrentCulture, Strings.NumberOfObjectIsRequired, Strings.TimetableStretch));
+        Number = number.ValueOrException(nameof(number), string.Format(CultureInfo.CurrentCulture, Strings.NumberOfObjectIsRequired, Strings.TimetableStretch));
         Description = string.Empty;
         Stretches = [];
     }

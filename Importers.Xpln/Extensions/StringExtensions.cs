@@ -26,6 +26,19 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
                 value.UntilOrEmpty(['_', '-', '.', ' ']);
 
             /// <summary>
+            /// Extracts the vehicle number from a locomotive or trainset identifier as the trailing run of digits.
+            /// Unlike <c>NumberOrZero</c>, this handles identifiers where the number follows a non-letter separator.
+            /// </summary>
+            /// <example>
+            /// "DB_GLok2" returns 2, "GT CL5814" returns 5814, "X2000" returns 2000; an identifier without
+            /// trailing digits (e.g. "DB_GLok") returns 0.
+            /// </example>
+            public int LocoNumber =>
+                int.TryParse(
+                    new string([.. value.Reverse().TakeWhile(char.IsDigit).Reverse()]),
+                    NumberStyles.Integer, CultureInfo.InvariantCulture, out var number) ? number : 0;
+
+            /// <summary>
             /// Extracts the train category prefix from a train identifier.
             /// The prefix is the alphabetic portion after the period and before any numbers or spaces.
             /// </summary>
@@ -85,13 +98,6 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions
             /// <returns><c>true</c> if the value is a valid number; otherwise, <c>false</c>.</returns>
             public bool IsTrackNumber() =>
                 value.IsNumber;
-        }
-
-        extension(string? filename)
-        {
-            //public bool HasFileExtension(params string[] extensions) =>
-            //    filename is not null &&
-            //    extensions.Any(e => Path.GetExtension(filename).Equals(e, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

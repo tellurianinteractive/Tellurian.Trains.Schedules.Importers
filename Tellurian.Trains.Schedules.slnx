@@ -15,6 +15,7 @@
   <Project Path="Importers.Interfaces/Interfaces.csproj" />
   <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
   <Project Path="Model.Databases/Model.Databases.csproj" />
+  <Project Path="Planning.App.Translations/Planning.App.Translations.csproj" />
   <Project Path="Planning.App/Planning.App.csproj" />
   <Project Path="Planning.Components/Planning.Components.csproj" />
   <Project Path="Planning.Tests/Planning.Tests.csproj" />

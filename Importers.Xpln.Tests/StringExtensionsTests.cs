@@ -15,6 +15,23 @@ public class StringExtensionsTests
     }
 
     [TestMethod]
+    public void ParsesLocoNumber()
+    {
+        Assert.AreEqual(2, "DB_GLok2".LocoNumber, "DB_GLok2");
+        Assert.AreEqual(0, "DB_GLok".LocoNumber, "DB_GLok (no number)");
+        Assert.AreEqual(2000, "X2000".LocoNumber, "X2000");
+        Assert.AreEqual(5814, "GT CL5814".LocoNumber, "GT CL5814");
+        Assert.AreEqual(218, "DB_218".LocoNumber, "DB_218");
+    }
+
+    [TestMethod]
+    public void ParsesLocoOperatingCompany()
+    {
+        Assert.AreEqual("DB", "DB_GLok2".LocoOperatingCompanySignature, "DB_GLok2");
+        Assert.AreEqual("SJ", "SJ-Rc6".LocoOperatingCompanySignature, "SJ-Rc6");
+    }
+
+    [TestMethod]
     public void ParsesTrainCategory()
     {
         Assert.AreEqual("GT", "054738.GT CN54738".TrainCategoryPrefix);

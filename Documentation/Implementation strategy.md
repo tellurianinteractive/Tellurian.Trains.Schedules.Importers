@@ -79,14 +79,46 @@ This was evaluated but **not recommended** for this project due to:
 
 ---
 
-## 2. Local Data Storage
+## 2. UI Styling — No External CSS Frameworks
 
-### 2.1 Strategy
+### 2.1 Decision
+
+**Use only custom CSS with Blazor's scoped CSS isolation (`.razor.css` files).
+No external CSS frameworks (Bootstrap, Tailwind, etc.).**
+
+### 2.2 Rationale
+
+- **Minimal footprint.** External frameworks add tens of kilobytes of unused
+  CSS. For a PWA cached by a service worker, every byte affects the initial
+  download and cache storage.
+- **Full control.** The app has a specialised UI (graphical timetable editor,
+  split panes, custom tab bar) that does not map well to generic framework
+  components. Custom CSS avoids fighting framework defaults.
+- **No version coupling.** Framework upgrades can introduce breaking visual
+  changes. Custom CSS evolves with the app.
+- **Scoped by default.** Blazor's `.razor.css` files are automatically scoped
+  to their component, preventing style leakage between components without
+  naming conventions or CSS-in-JS tooling.
+
+### 2.3 Conventions
+
+- Each component's styles live in a co-located `.razor.css` file.
+- Global styles (resets, CSS custom properties for colours and spacing) live
+  in `wwwroot/css/app.css`.
+- Use CSS custom properties for theming (e.g. `--primary-colour`, `--border`)
+  so the visual identity can be adjusted in one place.
+- Use flexbox and CSS grid for layout; avoid absolute positioning.
+
+---
+
+## 3. Local Data Storage
+
+### 3.1 Strategy
 
 Use the browser's **IndexedDB** (via SQLite compiled to WASM, or directly) for
 working data. The primary data format for save/load remains **JSON files**.
 
-### 2.2 Entity Identity — Surrogate IDs
+### 3.2 Entity Identity — Surrogate IDs
 
 All entities use **surrogate integer IDs** as their primary identity, both in
 the database and in JSON documents. This is essential because during planning,
@@ -127,7 +159,7 @@ foreign keys in the data model.
 | Timetable                        | Name                                | Single per layout in practice                                                          |
 | Schedule                         | Name                                | Top-level container                                                                    |
 
-### 2.2 File Operations
+### 3.3 File Operations
 
 Standard browser mechanisms cover all requirements:
 
@@ -142,7 +174,7 @@ The Chromium-only File System Access API provides a more desktop-like save
 experience but is **not essential**. The app must work with the standard
 upload/download flow on all browsers.
 
-### 2.3 Browser Storage Quotas
+### 3.4 Browser Storage Quotas
 
 SQLite-in-WASM persists data via the Origin Private File System (OPFS) or
 IndexedDB. Storage limits are governed by the browser:
@@ -161,14 +193,14 @@ evicting data under disc pressure.
 
 ---
 
-## 3. Collaboration Architecture
+## 4. Collaboration Architecture
 
-### 3.1 Offline-First, Sync-Optional
+### 4.1 Offline-First, Sync-Optional
 
 The primary workflow is **single-user, offline**. Users save and share timetable
 files (JSON) manually — sufficient for most FREMO planning scenarios.
 
-### 3.2 File-Based Collaborative Workflow
+### 4.2 File-Based Collaborative Workflow
 
 The expected collaboration model is **stretch-scoped division of work** with
 iterative merge rounds. This requires no online infrastructure — only a merge
@@ -200,7 +232,7 @@ The application must provide a **merge/import** operation that:
 - **Accepts a source document** (the file from the contributing planner).
 - **Scopes by timetable stretch** — identifies which entities belong to the
   contributing planner's stretch and imports or updates them.
-- **Remaps entity IDs** — all entities use surrogate IDs (see §2.2). During
+- **Remaps entity IDs** — all entities use surrogate IDs (see §3.2). During
   merge, incoming entities are assigned new IDs in the master document's ID
   space. All internal references within the imported batch (e.g. station
   calls pointing to trains, vehicle schedules pointing to station calls) are
@@ -249,7 +281,7 @@ This ownership is a convention enforced by the merge UI, not a hard access
 control mechanism. The merge function should display a clear summary of
 incoming changes for review before applying them.
 
-### 3.3 Online Collaboration (Future)
+### 4.3 Online Collaboration (Future)
 
 When multi-user editing is needed, the architecture adds:
 
@@ -262,7 +294,7 @@ CRDTs were considered but are unnecessarily complex for structured domain data
 like train schedules. Pessimistic locking (lock-on-edit) is an alternative for
 simpler scenarios but reduces concurrency.
 
-### 3.3 Solution Structure for Reuse
+### 4.4 Solution Structure for Reuse
 
 To support both standalone and collaborative modes (and a potential future
 MAUI desktop app), the solution should be structured as:
@@ -286,9 +318,9 @@ interfaces with per-host implementations.
 
 ---
 
-## 4. Risks and Caveats
+## 5. Risks and Caveats
 
-### 4.1 Blazor WASM PWA — Known Issues (as of March 2026)
+### 5.1 Blazor WASM PWA — Known Issues (as of March 2026)
 
 The Blazor PWA story has several active issues that must be tracked and
 mitigated during development.
@@ -355,7 +387,7 @@ flip-flop between old and new versions.
 worker and display a user-visible prompt to reload. Do not use `skipWaiting()`
 as it can break in-flight sessions.
 
-### 4.2 General Recommendations
+### 5.2 General Recommendations
 
 - **Do not customise the service worker** beyond the update prompt unless
   absolutely necessary — the default template is kept in sync with runtime
@@ -369,9 +401,9 @@ as it can break in-flight sessions.
 
 ---
 
-## 5. Selective Data Import
+## 6. Selective Data Import
 
-### 5.1 Problem
+### 6.1 Problem
 
 The planning app needs to import **specific slices** of data — not just full
 schedules. Typical scenarios:
@@ -391,7 +423,7 @@ Data sources fall into two categories:
 | **Document**    | Earlier plan (JSON), XPLN file, SQLite database | Read the full document, extract the relevant slice |
 | **Web service** | Company registry API, shared category service   | Query with filters, map response to model objects  |
 
-### 5.2 Per-Type Import Interfaces
+### 6.2 Per-Type Import Interfaces
 
 The existing `ICompaniesService` and `ITrainCategoriesService` already follow
 this pattern — one interface per importable data type. The concept extends this
@@ -408,7 +440,7 @@ IVehicleSchedulesService       → IEnumerable<VehicleSchedule>
 Each interface returns model objects directly. The implementation handles
 source-specific details (file parsing, API calls, field mapping) internally.
 
-### 5.3 Data Source Abstraction
+### 6.3 Data Source Abstraction
 
 A **data source** combines a user-visible identity with the set of import
 capabilities it provides:
@@ -441,7 +473,7 @@ CompanyRegistryApiSource : IDataSource, ICompaniesService
 SharedCategoriesApiSource : IDataSource, ITrainCategoriesService
 ```
 
-### 5.4 Document Sources — Partial Extraction
+### 6.4 Document Sources — Partial Extraction
 
 For document-based sources (JSON, XPLN, SQLite), the import reads the full
 document into memory and extracts only the requested data type. This reuses
@@ -457,9 +489,9 @@ The key difference from a full import is that the extracted entities are
 **not wired into the current schedule's object graph**. They are returned as
 detached objects that the user can review, filter, and selectively add to
 the current plan. During addition, surrogate IDs are reassigned (same
-mechanism as the merge workflow in §3.2).
+mechanism as the merge workflow in §4.2).
 
-### 5.5 Web Service Sources
+### 6.5 Web Service Sources
 
 Web service sources need additional considerations:
 
@@ -473,7 +505,7 @@ Web service sources need additional considerations:
 - **Authentication** — if required, credentials are configured per source
   in the app settings.
 
-### 5.6 Source Registration and UI
+### 6.6 Source Registration and UI
 
 Data sources are registered at application startup via dependency injection.
 The UI presents them as follows:
@@ -507,10 +539,10 @@ The UI presents them as follows:
 └─────────────────────────────────────────────┘
 ```
 
-### 5.7 Conflict Handling on Selective Import
+### 6.7 Conflict Handling on Selective Import
 
 When importing entities that already exist in the current plan (matched by
-natural key — see §2.2), the UI should:
+natural key — see §3.2), the UI should:
 
 - **Highlight duplicates** in the review list.
 - Let the user choose per item: **skip**, **replace**, or **keep both**
@@ -518,7 +550,7 @@ natural key — see §2.2), the UI should:
 - For layout elements (stations, stretches), warn that replacing may affect
   existing trains and station calls.
 
-### 5.8 Relationship to Existing Interfaces
+### 6.8 Relationship to Existing Interfaces
 
 The per-type import interfaces complement — not replace — the existing
 `IImportService` and `IExportService` interfaces:
@@ -532,3 +564,231 @@ The per-type import interfaces complement — not replace — the existing
 
 Full import remains the primary path for opening a plan. Selective import
 is used for **enriching** an existing plan with data from other sources.
+
+---
+
+## 7. Localisation
+
+### 7.1 Decision
+
+**Use the `Tellurian.Localization` NuGet package as the unified translation
+service. Centralise all planning-app translations in a dedicated
+`Planning.App.Translations` project.**
+
+### 7.2 Rationale
+
+The Requirements Specification (§1.2, §7.4) mandates multi-language support
+for UI labels, validation messages, note action texts, and report output — at
+minimum English, German, Danish, Norwegian, and Swedish.
+
+The existing codebase already contains `.resx` files scattered across three
+projects (`Model/Resources/`, `Importers.Xpln/Resources/`,
+`Importers.Access/Resources/`). These cover **validation messages** for
+their respective domains and should remain where they are — they are part
+of the library API and used independently of the planning app.
+
+The planning app introduces a new, larger category of translatable content:
+
+- **UI labels** — tab names, button text, field labels, headings.
+- **Note action texts** — localised verbs and phrases assembled at render
+  time (see Requirements Spec §4.5).
+- **Help and guidance content** — longer-form markdown texts (tooltips,
+  onboarding, help pages).
+
+A separate project keeps all this translation material in one place,
+co-located and easy to maintain, while the `Tellurian.Localization` library
+provides a consistent retrieval API across all resource types.
+
+### 7.3 The Tellurian.Localization Library
+
+The library provides:
+
+- **Multiple resource providers** — `ResxResourceProvider` for compiled
+  `.resx` resources, `MarkdownResourceProvider` for `.md` files with
+  language suffixes, and `ObjectResourceProvider` for database entities
+  with per-language columns.
+- **Fallback chain** — specific culture (e.g. `sv-SE`) → language (`sv`)
+  → default culture (`en-GB`) → language (`en`) → resource key as
+  last resort.
+- **Dependency injection** — providers are registered as keyed singletons
+  and resolved via `[FromKeyedServices("Resx")]` etc.
+- **`ILanguageService`** — reports supported languages and the fallback
+  language; used by the UI to populate language selectors.
+
+### 7.4 Supported Languages
+
+```csharp
+var languages = new List<Language>
+{
+    new("en", true) { IsFallback = true, CultureCode = "GB" },
+    new("sv", true) { CultureCode = "SE" },
+    new("de", false) { CapitalizesNouns = true },
+    new("da", false),
+    new("nb", false),
+};
+```
+
+English (British) is the fallback language. German is marked with
+`CapitalizesNouns = true` for correct noun casing in generated text.
+Languages are marked `IsFullySupported = false` until their translations
+are complete; the library falls back to English for any missing keys.
+
+### 7.5 Project: Planning.App.Translations
+
+A new class library project referenced by `Planning.App`:
+
+```
+Planning.App.Translations/
+├── Planning.App.Translations.csproj
+├── Resources/
+│   ├── Labels.resx              ← UI labels (English baseline)
+│   ├── Labels.sv.resx
+│   ├── Labels.de.resx
+│   ├── Labels.da.resx
+│   ├── Labels.nb.resx
+│   ├── NoteActions.resx         ← Note action texts (English baseline)
+│   ├── NoteActions.sv.resx
+│   ├── NoteActions.de.resx
+│   ├── NoteActions.da.resx
+│   └── NoteActions.nb.resx
+└── Content/
+    ├── help-settings.md         ← English (neutral, no suffix)
+    ├── help-settings.sv.md
+    ├── help-settings.de.md
+    └── ...
+```
+
+The `.csproj` references `Tellurian.Localization` and embeds the markdown
+content files:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Planning.App.Translations</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Planning.App.Translations</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Tellurian.Localization" Version="*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\**\*.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
+```
+
+### 7.6 Registration in Planning.App
+
+In `Program.cs`, the localisation services are configured and registered:
+
+```csharp
+using Tellurian.Localization;
+using Tellurian.Localization.DependencyInjection;
+
+builder.Services.Configure<Tellurian.Localization.Settings>(options =>
+{
+    options.Languages = new List<Language>
+    {
+        new("en", true) { IsFallback = true, CultureCode = "GB" },
+        new("sv", true) { CultureCode = "SE" },
+        new("de", false) { CapitalizesNouns = true },
+        new("da", false),
+        new("nb", false),
+    };
+    options.ResxTypeNames = new[]
+    {
+        "Tellurian.Trains.Schedules.Planning.App.Translations.Resources.Labels, Planning.App.Translations",
+        "Tellurian.Trains.Schedules.Planning.App.Translations.Resources.NoteActions, Planning.App.Translations",
+    };
+    options.MarkdownFilesBasePath = "Content";
+});
+
+var options = builder.Services.BuildServiceProvider()
+    .GetRequiredService<IOptions<Tellurian.Localization.Settings>>();
+builder.Services.AddTellurianLocalization(options);
+```
+
+### 7.7 Usage in Blazor Components
+
+Components inject the RESX provider group to retrieve translated labels:
+
+```razor
+@inject IResourceProviderGroup ResxProviders
+
+<label>@labelText</label>
+
+@code {
+    private string labelText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var content = await ResxProviders.Translated<Labels>("TrainNumber");
+        labelText = content.Text;
+    }
+}
+```
+
+For markdown help content, components inject the Markdown provider:
+
+```razor
+@inject IResourceProvider MarkdownProvider
+
+@((MarkupString)helpHtml)
+
+@code {
+    private string helpHtml = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var content = await MarkdownProvider.GetTranslationAsync(
+            "help-settings", CultureInfo.CurrentUICulture);
+        helpHtml = Markdig.Markdown.ToHtml(content.Text);
+    }
+}
+```
+
+### 7.8 Language Selection
+
+The app determines the active language from (in priority order):
+
+1. **User preference** — stored in browser local storage via the Settings
+   tab (see Requirements Spec §3.1).
+2. **Browser language** — `navigator.language`, mapped to the nearest
+   supported language.
+3. **Fallback** — English (GB).
+
+The selected language is applied by setting `CultureInfo.CurrentUICulture`
+at app startup and when the user changes language in settings. This
+propagates automatically to all resource provider lookups.
+
+### 7.9 Relationship to Existing RESX Files
+
+The existing `.resx` files in `Model/`, `Importers.Xpln/`, and
+`Importers.Access/` remain in place. They provide **domain validation
+messages** used by the libraries independently of any UI — for example,
+when running imports from a CLI tool or test harness.
+
+The `Planning.App.Translations` project covers a different concern:
+**UI-facing translations** for the planning application. There is no
+duplication — validation messages and UI labels serve different purposes
+and change at different rates.
+
+If the planning app needs to display validation messages (e.g. in an
+import results panel), it accesses them through the model's existing
+`ResourceManager` instances, not through the `Tellurian.Localization`
+providers. This keeps the library contracts stable.
+
+### 7.10 Note Localisation
+
+Structured notes (see Requirements Spec §4.5) are assembled at render
+time from:
+
+- **Action text** — retrieved from `NoteActions.resx` via the RESX
+  provider (e.g. key `ContinuesAs` → "Continues as" / "Fortsätter som").
+- **Value** — the train number, vehicle identity, or destination from
+  schedule data.
+- **Days prefix and remark** — also from resource files where applicable.
+
+Manual notes use the default-text-plus-translations model defined in the
+Requirements Spec §4.5.5. These translations are stored in the schedule
+data (per-note, per-language), not in resource files, and are retrieved
+via the `ObjectResourceProvider` at render time.

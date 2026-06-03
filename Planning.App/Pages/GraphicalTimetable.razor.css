@@ -1,0 +1,17 @@
+.stretch-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.stretch-selector label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stretch-selector select {
+    min-width: 200px;
+    font-size: 0.85rem;
+}

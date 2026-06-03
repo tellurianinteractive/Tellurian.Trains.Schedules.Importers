@@ -1,4 +1,77 @@
 @page "/graphical-timetable"
+@using Tellurian.Trains.Schedules.Planning.Components.Scheduling.Components
+@inject ScheduleState ScheduleState
+@implements IDisposable
 
-<h2>Graphical Timetable</h2>
-<p>Time-distance diagram per timetable stretch.</p>
+@if (!ScheduleState.HasSchedule)
+{
+    <p>No schedule loaded. Import a file on the Settings page.</p>
+}
+else if (ScheduleState.TimetableStretches.Count == 0)
+{
+    <p>The loaded schedule has no timetable stretches.</p>
+}
+else
+{
+    <div class="stretch-selector">
+        <label for="stretch-select">Stretch:</label>
+        <select id="stretch-select" @onchange="OnStretchChanged">
+            @foreach (var stretch in ScheduleState.TimetableStretches)
+            {
+                <option value="@stretch.Number"
+                        selected="@(stretch == ScheduleState.SelectedStretch)">
+                    @stretch.Number — @stretch.Description
+                </option>
+            }
+        </select>
+    </div>
+
+    @if (_graphSchedule is not null)
+    {
+        <GraphicalScheduleEditor Schedule="_graphSchedule" />
+    }
+}
+
+@code {
+    private GraphSchedule? _graphSchedule;
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        BuildGraphSchedule();
+    }
+
+    private void OnStretchChanged(ChangeEventArgs e)
+    {
+        var number = e.Value?.ToString();
+        var stretch = ScheduleState.TimetableStretches
+            .FirstOrDefault(s => s.Number == number);
+        if (stretch is not null)
+        {
+            ScheduleState.SelectedStretch = stretch;
+        }
+    }
+
+    private void OnStateChanged()
+    {
+        BuildGraphSchedule();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void BuildGraphSchedule()
+    {
+        if (ScheduleState.SelectedStretch is not null && ScheduleState.Timetable is not null)
+        {
+            _graphSchedule = new GraphSchedule(ScheduleState.SelectedStretch, ScheduleState.Timetable);
+        }
+        else
+        {
+            _graphSchedule = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+    }
+}

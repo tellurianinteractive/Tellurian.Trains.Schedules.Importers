@@ -73,16 +73,23 @@ public class Vehicle : IEquatable<Vehicle>
     public ICollection<VehicleScheduleAssignment> ScheduleAssignments { get; set; }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// A vehicle is identified solely by its source <see cref="ExternalId"/>, which is how vehicles are
+    /// uniquely identified in XPLN (the raw text of the locomotive/trainset column). The parsed
+    /// <see cref="Number"/> and company are deliberately not used: the identifier format differs between
+    /// XPLN files (e.g. "Co-LOK 123" versus "Co_GLok"), so the number cannot be parsed reliably and some
+    /// vehicles have no number at all, which would otherwise merge distinct vehicles.
+    /// </remarks>
     public bool Equals(Vehicle? other) =>
         other is not null &&
-        (Company?.Equals(other.Company) ?? other.Company is null) &&
-        Number == other.Number;
+        VehicleType == other.VehicleType &&
+        string.Equals(ExternalId, other.ExternalId, StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Vehicle other && Equals(other);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(CompanyId, Number);
+    public override int GetHashCode() => HashCode.Combine(VehicleType, ExternalId?.ToUpperInvariant());
 
     [JsonConstructor]
     private Vehicle()
@@ -124,4 +131,10 @@ public enum VehicleType
     /// A self-propelled trainset (multiple unit).
     /// </summary>
     Trainset,
+
+    /// <summary>
+    /// A self-propelled railcar. In XPLN this is identified by the same identifier appearing in both
+    /// the locomotive and the trainset section; such entries are merged into a single railcar.
+    /// </summary>
+    Railcar,
 }

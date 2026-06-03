@@ -1,3 +1,23 @@
+.graph-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.graph-toolbar label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.graph-container {
+    overflow: auto;
+}
+
 .hour {
     font-weight: bold;
     font-size: 16pt;

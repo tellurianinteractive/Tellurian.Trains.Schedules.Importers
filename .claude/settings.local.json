@@ -6,7 +6,12 @@
       "Skill(update-config)",
       "Bash(find C:UtvecklingGithubTellurian.TrainsTellurian.Trains.SchedulesModel -maxdepth 1 -type f \\\\\\(-name *oco* -o -name *rainset* \\\\\\))",
       "Bash(dotnet package:*)",
-      "Read(//c/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules/$HOME/.claude/**)"
+      "Read(//c/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules/$HOME/.claude/**)",
+      "Bash(grep -r \"ValueOrException\\\\|HasValue\\\\|IsEmpty\" \"/c/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules\" --include=\"*.cs\" ! -path \"*/obj/*\" -B2 -A2)",
+      "Bash(grep -r \"IResourceProvider\\\\|IResourceProviderGroup\\\\|MarkdownResourceProvider\" C:EntwickingGithubTellurian.TrainsTellurian.Trains.Schedules --include=*.cs)",
+      "Bash(grep -r \"IResourceProvider\\\\|IResourceProviderGroup\\\\|LanguageService\" C:EntwickingGithubTellurian.TrainsTellurian.Trains.Schedules --include=*.cs)",
+      "Bash(xargs grep:*)",
+      "Bash(dotnet ildasm:*)"
     ]
   }
 }

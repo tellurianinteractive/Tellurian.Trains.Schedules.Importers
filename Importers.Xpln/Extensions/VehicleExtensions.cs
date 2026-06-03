@@ -30,8 +30,9 @@ internal static class VehicleExtensions
         string? externalId = null,
         string? remark = null)
     {
-        // Create the vehicle
-        var vehicle = new Vehicle(id, vehicleType, number)
+        // Create the vehicle. When the identifier carries no parseable number, fall back to the unique
+        // id (the source row number) so every vehicle has a distinct, non-zero number for display.
+        var vehicle = new Vehicle(id, vehicleType, number == 0 ? id : number)
         {
             Class = vehicleClass ?? string.Empty,
             Company = company,

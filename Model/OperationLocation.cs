@@ -79,9 +79,9 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public OperationLocation(int id, string name, string signature)
     {
         Id = id;
-        name = name.TextOrException(nameof(name), string.Format(CultureInfo.CurrentCulture, Strings.NameOfObjectIsRequired, Strings.Station.ToLowerInvariant()));
+        name = name.ValueOrException(nameof(name), string.Format(CultureInfo.CurrentCulture, Strings.NameOfObjectIsRequired, Strings.Station.ToLowerInvariant()));
         Name = name.Replace("_", " ", StringComparison.OrdinalIgnoreCase);
-        Signature = signature.TextOrException(nameof(signature), string.Format(CultureInfo.CurrentCulture, Strings.SignatureOfStationIsRequired));
+        Signature = signature.ValueOrException(nameof(signature), string.Format(CultureInfo.CurrentCulture, Strings.SignatureOfStationIsRequired));
         Tracks = [];
     }
 

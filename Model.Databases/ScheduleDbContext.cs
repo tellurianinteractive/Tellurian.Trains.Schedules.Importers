@@ -363,6 +363,14 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .IsRequired(false)
                   .OnDelete(DeleteBehavior.Restrict);
 
+            // Self-referencing continuation chain: a train continues as another (and that train
+            // continues from this one). The "continues as" side holds the shadow foreign key.
+            entity.HasOne(e => e.ContinuesAs)
+                  .WithOne(e => e.ContinuesFrom)
+                  .HasForeignKey<Train>("ContinuesAsId")
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasMany(e => e.Calls)
                   .WithOne(e => e.Train)
                   .HasForeignKey(e => e.TrainId)

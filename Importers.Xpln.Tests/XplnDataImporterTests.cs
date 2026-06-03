@@ -66,6 +66,87 @@ public class XplnDataImporterTests
         await Import("Givskud-Modern-2025", "da-DK", 11, 125, 32, 8, 54, 73, 11, 1, 0);
     }
 
+    [TestMethod]
+    public async Task AssignsFallbackNumberToVehiclesWithoutParseableNumber()
+    {
+        // Barmstedt2022 has locomotives whose identifier has no number (e.g. "DB_GLok"). These must still
+        // get a distinct, non-zero number, falling back to the vehicle's unique id.
+        CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Barmstedt2022", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Barmstedt2022");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        Assert.IsFalse(result.Item.Vehicles.Any(v => v.Number == 0), "No vehicle should have number 0.");
+    }
+
+    [TestMethod]
+    public async Task MergesLocomotiveAndTrainsetWithSameIdIntoRailcar()
+    {
+        // In Kolding202009 the Swedish self-propelled X2000 is listed under both the locomotive and the
+        // trainset section with the same identifier. It must become a single railcar, not two vehicles.
+        CultureInfo.CurrentCulture = new CultureInfo("da-DK");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Kolding202009", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Kolding202009");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var x2000 = result.Item.Vehicles.Where(v => string.Equals(v.ExternalId, "X2000", StringComparison.OrdinalIgnoreCase)).ToArray();
+        Assert.HasCount(1, x2000, "X2000 vehicles");
+        Assert.AreEqual(VehicleType.Railcar, x2000[0].VehicleType, "X2000 vehicle type");
+    }
+
+    [TestMethod]
+    public async Task GroupsRoutesIntoTimetableStretchesWhenStartPositionIsZero()
+    {
+        // In XPLN the Routeid column is unique per row, so a timetable stretch (line) is delimited
+        // by the start position resetting to zero. Barmstedt2022 has two lines: Vta..Ead and Ando..Ost.
+        CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Barmstedt2022", out var file));
+
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Barmstedt2022");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(2, stretches, "TimetableStretches");
+
+        Assert.HasCount(7, stretches[0].Stretches, "First line track stretches");
+        Assert.AreEqual("Vta", stretches[0].Starts.Signature, ignoreCase: true);
+        Assert.AreEqual("EAD", stretches[0].Ends.Signature, ignoreCase: true);
+
+        Assert.HasCount(7, stretches[1].Stretches, "Second line track stretches");
+        Assert.AreEqual("ANDO", stretches[1].Starts.Signature, ignoreCase: true);
+        Assert.AreEqual("OST", stretches[1].Ends.Signature, ignoreCase: true);
+    }
+
+    [TestMethod]
+    public async Task GroupsRoutesByRouteIdWhenRouteIdIsShared()
+    {
+        // Värnamo2017 reuses the Routeid column to group segments into three lines, and its start
+        // positions do not reset to zero. The Routeid grouping must take precedence over the position rule.
+        CultureInfo.CurrentCulture = new CultureInfo("sv-SE");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Värnamo2017", out var file));
+
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Värnamo2017");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(3, stretches, "TimetableStretches");
+
+        Assert.AreEqual("GBG", stretches[0].Starts.Signature, ignoreCase: true);
+        Assert.AreEqual("CSN", stretches[0].Ends.Signature, ignoreCase: true);
+        Assert.AreEqual("VST", stretches[1].Starts.Signature, ignoreCase: true);
+        Assert.AreEqual("GMJ", stretches[1].Ends.Signature, ignoreCase: true);
+        Assert.AreEqual("RSE", stretches[2].Starts.Signature, ignoreCase: true);
+        Assert.AreEqual("THG", stretches[2].Ends.Signature, ignoreCase: true);
+    }
+
     [TestMethod()]
     [DataRow("Barmstedt2022", "de-DE", 14, 61, 18, 21, 14, 45, 10, 2)]
     [DataRow("DreamTrack2015", null, 12, 62, 24, 0, 0, 40, 11, 0)]
@@ -75,7 +156,7 @@ public class XplnDataImporterTests
     [DataRow("H0e-Schutterwald2013", "de-DE", 10, 26, 6, 0, 20, 25, 10, 6)]
     [DataRow("Hellerup2015", "da-DK", 18, 60, 24, 0, 87, 20, 18, 2)]
     [DataRow("Kolding_Epoke_III_2022", "da-DK", 19, 60, 16, 15, 18, 38, 19, 10)]
-    [DataRow("Kolding202009", "da-DK", 5, 38, 14, 2, 4, 28, 5, 0)]
+    [DataRow("Kolding202009", "da-DK", 5, 38, 13, 1, 4, 28, 5, 0)]
     [DataRow("Kolding2022", "da-DK", 14, 73, 26, 6, 10, 55, 14, 0)]
     [DataRow("KoldingNorge2019", "nb-NO", 13, 56, 16, 0, 0, 56, 13, 1)]
     [DataRow("Langhurst 2019", "de-DE", 6, 15, 4, 7, 11, 4, 6, 25)]
