@@ -111,10 +111,10 @@ jobs:
         run: dotnet test Model.Tests/Model.Tests.csproj --configuration Release --no-build --verbosity normal
 
       - name: Test Importers.Interfaces
-        run: dotnet test Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj --configuration Release --no-build --verbosity normal
+        run: dotnet test Importers.Interfaces.Tests/Interfaces.Tests.csproj --configuration Release --no-build --verbosity normal
 
       - name: Test Importers.Xpln
-        run: dotnet test Importers.Xpln.Tests/Importers.Xpln.Tests.csproj --configuration Release --no-build --verbosity normal
+        run: dotnet test Importers.Xpln.Tests/Xpln.Tests.csproj --configuration Release --no-build --verbosity normal
 
   publish:
     needs: [build, test]
