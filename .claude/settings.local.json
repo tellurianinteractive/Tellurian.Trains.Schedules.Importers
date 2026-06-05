@@ -13,7 +13,6 @@
       "Bash(xargs grep:*)",
       "Bash(dotnet ildasm:*)",
       "Bash(dotnet workload *)",
-      "Bash(rm -rf ./publish-aot)",
       "Bash(dotnet publish *)",
       "Bash(echo \"EXIT=$?\")",
       "Read(//tmp/**)",
@@ -27,7 +26,8 @@
       "Bash(dotnet build-server *)",
       "Bash(grep -oiE \"Schedules\\\\\\\\\\\\\\\\[^:]+\\\\.cs\")",
       "Bash(git rev-list *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
