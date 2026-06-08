@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
-namespace Tellurian.Trains.Schedules.Planning.App.E2E.Tests;
+namespace Tellurian.Trains.Schedules.Planning.App.Tests;
 
 /// <summary>End-to-end tests for the top-bar language selector.</summary>
 [TestClass]

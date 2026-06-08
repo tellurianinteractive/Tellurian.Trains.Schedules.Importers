@@ -1,4 +1,4 @@
-# Planning.App.E2E.Tests
+# Planning.App.Tests
 
 End-to-end tests for the Planning.App dockable Workspace, driven through a real headless
 Chromium browser with [Microsoft.Playwright](https://playwright.dev/dotnet/).
@@ -20,7 +20,7 @@ pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 ## Running
 
 ```powershell
-dotnet test Planning.App.E2E.Tests/Planning.App.E2E.Tests.csproj
+dotnet test Planning.App.Tests/Planning.App.Tests.csproj
 ```
 
 By default the fixture launches the app with `dotnet run --launch-profile http` (port 5097)

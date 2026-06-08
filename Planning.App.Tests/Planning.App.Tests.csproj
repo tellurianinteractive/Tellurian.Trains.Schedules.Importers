@@ -1,8 +1,8 @@
 <Project Sdk="MSTest.Sdk">
   <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Schedules.Planning.App.E2E.Tests</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Schedules.Planning.App.E2E.Tests</RootNamespace>
-    <!-- End-to-end tests launch the app and a real browser; run serially and locally only. -->
+    <AssemblyName>Tellurian.Trains.Schedules.Planning.App.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Planning.App.Tests</RootNamespace>
+    <!-- These tests launch the app and a real browser; run serially and locally only. -->
     <TestingPlatformParallelEnabled>false</TestingPlatformParallelEnabled>
   </PropertyGroup>
   <ItemGroup>

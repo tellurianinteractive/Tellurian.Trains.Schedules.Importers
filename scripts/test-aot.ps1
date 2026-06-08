@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
   Publish Planning.App (AOT by default), serve the published static site, run the
-  Playwright E2E suite against it, then stop the server.
+  Playwright test suite against it, then stop the server.
 
 .EXAMPLE
-  pwsh scripts/test-aot.ps1               # AOT publish + E2E
+  pwsh scripts/test-aot.ps1               # AOT publish + tests
   pwsh scripts/test-aot.ps1 -Aot:$false   # fast (non-AOT) publish, to validate the flow
   pwsh scripts/test-aot.ps1 -Port 5099
 #>
@@ -18,7 +18,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $appProject = Join-Path $root "Planning.App"
 $serverProject = Join-Path $root "tools/AppServer"
-$e2eProject = Join-Path $root "Planning.App.E2E.Tests/Planning.App.E2E.Tests.csproj"
+$testProject = Join-Path $root "Planning.App.Tests/Planning.App.Tests.csproj"
 $publishDir = Join-Path $root "Planning.App/bin/$Configuration/net10.0/publish"
 $wwwroot = Join-Path $publishDir "wwwroot"
 $baseUrl = "http://localhost:$Port"
@@ -47,9 +47,9 @@ try {
     }
     if (-not $ready) { throw "Server did not become ready at $baseUrl" }
 
-    Write-Host "==> Running E2E tests against the AOT build" -ForegroundColor Cyan
+    Write-Host "==> Running app tests against the AOT build" -ForegroundColor Cyan
     $env:PLANNING_APP_BASEURL = $baseUrl
-    dotnet test $e2eProject
+    dotnet test $testProject
     $testExit = $LASTEXITCODE
 }
 finally {

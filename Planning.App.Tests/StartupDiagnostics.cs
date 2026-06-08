@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace Tellurian.Trains.Schedules.Planning.App.E2E.Tests;
+namespace Tellurian.Trains.Schedules.Planning.App.Tests;
 
 /// <summary>Diagnostic capture of the app's browser console + uncaught errors at startup.</summary>
 [TestClass]

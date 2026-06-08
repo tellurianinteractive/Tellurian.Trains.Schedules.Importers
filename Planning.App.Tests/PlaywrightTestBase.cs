@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace Tellurian.Trains.Schedules.Planning.App.E2E.Tests;
+namespace Tellurian.Trains.Schedules.Planning.App.Tests;
 
 /// <summary>
 /// Base class giving each test an isolated <see cref="IBrowserContext"/> and <see cref="IPage"/>

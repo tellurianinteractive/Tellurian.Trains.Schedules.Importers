@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Playwright;
 
-namespace Tellurian.Trains.Schedules.Planning.App.E2E.Tests;
+namespace Tellurian.Trains.Schedules.Planning.App.Tests;
 
 /// <summary>
 /// Assembly-wide fixture: ensures the Planning.App is running and a headless browser is available.
