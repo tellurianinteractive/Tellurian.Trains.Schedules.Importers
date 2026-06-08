@@ -1,9 +1,9 @@
-namespace Tellurian.Trains.Schedules.Model.Validations;
+namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
 /// Configures which validations are run and the thresholds they use when validating a schedule.
 /// </summary>
-public class ValidationOptions
+public sealed class ValidationSettings
 {
     /// <summary>Gets or sets a value indicating whether station call timings are validated.</summary>
     public bool ValidateStationCalls { get; set; } = true;

@@ -61,7 +61,7 @@ Model/                 → Domain model: Schedule, Timetable, Train, Layout, Sta
 - `OperationLocation` (abstract) - Base class for locations; subclasses: `Station`, `SignalControlledLocation`, `OtherLocation`
 - `StationCall` - Scheduled stop with arrival/departure times
 - `LocoSchedule` / `TrainsetSchedule` - Equipment assignments (implement `VehicleSchedule`)
-- `ValidationOptions` - Configurable validation parameters
+- `ValidationSettings` - Configurable validation parameters (part of `LayoutSettings`)
 
 ### XPLN Importer (in Importers.Xpln/)
 

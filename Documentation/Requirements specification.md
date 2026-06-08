@@ -24,6 +24,8 @@ module meetings, but also for fixed club layouts and home layouts.
 | **Local-first, online-capable** | Primary mode is local (offline) planning; collaborative online planning is an alternative mode                 |
 | **Incremental data entry**      | Data can be entered from scratch, imported from previous plans, or fetched from external services              |
 | **Multi-language**              | UI and validation messages in English, German, Danish, Norwegian, Swedish (at minimum)                         |
+| **Reports separated from editing** | Printable content is treated as *reports*, hosted in a dedicated print shell distinct from the interactive editor; the same content may be offered both as an editor and as a report |
+| **Settings on the layout**      | All configurable settings live on the layout (`Layout.Settings`), grouped by purpose, and are persisted and re-applied with it |
 
 ### 1.3 Scope Boundaries
 
@@ -135,23 +137,38 @@ shall be defined. The interface uses a tab-based organisation with the following
 6. **Graphical Timetable** — one tab per timetable stretch; trains can be added, removed, and edited in the graph (see §3.7)
 7. **Vehicle Schedule Editor** — build vehicle schedules and assign to locomotives, wagons, wagon groups, and cargo flows (see §3.8)
 8. **Vehicle Owners** — who brings what of the needed rolling stock (see §3.9)
+9. **Reports** — preview and print all printable content; reports are selected here and kept separate from the editing tabs (see §3.12)
 
 ### 3.2 Settings
 
-The following timetable-level settings shall be configurable:
+All configurable settings are stored on the layout as `Layout.Settings` and are
+persisted with it, so they are re-applied whenever the layout is reopened. Settings
+are organised into groups — each a separate type — surfaced as sub-sections of the
+**Settings** tab:
 
+| Group               | Purpose                                                      | Detailed in  |
+| ------------------- | ------------------------------------------------------------ | ------------ |
+| General             | Session/day model and operating time window                  | this section |
+| Graphical Timetable | View and print preferences for the graphical timetable       | §3.7.3       |
+| Time & Speed        | Fast clock, speed mapping, default station operational times | §4.3         |
+| Validation          | Which validations run and their thresholds                   | §3.11.3      |
+| Integration         | API keys for external services (e.g. ModuleRegistry)         | §3.3         |
 
-| Setting    | Description                                        | Usage                                                         | Default      |
-| ---------- | -------------------------------------------------- | ------------------------------------------------------------- | ------------ |
-| Start time | Fast-time start hour of operation                  | Graphical timetable view                                      | 06:00        |
-| End time   | Fast-time end hour of operation                    | Graphical timetable view                                      | 20:00        |
-| Break time | Fast-time break hour of operation                  | Graphical timetable view split                                | None         |
-| Use days   | Option to use days instead of sessions             | All visible and printable content that presents sessions/days | Use sessions |
-| Start day  | When using days, sets first session weekday        | Ordering of days in visible/printable content                 | Monday       |
+**General settings:**
 
-Additional settings for speed mapping, fast clock speed, and station operational times
-are described in §4.3. API keys for external services (e.g. ModuleRegistry) are also
-stored in settings.
+| Setting    | Description                                                        | Default      |
+| ---------- | ----------------------------------------------------------------- | ------------ |
+| Use days   | Present operating days instead of sessions                        | Use sessions |
+| Start day  | Weekday of the first session when using days                      | Monday       |
+| Start time | Fast-time start hour of operation                                 | 06:00        |
+| End time   | Fast-time end hour of operation                                   | 20:00        |
+| Break time | Optional fast-time break hour that splits the graphical timetable | None         |
+
+Start, end, and break time define the operating time window used by the graphical
+timetable (see §3.7).
+
+The **user-interface language** is a user-level preference, chosen via the language selector
+in the top bar and persisted in the browser (localStorage) — it is not stored per layout.
 
 ### 3.3 Layout Operational Places
 
@@ -226,8 +243,10 @@ The graphical timetable shall support the following configurable display paramet
 | Show company           | Also shows train company signature before train number     |
 | Hide sessions/days     | Hide sessions/days before train number                     |
 
-The display parameters shall be stored in settings and re-applied when the timetable
-document is reopened.
+The display parameters are stored on the layout as `Layout.Settings.GraphicTimetable`
+and re-applied when the layout is reopened. They are user preferences that apply to
+both on-screen viewing and printing. Start, end, and break time come from the General
+settings (see §3.2).
 
 #### FR-3.7.4 Interaction
 
@@ -289,7 +308,8 @@ The system shall validate the schedule at two levels:
 #### FR-3.11.3 Validation Configuration
 
 All validations shall be individually toggleable. Speed thresholds and timing
-parameters shall be configurable.
+parameters shall be configurable. These settings are stored on the layout as
+`Layout.Settings.Validation` (see §3.2).
 
 #### FR-3.11.4 Validation Output
 
@@ -307,6 +327,19 @@ Validation errors shall include:
 The system shall generate printable reports in various page formats
 (A3 landscape, A4 portrait/landscape, A5, pocket cards).
 All reports shall support filtering by operator, station, duty number, etc.
+
+Printable content is organised as **reports**, separate from the editing UI. All
+reports are reached from the **Reports** tab, where the user selects a report,
+previews it, and prints it. Each report declares its own page format and
+**orientation (portrait or landscape)**, so a single planning session can produce
+reports of mixed orientations. Content that is also editable (e.g. the Graphical
+Timetable) is offered both as an editor and as a report, reusing the same rendering.
+
+#### FR-3.12.0 Report Shell
+
+Reports are hosted in a print-specific shell without editing chrome (title bar, tabs).
+On screen a report shows non-printing controls (parameters, print button) that are
+excluded from the printed output. Each report sets its own page size and orientation.
 
 #### FR-3.12.1 Driver & Station Reports
 
@@ -383,6 +416,9 @@ This section describes the data entities, their properties, and how they relate 
 
 ### 4.1 Layout
 
+The layout carries all configurable settings as `Layout.Settings`, grouped by purpose
+(see §3.2).
+
 #### DM-4.1.1 Operation Locations
 
 The system shall support defining operation locations with:
@@ -396,6 +432,7 @@ The system shall support defining operation locations with:
 | Owner     | Module owner (for FREMO)                             | No       |
 | Is Shadow | Hidden yard at line end                              | No       |
 | Regions   | Regions/countries represented (shadow stations only) | No       |
+| Timings   | Per-station operational time overrides (`OperationLocation.Timings`); each value optional, inheriting the layout default when unset (see §4.3.3) | No       |
 
 Subtypes:
 
@@ -606,8 +643,11 @@ All times in station calls and timetables are in fast-clock time.
 
 #### DM-4.3.3 Station Operational Times
 
-The following real-world durations shall be configurable globally and
-overridable per station:
+The following real-world durations are configurable. The layout-wide defaults are
+stored as `Layout.Settings.TimeAndSpeed.StationTimings`; each station may override
+any individual value via `OperationLocation.Timings`. Overrides are per field — an
+unset (null) value inherits the layout default — so imported stations can carry only
+the timing values that differ.
 
 
 | Parameter                | Description                                        | Default | Unit               |
@@ -622,7 +662,7 @@ Real-time durations are converted to fast-clock time for scheduling:
 fastClockMinutes = realMinutes × fastClockSpeed
 ```
 
-Stations may override these defaults to reflect their specific infrastructure
+Stations override these defaults to reflect their specific infrastructure
 (e.g., a large station with a long runaround track takes longer).
 
 ---

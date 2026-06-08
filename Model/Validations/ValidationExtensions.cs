@@ -1,6 +1,7 @@
 using System.Globalization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
 
@@ -15,7 +16,7 @@ public static class ValidationExtensions
     /// <param name="schedule">The schedule to validate.</param>
     /// <param name="options">The options controlling which validations run.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Schedule schedule, ValidationOptions options)
+    public static IEnumerable<ValidationError> GetValidationErrors(this Schedule schedule, ValidationSettings options)
     {
         schedule = schedule.ValueOrException(nameof(schedule));
         options = options.ValueOrException(nameof(options));
@@ -34,7 +35,7 @@ public static class ValidationExtensions
     /// <param name="schedule">The schedule the timetable belongs to.</param>
     /// <param name="options">The options controlling which validations run.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationOptions options)
+    public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationSettings options)
     {
         timetable = timetable.ValueOrException(nameof(timetable));
         options = options.ValueOrException(nameof(options));
@@ -164,7 +165,7 @@ public static class ValidationExtensions
     /// <param name="train">The train to validate.</param>
     /// <param name="options">The options controlling the speed thresholds.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Train train, ValidationOptions options)
+    public static IEnumerable<ValidationError> GetValidationErrors(this Train train, ValidationSettings options)
     {
         train = train.ValueOrException(nameof(train));
         options = options.ValueOrException(nameof(options));

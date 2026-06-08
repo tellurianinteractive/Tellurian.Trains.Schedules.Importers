@@ -19,7 +19,7 @@ else
             {
                 <option value="@stretch.Number"
                         selected="@(stretch == ScheduleState.SelectedStretch)">
-                    @stretch.Number — @stretch.Description
+                    @stretch.FullDescription
                 </option>
             }
         </select>
@@ -61,7 +61,8 @@ else
     {
         if (ScheduleState.SelectedStretch is not null && ScheduleState.Timetable is not null)
         {
-            _graphSchedule = new GraphSchedule(ScheduleState.SelectedStretch, ScheduleState.Timetable);
+            var graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
+            _graphSchedule = new GraphSchedule(ScheduleState.SelectedStretch, ScheduleState.Timetable, graphSettings);
         }
         else
         {

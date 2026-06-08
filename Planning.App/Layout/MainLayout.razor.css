@@ -140,6 +140,22 @@
     padding-bottom: calc(0.5rem + 2px);
 }
 
+/* The Workspace tab is a container, set slightly apart from the view tabs. */
+.tab-bar ::deep .tab.workspace-tab {
+    margin-right: 0.75rem;
+    border-right: 1px solid #ccc;
+    border-radius: 0;
+    font-weight: 600;
+}
+
+/* A view already docked in the Workspace gets a small marker. */
+.tab-bar ::deep .tab.docked::after {
+    content: " \25cf";
+    color: #2a9d57;
+    font-size: 0.6em;
+    vertical-align: middle;
+}
+
 .pin-btn {
     background: none;
     border: none;
@@ -167,6 +183,8 @@
 }
 
 .pane-content {
+    flex: 1;
+    min-width: 0;
     padding: 1rem;
     height: 100%;
     overflow: auto;

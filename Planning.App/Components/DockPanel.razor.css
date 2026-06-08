@@ -1,0 +1,11 @@
+.dock-empty {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    font-style: italic;
+    border: 2px dashed #d0d0d0;
+    border-radius: 6px;
+}

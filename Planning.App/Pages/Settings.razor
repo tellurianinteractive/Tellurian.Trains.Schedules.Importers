@@ -1,3 +1,287 @@
 @page "/settings"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Settings
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layout
+@inject ScheduleState ScheduleState
+@implements IDisposable
 
-<p>Layout name, timing parameters, and other default values.</p>
+<h2>Settings</h2>
+
+@if (Layout is null || S is null)
+{
+    <p>No schedule loaded. Import a file on the Import tab to edit its settings.</p>
+}
+else
+{
+    <div class="settings">
+        <nav class="sub-tabs">
+            @foreach (var section in Sections)
+            {
+                <button class="sub-tab @(section == _section ? "active" : "")"
+                        @onclick="() => _section = section">
+                    @SectionLabel(section)
+                </button>
+            }
+        </nav>
+
+        <div class="section">
+            @if (_section == SettingsSection.General)
+            {
+                var g = S.General;
+                <div class="field">
+                    <label>Layout name</label>
+                    <input type="text" @bind="LayoutName" />
+                </div>
+                <div class="field">
+                    <label>Use days instead of sessions</label>
+                    <input type="checkbox" @bind="g.UseDays" />
+                </div>
+                <div class="field">
+                    <label>Start day</label>
+                    <select @bind="g.StartDay">
+                        @foreach (var day in Enum.GetValues<DayOfWeek>())
+                        {
+                            <option value="@day">@day</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Start time</label>
+                    <input type="time" @bind="StartTime" />
+                </div>
+                <div class="field">
+                    <label>End time</label>
+                    <input type="time" @bind="EndTime" />
+                </div>
+                <div class="field">
+                    <label>Break (splits the graph)</label>
+                    <input type="checkbox" @bind="UseBreak" />
+                    @if (UseBreak)
+                    {
+                        <input type="time" @bind="BreakTime" />
+                    }
+                </div>
+            }
+            else if (_section == SettingsSection.GraphicTimetable)
+            {
+                var gt = S.GraphicTimetable;
+                <div class="field">
+                    <label>Time axis orientation</label>
+                    <select @bind="gt.Orientation">
+                        @foreach (var o in Enum.GetValues<TimeAxisOrientation>())
+                        {
+                            <option value="@o">@o</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Show arrival minutes</label>
+                    <input type="checkbox" @bind="gt.ShowArrivalMinutes" />
+                </div>
+                <div class="field">
+                    <label>Show departure minutes</label>
+                    <input type="checkbox" @bind="gt.ShowDepartureMinutes" />
+                </div>
+                <div class="field">
+                    <label>Minute spacing (px/min)</label>
+                    <input type="number" min="1" @bind="gt.MinuteSpacing" />
+                </div>
+                <div class="field">
+                    <label>Station spacing (px)</label>
+                    <input type="number" min="1" @bind="gt.StationSpacing" />
+                </div>
+                <div class="field">
+                    <label>Track spacing (px)</label>
+                    <input type="number" min="1" @bind="gt.TrackSpacing" />
+                </div>
+                <div class="field">
+                    <label>Show train category</label>
+                    <input type="checkbox" @bind="gt.ShowTrainCategory" />
+                </div>
+                <div class="field">
+                    <label>Show company</label>
+                    <input type="checkbox" @bind="gt.ShowCompany" />
+                </div>
+                <div class="field">
+                    <label>Hide sessions/days</label>
+                    <input type="checkbox" @bind="gt.HideSessionsOrDays" />
+                </div>
+            }
+            else if (_section == SettingsSection.TimeAndSpeed)
+            {
+                var ts = S.TimeAndSpeed;
+                <div class="field">
+                    <label>Fast clock speed (×)</label>
+                    <input type="number" min="1" @bind="ts.FastClockSpeed" />
+                </div>
+
+                <div class="group-heading">Speed mapping</div>
+                <table class="speed-map">
+                    <thead>
+                        <tr><th>Class</th><th>Scale km/h</th><th>Real m/s</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Slow</td>
+                            <td><input type="number" min="0" @bind="ts.Slow.ScaleSpeedKmh" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.Slow.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                        </tr>
+                        <tr>
+                            <td>Normal</td>
+                            <td><input type="number" min="0" @bind="ts.Normal.ScaleSpeedKmh" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.Normal.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                        </tr>
+                        <tr>
+                            <td>High</td>
+                            <td><input type="number" min="0" @bind="ts.High.ScaleSpeedKmh" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.High.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="group-heading">Default station times</div>
+                <p class="hint">Layout-wide defaults; individual stations may override these.</p>
+                <div class="field">
+                    <label>Minimum stop (fast-clock min)</label>
+                    <input type="number" min="0" @bind="ts.StationTimings.MinimumStopMinutes" />
+                </div>
+                <div class="field">
+                    <label>Loco runaround (real min)</label>
+                    <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" />
+                </div>
+                <div class="field">
+                    <label>Train clearance (real min)</label>
+                    <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" />
+                </div>
+            }
+            else if (_section == SettingsSection.Validation)
+            {
+                var v = S.Validation;
+                <div class="field">
+                    <label>Validate station calls</label>
+                    <input type="checkbox" @bind="v.ValidateStationCalls" />
+                </div>
+                <div class="field">
+                    <label>Validate station tracks</label>
+                    <input type="checkbox" @bind="v.ValidateStationTracks" />
+                </div>
+                <div class="field">
+                    <label>Validate stretches</label>
+                    <input type="checkbox" @bind="v.ValidateStretches" />
+                </div>
+                <div class="field">
+                    <label>Validate train speed</label>
+                    <input type="checkbox" @bind="v.ValidateTrainSpeed" />
+                </div>
+                <div class="field">
+                    <label>Validate train numbers</label>
+                    <input type="checkbox" @bind="v.ValidateTrainNumbers" />
+                </div>
+                <div class="field">
+                    <label>Validate vehicle schedules</label>
+                    <input type="checkbox" @bind="v.ValidateVehicleSchedules" />
+                </div>
+                <div class="field">
+                    <label>Validate locomotive coverage</label>
+                    <input type="checkbox" @bind="v.ValidateLocomotiveCoverage" />
+                </div>
+                <div class="field">
+                    <label>Validate driver duties</label>
+                    <input type="checkbox" @bind="v.ValidateDriverDuties" />
+                </div>
+
+                <div class="group-heading">Thresholds</div>
+                <div class="field">
+                    <label>Min train speed (m/clock-min)</label>
+                    <input type="number" step="0.1" @bind="v.MinTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
+                </div>
+                <div class="field">
+                    <label>Max train speed (m/clock-min)</label>
+                    <input type="number" step="0.1" @bind="v.MaxTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
+                </div>
+                <div class="field">
+                    <label>Min minutes between track usage</label>
+                    <input type="number" min="0" @bind="v.MinMinutesBetweenTrackUsage" />
+                </div>
+            }
+            else if (_section == SettingsSection.Integration)
+            {
+                var i = S.Integration;
+                <div class="field">
+                    <label>ModuleRegistry API key</label>
+                    <input type="text" @bind="i.ModuleRegistryApiKey" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private SettingsSection _section = SettingsSection.General;
+
+    private static readonly SettingsSection[] Sections = Enum.GetValues<SettingsSection>();
+
+    private static CultureInfo Invariant => CultureInfo.InvariantCulture;
+
+    private LayoutModel? Layout => ScheduleState.Layout;
+    private LayoutSettings? S => Layout?.Settings;
+
+    private string LayoutName
+    {
+        get => Layout?.Name ?? "";
+        set { if (Layout is not null) Layout.Name = value; }
+    }
+
+    private TimeOnly StartTime
+    {
+        get => S is null ? default : TimeOnly.FromTimeSpan(S.General.StartTime);
+        set { if (S is not null) S.General.StartTime = value.ToTimeSpan(); }
+    }
+
+    private TimeOnly EndTime
+    {
+        get => S is null ? default : TimeOnly.FromTimeSpan(S.General.EndTime);
+        set { if (S is not null) S.General.EndTime = value.ToTimeSpan(); }
+    }
+
+    private bool UseBreak
+    {
+        get => S?.General.BreakTime is not null;
+        set
+        {
+            if (S is null) return;
+            S.General.BreakTime = value ? S.General.BreakTime ?? TimeSpan.FromHours(12) : null;
+        }
+    }
+
+    private TimeOnly? BreakTime
+    {
+        get => S?.General.BreakTime is { } b ? TimeOnly.FromTimeSpan(b) : null;
+        set { if (S is not null) S.General.BreakTime = value?.ToTimeSpan(); }
+    }
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private static string SectionLabel(SettingsSection section) => section switch
+    {
+        SettingsSection.General => "General",
+        SettingsSection.GraphicTimetable => "Graphical Timetable",
+        SettingsSection.TimeAndSpeed => "Time & Speed",
+        SettingsSection.Validation => "Validation",
+        SettingsSection.Integration => "Integration",
+        _ => section.ToString()
+    };
+
+    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
+
+    private enum SettingsSection
+    {
+        General,
+        GraphicTimetable,
+        TimeAndSpeed,
+        Validation,
+        Integration
+    }
+}

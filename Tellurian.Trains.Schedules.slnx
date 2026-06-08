@@ -16,6 +16,8 @@
   <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
   <Project Path="Model.Databases/Model.Databases.csproj" />
   <Project Path="Planning.App.Translations/Planning.App.Translations.csproj" />
+  <Project Path="Planning.App.E2E.Tests/Planning.App.E2E.Tests.csproj" />
+  <Project Path="tools/AppServer/AppServer.csproj" />
   <Project Path="Planning.App/Planning.App.csproj" />
   <Project Path="Planning.Components/Planning.Components.csproj" />
   <Project Path="Planning.Tests/Planning.Tests.csproj" />

@@ -172,7 +172,7 @@ timing conflicts and scheduling issues using the `ValidationError` type:
 ```csharp
 if (result.IsSuccess)
 {
-    var options = new ValidationOptions
+    var options = new ValidationSettings
     {
         ValidateStationTracks = true,      // Track occupation conflicts
         ValidateStretches = true,          // Single-track conflicts

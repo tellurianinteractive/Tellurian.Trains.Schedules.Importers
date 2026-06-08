@@ -14,12 +14,14 @@
 }
 
 .split-pane-first {
+    display: flex;
     overflow: auto;
     min-width: 0;
     min-height: 0;
 }
 
 .split-pane-second {
+    display: flex;
     overflow: auto;
     min-width: 0;
     min-height: 0;

@@ -93,10 +93,10 @@ For detailed validation documentation, see [VALIDATION.md](../VALIDATION.md).
 
 ### Validation Options
 
-Validation can be configured using `ValidationOptions`:
+Validation can be configured using `ValidationSettings`:
 
 ```csharp
-var options = new ValidationOptions
+var options = new ValidationSettings
 {
     ValidateStationCalls = true,       // Check arrival/departure times
     ValidateStationTracks = true,      // Check track occupation conflicts

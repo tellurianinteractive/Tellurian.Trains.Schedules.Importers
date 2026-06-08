@@ -1,0 +1,39 @@
+@inject IJSRuntime JS
+@inject NavigationManager Navigator
+
+<div class="language-selector">
+    @foreach (var language in LanguageService.SupportedLanguages)
+    {
+        var culture = language.CultureInfo;
+        <img class="@(culture.Name == _currentCulture ? "active" : "")"
+             src="@FlagSrc(culture)"
+             alt="@DisplayName(language)"
+             title="@DisplayName(language)"
+             @onclick="() => SelectAsync(culture)" />
+    }
+</div>
+
+@code {
+    private const string FlagBasePath = "_content/Tellurian.Trains.Schedules.Planning.App.Translations/images/flags";
+
+    private string? _currentCulture;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var stored = await JS.InvokeAsync<string?>("localStorage.getItem", UiCulture.StorageKey);
+        _currentCulture = UiCulture.Resolve(stored).CultureInfo.Name;
+    }
+
+    private static string FlagSrc(CultureInfo culture) =>
+        $"{FlagBasePath}/{new RegionInfo(culture.Name).TwoLetterISORegionName.ToLowerInvariant()}.png";
+
+    private static string DisplayName(Language language) =>
+        CultureInfo.InvariantCulture.TextInfo.ToTitleCase(new CultureInfo(language.TwoLetterCode).NativeName);
+
+    private async Task SelectAsync(CultureInfo culture)
+    {
+        if (culture.Name == _currentCulture) return;
+        await JS.InvokeVoidAsync("localStorage.setItem", UiCulture.StorageKey, culture.Name);
+        Navigator.NavigateTo(Navigator.Uri, forceLoad: true);
+    }
+}

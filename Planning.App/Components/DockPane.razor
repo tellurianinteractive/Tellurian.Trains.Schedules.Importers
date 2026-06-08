@@ -1,0 +1,72 @@
+@inject DockLayoutState Dock
+@implements IDisposable
+
+<div class="dock-pane">
+    <div class="dock-pane-header"
+         draggable="true"
+         @ondragstart="() => Dock.DraggingViewId = ViewId"
+         @ondragend="() => Dock.DraggingViewId = null">
+        <span class="title">@Label</span>
+        <button class="close" title="Close" @onclick="() => Dock.CloseView(ViewId)">&times;</button>
+    </div>
+
+    <div class="pane-content">
+        @if (ComponentType is not null)
+        {
+            <DynamicComponent Type="ComponentType" />
+        }
+        else
+        {
+            <p>Unknown view '@ViewId'.</p>
+        }
+    </div>
+
+    @if (Dock.DraggingViewId is not null && Dock.DraggingViewId != ViewId)
+    {
+        <div class="drop-zones">
+            <div class="zone left @(_hover == DropDirection.Left ? "active" : "")"
+                 @ondragenter="() => _hover = DropDirection.Left"
+                 @ondragleave="() => _hover = null"
+                 @ondragover:preventDefault="true"
+                 @ondrop="() => OnDrop(DropDirection.Left)"></div>
+            <div class="zone right @(_hover == DropDirection.Right ? "active" : "")"
+                 @ondragenter="() => _hover = DropDirection.Right"
+                 @ondragleave="() => _hover = null"
+                 @ondragover:preventDefault="true"
+                 @ondrop="() => OnDrop(DropDirection.Right)"></div>
+            <div class="zone top @(_hover == DropDirection.Top ? "active" : "")"
+                 @ondragenter="() => _hover = DropDirection.Top"
+                 @ondragleave="() => _hover = null"
+                 @ondragover:preventDefault="true"
+                 @ondrop="() => OnDrop(DropDirection.Top)"></div>
+            <div class="zone bottom @(_hover == DropDirection.Bottom ? "active" : "")"
+                 @ondragenter="() => _hover = DropDirection.Bottom"
+                 @ondragleave="() => _hover = null"
+                 @ondragover:preventDefault="true"
+                 @ondrop="() => OnDrop(DropDirection.Bottom)"></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string ViewId { get; set; } = string.Empty;
+
+    private DropDirection? _hover;
+
+    private string Label => TabRegistry.Tabs.FirstOrDefault(t => t.Href == ViewId)?.Label ?? ViewId;
+    private Type? ComponentType => TabRegistry.GetComponentType(ViewId);
+
+    protected override void OnInitialized() => Dock.OnChanged += OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    private void OnDrop(DropDirection direction)
+    {
+        var dragged = Dock.DraggingViewId;
+        if (dragged is not null) Dock.DockRelative(ViewId, dragged, direction);
+        Dock.DraggingViewId = null;
+        _hover = null;
+    }
+
+    public void Dispose() => Dock.OnChanged -= OnChanged;
+}

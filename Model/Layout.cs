@@ -1,5 +1,6 @@
 using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -21,6 +22,11 @@ public sealed class Layout : IEquatable<Layout>
     /// Gets or sets the name of this layout.
     /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the configurable settings for this layout, grouped by purpose.
+    /// </summary>
+    public LayoutSettings Settings { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the collection of companies operating on this layout.

@@ -1,0 +1,38 @@
+@inject DockLayoutState Dock
+
+@if (Node is DockSplit split)
+{
+    <SplitPane Orientation="split.Orientation"
+               Ratio="split.Ratio"
+               RatioChanged="r => Dock.SetRatio(split, r)">
+        <First>
+            <DockPanel Node="split.First" />
+        </First>
+        <Second>
+            <DockPanel Node="split.Second" />
+        </Second>
+    </SplitPane>
+}
+else if (Node is DockLeaf leaf)
+{
+    <DockPane ViewId="@leaf.ViewId" />
+}
+else
+{
+    <div class="dock-empty"
+         @ondragover:preventDefault="true"
+         @ondrop="OnRootDrop">
+        <span>Drag a view here to start.</span>
+    </div>
+}
+
+@code {
+    [Parameter] public DockNode? Node { get; set; }
+
+    private void OnRootDrop()
+    {
+        var dragged = Dock.DraggingViewId;
+        if (dragged is not null) Dock.DockRoot(dragged, DropDirection.Right);
+        Dock.DraggingViewId = null;
+    }
+}

@@ -1,0 +1,15 @@
+@page "/workspace"
+@inject DockLayoutState Dock
+@implements IDisposable
+
+<div class="workspace">
+    <DockPanel Node="Dock.Root" />
+</div>
+
+@code {
+    protected override void OnInitialized() => Dock.OnChanged += OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Dock.OnChanged -= OnChanged;
+}

@@ -7,6 +7,7 @@ using Tellurian.Trains.Schedules.Importers.Access.Extensions;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 using Tellurian.Utilities;
 
@@ -24,7 +25,7 @@ public class XplnDataImporterTests
     private ILogger<XplnDataImporter> Logger => _serviceProvider.GetRequiredService<ILogger<XplnDataImporter>>();
 
     private DirectoryInfo? TestDocumentsDirectory;
-    private readonly ValidationOptions ValidationOptions = new()
+    private readonly ValidationSettings ValidationSettings = new()
     {
         MaxTrainSpeedMetersPerClockMinute = 8.0,
         MinTrainSpeedMetersPerClockMinute = 0.3,
@@ -197,7 +198,7 @@ public class XplnDataImporterTests
                 Assert.AreEqual(expectedWagonGroups, timetable.Trains.Sum(t => t.WagonGroups.Count));
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
-                var validationErrors = result.Item.GetValidationErrors(ValidationOptions);
+                var validationErrors = result.Item.GetValidationErrors(ValidationSettings);
                 WriteLines(result.Messages.ToStrings().Concat(validationErrors.ToStrings()), file);
                 Assert.AreEqual(expectedValidationWarnings, validationErrors.Count(), "Validation warnings");
             }

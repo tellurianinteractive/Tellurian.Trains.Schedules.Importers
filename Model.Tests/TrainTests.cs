@@ -1,4 +1,5 @@
 ﻿using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -40,7 +41,7 @@ public class TrainTests
         var station = TestDataFactory.CreateStation1();
         Target.Add(new StationCall(1, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
         Target.Add(new StationCall(2, station.Tracks.First(), Time.FromHourAndMinute(12, 30), Time.FromHourAndMinute(12, 45)));
-        var validationErrors = Target.GetValidationErrors(new ValidationOptions());
+        var validationErrors = Target.GetValidationErrors(new ValidationSettings());
         Assert.AreEqual(1, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
     }

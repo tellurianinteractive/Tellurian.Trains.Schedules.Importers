@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -58,6 +59,13 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// Gets or sets the collection of tracks at this operation location.
     /// </summary>
     public ICollection<StationTrack> Tracks { get; set; }
+
+    /// <summary>
+    /// Gets or sets the per-station operational time overrides.
+    /// Null-valued members inherit the layout-wide defaults from
+    /// <see cref="LayoutSettings.TimeAndSpeed"/>.
+    /// </summary>
+    public StationTimings Timings { get; set; } = new();
 
     /// <summary>
     /// Parameterless constructor for EF Core and JSON deserialization

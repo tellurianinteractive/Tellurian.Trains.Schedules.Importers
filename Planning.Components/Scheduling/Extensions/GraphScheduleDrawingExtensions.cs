@@ -1,6 +1,6 @@
 using Tellurian.Trains.Schedules.Model;
 
-namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling.Extensions;
+namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
 public static class GraphScheduleDrawingExtensions
 {

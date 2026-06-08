@@ -1,6 +1,6 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @using Tellurian.Trains.Schedules.Model
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
-@using Tellurian.Trains.Schedules.Planning.Components.Scheduling.Extensions
 
 @if (Current is null)
 {
@@ -8,11 +8,6 @@
 }
 else
 {
-    <div class="graph-toolbar">
-        <label><input type="checkbox" @onchange="ToggleAxis" /> Vertical time axis</label>
-        <label><input type="checkbox" checked="@Current.GraphSettings.ShowDepartureMinutes" @onchange="ToggleDepartureMinutes" /> Departure min.</label>
-        <label><input type="checkbox" checked="@Current.GraphSettings.ShowArrivalMinutes" @onchange="ToggleArrivalMinutes" /> Arrival min.</label>
-    </div>
     <div class="graph-container">
         <svg style="border: 1pt solid black " height="@Current.Height()" width="@Current.Width()" @onclick="OnClick" @onmousedown="OnMouseDown">
             <defs>
@@ -184,37 +179,16 @@ else
 @code
 {
     [Parameter] public GraphSchedule? Schedule { get; set; }
-    [Parameter] public GraphSettings Settings { get; set; } = GraphSettings.Default;
 
     GraphSchedule? Current;
-    bool ShowVertical;
 
     string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
     string TrainStroke(Train t) => t.Category?.Color ?? "#000000";
     string TrainStrokeWidth => "4";
 
-    void ToggleAxis()
-    {
-        ShowVertical = !ShowVertical;
-        if (Current is not null) Current.GraphSettings.AxisDirection = ShowVertical ? TimeAxisDirection.Vertical : TimeAxisDirection.Horisontal;
-    }
-
-    void ToggleDepartureMinutes()
-    {
-        if (Current is not null) Current.GraphSettings.ShowDepartureMinutes = !Current.GraphSettings.ShowDepartureMinutes;
-    }
-
-    void ToggleArrivalMinutes()
-    {
-        if (Current is not null) Current.GraphSettings.ShowArrivalMinutes = !Current.GraphSettings.ShowArrivalMinutes;
-    }
-
     protected override void OnParametersSet()
     {
         Current = Schedule;
-        if (Current is null) return;
-        Current.GraphSettings.ShowArrivalMinutes = false;
-        Current.GraphSettings.ShowDepartureMinutes = false;
     }
 
     void OnClick(MouseEventArgs e)

@@ -8,7 +8,7 @@ The validation system is located in `Model/Validations/` and consists of three f
 
 | File | Purpose |
 |------|---------|
-| `ValidationOptions.cs` | Configuration class for controlling which validations run |
+| `Settings/ValidationSettings.cs` | Configuration class for controlling which validations run |
 | `ValidationExtensions.cs` | Core validation logic as extension methods |
 | `ValidationError.cs` | Structured error type with location and time for graphical display |
 
@@ -52,12 +52,12 @@ public sealed record ValidationError
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
 | `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
 
-## ValidationOptions
+## ValidationSettings
 
 Controls which validations are performed and threshold values:
 
 ```csharp
-public class ValidationOptions
+public sealed class ValidationSettings
 {
     // Toggle flags (all default to true)
     public bool ValidateStationCalls { get; set; } = true;
@@ -91,14 +91,14 @@ public class ValidationOptions
 
 ### Schedule Validation (Top-Level)
 ```csharp
-IEnumerable<Message> GetValidationErrors(this Schedule schedule, ValidationOptions options)
+IEnumerable<Message> GetValidationErrors(this Schedule schedule, ValidationSettings options)
 ```
 - Entry point for validating entire schedule
 - Validates timetable and vehicle schedules
 
 ### Timetable Validation
 ```csharp
-IEnumerable<Message> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationOptions options)
+IEnumerable<Message> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationSettings options)
 ```
 - Comprehensive timetable validation
 - Calls sub-validators based on options
@@ -254,7 +254,7 @@ All validation messages use resource strings in `Model/Resources/Strings.resx` w
 var result = await importer.ImportScheduleAsync(scheduleName);
 if (result.IsSuccess)
 {
-    var options = new ValidationOptions
+    var options = new ValidationSettings
     {
         MaxTrainSpeedMetersPerClockMinute = 8.0,
         MinTrainSpeedMetersPerClockMinute = 0.3,

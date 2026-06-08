@@ -1,0 +1,23 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Planning.App.E2E.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Planning.App.E2E.Tests</RootNamespace>
+    <!-- End-to-end tests launch the app and a real browser; run serially and locally only. -->
+    <TestingPlatformParallelEnabled>false</TestingPlatformParallelEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" Version="1.60.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.8.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.2.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="MSTest.TestAdapter" Version="4.2.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="MSTest.TestFramework" Version="4.2.3" />
+  </ItemGroup>
+</Project>

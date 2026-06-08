@@ -1,0 +1,7 @@
+/* Print-only rules. Anything marked .no-print is hidden when printing. */
+@media print {
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+}
