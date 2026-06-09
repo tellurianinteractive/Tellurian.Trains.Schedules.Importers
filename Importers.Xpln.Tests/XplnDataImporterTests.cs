@@ -148,6 +148,85 @@ public class XplnDataImporterTests
         Assert.AreEqual("THG", stretches[2].Ends.Signature, ignoreCase: true);
     }
 
+    [TestMethod]
+    public async Task GroupsByStationContinuityWhenRouteIdDoesNotDistinguishLines()
+    {
+        // Montan2023H0e has Routeid = "1" on every row, which cannot distinguish lines, so grouping
+        // falls back to station continuity: the chain breaks at SBG -> HIT, giving two lines.
+        CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Montan2023H0e", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Montan2023H0e");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(2, stretches, "TimetableStretches");
+        Assert.AreEqual("HIT-S31-HLS-HMU-SBG", string.Join("-", stretches[0].Stations.Select(s => s.Signature)), ignoreCase: true);
+        Assert.AreEqual("HIT-WHM", string.Join("-", stretches[1].Stations.Select(s => s.Signature)), ignoreCase: true);
+    }
+
+    [TestMethod]
+    public async Task SortsRouteIdGroupedLinksByStartPosition()
+    {
+        // Rotebro2015 groups by Routeid (10/20/30). Line 30's links are listed in reverse position
+        // order (Bgs@30 then Brg@27), so they must be sorted by start position into Brg-Bgs-Ccw.
+        CultureInfo.CurrentCulture = new CultureInfo("sv-SE");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Rotebro2015", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Rotebro2015");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(3, stretches, "TimetableStretches");
+        var line30 = stretches.Single(s => s.Number == "30");
+        Assert.AreEqual("Brg-Bgs-Ccw", string.Join("-", line30.Stations.Select(s => s.Signature)), ignoreCase: true);
+    }
+
+    [TestMethod]
+    public async Task GroupsByStationContinuityAcrossNonZeroLineStarts()
+    {
+        // Givskud-Modern-2025 has unique per-row Routeid, so it uses station continuity. Line 2 starts
+        // at Frw (non-zero position) and its positions then decrease, which the old position rules broke.
+        CultureInfo.CurrentCulture = new CultureInfo("da-DK");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Givskud-Modern-2025", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Givskud-Modern-2025");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(3, stretches, "TimetableStretches");
+        Assert.AreEqual("Ing-Rot-Sa-Frw-Mkd", string.Join("-", stretches[0].Stations.Select(s => s.Signature)), ignoreCase: true);
+        Assert.AreEqual("Frw-Pa-Muk-Grp-Vdp-Sti", string.Join("-", stretches[1].Stations.Select(s => s.Signature)), ignoreCase: true);
+        Assert.AreEqual("Muk-Hov-Grb", string.Join("-", stretches[2].Stations.Select(s => s.Signature)), ignoreCase: true);
+    }
+
+    [TestMethod]
+    public async Task DoesNotFragmentWhenRouteIdIsEssentiallyPerSegment()
+    {
+        // Givskud2021 has 25 links but 24 distinct Routeids (one stray duplicate "18"), i.e. Routeid is a
+        // per-segment id, not a line id. That must NOT trigger Routeid grouping (which fragmented it into
+        // 24 single-link stretches); station continuity groups the branching network into 7 real lines,
+        // and no station may appear twice on a stretch.
+        CultureInfo.CurrentCulture = new CultureInfo("da-DK");
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
+        Assert.IsTrue(IsScheduleFileExisting("Givskud2021", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Givskud2021");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        Assert.HasCount(7, stretches, "TimetableStretches (must not fragment to one per link).");
+        foreach (var s in stretches)
+        {
+            var signatures = s.Stations.Select(x => x.Signature).ToList();
+            Assert.AreEqual(signatures.Count, signatures.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                $"Stretch '{s.Number}' has a repeated station: {string.Join("-", signatures)}");
+        }
+    }
+
     [TestMethod()]
     [DataRow("Barmstedt2022", "de-DE", 14, 61, 18, 21, 14, 45, 10, 2)]
     [DataRow("DreamTrack2015", null, 12, 62, 24, 0, 0, 40, 11, 0)]

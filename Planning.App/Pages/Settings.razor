@@ -36,15 +36,18 @@ else
                     <label>Use days instead of sessions</label>
                     <input type="checkbox" @bind="g.UseDays" />
                 </div>
-                <div class="field">
-                    <label>Start day</label>
-                    <select @bind="g.StartDay">
-                        @foreach (var day in Enum.GetValues<DayOfWeek>())
-                        {
-                            <option value="@day">@day</option>
-                        }
-                    </select>
-                </div>
+                @if (g.UseDays)
+                {
+                    <div class="field">
+                        <label>Start day</label>
+                        <select @bind="g.StartDay">
+                            @foreach (var day in Enum.GetValues<DayOfWeek>())
+                            {
+                                <option value="@day">@day</option>
+                            }
+                        </select>
+                    </div>
+                }
                 <div class="field">
                     <label>Start time</label>
                     <input type="time" @bind="StartTime" />
@@ -54,7 +57,7 @@ else
                     <input type="time" @bind="EndTime" />
                 </div>
                 <div class="field">
-                    <label>Break (splits the graph)</label>
+                    <label>Break for printing (splits the graph in two halves)</label>
                     <input type="checkbox" @bind="UseBreak" />
                     @if (UseBreak)
                     {

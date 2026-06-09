@@ -96,12 +96,13 @@ public static class TimetableStretchExtensions
         /// </summary>
         public string FullDescription => $"{stretch.Number} {stretch.Starts}-{stretch.Ends} {stretch.Description}".Trim();
         /// <summary>
-        /// Finds a station along the timetable stretch.
+        /// Finds a station along the timetable stretch. A station may occur more than once on a
+        /// stretch that revisits it (reversing or branching lines); the first occurrence is returned.
         /// </summary>
         /// <param name="station">The station to find.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the station if found.</returns>
         public Maybe<OperationLocation> GetStation(OperationLocation station) =>
-            new(stretch?.Stations.SingleOrDefault(s => s.Equals(station)), $"Station {station} is not in timetable stretch {stretch}.");
+            new(stretch?.Stations.FirstOrDefault(s => s.Equals(station)), $"Station {station} is not in timetable stretch {stretch}.");
 
         /// <summary>
         /// Gets the starting station of the timetable stretch.

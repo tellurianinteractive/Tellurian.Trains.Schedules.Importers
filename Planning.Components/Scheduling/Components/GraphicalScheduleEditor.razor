@@ -121,14 +121,14 @@ else
                             @if (Current.GraphSettings.ShowDepartureMinutes)
                             {
                                 <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.Minutes()</text>
+                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
                                 </text>
                             }
                             @if (Current.GraphSettings.ShowArrivalMinutes)
                             {
                                 var arrival = Current.ArrivalMinuteUnder(toStationIndex, toTrackIndex, stretch.To);
                                 <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.Minutes()</text>
+                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.MinutesText()</text>
                                 </text>
                             }
                         }
@@ -158,14 +158,14 @@ else
                             @if (Current.GraphSettings.ShowDepartureMinutes)
                             {
                                 <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.Minutes()</text>
+                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
                                 </text>
                             }
                             @if (Current.GraphSettings.ShowArrivalMinutes)
                             {
                                 var arrival = Current.ArrivalMinuteOver(toStationIndex, stretch.To);
                                 <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.Minutes()</text>
+                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.MinutesText()</text>
                                 </text>
                             }
                         }
@@ -184,7 +184,7 @@ else
 
     string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
     string TrainStroke(Train t) => t.Category?.Color ?? "#000000";
-    string TrainStrokeWidth => "4";
+    string TrainStrokeWidth => "2";
 
     protected override void OnParametersSet()
     {

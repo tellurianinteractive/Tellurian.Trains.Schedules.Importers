@@ -320,12 +320,15 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
         // Choose the line-grouping strategy for this file. When the Routeid column (A) is shared by
         // two or more rows it identifies the line; otherwise (e.g. Routeid unique per segment, as in
-        // some files) a new timetable stretch begins where the start position (column D) resets to zero.
+        // some files) the rows form one continuous line as long as each row's start station is the
+        // previous row's end station; when that chain breaks, a new timetable stretch begins.
         var groupByRouteId = UsesRouteIdGrouping(routes, Route, StartStation, EndStation);
 
         var rowNumber = 1;
         TimetableStretch? currentStretch = null;
         var stretchNumber = 0;
+        OperationLocation? previousEndStation = null;
+        var routeIdStretchOrder = new Dictionary<TimetableStretch, List<(double Position, TrackStretch Stretch)>>();
         foreach (DataRow route in routes.Rows)
         {
             if (rowNumber > 1)
@@ -372,13 +375,20 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     }
                     else
                     {
-                        var startsNewStretch = currentStretch is null || (fields[StartPosition].IsNumber && fields[StartPosition].ToDoubleOrZero == 0);
+                        // A row continues the current line when its start station is the previous row's
+                        // end station; otherwise it begins a new line. Continuity is by station, not by the
+                        // Position columns: positions may count up or down along a line and can even differ
+                        // for the same junction station shared by two lines (e.g. Pa listed at 228.2 then 109.7).
+                        var startsNewStretch = currentStretch is null
+                            || previousEndStation is null
+                            || !previousEndStation.Equals(start.Value);
                         if (startsNewStretch)
                         {
                             stretchNumber++;
                             currentStretch = new TimetableStretch(rowNumber, stretchNumber.ToString(CultureInfo.CurrentCulture));
                             layout.Add(currentStretch);
                         }
+                        previousEndStation = end.Value;
                     }
                     if (itemMessages.HasNoStoppingErrors())
                     {
@@ -386,12 +396,23 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToIntOrZero, fields[Speed].ToIntOrZero, fields[Time].ToIntOrZero);
                         stretch = currentStretch!.AddLast(stretch);
                         layout.Add(stretch);
+                        if (groupByRouteId)
+                        {
+                            if (!routeIdStretchOrder.TryGetValue(currentStretch!, out var order))
+                                routeIdStretchOrder[currentStretch!] = order = [];
+                            order.Add((fields[StartPosition].ToDoubleOrZero, stretch));
+                        }
                     }
                 }
                 messages.AddRange(itemMessages);
             }
             rowNumber++;
         }
+        // When grouping by Routeid, a line's track links may be listed in any row order (e.g.
+        // Rotebro2015 line 30 runs Brg(27)->Bgs(30)->Ccw(37) but is listed descending), so order
+        // each line's stretches by start position to recover the real station sequence.
+        foreach (var (timetableStretch, order) in routeIdStretchOrder)
+            timetableStretch.Stretches = [.. order.OrderBy(o => o.Position).Select(o => o.Stretch)];
         if (messages.HasStoppingErrors())
             return ImportResult<Layout>.Failure(messages);
         else
@@ -400,12 +421,15 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
     /// <summary>
     /// Determines whether the Routes worksheet uses the Routeid column to group track stretches into lines.
-    /// This is the case when at least two route rows share the same non-empty Routeid; otherwise the
-    /// Routeid is a per-segment identifier and lines must be derived from the start position instead.
+    /// Routeid is a <em>line</em> identifier only when it groups several links per line: there must be more
+    /// than one distinct Routeid AND, on average, at least two links per distinct Routeid (Rotebro2015:
+    /// 12 links / 3 routes). A single Routeid repeated on every row (Montan all "1") does not distinguish
+    /// lines, and Routeid that is essentially unique per link (Givskud2021: 25 links / 24 routes, one stray
+    /// duplicate) is a per-segment identifier; both fall back to station-continuity grouping.
     /// </summary>
     private static bool UsesRouteIdGrouping(DataTable routes, int routeColumn, int startStationColumn, int endStationColumn)
     {
-        var routeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var routeIds = new List<string>();
         var rowNumber = 1;
         foreach (DataRow route in routes.Rows)
         {
@@ -414,12 +438,13 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 var fields = route.GetRowFields();
                 if (fields.AreAllEmpty) break;
                 if (!(fields[startStationColumn].IsZeroesOrEmpty && fields[endStationColumn].IsZeroesOrEmpty)
-                    && fields[routeColumn].HasValue && !routeIds.Add(fields[routeColumn]))
-                    return true;
+                    && fields[routeColumn].HasValue)
+                    routeIds.Add(fields[routeColumn]);
             }
             rowNumber++;
         }
-        return false;
+        var distinct = new HashSet<string>(routeIds, StringComparer.OrdinalIgnoreCase).Count;
+        return distinct >= 2 && routeIds.Count >= 2 * distinct;
     }
 
     /// <summary>

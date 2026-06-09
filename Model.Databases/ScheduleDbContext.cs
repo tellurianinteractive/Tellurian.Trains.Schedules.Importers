@@ -194,6 +194,26 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasMany(e => e.TimetableStretches)
                   .WithOne()
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Layout-wide settings are a planning-time configuration aggregate, never queried
+            // relationally, so persist the whole graph in a single JSON column. The nested owned
+            // types are declared explicitly so the JSON-owned StationTimings stays distinct from the
+            // column-owned OperationLocation.Timings of the same CLR type.
+            entity.OwnsOne(e => e.Settings, settings =>
+            {
+                settings.ToJson();
+                settings.OwnsOne(s => s.General);
+                settings.OwnsOne(s => s.GraphicTimetable);
+                settings.OwnsOne(s => s.TimeAndSpeed, timeAndSpeed =>
+                {
+                    timeAndSpeed.OwnsOne(t => t.Slow);
+                    timeAndSpeed.OwnsOne(t => t.Normal);
+                    timeAndSpeed.OwnsOne(t => t.High);
+                    timeAndSpeed.OwnsOne(t => t.StationTimings);
+                });
+                settings.OwnsOne(s => s.Validation);
+                settings.OwnsOne(s => s.Integration);
+            });
         });
 
         // Company
@@ -220,6 +240,9 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne(e => e.Station)
                   .HasForeignKey(e => e.StationId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Per-station timing overrides: structured data worth real columns (owned, not JSON).
+            entity.OwnsOne(e => e.Timings);
 
             // TPH discriminator for OperationLocation hierarchy
             entity.HasDiscriminator<string>("LocationType")

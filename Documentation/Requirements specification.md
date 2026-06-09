@@ -162,7 +162,7 @@ are organised into groups — each a separate type — surfaced as sub-sections 
 | Start day  | Weekday of the first session when using days                      | Monday       |
 | Start time | Fast-time start hour of operation                                 | 06:00        |
 | End time   | Fast-time end hour of operation                                   | 20:00        |
-| Break time | Optional fast-time break hour that splits the graphical timetable | None         |
+| Break time | Optional fast-time hour that splits the graphical timetable into two halves for printing (start–break and break–end) | None |
 
 Start, end, and break time define the operating time window used by the graphical
 timetable (see §3.7).

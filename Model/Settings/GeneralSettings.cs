@@ -17,6 +17,10 @@ public sealed class GeneralSettings
     /// <summary>Fast-clock end hour of operation, used as the graphical timetable's time-axis end. Default is 20:00.</summary>
     public TimeSpan EndTime { get; set; } = TimeSpan.FromHours(20);
 
-    /// <summary>Optional fast-clock break hour that splits the graphical timetable. <c>null</c> means no break.</summary>
+    /// <summary>
+    /// Optional fast-clock break that splits the graphical timetable into two halves when printing:
+    /// the first half is <see cref="StartTime"/>–<see cref="BreakTime"/>, the second half is
+    /// <see cref="BreakTime"/>–<see cref="EndTime"/>. <c>null</c> means no break.
+    /// </summary>
     public TimeSpan? BreakTime { get; set; }
 }

@@ -85,7 +85,7 @@ public static class GraphScheduleDrawingExtensions
         };
     }
 
-    public static int Minutes(this Time time) => time.Value.Minutes;
+    public static string MinutesText(this Time time) => time.Value.Minutes.ToString("D2");
 
     private static Offset MinuteUnder(this GraphSchedule me, int stationIndex, int trackIndex, TimeSpan time)
     {
