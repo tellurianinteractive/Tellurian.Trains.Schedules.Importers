@@ -37,6 +37,10 @@ public class GraphSchedule
     public TimeSpan StartTime { get; private set; }
     public TimeSpan EndTime { get; private set; }
 
+    // The axis spans the driver service window, since the train can occupy the track for its whole
+    // duration: the earliest arrival is the first driver's start of service and the latest departure
+    // the last driver's end of service (see Train.DriverStartTime/DriverEndTime).
+
     private TimeSpan GetStartTime()
     {
         if (Trains.Length > 0)
