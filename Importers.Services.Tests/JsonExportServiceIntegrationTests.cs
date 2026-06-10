@@ -81,10 +81,10 @@ public class JsonExportServiceIntegrationTests
         Assert.IsTrue(root.TryGetProperty("Timetable", out _), "JSON missing 'Timetable' property");
 
         // Verify vehicles is present
-        Assert.IsTrue(root.TryGetProperty("Vehicles", out _), "JSON missing 'Vehicles' property");
+        Assert.IsTrue(root.TryGetProperty("ScheduledObjects", out _), "JSON missing 'ScheduledObjects' property");
 
         // Verify vehicle schedules is present
-        Assert.IsTrue(root.TryGetProperty("VehicleSchedules", out _), "JSON missing 'VehicleSchedules' property");
+        Assert.IsTrue(root.TryGetProperty("Schedules", out _), "JSON missing 'Schedules' property");
 
         // Verify driver duties is present
         Assert.IsTrue(root.TryGetProperty("DriverDuties", out _), "JSON missing 'DriverDuties' property");
@@ -136,15 +136,15 @@ public class JsonExportServiceIntegrationTests
             Assert.AreEqual(originalSchedule.Name, importedSchedule.Name, "Schedule name mismatch");
             Assert.AreEqual(originalSchedule.Timetable.Trains.Count, importedSchedule.Timetable.Trains.Count, "Train count mismatch");
             Assert.AreEqual(originalSchedule.Timetable.Layout.OperationLocations.Count, importedSchedule.Timetable.Layout.OperationLocations.Count, "Station count mismatch");
-            Assert.AreEqual(originalSchedule.Vehicles.Count, importedSchedule.Vehicles.Count, "Vehicles count mismatch");
-            Assert.AreEqual(originalSchedule.VehicleSchedules.Count, importedSchedule.VehicleSchedules.Count, "VehicleSchedules count mismatch");
+            Assert.AreEqual(originalSchedule.ScheduledObjects.Count, importedSchedule.ScheduledObjects.Count, "ScheduledObjects count mismatch");
+            Assert.AreEqual(originalSchedule.Schedules.Count, importedSchedule.Schedules.Count, "Schedules count mismatch");
             Assert.AreEqual(originalSchedule.DriverDuties.Count, importedSchedule.DriverDuties.Count, "DriverDuties count mismatch");
 
             Console.WriteLine($"Round-trip JSON export/import completed successfully");
             Console.WriteLine($"  Trains: {importedSchedule.Timetable.Trains.Count}");
             Console.WriteLine($"  Stations: {importedSchedule.Timetable.Layout.OperationLocations.Count}");
-            Console.WriteLine($"  Vehicles: {importedSchedule.Vehicles.Count}");
-            Console.WriteLine($"  VehicleSchedules: {importedSchedule.VehicleSchedules.Count}");
+            Console.WriteLine($"  ScheduledObjects: {importedSchedule.ScheduledObjects.Count}");
+            Console.WriteLine($"  Schedules: {importedSchedule.Schedules.Count}");
             Console.WriteLine($"  DriverDuties: {importedSchedule.DriverDuties.Count}");
         }
         finally

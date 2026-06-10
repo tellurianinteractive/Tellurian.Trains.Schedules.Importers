@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 
 namespace Tellurian.Trains.Schedules.Model.Databases;
@@ -22,7 +22,7 @@ public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) 
     /// <returns>A task that represents the asynchronous export operation. The task result contains an <see
     /// cref="ExportResult{Schedule}"/> object with details about the export, including the exported schedule and any
     /// error messages.</returns>
-    public async Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule)
+    public async Task<ExportResult<Plan>> ExportScheduleAsync(Plan schedule)
     {
         ArgumentNullException.ThrowIfNull(schedule);
 
@@ -35,21 +35,21 @@ public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) 
             await SaveTrainCategoriesAsync(context, schedule);
             await SaveScheduleAsync(context, schedule);
 
-            return ExportResult<Schedule>.Success(schedule);
+            return ExportResult<Plan>.Success(schedule);
         }
         catch (DbUpdateException ex)
         {
-            return ExportResult<Schedule>.Failure(ex.InnerException?.Message ?? ex.Message);
+            return ExportResult<Plan>.Failure(ex.InnerException?.Message ?? ex.Message);
         }
     }
 
-    private static void ClearStretchesToAvoidConstraintIssues(Schedule schedule)
+    private static void ClearStretchesToAvoidConstraintIssues(Plan schedule)
     {
         schedule.Timetable.Layout.TrackStretches.Clear();
         schedule.Timetable.Layout.TimetableStretches.Clear();
     }
 
-    private static async Task SaveTrainCategoriesAsync(ScheduleDbContext context, Schedule schedule)
+    private static async Task SaveTrainCategoriesAsync(ScheduleDbContext context, Plan schedule)
     {
         var categories = schedule.Timetable.Trains
             .Where(t => t.Category is not null)
@@ -72,18 +72,18 @@ public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) 
         }
     }
 
-    private static async Task SaveScheduleAsync(ScheduleDbContext context, Schedule schedule)
+    private static async Task SaveScheduleAsync(ScheduleDbContext context, Plan schedule)
     {
-        var existingSchedule = await context.Schedules
+        var existingSchedule = await context.Plans
             .FirstOrDefaultAsync(s => s.Name == schedule.Name);
 
         if (existingSchedule is not null)
         {
-            context.Schedules.Remove(existingSchedule);
+            context.Plans.Remove(existingSchedule);
             await context.SaveChangesAsync();
         }
 
-        context.Schedules.Add(schedule);
+        context.Plans.Add(schedule);
         await context.SaveChangesAsync();
     }
 }

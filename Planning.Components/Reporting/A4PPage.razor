@@ -1,0 +1,11 @@
+@inherits PageFormat
+
+<div class="a4p" style="padding: @MarginStyle">
+    @ChildContent
+    @if (PageNumber > 0)
+    {
+        <div class="footer">
+            @Footnote - <strong>@Translator("Page") @PageNumber</strong> -
+        </div>
+    }
+</div>

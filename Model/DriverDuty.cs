@@ -73,7 +73,7 @@ public class DriverDuty : IEquatable<DriverDuty>
     /// <summary>
     /// Gets or sets the schedule this duty belongs to.
     /// </summary>
-    public Schedule Schedule { get; set; } = default!;
+    public Plan Schedule { get; set; } = default!;
 
     /// <inheritdoc/>
     public bool Equals(DriverDuty? other) => Identity.Equals(other?.Identity, StringComparison.OrdinalIgnoreCase);

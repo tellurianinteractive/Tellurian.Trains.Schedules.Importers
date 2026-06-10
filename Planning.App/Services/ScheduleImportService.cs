@@ -19,22 +19,22 @@ public sealed class ScheduleImportService(
         MaxDepth = 256
     };
 
-    public async Task<ImportResult<Schedule>> ImportFromJsonAsync(Stream stream, string name)
+    public async Task<ImportResult<Plan>> ImportFromJsonAsync(Stream stream, string name)
     {
         try
         {
-            var schedule = await JsonSerializer.DeserializeAsync<Schedule>(stream, JsonOptions);
+            var schedule = await JsonSerializer.DeserializeAsync<Plan>(stream, JsonOptions);
             if (schedule is null)
-                return ImportResult<Schedule>.Failure(Message.System("Failed to deserialise JSON: result was null."));
-            return ImportResult<Schedule>.Success(schedule);
+                return ImportResult<Plan>.Failure(Message.System("Failed to deserialise JSON: result was null."));
+            return ImportResult<Plan>.Success(schedule);
         }
         catch (JsonException ex)
         {
-            return ImportResult<Schedule>.Failure(Message.System($"JSON deserialisation error: {ex.Message}"));
+            return ImportResult<Plan>.Failure(Message.System($"JSON deserialisation error: {ex.Message}"));
         }
     }
 
-    public async Task<ImportResult<Schedule>> ImportFromXplnAsync(Stream stream, string fileName)
+    public async Task<ImportResult<Plan>> ImportFromXplnAsync(Stream stream, string fileName)
     {
         try
         {
@@ -49,7 +49,7 @@ public sealed class ScheduleImportService(
         }
         catch (Exception ex)
         {
-            return ImportResult<Schedule>.Failure(Message.System($"XPLN import error: {ex.Message}"));
+            return ImportResult<Plan>.Failure(Message.System($"XPLN import error: {ex.Message}"));
         }
     }
 }

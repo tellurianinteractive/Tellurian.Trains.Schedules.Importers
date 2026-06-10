@@ -6,12 +6,12 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 public class VehicleScheduleTests
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    private VehicleSchedule Target { get; set; }
+    private Schedule Target { get; set; }
 
     [TestInitialize]
     public void TestInitialize()
     {
-        Target = new VehicleSchedule(1);
+        Target = new Schedule(1);
     }
 
     [TestMethod]

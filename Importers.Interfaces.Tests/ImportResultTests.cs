@@ -20,7 +20,7 @@ public class ImportResultTests
         var json = target.Json();
         Assert.IsNotNull(json);
         // Use matching options with ReferenceHandler.Preserve since that's what Json() uses
-        var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptionsWithReferenceHandler);
+        var result = JsonSerializer.Deserialize<ImportResult<Plan>>(json, JsonSerializerOptionsWithReferenceHandler);
         Assert.AreEqual(4, result.Messages.Length);
         Assert.IsTrue(result.IsSuccess);
     }
@@ -39,7 +39,7 @@ public class ImportResultTests
                 "isSuccess":true
             }
             """;
-        var result = JsonSerializer.Deserialize<ImportResult<Schedule>>(json, JsonSerializerOptions);
+        var result = JsonSerializer.Deserialize<ImportResult<Plan>>(json, JsonSerializerOptions);
         Assert.AreEqual(4, result.Messages.Length);
         Assert.IsTrue(result.IsSuccess);
     }
@@ -52,7 +52,7 @@ public class ImportResultTests
         ReferenceHandler = ReferenceHandler.Preserve
     };
 
-    static async Task<ImportResult<Schedule>> ImportResult(string testFilePath)
+    static async Task<ImportResult<Plan>> ImportResult(string testFilePath)
     {
         var file = new FileInfo(testFilePath);
         if (file.Exists)
@@ -64,7 +64,7 @@ public class ImportResultTests
             using var importer = new XplnDataImporter(file, provider, operatingCompainesService, trainCategoriesService, NullLogger<XplnDataImporter>.Instance);
             return await importer.ImportScheduleAsync(Path.GetFileNameWithoutExtension(testFilePath));
         }
-        return ImportResult<Schedule>.Failure(Message.System($"File {testFilePath} not found."));
+        return ImportResult<Plan>.Failure(Message.System($"File {testFilePath} not found."));
     }
 }
 

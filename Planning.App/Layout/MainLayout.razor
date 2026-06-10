@@ -1,7 +1,8 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @using System.Globalization
 @using Tellurian.Localization
 @inject DockLayoutState Dock
+@inject ScheduleStateService ScheduleState
 @inject IJSRuntime JS
 @inject TranslationService Translation
 @implements IDisposable
@@ -40,6 +41,8 @@
                 @tab.Label
             </NavLink>
         }
+        <ReportsMenu />
+        <ExportMenu />
     </nav>
 
     <main class="content">
@@ -69,6 +72,7 @@
         if (firstRender)
         {
             await Dock.LoadAsync(JS);
+            await ScheduleState.InitializeAsync();
             StateHasChanged();
         }
     }

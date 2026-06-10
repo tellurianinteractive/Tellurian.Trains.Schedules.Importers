@@ -16,14 +16,14 @@ public static class ValidationExtensions
     /// <param name="schedule">The schedule to validate.</param>
     /// <param name="options">The options controlling which validations run.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Schedule schedule, ValidationSettings options)
+    public static IEnumerable<ValidationError> GetValidationErrors(this Plan schedule, ValidationSettings options)
     {
         schedule = schedule.ValueOrException(nameof(schedule));
         options = options.ValueOrException(nameof(options));
         var result = new List<ValidationError>();
         result.AddRange(schedule.Timetable.GetValidationErrors(schedule, options));
-        if (options.ValidateVehicleSchedules) result.AddRange(schedule.VehicleSchedules.SelectMany(l => l.ValidateOverlappingParts()));
-        if (options.ValidateVehicleSchedules) result.AddRange(schedule.ValidateVehicleDoubleBooking());
+        if (options.ValidateSchedules) result.AddRange(schedule.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
+        if (options.ValidateSchedules) result.AddRange(schedule.ValidateVehicleDoubleBooking());
         if (options.ValidateLocomotiveCoverage) result.AddRange(schedule.ValidateLocomotiveCoverage());
         return result;
     }
@@ -35,14 +35,14 @@ public static class ValidationExtensions
     /// <param name="schedule">The schedule the timetable belongs to.</param>
     /// <param name="options">The options controlling which validations run.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Schedule schedule, ValidationSettings options)
+    public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Plan schedule, ValidationSettings options)
     {
         timetable = timetable.ValueOrException(nameof(timetable));
         options = options.ValueOrException(nameof(options));
         var result = new List<ValidationError>();
         result.AddRange(timetable.EnsureStationHasTrack());
         result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
-        if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(schedule.VehicleSchedules)));
+        if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(schedule.Schedules)));
         if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
         if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetValidationErrors()).Distinct());
         if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
@@ -76,7 +76,7 @@ public static class ValidationExtensions
     /// <param name="me">The station track to validate.</param>
     /// <param name="vehicleSchedules">The vehicle schedules used to determine whether conflicting calls share a vehicle.</param>
     /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this StationTrack me, IEnumerable<VehicleSchedule> vehicleSchedules) =>
+    public static IEnumerable<ValidationError> GetValidationErrors(this StationTrack me, IEnumerable<Schedule> vehicleSchedules) =>
         me is null ? [] :
         me.GetConflicts(vehicleSchedules).Select(c =>
         {
@@ -84,14 +84,14 @@ public static class ValidationExtensions
             return ValidationError.StationTrackConflict(me, c.one, c.another, message);
         });
 
-    private static IEnumerable<(StationCall one, StationCall another)> GetConflicts(this StationTrack me, IEnumerable<VehicleSchedule> vehicleSchedules)
+    private static IEnumerable<(StationCall one, StationCall another)> GetConflicts(this StationTrack me, IEnumerable<Schedule> vehicleSchedules)
     {
         if (me.Calls.Count < 2) return [];
         var result = GetConflicts(me.Calls.First(), me.Calls.Skip(1), vehicleSchedules);
         return result.Distinct();
     }
 
-    private static List<(StationCall one, StationCall other)> GetConflicts(this StationCall me, IEnumerable<StationCall> remaining, IEnumerable<VehicleSchedule> vehicleSchedules)
+    private static List<(StationCall one, StationCall other)> GetConflicts(this StationCall me, IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules)
     {
         var result = new List<(StationCall, StationCall)>();
         var conflictingWithMe = remaining.Where(r => r.Track.Equals(me.Track) && !r.Train!.Equals(me.Train) && r.Arrival > me.Departure && r.Departure < me.Arrival && !vehicleSchedules.HasSameVehicle(r, me)).ToList();
@@ -100,7 +100,7 @@ public static class ValidationExtensions
         return result;
     }
 
-    internal static (bool, IEnumerable<StationCall>?) GetConflicts(this StationTrack me, StationCall call, IEnumerable<StationCall> withCalls, IEnumerable<VehicleSchedule> vehicleSchedules)
+    internal static (bool, IEnumerable<StationCall>?) GetConflicts(this StationTrack me, StationCall call, IEnumerable<StationCall> withCalls, IEnumerable<Schedule> vehicleSchedules)
     {
         if (me.Calls.Count == 0) return (false, null);
         if (me.Calls.Count == 2)
@@ -279,7 +279,7 @@ public static class ValidationExtensions
 
     #region VehicleSchedule
 
-    private static List<ValidationError> ValidateOverlappingParts(this VehicleSchedule me)
+    private static List<ValidationError> ValidateOverlappingParts(this Schedule me)
     {
         var errors = new List<ValidationError>();
         var parts = me.Parts.ToArray();
@@ -305,15 +305,15 @@ public static class ValidationExtensions
     /// <summary>
     /// Validates that all trains have complete locomotive coverage without gaps or overlaps.
     /// </summary>
-    internal static IEnumerable<ValidationError> ValidateLocomotiveCoverage(this Schedule schedule)
+    internal static IEnumerable<ValidationError> ValidateLocomotiveCoverage(this Plan schedule)
     {
         var errors = new List<ValidationError>();
 
         // Get all traction vehicle schedules (locomotives and self-propelled railcars)
-        var locomotiveSchedules = schedule.Vehicles
-            .Where(v => v.VehicleType is VehicleType.Locomotive or VehicleType.Railcar)
+        var locomotiveSchedules = schedule.ScheduledObjects
+            .Where(v => v.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Railcar)
             .SelectMany(v => v.ScheduleAssignments)
-            .Select(a => a.VehicleSchedule)
+            .Select(a => a.Schedule)
             .Distinct()
             .ToList();
 
@@ -423,9 +423,9 @@ public static class ValidationExtensions
     /// <summary>
     /// Validates that no vehicle has overlapping schedule assignments (double-booked).
     /// </summary>
-    internal static IEnumerable<ValidationError> ValidateVehicleDoubleBooking(this Schedule schedule)
+    internal static IEnumerable<ValidationError> ValidateVehicleDoubleBooking(this Plan schedule)
     {
-        foreach (var vehicle in schedule.Vehicles)
+        foreach (var vehicle in schedule.ScheduledObjects)
         {
             var assignments = vehicle.ScheduleAssignments.ToArray();
             for (var i = 0; i < assignments.Length - 1; i++)
@@ -446,14 +446,14 @@ public static class ValidationExtensions
     }
     #endregion
 
-    internal static bool HasSameVehicle(this IEnumerable<VehicleSchedule> me, StationCall one, StationCall another)
+    internal static bool HasSameVehicle(this IEnumerable<Schedule> me, StationCall one, StationCall another)
     {
         var foundOne = me.FindVehicleSchedule(one);
         var foundOther = me.FindVehicleSchedule(another);
         return foundOne is not null && foundOther is not null && foundOne == foundOther;
     }
 
-    internal static VehicleSchedule? FindVehicleSchedule(this IEnumerable<VehicleSchedule> me, StationCall call)
+    internal static Schedule? FindVehicleSchedule(this IEnumerable<Schedule> me, StationCall call)
     {
         if (me == null) return null;
         foreach (var schedule in me)

@@ -26,7 +26,7 @@ public class JsonExportService(FileInfo destination) : IExportService
     /// <param name="schedule">The schedule to be exported. Cannot be null.</param>
     /// <returns>A task that represents the asynchronous export operation. The task result contains an ExportResult object with
     /// the exported schedule and status information.</returns>
-    public async Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule)
+    public async Task<ExportResult<Plan>> ExportScheduleAsync(Plan schedule)
     {
         ArgumentNullException.ThrowIfNull(schedule);
 
@@ -39,11 +39,11 @@ public class JsonExportService(FileInfo destination) : IExportService
             }
             var json = JsonSerializer.Serialize(schedule, JsonOptions);
             File.WriteAllText(path, json);
-            return ExportResult<Schedule>.Success(schedule);
+            return ExportResult<Plan>.Success(schedule);
         }
         catch (Exception ex)
         {
-            return ExportResult<Schedule>.Failure($"{ex.GetType().Name}: {ex.Message}");
+            return ExportResult<Plan>.Failure($"{ex.GetType().Name}: {ex.Message}");
         }
     }
 }

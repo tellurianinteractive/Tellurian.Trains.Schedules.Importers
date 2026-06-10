@@ -8,7 +8,7 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 internal static class VehicleExtensions
 {
     /// <summary>
-    /// Creates a Vehicle with a single VehicleScheduleAssignment for all sessions,
+    /// Creates a Vehicle with a single ScheduleAssignment for all sessions,
     /// and adds it to the schedule. This is the common case for XPLN imports.
     /// </summary>
     /// <param name="schedule">The schedule to add the vehicle to.</param>
@@ -20,10 +20,10 @@ internal static class VehicleExtensions
     /// <param name="externalId">External identifier (optional).</param>
     /// <param name="remark">Remark or description (optional).</param>
     /// <returns>The VehicleSchedule that TrainParts should be added to.</returns>
-    public static VehicleSchedule CreateVehicleWithAllSessionsSchedule(
-        this Schedule schedule,
+    public static Schedule CreateVehicleWithAllSessionsSchedule(
+        this Plan schedule,
         int id,
-        VehicleType vehicleType,
+        ScheduledObjectType vehicleType,
         int number,
         string? vehicleClass = null,
         Company? company = null,
@@ -32,7 +32,7 @@ internal static class VehicleExtensions
     {
         // Create the vehicle. When the identifier carries no parseable number, fall back to the unique
         // id (the source row number) so every vehicle has a distinct, non-zero number for display.
-        var vehicle = new Vehicle(id, vehicleType, number == 0 ? id : number)
+        var vehicle = new ScheduledObject(id, vehicleType, number == 0 ? id : number)
         {
             Class = vehicleClass ?? string.Empty,
             Company = company,
@@ -42,10 +42,10 @@ internal static class VehicleExtensions
         };
 
         // Create the VehicleSchedule
-        var vehicleSchedule = new VehicleSchedule(id);
+        var vehicleSchedule = new Schedule(id);
 
         // Create the assignment linking vehicle to schedule for all sessions
-        var assignment = new VehicleScheduleAssignment(id, vehicle, vehicleSchedule);
+        var assignment = new ScheduleAssignment(id, vehicle, vehicleSchedule);
 
         // Wire up to vehicle
         vehicle.ScheduleAssignments.Add(assignment);

@@ -1,4 +1,4 @@
-﻿using System.Data.Odbc;
+using System.Data.Odbc;
 using System.Diagnostics;
 using Tellurian.Trains.Schedules.Model;
 
@@ -6,14 +6,14 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Tests;
 
 internal static class ScheduleExtensions
 {
-    public static void SaveToDatabase(this Schedule me, string targetconnectionString)
+    public static void SaveToDatabase(this Plan me, string targetconnectionString)
     {
         var layoutId = me.GetOrCreateLayout(targetconnectionString);
         //me.SaveTrains(layoutId, targetconnectionString);
         me.SaveLocos(layoutId, targetconnectionString);
     }
 
-    private static int GetOrCreateLayout(this Schedule me, string targetconnectionString)
+    private static int GetOrCreateLayout(this Plan me, string targetconnectionString)
     {
         var id = GetLayoutId(targetconnectionString);
         if (id > 0) return id;
@@ -43,7 +43,7 @@ internal static class ScheduleExtensions
 
 
 
-    private static void SaveTrains(this Schedule me, int layoutId, string connectionString)
+    private static void SaveTrains(this Plan me, int layoutId, string connectionString)
     {
         using var connection = new OdbcConnection(connectionString);
         var stations = GetStations(layoutId, connectionString);
@@ -89,7 +89,7 @@ internal static class ScheduleExtensions
         }
     }
 
-    private static void SaveLocos(this Schedule me, int layoutId, string connectionString)
+    private static void SaveLocos(this Plan me, int layoutId, string connectionString)
     {
         using var connection = new OdbcConnection(connectionString);
         var stations = GetStations(layoutId, connectionString);
@@ -99,9 +99,9 @@ internal static class ScheduleExtensions
 
         var count = 0;
         var scheduleNumber = 1;
-        foreach (var vehicle in me.Vehicles.Where(v => v.VehicleType == VehicleType.Locomotive))
+        foreach (var vehicle in me.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Locomotive))
         {
-            var vehicleSchedule = vehicle.ScheduleAssignments.FirstOrDefault()?.VehicleSchedule;
+            var vehicleSchedule = vehicle.ScheduleAssignments.FirstOrDefault()?.Schedule;
             if (vehicleSchedule is null) continue;
 
             var locoOperator = vehicle.Company;

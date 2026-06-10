@@ -1,0 +1,37 @@
+﻿@page "/turnuscards"
+@layout PrintLayout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@if (Items == null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else
+{
+    @foreach (var itemsOnPage in Items.ItemsPerPage(10))
+    {
+        <A4LPage>
+            <div class="pagebreak">
+                @foreach (var item in itemsOnPage)
+                {
+                    <TurnusCard Item="@item" />
+                }
+            </div>
+        </A4LPage>
+    }
+
+}
+@code {
+    private IEnumerable<TurnusData>? Items { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is
+        // loaded (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        Items = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData ?? [];
+    }
+
+}

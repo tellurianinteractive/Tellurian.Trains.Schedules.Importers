@@ -2,7 +2,7 @@
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layout
-@inject ScheduleState ScheduleState
+@inject ScheduleStateService ScheduleState
 @implements IDisposable
 
 <h2>Settings</h2>
@@ -182,7 +182,7 @@ else
                 </div>
                 <div class="field">
                     <label>Validate vehicle schedules</label>
-                    <input type="checkbox" @bind="v.ValidateVehicleSchedules" />
+                    <input type="checkbox" @bind="v.ValidateSchedules" />
                 </div>
                 <div class="field">
                     <label>Validate locomotive coverage</label>

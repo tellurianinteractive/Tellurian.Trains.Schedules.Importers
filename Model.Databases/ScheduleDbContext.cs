@@ -105,22 +105,22 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     /// <summary>
     /// Gets the set of schedules in the database.
     /// </summary>
-    public DbSet<Schedule> Schedules => Set<Schedule>();
+    public DbSet<Plan> Plans => Set<Plan>();
 
     /// <summary>
     /// Gets the set of vehicles (locomotives and trainsets) in the database.
     /// </summary>
-    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<ScheduledObject> ScheduledObjects => Set<ScheduledObject>();
 
     /// <summary>
     /// Gets the set of vehicle schedule assignments in the database.
     /// </summary>
-    public DbSet<VehicleScheduleAssignment> VehicleScheduleAssignments => Set<VehicleScheduleAssignment>();
+    public DbSet<ScheduleAssignment> ScheduleAssignments => Set<ScheduleAssignment>();
 
     /// <summary>
     /// Gets the set of vehicle schedules in the database.
     /// </summary>
-    public DbSet<VehicleSchedule> VehicleSchedules => Set<VehicleSchedule>();
+    public DbSet<Schedule> Schedules => Set<Schedule>();
 
     /// <summary>
     /// Gets the set of driver duties in the database.
@@ -458,7 +458,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             v => new Sessions(v));
 
         // Schedule
-        modelBuilder.Entity<Schedule>(entity =>
+        modelBuilder.Entity<Plan>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
@@ -468,14 +468,14 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey(e => e.TimetableId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasMany(e => e.Vehicles)
-                  .WithOne(e => e.Schedule)
-                  .HasForeignKey(e => e.ScheduleId)
+            entity.HasMany(e => e.ScheduledObjects)
+                  .WithOne(e => e.Plan)
+                  .HasForeignKey(e => e.PlanId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(e => e.VehicleSchedules)
-                  .WithOne(e => e.Schedule)
-                  .HasForeignKey(e => e.ScheduleId)
+            entity.HasMany(e => e.Schedules)
+                  .WithOne(e => e.Plan)
+                  .HasForeignKey(e => e.PlanId)
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(e => e.DriverDuties)
@@ -485,7 +485,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         });
 
         // Vehicle
-        modelBuilder.Entity<Vehicle>(entity =>
+        modelBuilder.Entity<ScheduledObject>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Class).HasMaxLength(50);
@@ -498,26 +498,26 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasMany(e => e.ScheduleAssignments)
-                  .WithOne(e => e.Vehicle)
-                  .HasForeignKey(e => e.VehicleId)
+                  .WithOne(e => e.ScheduledObject)
+                  .HasForeignKey(e => e.ScheduledObjectId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // VehicleScheduleAssignment
-        modelBuilder.Entity<VehicleScheduleAssignment>(entity =>
+        // ScheduleAssignment
+        modelBuilder.Entity<ScheduleAssignment>(entity =>
         {
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Sessions).HasConversion(sessionsConverter);
 
-            entity.HasOne(e => e.VehicleSchedule)
+            entity.HasOne(e => e.Schedule)
                   .WithMany()
-                  .HasForeignKey(e => e.VehicleScheduleId)
+                  .HasForeignKey(e => e.ScheduleId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
         // VehicleSchedule
-        modelBuilder.Entity<VehicleSchedule>(entity =>
+        modelBuilder.Entity<Schedule>(entity =>
         {
             entity.HasKey(e => e.Id);
 

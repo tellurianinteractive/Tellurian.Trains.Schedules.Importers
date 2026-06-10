@@ -4,7 +4,7 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.App.Services;
 
-public sealed class WasmCompaniesService(HttpClient http) : ICompaniesService
+public sealed class CompaniesService(HttpClient http) : ICompaniesService
 {
     public async Task<IEnumerable<Company>> GetAllCompaiesAsync()
     {

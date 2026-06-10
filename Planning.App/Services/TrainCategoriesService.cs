@@ -3,7 +3,7 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.App.Services;
 
-public sealed class WasmTrainCategoriesService(HttpClient http) : ITrainCategoriesService
+public sealed class TrainCategoriesService(HttpClient http) : ITrainCategoriesService
 {
     public async Task<IEnumerable<TrainCategory>> GetAllTrainCategoriesAsync()
     {

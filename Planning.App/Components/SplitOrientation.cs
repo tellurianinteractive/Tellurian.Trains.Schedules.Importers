@@ -1,7 +1,7 @@
-namespace Tellurian.Trains.Schedules.Planning.App.Services;
+namespace Tellurian.Trains.Schedules.Planning.App.Components;
 
 /// <summary>
-/// The orientation of a <see cref="Components.SplitPane"/> / dock split.
+/// The orientation of a <see cref="SplitPane"/> / dock split.
 /// <see cref="Horizontal"/> lays the two panes side by side (a row);
 /// <see cref="Vertical"/> stacks them (a column).
 /// </summary>

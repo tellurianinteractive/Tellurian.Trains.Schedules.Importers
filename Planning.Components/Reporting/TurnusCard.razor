@@ -1,0 +1,60 @@
+﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
+@inject Translator Translator
+
+<PocketCard>
+    @if (Item is not null)
+    {
+        <svg>
+            <line style="stroke: @Item.CrossLineColor;" x1="50mm" y1="0mm" x2="0mm" y2="91mm" />
+        </svg>
+        <div>
+            <div class="schedule header">
+                <div><strong>@Item.CompanyName</strong> @Item.ObjectTypeName(Translator)</div>
+                <div>@Translator("Turnus"):&nbsp;<strong>@Item.TurnusId&nbsp;@Item.OperatingSessions(Translator)</strong></div>
+                @if (Item.Class.HasValue)
+                {
+                    <div>
+                        <span>@Item.ClassOrContentLabel(Translator):&nbsp;<strong>@Item.ClassAndNumber</strong></span>
+                    </div>
+                }
+            </div>
+            <div>
+                @Item.Remark
+            </div>
+            <div class="schedule item">
+                <table width="100%" style="border-collapse: collapse">
+                    <thead>
+                        <tr style="border-bottom: 1px solid gray">
+                            <th align="left">@Translator("Train")</th>
+                            <th align="left" colspan="2">@Translator("From")</th>
+                            <th align="left" colspan="2">@Translator("To")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Item.TrainParts != null) foreach (var part in Item.TrainParts)
+                        {
+                            <tr style="border-bottom: 1px solid gray">
+                                <td>@part.Train.Number</td>
+                                <td>@part.From.Station.Signature</td>
+                                <td>@part.From.Departure</td>
+                                <td>@part.To.Station.Signature</td>
+                                <td>@part.To.Arrival</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="schedule alert">
+                @if (Item.TurnForNextSession)
+                {
+                    <span>@Translator("TurnForNextSession")</span>
+                }
+            </div>
+        </div>
+    }
+</PocketCard>
+
+@code {
+    [Parameter] public TurnusData? Item { get; set; }
+   
+}

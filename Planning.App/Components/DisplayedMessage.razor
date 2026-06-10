@@ -1,0 +1,10 @@
+﻿@inject Translator Translator
+<div class="message">
+    @Translator(ResourceKey)
+</div>
+
+@code {
+    [Parameter]
+    public string? ResourceKey { set; get; }
+}
+

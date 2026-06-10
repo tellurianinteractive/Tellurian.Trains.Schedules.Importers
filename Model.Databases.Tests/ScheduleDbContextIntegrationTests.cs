@@ -63,9 +63,9 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsNotNull(context.Trains);
         Assert.IsNotNull(context.StationCalls);
         Assert.IsNotNull(context.Schedules);
-        Assert.IsNotNull(context.Vehicles);
-        Assert.IsNotNull(context.VehicleScheduleAssignments);
-        Assert.IsNotNull(context.VehicleSchedules);
+        Assert.IsNotNull(context.ScheduledObjects);
+        Assert.IsNotNull(context.ScheduleAssignments);
+        Assert.IsNotNull(context.Schedules);
         Assert.IsNotNull(context.DriverDuties);
         Assert.IsNotNull(context.TrainParts);
         Assert.IsNotNull(context.CallNotes);
@@ -136,8 +136,8 @@ public class ScheduleDbContextIntegrationTests
 
         // Verify expected counts from Barmstedt2022
         Assert.AreEqual(61, schedule.Timetable.Trains.Count, "Expected 61 trains");
-        Assert.AreEqual(18, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Locomotive), "Expected 18 loco schedules");
-        Assert.AreEqual(21, schedule.Vehicles.Count(v => v.VehicleType == VehicleType.Trainset), "Expected 21 trainset schedules");
+        Assert.AreEqual(18, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.Locomotive), "Expected 18 loco schedules");
+        Assert.AreEqual(21, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.Trainset), "Expected 21 trainset schedules");
         Assert.AreEqual(45, schedule.DriverDuties.Count, "Expected 45 driver duties");
         Assert.AreEqual(14, schedule.Timetable.Trains.Sum(t => t.WagonGroups.Count), "Expected 14 wagon groups");
     }
@@ -173,7 +173,7 @@ public class ScheduleDbContextIntegrationTests
 
         var options = exportServiceProvider.GetRequiredService<DbContextOptions<ScheduleDbContext>>();
         await using var context = new ScheduleDbContext(options);
-        var savedSchedule = await context.Schedules.FirstAsync(CancellationToken);
+        var savedSchedule = await context.Plans.FirstAsync(CancellationToken);
         Assert.IsNotNull(savedSchedule);
         Assert.AreEqual(scheduleName, savedSchedule.Name);
     }

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.JSInterop;
 
-namespace Tellurian.Trains.Schedules.Planning.App.Services;
+namespace Tellurian.Trains.Schedules.Planning.App.Components;
 
 /// <summary>
 /// Holds and mutates the dockable Workspace layout (a <see cref="DockNode"/> tree),

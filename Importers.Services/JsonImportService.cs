@@ -26,38 +26,38 @@ public class JsonImportService(FileInfo source) : IImportService
     /// validates that the imported schedule has a matching name.</param>
     /// <returns>A task that represents the asynchronous import operation. The task result contains an ImportResult object with
     /// the imported schedule and status information.</returns>
-    public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
+    public async Task<ImportResult<Plan>> ImportScheduleAsync(string name)
     {
         try
         {
             if (!_source.Exists)
             {
-                return ImportResult<Schedule>.Failure(Message.System($"File not found: {_source.FullName}"));
+                return ImportResult<Plan>.Failure(Message.System($"File not found: {_source.FullName}"));
             }
 
             await using var stream = _source.OpenRead();
-            var schedule = await JsonSerializer.DeserializeAsync<Schedule>(stream, JsonOptions);
+            var schedule = await JsonSerializer.DeserializeAsync<Plan>(stream, JsonOptions);
 
             if (schedule is null)
             {
-                return ImportResult<Schedule>.Failure(Message.System("Failed to deserialize JSON: result was null"));
+                return ImportResult<Plan>.Failure(Message.System("Failed to deserialize JSON: result was null"));
             }
 
             if (!string.IsNullOrEmpty(name) && schedule.Name != name)
             {
-                return ImportResult<Schedule>.Failure(
+                return ImportResult<Plan>.Failure(
                     Message.System($"Schedule name mismatch: expected '{name}', got '{schedule.Name}'"));
             }
 
-            return ImportResult<Schedule>.Success(schedule);
+            return ImportResult<Plan>.Success(schedule);
         }
         catch (JsonException ex)
         {
-            return ImportResult<Schedule>.Failure(Message.System($"JSON deserialization error: {ex.Message}"));
+            return ImportResult<Plan>.Failure(Message.System($"JSON deserialization error: {ex.Message}"));
         }
         catch (Exception ex)
         {
-            return ImportResult<Schedule>.Failure(Message.System($"{ex.GetType().Name}: {ex.Message}"));
+            return ImportResult<Plan>.Failure(Message.System($"{ex.GetType().Name}: {ex.Message}"));
         }
     }
 }

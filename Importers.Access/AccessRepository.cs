@@ -42,17 +42,17 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
     /// </summary>
     /// <param name="name">The name of the schedule/layout to import.</param>
     /// <returns>An import result containing the schedule if successful, or error messages if the import failed.</returns>
-    public Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
+    public Task<ImportResult<Plan>> ImportScheduleAsync(string name)
     {
         var layout = GetLayout(name);
         if (layout.IsFailure)
         {
-            var result = new ImportResult<Schedule>() { Messages = layout.Messages };
+            var result = new ImportResult<Plan>() { Messages = layout.Messages };
             LogMessages(result.Messages);
             return Task.FromResult(result);
         }
         var timetable = new Timetable(name, layout.Item);
-        var importResult = ImportResult<Schedule>.SuccessIfNoErrorMessagesOtherwiseFailure(Schedule.Create(name, timetable), layout.Messages);
+        var importResult = ImportResult<Plan>.SuccessIfNoErrorMessagesOtherwiseFailure(Plan.Create(name, timetable), layout.Messages);
         LogMessages(importResult.Messages);
         return Task.FromResult(importResult);
     }

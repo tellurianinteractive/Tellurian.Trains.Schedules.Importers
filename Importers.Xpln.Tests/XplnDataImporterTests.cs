@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -30,7 +30,7 @@ public class XplnDataImporterTests
         MaxTrainSpeedMetersPerClockMinute = 8.0,
         MinTrainSpeedMetersPerClockMinute = 0.3,
         ValidateDriverDuties = true,
-        ValidateVehicleSchedules = true,
+        ValidateSchedules = true,
         ValidateStationCalls = true,
         ValidateStationTracks = true,
         ValidateStretches = true,
@@ -79,7 +79,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Barmstedt2022");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        Assert.IsFalse(result.Item.Vehicles.Any(v => v.Number == 0), "No vehicle should have number 0.");
+        Assert.IsFalse(result.Item.ScheduledObjects.Any(v => v.Number == 0), "No vehicle should have number 0.");
     }
 
     [TestMethod]
@@ -94,9 +94,9 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Kolding202009");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var x2000 = result.Item.Vehicles.Where(v => string.Equals(v.ExternalId, "X2000", StringComparison.OrdinalIgnoreCase)).ToArray();
+        var x2000 = result.Item.ScheduledObjects.Where(v => string.Equals(v.ExternalId, "X2000", StringComparison.OrdinalIgnoreCase)).ToArray();
         Assert.HasCount(1, x2000, "X2000 vehicles");
-        Assert.AreEqual(VehicleType.Railcar, x2000[0].VehicleType, "X2000 vehicle type");
+        Assert.AreEqual(ScheduledObjectType.Railcar, x2000[0].ObjectType, "X2000 vehicle type");
     }
 
     [TestMethod]
@@ -272,8 +272,8 @@ public class XplnDataImporterTests
                 Assert.HasCount(expectedTrackStretches, result.Item.Timetable.Layout.TrackStretches, "TrackStreches");
                 Assert.HasCount(expectedDispatchStretches, result.Item.Timetable.Layout.DispatchStretches, "DispatchStreches");
                 Assert.HasCount(expectedTrains, timetable.Trains, "Trains");
-                Assert.HasCount(expectedLocos, result.Item.Vehicles.Where(v => v.VehicleType == VehicleType.Locomotive), "Locos");
-                Assert.HasCount(expectedTrainsets, result.Item.Vehicles.Where(v => v.VehicleType == VehicleType.Trainset), "Trainsets");
+                Assert.HasCount(expectedLocos, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Locomotive), "Locos");
+                Assert.HasCount(expectedTrainsets, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Trainset), "Trainsets");
                 Assert.AreEqual(expectedWagonGroups, timetable.Trains.Sum(t => t.WagonGroups.Count));
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 

@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Planning.App.Services;
+namespace Tellurian.Trains.Schedules.Planning.App.Components;
 
 /// <summary>
 /// Where a dragged view is dropped relative to a target pane.

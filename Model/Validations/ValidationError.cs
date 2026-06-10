@@ -234,33 +234,33 @@ public sealed record ValidationError
     /// Creates a vehicle double-booked error (overlapping schedule assignments).
     /// </summary>
     public static ValidationError VehicleDoubleBooked(
-        Vehicle vehicle,
-        VehicleScheduleAssignment assignment1,
-        VehicleScheduleAssignment assignment2,
+        ScheduledObject vehicle,
+        ScheduleAssignment assignment1,
+        ScheduleAssignment assignment2,
         Message message) => new()
         {
             ErrorType = ValidationErrorType.VehicleDoubleBooked,
-            FromTrack = GetFirstTrack(assignment1.VehicleSchedule) ?? StationTrack.Example,
-            ToTrack = GetLastTrack(assignment2.VehicleSchedule) ?? StationTrack.Example,
-            FromTime = GetFirstDeparture(assignment1.VehicleSchedule) ?? Time.Zero,
-            ToTime = GetLastArrival(assignment2.VehicleSchedule) ?? Time.Zero,
-            Trains = GetTrains(assignment1.VehicleSchedule, assignment2.VehicleSchedule),
+            FromTrack = GetFirstTrack(assignment1.Schedule) ?? StationTrack.Example,
+            ToTrack = GetLastTrack(assignment2.Schedule) ?? StationTrack.Example,
+            FromTime = GetFirstDeparture(assignment1.Schedule) ?? Time.Zero,
+            ToTime = GetLastArrival(assignment2.Schedule) ?? Time.Zero,
+            Trains = GetTrains(assignment1.Schedule, assignment2.Schedule),
             Message = message
         };
 
-    private static StationTrack? GetFirstTrack(VehicleSchedule schedule) =>
+    private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
-    private static StationTrack? GetLastTrack(VehicleSchedule schedule) =>
+    private static StationTrack? GetLastTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.To.Arrival.Value).LastOrDefault()?.To.Track;
 
-    private static Time? GetFirstDeparture(VehicleSchedule schedule) =>
+    private static Time? GetFirstDeparture(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Departure;
 
-    private static Time? GetLastArrival(VehicleSchedule schedule) =>
+    private static Time? GetLastArrival(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.To.Arrival.Value).LastOrDefault()?.To.Arrival;
 
-    private static Train[] GetTrains(VehicleSchedule schedule1, VehicleSchedule schedule2) =>
+    private static Train[] GetTrains(Schedule schedule1, Schedule schedule2) =>
         schedule1.Parts.Select(p => p.Train)
             .Concat(schedule2.Parts.Select(p => p.Train))
             .Distinct()

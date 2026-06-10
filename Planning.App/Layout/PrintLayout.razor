@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<div class="report-toolbar no-print">
+    <button @onclick="Print">Print</button>
+    <button @onclick="Close">Close</button>
+</div>
+
+@Body
+
+@code {
+    private async Task Print() => await JS.InvokeVoidAsync("window.print");
+
+    private void Close() => Nav.NavigateTo("");
+}

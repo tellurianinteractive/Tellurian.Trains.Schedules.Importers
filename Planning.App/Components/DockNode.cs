@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Tellurian.Trains.Schedules.Planning.App.Services;
+namespace Tellurian.Trains.Schedules.Planning.App.Components;
 
 /// <summary>
 /// A node in the dockable Workspace layout tree. Either a <see cref="DockSplit"/>

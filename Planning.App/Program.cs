@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Components.Web;
+﻿using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using System.Globalization;
 using Tellurian.Localization.DependencyInjection;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Planning.App;
+using Tellurian.Trains.Schedules.Planning.App.Components;
 using Tellurian.Trains.Schedules.Planning.App.Services;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 using Tellurian.Trains.Schedules.Planning.App.Translations.Resources;
@@ -14,11 +15,13 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddSingleton<BrowserStorageService>();
 builder.Services.AddSingleton<DockLayoutState>();
-builder.Services.AddSingleton<ScheduleState>();
-builder.Services.AddScoped<ICompaniesService, WasmCompaniesService>();
-builder.Services.AddScoped<ITrainCategoriesService, WasmTrainCategoriesService>();
+builder.Services.AddSingleton<ScheduleStateService>();
+builder.Services.AddScoped<ICompaniesService, CompaniesService>();
+builder.Services.AddScoped<ITrainCategoriesService, TrainCategoriesService>();
 builder.Services.AddScoped<ScheduleImportService>();
+builder.Services.AddScoped<ScheduleExportService>();
 
 // Localisation — register language service, RESX and Markdown providers.
 // NOTE: Language.IsFallback has 'internal set' in Tellurian.Localization 1.0.1,
@@ -28,6 +31,7 @@ builder.Services.AddResxResourceProviders([typeof(Labels)]);
 builder.Services.AddHttpMarkdownResourceProvider("_content/Tellurian.Trains.Schedules.Planning.App.Translations/Content");
 builder.Services.AddObjectResourceProvider();
 builder.Services.AddScoped<TranslationService>();
+builder.Services.AddResxStringLocalizers();
 
 var host = builder.Build();
 

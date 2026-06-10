@@ -28,7 +28,15 @@
       "Bash(git rev-list *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Skill(build)"
+      "Skill(build)",
+      "Bash(ls -d Planning.App.Components)",
+      "Bash(ls -d Planning.Components)",
+      "Bash(cat global.json)",
+      "Bash(grep -rn \"TestingPlatformDotnetTestSupport\\\\|MSTest.Sdk\\\\|runner\" Directory.Build.props global.json)",
+      "WebFetch(domain:css-tricks.com)",
+      "Bash(tee /tmp/aot-publish.log)",
+      "Bash(command -v dotnet-serve)",
+      "Bash(command -v python)"
     ]
   }
 }

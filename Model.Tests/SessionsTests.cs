@@ -120,7 +120,7 @@ public class SessionsTests
     public void DayResourceNameIsConsequtive()
     {
         var target = Sessions.FromDays(Days.Tuesday | Days.Wednesday | Days.Thursday);
-        var actual = target.DaysResourceKey;
+        var actual = target.FullDayNamesResourceKey;
         Assert.AreEqual("Tuesday-Thursday", actual);
     }
 }

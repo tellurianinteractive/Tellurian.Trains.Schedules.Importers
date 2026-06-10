@@ -1,0 +1,69 @@
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.dialog {
+    background: white;
+    color: #333;
+    border-radius: 6px;
+    padding: 1.5rem 2rem;
+    min-width: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dialog h3 {
+    margin-top: 0;
+}
+
+.formats {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.format {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.7rem;
+    border: 1px solid #1a3a5c;
+    background: #1a3a5c;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+}
+
+.format:hover:not(:disabled) {
+    background: #24507e;
+}
+
+.format:disabled {
+    background: #ccc;
+    border-color: #ccc;
+    cursor: default;
+}
+
+.format .ext {
+    font-weight: 400;
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.dialog-actions {
+    text-align: right;
+}
+
+.dialog-actions button {
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+}

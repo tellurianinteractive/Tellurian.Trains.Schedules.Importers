@@ -1,0 +1,36 @@
+﻿
+.pocket {
+    font-weight: 500;
+    font-size: 11pt;
+}
+
+    .pocket.frame {
+        width: 50mm;
+        height: 91mm;
+        padding: 0pt;
+        margin: 0pt;
+        border-color: gainsboro;
+        border-width: 1px;
+        border-style: solid;
+        padding: 2pt;
+        display: inline-block;
+    }
+
+    .pocket.header {
+        font-size: 11pt;
+        line-height: 13pt;
+        font-weight: 600;
+    }
+
+    .pocket th {
+        font-style: italic;
+        font-size: 11pt;
+        font-weight: 500;
+    }
+
+    .pocket tr {
+        height: 16pt;
+    }
+
+
+

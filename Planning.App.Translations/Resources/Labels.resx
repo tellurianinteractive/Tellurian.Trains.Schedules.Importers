@@ -103,4 +103,34 @@
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="Train" xml:space="preserve">
+    <value>Train</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Turnus" xml:space="preserve">
+    <value>Turnus</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Class</value>
+  </data>
+  <data name="TurnForNextDay" xml:space="preserve">
+    <value>Continues the next day</value>
+  </data>
+  <data name="SpareLoco" xml:space="preserve">
+    <value>Spare loco</value>
+  </data>
+  <data name="SpareRailcar" xml:space="preserve">
+    <value>Spare railcar</value>
+  </data>
+  <data name="SpareWagon" xml:space="preserve">
+    <value>Spare wagon</value>
+  </data>
 </root>

@@ -10,7 +10,7 @@ public interface IExportService
     /// <summary>
     /// Exports a schedule asynchronously to an external format.
     /// </summary>
-    /// <param name="schedule">The <see cref="Schedule"/> to export.</param>
+    /// <param name="schedule">The <see cref="Plan"/> to export.</param>
     /// <returns>An <see cref="ExportResult{T}"/> indicating success or failure with any error messages.</returns>
-    Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule);
+    Task<ExportResult<Plan>> ExportScheduleAsync(Plan schedule);
 }

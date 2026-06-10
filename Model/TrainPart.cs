@@ -49,7 +49,7 @@ public sealed class TrainPart : IEquatable<TrainPart>
     /// <summary>
     /// Gets or sets the vehicle schedule this train part is assigned to.
     /// </summary>
-    public VehicleSchedule? Schedule { get; set; }
+    public Schedule? Schedule { get; set; }
 
     /// <summary>
     /// Gets or sets the foreign key to the driver duty. Optional.

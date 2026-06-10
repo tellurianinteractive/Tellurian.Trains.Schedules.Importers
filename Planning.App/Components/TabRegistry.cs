@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Planning.App.Services;
+namespace Tellurian.Trains.Schedules.Planning.App.Components;
 
 public static class TabRegistry
 {
@@ -11,7 +11,7 @@ public static class TabRegistry
         new("Train Categories", "categories", typeof(Pages.TrainCategories)),
         new("Trains", "trains", typeof(Pages.Trains)),
         new("Graphical Timetable", "graphical-timetable", typeof(Pages.GraphicalTimetable)),
-        new("Vehicle Schedules", "vehicle-schedules", typeof(Pages.VehicleSchedules)),
+        new("Schedules", "schedules", typeof(Pages.Schedules)),
         new("Vehicle Owners", "vehicle-owners", typeof(Pages.VehicleOwners)),
         new("Import", "import", typeof(Pages.Import)),
     ];

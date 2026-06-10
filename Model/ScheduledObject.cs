@@ -5,7 +5,7 @@ namespace Tellurian.Trains.Schedules.Model;
 /// <summary>
 /// Represents a railway vehicle (locomotive or trainset) that can be assigned to trains.
 /// </summary>
-public class Vehicle : IEquatable<Vehicle>
+public class ScheduledObject : IEquatable<ScheduledObject>
 {
     /// <summary>
     /// Gets or sets the unique identifier for this vehicle.
@@ -27,6 +27,8 @@ public class Vehicle : IEquatable<Vehicle>
     /// </summary>
     public int NumberOfUnits { get; set; }
 
+    public int ReplaceOrder { get; set; }
+
     /// <summary>
     /// Gets or sets an optional remark about this vehicle.
     /// </summary>
@@ -35,7 +37,7 @@ public class Vehicle : IEquatable<Vehicle>
     /// <summary>
     /// Gets or sets the type of this vehicle.
     /// </summary>
-    public VehicleType VehicleType { get; set; }
+    public ScheduledObjectType ObjectType { get; set; }
 
     /// <summary>
     /// Gets or sets the class designation of this vehicle.
@@ -60,17 +62,18 @@ public class Vehicle : IEquatable<Vehicle>
     /// <summary>
     /// Gets or sets the foreign key to the owning schedule. Required.
     /// </summary>
-    public int ScheduleId { get; set; }
+    public int PlanId { get; set; }
 
     /// <summary>
     /// Gets or sets the schedule this vehicle belongs to.
     /// </summary>
-    public Schedule Schedule { get; set; } = default!;
+    public Plan Plan { get; set; } = default!;
 
     /// <summary>
     /// Gets or sets the collection of schedule assignments for this vehicle.
     /// </summary>
-    public ICollection<VehicleScheduleAssignment> ScheduleAssignments { get; set; }
+    [JsonInclude]
+    public ICollection<ScheduleAssignment> ScheduleAssignments { get; private set; } = [];
 
     /// <inheritdoc/>
     /// <remarks>
@@ -80,42 +83,42 @@ public class Vehicle : IEquatable<Vehicle>
     /// XPLN files (e.g. "Co-LOK 123" versus "Co_GLok"), so the number cannot be parsed reliably and some
     /// vehicles have no number at all, which would otherwise merge distinct vehicles.
     /// </remarks>
-    public bool Equals(Vehicle? other) =>
+    public bool Equals(ScheduledObject? other) =>
         other is not null &&
-        VehicleType == other.VehicleType &&
+        ObjectType == other.ObjectType &&
         string.Equals(ExternalId, other.ExternalId, StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is Vehicle other && Equals(other);
+    public override bool Equals(object? obj) => obj is ScheduledObject other && Equals(other);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(VehicleType, ExternalId?.ToUpperInvariant());
+    public override int GetHashCode() => HashCode.Combine(ObjectType, ExternalId?.ToUpperInvariant());
 
     [JsonConstructor]
-    private Vehicle()
+    private ScheduledObject()
     {
-        ScheduleAssignments = new HashSet<VehicleScheduleAssignment>();
+        ScheduleAssignments = new HashSet<ScheduleAssignment>();
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Vehicle"/> with the specified values.
+    /// Initializes a new instance of <see cref="ScheduledObject"/> with the specified values.
     /// </summary>
     /// <param name="id">The unique identifier for the vehicle.</param>
     /// <param name="vehicleType">The type of vehicle.</param>
     /// <param name="number">The vehicle number.</param>
-    public Vehicle(int id, VehicleType vehicleType, int number)
+    public ScheduledObject(int id, ScheduledObjectType vehicleType, int number)
     {
         Id = id;
-        VehicleType = vehicleType;
+        ObjectType = vehicleType;
         Number = number;
-        ScheduleAssignments = new HashSet<VehicleScheduleAssignment>();
+        ScheduleAssignments = new HashSet<ScheduleAssignment>();
     }
 }
 
 /// <summary>
 /// Specifies the type of railway vehicle.
 /// </summary>
-public enum VehicleType
+public enum ScheduledObjectType
 {
     /// <summary>
     /// Vehicle type is not specified.
@@ -137,4 +140,21 @@ public enum VehicleType
     /// the locomotive and the trainset section; such entries are merged into a single railcar.
     /// </summary>
     Railcar,
+    PassengerCar,
+    CargoWagon,
+    Cargo,
+}
+
+/// <summary>
+/// 
+/// </summary>
+public static class ScheduledObjectTypeExtensions
+{
+    extension(string? value)
+    {
+        /// <summary>
+        /// Tries to convert a string value to a <see cref="ScheduledObjectType"/>.
+        /// </summary>
+        public ScheduledObjectType ToScheduledObjectType => Enum.TryParse<ScheduledObjectType>(value, out var result) ? result : ScheduledObjectType.Unknown;
+    }
 }

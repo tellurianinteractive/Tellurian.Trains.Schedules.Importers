@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
 using System.Text;
@@ -112,7 +112,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     /// or validation messages describing any errors encountered during import.
     /// </returns>
     /// <exception cref="IOException">Thrown when the input stream cannot be read.</exception>
-    public async Task<ImportResult<Schedule>> ImportScheduleAsync(string name)
+    public async Task<ImportResult<Plan>> ImportScheduleAsync(string name)
     {
         _operatingCompanies = [.. await _operatingCompaniesService.GetAllCompaiesAsync()];
         _trainCategories = [.. await _trainCategoriesService.GetAllTrainCategoriesAsync()];
@@ -140,12 +140,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             else if (message.Severity == Severity.System && _logger.IsEnabled(LogLevel.Critical)) _logger.LogCritical("{CriticalMessage}", message.ToString());
         }
     }
-    private ImportResult<Schedule> GetImportResult(string name)
+    private ImportResult<Plan> GetImportResult(string name)
     {
         var layoutResult = GetLayout(name);
         if (layoutResult.IsFailure)
         {
-            var result = new ImportResult<Schedule>() { Name = name, Messages = layoutResult.Messages };
+            var result = new ImportResult<Plan>() { Name = name, Messages = layoutResult.Messages };
             LogMessages(result.Messages);
             return result;
         }
@@ -153,7 +153,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         var timetableResult = GetTimetable(name, layoutResult.Item);
         if (timetableResult.IsFailure)
         {
-            var result = new ImportResult<Schedule>() { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages] };
+            var result = new ImportResult<Plan>() { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages] };
             LogMessages(result.Messages);
             return result;
         }
@@ -452,32 +452,32 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     /// In XPLN a self-propelled railcar (e.g. the Swedish X2000) is listed under both the locomotive
     /// and the trainset section with the same identifier, but represents one physical vehicle.
     /// </summary>
-    private static void MergeRailcars(Schedule schedule)
+    private static void MergeRailcars(Plan schedule)
     {
-        var railcarGroups = schedule.Vehicles
-            .Where(v => v.ExternalId.HasValue && (v.VehicleType == VehicleType.Locomotive || v.VehicleType == VehicleType.Trainset))
+        var railcarGroups = schedule.ScheduledObjects
+            .Where(v => v.ExternalId.HasValue && (v.ObjectType == ScheduledObjectType.Locomotive || v.ObjectType == ScheduledObjectType.Trainset))
             .GroupBy(v => v.ExternalId!, StringComparer.OrdinalIgnoreCase)
-            .Where(g => g.Any(v => v.VehicleType == VehicleType.Locomotive) && g.Any(v => v.VehicleType == VehicleType.Trainset))
+            .Where(g => g.Any(v => v.ObjectType == ScheduledObjectType.Locomotive) && g.Any(v => v.ObjectType == ScheduledObjectType.Trainset))
             .ToList();
 
         foreach (var group in railcarGroups)
         {
             var members = group.ToList();
             var railcar = members[0];
-            railcar.VehicleType = VehicleType.Railcar;
-            var primarySchedule = railcar.ScheduleAssignments.Select(a => a.VehicleSchedule).FirstOrDefault();
+            railcar.ObjectType = ScheduledObjectType.Railcar;
+            var primarySchedule = railcar.ScheduleAssignments.Select(a => a.Schedule).FirstOrDefault();
 
             foreach (var duplicate in members.Skip(1))
             {
                 foreach (var assignment in duplicate.ScheduleAssignments)
                 {
-                    var duplicateSchedule = assignment.VehicleSchedule;
+                    var duplicateSchedule = assignment.Schedule;
                     if (primarySchedule is null || duplicateSchedule is null || duplicateSchedule.Id == primarySchedule.Id) continue;
                     foreach (var part in duplicateSchedule.Parts.ToList())
                         if (!primarySchedule.Parts.Contains(part)) primarySchedule.Add(part);
-                    schedule.VehicleSchedules.Remove(duplicateSchedule);
+                    schedule.Schedules.Remove(duplicateSchedule);
                 }
-                schedule.Vehicles.Remove(duplicate);
+                schedule.ScheduledObjects.Remove(duplicate);
             }
         }
     }
@@ -705,7 +705,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         }
     }
 
-    private ImportResult<Schedule> GetSchedule(string name, Timetable timetable)
+    private ImportResult<Plan> GetSchedule(string name, Timetable timetable)
     {
         const string WorkSheetNameAndObjects = "Trains:locomotive,trainset,job,remarks";
         const string WorkSheetName = "Trains";
@@ -724,19 +724,19 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int Remark = 10;
 
         var messages = new List<Message>();
-        var locoSchedules = new Dictionary<string, VehicleSchedule>(100);
-        var trainsetSchedules = new Dictionary<string, VehicleSchedule>(200);
+        var locoSchedules = new Dictionary<string, Schedule>(100);
+        var trainsetSchedules = new Dictionary<string, Schedule>(200);
         var driverDuties = new Dictionary<string, DriverDuty>();
 
         var trains = DataSet?.Tables[WorkSheetName];
         if (trains is null)
         {
             messages.Add(Message.System(string.Format(CultureInfo.CurrentCulture, Resources.Strings.WorksheetNotFound, WorkSheetName)));
-            return ImportResult<Schedule>.Failure(messages);
+            return ImportResult<Plan>.Failure(messages);
         }
 
         messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ReadingWorksheet, WorkSheetNameAndObjects)));
-        var schedule = Schedule.Create(name, timetable);
+        var schedule = Plan.Create(name, timetable);
         Train? currentTrain = null;
 
         var rowNumber = 1;
@@ -782,7 +782,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         var company = FindOrCreateCompany(operatorSignature);
                                         var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
                                             id: rowNumber,
-                                            vehicleType: VehicleType.Locomotive,
+                                            vehicleType: ScheduledObjectType.Locomotive,
                                             number: locoId.LocoNumber,
                                             vehicleClass: fields[LocoClass],
                                             company: company,
@@ -817,7 +817,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         {
                                             var vehicleSchedule = schedule.CreateVehicleWithAllSessionsSchedule(
                                                 id: rowNumber,
-                                                vehicleType: VehicleType.Trainset,
+                                                vehicleType: ScheduledObjectType.Trainset,
                                                 number: trainsetId.LocoNumber,
                                                 vehicleClass: fields[TrainsetClass],
                                                 externalId: trainsetId,
@@ -876,11 +876,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             }
             rowNumber++;
         }
-        if (messages.HasStoppingErrors()) return ImportResult<Schedule>.Failure(messages);
+        if (messages.HasStoppingErrors()) return ImportResult<Plan>.Failure(messages);
         // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
         MergeRailcars(schedule);
-        return ImportResult<Schedule>.Success(schedule, messages);
+        return ImportResult<Plan>.Success(schedule, messages);
 
         static TrainPartKeys GetTrainPartKeys(string[] fields, Train currentTrain, int rowNumber)
         {

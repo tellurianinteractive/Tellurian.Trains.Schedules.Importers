@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Resources;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -10,6 +12,7 @@ namespace Tellurian.Trains.Schedules.Model;
 /// Sessions are represented as a bit pattern where each bit indicates whether a specific session is active.
 /// This supports modeling operating patterns like "odd sessions only", "every third session", etc.
 /// </remarks>
+[JsonConverter(typeof(SessionsJsonConverter))]
 public readonly struct Sessions
 {
     /// <summary>
@@ -34,6 +37,24 @@ public readonly struct Sessions
     /// Gets the bit flags representing the active sessions.
     /// </summary>
     internal ushort Flags { get; init; }
+
+    /// <inheritdoc/>
+    public override string ToString() => Flags.ToString("D6");
+}
+
+/// <summary>
+/// Serialises <see cref="Sessions"/> as its numeric bit pattern, since the underlying
+/// <see cref="Sessions.Flags"/> is internal and would otherwise be lost during JSON round-trips.
+/// </summary>
+internal sealed class SessionsJsonConverter : JsonConverter<Sessions>
+{
+    /// <inheritdoc/>
+    public override Sessions Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        new() { Flags = reader.GetUInt16() };
+
+    /// <inheritdoc/>
+    public override void Write(Utf8JsonWriter writer, Sessions value, JsonSerializerOptions options) =>
+        writer.WriteNumberValue(value.Flags);
 }
 
 /// <summary>
@@ -87,21 +108,22 @@ public static class CommonSessionPatterns
 public static class CommonDayPatterns
 {
     /// <summary>Daily operation.</summary>
-    public const ushort Daily = 0b_____00_1111111_1111111;
+    public const ushort Daily = 0b_____10_1111111_1111111;
     /// <summary>Monday only.</summary>
-    public const ushort Monday = 0b____00_0000001_0000001;
+    public const ushort Monday = 0b____10_0000001_0000001;
     /// <summary>Tuesday only.</summary>
-    public const ushort Thuesday = 0b__00_0000010_0000010;
+    public const ushort Thuesday = 0b__10_0000010_0000010;
     /// <summary>Wednesday only.</summary>
-    public const ushort Wednesday = 0b_00_0000100_0000100;
+    public const ushort Wednesday = 0b_10_0000100_0000100;
     /// <summary>Thursday only.</summary>
-    public const ushort Thursday = 0b__00_0001000_0001000;
+    public const ushort Thursday = 0b__10_0001000_0001000;
     /// <summary>Friday only.</summary>
-    public const ushort Friday = 0b____00_0010000_0010000;
+    public const ushort Friday = 0b____10_0010000_0010000;
     /// <summary>Saturday only.</summary>
-    public const ushort Saturday = 0b__00_0100000_0100000;
+    public const ushort Saturday = 0b__10_0100000_0100000;
     /// <summary>Sunday only.</summary>
-    public const ushort Sunday = 0b____00_1000000_1000000;
+    public const ushort Sunday = 0b____10_1000000_1000000;
+
 }
 
 /// <summary>
@@ -111,6 +133,7 @@ public static class SessionsExtensions
 {
     extension(Sessions sessions)
     {
+
         /// <summary>
         /// Creates sessions from a set of days.
         /// </summary>
@@ -168,6 +191,8 @@ public static class SessionsExtensions
         /// </summary>
         public string OnDemand => sessions.IsOnDemand ? "OnDemand" : string.Empty;
 
+
+
         /// <summary>
         /// Gets the session numbers that are active.
         /// </summary>
@@ -179,9 +204,17 @@ public static class SessionsExtensions
             .Where(t => t.x)
             .Select(t => (byte)(t.y + 1))];
 
+        internal bool IsDays => (sessions.Flags & 0b____10_0000000_0000000) > 0;
+
+        /// <summary>
+        /// True if only one session.
+        /// </summary>
+        public bool IsSingleSessionOrDay => sessions.Numbers.Length == 1;
+
 
         internal bool IsConsequtiveSessions
         {
+
             get
             {
                 var numbers = sessions.Numbers;
@@ -193,6 +226,12 @@ public static class SessionsExtensions
                 return true;
             }
         }
+
+        /// <summary>
+        /// If sessions is days, gets the DaysResourceKey, otherwise SessionNumbers.
+        /// </summary>
+        public string FullNameResourceKey => sessions.IsDays ? sessions.FullDayNamesResourceKey : sessions.SessionsNumbers;
+
 
         /// <summary>
         /// Gets a display string for the session numbers.
@@ -230,7 +269,7 @@ public static class SessionsExtensions
         /// <summary>
         /// Gets a resource key for displaying the days.
         /// </summary>
-        public string DaysResourceKey
+        public string FullDayNamesResourceKey
         {
             get
             {
@@ -244,7 +283,25 @@ public static class SessionsExtensions
                 };
             }
         }
+        /// <summary>
+        /// Gets a resource key for displaying the days.
+        /// </summary>
+        public string ShortDayNamesResourceKey
+        {
+            get
+            {
+                var days = sessions.Days;
+                return days.Length switch
+                {
+                    0 => nameof(Days.None),
+                    7 => "DailyShort",
+                    _ when sessions.IsConsequtiveDays => $"{days.First()}Short-{days.Last()}Short",
+                    _ => string.Join(",", days.Select(s => s.ToString() + "Short")),
+                };
+            }
+        }
     }
+
 
     extension(ushort flags)
     {

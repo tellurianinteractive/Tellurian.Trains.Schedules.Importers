@@ -1,0 +1,53 @@
+@inject ScheduleStateService ScheduleState
+@inject ScheduleExportService Exporter
+@inject IJSRuntime JS
+
+<TabMenu @ref="_menu" Label="Export">
+    <button class="menu-item" @onclick="OpenSaveAs" disabled="@(!ScheduleState.HasSchedule)">Save as..</button>
+</TabMenu>
+
+@if (_showSaveAs)
+{
+    <div class="dialog-backdrop" @onclick="CloseSaveAs">
+        <div class="dialog" @onclick:stopPropagation>
+            <h3>Save as</h3>
+            <p>Download <strong>@ScheduleState.Schedule?.Name</strong> as:</p>
+            <div class="formats">
+                <button class="format" @onclick="SaveJson">JSON<span class="ext">.json</span></button>
+                <button class="format" disabled title="Coming soon">SQLite<span class="ext">.db</span></button>
+            </div>
+            <div class="dialog-actions">
+                <button @onclick="CloseSaveAs">Cancel</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private TabMenu? _menu;
+    private bool _showSaveAs;
+
+    private void OpenSaveAs()
+    {
+        _menu?.Close();
+        _showSaveAs = true;
+    }
+
+    private void CloseSaveAs() => _showSaveAs = false;
+
+    private async Task SaveJson()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        var json = Exporter.ToJson(plan);
+        var fileName = $"{SafeFileName(plan.Name)}.json";
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+        await module.InvokeVoidAsync("downloadText", fileName, json, "application/json");
+        _showSaveAs = false;
+    }
+
+    private static string SafeFileName(string name)
+    {
+        var cleaned = string.Join("_", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+        return string.IsNullOrWhiteSpace(cleaned) ? "schedule" : cleaned;
+    }
+}

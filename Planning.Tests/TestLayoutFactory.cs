@@ -174,11 +174,11 @@ internal static class TestLayoutFactory
         return layout;
     }
 
-    public static Schedule CreateSchedule()
+    public static Plan CreateSchedule()
     {
         var layout = CreateLayout();
         var timetable = new Timetable("Vinter 2026", layout);
-        return new Schedule("Test", timetable);
+        return new Plan("Test", timetable);
     }
 
     public static OperationsPlanner CreatePlanner() =>

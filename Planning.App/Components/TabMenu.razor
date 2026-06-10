@@ -1,0 +1,25 @@
+<div class="tab-menu">
+    <button class="tab" @onclick="Toggle">@Label <span class="caret">&#9662;</span></button>
+    @if (_open)
+    {
+        <div class="menu-backdrop" @onclick="Close"></div>
+        <div class="menu" @onclick="Close">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The tab caption.</summary>
+    [Parameter] public string Label { get; set; } = string.Empty;
+
+    /// <summary>The drop-down items. Give each a class of <c>menu-item</c>.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _open;
+
+    private void Toggle() => _open = !_open;
+
+    /// <summary>Closes the menu; called by the backdrop and after an item is chosen.</summary>
+    public void Close() => _open = false;
+}

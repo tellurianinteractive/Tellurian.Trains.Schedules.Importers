@@ -10,9 +10,9 @@ namespace Tellurian.Trains.Schedules.Planning;
 /// The planner shoul also provide a mechanism to notify a user interface about unresolved
 /// planning conflicts.
 /// </remarks>
-public class OperationsPlanner(Schedule schedule, TimetableSettings timetableSettings)
+public class OperationsPlanner(Plan schedule, TimetableSettings timetableSettings)
 {
-    internal Schedule Schedule { get; } = schedule;
+    internal Plan Schedule { get; } = schedule;
     internal Timetable Timetable => Schedule.Timetable;
     internal Layout Layout => Timetable.Layout;
     internal TimetableSettings TimetableSettings { get; } = timetableSettings;

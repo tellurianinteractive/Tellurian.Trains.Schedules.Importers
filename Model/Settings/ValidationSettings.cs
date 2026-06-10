@@ -16,7 +16,7 @@ public sealed class ValidationSettings
     /// <summary>Gets or sets a value indicating whether train numbers are validated.</summary>
     public bool ValidateTrainNumbers { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
-    public bool ValidateVehicleSchedules { get; set; } = true;
+    public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>
     public bool ValidateLocomotiveCoverage { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether driver duties are validated.</summary>

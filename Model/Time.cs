@@ -1,10 +1,13 @@
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model;
 
 /// <summary>
 /// Represents a time of day for railway scheduling purposes.
 /// </summary>
+[JsonConverter(typeof(TimeJsonConverter))]
 public readonly struct Time : IComparable<Time?>, IEquatable<Time>
 {
     /// <summary>
@@ -129,6 +132,26 @@ public readonly struct Time : IComparable<Time?>, IEquatable<Time>
 
     /// <inheritdoc/>
     public override string ToString() => string.Format(CultureInfo.InvariantCulture, "{0:hh\\:mm}", Value);
+}
+
+/// <summary>
+/// Serialises <see cref="Time"/> as an invariant <see cref="TimeSpan"/> string (e.g. "07:24:00",
+/// or "1.02:30:00" for times past midnight), preserving the full value including days.
+/// </summary>
+internal sealed class TimeJsonConverter : JsonConverter<Time>
+{
+    /// <inheritdoc/>
+    public override Time Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var text = reader.GetString();
+        return string.IsNullOrEmpty(text)
+            ? Time.Zero
+            : Time.FromTimeSpan(TimeSpan.Parse(text, CultureInfo.InvariantCulture));
+    }
+
+    /// <inheritdoc/>
+    public override void Write(Utf8JsonWriter writer, Time value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Value.ToString("c", CultureInfo.InvariantCulture));
 }
 
 /// <summary>

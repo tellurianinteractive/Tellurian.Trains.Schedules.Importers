@@ -3,83 +3,46 @@ using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model;
 
 /// <summary>
-/// Represents a complete railway schedule containing timetables, vehicles, vehicle schedules, and driver duties.
+/// Represents a schedule of train parts that a vehicle is assigned to operate.
 /// </summary>
-/// <remarks>
-/// A schedule is the top-level container for all railway operation planning data.
-/// It associates a timetable with the vehicles and personnel needed to operate the trains.
-/// </remarks>
-public class Schedule : IEquatable<Schedule>
+public sealed class Schedule : IEquatable<Schedule>
 {
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
     private Schedule()
     {
-        Name = string.Empty;
-        Timetable = default!;
-        Vehicles = [];
-        VehicleSchedules = [];
-        DriverDuties = [];
+        Parts = [];
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Schedule"/> with the specified name and timetable.
+    /// Initializes a new instance of <see cref="Model.Schedule"/> with the specified id.
     /// </summary>
-    /// <param name="name">The name of the schedule.</param>
-    /// <param name="timetable">The timetable associated with this schedule.</param>
-    public Schedule(string name, Timetable timetable)
+    /// <param name="id">The unique identifier for the vehicle schedule.</param>
+    public Schedule(int id)
     {
-        Name = name;
-        Timetable = timetable;
-        TimetableId = timetable.Id;
-        Vehicles = [];
-        VehicleSchedules = [];
-        DriverDuties = [];
+        Id = id;
+        Parts = [];
     }
 
     /// <summary>
-    /// Creates a new schedule with the specified name and timetable.
-    /// </summary>
-    /// <param name="name">The name of the schedule.</param>
-    /// <param name="timetable">The timetable associated with this schedule.</param>
-    /// <returns>A new <see cref="Schedule"/> instance.</returns>
-    public static Schedule Create(string name, Timetable timetable) =>
-        new(name, timetable);
-
-    /// <summary>
-    /// Gets or sets the unique identifier for this schedule.
+    /// Gets or sets the unique identifier for this vehicle schedule.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of this schedule.
+    /// Gets or sets the foreign key to the owning schedule. Required.
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public int PlanId { get; set; }
 
     /// <summary>
-    /// Gets or sets the foreign key to the associated timetable.
+    /// Gets or sets the schedule this vehicle schedule belongs to.
     /// </summary>
-    public int TimetableId { get; set; }
+    public Plan Plan { get; set; } = default!;
 
     /// <summary>
-    /// Gets or sets the timetable associated with this schedule.
+    /// Gets or sets the collection of train parts in this vehicle schedule.
     /// </summary>
-    public Timetable Timetable { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of vehicles available in this schedule.
-    /// </summary>
-    public ICollection<Vehicle> Vehicles { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of vehicle schedules defining how vehicles are assigned to trains.
-    /// </summary>
-    public ICollection<VehicleSchedule> VehicleSchedules { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of driver duties for this schedule.
-    /// </summary>
-    public ICollection<DriverDuty> DriverDuties { get; set; }
+    public ICollection<TrainPart> Parts { get; set; }
 
     /// <inheritdoc/>
     public bool Equals(Schedule? other) => other is not null && Id == other.Id;
@@ -91,68 +54,30 @@ public class Schedule : IEquatable<Schedule>
     public override int GetHashCode() => Id.GetHashCode();
 
     /// <inheritdoc/>
-    public override string ToString() => Name;
+    public override string ToString() => $"Schedule {Id}";
 }
 
 /// <summary>
 /// Provides extension methods for <see cref="Schedule"/>.
 /// </summary>
-public static class ScheduleExtensions
+public static class VehicleScheduleExtensions
 {
     /// <summary>
-    /// Adds a vehicle to the schedule.
+    /// Adds a train part to the vehicle schedule.
     /// </summary>
-    /// <param name="me">The schedule to add the vehicle to.</param>
-    /// <param name="vehicle">The vehicle to add.</param>
-    /// <returns>The added vehicle.</returns>
-    public static Vehicle AddVehicle(this Schedule me, Vehicle vehicle)
+    /// <param name="me">The vehicle schedule to add to.</param>
+    /// <param name="part">The train part to add.</param>
+    /// <returns>The added train part.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the vehicle schedule or part is null.</exception>
+    public static TrainPart? Add(this Schedule me, TrainPart? part)
     {
-        me = me.ValueOrException(nameof(me));
-        vehicle = vehicle.ValueOrException(nameof(vehicle));
-        if (!me.Vehicles.Contains(vehicle))
+        if (me == null || part is null) throw new ArgumentNullException(nameof(part));
+        part.Schedule = me;
+        part.ScheduleId = me.Id;
+        if (!me.Parts.Contains(part))
         {
-            vehicle.Schedule = me;
-            vehicle.ScheduleId = me.Id;
-            me.Vehicles.Add(vehicle);
+            me.Parts.Add(part);
         }
-        return vehicle;
-    }
-
-    /// <summary>
-    /// Adds a vehicle schedule to the schedule.
-    /// </summary>
-    /// <param name="me">The schedule to add the vehicle schedule to.</param>
-    /// <param name="vehicleSchedule">The vehicle schedule to add.</param>
-    /// <returns>The added vehicle schedule.</returns>
-    public static VehicleSchedule AddVehicleSchedule(this Schedule me, VehicleSchedule vehicleSchedule)
-    {
-        me = me.ValueOrException(nameof(me));
-        vehicleSchedule = vehicleSchedule.ValueOrException(nameof(vehicleSchedule));
-        if (!me.VehicleSchedules.Contains(vehicleSchedule))
-        {
-            vehicleSchedule.Schedule = me;
-            vehicleSchedule.ScheduleId = me.Id;
-            me.VehicleSchedules.Add(vehicleSchedule);
-        }
-        return vehicleSchedule;
-    }
-
-    /// <summary>
-    /// Adds a driver duty to the schedule.
-    /// </summary>
-    /// <param name="schedule">The schedule to add the driver duty to.</param>
-    /// <param name="driverDuty">The driver duty to add.</param>
-    /// <returns>The added driver duty.</returns>
-    public static DriverDuty AddDriverDuty(this Schedule schedule, DriverDuty driverDuty)
-    {
-        schedule = schedule.ValueOrException(nameof(schedule));
-        driverDuty = driverDuty.ValueOrException(nameof(driverDuty));
-        if (!schedule.DriverDuties.Contains(driverDuty))
-        {
-            driverDuty.Schedule = schedule;
-            driverDuty.ScheduleId = schedule.Id;
-            schedule.DriverDuties.Add(driverDuty);
-        }
-        return driverDuty;
+        return part;
     }
 }

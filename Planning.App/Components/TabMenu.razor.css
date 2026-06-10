@@ -1,0 +1,56 @@
+.tab-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.caret {
+    font-size: 0.6em;
+    vertical-align: middle;
+}
+
+/* Full-viewport invisible layer so a click anywhere outside closes the menu. */
+.menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+}
+
+.menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 101;
+    min-width: 180px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+}
+
+.menu ::deep .menu-item {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.menu ::deep .menu-item:hover:not(:disabled) {
+    background: #eef3f8;
+}
+
+.menu ::deep .menu-item:disabled {
+    color: #aaa;
+    cursor: default;
+}
