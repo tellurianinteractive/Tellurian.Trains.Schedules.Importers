@@ -665,6 +665,16 @@ fastClockMinutes = realMinutes × fastClockSpeed
 Stations override these defaults to reflect their specific infrastructure
 (e.g., a large station with a long runaround track takes longer).
 
+The per-field null-inherits-default design means defaults are resolved at the point of
+use, not copied onto each station. Imports must therefore **not** materialise the layout
+defaults into `OperationLocation.Timings`: a station with no explicit value keeps `null`
+so it continues to track the layout default if that default is later changed.
+
+When a future import refreshes layout operational locations into an existing plan (a merge,
+rather than the current full rebuild), it must **preserve any `Timings` already set** on a
+matching location — only locations new to the plan get their timings from the import. This
+keeps user-entered per-station overrides from being overwritten on re-import.
+
 ---
 
 ### 4.4 Schedule and Vehicles
