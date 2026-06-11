@@ -27,8 +27,15 @@
 
 svg {
     stroke-width: 5;
-    z-index: -2;
+    z-index: 0;
     position: absolute;
+    top: 0;
+    left: 0;
     height: 92mm;
     width: 50mm;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
 }

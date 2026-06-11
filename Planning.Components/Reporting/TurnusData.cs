@@ -1,4 +1,5 @@
 
+using Tellurian.Localization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 
@@ -25,10 +26,15 @@ public static class TurnusDataExtensions
     extension(TurnusData data)
     {
         public string ClassAndNumber =>
-            data.Number == 0 ? data.ExternalId : $"{data.Class} {data.Number}";
+            data.Number > 0 ? $"{data.Class} {data.Number}" : string.Empty;
+
+        public bool HasClass => data.Class.HasValue && data.ExternalId.IsEmpty;
 
         public string ClassOrContentLabel(Translator translator) =>
             data.ScheduledObjectType == ScheduledObjectType.Cargo ? translator("Content") : translator("Class");
+
+        public string CompanyNameOrEmpty =>
+            data.ExternalId.HasValue ? string.Empty : data.CompanyName;
 
         public string CrossLineColor => data.ScheduledObjectType switch
         {

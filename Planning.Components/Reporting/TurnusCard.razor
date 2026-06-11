@@ -7,11 +7,11 @@
         <svg>
             <line style="stroke: @Item.CrossLineColor;" x1="50mm" y1="0mm" x2="0mm" y2="91mm" />
         </svg>
-        <div>
+        <div class="content">
             <div class="schedule header">
-                <div><strong>@Item.CompanyName</strong> @Item.ObjectTypeName(Translator)</div>
+                <div><strong>@Item.CompanyNameOrEmpty</strong> @Item.ObjectTypeName(Translator)</div>
                 <div>@Translator("Turnus"):&nbsp;<strong>@Item.TurnusId&nbsp;@Item.OperatingSessions(Translator)</strong></div>
-                @if (Item.Class.HasValue)
+                @if (Item.HasClass)
                 {
                     <div>
                         <span>@Item.ClassOrContentLabel(Translator):&nbsp;<strong>@Item.ClassAndNumber</strong></span>
