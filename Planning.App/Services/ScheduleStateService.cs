@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
@@ -13,7 +14,7 @@ namespace Tellurian.Trains.Schedules.Planning.App.Services;
 public sealed class ScheduleStateService(BrowserStorageService storage)
 {
     private const string ScheduleStorageKey = "planning.schedule.v2";
-    private const string SelectedStretchStorageKey = "planning.schedule.selectedStretch.v1";
+    private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v1";
 
     /// <summary>
     /// JSON options matching the schedule importer/exporter: the object graph contains reference
@@ -28,34 +29,60 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
     public event Action? OnChanged;
 
     private Plan? _schedule;
-    private TimetableStretch? _selectedStretch;
+    private readonly HashSet<TimetableStretch> _selectedStretches = [];
     private bool _loaded;
 
     public Plan? Schedule
     {
         get => _schedule;
-        set { _schedule = value; _selectedStretch = FirstStretch; PersistSchedule(); NotifyChanged(); }
+        set { _schedule = value; ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
     }
 
-    public TimetableStretch? SelectedStretch
+    /// <summary>
+    /// The timetable stretches currently chosen for graphical display, in numeric order.
+    /// More than one may be selected so several graphical schedules can be shown at once.
+    /// </summary>
+    public IReadOnlyList<TimetableStretch> SelectedStretches =>
+        [.. _selectedStretches.OrderBy(NumericOrderKey).ThenBy(s => s.Number, StringComparer.OrdinalIgnoreCase)];
+
+    public bool IsSelected(TimetableStretch stretch) => _selectedStretches.Contains(stretch);
+
+    /// <summary>
+    /// Adds or removes a timetable stretch from the displayed selection and notifies subscribers.
+    /// </summary>
+    public void SetStretchSelected(TimetableStretch stretch, bool selected)
     {
-        get => _selectedStretch;
-        set { _selectedStretch = value; PersistSelectedStretch(); NotifyChanged(); }
+        var changed = selected ? _selectedStretches.Add(stretch) : _selectedStretches.Remove(stretch);
+        if (!changed) return;
+        PersistSelectedStretches();
+        NotifyChanged();
     }
 
     public bool HasSchedule => _schedule is not null;
 
     public IReadOnlyList<TimetableStretch> TimetableStretches =>
         _schedule?.Timetable?.Layout?.TimetableStretches is { } stretches
-            ? [.. stretches]
+            ? [.. stretches.OrderBy(NumericOrderKey).ThenBy(s => s.Number, StringComparer.OrdinalIgnoreCase)]
             : [];
 
     public Timetable? Timetable => _schedule?.Timetable;
 
     public Tellurian.Trains.Schedules.Model.Layout? Layout => _schedule?.Timetable?.Layout;
 
-    private TimetableStretch? FirstStretch =>
-        TimetableStretches.Count > 0 ? TimetableStretches[0] : null;
+    private void ResetSelectionToFirstStretch()
+    {
+        _selectedStretches.Clear();
+        if (TimetableStretches.Count > 0) _selectedStretches.Add(TimetableStretches[0]);
+    }
+
+    /// <summary>
+    /// Sort key that orders stretches by the numeric value of their <see cref="TimetableStretch.Number"/>
+    /// when it is numeric; non-numeric numbers sort last (then alphabetically as a tie-break).
+    /// </summary>
+    private static int NumericOrderKey(TimetableStretch stretch) =>
+        int.TryParse(stretch.Number, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)
+            ? value
+            : int.MaxValue;
 
     /// <summary>
     /// Restores the persisted plan (and previously selected stretch) from browser localStorage.
@@ -71,13 +98,20 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
         if (plan is null) return;
 
         _schedule = plan;
-        _selectedStretch = FirstStretch;
+        ResetSelectionToFirstStretch();
 
-        var stretchNumber = await storage.GetStringAsync(SelectedStretchStorageKey);
-        if (!string.IsNullOrEmpty(stretchNumber) &&
-            TimetableStretches.FirstOrDefault(s => s.Number == stretchNumber) is { } stretch)
+        var storedNumbers = await storage.GetStringAsync(SelectedStretchesStorageKey);
+        if (!string.IsNullOrEmpty(storedNumbers))
         {
-            _selectedStretch = stretch;
+            var numbers = storedNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var restored = TimetableStretches
+                .Where(s => numbers.Contains(s.Number, StringComparer.OrdinalIgnoreCase))
+                .ToArray();
+            if (restored.Length > 0)
+            {
+                _selectedStretches.Clear();
+                foreach (var stretch in restored) _selectedStretches.Add(stretch);
+            }
         }
 
         NotifyChanged();
@@ -98,11 +132,11 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
             : storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
     }
 
-    private void PersistSelectedStretch()
+    private void PersistSelectedStretches()
     {
         if (!_loaded) return;
-        _ = _selectedStretch?.Number is { } number
-            ? storage.SetStringAsync(SelectedStretchStorageKey, number)
-            : storage.RemoveAsync(SelectedStretchStorageKey);
+        _ = _selectedStretches.Count > 0
+            ? storage.SetStringAsync(SelectedStretchesStorageKey, string.Join(',', SelectedStretches.Select(s => s.Number)))
+            : storage.RemoveAsync(SelectedStretchesStorageKey);
     }
 }

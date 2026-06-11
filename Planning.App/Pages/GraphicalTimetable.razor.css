@@ -1,17 +1,36 @@
 .stretch-selector {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem 1rem;
     padding: 0.25rem 0;
     font-size: 0.85rem;
+
+    .stretch-selector-label {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .stretch-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+        cursor: pointer;
+    }
 }
 
-.stretch-selector label {
-    font-weight: 600;
-    white-space: nowrap;
-}
+.graph-list {
+    display: flex;
+    gap: 1rem;
 
-.stretch-selector select {
-    min-width: 200px;
-    font-size: 0.85rem;
+    &.stack-vertical {
+        flex-direction: column;
+    }
+
+    &.stack-horizontal {
+        flex-direction: row;
+        align-items: flex-start;
+        overflow-x: auto;
+    }
 }

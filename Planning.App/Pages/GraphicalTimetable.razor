@@ -13,60 +13,72 @@ else if (ScheduleState.TimetableStretches.Count == 0)
 else
 {
     <div class="stretch-selector">
-        <label for="stretch-select">Stretch:</label>
-        <select id="stretch-select" @onchange="OnStretchChanged">
-            @foreach (var stretch in ScheduleState.TimetableStretches)
-            {
-                <option value="@stretch.Number"
-                        selected="@(stretch == ScheduleState.SelectedStretch)">
-                    @stretch.FullDescription
-                </option>
-            }
-        </select>
+        <span class="stretch-selector-label">Stretches:</span>
+        @foreach (var stretch in ScheduleState.TimetableStretches)
+        {
+            <label class="stretch-option" title="@stretch.FullDescription">
+                <input type="checkbox"
+                       checked="@ScheduleState.IsSelected(stretch)"
+                       @onchange="e => OnStretchToggled(stretch, e)" />
+                <span>@stretch.FullDescription</span>
+            </label>
+        }
     </div>
 
-    @if (_graphSchedule is not null)
+    @if (_graphSchedules.Count == 0)
     {
-        <GraphicalScheduleEditor Schedule="_graphSchedule" />
+        <p>Select one or more stretches to display.</p>
+    }
+    else
+    {
+        <div class="graph-list @StackingCss">
+            @foreach (var graphSchedule in _graphSchedules)
+            {
+                <GraphicalScheduleEditor Schedule="graphSchedule" />
+            }
+        </div>
     }
 }
 
 @code {
-    private GraphSchedule? _graphSchedule;
+    private List<GraphSchedule> _graphSchedules = [];
+
+    // Horizontal time axis → graphs grow downward, so stack them vertically; a vertical
+    // time axis makes graphs grow sideways, so stack them horizontally.
+    private string StackingCss =>
+        _graphSchedules.FirstOrDefault()?.AxisDirection == TimeAxisDirection.Vertical
+            ? "stack-horizontal"
+            : "stack-vertical";
 
     protected override void OnInitialized()
     {
         ScheduleState.OnChanged += OnStateChanged;
-        BuildGraphSchedule();
+        BuildGraphSchedules();
     }
 
-    private void OnStretchChanged(ChangeEventArgs e)
+    private void OnStretchToggled(TimetableStretch stretch, ChangeEventArgs e)
     {
-        var number = e.Value?.ToString();
-        var stretch = ScheduleState.TimetableStretches
-            .FirstOrDefault(s => s.Number == number);
-        if (stretch is not null)
-        {
-            ScheduleState.SelectedStretch = stretch;
-        }
+        var selected = e.Value is bool b && b;
+        ScheduleState.SetStretchSelected(stretch, selected);
     }
 
     private void OnStateChanged()
     {
-        BuildGraphSchedule();
+        BuildGraphSchedules();
         InvokeAsync(StateHasChanged);
     }
 
-    private void BuildGraphSchedule()
+    private void BuildGraphSchedules()
     {
-        if (ScheduleState.SelectedStretch is not null && ScheduleState.Timetable is not null)
+        if (ScheduleState.Timetable is { } timetable)
         {
             var graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
-            _graphSchedule = new GraphSchedule(ScheduleState.SelectedStretch, ScheduleState.Timetable, graphSettings);
+            _graphSchedules = [.. ScheduleState.SelectedStretches
+                .Select(stretch => new GraphSchedule(stretch, timetable, graphSettings))];
         }
         else
         {
-            _graphSchedule = null;
+            _graphSchedules = [];
         }
     }
 
