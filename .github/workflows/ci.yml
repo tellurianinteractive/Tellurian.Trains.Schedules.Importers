@@ -116,6 +116,9 @@ jobs:
       - name: Test Importers.Xpln
         run: dotnet test Importers.Xpln.Tests/Xpln.Tests.csproj --configuration Release --no-build --verbosity normal
 
+      - name: Test Planning.Components
+        run: dotnet test Planning.Components.Tests/Planning.Components.Tests.csproj --configuration Release --no-build --verbosity normal
+
   publish:
     needs: [build, test]
     if: needs.build.outputs.version_changed == 'true'

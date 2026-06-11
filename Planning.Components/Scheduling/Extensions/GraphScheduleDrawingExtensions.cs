@@ -9,36 +9,77 @@ public static class GraphScheduleDrawingExtensions
         axisDirection == TimeAxisDirection.Vertical ? $"{classes} vertical".TrimStart() :
         string.Empty;
 
-    public static (Offset Start, Offset End) TrainBetweenStationsLine(this GraphSchedule me, int departureStationIndex, int departureTrackIndex, int arrivalStationIndex, int arrivalTrackIndex, Time departure, Time arrival)
+    public static IEnumerable<(Offset Start, Offset End)> TrainBetweenStationsLine(this GraphSchedule me, int departureStationIndex, int departureTrackIndex, int arrivalStationIndex, int arrivalTrackIndex, Time departure, Time arrival)
     {
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
             var yd = me.Y(departureStationIndex, departureTrackIndex);
             var ya = me.Y(arrivalStationIndex, arrivalTrackIndex);
-            return (new(me.TimeOffset(departure.Value).X, yd), new(me.TimeOffset(arrival.Value).X, ya));
+            foreach (var piece in WrapPieces(departure.Value, yd, arrival.Value, ya))
+                yield return (new(me.TimeOffset(piece.FromTime).X, piece.FromCross), new(me.TimeOffset(piece.ToTime).X, piece.ToCross));
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
             var xd = me.X(departureStationIndex, departureTrackIndex);
             var xa = me.X(arrivalStationIndex, arrivalTrackIndex);
-            return (new(xd, me.TimeOffset(departure.Value).Y), new(xa, me.TimeOffset(arrival.Value).Y));
+            foreach (var piece in WrapPieces(departure.Value, xd, arrival.Value, xa))
+                yield return (new(piece.FromCross, me.TimeOffset(piece.FromTime).Y), new(piece.ToCross, me.TimeOffset(piece.ToTime).Y));
         }
-        throw new NotSupportedException(me.AxisDirection.ToString());
+        else throw new NotSupportedException(me.AxisDirection.ToString());
     }
 
-    public static (Offset Start, Offset End) TrainAtStationLine(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall)
+    public static IEnumerable<(Offset Start, Offset End)> TrainAtStationLine(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall)
     {
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
             var y = me.Y(stationIndex, trackIndex);
-            return (new(me.TimeOffset(stationCall.Arrival.Value).X, y), new(me.TimeOffset(stationCall.Departure.Value).X, y));
+            foreach (var piece in WrapPieces(stationCall.Arrival.Value, y, stationCall.Departure.Value, y))
+                yield return (new(me.TimeOffset(piece.FromTime).X, piece.FromCross), new(me.TimeOffset(piece.ToTime).X, piece.ToCross));
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
             var x = me.X(stationIndex, trackIndex);
-            return (new(x, me.TimeOffset(stationCall.Arrival.Value).Y), new(x, me.TimeOffset(stationCall.Departure.Value).Y));
+            foreach (var piece in WrapPieces(stationCall.Arrival.Value, x, stationCall.Departure.Value, x))
+                yield return (new(piece.FromCross, me.TimeOffset(piece.FromTime).Y), new(piece.ToCross, me.TimeOffset(piece.ToTime).Y));
         }
-        throw new NotSupportedException(me.AxisDirection.ToString());
+        else throw new NotSupportedException(me.AxisDirection.ToString());
+    }
+
+    private static readonly TimeSpan OneDay = TimeSpan.FromHours(24);
+
+    /// <summary>Reduces a time into the current day ([0, 24:00)), so a label for an after-midnight call
+    /// (e.g. 24:05) is positioned at its wrapped place on the axis (00:05). A no-op for normal times.</summary>
+    private static TimeSpan WrapTime(TimeSpan time) =>
+        TimeSpan.FromMinutes(((time.TotalMinutes % OneDay.TotalMinutes) + OneDay.TotalMinutes) % OneDay.TotalMinutes);
+
+    /// <summary>
+    /// Splits a train line running from <paramref name="fromTime"/>/<paramref name="fromCross"/> to
+    /// <paramref name="toTime"/>/<paramref name="toCross"/> at every 24-hour boundary, so the part at or
+    /// past 24:00 wraps back to the start of the axis. Each returned piece has both times reduced into
+    /// the current day ([0, 24:00]); the cross-axis position (station/track) is interpolated at the
+    /// boundary so the line leaves the right edge and re-enters the left edge at the same position.
+    /// When nothing crosses 24:00 (the normal case), a single unchanged piece is returned.
+    /// </summary>
+    private static IEnumerable<(TimeSpan FromTime, int FromCross, TimeSpan ToTime, int ToCross)> WrapPieces(TimeSpan fromTime, int fromCross, TimeSpan toTime, int toCross)
+    {
+        var totalMinutes = (toTime - fromTime).TotalMinutes;
+        var cursorTime = fromTime;
+        var cursorCross = (double)fromCross;
+        while (true)
+        {
+            var dayIndex = (int)Math.Floor((cursorTime.TotalMinutes / OneDay.TotalMinutes) + 1e-6);
+            var boundary = OneDay * (dayIndex + 1);
+            var shift = OneDay * dayIndex;
+            if (totalMinutes <= 0 || toTime <= boundary)
+            {
+                yield return (cursorTime - shift, (int)Math.Round(cursorCross), toTime - shift, toCross);
+                yield break;
+            }
+            var boundaryCross = fromCross + ((toCross - fromCross) * ((boundary - fromTime).TotalMinutes / totalMinutes));
+            yield return (cursorTime - shift, (int)Math.Round(cursorCross), boundary - shift, (int)Math.Round(boundaryCross));
+            cursorTime = boundary;
+            cursorCross = boundaryCross;
+        }
     }
 
     public static Offset ArrivalMinuteOver(this GraphSchedule me, int stationIndex, StationCall stationCall)
@@ -89,6 +130,7 @@ public static class GraphScheduleDrawingExtensions
 
     private static Offset MinuteUnder(this GraphSchedule me, int stationIndex, int trackIndex, TimeSpan time)
     {
+        time = WrapTime(time);
         var station = me.Stations[stationIndex];
         var lastTrackIndex = station.Tracks.Count - 1;
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
@@ -108,6 +150,7 @@ public static class GraphScheduleDrawingExtensions
 
     private static Offset MinuteOver(this GraphSchedule me, int stationIndex, TimeSpan time)
     {
+        time = WrapTime(time);
         var trackIndex = 0;
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {

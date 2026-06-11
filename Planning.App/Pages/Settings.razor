@@ -235,15 +235,25 @@ else
         set { if (Layout is not null) Layout.Name = value; }
     }
 
+    // The operating window may run to or past midnight (e.g. an end of 24:00 when the last
+    // departure is in the 23:00 hour, or beyond for services running into the next day). A
+    // <input type="time">/TimeOnly cannot represent >= 24h, and TimeOnly.FromTimeSpan throws
+    // for such values, so clamp the displayed time into a valid day. The underlying TimeSpan
+    // is left untouched (the graph axis consumes it directly) unless the user edits the field.
+    private static readonly TimeSpan MaxTimeOfDay = TimeSpan.FromDays(1) - TimeSpan.FromTicks(1);
+
+    private static TimeOnly ToTimeOfDay(TimeSpan value) =>
+        TimeOnly.FromTimeSpan(value < TimeSpan.Zero ? TimeSpan.Zero : value > MaxTimeOfDay ? MaxTimeOfDay : value);
+
     private TimeOnly StartTime
     {
-        get => S is null ? default : TimeOnly.FromTimeSpan(S.General.StartTime);
+        get => S is null ? default : ToTimeOfDay(S.General.StartTime);
         set { if (S is not null) S.General.StartTime = value.ToTimeSpan(); }
     }
 
     private TimeOnly EndTime
     {
-        get => S is null ? default : TimeOnly.FromTimeSpan(S.General.EndTime);
+        get => S is null ? default : ToTimeOfDay(S.General.EndTime);
         set { if (S is not null) S.General.EndTime = value.ToTimeSpan(); }
     }
 
@@ -259,7 +269,7 @@ else
 
     private TimeOnly? BreakTime
     {
-        get => S?.General.BreakTime is { } b ? TimeOnly.FromTimeSpan(b) : null;
+        get => S?.General.BreakTime is { } b ? ToTimeOfDay(b) : null;
         set { if (S is not null) S.General.BreakTime = value?.ToTimeSpan(); }
     }
 

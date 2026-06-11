@@ -93,7 +93,8 @@ public static class TimetableExtensions
     /// <summary>
     /// Computes the operating time window for the timetable: the earliest arrival floored to the hour
     /// (the first driver's start of service) through the latest departure ceiled to the next whole hour
-    /// (the last driver's end of service). Returns 06:00–20:00 when the timetable has no calls.
+    /// (the last driver's end of service). Returns 06:00–20:00 when the timetable has no calls, and the
+    /// full day 00:00–24:00 when any call runs to or past midnight (so after-midnight times can wrap).
     /// </summary>
     /// <param name="me">The timetable.</param>
     /// <returns>The (start, end) operating window.</returns>
@@ -101,6 +102,10 @@ public static class TimetableExtensions
     {
         var calls = me?.Trains.SelectMany(t => t.Calls).ToList() ?? [];
         if (calls.Count == 0) return (TimeSpan.FromHours(6), TimeSpan.FromHours(20));
+        // A train may start before midnight and continue past it. When any call runs to or past 24:00,
+        // the operating window spans the whole day so the after-midnight part can wrap to the start.
+        var oneDay = TimeSpan.FromHours(24);
+        if (calls.Any(c => c.Arrival.Value >= oneDay || c.Departure.Value >= oneDay)) return (TimeSpan.Zero, oneDay);
         var min = calls.Min(c => c.Arrival.Value);
         var max = calls.Max(c => c.Departure.Value);
         var start = new TimeSpan(min.Days, min.Hours, 0, 0);

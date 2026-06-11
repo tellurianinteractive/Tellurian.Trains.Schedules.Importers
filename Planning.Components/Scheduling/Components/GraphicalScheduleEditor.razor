@@ -24,7 +24,7 @@ else
             {
                 var hourOffset = Current.TimeAxisLabelOffset(time);
                 <text>
-                    <text class="@Current.AxisDirection.OrientationCss("hour")" x="@hourOffset.X" y="@hourOffset.Y">@time.Hours</text>
+                    <text class="@Current.AxisDirection.OrientationCss("hour")" x="@hourOffset.X" y="@hourOffset.Y">@((int)time.TotalHours)</text>
                 </text>
                 var timeLine = Current.TimeLine(time);
                 <line class="timeline" x1="@timeLine.Start.X" y1="@timeLine.Start.Y" x2="@timeLine.End.X" y2="@timeLine.End.Y"></line>
@@ -66,8 +66,10 @@ else
                     var track = stationTracks[t];
                     @foreach (var stationCall in Current.Trains.SelectMany(tr => tr.Calls.Where(c => track.Equals(c.Track) && station.Equals(c.Track.Station))))
                     {
-                        var trackLine = Current.TrainAtStationLine(s, t, stationCall);
-                        <line stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                        @foreach (var trackLine in Current.TrainAtStationLine(s, t, stationCall))
+                        {
+                            <line stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                        }
                     }
                 }
             }
@@ -90,8 +92,10 @@ else
 
                         @foreach (var stretch in Current.Trains.SelectMany(t => t.StretchUses().Where(c => fromStation.Equals(c.From.Track.Station) && c.From.Track.Equals(fromTrack) && toStation.Equals(c.To.Track.Station) && c.To.Track.Equals(toTrack))))
                         {
-                            var trackLine = Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival);
-                            <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                            @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
+                            {
+                                <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                            }
                         }
                     }
                 }
@@ -115,8 +119,10 @@ else
 
                         @foreach (var stretch in Current.Trains.SelectMany(t => t.StretchUses().Where(c => fromStation.Equals(c.From.Track.Station) && c.From.Track.Equals(fromTrack) && toStation.Equals(c.To.Track.Station) && c.To.Track.Equals(toTrack))))
                         {
-                            var trackLine = Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival);
-                            <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                            @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
+                            {
+                                <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                            }
                             var departure = Current.DepartureMinuteOver(fromStationIndex, stretch.From);
                             @if (Current.GraphSettings.ShowDepartureMinutes)
                             {

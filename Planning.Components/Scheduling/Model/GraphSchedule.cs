@@ -20,7 +20,17 @@ public class GraphSchedule
 
         // Select trains that have at least one call at a station on this stretch.
         Trains = [.. timetable.Trains.Where(t => t.Calls.Any(c => stretchStations.Contains(c.Station)))];
+
+        // A train may start before midnight and continue past it (calls at 24:00 or later). When any
+        // call shown on this stretch runs to or past 24:00, the axis spans the full day 00:00–24:00 so
+        // the after-midnight part can wrap to the start. See GraphScheduleDrawingExtensions wrapping.
+        _crossesMidnight = Trains
+            .SelectMany(t => t.Calls.Where(c => stretchStations.Contains(c.Station)))
+            .Any(c => c.Arrival.Value >= OneDay || c.Departure.Value >= OneDay);
     }
+
+    private static readonly TimeSpan OneDay = TimeSpan.FromHours(24);
+    private readonly bool _crossesMidnight;
 
     public TimetableStretch TimetableStretch { get; }
     public Timetable Timetable { get; }
@@ -34,8 +44,10 @@ public class GraphSchedule
     // The time axis comes from the layout's operating window (General settings), which the importer
     // initialises from the timetable's driver service span (earliest arrival = first start of service,
     // latest departure = last end of service) and the user can then override. See Timetable.OperatingWindow.
-    public TimeSpan StartTime => GraphSettings.DefaultStartTime;
-    public TimeSpan EndTime => GraphSettings.DefaultEndTime;
+    // When the stretch has trains running past midnight, the axis is forced to the full day 00:00–24:00
+    // so the after-midnight portions can wrap back to the start.
+    public TimeSpan StartTime => _crossesMidnight ? TimeSpan.Zero : GraphSettings.DefaultStartTime;
+    public TimeSpan EndTime => _crossesMidnight ? OneDay : GraphSettings.DefaultEndTime;
 }
 
 /// <summary>
