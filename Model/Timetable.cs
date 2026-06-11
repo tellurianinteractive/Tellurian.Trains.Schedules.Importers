@@ -91,6 +91,26 @@ public static class TimetableExtensions
         (me?.Trains.Select(t => t.Calls.Max(c => c.Arrival)).Max(tt => tt).Hours() + 1) ?? 24;
 
     /// <summary>
+    /// Computes the operating time window for the timetable: the earliest arrival floored to the hour
+    /// (the first driver's start of service) through the latest departure ceiled to the next whole hour
+    /// (the last driver's end of service). Returns 06:00–20:00 when the timetable has no calls.
+    /// </summary>
+    /// <param name="me">The timetable.</param>
+    /// <returns>The (start, end) operating window.</returns>
+    public static (TimeSpan Start, TimeSpan End) OperatingWindow(this Timetable me)
+    {
+        var calls = me?.Trains.SelectMany(t => t.Calls).ToList() ?? [];
+        if (calls.Count == 0) return (TimeSpan.FromHours(6), TimeSpan.FromHours(20));
+        var min = calls.Min(c => c.Arrival.Value);
+        var max = calls.Max(c => c.Departure.Value);
+        var start = new TimeSpan(min.Days, min.Hours, 0, 0);
+        var end = max.Minutes == 0 && max.Seconds == 0
+            ? new TimeSpan(max.Days, max.Hours, 0, 0)
+            : new TimeSpan(max.Days, max.Hours + 1, 0, 0);
+        return (start, end);
+    }
+
+    /// <summary>
     /// Gets all stations from the timetable's layout.
     /// </summary>
     /// <param name="me">The timetable.</param>

@@ -20,9 +20,6 @@ public class GraphSchedule
 
         // Select trains that have at least one call at a station on this stretch.
         Trains = [.. timetable.Trains.Where(t => t.Calls.Any(c => stretchStations.Contains(c.Station)))];
-
-        StartTime = GetStartTime();
-        EndTime = GetEndTime();
     }
 
     public TimetableStretch TimetableStretch { get; }
@@ -34,38 +31,11 @@ public class GraphSchedule
     public TrackStretch[] TrackStretches { get; }
     public Train[] Trains { get; }
 
-    public TimeSpan StartTime { get; private set; }
-    public TimeSpan EndTime { get; private set; }
-
-    // The axis spans the driver service window, since the train can occupy the track for its whole
-    // duration: the earliest arrival is the first driver's start of service and the latest departure
-    // the last driver's end of service (see Train.DriverStartTime/DriverEndTime).
-
-    private TimeSpan GetStartTime()
-    {
-        if (Trains.Length > 0)
-        {
-            var time = Trains
-                .SelectMany(t => t.Calls)
-                .Select(c => c.Arrival.Value)
-                .Min();
-            return new TimeSpan(time.Days, time.Hours, 0, 0);
-        }
-        return GraphSettings.DefaultStartTime;
-    }
-
-    private TimeSpan GetEndTime()
-    {
-        if (Trains.Length > 0)
-        {
-            var time = Trains
-                .SelectMany(t => t.Calls)
-                .Select(c => c.Departure.Value)
-                .Max();
-            return new TimeSpan(time.Days, time.Hours + 1, 0, 0);
-        }
-        return GraphSettings.DefaultEndTime;
-    }
+    // The time axis comes from the layout's operating window (General settings), which the importer
+    // initialises from the timetable's driver service span (earliest arrival = first start of service,
+    // latest departure = last end of service) and the user can then override. See Timetable.OperatingWindow.
+    public TimeSpan StartTime => GraphSettings.DefaultStartTime;
+    public TimeSpan EndTime => GraphSettings.DefaultEndTime;
 }
 
 /// <summary>

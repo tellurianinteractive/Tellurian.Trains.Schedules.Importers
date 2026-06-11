@@ -157,6 +157,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             LogMessages(result.Messages);
             return result;
         }
+        // Initialise the layout's operating window from the imported timetable so the graphical
+        // timetable axis and the Settings page reflect the real service span (the user can override it).
+        (layoutResult.Item.Settings.General.StartTime, layoutResult.Item.Settings.General.EndTime) =
+            timetableResult.Item.OperatingWindow();
+
         var schedule = GetSchedule(name, timetableResult.Item);
         var ImportResult = schedule with { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages, .. schedule.Messages] };
         LogMessages(ImportResult.Messages);
