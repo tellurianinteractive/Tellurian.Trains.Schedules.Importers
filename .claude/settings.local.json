@@ -36,7 +36,28 @@
       "WebFetch(domain:css-tricks.com)",
       "Bash(tee /tmp/aot-publish.log)",
       "Bash(command -v dotnet-serve)",
-      "Bash(command -v python)"
+      "Bash(command -v python)",
+      "PowerShell($ps1 = Get-ChildItem -Recurse -Filter playwright.ps1 -Path \"Planning.App.Tests/bin/Debug\" | Select-Object -First 1 -ExpandProperty FullName; \"script: $ps1\"; & pwsh $ps1 install chromium 2>&1 | Select-Object -Last 8)",
+      "Read(//c/Users/Stefan/AppData/Local/Temp/**)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(grep -iE \"GLOBAL min|call .*arr=|Train .*:$|^\\\\s+[A-Za-z].*arr=|error CS|Passed!|Failed!|succeeded:|failed:\")",
+      "Bash(Select-Object -Last 25)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet test *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Stop-Process *)",
+      "Skill(local-nuget-development)",
+      "PowerShell(dotnet pack *)",
+      "PowerShell(dotnet restore Planning.App/Planning.App.csproj 2>&1 | Select-Object -Last 4; Write-Host \"=== verify 1.3.1 resolved ===\"; dotnet build Planning.App/Planning.App.csproj -c Debug 2>&1 | Select-Object -Last 6)",
+      "PowerShell($c = Get-NetTCPConnection -LocalPort 5097 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 800; Write-Host \"killed stale listener\\(s\\)\" } else { Write-Host \"5097 free\" })",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities add Directory.Build.props Tellurian.Utilities/Printing/PaginationExtensions.cs)",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities commit -m 'Fix generic extension members failing under Mono WASM interpreter' -m 'PaginationExtensions used a C# 14 generic extension block \\(extension<T>\\(IEnumerable<T>\\) { ... }\\). The .NET 10 Blazor WebAssembly Mono interpreter cannot resolve the synthesised generic extension grouping type and throws TypeLoadException when a consuming component renders; AOT and server runtimes resolve it fine. Rewrite the members as classic this-parameter generic extension methods, which the interpreter loads correctly. Bump version to 1.3.1.' -m 'Co-Authored-By: Claude Opus 4.8 \\(1M context\\) <noreply@anthropic.com>')",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities log --oneline -1)",
+      "Skill(publish)",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities add .github/workflows/build.yml .github/workflows/release.yml)",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities commit -m 'Upgrade GitHub Actions to Node 24 versions' -m 'Bump actions/checkout v4->v6, actions/setup-dotnet v4->v5 and softprops/action-gh-release v2->v3 so the workflows stop running on the deprecated Node 20 runtime.' -m 'Co-Authored-By: Claude Opus 4.8 \\(1M context\\) <noreply@anthropic.com>')",
+      "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities push origin master)",
+      "Bash(gh run *)"
     ]
   }
 }
