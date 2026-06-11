@@ -57,7 +57,11 @@
       "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities add .github/workflows/build.yml .github/workflows/release.yml)",
       "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities commit -m 'Upgrade GitHub Actions to Node 24 versions' -m 'Bump actions/checkout v4->v6, actions/setup-dotnet v4->v5 and softprops/action-gh-release v2->v3 so the workflows stop running on the deprecated Node 20 runtime.' -m 'Co-Authored-By: Claude Opus 4.8 \\(1M context\\) <noreply@anthropic.com>')",
       "Bash(git -C /c/Utveckling/Github/Tellurian/Tellurian.Utilities push origin master)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "Bash(gh search *)",
+      "Bash(gh issue *)",
+      "PowerShell($c = Get-NetTCPConnection -LocalPort 5176 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; \"killed\" } else { \"5176 free\" })",
+      "PowerShell(dotnet restore 2>&1 | Select-Object -Last 3; dotnet build --configuration Release 2>&1 | Select-Object -Last 5)"
     ]
   }
 }
