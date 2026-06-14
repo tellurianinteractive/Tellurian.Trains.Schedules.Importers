@@ -63,7 +63,9 @@
       "PowerShell($c = Get-NetTCPConnection -LocalPort 5176 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; \"killed\" } else { \"5176 free\" })",
       "PowerShell(dotnet restore 2>&1 | Select-Object -Last 3; dotnet build --configuration Release 2>&1 | Select-Object -Last 5)",
       "Bash(grep -iE '\\\\.\\(razor|cs\\)$')",
-      "Skill(csharp)"
+      "Skill(csharp)",
+      "Bash(git merge *)",
+      "Bash(git stash *)"
     ]
   }
 }
