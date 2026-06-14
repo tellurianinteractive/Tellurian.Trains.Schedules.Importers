@@ -1,6 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Model;
-
-namespace Tellurian.Trains.Schedules.Model.Tests;
+﻿namespace Tellurian.Trains.Schedules.Model.Tests;
 
 [TestClass]
 public class VehicleScheduleTests
@@ -34,5 +32,15 @@ public class VehicleScheduleTests
         var part = train.AsTrainPart(0, 1);
         Target.Add(part);
         Assert.AreEqual(part, Target.Parts.First());
+    }
+
+    [TestMethod]
+    public void AddingEquivalentTrainPartTwiceKeepsOne()
+    {
+        TestDataFactory.Init();
+        var train = TestDataFactory.CreateTrains("Persontåg", Time.FromHourAndMinute(12, 00)).First();
+        Target.Add(train.AsTrainPart(0, 1));
+        Target.Add(train.AsTrainPart(0, 1));
+        Assert.HasCount(1, Target.Parts);
     }
 }

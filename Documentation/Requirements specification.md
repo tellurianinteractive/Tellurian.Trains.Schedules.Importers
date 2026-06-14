@@ -1,10 +1,73 @@
 # Timetable Planning System — Requirements Specification
 
 > **Status:** Draft
-> **Last Updated:** 2026-03-20
+> **Last Updated:** 2026-06-14
 
 This is the main specification document for the Timetable Planning System,
 a single application for planning model railway operations based on schedules.
+
+> **Implementation status annotations.** As of 2026-06-14 this document is
+> annotated with the state of the implementation in this solution. Each functional
+> (§3) and data-model (§4) subsection carries a `Status:` line, and the
+> [Implementation Status Overview](#implementation-status-overview) below summarises
+> coverage. Legend:
+>
+> | Marker | Meaning |
+> | ------ | ------- |
+> | ✅ Implemented | Built and matching the spec (minor naming differences noted inline) |
+> | 🟡 Partial | Partly built; what is missing is noted |
+> | ❌ Missing | Not yet implemented |
+>
+> These markers describe *what exists today*, not a change to the requirement. A ❌
+> item is still a requirement, just not yet built.
+
+## Implementation Status Overview
+
+Snapshot of coverage by area (see each section for detail).
+
+### Domain model (§4)
+
+| Requirement | Status | Note |
+| ----------- | ------ | ---- |
+| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (Name/Color/IsAbroad) |
+| Station tracks (§4.1.2) | ✅ | |
+| Track / Timetable / Dispatch stretches (§4.1.3–5) | ✅ | |
+| Companies (§4.1.6) | ✅ | spec *Language Code* = code `Company.CountryCode` |
+| Train (§4.2.1) | ✅ | `MaxSpeed` added |
+| Train categories (§4.2.2) | ✅ | `DefaultSpeed` added |
+| Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | |
+| Cargo flows (§4.2.5) | 🟡 | schedule side modelled (`TrainPart.CargoFlowOptions`/`CargoOnlyOptions`, `Region`); cargo-flow editor/notes pending |
+| Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed formula wired (`Train.EffectiveScaleSpeed`/`…RealSpeed`, `TimeAndSpeedSettings.RealSpeedMetersPerSecond`) |
+| Schedule top level (§4.4.1) | ✅ | naming: spec *Schedule* = code `Plan`; spec *Vehicle Schedule* = code `Schedule` |
+| Vehicles inventory (§4.4.2) | ✅ | `DccAddress` added |
+| Vehicle schedules / driver duties (§4.4.3–4) | 🟡 | `Schedule.Parts` is `ICollection<TrainPart>`; type-specific data held in four nullable `TrainPart` option slots; wagon-group assignment editor still not wired |
+| Note generation system (§4.5.1–4) | ❌ | only manual `TextCallNote` exists |
+| Manual note translations (§4.5.5) | 🟡 | single language code, not a translation collection |
+
+### Functional / UI (§3)
+
+| Requirement | Status | Note |
+| ----------- | ------ | ---- |
+| Settings tab (§3.2) | ✅ | all 5 groups + language selector |
+| Layout Operational Places (§3.3) | ❌ | stub page; ModuleRegistry import (FR-3.3.1) missing |
+| Track/Timetable Stretches (§3.4) | ❌ | stub page |
+| Train Categories (§3.5) | ❌ | stub page |
+| Trains (§3.6) | ❌ | stub page |
+| Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation; interaction (drag, context menu) is empty handlers |
+| Vehicle Schedule Editor (§3.8) | ❌ | stub page |
+| Vehicle Owners (§3.9) | ❌ | stub page |
+| Automatic time calculation UI (§3.10) | ❌ | |
+| Validation (§3.11) | ✅ | all integrity rules + 7 conflict types; 2 toggles/1 threshold unused |
+| Reports (§3.12) | 🟡 | shell + page formats present; 1 of 15 reports (Turnus Cards) built |
+
+### Integration (§5)
+
+| Requirement | Status | Note |
+| ----------- | ------ | ---- |
+| Import from previous plans / JSON (§5.1) | ✅ | |
+| External service import — categories, companies (§5.2) | 🟡 | categories + ~9,700 companies done; ModuleRegistry not built |
+| XPLN import (§5.3) | ✅ | ODS/XLSX |
+| JSON export (§5.4) | ✅ | SQLite export deferred |
 
 ## 1. Objectives
 
@@ -141,6 +204,10 @@ shall be defined. The interface uses a tab-based organisation with the following
 
 ### 3.2 Settings
 
+> **Status:** ✅ Implemented (`Planning.App/Pages/Settings.razor`). All five groups
+> (General, GraphicTimetable, TimeAndSpeed, Validation, Integration) and the
+> top-bar language selector (localStorage) are present.
+
 All configurable settings are stored on the layout as `Layout.Settings` and are
 persisted with it, so they are re-applied whenever the layout is reopened. Settings
 are organised into groups — each a separate type — surfaced as sub-sections of the
@@ -172,6 +239,10 @@ in the top bar and persisted in the browser (localStorage) — it is not stored 
 
 ### 3.3 Layout Operational Places
 
+> **Status:** ❌ Missing. `Planning.App/Pages/LayoutEditor.razor` is a stub
+> (heading only). FR-3.3.1 ModuleRegistry import not built (API-key field exists
+> in Settings).
+
 *To be detailed — entry and editing of operation locations and their tracks.*
 
 #### FR-3.3.1 Data Import
@@ -179,6 +250,10 @@ in the top bar and persisted in the browser (localStorage) — it is not stored 
 - **From the [ModuleRegistry](https://moduleregistry.azurewebsites.net)**: if the modules have been submitted to the meeting layout, it shall be possible to import the operation locations using its web API. This API requires an API key, stored in settings.
 
 ### 3.4 Track and Timetable Stretches
+
+> **Status:** ❌ Missing. `Planning.App/Pages/Stretches.razor` is a stub. The
+> domain types (`TrackStretch`, `TimetableStretch`) exist; the sequence-entry
+> editor and same-direction enforcement UI do not.
 
 To create track stretches, the user enters a sequence of operational places using a
 dropdown. The application then automatically creates track stretch entries with default
@@ -192,13 +267,26 @@ same direction, meaning trains can traverse these stretches without changing dir
 
 ### 3.5 Train Categories
 
+> **Status:** ❌ Missing. `Planning.App/Pages/TrainCategories.razor` is a stub.
+> Category data loads from CSV via `TrainCategoriesService`, but there is no
+> add/edit/delete/import editor.
+
 *To be detailed — entry, editing, deletion, and import of train categories.*
 
 ### 3.6 Trains
 
+> **Status:** ❌ Missing. `Planning.App/Pages/Trains.razor` is a stub. The
+> expandable trains → calls → notes editor is not built.
+
 *To be detailed — entry and editing of trains, station calls, and call-level notes.*
 
 ### 3.7 Graphical Timetable
+
+> **Status:** 🟡 Partial (`Planning.Components/Scheduling/Components/GraphicalScheduleEditor.razor`,
+> `Planning.App/Pages/GraphicalTimetable.razor`). SVG rendering, both orientations
+> (FR-3.7.1), visual styling (FR-3.7.2) and all display settings (FR-3.7.3) are
+> built. Interaction (FR-3.7.4: drag times, context menu) is **not** — the click/
+> mouse handlers are empty stubs.
 
 The system shall display a graphical timetable for each timetable stretch:
 
@@ -250,6 +338,9 @@ settings (see §3.2).
 
 #### FR-3.7.4 Interaction
 
+> **Status:** ❌ Missing. Event handlers in `GraphicalScheduleEditor.razor` are
+> empty; no train selection, time dragging, or context menu yet.
+
 ##### Change timing of a train or part of train
 - Click to select a train: arrival and departure times become small draggable squares
 - When dragging an arrival or departure time, only the dragged time and all later times are affected
@@ -261,15 +352,25 @@ Right-click on a train to show a context menu: edit, duplicate, remove, select c
 
 ### 3.8 Vehicle Schedule Editor
 
+> **Status:** ❌ Missing. `Planning.App/Pages/Schedules.razor` is a stub. The
+> domain mechanism (`Schedule`, `ScheduleAssignment`, `TrainPart`) exists; the
+> editor does not.
+
 *To be detailed — building vehicle schedules and assigning them to locomotives, wagons, wagon groups, and cargo flows.*
 
 ### 3.9 Vehicle Owners
+
+> **Status:** ❌ Missing. `Planning.App/Pages/VehicleOwners.razor` is a stub.
 
 *To be detailed — managing who brings what rolling stock for the session.*
 
 ---
 
 ### 3.10 Automatic Time Calculation
+
+> **Status:** ❌ Missing in the UI. The §4.3.1 effective-speed and travel-time
+> formula now exists in the model (`Train.ScheduledTravelMinutes`), but no UI uses
+> it to compute and propagate call times or to lock individual times.
 
 The system shall calculate travel times between station calls using:
 
@@ -284,6 +385,14 @@ with an option to lock individual times.
 ---
 
 ### 3.11 Validation
+
+> **Status:** ✅ Implemented (`Model/Validations/`, `Model/Settings/ValidationSettings.cs`).
+> All FR-3.11.1 integrity rules and all seven FR-3.11.2 conflict types are present,
+> with FR-3.11.4 output (severity, localized message, location + time range,
+> involved trains). See `Documentation/Validation.md`. **Caveat:** the toggles
+> `ValidateTrainNumbers` and `ValidateDriverDuties` and the threshold
+> `MinMinutesBetweenTrackUsage` exist in `ValidationSettings` but have no backing
+> validation yet.
 
 The system shall validate the schedule at two levels:
 
@@ -324,6 +433,12 @@ Validation errors shall include:
 
 ### 3.12 Output and Printing
 
+> **Status:** 🟡 Partial. The report shell (FR-3.12.0, `Planning.App/Layout/PrintLayout.razor`)
+> and page-format components A4L / A4P / Card (`Planning.Components/Reporting/`)
+> exist. Of the 15 reports in FR-3.12.1–3.12.6 only **Wagon/Turnus Cards**
+> (`Planning.App/Reports/TurnusCardsReport.razor`) is built; A5 / A3L / Label
+> formats are not yet created. See per-report markers below.
+
 The system shall generate printable reports in various page formats
 (A3 landscape, A4 portrait/landscape, A5, pocket cards).
 All reports shall support filtering by operator, station, duty number, etc.
@@ -351,6 +466,8 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Station Instructions   | Station-specific operational and shunting instructions                                 | A5     |
 | Station Train Order    | Train order tables per station with times, tracks, destinations, and dispatch contacts | A4L    |
 
+> **Status:** ❌ None of these four reports built yet.
+
 #### FR-3.12.2 Vehicle Schedule Reports
 
 
@@ -361,6 +478,9 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Wagon/Turnus Cards           | Four cards per page showing specific wagon assignments                | Card   |
 | Graphic Locomotive Schedules | Graphical time-based view of locomotive assignments across turnus     | A3L    |
 
+> **Status:** 🟡 Only **Wagon/Turnus Cards** built (`TurnusCardsReport.razor`).
+> Locomotive Schedule Cards, Trainset Schedule Cards, Graphic Locomotive Schedules ❌.
+
 #### FR-3.12.3 Timetable Displays
 
 
@@ -368,6 +488,9 @@ excluded from the printed output. Each report sets its own page size and orienta
 | --------------------- | -------------------------------------------------------------------- | -------- |
 | Graphical Timetable | Time-distance diagram per timetable stretch, filterable by days    | A3L    |
 | Train Compositions  | Detailed car assignments per train with class, number, and routing | A4L    |
+
+> **Status:** ❌ Neither report built as a *report*. (The Graphical Timetable
+> exists as an interactive editor, §3.7, but not yet as an A3L print report.)
 
 #### FR-3.12.4 Operational Lists
 
@@ -378,12 +501,16 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Block Destinations       | Signal block routing information for dispatching                     | A4     |
 | Adjacent Dispatch Places | Contact list of neighbouring dispatch locations with phone numbers   | A4     |
 
+> **Status:** ❌ None of these three reports built yet.
+
 #### FR-3.12.5 Vehicle Start & Inventory
 
 
 | Report              | Description                                                                                                     | Format |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
 | Vehicle Start Infos | Where vehicles must be at session start — multiple views: overview, per owner, per station, with DCC addresses | A4     |
+
+> **Status:** ❌ Report not built. Its `DccAddress` dependency now exists (§4.4.2).
 
 #### FR-3.12.6 Planning Analysis
 
@@ -392,9 +519,14 @@ excluded from the printed output. Each report sets its own page size and orienta
 | ------------------------ | -------------------------------------------------------------------------------------- | -------- |
 | Trains Time Allocation | Bar chart showing driver duty demand per time slot, colour-coded for capacity status | A4L    |
 
+> **Status:** ❌ Not built.
+
 ---
 
 ### 3.13 Collaboration (Future Enhancement)
+
+> **Status:** ❌ Not started. The app runs in local mode only (FR-3.13.1 storage
+> via `BrowserStorageService`); online collaborative mode (FR-3.13.2) is not built.
 
 #### FR-3.13.1 Local Planning Mode
 
@@ -421,6 +553,15 @@ The layout carries all configurable settings as `Layout.Settings`, grouped by pu
 
 #### DM-4.1.1 Operation Locations
 
+> **Status:** ✅ Implemented (`Model/OperationLocation.cs`, `Model/Station.cs`).
+> Name, Signature, subtypes (`Station`, `SignalControlledLocation`, `OtherLocation`),
+> `IsShadow` and `Timings` present. `Owner` is on the `OperationLocation` base;
+> `Regions` is on `Station` (alongside `IsShadow`) as an `IList<Region>`, where
+> `Region` (`Model/Region.cs`) carries Name, Color, and an `IsAbroad` flag for
+> foreign-country destinations (see DM-4.5.4).
+
+
+
 The system shall support defining operation locations with:
 
 
@@ -444,6 +585,8 @@ Subtypes:
 
 #### DM-4.1.2 Station Tracks
 
+> **Status:** ✅ Implemented (`Model/StationTrack.cs`) — all properties present.
+
 Each operation location shall have one or more tracks:
 
 
@@ -458,6 +601,8 @@ Each operation location shall have one or more tracks:
 
 #### DM-4.1.3 Track Stretches
 
+> **Status:** ✅ Implemented (`Model/TrackStretch.cs`).
+
 The system shall define physical connections between operation locations:
 
 
@@ -470,6 +615,8 @@ The system shall define physical connections between operation locations:
 | Time         | Calculated travel time based on speed mapping                  |
 
 #### DM-4.1.4 Timetable Stretches
+
+> **Status:** ✅ Implemented (`Model/TimetableStretch.cs`).
 
 The system shall support grouping track stretches into named lines:
 
@@ -484,9 +631,14 @@ Timetable stretches are the unit for graphical timetable display.
 
 #### DM-4.1.5 Dispatch Stretches
 
+> **Status:** ✅ Implemented (`Model/DispatchStretch.cs`).
+
 The system shall define dispatch territories between manned stations.
 
 #### DM-4.1.6 Companies
+
+> **Status:** ✅ Implemented (`Model/Company.cs`). The spec's *Language Code* is
+> named `CountryCode` in code.
 
 The system shall maintain railway companies operating on the layout:
 
@@ -503,6 +655,10 @@ The system shall maintain railway companies operating on the layout:
 
 #### DM-4.2.1 Train Definition
 
+> **Status:** ✅ Implemented (`Model/Train.cs`). Number, Category, Company,
+> Sessions and `MaxSpeed` present. Code additionally has `ContinuesAs`/
+> `ContinuesFrom` (train continuation) and `Length`, not yet described here.
+
 The system shall support creating trains with:
 
 
@@ -516,6 +672,10 @@ The system shall support creating trains with:
 
 #### DM-4.2.2 Train Categories
 
+> **Status:** ✅ Implemented (`Model/TrainCategory.cs`). Prefix, Suffix,
+> IsPassenger, IsFreight, Name (Display Name), Color and `DefaultSpeed` (default
+> 100 km/h) present.
+
 The system shall support configurable train categories:
 
 
@@ -528,6 +688,8 @@ The system shall support configurable train categories:
 | Default Speed             | Default scale speed for this category (km/h); used when no per-train speed is set |
 
 #### DM-4.2.3 Station Calls
+
+> **Status:** ✅ Implemented (`Model/StationCall.cs`).
 
 Each train shall have an ordered sequence of station calls:
 
@@ -544,6 +706,9 @@ Each train shall have an ordered sequence of station calls:
 
 #### DM-4.2.4 Wagon Groups
 
+> **Status:** 🟡 Partial (`Model/WagonGroup.cs`). All listed properties present;
+> direction-dependent ordering logic and schedule assignment of groups not yet wired.
+
 The system shall track wagon groups within trains:
 
 
@@ -558,6 +723,14 @@ A consist ordered 1-2-3-4 becomes 4-3-2-1 when the train reverses direction.
 The system must track and display the correct order based on current direction of travel.
 
 #### DM-4.2.5 Cargo Flows
+
+> **Status:** 🟡 Partial. The schedule side is modelled: a cargo flow is a
+> `ScheduledObject` of type `Cargo` assigned to a `Schedule` whose `TrainPart`s carry
+> `CargoFlowOptions` (and/or `CargoOnlyOptions`) in `Model/TrainPartOptions.cs`. These
+> hold the destination semantics from this section — `AndRegions`, `AndBeyond`,
+> `AndLocalDestinations`, `ToAllDestinations`, `TransferOrigin`/`TransferDestination` —
+> routing to the shadow-yard `Region`s on `Station` (DM-4.1.1). Still pending: the
+> cargo-flow editor (§3.8) and the generated destination notes (§4.5.4).
 
 The system shall support cargo flow scheduling, which is distinct from wagon/vehicle scheduling.
 A cargo flow describes the movement of cargo to specific destinations, assigned to a
@@ -585,6 +758,10 @@ but assigned to a cargo flow object instead.
 
 #### DM-4.2.6 Sessions
 
+> **Status:** ✅ Implemented (`Model/Sessions.cs`, `Model/Resources/Days`). Bit
+> patterns 1–14, predefined patterns, day mapping, And/Or/overlap, and
+> number-or-day-name display all present.
+
 The system shall support 1–14 operating sessions with:
 
 - Predefined patterns: All, Odd, Even, Thirds, On-Demand
@@ -598,6 +775,14 @@ The system shall support 1–14 operating sessions with:
 ### 4.3 Speed Mapping and Time Calculation
 
 #### DM-4.3.1 Multi-Point Speed Mapping
+
+> **Status:** ✅ Implemented (`Model/Settings/SpeedPoint.cs`, `TimeAndSpeedSettings.cs`,
+> `Model/Train.cs`). The three configurable points, piecewise-linear interpolation
+> (`TimeAndSpeedSettings.RealSpeedMetersPerSecond`, clamped at the ends), and the
+> effective-speed formula (`Train.EffectiveScaleSpeed`,
+> `EffectiveRealSpeedMetersPerSecond`, `ScheduledTravelMinutes`) are wired and unit-
+> tested. *Note:* applying these to recalculate call times in the UI is the separate
+> §3.10 work, still ❌.
 
 The system shall map scale speeds (km/h) to real model speeds (m/s) using a
 three-point curve:
@@ -632,6 +817,8 @@ concern during the running session.
 
 #### DM-4.3.2 Fast Clock
 
+> **Status:** ✅ Implemented (`TimeAndSpeedSettings.FastClockSpeed`, default 5).
+
 The system shall use an expected fast clock speed (integer multiplier, e.g. 5×)
 to convert between real time and scheduled (model) time:
 
@@ -642,6 +829,9 @@ scheduledMinutes = realSeconds / 60 × expectedFastClockSpeed
 All times in station calls and timetables are in fast-clock time.
 
 #### DM-4.3.3 Station Operational Times
+
+> **Status:** ✅ Implemented (`Model/Settings/StationTimings.cs`,
+> `OperationLocation.Timings`). Per-field null-inherits-default design is in place.
 
 The following real-world durations are configurable. The layout-wide defaults are
 stored as `Layout.Settings.TimeAndSpeed.StationTimings`; each station may override
@@ -681,6 +871,10 @@ keeps user-entered per-station overrides from being overwritten on re-import.
 
 #### DM-4.4.1 Schedule
 
+> **Status:** ✅ Implemented as `Model/Plan.cs`. **Naming difference:** the spec's
+> top-level *Schedule* (Umlaufplan) is the code's `Plan`; the code's `Schedule`
+> type is the spec's *Vehicle Schedule* (DM-4.4.3).
+
 A schedule is the top-level planning artifact combining:
 
 - A timetable (trains and their station calls)
@@ -689,6 +883,10 @@ A schedule is the top-level planning artifact combining:
 - Vehicle inventory
 
 #### DM-4.4.2 Vehicles
+
+> **Status:** ✅ Implemented as `Model/ScheduledObject.cs` (an `ObjectType` enum:
+> Locomotive, Trainset, Wagonset, Cargo). `DccAddress` (nullable; motorised vehicles
+> only) present, feeding the Vehicle Start Infos report (FR-3.12.5).
 
 The system shall maintain a vehicle inventory:
 
@@ -704,6 +902,15 @@ The system shall maintain a vehicle inventory:
 | DCC-address        | For motorised vehicles only                             |
 
 #### DM-4.4.3 Vehicle Schedules
+
+> **Status:** 🟡 Partial (`Model/Schedule.cs`, `ScheduleAssignment.cs`,
+> `TrainPart.cs`, `TrainPartOptions.cs`). `Schedule.Parts` is `ICollection<TrainPart>` —
+> a reusable, type-agnostic sequence assigned to a `ScheduledObject` via
+> `ScheduleAssignment` (so one schedule can be reused across locomotives, wagons and
+> cargo). The object-type-specific data lives in four nullable, combinable option
+> slots on each `TrainPart` — `TractionOptions`, `NonTractionOptions`, `CargoFlowOptions`,
+> `CargoOnlyOptions` (all deriving from `TrainPartOptions`). Assignment to **wagon
+> groups via an editor is still not wired**.
 
 A vehicle schedule defines a sequence of train parts forming a circulation pattern.
 The same schedule structure is used for all assignable objects.
@@ -737,6 +944,8 @@ Cargo flow assignments can additionally restrict the maximum number of wagons to
 
 #### DM-4.4.4 Driver Duties
 
+> **Status:** ✅ Implemented (`Model/DriverDuty.cs`, `DriverDutyNote.cs`).
+
 The system shall support creating driver duties:
 
 
@@ -751,6 +960,12 @@ The system shall support creating driver duties:
 ---
 
 ### 4.5 Note Structure and Localized Text
+
+> **Status:** ❌ Largely missing. Only a manual `TextCallNote` (single language
+> code) and an abstract `CallNote` with intent flags exist (`Model/CallNote.cs`,
+> `TextCallNote.cs`). The data-driven note **generation engine, the 14 note types,
+> structured markup, and destination rendering are not implemented.** See per-item
+> markers below.
 
 #### DM-4.5.1 Data-Driven Note Texts
 
@@ -814,6 +1029,10 @@ color luminance to ensure readability.
 
 #### DM-4.5.5 Manual Notes with Multi-Language Support
 
+> **Status:** 🟡 Partial. `TextCallNote` carries `Text` + a single `LanguageCode`.
+> The default-text-plus-translations collection (multiple translations per note) is
+> not yet modelled.
+
 Users shall be able to add manual free-text notes to any station call.
 A manual note has a default text (in the planner's language of choice) and
 optional translations as sub-items, each keyed by language code (e.g. "de", "sv").
@@ -828,6 +1047,9 @@ This section describes how data is exchanged with external systems and previous 
 
 ### 5.1 Import from Previous Plans
 
+> **Status:** ✅ Implemented via JSON round-trip
+> (`Planning.App/Services/ScheduleImportService.cs`, `Pages/Import.razor`).
+
 The system shall support importing reusable data from saved plans:
 
 - Layout (stations, tracks, stretches)
@@ -837,6 +1059,10 @@ The system shall support importing reusable data from saved plans:
 
 ### 5.2 External Service Import
 
+> **Status:** 🟡 Partial. Train categories (`TrainCategoriesService`, CSV) and the
+> ~9,700-company dataset (`CompaniesService`, JSON) are loaded. Module/station data
+> from the ModuleRegistry API (FR-3.3.1) is **not** implemented.
+
 The system shall support fetching reference data via web API:
 
 - Train categories from a shared service
@@ -845,10 +1071,15 @@ The system shall support fetching reference data via web API:
 
 ### 5.3 XPLN Import (Legacy)
 
+> **Status:** ✅ Implemented (`Importers.Xpln/`, ODS + XLSX providers).
+
 The system shall support importing complete schedules from XPLN spreadsheets
 (ODS/XLSX format) as described in the existing Importers.Xpln project.
 
 ### 5.4 Export
+
+> **Status:** ✅ JSON export implemented (`ScheduleExportService`, `ExportMenu.razor`).
+> SQLite export is flagged "coming soon" (deferred — WASM EF Core constraint).
 
 The system shall export schedules in JSON format for:
 

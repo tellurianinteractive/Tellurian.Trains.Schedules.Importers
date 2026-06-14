@@ -40,7 +40,11 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// </summary>
     public string Signature { get; set; }
 
-
+    /// <summary>
+    /// Gets or sets the module owner of this operation location. Used in FREMO meetings
+    /// where stations are owned by the members who bring the modules. Optional.
+    /// </summary>
+    public string? Owner { get; set; }
 
     /// <summary>
     ///

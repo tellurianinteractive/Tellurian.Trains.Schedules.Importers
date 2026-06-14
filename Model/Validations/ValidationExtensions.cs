@@ -1,5 +1,4 @@
 using System.Globalization;
-using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Model.Resources;
 using Tellurian.Trains.Schedules.Model.Settings;
 
@@ -453,10 +452,10 @@ public static class ValidationExtensions
         return foundOne is not null && foundOther is not null && foundOne == foundOther;
     }
 
-    internal static Schedule? FindVehicleSchedule(this IEnumerable<Schedule> me, StationCall call)
+    internal static Schedule? FindVehicleSchedule(this IEnumerable<Schedule> schedules, StationCall call)
     {
-        if (me == null) return null;
-        foreach (var schedule in me)
+        if (schedules == null) return null;
+        foreach (var schedule in schedules)
         {
             foreach (var part in schedule.Parts)
             {

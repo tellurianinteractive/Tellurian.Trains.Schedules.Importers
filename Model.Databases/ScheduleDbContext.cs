@@ -570,6 +570,38 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.Train);
             entity.Ignore(e => e.Departure);
             entity.Ignore(e => e.Arrival);
+
+            // Per-part options: four optional, independent owned types, each mapped to its own
+            // table sharing the TrainPart primary key (an absent row means the option is null).
+            entity.OwnsOne(e => e.TractionOptions, o => o.ToTable("TractionOptions"));
+
+            entity.OwnsOne(e => e.NonTractionOptions, o =>
+            {
+                o.ToTable("NonTractionOptions");
+                o.OwnsMany(n => n.WagonGroup, w =>
+                {
+                    w.ToTable("Wagons");
+                    // Sole auto-increment key so SQLite can generate it (a composite owned key cannot).
+                    w.Property<int>("Id").ValueGeneratedOnAdd();
+                    w.HasKey("Id");
+                });
+            });
+
+            entity.OwnsOne(e => e.CargoFlowOptions, o =>
+            {
+                o.ToTable("CargoFlowOptions");
+                // Transfer points reference Station entities (not owned).
+                o.HasOne(c => c.TransferOrigin).WithMany().OnDelete(DeleteBehavior.Restrict);
+                o.HasOne(c => c.TransferDestination).WithMany().OnDelete(DeleteBehavior.Restrict);
+            });
+
+            entity.OwnsOne(e => e.CargoOnlyOptions, o =>
+            {
+                o.ToTable("CargoOnlyOptions");
+                // Load/Unload are computed from the base couple/uncouple flags.
+                o.Ignore(c => c.Load);
+                o.Ignore(c => c.Unload);
+            });
         });
     }
 

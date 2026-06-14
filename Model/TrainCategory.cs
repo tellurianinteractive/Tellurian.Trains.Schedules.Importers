@@ -42,6 +42,12 @@ public record TrainCategory
     /// </summary>
     public string Color { get; init; } = "#000000";
 
+    /// <summary>
+    /// Gets or initializes the default scale speed in km/h for trains of this category.
+    /// Used when a train does not set its own <see cref="Train.MaxSpeed"/>.
+    /// </summary>
+    public int DefaultSpeed { get; init; } = 100;
+
     /// <inheritdoc/>
     public override string ToString() => Name;
 }

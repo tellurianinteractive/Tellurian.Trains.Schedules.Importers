@@ -87,6 +87,30 @@ public sealed class TrainPart : IEquatable<TrainPart>
     public string? ExternalKey { get; set; }
 
     /// <summary>
+    /// Options applying when this part is operated by a traction unit (locomotive or trainset).
+    /// Null when not applicable. A part may carry several option kinds at once.
+    /// </summary>
+    public TractionOptions? TractionOptions { get; set; }
+
+    /// <summary>
+    /// Options applying when this part carries non-traction rolling stock (wagons).
+    /// Null when not applicable.
+    /// </summary>
+    public NonTractionOptions? NonTractionOptions { get; set; }
+
+    /// <summary>
+    /// Options applying when this part participates in a cargo flow directed by waybills.
+    /// Null when not applicable.
+    /// </summary>
+    public CargoFlowOptions? CargoFlowOptions { get; set; }
+
+    /// <summary>
+    /// Options applying when this part is a fixed-schedule cargo-only working.
+    /// Null when not applicable.
+    /// </summary>
+    public CargoOnlyOptions? CargoOnlyOptions { get; set; }
+
+    /// <summary>
     /// Gets the train this train part belongs to.
     /// </summary>
     public Train Train => From.Train!;

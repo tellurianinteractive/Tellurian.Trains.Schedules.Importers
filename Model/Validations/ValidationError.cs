@@ -261,10 +261,9 @@ public sealed record ValidationError
         schedule.Parts.OrderBy(p => p.To.Arrival.Value).LastOrDefault()?.To.Arrival;
 
     private static Train[] GetTrains(Schedule schedule1, Schedule schedule2) =>
-        schedule1.Parts.Select(p => p.Train)
+        [.. schedule1.Parts.Select(p => p.Train)
             .Concat(schedule2.Parts.Select(p => p.Train))
-            .Distinct()
-            .ToArray();
+            .Distinct()];
 }
 
 /// <summary>

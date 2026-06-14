@@ -38,9 +38,8 @@ public static class TurnusDataExtensions
 
         public string CrossLineColor => data.ScheduledObjectType switch
         {
-            ScheduledObjectType.Locomotive or ScheduledObjectType.Railcar or ScheduledObjectType.Trainset => "#ffc0cb",
-            ScheduledObjectType.PassengerCar => "#66ff99",
-            ScheduledObjectType.CargoWagon => "#66ff99",
+            ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset => "#ffc0cb",
+            ScheduledObjectType.Wagonset => "#66ff99",
             ScheduledObjectType.Cargo => "#ffff99",
             _ => "#cccccc"
         };
@@ -80,17 +79,17 @@ public static class TurnusDataExtensions
             {
                 // One row per (vehicle, assignment); each row carries that assignment's train parts.
                 var rows = items
-                    .SelectMany(vehicle => vehicle.ScheduleAssignments.Select(assignment => new
+                    .SelectMany(scheduledObject => scheduledObject.ScheduleAssignments.Select(assignment => new
                     {
                         Data = new TurnusData
                         {
-                            ScheduledObjectType = vehicle.ObjectType,
-                            CompanyName = vehicle.Company?.DisplayName ?? string.Empty,
-                            Class = vehicle.Class,
+                            ScheduledObjectType = scheduledObject.ObjectType,
+                            CompanyName = scheduledObject.Company?.DisplayName ?? string.Empty,
+                            Class = scheduledObject.Class,
                             Number = assignment.Number,
-                            ExternalId = vehicle.ExternalId ?? string.Empty,
+                            ExternalId = scheduledObject.ExternalId ?? string.Empty,
                             Sessions = assignment.Sessions,
-                            Remark = vehicle.Remark ?? string.Empty,
+                            Remark = scheduledObject.Remark ?? string.Empty,
                         },
                         Parts = assignment.Schedule?.Parts ?? Enumerable.Empty<TrainPart>(),
                     }));
@@ -100,11 +99,10 @@ public static class TurnusDataExtensions
                     .GroupBy(row => row.Data.KeyWithSession)
                     .Select(group => group.First().Data with
                     {
-                        TrainParts = group
+                        TrainParts = [.. group
                             .SelectMany(row => row.Parts)
                             .Distinct()
-                            .OrderBy(part => part.Departure?.Value)
-                            .ToList(),
+                            .OrderBy(part => part.Departure?.Value)],
                     })
                     .ToList();
 

@@ -115,6 +115,70 @@ public class ScheduleDbContextIntegrationTests
     }
 
     [TestMethod]
+    public async Task RoundTripsTrainPartOptions()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ScheduleDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options;
+
+        await using var context = new ScheduleDbContext(options);
+        await context.Database.OpenConnectionAsync(CancellationToken);
+        await context.Database.EnsureCreatedAsync(CancellationToken);
+
+        var layout = new Layout { Id = 1, Name = "L" };
+        var station = new Station(1, "Station", "S");
+        var track = new StationTrack(1, "1");
+        station.Add(track);
+        layout.Add(station);
+
+        var timetable = new Timetable("T", layout);
+        var train = new Train(1, 100) { Timetable = timetable, TimetableId = timetable.Id };
+        train.Add(new StationCall(1, track, Time.FromHourAndMinute(8, 0), Time.FromHourAndMinute(8, 0)));
+        train.Add(new StationCall(2, track, Time.FromHourAndMinute(8, 30), Time.FromHourAndMinute(8, 30)));
+
+        var part = train.AsTrainPart(0, 1);
+        part.Id = 1;
+        part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true };
+        part.NonTractionOptions = new NonTractionOptions { OrderInTrain = 3, WagonGroup = { new Wagon(1, "Gbs") { Number = "1234" } } };
+        part.CargoFlowOptions = new CargoFlowOptions { AndRegions = true, TransferDestination = station };
+        part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
+
+        // Act
+        context.Layouts.Add(layout);
+        context.Timetables.Add(timetable);
+        context.Trains.Add(train);
+        context.TrainParts.Add(part);
+        await context.SaveChangesAsync(CancellationToken);
+        context.ChangeTracker.Clear();
+
+        var loaded = await context.TrainParts
+            .Include(p => p.NonTractionOptions!).ThenInclude(n => n.WagonGroup)
+            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.TransferDestination)
+            .FirstAsync(CancellationToken);
+
+        // Assert - each option kind persisted and read back from SQLite
+        Assert.IsNotNull(loaded.TractionOptions, "TractionOptions");
+        Assert.AreEqual(2, loaded.TractionOptions!.NumberOfUnits);
+        Assert.IsTrue(loaded.TractionOptions.TurnLoco);
+        Assert.IsTrue(loaded.TractionOptions.HasCoupleNote);
+
+        Assert.IsNotNull(loaded.NonTractionOptions, "NonTractionOptions");
+        Assert.AreEqual(3, loaded.NonTractionOptions!.OrderInTrain);
+        Assert.AreEqual(1, loaded.NonTractionOptions.WagonGroup.Count);
+        Assert.AreEqual("Gbs", loaded.NonTractionOptions.WagonGroup.First().Class);
+        Assert.AreEqual("1234", loaded.NonTractionOptions.WagonGroup.First().Number);
+
+        Assert.IsNotNull(loaded.CargoFlowOptions, "CargoFlowOptions");
+        Assert.IsTrue(loaded.CargoFlowOptions!.AndRegions);
+        Assert.AreEqual("S", loaded.CargoFlowOptions.TransferDestination?.Signature);
+
+        Assert.IsNotNull(loaded.CargoOnlyOptions, "CargoOnlyOptions");
+        Assert.AreEqual("Coal", loaded.CargoOnlyOptions!.CargoName);
+        Assert.IsTrue(loaded.CargoOnlyOptions.Load, "Load is computed from HasCoupleNote");
+    }
+
+    [TestMethod]
     public async Task CanImportFromXpln()
     {
         // Arrange - verify we can import from ODS file

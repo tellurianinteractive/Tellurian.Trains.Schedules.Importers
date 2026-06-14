@@ -4,6 +4,10 @@
     <File Path=".github/workflows/publish.yml" />
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
+    <File Path="Documentation/Implementation strategy.md" />
+    <File Path="Documentation/Model.md" />
+    <File Path="Documentation/Requirements specification.md" />
+    <File Path="Documentation/Validation.md" />
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
     <File Path="UNIFIED_MODEL.md" />
@@ -13,20 +17,20 @@
   <Project Path="Importers.Access/Access.csproj" />
   <Project Path="Importers.Interfaces.Tests/Interfaces.Tests.csproj" />
   <Project Path="Importers.Interfaces/Interfaces.csproj" />
-  <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
-  <Project Path="Model.Databases/Model.Databases.csproj" />
-  <Project Path="Planning.App.Translations/Planning.App.Translations.csproj" />
-  <Project Path="Planning.App.Tests/Planning.App.Tests.csproj" />
-  <Project Path="tools/AppServer/AppServer.csproj" />
-  <Project Path="Planning.App/Planning.App.csproj" />
-  <Project Path="Planning.Components/Planning.Components.csproj" />
-  <Project Path="Planning.Components.Tests/Planning.Components.Tests.csproj" />
-  <Project Path="Planning.Tests/Planning.Tests.csproj" />
-  <Project Path="Planning/Planning.csproj" />
-  <Project Path="Model.Tests/Model.Tests.csproj" />
-  <Project Path="Model/Model.csproj" />
   <Project Path="Importers.Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
   <Project Path="Importers.Services/Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
   <Project Path="Importers.Xpln.Tests/Xpln.Tests.csproj" />
   <Project Path="Importers.Xpln/Xpln.csproj" />
+  <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
+  <Project Path="Model.Databases/Model.Databases.csproj" />
+  <Project Path="Model.Tests/Model.Tests.csproj" />
+  <Project Path="Model/Model.csproj" />
+  <Project Path="Planning.App.Tests/Planning.App.Tests.csproj" />
+  <Project Path="Planning.App.Translations/Planning.App.Translations.csproj" />
+  <Project Path="Planning.App/Planning.App.csproj" />
+  <Project Path="Planning.Components.Tests/Planning.Components.Tests.csproj" />
+  <Project Path="Planning.Components/Planning.Components.csproj" />
+  <Project Path="Planning.Tests/Planning.Tests.csproj" />
+  <Project Path="Planning/Planning.csproj" />
+  <Project Path="tools/AppServer/AppServer.csproj" />
 </Solution>

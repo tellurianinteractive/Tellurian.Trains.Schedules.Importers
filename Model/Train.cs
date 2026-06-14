@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -105,6 +106,12 @@ public class Train : IEquatable<Train>
     /// Gets or sets the category of this train.
     /// </summary>
     public TrainCategory? Category { get; set; }
+
+    /// <summary>
+    /// Gets or sets this train's maximum scale speed in km/h. Optional; when unset,
+    /// the speed calculation falls back to <see cref="TrainCategory.DefaultSpeed"/>.
+    /// </summary>
+    public int? MaxSpeed { get; set; }
 
     /// <summary>
     /// Gets or sets the sessions during which this train operates.
@@ -232,6 +239,44 @@ public static class TrainExtensions
         /// </summary>
         public string Identity =>
             train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString();
+
+        /// <summary>
+        /// Gets the effective scale speed (km/h) for this train on a track stretch:
+        /// the lower of the train speed (its <see cref="Train.MaxSpeed"/>, or its category's
+        /// <see cref="TrainCategory.DefaultSpeed"/> when unset) and the stretch's maximum speed.
+        /// </summary>
+        /// <param name="stretch">The track stretch the train runs on.</param>
+        /// <returns>The effective scale speed in km/h.</returns>
+        public int EffectiveScaleSpeed(TrackStretch stretch)
+        {
+            var trainSpeed = train.MaxSpeed ?? train.Category?.DefaultSpeed ?? stretch.Speed;
+            return Math.Min(trainSpeed, stretch.Speed);
+        }
+
+        /// <summary>
+        /// Gets the effective real model speed (m/s) for this train on a track stretch,
+        /// by mapping the effective scale speed through the speed curve.
+        /// </summary>
+        /// <param name="stretch">The track stretch the train runs on.</param>
+        /// <param name="settings">The time and speed settings holding the speed mapping curve.</param>
+        /// <returns>The effective real model speed in metres per second.</returns>
+        public double EffectiveRealSpeedMetersPerSecond(TrackStretch stretch, TimeAndSpeedSettings settings) =>
+            settings.RealSpeedMetersPerSecond(train.EffectiveScaleSpeed(stretch));
+
+        /// <summary>
+        /// Gets the scheduled (fast-clock) travel time in minutes for this train across a track stretch,
+        /// derived from the stretch distance, the effective real speed, and the fast-clock multiplier.
+        /// </summary>
+        /// <param name="stretch">The track stretch the train runs on.</param>
+        /// <param name="settings">The time and speed settings holding the speed curve and fast-clock speed.</param>
+        /// <returns>The scheduled travel time in fast-clock minutes; zero when the real speed is not positive.</returns>
+        public double ScheduledTravelMinutes(TrackStretch stretch, TimeAndSpeedSettings settings)
+        {
+            var realSpeed = train.EffectiveRealSpeedMetersPerSecond(stretch, settings);
+            if (realSpeed <= 0) return 0;
+            var realSeconds = stretch.Distance / realSpeed;
+            return realSeconds / 60.0 * settings.FastClockSpeed;
+        }
 
         /// <summary>
         /// Finds the station call at the specified time.

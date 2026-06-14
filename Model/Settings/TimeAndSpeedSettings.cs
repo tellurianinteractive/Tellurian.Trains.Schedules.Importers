@@ -20,4 +20,29 @@ public sealed class TimeAndSpeedSettings
 
     /// <summary>Layout-wide default station operational times. Individual stations may override these.</summary>
     public StationTimings StationTimings { get; set; } = StationTimings.LayoutDefaults;
+
+    /// <summary>
+    /// Maps a scale speed (km/h) to a real model speed (m/s) using the piecewise-linear curve
+    /// defined by the <see cref="Slow"/>, <see cref="Normal"/> and <see cref="High"/> points.
+    /// Speeds below the slowest or above the fastest point are clamped to that point's real speed.
+    /// </summary>
+    /// <param name="scaleSpeedKmh">The scale speed in km/h to convert.</param>
+    /// <returns>The interpolated real model speed in metres per second.</returns>
+    public double RealSpeedMetersPerSecond(int scaleSpeedKmh)
+    {
+        var points = new[] { Slow, Normal, High }.OrderBy(p => p.ScaleSpeedKmh).ToArray();
+        if (scaleSpeedKmh <= points[0].ScaleSpeedKmh) return points[0].RealSpeedMetersPerSecond;
+        if (scaleSpeedKmh >= points[^1].ScaleSpeedKmh) return points[^1].RealSpeedMetersPerSecond;
+        for (var i = 0; i < points.Length - 1; i++)
+        {
+            var low = points[i];
+            var high = points[i + 1];
+            if (scaleSpeedKmh > high.ScaleSpeedKmh) continue;
+            var span = high.ScaleSpeedKmh - low.ScaleSpeedKmh;
+            if (span == 0) return high.RealSpeedMetersPerSecond;
+            var fraction = (double)(scaleSpeedKmh - low.ScaleSpeedKmh) / span;
+            return low.RealSpeedMetersPerSecond + fraction * (high.RealSpeedMetersPerSecond - low.RealSpeedMetersPerSecond);
+        }
+        return points[^1].RealSpeedMetersPerSecond;
+    }
 }

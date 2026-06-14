@@ -27,6 +27,9 @@ public class ScheduledObject : IEquatable<ScheduledObject>
     /// </summary>
     public int NumberOfUnits { get; set; }
 
+    /// <summary>
+    /// if greather that zero, defines a spare scheduled object.
+    /// </summary>
     public int ReplaceOrder { get; set; }
 
     /// <summary>
@@ -48,6 +51,12 @@ public class ScheduledObject : IEquatable<ScheduledObject>
     /// Gets or sets a value indicating whether this vehicle can operate in both directions.
     /// </summary>
     public bool IsDoubleDirected { get; set; }
+
+    /// <summary>
+    /// Gets or sets the DCC address of this vehicle. Applies to motorised vehicles only
+    /// (locomotives, trainsets, railcars); <c>null</c> for non-motorised vehicles.
+    /// </summary>
+    public int? DccAddress { get; set; }
 
     /// <summary>
     /// Gets or sets the foreign key to the owning company. Optional.
@@ -131,17 +140,22 @@ public enum ScheduledObjectType
     Locomotive,
 
     /// <summary>
-    /// A self-propelled trainset (multiple unit).
+    /// A self-propelled trainset (multiple unit). 
     /// </summary>
+    /// <remarks>In XPLN this is identified by the same identifier appearing in both
+    /// the locomotive and the trainset section; such entries are merged into a single railcar.</remarks>
     Trainset,
 
     /// <summary>
-    /// A self-propelled railcar. In XPLN this is identified by the same identifier appearing in both
-    /// the locomotive and the trainset section; such entries are merged into a single railcar.
+    /// A multiple unit of wagons operated as one.
     /// </summary>
+    Wagonset,
+    [Obsolete("Use trainset")]
     Railcar,
-    PassengerCar,
-    CargoWagon,
+
+    /// <summary>
+    /// A unit of cargo (non-rolling stock)
+    /// </summary>
     Cargo,
 }
 

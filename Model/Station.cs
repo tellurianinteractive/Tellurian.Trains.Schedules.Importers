@@ -20,6 +20,13 @@ public class Station : OperationLocation
     public bool IsShadow { get; set; }
 
     /// <summary>
+    /// Gets or sets the regions and countries represented by this station. Meaningful for
+    /// shadow stations (<see cref="IsShadow"/>), which stand in for the outside world and
+    /// are used for cargo flow routing. Empty for ordinary stations.
+    /// </summary>
+    public IList<Region> Regions { get; set; } = [];
+
+    /// <summary>
     /// Parameterless constructor for EF Core and JSON deserialization
     /// </summary>
     [JsonConstructor]
