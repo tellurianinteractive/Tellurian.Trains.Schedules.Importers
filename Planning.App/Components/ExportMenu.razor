@@ -1,23 +1,24 @@
 @inject ScheduleStateService ScheduleState
 @inject ScheduleExportService Exporter
 @inject IJSRuntime JS
+@inject Translator Translator
 
-<TabMenu @ref="_menu" Label="Export">
-    <button class="menu-item" @onclick="OpenSaveAs" disabled="@(!ScheduleState.HasSchedule)">Save as..</button>
+<TabMenu @ref="_menu" Label="@Translator("Export")">
+    <button class="menu-item" @onclick="OpenSaveAs" disabled="@(!ScheduleState.HasSchedule)">@Translator("SaveAs")</button>
 </TabMenu>
 
 @if (_showSaveAs)
 {
     <div class="dialog-backdrop" @onclick="CloseSaveAs">
         <div class="dialog" @onclick:stopPropagation>
-            <h3>Save as</h3>
-            <p>Download <strong>@ScheduleState.Schedule?.Name</strong> as:</p>
+            <h3>@Translator("SaveAs")</h3>
+            <p>@((MarkupString)string.Format(Translator("DownloadAs"), System.Net.WebUtility.HtmlEncode(ScheduleState.Schedule?.Name ?? "")))</p>
             <div class="formats">
                 <button class="format" @onclick="SaveJson">JSON<span class="ext">.json</span></button>
-                <button class="format" disabled title="Coming soon">SQLite<span class="ext">.db</span></button>
+                <button class="format" disabled title="@Translator("ComingSoon")">SQLite<span class="ext">.db</span></button>
             </div>
             <div class="dialog-actions">
-                <button @onclick="CloseSaveAs">Cancel</button>
+                <button @onclick="CloseSaveAs">@Translator("Cancel")</button>
             </div>
         </div>
     </div>

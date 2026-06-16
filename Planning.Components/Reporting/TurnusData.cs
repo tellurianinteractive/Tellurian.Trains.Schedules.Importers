@@ -40,7 +40,7 @@ public static class TurnusDataExtensions
         {
             ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset => "#ffc0cb",
             ScheduledObjectType.Wagonset => "#66ff99",
-            ScheduledObjectType.Cargo => "#ffff99",
+            ScheduledObjectType.CargoFlow or ScheduledObjectType.Cargo => "#ffff99",
             _ => "#cccccc"
         };
 
@@ -78,7 +78,7 @@ public static class TurnusDataExtensions
             get
             {
                 // One row per (vehicle, assignment); each row carries that assignment's train parts.
-                var rows = items
+                var rows = items.Where(i => i.HasTurnusCard)
                     .SelectMany(scheduledObject => scheduledObject.ScheduleAssignments.Select(assignment => new
                     {
                         Data = new TurnusData
@@ -111,10 +111,9 @@ public static class TurnusDataExtensions
                     .GroupBy(card => card.Key)
                     .ToDictionary(group => group.Key, group => group.Count());
 
-                return cards
+                return [.. cards
                     .Select(card => card with { TurnForNextSession = sessionVariants[card.Key] > 1 })
-                    .OrderBy(card => card.KeyWithSession)
-                    .ToList();
+                    .OrderBy(card => card.KeyWithSession)];
             }
         }
     }

@@ -67,7 +67,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
 
     public Timetable? Timetable => _schedule?.Timetable;
 
-    public Tellurian.Trains.Schedules.Model.Layout? Layout => _schedule?.Timetable?.Layout;
+    public Tellurian.Trains.Schedules.Model.Layouts.Layout? Layout => _schedule?.Timetable?.Layout;
 
     private void ResetSelectionToFirstStretch()
     {

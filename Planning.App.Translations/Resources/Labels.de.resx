@@ -123,4 +123,334 @@
   <data name="About" xml:space="preserve">
     <value>Über</value>
   </data>
+  <data name="Workspace" xml:space="preserve">
+    <value>Arbeitsbereich</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Anlage</value>
+  </data>
+  <data name="Stretches" xml:space="preserve">
+    <value>Strecken</value>
+  </data>
+  <data name="TrainCategories" xml:space="preserve">
+    <value>Zugkategorien</value>
+  </data>
+  <data name="Trains" xml:space="preserve">
+    <value>Züge</value>
+  </data>
+  <data name="GraphicalTimetable" xml:space="preserve">
+    <value>Bildfahrplan</value>
+  </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Umläufe</value>
+  </data>
+  <data name="VehicleOwners" xml:space="preserve">
+    <value>Fahrzeugbesitzer</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Reports" xml:space="preserve">
+    <value>Berichte</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="TurnusCards" xml:space="preserve">
+    <value>Umlaufkarten</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Drucken</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Train" xml:space="preserve">
+    <value>Zug</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Von</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Nach</value>
+  </data>
+  <data name="Turnus" xml:space="preserve">
+    <value>Umlauf</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Inhalt</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Klasse</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Seite</value>
+  </data>
+  <data name="CreatingReport" xml:space="preserve">
+    <value>Bericht wird erstellt…</value>
+  </data>
+  <data name="TurnForNextDay" xml:space="preserve">
+    <value>Setzt am nächsten Tag fort</value>
+  </data>
+  <data name="TurnForNextSession" xml:space="preserve">
+    <value>Setzt sich in der nächsten Session fort</value>
+  </data>
+  <data name="Locomotive" xml:space="preserve">
+    <value>Lokomotive</value>
+  </data>
+  <data name="Trainset" xml:space="preserve">
+    <value>Triebzug</value>
+  </data>
+  <data name="Wagonset" xml:space="preserve">
+    <value>Wagengruppe</value>
+  </data>
+  <data name="Cargo" xml:space="preserve">
+    <value>Fracht</value>
+  </data>
+  <data name="CargoFlow" xml:space="preserve">
+    <value>Güterverkehr</value>
+  </data>
+  <data name="SpareLoco" xml:space="preserve">
+    <value>Reservelok</value>
+  </data>
+  <data name="SpareRailcar" xml:space="preserve">
+    <value>Reservetriebwagen</value>
+  </data>
+  <data name="SpareWagon" xml:space="preserve">
+    <value>Reservewagen</value>
+  </data>
+  <data name="MondayShort" xml:space="preserve">
+    <value>Mo</value>
+  </data>
+  <data name="TuesdayShort" xml:space="preserve">
+    <value>Di</value>
+  </data>
+  <data name="WednesdayShort" xml:space="preserve">
+    <value>Mi</value>
+  </data>
+  <data name="ThursdayShort" xml:space="preserve">
+    <value>Do</value>
+  </data>
+  <data name="FridayShort" xml:space="preserve">
+    <value>Fr</value>
+  </data>
+  <data name="SaturdayShort" xml:space="preserve">
+    <value>Sa</value>
+  </data>
+  <data name="SundayShort" xml:space="preserve">
+    <value>So</value>
+  </data>
+  <data name="SettingsNoSchedule" xml:space="preserve">
+    <value>Kein Fahrplan geladen. Importieren Sie eine Datei auf der Registerkarte „Import“, um die Einstellungen zu bearbeiten.</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>Allgemein</value>
+  </data>
+  <data name="TimeAndSpeed" xml:space="preserve">
+    <value>Zeit &amp; Geschwindigkeit</value>
+  </data>
+  <data name="Validation" xml:space="preserve">
+    <value>Validierung</value>
+  </data>
+  <data name="Integration" xml:space="preserve">
+    <value>Integration</value>
+  </data>
+  <data name="LayoutName" xml:space="preserve">
+    <value>Anlagenname</value>
+  </data>
+  <data name="UseDays" xml:space="preserve">
+    <value>Tage statt Sessions verwenden</value>
+  </data>
+  <data name="StartDay" xml:space="preserve">
+    <value>Starttag</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Startzeit</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>Endzeit</value>
+  </data>
+  <data name="BreakForPrinting" xml:space="preserve">
+    <value>Umbruch für den Druck (teilt den Bildfahrplan in zwei Hälften)</value>
+  </data>
+  <data name="TimeAxisOrientation" xml:space="preserve">
+    <value>Ausrichtung der Zeitachse</value>
+  </data>
+  <data name="ShowArrivalMinutes" xml:space="preserve">
+    <value>Ankunftsminuten anzeigen</value>
+  </data>
+  <data name="ShowDepartureMinutes" xml:space="preserve">
+    <value>Abfahrtsminuten anzeigen</value>
+  </data>
+  <data name="MinuteSpacing" xml:space="preserve">
+    <value>Minutenabstand (px/min)</value>
+  </data>
+  <data name="StationSpacing" xml:space="preserve">
+    <value>Stationsabstand (px)</value>
+  </data>
+  <data name="TrackSpacing" xml:space="preserve">
+    <value>Gleisabstand (px)</value>
+  </data>
+  <data name="ShowTrainCategory" xml:space="preserve">
+    <value>Zugkategorie anzeigen</value>
+  </data>
+  <data name="ShowCompany" xml:space="preserve">
+    <value>Gesellschaft anzeigen</value>
+  </data>
+  <data name="HideSessionsOrDays" xml:space="preserve">
+    <value>Sessions/Tage ausblenden</value>
+  </data>
+  <data name="FastClockSpeed" xml:space="preserve">
+    <value>Zeitraffer-Faktor (×)</value>
+  </data>
+  <data name="SpeedMapping" xml:space="preserve">
+    <value>Geschwindigkeitszuordnung</value>
+  </data>
+  <data name="ScaleSpeedKmh" xml:space="preserve">
+    <value>Maßstab km/h</value>
+  </data>
+  <data name="RealSpeedMs" xml:space="preserve">
+    <value>Real m/s</value>
+  </data>
+  <data name="SpeedSlow" xml:space="preserve">
+    <value>Langsam</value>
+  </data>
+  <data name="SpeedNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="SpeedHigh" xml:space="preserve">
+    <value>Hoch</value>
+  </data>
+  <data name="DefaultStationTimes" xml:space="preserve">
+    <value>Standard-Stationszeiten</value>
+  </data>
+  <data name="DefaultStationTimesHint" xml:space="preserve">
+    <value>Anlagenweite Standardwerte; einzelne Stationen können diese überschreiben.</value>
+  </data>
+  <data name="MinimumStop" xml:space="preserve">
+    <value>Mindeststopp (Zeitraffer-Min)</value>
+  </data>
+  <data name="LocoRunaround" xml:space="preserve">
+    <value>Lokumlauf (reale Min)</value>
+  </data>
+  <data name="TrainClearance" xml:space="preserve">
+    <value>Zugfreigabe (reale Min)</value>
+  </data>
+  <data name="ValidateStationCalls" xml:space="preserve">
+    <value>Stationshalte prüfen</value>
+  </data>
+  <data name="ValidateStationTracks" xml:space="preserve">
+    <value>Stationsgleise prüfen</value>
+  </data>
+  <data name="ValidateStretches" xml:space="preserve">
+    <value>Strecken prüfen</value>
+  </data>
+  <data name="ValidateTrainSpeed" xml:space="preserve">
+    <value>Zuggeschwindigkeit prüfen</value>
+  </data>
+  <data name="ValidateTrainNumbers" xml:space="preserve">
+    <value>Zugnummern prüfen</value>
+  </data>
+  <data name="ValidateSchedules" xml:space="preserve">
+    <value>Fahrzeugumläufe prüfen</value>
+  </data>
+  <data name="ValidateLocomotiveCoverage" xml:space="preserve">
+    <value>Lokomotivabdeckung prüfen</value>
+  </data>
+  <data name="ValidateDriverDuties" xml:space="preserve">
+    <value>Triebfahrzeugführerdienste prüfen</value>
+  </data>
+  <data name="Thresholds" xml:space="preserve">
+    <value>Schwellenwerte</value>
+  </data>
+  <data name="MinTrainSpeed" xml:space="preserve">
+    <value>Min. Zuggeschwindigkeit (m/Uhr-Min)</value>
+  </data>
+  <data name="MaxTrainSpeed" xml:space="preserve">
+    <value>Max. Zuggeschwindigkeit (m/Uhr-Min)</value>
+  </data>
+  <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
+    <value>Min. Minuten zwischen Gleisnutzung</value>
+  </data>
+  <data name="ModuleRegistryApiKey" xml:space="preserve">
+    <value>ModuleRegistry-API-Schlüssel</value>
+  </data>
+  <data name="OpenSchedule" xml:space="preserve">
+    <value>Fahrplan öffnen:</value>
+  </data>
+  <data name="Importing" xml:space="preserve">
+    <value>Wird importiert…</value>
+  </data>
+  <data name="Stations" xml:space="preserve">
+    <value>Stationen</value>
+  </data>
+  <data name="ImportMessages" xml:space="preserve">
+    <value>Importmeldungen</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Unerwarteter Fehler: {0}</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>Speichern unter</value>
+  </data>
+  <data name="DownloadAs" xml:space="preserve">
+    <value>&lt;strong&gt;{0}&lt;/strong&gt; herunterladen als:</value>
+  </data>
+  <data name="ComingSoon" xml:space="preserve">
+    <value>Demnächst</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value>Willkommen beim Fahrplan Planner.</value>
+  </data>
+  <data name="TrainsDescription" xml:space="preserve">
+    <value>Züge mit Stationshalten und Zeiten.</value>
+  </data>
+  <data name="StretchesPageTitle" xml:space="preserve">
+    <value>Gleis- und Fahrplanstrecken</value>
+  </data>
+  <data name="StretchesDescription" xml:space="preserve">
+    <value>Verbindungen zwischen Betriebsstellen und Fahrplanstrecken.</value>
+  </data>
+  <data name="TrainCategoriesDescription" xml:space="preserve">
+    <value>Zugkategorien mit Präfix, Farbe und Klassifizierung.</value>
+  </data>
+  <data name="VehicleOwnersDescription" xml:space="preserve">
+    <value>Wer bringt welches rollende Material zur Session mit.</value>
+  </data>
+  <data name="SchedulesDescription" xml:space="preserve">
+    <value>Fahrzeugumläufe erstellen und Lokomotiven, Wagen und Frachtströmen zuweisen.</value>
+  </data>
+  <data name="LayoutPageTitle" xml:space="preserve">
+    <value>Betriebsstellen der Anlage</value>
+  </data>
+  <data name="LayoutDescription" xml:space="preserve">
+    <value>Stationen und ihre Gleise.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Nicht gefunden</value>
+  </data>
+  <data name="NotFoundMessage" xml:space="preserve">
+    <value>Der gesuchte Inhalt existiert leider nicht.</value>
+  </data>
+  <data name="GraphNoSchedule" xml:space="preserve">
+    <value>Kein Fahrplan geladen. Importieren Sie eine Datei auf der Registerkarte „Import“.</value>
+  </data>
+  <data name="NoTimetableStretches" xml:space="preserve">
+    <value>Der geladene Fahrplan enthält keine Fahrplanstrecken.</value>
+  </data>
+  <data name="SelectStretches" xml:space="preserve">
+    <value>Wählen Sie eine oder mehrere Strecken zur Anzeige.</value>
+  </data>
+  <data name="DragViewHere" xml:space="preserve">
+    <value>Ziehen Sie eine Ansicht hierher, um zu beginnen.</value>
+  </data>
 </root>

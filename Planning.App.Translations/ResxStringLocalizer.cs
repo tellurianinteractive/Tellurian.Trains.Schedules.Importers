@@ -20,6 +20,10 @@ public sealed class ResxStringLocalizer<T> : IStringLocalizer<T>
 {
     private readonly ResourceManager _resourceManager = new(typeof(T));
 
+    /// <summary>
+    /// Gets the localized string for <paramref name="name"/> in the current UI culture,
+    /// falling back to the key itself (with <see cref="LocalizedString.ResourceNotFound"/> set) when no translation exists.
+    /// </summary>
     public LocalizedString this[string name]
     {
         get
@@ -29,6 +33,10 @@ public sealed class ResxStringLocalizer<T> : IStringLocalizer<T>
         }
     }
 
+    /// <summary>
+    /// Gets the localized string for <paramref name="name"/> in the current UI culture and formats it
+    /// with <paramref name="arguments"/>, falling back to the key itself when no translation exists.
+    /// </summary>
     public LocalizedString this[string name, params object[] arguments]
     {
         get
@@ -41,6 +49,10 @@ public sealed class ResxStringLocalizer<T> : IStringLocalizer<T>
         }
     }
 
+    /// <summary>
+    /// Gets all localized strings for the current UI culture, optionally including values inherited
+    /// from parent cultures.
+    /// </summary>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var set = _resourceManager.GetResourceSet(CultureInfo.CurrentUICulture, createIfNotExists: true, tryParents: includeParentCultures);

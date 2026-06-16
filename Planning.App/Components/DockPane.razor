@@ -1,4 +1,5 @@
 @inject DockLayoutState Dock
+@inject Translator Translator
 @implements IDisposable
 
 <div class="dock-pane">
@@ -6,8 +7,8 @@
          draggable="true"
          @ondragstart="() => Dock.DraggingViewId = ViewId"
          @ondragend="() => Dock.DraggingViewId = null">
-        <span class="title">@Label</span>
-        <button class="close" title="Close" @onclick="() => Dock.CloseView(ViewId)">&times;</button>
+        <span class="title">@Translator(Label)</span>
+        <button class="close" title="@Translator("Close")" @onclick="() => Dock.CloseView(ViewId)">&times;</button>
     </div>
 
     <div class="pane-content">
@@ -53,7 +54,7 @@
 
     private DropDirection? _hover;
 
-    private string Label => TabRegistry.Tabs.FirstOrDefault(t => t.Href == ViewId)?.Label ?? ViewId;
+    private string Label => TabRegistry.Tabs.FirstOrDefault(t => t.Href == ViewId)?.ResourceKey ?? ViewId;
     private Type? ComponentType => TabRegistry.GetComponentType(ViewId);
 
     protected override void OnInitialized() => Dock.OnChanged += OnChanged;

@@ -8,11 +8,11 @@ public static class TabRegistry
         new("Settings", "settings", typeof(Pages.Settings)),
         new("Layout", "layout", typeof(Pages.LayoutEditor)),
         new("Stretches", "stretches", typeof(Pages.Stretches)),
-        new("Train Categories", "categories", typeof(Pages.TrainCategories)),
+        new("TrainCategories", "categories", typeof(Pages.TrainCategories)),
         new("Trains", "trains", typeof(Pages.Trains)),
-        new("Graphical Timetable", "graphical-timetable", typeof(Pages.GraphicalTimetable)),
+        new("GraphicalTimetable", "graphical-timetable", typeof(Pages.GraphicalTimetable)),
         new("Schedules", "schedules", typeof(Pages.Schedules)),
-        new("Vehicle Owners", "vehicle-owners", typeof(Pages.VehicleOwners)),
+        new("VehicleOwners", "vehicle-owners", typeof(Pages.VehicleOwners)),
         new("Import", "import", typeof(Pages.Import)),
     ];
 
@@ -20,4 +20,6 @@ public static class TabRegistry
         Tabs.FirstOrDefault(t => t.Href == href)?.ComponentType;
 }
 
-public sealed record TabDefinition(string Label, string Href, Type ComponentType);
+/// <summary>A workspace tab. <paramref name="ResourceKey"/> is the <c>Labels</c> resource key used to
+/// localise the tab caption via the <c>Translator</c> service.</summary>
+public sealed record TabDefinition(string ResourceKey, string Href, Type ComponentType);

@@ -1,19 +1,20 @@
 @page "/graphical-timetable"
 @inject ScheduleStateService ScheduleState
+@inject Translator Translator
 @implements IDisposable
 
 @if (!ScheduleState.HasSchedule)
 {
-    <p>No schedule loaded. Import a file on the Settings page.</p>
+    <p>@Translator("GraphNoSchedule")</p>
 }
 else if (ScheduleState.TimetableStretches.Count == 0)
 {
-    <p>The loaded schedule has no timetable stretches.</p>
+    <p>@Translator("NoTimetableStretches")</p>
 }
 else
 {
     <div class="stretch-selector">
-        <span class="stretch-selector-label">Stretches:</span>
+        <span class="stretch-selector-label">@Translator("Stretches"):</span>
         @foreach (var stretch in ScheduleState.TimetableStretches)
         {
             <label class="stretch-option" title="@stretch.FullDescription">
@@ -27,7 +28,7 @@ else
 
     @if (_graphSchedules.Count == 0)
     {
-        <p>Select one or more stretches to display.</p>
+        <p>@Translator("SelectStretches")</p>
     }
     else
     {

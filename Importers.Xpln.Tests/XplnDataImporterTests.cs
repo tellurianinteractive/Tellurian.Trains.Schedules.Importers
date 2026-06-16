@@ -96,7 +96,7 @@ public class XplnDataImporterTests
 
         var x2000 = result.Item.ScheduledObjects.Where(v => string.Equals(v.ExternalId, "X2000", StringComparison.OrdinalIgnoreCase)).ToArray();
         Assert.HasCount(1, x2000, "X2000 vehicles");
-        Assert.AreEqual(ScheduledObjectType.Railcar, x2000[0].ObjectType, "X2000 vehicle type");
+        Assert.AreEqual(ScheduledObjectType.Trainset, x2000[0].ObjectType, "X2000 vehicle type");
     }
 
     [TestMethod]
@@ -249,7 +249,7 @@ public class XplnDataImporterTests
     [DataRow("Värnamo2016", "sv-SE", 8, 40, 13, 0, 0, 27, 8, 0)]
     [DataRow("Värnamo2017", "sv-SE", 9, 40, 12, 0, 0, 29, 9, 0)]
 
-    public async Task Import(string scheduleName, string? culture, int expectedTrackStretches, int expectedTrains, int expectedLocos, int expectedTrainsets, int expectedWagonGroups, int expectedDuties, int expectedDispatchStretches, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
+    public async Task Import(string scheduleName, string? culture, int expectedTrackStretches, int expectedTrains, int expectedLocos, int expectedWagonsets, int expectedCargoFlows, int expectedDuties, int expectedDispatchStretches, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
     {
         culture ??= "sv-SE";
         CultureInfo.CurrentCulture = new CultureInfo(culture);
@@ -273,8 +273,8 @@ public class XplnDataImporterTests
                 Assert.HasCount(expectedDispatchStretches, result.Item.Timetable.Layout.DispatchStretches, "DispatchStreches");
                 Assert.HasCount(expectedTrains, timetable.Trains, "Trains");
                 Assert.HasCount(expectedLocos, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Locomotive), "Locos");
-                Assert.HasCount(expectedTrainsets, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Trainset), "Trainsets");
-                Assert.AreEqual(expectedWagonGroups, timetable.Trains.Sum(t => t.WagonGroups.Count));
+                Assert.HasCount(expectedWagonsets, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Wagonset), "Wagonsets");
+                Assert.HasCount(expectedCargoFlows, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.CargoFlow), "Cargo flows");
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
                 var validationErrors = result.Item.GetValidationErrors(ValidationSettings);

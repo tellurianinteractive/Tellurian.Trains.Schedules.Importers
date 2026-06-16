@@ -1,4 +1,5 @@
 @inject DockLayoutState Dock
+@inject Translator Translator
 
 @if (Node is DockSplit split)
 {
@@ -22,7 +23,7 @@ else
     <div class="dock-empty"
          @ondragover:preventDefault="true"
          @ondrop="OnRootDrop">
-        <span>Drag a view here to start.</span>
+        <span>@Translator("DragViewHere")</span>
     </div>
 }
 

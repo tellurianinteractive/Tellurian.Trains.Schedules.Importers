@@ -65,7 +65,16 @@
       "Bash(grep -iE '\\\\.\\(razor|cs\\)$')",
       "Skill(csharp)",
       "Bash(git merge *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "PowerShell(git *)",
+      "Bash(dotnet nuget *)",
+      "PowerShell($p=\"$env:USERPROFILE\\\\.nuget\\\\packages\\\\tellurian.localization\"; if \\(Test-Path $p\\) { Get-ChildItem $p | Select-Object Name; } else { \"not cached\" }; \"--- nupkg build time ---\"; Get-ChildItem C:\\\\NuGets\\\\Tellurian.Localization.1.2.0.nupkg | Select-Object LastWriteTime)",
+      "mcp__nuget__get_latest_package_version",
+      "Bash(Get-ChildItem -Path \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedules\\\\Model\" -Recurse -Filter \"*.cs\")",
+      "Bash(Select-Object -Property FullName, Directory)",
+      "Bash(Sort-Object FullName)",
+      "Bash(grep -rl \"Model/Model.csproj\\\\|Model\\\\\\\\\\\\\\\\Model.csproj\\\\|\\\\\"..\\\\\\\\\\\\\\\\Model\\\\\\\\\\\\\\\\Model.csproj\\\\\"\\\\|\\\\\\\\.\\\\\\\\./Model/Model.csproj\" --include=*.csproj .)",
+      "Bash(grep -rlE \"ProjectReference.*[\\\\\\\\\\\\\\\\/]Model[\\\\\\\\\\\\\\\\/]Model\\\\.csproj\" --include=*.csproj .)"
     ]
   }
 }

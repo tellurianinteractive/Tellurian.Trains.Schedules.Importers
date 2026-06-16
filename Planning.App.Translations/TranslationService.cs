@@ -16,6 +16,6 @@ public sealed class TranslationService(
     /// Returns the translated label for <paramref name="key"/> in the current UI culture,
     /// falling back to the key itself when no translation exists.
     /// </summary>
-    public async Task<string> GetLabel(string key) =>
-        (await resx.Translated<Labels>(key)).Text;
+    public string GetLabel(string key) =>
+        resx.Translated<Labels>(key).Text;
 }

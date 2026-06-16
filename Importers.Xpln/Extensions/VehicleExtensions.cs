@@ -13,7 +13,7 @@ internal static class VehicleExtensions
     /// </summary>
     /// <param name="schedule">The schedule to add the vehicle to.</param>
     /// <param name="id">The unique identifier for the vehicle.</param>
-    /// <param name="vehicleType">The type of vehicle (Locomotive, Railcar, etc.).</param>
+    /// <param name="vehicleType">The type of vehicle (Locomotive, Trainset, etc.).</param>
     /// <param name="number">The vehicle number.</param>
     /// <param name="vehicleClass">The vehicle class (e.g., "BR 218").</param>
     /// <param name="company">The operating company (optional).</param>

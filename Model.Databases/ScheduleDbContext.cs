@@ -479,8 +479,8 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(e => e.DriverDuties)
-                  .WithOne(e => e.Schedule)
-                  .HasForeignKey(e => e.ScheduleId)
+                  .WithOne(e => e.Plan)
+                  .HasForeignKey(e => e.PlanId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -575,7 +575,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // table sharing the TrainPart primary key (an absent row means the option is null).
             entity.OwnsOne(e => e.TractionOptions, o => o.ToTable("TractionOptions"));
 
-            entity.OwnsOne(e => e.NonTractionOptions, o =>
+            entity.OwnsOne(e => e.WagonSetOptions, o =>
             {
                 o.ToTable("NonTractionOptions");
                 o.OwnsMany(n => n.WagonGroup, w =>
@@ -590,9 +590,27 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.OwnsOne(e => e.CargoFlowOptions, o =>
             {
                 o.ToTable("CargoFlowOptions");
-                // Transfer points reference Station entities (not owned).
-                o.HasOne(c => c.TransferOrigin).WithMany().OnDelete(DeleteBehavior.Restrict);
-                o.HasOne(c => c.TransferDestination).WithMany().OnDelete(DeleteBehavior.Restrict);
+
+                // Origins and destinations are owned collections; each references a Station entity
+                // (not owned). A sole auto-increment shadow key lets SQLite generate it, mirroring
+                // the Wagons mapping above.
+                o.OwnsMany(c => c.Origins, origin =>
+                {
+                    origin.ToTable("CargoFlowOrigins");
+                    origin.Property<int>("Id").ValueGeneratedOnAdd();
+                    origin.HasKey("Id");
+                    origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                });
+
+                o.OwnsMany(c => c.Destinations, destination =>
+                {
+                    destination.ToTable("CargoFlowDestinations");
+                    destination.Property<int>("Id").ValueGeneratedOnAdd();
+                    destination.HasKey("Id");
+                    destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                    // Computed markup rendering, not persisted.
+                    destination.Ignore(x => x.Display);
+                });
             });
 
             entity.OwnsOne(e => e.CargoOnlyOptions, o =>
@@ -615,11 +633,9 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasValue<TextCallNote>("Text");
         });
 
-        // TextCallNote
+        // TextCallNote 
         modelBuilder.Entity<TextCallNote>(entity =>
         {
-            entity.Property(e => e.Text).HasMaxLength(1000);
-            entity.Property(e => e.LanguageCode).HasMaxLength(5);
         });
 
         // DriverDutyNote

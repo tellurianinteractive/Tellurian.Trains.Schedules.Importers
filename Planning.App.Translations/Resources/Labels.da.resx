@@ -123,4 +123,334 @@
   <data name="About" xml:space="preserve">
     <value>Om</value>
   </data>
+  <data name="Workspace" xml:space="preserve">
+    <value>Arbejdsområde</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Hjem</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Indstillinger</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Anlæg</value>
+  </data>
+  <data name="Stretches" xml:space="preserve">
+    <value>Strækninger</value>
+  </data>
+  <data name="TrainCategories" xml:space="preserve">
+    <value>Togkategorier</value>
+  </data>
+  <data name="Trains" xml:space="preserve">
+    <value>Tog</value>
+  </data>
+  <data name="GraphicalTimetable" xml:space="preserve">
+    <value>Grafisk køreplan</value>
+  </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Omløb</value>
+  </data>
+  <data name="VehicleOwners" xml:space="preserve">
+    <value>Køretøjsejere</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Importér</value>
+  </data>
+  <data name="Reports" xml:space="preserve">
+    <value>Rapporter</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Eksportér</value>
+  </data>
+  <data name="TurnusCards" xml:space="preserve">
+    <value>Omløbskort</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Udskriv</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Luk</value>
+  </data>
+  <data name="Train" xml:space="preserve">
+    <value>Tog</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Fra</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Til</value>
+  </data>
+  <data name="Turnus" xml:space="preserve">
+    <value>Omløb</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Indhold</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>Klasse</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Side</value>
+  </data>
+  <data name="CreatingReport" xml:space="preserve">
+    <value>Opretter rapport…</value>
+  </data>
+  <data name="TurnForNextDay" xml:space="preserve">
+    <value>Fortsætter næste dag</value>
+  </data>
+  <data name="TurnForNextSession" xml:space="preserve">
+    <value>Fortsætter næste session</value>
+  </data>
+  <data name="Locomotive" xml:space="preserve">
+    <value>Lokomotiv</value>
+  </data>
+  <data name="Trainset" xml:space="preserve">
+    <value>Togsæt</value>
+  </data>
+  <data name="Wagonset" xml:space="preserve">
+    <value>Vognsæt</value>
+  </data>
+  <data name="Cargo" xml:space="preserve">
+    <value>Gods</value>
+  </data>
+  <data name="CargoFlow" xml:space="preserve">
+    <value>Godsstrøm</value>
+  </data>
+  <data name="SpareLoco" xml:space="preserve">
+    <value>Reservelokomotiv</value>
+  </data>
+  <data name="SpareRailcar" xml:space="preserve">
+    <value>Reservemotorvogn</value>
+  </data>
+  <data name="SpareWagon" xml:space="preserve">
+    <value>Reservevogn</value>
+  </data>
+  <data name="MondayShort" xml:space="preserve">
+    <value>Man</value>
+  </data>
+  <data name="TuesdayShort" xml:space="preserve">
+    <value>Tir</value>
+  </data>
+  <data name="WednesdayShort" xml:space="preserve">
+    <value>Ons</value>
+  </data>
+  <data name="ThursdayShort" xml:space="preserve">
+    <value>Tor</value>
+  </data>
+  <data name="FridayShort" xml:space="preserve">
+    <value>Fre</value>
+  </data>
+  <data name="SaturdayShort" xml:space="preserve">
+    <value>Lør</value>
+  </data>
+  <data name="SundayShort" xml:space="preserve">
+    <value>Søn</value>
+  </data>
+  <data name="SettingsNoSchedule" xml:space="preserve">
+    <value>Ingen køreplan indlæst. Importér en fil under fanen Importér for at redigere indstillingerne.</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>Generelt</value>
+  </data>
+  <data name="TimeAndSpeed" xml:space="preserve">
+    <value>Tid &amp; hastighed</value>
+  </data>
+  <data name="Validation" xml:space="preserve">
+    <value>Validering</value>
+  </data>
+  <data name="Integration" xml:space="preserve">
+    <value>Integration</value>
+  </data>
+  <data name="LayoutName" xml:space="preserve">
+    <value>Anlæggets navn</value>
+  </data>
+  <data name="UseDays" xml:space="preserve">
+    <value>Brug dage i stedet for sessioner</value>
+  </data>
+  <data name="StartDay" xml:space="preserve">
+    <value>Startdag</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Starttidspunkt</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>Sluttidspunkt</value>
+  </data>
+  <data name="BreakForPrinting" xml:space="preserve">
+    <value>Skift til udskrift (deler grafen i to halvdele)</value>
+  </data>
+  <data name="TimeAxisOrientation" xml:space="preserve">
+    <value>Tidsaksens orientering</value>
+  </data>
+  <data name="ShowArrivalMinutes" xml:space="preserve">
+    <value>Vis ankomstminutter</value>
+  </data>
+  <data name="ShowDepartureMinutes" xml:space="preserve">
+    <value>Vis afgangsminutter</value>
+  </data>
+  <data name="MinuteSpacing" xml:space="preserve">
+    <value>Minutafstand (px/min)</value>
+  </data>
+  <data name="StationSpacing" xml:space="preserve">
+    <value>Stationsafstand (px)</value>
+  </data>
+  <data name="TrackSpacing" xml:space="preserve">
+    <value>Sporafstand (px)</value>
+  </data>
+  <data name="ShowTrainCategory" xml:space="preserve">
+    <value>Vis togkategori</value>
+  </data>
+  <data name="ShowCompany" xml:space="preserve">
+    <value>Vis selskab</value>
+  </data>
+  <data name="HideSessionsOrDays" xml:space="preserve">
+    <value>Skjul sessioner/dage</value>
+  </data>
+  <data name="FastClockSpeed" xml:space="preserve">
+    <value>Hurtigursfart (×)</value>
+  </data>
+  <data name="SpeedMapping" xml:space="preserve">
+    <value>Hastighedstildeling</value>
+  </data>
+  <data name="ScaleSpeedKmh" xml:space="preserve">
+    <value>Skala km/t</value>
+  </data>
+  <data name="RealSpeedMs" xml:space="preserve">
+    <value>Reel m/s</value>
+  </data>
+  <data name="SpeedSlow" xml:space="preserve">
+    <value>Langsom</value>
+  </data>
+  <data name="SpeedNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="SpeedHigh" xml:space="preserve">
+    <value>Høj</value>
+  </data>
+  <data name="DefaultStationTimes" xml:space="preserve">
+    <value>Standardstationstider</value>
+  </data>
+  <data name="DefaultStationTimesHint" xml:space="preserve">
+    <value>Standardværdier for hele anlægget; enkelte stationer kan tilsidesætte disse.</value>
+  </data>
+  <data name="MinimumStop" xml:space="preserve">
+    <value>Mindste ophold (hurtigur-min)</value>
+  </data>
+  <data name="LocoRunaround" xml:space="preserve">
+    <value>Lokomotivomløb (reelle min)</value>
+  </data>
+  <data name="TrainClearance" xml:space="preserve">
+    <value>Togklarering (reelle min)</value>
+  </data>
+  <data name="ValidateStationCalls" xml:space="preserve">
+    <value>Validér stationsophold</value>
+  </data>
+  <data name="ValidateStationTracks" xml:space="preserve">
+    <value>Validér stationsspor</value>
+  </data>
+  <data name="ValidateStretches" xml:space="preserve">
+    <value>Validér strækninger</value>
+  </data>
+  <data name="ValidateTrainSpeed" xml:space="preserve">
+    <value>Validér toghastighed</value>
+  </data>
+  <data name="ValidateTrainNumbers" xml:space="preserve">
+    <value>Validér tognumre</value>
+  </data>
+  <data name="ValidateSchedules" xml:space="preserve">
+    <value>Validér køretøjsomløb</value>
+  </data>
+  <data name="ValidateLocomotiveCoverage" xml:space="preserve">
+    <value>Validér lokomotivdækning</value>
+  </data>
+  <data name="ValidateDriverDuties" xml:space="preserve">
+    <value>Validér førertjenester</value>
+  </data>
+  <data name="Thresholds" xml:space="preserve">
+    <value>Tærskelværdier</value>
+  </data>
+  <data name="MinTrainSpeed" xml:space="preserve">
+    <value>Mindste toghastighed (m/ur-min)</value>
+  </data>
+  <data name="MaxTrainSpeed" xml:space="preserve">
+    <value>Største toghastighed (m/ur-min)</value>
+  </data>
+  <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
+    <value>Mindste minutter mellem sporbrug</value>
+  </data>
+  <data name="ModuleRegistryApiKey" xml:space="preserve">
+    <value>ModuleRegistry API-nøgle</value>
+  </data>
+  <data name="OpenSchedule" xml:space="preserve">
+    <value>Åbn køreplan:</value>
+  </data>
+  <data name="Importing" xml:space="preserve">
+    <value>Importerer…</value>
+  </data>
+  <data name="Stations" xml:space="preserve">
+    <value>Stationer</value>
+  </data>
+  <data name="ImportMessages" xml:space="preserve">
+    <value>Importmeddelelser</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Uventet fejl: {0}</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>Gem som</value>
+  </data>
+  <data name="DownloadAs" xml:space="preserve">
+    <value>Hent &lt;strong&gt;{0}&lt;/strong&gt; som:</value>
+  </data>
+  <data name="ComingSoon" xml:space="preserve">
+    <value>Kommer snart</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annullér</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value>Velkommen til Køreplanlæggeren.</value>
+  </data>
+  <data name="TrainsDescription" xml:space="preserve">
+    <value>Tog med stationsophold og tider.</value>
+  </data>
+  <data name="StretchesPageTitle" xml:space="preserve">
+    <value>Spor- og køreplanstrækninger</value>
+  </data>
+  <data name="StretchesDescription" xml:space="preserve">
+    <value>Forbindelser mellem driftssteder og køreplanstrækninger.</value>
+  </data>
+  <data name="TrainCategoriesDescription" xml:space="preserve">
+    <value>Togkategorier med præfiks, farve og klassifikation.</value>
+  </data>
+  <data name="VehicleOwnersDescription" xml:space="preserve">
+    <value>Hvem medbringer hvilket rullende materiel til sessionen.</value>
+  </data>
+  <data name="SchedulesDescription" xml:space="preserve">
+    <value>Byg køretøjsomløb og tildel lokomotiver, vogne og godsstrømme.</value>
+  </data>
+  <data name="LayoutPageTitle" xml:space="preserve">
+    <value>Anlæggets driftssteder</value>
+  </data>
+  <data name="LayoutDescription" xml:space="preserve">
+    <value>Stationer og deres spor.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Ikke fundet</value>
+  </data>
+  <data name="NotFoundMessage" xml:space="preserve">
+    <value>Beklager, det indhold du leder efter findes ikke.</value>
+  </data>
+  <data name="GraphNoSchedule" xml:space="preserve">
+    <value>Ingen køreplan indlæst. Importér en fil under fanen Importér.</value>
+  </data>
+  <data name="NoTimetableStretches" xml:space="preserve">
+    <value>Den indlæste køreplan har ingen køreplanstrækninger.</value>
+  </data>
+  <data name="SelectStretches" xml:space="preserve">
+    <value>Vælg en eller flere strækninger at vise.</value>
+  </data>
+  <data name="DragViewHere" xml:space="preserve">
+    <value>Træk en visning hertil for at begynde.</value>
+  </data>
 </root>

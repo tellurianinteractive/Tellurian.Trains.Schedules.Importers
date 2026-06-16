@@ -1,15 +1,16 @@
 @page "/settings"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
-@using LayoutModel = Tellurian.Trains.Schedules.Model.Layout
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
 @inject ScheduleStateService ScheduleState
+@inject Translator Translator
 @implements IDisposable
 
-<h2>Settings</h2>
+<h2>@Translator("Settings")</h2>
 
 @if (Layout is null || S is null)
 {
-    <p>No schedule loaded. Import a file on the Import tab to edit its settings.</p>
+    <p>@Translator("SettingsNoSchedule")</p>
 }
 else
 {
@@ -29,17 +30,17 @@ else
             {
                 var g = S.General;
                 <div class="field">
-                    <label>Layout name</label>
+                    <label>@Translator("LayoutName")</label>
                     <input type="text" @bind="LayoutName" />
                 </div>
                 <div class="field">
-                    <label>Use days instead of sessions</label>
+                    <label>@Translator("UseDays")</label>
                     <input type="checkbox" @bind="g.UseDays" />
                 </div>
                 @if (g.UseDays)
                 {
                     <div class="field">
-                        <label>Start day</label>
+                        <label>@Translator("StartDay")</label>
                         <select @bind="g.StartDay">
                             @foreach (var day in Enum.GetValues<DayOfWeek>())
                             {
@@ -49,15 +50,15 @@ else
                     </div>
                 }
                 <div class="field">
-                    <label>Start time</label>
+                    <label>@Translator("StartTime")</label>
                     <input type="time" @bind="StartTime" />
                 </div>
                 <div class="field">
-                    <label>End time</label>
+                    <label>@Translator("EndTime")</label>
                     <input type="time" @bind="EndTime" />
                 </div>
                 <div class="field">
-                    <label>Break for printing (splits the graph in two halves)</label>
+                    <label>@Translator("BreakForPrinting")</label>
                     <input type="checkbox" @bind="UseBreak" />
                     @if (UseBreak)
                     {
@@ -69,7 +70,7 @@ else
             {
                 var gt = S.GraphicTimetable;
                 <div class="field">
-                    <label>Time axis orientation</label>
+                    <label>@Translator("TimeAxisOrientation")</label>
                     <select @bind="gt.Orientation">
                         @foreach (var o in Enum.GetValues<TimeAxisOrientation>())
                         {
@@ -78,35 +79,35 @@ else
                     </select>
                 </div>
                 <div class="field">
-                    <label>Show arrival minutes</label>
+                    <label>@Translator("ShowArrivalMinutes")</label>
                     <input type="checkbox" @bind="gt.ShowArrivalMinutes" />
                 </div>
                 <div class="field">
-                    <label>Show departure minutes</label>
+                    <label>@Translator("ShowDepartureMinutes")</label>
                     <input type="checkbox" @bind="gt.ShowDepartureMinutes" />
                 </div>
                 <div class="field">
-                    <label>Minute spacing (px/min)</label>
+                    <label>@Translator("MinuteSpacing")</label>
                     <input type="number" min="1" @bind="gt.MinuteSpacing" />
                 </div>
                 <div class="field">
-                    <label>Station spacing (px)</label>
+                    <label>@Translator("StationSpacing")</label>
                     <input type="number" min="1" @bind="gt.StationSpacing" />
                 </div>
                 <div class="field">
-                    <label>Track spacing (px)</label>
+                    <label>@Translator("TrackSpacing")</label>
                     <input type="number" min="1" @bind="gt.TrackSpacing" />
                 </div>
                 <div class="field">
-                    <label>Show train category</label>
+                    <label>@Translator("ShowTrainCategory")</label>
                     <input type="checkbox" @bind="gt.ShowTrainCategory" />
                 </div>
                 <div class="field">
-                    <label>Show company</label>
+                    <label>@Translator("ShowCompany")</label>
                     <input type="checkbox" @bind="gt.ShowCompany" />
                 </div>
                 <div class="field">
-                    <label>Hide sessions/days</label>
+                    <label>@Translator("HideSessionsOrDays")</label>
                     <input type="checkbox" @bind="gt.HideSessionsOrDays" />
                 </div>
             }
@@ -114,46 +115,46 @@ else
             {
                 var ts = S.TimeAndSpeed;
                 <div class="field">
-                    <label>Fast clock speed (×)</label>
+                    <label>@Translator("FastClockSpeed")</label>
                     <input type="number" min="1" @bind="ts.FastClockSpeed" />
                 </div>
 
-                <div class="group-heading">Speed mapping</div>
+                <div class="group-heading">@Translator("SpeedMapping")</div>
                 <table class="speed-map">
                     <thead>
-                        <tr><th>Class</th><th>Scale km/h</th><th>Real m/s</th></tr>
+                        <tr><th>@Translator("Class")</th><th>@Translator("ScaleSpeedKmh")</th><th>@Translator("RealSpeedMs")</th></tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Slow</td>
+                            <td>@Translator("SpeedSlow")</td>
                             <td><input type="number" min="0" @bind="ts.Slow.ScaleSpeedKmh" /></td>
                             <td><input type="number" step="0.01" @bind="ts.Slow.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
                         </tr>
                         <tr>
-                            <td>Normal</td>
+                            <td>@Translator("SpeedNormal")</td>
                             <td><input type="number" min="0" @bind="ts.Normal.ScaleSpeedKmh" /></td>
                             <td><input type="number" step="0.01" @bind="ts.Normal.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
                         </tr>
                         <tr>
-                            <td>High</td>
+                            <td>@Translator("SpeedHigh")</td>
                             <td><input type="number" min="0" @bind="ts.High.ScaleSpeedKmh" /></td>
                             <td><input type="number" step="0.01" @bind="ts.High.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div class="group-heading">Default station times</div>
-                <p class="hint">Layout-wide defaults; individual stations may override these.</p>
+                <div class="group-heading">@Translator("DefaultStationTimes")</div>
+                <p class="hint">@Translator("DefaultStationTimesHint")</p>
                 <div class="field">
-                    <label>Minimum stop (fast-clock min)</label>
+                    <label>@Translator("MinimumStop")</label>
                     <input type="number" min="0" @bind="ts.StationTimings.MinimumStopMinutes" />
                 </div>
                 <div class="field">
-                    <label>Loco runaround (real min)</label>
+                    <label>@Translator("LocoRunaround")</label>
                     <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" />
                 </div>
                 <div class="field">
-                    <label>Train clearance (real min)</label>
+                    <label>@Translator("TrainClearance")</label>
                     <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" />
                 </div>
             }
@@ -161,49 +162,49 @@ else
             {
                 var v = S.Validation;
                 <div class="field">
-                    <label>Validate station calls</label>
+                    <label>@Translator("ValidateStationCalls")</label>
                     <input type="checkbox" @bind="v.ValidateStationCalls" />
                 </div>
                 <div class="field">
-                    <label>Validate station tracks</label>
+                    <label>@Translator("ValidateStationTracks")</label>
                     <input type="checkbox" @bind="v.ValidateStationTracks" />
                 </div>
                 <div class="field">
-                    <label>Validate stretches</label>
+                    <label>@Translator("ValidateStretches")</label>
                     <input type="checkbox" @bind="v.ValidateStretches" />
                 </div>
                 <div class="field">
-                    <label>Validate train speed</label>
+                    <label>@Translator("ValidateTrainSpeed")</label>
                     <input type="checkbox" @bind="v.ValidateTrainSpeed" />
                 </div>
                 <div class="field">
-                    <label>Validate train numbers</label>
+                    <label>@Translator("ValidateTrainNumbers")</label>
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" />
                 </div>
                 <div class="field">
-                    <label>Validate vehicle schedules</label>
+                    <label>@Translator("ValidateSchedules")</label>
                     <input type="checkbox" @bind="v.ValidateSchedules" />
                 </div>
                 <div class="field">
-                    <label>Validate locomotive coverage</label>
+                    <label>@Translator("ValidateLocomotiveCoverage")</label>
                     <input type="checkbox" @bind="v.ValidateLocomotiveCoverage" />
                 </div>
                 <div class="field">
-                    <label>Validate driver duties</label>
+                    <label>@Translator("ValidateDriverDuties")</label>
                     <input type="checkbox" @bind="v.ValidateDriverDuties" />
                 </div>
 
-                <div class="group-heading">Thresholds</div>
+                <div class="group-heading">@Translator("Thresholds")</div>
                 <div class="field">
-                    <label>Min train speed (m/clock-min)</label>
+                    <label>@Translator("MinTrainSpeed")</label>
                     <input type="number" step="0.1" @bind="v.MinTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
                 </div>
                 <div class="field">
-                    <label>Max train speed (m/clock-min)</label>
+                    <label>@Translator("MaxTrainSpeed")</label>
                     <input type="number" step="0.1" @bind="v.MaxTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
                 </div>
                 <div class="field">
-                    <label>Min minutes between track usage</label>
+                    <label>@Translator("MinMinutesBetweenTrackUsage")</label>
                     <input type="number" min="0" @bind="v.MinMinutesBetweenTrackUsage" />
                 </div>
             }
@@ -211,7 +212,7 @@ else
             {
                 var i = S.Integration;
                 <div class="field">
-                    <label>ModuleRegistry API key</label>
+                    <label>@Translator("ModuleRegistryApiKey")</label>
                     <input type="text" @bind="i.ModuleRegistryApiKey" />
                 </div>
             }
@@ -277,15 +278,15 @@ else
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
-    private static string SectionLabel(SettingsSection section) => section switch
+    private string SectionLabel(SettingsSection section) => Translator(section switch
     {
         SettingsSection.General => "General",
-        SettingsSection.GraphicTimetable => "Graphical Timetable",
-        SettingsSection.TimeAndSpeed => "Time & Speed",
+        SettingsSection.GraphicTimetable => "GraphicalTimetable",
+        SettingsSection.TimeAndSpeed => "TimeAndSpeed",
         SettingsSection.Validation => "Validation",
         SettingsSection.Integration => "Integration",
         _ => section.ToString()
-    };
+    });
 
     public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
 

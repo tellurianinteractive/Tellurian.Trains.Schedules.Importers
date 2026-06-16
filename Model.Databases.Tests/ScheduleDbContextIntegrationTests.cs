@@ -140,8 +140,12 @@ public class ScheduleDbContextIntegrationTests
         var part = train.AsTrainPart(0, 1);
         part.Id = 1;
         part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true };
-        part.NonTractionOptions = new NonTractionOptions { OrderInTrain = 3, WagonGroup = { new Wagon(1, "Gbs") { Number = "1234" } } };
-        part.CargoFlowOptions = new CargoFlowOptions { AndRegions = true, TransferDestination = station };
+        part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3, WagonGroup = { new Wagon(1, "Gbs") { Number = "1234" } } };
+        part.CargoFlowOptions = new CargoFlowOptions
+        {
+            Origins = { new Origin { Station = station } },
+            Destinations = { new Destination { Station = station, AndRegions = true } }
+        };
         part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
 
         // Act
@@ -153,8 +157,9 @@ public class ScheduleDbContextIntegrationTests
         context.ChangeTracker.Clear();
 
         var loaded = await context.TrainParts
-            .Include(p => p.NonTractionOptions!).ThenInclude(n => n.WagonGroup)
-            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.TransferDestination)
+            .Include(p => p.WagonSetOptions!).ThenInclude(n => n.WagonGroup)
+            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Origins).ThenInclude(o => o.Station)
+            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Destinations).ThenInclude(d => d.Station)
             .FirstAsync(CancellationToken);
 
         // Assert - each option kind persisted and read back from SQLite
@@ -163,15 +168,18 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsTrue(loaded.TractionOptions.TurnLoco);
         Assert.IsTrue(loaded.TractionOptions.HasCoupleNote);
 
-        Assert.IsNotNull(loaded.NonTractionOptions, "NonTractionOptions");
-        Assert.AreEqual(3, loaded.NonTractionOptions!.OrderInTrain);
-        Assert.AreEqual(1, loaded.NonTractionOptions.WagonGroup.Count);
-        Assert.AreEqual("Gbs", loaded.NonTractionOptions.WagonGroup.First().Class);
-        Assert.AreEqual("1234", loaded.NonTractionOptions.WagonGroup.First().Number);
+        Assert.IsNotNull(loaded.WagonSetOptions, "NonTractionOptions");
+        Assert.AreEqual(3, loaded.WagonSetOptions!.OrderInTrain);
+        Assert.AreEqual(1, loaded.WagonSetOptions.WagonGroup.Count);
+        Assert.AreEqual("Gbs", loaded.WagonSetOptions.WagonGroup.First().Class);
+        Assert.AreEqual("1234", loaded.WagonSetOptions.WagonGroup.First().Number);
 
         Assert.IsNotNull(loaded.CargoFlowOptions, "CargoFlowOptions");
-        Assert.IsTrue(loaded.CargoFlowOptions!.AndRegions);
-        Assert.AreEqual("S", loaded.CargoFlowOptions.TransferDestination?.Signature);
+        Assert.AreEqual(1, loaded.CargoFlowOptions!.Origins.Count);
+        Assert.AreEqual("S", loaded.CargoFlowOptions.Origins.First().Station.Signature);
+        Assert.AreEqual(1, loaded.CargoFlowOptions.Destinations.Count);
+        Assert.AreEqual("S", loaded.CargoFlowOptions.Destinations.First().Station.Signature);
+        Assert.IsTrue(loaded.CargoFlowOptions.Destinations.First().AndRegions);
 
         Assert.IsNotNull(loaded.CargoOnlyOptions, "CargoOnlyOptions");
         Assert.AreEqual("Coal", loaded.CargoOnlyOptions!.CargoName);
@@ -201,9 +209,9 @@ public class ScheduleDbContextIntegrationTests
         // Verify expected counts from Barmstedt2022
         Assert.AreEqual(61, schedule.Timetable.Trains.Count, "Expected 61 trains");
         Assert.AreEqual(18, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.Locomotive), "Expected 18 loco schedules");
-        Assert.AreEqual(21, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.Trainset), "Expected 21 trainset schedules");
+        Assert.AreEqual(21, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.Wagonset), "Expected 21 wagonset schedules");
         Assert.AreEqual(45, schedule.DriverDuties.Count, "Expected 45 driver duties");
-        Assert.AreEqual(14, schedule.Timetable.Trains.Sum(t => t.WagonGroups.Count), "Expected 14 wagon groups");
+        Assert.AreEqual(14, schedule.ScheduledObjects.Count(v => v.ObjectType == ScheduledObjectType.CargoFlow), "Expected 14 cargo flows");
     }
 
     [TestMethod]

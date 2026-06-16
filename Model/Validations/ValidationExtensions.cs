@@ -310,7 +310,7 @@ public static class ValidationExtensions
 
         // Get all traction vehicle schedules (locomotives and self-propelled railcars)
         var locomotiveSchedules = schedule.ScheduledObjects
-            .Where(v => v.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Railcar)
+            .Where(v => v.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset)
             .SelectMany(v => v.ScheduleAssignments)
             .Select(a => a.Schedule)
             .Distinct()

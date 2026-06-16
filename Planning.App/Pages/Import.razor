@@ -2,13 +2,14 @@
 @using Tellurian.Trains.Schedules.Importers.Interfaces
 @inject ScheduleImportService ImportService
 @inject ScheduleStateService ScheduleState
+@inject Translator Translator
 
 <div class="import-row">
-    <span class="import-label">Open schedule:</span>
+    <span class="import-label">@Translator("OpenSchedule")</span>
     <InputFile OnChange="OnFileSelected" accept=".json,.ods,.xlsx" />
     @if (_isImporting)
     {
-        <span class="status-importing">Importing...</span>
+        <span class="status-importing">@Translator("Importing")</span>
     }
 </div>
 
@@ -16,16 +17,16 @@
 {
     <div class="schedule-summary">
         <span><strong>@ScheduleState.Schedule!.Name</strong></span>
-        <span>@(ScheduleState.Schedule.Timetable?.Trains?.Count ?? 0) trains</span>
-        <span>@ScheduleState.TimetableStretches.Count stretches</span>
-        <span>@(ScheduleState.Schedule.Timetable?.Layout?.OperationLocations?.Count ?? 0) stations</span>
+        <span>@(ScheduleState.Schedule.Timetable?.Trains?.Count ?? 0) @Translator("Trains")</span>
+        <span>@ScheduleState.TimetableStretches.Count @Translator("Stretches")</span>
+        <span>@(ScheduleState.Schedule.Timetable?.Layout?.OperationLocations?.Count ?? 0) @Translator("Stations")</span>
     </div>
 }
 
 @if (_messages.Count > 0)
 {
     <details class="import-messages" open="@_hasErrors">
-        <summary>Import messages (@_messages.Count)</summary>
+        <summary>@Translator("ImportMessages") (@_messages.Count)</summary>
         <ul>
             @foreach (var message in _messages)
             {
@@ -72,7 +73,7 @@
         }
         catch (Exception ex)
         {
-            _messages.Add(Message.System($"Unexpected error: {ex.Message}"));
+            _messages.Add(Message.System(string.Format(Translator("UnexpectedError"), ex.Message)));
             _hasErrors = true;
         }
         finally

@@ -1,10 +1,11 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject Translator Translator
 
 <div class="report-toolbar no-print">
-    <button @onclick="Print">Print</button>
-    <button @onclick="Close">Close</button>
+    <button @onclick="Print">@Translator("Print")</button>
+    <button @onclick="Close">@Translator("Close")</button>
 </div>
 
 @Body

@@ -4,15 +4,15 @@
 @inject DockLayoutState Dock
 @inject ScheduleStateService ScheduleState
 @inject IJSRuntime JS
-@inject TranslationService Translation
+@inject Translator Translator
 @implements IDisposable
 
 <div class="page">
     <header class="top-bar no-print">
-        <h1 class="app-title">Timetable Planner <span class="app-version">@AppVersion</span></h1>
+        <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span></h1>
         <div class="top-bar-actions">
             <LanguageSelector />
-            <button class="header-btn" @onclick="ToggleAbout">@_aboutLabel</button>
+            <button class="header-btn" @onclick="ToggleAbout">@Translator("About")</button>
         </div>
     </header>
 
@@ -29,7 +29,7 @@
 
     <nav class="tab-bar no-print">
         <NavLink class="tab workspace-tab" href="workspace" Match="NavLinkMatch.Prefix">
-            Workspace
+            @Translator("Workspace")
         </NavLink>
         @foreach (var tab in TabRegistry.Tabs)
         {
@@ -39,7 +39,7 @@
                      draggable="true"
                      @ondragstart="() => Dock.DraggingViewId = tab.Href"
                      @ondragend="() => Dock.DraggingViewId = null">
-                @tab.Label
+                @Translator(tab.ResourceKey)
             </NavLink>
         }
         <ReportsMenu />
@@ -57,16 +57,11 @@
     private const string AppVersion = "0.1";
     private bool _showAbout;
     private string _aboutHtml = "";
-    private string _aboutLabel = "";
 
     [Inject(Key = "Markdown")]
     public IResourceProvider MarkdownProvider { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Dock.OnChanged += StateHasChanged;
-        _aboutLabel = await Translation.GetLabel("About");
-    }
+    protected override void OnInitialized() => Dock.OnChanged += StateHasChanged;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

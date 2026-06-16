@@ -1,5 +1,4 @@
 using System.Globalization;
-using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model;
 
@@ -98,37 +97,6 @@ public sealed record Message : IEquatable<Message>
 }
 
 /// <summary>
-/// Specifies the severity level of a message.
-/// </summary>
-public enum Severity
-{
-    /// <summary>
-    /// No severity.
-    /// </summary>
-    None = 0,
-
-    /// <summary>
-    /// Informational message.
-    /// </summary>
-    Information = 1,
-
-    /// <summary>
-    /// Warning message.
-    /// </summary>
-    Warning = 2,
-
-    /// <summary>
-    /// Error message.
-    /// </summary>
-    Error = 3,
-
-    /// <summary>
-    /// System message.
-    /// </summary>
-    System = 4
-}
-
-/// <summary>
 /// Provides extension methods for collections of <see cref="Message"/>.
 /// </summary>
 public static class ErrorMessageExtensions
@@ -162,10 +130,4 @@ public static class ErrorMessageExtensions
     /// <returns>A collection of message strings.</returns>
     public static IEnumerable<string> ToStrings(this IEnumerable<Message> me) =>
         me is null ? [] : me.Select(m => m.ToString());
-}
-
-internal static class SeverityExtensions
-{
-    public static string ToLanguageString(this Severity me, CultureInfo culture) =>
-        Strings.ResourceManager.GetString(me.ToString(), culture) ?? string.Empty;
 }

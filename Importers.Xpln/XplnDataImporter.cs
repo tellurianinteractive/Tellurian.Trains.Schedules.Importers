@@ -6,7 +6,7 @@ using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Importers.Xpln.Extensions;
 using Tellurian.Trains.Schedules.Model;
-using static Tellurian.Trains.Schedules.Model.TrainExtensions;
+using static Tellurian.Trains.Schedules.Model.Timetables.TrainExtensions;
 
 namespace Tellurian.Trains.Schedules.Importers.Xpln;
 
@@ -453,11 +453,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     }
 
     /// <summary>
-    /// Merges locomotive/trainset pairs that share the same identifier into a single railcar.
-    /// In XPLN a self-propelled railcar (e.g. the Swedish X2000) is listed under both the locomotive
-    /// and the trainset section with the same identifier, but represents one physical vehicle.
+    /// Resolves the final type of XPLN "trainset" entries.
+    /// A trainset that is listed under both the locomotive and the trainset section with the same
+    /// identifier is a self-propelled railcar (e.g. the Swedish X2000): the pair represents one
+    /// physical vehicle and is merged into a single <see cref="ScheduledObjectType.Trainset"/>.
+    /// Any remaining trainset is not self-propelled; per XPLN semantics it is reclassified as a
+    /// <see cref="ScheduledObjectType.Wagonset"/>.
     /// </summary>
-    private static void MergeRailcars(Plan schedule)
+    private static void MergeRailcarsAndReclassifyTrainsets(Plan schedule)
     {
         var railcarGroups = schedule.ScheduledObjects
             .Where(v => v.ExternalId.HasValue && (v.ObjectType == ScheduledObjectType.Locomotive || v.ObjectType == ScheduledObjectType.Trainset))
@@ -465,11 +468,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             .Where(g => g.Any(v => v.ObjectType == ScheduledObjectType.Locomotive) && g.Any(v => v.ObjectType == ScheduledObjectType.Trainset))
             .ToList();
 
+        var mergedRailcarIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var group in railcarGroups)
         {
             var members = group.ToList();
             var railcar = members[0];
-            railcar.ObjectType = ScheduledObjectType.Railcar;
+            railcar.ObjectType = ScheduledObjectType.Trainset;
+            mergedRailcarIds.Add(group.Key);
             var primarySchedule = railcar.ScheduleAssignments.Select(a => a.Schedule).FirstOrDefault();
 
             foreach (var duplicate in members.Skip(1))
@@ -485,6 +491,13 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 schedule.ScheduledObjects.Remove(duplicate);
             }
         }
+
+        // A trainset that is not paired with a locomotive of the same identifier is not a
+        // self-propelled railcar; it is a wagon set. (Cargo flows are not yet distinguished here.)
+        foreach (var vehicle in schedule.ScheduledObjects)
+            if (vehicle.ObjectType == ScheduledObjectType.Trainset &&
+                (vehicle.ExternalId.IsEmpty || !mergedRailcarIds.Contains(vehicle.ExternalId!)))
+                vehicle.ObjectType = ScheduledObjectType.Wagonset;
     }
 
     private ImportResult<Timetable> GetTimetable(string name, Layout layout)
@@ -579,12 +592,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 {
                                     var note = new TextCallNote(fields[Remark].HasValue ?
                                             string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
-                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object]))
+                                            string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object]),
+                                            CultureInfo.CurrentCulture.TwoLetterISOLanguageName)
                                     {
                                         IsDriverNote = true,
                                         IsStationNote = true,
                                         IsForDeparture = true,
-                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName
                                     };
                                     var train = result.Trains.SingleOrDefault(t => t.Equals(current));
                                     if (train is not null)
@@ -602,12 +615,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 if (current.IsNullOrHasNoCalls()) continue;
                                 if (fields[Remark].HasValue)
                                 {
-                                    var note = new TextCallNote($"{fields[Group]}: {fields[Object].WithQuotationMarksRemoved} {fields[Remark].WithQuotationMarksRemoved}")
-                                    {
-                                        IsDriverNote = true,
-                                        IsForDeparture = true,
-                                        LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName
-                                    };
+                                    var note =
+                                        new TextCallNote($"{fields[Group]}: {fields[Object].WithQuotationMarksRemoved} {fields[Remark].WithQuotationMarksRemoved}", CultureInfo.CurrentCulture.TwoLetterISOLanguageName)
+                                        {
+                                            IsDriverNote = true,
+                                            IsForDeparture = true,
+                                        };
                                     current?.Calls.First().Notes.Add(note);
                                 }
 
@@ -719,7 +732,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int To = 3;
         const int Arrival = 4;
         const int Departure = 5;
-        const int Group = 6;
         const int Object = 7;
         const int Type = 8;
         const int TrainName = 9;
@@ -800,7 +812,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         locoMessages.AddRange(keys.Messages);
                                         if (locoMessages.HasNoStoppingErrors())
                                         {
-                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value);
+                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                            {
+                                                TractionOptions = new TractionOptions()
+                                            };
                                             loco.Add(trainPart);
                                         }
                                     }
@@ -835,16 +850,36 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                             trainsetMessages.AddRange(keys.Messages);
                                             if (trainsetMessages.HasNoStoppingErrors())
                                             {
-                                                TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value);
+                                                TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                                {
+                                                    WagonSetOptions = new WagonSetOptions()
+                                                };
                                                 trainset.Add(trainPart);
                                             }
                                         }
                                     }
-                                    else // This might be a wagon group
+                                    else // A 'trainset' row with no id but a remark is a cargo flow:
+                                         // freight wagons (directed by waybills) that the train couples and later uncouples.
                                     {
-                                        if (fields[Object].IsEmpty && fields[Remark].IsEmpty) continue; // No information about wagon group, despite a row in the data.
-                                        var wagonGroup = currentTrain.CreateWagonGroup(rowNumber, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Group].ToIntOrZero, fields[Remark]);
-                                        currentTrain.Add(wagonGroup);
+                                        if (fields[Object].IsEmpty && fields[Remark].IsEmpty) continue; // No information about the cargo flow, despite a row in the data.
+                                        var keys = GetTrainPartKeys(fields, currentTrain, rowNumber);
+                                        trainsetMessages.AddRange(keys.Messages);
+                                        if (trainsetMessages.HasNoStoppingErrors())
+                                        {
+                                            // A cargo flow carries no XPLN identifier; synthesise a unique one so each flow
+                                            // is a distinct Cargo object (identity is ObjectType + ExternalId).
+                                            var cargoFlow = schedule.CreateVehicleWithAllSessionsSchedule(
+                                                id: rowNumber,
+                                                vehicleType: ScheduledObjectType.CargoFlow,
+                                                number: 0,
+                                                externalId: $"WagonGroup{rowNumber}",
+                                                remark: fields[Remark]);
+                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                            {
+                                                CargoFlowOptions = new CargoFlowOptions { HasCoupleNote = true, HasUncoupleNote = true }
+                                            };
+                                            cargoFlow.Add(trainPart);
+                                        }
                                     }
                                 }
                                 messages.AddRange(trainsetMessages);
@@ -884,7 +919,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (messages.HasStoppingErrors()) return ImportResult<Plan>.Failure(messages);
         // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
-        MergeRailcars(schedule);
+        MergeRailcarsAndReclassifyTrainsets(schedule);
         return ImportResult<Plan>.Success(schedule, messages);
 
         static TrainPartKeys GetTrainPartKeys(string[] fields, Train currentTrain, int rowNumber)

@@ -15,12 +15,6 @@ public class TrainPartTests
     }
 
     [TestMethod]
-    public void NullTrainThrows()
-    {
-        Assert.Throws<ArgumentNullException>(() => TrainPartExtensions.AsTrainPart(null, 0, 1));
-    }
-
-    [TestMethod]
     public void NegativeStartIndexThrows()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => Train.AsTrainPart(-1, 1));

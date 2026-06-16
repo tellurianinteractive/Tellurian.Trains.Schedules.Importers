@@ -103,6 +103,54 @@
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="Workspace" xml:space="preserve">
+    <value>Workspace</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Stretches" xml:space="preserve">
+    <value>Stretches</value>
+  </data>
+  <data name="TrainCategories" xml:space="preserve">
+    <value>Train Categories</value>
+  </data>
+  <data name="Trains" xml:space="preserve">
+    <value>Trains</value>
+  </data>
+  <data name="GraphicalTimetable" xml:space="preserve">
+    <value>Graphical Timetable</value>
+  </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Schedules</value>
+  </data>
+  <data name="VehicleOwners" xml:space="preserve">
+    <value>Vehicle Owners</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Reports" xml:space="preserve">
+    <value>Reports</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="TurnusCards" xml:space="preserve">
+    <value>Turnus cards</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
   <data name="Train" xml:space="preserve">
     <value>Train</value>
   </data>
@@ -121,8 +169,32 @@
   <data name="Class" xml:space="preserve">
     <value>Class</value>
   </data>
+  <data name="Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="CreatingReport" xml:space="preserve">
+    <value>Creating report…</value>
+  </data>
   <data name="TurnForNextDay" xml:space="preserve">
     <value>Continues the next day</value>
+  </data>
+  <data name="TurnForNextSession" xml:space="preserve">
+    <value>Continues next session</value>
+  </data>
+  <data name="Locomotive" xml:space="preserve">
+    <value>Locomotive</value>
+  </data>
+  <data name="Trainset" xml:space="preserve">
+    <value>Trainset</value>
+  </data>
+  <data name="Wagonset" xml:space="preserve">
+    <value>Wagonset</value>
+  </data>
+  <data name="Cargo" xml:space="preserve">
+    <value>Cargo</value>
+  </data>
+  <data name="CargoFlow" xml:space="preserve">
+    <value>Cargo flow</value>
   </data>
   <data name="SpareLoco" xml:space="preserve">
     <value>Spare loco</value>
@@ -132,5 +204,233 @@
   </data>
   <data name="SpareWagon" xml:space="preserve">
     <value>Spare wagon</value>
+  </data>
+  <data name="MondayShort" xml:space="preserve">
+    <value>Mon</value>
+  </data>
+  <data name="TuesdayShort" xml:space="preserve">
+    <value>Tue</value>
+  </data>
+  <data name="WednesdayShort" xml:space="preserve">
+    <value>Wed</value>
+  </data>
+  <data name="ThursdayShort" xml:space="preserve">
+    <value>Thu</value>
+  </data>
+  <data name="FridayShort" xml:space="preserve">
+    <value>Fri</value>
+  </data>
+  <data name="SaturdayShort" xml:space="preserve">
+    <value>Sat</value>
+  </data>
+  <data name="SundayShort" xml:space="preserve">
+    <value>Sun</value>
+  </data>
+  <data name="SettingsNoSchedule" xml:space="preserve">
+    <value>No schedule loaded. Import a file on the Import tab to edit its settings.</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="TimeAndSpeed" xml:space="preserve">
+    <value>Time &amp; Speed</value>
+  </data>
+  <data name="Validation" xml:space="preserve">
+    <value>Validation</value>
+  </data>
+  <data name="Integration" xml:space="preserve">
+    <value>Integration</value>
+  </data>
+  <data name="LayoutName" xml:space="preserve">
+    <value>Layout name</value>
+  </data>
+  <data name="UseDays" xml:space="preserve">
+    <value>Use days instead of sessions</value>
+  </data>
+  <data name="StartDay" xml:space="preserve">
+    <value>Start day</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Start time</value>
+  </data>
+  <data name="EndTime" xml:space="preserve">
+    <value>End time</value>
+  </data>
+  <data name="BreakForPrinting" xml:space="preserve">
+    <value>Break for printing (splits the graph in two halves)</value>
+  </data>
+  <data name="TimeAxisOrientation" xml:space="preserve">
+    <value>Time axis orientation</value>
+  </data>
+  <data name="ShowArrivalMinutes" xml:space="preserve">
+    <value>Show arrival minutes</value>
+  </data>
+  <data name="ShowDepartureMinutes" xml:space="preserve">
+    <value>Show departure minutes</value>
+  </data>
+  <data name="MinuteSpacing" xml:space="preserve">
+    <value>Minute spacing (px/min)</value>
+  </data>
+  <data name="StationSpacing" xml:space="preserve">
+    <value>Station spacing (px)</value>
+  </data>
+  <data name="TrackSpacing" xml:space="preserve">
+    <value>Track spacing (px)</value>
+  </data>
+  <data name="ShowTrainCategory" xml:space="preserve">
+    <value>Show train category</value>
+  </data>
+  <data name="ShowCompany" xml:space="preserve">
+    <value>Show company</value>
+  </data>
+  <data name="HideSessionsOrDays" xml:space="preserve">
+    <value>Hide sessions/days</value>
+  </data>
+  <data name="FastClockSpeed" xml:space="preserve">
+    <value>Fast clock speed (×)</value>
+  </data>
+  <data name="SpeedMapping" xml:space="preserve">
+    <value>Speed mapping</value>
+  </data>
+  <data name="ScaleSpeedKmh" xml:space="preserve">
+    <value>Scale km/h</value>
+  </data>
+  <data name="RealSpeedMs" xml:space="preserve">
+    <value>Real m/s</value>
+  </data>
+  <data name="SpeedSlow" xml:space="preserve">
+    <value>Slow</value>
+  </data>
+  <data name="SpeedNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="SpeedHigh" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="DefaultStationTimes" xml:space="preserve">
+    <value>Default station times</value>
+  </data>
+  <data name="DefaultStationTimesHint" xml:space="preserve">
+    <value>Layout-wide defaults; individual stations may override these.</value>
+  </data>
+  <data name="MinimumStop" xml:space="preserve">
+    <value>Minimum stop (fast-clock min)</value>
+  </data>
+  <data name="LocoRunaround" xml:space="preserve">
+    <value>Loco runaround (real min)</value>
+  </data>
+  <data name="TrainClearance" xml:space="preserve">
+    <value>Train clearance (real min)</value>
+  </data>
+  <data name="ValidateStationCalls" xml:space="preserve">
+    <value>Validate station calls</value>
+  </data>
+  <data name="ValidateStationTracks" xml:space="preserve">
+    <value>Validate station tracks</value>
+  </data>
+  <data name="ValidateStretches" xml:space="preserve">
+    <value>Validate stretches</value>
+  </data>
+  <data name="ValidateTrainSpeed" xml:space="preserve">
+    <value>Validate train speed</value>
+  </data>
+  <data name="ValidateTrainNumbers" xml:space="preserve">
+    <value>Validate train numbers</value>
+  </data>
+  <data name="ValidateSchedules" xml:space="preserve">
+    <value>Validate vehicle schedules</value>
+  </data>
+  <data name="ValidateLocomotiveCoverage" xml:space="preserve">
+    <value>Validate locomotive coverage</value>
+  </data>
+  <data name="ValidateDriverDuties" xml:space="preserve">
+    <value>Validate driver duties</value>
+  </data>
+  <data name="Thresholds" xml:space="preserve">
+    <value>Thresholds</value>
+  </data>
+  <data name="MinTrainSpeed" xml:space="preserve">
+    <value>Min train speed (m/clock-min)</value>
+  </data>
+  <data name="MaxTrainSpeed" xml:space="preserve">
+    <value>Max train speed (m/clock-min)</value>
+  </data>
+  <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
+    <value>Min minutes between track usage</value>
+  </data>
+  <data name="ModuleRegistryApiKey" xml:space="preserve">
+    <value>ModuleRegistry API key</value>
+  </data>
+  <data name="OpenSchedule" xml:space="preserve">
+    <value>Open schedule:</value>
+  </data>
+  <data name="Importing" xml:space="preserve">
+    <value>Importing…</value>
+  </data>
+  <data name="Stations" xml:space="preserve">
+    <value>Stations</value>
+  </data>
+  <data name="ImportMessages" xml:space="preserve">
+    <value>Import messages</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Unexpected error: {0}</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>Save as</value>
+  </data>
+  <data name="DownloadAs" xml:space="preserve">
+    <value>Download &lt;strong&gt;{0}&lt;/strong&gt; as:</value>
+  </data>
+  <data name="ComingSoon" xml:space="preserve">
+    <value>Coming soon</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value>Welcome to Timetable Planner.</value>
+  </data>
+  <data name="TrainsDescription" xml:space="preserve">
+    <value>Trains with station calls and timing.</value>
+  </data>
+  <data name="StretchesPageTitle" xml:space="preserve">
+    <value>Track and Timetable Stretches</value>
+  </data>
+  <data name="StretchesDescription" xml:space="preserve">
+    <value>Connections between operation locations and timetable stretches.</value>
+  </data>
+  <data name="TrainCategoriesDescription" xml:space="preserve">
+    <value>Train categories with prefix, colour, and classification.</value>
+  </data>
+  <data name="VehicleOwnersDescription" xml:space="preserve">
+    <value>Who brings what rolling stock for the session.</value>
+  </data>
+  <data name="SchedulesDescription" xml:space="preserve">
+    <value>Build vehicle schedules and assign to locomotives, wagons, and cargo flows.</value>
+  </data>
+  <data name="LayoutPageTitle" xml:space="preserve">
+    <value>Layout Operational Places</value>
+  </data>
+  <data name="LayoutDescription" xml:space="preserve">
+    <value>Stations and their tracks.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="NotFoundMessage" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+  </data>
+  <data name="GraphNoSchedule" xml:space="preserve">
+    <value>No schedule loaded. Import a file on the Import tab.</value>
+  </data>
+  <data name="NoTimetableStretches" xml:space="preserve">
+    <value>The loaded schedule has no timetable stretches.</value>
+  </data>
+  <data name="SelectStretches" xml:space="preserve">
+    <value>Select one or more stretches to display.</value>
+  </data>
+  <data name="DragViewHere" xml:space="preserve">
+    <value>Drag a view here to start.</value>
   </data>
 </root>
