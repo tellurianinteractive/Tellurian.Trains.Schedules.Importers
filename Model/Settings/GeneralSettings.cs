@@ -23,4 +23,12 @@ public sealed class GeneralSettings
     /// <see cref="BreakTime"/>–<see cref="EndTime"/>. <c>null</c> means no break.
     /// </summary>
     public TimeSpan? BreakTime { get; set; }
+
+    /// <summary>
+    /// When <c>true</c>, reports render each item in the language derived from the item itself
+    /// (for example, a driver duty in its operating company's language) rather than in the user's
+    /// preferred interface language. The interface and any item without a derivable language keep
+    /// using the user's language. Default is <c>false</c>.
+    /// </summary>
+    public bool UseObjectLanguageInReports { get; set; }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Notes;
 
@@ -43,15 +44,15 @@ public static class GeneratedNoteExtensions
         /// </summary>
         internal string TextOf => note switch
         {
-            UseNote(var so) => NoteText.Format("Use", so),
-            CoupleNote(var so, 0) => NoteText.Format("CoupleToTrain", so),
-            CoupleNote(var so, var position) => NoteText.Format("CoupleToTrainInPosition", so, position),
-            UncoupleNote(var so) => NoteText.Format("UncoupleFromTrain", so),
-            FromParkingNote(var so) => NoteText.Format("MoveTractionUnitFromParkingToDepartureTrack", so),
-            ToParkingNote(var so) => NoteText.Format("MoveTractionUnitToParking", so),
-            ReinforcementNote(_, var part) => NoteText.Format("ReinforcesBetweenAnd", part.Train, part.From.Station, part.To.Station),
+            UseNote(var so) => NoteText.Format(NoteResources.Use, so),
+            CoupleNote(var so, 0) => NoteText.Format(NoteResources.CoupleToTrain, so),
+            CoupleNote(var so, var position) => NoteText.Format(NoteResources.CoupleToTrainInPosition, so, position),
+            UncoupleNote(var so) => NoteText.Format(NoteResources.UncoupleFromTrain, so),
+            FromParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
+            ToParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitToParking, so),
+            ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.Station, part.To.Station),
             CargoFlowDestinationNote(_, var part) when part.CargoFlowOptions is not null =>
-                NoteText.Format("BringsWagonsTo", part.CargoFlowDestinationsText),
+                NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsText),
             _ => string.Empty,
         };
 
@@ -63,7 +64,7 @@ public static class GeneratedNoteExtensions
         {
             // Specialised variant: destination regions are rendered as coloured chips (see Region.Display).
             CargoFlowDestinationNote(_, var part) when part.CargoFlowOptions is not null =>
-                new($"""<span class="callnote">{NoteText.Format("BringsWagonsTo", part.CargoFlowDestinationsHtml)}</span>"""),
+                new($"""<span class="callnote">{NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsHtml)}</span>"""),
             // Default: what the base note rendering does — wrap the plain text in a callnote span.
             _ => new($"""<span class="callnote">{note.TextOf}</span>"""),
         };

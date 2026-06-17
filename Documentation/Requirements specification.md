@@ -239,7 +239,7 @@ in the top bar and persisted in the browser (localStorage) — it is not stored 
 
 ### 3.3 Layout Operational Places
 
-> **Status:** ❌ Missing. `Planning.App/Pages/LayoutEditor.razor` is a stub
+> **Status:** ❌ Missing. `Planning.App/Pages/OperationLocationsEditor.razor` is a stub
 > (heading only). FR-3.3.1 ModuleRegistry import not built (API-key field exists
 > in Settings).
 

@@ -11,7 +11,7 @@ namespace Tellurian.Trains.Schedules.Planning.App.Services;
 /// on startup, so it survives a language change (which force-reloads the WASM app) and closing
 /// and reopening the browser. All subscribing views re-render via <see cref="OnChanged"/>.
 /// </summary>
-public sealed class ScheduleStateService(BrowserStorageService storage)
+public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<ScheduleStateService> logger)
 {
     private const string ScheduleStorageKey = "planning.schedule.v2";
     private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v1";
@@ -32,10 +32,17 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
     private readonly HashSet<TimetableStretch> _selectedStretches = [];
     private bool _loaded;
 
+    // Debounced persistence: an edit notifies subscribers immediately (cheap, keeps docked views live)
+    // but the expensive full-plan serialize is coalesced to run once the user pauses, rather than on
+    // every edit. A pending save is flushed on dispose/navigation so the last edit is never dropped.
+    private const int SaveDebounceMilliseconds = 750;
+    private CancellationTokenSource? _saveDebounceCts;
+    private bool _savePending;
+
     public Plan? Schedule
     {
         get => _schedule;
-        set { _schedule = value; ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
+        set { _schedule = value; CancelPendingSave(); ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
     }
 
     /// <summary>
@@ -124,12 +131,83 @@ public sealed class ScheduleStateService(BrowserStorageService storage)
     /// </summary>
     public void NotifyChanged() => OnChanged?.Invoke();
 
+    /// <summary>
+    /// Notifies subscribers immediately (so views docked alongside the editor re-render at once) and
+    /// schedules a debounced save of the plan. Call after editing the shared model through bound
+    /// properties that do not save or notify on their own (settings, train edits). The save is
+    /// coalesced across rapid edits; call <see cref="FlushPendingSave"/> when the page may be lost
+    /// (dispose, navigation) to guarantee the last edit is written.
+    /// </summary>
+    public void SaveAndNotify()
+    {
+        NotifyChanged();
+        ScheduleDebouncedSave();
+    }
+
+    /// <summary>
+    /// Writes any pending debounced save immediately. Call before the editing view is disposed or the
+    /// user navigates away, so an edit made within the debounce window is not dropped.
+    /// </summary>
+    public void FlushPendingSave()
+    {
+        if (!_savePending) return;
+        CancelPendingSave();
+        PersistSchedule();
+    }
+
+    private void ScheduleDebouncedSave()
+    {
+        _savePending = true;
+        _saveDebounceCts?.Cancel();
+        _saveDebounceCts?.Dispose();
+        _saveDebounceCts = new CancellationTokenSource();
+        _ = RunDebouncedSaveAsync(_saveDebounceCts.Token);
+    }
+
+    private async Task RunDebouncedSaveAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(SaveDebounceMilliseconds, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return; // superseded by a newer edit, or flushed synchronously
+        }
+        _savePending = false;
+        PersistSchedule();
+    }
+
+    private void CancelPendingSave()
+    {
+        _saveDebounceCts?.Cancel();
+        _saveDebounceCts?.Dispose();
+        _saveDebounceCts = null;
+        _savePending = false;
+    }
+
     private void PersistSchedule()
     {
         if (!_loaded) return; // don't write back while still restoring
-        _ = _schedule is null
-            ? storage.RemoveAsync(ScheduleStorageKey)
-            : storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
+        _ = PersistScheduleAsync();
+    }
+
+    // Persistence is fire-and-forget so it never blocks the UI, but the task MUST be observed: a
+    // throwing serialize (e.g. a model getter that throws) would otherwise be swallowed silently and
+    // break persistence with no trace — exactly the failure this logging is here to prevent.
+    private async Task PersistScheduleAsync()
+    {
+        try
+        {
+            if (_schedule is null)
+                await storage.RemoveAsync(ScheduleStorageKey);
+            else
+                await storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to persist the schedule to browser storage.");
+        }
     }
 
     private void PersistSelectedStretches()

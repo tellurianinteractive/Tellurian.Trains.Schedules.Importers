@@ -304,7 +304,7 @@ public static class GraphScheduleDrawingExtensions
             {
                 var stretch = me.TrackStretches[i];
                 var fromTrackCount = me.Stations[i].Tracks.Count;
-                var Δ1 = Math.Max(me.GraphSettings.MinStationSpacing, ((fromTrackCount - 1) * me.GraphSettings.TrackSpacing) + (me.GraphSettings.KilometerSpacing * (int)Math.Round(stretch.Distance)));
+                var Δ1 = Math.Max(me.GraphSettings.MinStationSpacing, ((fromTrackCount - 1) * me.GraphSettings.TrackSpacing) + (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance));
                 x += Δ1;
                 y += Δ1;
             }
@@ -329,7 +329,7 @@ public static class GraphScheduleDrawingExtensions
         {
             var stretch = me.TrackStretches[i];
             var toTrackCount = me.Stations[i + 1].Tracks.Count;
-            var Δ = Math.Max(me.GraphSettings.MinStationSpacing, (me.GraphSettings.KilometerSpacing * (int)Math.Round(stretch.Distance)) + ((toTrackCount - 1) * me.GraphSettings.TrackSpacing));
+            var Δ = Math.Max(me.GraphSettings.MinStationSpacing, (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance) + ((toTrackCount - 1) * me.GraphSettings.TrackSpacing));
             x += Δ;
             y += Δ;
         }

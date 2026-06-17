@@ -24,6 +24,7 @@ public static class GraphSettingsMapping
                 DefaultStartTime = settings.General.StartTime,
                 DefaultEndTime = settings.General.EndTime,
                 MinuteSpacing = gt.MinuteSpacing,
+                KilometerSpacing = gt.KilometerSpacing,
                 MinStationSpacing = gt.StationSpacing,
                 TrackSpacing = gt.TrackSpacing,
                 ShowArrivalMinutes = gt.ShowArrivalMinutes,

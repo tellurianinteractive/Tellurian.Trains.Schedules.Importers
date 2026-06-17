@@ -48,6 +48,11 @@ public record TrainCategory
     /// </summary>
     public int DefaultSpeed { get; init; } = 100;
 
+    /// <summary>
+    /// Optional company that operates trains in this category.
+    /// </summary>
+    public Company? Company { get; init; }
+
     /// <inheritdoc/>
     public override string ToString() => Name;
 

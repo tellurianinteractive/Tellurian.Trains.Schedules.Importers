@@ -1,0 +1,29 @@
+@inject Translator Translator
+
+@* A field label with an optional "?" help affordance. The help text, when present, is the
+   "{For}Help" resource; if that key is untranslated no icon is shown. The rendered <label> is a
+   direct DOM child of the surrounding .field, so the global .field/.help-label rules style it. *@
+<label class="help-label">
+    @Translator(For)@(Suffix is null ? "" : $" {Suffix}")
+    @if (HasHelp)
+    {
+        <span class="help-icon" tabindex="0" role="note" aria-label="@HelpText">
+            ?<span class="help-tip">@HelpText</span>
+        </span>
+    }
+</label>
+
+@code {
+    /// <summary>Resource key for the field label. The help text, when it exists, is the
+    /// <c>{For}Help</c> resource.</summary>
+    [Parameter, EditorRequired] public string For { get; set; } = "";
+
+    /// <summary>Optional trailing text appended after the label (e.g. a unit), not localised here.</summary>
+    [Parameter] public string? Suffix { get; set; }
+
+    private string HelpKey => $"{For}Help";
+    private string HelpText => Translator(HelpKey);
+
+    // The Translator returns the key itself when a resource is missing.
+    private bool HasHelp => !string.IsNullOrWhiteSpace(HelpText) && HelpText != HelpKey;
+}

@@ -43,8 +43,11 @@ public sealed class ScheduleImportService(
                 : new XlsxDataSetProvider(loggerFactory.CreateLogger<XlsxDataSetProvider>());
 
             var logger = loggerFactory.CreateLogger<XplnDataImporter>();
-            using var importer = new XplnDataImporter(stream, provider, companiesService, categoriesService, logger);
-            var name = Path.GetFileNameWithoutExtension(fileName);
+            // The language and country come from a culture in the file name (e.g. "Plan.de-DE.ods"),
+            // falling back to the current UI culture when the name has no culture segment.
+            var options = XplnImportOptions.FromFileName(fileName);
+            using var importer = new XplnDataImporter(stream, provider, companiesService, categoriesService, logger, options);
+            var name = XplnImportOptions.ScheduleNameFrom(fileName);
             return await importer.ImportScheduleAsync(name);
         }
         catch (Exception ex)

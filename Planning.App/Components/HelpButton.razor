@@ -1,0 +1,62 @@
+@using System.Globalization
+@inject HelpContentService Help
+@inject Translator Translator
+
+@* A small "?" in a tab title that opens the tab's "About this tab" help as a non-modal popover
+   anchored to the button, overlaying (not pushing down) the content. A transparent backdrop
+   closes it on an outside click. Content is loaded lazily on first open and cached by the
+   service, so mounting many of these (one per tab) costs nothing until one is opened. *@
+<span class="help-anchor">
+    <button class="help-toggle @(_open ? "open" : "")" type="button" draggable="false"
+            title="@Translator("AboutThisTab")" aria-label="@Translator("AboutThisTab")"
+            @onclick="ToggleAsync" @onclick:stopPropagation @onclick:preventDefault>?</button>
+    @if (_open)
+    {
+        <div class="help-backdrop" @onclick="Close"></div>
+        <div class="help-popover" @onclick:stopPropagation>
+            <div class="help-popover-header">
+                <span class="help-popover-title">@Translator("AboutThisTab")</span>
+                <button class="help-popover-close" type="button"
+                        title="@Translator("Close")" aria-label="@Translator("Close")"
+                        @onclick="Close">&times;</button>
+            </div>
+            <div class="help-popover-body">
+                @if (_loading)
+                {
+                    <p class="help-popover-status">…</p>
+                }
+                else if (string.IsNullOrEmpty(_html))
+                {
+                    <p class="help-popover-status">@Translator("NoHelpYet")</p>
+                }
+                else
+                {
+                    @((MarkupString)_html)
+                }
+            </div>
+        </div>
+    }
+</span>
+
+@code {
+    /// <summary>The tab's help key (resolves to <c>Content/Help/{For}.md</c>).</summary>
+    [Parameter, EditorRequired] public string For { get; set; } = "";
+
+    private bool _open;
+    private bool _loading;
+    private string _html = "";
+
+    private async Task ToggleAsync()
+    {
+        if (_open) { Close(); return; }
+        _open = true;
+        if (_html.Length == 0)
+        {
+            _loading = true;
+            _html = await Help.GetHtmlAsync(For, CultureInfo.CurrentUICulture);
+            _loading = false;
+        }
+    }
+
+    private void Close() => _open = false;
+}

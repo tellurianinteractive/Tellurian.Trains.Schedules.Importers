@@ -32,24 +32,79 @@
         top: 2px;
     }
 
+    /* Two-column grid for the whole section: column 1 sizes to the widest label (so no label
+       ever wraps and they all align), column 2 takes the rest for the controls. Each .field is a
+       subgrid row, keeping it a real element we can highlight while still sharing those columns.
+       Headings, hints and the speed table span both columns. */
     .section {
-        max-width: 640px;
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        align-items: center;
+        max-width: 760px;
+    }
+
+    .section > * {
+        grid-column: 1 / -1;
     }
 
     .field {
-        display: flex;
+        display: grid;
+        grid-template-columns: subgrid;
         align-items: center;
-        gap: 1rem;
-        padding: 0.3rem 0;
+        /* Controls size to their content and sit at the start of the field column, rather than
+           every control stretching to the full column width. */
+        justify-items: start;
+        column-gap: 1.5rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 5px;
     }
 
-    .field > label {
-        flex: 0 0 15rem;
+    /* Row highlight ties a label to its control as the eye moves across the gap. */
+    .field:hover {
+        background: #f3f6fa;
+    }
+
+    /* Labels never wrap; a dotted leader fills the gap from the label to the aligned control
+       column, visually connecting the two. Covers both plain <label> and HelpLabel's .help-label
+       (the latter reached with ::deep since it is rendered by a child component). */
+    .field > label,
+    .field ::deep .help-label {
+        grid-column: 1;
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
         font-weight: 500;
+    }
+
+    .field > label::after,
+    .field ::deep .help-label::after {
+        content: "";
+        flex: 1 1 auto;
+        min-width: 1rem;
+        margin-left: 0.5rem;
+        align-self: flex-end;
+        margin-bottom: 0.35rem;
+        border-top: 2px dotted #cdd6e0;
+    }
+
+    /* Controls sit in column 2; the wrapper groups multi-control rows (e.g. break time). */
+    .field > .control {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
     }
 
     .field input[type="number"] {
         width: 7rem;
+    }
+
+    /* Free-text fields get a comfortable width; they would otherwise fall back to the narrow
+       browser default once they no longer stretch to fill the column. */
+    .field input[type="text"] {
+        width: 22rem;
+        max-width: 100%;
     }
 
     .group-heading {

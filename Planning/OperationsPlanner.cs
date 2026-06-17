@@ -1,5 +1,4 @@
-﻿using Tellurian.Trains.Schedules.Model;
-using Tellurian.Trains.Schedules.Planning.Timetables;
+﻿using Tellurian.Trains.Schedules.Planning.Timetables;
 
 namespace Tellurian.Trains.Schedules.Planning;
 
@@ -10,10 +9,10 @@ namespace Tellurian.Trains.Schedules.Planning;
 /// The planner shoul also provide a mechanism to notify a user interface about unresolved
 /// planning conflicts.
 /// </remarks>
-public class OperationsPlanner(Plan schedule, TimetableSettings timetableSettings)
+public class OperationsPlanner(Plan plan, TimetableSettings timetableSettings)
 {
-    internal Plan Schedule { get; } = schedule;
-    internal Timetable Timetable => Schedule.Timetable;
+    internal Plan Plan { get; } = plan;
+    internal Timetable Timetable => Plan.Timetable;
     internal Layout Layout => Timetable.Layout;
     internal TimetableSettings TimetableSettings { get; } = timetableSettings;
 }

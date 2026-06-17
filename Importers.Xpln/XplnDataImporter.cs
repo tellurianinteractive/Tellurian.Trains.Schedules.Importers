@@ -32,6 +32,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private readonly ILogger _logger;
     private readonly ICompaniesService _operatingCompaniesService;
     private readonly ITrainCategoriesService _trainCategoriesService;
+    private readonly XplnImportOptions _options;
     private readonly DataSetConfiguration _dataSetConfiguration = CreateDataSetConfiguration();
     private List<Company> _operatingCompanies = [];
     private List<TrainCategory> _trainCategories = [];
@@ -46,13 +47,15 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     /// <param name="operatingCompaniesService">Service for retrieving operating company information.</param>
     /// <param name="trainCategoriesService">Service for retrieving train category information.</param>
     /// <param name="logger">Logger for recording import progress and errors.</param>
-    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger)
+    /// <param name="options">Per-import language and country settings. Defaults to the current culture.</param>
+    public XplnDataImporter(Stream inputStream, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger, XplnImportOptions? options = null)
     {
         _inputStream = inputStream;
         _dataSetProvider = dataSetProvider;
         _operatingCompaniesService = operatingCompaniesService;
         _trainCategoriesService = trainCategoriesService; ;
         _logger = logger;
+        _options = options ?? XplnImportOptions.FromCurrentCulture();
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
@@ -64,8 +67,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     /// <param name="operatingCompaniesService">Service for retrieving operating company information.</param>
     /// <param name="trainCategoriesService">Service for retrieving train category information.</param>
     /// <param name="logger">Logger for recording import progress and errors.</param>
-    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger) :
-        this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger)
+    /// <param name="options">Per-import language and country settings. Defaults to the current culture.</param>
+    public XplnDataImporter(FileInfo inputFile, IDataSetProvider dataSetProvider, ICompaniesService operatingCompaniesService, ITrainCategoriesService trainCategoriesService, ILogger<XplnDataImporter> logger, XplnImportOptions? options = null) :
+        this(File.OpenRead(inputFile.FullName), dataSetProvider, operatingCompaniesService, trainCategoriesService, logger, options ?? XplnImportOptions.FromFileName(inputFile.Name))
     { }
 
     private Company? FindOrCreateCompany(string? companySignature)
@@ -162,10 +166,23 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         (layoutResult.Item.Settings.General.StartTime, layoutResult.Item.Settings.General.EndTime) =
             timetableResult.Item.OperatingWindow();
 
+        // An XPLN file carries no country, so apply the import setting: set the layout's default
+        // country and its theme (the user can change them on the Settings page).
+        ApplyImportCountry(layoutResult.Item);
+
         var schedule = GetSchedule(name, timetableResult.Item);
         var ImportResult = schedule with { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages, .. schedule.Messages] };
         LogMessages(ImportResult.Messages);
         return ImportResult;
+    }
+
+    private void ApplyImportCountry(Layout layout)
+    {
+        var country = Country.ByCountryCode(_options.CountryCode);
+        if (country is null) return;
+        layout.Settings.Identity.DefaultCountryId = country.Id;
+        layout.Settings.Identity.Theme =
+            Country.CountriesByTheme(Theme.American).Any(c => c.Id == country.Id) ? Theme.American : Theme.European;
     }
 
     private ImportResult<Layout> GetLayout(string name)
@@ -593,7 +610,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                     var note = new TextCallNote(fields[Remark].HasValue ?
                                             string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLocoClasses, fields[Object], fields[Remark]) :
                                             string.Format(CultureInfo.CurrentCulture, Resources.Strings.UseLoco, fields[Object]),
-                                            CultureInfo.CurrentCulture.TwoLetterISOLanguageName)
+                                            _options.Language)
                                     {
                                         IsDriverNote = true,
                                         IsStationNote = true,
@@ -616,7 +633,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 if (fields[Remark].HasValue)
                                 {
                                     var note =
-                                        new TextCallNote($"{fields[Group]}: {fields[Object].WithQuotationMarksRemoved} {fields[Remark].WithQuotationMarksRemoved}", CultureInfo.CurrentCulture.TwoLetterISOLanguageName)
+                                        new TextCallNote($"{fields[Group]}: {fields[Object].WithQuotationMarksRemoved} {fields[Remark].WithQuotationMarksRemoved}", _options.Language)
                                         {
                                             IsDriverNote = true,
                                             IsForDeparture = true,

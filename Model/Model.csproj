@@ -29,6 +29,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Notes.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Notes.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\Days.resx">
@@ -40,6 +45,10 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <CustomToolNamespace>
       </CustomToolNamespace>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Notes.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Notes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

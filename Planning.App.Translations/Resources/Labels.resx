@@ -112,8 +112,14 @@
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="Layout" xml:space="preserve">
-    <value>Layout</value>
+  <data name="OperationLocations" xml:space="preserve">
+    <value>Operation Locations</value>
+  </data>
+  <data name="Companies" xml:space="preserve">
+    <value>Companies</value>
+  </data>
+  <data name="CompaniesDescription" xml:space="preserve">
+    <value>The companies that operate the layout's trains.</value>
   </data>
   <data name="Stretches" xml:space="preserve">
     <value>Stretches</value>
@@ -271,6 +277,12 @@
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minute spacing (px/min)</value>
   </data>
+  <data name="KilometerSpacing" xml:space="preserve">
+    <value>Distance scale (px/km)</value>
+  </data>
+  <data name="RestoringWork" xml:space="preserve">
+    <value>Restoring your work. Please wait…</value>
+  </data>
   <data name="StationSpacing" xml:space="preserve">
     <value>Station spacing (px)</value>
   </data>
@@ -394,9 +406,6 @@
   <data name="TrainsDescription" xml:space="preserve">
     <value>Trains with station calls and timing.</value>
   </data>
-  <data name="StretchesPageTitle" xml:space="preserve">
-    <value>Track and Timetable Stretches</value>
-  </data>
   <data name="StretchesDescription" xml:space="preserve">
     <value>Connections between operation locations and timetable stretches.</value>
   </data>
@@ -409,10 +418,7 @@
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Build vehicle schedules and assign to locomotives, wagons, and cargo flows.</value>
   </data>
-  <data name="LayoutPageTitle" xml:space="preserve">
-    <value>Layout Operational Places</value>
-  </data>
-  <data name="LayoutDescription" xml:space="preserve">
+  <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stations and their tracks.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
@@ -432,5 +438,119 @@
   </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Drag a view here to start.</value>
+  </data>
+  <data name="NoHelpYet" xml:space="preserve">
+    <value>No help for this tab yet.</value>
+  </data>
+  <data name="AboutThisTab" xml:space="preserve">
+    <value>About this tab</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="UseObjectLanguageInReports" xml:space="preserve">
+    <value>Print each report item in its own language</value>
+  </data>
+  <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
+    <value>When on, reports render each item in the language derived from the item itself — for example, a driver duty in its operating company's language. The interface, and any item with no derivable language, keep using your preferred language.</value>
+  </data>
+  <data name="LayoutNameHelp" xml:space="preserve">
+    <value>The name of this layout, shown in reports and exported files.</value>
+  </data>
+  <data name="UseDaysHelp" xml:space="preserve">
+    <value>Plan trains across several named operating days rather than a single session.</value>
+  </data>
+  <data name="StartDayHelp" xml:space="preserve">
+    <value>The first operating day of the timetable.</value>
+  </data>
+  <data name="StartTimeHelp" xml:space="preserve">
+    <value>The clock time at which the operating session begins.</value>
+  </data>
+  <data name="EndTimeHelp" xml:space="preserve">
+    <value>The clock time at which the operating session ends. It may run to or past midnight.</value>
+  </data>
+  <data name="BreakForPrintingHelp" xml:space="preserve">
+    <value>Split the printed graphical timetable at this time so a long day fits across pages.</value>
+  </data>
+  <data name="MinimumStopHelp" xml:space="preserve">
+    <value>The shortest time, in fast-clock minutes, a train must remain at a station before it may depart.</value>
+  </data>
+  <data name="LocoRunaroundHelp" xml:space="preserve">
+    <value>Real minutes allowed for a locomotive to run round its train to the opposite end.</value>
+  </data>
+  <data name="TrainClearanceHelp" xml:space="preserve">
+    <value>Real minutes a train occupies a station track before that track counts as free again.</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="DefaultCountry" xml:space="preserve">
+    <value>Default country</value>
+  </data>
+  <data name="European" xml:space="preserve">
+    <value>European</value>
+  </data>
+  <data name="American" xml:space="preserve">
+    <value>American</value>
+  </data>
+  <data name="Norway" xml:space="preserve">
+    <value>Norway</value>
+  </data>
+  <data name="Sweden" xml:space="preserve">
+    <value>Sweden</value>
+  </data>
+  <data name="Denmark" xml:space="preserve">
+    <value>Denmark</value>
+  </data>
+  <data name="Finland" xml:space="preserve">
+    <value>Finland</value>
+  </data>
+  <data name="Germany" xml:space="preserve">
+    <value>Germany</value>
+  </data>
+  <data name="Austria" xml:space="preserve">
+    <value>Austria</value>
+  </data>
+  <data name="Netherlands" xml:space="preserve">
+    <value>Netherlands</value>
+  </data>
+  <data name="Belgium" xml:space="preserve">
+    <value>Belgium</value>
+  </data>
+  <data name="France" xml:space="preserve">
+    <value>France</value>
+  </data>
+  <data name="Italy" xml:space="preserve">
+    <value>Italy</value>
+  </data>
+  <data name="Czechia" xml:space="preserve">
+    <value>Czechia</value>
+  </data>
+  <data name="Slovakia" xml:space="preserve">
+    <value>Slovakia</value>
+  </data>
+  <data name="Poland" xml:space="preserve">
+    <value>Poland</value>
+  </data>
+  <data name="Hungary" xml:space="preserve">
+    <value>Hungary</value>
+  </data>
+  <data name="UnitedStates" xml:space="preserve">
+    <value>United States</value>
+  </data>
+  <data name="Canada" xml:space="preserve">
+    <value>Canada</value>
+  </data>
+  <data name="Switzerland" xml:space="preserve">
+    <value>Switzerland</value>
+  </data>
+  <data name="UnitedKingdom" xml:space="preserve">
+    <value>United Kingdom</value>
+  </data>
+  <data name="CzechRepublic" xml:space="preserve">
+    <value>Czech Republic</value>
   </data>
 </root>

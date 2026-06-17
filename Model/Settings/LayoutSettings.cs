@@ -5,6 +5,9 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 /// </summary>
 public sealed class LayoutSettings
 {
+    /// <summary>Identity settings: the operating theme, the modelling scale and the default country.</summary>
+    public IdentitySettings Identity { get; set; } = new();
+
     /// <summary>General settings: language, the session/day model and the operating time window.</summary>
     public GeneralSettings General { get; set; } = new();
 

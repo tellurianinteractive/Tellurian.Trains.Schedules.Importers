@@ -1,21 +1,19 @@
 using System.Globalization;
-using Tellurian.Localization.Implementatioms;
-using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Notes;
 
 /// <summary>
-/// Resolves localised generated-note text from the <see cref="Resources.Notes"/> resx resources for the
-/// current UI culture, using the synchronous resx lookup in Tellurian.Localization.
+/// Formats the strongly-typed generated-note resources (see <see cref="Resources.Notes"/>) with their
+/// arguments. The resource string is looked up by the generated accessor using
+/// <see cref="CultureInfo.CurrentUICulture"/>; this helper applies the composite formatting of the
+/// arguments (numbers, dates) using <see cref="CultureInfo.CurrentCulture"/>, per the .NET convention
+/// that UI culture selects the text and the formatting culture renders the values.
 /// </summary>
 internal static class NoteText
 {
-    private static readonly ResxResourceProvider Provider = new(typeof(Resources.Notes));
-
     /// <summary>
-    /// Returns the localised note text for <paramref name="key"/>, formatted with
-    /// <paramref name="args"/> in the current UI culture; falls back to the key when no translation exists.
+    /// Returns <paramref name="format"/> formatted with <paramref name="args"/> in the current culture.
     /// </summary>
-    public static string Format(string key, params object[] args) =>
-        string.Format(CultureInfo.CurrentUICulture, Provider.GetTranslation(key).Text, args);
+    public static string Format(string format, params object[] args) =>
+        string.Format(CultureInfo.CurrentCulture, format, args);
 }

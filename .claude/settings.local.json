@@ -74,7 +74,14 @@
       "Bash(Select-Object -Property FullName, Directory)",
       "Bash(Sort-Object FullName)",
       "Bash(grep -rl \"Model/Model.csproj\\\\|Model\\\\\\\\\\\\\\\\Model.csproj\\\\|\\\\\"..\\\\\\\\\\\\\\\\Model\\\\\\\\\\\\\\\\Model.csproj\\\\\"\\\\|\\\\\\\\.\\\\\\\\./Model/Model.csproj\" --include=*.csproj .)",
-      "Bash(grep -rlE \"ProjectReference.*[\\\\\\\\\\\\\\\\/]Model[\\\\\\\\\\\\\\\\/]Model\\\\.csproj\" --include=*.csproj .)"
+      "Bash(grep -rlE \"ProjectReference.*[\\\\\\\\\\\\\\\\/]Model[\\\\\\\\\\\\\\\\/]Model\\\\.csproj\" --include=*.csproj .)",
+      "Bash(awk -F',' '{print $1\" | \"$2}')",
+      "Bash(awk -F',' '{print $7}')",
+      "Bash(awk -F',' '{print $6}')",
+      "Bash(awk -F',' '{print $13}')",
+      "Bash(awk -F',' '{print $6\" | \"$12}')",
+      "Bash(awk -F'\\\\t' '{print $2}')",
+      "Bash(git rm *)"
     ]
   }
 }

@@ -16,12 +16,14 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton<BrowserStorageService>();
+builder.Services.AddSingleton<UiPreferenceService>();
 builder.Services.AddSingleton<DockLayoutState>();
 builder.Services.AddSingleton<ScheduleStateService>();
 builder.Services.AddScoped<ICompaniesService, CompaniesService>();
 builder.Services.AddScoped<ITrainCategoriesService, TrainCategoriesService>();
 builder.Services.AddScoped<ScheduleImportService>();
 builder.Services.AddScoped<ScheduleExportService>();
+builder.Services.AddScoped<HelpContentService>();
 
 // Localisation — register language service, RESX and Markdown providers.
 // NOTE: Language.IsFallback has 'internal set' in Tellurian.Localization 1.0.1,

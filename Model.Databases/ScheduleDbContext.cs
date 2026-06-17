@@ -202,6 +202,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.OwnsOne(e => e.Settings, settings =>
             {
                 settings.ToJson();
+                settings.OwnsOne(s => s.Identity);
                 settings.OwnsOne(s => s.General);
                 settings.OwnsOne(s => s.GraphicTimetable);
                 settings.OwnsOne(s => s.TimeAndSpeed, timeAndSpeed =>

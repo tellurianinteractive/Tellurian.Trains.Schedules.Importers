@@ -132,8 +132,14 @@
   <data name="Settings" xml:space="preserve">
     <value>Indstillinger</value>
   </data>
-  <data name="Layout" xml:space="preserve">
-    <value>Anlæg</value>
+  <data name="OperationLocations" xml:space="preserve">
+    <value>Driftssteder</value>
+  </data>
+  <data name="Companies" xml:space="preserve">
+    <value>Selskaber</value>
+  </data>
+  <data name="CompaniesDescription" xml:space="preserve">
+    <value>Selskaberne, der kører anlæggets tog.</value>
   </data>
   <data name="Stretches" xml:space="preserve">
     <value>Strækninger</value>
@@ -167,6 +173,9 @@
   </data>
   <data name="Print" xml:space="preserve">
     <value>Udskriv</value>
+  </data>
+  <data name="NoHelpYet" xml:space="preserve">
+    <value>Ingen hjælp til denne fane endnu.</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Luk</value>
@@ -291,6 +300,12 @@
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minutafstand (px/min)</value>
   </data>
+  <data name="KilometerSpacing" xml:space="preserve">
+    <value>Afstandsskala (px/km)</value>
+  </data>
+  <data name="RestoringWork" xml:space="preserve">
+    <value>Gendanner dit arbejde. Vent venligst…</value>
+  </data>
   <data name="StationSpacing" xml:space="preserve">
     <value>Stationsafstand (px)</value>
   </data>
@@ -414,9 +429,6 @@
   <data name="TrainsDescription" xml:space="preserve">
     <value>Tog med stationsophold og tider.</value>
   </data>
-  <data name="StretchesPageTitle" xml:space="preserve">
-    <value>Spor- og køreplanstrækninger</value>
-  </data>
   <data name="StretchesDescription" xml:space="preserve">
     <value>Forbindelser mellem driftssteder og køreplanstrækninger.</value>
   </data>
@@ -429,10 +441,7 @@
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Byg køretøjsomløb og tildel lokomotiver, vogne og godsstrømme.</value>
   </data>
-  <data name="LayoutPageTitle" xml:space="preserve">
-    <value>Anlæggets driftssteder</value>
-  </data>
-  <data name="LayoutDescription" xml:space="preserve">
+  <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationer og deres spor.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
@@ -452,5 +461,77 @@
   </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Træk en visning hertil for at begynde.</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Skala</value>
+  </data>
+  <data name="DefaultCountry" xml:space="preserve">
+    <value>Standardland</value>
+  </data>
+  <data name="European" xml:space="preserve">
+    <value>Europæisk</value>
+  </data>
+  <data name="American" xml:space="preserve">
+    <value>Amerikansk</value>
+  </data>
+  <data name="Norway" xml:space="preserve">
+    <value>Norge</value>
+  </data>
+  <data name="Sweden" xml:space="preserve">
+    <value>Sverige</value>
+  </data>
+  <data name="Denmark" xml:space="preserve">
+    <value>Danmark</value>
+  </data>
+  <data name="Finland" xml:space="preserve">
+    <value>Finland</value>
+  </data>
+  <data name="Germany" xml:space="preserve">
+    <value>Tyskland</value>
+  </data>
+  <data name="Austria" xml:space="preserve">
+    <value>Østrig</value>
+  </data>
+  <data name="Netherlands" xml:space="preserve">
+    <value>Nederlandene</value>
+  </data>
+  <data name="Belgium" xml:space="preserve">
+    <value>Belgien</value>
+  </data>
+  <data name="France" xml:space="preserve">
+    <value>Frankrig</value>
+  </data>
+  <data name="Italy" xml:space="preserve">
+    <value>Italien</value>
+  </data>
+  <data name="Czechia" xml:space="preserve">
+    <value>Tjekkiet</value>
+  </data>
+  <data name="Slovakia" xml:space="preserve">
+    <value>Slovakiet</value>
+  </data>
+  <data name="Poland" xml:space="preserve">
+    <value>Polen</value>
+  </data>
+  <data name="Hungary" xml:space="preserve">
+    <value>Ungarn</value>
+  </data>
+  <data name="UnitedStates" xml:space="preserve">
+    <value>USA</value>
+  </data>
+  <data name="Canada" xml:space="preserve">
+    <value>Canada</value>
+  </data>
+  <data name="Switzerland" xml:space="preserve">
+    <value>Schweiz</value>
+  </data>
+  <data name="UnitedKingdom" xml:space="preserve">
+    <value>Storbritannien</value>
+  </data>
+  <data name="CzechRepublic" xml:space="preserve">
+    <value>Tjekkiet</value>
   </data>
 </root>

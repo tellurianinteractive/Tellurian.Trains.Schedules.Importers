@@ -7,7 +7,13 @@
          draggable="true"
          @ondragstart="() => Dock.DraggingViewId = ViewId"
          @ondragend="() => Dock.DraggingViewId = null">
-        <span class="title">@Translator(Label)</span>
+        <span class="title-group">
+            <span class="title">@Translator(Label)</span>
+            @if (HelpKey is { } helpKey)
+            {
+                <HelpButton For="@helpKey" />
+            }
+        </span>
         <button class="close" title="@Translator("Close")" @onclick="() => Dock.CloseView(ViewId)">&times;</button>
     </div>
 
@@ -54,7 +60,9 @@
 
     private DropDirection? _hover;
 
-    private string Label => TabRegistry.Tabs.FirstOrDefault(t => t.Href == ViewId)?.ResourceKey ?? ViewId;
+    private TabDefinition? Tab => TabRegistry.Tabs.FirstOrDefault(t => t.Href == ViewId);
+    private string Label => Tab?.ResourceKey ?? ViewId;
+    private string? HelpKey => Tab?.HelpKey;
     private Type? ComponentType => TabRegistry.GetComponentType(ViewId);
 
     protected override void OnInitialized() => Dock.OnChanged += OnChanged;

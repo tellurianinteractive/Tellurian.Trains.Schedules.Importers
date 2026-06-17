@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Use" xml:space="preserve">
+    <value>Brug {0}.</value>
+  </data>
+  <data name="CoupleToTrain" xml:space="preserve">
+    <value>Kobl {0} til toget.</value>
+  </data>
+  <data name="CoupleToTrainInPosition" xml:space="preserve">
+    <value>Kobl {0} til toget i position {1}.</value>
+  </data>
+  <data name="UncoupleFromTrain" xml:space="preserve">
+    <value>Frakobl {0} fra toget.</value>
+  </data>
+  <data name="MoveTractionUnitFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Flyt trækkraftenhed {0} fra opstilling til afgangsspor.</value>
+  </data>
+  <data name="MoveTractionUnitToParking" xml:space="preserve">
+    <value>Flyt trækkraftenhed {0} til opstilling.</value>
+  </data>
+  <data name="ReinforcesBetweenAnd" xml:space="preserve">
+    <value>Forstærker {0} mellem {1} og {2}.</value>
+  </data>
+  <data name="BringsWagonsTo" xml:space="preserve">
+    <value>Medbringer vogne til {0}</value>
+  </data>
+  <data name="AllDestinations" xml:space="preserve">
+    <value>alle destinationer</value>
+  </data>
+  <data name="AndBeyond" xml:space="preserve">
+    <value>og videre</value>
+  </data>
+  <data name="AndLocalDestinations" xml:space="preserve">
+    <value>og lokale destinationer</value>
+  </data>
+  <data name="AndLocalDestinationsAndBeyond" xml:space="preserve">
+    <value>og lokale destinationer og videre</value>
+  </data>
+  <data name="Axles" xml:space="preserve">
+    <value>Aksler × {0}</value>
+  </data>
+  <data name="Wagons" xml:space="preserve">
+    <value>Vogne × {0}</value>
+  </data>
+</root>

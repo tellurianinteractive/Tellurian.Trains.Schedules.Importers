@@ -2,13 +2,16 @@
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
+@using Theme = Tellurian.Trains.Schedules.Model.Layouts.Theme
+@using Scale = Tellurian.Trains.Schedules.Model.Layouts.Scale
+@using Country = Tellurian.Trains.Schedules.Model.Country
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@inject UiPreferenceService UiPrefs
 @implements IDisposable
 
-<h2>@Translator("Settings")</h2>
 
-@if (Layout is null || S is null)
+@if (Layout is null || LayoutSettings is null)
 {
     <p>@Translator("SettingsNoSchedule")</p>
 }
@@ -19,29 +22,60 @@ else
             @foreach (var section in Sections)
             {
                 <button class="sub-tab @(section == _section ? "active" : "")"
-                        @onclick="() => _section = section">
+                        @onclick="() => SelectSection(section)">
                     @SectionLabel(section)
                 </button>
             }
         </nav>
 
+        @* Settings bind directly to the shared Layout model. Each field uses @bind:after="OnEdited"
+           so every edit is saved to storage and broadcast: docked views (e.g. the graphical timetable)
+           re-render via ScheduleState.OnChanged, and the change survives a reload. *@
         <div class="section">
             @if (_section == SettingsSection.General)
             {
-                var g = S.General;
+                var g = LayoutSettings.General;
+                var i = LayoutSettings.Identity;
                 <div class="field">
-                    <label>@Translator("LayoutName")</label>
-                    <input type="text" @bind="LayoutName" />
+                    <HelpLabel For="LayoutName" />
+                    <input type="text" @bind="LayoutName" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("UseDays")</label>
-                    <input type="checkbox" @bind="g.UseDays" />
+                    <label>@Translator("Theme")</label>
+                    <select @bind="LayoutTheme" @bind:after="OnEdited">
+                        @foreach (var t in Enum.GetValues<Theme>())
+                        {
+                            <option value="@t">@Translator(t.ToString())</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>@Translator("Scale")</label>
+                    <select @bind="i.ScaleId" @bind:after="OnEdited">
+                        @foreach (var s in Scale.Scales.OrderBy(s => s.Denominator))
+                        {
+                            <option value="@s.Id">@ScaleLabel(s)</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>@Translator("DefaultCountry")</label>
+                    <select @bind="i.DefaultCountryId" @bind:after="OnEdited">
+                        @foreach (var c in CountryChoices)
+                        {
+                            <option value="@c.Id">@Translator(c.ResourceKey)</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <HelpLabel For="UseDays" />
+                    <input type="checkbox" @bind="g.UseDays" @bind:after="OnEdited" />
                 </div>
                 @if (g.UseDays)
                 {
                     <div class="field">
-                        <label>@Translator("StartDay")</label>
-                        <select @bind="g.StartDay">
+                        <HelpLabel For="StartDay" />
+                        <select @bind="g.StartDay" @bind:after="OnEdited">
                             @foreach (var day in Enum.GetValues<DayOfWeek>())
                             {
                                 <option value="@day">@day</option>
@@ -50,28 +84,36 @@ else
                     </div>
                 }
                 <div class="field">
-                    <label>@Translator("StartTime")</label>
-                    <input type="time" @bind="StartTime" />
+                    <HelpLabel For="StartTime" />
+                    <input type="time" @bind="StartTime" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("EndTime")</label>
-                    <input type="time" @bind="EndTime" />
+                    <HelpLabel For="EndTime" />
+                    <input type="time" @bind="EndTime" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("BreakForPrinting")</label>
-                    <input type="checkbox" @bind="UseBreak" />
-                    @if (UseBreak)
-                    {
-                        <input type="time" @bind="BreakTime" />
-                    }
+                    <HelpLabel For="BreakForPrinting" />
+                    <span class="control">
+                        <input type="checkbox" @bind="UseBreak" @bind:after="OnEdited" />
+                        @if (UseBreak)
+                        {
+                            <input type="time" @bind="BreakTime" @bind:after="OnEdited" />
+                        }
+                    </span>
+                </div>
+
+                <div class="group-heading">@Translator("Reports")</div>
+                <div class="field">
+                    <HelpLabel For="UseObjectLanguageInReports" />
+                    <input type="checkbox" @bind="g.UseObjectLanguageInReports" @bind:after="OnEdited" />
                 </div>
             }
             else if (_section == SettingsSection.GraphicTimetable)
             {
-                var gt = S.GraphicTimetable;
+                var gt = LayoutSettings.GraphicTimetable;
                 <div class="field">
                     <label>@Translator("TimeAxisOrientation")</label>
-                    <select @bind="gt.Orientation">
+                    <select @bind="gt.Orientation" @bind:after="OnEdited">
                         @foreach (var o in Enum.GetValues<TimeAxisOrientation>())
                         {
                             <option value="@o">@o</option>
@@ -80,43 +122,47 @@ else
                 </div>
                 <div class="field">
                     <label>@Translator("ShowArrivalMinutes")</label>
-                    <input type="checkbox" @bind="gt.ShowArrivalMinutes" />
+                    <input type="checkbox" @bind="gt.ShowArrivalMinutes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ShowDepartureMinutes")</label>
-                    <input type="checkbox" @bind="gt.ShowDepartureMinutes" />
+                    <input type="checkbox" @bind="gt.ShowDepartureMinutes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("MinuteSpacing")</label>
-                    <input type="number" min="1" @bind="gt.MinuteSpacing" />
+                    <input type="number" min="1" @bind="gt.MinuteSpacing" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <label>@Translator("KilometerSpacing")</label>
+                    <input type="number" min="1" @bind="gt.KilometerSpacing" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("StationSpacing")</label>
-                    <input type="number" min="1" @bind="gt.StationSpacing" />
+                    <input type="number" min="1" @bind="gt.StationSpacing" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("TrackSpacing")</label>
-                    <input type="number" min="1" @bind="gt.TrackSpacing" />
+                    <input type="number" min="1" @bind="gt.TrackSpacing" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ShowTrainCategory")</label>
-                    <input type="checkbox" @bind="gt.ShowTrainCategory" />
+                    <input type="checkbox" @bind="gt.ShowTrainCategory" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ShowCompany")</label>
-                    <input type="checkbox" @bind="gt.ShowCompany" />
+                    <input type="checkbox" @bind="gt.ShowCompany" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("HideSessionsOrDays")</label>
-                    <input type="checkbox" @bind="gt.HideSessionsOrDays" />
+                    <input type="checkbox" @bind="gt.HideSessionsOrDays" @bind:after="OnEdited" />
                 </div>
             }
             else if (_section == SettingsSection.TimeAndSpeed)
             {
-                var ts = S.TimeAndSpeed;
+                var ts = LayoutSettings.TimeAndSpeed;
                 <div class="field">
                     <label>@Translator("FastClockSpeed")</label>
-                    <input type="number" min="1" @bind="ts.FastClockSpeed" />
+                    <input type="number" min="1" @bind="ts.FastClockSpeed" @bind:after="OnEdited" />
                 </div>
 
                 <div class="group-heading">@Translator("SpeedMapping")</div>
@@ -127,18 +173,18 @@ else
                     <tbody>
                         <tr>
                             <td>@Translator("SpeedSlow")</td>
-                            <td><input type="number" min="0" @bind="ts.Slow.ScaleSpeedKmh" /></td>
-                            <td><input type="number" step="0.01" @bind="ts.Slow.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                            <td><input type="number" min="0" @bind="ts.Slow.ScaleSpeedKmh" @bind:after="OnEdited" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.Slow.RealSpeedMetersPerSecond" @bind:culture="Invariant" @bind:after="OnEdited" /></td>
                         </tr>
                         <tr>
                             <td>@Translator("SpeedNormal")</td>
-                            <td><input type="number" min="0" @bind="ts.Normal.ScaleSpeedKmh" /></td>
-                            <td><input type="number" step="0.01" @bind="ts.Normal.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                            <td><input type="number" min="0" @bind="ts.Normal.ScaleSpeedKmh" @bind:after="OnEdited" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.Normal.RealSpeedMetersPerSecond" @bind:culture="Invariant" @bind:after="OnEdited" /></td>
                         </tr>
                         <tr>
                             <td>@Translator("SpeedHigh")</td>
-                            <td><input type="number" min="0" @bind="ts.High.ScaleSpeedKmh" /></td>
-                            <td><input type="number" step="0.01" @bind="ts.High.RealSpeedMetersPerSecond" @bind:culture="Invariant" /></td>
+                            <td><input type="number" min="0" @bind="ts.High.ScaleSpeedKmh" @bind:after="OnEdited" /></td>
+                            <td><input type="number" step="0.01" @bind="ts.High.RealSpeedMetersPerSecond" @bind:culture="Invariant" @bind:after="OnEdited" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -146,74 +192,74 @@ else
                 <div class="group-heading">@Translator("DefaultStationTimes")</div>
                 <p class="hint">@Translator("DefaultStationTimesHint")</p>
                 <div class="field">
-                    <label>@Translator("MinimumStop")</label>
-                    <input type="number" min="0" @bind="ts.StationTimings.MinimumStopMinutes" />
+                    <HelpLabel For="MinimumStop" />
+                    <input type="number" min="0" @bind="ts.StationTimings.MinimumStopMinutes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("LocoRunaround")</label>
-                    <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" />
+                    <HelpLabel For="LocoRunaround" />
+                    <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("TrainClearance")</label>
-                    <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" />
+                    <HelpLabel For="TrainClearance" />
+                    <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
                 </div>
             }
             else if (_section == SettingsSection.Validation)
             {
-                var v = S.Validation;
+                var v = LayoutSettings.Validation;
                 <div class="field">
                     <label>@Translator("ValidateStationCalls")</label>
-                    <input type="checkbox" @bind="v.ValidateStationCalls" />
+                    <input type="checkbox" @bind="v.ValidateStationCalls" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateStationTracks")</label>
-                    <input type="checkbox" @bind="v.ValidateStationTracks" />
+                    <input type="checkbox" @bind="v.ValidateStationTracks" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateStretches")</label>
-                    <input type="checkbox" @bind="v.ValidateStretches" />
+                    <input type="checkbox" @bind="v.ValidateStretches" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateTrainSpeed")</label>
-                    <input type="checkbox" @bind="v.ValidateTrainSpeed" />
+                    <input type="checkbox" @bind="v.ValidateTrainSpeed" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateTrainNumbers")</label>
-                    <input type="checkbox" @bind="v.ValidateTrainNumbers" />
+                    <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateSchedules")</label>
-                    <input type="checkbox" @bind="v.ValidateSchedules" />
+                    <input type="checkbox" @bind="v.ValidateSchedules" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateLocomotiveCoverage")</label>
-                    <input type="checkbox" @bind="v.ValidateLocomotiveCoverage" />
+                    <input type="checkbox" @bind="v.ValidateLocomotiveCoverage" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ValidateDriverDuties")</label>
-                    <input type="checkbox" @bind="v.ValidateDriverDuties" />
+                    <input type="checkbox" @bind="v.ValidateDriverDuties" @bind:after="OnEdited" />
                 </div>
 
                 <div class="group-heading">@Translator("Thresholds")</div>
                 <div class="field">
                     <label>@Translator("MinTrainSpeed")</label>
-                    <input type="number" step="0.1" @bind="v.MinTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
+                    <input type="number" step="0.1" @bind="v.MinTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("MaxTrainSpeed")</label>
-                    <input type="number" step="0.1" @bind="v.MaxTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" />
+                    <input type="number" step="0.1" @bind="v.MaxTrainSpeedMetersPerClockMinute" @bind:culture="Invariant" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("MinMinutesBetweenTrackUsage")</label>
-                    <input type="number" min="0" @bind="v.MinMinutesBetweenTrackUsage" />
+                    <input type="number" min="0" @bind="v.MinMinutesBetweenTrackUsage" @bind:after="OnEdited" />
                 </div>
             }
             else if (_section == SettingsSection.Integration)
             {
-                var i = S.Integration;
+                var i = LayoutSettings.Integration;
                 <div class="field">
                     <label>@Translator("ModuleRegistryApiKey")</label>
-                    <input type="text" @bind="i.ModuleRegistryApiKey" />
+                    <input type="text" @bind="i.ModuleRegistryApiKey" @bind:after="OnEdited" />
                 </div>
             }
         </div>
@@ -228,13 +274,38 @@ else
     private static CultureInfo Invariant => CultureInfo.InvariantCulture;
 
     private LayoutModel? Layout => ScheduleState.Layout;
-    private LayoutSettings? S => Layout?.Settings;
+    private LayoutSettings? LayoutSettings => Layout?.Settings;
 
     private string LayoutName
     {
         get => Layout?.Name ?? "";
         set { if (Layout is not null) Layout.Name = value; }
     }
+
+    // Changing the theme switches which countries are offered, so keep the stored default country
+    // valid for the new theme (fall back to the first available one).
+    private Theme LayoutTheme
+    {
+        get => LayoutSettings?.Identity.Theme ?? Theme.European;
+        set
+        {
+            if (LayoutSettings is null) return;
+            LayoutSettings.Identity.Theme = value;
+            var available = Country.CountriesByTheme(value);
+            if (!available.Any(c => c.Id == LayoutSettings.Identity.DefaultCountryId))
+                LayoutSettings.Identity.DefaultCountryId = available.FirstOrDefault()?.Id ?? 0;
+        }
+    }
+
+    private static string ScaleLabel(Scale scale) =>
+        string.IsNullOrEmpty(scale.Remark)
+            ? $"{scale.Name} (1:{scale.Denominator})"
+            : $"{scale.Name} (1:{scale.Denominator}, {scale.Remark})";
+
+    // Sort by the name as shown in the current UI language (one entry per country).
+    private IEnumerable<Country> CountryChoices =>
+        Country.CountriesByTheme(LayoutTheme)
+            .OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture);
 
     // The operating window may run to or past midnight (e.g. an end of 24:00 when the last
     // departure is in the 23:00 hour, or beyond for services running into the next day). A
@@ -248,35 +319,53 @@ else
 
     private TimeOnly StartTime
     {
-        get => S is null ? default : ToTimeOfDay(S.General.StartTime);
-        set { if (S is not null) S.General.StartTime = value.ToTimeSpan(); }
+        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.StartTime);
+        set { if (LayoutSettings is not null) LayoutSettings.General.StartTime = value.ToTimeSpan(); }
     }
 
     private TimeOnly EndTime
     {
-        get => S is null ? default : ToTimeOfDay(S.General.EndTime);
-        set { if (S is not null) S.General.EndTime = value.ToTimeSpan(); }
+        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.EndTime);
+        set { if (LayoutSettings is not null) LayoutSettings.General.EndTime = value.ToTimeSpan(); }
     }
 
     private bool UseBreak
     {
-        get => S?.General.BreakTime is not null;
+        get => LayoutSettings?.General.BreakTime is not null;
         set
         {
-            if (S is null) return;
-            S.General.BreakTime = value ? S.General.BreakTime ?? TimeSpan.FromHours(12) : null;
+            if (LayoutSettings is null) return;
+            LayoutSettings.General.BreakTime = value ? LayoutSettings.General.BreakTime ?? TimeSpan.FromHours(12) : null;
         }
     }
 
     private TimeOnly? BreakTime
     {
-        get => S?.General.BreakTime is { } b ? ToTimeOfDay(b) : null;
-        set { if (S is not null) S.General.BreakTime = value?.ToTimeSpan(); }
+        get => LayoutSettings?.General.BreakTime is { } b ? ToTimeOfDay(b) : null;
+        set { if (LayoutSettings is not null) LayoutSettings.General.BreakTime = value?.ToTimeSpan(); }
     }
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (await UiPrefs.GetSettingsSectionAsync() is { } saved && Enum.TryParse<SettingsSection>(saved, out var section))
+            _section = section;
+    }
+
+    // Switches the active sub-tab and remembers it, so the same section is shown next time.
+    private void SelectSection(SettingsSection section)
+    {
+        _section = section;
+        _ = UiPrefs.SetSettingsSectionAsync(section.ToString());
+    }
+
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // Runs after each bound settings field changes: save the edit and notify docked views so they
+    // re-render. Bound directly to the shared Layout model, these edits otherwise neither persist
+    // nor notify on their own.
+    private void OnEdited() => ScheduleState.SaveAndNotify();
 
     private string SectionLabel(SettingsSection section) => Translator(section switch
     {
@@ -288,7 +377,12 @@ else
         _ => section.ToString()
     });
 
-    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        // Write any edit still inside the debounce window before this view goes away.
+        ScheduleState.FlushPendingSave();
+    }
 
     private enum SettingsSection
     {

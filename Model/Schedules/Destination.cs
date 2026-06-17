@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
@@ -62,13 +63,13 @@ public class Destination
     private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToString())) : string.Empty;
     private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Display.Value)) : string.Empty;
     private string AndText =>
-        AndLocalDestinations && AndBeyond ? NoteText.Format("AndLocalDestinationsAndBeyond") :
-        AndBeyond ? NoteText.Format("AndBeyond") :
-        AndLocalDestinations ? NoteText.Format("AndLocalDestinations") :
+        AndLocalDestinations && AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :
+        AndBeyond ? NoteResources.AndBeyond :
+        AndLocalDestinations ? NoteResources.AndLocalDestinations :
         string.Empty;
 
     private string MaxLength =>
-        MaxNumberOfAxles > 0 ? NoteText.Format("Axles", MaxNumberOfAxles) :
-        MaxNumberOfWagons > 0 ? NoteText.Format("Wagons", MaxNumberOfWagons) :
+        MaxNumberOfAxles > 0 ? NoteText.Format(NoteResources.Axles, MaxNumberOfAxles) :
+        MaxNumberOfWagons > 0 ? NoteText.Format(NoteResources.Wagons, MaxNumberOfWagons) :
         string.Empty;
 }

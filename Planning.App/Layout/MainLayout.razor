@@ -1,8 +1,11 @@
 ﻿@inherits LayoutComponentBase
 @using System.Globalization
+@using Microsoft.AspNetCore.Components.Routing
 @using Tellurian.Localization
 @inject DockLayoutState Dock
 @inject ScheduleStateService ScheduleState
+@inject UiPreferenceService UiPrefs
+@inject NavigationManager Nav
 @inject IJSRuntime JS
 @inject Translator Translator
 @implements IDisposable
@@ -28,27 +31,51 @@
     }
 
     <nav class="tab-bar no-print">
-        <NavLink class="tab workspace-tab" href="workspace" Match="NavLinkMatch.Prefix">
-            @Translator("Workspace")
-        </NavLink>
         @foreach (var tab in TabRegistry.Tabs)
         {
-            <NavLink class="@($"tab{(Dock.ContainsView(tab.Href) ? " docked" : "")}")"
-                     href="@tab.Href"
-                     Match="@(tab.Href == "" ? NavLinkMatch.All : NavLinkMatch.Prefix)"
-                     draggable="true"
-                     @ondragstart="() => Dock.DraggingViewId = tab.Href"
-                     @ondragend="() => Dock.DraggingViewId = null">
-                @Translator(tab.ResourceKey)
-            </NavLink>
+            @* Reports sits just before Import in the tab order. *@
+            @if (tab.Href == "import")
+            {
+                <ReportsMenu />
+            }
+            <span class="tab-slot">
+                <NavLink class="@($"tab{(Dock.ContainsView(tab.Href) ? " docked" : "")}")"
+                         href="@tab.Href"
+                         Match="@(tab.Href == "" ? NavLinkMatch.All : NavLinkMatch.Prefix)"
+                         draggable="true"
+                         @ondragstart="() => Dock.DraggingViewId = tab.Href"
+                         @ondragend="() => Dock.DraggingViewId = null">
+                    @Translator(tab.ResourceKey)
+                </NavLink>
+                @if (tab.HelpKey is { } helpKey)
+                {
+                    <HelpButton For="@helpKey" />
+                }
+            </span>
+            @* Workspace sits just after Home (the empty route). *@
+            @if (tab.Href == "")
+            {
+                <NavLink class="tab workspace-tab" href="workspace" Match="NavLinkMatch.Prefix">
+                    @Translator("Workspace")
+                </NavLink>
+            }
         }
-        <ReportsMenu />
         <ExportMenu />
     </nav>
 
     <main class="content">
         <div class="pane-content">
-            @Body
+            @if (_initializing)
+            {
+                <div class="app-loading">
+                    <div class="spinner"></div>
+                    <p>@Translator("RestoringWork")</p>
+                </div>
+            }
+            else
+            {
+                @Body
+            }
         </div>
     </main>
 </div>
@@ -58,20 +85,49 @@
     private bool _showAbout;
     private string _aboutHtml = "";
 
+    // Restoring state on startup (deserializing the persisted plan, restoring the dock and last route)
+    // takes a moment on WebAssembly; show a spinner until it finishes instead of a blank/wrong tab.
+    private bool _initializing = true;
+
     [Inject(Key = "Markdown")]
     public IResourceProvider MarkdownProvider { get; set; } = default!;
 
-    protected override void OnInitialized() => Dock.OnChanged += StateHasChanged;
+    protected override void OnInitialized()
+    {
+        Dock.OnChanged += StateHasChanged;
+        Nav.LocationChanged += OnLocationChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await Dock.LoadAsync(JS);
-            await ScheduleState.InitializeAsync();
-            StateHasChanged();
+            try
+            {
+                await Dock.LoadAsync(JS);
+                await ScheduleState.InitializeAsync();
+                await RestoreLastRouteAsync();
+            }
+            finally
+            {
+                // Always clear the spinner, even if a restore step fails, so the app never hangs on it.
+                _initializing = false;
+                StateHasChanged();
+            }
         }
     }
+
+    // On a fresh start (at the app root) navigate to the route the user last had open. An explicit
+    // deep link (non-root start) is respected and left untouched.
+    private async Task RestoreLastRouteAsync()
+    {
+        if (!string.IsNullOrEmpty(Nav.ToBaseRelativePath(Nav.Uri))) return;
+        if (await UiPrefs.GetLastRouteAsync() is { Length: > 0 } last)
+            Nav.NavigateTo(last);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) =>
+        _ = UiPrefs.SetLastRouteAsync(Nav.ToBaseRelativePath(e.Location));
 
     private async Task ToggleAbout()
     {
@@ -87,5 +143,6 @@
     public void Dispose()
     {
         Dock.OnChanged -= StateHasChanged;
+        Nav.LocationChanged -= OnLocationChanged;
     }
 }

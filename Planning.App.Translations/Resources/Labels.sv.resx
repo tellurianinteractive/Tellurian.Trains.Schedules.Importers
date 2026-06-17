@@ -132,8 +132,14 @@
   <data name="Settings" xml:space="preserve">
     <value>Inställningar</value>
   </data>
-  <data name="Layout" xml:space="preserve">
-    <value>Anläggning</value>
+  <data name="OperationLocations" xml:space="preserve">
+    <value>Driftplatser</value>
+  </data>
+  <data name="Companies" xml:space="preserve">
+    <value>Företag</value>
+  </data>
+  <data name="CompaniesDescription" xml:space="preserve">
+    <value>Företagen som kör banans tåg.</value>
   </data>
   <data name="Stretches" xml:space="preserve">
     <value>Sträckor</value>
@@ -167,6 +173,9 @@
   </data>
   <data name="Print" xml:space="preserve">
     <value>Skriv ut</value>
+  </data>
+  <data name="NoHelpYet" xml:space="preserve">
+    <value>Ingen hjälp för den här fliken ännu.</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Stäng</value>
@@ -262,7 +271,7 @@
     <value>Integration</value>
   </data>
   <data name="LayoutName" xml:space="preserve">
-    <value>Anläggningens namn</value>
+    <value>Banans namn</value>
   </data>
   <data name="UseDays" xml:space="preserve">
     <value>Använd dagar istället för sessioner</value>
@@ -290,6 +299,12 @@
   </data>
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minutavstånd (px/min)</value>
+  </data>
+  <data name="KilometerSpacing" xml:space="preserve">
+    <value>Avståndsskala (px/km)</value>
+  </data>
+  <data name="RestoringWork" xml:space="preserve">
+    <value>Återställer ditt arbete. Vänta…</value>
   </data>
   <data name="StationSpacing" xml:space="preserve">
     <value>Stationsavstånd (px)</value>
@@ -331,7 +346,7 @@
     <value>Standardtider för stationer</value>
   </data>
   <data name="DefaultStationTimesHint" xml:space="preserve">
-    <value>Standardvärden för hela anläggningen; enskilda stationer kan åsidosätta dessa.</value>
+    <value>Standardvärden för hela banan; enskilda stationer kan åsidosätta dessa.</value>
   </data>
   <data name="MinimumStop" xml:space="preserve">
     <value>Minsta uppehåll (snabbklocksmin)</value>
@@ -414,9 +429,6 @@
   <data name="TrainsDescription" xml:space="preserve">
     <value>Tåg med stationsuppehåll och tider.</value>
   </data>
-  <data name="StretchesPageTitle" xml:space="preserve">
-    <value>Spår- och tidtabellssträckor</value>
-  </data>
   <data name="StretchesDescription" xml:space="preserve">
     <value>Förbindelser mellan driftplatser och tidtabellssträckor.</value>
   </data>
@@ -429,10 +441,7 @@
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Bygg fordonsomlopp och tilldela lok, vagnar och godsflöden.</value>
   </data>
-  <data name="LayoutPageTitle" xml:space="preserve">
-    <value>Anläggningens driftplatser</value>
-  </data>
-  <data name="LayoutDescription" xml:space="preserve">
+  <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationer och deras spår.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
@@ -452,5 +461,77 @@
   </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Dra en vy hit för att börja.</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Skala</value>
+  </data>
+  <data name="DefaultCountry" xml:space="preserve">
+    <value>Standardland</value>
+  </data>
+  <data name="European" xml:space="preserve">
+    <value>Europeisk</value>
+  </data>
+  <data name="American" xml:space="preserve">
+    <value>Amerikansk</value>
+  </data>
+  <data name="Norway" xml:space="preserve">
+    <value>Norge</value>
+  </data>
+  <data name="Sweden" xml:space="preserve">
+    <value>Sverige</value>
+  </data>
+  <data name="Denmark" xml:space="preserve">
+    <value>Danmark</value>
+  </data>
+  <data name="Finland" xml:space="preserve">
+    <value>Finland</value>
+  </data>
+  <data name="Germany" xml:space="preserve">
+    <value>Tyskland</value>
+  </data>
+  <data name="Austria" xml:space="preserve">
+    <value>Österrike</value>
+  </data>
+  <data name="Netherlands" xml:space="preserve">
+    <value>Nederländerna</value>
+  </data>
+  <data name="Belgium" xml:space="preserve">
+    <value>Belgien</value>
+  </data>
+  <data name="France" xml:space="preserve">
+    <value>Frankrike</value>
+  </data>
+  <data name="Italy" xml:space="preserve">
+    <value>Italien</value>
+  </data>
+  <data name="Czechia" xml:space="preserve">
+    <value>Tjeckien</value>
+  </data>
+  <data name="Slovakia" xml:space="preserve">
+    <value>Slovakien</value>
+  </data>
+  <data name="Poland" xml:space="preserve">
+    <value>Polen</value>
+  </data>
+  <data name="Hungary" xml:space="preserve">
+    <value>Ungern</value>
+  </data>
+  <data name="UnitedStates" xml:space="preserve">
+    <value>USA</value>
+  </data>
+  <data name="Canada" xml:space="preserve">
+    <value>Kanada</value>
+  </data>
+  <data name="Switzerland" xml:space="preserve">
+    <value>Schweiz</value>
+  </data>
+  <data name="UnitedKingdom" xml:space="preserve">
+    <value>Storbritannien</value>
+  </data>
+  <data name="CzechRepublic" xml:space="preserve">
+    <value>Tjeckien</value>
   </data>
 </root>

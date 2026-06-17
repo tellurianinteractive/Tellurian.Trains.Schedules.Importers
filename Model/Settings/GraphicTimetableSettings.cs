@@ -17,7 +17,18 @@ public sealed class GraphicTimetableSettings
     /// <summary>Pixels per minute along the time axis. Default is 2.</summary>
     public int MinuteSpacing { get; set; } = 2;
 
-    /// <summary>Minimum pixel spacing between stations on the distance axis. Default is 40.</summary>
+    /// <summary>
+    /// Pixels per kilometre along the distance axis. This is the scale that sizes the graph's
+    /// distance extent (its height for a horizontal time axis); stations are spaced in proportion
+    /// to their real <c>TrackStretch.Distance</c>. Default is 10.
+    /// </summary>
+    public int KilometerSpacing { get; set; } = 10;
+
+    /// <summary>
+    /// Minimum pixel spacing between stations on the distance axis, applied when the distance-based
+    /// spacing would be smaller. Ensures labels on train lines between close stations have room.
+    /// Default is 40.
+    /// </summary>
     public int StationSpacing { get; set; } = 40;
 
     /// <summary>Pixel spacing between individual tracks at a station. Default is 8.</summary>

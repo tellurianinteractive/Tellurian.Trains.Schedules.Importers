@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
@@ -267,7 +268,7 @@ public static class TrainPartExtensions
             get
             {
                 var options = trainPart.CargoFlowOptions!;
-                return options.ToAllDestinations ? NoteText.Format("AllDestinations") :
+                return options.ToAllDestinations ? NoteResources.AllDestinations :
                         string.Join(", ", options.Destinations.Select(d => d.ToString()));
             }
         }
@@ -277,7 +278,7 @@ public static class TrainPartExtensions
             get
             {
                 var options = trainPart.CargoFlowOptions!;
-                return options.ToAllDestinations ? NoteText.Format("AllDestinations") : string.Join(", ", options.Destinations.Select(d => d.Display.Value));
+                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.Display.Value));
             }
         }
     }

@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Importers.Services\Services.csproj" />
     <ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
     <ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
     <ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />

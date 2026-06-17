@@ -1,0 +1,53 @@
+namespace Tellurian.Trains.Schedules.Planning.App.Services;
+
+/// <summary>
+/// App-wide user-interface preferences persisted in browser storage, distinct from a layout's own
+/// settings (which are saved with the planning document). Values are cached in memory after the
+/// first read so components can apply them without an async round-trip on every render.
+/// </summary>
+public sealed class UiPreferenceService(BrowserStorageService storage)
+{
+    private const string SettingsSectionKey = "planning.ui.settingsSection";
+    private const string LastRouteKey = "planning.ui.lastRoute";
+
+    private string? _settingsSection;
+    private bool _settingsSectionLoaded;
+    private string? _lastRoute;
+    private bool _lastRouteLoaded;
+
+    /// <summary>The last active sub-tab in the Settings page, or null when none has been stored.</summary>
+    public async Task<string?> GetSettingsSectionAsync()
+    {
+        if (_settingsSectionLoaded) return _settingsSection;
+        _settingsSection = await storage.GetStringAsync(SettingsSectionKey);
+        _settingsSectionLoaded = true;
+        return _settingsSection;
+    }
+
+    /// <summary>Remembers the active sub-tab in the Settings page.</summary>
+    public async Task SetSettingsSectionAsync(string section)
+    {
+        if (_settingsSection == section) return;
+        _settingsSection = section;
+        _settingsSectionLoaded = true;
+        await storage.SetStringAsync(SettingsSectionKey, section);
+    }
+
+    /// <summary>The last active top-level route (e.g. "settings", "workspace"), or null when none.</summary>
+    public async Task<string?> GetLastRouteAsync()
+    {
+        if (_lastRouteLoaded) return _lastRoute;
+        _lastRoute = await storage.GetStringAsync(LastRouteKey);
+        _lastRouteLoaded = true;
+        return _lastRoute;
+    }
+
+    /// <summary>Remembers the active top-level route so it can be restored on the next start.</summary>
+    public async Task SetLastRouteAsync(string route)
+    {
+        if (_lastRoute == route) return;
+        _lastRoute = route;
+        _lastRouteLoaded = true;
+        await storage.SetStringAsync(LastRouteKey, route);
+    }
+}
