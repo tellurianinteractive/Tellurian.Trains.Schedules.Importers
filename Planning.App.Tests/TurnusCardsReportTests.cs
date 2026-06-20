@@ -20,7 +20,7 @@ public sealed class TurnusCardsReportTests : PlaywrightTestBase
         {
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             while (dir is not null && !dir.EnumerateFiles("*.slnx").Any()) dir = dir.Parent;
-            return Path.Combine(dir!.FullName, "Importers.Xpln.Tests", "Test data", "Rotebro2016.ods");
+            return Path.Combine(dir!.FullName, "Importers.Xpln.Tests", "Test data", "Rotebro2016.sv-SE.ods");
         }
     }
 

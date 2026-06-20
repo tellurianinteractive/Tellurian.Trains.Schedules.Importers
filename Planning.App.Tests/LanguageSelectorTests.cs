@@ -36,12 +36,12 @@ public sealed class LanguageSelectorTests : PlaywrightTestBase
     public async Task About_button_text_is_localized()
     {
         await Page.GotoAsync("/", Idle);
-        await Expect(Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "About" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "About", Exact = true })).ToBeVisibleAsync();
 
         await Page.GetByAltText("Svenska").ClickAsync();
 
         // After switching to Swedish the resx label resolves: About -> Om.
-        await Expect(Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Om" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Om", Exact = true })).ToBeVisibleAsync();
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("about-localized-sv.png") });
     }
 
@@ -49,7 +49,7 @@ public sealed class LanguageSelectorTests : PlaywrightTestBase
     public async Task About_dialog_loads_markdown_from_content()
     {
         await Page.GotoAsync("/", Idle);
-        await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "About" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "About", Exact = true }).ClickAsync();
 
         // The dialog renders About.md fetched from the Translations RCL's _content path.
         await Expect(Page.Locator(".about .panel")).ToContainTextAsync("Features");
