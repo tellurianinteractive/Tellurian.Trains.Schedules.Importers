@@ -6,11 +6,10 @@ train's destination note say where its wagons are bound beyond the modelled rail
 
 Each region has:
 
-- a **name**, shown wherever the region is referenced;
+- a **name**, shown wherever the region is referenced and presented in your chosen interface
+  language;
 - a **background colour**, used to render the region as a coloured chip in notes (the text colour is
-  contrasted automatically for readability);
-- an **abroad** flag, marking the region as a foreign country (shown with a flag icon) rather than a
-  domestic region.
+  contrasted automatically for readability).
 
 ## How regions are used
 

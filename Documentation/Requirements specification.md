@@ -29,7 +29,7 @@ Snapshot of coverage by area (see each section for detail).
 
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
-| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (Name/Color/IsAbroad) |
+| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (localised Name + Color) |
 | Station tracks (§4.1.2) | ✅ | |
 | Track / Timetable / Dispatch stretches (§4.1.3–5) | ✅ | |
 | Companies (§4.1.6) | ✅ | spec *Language Code* = code `Company.CountryCode` |
@@ -556,9 +556,13 @@ The layout carries all configurable settings as `Layout.Settings`, grouped by pu
 > **Status:** ✅ Implemented (`Model/OperationLocation.cs`, `Model/Station.cs`).
 > Name, Signature, subtypes (`Station`, `SignalControlledLocation`, `OtherLocation`),
 > `IsShadow` and `Timings` present. `Owner` is on the `OperationLocation` base;
-> `Regions` is on `Station` (alongside `IsShadow`) as an `IList<Region>`, where
-> `Region` (`Model/Region.cs`) carries Name, Color, and an `IsAbroad` flag for
-> foreign-country destinations (see DM-4.5.4).
+> The region catalogue is owned by the layout (`Layout.Regions`); a `Station`'s `Regions`
+> (`IList<Region>`, alongside `IsShadow`) references a subset of it. `Region`
+> (`Model/Layouts/Region.cs`) carries a background colour and a set of language-specific name
+> properties (`EN`, `DA`, `DE`, `NB`, `SV`); `Name` resolves the property for the current UI
+> culture via Tellurian.Localization's object resource provider, falling back to `EN` (see DM-4.5.4).
+> Operation locations, their tracks, and region assignments are edited on the **Operation Locations**
+> tab (`Pages/OperationLocationsEditor.razor`).
 
 
 

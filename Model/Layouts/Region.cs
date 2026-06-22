@@ -1,6 +1,5 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
-using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Localization;
 using Tellurian.Utilities.Web;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
@@ -18,9 +17,28 @@ public class Region
     public int Id { get; set; }
 
     /// <summary>
-    /// The resource key to use for translating the region name.
+    /// The resource key formerly used to translate the region name.
     /// </summary>
-    public required string EnglishName { get; set; }
+    [Obsolete("Replaced by language specific names.")]
+    public string EnglishName { get; set; } = "";
+
+    /// <summary>The region name in English. Required; used as the fallback for untranslated cultures.</summary>
+    public required string EN { get; init; }
+    /// <summary>The region name in Danish, or <c>null</c> when not translated.</summary>
+    public string? DA { get; init; }
+    /// <summary>The region name in German, or <c>null</c> when not translated.</summary>
+    public string? DE { get; init; }
+    /// <summary>The region name in Norwegian Bokmål, or <c>null</c> when not translated.</summary>
+    public string? NB { get; init; }
+    /// <summary>The region name in Swedish, or <c>null</c> when not translated.</summary>
+    public string? SV { get; init; }
+
+    /// <summary>
+    /// Selects the language-specific name property (<see cref="EN"/>, <see cref="SV"/>, …) matching the
+    /// current UI culture. Assigned once at application start-up (see <c>Program.cs</c>); contexts where it
+    /// is not configured fall back to the English <see cref="EN"/> name.
+    /// </summary>
+    public static ISynchronousResourceProvider? Localizer { get; set; }
 
     /// <summary>
     /// Gets or sets the background colour used when rendering this region in notes,
@@ -29,19 +47,19 @@ public class Region
     public string BackgroundColor { get; set; } = "#cccccc";
 
     /// <summary>
-    /// Gets or sets a value indicating whether this region represents a foreign country
-    /// (rendered with a flag icon) rather than a domestic region.
+    /// The region name localised for the current UI culture, selected from the language-specific
+    /// properties (<see cref="EN"/>, <see cref="SV"/>, …) via <see cref="Localizer"/>. Falls back to
+    /// the English <see cref="EN"/> name when no localiser is configured or the matching property is
+    /// empty — for example an untranslated, user-defined region.
     /// </summary>
-    public bool IsAbroad { get; set; }
-
-
-    /// <summary>
-    /// The region name localised for the current UI culture. <see cref="EnglishName"/> is used as the
-    /// resource key (see <c>Resources/Regions.resx</c>); names without a translation — such as
-    /// user-defined regions outside the standard <c>Defaults</c> set — fall back to the key.
-    /// </summary>
-    public string Name =>
-        Regions.ResourceManager.GetString(EnglishName, CultureInfo.CurrentUICulture) ?? EnglishName;
+    public string Name
+    {
+        get
+        {
+            var localised = Localizer?.GetTranslation(this).Text;
+            return string.IsNullOrEmpty(localised) ? EN : localised;
+        }
+    }
 
     /// <summary>
     /// Markup display: the localised <see cref="Name"/> as a coloured chip, with the text colour
@@ -64,13 +82,13 @@ public static class RegionExtensions
         /// The standard set of regions.
         /// </summary>
         public static IEnumerable<Region> Defaults => [
-             new (){ Id=1, EnglishName="South", BackgroundColor="#ffff00" },
-             new (){ Id=2, EnglishName="West", BackgroundColor="#009933" },
-             new (){ Id=3, EnglishName="East", BackgroundColor="#CC0000" },
-             new (){ Id=4, EnglishName="Northwest", BackgroundColor="#996600" },
-             new (){ Id=5, EnglishName="Northeast", BackgroundColor="#000000" },
-             new (){ Id=6, EnglishName="North", BackgroundColor="#0066FF" },
-             new (){ Id=7, EnglishName="Middle", BackgroundColor="#FF9933" },
+             new (){ Id=1, EN="South", DA="Syd", DE="Süden", NB="Syd", SV="Söder", BackgroundColor="#ffff00" },
+             new (){ Id=2, EN="West", DA="Vest", DE="Westen", NB="Vest", SV="Väster", BackgroundColor="#009933" },
+             new (){ Id=3, EN="East", DA="Sjælland", DE="Osten", NB="Øst", SV="Öster", BackgroundColor="#CC0000" },
+             new (){ Id=4, EN="Northwest", DA="Nordvest", DE="Rhen-Main", NB="Trøndelag", SV="Nordväst", BackgroundColor="#996600" },
+             new (){ Id=5, EN="Northeast", DA="Fyn", DE="Rhurgebeit", NB="", SV="Nordost", BackgroundColor="#000000" },
+             new (){ Id=6, EN="North", DA="Nord", DE="Norden", NB="Nord", SV="Norr", BackgroundColor="#0066FF" },
+             new (){ Id=7, EN="Middle", DA="Stykgods", DE="Stückgut", NB="Stykgods", SV="Hallsberg", BackgroundColor="#FF9933" },
         ];
     }
 }

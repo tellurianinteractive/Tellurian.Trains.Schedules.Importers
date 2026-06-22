@@ -1,0 +1,250 @@
+.operation-locations {
+    --primary: #1a3a5c;
+    --danger: #c00;
+    --border: #ddd;
+    --hover: #f3f6fa;
+
+    button {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+
+    button.primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    button.danger {
+        color: var(--danger);
+        border-color: #e0b4b4;
+    }
+
+    button.danger:hover {
+        background: #fbeaea;
+    }
+
+    button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .toolbar {
+        margin: 0.75rem 0;
+    }
+
+    .type-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding: 0.6rem 0.75rem;
+        margin-bottom: 0.75rem;
+        background: var(--hover);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+    }
+
+    .empty,
+    .hint {
+        color: #667;
+        font-style: italic;
+    }
+
+    .hint button {
+        margin-left: 0.6rem;
+        font-style: normal;
+    }
+
+    /* QuickGrid list */
+    ::deep table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 960px;
+        font-size: 0.9rem;
+    }
+
+    ::deep th,
+    ::deep td {
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    ::deep thead th {
+        color: var(--primary);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    ::deep tbody tr:hover {
+        background: var(--hover);
+    }
+
+    ::deep td.actions,
+    ::deep th.actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    ::deep td.actions button {
+        margin-left: 0.3rem;
+    }
+
+    .confirm {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        background: #fbeaea;
+        border: 1px solid #e0b4b4;
+        border-radius: 5px;
+    }
+
+    /* Edit form */
+    .edit h2,
+    .info h2 {
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .edit h3,
+    .info h3 {
+        color: var(--primary);
+        font-size: 1rem;
+        margin: 1.2rem 0 0.4rem;
+    }
+
+    .section {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        align-items: center;
+        max-width: 640px;
+    }
+
+    .field {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: 1 / span 2;
+        align-items: center;
+        column-gap: 1.5rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 5px;
+    }
+
+    .field:hover {
+        background: var(--hover);
+    }
+
+    .field > label,
+    .field ::deep .help-label {
+        grid-column: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .field input[type="text"] {
+        width: 22rem;
+        max-width: 100%;
+    }
+
+    .field input.num {
+        width: 7rem;
+    }
+
+    .regions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        max-width: 720px;
+    }
+
+    .region-choice {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: pointer;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 0.1rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        color: #000;
+    }
+
+    .info .chip {
+        margin-right: 0.3rem;
+    }
+
+    table.tracks {
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    table.tracks th,
+    table.tracks td {
+        padding: 0.25rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+    }
+
+    table.tracks th {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    table.tracks input[type="text"] {
+        width: 9rem;
+    }
+
+    table.tracks input.num {
+        width: 5rem;
+    }
+
+    table.tracks input.track-number {
+        width: 5rem;
+    }
+
+    .info dl {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.3rem 1.5rem;
+        max-width: 640px;
+    }
+
+    .info dt {
+        font-weight: 500;
+        color: #445;
+    }
+
+    .info dd {
+        margin: 0;
+    }
+
+    .error {
+        color: var(--danger);
+        font-weight: 500;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 1.2rem;
+    }
+}

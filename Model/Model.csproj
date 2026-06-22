@@ -15,7 +15,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Tellurian.Localization" Version="1.4.0" />
+    <PackageReference Include="Tellurian.Localization" Version="1.4.1" />
     <PackageReference Include="Tellurian.Utilities" Version="1.3.1" />
   </ItemGroup>
   <ItemGroup>
@@ -34,11 +34,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Notes.resx</DependentUpon>
     </Compile>
-    <Compile Update="Resources\Regions.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Regions.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\Days.resx">
@@ -54,10 +49,6 @@
     <EmbeddedResource Update="Resources\Notes.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Notes.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Regions.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Regions.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

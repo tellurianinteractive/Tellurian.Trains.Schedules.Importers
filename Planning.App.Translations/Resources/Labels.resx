@@ -424,6 +424,166 @@
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stations and their tracks.</value>
   </data>
+  <!-- Operation Locations editor -->
+  <data name="OperationLocationsNoSchedule" xml:space="preserve">
+    <value>No layout is loaded. Import or create a schedule first.</value>
+  </data>
+  <data name="NoOperationLocations" xml:space="preserve">
+    <value>No operation locations have been defined yet.</value>
+  </data>
+  <data name="AddNew" xml:space="preserve">
+    <value>Add new</value>
+  </data>
+  <data name="SelectLocationType" xml:space="preserve">
+    <value>Select the type of operation location to add:</value>
+  </data>
+  <data name="Station" xml:space="preserve">
+    <value>Station</value>
+  </data>
+  <data name="SignalControlledLocation" xml:space="preserve">
+    <value>Signal-controlled location</value>
+  </data>
+  <data name="OtherLocation" xml:space="preserve">
+    <value>Other location</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Signature" xml:space="preserve">
+    <value>Signature</value>
+  </data>
+  <data name="SignatureHelp" xml:space="preserve">
+    <value>A short, unique abbreviation identifying this location (e.g. a station code).</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="OwnerHelp" xml:space="preserve">
+    <value>The FREMO module owner who brings this location. Optional.</value>
+  </data>
+  <data name="Shadow" xml:space="preserve">
+    <value>Shadow</value>
+  </data>
+  <data name="IsShadow" xml:space="preserve">
+    <value>Shadow yard</value>
+  </data>
+  <data name="IsShadowHelp" xml:space="preserve">
+    <value>A hidden yard at the end of a line that stands in for the world beyond the modelled railway.</value>
+  </data>
+  <data name="IsManned" xml:space="preserve">
+    <value>Manned</value>
+  </data>
+  <data name="IsMannedHelp" xml:space="preserve">
+    <value>Whether the station is operated by a dispatcher rather than self-operated.</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
+    <value>Train can change direction</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
+    <value>Whether a train can reverse here, which typically requires a locomotive runaround.</value>
+  </data>
+  <data name="ControlledBy" xml:space="preserve">
+    <value>Controlled by</value>
+  </data>
+  <data name="ControlledByHelp" xml:space="preserve">
+    <value>The manned station whose dispatcher controls this signal-controlled location.</value>
+  </data>
+  <data name="NoneOption" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="OperationalTimes" xml:space="preserve">
+    <value>Operational time overrides</value>
+  </data>
+  <data name="OperationalTimesHint" xml:space="preserve">
+    <value>Leave blank to inherit the layout default.</value>
+  </data>
+  <data name="MinimumStopMinutes" xml:space="preserve">
+    <value>Minimum stop (min)</value>
+  </data>
+  <data name="MinimumStopMinutesHelp" xml:space="preserve">
+    <value>Minimum time a train stops at this manned station, in fast-clock minutes.</value>
+  </data>
+  <data name="LocoRunaroundRealMinutes" xml:space="preserve">
+    <value>Loco runaround (real min)</value>
+  </data>
+  <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
+    <value>Real time for a locomotive to run around its train, in real minutes.</value>
+  </data>
+  <data name="TrainClearanceRealMinutes" xml:space="preserve">
+    <value>Train clearance (real min)</value>
+  </data>
+  <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
+    <value>Real time for telephone dispatch clearance, in real minutes.</value>
+  </data>
+  <data name="Tracks" xml:space="preserve">
+    <value>Tracks</value>
+  </data>
+  <data name="TrackNumber" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="IsMain" xml:space="preserve">
+    <value>Main</value>
+  </data>
+  <data name="IsScheduled" xml:space="preserve">
+    <value>Scheduled</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Length (m)</value>
+  </data>
+  <data name="Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="AddTrack" xml:space="preserve">
+    <value>Add track</value>
+  </data>
+  <data name="TrackReferencedByTrains" xml:space="preserve">
+    <value>Cannot delete: {0} train(s) use this track.</value>
+  </data>
+  <data name="LocationReferencedByTrains" xml:space="preserve">
+    <value>Cannot delete: trains call at this location.</value>
+  </data>
+  <data name="DeleteLocationConfirm" xml:space="preserve">
+    <value>Delete operation location '{0}' and its tracks?</value>
+  </data>
+  <data name="NameAndSignatureRequired" xml:space="preserve">
+    <value>Name and signature are required.</value>
+  </data>
+  <data name="SignatureMustBeUnique" xml:space="preserve">
+    <value>The signature must be unique within the layout.</value>
+  </data>
+  <data name="NoRegionsDefined" xml:space="preserve">
+    <value>No regions are defined for this layout.</value>
+  </data>
+  <data name="AddStandardRegions" xml:space="preserve">
+    <value>Add standard regions</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>Not Found</value>
   </data>

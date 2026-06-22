@@ -39,6 +39,13 @@ public sealed class Layout : IEquatable<Layout>
     public ICollection<OperationLocation> OperationLocations { get; set; }
 
     /// <summary>
+    /// Gets or sets the catalogue of regions (domestic regions and foreign countries) available on
+    /// this layout for cargo flow routing. A <see cref="Station"/>'s <see cref="Station.Regions"/>
+    /// references a subset of these.
+    /// </summary>
+    public ICollection<Region> Regions { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of track stretches connecting stations.
     /// </summary>
     public ICollection<TrackStretch> TrackStretches { get; set; }
@@ -60,6 +67,7 @@ public sealed class Layout : IEquatable<Layout>
     {
         Companies = [];
         OperationLocations = [];
+        Regions = [];
         TrackStretches = [];
         TimetableStretches = [];
         DispatchStretches = [];
@@ -124,6 +132,35 @@ public static class LayoutCompanyExtensions
                 layout.Companies.Add(company);
             }
             return company;
+        }
+    }
+}
+
+/// <summary>
+/// Provides extension methods for managing the region catalogue within a <see cref="Layout"/>.
+/// </summary>
+public static class LayoutRegionExtensions
+{
+    extension(Layout? layout)
+    {
+        /// <summary>
+        /// Determines whether the layout's catalogue contains a region with the specified id.
+        /// </summary>
+        /// <param name="id">The region id to look for.</param>
+        /// <returns><c>true</c> if a region with the id exists; otherwise, <c>false</c>.</returns>
+        public bool HasRegion(int id) => layout?.Regions.Any(r => r.Id == id) ?? false;
+
+        /// <summary>
+        /// Adds a region to the layout's catalogue if a region with the same id is not already present.
+        /// </summary>
+        /// <param name="region">The region to add.</param>
+        /// <returns>The added (or already present) region.</returns>
+        public Region Add(Region region)
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            region = region.ValueOrException(nameof(region));
+            if (!layout.HasRegion(region.Id)) layout.Regions.Add(region);
+            return region;
         }
     }
 }

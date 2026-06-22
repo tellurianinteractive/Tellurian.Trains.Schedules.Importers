@@ -1,4 +1,481 @@
 @page "/operation-locations"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@implements IDisposable
 
-<p>@Translator("OperationLocationsDescription")</p>
+@if (Layout is null)
+{
+    <p>@Translator("OperationLocationsNoSchedule")</p>
+}
+else
+{
+    <div class="operation-locations">
+        @if (_mode == Mode.List)
+        {
+            <div class="toolbar">
+                <button class="primary" @onclick="StartAdd">@Translator("AddNew")</button>
+            </div>
+
+            @if (_addingType)
+            {
+                <div class="type-picker">
+                    <span>@Translator("SelectLocationType")</span>
+                    <button @onclick="() => AddNew(LocationType.Station)">@Translator("Station")</button>
+                    <button @onclick="() => AddNew(LocationType.SignalControlled)">@Translator("SignalControlledLocation")</button>
+                    <button @onclick="() => AddNew(LocationType.Other)">@Translator("OtherLocation")</button>
+                    <button @onclick="() => _addingType = false">@Translator("Cancel")</button>
+                </div>
+            }
+
+            @if (!Locations.Any())
+            {
+                <p class="empty">@Translator("NoOperationLocations")</p>
+            }
+            else
+            {
+                <QuickGrid Items="Locations" Class="grid">
+                    <PropertyColumn Property="o => o.Signature" Title='@Translator("Signature")' Sortable="true" />
+                    <PropertyColumn Property="o => o.Name" Title='@Translator("Name")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("Type")'>@Translator(TypeKey(context))</TemplateColumn>
+                    <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@(context is Station { IsShadow: true } ? "✓" : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        <button @onclick="() => Info(context)">@Translator("Info")</button>
+                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button class="danger" disabled="@IsReferenced(context)"
+                                title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
+                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                    </TemplateColumn>
+                </QuickGrid>
+            }
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Culture, Translator("DeleteLocationConfirm"), _deleteTarget.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+        else if (_mode == Mode.Edit && Editing is not null)
+        {
+            <div class="edit">
+                <h2>@Translator(TypeKey(Editing)) — @(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+
+                <div class="section">
+                    <div class="field">
+                        <HelpLabel For="Name" />
+                        <input type="text" @bind="Editing.Name" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <HelpLabel For="Signature" />
+                        <input type="text" @bind="Editing.Signature" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <HelpLabel For="Owner" />
+                        <input type="text" @bind="Editing.Owner" @bind:after="OnEdited" />
+                    </div>
+
+                    @if (Editing is not OtherLocation)
+                    {
+                        <div class="field">
+                            <HelpLabel For="IsChangingTrainDirectionPossible" />
+                            <input type="checkbox" @bind="Editing.IsChangingTrainDirectionPossible" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @if (Editing is Station station)
+                    {
+                        <div class="field">
+                            <HelpLabel For="IsShadow" />
+                            <input type="checkbox" @bind="station.IsShadow" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <HelpLabel For="IsManned" />
+                            <input type="checkbox" @bind="station.IsManned" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @if (Editing is SignalControlledLocation)
+                    {
+                        <div class="field">
+                            <HelpLabel For="ControlledBy" />
+                            <select @bind="ControlledById" @bind:after="OnEdited">
+                                <option value="">@Translator("NoneOption")</option>
+                                @foreach (var s in Stations)
+                                {
+                                    <option value="@s.Id">@s.Name (@s.Signature)</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                </div>
+
+                @if (Editing is Station regionStation)
+                {
+                    <h3>@Translator("Regions")</h3>
+                    @if (!Layout.Regions.Any())
+                    {
+                        <p class="hint">
+                            @Translator("NoRegionsDefined")
+                            <button @onclick="AddStandardRegions">@Translator("AddStandardRegions")</button>
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="regions">
+                            @foreach (var r in Layout.Regions)
+                            {
+                                <label class="region-choice">
+                                    <input type="checkbox" checked="@HasRegion(regionStation, r)"
+                                           @onchange="e => ToggleRegion(regionStation, r, (bool)e.Value!)" />
+                                    <span class="chip" style="background-color:@r.BackgroundColor">@r.Name</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                }
+
+                <h3>@Translator("OperationalTimes")</h3>
+                <p class="hint">@Translator("OperationalTimesHint")</p>
+                <div class="section">
+                    <div class="field">
+                        <HelpLabel For="MinimumStopMinutes" />
+                        <input type="number" class="num" @bind="Editing.Timings.MinimumStopMinutes" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <HelpLabel For="LocoRunaroundRealMinutes" />
+                        <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <HelpLabel For="TrainClearanceRealMinutes" />
+                        <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                    </div>
+                </div>
+
+                <h3>@Translator("Tracks")</h3>
+                <table class="tracks">
+                    <thead>
+                        <tr>
+                            <th>@Translator("TrackNumber")</th>
+                            <th>@Translator("DisplayOrder")</th>
+                            <th>@Translator("IsMain")</th>
+                            <th>@Translator("IsScheduled")</th>
+                            <th>@Translator("Length")</th>
+                            <th>@Translator("Usage")</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Editing.Tracks.OrderBy(t => t.DisplayOrder).ThenBy(t => t.Number, StringComparer.OrdinalIgnoreCase).ToList())
+                        {
+                            <tr>
+                                <td><input type="text" class="track-number" @bind="t.Number" @bind:after="OnEdited" /></td>
+                                <td><input type="number" class="num" @bind="t.DisplayOrder" @bind:after="OnEdited" /></td>
+                                <td><input type="checkbox" @bind="t.IsMain" @bind:after="OnEdited" /></td>
+                                <td><input type="checkbox" @bind="t.IsScheduled" @bind:after="OnEdited" /></td>
+                                <td><input type="number" step="0.1" class="num" @bind="t.Length" @bind:after="OnEdited" /></td>
+                                <td><input type="text" @bind="t.Usage" @bind:after="OnEdited" /></td>
+                                <td>
+                                    <button class="danger" disabled="@TrackReferenced(t)"
+                                            title='@(TrackReferenced(t) ? string.Format(Culture, Translator("TrackReferencedByTrains"), t.Calls.Count) : null)'
+                                            @onclick="() => DeleteTrack(t)">@Translator("Delete")</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button @onclick="AddTrack">@Translator("AddTrack")</button>
+
+                @if (_error is not null)
+                {
+                    <p class="error">@_error</p>
+                }
+
+                <div class="form-actions">
+                    @if (_isNew)
+                    {
+                        <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
+                        <button @onclick="BackToList">@Translator("Cancel")</button>
+                    }
+                    else
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
+            </div>
+        }
+        else if (_mode == Mode.Info && _selected is not null)
+        {
+            <div class="info">
+                <h2>@_selected.Name (@_selected.Signature)</h2>
+                <dl>
+                    <dt>@Translator("Type")</dt>
+                    <dd>@Translator(TypeKey(_selected))</dd>
+                    <dt>@Translator("Owner")</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(_selected.Owner) ? "—" : _selected.Owner)</dd>
+                    <dt>@Translator("IsChangingTrainDirectionPossible")</dt>
+                    <dd>@YesNo(_selected.IsChangingTrainDirectionPossible)</dd>
+                    @if (_selected is Station infoStation)
+                    {
+                        <dt>@Translator("IsShadow")</dt>
+                        <dd>@YesNo(infoStation.IsShadow)</dd>
+                        <dt>@Translator("IsManned")</dt>
+                        <dd>@YesNo(infoStation.IsManned)</dd>
+                        <dt>@Translator("Regions")</dt>
+                        <dd>
+                            @if (infoStation.Regions.Any())
+                            {
+                                @foreach (var r in infoStation.Regions)
+                                {
+                                    <span class="chip" style="background-color:@r.BackgroundColor">@r.Name</span>
+                                }
+                            }
+                            else
+                            {
+                                <text>—</text>
+                            }
+                        </dd>
+                    }
+                    @if (_selected is SignalControlledLocation infoSignal)
+                    {
+                        <dt>@Translator("ControlledBy")</dt>
+                        <dd>@(infoSignal.ControlledBy is { } c ? $"{c.Name} ({c.Signature})" : "—")</dd>
+                    }
+                    <dt>@Translator("MinimumStopMinutes")</dt>
+                    <dd>@Inherited(_selected.Timings.MinimumStopMinutes)</dd>
+                    <dt>@Translator("LocoRunaroundRealMinutes")</dt>
+                    <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes)</dd>
+                    <dt>@Translator("TrainClearanceRealMinutes")</dt>
+                    <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes)</dd>
+                </dl>
+
+                <h3>@Translator("Tracks")</h3>
+                @if (_selected.Tracks.Any())
+                {
+                    <table class="tracks">
+                        <thead>
+                            <tr>
+                                <th>@Translator("TrackNumber")</th>
+                                <th>@Translator("DisplayOrder")</th>
+                                <th>@Translator("IsMain")</th>
+                                <th>@Translator("IsScheduled")</th>
+                                <th>@Translator("Length")</th>
+                                <th>@Translator("Usage")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in _selected.Tracks.OrderBy(t => t.DisplayOrder).ThenBy(t => t.Number, StringComparer.OrdinalIgnoreCase))
+                            {
+                                <tr>
+                                    <td>@t.Number</td>
+                                    <td>@t.DisplayOrder</td>
+                                    <td>@YesNo(t.IsMain)</td>
+                                    <td>@YesNo(t.IsScheduled)</td>
+                                    <td>@(t.Length > 0 ? t.Length.ToString(Culture) : "—")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(t.Usage) ? "—" : t.Usage)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="empty">—</p>
+                }
+
+                <div class="form-actions">
+                    <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private enum Mode { List, Edit, Info }
+    private enum LocationType { Station, SignalControlled, Other }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Layout? Layout => ScheduleState.Layout;
+    private IQueryable<OperationLocation> Locations =>
+        (Layout?.OperationLocations ?? []).AsQueryable();
+    private IEnumerable<Station> Stations =>
+        Layout?.OperationLocations.OfType<Station>() ?? [];
+
+    private Mode _mode = Mode.List;
+    private bool _addingType;
+    private bool _isNew;
+    private OperationLocation? Editing { get; set; }
+    private OperationLocation? _selected;
+    private OperationLocation? _deleteTarget;
+    private string? _error;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    private static string TypeKey(OperationLocation o) => o switch
+    {
+        Station => "Station",
+        SignalControlledLocation => "SignalControlledLocation",
+        _ => "OtherLocation"
+    };
+
+    private string YesNo(bool value) => Translator(value ? "Yes" : "No");
+    private string Inherited(int? value) => value?.ToString(Culture) ?? "—";
+
+    // A location/track is referenced when any train calls there; such items cannot be deleted.
+    private static bool IsReferenced(OperationLocation o) => o.Tracks.Any(t => t.Calls.Count > 0);
+    private static bool TrackReferenced(StationTrack t) => t.Calls.Count > 0;
+
+    private void StartAdd()
+    {
+        _addingType = true;
+        _error = null;
+    }
+
+    private void AddNew(LocationType type)
+    {
+        var id = NextLocationId();
+        // The constructors reject blank name/signature, so seed placeholders and clear them for the form.
+        OperationLocation created = type switch
+        {
+            LocationType.Station => new Station(id, "x", "x") { IsManned = true },
+            LocationType.SignalControlled => new SignalControlledLocation(id, "x", "x"),
+            _ => new OtherLocation(id, "x", "x")
+        };
+        created.Name = "";
+        created.Signature = "";
+        Editing = created;
+        _isNew = true;
+        _addingType = false;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(OperationLocation location)
+    {
+        Editing = location;
+        _isNew = false;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void Info(OperationLocation location)
+    {
+        _selected = location;
+        _mode = Mode.Info;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        Editing = null;
+        _selected = null;
+        _isNew = false;
+        _error = null;
+        _addingType = false;
+    }
+
+    // Existing locations are edited live and persisted on each change; a new one is held detached
+    // until Save validates and adds it.
+    private void OnEdited()
+    {
+        _error = null;
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void SaveNew()
+    {
+        if (Editing is null) return;
+        if (string.IsNullOrWhiteSpace(Editing.Name) || string.IsNullOrWhiteSpace(Editing.Signature))
+        {
+            _error = Translator("NameAndSignatureRequired");
+            return;
+        }
+        if (Layout!.OperationLocations.Any(o => o.Signature.Equals(Editing.Signature, StringComparison.OrdinalIgnoreCase)))
+        {
+            _error = Translator("SignatureMustBeUnique");
+            return;
+        }
+        Layout.Add(Editing);
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.OperationLocations.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void AddTrack()
+    {
+        if (Editing is null) return;
+        var order = Editing.Tracks.Count == 0 ? 1 : Editing.Tracks.Max(t => t.DisplayOrder) + 1;
+        var track = new StationTrack(NextTrackId(), order.ToString(Culture), isMain: false, isScheduled: true)
+        {
+            DisplayOrder = order
+        };
+        Editing.Add(track);
+        OnEdited();
+    }
+
+    private void DeleteTrack(StationTrack track)
+    {
+        if (Editing is null || TrackReferenced(track)) return;
+        Editing.Tracks.Remove(track);
+        OnEdited();
+    }
+
+    private void AddStandardRegions()
+    {
+        foreach (var region in Region.Defaults) Layout!.Add(region);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private static bool HasRegion(Station station, Region region) => station.Regions.Any(r => r.Id == region.Id);
+
+    private void ToggleRegion(Station station, Region region, bool on)
+    {
+        var existing = station.Regions.FirstOrDefault(r => r.Id == region.Id);
+        if (on && existing is null) station.Regions.Add(region);
+        else if (!on && existing is not null) station.Regions.Remove(existing);
+        OnEdited();
+    }
+
+    private string ControlledById
+    {
+        get => (Editing as SignalControlledLocation)?.ControlledBy?.Id.ToString(Culture) ?? "";
+        set
+        {
+            if (Editing is not SignalControlledLocation signal) return;
+            signal.ControlledBy = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
+                ? Stations.FirstOrDefault(s => s.Id == id)
+                : null;
+        }
+    }
+
+    private int NextLocationId() =>
+        (Layout!.OperationLocations.Count == 0 ? 0 : Layout.OperationLocations.Max(o => o.Id)) + 1;
+
+    private int NextTrackId()
+    {
+        var existing = Layout!.OperationLocations.SelectMany(o => o.Tracks).Select(t => t.Id);
+        var pending = Editing?.Tracks.Select(t => t.Id) ?? [];
+        return existing.Concat(pending).DefaultIfEmpty(0).Max() + 1;
+    }
+}

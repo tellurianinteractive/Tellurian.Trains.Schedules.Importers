@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using System.Globalization;
+using Tellurian.Localization;
 using Tellurian.Localization.DependencyInjection;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Planning.App;
@@ -36,6 +37,11 @@ builder.Services.AddScoped<TranslationService>();
 builder.Services.AddResxStringLocalizers();
 
 var host = builder.Build();
+
+// Region.Name localises itself from its language-specific properties (EN, SV, …) for the current
+// UI culture. The domain model has no DI, so hand the (stateless, singleton) Object resource
+// provider to its static accessor.
+Region.Localizer = (ISynchronousResourceProvider)host.Services.GetRequiredKeyedService<IResourceProvider>("Object");
 
 // Apply the user's stored UI culture (set by the LanguageSelector) before the app runs.
 await host.Services.ApplyStoredUiCultureAsync();
