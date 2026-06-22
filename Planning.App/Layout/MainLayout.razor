@@ -67,8 +67,13 @@
         <div class="pane-content">
             @if (_initializing)
             {
+                @* Mirrors the Blazor boot loader (wwwroot/index.html) — same SVG ring at the same 20vh
+                   spot — but the blue arc spins instead of filling by load percentage. *@
                 <div class="app-loading">
-                    <div class="spinner"></div>
+                    <svg class="app-loading-progress">
+                        <circle r="40%" cx="50%" cy="50%" />
+                        <circle r="40%" cx="50%" cy="50%" pathLength="100" />
+                    </svg>
                     <p>@Translator("RestoringWork")</p>
                 </div>
             }

@@ -292,7 +292,7 @@
     <value>Endzeit</value>
   </data>
   <data name="BreakForPrinting" xml:space="preserve">
-    <value>Umbruch für den Druck (teilt den Bildfahrplan in zwei Hälften)</value>
+    <value>Umbruchzeit (teilt den Bildfahrplan in zwei Hälften)</value>
   </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Ausrichtung der Zeitachse</value>
@@ -461,6 +461,18 @@
   </data>
   <data name="SelectStretches" xml:space="preserve">
     <value>Wählen Sie eine oder mehrere Strecken zur Anzeige.</value>
+  </data>
+  <data name="GraphPart" xml:space="preserve">
+    <value>Anzeigen</value>
+  </data>
+  <data name="WholeGraph" xml:space="preserve">
+    <value>Ganzer Bildfahrplan</value>
+  </data>
+  <data name="FirstHalf" xml:space="preserve">
+    <value>Erste Hälfte</value>
+  </data>
+  <data name="LastHalf" xml:space="preserve">
+    <value>Letzte Hälfte</value>
   </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Ziehen Sie eine Ansicht hierher, um zu beginnen.</value>

@@ -9,11 +9,14 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
 {
     private const string SettingsSectionKey = "planning.ui.settingsSection";
     private const string LastRouteKey = "planning.ui.lastRoute";
+    private const string GraphHalfKey = "planning.ui.graphHalf";
 
     private string? _settingsSection;
     private bool _settingsSectionLoaded;
     private string? _lastRoute;
     private bool _lastRouteLoaded;
+    private string? _graphHalf;
+    private bool _graphHalfLoaded;
 
     /// <summary>The last active sub-tab in the Settings page, or null when none has been stored.</summary>
     public async Task<string?> GetSettingsSectionAsync()
@@ -49,5 +52,24 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
         _lastRoute = route;
         _lastRouteLoaded = true;
         await storage.SetStringAsync(LastRouteKey, route);
+    }
+
+    /// <summary>Which part of the graphical timetable to show (whole/first/last half), or null when none
+    /// has been stored. This is a user preference, not part of the planning document.</summary>
+    public async Task<string?> GetGraphHalfAsync()
+    {
+        if (_graphHalfLoaded) return _graphHalf;
+        _graphHalf = await storage.GetStringAsync(GraphHalfKey);
+        _graphHalfLoaded = true;
+        return _graphHalf;
+    }
+
+    /// <summary>Remembers which part of the graphical timetable to show.</summary>
+    public async Task SetGraphHalfAsync(string half)
+    {
+        if (_graphHalf == half) return;
+        _graphHalf = half;
+        _graphHalfLoaded = true;
+        await storage.SetStringAsync(GraphHalfKey, half);
     }
 }

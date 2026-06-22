@@ -15,14 +15,14 @@ public static class GraphScheduleDrawingExtensions
         {
             var yd = me.Y(departureStationIndex, departureTrackIndex);
             var ya = me.Y(arrivalStationIndex, arrivalTrackIndex);
-            foreach (var piece in WrapPieces(departure.Value, yd, arrival.Value, ya))
+            foreach (var piece in me.ClipToWindow(WrapPieces(departure.Value, yd, arrival.Value, ya)))
                 yield return (new(me.TimeOffset(piece.FromTime).X, piece.FromCross), new(me.TimeOffset(piece.ToTime).X, piece.ToCross));
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
             var xd = me.X(departureStationIndex, departureTrackIndex);
             var xa = me.X(arrivalStationIndex, arrivalTrackIndex);
-            foreach (var piece in WrapPieces(departure.Value, xd, arrival.Value, xa))
+            foreach (var piece in me.ClipToWindow(WrapPieces(departure.Value, xd, arrival.Value, xa)))
                 yield return (new(piece.FromCross, me.TimeOffset(piece.FromTime).Y), new(piece.ToCross, me.TimeOffset(piece.ToTime).Y));
         }
         else throw new NotSupportedException(me.AxisDirection.ToString());
@@ -33,13 +33,13 @@ public static class GraphScheduleDrawingExtensions
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
             var y = me.Y(stationIndex, trackIndex);
-            foreach (var piece in WrapPieces(stationCall.Arrival.Value, y, stationCall.Departure.Value, y))
+            foreach (var piece in me.ClipToWindow(WrapPieces(stationCall.Arrival.Value, y, stationCall.Departure.Value, y)))
                 yield return (new(me.TimeOffset(piece.FromTime).X, piece.FromCross), new(me.TimeOffset(piece.ToTime).X, piece.ToCross));
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
             var x = me.X(stationIndex, trackIndex);
-            foreach (var piece in WrapPieces(stationCall.Arrival.Value, x, stationCall.Departure.Value, x))
+            foreach (var piece in me.ClipToWindow(WrapPieces(stationCall.Arrival.Value, x, stationCall.Departure.Value, x)))
                 yield return (new(piece.FromCross, me.TimeOffset(piece.FromTime).Y), new(piece.ToCross, me.TimeOffset(piece.ToTime).Y));
         }
         else throw new NotSupportedException(me.AxisDirection.ToString());
@@ -79,6 +79,34 @@ public static class GraphScheduleDrawingExtensions
             yield return (cursorTime - shift, (int)Math.Round(cursorCross), boundary - shift, (int)Math.Round(boundaryCross));
             cursorTime = boundary;
             cursorCross = boundaryCross;
+        }
+    }
+
+    /// <summary>
+    /// Clips each piece to the visible time window [<see cref="GraphSchedule.StartTime"/>,
+    /// <see cref="GraphSchedule.EndTime"/>]. A piece reaching outside the window is shortened to the
+    /// window edge with its cross-axis position (station/track) interpolated at that edge; a piece
+    /// wholly outside is dropped. Without this, an out-of-window time yields <see cref="Offset.Invalid"/>
+    /// (0,0) from <see cref="TimeOffset"/>, drawing a stray line to the axis origin. Pieces already
+    /// inside the window pass through unchanged. Each piece runs forward in time (FromTime ≤ ToTime).
+    /// </summary>
+    private static IEnumerable<(TimeSpan FromTime, int FromCross, TimeSpan ToTime, int ToCross)> ClipToWindow(
+        this GraphSchedule me, IEnumerable<(TimeSpan FromTime, int FromCross, TimeSpan ToTime, int ToCross)> pieces)
+    {
+        var start = me.StartTime;
+        var end = me.EndTime;
+        foreach (var piece in pieces)
+        {
+            if (piece.ToTime < start || piece.FromTime > end) continue; // wholly outside the window
+
+            var span = (piece.ToTime - piece.FromTime).TotalMinutes;
+            int CrossAt(TimeSpan time) => span <= 0
+                ? piece.FromCross
+                : (int)Math.Round(piece.FromCross + ((piece.ToCross - piece.FromCross) * ((time - piece.FromTime).TotalMinutes / span)));
+
+            var fromTime = piece.FromTime < start ? start : piece.FromTime;
+            var toTime = piece.ToTime > end ? end : piece.ToTime;
+            yield return (fromTime, CrossAt(fromTime), toTime, CrossAt(toTime));
         }
     }
 
@@ -272,6 +300,15 @@ public static class GraphScheduleDrawingExtensions
     public static Offset MaxTimeOffset(this GraphSchedule me) =>
         TimeOffset(me, me.EndTime);
 
+    /// <summary>Whether the given call time falls inside the visible time window, so its minute label
+    /// has a valid position. After-midnight times are wrapped into the current day first, matching how
+    /// they are positioned on the axis.</summary>
+    public static bool IsTimeVisible(this GraphSchedule me, TimeSpan time)
+    {
+        var wrapped = WrapTime(time);
+        return wrapped >= me.StartTime && wrapped <= me.EndTime;
+    }
+
     public static int X(this GraphSchedule me, int stationIndex, int trackIndex) =>
         me.AxisDirection switch
         {
@@ -320,25 +357,15 @@ public static class GraphScheduleDrawingExtensions
         };
     }
 
+    // The distance-axis extent is the position of the last station's last track. This must use the same
+    // accumulation as TrackOffset (which positions every drawn track): the hour-display margin
+    // (TimeAxisSpacing) plus the per-stretch spacing, plus the last station's track fan-out added
+    // *outside* the MinStationSpacing floor. Re-deriving it with a different formula under-reserved the
+    // fan-out when KilometerSpacing was low, clipping the last station. Height()/Width() add EndMargin.
     public static Offset MaxTrackOffset(this GraphSchedule me)
     {
-        var firstTrackCount = me.Stations[0].Tracks.Count;
-        var x = me.GraphSettings.TimeAxisSpacing.X + ((firstTrackCount - 1) * me.GraphSettings.TrackSpacing);
-        var y = me.GraphSettings.TimeAxisSpacing.Y + ((firstTrackCount - 1) * me.GraphSettings.TrackSpacing);
-        for (var i = 0; i < me.TrackStretches.Length; i++)
-        {
-            var stretch = me.TrackStretches[i];
-            var toTrackCount = me.Stations[i + 1].Tracks.Count;
-            var Δ = Math.Max(me.GraphSettings.MinStationSpacing, (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance) + ((toTrackCount - 1) * me.GraphSettings.TrackSpacing));
-            x += Δ;
-            y += Δ;
-        }
-
-        return me.AxisDirection switch
-        {
-            TimeAxisDirection.Horisontal => new(0, y),
-            TimeAxisDirection.Vertical => new(x, 0),
-            _ => Offset.Invalid
-        };
+        var lastStationIndex = me.Stations.Length - 1;
+        var lastTrackIndex = me.Stations[lastStationIndex].Tracks.Count - 1;
+        return me.TrackOffset(lastStationIndex, lastTrackIndex);
     }
 }

@@ -198,26 +198,43 @@
     overflow: auto;
 }
 
+/* Positioned to match the Blazor boot loader (wwwroot/css/app.css .loading-progress): the ring sits
+   at 20vh from the top of the viewport, horizontally centred, so the workspace loader appears in the
+   same place once the app shell takes over. */
 .app-loading {
+    position: fixed;
+    inset: 20vh 0 auto 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 1rem;
-    height: 100%;
     color: #1a3a5c;
+    pointer-events: none;
 }
 
-.spinner {
-    width: 2.5rem;
-    height: 2.5rem;
-    border: 4px solid #d6dde6;
-    border-top-color: #1a3a5c;
-    border-radius: 50%;
-    animation: app-spin 0.8s linear infinite;
+/* Same ring as the Blazor loader (same radius, stroke width and colours), but the blue arc is a fixed
+   quarter-circle that rotates, rather than an arc whose length tracks the load percentage. */
+.app-loading-progress {
+    display: block;
+    width: 8rem;
+    height: 8rem;
 }
 
-@keyframes app-spin {
+    .app-loading-progress circle {
+        fill: none;
+        stroke: #e0e0e0;
+        stroke-width: 0.6rem;
+        transform-origin: 50% 50%;
+    }
+
+        .app-loading-progress circle:last-child {
+            stroke: #1b6ec2;
+            stroke-dasharray: 25 100;
+            stroke-linecap: round;
+            animation: app-loading-spin 1s linear infinite;
+        }
+
+@keyframes app-loading-spin {
     to {
         transform: rotate(360deg);
     }

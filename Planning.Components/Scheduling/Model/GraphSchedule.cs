@@ -8,11 +8,12 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 /// </summary>
 public class GraphSchedule
 {
-    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null)
+    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null, GraphHalf half = GraphHalf.Whole)
     {
         TimetableStretch = timetableStretch;
         Timetable = timetable;
         GraphSettings = graphSettings ?? GraphSettings.Default;
+        Half = half;
 
         var stretchStations = new HashSet<OperationLocation>(timetableStretch.Stations);
         Stations = [.. timetableStretch.Stations];
@@ -35,6 +36,7 @@ public class GraphSchedule
     public TimetableStretch TimetableStretch { get; }
     public Timetable Timetable { get; }
     public GraphSettings GraphSettings { get; }
+    public GraphHalf Half { get; }
     public TimeAxisDirection AxisDirection => GraphSettings.AxisDirection;
     public string Description => TimetableStretch.FullDescription;
     public OperationLocation[] Stations { get; }
@@ -46,8 +48,19 @@ public class GraphSchedule
     // latest departure = last end of service) and the user can then override. See Timetable.OperatingWindow.
     // When the stretch has trains running past midnight, the axis is forced to the full day 00:00–24:00
     // so the after-midnight portions can wrap back to the start.
-    public TimeSpan StartTime => _crossesMidnight ? TimeSpan.Zero : GraphSettings.DefaultStartTime;
-    public TimeSpan EndTime => _crossesMidnight ? OneDay : GraphSettings.DefaultEndTime;
+    private TimeSpan WindowStart => _crossesMidnight ? TimeSpan.Zero : GraphSettings.DefaultStartTime;
+    private TimeSpan WindowEnd => _crossesMidnight ? OneDay : GraphSettings.DefaultEndTime;
+
+    // The break splits the axis only when it is set and falls strictly inside the operating window;
+    // otherwise the whole window is used regardless of the selected half.
+    private TimeSpan? EffectiveBreak =>
+        GraphSettings.BreakTime is { } b && b > WindowStart && b < WindowEnd ? b : null;
+
+    /// <summary>Whether a break is configured for this schedule, so first/last half can be selected.</summary>
+    public bool HasBreak => EffectiveBreak is not null;
+
+    public TimeSpan StartTime => Half == GraphHalf.Last && EffectiveBreak is { } b ? b : WindowStart;
+    public TimeSpan EndTime => Half == GraphHalf.First && EffectiveBreak is { } b ? b : WindowEnd;
 }
 
 /// <summary>

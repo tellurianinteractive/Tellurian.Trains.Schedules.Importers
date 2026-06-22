@@ -23,6 +23,7 @@ public static class GraphSettingsMapping
                     : TimeAxisDirection.Horisontal,
                 DefaultStartTime = settings.General.StartTime,
                 DefaultEndTime = settings.General.EndTime,
+                BreakTime = settings.General.BreakTime,
                 MinuteSpacing = gt.MinuteSpacing,
                 KilometerSpacing = gt.KilometerSpacing,
                 MinStationSpacing = gt.StationSpacing,

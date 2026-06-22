@@ -19,8 +19,10 @@ else
                     </feMerge>
                 </filter>
             </defs>
-            @* Draw hours *@
-            @for (var time = Current.StartTime; time <= Current.EndTime; time += TimeSpan.FromHours(1))
+            @* Draw hours. Gridlines sit on whole hours, so start at the first whole hour at or after the
+               axis start (which may be a half hour such as 04:30) — otherwise the lines land on the half
+               hour but are labelled as whole hours, making trains look offset from them. *@
+            @for (var time = FirstWholeHour(Current.StartTime); time <= Current.EndTime; time += TimeSpan.FromHours(1))
             {
                 var hourOffset = Current.TimeAxisLabelOffset(time);
                 <text>
@@ -124,13 +126,13 @@ else
                                 <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
                             }
                             var departure = Current.DepartureMinuteOver(fromStationIndex, stretch.From);
-                            @if (Current.GraphSettings.ShowDepartureMinutes)
+                            @if (Current.GraphSettings.ShowDepartureMinutes && Current.IsTimeVisible(stretch.From.Departure.Value))
                             {
                                 <text>
                                     <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
                                 </text>
                             }
-                            @if (Current.GraphSettings.ShowArrivalMinutes)
+                            @if (Current.GraphSettings.ShowArrivalMinutes && Current.IsTimeVisible(stretch.To.Arrival.Value))
                             {
                                 var arrival = Current.ArrivalMinuteUnder(toStationIndex, toTrackIndex, stretch.To);
                                 <text>
@@ -161,13 +163,13 @@ else
                         @foreach (var stretch in Current.Trains.SelectMany(t => t.StretchUses().Where(c => fromStation.Equals(c.From.Track.Station) && c.From.Track.Equals(fromTrack) && toStation.Equals(c.To.Track.Station) && c.To.Track.Equals(toTrack))))
                         {
                             var departure = Current.DepartureMinuteUnder(fromStationIndex, fromTrackIndex, stretch.From);
-                            @if (Current.GraphSettings.ShowDepartureMinutes)
+                            @if (Current.GraphSettings.ShowDepartureMinutes && Current.IsTimeVisible(stretch.From.Departure.Value))
                             {
                                 <text>
                                     <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
                                 </text>
                             }
-                            @if (Current.GraphSettings.ShowArrivalMinutes)
+                            @if (Current.GraphSettings.ShowArrivalMinutes && Current.IsTimeVisible(stretch.To.Arrival.Value))
                             {
                                 var arrival = Current.ArrivalMinuteOver(toStationIndex, stretch.To);
                                 <text>
@@ -187,6 +189,14 @@ else
     [Parameter] public GraphSchedule? Schedule { get; set; }
 
     GraphSchedule? Current;
+
+    // The first whole hour at or after the given time, computed in integer minutes to avoid
+    // floating-point drift (so an exact whole hour is returned unchanged, not rounded up).
+    static TimeSpan FirstWholeHour(TimeSpan time)
+    {
+        var minutes = (int)Math.Round(time.TotalMinutes);
+        return TimeSpan.FromMinutes((minutes + 59) / 60 * 60);
+    }
 
     string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
     string TrainStroke(Train t) => t.Category?.Color ?? "#000000";

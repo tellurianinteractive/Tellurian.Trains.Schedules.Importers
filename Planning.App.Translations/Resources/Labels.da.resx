@@ -292,7 +292,7 @@
     <value>Sluttidspunkt</value>
   </data>
   <data name="BreakForPrinting" xml:space="preserve">
-    <value>Skift til udskrift (deler grafen i to halvdele)</value>
+    <value>Delepunkt (deler grafen i to halvdele)</value>
   </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Tidsaksens orientering</value>
@@ -461,6 +461,18 @@
   </data>
   <data name="SelectStretches" xml:space="preserve">
     <value>Vælg en eller flere strækninger at vise.</value>
+  </data>
+  <data name="GraphPart" xml:space="preserve">
+    <value>Vis</value>
+  </data>
+  <data name="WholeGraph" xml:space="preserve">
+    <value>Hele grafen</value>
+  </data>
+  <data name="FirstHalf" xml:space="preserve">
+    <value>Første halvdel</value>
+  </data>
+  <data name="LastHalf" xml:space="preserve">
+    <value>Sidste halvdel</value>
   </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Træk en visning hertil for at begynde.</value>

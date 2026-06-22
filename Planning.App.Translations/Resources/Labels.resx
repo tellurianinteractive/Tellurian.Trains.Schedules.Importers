@@ -269,7 +269,7 @@
     <value>End time</value>
   </data>
   <data name="BreakForPrinting" xml:space="preserve">
-    <value>Break for printing (splits the graph in two halves)</value>
+    <value>Break time (splits the graph in two halves)</value>
   </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Time axis orientation</value>
@@ -645,6 +645,18 @@
   <data name="SelectStretches" xml:space="preserve">
     <value>Select one or more stretches to display.</value>
   </data>
+  <data name="GraphPart" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="WholeGraph" xml:space="preserve">
+    <value>Whole graph</value>
+  </data>
+  <data name="FirstHalf" xml:space="preserve">
+    <value>First half</value>
+  </data>
+  <data name="LastHalf" xml:space="preserve">
+    <value>Last half</value>
+  </data>
   <data name="DragViewHere" xml:space="preserve">
     <value>Drag a view here to start.</value>
   </data>
@@ -679,7 +691,7 @@
     <value>The clock time at which the operating session ends. It may run to or past midnight.</value>
   </data>
   <data name="BreakForPrintingHelp" xml:space="preserve">
-    <value>Split the printed graphical timetable at this time so a long day fits across pages.</value>
+    <value>Split the day at this time. The graphical timetable can then be printed across pages, and shown one half at a time on screen.</value>
   </data>
   <data name="MinimumStopHelp" xml:space="preserve">
     <value>The shortest time, in fast-clock minutes, a train must remain at a station before it may depart.</value>

@@ -1,3 +1,12 @@
+/* Lay the stretch and half selectors out side by side; each is a flex group that keeps its own
+   items together, and the row wraps the second group below only when it does not fit. */
+.selectors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 2rem;
+}
+
 .stretch-selector {
     display: flex;
     flex-wrap: wrap;
@@ -12,6 +21,28 @@
     }
 
     .stretch-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+}
+
+.half-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+
+    .half-selector-label {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .half-option {
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;

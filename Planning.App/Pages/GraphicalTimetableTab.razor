@@ -1,6 +1,7 @@
 @page "/graphical-timetable"
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@inject UiPreferenceService UiPrefs
 @implements IDisposable
 
 
@@ -14,16 +15,34 @@ else if (ScheduleState.TimetableStretches.Count == 0)
 }
 else
 {
-    <div class="stretch-selector">
-        <span class="stretch-selector-label">@Translator("Stretches"):</span>
-        @foreach (var stretch in ScheduleState.TimetableStretches)
+    <div class="selectors">
+        <div class="stretch-selector">
+            <span class="stretch-selector-label">@Translator("Stretches"):</span>
+            @foreach (var stretch in ScheduleState.TimetableStretches)
+            {
+                <label class="stretch-option" title="@stretch.FullDescription">
+                    <input type="checkbox"
+                           checked="@ScheduleState.IsSelected(stretch)"
+                           @onchange="e => OnStretchToggled(stretch, e)" />
+                    <span>@stretch.FullDescription</span>
+                </label>
+            }
+        </div>
+
+        @if (HasBreak)
         {
-            <label class="stretch-option" title="@stretch.FullDescription">
-                <input type="checkbox"
-                       checked="@ScheduleState.IsSelected(stretch)"
-                       @onchange="e => OnStretchToggled(stretch, e)" />
-                <span>@stretch.FullDescription</span>
-            </label>
+            <div class="half-selector">
+                <span class="half-selector-label">@Translator("GraphPart"):</span>
+                @foreach (var (half, key) in Halves)
+                {
+                    <label class="half-option">
+                        <input type="radio" name="graph-half"
+                               checked="@(_half == half)"
+                               @onchange="() => OnHalfSelected(half)" />
+                        <span>@Translator(key)</span>
+                    </label>
+                }
+            </div>
         }
     </div>
 
@@ -44,6 +63,17 @@ else
 
 @code {
     private List<GraphSchedule> _graphSchedules = [];
+    private GraphHalf _half = GraphHalf.Whole;
+
+    // The first/last-half selector is only meaningful when a break time is configured.
+    private bool HasBreak => ScheduleState.Layout?.Settings.General.BreakTime is not null;
+
+    private static readonly (GraphHalf Half, string Key)[] Halves =
+    [
+        (GraphHalf.Whole, "WholeGraph"),
+        (GraphHalf.First, "FirstHalf"),
+        (GraphHalf.Last, "LastHalf"),
+    ];
 
     // Horizontal time axis → graphs grow downward, so stack them vertically; a vertical
     // time axis makes graphs grow sideways, so stack them horizontally.
@@ -58,10 +88,26 @@ else
         BuildGraphSchedules();
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (await UiPrefs.GetGraphHalfAsync() is { } saved && Enum.TryParse<GraphHalf>(saved, out var half))
+        {
+            _half = half;
+            BuildGraphSchedules();
+        }
+    }
+
     private void OnStretchToggled(TimetableStretch stretch, ChangeEventArgs e)
     {
         var selected = e.Value is bool b && b;
         ScheduleState.SetStretchSelected(stretch, selected);
+    }
+
+    private void OnHalfSelected(GraphHalf half)
+    {
+        _half = half;
+        BuildGraphSchedules();
+        _ = UiPrefs.SetGraphHalfAsync(half.ToString());
     }
 
     private void OnStateChanged()
@@ -75,8 +121,10 @@ else
         if (ScheduleState.Timetable is { } timetable)
         {
             var graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
+            // A break may have been cleared since it was last selected; fall back to the whole graph.
+            if (!HasBreak) _half = GraphHalf.Whole;
             _graphSchedules = [.. ScheduleState.SelectedStretches
-                .Select(stretch => new GraphSchedule(stretch, timetable, graphSettings))];
+                .Select(stretch => new GraphSchedule(stretch, timetable, graphSettings, _half))];
         }
         else
         {
