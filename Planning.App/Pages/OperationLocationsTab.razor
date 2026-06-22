@@ -1,6 +1,7 @@
 @page "/operation-locations"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Utilities.Web
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 @implements IDisposable
@@ -128,12 +129,12 @@ else
                     else
                     {
                         <div class="regions">
-                            @foreach (var r in Layout.Regions)
+                            @foreach (var r in AvailableRegions(regionStation))
                             {
                                 <label class="region-choice">
                                     <input type="checkbox" checked="@HasRegion(regionStation, r)"
                                            @onchange="e => ToggleRegion(regionStation, r, (bool)e.Value!)" />
-                                    <span class="chip" style="background-color:@r.BackgroundColor">@r.Name</span>
+                                    <span class="chip" style="background-color:@r.BackgroundColor; color:@r.BackgroundColor.TextColor">@r.Name</span>
                                 </label>
                             }
                         </div>
@@ -232,7 +233,7 @@ else
                             {
                                 @foreach (var r in infoStation.Regions)
                                 {
-                                    <span class="chip" style="background-color:@r.BackgroundColor">@r.Name</span>
+                                    <span class="chip" style="background-color:@r.BackgroundColor; color:@r.BackgroundColor.TextColor">@r.Name</span>
                                 }
                             }
                             else
@@ -448,6 +449,15 @@ else
     }
 
     private static bool HasRegion(Station station, Region region) => station.Regions.Any(r => r.Id == region.Id);
+
+    // A region may belong to only one station, so the selector offers regions that are not already
+    // attached to a different station; those on this station remain in the list, shown as checked.
+    private IEnumerable<Region> AvailableRegions(Station station) =>
+        Layout!.Regions.Where(r => !AttachedToOtherStation(r, station));
+
+    private bool AttachedToOtherStation(Region region, Station station) =>
+        Layout!.OperationLocations.OfType<Station>()
+            .Any(s => s.Id != station.Id && s.Regions.Any(r => r.Id == region.Id));
 
     private void ToggleRegion(Station station, Region region, bool on)
     {
