@@ -112,6 +112,12 @@
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Regions" xml:space="preserve">
+    <value>Regions</value>
+  </data>
+  <data name="RegionsDescription" xml:space="preserve">
+    <value>Domestic regions and foreign countries used for cargo flow routing.</value>
+  </data>
   <data name="OperationLocations" xml:space="preserve">
     <value>Operation Locations</value>
   </data>
@@ -399,9 +405,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
-  </data>
-  <data name="WelcomeMessage" xml:space="preserve">
-    <value>Welcome to Timetable Planner.</value>
   </data>
   <data name="TrainsDescription" xml:space="preserve">
     <value>Trains with station calls and timing.</value>

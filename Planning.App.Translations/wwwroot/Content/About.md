@@ -17,7 +17,7 @@ works for fixed club layouts and home layouts.
 ## Getting Started
 
 Use the **Settings** tab to configure your layout name, timing parameters,
-and default values. Then define your layout in the **Layout** tab, and start
+and default values. Then define your operational places in the **Operation Locations** tab, and start
 adding trains in the **Trains** tab.
 
 ## About This Project

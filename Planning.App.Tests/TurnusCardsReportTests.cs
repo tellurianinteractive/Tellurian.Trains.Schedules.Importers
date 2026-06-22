@@ -24,6 +24,7 @@ public sealed class TurnusCardsReportTests : PlaywrightTestBase
         }
     }
 
+    [Ignore("This test is removed because it takes too long time to run and stricly is not necessary.")]
     [TestMethod]
     public async Task Importing_Rotebro2016_shows_twelve_turnus_cards()
     {

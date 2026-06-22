@@ -132,6 +132,12 @@
   <data name="Settings" xml:space="preserve">
     <value>Indstillinger</value>
   </data>
+  <data name="Regions" xml:space="preserve">
+    <value>Regioner</value>
+  </data>
+  <data name="RegionsDescription" xml:space="preserve">
+    <value>Indenlandske regioner og udenlandske lande til godsstrømsstyring.</value>
+  </data>
   <data name="OperationLocations" xml:space="preserve">
     <value>Driftssteder</value>
   </data>
@@ -422,9 +428,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Annullér</value>
-  </data>
-  <data name="WelcomeMessage" xml:space="preserve">
-    <value>Velkommen til Køreplanlæggeren.</value>
   </data>
   <data name="TrainsDescription" xml:space="preserve">
     <value>Tog med stationsophold og tider.</value>

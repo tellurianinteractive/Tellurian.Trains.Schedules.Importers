@@ -1,4 +1,25 @@
 @page "/"
-@inject Translator Translator
+@using System.Globalization
+@using Tellurian.Localization
 
-<p>@Translator("WelcomeMessage")</p>
+@* The Home tab is the start page; its content is the localised markdown in Content/Home.md.
+   It has no "?" help popover of its own (see TabRegistry). *@
+<div class="home-intro">
+    @if (_html.Length > 0)
+    {
+        @((MarkupString)_html)
+    }
+</div>
+
+@code {
+    [Inject(Key = "Markdown")]
+    public IResourceProvider Markdown { get; set; } = default!;
+
+    private string _html = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var content = await Markdown.GetTranslationAsync("Home", CultureInfo.CurrentUICulture);
+        _html = Markdig.Markdown.ToHtml(content.Text);
+    }
+}

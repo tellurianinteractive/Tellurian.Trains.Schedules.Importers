@@ -1,5 +1,3 @@
-using Tellurian.Trains.Schedules.Model;
-
 namespace Tellurian.Trains.Schedules.Planning.Tests;
 
 [TestClass]
@@ -70,12 +68,5 @@ public class PlanningTests
     {
         var layout = TestLayoutFactory.CreateLayout();
         Assert.AreEqual(5, layout.TimetableStretches.Count);
-    }
-
-    [TestMethod]
-    public void PlannerIsCreatedWithDefaults()
-    {
-        var planner = TestLayoutFactory.CreatePlanner();
-        Assert.IsNotNull(planner);
     }
 }

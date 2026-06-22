@@ -4,8 +4,9 @@ public static class TabRegistry
 {
     public static IReadOnlyList<TabDefinition> Tabs { get; } =
     [
-        new("Home", "", typeof(Pages.Home), HelpKey: "Home"),
+        new("Home", "", typeof(Pages.Home)),
         new("Settings", "settings", typeof(Pages.Settings), HelpKey: "Settings"),
+        new("Regions", "regions", typeof(Pages.Regions), HelpKey: "Regions"),
         new("OperationLocations", "operation-locations", typeof(Pages.OperationLocationsEditor), HelpKey: "OperationLocations"),
         new("Stretches", "stretches", typeof(Pages.Stretches), HelpKey: "Stretches"),
         new("Companies", "companies", typeof(Pages.Companies)),

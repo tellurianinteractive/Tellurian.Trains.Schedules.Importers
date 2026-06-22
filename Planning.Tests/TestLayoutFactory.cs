@@ -1,6 +1,3 @@
-using Tellurian.Trains.Schedules.Model;
-using Tellurian.Trains.Schedules.Planning.Timetables;
-
 namespace Tellurian.Trains.Schedules.Planning.Tests;
 
 /// <summary>
@@ -174,15 +171,12 @@ internal static class TestLayoutFactory
         return layout;
     }
 
-    public static Plan CreateSchedule()
+    public static Plan CreatePlan()
     {
         var layout = CreateLayout();
         var timetable = new Timetable("Vinter 2026", layout);
         return new Plan("Test", timetable);
     }
-
-    public static OperationsPlanner CreatePlanner() =>
-        new(CreateSchedule(), TimetableSettings.Default);
 
     private static Station AddStation(Layout layout, int id, string name, string signature, string[] trackNumbers, bool canChangeDirection = false)
     {

@@ -60,7 +60,7 @@ public class Destination
         $"{Station.Name} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
         $"{Station.Name} {AndText} {MaxLength}".TrimEnd());
 
-    private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToString())) : string.Empty;
+    private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Name)) : string.Empty;
     private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Display.Value)) : string.Empty;
     private string AndText =>
         AndLocalDestinations && AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :

@@ -132,6 +132,12 @@
   <data name="Settings" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
+  <data name="Regions" xml:space="preserve">
+    <value>Regionen</value>
+  </data>
+  <data name="RegionsDescription" xml:space="preserve">
+    <value>Inländische Regionen und ausländische Länder für die Wagenstromlenkung.</value>
+  </data>
   <data name="OperationLocations" xml:space="preserve">
     <value>Betriebsstellen</value>
   </data>
@@ -422,9 +428,6 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Abbrechen</value>
-  </data>
-  <data name="WelcomeMessage" xml:space="preserve">
-    <value>Willkommen beim Fahrplan Planner.</value>
   </data>
   <data name="TrainsDescription" xml:space="preserve">
     <value>Züge mit Stationshalten und Zeiten.</value>

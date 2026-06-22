@@ -1,4 +1,4 @@
-The **Layout** tab describes the operational places of your railway — the stations and other
+The **Operation Locations** tab describes the operational places of your railway — the stations and other
 locations where trains run, stop or are controlled, together with their tracks.
 
 An operational place is one of:
