@@ -53,7 +53,7 @@ Snapshot of coverage by area (see each section for detail).
 | Track/Timetable Stretches (§3.4) | ❌ | stub page |
 | Train Categories (§3.5) | ❌ | stub page |
 | Trains (§3.6) | ❌ | stub page |
-| Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation; interaction (drag, context menu) is empty handlers |
+| Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection; interaction (drag, context menu) is empty handlers |
 | Vehicle Schedule Editor (§3.8) | ❌ | stub page |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | ❌ | |
@@ -229,7 +229,7 @@ are organised into groups — each a separate type — surfaced as sub-sections 
 | Start day  | Weekday of the first session when using days                      | Monday       |
 | Start time | Fast-time start hour of operation                                 | 06:00        |
 | End time   | Fast-time end hour of operation                                   | 20:00        |
-| Break time | Optional fast-time hour that splits the graphical timetable into two halves for printing (start–break and break–end) | None |
+| Break time | Optional fast-time hour that splits the graphical timetable into two halves (start–break and break–end), for printing across pages and for the on-screen first/last-half view (see §3.7.5) | None |
 
 Start, end, and break time define the operating time window used by the graphical
 timetable (see §3.7).
@@ -283,10 +283,10 @@ same direction, meaning trains can traverse these stretches without changing dir
 ### 3.7 Graphical Timetable
 
 > **Status:** 🟡 Partial (`Planning.Components/Scheduling/Components/GraphicalScheduleEditor.razor`,
-> `Planning.App/Pages/GraphicalTimetable.razor`). SVG rendering, both orientations
-> (FR-3.7.1), visual styling (FR-3.7.2) and all display settings (FR-3.7.3) are
-> built. Interaction (FR-3.7.4: drag times, context menu) is **not** — the click/
-> mouse handlers are empty stubs.
+> `Planning.App/Pages/GraphicalTimetableTab.razor`). SVG rendering, both orientations
+> (FR-3.7.1), visual styling (FR-3.7.2), all display settings (FR-3.7.3) and the
+> stretch/time-window selection (FR-3.7.5) are built. Interaction (FR-3.7.4: drag
+> times, context menu) is **not** — the click/mouse handlers are empty stubs.
 
 The system shall display a graphical timetable for each timetable stretch:
 
@@ -349,6 +349,24 @@ settings (see §3.2).
 
 ##### Train context menu
 Right-click on a train to show a context menu: edit, duplicate, remove, select category.
+
+#### FR-3.7.5 Stretch and Time-Window Selection
+
+> **Status:** ✅ Built (`Planning.App/Pages/GraphicalTimetableTab.razor`).
+
+The user shall be able to choose what part of the timetable is drawn:
+
+- **Stretches** — one or more timetable stretches are selected; each selected stretch
+  is drawn as its own graph. The selection is remembered with the layout.
+- **Time window** — when a **break time** is set (see §3.2), a *Show* selector offers
+  the **whole graph**, the **first half** (start–break) or the **last half** (break–end).
+  Selecting a half limits the time axis to that part of the day, so a long day fits on
+  smaller screens, especially with a vertical time axis. The selector is hidden when no
+  break time is set. Train lines and minute labels are clipped to the visible window.
+
+The chosen half is a **user-level preference** persisted in the browser (localStorage),
+not stored in the plan document, so it is retained across restarts and is independent of
+which layout is open.
 
 ### 3.8 Vehicle Schedule Editor
 
