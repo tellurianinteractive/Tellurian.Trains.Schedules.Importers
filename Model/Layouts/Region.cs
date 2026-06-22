@@ -16,22 +16,16 @@ public class Region
     /// </summary>
     public int Id { get; set; }
 
-    /// <summary>
-    /// The resource key formerly used to translate the region name.
-    /// </summary>
-    [Obsolete("Replaced by language specific names.")]
-    public string EnglishName { get; set; } = "";
-
     /// <summary>The region name in English. Required; used as the fallback for untranslated cultures.</summary>
-    public required string EN { get; init; }
+    public required string EN { get; set; }
     /// <summary>The region name in Danish, or <c>null</c> when not translated.</summary>
-    public string? DA { get; init; }
+    public string? DA { get; set; }
     /// <summary>The region name in German, or <c>null</c> when not translated.</summary>
-    public string? DE { get; init; }
+    public string? DE { get; set; }
     /// <summary>The region name in Norwegian Bokmål, or <c>null</c> when not translated.</summary>
-    public string? NB { get; init; }
+    public string? NB { get; set; }
     /// <summary>The region name in Swedish, or <c>null</c> when not translated.</summary>
-    public string? SV { get; init; }
+    public string? SV { get; set; }
 
     /// <summary>
     /// Selects the language-specific name property (<see cref="EN"/>, <see cref="SV"/>, …) matching the

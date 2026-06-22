@@ -30,6 +30,11 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     public DbSet<Company> Companies => Set<Company>();
 
     /// <summary>
+    /// Gets the set of regions (the per-layout catalogue) in the database.
+    /// </summary>
+    public DbSet<Region> Regions => Set<Region>();
+
+    /// <summary>
     /// Gets the set of operation locations (stations) in the database.
     /// </summary>
     public DbSet<OperationLocation> OperationLocations => Set<OperationLocation>();
@@ -186,6 +191,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey(e => e.LayoutId)
                   .OnDelete(DeleteBehavior.Cascade);
 
+            // The region catalogue belongs to the layout (1:N). Region has no Layout navigation,
+            // so the foreign key is a shadow property.
+            entity.HasMany(e => e.Regions)
+                  .WithOne()
+                  .HasForeignKey("LayoutId")
+                  .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasMany(e => e.TrackStretches)
                   .WithOne(e => e.Layout)
                   .HasForeignKey(e => e.LayoutId)
@@ -228,6 +240,22 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
         });
 
+        // Region (the per-layout catalogue; a Station references a subset via a many-to-many)
+        modelBuilder.Entity<Region>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.EN).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.DA).HasMaxLength(100);
+            entity.Property(e => e.DE).HasMaxLength(100);
+            entity.Property(e => e.NB).HasMaxLength(100);
+            entity.Property(e => e.SV).HasMaxLength(100);
+            entity.Property(e => e.BackgroundColor).HasMaxLength(20);
+
+            // Computed members are not persisted.
+            entity.Ignore(e => e.Name);
+            entity.Ignore(e => e.Display);
+        });
+
         // OperationLocation (Station) - TPH inheritance
         modelBuilder.Entity<OperationLocation>(entity =>
         {
@@ -253,7 +281,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         });
 
         // Register derived types
-        modelBuilder.Entity<Station>();
+        modelBuilder.Entity<Station>(entity =>
+        {
+            // A station is associated with zero, one, or many regions from the layout's catalogue.
+            // EF Core creates the StationRegion join table for this many-to-many.
+            entity.HasMany(e => e.Regions)
+                  .WithMany();
+        });
         modelBuilder.Entity<SignalControlledLocation>(entity =>
         {
             entity.HasOne(e => e.ControlledBy)

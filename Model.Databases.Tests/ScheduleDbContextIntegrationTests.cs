@@ -115,6 +115,43 @@ public class ScheduleDbContextIntegrationTests
     }
 
     [TestMethod]
+    public async Task RoundTripsLayoutAndStationRegions()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ScheduleDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options;
+
+        await using var context = new ScheduleDbContext(options);
+        await context.Database.OpenConnectionAsync(CancellationToken);
+        await context.Database.EnsureCreatedAsync(CancellationToken);
+
+        // The layout owns a region catalogue; a station is assigned a subset of it.
+        var layout = new Layout { Id = 1, Name = "L" };
+        var south = layout.Add(new Region { Id = 1, EN = "South", SV = "Söder", BackgroundColor = "#ffff00" });
+        layout.Add(new Region { Id = 2, EN = "North", SV = "Norr", BackgroundColor = "#0066FF" });
+
+        var station = new Station(1, "Shadow", "SH") { IsShadow = true };
+        station.Add(south);
+        layout.Add(station);
+
+        // Act
+        context.Layouts.Add(layout);
+        await context.SaveChangesAsync(CancellationToken);
+        context.ChangeTracker.Clear();
+
+        // Assert - the catalogue (Layout.Regions) and the assignment (Station.Regions) both persist.
+        var loadedLayout = await context.Layouts.Include(l => l.Regions).FirstAsync(CancellationToken);
+        Assert.AreEqual(2, loadedLayout.Regions.Count, "Layout region catalogue");
+
+        var loadedStation = await context.Stations.Include(s => s.Regions).FirstAsync(CancellationToken);
+        Assert.AreEqual(1, loadedStation.Regions.Count, "Station region assignment");
+        Assert.AreEqual("South", loadedStation.Regions.First().EN);
+        Assert.AreEqual("Söder", loadedStation.Regions.First().SV);
+        Assert.AreEqual("#ffff00", loadedStation.Regions.First().BackgroundColor);
+    }
+
+    [TestMethod]
     public async Task RoundTripsTrainPartOptions()
     {
         // Arrange

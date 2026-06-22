@@ -1,0 +1,196 @@
+@page "/regions"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+@if (Layout is null)
+{
+    <p>@Translator("RegionsNoSchedule")</p>
+}
+else
+{
+    <div class="regions-editor">
+        @if (_mode == Mode.List)
+        {
+            <div class="toolbar">
+                <button class="primary" @onclick="StartAdd">@Translator("AddNew")</button>
+                <button @onclick="AddDefaults">@Translator("DefaultRegions")</button>
+            </div>
+
+            @if (!Regions.Any())
+            {
+                <p class="empty">@Translator("NoRegions")</p>
+            }
+            else
+            {
+                <QuickGrid Items="Regions" Class="grid">
+                    <TemplateColumn Title='@Translator("Region")'>@context.Display</TemplateColumn>
+                    <PropertyColumn Property="r => r.EN" Title='@Translator("English")' Sortable="true" />
+                    <PropertyColumn Property="r => r.DA" Title='@Translator("Danish")' />
+                    <PropertyColumn Property="r => r.DE" Title='@Translator("German")' />
+                    <PropertyColumn Property="r => r.NB" Title='@Translator("Norwegian")' />
+                    <PropertyColumn Property="r => r.SV" Title='@Translator("Swedish")' />
+                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button class="danger" disabled="@IsReferenced(context)"
+                                title='@(IsReferenced(context) ? Translator("RegionReferenced") : null)'
+                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                    </TemplateColumn>
+                </QuickGrid>
+            }
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Culture, Translator("DeleteRegionConfirm"), _deleteTarget.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+        else if (_mode == Mode.Edit && Editing is not null)
+        {
+            <div class="edit">
+                <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+
+                <div class="section">
+                    <div class="field">
+                        <HelpLabel For="English" />
+                        <input type="text" @bind="Editing.EN" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Danish")</label>
+                        <input type="text" @bind="Editing.DA" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("German")</label>
+                        <input type="text" @bind="Editing.DE" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Norwegian")</label>
+                        <input type="text" @bind="Editing.NB" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Swedish")</label>
+                        <input type="text" @bind="Editing.SV" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <HelpLabel For="BackgroundColor" />
+                        <span class="control">
+                            <input type="color" @bind="Editing.BackgroundColor" @bind:after="OnEdited" />
+                            <span class="preview">@Editing.Display</span>
+                        </span>
+                    </div>
+                </div>
+
+                @if (_error is not null)
+                {
+                    <p class="error">@_error</p>
+                }
+
+                <div class="form-actions">
+                    @if (_isNew)
+                    {
+                        <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
+                        <button @onclick="BackToList">@Translator("Cancel")</button>
+                    }
+                    else
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private enum Mode { List, Edit }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Layout? Layout => ScheduleState.Layout;
+    private IQueryable<Region> Regions => (Layout?.Regions ?? []).AsQueryable();
+
+    private Mode _mode = Mode.List;
+    private bool _isNew;
+    private Region? Editing { get; set; }
+    private Region? _deleteTarget;
+    private string? _error;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // A region is referenced when any station is associated with it; such regions cannot be deleted.
+    private bool IsReferenced(Region region) =>
+        Layout!.OperationLocations.OfType<Station>().Any(s => s.Regions.Any(r => r.Id == region.Id));
+
+    private void StartAdd()
+    {
+        Editing = new Region { Id = NextId(), EN = "" };
+        _isNew = true;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(Region region)
+    {
+        Editing = region;
+        _isNew = false;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        Editing = null;
+        _isNew = false;
+        _error = null;
+    }
+
+    // Existing regions edit live and persist on each change; a new one is held until Save validates it.
+    private void OnEdited()
+    {
+        _error = null;
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void SaveNew()
+    {
+        if (Editing is null) return;
+        if (string.IsNullOrWhiteSpace(Editing.EN))
+        {
+            _error = Translator("RegionEnglishNameRequired");
+            return;
+        }
+        Layout!.Add(Editing);
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.Regions.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void AddDefaults()
+    {
+        foreach (var region in Region.Defaults) Layout!.Add(region);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private int NextId() => (Layout!.Regions.Count == 0 ? 0 : Layout.Regions.Max(r => r.Id)) + 1;
+}

@@ -584,6 +584,52 @@
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
+  <!-- Regions editor -->
+  <data name="RegionsNoSchedule" xml:space="preserve">
+    <value>No layout is loaded. Import or create a schedule first.</value>
+  </data>
+  <data name="NoRegions" xml:space="preserve">
+    <value>No regions have been defined yet.</value>
+  </data>
+  <data name="DefaultRegions" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Region" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="EnglishHelp" xml:space="preserve">
+    <value>The English name. Required; used as the fallback when a language has no translation.</value>
+  </data>
+  <data name="Danish" xml:space="preserve">
+    <value>Danish</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>German</value>
+  </data>
+  <data name="Norwegian" xml:space="preserve">
+    <value>Norwegian</value>
+  </data>
+  <data name="Swedish" xml:space="preserve">
+    <value>Swedish</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Colour</value>
+  </data>
+  <data name="BackgroundColorHelp" xml:space="preserve">
+    <value>The background colour used to render this region as a chip in notes.</value>
+  </data>
+  <data name="RegionReferenced" xml:space="preserve">
+    <value>Cannot delete: this region is assigned to one or more stations.</value>
+  </data>
+  <data name="DeleteRegionConfirm" xml:space="preserve">
+    <value>Delete region '{0}'?</value>
+  </data>
+  <data name="RegionEnglishNameRequired" xml:space="preserve">
+    <value>The English name is required.</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>Not Found</value>
   </data>
