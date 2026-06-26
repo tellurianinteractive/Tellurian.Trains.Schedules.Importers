@@ -94,7 +94,7 @@ public static class TimetableStretchExtensions
         /// <summary>
         /// Includes stretch number, start and end station and an optional additional description.
         /// </summary>
-        public string FullDescription => $"{stretch.Number} {stretch.Starts}-{stretch.Ends} {stretch.Description}".Trim();
+        public string FullDescription => $"{stretch.Number} {stretch.Description}: {stretch.Starts}-{stretch.Ends}".Trim();
         /// <summary>
         /// Finds a station along the timetable stretch. A station may occur more than once on a
         /// stretch that revisits it (reversing or branching lines); the first occurrence is returned.
@@ -132,6 +132,32 @@ public static class TimetableStretchExtensions
             if (to.Value.Equals(stretch.Starts)) return 0.0;
             return stretch.Stretches.Where(s => !s.Start.Equals(to.Value)).Sum(s => s.Distance);
         }
+        /// <summary>
+        /// The first track stretch that does not continue from the previous one (its <c>Start</c> differs
+        /// from the previous stretch's <c>End</c>), or <see langword="null"/> when the stretches form one
+        /// continuous, contiguous route.
+        /// </summary>
+        public TrackStretch? FirstDiscontinuity()
+        {
+            var list = stretch.Stretches.ToList();
+            for (var i = 1; i < list.Count; i++)
+                if (!list[i - 1].End.Equals(list[i].Start)) return list[i];
+            return null;
+        }
+
+        /// <summary>
+        /// Whether the track stretches form one continuous route, each continuing from the previous one.
+        /// </summary>
+        public bool IsContiguous => stretch.FirstDiscontinuity() is null;
+
+        /// <summary>
+        /// Whether the given track stretch could be appended after the current last one: it must continue
+        /// from where this stretch currently ends (or be the very first stretch added).
+        /// </summary>
+        /// <param name="trackStretch">The candidate track stretch.</param>
+        public bool CanAppend(TrackStretch trackStretch) =>
+            stretch.Stretches.Count == 0 || stretch.Stretches.Last().End.Equals(trackStretch.Start);
+
         /// <summary>
         /// Adds a track stretch to the end of the timetable stretch.
         /// </summary>

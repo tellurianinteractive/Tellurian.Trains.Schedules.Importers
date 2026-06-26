@@ -1,0 +1,114 @@
+@page "/countries"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+@if (Layout is null)
+{
+    <p>@Translator("CountriesNoSchedule")</p>
+}
+else
+{
+    <div class="countries-editor">
+        <p class="hint">@Translator("CountriesDescription")</p>
+
+        <div class="toolbar">
+            <label>@Translator("AddCountry")</label>
+            <select @bind="_toAdd">
+                <option value="">—</option>
+                @foreach (var c in AvailableToAdd)
+                {
+                    <option value="@c.Id">@Translator(c.ResourceKey)</option>
+                }
+            </select>
+            <button class="primary" disabled="@(_toAdd is null)" @onclick="AddCountry">@Translator("Add")</button>
+        </div>
+
+        <QuickGrid Items="Countries" Class="grid" Theme="tellurian">
+            <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Country>.ByAscending(c => c.Id)">
+                @Translator(context.ResourceKey)
+                @if (context.Id == DefaultCountryId)
+                {
+                    <span class="badge">@Translator("DefaultCountry")</span>
+                }
+            </TemplateColumn>
+            <PropertyColumn Property="c => c.CountryCode" Title='@Translator("CountryCode")' />
+            <PropertyColumn Property="c => c.Languages" Title='@Translator("Languages")' />
+            <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                <button class="danger" disabled="@IsReferenced(context)"
+                        title='@(IsReferenced(context) ? Translator("CountryReferenced") : null)'
+                        @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+            </TemplateColumn>
+        </QuickGrid>
+
+        @if (_deleteTarget is not null)
+        {
+            <div class="confirm">
+                <span>@string.Format(Culture, Translator("DeleteCountryConfirm"), Translator(_deleteTarget.ResourceKey))</span>
+                <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Layout? Layout => ScheduleState.Layout;
+    private int DefaultCountryId => Layout!.Settings.Identity.DefaultCountryId;
+
+    private IQueryable<Country> Countries =>
+        Layout!.Countries.OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture).AsQueryable();
+
+    // Every predefined country not already in the layout's catalogue, regardless of theme (so foreign
+    // countries for cargo regions and international trains can be added), sorted by translated name.
+    private IEnumerable<Country> AvailableToAdd =>
+        Country.Countries
+            .Where(c => Layout!.Countries.All(x => x.Id != c.Id))
+            .OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture);
+
+    private int? _toAdd;
+    private Country? _deleteTarget;
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // A country cannot be deleted while it is the layout default or referenced by a company or region.
+    private bool IsReferenced(Country country) =>
+        country.Id == DefaultCountryId
+        || Layout!.Companies.Any(c => c.CountryId == country.Id)
+        || Layout!.Regions.Any(r => r.CountryId == country.Id);
+
+    private void AddCountry()
+    {
+        if (_toAdd is int id && Country.ById(id) is { } country && Layout!.Countries.All(c => c.Id != id))
+        {
+            Layout.Countries.Add(country);
+            ScheduleState.SaveAndNotify();
+        }
+        _toAdd = null;
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.Countries.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+}

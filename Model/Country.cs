@@ -71,6 +71,21 @@ public static class CountryExtensions
             Country.Countries.FirstOrDefault(c => c.CountryCode.Equals(countryCode, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
+        /// Finds the home <see cref="Country"/> for a two-letter language code — the country whose
+        /// first (primary) language equals it, lowest <see cref="Country.Id"/> winning when several
+        /// share it (so <c>de</c>→Germany, not Switzerland). Used to derive a new layout's default
+        /// country from the GUI language. Falls back to Sweden (id 1) when nothing matches.
+        /// </summary>
+        /// <param name="twoLetterLanguage">A two-letter ISO language code, e.g. <c>sv</c>, <c>de</c>, <c>nb</c>.</param>
+        public static Country ByLanguage(string twoLetterLanguage) =>
+            Country.Countries
+                .Where(c => c.Languages
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .FirstOrDefault()?.Equals(twoLetterLanguage, StringComparison.OrdinalIgnoreCase) == true)
+                .OrderBy(c => c.Id)
+                .FirstOrDefault() ?? Country.ById(1)!;
+
+        /// <summary>
         /// Finds countries by <see cref="Theme"/>.
         /// </summary>
         /// <param name="theme"></param>

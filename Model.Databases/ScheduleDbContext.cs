@@ -180,6 +180,11 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200);
 
+            // The country catalogue saved with the layout. Stored as a JSON column rather than a
+            // table: the entries are reference data referenced elsewhere only by their stable
+            // Country.Id (a plain int), so no separate table or foreign keys are needed.
+            entity.OwnsMany(e => e.Countries, b => b.ToJson());
+
             entity.HasMany(e => e.Companies)
                   .WithOne(e => e.Layout)
                   .HasForeignKey(e => e.LayoutId)
@@ -235,7 +240,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Signature).HasMaxLength(20).IsRequired();
-            entity.Property(e => e.CountryCode).HasMaxLength(5);
+            entity.Property(e => e.CountryId);
 
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
         });
@@ -244,15 +249,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         modelBuilder.Entity<Region>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.EN).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.DA).HasMaxLength(100);
-            entity.Property(e => e.DE).HasMaxLength(100);
-            entity.Property(e => e.NB).HasMaxLength(100);
-            entity.Property(e => e.SV).HasMaxLength(100);
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.BackgroundColor).HasMaxLength(20);
 
             // Computed members are not persisted.
-            entity.Ignore(e => e.Name);
             entity.Ignore(e => e.Display);
         });
 
@@ -310,6 +310,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasOne(e => e.To)
                   .WithMany()
                   .OnDelete(DeleteBehavior.Restrict);
+
+            // IntermediateLocations is a computed view over Stretches, not stored data.
+            entity.Ignore(e => e.IntermediateLocations);
+
+            // The ordered track stretches the dispatch stretch comprises; the track stretches
+            // themselves belong to the layout, so this is a reference-only many-to-many.
+            entity.HasMany(e => e.Stretches).WithMany();
         });
 
         // StationTrack
@@ -387,6 +394,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne(e => e.Timetable)
                   .HasForeignKey(e => e.TimetableId)
                   .IsRequired()
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The category catalogue belongs to the timetable (1:N). TrainCategory has no Timetable
+            // navigation, so the foreign key is a shadow property.
+            entity.HasMany(e => e.TrainCategories)
+                  .WithOne()
+                  .HasForeignKey("TimetableId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 

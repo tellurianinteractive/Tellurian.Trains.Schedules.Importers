@@ -1,0 +1,61 @@
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+<div class="stretch-editor">
+    <p class="hint">@Translator("DispatchStretchesHint")</p>
+
+    <div class="toolbar">
+        <button class="primary" @onclick="Regenerate" disabled="@(Layout is null)">@Translator("RegenerateDispatchStretches")</button>
+    </div>
+
+    @if (Dispatches.Count == 0)
+    {
+        <p class="empty">@Translator("NoDispatchStretches")</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th>@Translator("From")</th>
+                    <th>@Translator("To")</th>
+                    <th>@Translator("Via")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Dispatches)
+                {
+                    <tr>
+                        <td>@d.From.Name</td>
+                        <td>@d.To.Name</td>
+                        <td>@ViaText(d)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private Layout? Layout => ScheduleState.Layout;
+    private IReadOnlyList<DispatchStretch> Dispatches =>
+        Layout is null ? [] : [.. Layout.DispatchStretches.OrderBy(d => d.From.Name).ThenBy(d => d.To.Name)];
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private void Regenerate()
+    {
+        if (Layout is null) return;
+        Layout.DispatchStretches = Layout.CreateDispatchStretches();
+        ScheduleState.SaveAndNotify();
+    }
+
+    private static string ViaText(DispatchStretch dispatch) =>
+        string.Join(", ", dispatch.IntermediateLocations.Select(l => l.Name));
+
+    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
+}

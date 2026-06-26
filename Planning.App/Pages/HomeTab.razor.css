@@ -1,0 +1,49 @@
+.home-intro {
+    --primary: #1a3a5c;
+    --danger: #c00;
+
+    .home-actions {
+        margin: 1.25rem 0;
+    }
+
+    button {
+        padding: 0.4rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+
+    button.primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    button.danger {
+        color: var(--danger);
+        border-color: #e0b4b4;
+    }
+
+    button.danger:hover {
+        background: #fbeaea;
+    }
+
+    .confirm {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin: 0.9rem 0;
+        padding: 0.6rem 0.75rem;
+        background: #fbeaea;
+        border: 1px solid #e0b4b4;
+        border-radius: 5px;
+    }
+}

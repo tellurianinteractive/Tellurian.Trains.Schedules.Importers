@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Tellurian.Localization;
 using Tellurian.Utilities.Web;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
@@ -16,48 +15,28 @@ public class Region
     /// </summary>
     public int Id { get; set; }
 
-    /// <summary>The region name in English. Required; used as the fallback for untranslated cultures.</summary>
-    public required string EN { get; set; }
-    /// <summary>The region name in Danish, or <c>null</c> when not translated.</summary>
-    public string? DA { get; set; }
-    /// <summary>The region name in German, or <c>null</c> when not translated.</summary>
-    public string? DE { get; set; }
-    /// <summary>The region name in Norwegian Bokmål, or <c>null</c> when not translated.</summary>
-    public string? NB { get; set; }
-    /// <summary>The region name in Swedish, or <c>null</c> when not translated.</summary>
-    public string? SV { get; set; }
-
     /// <summary>
-    /// Selects the language-specific name property (<see cref="EN"/>, <see cref="SV"/>, …) matching the
-    /// current UI culture. Assigned once at application start-up (see <c>Program.cs</c>); contexts where it
-    /// is not configured fall back to the English <see cref="EN"/> name.
+    /// Gets or sets the region name, written in the layout's default language. Required.
     /// </summary>
-    public static ISynchronousResourceProvider? Localizer { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
-    /// Gets or sets the background colour used when rendering this region in notes,
-    /// as a CSS colour string. The text colour is auto-contrasted from it (see DM-4.5.4).
+    /// Gets or sets the <see cref="Country.Id"/> of the country this region belongs to. A new region
+    /// defaults to the layout's default country (see <c>IdentitySettings.DefaultCountryId</c>); a region
+    /// representing a foreign destination is set to that country instead.
     /// </summary>
-    public string BackgroundColor { get; set; } = "#cccccc";
+    public int? CountryId { get; set; }
 
     /// <summary>
-    /// The region name localised for the current UI culture, selected from the language-specific
-    /// properties (<see cref="EN"/>, <see cref="SV"/>, …) via <see cref="Localizer"/>. Falls back to
-    /// the English <see cref="EN"/> name when no localiser is configured or the matching property is
-    /// empty — for example an untranslated, user-defined region.
+    /// Gets or sets the background colour used when rendering this region in notes, as a CSS colour
+    /// string. The text colour is auto-contrasted from it (see DM-4.5.4). Chosen from the
+    /// region <c>Palette</c>.
     /// </summary>
-    public string Name
-    {
-        get
-        {
-            var localised = Localizer?.GetTranslation(this).Text;
-            return string.IsNullOrEmpty(localised) ? EN : localised;
-        }
-    }
+    public string BackgroundColor { get; set; } = "#ffff00";
 
     /// <summary>
-    /// Markup display: the localised <see cref="Name"/> as a coloured chip, with the text colour
-    /// auto-contrasted from <see cref="BackgroundColor"/>.
+    /// Markup display: the <see cref="Name"/> as a coloured chip, with the text colour auto-contrasted
+    /// from <see cref="BackgroundColor"/>.
     /// </summary>
     public MarkupString Display =>
         new($"""
@@ -66,23 +45,72 @@ public class Region
 }
 
 /// <summary>
-/// 
+/// Provides the standard region palette and the localised default regions for a layout.
 /// </summary>
 public static class RegionExtensions
 {
     extension(Region region)
     {
         /// <summary>
-        /// The standard set of regions.
+        /// The colours permitted for a region: the seven standard region colours plus purple and pink.
         /// </summary>
-        public static IEnumerable<Region> Defaults => [
-             new (){ Id=1, EN="South", DA="Syd", DE="Süden", NB="Syd", SV="Söder", BackgroundColor="#ffff00" },
-             new (){ Id=2, EN="West", DA="Vest", DE="Westen", NB="Vest", SV="Väster", BackgroundColor="#009933" },
-             new (){ Id=3, EN="East", DA="Sjælland", DE="Osten", NB="Øst", SV="Öster", BackgroundColor="#CC0000" },
-             new (){ Id=4, EN="Northwest", DA="Nordvest", DE="Rhen-Main", NB="Trøndelag", SV="Nordväst", BackgroundColor="#996600" },
-             new (){ Id=5, EN="Northeast", DA="Fyn", DE="Rhurgebeit", NB="", SV="Nordost", BackgroundColor="#000000" },
-             new (){ Id=6, EN="North", DA="Nord", DE="Norden", NB="Nord", SV="Norr", BackgroundColor="#0066FF" },
-             new (){ Id=7, EN="Middle", DA="Stykgods", DE="Stückgut", NB="Stykgods", SV="Hallsberg", BackgroundColor="#FF9933" },
+        public static IReadOnlyList<string> Palette =>
+        [
+            "#ffff00", // yellow
+            "#009933", // green
+            "#CC0000", // red
+            "#996600", // brown
+            "#000000", // black
+            "#0066FF", // blue
+            "#FF9933", // orange
+            "#9900CC", // purple
+            "#FF66CC", // pink
         ];
+
+        /// <summary>
+        /// The standard set of regions, named in the language of the country with the given
+        /// <see cref="Country.Id"/> (falling back to English) and assigned to that country.
+        /// </summary>
+        /// <param name="countryId">The <see cref="Country.Id"/> of the layout's default country.</param>
+        public static IEnumerable<Region> DefaultsFor(int countryId)
+        {
+            var language = Country.ById(countryId)?.Languages
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault() ?? "en";
+            return Defaults.Select(d => new Region
+            {
+                Id = d.Id,
+                Name = d.NameFor(language),
+                CountryId = countryId,
+                BackgroundColor = d.Color,
+            });
+        }
+    }
+
+    // The localised names of the standard regions; used only when generating the default regions, after
+    // which each region keeps a single Name in the layout's default language.
+    private static readonly RegionDefault[] Defaults =
+    [
+        new(1, "#ffff00", EN: "South",     DA: "Syd",      DE: "Süden",      NB: "Syd",        SV: "Söder"),
+        new(2, "#009933", EN: "West",      DA: "Vest",     DE: "Westen",     NB: "Vest",       SV: "Väster"),
+        new(3, "#CC0000", EN: "East",      DA: "Sjælland", DE: "Osten",      NB: "Øst",        SV: "Öster"),
+        new(4, "#996600", EN: "Northwest", DA: "Nordvest", DE: "Rhen-Main",  NB: "Trøndelag",  SV: "Nordväst"),
+        new(5, "#000000", EN: "Northeast", DA: "Fyn",      DE: "Rhurgebeit", NB: "",           SV: "Nordost"),
+        new(6, "#0066FF", EN: "North",     DA: "Nord",     DE: "Norden",     NB: "Nord",       SV: "Norr"),
+        new(7, "#FF9933", EN: "Middle",    DA: "Stykgods", DE: "Stückgut",   NB: "Stykgods",   SV: "Hallsberg"),
+    ];
+
+    private sealed record RegionDefault(int Id, string Color, string EN, string DA, string DE, string NB, string SV)
+    {
+        public string NameFor(string language) => language switch
+        {
+            "sv" => Or(SV),
+            "da" => Or(DA),
+            "de" => Or(DE),
+            "nb" or "nn" => Or(NB),
+            _ => EN,
+        };
+
+        private string Or(string? localised) => string.IsNullOrEmpty(localised) ? EN : localised;
     }
 }

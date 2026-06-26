@@ -57,7 +57,7 @@ public sealed class ExplorationTests
             {
                 if (number.HasValue && signature.HasValue && name.HasValue && country.HasValue)
                 {
-                    _operatingCompanies.Add(new(number.NumberOrZero, name, signature, country));
+                    _operatingCompanies.Add(new(number.NumberOrZero, name, signature, Country.ByCountryCode(country)?.Id));
                 }
                 else
                 {
@@ -67,11 +67,12 @@ public sealed class ExplorationTests
             }
         }
 
-        foreach (var oc in _operatingCompanies.OrderBy(oc => oc.CountryCode).ThenBy(oc => signature))
+        foreach (var oc in _operatingCompanies.OrderBy(oc => Country.ById(oc.CountryId ?? 0)?.CountryCode).ThenBy(oc => signature))
         {
+            var countryCode = Country.ById(oc.CountryId ?? 0)?.CountryCode ?? "";
             streamWriter.WriteLine(
-                $""" 
-                "{oc.Id:0000}"; "{oc.CountryCode}; "{oc.Signature}"; "{oc.Name}"" 
+                $"""
+                "{oc.Id:0000}"; "{countryCode}; "{oc.Signature}"; "{oc.Name}""
                 """);
 
         }

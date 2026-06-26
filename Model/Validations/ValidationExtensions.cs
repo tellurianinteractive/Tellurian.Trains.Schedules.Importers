@@ -1,6 +1,5 @@
 using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Resources;
-using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
 

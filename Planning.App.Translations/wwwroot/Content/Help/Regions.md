@@ -6,8 +6,9 @@ train's destination note say where its wagons are bound beyond the modelled rail
 
 Each region has:
 
-- a **name**, shown wherever the region is referenced and presented in your chosen interface
-  language;
+- a **name**, written in the layout's default language and shown wherever the region is referenced;
+- a **country** it belongs to — a new region defaults to the layout's default country, but a region
+  standing for a foreign destination can be set to that country instead;
 - a **background colour**, used to render the region as a coloured chip in notes (the text colour is
   contrasted automatically for readability).
 
@@ -27,14 +28,15 @@ Define the regions you need here, then assign them to your shadow stations on th
 
 ## Managing regions
 
-The list shows each region as a coloured chip alongside its name in each supported language.
+The list shows each region as a coloured chip alongside its name and country.
 
-- **Add new** creates a region; give it at least an English name (the fallback for languages you
-  leave blank), translations for the other languages, and a colour.
-- **Edit** changes a region's names or colour.
+- **Add new** creates a region; give it a name, choose its country, and pick a colour from the
+  palette.
+- **Edit** changes a region's name, country or colour.
 - **Delete** removes a region. It is blocked while any station is assigned the region — remove the
   assignment on the **Operation Locations** tab first.
-- **Default** adds the standard set of regions, handy when starting a new layout.
+- **Default regions** adds the standard set of regions, named in the layout's default language and
+  handy when starting a new layout.
 
 Regions are stored with the layout, and this catalogue is the source for the region choices shown
 when editing a station.

@@ -2,6 +2,7 @@
 @using System.Globalization
 @using Microsoft.AspNetCore.Components.Routing
 @using Tellurian.Localization
+@using Tellurian.Utilities.Web
 @inject DockLayoutState Dock
 @inject ScheduleStateService ScheduleState
 @inject UiPreferenceService UiPrefs
@@ -10,7 +11,7 @@
 @inject Translator Translator
 @implements IDisposable
 
-<div class="page">
+<div class="page" style="--primary: @Primary; --primary-text: @Primary.TextColor">@* signature colour + its auto-contrasted text, exposed app-wide for data-grid headers etc. *@
     <header class="top-bar no-print">
         <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span></h1>
         <div class="top-bar-actions">
@@ -87,6 +88,10 @@
 
 @code {
     private const string AppVersion = "0.1";
+
+    // The app's signature colour. Exposed (with its auto-contrasted text colour) as the --primary /
+    // --primary-text CSS variables on the page root, so data-grid headers and similar can use them.
+    private const string Primary = "#1a3a5c";
     private bool _showAbout;
     private string _aboutHtml = "";
 

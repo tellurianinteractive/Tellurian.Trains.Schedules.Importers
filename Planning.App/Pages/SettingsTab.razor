@@ -116,7 +116,7 @@ else
                     <select @bind="gt.Orientation" @bind:after="OnEdited">
                         @foreach (var o in Enum.GetValues<TimeAxisOrientation>())
                         {
-                            <option value="@o">@o</option>
+                            <option value="@o">@Translator(o.ToString())</option>
                         }
                     </select>
                 </div>

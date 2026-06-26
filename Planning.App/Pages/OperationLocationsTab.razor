@@ -36,12 +36,23 @@ else
             }
             else
             {
-                <QuickGrid Items="Locations" Class="grid">
+                <QuickGrid Items="Locations" Class="grid" Theme="tellurian">
                     <PropertyColumn Property="o => o.Signature" Title='@Translator("Signature")' Sortable="true" />
                     <PropertyColumn Property="o => o.Name" Title='@Translator("Name")' Sortable="true" />
                     <TemplateColumn Title='@Translator("Type")'>@Translator(TypeKey(context))</TemplateColumn>
-                    <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("Regions")'>
+                        @if (context is Station { Regions.Count: > 0 } regionStation)
+                        {
+                            @foreach (var region in regionStation.Regions)
+                            {
+                                @region.Display
+                            }
+                        }
+                    </TemplateColumn>
+                    <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@(context is Station { IsManned: true } ? "✓" : "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@(context is Station { IsShadow: true } ? "✓" : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
+                    <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Info(context)">@Translator("Info")</button>
@@ -65,9 +76,20 @@ else
         else if (_mode == Mode.Edit && Editing is not null)
         {
             <div class="edit">
-                <h2>@Translator(TypeKey(Editing)) — @(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+                <h2>@(_isNew ? $"{Translator(TypeKey(Editing))} — {Translator("AddNew")}" : Editing.Name)</h2>
 
                 <div class="section">
+                    @if (!_isNew)
+                    {
+                        <div class="field">
+                            <label>@Translator("Type")</label>
+                            <select value="@TypeKey(Editing)" @onchange="OnTypeChanged">
+                                <option value="Station">@Translator("Station")</option>
+                                <option value="SignalControlledLocation">@Translator("SignalControlledLocation")</option>
+                                <option value="OtherLocation">@Translator("OtherLocation")</option>
+                            </select>
+                        </div>
+                    }
                     <div class="field">
                         <HelpLabel For="Name" />
                         <input type="text" @bind="Editing.Name" @bind:after="OnEdited" />
@@ -373,6 +395,22 @@ else
         _mode = Mode.Edit;
     }
 
+    // Changes the type of the location being edited. The model creates a replacement of the new type,
+    // carries over the shared state and repoints all references; the form rebinds to it.
+    private void OnTypeChanged(ChangeEventArgs e)
+    {
+        if (Editing is null || Layout is null) return;
+        var kind = (string?)e.Value switch
+        {
+            "SignalControlledLocation" => OperationLocationKind.SignalControlled,
+            "OtherLocation" => OperationLocationKind.Other,
+            _ => OperationLocationKind.Station
+        };
+        Editing = Layout.ChangeOperationLocationType(Editing, kind);
+        _error = null;
+        ScheduleState.SaveAndNotify();
+    }
+
     private void Info(OperationLocation location)
     {
         _selected = location;
@@ -444,7 +482,7 @@ else
 
     private void AddStandardRegions()
     {
-        foreach (var region in Region.Defaults) Layout!.Add(region);
+        foreach (var region in Region.DefaultsFor(Layout!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
         ScheduleState.SaveAndNotify();
     }
 

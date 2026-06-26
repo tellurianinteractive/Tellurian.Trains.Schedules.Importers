@@ -102,6 +102,10 @@ public static class PlanExtensions
     extension(Plan plan)
     {
         /// <summary>
+        /// Returns the <see cref="Layout"/> for the plan.
+        /// </summary>
+        public Layout Layout => plan.Timetable.Layout;
+        /// <summary>
         /// Adds a vehicle to the schedule.
         /// </summary>
         /// <param name="vehicle">The vehicle to add.</param>

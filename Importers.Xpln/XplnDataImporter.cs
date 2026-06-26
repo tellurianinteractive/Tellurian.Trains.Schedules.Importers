@@ -183,6 +183,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         layout.Settings.Identity.DefaultCountryId = country.Id;
         layout.Settings.Identity.Theme =
             Country.CountriesByTheme(Theme.American).Any(c => c.Id == country.Id) ? Theme.American : Theme.European;
+        // Seed the layout's saved country catalogue from the now-known theme, so company/region
+        // country references resolve against data that travels with the layout.
+        layout.EnsureCountries();
     }
 
     private ImportResult<Layout> GetLayout(string name)
@@ -273,7 +276,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         {
             return fields[SubType].ToUpperInvariant() switch
             {
-                "STATION" => new Station(rowNumber, fields[Name], fields[Signature]),
+                // An XPLN "STATION" is a manned operating place; unmanned places are imported as BLOCK
+                // (signal-controlled) or other locations. Marking it manned makes it a dispatch endpoint.
+                "STATION" => new Station(rowNumber, fields[Name], fields[Signature]) { IsManned = true },
                 "BLOCK" => new SignalControlledLocation(rowNumber, fields[Name], fields[Signature]) { ControlledBy = last },
                 _ => new OtherLocation(rowNumber, fields[Name], fields[Signature])
             };
@@ -414,7 +419,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                     }
                     if (itemMessages.HasNoStoppingErrors())
                     {
-                        var distance = Math.Abs(fields[EndPosition].ToDoubleOrZero - fields[StartPosition].ToDoubleOrZero);
+                        // Positions can carry many decimals; the stretch length is only meaningful to ~0.1 km.
+                        var distance = Math.Round(Math.Abs(fields[EndPosition].ToDoubleOrZero - fields[StartPosition].ToDoubleOrZero), 1);
                         var stretch = new TrackStretch(rowNumber, start.Value, end.Value, distance, fields[Tracks].ToIntOrZero, fields[Speed].ToIntOrZero, fields[Time].ToIntOrZero);
                         stretch = currentStretch!.AddLast(stretch);
                         layout.Add(stretch);

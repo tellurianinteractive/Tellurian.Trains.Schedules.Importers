@@ -1,4 +1,78 @@
 @page "/stretches"
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@inject UiPreferenceService UiPrefs
+@implements IDisposable
 
-<p>@Translator("StretchesDescription")</p>
+@if (ScheduleState.Layout is null)
+{
+    <p>@Translator("StretchesNoSchedule")</p>
+}
+else
+{
+    <div class="stretches">
+        <p class="intro">@Translator("StretchesDescription")</p>
+
+        <nav class="sub-tabs">
+            @foreach (var section in Sections)
+            {
+                <button class="sub-tab @(section == _section ? "active" : "")"
+                        @onclick="() => SelectSection(section)">
+                    @SectionLabel(section)
+                </button>
+            }
+        </nav>
+
+        <div class="section">
+            @switch (_section)
+            {
+                case StretchSection.Track:
+                    <TrackStretchesEditor />
+                    break;
+                case StretchSection.Dispatch:
+                    <DispatchStretchesView />
+                    break;
+                case StretchSection.Timetable:
+                    <TimetableStretchesEditor />
+                    break;
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private enum StretchSection { Track, Dispatch, Timetable }
+
+    private StretchSection _section = StretchSection.Track;
+    private static readonly StretchSection[] Sections = Enum.GetValues<StretchSection>();
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await UiPrefs.GetStretchesSectionAsync() is { } saved && Enum.TryParse<StretchSection>(saved, out var section))
+            _section = section;
+    }
+
+    private void SelectSection(StretchSection section)
+    {
+        _section = section;
+        _ = UiPrefs.SetStretchesSectionAsync(section.ToString());
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private string SectionLabel(StretchSection section) => Translator(section switch
+    {
+        StretchSection.Track => "TrackStretches",
+        StretchSection.Dispatch => "DispatchStretches",
+        StretchSection.Timetable => "TimetableStretches",
+        _ => section.ToString()
+    });
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

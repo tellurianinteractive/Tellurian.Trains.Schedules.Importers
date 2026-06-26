@@ -10,11 +10,17 @@ public sealed class CompaniesService(HttpClient http) : ICompaniesService
     {
         try
         {
-            return await http.GetFromJsonAsync<IEnumerable<Company>>("data/OperatingCompanies.json") ?? [];
+            var records = await http.GetFromJsonAsync<IEnumerable<CompanyRecord>>("data/OperatingCompanies.json") ?? [];
+            // The seed file stores an ISO country code; the model references a country by its stable
+            // Country.Id, so map the code through the catalogue (unknown codes become null).
+            return [.. records.Select(r => new Company(r.Id, r.Name, r.Signature, Country.ByCountryCode(r.CountryCode ?? "")?.Id))];
         }
         catch
         {
             return [];
         }
     }
+
+    // Mirrors the seed JSON shape, which predates the move from country code to country id.
+    private sealed record CompanyRecord(int Id, string Name, string Signature, string? CountryCode);
 }

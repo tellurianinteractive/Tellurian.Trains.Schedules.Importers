@@ -8,11 +8,14 @@ namespace Tellurian.Trains.Schedules.Planning.App.Services;
 public sealed class UiPreferenceService(BrowserStorageService storage)
 {
     private const string SettingsSectionKey = "planning.ui.settingsSection";
+    private const string StretchesSectionKey = "planning.ui.stretchesSection";
     private const string LastRouteKey = "planning.ui.lastRoute";
     private const string GraphHalfKey = "planning.ui.graphHalf";
 
     private string? _settingsSection;
     private bool _settingsSectionLoaded;
+    private string? _stretchesSection;
+    private bool _stretchesSectionLoaded;
     private string? _lastRoute;
     private bool _lastRouteLoaded;
     private string? _graphHalf;
@@ -34,6 +37,24 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
         _settingsSection = section;
         _settingsSectionLoaded = true;
         await storage.SetStringAsync(SettingsSectionKey, section);
+    }
+
+    /// <summary>The last active sub-section in the Stretches page, or null when none has been stored.</summary>
+    public async Task<string?> GetStretchesSectionAsync()
+    {
+        if (_stretchesSectionLoaded) return _stretchesSection;
+        _stretchesSection = await storage.GetStringAsync(StretchesSectionKey);
+        _stretchesSectionLoaded = true;
+        return _stretchesSection;
+    }
+
+    /// <summary>Remembers the active sub-section in the Stretches page.</summary>
+    public async Task SetStretchesSectionAsync(string section)
+    {
+        if (_stretchesSection == section) return;
+        _stretchesSection = section;
+        _stretchesSectionLoaded = true;
+        await storage.SetStringAsync(StretchesSectionKey, section);
     }
 
     /// <summary>The last active top-level route (e.g. "settings", "workspace"), or null when none.</summary>

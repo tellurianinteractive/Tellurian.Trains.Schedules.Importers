@@ -274,6 +274,12 @@
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Time axis orientation</value>
   </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
     <value>Show arrival minutes</value>
   </data>
@@ -627,8 +633,29 @@
   <data name="DeleteRegionConfirm" xml:space="preserve">
     <value>Delete region '{0}'?</value>
   </data>
-  <data name="RegionEnglishNameRequired" xml:space="preserve">
-    <value>The English name is required.</value>
+  <data name="RegionNameRequired" xml:space="preserve">
+    <value>The name is required.</value>
+  </data>
+  <data name="CompaniesNoSchedule" xml:space="preserve">
+    <value>No layout is loaded. Import or create a schedule first.</value>
+  </data>
+  <data name="NoCompanies" xml:space="preserve">
+    <value>No companies have been added yet.</value>
+  </data>
+  <data name="DeleteCompanyConfirm" xml:space="preserve">
+    <value>Delete company '{0}'?</value>
+  </data>
+  <data name="CompanyReferenced" xml:space="preserve">
+    <value>Cannot delete: this company is used by trains, duties or equipment.</value>
+  </data>
+  <data name="CompanyNameRequired" xml:space="preserve">
+    <value>The name is required.</value>
+  </data>
+  <data name="CompanySignatureRequired" xml:space="preserve">
+    <value>The signature is required.</value>
+  </data>
+  <data name="CompanySignatureInUse" xml:space="preserve">
+    <value>A company with this signature already exists.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>Not Found</value>
@@ -773,5 +800,191 @@
   </data>
   <data name="CzechRepublic" xml:space="preserve">
     <value>Czech Republic</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Route" xml:space="preserve">
+    <value>Route</value>
+  </data>
+  <data name="DistanceKm" xml:space="preserve">
+    <value>Distance (km)</value>
+  </data>
+  <data name="SpeedKmh" xml:space="preserve">
+    <value>Speed (km/h)</value>
+  </data>
+  <data name="TimeMinutes" xml:space="preserve">
+    <value>Time (min)</value>
+  </data>
+  <data name="Via" xml:space="preserve">
+    <value>Via</value>
+  </data>
+  <data name="TrackStretches" xml:space="preserve">
+    <value>Track stretches</value>
+  </data>
+  <data name="DispatchStretches" xml:space="preserve">
+    <value>Dispatch stretches</value>
+  </data>
+  <data name="TimetableStretches" xml:space="preserve">
+    <value>Timetable stretches</value>
+  </data>
+  <data name="StretchesNoSchedule" xml:space="preserve">
+    <value>Open or import a plan to edit its stretches.</value>
+  </data>
+  <data name="SelectTrackStretch" xml:space="preserve">
+    <value>Select a track stretch…</value>
+  </data>
+  <data name="TrackStretchNeedsLocations" xml:space="preserve">
+    <value>Add at least two operation locations before defining track stretches.</value>
+  </data>
+  <data name="NoTrackStretches" xml:space="preserve">
+    <value>No track stretches defined yet.</value>
+  </data>
+  <data name="TrackStretchReferenced" xml:space="preserve">
+    <value>This track stretch is used by a timetable stretch and cannot be deleted.</value>
+  </data>
+  <data name="DeleteTrackStretchConfirm" xml:space="preserve">
+    <value>Delete the track stretch {0} – {1}?</value>
+  </data>
+  <data name="TrackStretchDirectionWarning" xml:space="preserve">
+    <value>Some track stretches are not all defined in the same direction:</value>
+  </data>
+  <data name="AddTrackStretch" xml:space="preserve">
+    <value>Add track stretch</value>
+  </data>
+  <data name="TrackStretchSameEndpoints" xml:space="preserve">
+    <value>A track stretch must connect two different locations.</value>
+  </data>
+  <data name="TrackStretchDuplicate" xml:space="preserve">
+    <value>A track stretch with these endpoints already exists.</value>
+  </data>
+  <data name="DispatchStretchesHint" xml:space="preserve">
+    <value>Dispatch stretches run between manned or shadow stations, passing through any unmanned locations between them. They are generated from the track stretches.</value>
+  </data>
+  <data name="RegenerateDispatchStretches" xml:space="preserve">
+    <value>Regenerate from track stretches</value>
+  </data>
+  <data name="NoDispatchStretches" xml:space="preserve">
+    <value>No dispatch stretches yet. Use Regenerate to create them from the track stretches.</value>
+  </data>
+  <data name="TimetableStretchNeedsTrackStretches" xml:space="preserve">
+    <value>Add track stretches before defining timetable stretches.</value>
+  </data>
+  <data name="DeleteTimetableStretchConfirm" xml:space="preserve">
+    <value>Delete the timetable stretch {0}?</value>
+  </data>
+  <data name="AddTimetableStretch" xml:space="preserve">
+    <value>Add timetable stretch</value>
+  </data>
+  <data name="TimetableStretchEmptyRoute" xml:space="preserve">
+    <value>No track stretches in the route yet. Add one below.</value>
+  </data>
+  <data name="AddToRoute" xml:space="preserve">
+    <value>Add to route</value>
+  </data>
+  <data name="RemoveLast" xml:space="preserve">
+    <value>Remove last</value>
+  </data>
+  <data name="TimetableStretchNoContinuation" xml:space="preserve">
+    <value>No track stretch continues from here.</value>
+  </data>
+  <data name="TimetableStretchNumberRequired" xml:space="preserve">
+    <value>A number is required.</value>
+  </data>
+  <data name="TimetableStretchNumberDuplicate" xml:space="preserve">
+    <value>A timetable stretch with this number already exists.</value>
+  </data>
+  <data name="TimetableStretchRouteRequired" xml:space="preserve">
+    <value>Add at least one track stretch to the route.</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="CreateNewLayout" xml:space="preserve">
+    <value>New layout</value>
+  </data>
+  <data name="NewLayoutName" xml:space="preserve">
+    <value>New layout</value>
+  </data>
+  <data name="NewLayoutReplaceConfirm" xml:space="preserve">
+    <value>This replaces the layout currently loaded. Continue?</value>
+  </data>
+  <data name="CountriesNoSchedule" xml:space="preserve">
+    <value>No layout is loaded. Import or create a schedule first.</value>
+  </data>
+  <data name="CountriesDescription" xml:space="preserve">
+    <value>The countries used by this layout, for companies and regions.</value>
+  </data>
+  <data name="Countries" xml:space="preserve">
+    <value>Countries</value>
+  </data>
+  <data name="AddCountry" xml:space="preserve">
+    <value>Add country</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="CountryCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Languages</value>
+  </data>
+  <data name="CountryReferenced" xml:space="preserve">
+    <value>Cannot delete: this country is the default or is used by a company or region.</value>
+  </data>
+  <data name="DeleteCountryConfirm" xml:space="preserve">
+    <value>Remove country '{0}' from the layout?</value>
+  </data>
+  <data name="TrainCategoriesNoSchedule" xml:space="preserve">
+    <value>No layout is loaded. Import or create a schedule first.</value>
+  </data>
+  <data name="NoTrainCategories" xml:space="preserve">
+    <value>No train categories have been defined yet.</value>
+  </data>
+  <data name="Prefix" xml:space="preserve">
+    <value>Prefix</value>
+  </data>
+  <data name="Suffix" xml:space="preserve">
+    <value>Suffix</value>
+  </data>
+  <data name="Passenger" xml:space="preserve">
+    <value>Passenger</value>
+  </data>
+  <data name="Freight" xml:space="preserve">
+    <value>Freight</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Colour</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="DeleteTrainCategoryConfirm" xml:space="preserve">
+    <value>Delete train category '{0}'?</value>
+  </data>
+  <data name="TrainCategoryReferenced" xml:space="preserve">
+    <value>Cannot delete: this category is used by one or more trains.</value>
+  </data>
+  <data name="TrainCategoryNameRequired" xml:space="preserve">
+    <value>The name is required.</value>
+  </data>
+  <data name="AddFromCatalogue" xml:space="preserve">
+    <value>Add from catalogue</value>
+  </data>
+  <data name="AddFromCatalogueHint" xml:space="preserve">
+    <value>Operating companies registered in the layout's countries. Tick the ones to add.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="NoCompanyCandidates" xml:space="preserve">
+    <value>No companies are available for the layout's countries.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Add selected</value>
   </data>
 </root>

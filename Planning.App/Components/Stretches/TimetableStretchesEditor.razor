@@ -1,0 +1,259 @@
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+<div class="stretch-editor">
+    @if (_mode == Mode.List)
+    {
+        <div class="toolbar">
+            <button class="primary" @onclick="StartAdd" disabled="@(!HasTrackStretches)">@Translator("AddNew")</button>
+        </div>
+
+        @if (!HasTrackStretches)
+        {
+            <p class="empty">@Translator("TimetableStretchNeedsTrackStretches")</p>
+        }
+        else if (Stretches.Count == 0)
+        {
+            <p class="empty">@Translator("NoTimetableStretches")</p>
+        }
+        else
+        {
+            <table class="grid">
+                <thead>
+                    <tr>
+                        <th>@Translator("Number")</th>
+                        <th>@Translator("Route")</th>
+                        <th>@Translator("Description")</th>
+                        <th class="num">@Translator("TrackStretches")</th>
+                        <th class="num">@Translator("DistanceKm")</th>
+                        <th class="actions">@Translator("Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Stretches)
+                    {
+                        <tr>
+                            <td>@s.Number</td>
+                            <td>@RouteText(s)</td>
+                            <td>@s.Description</td>
+                            <td class="num">@s.Stretches.Count</td>
+                            <td class="num">@TotalDistance(s)</td>
+                            <td class="actions">
+                                <button @onclick="() => Edit(s)">@Translator("Edit")</button>
+                                <button class="danger" @onclick="() => _deleteTarget = s">@Translator("Delete")</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Translator("DeleteTimetableStretchConfirm"), _deleteTarget.Number)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+    }
+    else if (_editing is not null)
+    {
+        <div class="edit">
+            <h2>@(_isNew ? Translator("AddTimetableStretch") : _editing.FullDescription)</h2>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label>@Translator("Number")</label>
+                    <input type="text" @bind="_number" />
+                </div>
+                <div class="field">
+                    <label>@Translator("Description")</label>
+                    <input type="text" @bind="_description" />
+                </div>
+            </div>
+
+            <div class="route">
+                <h3>@Translator("Route")</h3>
+                @if (_editing.Stretches.Count == 0)
+                {
+                    <p class="empty">@Translator("TimetableStretchEmptyRoute")</p>
+                }
+                else
+                {
+                    <ol class="route-list">
+                        @foreach (var ts in _editing.Stretches)
+                        {
+                            <li>@ts.Start.Name (@ts.Start.Signature) → @ts.End.Name (@ts.End.Signature) <span class="dim">@ts.Distance @Translator("DistanceKm")</span></li>
+                        }
+                    </ol>
+                    <p class="summary">
+                        @Translator("Stations"): @StationsText(_editing) &nbsp;·&nbsp;
+                        @Translator("DistanceKm"): @TotalDistance(_editing)
+                    </p>
+                }
+
+                <div class="route-add">
+                    @if (Appendable.Count == 0)
+                    {
+                        <span class="dim">@Translator("TimetableStretchNoContinuation")</span>
+                    }
+                    else
+                    {
+                        <select @bind="_candidateId">
+                            <option value="0">@Translator("SelectTrackStretch")</option>
+                            @foreach (var ts in Appendable)
+                            {
+                                <option value="@ts.Id">@ts.Start.Signature → @ts.End.Signature (@ts.Distance @Translator("DistanceKm"))</option>
+                            }
+                        </select>
+                        <button @onclick="AppendSelected" disabled="@(_candidateId == 0)">@Translator("AddToRoute")</button>
+                    }
+                    @if (_editing.Stretches.Count > 0)
+                    {
+                        <button @onclick="RemoveLast">@Translator("RemoveLast")</button>
+                    }
+                </div>
+            </div>
+
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+
+            <div class="form-actions">
+                <button class="primary" @onclick="Save">@Translator("Save")</button>
+                <button @onclick="BackToList">@Translator("Cancel")</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private enum Mode { List, Edit }
+
+    private Layout? Layout => ScheduleState.Layout;
+    private bool HasTrackStretches => Layout?.TrackStretches.Count > 0;
+    private IReadOnlyList<TimetableStretch> Stretches =>
+        Layout is null ? [] : [.. Layout.TimetableStretches];
+
+    // Track stretches that can extend the route currently being built (contiguous from its end).
+    private IReadOnlyList<TrackStretch> Appendable =>
+        _editing is null || Layout is null
+            ? []
+            : [.. Layout.TrackStretches.Where(s => _editing.CanAppend(s)).OrderBy(s => s.Start.Name).ThenBy(s => s.End.Name)];
+
+    private Mode _mode = Mode.List;
+    private bool _isNew;
+    private TimetableStretch? _editing;
+    private TimetableStretch? _deleteTarget;
+    private string? _error;
+
+    private string _number = "";
+    private string _description = "";
+    private int _candidateId;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private void StartAdd()
+    {
+        _isNew = true;
+        _editing = new TimetableStretch(NextId(), "");
+        _number = "";
+        _description = "";
+        _candidateId = 0;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(TimetableStretch stretch)
+    {
+        _isNew = false;
+        _editing = stretch;
+        _number = stretch.Number;
+        _description = stretch.Description;
+        _candidateId = 0;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        _editing = null;
+        _isNew = false;
+        _error = null;
+    }
+
+    private void AppendSelected()
+    {
+        if (_editing is null || Layout is null || _candidateId == 0) return;
+        var stretch = Layout.TrackStretches.FirstOrDefault(s => s.Id == _candidateId);
+        if (stretch is null || !_editing.CanAppend(stretch)) return;
+        _editing.AddLast(stretch);
+        _candidateId = 0;
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void RemoveLast()
+    {
+        if (_editing is null || _editing.Stretches.Count == 0) return;
+        var last = _editing.Stretches.Last();
+        _editing.Stretches.Remove(last);
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void Save()
+    {
+        if (_editing is null || Layout is null) return;
+        if (string.IsNullOrWhiteSpace(_number))
+        {
+            _error = Translator("TimetableStretchNumberRequired");
+            return;
+        }
+        if (Layout.TimetableStretches.Any(t => !ReferenceEquals(t, _editing) && t.Number.Equals(_number.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            _error = Translator("TimetableStretchNumberDuplicate");
+            return;
+        }
+        if (_editing.Stretches.Count == 0)
+        {
+            _error = Translator("TimetableStretchRouteRequired");
+            return;
+        }
+        _editing.Number = _number.Trim();
+        _editing.Description = _description?.Trim() ?? "";
+        if (_isNew) Layout.Add(_editing);
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.TimetableStretches.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private int NextId() =>
+        (Layout!.TimetableStretches.Count == 0 ? 0 : Layout.TimetableStretches.Max(t => t.Id)) + 1;
+
+    private static string RouteText(TimetableStretch s) =>
+        s.Stretches.Count == 0 ? "" : $"{s.Starts.Signature} → {s.Ends.Signature}";
+
+    private static string StationsText(TimetableStretch s) =>
+        string.Join(" → ", s.Stations.Select(st => st.Signature));
+
+    private static double TotalDistance(TimetableStretch s) => s.Stretches.Sum(x => x.Distance);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

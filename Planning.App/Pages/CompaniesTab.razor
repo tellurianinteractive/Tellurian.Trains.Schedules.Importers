@@ -1,4 +1,295 @@
 @page "/companies"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Schedules
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Importers.Interfaces
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@inject ICompaniesService CompaniesCatalogue
+@implements IDisposable
 
-<p>@Translator("CompaniesDescription")</p>
+@if (Layout is null)
+{
+    <p>@Translator("CompaniesNoSchedule")</p>
+}
+else
+{
+    <div class="companies-editor">
+        <p class="hint">@Translator("CompaniesDescription")</p>
+
+        @if (_mode == Mode.List)
+        {
+            <div class="toolbar">
+                <button class="primary" @onclick="StartAdd">@Translator("AddNew")</button>
+                <button @onclick="StartAddFromCatalogue">@Translator("AddFromCatalogue")</button>
+            </div>
+
+            @if (!Companies.Any())
+            {
+                <p class="empty">@Translator("NoCompanies")</p>
+            }
+            else
+            {
+                <QuickGrid Items="Companies" Class="grid" Theme="tellurian">
+                    <PropertyColumn Property="c => c.Name" Title='@Translator("Name")' Sortable="true" />
+                    <PropertyColumn Property="c => c.Signature" Title='@Translator("Signature")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Company>.ByAscending(c => c.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button class="danger" disabled="@IsReferenced(context)"
+                                title='@(IsReferenced(context) ? Translator("CompanyReferenced") : null)'
+                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                    </TemplateColumn>
+                </QuickGrid>
+            }
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Culture, Translator("DeleteCompanyConfirm"), _deleteTarget.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+        else if (_mode == Mode.Edit && Editing is not null)
+        {
+            <div class="edit">
+                <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+
+                <div class="section">
+                    <div class="field">
+                        <label>@Translator("Name")</label>
+                        <input type="text" @bind="Editing.Name" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Signature")</label>
+                        <input type="text" @bind="Editing.Signature" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Country")</label>
+                        <select @bind="Editing.CountryId" @bind:after="OnEdited">
+                            <option value="">—</option>
+                            @foreach (var c in CountryChoices)
+                            {
+                                <option value="@c.Id">@Translator(c.ResourceKey)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                @if (_error is not null)
+                {
+                    <p class="error">@_error</p>
+                }
+
+                <div class="form-actions">
+                    @if (_isNew)
+                    {
+                        <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
+                        <button @onclick="BackToList">@Translator("Cancel")</button>
+                    }
+                    else
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
+            </div>
+        }
+        else if (_mode == Mode.Candidates)
+        {
+            <div class="candidates">
+                <h2>@Translator("AddFromCatalogue")</h2>
+                <p class="hint">@Translator("AddFromCatalogueHint")</p>
+
+                @if (_candidates is null)
+                {
+                    <p class="empty">@Translator("Loading")</p>
+                }
+                else if (_candidates.Count == 0)
+                {
+                    <p class="empty">@Translator("NoCompanyCandidates")</p>
+                }
+                else
+                {
+                    <ul class="candidate-list">
+                        @foreach (var candidate in _candidates)
+                        {
+                            <li>
+                                <label>
+                                    <input type="checkbox"
+                                           checked="@_selected.Contains(candidate.Signature)"
+                                           @onchange="e => ToggleCandidate(candidate.Signature, e)" />
+                                    <span>@candidate.Name</span>
+                                    <span class="sig">(@candidate.Signature)</span>
+                                    <span class="ctry">@CountryName(candidate.CountryId)</span>
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <div class="form-actions">
+                    <button class="primary" disabled="@(_selected.Count == 0)" @onclick="AddSelectedCandidates">@Translator("AddSelected")</button>
+                    <button @onclick="BackToList">@Translator("Cancel")</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private enum Mode { List, Edit, Candidates }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Layout? Layout => ScheduleState.Layout;
+    private IQueryable<Company> Companies =>
+        (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture).AsQueryable();
+
+    private Mode _mode = Mode.List;
+    private bool _isNew;
+    private Company? Editing { get; set; }
+    private Company? _deleteTarget;
+    private string? _error;
+
+    // The operating-company catalogue, loaded once and cached for the session.
+    private IReadOnlyList<Company>? _catalogue;
+    private List<Company>? _candidates;
+    private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        // Make sure the countries this layout references are in its catalogue (older/imported layouts
+        // may not have them yet); only persist when something was actually added.
+        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // A company cannot be deleted while it is referenced by any train, train category, driver duty,
+    // or piece of equipment.
+    private bool IsReferenced(Company company)
+    {
+        bool Same(Company? c) => c is not null && c.Id == company.Id;
+        if ((ScheduleState.Timetable?.Trains ?? []).Any(t => Same(t.Company) || Same(t.Category?.Company))) return true;
+        if (ScheduleState.Schedule is { } plan)
+        {
+            if (plan.DriverDuties.Any(d => Same(d.Company))) return true;
+            if (plan.ScheduledObjects.Any(o => Same(o.Company))) return true;
+        }
+        return false;
+    }
+
+    // The company's country, shown in the current UI language; "—" when not set.
+    private string CountryName(int? countryId) =>
+        Layout!.CountryById(countryId) is { } c ? Translator(c.ResourceKey) : "—";
+
+    // Countries saved with the layout, sorted by their name in the current UI language.
+    private IEnumerable<Country> CountryChoices =>
+        Layout!.Countries.OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture);
+
+    private void StartAdd()
+    {
+        Editing = new Company(NextId(), "", "", Layout!.Settings.Identity.DefaultCountryId);
+        _isNew = true;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(Company company)
+    {
+        Editing = company;
+        _isNew = false;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        Editing = null;
+        _isNew = false;
+        _error = null;
+        _candidates = null;
+        _selected.Clear();
+    }
+
+    // Present operating companies from the catalogue whose country is in the layout, excluding those
+    // already added. Repeatable: after adding a country, reopening offers that country's companies.
+    private async Task StartAddFromCatalogue()
+    {
+        _mode = Mode.Candidates;
+        _selected.Clear();
+        _candidates = null;
+        _catalogue ??= [.. await CompaniesCatalogue.GetAllCompaiesAsync()];
+        var layoutCountryIds = Layout!.Countries.Select(c => c.Id).ToHashSet();
+        _candidates = [.. _catalogue
+            .Where(c => c.CountryId is int id && layoutCountryIds.Contains(id) && !Layout!.HasCompany(c.Signature))
+            .OrderBy(c => c.Name, StringComparer.CurrentCulture)];
+    }
+
+    private void ToggleCandidate(string signature, ChangeEventArgs e)
+    {
+        if (e.Value is true) _selected.Add(signature);
+        else _selected.Remove(signature);
+    }
+
+    private void AddSelectedCandidates()
+    {
+        if (_candidates is null) return;
+        foreach (var candidate in _candidates.Where(c => _selected.Contains(c.Signature)))
+            Layout!.Add(new Company(NextId(), candidate.Name, candidate.Signature, candidate.CountryId));
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    // Existing companies edit live and persist on each change; a new one is held until Save validates it.
+    private void OnEdited()
+    {
+        _error = null;
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void SaveNew()
+    {
+        if (Editing is null) return;
+        if (string.IsNullOrWhiteSpace(Editing.Name))
+        {
+            _error = Translator("CompanyNameRequired");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(Editing.Signature))
+        {
+            _error = Translator("CompanySignatureRequired");
+            return;
+        }
+        if (Layout!.HasCompany(Editing.Signature))
+        {
+            _error = Translator("CompanySignatureInUse");
+            return;
+        }
+        Layout!.Add(Editing);
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.Companies.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private int NextId() => (Layout!.Companies.Count == 0 ? 0 : Layout.Companies.Max(c => c.Id)) + 1;
+}

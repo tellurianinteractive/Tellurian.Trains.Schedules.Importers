@@ -46,6 +46,59 @@ textarea:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+/* --- Data-grid headers (app-wide) ---------------------------------------------
+   Every data grid (QuickGrid and the plain stretch-editor tables) uses Class="grid".
+   Header cells use the app signature colour as background with an auto-contrasted text
+   colour. --primary / --primary-text are set on the page root in MainLayout, the latter
+   computed from the signature colour's .TextColor, so the text adapts if the colour changes.
+   QuickGrid renders a sortable column's header as a <button class="col-title">. The grids set
+   Theme="tellurian" (see the .razor files), which disables QuickGrid's built-in .quickgrid[theme=default]
+   rules so these plain rules apply without !important. The sort-direction arrow is a hard-coded black
+   SVG background-image (dotnet/aspnetcore#47805) that `color` cannot change, so it is recoloured to the
+   header text colour with a filter. */
+/* The header look is shared by QuickGrid (table.grid) and the ordinary data tables (tracks,
+   speed-map): signature background with auto-contrasted text. A new data table should use one of
+   these classes to match. */
+table.grid thead th,
+table.tracks thead th,
+table.speed-map thead th {
+    background-color: var(--primary, #1a3a5c);
+    color: var(--primary-text, #fff);
+    font-weight: 600;
+}
+
+/* The column title (a <div> when not sortable, a <button> when sortable) inherits the header colour
+   and drops the native button chrome. */
+table.grid thead th .col-title {
+    color: var(--primary-text, #fff);
+    background: none;
+    border: none;
+    font: inherit;
+}
+
+table.grid thead th button.col-title {
+    cursor: pointer;
+}
+
+table.grid thead th button.col-title:hover {
+    text-decoration: underline;
+}
+
+/* Recolour QuickGrid's black SVG sort arrow to white so it matches the header text. */
+table.grid thead th .sort-indicator {
+    filter: brightness(0) invert(1);
+}
+
+/* Coloured region chip rendered from Region.Display (shared markup, used wherever a region is shown).
+   The background/text colours are set inline; this provides the chip shape and spacing. */
+.region {
+    display: inline-block;
+    padding: 1px 2px;
+    margin: 1px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
 /* --- Validation --- */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
@@ -192,5 +245,205 @@ code {
     .help-icon:focus-visible .help-tip {
         opacity: 1;
         visibility: visible;
+    }
+}
+
+/* --- Stretch editors (Track / Dispatch / Timetable sub-sections) --- */
+.stretch-editor {
+    --primary: #1a3a5c;
+    --danger: #c00;
+    --border: #ddd;
+    --hover: #f3f6fa;
+
+    button {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+
+    button.primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    button.danger {
+        color: var(--danger);
+        border-color: #e0b4b4;
+    }
+
+    button.danger:hover {
+        background: #fbeaea;
+    }
+
+    button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.5rem 0 0.75rem 0;
+    }
+
+    .hint {
+        color: #445;
+        max-width: 760px;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .empty {
+        color: #667;
+        font-style: italic;
+    }
+
+    table.grid {
+        border-collapse: separate;
+        border-spacing: 2px 0;
+        width: 100%;
+        max-width: 960px;
+        font-size: 0.9rem;
+    }
+
+    table.grid th,
+    table.grid td {
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    table.grid thead th {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    table.grid th.num,
+    table.grid td.num {
+        text-align: right;
+    }
+
+    table.grid tbody tr:hover {
+        background: var(--hover);
+    }
+
+    table.grid td.actions,
+    table.grid th.actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    table.grid td.actions button {
+        margin-left: 0.3rem;
+    }
+
+    .confirm {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        background: #fbeaea;
+        border: 1px solid #e0b4b4;
+        border-radius: 5px;
+    }
+
+    .warning {
+        margin-top: 1rem;
+        padding: 0.6rem 0.9rem;
+        max-width: 960px;
+        background: #fff7e6;
+        border: 1px solid #f0c98a;
+        border-radius: 5px;
+    }
+
+    .warning ul {
+        margin: 0.4rem 0 0 1.1rem;
+        padding: 0;
+    }
+
+    .edit h2 {
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: max-content max-content;
+        align-items: center;
+        gap: 0.4rem 1.5rem;
+        max-width: 560px;
+    }
+
+    .form-grid .field {
+        display: contents;
+    }
+
+    .form-grid .field > label {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .form-grid input[type="text"] {
+        width: 22rem;
+        max-width: 100%;
+    }
+
+    .route {
+        margin-top: 1.25rem;
+        max-width: 640px;
+    }
+
+    .route h3 {
+        color: var(--primary);
+        font-size: 1.05rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .route-list {
+        margin: 0.25rem 0;
+        padding-left: 1.4rem;
+    }
+
+    .route-list li {
+        padding: 0.15rem 0;
+    }
+
+    .route .summary {
+        color: #445;
+        font-size: 0.9rem;
+    }
+
+    .route-add {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+    }
+
+    .dim {
+        color: #889;
+        font-size: 0.85rem;
+    }
+
+    .error {
+        color: var(--danger);
+        font-weight: 500;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 1.2rem;
     }
 }

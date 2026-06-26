@@ -29,12 +29,13 @@ Snapshot of coverage by area (see each section for detail).
 
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
-| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (localised Name + Color) |
+| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (Name + CountryId + palette colour) |
 | Station tracks (§4.1.2) | ✅ | |
 | Track / Timetable / Dispatch stretches (§4.1.3–5) | ✅ | |
-| Companies (§4.1.6) | ✅ | spec *Language Code* = code `Company.CountryCode` |
+| Companies (§4.1.6) | ✅ | `Company.CountryId` references a country in `Layout.Countries` |
+| Country catalogue (§4.1.7) | ✅ | `Layout.Countries` saved with the layout; referenced by `Company`/`Region`/`DefaultCountryId` |
 | Train (§4.2.1) | ✅ | `MaxSpeed` added |
-| Train categories (§4.2.2) | ✅ | `DefaultSpeed` added |
+| Train categories (§4.2.2) | ✅ | `DefaultSpeed` added; catalogue on `Timetable.TrainCategories`, seeded Passenger/Freight |
 | Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | |
 | Cargo flows (§4.2.5) | 🟡 | schedule side modelled (`TrainPart.CargoFlowOptions`/`CargoOnlyOptions`, `Region`); cargo-flow editor/notes pending |
 | Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed formula wired (`Train.EffectiveScaleSpeed`/`…RealSpeed`, `TimeAndSpeedSettings.RealSpeedMetersPerSecond`) |
@@ -49,9 +50,9 @@ Snapshot of coverage by area (see each section for detail).
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
 | Settings tab (§3.2) | ✅ | all 5 groups + language selector |
-| Layout Operational Places (§3.3) | ❌ | stub page; ModuleRegistry import (FR-3.3.1) missing |
-| Track/Timetable Stretches (§3.4) | ❌ | stub page |
-| Train Categories (§3.5) | ❌ | stub page |
+| Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor built; ModuleRegistry import (FR-3.3.1) missing |
+| Track/Dispatch/Timetable Stretches (§3.4) | ✅ | three sub-sections; direction warnings; auto dispatch + route builder |
+| Train Categories (§3.5) | ✅ | list + add/edit/delete on `Timetable.TrainCategories`; delete blocked when referenced by a train |
 | Trains (§3.6) | ❌ | stub page |
 | Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection; interaction (drag, context menu) is empty handlers |
 | Vehicle Schedule Editor (§3.8) | ❌ | stub page |
@@ -67,7 +68,7 @@ Snapshot of coverage by area (see each section for detail).
 | Import from previous plans / JSON (§5.1) | ✅ | |
 | External service import — categories, companies (§5.2) | 🟡 | categories + ~9,700 companies done; ModuleRegistry not built |
 | XPLN import (§5.3) | ✅ | ODS/XLSX |
-| JSON export (§5.4) | ✅ | SQLite export deferred |
+| JSON export (§5.4) | ✅ | SQLite produced externally by an online service (§5.5, future), not in the app |
 
 ## 1. Objectives
 
@@ -190,17 +191,45 @@ Detailed GUI interactions will be expanded progressively in the subsections belo
 ### 3.1 User Interface Overview
 
 The user interface shall be web-based. A minimal viewport for data entry and editing
-shall be defined. The interface uses a tab-based organisation with the following tabs:
+shall be defined. The interface uses a tab-based organisation. **The tab order reflects the
+recommended order of data entry** when building a layout from scratch:
 
 1. **Settings** — name of layout, timing parameters, and other default values (see §3.2)
-2. **Layout Operational Places** — each expandable to show tracks; data entered manually or imported from external file/web API (see §3.3)
-3. **Track and Timetable Stretches** — connections between operation locations and timetable stretches as sequences of track stretches (see §3.4)
-4. **Train Categories** — list of train category entries that can be added, edited, deleted (if not referenced), and imported from file/web API (see §3.5)
-5. **Trains** — list of trains, each expandable to show times, each time expandable to show notes; editable at all levels; groupable by category (see §3.6)
-6. **Graphical Timetable** — one tab per timetable stretch; trains can be added, removed, and edited in the graph (see §3.7)
-7. **Vehicle Schedule Editor** — build vehicle schedules and assign to locomotives, wagons, wagon groups, and cargo flows (see §3.8)
-8. **Vehicle Owners** — who brings what of the needed rolling stock (see §3.9)
-9. **Reports** — preview and print all printable content; reports are selected here and kept separate from the editing tabs (see §3.12)
+2. **Countries** — the catalogue of countries used by the layout; companies and regions reference an entry here (see §3.2.2)
+3. **Regions** — domestic regions and foreign countries for cargo-flow routing
+4. **Layout Operational Places** — each expandable to show tracks; data entered manually or imported from external file/web API (see §3.3)
+5. **Track and Timetable Stretches** — connections between operation locations and timetable stretches as sequences of track stretches (see §3.4)
+6. **Companies** — railway companies that operate trains; each belongs to a country
+7. **Train Categories** — list of train category entries that can be added, edited, deleted (if not referenced), and imported from file/web API (see §3.5)
+8. **Trains** — list of trains, each expandable to show times, each time expandable to show notes; editable at all levels; groupable by category (see §3.6)
+9. **Graphical Timetable** — one tab per timetable stretch; trains can be added, removed, and edited in the graph (see §3.7)
+10. **Vehicle Schedule Editor** — build vehicle schedules and assign to locomotives, wagons, wagon groups, and cargo flows (see §3.8)
+11. **Vehicle Owners** — who brings what of the needed rolling stock (see §3.9)
+12. **Reports** — preview and print all printable content; reports are selected here and kept separate from the editing tabs (see §3.12)
+
+A **Home** tab (start page) and an **Import** tab sit outside this sequence.
+
+#### 3.1.1 Creating a new layout
+
+From the **Home** tab the user can create a new, empty layout/timetable/plan from scratch
+(the alternative to importing). All translatable values are generated in the current
+GUI language. The new layout is seeded with these defaults:
+
+| Area | Default |
+| ---- | ------- |
+| Layout name | "New layout" (localised) |
+| Theme · Scale | European · H0 (1:87) |
+| Default country | derived from the GUI language (sv→Sweden, da→Denmark, de→Germany, nb→Norway, en→United Kingdom); also added to `Layout.Countries` |
+| Operating window | Start 06:00, End 18:00 |
+| Graphical timetable | Horizontal; minute spacing 3, kilometre spacing 2, station spacing 100, track spacing 10 |
+| Time & Speed | Clock speed 5; minimum station stop 2; speed points, loco runaround (5) and clearance (1) at their standard values |
+| Validation | all checks on, standard thresholds; Integration empty |
+| Countries | the default country only — the user adds more on the Countries tab |
+| Regions | the standard regions for the default country (localised) |
+| Operation locations · stretches · companies | none (added or imported by the user) |
+| Train categories | Passenger (prefix `P`) and Freight (prefix `G`), localised, no company |
+
+Creating a new layout replaces any plan currently loaded (confirmed first when one exists).
 
 ### 3.2 Settings
 
@@ -228,7 +257,7 @@ are organised into groups — each a separate type — surfaced as sub-sections 
 | Use days   | Present operating days instead of sessions                        | Use sessions |
 | Start day  | Weekday of the first session when using days                      | Monday       |
 | Start time | Fast-time start hour of operation                                 | 06:00        |
-| End time   | Fast-time end hour of operation                                   | 20:00        |
+| End time   | Fast-time end hour of operation                                   | 18:00        |
 | Break time | Optional fast-time hour that splits the graphical timetable into two halves (start–break and break–end), for printing across pages and for the on-screen first/last-half view (see §3.7.5) | None |
 
 Start, end, and break time define the operating time window used by the graphical
@@ -237,41 +266,87 @@ timetable (see §3.7).
 The **user-interface language** is a user-level preference, chosen via the language selector
 in the top bar and persisted in the browser (localStorage) — it is not stored per layout.
 
+#### 3.2.2 Countries
+
+> **Status:** ✅ Built (`Planning.App/Pages/CountriesTab.razor`).
+
+Each layout keeps a curated catalogue of countries in `Layout.Countries`, saved with the layout
+so a plan is self-contained. A `Company`, a `Region` and the layout's default country all
+reference an entry here by its stable `Country.Id`.
+
+- The catalogue starts with the layout's **default country** only (added when the layout is
+  created); the user adds more on the Countries tab, choosing from **all predefined countries**
+  (so foreign countries needed by regions or international trains can be added).
+- A country **cannot be removed** while it is the default or is referenced by any company or region.
+- The default country is set on the **Settings** tab; it is always kept in the catalogue.
+
+The predefined catalogue (stable ids, never reused) is the reference data described in §4; the
+Countries tab selects a subset of it into the layout.
+
 ### 3.3 Layout Operational Places
 
-> **Status:** ❌ Missing. `Planning.App/Pages/OperationLocationsEditor.razor` is a stub
-> (heading only). FR-3.3.1 ModuleRegistry import not built (API-key field exists
-> in Settings).
+> **Status:** 🟡 Partial (`Planning.App/Pages/OperationLocationsTab.razor`). Entry and editing
+> of operation locations (stations, signal-controlled and other locations), their tracks, and
+> the manned/shadow flags are built. FR-3.3.1 ModuleRegistry import is **not** built (the
+> API-key field exists in Settings).
 
-*To be detailed — entry and editing of operation locations and their tracks.*
+The user adds, edits and deletes operation locations and their station tracks, and marks each
+station as manned and/or a shadow station — these flags drive automatic dispatch-stretch
+generation (§3.4.2).
 
 #### FR-3.3.1 Data Import
 
 - **From the [ModuleRegistry](https://moduleregistry.azurewebsites.net)**: if the modules have been submitted to the meeting layout, it shall be possible to import the operation locations using its web API. This API requires an API key, stored in settings.
 
-### 3.4 Track and Timetable Stretches
+### 3.4 Track, Dispatch and Timetable Stretches
 
-> **Status:** ❌ Missing. `Planning.App/Pages/Stretches.razor` is a stub. The
-> domain types (`TrackStretch`, `TimetableStretch`) exist; the sequence-entry
-> editor and same-direction enforcement UI do not.
+> **Status:** ✅ Built (`Planning.App/Pages/StretchesTab.razor` hosting three sub-section
+> components under `Planning.App/Components/Stretches/`). The page has three sub-sections —
+> Track, Dispatch and Timetable stretches — with the active one remembered as a user
+> preference (`UiPreferenceService`). Direction consistency is checked
+> (`Layout.DirectionInconsistencies()`) and timetable-route contiguity is enforced
+> (`TimetableStretch.CanAppend`/`IsContiguous`).
 
-To create track stretches, the user enters a sequence of operational places using a
-dropdown. The application then automatically creates track stretch entries with default
-values and builds a timetable stretch.
+#### FR-3.4.1 Track stretches
 
-The user can continue with an additional sequence of operational places; the application
-reuses already-created track stretches or creates new ones as necessary.
+A **track stretch** connects two adjacent operation locations and carries its distance, track
+count, speed and running time. The user adds, edits and deletes track stretches; the start and end
+locations are chosen from the layout's operation locations, so direction is explicit.
 
-The application shall enforce that all stretches within a timetable stretch run in the
-same direction, meaning trains can traverse these stretches without changing direction.
+All track stretches are expected to run in the same direction so trains traverse them without
+unintended reversals. The editor surfaces any inconsistency (a reversed pair or a directed cycle in
+the `Start → End` graph) as a **warning** that lists the offending stretches, but does not block
+saving. A track stretch used by a timetable stretch cannot be deleted.
+
+#### FR-3.4.2 Dispatch stretches
+
+A **dispatch stretch** runs between two dispatch endpoints — a manned or a shadow station — passing
+through any unmanned locations between them. They are generated automatically from the track
+stretches (`Layout.CreateDispatchStretches()`), recording the ordered track stretches they comprise,
+and presented read-only with a **Regenerate** action. Whether a station is manned or a shadow station
+is set on the Operation locations tab (§3.3).
+
+#### FR-3.4.3 Timetable stretches
+
+A **timetable stretch** is an ordered, contiguous sequence of track stretches forming a logical line.
+The user gives it a number and optional description and builds its route by appending track stretches
+one at a time; only stretches that continue from the current end are offered, keeping the route
+connected. Each timetable stretch is selectable on the Graphical timetable tab (§3.7.5) and becomes
+one graph.
 
 ### 3.5 Train Categories
 
-> **Status:** ❌ Missing. `Planning.App/Pages/TrainCategories.razor` is a stub.
-> Category data loads from CSV via `TrainCategoriesService`, but there is no
-> add/edit/delete/import editor.
+> **Status:** ✅ Built (`Planning.App/Pages/TrainCategoriesTab.razor`).
 
-*To be detailed — entry, editing, deletion, and import of train categories.*
+The train categories are a catalogue saved on `Timetable.TrainCategories`. The user adds, edits
+and deletes categories (name, prefix, suffix, passenger/freight, colour and an optional operating
+company). A category **cannot be deleted** while any train references it.
+
+A new timetable is seeded with two standard categories, named in the layout's default language:
+**Passenger** (prefix `P`) and **Freight** (prefix `G`), with no operating company (see
+`TrainCategory.DefaultsFor`).
+
+*Still to come: import of categories from file/web API.*
 
 ### 3.6 Trains
 
@@ -381,6 +456,11 @@ which layout is open.
 > **Status:** ❌ Missing. `Planning.App/Pages/VehicleOwners.razor` is a stub.
 
 *To be detailed — managing who brings what rolling stock for the session.*
+
+Beyond in-app entry, vehicle owners may **submit the rolling stock they will bring online** (planned
+as a Module Registry feature). Those submissions are folded into the SQLite database distributed to
+the on-premise dispatch applications, so the inventory is complete without the planner re-keying it
+(see §5.5).
 
 ---
 
@@ -576,9 +656,10 @@ The layout carries all configurable settings as `Layout.Settings`, grouped by pu
 > `IsShadow` and `Timings` present. `Owner` is on the `OperationLocation` base;
 > The region catalogue is owned by the layout (`Layout.Regions`); a `Station`'s `Regions`
 > (`IList<Region>`, alongside `IsShadow`) references a subset of it. `Region`
-> (`Model/Layouts/Region.cs`) carries a background colour and a set of language-specific name
-> properties (`EN`, `DA`, `DE`, `NB`, `SV`); `Name` resolves the property for the current UI
-> culture via Tellurian.Localization's object resource provider, falling back to `EN` (see DM-4.5.4).
+> (`Model/Layouts/Region.cs`) carries a single `Name` (written in the layout's default language),
+> a `CountryId` (the country it belongs to, defaulting to the layout's default country) and a
+> background colour chosen from a fixed palette (see DM-4.5.4). The standard regions
+> (`Region.DefaultsFor`) are named in the layout's default language.
 > Operation locations, their tracks, and region assignments are edited on the **Operation Locations**
 > tab (`Pages/OperationLocationsEditor.razor`).
 
@@ -655,21 +736,38 @@ Timetable stretches are the unit for graphical timetable display.
 
 > **Status:** ✅ Implemented (`Model/DispatchStretch.cs`).
 
-The system shall define dispatch territories between manned stations.
+The system shall define dispatch territories between dispatch endpoints — manned or shadow stations.
+Besides its `From`/`To` endpoints, a dispatch stretch records the ordered `Stretches` (the contiguous
+track stretches it comprises) and exposes the unmanned `IntermediateLocations` it passes through.
+`Layout.CreateDispatchStretches()` generates them by following track stretches from each endpoint,
+passing through unmanned locations.
 
 #### DM-4.1.6 Companies
 
-> **Status:** ✅ Implemented (`Model/Company.cs`). The spec's *Language Code* is
-> named `CountryCode` in code.
+> **Status:** ✅ Implemented (`Model/Company.cs`). A company references its country by
+> `CountryId` (an entry in `Layout.Countries`), replacing the former `CountryCode` string.
+> A company operating in several countries is added once per country of operation; in a
+> selection drop-down it shows its name followed by the country, e.g. "DB Cargo Germany".
 
 The system shall maintain railway companies operating on the layout:
 
 
-| Property      | Description                 | Remark                                        |
-| -------------- | :---------------------------- | ----------------------------------------------- |
-| Name          | Company name                | Can be both real and fictive companies        |
-| Signature     | Short code                  | For real companies, use the UIC-assigned code |
-| Language Code | Two-letter ISO country code | Used to translate output                      |
+| Property   | Description    | Remark                                                        |
+| ---------- | :------------- | ------------------------------------------------------------- |
+| Name       | Company name   | Can be both real and fictive companies                        |
+| Signature  | Short code     | For real companies, use the UIC-assigned code; unique per layout |
+| Country    | `CountryId`    | References a country in `Layout.Countries`; drives report language |
+
+#### DM-4.1.7 Country catalogue
+
+> **Status:** ✅ Implemented (`Layout.Countries`, `Model/Country.cs`).
+
+Each layout saves the set of countries it uses in `Layout.Countries`, a curated subset of the
+predefined `Country` catalogue (stable ids 1–14 from the Module Registry plus a 101+ overflow
+range; ids are never reused). `Company.CountryId`, `Region.CountryId` and
+`IdentitySettings.DefaultCountryId` all reference an entry by `Country.Id`. `Layout.CountryById`
+resolves an id (preferring the saved catalogue, falling back to the static list);
+`Layout.EnsureCountries` keeps referenced countries present.
 
 ---
 
@@ -696,7 +794,8 @@ The system shall support creating trains with:
 
 > **Status:** ✅ Implemented (`Model/TrainCategory.cs`). Prefix, Suffix,
 > IsPassenger, IsFreight, Name (Display Name), Color and `DefaultSpeed` (default
-> 100 km/h) present.
+> 100 km/h) present. The catalogue is held on `Timetable.TrainCategories`;
+> `TrainCategory.DefaultsFor(language)` provides the seeded Passenger/Freight pair.
 
 The system shall support configurable train categories:
 
@@ -1101,13 +1200,36 @@ The system shall support importing complete schedules from XPLN spreadsheets
 ### 5.4 Export
 
 > **Status:** ✅ JSON export implemented (`ScheduleExportService`, `ExportMenu.razor`).
-> SQLite export is flagged "coming soon" (deferred — WASM EF Core constraint).
+> The "SQLite" option in the export dialog is a disabled placeholder; SQLite is produced
+> by an external online service, not by this application (see §5.5).
 
 The system shall export schedules in JSON format for:
 
 - Backup and archival
 - Transfer to other users
-- Input to other systems (dispatch, etc.)
+- Input to other systems (dispatch, etc.) — directly, or via the SQLite conversion service (§5.5)
+
+### 5.5 SQLite distribution (online conversion service)
+
+> **Status:** ❌ Future feature, hosted **outside** this application — planned as part of the
+> [Module Registry](https://moduleregistry.azurewebsites.net).
+
+On-premise applications used at module meetings (train dispatch, station displays, etc.) consume a
+**SQLite database** rather than JSON. Producing SQLite in the browser would require the EF Core
+SQLite provider to run under WebAssembly (a heavy native build); instead the conversion is delegated
+to an online service:
+
+1. The planner exports the plan as JSON (§5.4) and it is uploaded to the service.
+2. The service builds a SQLite database from the JSON using the **server-side** EF Core model
+   (`Model.Databases`, which already targets SQLite), and offers it for download as a `.db` file.
+3. The service may **enrich** the database with data collected online — in particular
+   **vehicle-owner submissions** (§3.9): owners register the rolling stock they will bring, which is
+   added to the downloadable database so the on-premise apps have the full inventory.
+
+The downloaded `.db` is one-way (downstream) output; it is **not** re-imported into the planner,
+which continues to import only JSON and XPLN (§5.1–5.3). This keeps the WebAssembly planner light
+and reuses the tested `Model.Databases` EF mapping on the server. The in-app "SQLite" export option
+remains a placeholder until this service exists.
 
 ---
 
