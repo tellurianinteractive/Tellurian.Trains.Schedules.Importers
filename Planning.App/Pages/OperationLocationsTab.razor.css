@@ -81,7 +81,6 @@
     }
 
     ::deep thead th {
-        color: var(--primary);
         font-weight: 600;
         white-space: nowrap;
     }
@@ -193,7 +192,8 @@
     }
 
     table.tracks {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 2px 0;
         font-size: 0.9rem;
     }
 
@@ -205,7 +205,6 @@
     }
 
     table.tracks th {
-        color: var(--primary);
         font-weight: 600;
     }
 

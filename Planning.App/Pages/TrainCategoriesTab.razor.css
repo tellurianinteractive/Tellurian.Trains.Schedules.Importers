@@ -1,4 +1,4 @@
-.regions-editor {
+.categories-editor {
     --primary: #1a3a5c;
     --danger: #c00;
     --border: #ddd;
@@ -38,6 +38,12 @@
         cursor: not-allowed;
     }
 
+    .hint {
+        margin: 0.25rem 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
     .toolbar {
         display: flex;
         gap: 0.5rem;
@@ -47,6 +53,15 @@
     .empty {
         color: #667;
         font-style: italic;
+    }
+
+    .swatch {
+        display: inline-block;
+        width: 1.4rem;
+        height: 1.4rem;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        vertical-align: middle;
     }
 
     /* QuickGrid list */
@@ -122,8 +137,7 @@
         background: var(--hover);
     }
 
-    .field > label,
-    .field ::deep .help-label {
+    .field > label {
         grid-column: 1;
         display: inline-flex;
         align-items: center;
@@ -133,32 +147,23 @@
     }
 
     .field input[type="text"] {
-        width: 20rem;
+        width: 18rem;
         max-width: 100%;
+    }
+
+    .field input[type="text"].short {
+        width: 5rem;
     }
 
     .field select {
         padding: 0.25rem 0.4rem;
     }
 
-    .palette {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-    }
-
-    .palette .swatch {
-        width: 2rem;
-        height: 2rem;
+    .field input[type="color"] {
+        width: 3rem;
+        height: 1.8rem;
         padding: 0;
-        border: 2px solid var(--border);
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .palette .swatch.selected {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px var(--primary);
+        border: 1px solid var(--border);
     }
 
     .error {

@@ -1,36 +1,48 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <AssemblyName>Tellurian.Trains.Schedules.Planning.App</AssemblyName>
-    <RootNamespace>Tellurian.Trains.Schedules.Planning.App</RootNamespace>
-    <IsPackable>false</IsPackable>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-    <!-- Ahead-of-time compile the WebAssembly on publish for faster CPU-bound work (e.g. ODS import).
+	<PropertyGroup>
+		<AssemblyName>Tellurian.Trains.Schedules.Planning.App</AssemblyName>
+		<RootNamespace>Tellurian.Trains.Schedules.Planning.App</RootNamespace>
+		<IsPackable>false</IsPackable>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+		<!-- Ahead-of-time compile the WebAssembly on publish for faster CPU-bound work (e.g. ODS import).
          Only applied by `dotnet publish` (Release); `dotnet build`/`run` stay interpreted for fast dev.
          Requires the wasm-tools workload: `dotnet workload install wasm-tools`. -->
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <!-- Required so the UI culture can be set dynamically at startup (see LanguageSelector). -->
-    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
-  </PropertyGroup>
+		<RunAOTCompilation>true</RunAOTCompilation>
+		<!-- Required so the UI culture can be set dynamically at startup (see LanguageSelector). -->
+		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+	</PropertyGroup>
+	<PropertyGroup> <DebugType>portable</DebugType> <DebugSymbols>true</DebugSymbols> <IncludeSymbols>true</IncludeSymbols> <PublishTrimmed>false</PublishTrimmed> </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.9" PrivateAssets="all" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DebugType>embedded</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<IncludeSymbols>true</IncludeSymbols>
+		<PublishTrimmed>false</PublishTrimmed>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Importers.Services\Services.csproj" />
-    <ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
-    <ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
-    <ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.9" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Importers.Services\Services.csproj" />
+		<ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+		<ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
+		<ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
 
 </Project>

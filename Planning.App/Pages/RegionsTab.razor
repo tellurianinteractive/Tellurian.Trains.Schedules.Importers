@@ -1,5 +1,6 @@
 @page "/regions"
 @using System.Globalization
+@using Tellurian.Trains.Schedules.Model
 @using Tellurian.Trains.Schedules.Model.Layouts
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
@@ -25,13 +26,9 @@ else
             }
             else
             {
-                <QuickGrid Items="Regions" Class="grid">
+                <QuickGrid Items="Regions" Class="grid" Theme="tellurian">
                     <TemplateColumn Title='@Translator("Region")'>@context.Display</TemplateColumn>
-                    <PropertyColumn Property="r => r.EN" Title='@Translator("English")' Sortable="true" />
-                    <PropertyColumn Property="r => r.DA" Title='@Translator("Danish")' />
-                    <PropertyColumn Property="r => r.DE" Title='@Translator("German")' />
-                    <PropertyColumn Property="r => r.NB" Title='@Translator("Norwegian")' />
-                    <PropertyColumn Property="r => r.SV" Title='@Translator("Swedish")' />
+                    <TemplateColumn Title='@Translator("Country")'>@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Edit(context)">@Translator("Edit")</button>
                         <button class="danger" disabled="@IsReferenced(context)"
@@ -57,31 +54,33 @@ else
 
                 <div class="section">
                     <div class="field">
-                        <HelpLabel For="English" />
-                        <input type="text" @bind="Editing.EN" @bind:after="OnEdited" />
+                        <HelpLabel For="Name" />
+                        <input type="text" @bind="Editing.Name" @bind:after="OnEdited" />
                     </div>
                     <div class="field">
-                        <label>@Translator("Danish")</label>
-                        <input type="text" @bind="Editing.DA" @bind:after="OnEdited" />
-                    </div>
-                    <div class="field">
-                        <label>@Translator("German")</label>
-                        <input type="text" @bind="Editing.DE" @bind:after="OnEdited" />
-                    </div>
-                    <div class="field">
-                        <label>@Translator("Norwegian")</label>
-                        <input type="text" @bind="Editing.NB" @bind:after="OnEdited" />
-                    </div>
-                    <div class="field">
-                        <label>@Translator("Swedish")</label>
-                        <input type="text" @bind="Editing.SV" @bind:after="OnEdited" />
+                        <label>@Translator("Country")</label>
+                        <select @bind="Editing.CountryId" @bind:after="OnEdited">
+                            @foreach (var c in CountryChoices)
+                            {
+                                <option value="@c.Id">@Translator(c.ResourceKey)</option>
+                            }
+                        </select>
                     </div>
                     <div class="field">
                         <HelpLabel For="BackgroundColor" />
-                        <span class="control">
-                            <input type="color" @bind="Editing.BackgroundColor" @bind:after="OnEdited" />
-                            <span class="preview">@Editing.Display</span>
-                        </span>
+                        <div class="palette">
+                            @foreach (var color in Region.Palette)
+                            {
+                                <button type="button" title="@color"
+                                        class="swatch@(IsSelected(color) ? " selected" : "")"
+                                        style="background-color:@color"
+                                        @onclick="() => SelectColor(color)"></button>
+                            }
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Region")</label>
+                        <span>@Editing.Display</span>
                     </div>
                 </div>
 
@@ -120,7 +119,13 @@ else
     private Region? _deleteTarget;
     private string? _error;
 
-    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        // Make sure the countries this layout references are in its catalogue (older/imported layouts
+        // may not have them yet); only persist when something was actually added.
+        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+    }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
@@ -134,9 +139,27 @@ else
     private bool IsReferenced(Region region) =>
         Layout!.OperationLocations.OfType<Station>().Any(s => s.Regions.Any(r => r.Id == region.Id));
 
+    // The country a region belongs to, shown in the current UI language; "—" when not set.
+    private string CountryName(int? countryId) =>
+        Layout!.CountryById(countryId) is { } c ? Translator(c.ResourceKey) : "—";
+
+    // Countries saved with the layout, sorted by their name in the current UI language.
+    private IEnumerable<Country> CountryChoices =>
+        Layout!.Countries.OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture);
+
+    private bool IsSelected(string color) =>
+        Editing is not null && string.Equals(Editing.BackgroundColor, color, StringComparison.OrdinalIgnoreCase);
+
+    private void SelectColor(string color)
+    {
+        if (Editing is null) return;
+        Editing.BackgroundColor = color;
+        OnEdited();
+    }
+
     private void StartAdd()
     {
-        Editing = new Region { Id = NextId(), EN = "" };
+        Editing = new Region { Id = NextId(), Name = "", CountryId = Layout!.Settings.Identity.DefaultCountryId };
         _isNew = true;
         _error = null;
         _mode = Mode.Edit;
@@ -168,9 +191,9 @@ else
     private void SaveNew()
     {
         if (Editing is null) return;
-        if (string.IsNullOrWhiteSpace(Editing.EN))
+        if (string.IsNullOrWhiteSpace(Editing.Name))
         {
-            _error = Translator("RegionEnglishNameRequired");
+            _error = Translator("RegionNameRequired");
             return;
         }
         Layout!.Add(Editing);
@@ -188,7 +211,7 @@ else
 
     private void AddDefaults()
     {
-        foreach (var region in Region.Defaults) Layout!.Add(region);
+        foreach (var region in Region.DefaultsFor(Layout!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
         ScheduleState.SaveAndNotify();
     }
 

@@ -1,4 +1,216 @@
 @page "/categories"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Timetables
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@implements IDisposable
 
-<p>@Translator("TrainCategoriesDescription")</p>
+@if (Timetable is null)
+{
+    <p>@Translator("TrainCategoriesNoSchedule")</p>
+}
+else
+{
+    <div class="categories-editor">
+        <p class="hint">@Translator("TrainCategoriesDescription")</p>
+
+        @if (_mode == Mode.List)
+        {
+            <div class="toolbar">
+                <button class="primary" @onclick="StartAdd">@Translator("AddNew")</button>
+            </div>
+
+            @if (!Categories.Any())
+            {
+                <p class="empty">@Translator("NoTrainCategories")</p>
+            }
+            else
+            {
+                <QuickGrid Items="Categories" Class="grid" Theme="tellurian">
+                    <PropertyColumn Property="c => c.Name" Title='@Translator("Name")' Sortable="true" />
+                    <PropertyColumn Property="c => c.Prefix" Title='@Translator("Prefix")' />
+                    <PropertyColumn Property="c => c.Suffix" Title='@Translator("Suffix")' />
+                    <TemplateColumn Title='@Translator("Type")'>@Translator(context.IsFreight ? "Freight" : "Passenger")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Color")'>
+                        <span class="swatch" style="background-color:@context.Color"></span>
+                    </TemplateColumn>
+                    <TemplateColumn Title='@Translator("Company")'>@(context.Company?.Name ?? "—")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button class="danger" disabled="@IsReferenced(context)"
+                                title='@(IsReferenced(context) ? Translator("TrainCategoryReferenced") : null)'
+                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                    </TemplateColumn>
+                </QuickGrid>
+            }
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Culture, Translator("DeleteTrainCategoryConfirm"), _deleteTarget.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+        else if (_mode == Mode.Edit && Editing is not null)
+        {
+            <div class="edit">
+                <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+
+                <div class="section">
+                    <div class="field">
+                        <label>@Translator("Name")</label>
+                        <input type="text" @bind="Editing.Name" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Prefix")</label>
+                        <input type="text" class="short" @bind="Editing.Prefix" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Suffix")</label>
+                        <input type="text" class="short" @bind="Editing.Suffix" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Type")</label>
+                        <select value="@(Editing.IsFreight ? "F" : "P")" @onchange="OnTypeChanged">
+                            <option value="P">@Translator("Passenger")</option>
+                            <option value="F">@Translator("Freight")</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Color")</label>
+                        <input type="color" @bind="Editing.Color" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Company")</label>
+                        <select @bind="CategoryCompanyId" @bind:after="OnEdited">
+                            <option value="">@Translator("None")</option>
+                            @foreach (var company in Layout!.Companies.OrderBy(c => c.Name, StringComparer.CurrentCulture))
+                            {
+                                <option value="@company.Id">@company.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                @if (_error is not null)
+                {
+                    <p class="error">@_error</p>
+                }
+
+                <div class="form-actions">
+                    @if (_isNew)
+                    {
+                        <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
+                        <button @onclick="BackToList">@Translator("Cancel")</button>
+                    }
+                    else
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private enum Mode { List, Edit }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+    private IQueryable<TrainCategory> Categories =>
+        (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture).AsQueryable();
+
+    private Mode _mode = Mode.List;
+    private bool _isNew;
+    private TrainCategory? Editing { get; set; }
+    private TrainCategory? _deleteTarget;
+    private string? _error;
+
+    private int? CategoryCompanyId
+    {
+        get => Editing?.Company?.Id;
+        set => Editing!.Company = value is int id ? Layout!.Companies.FirstOrDefault(c => c.Id == id) : null;
+    }
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // A category cannot be deleted while any train uses it.
+    private bool IsReferenced(TrainCategory category) =>
+        (Timetable?.Trains ?? []).Any(t => t.Category?.Id == category.Id);
+
+    private void OnTypeChanged(ChangeEventArgs e)
+    {
+        if (Editing is null) return;
+        var isFreight = (string?)e.Value == "F";
+        Editing.IsFreight = isFreight;
+        Editing.IsPassenger = !isFreight;
+        OnEdited();
+    }
+
+    private void StartAdd()
+    {
+        Editing = new TrainCategory { Id = NextId(), Name = "", IsPassenger = true };
+        _isNew = true;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(TrainCategory category)
+    {
+        Editing = category;
+        _isNew = false;
+        _error = null;
+        _mode = Mode.Edit;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        Editing = null;
+        _isNew = false;
+        _error = null;
+    }
+
+    private void OnEdited()
+    {
+        _error = null;
+        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void SaveNew()
+    {
+        if (Editing is null) return;
+        if (string.IsNullOrWhiteSpace(Editing.Name))
+        {
+            _error = Translator("TrainCategoryNameRequired");
+            return;
+        }
+        Timetable!.TrainCategories.Add(Editing);
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Timetable!.TrainCategories.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private int NextId() => (Timetable!.TrainCategories.Count == 0 ? 0 : Timetable.TrainCategories.Max(c => c.Id)) + 1;
+}

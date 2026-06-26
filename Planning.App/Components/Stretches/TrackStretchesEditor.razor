@@ -1,0 +1,262 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+<div class="stretch-editor">
+    @if (_mode == Mode.List)
+    {
+        <div class="toolbar">
+            <button class="primary" @onclick="StartAdd" disabled="@(Locations.Count < 2)">@Translator("AddNew")</button>
+        </div>
+
+        @if (Locations.Count < 2)
+        {
+            <p class="empty">@Translator("TrackStretchNeedsLocations")</p>
+        }
+        else if (Stretches.Count == 0)
+        {
+            <p class="empty">@Translator("NoTrackStretches")</p>
+        }
+        else
+        {
+            <table class="grid">
+                <thead>
+                    <tr>
+                        <th>@Translator("From")</th>
+                        <th>@Translator("To")</th>
+                        <th class="num">@Translator("DistanceKm")</th>
+                        <th class="num">@Translator("Tracks")</th>
+                        <th class="num">@Translator("SpeedKmh")</th>
+                        <th class="num">@Translator("TimeMinutes")</th>
+                        <th class="actions">@Translator("Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Stretches)
+                    {
+                        <tr>
+                            <td>@s.Start.Name</td>
+                            <td>@s.End.Name</td>
+                            <td class="num">@s.Distance</td>
+                            <td class="num">@s.TracksCount</td>
+                            <td class="num">@s.Speed</td>
+                            <td class="num">@s.Time</td>
+                            <td class="actions">
+                                <button @onclick="() => Edit(s)">@Translator("Edit")</button>
+                                <button class="danger" disabled="@IsReferenced(s)"
+                                        title="@(IsReferenced(s) ? Translator("TrackStretchReferenced") : null)"
+                                        @onclick="() => _deleteTarget = s">@Translator("Delete")</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (_deleteTarget is not null)
+            {
+                <div class="confirm">
+                    <span>@string.Format(Translator("DeleteTrackStretchConfirm"), _deleteTarget.Start.Name, _deleteTarget.End.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            }
+        }
+
+        @if (Inconsistencies.Count > 0)
+        {
+            <div class="warning">
+                <strong>@Translator("TrackStretchDirectionWarning")</strong>
+                <ul>
+                    @foreach (var cycle in Inconsistencies)
+                    {
+                        <li>@CycleText(cycle)</li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="edit">
+            <h2>@(_isNew ? Translator("AddTrackStretch") : $"{_startName} – {_endName}")</h2>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label>@Translator("From")</label>
+                    <select @bind="_startId">
+                        @foreach (var loc in Locations)
+                        {
+                            <option value="@loc.Id">@loc.Name (@loc.Signature)</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>@Translator("To")</label>
+                    <select @bind="_endId">
+                        @foreach (var loc in Locations)
+                        {
+                            <option value="@loc.Id">@loc.Name (@loc.Signature)</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>@Translator("DistanceKm")</label>
+                    <input type="number" min="0" step="0.1" @bind="_distance" @bind:culture="Invariant" />
+                </div>
+                <div class="field">
+                    <label>@Translator("Tracks")</label>
+                    <input type="number" min="1" @bind="_tracks" />
+                </div>
+                <div class="field">
+                    <label>@Translator("SpeedKmh")</label>
+                    <input type="number" min="0" @bind="_speed" />
+                </div>
+                <div class="field">
+                    <label>@Translator("TimeMinutes")</label>
+                    <input type="number" min="0" @bind="_time" />
+                </div>
+            </div>
+
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+
+            <div class="form-actions">
+                <button class="primary" @onclick="Save">@Translator("Save")</button>
+                <button @onclick="BackToList">@Translator("Cancel")</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private enum Mode { List, Edit }
+
+    private static CultureInfo Invariant => CultureInfo.InvariantCulture;
+
+    private Layout? Layout => ScheduleState.Layout;
+    private IReadOnlyList<OperationLocation> Locations =>
+        Layout is null ? [] : [.. Layout.OperationLocations.OrderBy(l => l.Name, StringComparer.CurrentCulture)];
+    private IReadOnlyList<TrackStretch> Stretches =>
+        Layout is null ? [] : [.. Layout.TrackStretches.OrderBy(s => s.Start.Name).ThenBy(s => s.End.Name)];
+    private IReadOnlyList<IReadOnlyList<TrackStretch>> Inconsistencies =>
+        Layout is null ? [] : Layout.DirectionInconsistencies();
+
+    private Mode _mode = Mode.List;
+    private bool _isNew;
+    private TrackStretch? _editing;
+    private TrackStretch? _deleteTarget;
+    private string? _error;
+
+    // Edit-form fields, committed on Save.
+    private int _startId, _endId, _tracks = 1, _speed = 100, _time;
+    private double _distance;
+    private string _startName = "", _endName = "";
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // A track stretch is referenced when a timetable stretch is built from it; deleting it would break that route.
+    private bool IsReferenced(TrackStretch stretch) =>
+        Layout!.TimetableStretches.Any(t => t.Stretches.Contains(stretch));
+
+    private void StartAdd()
+    {
+        _isNew = true;
+        _editing = null;
+        _error = null;
+        _startId = Locations[0].Id;
+        _endId = Locations.Count > 1 ? Locations[1].Id : Locations[0].Id;
+        _distance = 0;
+        _tracks = 1;
+        _speed = 100;
+        _time = 0;
+        _mode = Mode.Edit;
+    }
+
+    private void Edit(TrackStretch stretch)
+    {
+        _isNew = false;
+        _editing = stretch;
+        _error = null;
+        _startId = stretch.Start.Id;
+        _endId = stretch.End.Id;
+        _startName = stretch.Start.Name;
+        _endName = stretch.End.Name;
+        _distance = stretch.Distance;
+        _tracks = stretch.TracksCount;
+        _speed = stretch.Speed;
+        _time = stretch.Time;
+        _mode = Mode.Edit;
+    }
+
+    private void BackToList()
+    {
+        _mode = Mode.List;
+        _editing = null;
+        _isNew = false;
+        _error = null;
+    }
+
+    private void Save()
+    {
+        if (Layout is null) return;
+        if (_startId == _endId)
+        {
+            _error = Translator("TrackStretchSameEndpoints");
+            return;
+        }
+        var start = Layout.OperationLocations.Single(l => l.Id == _startId);
+        var end = Layout.OperationLocations.Single(l => l.Id == _endId);
+
+        // A stretch is identified by its endpoints (direction included); block a second one the same way.
+        var duplicate = Layout.TrackStretches.FirstOrDefault(s => s.Start.Equals(start) && s.End.Equals(end));
+        if (duplicate is not null && !ReferenceEquals(duplicate, _editing))
+        {
+            _error = Translator("TrackStretchDuplicate");
+            return;
+        }
+
+        if (_isNew)
+        {
+            Layout.Add(new TrackStretch(NextId(), start, end, _distance, _tracks, _speed, _time));
+        }
+        else if (_editing is not null)
+        {
+            _editing.Start = start;
+            _editing.StartId = start.Id;
+            _editing.End = end;
+            _editing.EndId = end.Id;
+            _editing.Distance = _distance;
+            _editing.TracksCount = _tracks;
+            _editing.Speed = _speed;
+            _editing.Time = _time;
+        }
+        ScheduleState.SaveAndNotify();
+        BackToList();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is null) return;
+        Layout!.TrackStretches.Remove(_deleteTarget);
+        _deleteTarget = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private int NextId() =>
+        (Layout!.TrackStretches.Count == 0 ? 0 : Layout.TrackStretches.Max(s => s.Id)) + 1;
+
+    private static string CycleText(IReadOnlyList<TrackStretch> cycle) =>
+        string.Join(" → ", cycle.Select(s => s.Start.Signature).Append(cycle[^1].End.Signature));
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

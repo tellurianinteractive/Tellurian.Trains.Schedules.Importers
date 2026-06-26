@@ -13,7 +13,6 @@ public class Company : IEquatable<Company>
     {
         Name = string.Empty;
         Signature = string.Empty;
-        CountryCode = string.Empty;
     }
 
     /// <summary>
@@ -22,13 +21,14 @@ public class Company : IEquatable<Company>
     /// <param name="id">The unique identifier for the company.</param>
     /// <param name="name">The full name of the company.</param>
     /// <param name="signature">The short signature or abbreviation for the company.</param>
-    /// <param name="countryCode">The ISO country code where the company is based.</param>
-    public Company(int id, string name, string signature, string countryCode)
+    /// <param name="countryId">The <see cref="Country.Id"/> of the country the company belongs to,
+    /// or <c>null</c> when not specified.</param>
+    public Company(int id, string name, string signature, int? countryId = null)
     {
         Id = id;
         Name = name;
         Signature = signature;
-        CountryCode = countryCode;
+        CountryId = countryId;
     }
 
     /// <summary>
@@ -47,9 +47,12 @@ public class Company : IEquatable<Company>
     public string Signature { get; set; }
 
     /// <summary>
-    /// Gets or sets the ISO country code where the company is based.
+    /// Gets or sets the <see cref="Country.Id"/> of the country the company belongs to, or
+    /// <c>null</c> when not specified. The country is resolved through the layout's saved catalogue
+    /// (see <c>Layout.CountryById</c>). A company operating in several countries is added once per
+    /// country of operation.
     /// </summary>
-    public string CountryCode { get; set; }
+    public int? CountryId { get; set; }
 
     /// <summary>
     /// Gets or sets the foreign key to the associated layout.
@@ -82,10 +85,26 @@ public static class CompanyExtensions
     extension(Company company)
     {
         /// <summary>
-        /// Gets a display name including the company name, signature, and country code.
+        /// Gets a display name including the company name, signature, and country code (resolved
+        /// from <see cref="Company.CountryId"/> via the static catalogue; the code is omitted when
+        /// no country is set).
         /// </summary>
         public string DisplayName =>
-             $"{company.Name} ({company.Signature}-{company.CountryCode})";
+            Country.ById(company.CountryId ?? 0) is { } country
+                ? $"{company.Name} ({company.Signature}-{country.CountryCode})"
+                : $"{company.Name} ({company.Signature})";
+
+        /// <summary>
+        /// Builds the text shown for the company in a selection drop-down: the company name followed
+        /// by its country's name in the current language, for example <c>DB Cargo Germany</c>. The
+        /// country name is omitted when no country is set.
+        /// </summary>
+        /// <param name="translateCountry">Resolves a country's <see cref="Country.ResourceKey"/> to
+        /// its display name in the current language.</param>
+        public string DropdownText(Func<string, string> translateCountry) =>
+            Country.ById(company.CountryId ?? 0) is { } country
+                ? $"{company.Name} {translateCountry(country.ResourceKey)}"
+                : company.Name;
 
         /// <summary>
         /// Creates a company from just a signature, using the signature as the name.
@@ -93,6 +112,6 @@ public static class CompanyExtensions
         /// <param name="signature">The signature to use.</param>
         /// <returns>A new company with the signature as both name and signature.</returns>
         public static Company FromSignature(string signature) =>
-            new(0, signature, signature, "");
+            new(0, signature, signature);
     }
 }

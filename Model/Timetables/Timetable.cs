@@ -35,12 +35,20 @@ public sealed class Timetable : IEquatable<Timetable>
     /// </summary>
     public ICollection<Train> Trains { get; set; }
 
+    /// <summary>
+    /// Gets or sets the catalogue of train categories available in this timetable. A <see cref="Train"/>'s
+    /// <see cref="Train.Category"/> references an entry here. Seeded with default Passenger and Freight
+    /// categories for a new timetable (see <c>TrainCategory.DefaultsFor</c>).
+    /// </summary>
+    public ICollection<TrainCategory> TrainCategories { get; set; }
+
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
     private Timetable()
     {
         Layout = default!;
         Trains = [];
+        TrainCategories = [];
     }
 
     /// <summary>
@@ -54,6 +62,7 @@ public sealed class Timetable : IEquatable<Timetable>
         Layout = layout;
         LayoutId = layout.Id;
         Trains = [];
+        TrainCategories = [];
     }
 
     /// <inheritdoc/>

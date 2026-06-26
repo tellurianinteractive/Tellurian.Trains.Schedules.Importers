@@ -297,6 +297,12 @@
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Tidsaxelns orientering</value>
   </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>Horisontell</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>Vertikal</value>
+  </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
     <value>Visa ankomstminuter</value>
   </data>
@@ -548,5 +554,224 @@
   </data>
   <data name="CzechRepublic" xml:space="preserve">
     <value>Tjeckien</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Nummer</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beskrivning</value>
+  </data>
+  <data name="Route" xml:space="preserve">
+    <value>Sträckning</value>
+  </data>
+  <data name="DistanceKm" xml:space="preserve">
+    <value>Distans (km)</value>
+  </data>
+  <data name="SpeedKmh" xml:space="preserve">
+    <value>Hastighet (km/h)</value>
+  </data>
+  <data name="TimeMinutes" xml:space="preserve">
+    <value>Tid (min)</value>
+  </data>
+  <data name="Via" xml:space="preserve">
+    <value>Via</value>
+  </data>
+  <data name="TrackStretches" xml:space="preserve">
+    <value>Bansträckor</value>
+  </data>
+  <data name="DispatchStretches" xml:space="preserve">
+    <value>Trafikledningssträckor</value>
+  </data>
+  <data name="TimetableStretches" xml:space="preserve">
+    <value>Tidtabellssträckor</value>
+  </data>
+  <data name="StretchesNoSchedule" xml:space="preserve">
+    <value>Öppna eller importera en plan för att redigera dess sträckor.</value>
+  </data>
+  <data name="SelectTrackStretch" xml:space="preserve">
+    <value>Välj en bansträcka…</value>
+  </data>
+  <data name="TrackStretchNeedsLocations" xml:space="preserve">
+    <value>Lägg till minst två driftplatser innan du definierar bansträckor.</value>
+  </data>
+  <data name="NoTrackStretches" xml:space="preserve">
+    <value>Inga bansträckor är definierade ännu.</value>
+  </data>
+  <data name="TrackStretchReferenced" xml:space="preserve">
+    <value>Den här bansträckan används av en tidtabellssträcka och kan inte tas bort.</value>
+  </data>
+  <data name="DeleteTrackStretchConfirm" xml:space="preserve">
+    <value>Ta bort bansträckan {0} – {1}?</value>
+  </data>
+  <data name="TrackStretchDirectionWarning" xml:space="preserve">
+    <value>Alla bansträckor är inte definierade i samma riktning:</value>
+  </data>
+  <data name="AddTrackStretch" xml:space="preserve">
+    <value>Lägg till bansträcka</value>
+  </data>
+  <data name="TrackStretchSameEndpoints" xml:space="preserve">
+    <value>En bansträcka måste förbinda två olika platser.</value>
+  </data>
+  <data name="TrackStretchDuplicate" xml:space="preserve">
+    <value>En bansträcka med dessa ändpunkter finns redan.</value>
+  </data>
+  <data name="DispatchStretchesHint" xml:space="preserve">
+    <value>Trafikledningssträckor går mellan bemannade stationer eller skuggstationer och passerar obemannade platser mellan dem. De skapas från bansträckorna.</value>
+  </data>
+  <data name="RegenerateDispatchStretches" xml:space="preserve">
+    <value>Skapa om från bansträckor</value>
+  </data>
+  <data name="NoDispatchStretches" xml:space="preserve">
+    <value>Inga trafikledningssträckor ännu. Använd Skapa om för att skapa dem från bansträckorna.</value>
+  </data>
+  <data name="TimetableStretchNeedsTrackStretches" xml:space="preserve">
+    <value>Lägg till bansträckor innan du definierar tidtabellssträckor.</value>
+  </data>
+  <data name="DeleteTimetableStretchConfirm" xml:space="preserve">
+    <value>Ta bort tidtabellssträckan {0}?</value>
+  </data>
+  <data name="AddTimetableStretch" xml:space="preserve">
+    <value>Lägg till tidtabellssträcka</value>
+  </data>
+  <data name="TimetableStretchEmptyRoute" xml:space="preserve">
+    <value>Inga bansträckor i sträckningen ännu. Lägg till en nedan.</value>
+  </data>
+  <data name="AddToRoute" xml:space="preserve">
+    <value>Lägg till i sträckningen</value>
+  </data>
+  <data name="RemoveLast" xml:space="preserve">
+    <value>Ta bort sista</value>
+  </data>
+  <data name="TimetableStretchNoContinuation" xml:space="preserve">
+    <value>Ingen bansträcka fortsätter härifrån.</value>
+  </data>
+  <data name="TimetableStretchNumberRequired" xml:space="preserve">
+    <value>Ett nummer krävs.</value>
+  </data>
+  <data name="TimetableStretchNumberDuplicate" xml:space="preserve">
+    <value>En tidtabellssträcka med detta nummer finns redan.</value>
+  </data>
+  <data name="TimetableStretchRouteRequired" xml:space="preserve">
+    <value>Lägg till minst en bansträcka i sträckningen.</value>
+  </data>
+  <data name="RegionNameRequired" xml:space="preserve">
+    <value>Namnet krävs.</value>
+  </data>
+  <data name="CompaniesNoSchedule" xml:space="preserve">
+    <value>Ingen bana är inläst. Importera eller skapa en tidtabell först.</value>
+  </data>
+  <data name="NoCompanies" xml:space="preserve">
+    <value>Inga företag har lagts till än.</value>
+  </data>
+  <data name="DeleteCompanyConfirm" xml:space="preserve">
+    <value>Ta bort företaget '{0}'?</value>
+  </data>
+  <data name="CompanyReferenced" xml:space="preserve">
+    <value>Kan inte ta bort: företaget används av tåg, tjänster eller fordon.</value>
+  </data>
+  <data name="CompanyNameRequired" xml:space="preserve">
+    <value>Namnet krävs.</value>
+  </data>
+  <data name="CompanySignatureRequired" xml:space="preserve">
+    <value>Signaturen krävs.</value>
+  </data>
+  <data name="CompanySignatureInUse" xml:space="preserve">
+    <value>Ett företag med denna signatur finns redan.</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Land</value>
+  </data>
+  <data name="Station" xml:space="preserve">
+    <value>Station</value>
+  </data>
+  <data name="SignalControlledLocation" xml:space="preserve">
+    <value>Signalreglerad plats</value>
+  </data>
+  <data name="OtherLocation" xml:space="preserve">
+    <value>Annan plats</value>
+  </data>
+  <data name="CreateNewLayout" xml:space="preserve">
+    <value>Ny bana</value>
+  </data>
+  <data name="NewLayoutName" xml:space="preserve">
+    <value>Ny bana</value>
+  </data>
+  <data name="NewLayoutReplaceConfirm" xml:space="preserve">
+    <value>Detta ersätter den bana som är inläst. Fortsätta?</value>
+  </data>
+  <data name="CountriesNoSchedule" xml:space="preserve">
+    <value>Ingen bana är inläst. Importera eller skapa en tidtabell först.</value>
+  </data>
+  <data name="CountriesDescription" xml:space="preserve">
+    <value>Länderna som används av banan, för företag och regioner.</value>
+  </data>
+  <data name="Countries" xml:space="preserve">
+    <value>Länder</value>
+  </data>
+  <data name="AddCountry" xml:space="preserve">
+    <value>Lägg till land</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Lägg till</value>
+  </data>
+  <data name="CountryCode" xml:space="preserve">
+    <value>Kod</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Språk</value>
+  </data>
+  <data name="CountryReferenced" xml:space="preserve">
+    <value>Kan inte ta bort: landet är standard eller används av ett företag eller en region.</value>
+  </data>
+  <data name="DeleteCountryConfirm" xml:space="preserve">
+    <value>Ta bort landet '{0}' från banan?</value>
+  </data>
+  <data name="TrainCategoriesNoSchedule" xml:space="preserve">
+    <value>Ingen bana är inläst. Importera eller skapa en tidtabell först.</value>
+  </data>
+  <data name="NoTrainCategories" xml:space="preserve">
+    <value>Inga tågkategorier har definierats än.</value>
+  </data>
+  <data name="Prefix" xml:space="preserve">
+    <value>Prefix</value>
+  </data>
+  <data name="Suffix" xml:space="preserve">
+    <value>Suffix</value>
+  </data>
+  <data name="Passenger" xml:space="preserve">
+    <value>Persontåg</value>
+  </data>
+  <data name="Freight" xml:space="preserve">
+    <value>Godståg</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Färg</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Ingen</value>
+  </data>
+  <data name="DeleteTrainCategoryConfirm" xml:space="preserve">
+    <value>Ta bort tågkategorin '{0}'?</value>
+  </data>
+  <data name="TrainCategoryReferenced" xml:space="preserve">
+    <value>Kan inte ta bort: kategorin används av ett eller flera tåg.</value>
+  </data>
+  <data name="TrainCategoryNameRequired" xml:space="preserve">
+    <value>Namnet krävs.</value>
+  </data>
+  <data name="AddFromCatalogue" xml:space="preserve">
+    <value>Lägg till från katalog</value>
+  </data>
+  <data name="AddFromCatalogueHint" xml:space="preserve">
+    <value>Trafikföretag registrerade i banans länder. Markera dem som ska läggas till.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Laddar…</value>
+  </data>
+  <data name="NoCompanyCandidates" xml:space="preserve">
+    <value>Inga företag finns tillgängliga för banans länder.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Lägg till markerade</value>
   </data>
 </root>

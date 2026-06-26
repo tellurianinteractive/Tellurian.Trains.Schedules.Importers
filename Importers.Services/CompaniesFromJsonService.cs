@@ -19,7 +19,13 @@ public class CompaniesFromJsonService(string? path = null) : ICompaniesService
     /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable collection of companies.</returns>
     public async Task<IEnumerable<Company>> GetAllCompaiesAsync()
     {
-        var json = File.ReadAllText(_path);
-        return JsonSerializer.Deserialize<IEnumerable<Company>>(json) ?? [];
+        var json = await File.ReadAllTextAsync(_path);
+        var records = JsonSerializer.Deserialize<IEnumerable<CompanyRecord>>(json) ?? [];
+        // The seed file stores a human-friendly ISO country code; the model references a country by
+        // its stable Country.Id, so map the code through the catalogue (unknown codes become null).
+        return [.. records.Select(r => new Company(r.Id, r.Name, r.Signature, Country.ByCountryCode(r.CountryCode ?? "")?.Id))];
     }
+
+    // Mirrors the seed JSON shape, which predates the move from country code to country id.
+    private sealed record CompanyRecord(int Id, string Name, string Signature, string? CountryCode);
 }

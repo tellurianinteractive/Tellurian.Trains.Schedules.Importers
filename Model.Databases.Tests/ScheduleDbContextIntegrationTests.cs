@@ -87,7 +87,7 @@ public class ScheduleDbContextIntegrationTests
 
         // Act - Create and save a simple layout with a company and station
         var layout = new Layout { Id = 1, Name = "Test Layout" };
-        var company = new Company(1, "Test Company", "TST", "DE");
+        var company = new Company(1, "Test Company", "TST", countryId: 4); // 4 = Germany
         layout.Add(company);
 
         var station = new Station(1, "Test Station", "TS");
@@ -109,6 +109,7 @@ public class ScheduleDbContextIntegrationTests
         Assert.AreEqual("Test Layout", savedLayout.Name);
         Assert.AreEqual(1, savedLayout.Companies.Count);
         Assert.AreEqual("Test Company", savedLayout.Companies.First().Name);
+        Assert.AreEqual(4, savedLayout.Companies.First().CountryId);
         Assert.AreEqual(1, savedLayout.OperationLocations.Count);
         Assert.AreEqual("Test Station", savedLayout.OperationLocations.First().Name);
         Assert.AreEqual(1, savedLayout.OperationLocations.First().Tracks.Count);
@@ -128,8 +129,8 @@ public class ScheduleDbContextIntegrationTests
 
         // The layout owns a region catalogue; a station is assigned a subset of it.
         var layout = new Layout { Id = 1, Name = "L" };
-        var south = layout.Add(new Region { Id = 1, EN = "South", SV = "Söder", BackgroundColor = "#ffff00" });
-        layout.Add(new Region { Id = 2, EN = "North", SV = "Norr", BackgroundColor = "#0066FF" });
+        var south = layout.Add(new Region { Id = 1, Name = "Söder", CountryId = 1, BackgroundColor = "#ffff00" });
+        layout.Add(new Region { Id = 2, Name = "Norr", CountryId = 1, BackgroundColor = "#0066FF" });
 
         var station = new Station(1, "Shadow", "SH") { IsShadow = true };
         station.Add(south);
@@ -146,8 +147,8 @@ public class ScheduleDbContextIntegrationTests
 
         var loadedStation = await context.Stations.Include(s => s.Regions).FirstAsync(CancellationToken);
         Assert.AreEqual(1, loadedStation.Regions.Count, "Station region assignment");
-        Assert.AreEqual("South", loadedStation.Regions.First().EN);
-        Assert.AreEqual("Söder", loadedStation.Regions.First().SV);
+        Assert.AreEqual("Söder", loadedStation.Regions.First().Name);
+        Assert.AreEqual(1, loadedStation.Regions.First().CountryId);
         Assert.AreEqual("#ffff00", loadedStation.Regions.First().BackgroundColor);
     }
 

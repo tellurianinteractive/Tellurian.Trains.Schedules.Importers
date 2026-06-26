@@ -120,7 +120,8 @@
     }
 
     table.speed-map {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 2px 0;
         margin: 0.25rem 0 0.5rem;
     }
 

@@ -1,6 +1,11 @@
 @page "/"
 @using System.Globalization
 @using Tellurian.Localization
+@using Tellurian.Trains.Schedules.Model
+@using Tellurian.Trains.Schedules.Planning
+@inject ScheduleStateService ScheduleState
+@inject NavigationManager Nav
+@inject Translator Translator
 
 @* The Home tab is the start page; its content is the localised markdown in Content/Home.md.
    It has no "?" help popover of its own (see TabRegistry). *@
@@ -9,6 +14,19 @@
     {
         @((MarkupString)_html)
     }
+
+    <div class="home-actions">
+        <button class="primary" @onclick="OnNewLayoutClicked">@Translator("CreateNewLayout")</button>
+    </div>
+
+    @if (_confirmReplace)
+    {
+        <div class="confirm">
+            <span>@Translator("NewLayoutReplaceConfirm")</span>
+            <button class="danger" @onclick="CreateNewLayout">@Translator("CreateNewLayout")</button>
+            <button @onclick="() => _confirmReplace = false">@Translator("Cancel")</button>
+        </div>
+    }
 </div>
 
 @code {
@@ -16,10 +34,27 @@
     public IResourceProvider Markdown { get; set; } = default!;
 
     private string _html = "";
+    private bool _confirmReplace;
 
     protected override async Task OnInitializedAsync()
     {
         var content = await Markdown.GetTranslationAsync("Home", CultureInfo.CurrentUICulture);
         _html = Markdig.Markdown.ToHtml(content.Text);
+    }
+
+    // Creating a new layout replaces any plan currently loaded, so confirm first when one exists.
+    private void OnNewLayoutClicked()
+    {
+        if (ScheduleState.HasSchedule) _confirmReplace = true;
+        else CreateNewLayout();
+    }
+
+    private void CreateNewLayout()
+    {
+        _confirmReplace = false;
+        var language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var defaultCountryId = Country.ByLanguage(language).Id;
+        ScheduleState.Schedule = NewPlanFactory.CreatePlan(Translator("NewLayoutName"), defaultCountryId, language);
+        Nav.NavigateTo("settings");
     }
 }

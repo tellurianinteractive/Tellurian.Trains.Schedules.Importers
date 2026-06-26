@@ -1,0 +1,113 @@
+.countries-editor {
+    --primary: #1a3a5c;
+    --danger: #c00;
+    --border: #ddd;
+    --hover: #f3f6fa;
+
+    button {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+
+    button.primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    button.danger {
+        color: var(--danger);
+        border-color: #e0b4b4;
+    }
+
+    button.danger:hover {
+        background: #fbeaea;
+    }
+
+    button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .hint {
+        margin: 0.25rem 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+    }
+
+    .toolbar label {
+        font-weight: 500;
+    }
+
+    .toolbar select {
+        padding: 0.25rem 0.4rem;
+    }
+
+    .badge {
+        margin-left: 0.5rem;
+        padding: 0.05rem 0.4rem;
+        font-size: 0.7rem;
+        border-radius: 3px;
+        background: var(--primary);
+        color: #fff;
+        vertical-align: middle;
+    }
+
+    /* QuickGrid list */
+    ::deep table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 700px;
+        font-size: 0.9rem;
+    }
+
+    ::deep th,
+    ::deep td {
+        text-align: left;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    ::deep thead th {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    ::deep tbody tr:hover {
+        background: var(--hover);
+    }
+
+    ::deep td.actions,
+    ::deep th.actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .confirm {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        background: #fbeaea;
+        border: 1px solid #e0b4b4;
+        border-radius: 5px;
+    }
+}

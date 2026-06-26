@@ -297,6 +297,12 @@
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Ausrichtung der Zeitachse</value>
   </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>Vertikal</value>
+  </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
     <value>Ankunftsminuten anzeigen</value>
   </data>
@@ -548,5 +554,224 @@
   </data>
   <data name="CzechRepublic" xml:space="preserve">
     <value>Tschechien</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Nummer</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Route" xml:space="preserve">
+    <value>Laufweg</value>
+  </data>
+  <data name="DistanceKm" xml:space="preserve">
+    <value>Entfernung (km)</value>
+  </data>
+  <data name="SpeedKmh" xml:space="preserve">
+    <value>Geschwindigkeit (km/h)</value>
+  </data>
+  <data name="TimeMinutes" xml:space="preserve">
+    <value>Zeit (Min.)</value>
+  </data>
+  <data name="Via" xml:space="preserve">
+    <value>Über</value>
+  </data>
+  <data name="TrackStretches" xml:space="preserve">
+    <value>Streckenabschnitte</value>
+  </data>
+  <data name="DispatchStretches" xml:space="preserve">
+    <value>Zugleitabschnitte</value>
+  </data>
+  <data name="TimetableStretches" xml:space="preserve">
+    <value>Fahrplanabschnitte</value>
+  </data>
+  <data name="StretchesNoSchedule" xml:space="preserve">
+    <value>Öffnen oder importieren Sie einen Plan, um dessen Abschnitte zu bearbeiten.</value>
+  </data>
+  <data name="SelectTrackStretch" xml:space="preserve">
+    <value>Streckenabschnitt auswählen…</value>
+  </data>
+  <data name="TrackStretchNeedsLocations" xml:space="preserve">
+    <value>Fügen Sie mindestens zwei Betriebsstellen hinzu, bevor Sie Streckenabschnitte definieren.</value>
+  </data>
+  <data name="NoTrackStretches" xml:space="preserve">
+    <value>Noch keine Streckenabschnitte definiert.</value>
+  </data>
+  <data name="TrackStretchReferenced" xml:space="preserve">
+    <value>Dieser Streckenabschnitt wird von einem Fahrplanabschnitt verwendet und kann nicht gelöscht werden.</value>
+  </data>
+  <data name="DeleteTrackStretchConfirm" xml:space="preserve">
+    <value>Streckenabschnitt {0} – {1} löschen?</value>
+  </data>
+  <data name="TrackStretchDirectionWarning" xml:space="preserve">
+    <value>Nicht alle Streckenabschnitte sind in derselben Richtung definiert:</value>
+  </data>
+  <data name="AddTrackStretch" xml:space="preserve">
+    <value>Streckenabschnitt hinzufügen</value>
+  </data>
+  <data name="TrackStretchSameEndpoints" xml:space="preserve">
+    <value>Ein Streckenabschnitt muss zwei verschiedene Betriebsstellen verbinden.</value>
+  </data>
+  <data name="TrackStretchDuplicate" xml:space="preserve">
+    <value>Ein Streckenabschnitt mit diesen Endpunkten existiert bereits.</value>
+  </data>
+  <data name="DispatchStretchesHint" xml:space="preserve">
+    <value>Zugleitabschnitte verlaufen zwischen besetzten Stationen oder Schattenbahnhöfen und führen durch unbesetzte Stellen dazwischen. Sie werden aus den Streckenabschnitten erzeugt.</value>
+  </data>
+  <data name="RegenerateDispatchStretches" xml:space="preserve">
+    <value>Aus Streckenabschnitten neu erzeugen</value>
+  </data>
+  <data name="NoDispatchStretches" xml:space="preserve">
+    <value>Noch keine Zugleitabschnitte. Verwenden Sie „Neu erzeugen“, um sie aus den Streckenabschnitten zu erstellen.</value>
+  </data>
+  <data name="TimetableStretchNeedsTrackStretches" xml:space="preserve">
+    <value>Fügen Sie Streckenabschnitte hinzu, bevor Sie Fahrplanabschnitte definieren.</value>
+  </data>
+  <data name="DeleteTimetableStretchConfirm" xml:space="preserve">
+    <value>Fahrplanabschnitt {0} löschen?</value>
+  </data>
+  <data name="AddTimetableStretch" xml:space="preserve">
+    <value>Fahrplanabschnitt hinzufügen</value>
+  </data>
+  <data name="TimetableStretchEmptyRoute" xml:space="preserve">
+    <value>Noch keine Streckenabschnitte im Laufweg. Fügen Sie unten einen hinzu.</value>
+  </data>
+  <data name="AddToRoute" xml:space="preserve">
+    <value>Zum Laufweg hinzufügen</value>
+  </data>
+  <data name="RemoveLast" xml:space="preserve">
+    <value>Letzten entfernen</value>
+  </data>
+  <data name="TimetableStretchNoContinuation" xml:space="preserve">
+    <value>Kein Streckenabschnitt setzt sich von hier fort.</value>
+  </data>
+  <data name="TimetableStretchNumberRequired" xml:space="preserve">
+    <value>Eine Nummer ist erforderlich.</value>
+  </data>
+  <data name="TimetableStretchNumberDuplicate" xml:space="preserve">
+    <value>Ein Fahrplanabschnitt mit dieser Nummer existiert bereits.</value>
+  </data>
+  <data name="TimetableStretchRouteRequired" xml:space="preserve">
+    <value>Fügen Sie dem Laufweg mindestens einen Streckenabschnitt hinzu.</value>
+  </data>
+  <data name="RegionNameRequired" xml:space="preserve">
+    <value>Der Name ist erforderlich.</value>
+  </data>
+  <data name="CompaniesNoSchedule" xml:space="preserve">
+    <value>Keine Anlage geladen. Importieren oder erstellen Sie zuerst einen Fahrplan.</value>
+  </data>
+  <data name="NoCompanies" xml:space="preserve">
+    <value>Es wurden noch keine Unternehmen hinzugefügt.</value>
+  </data>
+  <data name="DeleteCompanyConfirm" xml:space="preserve">
+    <value>Unternehmen '{0}' löschen?</value>
+  </data>
+  <data name="CompanyReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Dieses Unternehmen wird von Zügen, Diensten oder Fahrzeugen verwendet.</value>
+  </data>
+  <data name="CompanyNameRequired" xml:space="preserve">
+    <value>Der Name ist erforderlich.</value>
+  </data>
+  <data name="CompanySignatureRequired" xml:space="preserve">
+    <value>Das Kürzel ist erforderlich.</value>
+  </data>
+  <data name="CompanySignatureInUse" xml:space="preserve">
+    <value>Ein Unternehmen mit diesem Kürzel existiert bereits.</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>Land</value>
+  </data>
+  <data name="Station" xml:space="preserve">
+    <value>Bahnhof</value>
+  </data>
+  <data name="SignalControlledLocation" xml:space="preserve">
+    <value>Signalgesteuerte Stelle</value>
+  </data>
+  <data name="OtherLocation" xml:space="preserve">
+    <value>Sonstige Stelle</value>
+  </data>
+  <data name="CreateNewLayout" xml:space="preserve">
+    <value>Neue Anlage</value>
+  </data>
+  <data name="NewLayoutName" xml:space="preserve">
+    <value>Neue Anlage</value>
+  </data>
+  <data name="NewLayoutReplaceConfirm" xml:space="preserve">
+    <value>Dies ersetzt die aktuell geladene Anlage. Fortfahren?</value>
+  </data>
+  <data name="CountriesNoSchedule" xml:space="preserve">
+    <value>Keine Anlage geladen. Importieren oder erstellen Sie zuerst einen Fahrplan.</value>
+  </data>
+  <data name="CountriesDescription" xml:space="preserve">
+    <value>Die von der Anlage verwendeten Länder, für Unternehmen und Regionen.</value>
+  </data>
+  <data name="Countries" xml:space="preserve">
+    <value>Länder</value>
+  </data>
+  <data name="AddCountry" xml:space="preserve">
+    <value>Land hinzufügen</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="CountryCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Sprachen</value>
+  </data>
+  <data name="CountryReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Das Land ist Standard oder wird von einem Unternehmen oder einer Region verwendet.</value>
+  </data>
+  <data name="DeleteCountryConfirm" xml:space="preserve">
+    <value>Land '{0}' aus der Anlage entfernen?</value>
+  </data>
+  <data name="TrainCategoriesNoSchedule" xml:space="preserve">
+    <value>Keine Anlage geladen. Importieren oder erstellen Sie zuerst einen Fahrplan.</value>
+  </data>
+  <data name="NoTrainCategories" xml:space="preserve">
+    <value>Es wurden noch keine Zugkategorien definiert.</value>
+  </data>
+  <data name="Prefix" xml:space="preserve">
+    <value>Präfix</value>
+  </data>
+  <data name="Suffix" xml:space="preserve">
+    <value>Suffix</value>
+  </data>
+  <data name="Passenger" xml:space="preserve">
+    <value>Reisezug</value>
+  </data>
+  <data name="Freight" xml:space="preserve">
+    <value>Güterzug</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Keine</value>
+  </data>
+  <data name="DeleteTrainCategoryConfirm" xml:space="preserve">
+    <value>Zugkategorie '{0}' löschen?</value>
+  </data>
+  <data name="TrainCategoryReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Diese Kategorie wird von einem oder mehreren Zügen verwendet.</value>
+  </data>
+  <data name="TrainCategoryNameRequired" xml:space="preserve">
+    <value>Der Name ist erforderlich.</value>
+  </data>
+  <data name="AddFromCatalogue" xml:space="preserve">
+    <value>Aus Katalog hinzufügen</value>
+  </data>
+  <data name="AddFromCatalogueHint" xml:space="preserve">
+    <value>In den Ländern der Anlage registrierte Unternehmen. Wählen Sie die hinzuzufügenden aus.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Wird geladen…</value>
+  </data>
+  <data name="NoCompanyCandidates" xml:space="preserve">
+    <value>Für die Länder der Anlage sind keine Unternehmen verfügbar.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Auswahl hinzufügen</value>
   </data>
 </root>

@@ -6,6 +6,7 @@ public static class TabRegistry
     [
         new("Home", "", typeof(Pages.HomeTab)),
         new("Settings", "settings", typeof(Pages.SettingsTab), HelpKey: "Settings"),
+        new("Countries", "countries", typeof(Pages.CountriesTab)),
         new("Regions", "regions", typeof(Pages.RegionsTab), HelpKey: "Regions"),
         new("OperationLocations", "operation-locations", typeof(Pages.OperationLocationsTab), HelpKey: "OperationLocations"),
         new("Stretches", "stretches", typeof(Pages.StretchesTab), HelpKey: "Stretches"),
