@@ -68,7 +68,7 @@ Snapshot of coverage by area (see each section for detail).
 | Import from previous plans / JSON (§5.1) | ✅ | |
 | External service import — categories, companies (§5.2) | 🟡 | categories + ~9,700 companies done; ModuleRegistry not built |
 | XPLN import (§5.3) | ✅ | ODS/XLSX |
-| JSON export (§5.4) | ✅ | SQLite export deferred |
+| JSON export (§5.4) | ✅ | SQLite produced externally by an online service (§5.5, future), not in the app |
 
 ## 1. Objectives
 
@@ -456,6 +456,11 @@ which layout is open.
 > **Status:** ❌ Missing. `Planning.App/Pages/VehicleOwners.razor` is a stub.
 
 *To be detailed — managing who brings what rolling stock for the session.*
+
+Beyond in-app entry, vehicle owners may **submit the rolling stock they will bring online** (planned
+as a Module Registry feature). Those submissions are folded into the SQLite database distributed to
+the on-premise dispatch applications, so the inventory is complete without the planner re-keying it
+(see §5.5).
 
 ---
 
@@ -1195,13 +1200,36 @@ The system shall support importing complete schedules from XPLN spreadsheets
 ### 5.4 Export
 
 > **Status:** ✅ JSON export implemented (`ScheduleExportService`, `ExportMenu.razor`).
-> SQLite export is flagged "coming soon" (deferred — WASM EF Core constraint).
+> The "SQLite" option in the export dialog is a disabled placeholder; SQLite is produced
+> by an external online service, not by this application (see §5.5).
 
 The system shall export schedules in JSON format for:
 
 - Backup and archival
 - Transfer to other users
-- Input to other systems (dispatch, etc.)
+- Input to other systems (dispatch, etc.) — directly, or via the SQLite conversion service (§5.5)
+
+### 5.5 SQLite distribution (online conversion service)
+
+> **Status:** ❌ Future feature, hosted **outside** this application — planned as part of the
+> [Module Registry](https://moduleregistry.azurewebsites.net).
+
+On-premise applications used at module meetings (train dispatch, station displays, etc.) consume a
+**SQLite database** rather than JSON. Producing SQLite in the browser would require the EF Core
+SQLite provider to run under WebAssembly (a heavy native build); instead the conversion is delegated
+to an online service:
+
+1. The planner exports the plan as JSON (§5.4) and it is uploaded to the service.
+2. The service builds a SQLite database from the JSON using the **server-side** EF Core model
+   (`Model.Databases`, which already targets SQLite), and offers it for download as a `.db` file.
+3. The service may **enrich** the database with data collected online — in particular
+   **vehicle-owner submissions** (§3.9): owners register the rolling stock they will bring, which is
+   added to the downloadable database so the on-premise apps have the full inventory.
+
+The downloaded `.db` is one-way (downstream) output; it is **not** re-imported into the planner,
+which continues to import only JSON and XPLN (§5.1–5.3). This keeps the WebAssembly planner light
+and reuses the tested `Model.Databases` EF mapping on the server. The in-app "SQLite" export option
+remains a placeholder until this service exists.
 
 ---
 
