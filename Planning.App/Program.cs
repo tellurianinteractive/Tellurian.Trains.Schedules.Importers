@@ -24,6 +24,7 @@ builder.Services.AddScoped<ICompaniesService, CompaniesService>();
 builder.Services.AddScoped<ITrainCategoriesService, TrainCategoriesService>();
 builder.Services.AddScoped<ScheduleImportService>();
 builder.Services.AddScoped<ScheduleExportService>();
+builder.Services.AddScoped<ModuleRegistryUploadService>();
 builder.Services.AddScoped<HelpContentService>();
 
 // Localisation — register language service, RESX and Markdown providers.

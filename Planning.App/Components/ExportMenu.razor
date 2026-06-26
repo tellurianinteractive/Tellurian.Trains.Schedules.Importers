@@ -1,5 +1,6 @@
 @inject ScheduleStateService ScheduleState
 @inject ScheduleExportService Exporter
+@inject ModuleRegistryUploadService Uploader
 @inject IJSRuntime JS
 @inject Translator Translator
 
@@ -13,12 +14,28 @@
         <div class="dialog" @onclick:stopPropagation>
             <h3>@Translator("SaveAs")</h3>
             <p>@((MarkupString)string.Format(Translator("DownloadAs"), System.Net.WebUtility.HtmlEncode(ScheduleState.Schedule?.Name ?? "")))</p>
-            <div class="formats">
-                <button class="format" @onclick="SaveJson">JSON<span class="ext">.json</span></button>
-                <button class="format" disabled title="@Translator("ComingSoon")">SQLite<span class="ext">.db</span></button>
+
+            <div class="export-row">
+                <span class="fmt">JSON<span class="ext">.json</span></span>
+                <button class="dest" disabled="@_busy" @onclick="SaveJsonToDisk">@Translator("ToDisk")</button>
+                <button class="dest" disabled="@_busy" @onclick="SendJsonToModuleRegistry">@Translator("ToModuleRegistry")</button>
             </div>
+            <div class="export-row dim">
+                <span class="fmt">SQLite<span class="ext">.db</span></span>
+                <span class="note">@Translator("SqliteViaModuleRegistry")</span>
+            </div>
+
+            @if (_busy)
+            {
+                <p class="status busy"><span class="spinner"></span>@Translator(_busyKey!)</p>
+            }
+            else if (_result is not null)
+            {
+                <p class="status @(_resultOk ? "ok" : "err")">@_result</p>
+            }
+
             <div class="dialog-actions">
-                <button @onclick="CloseSaveAs">@Translator("Cancel")</button>
+                <button @onclick="CloseSaveAs" disabled="@_busy">@Translator("Close")</button>
             </div>
         </div>
     </div>
@@ -27,23 +44,78 @@
 @code {
     private TabMenu? _menu;
     private bool _showSaveAs;
+    private bool _busy;
+    private string? _busyKey;
+    private string? _result;
+    private bool _resultOk;
 
     private void OpenSaveAs()
     {
         _menu?.Close();
+        _result = null;
         _showSaveAs = true;
     }
 
-    private void CloseSaveAs() => _showSaveAs = false;
+    private void CloseSaveAs()
+    {
+        if (_busy) return;
+        _showSaveAs = false;
+    }
 
-    private async Task SaveJson()
+    // Show the spinner before the (synchronous, UI-thread-blocking) serialize: flip to busy, render,
+    // then yield so the browser repaints before the heavy work starts.
+    private async Task BeginBusy(string key)
+    {
+        _result = null;
+        _busyKey = key;
+        _busy = true;
+        StateHasChanged();
+        await Task.Delay(1);
+    }
+
+    private async Task SaveJsonToDisk()
     {
         if (ScheduleState.Schedule is not { } plan) return;
-        var json = Exporter.ToJson(plan);
-        var fileName = $"{SafeFileName(plan.Name)}.json";
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
-        await module.InvokeVoidAsync("downloadText", fileName, json, "application/json");
-        _showSaveAs = false;
+        await BeginBusy("Saving");
+        try
+        {
+            var json = Exporter.ToJson(plan);
+            var fileName = $"{SafeFileName(plan.Name)}.json";
+            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+            await module.InvokeVoidAsync("downloadText", fileName, json, "application/json");
+            _showSaveAs = false;
+        }
+        catch (Exception ex)
+        {
+            _resultOk = false;
+            _result = string.Format(Translator("ExportFailed"), ex.Message);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task SendJsonToModuleRegistry()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        await BeginBusy("Sending");
+        try
+        {
+            var integration = ScheduleState.Layout?.Settings.Integration;
+            var json = Exporter.ToJson(plan);
+            var result = await Uploader.UploadJsonAsync(integration?.ModuleRegistryApiUrl, integration?.ModuleRegistryApiKey, json);
+            _resultOk = result.Success;
+            _result = result.Success
+                ? Translator("UploadSucceeded")
+                : result.Message == "MissingUrl"
+                    ? Translator("ModuleRegistryUrlMissing")
+                    : string.Format(Translator("UploadFailed"), result.Message);
+        }
+        finally
+        {
+            _busy = false;
+        }
     }
 
     private static string SafeFileName(string name)

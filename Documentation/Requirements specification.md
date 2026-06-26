@@ -248,7 +248,7 @@ are organised into groups — each a separate type — surfaced as sub-sections 
 | Graphical Timetable | View and print preferences for the graphical timetable       | §3.7.3       |
 | Time & Speed        | Fast clock, speed mapping, default station operational times | §4.3         |
 | Validation          | Which validations run and their thresholds                   | §3.11.3      |
-| Integration         | API keys for external services (e.g. ModuleRegistry)         | §3.3         |
+| Import & Export     | Module Registry API URL and key (importing operation locations; sending the plan for conversion) | §3.3, §5.5 |
 
 **General settings:**
 
@@ -1203,11 +1203,15 @@ The system shall support importing complete schedules from XPLN spreadsheets
 > The "SQLite" option in the export dialog is a disabled placeholder; SQLite is produced
 > by an external online service, not by this application (see §5.5).
 
-The system shall export schedules in JSON format for:
+The system shall export schedules in JSON to two destinations, chosen in the export dialog:
 
-- Backup and archival
-- Transfer to other users
-- Input to other systems (dispatch, etc.) — directly, or via the SQLite conversion service (§5.5)
+- **Save to disk** — downloads a `.json` file for backup, archival or transfer to other users.
+- **Send to Module Registry** — POSTs the plan JSON to the Module Registry API (URL and key from
+  the **Import & Export** settings; `ModuleRegistryUploadService`), where it is converted and
+  distributed as SQLite (§5.5).
+
+Both show a progress indicator while the plan is serialised (a large graph) and sent. The export
+dialog also lists SQLite as a disabled, "via Module Registry" placeholder.
 
 ### 5.5 SQLite distribution (online conversion service)
 

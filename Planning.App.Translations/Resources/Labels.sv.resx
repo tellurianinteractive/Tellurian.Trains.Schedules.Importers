@@ -774,4 +774,37 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Lägg till markerade</value>
   </data>
+  <data name="ImportExport" xml:space="preserve">
+    <value>Import &amp; export</value>
+  </data>
+  <data name="ModuleRegistryApiUrl" xml:space="preserve">
+    <value>Module Registry API-URL</value>
+  </data>
+  <data name="ToDisk" xml:space="preserve">
+    <value>Spara till disk</value>
+  </data>
+  <data name="ToModuleRegistry" xml:space="preserve">
+    <value>Skicka till Module Registry</value>
+  </data>
+  <data name="SqliteViaModuleRegistry" xml:space="preserve">
+    <value>Skapas av Module Registry-tjänsten (kommer snart)</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Sparar…</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Skickar…</value>
+  </data>
+  <data name="UploadSucceeded" xml:space="preserve">
+    <value>Skickat till Module Registry.</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Uppladdning misslyckades: {0}</value>
+  </data>
+  <data name="ModuleRegistryUrlMissing" xml:space="preserve">
+    <value>Ange Module Registry API-URL under Inställningar → Import &amp; export först.</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>Export misslyckades: {0}</value>
+  </data>
 </root>

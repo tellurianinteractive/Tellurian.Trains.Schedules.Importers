@@ -987,4 +987,37 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Add selected</value>
   </data>
+  <data name="ImportExport" xml:space="preserve">
+    <value>Import &amp; Export</value>
+  </data>
+  <data name="ModuleRegistryApiUrl" xml:space="preserve">
+    <value>Module Registry API URL</value>
+  </data>
+  <data name="ToDisk" xml:space="preserve">
+    <value>Save to disk</value>
+  </data>
+  <data name="ToModuleRegistry" xml:space="preserve">
+    <value>Send to Module Registry</value>
+  </data>
+  <data name="SqliteViaModuleRegistry" xml:space="preserve">
+    <value>Produced by the Module Registry service (coming soon)</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Sending…</value>
+  </data>
+  <data name="UploadSucceeded" xml:space="preserve">
+    <value>Sent to the Module Registry.</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Upload failed: {0}</value>
+  </data>
+  <data name="ModuleRegistryUrlMissing" xml:space="preserve">
+    <value>Set the Module Registry API URL in Settings → Import &amp; Export first.</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
 </root>
