@@ -21,46 +21,88 @@
     margin-top: 0;
 }
 
-.formats {
+.export-row {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
-    margin: 1rem 0;
+    margin: 0.6rem 0;
 }
 
-.format {
-    flex: 1;
+.export-row .fmt {
+    flex: 0 0 5.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.7rem;
+    font-weight: 600;
+}
+
+.export-row .fmt .ext {
+    font-weight: 400;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.export-row.dim {
+    opacity: 0.6;
+}
+
+.export-row .note {
+    font-size: 0.85rem;
+    color: #667;
+}
+
+.export-row .dest {
+    flex: 1;
+    padding: 0.5rem 0.7rem;
     border: 1px solid #1a3a5c;
     background: #1a3a5c;
     color: white;
     border-radius: 4px;
     cursor: pointer;
     font: inherit;
-    font-weight: 600;
 }
 
-.format:hover:not(:disabled) {
+.export-row .dest:hover:not(:disabled) {
     background: #24507e;
 }
 
-.format:disabled {
+.export-row .dest:disabled {
     background: #ccc;
     border-color: #ccc;
     cursor: default;
 }
 
-.format .ext {
-    font-weight: 400;
-    font-size: 0.8em;
-    opacity: 0.8;
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.9rem;
+}
+
+.status.ok {
+    color: #197a2b;
+}
+
+.status.err {
+    color: #c00;
+}
+
+.spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #c7d2de;
+    border-top-color: #1a3a5c;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .dialog-actions {
     text-align: right;
+    margin-top: 1rem;
 }
 
 .dialog-actions button {

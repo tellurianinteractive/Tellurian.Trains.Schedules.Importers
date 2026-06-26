@@ -258,6 +258,10 @@ else
             {
                 var i = LayoutSettings.Integration;
                 <div class="field">
+                    <label>@Translator("ModuleRegistryApiUrl")</label>
+                    <input type="text" @bind="i.ModuleRegistryApiUrl" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
                     <label>@Translator("ModuleRegistryApiKey")</label>
                     <input type="text" @bind="i.ModuleRegistryApiKey" @bind:after="OnEdited" />
                 </div>
@@ -373,7 +377,7 @@ else
         SettingsSection.GraphicTimetable => "GraphicalTimetable",
         SettingsSection.TimeAndSpeed => "TimeAndSpeed",
         SettingsSection.Validation => "Validation",
-        SettingsSection.Integration => "Integration",
+        SettingsSection.Integration => "ImportExport",
         _ => section.ToString()
     });
 

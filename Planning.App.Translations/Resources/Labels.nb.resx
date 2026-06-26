@@ -774,4 +774,37 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Legg til valgte</value>
   </data>
+  <data name="ImportExport" xml:space="preserve">
+    <value>Import og eksport</value>
+  </data>
+  <data name="ModuleRegistryApiUrl" xml:space="preserve">
+    <value>Module Registry API-URL</value>
+  </data>
+  <data name="ToDisk" xml:space="preserve">
+    <value>Lagre til disk</value>
+  </data>
+  <data name="ToModuleRegistry" xml:space="preserve">
+    <value>Send til Module Registry</value>
+  </data>
+  <data name="SqliteViaModuleRegistry" xml:space="preserve">
+    <value>Opprettes av Module Registry-tjenesten (kommer snart)</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Lagrer…</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Sender…</value>
+  </data>
+  <data name="UploadSucceeded" xml:space="preserve">
+    <value>Sendt til Module Registry.</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Opplasting mislyktes: {0}</value>
+  </data>
+  <data name="ModuleRegistryUrlMissing" xml:space="preserve">
+    <value>Angi Module Registry API-URL under Innstillinger → Import og eksport først.</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>Eksport mislyktes: {0}</value>
+  </data>
 </root>

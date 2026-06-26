@@ -774,4 +774,37 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Auswahl hinzufügen</value>
   </data>
+  <data name="ImportExport" xml:space="preserve">
+    <value>Import &amp; Export</value>
+  </data>
+  <data name="ModuleRegistryApiUrl" xml:space="preserve">
+    <value>Module-Registry-API-URL</value>
+  </data>
+  <data name="ToDisk" xml:space="preserve">
+    <value>Auf Datenträger speichern</value>
+  </data>
+  <data name="ToModuleRegistry" xml:space="preserve">
+    <value>An Module Registry senden</value>
+  </data>
+  <data name="SqliteViaModuleRegistry" xml:space="preserve">
+    <value>Wird vom Module-Registry-Dienst erstellt (in Kürze)</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Wird gespeichert…</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Wird gesendet…</value>
+  </data>
+  <data name="UploadSucceeded" xml:space="preserve">
+    <value>An die Module Registry gesendet.</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Hochladen fehlgeschlagen: {0}</value>
+  </data>
+  <data name="ModuleRegistryUrlMissing" xml:space="preserve">
+    <value>Legen Sie zuerst die Module-Registry-API-URL unter Einstellungen → Import &amp; Export fest.</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>Export fehlgeschlagen: {0}</value>
+  </data>
 </root>
