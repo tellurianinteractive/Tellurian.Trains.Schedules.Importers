@@ -175,7 +175,7 @@ public static class PlanExtensions
         /// </summary>
         /// <param name="trainPart"></param>
         /// <returns></returns>
-        public IEnumerable<ScheduledObject> ScheduledObjectsFor(TrainPart trainPart)
+        public IEnumerable<ScheduledObject> ScheduledObjectsFor(ScheduledTrainPart trainPart)
         {
             return plan.ScheduledObjects
                 .Where(so => so.ScheduleAssignments

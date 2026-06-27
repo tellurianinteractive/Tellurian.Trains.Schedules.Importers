@@ -48,7 +48,7 @@ public class DriverDuty : IEquatable<DriverDuty>
     /// <summary>
     /// Gets or sets the collection of train parts in this duty.
     /// </summary>
-    public ICollection<TrainPart> Parts { get; set; }
+    public ICollection<ScheduledTrainPart> Parts { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of notes for this duty.
@@ -103,18 +103,18 @@ public static class DriverDutyExtensions
         /// </summary>
         /// <param name="part">The train part to add.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the part if added successfully, or an error message if overlapping.</returns>
-        public Maybe<TrainPart> Add(TrainPart part)
+        public Maybe<ScheduledTrainPart> Add(ScheduledTrainPart part)
         {
             duty = duty.ValueOrException(nameof(duty));
             part = part.ValueOrException(nameof(part));
             if (!duty.Parts.Contains(part))
             {
-                if (part.IsOverlapping(duty.Parts)) return new Maybe<TrainPart>($"Part {part} overlaps existing parts in driver duty '{duty.Identity}'");
+                if (part.IsOverlapping(duty.Parts)) return new Maybe<ScheduledTrainPart>($"Part {part} overlaps existing parts in driver duty '{duty.Identity}'");
                 part.Duty = duty;
                 part.DutyId = duty.Id;
                 duty.Parts.Add(part);
             }
-            return new Maybe<TrainPart>(part);
+            return new Maybe<ScheduledTrainPart>(part);
         }
     }
 }

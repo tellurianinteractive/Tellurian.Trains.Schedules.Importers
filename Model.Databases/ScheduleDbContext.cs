@@ -620,8 +620,16 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.Departure);
             entity.Ignore(e => e.Arrival);
 
-            // Per-part options: four optional, independent owned types, each mapped to its own
-            // table sharing the TrainPart primary key (an absent row means the option is null).
+            // Table-per-hierarchy: ScheduledTrainPart is the only mapped subclass for now;
+            // CargoFlowTrainPart is added in a later step.
+            entity.HasDiscriminator<string>("PartType")
+                  .HasValue<ScheduledTrainPart>("Scheduled");
+        });
+
+        // ScheduledTrainPart per-part options: four optional, independent owned types, each mapped to
+        // their own table sharing the train part primary key (an absent row means the option is null).
+        modelBuilder.Entity<ScheduledTrainPart>(entity =>
+        {
             entity.OwnsOne(e => e.TractionOptions, o => o.ToTable("TractionOptions"));
 
             entity.OwnsOne(e => e.WagonSetOptions, o =>

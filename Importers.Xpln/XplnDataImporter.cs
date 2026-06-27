@@ -844,7 +844,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         locoMessages.AddRange(keys.Messages);
                                         if (locoMessages.HasNoStoppingErrors())
                                         {
-                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value)
                                             {
                                                 TractionOptions = new TractionOptions()
                                             };
@@ -882,7 +882,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                             trainsetMessages.AddRange(keys.Messages);
                                             if (trainsetMessages.HasNoStoppingErrors())
                                             {
-                                                TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                                ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value)
                                                 {
                                                     WagonSetOptions = new WagonSetOptions()
                                                 };
@@ -906,7 +906,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                                 number: 0,
                                                 externalId: $"WagonGroup{rowNumber}",
                                                 remark: fields[Remark]);
-                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value)
+                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value)
                                             {
                                                 CargoFlowOptions = new CargoFlowOptions { HasCoupleNote = true, HasUncoupleNote = true }
                                             };
@@ -933,7 +933,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         dutyMessages.AddRange(keys.Messages);
                                         if (dutyMessages.HasNoStoppingErrors())
                                         {
-                                            TrainPart trainPart = new TrainPart(keys.FromCall.Value, keys.ToCall.Value);
+                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value);
                                             duty.Add(trainPart);
                                         }
                                     }

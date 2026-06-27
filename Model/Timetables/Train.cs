@@ -184,7 +184,7 @@ public class Train : IEquatable<Train>
     /// <summary>
     /// Gets this train as a train part covering all station calls.
     /// </summary>
-    public TrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
+    public ScheduledTrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
 
     /// <inheritdoc/>
     public bool Equals(Train? other) =>
@@ -240,14 +240,14 @@ public static class TrainExtensions
         /// <param name="toCallIndex">The index of the arrival call.</param>
         /// <returns>A new train part.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the indices are invalid.</exception>
-        public TrainPart AsTrainPart(int fromCallIndex, int toCallIndex)
+        public ScheduledTrainPart AsTrainPart(int fromCallIndex, int toCallIndex)
         {
             var t = train.ValueOrException(nameof(train));
             var c = t.Calls.Count;
             (fromCallIndex < 0 || fromCallIndex > c - 2).IfTrueThrows(nameof(fromCallIndex));
             (toCallIndex <= fromCallIndex || toCallIndex > c - 1).IfTrueThrows(nameof(toCallIndex));
             var calls = t.Calls.ToArray();
-            return new TrainPart(calls[fromCallIndex], calls[toCallIndex]);
+            return new ScheduledTrainPart(calls[fromCallIndex], calls[toCallIndex]);
         }
         /// <summary>
         /// Gets the full identity string for the train (category prefix + number + suffix).

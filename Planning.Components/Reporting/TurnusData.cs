@@ -91,7 +91,7 @@ public static class TurnusDataExtensions
                             Sessions = assignment.Sessions,
                             Remark = scheduledObject.Remark ?? string.Empty,
                         },
-                        Parts = assignment.Schedule?.Parts ?? Enumerable.Empty<TrainPart>(),
+                        Parts = assignment.Schedule?.Parts ?? Enumerable.Empty<ScheduledTrainPart>(),
                     }));
 
                 // One card per full identity (KeyWithSession); merge the rows' train parts.

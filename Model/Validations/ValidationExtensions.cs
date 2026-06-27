@@ -349,7 +349,7 @@ public static class ValidationExtensions
         return errors;
     }
 
-    private static IEnumerable<ValidationError> CheckLocomotiveCoverageGaps(Train train, List<TrainPart> locomotiveParts)
+    private static IEnumerable<ValidationError> CheckLocomotiveCoverageGaps(Train train, List<ScheduledTrainPart> locomotiveParts)
     {
         var errors = new List<ValidationError>();
         var calls = train.Calls.ToArray();
@@ -396,7 +396,7 @@ public static class ValidationExtensions
         foreach (var error in errors) yield return error;
     }
 
-    private static IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(Train train, List<TrainPart> locomotiveParts)
+    private static IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(Train train, List<ScheduledTrainPart> locomotiveParts)
     {
         for (var i = 0; i < locomotiveParts.Count - 1; i++)
         {

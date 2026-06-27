@@ -195,6 +195,7 @@ public class ScheduleDbContextIntegrationTests
         context.ChangeTracker.Clear();
 
         var loaded = await context.TrainParts
+            .OfType<ScheduledTrainPart>()
             .Include(p => p.WagonSetOptions!).ThenInclude(n => n.WagonGroup)
             .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Origins).ThenInclude(o => o.Station)
             .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Destinations).ThenInclude(d => d.Station)

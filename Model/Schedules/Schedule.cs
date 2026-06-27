@@ -42,7 +42,7 @@ public sealed class Schedule : IEquatable<Schedule>
     /// <summary>
     /// Gets or sets the collection of train parts in this vehicle schedule.
     /// </summary>
-    public ICollection<TrainPart> Parts { get; set; }
+    public ICollection<ScheduledTrainPart> Parts { get; set; }
 
     /// <inheritdoc/>
     public bool Equals(Schedule? other) => other is not null && Id == other.Id;
@@ -69,7 +69,7 @@ public static class VehicleScheduleExtensions
     /// <param name="part">The train part to add.</param>
     /// <returns>The added train part.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the vehicle schedule or part is null.</exception>
-    public static TrainPart? Add(this Schedule me, TrainPart? part)
+    public static ScheduledTrainPart? Add(this Schedule me, ScheduledTrainPart? part)
     {
         if (me == null || part is null) throw new ArgumentNullException(nameof(part));
         part.Schedule = me;
