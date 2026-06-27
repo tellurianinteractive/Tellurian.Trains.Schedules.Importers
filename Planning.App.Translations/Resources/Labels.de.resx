@@ -807,4 +807,235 @@
   <data name="ExportFailed" xml:space="preserve">
     <value>Export fehlgeschlagen: {0}</value>
   </data>
+  <data name="AboutThisTab" xml:space="preserve">
+    <value>Über diesen Tab</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="AddNew" xml:space="preserve">
+    <value>Neu hinzufügen</value>
+  </data>
+  <data name="AddStandardRegions" xml:space="preserve">
+    <value>Standardregionen hinzufügen</value>
+  </data>
+  <data name="AddTrack" xml:space="preserve">
+    <value>Gleis hinzufügen</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="BackgroundColorHelp" xml:space="preserve">
+    <value>Die Hintergrundfarbe, mit der diese Region als Chip in Notizen dargestellt wird.</value>
+  </data>
+  <data name="BreakForPrintingHelp" xml:space="preserve">
+    <value>Den Tag zu dieser Zeit teilen. Der Bildfahrplan kann dann über mehrere Seiten gedruckt und am Bildschirm halbweise angezeigt werden.</value>
+  </data>
+  <data name="ControlledBy" xml:space="preserve">
+    <value>Gesteuert von</value>
+  </data>
+  <data name="ControlledByHelp" xml:space="preserve">
+    <value>Die besetzte Station, deren Fahrdienstleiter diese signalgesteuerte Stelle bedient.</value>
+  </data>
+  <data name="Danish" xml:space="preserve">
+    <value>Dänisch</value>
+  </data>
+  <data name="DefaultRegions" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="DeleteLocationConfirm" xml:space="preserve">
+    <value>Betriebsstelle '{0}' und ihre Gleise löschen?</value>
+  </data>
+  <data name="DeleteRegionConfirm" xml:space="preserve">
+    <value>Region '{0}' löschen?</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Reihenfolge</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="EndTimeHelp" xml:space="preserve">
+    <value>Die Uhrzeit, zu der die Betriebssitzung endet. Sie kann bis Mitternacht oder darüber hinaus laufen.</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Englisch</value>
+  </data>
+  <data name="EnglishHelp" xml:space="preserve">
+    <value>Der englische Name. Erforderlich; wird als Rückfall verwendet, wenn eine Sprache keine Übersetzung hat.</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Hilfe</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
+    <value>Zug kann die Richtung wechseln</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
+    <value>Ob ein Zug hier wenden kann, was üblicherweise ein Umsetzen der Lok erfordert.</value>
+  </data>
+  <data name="IsMain" xml:space="preserve">
+    <value>Hauptgleis</value>
+  </data>
+  <data name="IsManned" xml:space="preserve">
+    <value>Besetzt</value>
+  </data>
+  <data name="IsMannedHelp" xml:space="preserve">
+    <value>Ob die Station von einem Fahrdienstleiter bedient wird statt selbstbedient zu sein.</value>
+  </data>
+  <data name="IsScheduled" xml:space="preserve">
+    <value>Geplant</value>
+  </data>
+  <data name="IsShadow" xml:space="preserve">
+    <value>Schattenbahnhof</value>
+  </data>
+  <data name="IsShadowHelp" xml:space="preserve">
+    <value>Ein verborgener Bahnhof am Ende einer Strecke, der die Welt jenseits der modellierten Bahn darstellt.</value>
+  </data>
+  <data name="LayoutNameHelp" xml:space="preserve">
+    <value>Der Name dieser Anlage, der in Berichten und exportierten Dateien angezeigt wird.</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Länge (m)</value>
+  </data>
+  <data name="LocationReferencedByTrains" xml:space="preserve">
+    <value>Kann nicht gelöscht werden: Züge halten an dieser Stelle.</value>
+  </data>
+  <data name="LocoRunaroundHelp" xml:space="preserve">
+    <value>Echte Minuten, die einer Lok zum Umsetzen ans andere Zugende zugestanden werden.</value>
+  </data>
+  <data name="LocoRunaroundRealMinutes" xml:space="preserve">
+    <value>Lok umsetzen (echte Min.)</value>
+  </data>
+  <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
+    <value>Echte Zeit für das Umsetzen einer Lok um ihren Zug, in echten Minuten.</value>
+  </data>
+  <data name="MinimumStopHelp" xml:space="preserve">
+    <value>Die kürzeste Zeit in Modelluhr-Minuten, die ein Zug an einer Station bleiben muss, bevor er abfahren darf.</value>
+  </data>
+  <data name="MinimumStopMinutes" xml:space="preserve">
+    <value>Mindesthalt (Min.)</value>
+  </data>
+  <data name="MinimumStopMinutesHelp" xml:space="preserve">
+    <value>Mindestzeit, die ein Zug an dieser besetzten Station hält, in Modelluhr-Minuten.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NameAndSignatureRequired" xml:space="preserve">
+    <value>Name und Signatur sind erforderlich.</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="NoOperationLocations" xml:space="preserve">
+    <value>Es wurden noch keine Betriebsstellen definiert.</value>
+  </data>
+  <data name="NoRegions" xml:space="preserve">
+    <value>Es wurden noch keine Regionen definiert.</value>
+  </data>
+  <data name="NoRegionsDefined" xml:space="preserve">
+    <value>Für diese Anlage sind keine Regionen definiert.</value>
+  </data>
+  <data name="NoneOption" xml:space="preserve">
+    <value>(keine)</value>
+  </data>
+  <data name="Norwegian" xml:space="preserve">
+    <value>Norwegisch</value>
+  </data>
+  <data name="OperationLocationsNoSchedule" xml:space="preserve">
+    <value>Es ist keine Anlage geladen. Importieren oder erstellen Sie zuerst einen Fahrplan.</value>
+  </data>
+  <data name="OperationalTimes" xml:space="preserve">
+    <value>Überschreibungen der Betriebszeiten</value>
+  </data>
+  <data name="OperationalTimesHint" xml:space="preserve">
+    <value>Leer lassen, um den Standardwert der Anlage zu übernehmen.</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Eigentümer</value>
+  </data>
+  <data name="OwnerHelp" xml:space="preserve">
+    <value>Der FREMO-Modulbesitzer, der diese Stelle mitbringt. Optional.</value>
+  </data>
+  <data name="Region" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="RegionReferenced" xml:space="preserve">
+    <value>Kann nicht gelöscht werden: Diese Region ist einer oder mehreren Stationen zugewiesen.</value>
+  </data>
+  <data name="RegionsNoSchedule" xml:space="preserve">
+    <value>Es ist keine Anlage geladen. Importieren oder erstellen Sie zuerst einen Fahrplan.</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="SelectLocationType" xml:space="preserve">
+    <value>Wählen Sie den Typ der hinzuzufügenden Betriebsstelle:</value>
+  </data>
+  <data name="Shadow" xml:space="preserve">
+    <value>Schatten</value>
+  </data>
+  <data name="Signature" xml:space="preserve">
+    <value>Signatur</value>
+  </data>
+  <data name="SignatureHelp" xml:space="preserve">
+    <value>Eine kurze, eindeutige Abkürzung zur Identifizierung dieser Stelle (z. B. ein Stationskürzel).</value>
+  </data>
+  <data name="SignatureMustBeUnique" xml:space="preserve">
+    <value>Die Signatur muss innerhalb der Anlage eindeutig sein.</value>
+  </data>
+  <data name="StartDayHelp" xml:space="preserve">
+    <value>Der erste Betriebstag des Fahrplans.</value>
+  </data>
+  <data name="StartTimeHelp" xml:space="preserve">
+    <value>Die Uhrzeit, zu der die Betriebssitzung beginnt.</value>
+  </data>
+  <data name="Swedish" xml:space="preserve">
+    <value>Schwedisch</value>
+  </data>
+  <data name="TrackNumber" xml:space="preserve">
+    <value>Gleis</value>
+  </data>
+  <data name="TrackReferencedByTrains" xml:space="preserve">
+    <value>Kann nicht gelöscht werden: {0} Zug/Züge nutzen dieses Gleis.</value>
+  </data>
+  <data name="Tracks" xml:space="preserve">
+    <value>Gleise</value>
+  </data>
+  <data name="TrainClearanceHelp" xml:space="preserve">
+    <value>Echte Minuten, die ein Zug ein Stationsgleis belegt, bevor das Gleis wieder als frei gilt.</value>
+  </data>
+  <data name="TrainClearanceRealMinutes" xml:space="preserve">
+    <value>Zugfreigabe (echte Min.)</value>
+  </data>
+  <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
+    <value>Echte Zeit für die telefonische Zugfreigabe, in echten Minuten.</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="Usage" xml:space="preserve">
+    <value>Verwendung</value>
+  </data>
+  <data name="UseDaysHelp" xml:space="preserve">
+    <value>Züge über mehrere benannte Betriebstage statt einer einzelnen Sitzung planen.</value>
+  </data>
+  <data name="UseObjectLanguageInReports" xml:space="preserve">
+    <value>Jedes Berichtselement in seiner eigenen Sprache drucken</value>
+  </data>
+  <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
+    <value>Wenn aktiviert, werden Berichtselemente in der vom Element selbst abgeleiteten Sprache dargestellt – zum Beispiel ein Lokführerdienst in der Sprache des betreibenden Unternehmens. Die Oberfläche und alle Elemente ohne ableitbare Sprache verwenden weiterhin Ihre bevorzugte Sprache.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
 </root>
