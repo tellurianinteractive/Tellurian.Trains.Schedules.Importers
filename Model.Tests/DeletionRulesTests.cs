@@ -92,4 +92,41 @@ public class DeletionRulesTests
         Assert.IsFalse(Train.Calls.Contains(calls[0]));
         Assert.IsFalse(Train.WagonGroups.Contains(wagonGroup), "A wagon group that attached at the deleted call is removed.");
     }
+
+    [TestMethod]
+    public void CargoFlowOptionsCannotBeDeletedWhenReferencedByACargoFlow()
+    {
+        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+        var calls = Train.Calls.OrderBy(c => c.SortTime).ToList();
+        Train.CreateCargoFlow(1, calls.First(), calls.Last(), description);
+
+        var result = Plan.TryDelete(description);
+
+        Assert.IsInstanceOfType<DeletionResult.Failure>(result);
+        Assert.IsTrue(Plan.Timetable.CargoFlowOptions.Contains(description), "The description is left untouched when referenced.");
+    }
+
+    [TestMethod]
+    public void CargoFlowOptionsIsDeletedWhenNotReferenced()
+    {
+        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+
+        var result = Plan.TryDelete(description);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsFalse(Plan.Timetable.CargoFlowOptions.Contains(description));
+    }
+
+    [TestMethod]
+    public void CargoFlowTrainPartIsDeleted()
+    {
+        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+        var calls = Train.Calls.OrderBy(c => c.SortTime).ToList();
+        var cargoFlow = Train.CreateCargoFlow(1, calls.First(), calls.Last(), description);
+
+        var result = Plan.TryDelete(cargoFlow);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsFalse(Train.CargoFlows.Contains(cargoFlow));
+    }
 }

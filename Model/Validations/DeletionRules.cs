@@ -135,6 +135,46 @@ public static class DeletionRules
             plan.Timetable.Trains.FirstOrDefault(t => t.WagonGroups.Contains(wagonGroup))?.WagonGroups.Remove(wagonGroup);
             return new DeletionResult.Success(wagonGroup);
         }
+
+        /// <summary>
+        /// Determines whether a <see cref="CargoFlowOptions"/> description may be removed from the
+        /// timetable catalogue, i.e. no cargo flow on any train references it.
+        /// </summary>
+        public DeletionResult MayDelete(CargoFlowOptions options)
+        {
+            var references = ReferencesTo(plan, options);
+            return references.Count == 0
+                ? new DeletionResult.Success(options)
+                : new DeletionResult.Failure(options, references);
+        }
+
+        /// <summary>
+        /// Removes a <see cref="CargoFlowOptions"/> description from the timetable catalogue when no
+        /// cargo flow references it. Returns the <see cref="DeletionResult.Failure"/> from
+        /// <c>MayDelete</c> unchanged when it is still referenced, leaving the model untouched.
+        /// </summary>
+        public DeletionResult TryDelete(CargoFlowOptions options)
+        {
+            if (plan.MayDelete(options) is DeletionResult.Failure failure) return failure;
+            plan.Timetable.CargoFlowOptions.Remove(options);
+            return new DeletionResult.Success(options);
+        }
+
+        /// <summary>
+        /// A <see cref="CargoFlowTrainPart"/> may always be deleted: nothing else references it.
+        /// </summary>
+        public DeletionResult MayDelete(CargoFlowTrainPart cargoFlow) => new DeletionResult.Success(cargoFlow);
+
+        /// <summary>
+        /// Deletes a <see cref="CargoFlowTrainPart"/> from the train that owns it.
+        /// </summary>
+        public DeletionResult TryDelete(CargoFlowTrainPart cargoFlow)
+        {
+            // The owning train is derived from the cargo flow's from-call; find it through the timetable
+            // to stay consistent with how wagon groups are removed.
+            plan.Timetable.Trains.FirstOrDefault(t => t.CargoFlows.Contains(cargoFlow))?.CargoFlows.Remove(cargoFlow);
+            return new DeletionResult.Success(cargoFlow);
+        }
     }
 
     // Company is referenced by its Id (Train, ScheduledObject, DriverDuty foreign keys) and, for train
@@ -192,6 +232,16 @@ public static class DeletionRules
             references.Add(Reference.For(schedule));
         foreach (var duty in plan.DriverDuties.Where(d => d.Parts.Any(p => p.From.Equals(call) || p.To.Equals(call))))
             references.Add(Reference.For(duty));
+        return references;
+    }
+
+    // A cargo flow description is referenced by any train carrying a cargo flow that uses it (matched by
+    // the foreign key, or by instance for an as-yet-unsaved flow).
+    private static List<Reference> ReferencesTo(Plan plan, CargoFlowOptions options)
+    {
+        var references = new List<Reference>();
+        foreach (var train in plan.Timetable.Trains.Where(t => t.CargoFlows.Any(cf => cf.CargoFlowOptionsId == options.Id || ReferenceEquals(cf.CargoFlowOptions, options))))
+            references.Add(Reference.For(train));
         return references;
     }
 }
