@@ -50,6 +50,13 @@ public sealed class Timetable : IEquatable<Timetable>
     /// </summary>
     public IList<Sessions> Sessions { get; set; }
 
+    /// <summary>
+    /// Gets or sets the catalogue of reusable cargo flow descriptions available in this timetable. A
+    /// cargo flow references an entry here (editing the entry updates every cargo flow that uses it).
+    /// Managed on the Cargo Flow tab; empty for a new timetable until the planner adds descriptions.
+    /// </summary>
+    public IList<CargoFlowOptions> CargoFlowOptions { get; set; }
+
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
     private Timetable()
@@ -58,6 +65,7 @@ public sealed class Timetable : IEquatable<Timetable>
         Trains = [];
         TrainCategories = [];
         Sessions = [];
+        CargoFlowOptions = [];
     }
 
     /// <summary>
@@ -73,6 +81,7 @@ public sealed class Timetable : IEquatable<Timetable>
         Trains = [];
         TrainCategories = [];
         Sessions = [];
+        CargoFlowOptions = [];
     }
 
     /// <inheritdoc/>
@@ -184,4 +193,30 @@ public static class TimetableExtensions
         }
         return train;
     }
+
+    /// <summary>
+    /// Adds a cargo flow description to the timetable's catalogue, assigning the next free id when it
+    /// has none. A description already present is left untouched.
+    /// </summary>
+    /// <param name="timetable">The timetable whose catalogue to add to.</param>
+    /// <param name="options">The cargo flow description to add.</param>
+    /// <returns>The added (or already present) cargo flow description.</returns>
+    public static CargoFlowOptions Add(this Timetable timetable, CargoFlowOptions options)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        options = options.ValueOrException(nameof(options));
+        if (!timetable.CargoFlowOptions.Contains(options))
+        {
+            if (options.Id == 0) options.Id = timetable.NextCargoFlowOptionsId();
+            timetable.CargoFlowOptions.Add(options);
+        }
+        return options;
+    }
+
+    /// <summary>
+    /// Gets the next free cargo flow description id for this timetable's catalogue.
+    /// </summary>
+    /// <param name="timetable">The timetable.</param>
+    public static int NextCargoFlowOptionsId(this Timetable timetable) =>
+        (timetable.CargoFlowOptions.Select(o => o.Id).DefaultIfEmpty(0).Max()) + 1;
 }

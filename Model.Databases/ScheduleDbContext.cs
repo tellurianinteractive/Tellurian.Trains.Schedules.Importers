@@ -402,6 +402,32 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne()
                   .HasForeignKey("TimetableId")
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // The cargo flow description catalogue belongs to the timetable (owned 1:N). Each
+            // description owns its origin and destination collections (each referencing a Station).
+            entity.OwnsMany(e => e.CargoFlowOptions, o =>
+            {
+                o.ToTable("TimetableCargoFlowOptions");
+                o.HasKey(c => c.Id);
+
+                o.OwnsMany(c => c.Origins, origin =>
+                {
+                    origin.ToTable("TimetableCargoFlowOrigins");
+                    origin.Property<int>("Id").ValueGeneratedOnAdd();
+                    origin.HasKey("Id");
+                    origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                });
+
+                o.OwnsMany(c => c.Destinations, destination =>
+                {
+                    destination.ToTable("TimetableCargoFlowDestinations");
+                    destination.Property<int>("Id").ValueGeneratedOnAdd();
+                    destination.HasKey("Id");
+                    destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                    // Computed markup rendering, not persisted.
+                    destination.Ignore(x => x.Display);
+                });
+            });
         });
 
         // TrainCategory
