@@ -912,10 +912,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                                 number: 0,
                                                 externalId: $"WagonGroup{rowNumber}",
                                                 remark: fields[Remark]);
-                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value)
-                                            {
-                                                CargoFlowOptions = new CargoFlowOptions { HasCoupleNote = true, HasUncoupleNote = true }
-                                            };
+                                            // The imported cargo flow is a ScheduledObject(CargoFlow) assigned to its
+                                            // own schedule; the bare part records the segment it runs over. Structured
+                                            // routing (CargoFlowOptions) is added later through the cargo-flow editor.
+                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value);
                                             cargoFlow.Add(trainPart);
                                         }
                                     }

@@ -179,11 +179,6 @@ public class ScheduleDbContextIntegrationTests
         part.Id = 1;
         part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true };
         part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3, WagonGroup = { new Wagon(1, "Gbs") { Number = "1234" } } };
-        part.CargoFlowOptions = new CargoFlowOptions
-        {
-            Origins = { new Origin { Station = station } },
-            Destinations = { new Destination { Station = station, AndRegions = true } }
-        };
         part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
 
         // Act
@@ -197,8 +192,6 @@ public class ScheduleDbContextIntegrationTests
         var loaded = await context.TrainParts
             .OfType<ScheduledTrainPart>()
             .Include(p => p.WagonSetOptions!).ThenInclude(n => n.WagonGroup)
-            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Origins).ThenInclude(o => o.Station)
-            .Include(p => p.CargoFlowOptions!).ThenInclude(c => c.Destinations).ThenInclude(d => d.Station)
             .FirstAsync(CancellationToken);
 
         // Assert - each option kind persisted and read back from SQLite
@@ -212,13 +205,6 @@ public class ScheduleDbContextIntegrationTests
         Assert.AreEqual(1, loaded.WagonSetOptions.WagonGroup.Count);
         Assert.AreEqual("Gbs", loaded.WagonSetOptions.WagonGroup.First().Class);
         Assert.AreEqual("1234", loaded.WagonSetOptions.WagonGroup.First().Number);
-
-        Assert.IsNotNull(loaded.CargoFlowOptions, "CargoFlowOptions");
-        Assert.AreEqual(1, loaded.CargoFlowOptions!.Origins.Count);
-        Assert.AreEqual("S", loaded.CargoFlowOptions.Origins.First().Station.Signature);
-        Assert.AreEqual(1, loaded.CargoFlowOptions.Destinations.Count);
-        Assert.AreEqual("S", loaded.CargoFlowOptions.Destinations.First().Station.Signature);
-        Assert.IsTrue(loaded.CargoFlowOptions.Destinations.First().AndRegions);
 
         Assert.IsNotNull(loaded.CargoOnlyOptions, "CargoOnlyOptions");
         Assert.AreEqual("Coal", loaded.CargoOnlyOptions!.CargoName);

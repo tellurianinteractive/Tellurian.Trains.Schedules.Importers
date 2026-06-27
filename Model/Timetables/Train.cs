@@ -25,6 +25,7 @@ public class Train : IEquatable<Train>
         Timetable = default!;
         Calls = [];
         WagonGroups = [];
+        CargoFlows = [];
     }
 
     /// <summary>
@@ -42,6 +43,7 @@ public class Train : IEquatable<Train>
         Timetable = default!;
         Calls = [];
         WagonGroups = [];
+        CargoFlows = [];
     }
 
     /// <summary>
@@ -142,6 +144,13 @@ public class Train : IEquatable<Train>
     /// Gets or sets the collection of wagon groups in this train.
     /// </summary>
     public IList<WagonGroup> WagonGroups { get; set; }
+
+    /// <summary>
+    /// Gets or sets the collection of cargo flows on this train. Each <see cref="CargoFlowTrainPart"/>
+    /// connects wagons at its from-call and disconnects them at its to-call, referencing a reusable
+    /// description in the timetable's cargo flow catalogue.
+    /// </summary>
+    public IList<CargoFlowTrainPart> CargoFlows { get; set; }
 
     /// <summary>
     /// Gets the driver's start time (arrival time of first call).
@@ -366,6 +375,39 @@ public static class TrainExtensions
                 train.WagonGroups.Add(wagonGroup);
             }
             return wagonGroup;
+        }
+
+        /// <summary>
+        /// Creates a cargo flow over a segment of this train and adds it to <see cref="Train.CargoFlows"/>.
+        /// </summary>
+        /// <param name="id">The unique identifier for the cargo flow train part.</param>
+        /// <param name="from">The departure call where wagons are connected.</param>
+        /// <param name="to">The arrival call where wagons are disconnected.</param>
+        /// <param name="options">The cargo flow description (a timetable catalogue entry) to reference.</param>
+        /// <param name="positionInTrain">The position of the cargo flow within the train (default 1).</param>
+        /// <returns>The created cargo flow, already added to the train.</returns>
+        public CargoFlowTrainPart CreateCargoFlow(int id, StationCall from, StationCall to, CargoFlowOptions options, int positionInTrain = 1)
+        {
+            var cargoFlow = new CargoFlowTrainPart(from, to)
+            {
+                Id = id,
+                CargoFlowOptions = options,
+                CargoFlowOptionsId = options.Id,
+                PositionInTrain = positionInTrain,
+            };
+            return train.Add(cargoFlow);
+        }
+
+        /// <summary>
+        /// Adds a cargo flow to the train.
+        /// </summary>
+        /// <param name="cargoFlow">The cargo flow to add.</param>
+        /// <returns>The added cargo flow.</returns>
+        public CargoFlowTrainPart Add(CargoFlowTrainPart cargoFlow)
+        {
+            cargoFlow = cargoFlow.ValueOrException(nameof(cargoFlow));
+            if (!train.CargoFlows.Contains(cargoFlow)) train.CargoFlows.Add(cargoFlow);
+            return cargoFlow;
         }
 
         /// <summary>

@@ -97,22 +97,3 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <inheritdoc/>
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", Train, From.Station, From.Departure.HHMM(), To.Station, To.Arrival.HHMM());
 }
-
-/// <summary>
-/// Provides extension methods for <see cref="TrainPart"/>.
-/// </summary>
-public static class TrainPartExtensions
-{
-    extension(TrainPart trainPart)
-    {
-        /// <summary>
-        /// Determines whether this train part overlaps with any of the specified train parts.
-        /// </summary>
-        /// <param name="otherTrainParts">The collection of train parts to check against.</param>
-        /// <returns><c>true</c> if there is any overlap; otherwise, <c>false</c>.</returns>
-        public bool IsOverlapping(IEnumerable<TrainPart> otherTrainParts)
-        {
-            return otherTrainParts.Any(o => o.Arrival > trainPart.Departure && o.Departure < trainPart.Arrival);
-        }
-    }
-}

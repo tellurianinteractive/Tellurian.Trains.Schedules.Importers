@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
@@ -56,12 +55,6 @@ public sealed class ScheduledTrainPart : TrainPart
     public WagonSetOptions? WagonSetOptions { get; set; }
 
     /// <summary>
-    /// Options applying when this part participates in a cargo flow directed by waybills.
-    /// Null when not applicable.
-    /// </summary>
-    public CargoFlowOptions? CargoFlowOptions { get; set; }
-
-    /// <summary>
     /// Options applying when this part is a fixed-schedule cargo-only working.
     /// Null when not applicable.
     /// </summary>
@@ -76,6 +69,18 @@ public static class ScheduledTrainPartExtensions
     extension(ScheduledTrainPart trainPart)
     {
         /// <summary>
+        /// Determines whether this train part overlaps in time with any of the specified train parts.
+        /// Overlap only applies to scheduled parts (vehicle circulations and driver duties); a cargo
+        /// flow is not subject to it.
+        /// </summary>
+        /// <param name="otherTrainParts">The collection of train parts to check against.</param>
+        /// <returns><c>true</c> if there is any overlap; otherwise, <c>false</c>.</returns>
+        public bool IsOverlapping(IEnumerable<ScheduledTrainPart> otherTrainParts)
+        {
+            return otherTrainParts.Any(o => o.Arrival > trainPart.Departure && o.Departure < trainPart.Arrival);
+        }
+
+        /// <summary>
         /// Creates <see cref="ICallNote">notes</see> for the departure station call at the train part's start station.
         /// </summary>
         public IEnumerable<ICallNote> DepartureNotes
@@ -85,7 +90,6 @@ public static class ScheduledTrainPartExtensions
                 List<ICallNote> result = [];
                 trainPart.AddTractionUnitDepartureNotes(result);
                 trainPart.AddWagonSetDepartureNotes(result);
-                trainPart.AddCargoFlowDepartureNotes(result);
                 result.AddRange(trainPart.From.Notes);
                 return result;
             }
@@ -160,17 +164,6 @@ public static class ScheduledTrainPartExtensions
             }
         }
 
-        private void AddCargoFlowDepartureNotes(List<ICallNote> callNotes)
-        {
-            var options = trainPart.CargoFlowOptions;
-            if (options is null) return;
-            if (options.HasCoupleNote)
-            {
-                callNotes.AddRange(trainPart.CargoFlows
-                    .Select(cf => new CargoFlowDestinationNote(cf, trainPart)));
-            }
-        }
-
         private IEnumerable<ScheduledObject> ScheduledObjects =>
             trainPart.Schedule?.Plan.ScheduledObjectsFor(trainPart) ?? [];
 
@@ -179,27 +172,5 @@ public static class ScheduledTrainPartExtensions
 
         private IEnumerable<ScheduledObject> WagonSets =>
             trainPart.ScheduledObjects.Where(so => so.IsWagonSet);
-
-        private IEnumerable<ScheduledObject> CargoFlows =>
-            trainPart.ScheduledObjects.Where(so => so.IsCargoFlow);
-
-        internal string CargoFlowDestinationsText
-        {
-            get
-            {
-                var options = trainPart.CargoFlowOptions!;
-                return options.ToAllDestinations ? NoteResources.AllDestinations :
-                        string.Join(", ", options.Destinations.Select(d => d.ToString()));
-            }
-        }
-
-        internal string CargoFlowDestinationsHtml
-        {
-            get
-            {
-                var options = trainPart.CargoFlowOptions!;
-                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.Display.Value));
-            }
-        }
     }
 }

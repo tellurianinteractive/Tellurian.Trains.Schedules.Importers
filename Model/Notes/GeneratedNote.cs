@@ -7,7 +7,7 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// Base type for the transient call notes generated on demand from a <see cref="TrainPart"/>'s options.
 /// Unlike the persisted <see cref="CallNote"/> family, generated notes are never stored; they exist only
 /// to be rendered. Each note is a thin data carrier — the text and markup are produced by the switch
-/// expressions in <see cref="TrainPartExtensions"/>.
+/// expressions in <see cref="GeneratedNoteExtensions"/>.
 /// </summary>
 public abstract record GeneratedNote : ICallNote
 {
@@ -51,7 +51,7 @@ public static class GeneratedNoteExtensions
             FromParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitToParking, so),
             ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.Station, part.To.Station),
-            CargoFlowDestinationNote(_, var part) when part.CargoFlowOptions is not null =>
+            CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsText),
             _ => string.Empty,
         };
@@ -63,7 +63,7 @@ public static class GeneratedNoteExtensions
         internal MarkupString HtmlOf => note switch
         {
             // Specialised variant: destination regions are rendered as coloured chips (see Region.Display).
-            CargoFlowDestinationNote(_, var part) when part.CargoFlowOptions is not null =>
+            CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 new($"""<span class="callnote">{NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsHtml)}</span>"""),
             // Default: what the base note rendering does — wrap the plain text in a callnote span.
             _ => new($"""<span class="callnote">{note.TextOf}</span>"""),

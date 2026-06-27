@@ -403,31 +403,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey("TimetableId")
                   .OnDelete(DeleteBehavior.Cascade);
 
-            // The cargo flow description catalogue belongs to the timetable (owned 1:N). Each
-            // description owns its origin and destination collections (each referencing a Station).
-            entity.OwnsMany(e => e.CargoFlowOptions, o =>
-            {
-                o.ToTable("TimetableCargoFlowOptions");
-                o.HasKey(c => c.Id);
-
-                o.OwnsMany(c => c.Origins, origin =>
-                {
-                    origin.ToTable("TimetableCargoFlowOrigins");
-                    origin.Property<int>("Id").ValueGeneratedOnAdd();
-                    origin.HasKey("Id");
-                    origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
-                });
-
-                o.OwnsMany(c => c.Destinations, destination =>
-                {
-                    destination.ToTable("TimetableCargoFlowDestinations");
-                    destination.Property<int>("Id").ValueGeneratedOnAdd();
-                    destination.HasKey("Id");
-                    destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
-                    // Computed markup rendering, not persisted.
-                    destination.Ignore(x => x.Display);
-                });
-            });
+            // The cargo flow description catalogue belongs to the timetable (1:N). CargoFlowOptions is a
+            // referenced entity (a CargoFlowTrainPart points at one), configured separately below; it has
+            // no Timetable navigation, so the foreign key is a shadow property.
+            entity.HasMany(e => e.CargoFlowOptions)
+                  .WithOne()
+                  .HasForeignKey("TimetableId")
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // TrainCategory
@@ -479,6 +461,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasMany(e => e.WagonGroups)
                   .WithOne(e => e.Train)
                   .HasForeignKey(e => e.TrainId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Cargo flows belong to the train (1:N). CargoFlowTrainPart has no Train navigation of its
+            // own (Train is derived from its from-call), so the foreign key is a shadow property.
+            entity.HasMany(e => e.CargoFlows)
+                  .WithOne()
+                  .HasForeignKey("TrainId")
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -638,10 +627,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.Departure);
             entity.Ignore(e => e.Arrival);
 
-            // Table-per-hierarchy: ScheduledTrainPart is the only mapped subclass for now;
-            // CargoFlowTrainPart is added in a later step.
+            // Table-per-hierarchy over the train-part kinds.
             entity.HasDiscriminator<string>("PartType")
-                  .HasValue<ScheduledTrainPart>("Scheduled");
+                  .HasValue<ScheduledTrainPart>("Scheduled")
+                  .HasValue<CargoFlowTrainPart>("CargoFlow");
         });
 
         // ScheduledTrainPart per-part options: four optional, independent owned types, each mapped to
@@ -662,32 +651,6 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 });
             });
 
-            entity.OwnsOne(e => e.CargoFlowOptions, o =>
-            {
-                o.ToTable("CargoFlowOptions");
-
-                // Origins and destinations are owned collections; each references a Station entity
-                // (not owned). A sole auto-increment shadow key lets SQLite generate it, mirroring
-                // the Wagons mapping above.
-                o.OwnsMany(c => c.Origins, origin =>
-                {
-                    origin.ToTable("CargoFlowOrigins");
-                    origin.Property<int>("Id").ValueGeneratedOnAdd();
-                    origin.HasKey("Id");
-                    origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
-                });
-
-                o.OwnsMany(c => c.Destinations, destination =>
-                {
-                    destination.ToTable("CargoFlowDestinations");
-                    destination.Property<int>("Id").ValueGeneratedOnAdd();
-                    destination.HasKey("Id");
-                    destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
-                    // Computed markup rendering, not persisted.
-                    destination.Ignore(x => x.Display);
-                });
-            });
-
             entity.OwnsOne(e => e.CargoOnlyOptions, o =>
             {
                 o.ToTable("CargoOnlyOptions");
@@ -695,6 +658,42 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 o.Ignore(c => c.Load);
                 o.Ignore(c => c.Unload);
             });
+        });
+
+        // CargoFlowOptions: a reusable cargo flow description in the timetable catalogue, referenced by
+        // CargoFlowTrainParts. Owns its origin and destination collections (each referencing a Station).
+        modelBuilder.Entity<CargoFlowOptions>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200);
+
+            entity.OwnsMany(c => c.Origins, origin =>
+            {
+                origin.ToTable("CargoFlowOrigins");
+                origin.Property<int>("Id").ValueGeneratedOnAdd();
+                origin.HasKey("Id");
+                origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+            });
+
+            entity.OwnsMany(c => c.Destinations, destination =>
+            {
+                destination.ToTable("CargoFlowDestinations");
+                destination.Property<int>("Id").ValueGeneratedOnAdd();
+                destination.HasKey("Id");
+                destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                // Computed markup rendering, not persisted.
+                destination.Ignore(x => x.Display);
+            });
+        });
+
+        // CargoFlowTrainPart: belongs to its Train (Train.CargoFlows, shadow TrainId FK) and references a
+        // catalogue CargoFlowOptions. It is not part of a vehicle schedule or driver duty.
+        modelBuilder.Entity<CargoFlowTrainPart>(entity =>
+        {
+            entity.HasOne(e => e.CargoFlowOptions)
+                  .WithMany()
+                  .HasForeignKey(e => e.CargoFlowOptionsId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
