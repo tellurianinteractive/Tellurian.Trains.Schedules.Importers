@@ -8,7 +8,7 @@ namespace Tellurian.Trains.Schedules.Model.Timetables;
 /// Represents a time of day for railway scheduling purposes.
 /// </summary>
 [JsonConverter(typeof(TimeJsonConverter))]
-public readonly struct Time : IComparable<Time?>, IEquatable<Time>
+public readonly struct Time : IComparable<Time?>, IComparable<Time>, IComparable, IEquatable<Time>
 {
     /// <summary>
     /// Gets a time value representing midnight (00:00).
@@ -102,6 +102,13 @@ public readonly struct Time : IComparable<Time?>, IEquatable<Time>
 
     /// <inheritdoc/>
     public int CompareTo(Time? other) => other?.Value is null ? int.MinValue : (int)(Value - other.Value.Value).TotalMinutes;
+
+    /// <inheritdoc/>
+    public int CompareTo(Time other) => Value.CompareTo(other.Value);
+
+    /// <inheritdoc/>
+    public int CompareTo(object? obj) => obj is null ? 1 : obj is Time other ? CompareTo(other)
+        : throw new ArgumentException($"Object must be of type {nameof(Time)}.", nameof(obj));
 
     /// <summary>Determines whether two times are not equal.</summary>
     public static bool operator !=(Time? time1, Time? time2) => time1?.CompareTo(time2) != 0;

@@ -64,6 +64,77 @@ public static class DeletionRules
                 countries.Remove(existing);
             return new DeletionResult.Success(country);
         }
+
+        /// <summary>
+        /// Determines whether a <see cref="Train"/> may be deleted from the timetable, i.e. no vehicle
+        /// schedule or driver duty runs any part of it.
+        /// </summary>
+        public DeletionResult MayDelete(Train train)
+        {
+            var references = ReferencesTo(plan, train);
+            return references.Count == 0
+                ? new DeletionResult.Success(train)
+                : new DeletionResult.Failure(train, references);
+        }
+
+        /// <summary>
+        /// Deletes a <see cref="Train"/> from the timetable when nothing runs it: removes the train's
+        /// calls from the tracks that hold them, and removes the train (its calls and wagon groups go
+        /// with it). Returns the <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged
+        /// when it is still referenced, leaving the model untouched.
+        /// </summary>
+        public DeletionResult TryDelete(Train train)
+        {
+            if (plan.MayDelete(train) is DeletionResult.Failure failure) return failure;
+            foreach (var call in train.Calls) call.Track.Calls.Remove(call);
+            plan.Timetable.Trains.Remove(train);
+            return new DeletionResult.Success(train);
+        }
+
+        /// <summary>
+        /// Determines whether a <see cref="StationCall"/> may be deleted from its train, i.e. no vehicle
+        /// schedule or driver duty part starts or ends at it. Wagon groups of the same train that attach
+        /// or detach at the call do not block deletion — <c>TryDelete</c> removes them.
+        /// </summary>
+        public DeletionResult MayDelete(StationCall call)
+        {
+            var references = ReferencesTo(plan, call);
+            return references.Count == 0
+                ? new DeletionResult.Success(call)
+                : new DeletionResult.Failure(call, references);
+        }
+
+        /// <summary>
+        /// Deletes a <see cref="StationCall"/> from its train when no part uses it: removes the call from
+        /// its train and its track, and drops the train's wagon groups that referenced it. Returns the
+        /// <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when it is still
+        /// referenced, leaving the model untouched.
+        /// </summary>
+        public DeletionResult TryDelete(StationCall call)
+        {
+            if (plan.MayDelete(call) is DeletionResult.Failure failure) return failure;
+            var train = call.Train;
+            train.Calls.Remove(call);
+            call.Track.Calls.Remove(call);
+            foreach (var wagonGroup in train.WagonGroups.Where(w => w.FromStationCallId == call.Id || w.ToStationCallId == call.Id).ToList())
+                train.WagonGroups.Remove(wagonGroup);
+            return new DeletionResult.Success(call);
+        }
+
+        /// <summary>
+        /// A <see cref="WagonGroup"/> may always be deleted: nothing else references it.
+        /// </summary>
+        public DeletionResult MayDelete(WagonGroup wagonGroup) => new DeletionResult.Success(wagonGroup);
+
+        /// <summary>
+        /// Deletes a <see cref="WagonGroup"/> from the train that owns it.
+        /// </summary>
+        public DeletionResult TryDelete(WagonGroup wagonGroup)
+        {
+            // WagonGroup.Train is not persisted, so find the owner through the timetable.
+            plan.Timetable.Trains.FirstOrDefault(t => t.WagonGroups.Contains(wagonGroup))?.WagonGroups.Remove(wagonGroup);
+            return new DeletionResult.Success(wagonGroup);
+        }
     }
 
     // Company is referenced by its Id (Train, ScheduledObject, DriverDuty foreign keys) and, for train
@@ -99,6 +170,28 @@ public static class DeletionRules
         // Region has no ToString override, so its display name is passed explicitly.
         foreach (var region in layout.Regions.Where(r => r.CountryId == country.Id))
             references.Add(new(nameof(Region), region.Name));
+        return references;
+    }
+
+    // A train is referenced by any vehicle-schedule or driver-duty part that runs it.
+    private static List<Reference> ReferencesTo(Plan plan, Train train)
+    {
+        var references = new List<Reference>();
+        foreach (var schedule in plan.Schedules.Where(s => s.Parts.Any(p => p.Train.Equals(train))))
+            references.Add(Reference.For(schedule));
+        foreach (var duty in plan.DriverDuties.Where(d => d.Parts.Any(p => p.Train.Equals(train))))
+            references.Add(Reference.For(duty));
+        return references;
+    }
+
+    // A station call is referenced by any vehicle-schedule or driver-duty part that starts or ends at it.
+    private static List<Reference> ReferencesTo(Plan plan, StationCall call)
+    {
+        var references = new List<Reference>();
+        foreach (var schedule in plan.Schedules.Where(s => s.Parts.Any(p => p.From.Equals(call) || p.To.Equals(call))))
+            references.Add(Reference.For(schedule));
+        foreach (var duty in plan.DriverDuties.Where(d => d.Parts.Any(p => p.From.Equals(call) || p.To.Equals(call))))
+            references.Add(Reference.For(duty));
         return references;
     }
 }

@@ -19,3 +19,11 @@ public sealed class CargoOnlyOptions : TrainPartOptions
     /// </summary>
     public bool Unload => base.HasUncoupleNote;
 }
+
+/// <summary>
+/// 
+/// </summary>
+public static class CargoOnlyOptionsExtensions
+{
+
+}

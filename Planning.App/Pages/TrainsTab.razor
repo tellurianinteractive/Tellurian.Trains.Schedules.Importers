@@ -1,4 +1,563 @@
 @page "/trains"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@implements IDisposable
 
-<p>@Translator("TrainsDescription")</p>
+@if (Timetable is null || Layout is null)
+{
+    <p>@Translator("TrainsNoSchedule")</p>
+}
+else
+{
+    <div class="trains-editor">
+        <p class="hint">@Translator("TrainsDescription")</p>
+
+        <div class="toolbar">
+            <button class="primary" @onclick="AddTrain">@Translator("AddTrain")</button>
+        </div>
+
+        @if (Trains.Count == 0)
+        {
+            <p class="empty">@Translator("NoTrains")</p>
+        }
+        else
+        {
+            <table class="trains">
+                <thead>
+                    <tr>
+                        <th class="expander"></th>
+                        @if (ShowExternalId)
+                        {
+                            <th>@Translator("ExternalId")</th>
+                        }
+                        <th>@Translator("Company")</th>
+                        <th>@Translator("Number")</th>
+                        <th>@Translator("Sessions")</th>
+                        <th>@Translator("Category")</th>
+                        <th>@Translator("MaxSpeed")</th>
+                        <th>@Translator("Axles")</th>
+                        <th>@Translator("Wagons")</th>
+                        <th>@Translator("LengthMeters")</th>
+                        <th>@Translator("ContinuesAs")</th>
+                        <th class="actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var train in Trains)
+                    {
+                        <tr class="train @(IsExpanded(train) ? "expanded" : "")">
+                            <td class="expander">
+                                <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
+                                        @onclick="() => ToggleExpanded(train)">@(IsExpanded(train) ? "▾" : "▸")</button>
+                            </td>
+                            @if (ShowExternalId)
+                            {
+                                <td>
+                                    <input type="text" class="ext" value="@train.ExternalId"
+                                           @onchange="e => SetExternalId(train, e)" />
+                                </td>
+                            }
+                            <td>
+                                @{ var inheritedCompany = train.Category?.Company; }
+                                <select class="@(train.Company is null ? "inherited" : null)"
+                                        value="@(train.CompanyId?.ToString() ?? "")" @onchange="e => SetCompany(train, e)">
+                                    <option value="">@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")</option>
+                                    @foreach (var company in CompanyChoices)
+                                    {
+                                        <option value="@company.Id">@company.Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="num" value="@train.Number" @onchange="e => SetNumber(train, e)" />
+                            </td>
+                            <td>
+                                <select value="@SessionsKey(train)" @onchange="e => SetSessions(train, e)">
+                                    @if (!SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == SessionsKey(train)))
+                                    {
+                                        <option value="@SessionsKey(train)" selected>@SessionsText(train.Sessions)</option>
+                                    }
+                                    @foreach (var sessions in SessionsCatalogue)
+                                    {
+                                        <option value="@SessionsDisplay.Key(sessions)">@SessionsText(sessions)</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select value="@(train.CategoryId?.ToString() ?? "")" @onchange="e => SetCategory(train, e)">
+                                    <option value="">—</option>
+                                    @foreach (var category in CategoryChoices)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="num" min="0" value="@train.MaxSpeed"
+                                       placeholder="@(train.Category?.DefaultSpeed.ToString(Culture))"
+                                       @onchange="e => SetMaxSpeed(train, e)" />
+                            </td>
+                            <td><input type="number" class="num3" min="0" value="@train.Length.Axles" @onchange="e => SetAxles(train, e)" /></td>
+                            <td><input type="number" class="num3" min="0" value="@train.Length.Wagons" @onchange="e => SetWagons(train, e)" /></td>
+                            <td><input type="text" class="num3"
+                                       value="@train.Length.Meters?.ToString("0.#", Culture)" @onchange="e => SetMeters(train, e)" /></td>
+                            <td class="continues">
+                                <input type="checkbox" checked="@train.ShowContinuesAs"
+                                       title="@Translator("ShowContinuesAsHint")" @onchange="e => SetShowContinuesAs(train, e)" />
+                            </td>
+                            <td class="actions">
+                                @{ var deletion = Plan?.MayDelete(train); }
+                                <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
+                                    <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                                            @onclick="() => _deleteTarget = train">@Translator("Delete")</button>
+                                </span>
+                            </td>
+                        </tr>
+                        @if (IsExpanded(train))
+                        {
+                            <tr class="detail">
+                                <td></td>
+                                <td colspan="@(ShowExternalId ? 11 : 10)">
+                                    <div class="sub-tabs">
+                                        @foreach (var view in SubViews)
+                                        {
+                                            <button class="sub-tab @(SubViewOf(train) == view ? "active" : "")"
+                                                    @onclick="() => SetSubView(train, view)">@SubViewLabel(view)</button>
+                                        }
+                                    </div>
+                                    @if (SubViewOf(train) == SubView.Calls)
+                                    {
+                                        @CallsTable(train)
+                                    }
+                                    else
+                                    {
+                                        @WagonGroupsTable(train)
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (_deleteTarget is not null)
+        {
+            <div class="confirm">
+                <span>@string.Format(Culture, Translator("DeleteTrainConfirm"), TrainLabel(_deleteTarget))</span>
+                <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private enum SubView { Calls, WagonGroups }
+    private static readonly SubView[] SubViews = Enum.GetValues<SubView>();
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+
+    private bool UseDays => Layout?.Settings.General.UseDays ?? false;
+
+    private List<Train> Trains =>
+        [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number)];
+
+    // The ExternalId column is only meaningful for imported trains; hide it when nothing uses it.
+    private bool ShowExternalId => Trains.Any(t => !string.IsNullOrWhiteSpace(t.ExternalId));
+
+    private IEnumerable<Company> CompanyChoices =>
+        (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<TrainCategory> CategoryChoices =>
+        (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<Sessions> SessionsCatalogue =>
+        Timetable?.Sessions ?? [];
+
+    private readonly HashSet<int> _expanded = [];
+    private readonly Dictionary<int, SubView> _subView = [];
+    private Train? _deleteTarget;
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        // Older/imported timetables have no session catalogue yet; seed the standard patterns so the
+        // Sessions drop-down is usable. Only persists when something was actually added.
+        if (Timetable is { } timetable && timetable.EnsureSessions()) ScheduleState.SaveAndNotify();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // ---- Expansion / sub-view state -------------------------------------------------------------
+
+    private bool IsExpanded(Train train) => _expanded.Contains(train.Id);
+
+    private void ToggleExpanded(Train train)
+    {
+        if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
+    }
+
+    private SubView SubViewOf(Train train) => _subView.TryGetValue(train.Id, out var v) ? v : SubView.Calls;
+
+    private void SetSubView(Train train, SubView view) => _subView[train.Id] = view;
+
+    private string SubViewLabel(SubView view) => Translator(view switch
+    {
+        SubView.Calls => "Calls",
+        _ => "WagonGroups",
+    });
+
+    // ---- Display helpers ------------------------------------------------------------------------
+
+    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator);
+
+    private string SessionsKey(Train train) => SessionsDisplay.Key(train.Sessions);
+
+    private string TrainLabel(Train train)
+    {
+        var identity = train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString(Culture);
+        return train.EffectiveCompany is { } c ? $"{c.Signature} {identity}".Trim() : identity;
+    }
+
+    // ---- Train field editing --------------------------------------------------------------------
+
+    private void SetExternalId(Train train, ChangeEventArgs e)
+    {
+        train.ExternalId = e.Value?.ToString() ?? "";
+        Save();
+    }
+
+    private void SetNumber(Train train, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var number)) train.Number = number;
+        Save();
+    }
+
+    private void SetCompany(Train train, ChangeEventArgs e)
+    {
+        train.Company = int.TryParse(e.Value?.ToString(), out var id) ? Layout!.Companies.FirstOrDefault(c => c.Id == id) : null;
+        train.CompanyId = train.Company?.Id;
+        Save();
+    }
+
+    private void SetCategory(Train train, ChangeEventArgs e)
+    {
+        train.Category = int.TryParse(e.Value?.ToString(), out var id) ? Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id) : null;
+        train.CategoryId = train.Category?.Id;
+        Save();
+    }
+
+    private void SetSessions(Train train, ChangeEventArgs e)
+    {
+        var key = e.Value?.ToString();
+        var match = SessionsCatalogue.FirstOrDefault(s => SessionsDisplay.Key(s) == key);
+        if (SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == key)) train.Sessions = match;
+        Save();
+    }
+
+    private void SetMaxSpeed(Train train, ChangeEventArgs e)
+    {
+        train.MaxSpeed = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var speed) ? speed : null;
+        Save();
+    }
+
+    private void SetAxles(Train train, ChangeEventArgs e) =>
+        SetLength(train, train.Length with { Axles = ParseInt(e) });
+
+    private void SetWagons(Train train, ChangeEventArgs e) =>
+        SetLength(train, train.Length with { Wagons = ParseInt(e) });
+
+    private void SetMeters(Train train, ChangeEventArgs e) =>
+        // Train length in metres is kept to at most one decimal place.
+        SetLength(train, train.Length with { Meters = ParseDouble(e) is double m ? Math.Round(m, 1, MidpointRounding.AwayFromZero) : null });
+
+    private void SetLength(Train train, TrainLenght length)
+    {
+        train.Length = length;
+        Save();
+    }
+
+    private void SetShowContinuesAs(Train train, ChangeEventArgs e)
+    {
+        train.ShowContinuesAs = e.Value is true;
+        Save();
+    }
+
+    // ---- Calls sub-table ------------------------------------------------------------------------
+
+    private RenderFragment CallsTable(Train train) => @<div class="sub">
+        <table class="sub-grid">
+            <thead>
+                <tr>
+                    <th>@Translator("Station") / @Translator("Track")</th>
+                    <th>@Translator("Arrival")</th>
+                    <th>@Translator("Departure")</th>
+                    <th title="@Translator("IsArrival")">@Translator("Arr")</th>
+                    <th title="@Translator("IsDeparture")">@Translator("Dep")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var call in train.Calls.OrderBy(c => c.SortTime).ToList())
+                {
+                    <tr>
+                        <td>
+                            <select value="@call.TrackId" @onchange="e => SetCallTrack(call, e)">
+                                @foreach (var track in TrackChoices)
+                                {
+                                    <option value="@track.Id">@TrackLabel(track)</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="text" class="time" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
+                        <td><input type="text" class="time" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
+                        <td><input type="checkbox" checked="@call.IsArrival" @onchange="e => SetIsArrival(call, e)" /></td>
+                        <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
+                        <td><button class="danger small" @onclick="() => RemoveCall(call)">@Translator("Delete")</button></td>
+                    </tr>
+                }
+                @if (train.Calls.Count == 0)
+                {
+                    <tr><td colspan="6" class="empty">@Translator("NoCalls")</td></tr>
+                }
+            </tbody>
+        </table>
+        <button class="small" disabled="@(!TrackChoices.Any())" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
+    </div>;
+
+    private IEnumerable<StationTrack> TrackChoices =>
+        (Layout?.StationTracks() ?? []).OrderBy(t => t.Station.Name, StringComparer.CurrentCulture).ThenBy(t => t.Number, StringComparer.CurrentCulture);
+
+    private static string TrackLabel(StationTrack track) => $"{track.Station.Name} {track.Number}";
+
+    private void SetCallTrack(StationCall call, ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var id)) return;
+        var track = TrackChoices.FirstOrDefault(t => t.Id == id);
+        if (track is null) return;
+        call.Track.Calls.Remove(call);
+        call.Track = track;
+        call.TrackId = track.Id;
+        track.Calls.Add(call);
+        Save();
+    }
+
+    private void SetArrival(StationCall call, ChangeEventArgs e)
+    {
+        if (TryParseTime(e, out var time)) call.Arrival = time;
+        Save();
+    }
+
+    private void SetDeparture(StationCall call, ChangeEventArgs e)
+    {
+        if (TryParseTime(e, out var time)) call.Departure = time;
+        Save();
+    }
+
+    private void SetIsArrival(StationCall call, ChangeEventArgs e)
+    {
+        call.IsArrival = e.Value is true;
+        Save();
+    }
+
+    private void SetIsDeparture(StationCall call, ChangeEventArgs e)
+    {
+        call.IsDeparture = e.Value is true;
+        Save();
+    }
+
+    private void AddCall(Train train)
+    {
+        var track = TrackChoices.FirstOrDefault();
+        if (track is null) return;
+        var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
+        var call = new StationCall(NextCallId(), track, start, start);
+        train.Add(call);
+        Save();
+    }
+
+    private void RemoveCall(StationCall call)
+    {
+        if (Plan?.TryDelete(call).IsSuccess == true) Save();
+    }
+
+    private int NextCallId() =>
+        ((Timetable?.Trains.SelectMany(t => t.Calls).Select(c => c.Id) ?? []).DefaultIfEmpty(0).Max()) + 1;
+
+    // ---- Wagon groups sub-table -----------------------------------------------------------------
+
+    private RenderFragment WagonGroupsTable(Train train) => @<div class="sub">
+        <table class="sub-grid">
+            <thead>
+                <tr>
+                    <th>@Translator("Position")</th>
+                    <th>@Translator("From")</th>
+                    <th>@Translator("To")</th>
+                    <th>@Translator("Remark")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var wg in train.WagonGroups.OrderBy(w => w.PositionInTrain).ToList())
+                {
+                    <tr>
+                        <td><input type="number" class="num" min="1" value="@wg.PositionInTrain" @onchange="e => SetPosition(wg, e)" /></td>
+                        <td>
+                            <select value="@wg.FromStationCallId" @onchange="e => SetWagonGroupFrom(train, wg, e)">
+                                @foreach (var call in CallChoices(train))
+                                {
+                                    <option value="@call.Id">@CallLabel(call)</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select value="@wg.ToStationCallId" @onchange="e => SetWagonGroupTo(train, wg, e)">
+                                @foreach (var call in CallChoices(train))
+                                {
+                                    <option value="@call.Id">@CallLabel(call)</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="text" class="remark" value="@wg.Remark" @onchange="e => SetWagonGroupRemark(wg, e)" /></td>
+                        <td><button class="danger small" @onclick="() => RemoveWagonGroup(wg)">@Translator("Delete")</button></td>
+                    </tr>
+                }
+                @if (train.WagonGroups.Count == 0)
+                {
+                    <tr><td colspan="5" class="empty">@Translator("NoWagonGroups")</td></tr>
+                }
+            </tbody>
+        </table>
+        <button class="small" disabled="@train.IsNullOrHasNoCalls()" @onclick="() => AddWagonGroup(train)">@Translator("AddWagonGroup")</button>
+    </div>;
+
+    private static IEnumerable<StationCall> CallChoices(Train train) => train.Calls.OrderBy(c => c.SortTime);
+
+    private static string CallLabel(StationCall call) => $"{call.Station.Name} {call.SortTime.HHMM()}";
+
+    private void SetPosition(WagonGroup wg, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var position)) wg.PositionInTrain = position;
+        Save();
+    }
+
+    private void SetWagonGroupFrom(Train train, WagonGroup wg, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id) && train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
+        {
+            wg.FromStationCall = call;
+            wg.FromStationCallId = call.Id;
+        }
+        Save();
+    }
+
+    private void SetWagonGroupTo(Train train, WagonGroup wg, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id) && train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
+        {
+            wg.ToStationCall = call;
+            wg.ToStationCallId = call.Id;
+        }
+        Save();
+    }
+
+    private void SetWagonGroupRemark(WagonGroup wg, ChangeEventArgs e)
+    {
+        wg.Remark = e.Value?.ToString();
+        Save();
+    }
+
+    private void AddWagonGroup(Train train)
+    {
+        if (train.IsNullOrHasNoCalls()) return;
+        var ordered = CallChoices(train).ToList();
+        var wg = new WagonGroup
+        {
+            Id = NextWagonGroupId(),
+            FromStationCall = ordered.First(),
+            FromStationCallId = ordered.First().Id,
+            ToStationCall = ordered.Last(),
+            ToStationCallId = ordered.Last().Id,
+            PositionInTrain = train.WagonGroups.Count + 1,
+        };
+        train.Add(wg);
+        Save();
+    }
+
+    private void RemoveWagonGroup(WagonGroup wg)
+    {
+        if (Plan?.TryDelete(wg).IsSuccess == true) Save();
+    }
+
+    private int NextWagonGroupId() =>
+        ((Timetable?.Trains.SelectMany(t => t.WagonGroups).Select(w => w.Id) ?? []).DefaultIfEmpty(0).Max()) + 1;
+
+    // ---- Add / delete train ---------------------------------------------------------------------
+
+    private void AddTrain()
+    {
+        var id = ((Timetable!.Trains.Select(t => t.Id)).DefaultIfEmpty(0).Max()) + 1;
+        var number = ((Timetable.Trains.Select(t => t.Number)).DefaultIfEmpty(0).Max()) + 1;
+        var train = new Train(id, number);
+        Timetable.Add(train);
+        _expanded.Add(train.Id);
+        Save();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is not { } train || Plan is not { } plan) return;
+        if (plan.TryDelete(train).IsSuccess)
+        {
+            _expanded.Remove(train.Id);
+            _subView.Remove(train.Id);
+            Save();
+        }
+        _deleteTarget = null;
+    }
+
+    // ---- Parsing helpers ------------------------------------------------------------------------
+
+    private void Save() => ScheduleState.SaveAndNotify();
+
+    private static int? ParseInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;
+
+    // Accept a decimal typed in either the current culture (e.g. "2,5") or with a dot ("2.5"); the
+    // value is displayed back in the current culture.
+    private static double? ParseDouble(ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var value)) return value;
+        if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value)) return value;
+        return null;
+    }
+
+    private static bool TryParseTime(ChangeEventArgs e, out Time time)
+    {
+        var text = e.Value?.ToString();
+        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span))
+        {
+            time = Time.FromTimeSpan(span);
+            return true;
+        }
+        time = Time.Zero;
+        return false;
+    }
+}

@@ -101,7 +101,19 @@
       "Bash(python gen_classes_resx.py)",
       "Bash(grep -E '^\\(sv|da|de|nb\\)$')",
       "Bash(rm -f gen_classes_resx.py)",
-      "Bash(grep -iE \"Planning.App\\($|[^.]\\)|Planning\\\\.App\\\\\"\")"
+      "Bash(grep -iE \"Planning.App\\($|[^.]\\)|Planning\\\\.App\\\\\"\")",
+      "Bash(python -)",
+      "Bash(ls -d *Tests*)",
+      "Bash(ls Importers.Xpln.Tests/*.csproj)",
+      "Bash(ls Xpln.Tests/*.csproj)",
+      "Bash(tasklist)",
+      "Bash(git worktree *)",
+      "Bash(cygpath -w /tmp/stage1-verify)",
+      "Bash(mkdir -p /tmp/stage2-backup)",
+      "Bash(cp Model/Timetables/Timetable.cs            /tmp/stage2-backup/Timetable.cs)",
+      "Bash(cp Model/Schedules/CargoFlowOptions.cs      /tmp/stage2-backup/CargoFlowOptions.cs)",
+      "Bash(cp Model.Databases/ScheduleDbContext.cs     /tmp/stage2-backup/ScheduleDbContext.cs)",
+      "Bash(mv Model.Tests/CargoFlowOptionsCatalogueTests.cs /tmp/stage2-backup/CargoFlowOptionsCatalogueTests.cs)"
     ]
   }
 }

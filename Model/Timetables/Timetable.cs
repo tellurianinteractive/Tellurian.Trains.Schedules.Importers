@@ -42,6 +42,14 @@ public sealed class Timetable : IEquatable<Timetable>
     /// </summary>
     public ICollection<TrainCategory> TrainCategories { get; set; }
 
+    /// <summary>
+    /// Gets or sets the catalogue of session (or day) patterns available in this timetable. A
+    /// <see cref="Train"/>'s <see cref="Train.Sessions"/> is chosen from this catalogue. Seeded with
+    /// the standard patterns for a new timetable (see <see cref="CommonSessionPatterns.DefaultCatalogue"/>);
+    /// the user adds custom patterns (e.g. <c>1-3</c>, <c>4-7</c>) from the settings.
+    /// </summary>
+    public IList<Sessions> Sessions { get; set; }
+
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
     private Timetable()
@@ -49,6 +57,7 @@ public sealed class Timetable : IEquatable<Timetable>
         Layout = default!;
         Trains = [];
         TrainCategories = [];
+        Sessions = [];
     }
 
     /// <summary>
@@ -63,6 +72,7 @@ public sealed class Timetable : IEquatable<Timetable>
         LayoutId = layout.Id;
         Trains = [];
         TrainCategories = [];
+        Sessions = [];
     }
 
     /// <inheritdoc/>
@@ -140,6 +150,21 @@ public static class TimetableExtensions
     /// <returns>A <see cref="Maybe{T}"/> containing the train if found.</returns>
     public static Maybe<Train> Train(this Timetable me, string externalId) =>
         new(me?.Trains.Where(t => t.ExternalId == externalId), $"Train with external id '{externalId}' not found.");
+
+    /// <summary>
+    /// Ensures the timetable has a session catalogue to choose from: when <see cref="Timetable.Sessions"/>
+    /// is empty (an older or imported timetable created before the catalogue existed), it is seeded with
+    /// the standard patterns (see <see cref="CommonSessionPatterns.DefaultCatalogue"/>). Idempotent while
+    /// the catalogue is non-empty. Returns <c>true</c> when patterns were added.
+    /// </summary>
+    /// <param name="timetable">The timetable whose catalogue to ensure.</param>
+    public static bool EnsureSessions(this Timetable timetable)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        if (timetable.Sessions.Count > 0) return false;
+        foreach (var sessions in CommonSessionPatterns.DefaultCatalogue) timetable.Sessions.Add(sessions);
+        return true;
+    }
 
     /// <summary>
     /// Adds a train to the timetable.

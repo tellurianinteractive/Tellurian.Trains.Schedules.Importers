@@ -1,6 +1,7 @@
 @page "/settings"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
+@using Tellurian.Trains.Schedules.Model.Timetables
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
 @using Theme = Tellurian.Trains.Schedules.Model.Layouts.Theme
 @using Scale = Tellurian.Trains.Schedules.Model.Layouts.Scale
@@ -83,6 +84,45 @@ else
                         </select>
                     </div>
                 }
+
+                @if (Timetable is not null)
+                {
+                    <div class="group-heading">@Translator("SessionPatterns")</div>
+                    <p class="hint">@Translator(g.UseDays ? "DayPatternHint" : "SessionPatternHint")</p>
+                    <div class="session-patterns">
+                        @if (Timetable.Sessions.Count == 0)
+                        {
+                            <span class="none">@Translator("NoneOption")</span>
+                        }
+                        @foreach (var sessions in Timetable.Sessions.ToList())
+                        {
+                            <span class="chip">
+                                @SessionsText(sessions)
+                                <button type="button" class="remove" title="@Translator("Delete")"
+                                        @onclick="() => RemoveSessionPattern(sessions)">×</button>
+                            </span>
+                        }
+                    </div>
+                    <div class="field add-pattern">
+                        @if (g.UseDays)
+                        {
+                            <span class="days">
+                                @foreach (var day in WeekDays)
+                                {
+                                    <label><input type="checkbox" checked="@_newDays.Contains(day)"
+                                                  @onchange="e => ToggleNewDay(day, e)" /> @Translator(day + "Short")</label>
+                                }
+                            </span>
+                            <button type="button" disabled="@(_newDays.Count == 0)" @onclick="AddDaysPattern">@Translator("AddSessionPattern")</button>
+                        }
+                        else
+                        {
+                            <input type="text" placeholder="1-3, 4 7" @bind="_newSessionsText" />
+                            <button type="button" @onclick="AddSessionsPattern">@Translator("AddSessionPattern")</button>
+                        }
+                    </div>
+                }
+
                 <div class="field">
                     <HelpLabel For="StartTime" />
                     <input type="time" @bind="StartTime" @bind:after="OnEdited" />
@@ -279,6 +319,53 @@ else
 
     private LayoutModel? Layout => ScheduleState.Layout;
     private LayoutSettings? LayoutSettings => Layout?.Settings;
+    private Timetable? Timetable => ScheduleState.Timetable;
+
+    private static readonly Days[] WeekDays =
+        [Days.Monday, Days.Tuesday, Days.Wednesday, Days.Thursday, Days.Friday, Days.Saturday, Days.Sunday];
+
+    private string _newSessionsText = "";
+    private readonly HashSet<Days> _newDays = [];
+
+    private string SessionsText(Sessions sessions) =>
+        SessionsDisplay.Text(sessions, LayoutSettings?.General.UseDays ?? false, Translator);
+
+    private void ToggleNewDay(Days day, ChangeEventArgs e)
+    {
+        if (e.Value is true) _newDays.Add(day); else _newDays.Remove(day);
+    }
+
+    private void AddSessionsPattern()
+    {
+        var numbers = SessionsDisplay.ParseSessionNumbers(_newSessionsText);
+        if (numbers.Length == 0) return;
+        AddPattern(Sessions.FromSessionNumbers(numbers));
+        _newSessionsText = "";
+    }
+
+    private void AddDaysPattern()
+    {
+        if (_newDays.Count == 0) return;
+        var days = _newDays.Aggregate(Days.None, (acc, d) => acc | d);
+        AddPattern(Sessions.FromDays(days));
+        _newDays.Clear();
+    }
+
+    // Add a pattern to the timetable's catalogue unless an equal one is already present.
+    private void AddPattern(Sessions sessions)
+    {
+        if (Timetable is null) return;
+        if (Timetable.Sessions.Any(s => SessionsDisplay.Key(s) == SessionsDisplay.Key(sessions))) return;
+        Timetable.Sessions.Add(sessions);
+        OnEdited();
+    }
+
+    private void RemoveSessionPattern(Sessions sessions)
+    {
+        if (Timetable is null) return;
+        Timetable.Sessions.Remove(sessions);
+        OnEdited();
+    }
 
     private string LayoutName
     {

@@ -123,6 +123,9 @@
   <data name="DailyShort" xml:space="preserve">
     <value>Dagl</value>
   </data>
+  <data name="DayRangeConnector" xml:space="preserve">
+    <value>til</value>
+  </data>
   <data name="Friday" xml:space="preserve">
     <value>Fredag</value>
   </data>

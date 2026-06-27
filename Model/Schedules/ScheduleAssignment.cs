@@ -49,16 +49,16 @@ public class ScheduleAssignment
     /// Initializes a new instance of <see cref="ScheduleAssignment"/> with the specified values.
     /// </summary>
     /// <param name="id">The unique identifier for the assignment.</param>
-    /// <param name="vehicle">The vehicle being assigned.</param>
-    /// <param name="vehicleSchedule">The vehicle schedule to assign to.</param>
+    /// <param name="scheduledObject">The vehicle being assigned.</param>
+    /// <param name="schedule">The vehicle schedule to assign to.</param>
     /// <param name="sessions">The sessions during which the assignment is active. Defaults to all sessions.</param>
-    public ScheduleAssignment(int id, ScheduledObject vehicle, Schedule vehicleSchedule, Sessions? sessions = null)
+    public ScheduleAssignment(int id, ScheduledObject scheduledObject, Schedule schedule, Sessions? sessions = null)
     {
         Id = id;
-        ScheduledObject = vehicle;
-        ScheduledObjectId = vehicle.Id;
-        Schedule = vehicleSchedule;
-        ScheduleId = vehicleSchedule.Id;
+        ScheduledObject = scheduledObject;
+        ScheduledObjectId = scheduledObject.Id;
+        Schedule = schedule;
+        ScheduleId = schedule.Id;
         Sessions = sessions ?? Sessions.All;
     }
 }

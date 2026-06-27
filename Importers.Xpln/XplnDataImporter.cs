@@ -85,7 +85,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 }
                 return company;
             }
-            var newCompany = Company.FromSignature(companySignature);
+            // Give each discovered company a unique (negative) transient id so trains, vehicles and
+            // duties can reference it by CompanyId without colliding; companies found in the catalogue
+            // keep their real (positive) ids. Mirrors how categories get NextCategoryId.
+            var newCompany = new Company(NextCompanyId, companySignature, companySignature);
             _operatingCompanies.Add(newCompany);
             _currentLayout?.Add(newCompany);
             return newCompany;
@@ -110,6 +113,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
     private int _nextCategoryId = -3000;
     private int NextCategoryId => Interlocked.Decrement(ref _nextCategoryId);
+
+    private int _nextCompanyId = -2000;
+    private int NextCompanyId => Interlocked.Decrement(ref _nextCompanyId);
 
 
     /// <summary>
@@ -664,15 +670,15 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                             }
                             break;
                         case "group":
-                            if (current is null) break;
-                            var group = fields[Object] switch
+                            if (current?.Category is null) break;
+                            // XPLN's group row classifies the train as freight (G_Zug) or passenger
+                            // (P_Zug); apply that to the train's category. Other group values carry no
+                            // freight/passenger meaning and are ignored.
+                            switch (fields[Object])
                             {
-                                "G_Zug" => "Freight",
-                                "P_Zug" => "Passenger",
-                                var value when value.HasValue => value,
-                                _ => null,
-                            };
-                            if (group.HasValue) current.Groups.Add(group);
+                                case "G_Zug": current.Category.IsFreight = true; current.Category.IsPassenger = false; break;
+                                case "P_Zug": current.Category.IsPassenger = true; current.Category.IsFreight = false; break;
+                            }
                             break;
                     }
                 }

@@ -117,6 +117,22 @@ public class XplnDataImporterTests
     }
 
     [TestMethod]
+    public async Task AssignsDistinctIdsToImportedCompanies()
+    {
+        // Givskud-Modern-2025 references operating companies that are not in the catalogue (e.g. CFLDK,
+        // DBSCH). Each discovered company must get a distinct id; otherwise trains and categories that
+        // reference a company by id collide (selecting one resolves to the first with the shared id).
+        Assert.IsTrue(IsScheduleFileExisting("Givskud-Modern-2025", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Givskud-Modern-2025");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var companies = result.Item.Layout.Companies.ToArray();
+        Assert.IsNotEmpty(companies, "The layout should have operating companies.");
+        Assert.AreEqual(companies.Length, companies.Select(c => c.Id).Distinct().Count(), "Every company should have a distinct id.");
+    }
+
+    [TestMethod]
     public async Task GroupsRoutesIntoTimetableStretchesWhenStartPositionIsZero()
     {
         // In XPLN the Routeid column is unique per row, so a timetable stretch (line) is delimited

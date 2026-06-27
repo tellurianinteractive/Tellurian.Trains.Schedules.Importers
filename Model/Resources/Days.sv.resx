@@ -120,6 +120,9 @@
   <data name="Daily" xml:space="preserve">
     <value>Dagligen</value>
   </data>
+  <data name="DayRangeConnector" xml:space="preserve">
+    <value>till</value>
+  </data>
   <data name="DailyShort" xml:space="preserve">
     <value>Dagl</value>
   </data>

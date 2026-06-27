@@ -79,6 +79,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to to.
+        /// </summary>
+        internal static string DayRangeConnector {
+            get {
+                return ResourceManager.GetString("DayRangeConnector", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Friday.
         /// </summary>
         internal static string Friday {
@@ -129,24 +138,6 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string NoneShort {
             get {
                 return ResourceManager.GetString("NoneShort", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to On order.
-        /// </summary>
-        internal static string OnOrder {
-            get {
-                return ResourceManager.GetString("OnOrder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Order.
-        /// </summary>
-        internal static string OnOrderShort {
-            get {
-                return ResourceManager.GetString("OnOrderShort", resourceCulture);
             }
         }
         

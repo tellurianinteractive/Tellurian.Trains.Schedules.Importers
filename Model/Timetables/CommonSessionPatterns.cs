@@ -19,4 +19,19 @@ public static class CommonSessionPatterns
     public const ushort Third3 = 0b___00_0010010_0100100;
     /// <summary>On-demand train flag.</summary>
     public const ushort OnDemand = 0b_01_0000000_0000000;
+
+    /// <summary>
+    /// The default catalogue of session patterns a new timetable starts with: every session,
+    /// odd, even, and the three every-third patterns. Users add custom patterns (e.g. <c>1-3</c>,
+    /// <c>4-7</c>) to a timetable's <c>Sessions</c> catalogue from the settings.
+    /// </summary>
+    public static IReadOnlyList<Sessions> DefaultCatalogue { get; } =
+    [
+        new(All),
+        new(Odd),
+        new(Even),
+        new(Third1),
+        new(Third2),
+        new(Third3),
+    ];
 }

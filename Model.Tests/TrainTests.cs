@@ -55,4 +55,29 @@ public class TrainTests
         Target.Add(call1);
         Target.Add(call2);
     }
+
+    [TestMethod]
+    public void EffectiveCompanyInheritsFromCategoryWhenTrainHasNone()
+    {
+        var categoryCompany = new Company(1, "Statens Järnvägar", "SJ");
+        Target.Category = Category with { Company = categoryCompany };
+        Target.Company = null;
+        Assert.AreEqual(categoryCompany, Target.EffectiveCompany);
+    }
+
+    [TestMethod]
+    public void EffectiveCompanyUsesTheTrainCompanyWhenSetAsOverride()
+    {
+        Target.Category = Category with { Company = new Company(1, "Statens Järnvägar", "SJ") };
+        var ownCompany = new Company(2, "Green Cargo", "GC");
+        Target.Company = ownCompany;
+        Assert.AreEqual(ownCompany, Target.EffectiveCompany);
+    }
+
+    [TestMethod]
+    public void EffectiveCompanyIsNullWhenNeitherTrainNorCategoryHasOne()
+    {
+        Target.Company = null;
+        Assert.IsNull(Target.EffectiveCompany);
+    }
 }

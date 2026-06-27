@@ -1,8 +1,108 @@
-﻿namespace Tellurian.Trains.Schedules.Model.Tests;
+﻿using System.Globalization;
+
+namespace Tellurian.Trains.Schedules.Model.Tests;
 
 [TestClass]
 public class SessionsTests
 {
+    private static void WithCulture(string culture, Action test)
+    {
+        var c = CultureInfo.GetCultureInfo(culture);
+        var (originalCulture, originalUiCulture) = (CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
+        try
+        {
+            CultureInfo.CurrentCulture = c;
+            CultureInfo.CurrentUICulture = c;
+            test();
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [TestMethod]
+    public void OrderedDaysMondayFirstStartsOnMonday() => WithCulture("sv-SE", () =>
+    {
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        var expected = new[] { Days.Monday, Days.Wednesday, Days.Friday, Days.Sunday };
+        CollectionAssert.AreEqual(expected, target.OrderedDays);
+    });
+
+    [TestMethod]
+    public void OrderedDaysSundayFirstStartsOnSunday() => WithCulture("en-US", () =>
+    {
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        var expected = new[] { Days.Sunday, Days.Monday, Days.Wednesday, Days.Friday };
+        CollectionAssert.AreEqual(expected, target.OrderedDays);
+    });
+
+    [TestMethod]
+    public void DaysShortSundayFirstUsesEnglishShortNames() => WithCulture("en-US", () =>
+    {
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        Assert.AreEqual("Su, Mo, We, Fr", target.DaysShort);
+    });
+
+    [TestMethod]
+    public void DaysFullMondayFirstUsesSwedishNamesInWeekOrder() => WithCulture("sv-SE", () =>
+    {
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Even);
+        Assert.AreEqual("Tisdag, Torsdag, Lördag", target.DaysFull);
+    });
+
+    [TestMethod]
+    public void DaysFullForAllSessionsIsTranslatedDaily() => WithCulture("sv-SE", () =>
+    {
+        Assert.AreEqual("Dagligen", Sessions.All.DaysFull);
+    });
+
+    [TestMethod]
+    public void DaysFullForNoDaysIsTranslatedNone() => WithCulture("sv-SE", () =>
+    {
+        var target = Sessions.FromSessionNumbers();
+        Assert.AreEqual("Inga kördagar", target.DaysFull);
+    });
+
+    [TestMethod]
+    public void ConsecutiveDaysAreShownAsRange() => WithCulture("en-US", () =>
+    {
+        var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
+        Assert.AreEqual("Mo-Fr", target.DaysShort);
+        Assert.AreEqual("Monday to Friday", target.DaysFull);
+    });
+
+    [TestMethod]
+    public void LongRangeUsesLocalisedConnector() => WithCulture("sv-SE", () =>
+    {
+        var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
+        Assert.AreEqual("Måndag till Fredag", target.DaysFull);
+    });
+
+    [TestMethod]
+    public void DaysConsecutiveOnlyWhenWeekStartsOnSunday() => WithCulture("en-US", () =>
+    {
+        // Sunday-first: Su, Mo, Tu is an unbroken run.
+        var target = Sessions.FromDays(Days.Sunday | Days.Monday | Days.Tuesday);
+        Assert.AreEqual("Su-Tu", target.DaysShort);
+    });
+
+    [TestMethod]
+    public void SameDaysAreNotConsecutiveWhenWeekStartsOnMonday() => WithCulture("sv-SE", () =>
+    {
+        // Monday-first: the same set is Mo, Tu, ... Su — broken, so listed not ranged.
+        var target = Sessions.FromDays(Days.Sunday | Days.Monday | Days.Tuesday);
+        Assert.AreEqual("M, Ti, S", target.DaysShort);
+    });
+
+    [TestMethod]
+    public void ConsecutiveSessionsAreShownAsRange()
+    {
+        var target = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
+        Assert.AreEqual("1-5", target.SessionsNumbers);
+    }
+
     [TestMethod]
     public void IsAllSessions()
     {
@@ -122,5 +222,37 @@ public class SessionsTests
         var target = Sessions.FromDays(Days.Tuesday | Days.Wednesday | Days.Thursday);
         var actual = target.FullDayNamesResourceKey;
         Assert.AreEqual("Tuesday-Thursday", actual);
+    }
+
+    [TestMethod]
+    public void DefaultCatalogueHasTheSixStandardPatterns()
+    {
+        var catalogue = CommonSessionPatterns.DefaultCatalogue;
+        Assert.HasCount(6, catalogue);
+        Assert.AreEqual(14, catalogue[0].Numbers.Length, "First pattern is All.");
+    }
+
+    [TestMethod]
+    public void EnsureSessionsSeedsTheCatalogueWhenEmpty()
+    {
+        var timetable = new Timetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
+        Assert.IsEmpty(timetable.Sessions);
+
+        var added = timetable.EnsureSessions();
+
+        Assert.IsTrue(added);
+        Assert.HasCount(6, timetable.Sessions);
+    }
+
+    [TestMethod]
+    public void EnsureSessionsIsNoOpWhenCatalogueIsNotEmpty()
+    {
+        var timetable = new Timetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
+        timetable.Sessions.Add(Sessions.FromSessionNumbers(1, 2, 3));
+
+        var added = timetable.EnsureSessions();
+
+        Assert.IsFalse(added);
+        Assert.HasCount(1, timetable.Sessions);
     }
 }

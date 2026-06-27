@@ -29,6 +29,7 @@ public sealed class CargoFlowOptions : TrainPartOptions
     /// If true, overrides the <see cref="Destinations"/>
     /// </summary>
     public bool ToAllDestinations { get; set; }
+
     /// <summary>
     /// If true, no wagons should be brought from the train-part's from-station.
     /// </summary>

@@ -1041,4 +1041,118 @@
   <data name="AndMore" xml:space="preserve">
     <value>(og {0} flere)</value>
   </data>
+  <data name="TrainsNoSchedule" xml:space="preserve">
+    <value>Ingen anlegg lastet. Opprett eller åpne en plan først.</value>
+  </data>
+  <data name="NoTrains" xml:space="preserve">
+    <value>Ingen tog ennå.</value>
+  </data>
+  <data name="AddTrain" xml:space="preserve">
+    <value>Legg til tog</value>
+  </data>
+  <data name="ExternalId" xml:space="preserve">
+    <value>Ekstern id</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Kategori</value>
+  </data>
+  <data name="Sessions" xml:space="preserve">
+    <value>Økter</value>
+  </data>
+  <data name="MaxSpeed" xml:space="preserve">
+    <value>Maks hastighet</value>
+  </data>
+  <data name="Axles" xml:space="preserve">
+    <value>Aksler</value>
+  </data>
+  <data name="Wagons" xml:space="preserve">
+    <value>Vogner</value>
+  </data>
+  <data name="ContinuesAs" xml:space="preserve">
+    <value>Fortsetter som</value>
+  </data>
+  <data name="Calls" xml:space="preserve">
+    <value>Stopp</value>
+  </data>
+  <data name="WagonGroups" xml:space="preserve">
+    <value>Vogngrupper</value>
+  </data>
+  <data name="Arrival" xml:space="preserve">
+    <value>Ankomst</value>
+  </data>
+  <data name="Departure" xml:space="preserve">
+    <value>Avgang</value>
+  </data>
+  <data name="Arr" xml:space="preserve">
+    <value>Ank</value>
+  </data>
+  <data name="Dep" xml:space="preserve">
+    <value>Avg</value>
+  </data>
+  <data name="IsArrival" xml:space="preserve">
+    <value>Stopper for ankomst</value>
+  </data>
+  <data name="IsDeparture" xml:space="preserve">
+    <value>Stopper for avgang</value>
+  </data>
+  <data name="Track" xml:space="preserve">
+    <value>Spor</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Posisjon</value>
+  </data>
+  <data name="Remark" xml:space="preserve">
+    <value>Merknad</value>
+  </data>
+  <data name="NoCalls" xml:space="preserve">
+    <value>Ingen stopp.</value>
+  </data>
+  <data name="NoWagonGroups" xml:space="preserve">
+    <value>Ingen vogngrupper.</value>
+  </data>
+  <data name="AddCall" xml:space="preserve">
+    <value>Legg til stopp</value>
+  </data>
+  <data name="AddWagonGroup" xml:space="preserve">
+    <value>Legg til vogngruppe</value>
+  </data>
+  <data name="DeleteTrainConfirm" xml:space="preserve">
+    <value>Slette tog {0}?</value>
+  </data>
+  <data name="Expand" xml:space="preserve">
+    <value>Utvid</value>
+  </data>
+  <data name="Collapse" xml:space="preserve">
+    <value>Skjul</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Daily" xml:space="preserve">
+    <value>Daglig</value>
+  </data>
+  <data name="SessionPatterns" xml:space="preserve">
+    <value>Øktmønstre</value>
+  </data>
+  <data name="SessionPatternHint" xml:space="preserve">
+    <value>Angi øktkombinasjonene tog kan bruke, f.eks. 1-3 eller 4 7.</value>
+  </data>
+  <data name="DayPatternHint" xml:space="preserve">
+    <value>Angi dagkombinasjonene tog kan bruke.</value>
+  </data>
+  <data name="AddSessionPattern" xml:space="preserve">
+    <value>Legg til</value>
+  </data>
+  <data name="TrainReferenced" xml:space="preserve">
+    <value>Kan ikke slette: toget brukes av materiellomløp eller førertjenester.</value>
+  </data>
+  <data name="CompanyFromCategory" xml:space="preserve">
+    <value>Fra kategori: {0}</value>
+  </data>
+  <data name="LengthMeters" xml:space="preserve">
+    <value>Lengde (m)</value>
+  </data>
+  <data name="ShowContinuesAsHint" xml:space="preserve">
+    <value>Vis en merknad ved ankomst om hvilket tog dette fortsetter som ifølge ruteplanen.</value>
+  </data>
 </root>

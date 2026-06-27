@@ -120,6 +120,10 @@
   <data name="Daily" xml:space="preserve">
     <value>Daily</value>
   </data>
+  <data name="DayRangeConnector" xml:space="preserve">
+    <value>to</value>
+    <comment>Joins the first and last day of a consecutive range in the long form, e.g. "Monday to Friday".</comment>
+  </data>
   <data name="DailyShort" xml:space="preserve">
     <value>Daily</value>
   </data>

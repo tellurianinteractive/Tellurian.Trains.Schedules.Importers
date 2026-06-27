@@ -135,4 +135,62 @@
     table.speed-map input[type="number"] {
         width: 6rem;
     }
+
+    /* Session/day pattern catalogue editor. */
+    .session-patterns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0 0 0.6rem;
+    }
+
+    .session-patterns .none {
+        color: #889;
+        font-style: italic;
+    }
+
+    .session-patterns .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.15rem 0.5rem;
+        background: #eef2f7;
+        border: 1px solid #d4dde7;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
+
+    .session-patterns .chip .remove {
+        border: none;
+        background: transparent;
+        color: #c00;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        padding: 0 0.1rem;
+    }
+
+    /* The add-pattern row carries its own controls instead of a label/control pair, so let it
+       span both columns and lay its parts out inline. */
+    .field.add-pattern {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .field.add-pattern .days {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .field.add-pattern .days label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        font-weight: 400;
+        white-space: nowrap;
+    }
 }

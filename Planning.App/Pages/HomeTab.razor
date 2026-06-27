@@ -2,7 +2,6 @@
 @using System.Globalization
 @using Tellurian.Localization
 @using Tellurian.Trains.Schedules.Model
-@using Tellurian.Trains.Schedules.Planning
 @inject ScheduleStateService ScheduleState
 @inject NavigationManager Nav
 @inject Translator Translator
@@ -53,8 +52,7 @@
     {
         _confirmReplace = false;
         var language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-        var defaultCountryId = Country.ByLanguage(language).Id;
-        ScheduleState.Schedule = NewPlanFactory.CreatePlan(Translator("NewLayoutName"), defaultCountryId, language);
+        ScheduleState.Schedule = PlanFactory.CreatePlan(Translator("NewLayoutName"), language);
         Nav.NavigateTo("settings");
     }
 }

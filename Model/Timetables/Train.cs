@@ -23,7 +23,6 @@ public class Train : IEquatable<Train>
     {
         ExternalId = string.Empty;
         Timetable = default!;
-        Groups = [];
         Calls = [];
         WagonGroups = [];
     }
@@ -41,7 +40,6 @@ public class Train : IEquatable<Train>
         Number = number;
         ExternalId = externalId;
         Timetable = default!;
-        Groups = [];
         Calls = [];
         WagonGroups = [];
     }
@@ -118,11 +116,6 @@ public class Train : IEquatable<Train>
     public required Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
-    /// Gets or sets the groups this train belongs to.
-    /// </summary>
-    public IList<string> Groups { get; set; }
-
-    /// <summary>
     /// Gets or sets the foreign key to the timetable. Required.
     /// </summary>
     public int TimetableId { get; set; }
@@ -133,16 +126,12 @@ public class Train : IEquatable<Train>
     public Timetable Timetable { get; set; }
 
     /// <summary>
-    /// Gets or sets the train that this train continues as at its final destination.
-    /// Used when a train reverses direction, e.g. an odd-numbered train arriving at a terminus
-    /// continues as an even-numbered train in the opposite direction.
+    /// Gets or sets whether a note is shown at this train's final arrival stating which train it
+    /// continues as and when (for example "Continues as G 1234 at 15:30"). The continuation train and
+    /// time are derived from the schedule (the vehicle's next working departing the arrival station),
+    /// so no explicit link is stored. Leave <c>false</c> for trains that terminate.
     /// </summary>
-    public Train? ContinuesAs { get; set; }
-
-    /// <summary>
-    /// Gets or sets the train that this train is a continuation of.
-    /// </summary>
-    public Train? ContinuesFrom { get; set; }
+    public bool ShowContinuesAs { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of station calls for this train.
@@ -200,7 +189,7 @@ public class Train : IEquatable<Train>
 
     /// <inheritdoc/>
     public override string ToString() =>
-        string.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", Company?.Signature, Category?.Prefix, Number, Category?.Suffix).Trim();
+        string.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", this.EffectiveCompany?.Signature, Category?.Prefix, Number, Category?.Suffix).Trim();
 }
 
 /// <summary>
@@ -254,6 +243,15 @@ public static class TrainExtensions
         /// </summary>
         public string Identity =>
             train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString();
+
+        /// <summary>
+        /// Gets the company that operates the train: the train's own <see cref="Train.Company"/> when set,
+        /// otherwise the company of its <see cref="Train.Category"/> (<see cref="TrainCategory.Company"/>),
+        /// or <c>null</c> when neither is set. Mirrors how <see cref="Train.MaxSpeed"/> falls back to the
+        /// category's <see cref="TrainCategory.DefaultSpeed"/>. Use this for display and reporting; the
+        /// stored <see cref="Train.Company"/> stays <c>null</c> while a train inherits its category's company.
+        /// </summary>
+        public Company? EffectiveCompany => train.Company ?? train.Category?.Company;
 
         /// <summary>
         /// Gets the effective scale speed (km/h) for this train on a track stretch:
