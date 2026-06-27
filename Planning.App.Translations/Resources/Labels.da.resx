@@ -807,4 +807,235 @@
   <data name="ExportFailed" xml:space="preserve">
     <value>Eksport mislykkedes: {0}</value>
   </data>
+  <data name="AboutThisTab" xml:space="preserve">
+    <value>Om denne fane</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Handlinger</value>
+  </data>
+  <data name="AddNew" xml:space="preserve">
+    <value>Tilføj ny</value>
+  </data>
+  <data name="AddStandardRegions" xml:space="preserve">
+    <value>Tilføj standardregioner</value>
+  </data>
+  <data name="AddTrack" xml:space="preserve">
+    <value>Tilføj spor</value>
+  </data>
+  <data name="BackgroundColor" xml:space="preserve">
+    <value>Farve</value>
+  </data>
+  <data name="BackgroundColorHelp" xml:space="preserve">
+    <value>Baggrundsfarven, der bruges til at vise regionen som en chip i noter.</value>
+  </data>
+  <data name="BreakForPrintingHelp" xml:space="preserve">
+    <value>Del dagen på dette tidspunkt. Den grafiske køreplan kan så udskrives over flere sider og vises en halvdel ad gangen på skærmen.</value>
+  </data>
+  <data name="ControlledBy" xml:space="preserve">
+    <value>Styres af</value>
+  </data>
+  <data name="ControlledByHelp" xml:space="preserve">
+    <value>Den bemandede station, hvis fjernstyringsleder styrer dette signalstyrede sted.</value>
+  </data>
+  <data name="Danish" xml:space="preserve">
+    <value>Dansk</value>
+  </data>
+  <data name="DefaultRegions" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Slet</value>
+  </data>
+  <data name="DeleteLocationConfirm" xml:space="preserve">
+    <value>Slet driftsstedet '{0}' og dets spor?</value>
+  </data>
+  <data name="DeleteRegionConfirm" xml:space="preserve">
+    <value>Slet regionen '{0}'?</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Rækkefølge</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Rediger</value>
+  </data>
+  <data name="EndTimeHelp" xml:space="preserve">
+    <value>Klokkeslættet, hvor køreseancen slutter. Den kan løbe til eller forbi midnat.</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Engelsk</value>
+  </data>
+  <data name="EnglishHelp" xml:space="preserve">
+    <value>Det engelske navn. Påkrævet; bruges som reserve, når et sprog ikke har en oversættelse.</value>
+  </data>
+  <data name="German" xml:space="preserve">
+    <value>Tysk</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Hjælp</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
+    <value>Tog kan skifte retning</value>
+  </data>
+  <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
+    <value>Om et tog kan vende her, hvilket typisk kræver en lokomotivrundgang.</value>
+  </data>
+  <data name="IsMain" xml:space="preserve">
+    <value>Hovedspor</value>
+  </data>
+  <data name="IsManned" xml:space="preserve">
+    <value>Bemandet</value>
+  </data>
+  <data name="IsMannedHelp" xml:space="preserve">
+    <value>Om stationen betjenes af en fjernstyringsleder i stedet for at være selvbetjent.</value>
+  </data>
+  <data name="IsScheduled" xml:space="preserve">
+    <value>Planlagt</value>
+  </data>
+  <data name="IsShadow" xml:space="preserve">
+    <value>Skyggebanegård</value>
+  </data>
+  <data name="IsShadowHelp" xml:space="preserve">
+    <value>En skjult banegård for enden af en strækning, der repræsenterer verden uden for den modellerede jernbane.</value>
+  </data>
+  <data name="LayoutNameHelp" xml:space="preserve">
+    <value>Navnet på dette anlæg, som vises i rapporter og eksporterede filer.</value>
+  </data>
+  <data name="Length" xml:space="preserve">
+    <value>Længde (m)</value>
+  </data>
+  <data name="LocationReferencedByTrains" xml:space="preserve">
+    <value>Kan ikke slettes: tog standser på dette sted.</value>
+  </data>
+  <data name="LocoRunaroundHelp" xml:space="preserve">
+    <value>Reelle minutter tilladt for et lokomotiv at køre rundt til togets modsatte ende.</value>
+  </data>
+  <data name="LocoRunaroundRealMinutes" xml:space="preserve">
+    <value>Lokomotivrundgang (reelle min)</value>
+  </data>
+  <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
+    <value>Reel tid for et lokomotiv at køre rundt om sit tog, i reelle minutter.</value>
+  </data>
+  <data name="MinimumStopHelp" xml:space="preserve">
+    <value>Den korteste tid, i hurtigursminutter, et tog skal blive på en station, før det må afgå.</value>
+  </data>
+  <data name="MinimumStopMinutes" xml:space="preserve">
+    <value>Mindste ophold (min)</value>
+  </data>
+  <data name="MinimumStopMinutesHelp" xml:space="preserve">
+    <value>Mindste tid et tog standser på denne bemandede station, i hurtigursminutter.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="NameAndSignatureRequired" xml:space="preserve">
+    <value>Navn og signatur er påkrævet.</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nej</value>
+  </data>
+  <data name="NoOperationLocations" xml:space="preserve">
+    <value>Der er endnu ikke defineret nogen driftssteder.</value>
+  </data>
+  <data name="NoRegions" xml:space="preserve">
+    <value>Der er endnu ikke defineret nogen regioner.</value>
+  </data>
+  <data name="NoRegionsDefined" xml:space="preserve">
+    <value>Der er ikke defineret nogen regioner for dette anlæg.</value>
+  </data>
+  <data name="NoneOption" xml:space="preserve">
+    <value>(ingen)</value>
+  </data>
+  <data name="Norwegian" xml:space="preserve">
+    <value>Norsk</value>
+  </data>
+  <data name="OperationLocationsNoSchedule" xml:space="preserve">
+    <value>Der er ikke indlæst noget anlæg. Importer eller opret en køreplan først.</value>
+  </data>
+  <data name="OperationalTimes" xml:space="preserve">
+    <value>Tilsidesættelser af driftstider</value>
+  </data>
+  <data name="OperationalTimesHint" xml:space="preserve">
+    <value>Lad stå tomt for at arve anlæggets standard.</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Ejer</value>
+  </data>
+  <data name="OwnerHelp" xml:space="preserve">
+    <value>Den FREMO-modulejer, der medbringer dette sted. Valgfrit.</value>
+  </data>
+  <data name="Region" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="RegionReferenced" xml:space="preserve">
+    <value>Kan ikke slettes: denne region er tildelt en eller flere stationer.</value>
+  </data>
+  <data name="RegionsNoSchedule" xml:space="preserve">
+    <value>Der er ikke indlæst noget anlæg. Importer eller opret en køreplan først.</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Gem</value>
+  </data>
+  <data name="SelectLocationType" xml:space="preserve">
+    <value>Vælg den type driftssted, der skal tilføjes:</value>
+  </data>
+  <data name="Shadow" xml:space="preserve">
+    <value>Skygge</value>
+  </data>
+  <data name="Signature" xml:space="preserve">
+    <value>Signatur</value>
+  </data>
+  <data name="SignatureHelp" xml:space="preserve">
+    <value>En kort, unik forkortelse, der identificerer dette sted (f.eks. en stationsforkortelse).</value>
+  </data>
+  <data name="SignatureMustBeUnique" xml:space="preserve">
+    <value>Signaturen skal være unik inden for anlægget.</value>
+  </data>
+  <data name="StartDayHelp" xml:space="preserve">
+    <value>Køreplanens første driftsdag.</value>
+  </data>
+  <data name="StartTimeHelp" xml:space="preserve">
+    <value>Klokkeslættet, hvor køreseancen begynder.</value>
+  </data>
+  <data name="Swedish" xml:space="preserve">
+    <value>Svensk</value>
+  </data>
+  <data name="TrackNumber" xml:space="preserve">
+    <value>Spor</value>
+  </data>
+  <data name="TrackReferencedByTrains" xml:space="preserve">
+    <value>Kan ikke slettes: {0} tog bruger dette spor.</value>
+  </data>
+  <data name="Tracks" xml:space="preserve">
+    <value>Spor</value>
+  </data>
+  <data name="TrainClearanceHelp" xml:space="preserve">
+    <value>Reelle minutter et tog optager et stationsspor, før sporet tæller som ledigt igen.</value>
+  </data>
+  <data name="TrainClearanceRealMinutes" xml:space="preserve">
+    <value>Togklarering (reelle min)</value>
+  </data>
+  <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
+    <value>Reel tid for togklarering via telefon, i reelle minutter.</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Usage" xml:space="preserve">
+    <value>Anvendelse</value>
+  </data>
+  <data name="UseDaysHelp" xml:space="preserve">
+    <value>Planlæg tog over flere navngivne driftsdage i stedet for en enkelt seance.</value>
+  </data>
+  <data name="UseObjectLanguageInReports" xml:space="preserve">
+    <value>Udskriv hvert rapportelement på sit eget sprog</value>
+  </data>
+  <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
+    <value>Når dette er slået til, gengives hvert element i rapporter på det sprog, der udledes af elementet selv – for eksempel en førertjeneste på dets operatørselskabs sprog. Grænsefladen og alle elementer uden udledeligt sprog fortsætter med at bruge dit foretrukne sprog.</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
 </root>
