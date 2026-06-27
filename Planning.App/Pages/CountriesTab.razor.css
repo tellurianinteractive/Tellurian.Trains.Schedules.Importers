@@ -99,6 +99,16 @@
         white-space: nowrap;
     }
 
+    ::deep td.actions .delete-wrap {
+        display: inline-block;
+    }
+
+    /* The disabled Delete button would otherwise swallow the hover; letting it pass through means the
+       wrapping span receives the hover and shows its title tooltip (the blocked-delete reason). */
+    ::deep td.actions .delete-wrap > button:disabled {
+        pointer-events: none;
+    }
+
     .confirm {
         display: flex;
         align-items: center;

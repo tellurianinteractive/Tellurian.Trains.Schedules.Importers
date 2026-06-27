@@ -99,12 +99,17 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (category is not null) return category;
         if (trainPrefix.HasValue)
         {
-            var newCategory = new TrainCategory() { Name = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
+            // Give each discovered category a unique (negative) transient id so trains can reference it by
+            // CategoryId without colliding; the categories service already uses negative ids by convention.
+            var newCategory = new TrainCategory() { Id = NextCategoryId, Name = trainPrefix, Prefix = trainPrefix, Color = backgroundColor ?? "#FFFFFF" };
             _trainCategories.Add(newCategory);
             return newCategory;
         }
         return null;
     }
+
+    private int _nextCategoryId = -3000;
+    private int NextCategoryId => Interlocked.Decrement(ref _nextCategoryId);
 
 
     /// <summary>
@@ -678,8 +683,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         if (current is not null) messages.AddRange(AddTrain(result, current, rowNumber));
         if (messages.HasStoppingErrors())
             return ImportResult<Timetable>.Failure(messages);
-        else
-            return ImportResult<Timetable>.Success(result, messages);
+
+        // Populate the timetable's category catalogue with exactly the categories the imported trains use
+        // (mirrors how only referenced companies are added to the layout). The colour each train is drawn
+        // with rides on Train.Category; this makes the same categories available on the Train Categories tab.
+        result.TrainCategories = [.. result.Trains.Select(t => t.Category).OfType<TrainCategory>().Distinct()];
+        return ImportResult<Timetable>.Success(result, messages);
 
         static IEnumerable<Message> AddTrain(Timetable timetable, Train train, int rowNumber)
         {

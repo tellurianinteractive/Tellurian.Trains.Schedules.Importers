@@ -4,6 +4,7 @@
 @using Tellurian.Trains.Schedules.Model.Layouts
 @using Tellurian.Trains.Schedules.Model.Schedules
 @using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
 @using Tellurian.Trains.Schedules.Importers.Interfaces
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
@@ -37,10 +38,13 @@ else
                     <PropertyColumn Property="c => c.Signature" Title='@Translator("Signature")' Sortable="true" />
                     <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Company>.ByAscending(c => c.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        @{ var deletion = ScheduleState.Schedule?.MayDelete(context); }
                         <button @onclick="() => Edit(context)">@Translator("Edit")</button>
-                        <button class="danger" disabled="@IsReferenced(context)"
-                                title='@(IsReferenced(context) ? Translator("CompanyReferenced") : null)'
-                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                        @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
+                        <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CompanyReferenced", Translator)">
+                            <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                                    @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                        </span>
                     </TemplateColumn>
                 </QuickGrid>
             }
@@ -176,20 +180,6 @@ else
         ScheduleState.FlushPendingSave();
     }
 
-    // A company cannot be deleted while it is referenced by any train, train category, driver duty,
-    // or piece of equipment.
-    private bool IsReferenced(Company company)
-    {
-        bool Same(Company? c) => c is not null && c.Id == company.Id;
-        if ((ScheduleState.Timetable?.Trains ?? []).Any(t => Same(t.Company) || Same(t.Category?.Company))) return true;
-        if (ScheduleState.Schedule is { } plan)
-        {
-            if (plan.DriverDuties.Any(d => Same(d.Company))) return true;
-            if (plan.ScheduledObjects.Any(o => Same(o.Company))) return true;
-        }
-        return false;
-    }
-
     // The company's country, shown in the current UI language; "—" when not set.
     private string CountryName(int? countryId) =>
         Layout!.CountryById(countryId) is { } c ? Translator(c.ResourceKey) : "—";
@@ -285,10 +275,9 @@ else
 
     private void DeleteConfirmed()
     {
-        if (_deleteTarget is null) return;
-        Layout!.Companies.Remove(_deleteTarget);
+        if (_deleteTarget is null || ScheduleState.Schedule is not { } plan) return;
+        if (plan.TryDelete(_deleteTarget).IsSuccess) ScheduleState.SaveAndNotify();
         _deleteTarget = null;
-        ScheduleState.SaveAndNotify();
     }
 
     private int NextId() => (Layout!.Companies.Count == 0 ? 0 : Layout.Companies.Max(c => c.Id)) + 1;

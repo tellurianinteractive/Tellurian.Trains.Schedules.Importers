@@ -10,7 +10,7 @@ public static class TabRegistry
         new("Regions", "regions", typeof(Pages.RegionsTab), HelpKey: "Regions"),
         new("OperationLocations", "operation-locations", typeof(Pages.OperationLocationsTab), HelpKey: "OperationLocations"),
         new("Stretches", "stretches", typeof(Pages.StretchesTab), HelpKey: "Stretches"),
-        new("Companies", "companies", typeof(Pages.CompaniesTab)),
+        new("Companies", "companies", typeof(Pages.CompaniesTab), HelpKey: "Companies"),
         new("TrainCategories", "categories", typeof(Pages.TrainCategoriesTab), HelpKey: "TrainCategories"),
         new("Trains", "trains", typeof(Pages.TrainsTab), HelpKey: "Trains"),
         new("GraphicalTimetable", "graphical-timetable", typeof(Pages.GraphicalTimetableTab), HelpKey: "GraphicalTimetable"),

@@ -5,8 +5,14 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// <summary>
 /// Represents a railway vehicle (locomotive or trainset) that can be assigned to trains.
 /// </summary>
-public class ScheduledObject : IEquatable<ScheduledObject>
+public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
 {
+    /// <summary>
+    /// The display-label key for a vehicle is its <see cref="ScheduledObjectType"/> (e.g. Locomotive,
+    /// Wagonset), not the class name, so each kind is labelled distinctly. See <see cref="ITranslatable"/>.
+    /// </summary>
+    string ITranslatable.TranslationKey => ObjectType.ToString();
+
     /// <summary>
     /// Gets or sets the unique identifier for this vehicle.
     /// </summary>

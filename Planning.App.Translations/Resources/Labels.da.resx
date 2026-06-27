@@ -1038,4 +1038,7 @@
   <data name="Yes" xml:space="preserve">
     <value>Ja</value>
   </data>
+  <data name="AndMore" xml:space="preserve">
+    <value>(og {0} flere)</value>
+  </data>
 </root>

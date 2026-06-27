@@ -19,7 +19,7 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Strings {
@@ -385,6 +385,33 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} has a locomotive coverage gap between {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageGap {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageGap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has overlapping locomotive assignments: {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageOverlap {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageOverlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no locomotive assigned..
+        /// </summary>
+        internal static string TrainHasNoLocomotiveAssigned {
+            get {
+                return ResourceManager.GetString("TrainHasNoLocomotiveAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Train {0} must stop at at least two stations..
         /// </summary>
         internal static string TrainMustHaveMinimumTwoCalls {
@@ -412,6 +439,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Undefined.
+        /// </summary>
+        internal static string Undefined {
+            get {
+                return ResourceManager.GetString("Undefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}..
+        /// </summary>
+        internal static string VehicleIsDoubleBooked {
+            get {
+                return ResourceManager.GetString("VehicleIsDoubleBooked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle schedule {0} contains overlapping {1} and {2}..
         /// </summary>
         internal static string VehicleScheduleContainsOverlappingTrainParts {
@@ -426,42 +471,6 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string Warning {
             get {
                 return ResourceManager.GetString("Warning", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Train {0} has no locomotive assigned..
-        /// </summary>
-        internal static string TrainHasNoLocomotiveAssigned {
-            get {
-                return ResourceManager.GetString("TrainHasNoLocomotiveAssigned", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Train {0} has a locomotive coverage gap between {1} and {2}..
-        /// </summary>
-        internal static string TrainHasLocomotiveCoverageGap {
-            get {
-                return ResourceManager.GetString("TrainHasLocomotiveCoverageGap", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Train {0} has overlapping locomotive assignments: {1} and {2}..
-        /// </summary>
-        internal static string TrainHasLocomotiveCoverageOverlap {
-            get {
-                return ResourceManager.GetString("TrainHasLocomotiveCoverageOverlap", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}..
-        /// </summary>
-        internal static string VehicleIsDoubleBooked {
-            get {
-                return ResourceManager.GetString("VehicleIsDoubleBooked", resourceCulture);
             }
         }
     }

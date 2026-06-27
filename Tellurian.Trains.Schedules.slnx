@@ -10,8 +10,6 @@
     <File Path="Documentation/Validation.md" />
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
-    <File Path="UNIFIED_MODEL.md" />
-    <File Path="VALIDATION.md" />
   </Folder>
   <Project Path="Importers.Access.Tests/Access.Tests.csproj" />
   <Project Path="Importers.Access/Access.csproj" />

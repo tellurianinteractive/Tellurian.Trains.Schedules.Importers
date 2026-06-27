@@ -96,6 +96,27 @@ public class XplnDataImporterTests
     }
 
     [TestMethod]
+    public async Task PopulatesTimetableCatalogueWithExactlyTheCategoriesUsedByTrains()
+    {
+        // The colour each train is drawn with rides on Train.Category, but the timetable's category
+        // catalogue (shown on the Train Categories tab) must also list those same categories - no more,
+        // no less - and each must have a distinct id so trains can reference it without collision.
+        Assert.IsTrue(IsScheduleFileExisting("Barmstedt2022", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Barmstedt2022");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var timetable = result.Item.Timetable;
+        var usedByTrains = timetable.Trains.Select(t => t.Category).OfType<TrainCategory>().Distinct().ToArray();
+        Assert.IsNotEmpty(usedByTrains, "At least one train should have a category.");
+
+        var catalogue = timetable.TrainCategories.ToArray();
+        Assert.IsNotEmpty(catalogue, "The timetable's category catalogue should be populated.");
+        CollectionAssert.AreEquivalent(usedByTrains, catalogue, "Catalogue should contain exactly the categories used by trains.");
+        Assert.AreEqual(catalogue.Length, catalogue.Select(c => c.Id).Distinct().Count(), "Every catalogue category should have a distinct id.");
+    }
+
+    [TestMethod]
     public async Task GroupsRoutesIntoTimetableStretchesWhenStartPositionIsZero()
     {
         // In XPLN the Routeid column is unique per row, so a timetable stretch (line) is delimited

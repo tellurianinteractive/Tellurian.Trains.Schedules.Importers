@@ -2,6 +2,7 @@
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model
 @using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Validations
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 @implements IDisposable
@@ -38,9 +39,12 @@ else
             <PropertyColumn Property="c => c.CountryCode" Title='@Translator("CountryCode")' />
             <PropertyColumn Property="c => c.Languages" Title='@Translator("Languages")' />
             <TemplateColumn Title='@Translator("Actions")' Class="actions">
-                <button class="danger" disabled="@IsReferenced(context)"
-                        title='@(IsReferenced(context) ? Translator("CountryReferenced") : null)'
-                        @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                @{ var deletion = ScheduleState.Schedule?.MayDelete(context); }
+                @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
+                <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CountryReferenced", Translator)">
+                    <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                            @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                </span>
             </TemplateColumn>
         </QuickGrid>
 
@@ -88,12 +92,6 @@ else
         ScheduleState.FlushPendingSave();
     }
 
-    // A country cannot be deleted while it is the layout default or referenced by a company or region.
-    private bool IsReferenced(Country country) =>
-        country.Id == DefaultCountryId
-        || Layout!.Companies.Any(c => c.CountryId == country.Id)
-        || Layout!.Regions.Any(r => r.CountryId == country.Id);
-
     private void AddCountry()
     {
         if (_toAdd is int id && Country.ById(id) is { } country && Layout!.Countries.All(c => c.Id != id))
@@ -106,9 +104,8 @@ else
 
     private void DeleteConfirmed()
     {
-        if (_deleteTarget is null) return;
-        Layout!.Countries.Remove(_deleteTarget);
+        if (_deleteTarget is null || ScheduleState.Schedule is not { } plan) return;
+        if (plan.TryDelete(_deleteTarget).IsSuccess) ScheduleState.SaveAndNotify();
         _deleteTarget = null;
-        ScheduleState.SaveAndNotify();
     }
 }

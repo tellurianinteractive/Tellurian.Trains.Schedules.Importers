@@ -252,4 +252,7 @@
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Køretøj {0} er dobbeltbooket: sessioner {1} overlapper med sessioner {2}.</value>
   </data>
+  <data name="Undefined" xml:space="preserve">
+    <value>Udefineret</value>
+  </data>
 </root>

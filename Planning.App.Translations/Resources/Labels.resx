@@ -1020,4 +1020,7 @@
   <data name="ExportFailed" xml:space="preserve">
     <value>Export failed: {0}</value>
   </data>
+  <data name="AndMore" xml:space="preserve">
+    <value>(and {0} more)</value>
+  </data>
 </root>

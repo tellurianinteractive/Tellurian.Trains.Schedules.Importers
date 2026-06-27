@@ -81,7 +81,27 @@
       "Bash(awk -F',' '{print $13}')",
       "Bash(awk -F',' '{print $6\" | \"$12}')",
       "Bash(awk -F'\\\\t' '{print $2}')",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(python add_stretch_labels.py)",
+      "PowerShell(\"Model.Tests/Model.Tests.csproj\",\"Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj\",\"Importers.Xpln.Tests/Importers.Xpln.Tests.csproj\" | ForEach-Object { dotnet test $_ 2>&1 | Select-String -Pattern \"Test run summary|total:|failed:|error\" })",
+      "Bash(ls -d Importers.Interfaces.Tests Importers.Xpln.Tests)",
+      "Bash(ls Importers.Interfaces.Tests/*.csproj Importers.Xpln.Tests/*.csproj)",
+      "PowerShell(\"Importers.Interfaces.Tests/Interfaces.Tests.csproj\",\"Importers.Xpln.Tests/Xpln.Tests.csproj\" | ForEach-Object { Write-Host \"=== $_ ===\"; dotnet test $_ 2>&1 | Select-String -Pattern \"Test run summary|total:|failed:|succeeded:\" })",
+      "Read(//c/Users/Stefan/.claude/projects/C--Utveckling-Github-Tellurian-Trains-Tellurian-Trains-Schedules/b8acc9bb-3f50-4c23-9b15-1d6594d05c81/tool-results/**)",
+      "Bash(grep -niA3 \"theme\\\\|sort-indicator\\\\|col-title\\\\|quickgrid\\\\[\" toolu_012o9yLFk1iZaesVvmeDzqtF.txt)",
+      "Bash(dotnet \"Importers.Xpln.Tests/bin/Debug/net10.0/Tellurian.Trains.Schedules.Importers.Xpln.Tests.dll\")",
+      "Bash(dotnet \"Importers.Services.Tests/bin/Debug/net10.0/Tellurian.Trains.Schedules.Importers.Services.Tests.dll\")",
+      "Bash(dotnet \"Importers.Interfaces.Tests/bin/Debug/net10.0/Tellurian.Trains.Schedules.Importers.Interfaces.Tests.dll\")",
+      "Bash(dotnet \"Model.Databases.Tests/bin/Debug/net10.0/Tellurian.Trains.Schedules.Model.Databases.Tests.dll\")",
+      "Bash(python add_labels.py)",
+      "Bash(git restore *)",
+      "Bash(python add_labels2.py)",
+      "Bash(python -c ' *)",
+      "Bash(python translate_tmp.py)",
+      "Bash(python gen_classes_resx.py)",
+      "Bash(grep -E '^\\(sv|da|de|nb\\)$')",
+      "Bash(rm -f gen_classes_resx.py)",
+      "Bash(grep -iE \"Planning.App\\($|[^.]\\)|Planning\\\\.App\\\\\"\")"
     ]
   }
 }

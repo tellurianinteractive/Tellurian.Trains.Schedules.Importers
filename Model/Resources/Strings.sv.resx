@@ -252,4 +252,7 @@
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Fordon {0} är dubbelbokat: sessioner {1} överlappar med sessioner {2}.</value>
   </data>
+  <data name="Undefined" xml:space="preserve">
+    <value>Odefinierad</value>
+  </data>
 </root>
