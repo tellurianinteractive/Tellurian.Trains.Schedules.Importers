@@ -37,7 +37,7 @@ Snapshot of coverage by area (see each section for detail).
 | Train (§4.2.1) | ✅ | `MaxSpeed` added |
 | Train categories (§4.2.2) | ✅ | `DefaultSpeed` added; catalogue on `Timetable.TrainCategories`, seeded Passenger/Freight |
 | Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | |
-| Cargo flows (§4.2.5) | 🟡 | schedule side modelled (`TrainPart.CargoFlowOptions`/`CargoOnlyOptions`, `Region`); cargo-flow editor/notes pending |
+| Cargo flows (§4.2.5) | 🟢 | reusable `Timetable.CargoFlowOptions` catalogue + `CargoFlowTrainPart` on `Train.CargoFlows`; **Cargo flow** tab (descriptions + per-train editor); destination note generated (report rendering pending) |
 | Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed formula wired (`Train.EffectiveScaleSpeed`/`…RealSpeed`, `TimeAndSpeedSettings.RealSpeedMetersPerSecond`) |
 | Schedule top level (§4.4.1) | ✅ | naming: spec *Schedule* = code `Plan`; spec *Vehicle Schedule* = code `Schedule` |
 | Vehicles inventory (§4.4.2) | ✅ | `DccAddress` added |
@@ -845,13 +845,17 @@ The system must track and display the correct order based on current direction o
 
 #### DM-4.2.5 Cargo Flows
 
-> **Status:** 🟡 Partial. The schedule side is modelled: a cargo flow is a
-> `ScheduledObject` of type `Cargo` assigned to a `Schedule` whose `TrainPart`s carry
-> `CargoFlowOptions` (and/or `CargoOnlyOptions`) in `Model/TrainPartOptions.cs`. These
-> hold the destination semantics from this section — `AndRegions`, `AndBeyond`,
-> `AndLocalDestinations`, `ToAllDestinations`, `TransferOrigin`/`TransferDestination` —
-> routing to the shadow-yard `Region`s on `Station` (DM-4.1.1). Still pending: the
-> cargo-flow editor (§3.8) and the generated destination notes (§4.5.4).
+> **Status:** 🟢 Implemented. A cargo flow's routing is a reusable `CargoFlowOptions`
+> description (name, `Destinations` with `AndRegions`/`AndBeyond`/`AndLocalDestinations`
+> and max wagons/axles, `Origins`, `ToAllDestinations`) held in the
+> `Timetable.CargoFlowOptions` catalogue, routing to the shadow-yard `Region`s on
+> `Station` (DM-4.1.1). Each occurrence is a `CargoFlowTrainPart` on `Train.CargoFlows`
+> (from-call/to-call, position, per-occurrence shunting/couple flags) referencing a
+> description. Edited on the **Cargo flow** tab (Cargo descriptions + Cargo trains
+> sub-tabs); deletion guarded by `DeletionRules`. The destination note
+> (`CargoFlowDestinationNote`) is generated from the part; rendering it in the printed
+> reports (§4.5.4) is still pending. The XPLN importer still creates a
+> `ScheduledObject(CargoFlow)`; migrating import to the new model is a later step.
 
 The system shall support cargo flow scheduling, which is distinct from wagon/vehicle scheduling.
 A cargo flow describes the movement of cargo to specific destinations, assigned to a

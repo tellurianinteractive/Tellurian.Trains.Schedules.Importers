@@ -13,7 +13,7 @@ public static class TabRegistry
         new("Companies", "companies", typeof(Pages.CompaniesTab), HelpKey: "Companies"),
         new("TrainCategories", "categories", typeof(Pages.TrainCategoriesTab), HelpKey: "TrainCategories"),
         new("Trains", "trains", typeof(Pages.TrainsTab), HelpKey: "Trains"),
-        new("CargoFlow", "cargo-flow", typeof(Pages.CargoFlowTab)),
+        new("CargoFlow", "cargo-flow", typeof(Pages.CargoFlowTab), HelpKey: "CargoFlow"),
         new("GraphicalTimetable", "graphical-timetable", typeof(Pages.GraphicalTimetableTab), HelpKey: "GraphicalTimetable"),
         new("Schedules", "schedules", typeof(Pages.SchedulesTab), HelpKey: "Schedules"),
         new("VehicleOwners", "vehicle-owners", typeof(Pages.VehicleOwnersTab), HelpKey: "VehicleOwners"),
