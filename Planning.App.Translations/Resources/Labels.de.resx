@@ -1155,4 +1155,106 @@
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Bei Ankunft einen Hinweis anzeigen, als welcher Zug dieser laut Fahrplan weiterfährt.</value>
   </data>
+  <data name="CargoFlowNoSchedule" xml:space="preserve">
+    <value>Erstellen oder importieren Sie eine Anlage, um Wagenströme zu planen.</value>
+  </data>
+  <data name="CargoFlowDescription" xml:space="preserve">
+    <value>Planen Sie Wagenströme in zwei Schritten: Definieren Sie wiederverwendbare Güterbeschreibungen und fügen Sie dann Wagenströme zu Zügen hinzu.</value>
+  </data>
+  <data name="CargoDescriptions" xml:space="preserve">
+    <value>Güterbeschreibungen</value>
+  </data>
+  <data name="CargoTrains" xml:space="preserve">
+    <value>Güterzüge</value>
+  </data>
+  <data name="CargoDescriptionsDescription" xml:space="preserve">
+    <value>Wiederverwendbare Beschreibungen, wohin Wagen geleitet werden. Ein Wagenstrom an einem Zug verweist auf eine davon; das Bearbeiten einer Beschreibung aktualisiert alle Ströme, die sie verwenden.</value>
+  </data>
+  <data name="AddCargoDescription" xml:space="preserve">
+    <value>Güterbeschreibung hinzufügen</value>
+  </data>
+  <data name="NoCargoDescriptions" xml:space="preserve">
+    <value>Noch keine Güterbeschreibungen.</value>
+  </data>
+  <data name="NewCargoDescriptionName" xml:space="preserve">
+    <value>Neue Güterbeschreibung</value>
+  </data>
+  <data name="ToAllDestinations" xml:space="preserve">
+    <value>Zu allen Zielen</value>
+  </data>
+  <data name="Destinations" xml:space="preserve">
+    <value>Ziele</value>
+  </data>
+  <data name="Origins" xml:space="preserve">
+    <value>Herkünfte</value>
+  </data>
+  <data name="CargoDescriptionReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Diese Güterbeschreibung wird von einem oder mehreren Wagenströmen verwendet.</value>
+  </data>
+  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
+    <value>Güterbeschreibung '{0}' löschen?</value>
+  </data>
+  <data name="PositionInTrainHint" xml:space="preserve">
+    <value>Position im Zug (1 = vorne); 0 bedeutet beliebig.</value>
+  </data>
+  <data name="MaxWagons" xml:space="preserve">
+    <value>Max. Wagen</value>
+  </data>
+  <data name="MaxAxles" xml:space="preserve">
+    <value>Max. Achsen</value>
+  </data>
+  <data name="AndRegions" xml:space="preserve">
+    <value>Und Regionen</value>
+  </data>
+  <data name="AndRegionsHint" xml:space="preserve">
+    <value>Auch die der Zielstation zugeordneten Regionen auflisten.</value>
+  </data>
+  <data name="AndBeyond" xml:space="preserve">
+    <value>Und darüber hinaus</value>
+  </data>
+  <data name="AndBeyondHint" xml:space="preserve">
+    <value>Auch alle Orte jenseits der Zielstation einbeziehen.</value>
+  </data>
+  <data name="AndLocal" xml:space="preserve">
+    <value>Und lokal</value>
+  </data>
+  <data name="AndLocalDestinationsHint" xml:space="preserve">
+    <value>Auch lokale Ziele einbeziehen, die von der Station aus bedient werden.</value>
+  </data>
+  <data name="NoDestinations" xml:space="preserve">
+    <value>Keine Ziele.</value>
+  </data>
+  <data name="AddDestination" xml:space="preserve">
+    <value>Ziel hinzufügen</value>
+  </data>
+  <data name="NoOrigins" xml:space="preserve">
+    <value>Keine Herkünfte.</value>
+  </data>
+  <data name="AddOrigin" xml:space="preserve">
+    <value>Herkunft hinzufügen</value>
+  </data>
+  <data name="CargoTrainsDescription" xml:space="preserve">
+    <value>Wagenströme zu Zügen hinzufügen: Wählen Sie einen Zug und legen Sie dann fest, wo Wagen an- und abgekuppelt werden und welche Güterbeschreibung gilt.</value>
+  </data>
+  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
+    <value>Fügen Sie zuerst mindestens eine Güterbeschreibung auf der Registerkarte Güterbeschreibungen hinzu.</value>
+  </data>
+  <data name="SelectTrain" xml:space="preserve">
+    <value>Zug auswählen…</value>
+  </data>
+  <data name="AddCargoFlow" xml:space="preserve">
+    <value>Wagenstrom hinzufügen</value>
+  </data>
+  <data name="NoCargoFlows" xml:space="preserve">
+    <value>Noch keine Wagenströme.</value>
+  </data>
+  <data name="CargoFlows" xml:space="preserve">
+    <value>Wagenströme</value>
+  </data>
+  <data name="CargoDescription" xml:space="preserve">
+    <value>Güterbeschreibung</value>
+  </data>
+  <data name="DeleteCargoFlowConfirm" xml:space="preserve">
+    <value>Diesen Wagenstrom löschen?</value>
+  </data>
 </root>

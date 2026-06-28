@@ -1155,4 +1155,106 @@
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Vis en merknad ved ankomst om hvilket tog dette fortsetter som ifølge ruteplanen.</value>
   </data>
+  <data name="CargoFlowNoSchedule" xml:space="preserve">
+    <value>Opprett eller importer et anlegg for å planlegge godsstrømmer.</value>
+  </data>
+  <data name="CargoFlowDescription" xml:space="preserve">
+    <value>Planlegg godsstrømmer i to trinn: definer gjenbrukbare godsbeskrivelser, og legg deretter godsstrømmer til tog.</value>
+  </data>
+  <data name="CargoDescriptions" xml:space="preserve">
+    <value>Godsbeskrivelser</value>
+  </data>
+  <data name="CargoTrains" xml:space="preserve">
+    <value>Godstog</value>
+  </data>
+  <data name="CargoDescriptionsDescription" xml:space="preserve">
+    <value>Gjenbrukbare beskrivelser av hvor vogner dirigeres. En godsstrøm på et tog refererer til en av disse; å redigere en beskrivelse oppdaterer alle strømmer som bruker den.</value>
+  </data>
+  <data name="AddCargoDescription" xml:space="preserve">
+    <value>Legg til godsbeskrivelse</value>
+  </data>
+  <data name="NoCargoDescriptions" xml:space="preserve">
+    <value>Ingen godsbeskrivelser ennå.</value>
+  </data>
+  <data name="NewCargoDescriptionName" xml:space="preserve">
+    <value>Ny godsbeskrivelse</value>
+  </data>
+  <data name="ToAllDestinations" xml:space="preserve">
+    <value>Til alle destinasjoner</value>
+  </data>
+  <data name="Destinations" xml:space="preserve">
+    <value>Destinasjoner</value>
+  </data>
+  <data name="Origins" xml:space="preserve">
+    <value>Opprinnelser</value>
+  </data>
+  <data name="CargoDescriptionReferenced" xml:space="preserve">
+    <value>Kan ikke slette: denne godsbeskrivelsen brukes av en eller flere godsstrømmer.</value>
+  </data>
+  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
+    <value>Slett godsbeskrivelse '{0}'?</value>
+  </data>
+  <data name="PositionInTrainHint" xml:space="preserve">
+    <value>Posisjon i toget (1 = fremst); 0 betyr hvor som helst.</value>
+  </data>
+  <data name="MaxWagons" xml:space="preserve">
+    <value>Maks. vogner</value>
+  </data>
+  <data name="MaxAxles" xml:space="preserve">
+    <value>Maks. aksler</value>
+  </data>
+  <data name="AndRegions" xml:space="preserve">
+    <value>Og regioner</value>
+  </data>
+  <data name="AndRegionsHint" xml:space="preserve">
+    <value>List også opp regionene som er knyttet til destinasjonsstasjonen.</value>
+  </data>
+  <data name="AndBeyond" xml:space="preserve">
+    <value>Og videre</value>
+  </data>
+  <data name="AndBeyondHint" xml:space="preserve">
+    <value>Inkluder også alle steder utover destinasjonsstasjonen.</value>
+  </data>
+  <data name="AndLocal" xml:space="preserve">
+    <value>Og lokale</value>
+  </data>
+  <data name="AndLocalDestinationsHint" xml:space="preserve">
+    <value>Inkluder også lokale destinasjoner som betjenes fra stasjonen.</value>
+  </data>
+  <data name="NoDestinations" xml:space="preserve">
+    <value>Ingen destinasjoner.</value>
+  </data>
+  <data name="AddDestination" xml:space="preserve">
+    <value>Legg til destinasjon</value>
+  </data>
+  <data name="NoOrigins" xml:space="preserve">
+    <value>Ingen opprinnelser.</value>
+  </data>
+  <data name="AddOrigin" xml:space="preserve">
+    <value>Legg til opprinnelse</value>
+  </data>
+  <data name="CargoTrainsDescription" xml:space="preserve">
+    <value>Legg til godsstrømmer på tog: velg et tog, og angi deretter hvor vogner kobles til og fra, og hvilken godsbeskrivelse som gjelder.</value>
+  </data>
+  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
+    <value>Legg først til minst én godsbeskrivelse på fanen Godsbeskrivelser.</value>
+  </data>
+  <data name="SelectTrain" xml:space="preserve">
+    <value>Velg et tog…</value>
+  </data>
+  <data name="AddCargoFlow" xml:space="preserve">
+    <value>Legg til godsstrøm</value>
+  </data>
+  <data name="NoCargoFlows" xml:space="preserve">
+    <value>Ingen godsstrømmer ennå.</value>
+  </data>
+  <data name="CargoFlows" xml:space="preserve">
+    <value>Godsstrømmer</value>
+  </data>
+  <data name="CargoDescription" xml:space="preserve">
+    <value>Godsbeskrivelse</value>
+  </data>
+  <data name="DeleteCargoFlowConfirm" xml:space="preserve">
+    <value>Slett denne godsstrømmen?</value>
+  </data>
 </root>

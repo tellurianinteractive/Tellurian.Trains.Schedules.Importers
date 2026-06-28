@@ -1149,9 +1149,6 @@
   <data name="CargoTrains" xml:space="preserve">
     <value>Cargo trains</value>
   </data>
-  <data name="CargoTrainsComingSoon" xml:space="preserve">
-    <value>Adding cargo flows to trains is coming next.</value>
-  </data>
   <data name="CargoDescriptionsDescription" xml:space="preserve">
     <value>Reusable descriptions of where wagons are routed. A cargo flow on a train references one of these; editing a description updates every flow that uses it.</value>
   </data>
