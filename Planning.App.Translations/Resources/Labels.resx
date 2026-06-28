@@ -1218,4 +1218,28 @@
   <data name="AddOrigin" xml:space="preserve">
     <value>Add origin</value>
   </data>
+  <data name="CargoTrainsDescription" xml:space="preserve">
+    <value>Add cargo flows to trains: choose a train, then set where wagons are connected and disconnected and which cargo description applies.</value>
+  </data>
+  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
+    <value>Add at least one cargo description first, on the Cargo descriptions tab.</value>
+  </data>
+  <data name="SelectTrain" xml:space="preserve">
+    <value>Select a train…</value>
+  </data>
+  <data name="AddCargoFlow" xml:space="preserve">
+    <value>Add cargo flow</value>
+  </data>
+  <data name="NoCargoFlows" xml:space="preserve">
+    <value>No cargo flows yet.</value>
+  </data>
+  <data name="CargoFlows" xml:space="preserve">
+    <value>Cargo flows</value>
+  </data>
+  <data name="CargoDescription" xml:space="preserve">
+    <value>Cargo description</value>
+  </data>
+  <data name="DeleteCargoFlowConfirm" xml:space="preserve">
+    <value>Delete this cargo flow?</value>
+  </data>
 </root>
