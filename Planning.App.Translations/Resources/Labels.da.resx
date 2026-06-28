@@ -1257,4 +1257,34 @@
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Slet denne godsstrøm?</value>
   </data>
+  <data name="CargoFlowCouple" xml:space="preserve">
+    <value>Kobl til</value>
+  </data>
+  <data name="CargoFlowUncouple" xml:space="preserve">
+    <value>Kobl fra</value>
+  </data>
+  <data name="CargoFlowShuntBefore" xml:space="preserve">
+    <value>Ranger før</value>
+  </data>
+  <data name="CargoFlowShuntAfter" xml:space="preserve">
+    <value>Ranger efter</value>
+  </data>
+  <data name="CargoFlowNoWagonsHere" xml:space="preserve">
+    <value>Ingen vogne herfra</value>
+  </data>
+  <data name="CargoFlowCoupleHint" xml:space="preserve">
+    <value>Vis en tilkoblingsnotits for vognene ved afgangskaldet.</value>
+  </data>
+  <data name="CargoFlowUncoupleHint" xml:space="preserve">
+    <value>Vis en frakoblingsnotits for vognene ved ankomstkaldet.</value>
+  </data>
+  <data name="CargoFlowShuntBeforeHint" xml:space="preserve">
+    <value>Lokføreren rangerer også de afgående vogne før afgang.</value>
+  </data>
+  <data name="CargoFlowShuntAfterHint" xml:space="preserve">
+    <value>Lokføreren rangerer også de ankomne vogne efter ankomst.</value>
+  </data>
+  <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
+    <value>Medtag ingen vogne fra denne station; strømmen videresender stadig vogne fra beskrivelsens oprindelser.</value>
+  </data>
 </root>

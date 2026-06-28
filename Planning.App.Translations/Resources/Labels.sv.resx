@@ -1257,4 +1257,34 @@
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Ta bort det här godsflödet?</value>
   </data>
+  <data name="CargoFlowCouple" xml:space="preserve">
+    <value>Koppla</value>
+  </data>
+  <data name="CargoFlowUncouple" xml:space="preserve">
+    <value>Koppla loss</value>
+  </data>
+  <data name="CargoFlowShuntBefore" xml:space="preserve">
+    <value>Växla före</value>
+  </data>
+  <data name="CargoFlowShuntAfter" xml:space="preserve">
+    <value>Växla efter</value>
+  </data>
+  <data name="CargoFlowNoWagonsHere" xml:space="preserve">
+    <value>Inga vagnar härifrån</value>
+  </data>
+  <data name="CargoFlowCoupleHint" xml:space="preserve">
+    <value>Visa en notis om att koppla till vagnarna vid avgångsanropet.</value>
+  </data>
+  <data name="CargoFlowUncoupleHint" xml:space="preserve">
+    <value>Visa en notis om att koppla loss vagnarna vid ankomstanropet.</value>
+  </data>
+  <data name="CargoFlowShuntBeforeHint" xml:space="preserve">
+    <value>Tågföraren växlar även de avgående vagnarna före avgång.</value>
+  </data>
+  <data name="CargoFlowShuntAfterHint" xml:space="preserve">
+    <value>Tågföraren växlar även de ankomna vagnarna efter ankomst.</value>
+  </data>
+  <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
+    <value>Ta inga vagnar från denna station; flödet vidarebefordrar ändå vagnar från beskrivningens ursprung.</value>
+  </data>
 </root>

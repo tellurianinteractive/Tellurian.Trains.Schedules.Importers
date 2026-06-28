@@ -141,6 +141,11 @@
                     <th>@Translator("From")</th>
                     <th>@Translator("To")</th>
                     <th>@Translator("CargoDescription")</th>
+                    <th class="center" title="@Translator("CargoFlowCoupleHint")">@Translator("CargoFlowCouple")</th>
+                    <th class="center" title="@Translator("CargoFlowUncoupleHint")">@Translator("CargoFlowUncouple")</th>
+                    <th class="center" title="@Translator("CargoFlowShuntBeforeHint")">@Translator("CargoFlowShuntBefore")</th>
+                    <th class="center" title="@Translator("CargoFlowShuntAfterHint")">@Translator("CargoFlowShuntAfter")</th>
+                    <th class="center" title="@Translator("CargoFlowNoWagonsHereHint")">@Translator("CargoFlowNoWagonsHere")</th>
                     <th></th>
                 </tr>
             </thead>
@@ -161,6 +166,11 @@
                             <ListBoxView Items="@(Descriptions.ToListItems())"
                                          Value="flow.CargoFlowOptionsId" ValueChanged="id => SetDescription(flow, id)" />
                         </td>
+                        <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.HasUncoupleNote" @onchange="e => { flow.HasUncoupleNote = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.AlsoShuntBeforeDeparture" @onchange="e => { flow.AlsoShuntBeforeDeparture = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.AlsoShuntAfterArrival" @onchange="e => { flow.AlsoShuntAfterArrival = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.BringsNoWagonsFromHere = e.Value is true; Save(); }" /></td>
                         <td><button class="danger small" @onclick="() => _deleteTarget = flow">@Translator("Delete")</button></td>
                     </tr>
                 }

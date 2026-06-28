@@ -1257,4 +1257,34 @@
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Diesen Wagenstrom löschen?</value>
   </data>
+  <data name="CargoFlowCouple" xml:space="preserve">
+    <value>Kuppeln</value>
+  </data>
+  <data name="CargoFlowUncouple" xml:space="preserve">
+    <value>Abkuppeln</value>
+  </data>
+  <data name="CargoFlowShuntBefore" xml:space="preserve">
+    <value>Rangieren vorher</value>
+  </data>
+  <data name="CargoFlowShuntAfter" xml:space="preserve">
+    <value>Rangieren danach</value>
+  </data>
+  <data name="CargoFlowNoWagonsHere" xml:space="preserve">
+    <value>Keine Wagen von hier</value>
+  </data>
+  <data name="CargoFlowCoupleHint" xml:space="preserve">
+    <value>Eine Ankuppel-Notiz für die Wagen am Abfahrtshalt anzeigen.</value>
+  </data>
+  <data name="CargoFlowUncoupleHint" xml:space="preserve">
+    <value>Eine Abkuppel-Notiz für die Wagen am Ankunftshalt anzeigen.</value>
+  </data>
+  <data name="CargoFlowShuntBeforeHint" xml:space="preserve">
+    <value>Der Triebfahrzeugführer rangiert die abgehenden Wagen auch vor der Abfahrt.</value>
+  </data>
+  <data name="CargoFlowShuntAfterHint" xml:space="preserve">
+    <value>Der Triebfahrzeugführer rangiert die angekommenen Wagen auch nach der Ankunft.</value>
+  </data>
+  <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
+    <value>Keine Wagen von dieser Station mitnehmen; der Strom leitet dennoch Wagen von den Herkünften der Beschreibung weiter.</value>
+  </data>
 </root>

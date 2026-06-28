@@ -164,6 +164,11 @@
         text-align: right;
     }
 
+    table.sub-grid th.center,
+    table.sub-grid td.center {
+        text-align: center;
+    }
+
     table.sub-grid td {
         padding: 0.15rem 0.5rem;
         vertical-align: middle;

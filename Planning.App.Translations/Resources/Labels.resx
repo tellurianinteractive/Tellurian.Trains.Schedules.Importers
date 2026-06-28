@@ -1239,4 +1239,34 @@
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Delete this cargo flow?</value>
   </data>
+  <data name="CargoFlowCouple" xml:space="preserve">
+    <value>Couple</value>
+  </data>
+  <data name="CargoFlowUncouple" xml:space="preserve">
+    <value>Uncouple</value>
+  </data>
+  <data name="CargoFlowShuntBefore" xml:space="preserve">
+    <value>Shunt before</value>
+  </data>
+  <data name="CargoFlowShuntAfter" xml:space="preserve">
+    <value>Shunt after</value>
+  </data>
+  <data name="CargoFlowNoWagonsHere" xml:space="preserve">
+    <value>No wagons here</value>
+  </data>
+  <data name="CargoFlowCoupleHint" xml:space="preserve">
+    <value>Show a couple note for the wagons at the from-call.</value>
+  </data>
+  <data name="CargoFlowUncoupleHint" xml:space="preserve">
+    <value>Show an uncouple note for the wagons at the to-call.</value>
+  </data>
+  <data name="CargoFlowShuntBeforeHint" xml:space="preserve">
+    <value>The train driver also shunts the departing wagons before departure.</value>
+  </data>
+  <data name="CargoFlowShuntAfterHint" xml:space="preserve">
+    <value>The train driver also shunts the arrived wagons after arrival.</value>
+  </data>
+  <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
+    <value>Bring no wagons from this station; the flow still forwards wagons from the description's origins.</value>
+  </data>
 </root>
