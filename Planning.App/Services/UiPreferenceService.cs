@@ -9,6 +9,7 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
 {
     private const string SettingsSectionKey = "planning.ui.settingsSection";
     private const string StretchesSectionKey = "planning.ui.stretchesSection";
+    private const string CargoFlowSectionKey = "planning.ui.cargoFlowSection";
     private const string LastRouteKey = "planning.ui.lastRoute";
     private const string GraphHalfKey = "planning.ui.graphHalf";
 
@@ -16,6 +17,8 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
     private bool _settingsSectionLoaded;
     private string? _stretchesSection;
     private bool _stretchesSectionLoaded;
+    private string? _cargoFlowSection;
+    private bool _cargoFlowSectionLoaded;
     private string? _lastRoute;
     private bool _lastRouteLoaded;
     private string? _graphHalf;
@@ -55,6 +58,24 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
         _stretchesSection = section;
         _stretchesSectionLoaded = true;
         await storage.SetStringAsync(StretchesSectionKey, section);
+    }
+
+    /// <summary>The last active sub-section in the Cargo Flow page, or null when none has been stored.</summary>
+    public async Task<string?> GetCargoFlowSectionAsync()
+    {
+        if (_cargoFlowSectionLoaded) return _cargoFlowSection;
+        _cargoFlowSection = await storage.GetStringAsync(CargoFlowSectionKey);
+        _cargoFlowSectionLoaded = true;
+        return _cargoFlowSection;
+    }
+
+    /// <summary>Remembers the active sub-section in the Cargo Flow page.</summary>
+    public async Task SetCargoFlowSectionAsync(string section)
+    {
+        if (_cargoFlowSection == section) return;
+        _cargoFlowSection = section;
+        _cargoFlowSectionLoaded = true;
+        await storage.SetStringAsync(CargoFlowSectionKey, section);
     }
 
     /// <summary>The last active top-level route (e.g. "settings", "workspace"), or null when none.</summary>

@@ -1,0 +1,295 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Schedules
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+<div class="cargo-descriptions">
+    <p class="hint">@Translator("CargoDescriptionsDescription")</p>
+
+    <div class="toolbar">
+        <button class="primary" @onclick="AddDescription">@Translator("AddCargoDescription")</button>
+    </div>
+
+    @if (Descriptions.Count == 0)
+    {
+        <p class="empty">@Translator("NoCargoDescriptions")</p>
+    }
+    else
+    {
+        <table class="grid">
+            <thead>
+                <tr>
+                    <th class="expander"></th>
+                    <th>@Translator("Name")</th>
+                    <th class="center">@Translator("ToAllDestinations")</th>
+                    <th class="num">@Translator("Destinations")</th>
+                    <th class="num">@Translator("Origins")</th>
+                    <th class="actions"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Descriptions)
+                {
+                    <tr class="description @(IsExpanded(d) ? "expanded" : "")">
+                        <td class="expander">
+                            <button class="toggle" title="@Translator(IsExpanded(d) ? "Collapse" : "Expand")"
+                                    @onclick="() => ToggleExpanded(d)">@(IsExpanded(d) ? "▾" : "▸")</button>
+                        </td>
+                        <td><input type="text" value="@d.Name" @onchange="e => SetName(d, e)" /></td>
+                        <td class="center"><input type="checkbox" checked="@d.ToAllDestinations" @onchange="e => SetToAll(d, e)" /></td>
+                        <td class="num">@d.Destinations.Count</td>
+                        <td class="num">@d.Origins.Count</td>
+                        <td class="actions">
+                            @{ var deletion = Plan?.MayDelete(d); }
+                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
+                                <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                                        @onclick="() => _deleteTarget = d">@Translator("Delete")</button>
+                            </span>
+                        </td>
+                    </tr>
+                    @if (IsExpanded(d))
+                    {
+                        <tr class="detail">
+                            <td></td>
+                            <td colspan="5">
+                                @DestinationsTable(d)
+                                @OriginsTable(d)
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (_deleteTarget is not null)
+    {
+        <div class="confirm">
+            <span>@string.Format(Culture, Translator("DeleteCargoDescriptionConfirm"), _deleteTarget.Name)</span>
+            <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+            <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+        </div>
+    }
+</div>
+
+@code {
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+
+    private List<CargoFlowOptions> Descriptions =>
+        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.Name, StringComparer.CurrentCulture)];
+
+    private IEnumerable<Station> StationChoices =>
+        (Layout?.OperationLocations.OfType<Station>() ?? []).OrderBy(s => s.Name, StringComparer.CurrentCulture);
+
+    private readonly HashSet<int> _expanded = [];
+    private CargoFlowOptions? _deleteTarget;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    private bool IsExpanded(CargoFlowOptions d) => _expanded.Contains(d.Id);
+
+    private void ToggleExpanded(CargoFlowOptions d)
+    {
+        if (!_expanded.Remove(d.Id)) _expanded.Add(d.Id);
+    }
+
+    // ---- Description fields ----------------------------------------------------------------------
+
+    private void SetName(CargoFlowOptions d, ChangeEventArgs e)
+    {
+        d.Name = e.Value?.ToString() ?? "";
+        Save();
+    }
+
+    private void SetToAll(CargoFlowOptions d, ChangeEventArgs e)
+    {
+        d.ToAllDestinations = e.Value is true;
+        Save();
+    }
+
+    private void AddDescription()
+    {
+        if (Timetable is not { } timetable) return;
+        var added = timetable.Add(new CargoFlowOptions { Name = Translator("NewCargoDescriptionName") });
+        _expanded.Add(added.Id);
+        Save();
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is { } d && Plan?.TryDelete(d).IsSuccess == true)
+        {
+            _expanded.Remove(d.Id);
+            Save();
+        }
+        _deleteTarget = null;
+    }
+
+    // ---- Destinations sub-table ------------------------------------------------------------------
+
+    private RenderFragment DestinationsTable(CargoFlowOptions d) => @<div class="sub">
+        <h4>@Translator("Destinations")</h4>
+        <table class="sub-grid">
+            <thead>
+                <tr>
+                    <th>@Translator("Station")</th>
+                    <th class="num" title="@Translator("PositionInTrainHint")">@Translator("Position")</th>
+                    <th class="num">@Translator("MaxWagons")</th>
+                    <th class="num">@Translator("MaxAxles")</th>
+                    <th class="center" title="@Translator("AndRegionsHint")">@Translator("AndRegions")</th>
+                    <th class="center" title="@Translator("AndBeyondHint")">@Translator("AndBeyond")</th>
+                    <th class="center" title="@Translator("AndLocalDestinationsHint")">@Translator("AndLocal")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dest in d.Destinations.ToList())
+                {
+                    <tr>
+                        <td>
+                            <select value="@dest.Station.Id" @onchange="e => SetDestinationStation(dest, e)">
+                                @foreach (var s in StationChoices)
+                                {
+                                    <option value="@s.Id">@s.Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="number" class="num" min="0" value="@dest.PositionInTrain" @onchange="e => SetDestinationPosition(dest, e)" /></td>
+                        <td><input type="number" class="num" min="0" value="@dest.MaxNumberOfWagons" @onchange="e => SetDestinationMaxWagons(dest, e)" /></td>
+                        <td><input type="number" class="num" min="0" value="@dest.MaxNumberOfAxles" @onchange="e => SetDestinationMaxAxles(dest, e)" /></td>
+                        <td class="center"><input type="checkbox" checked="@dest.AndRegions" @onchange="e => SetDestinationAndRegions(dest, e)" /></td>
+                        <td class="center"><input type="checkbox" checked="@dest.AndBeyond" @onchange="e => SetDestinationAndBeyond(dest, e)" /></td>
+                        <td class="center"><input type="checkbox" checked="@dest.AndLocalDestinations" @onchange="e => SetDestinationAndLocal(dest, e)" /></td>
+                        <td><button class="danger small" @onclick="() => RemoveDestination(d, dest)">@Translator("Delete")</button></td>
+                    </tr>
+                }
+                @if (d.Destinations.Count == 0)
+                {
+                    <tr><td colspan="8" class="empty">@Translator("NoDestinations")</td></tr>
+                }
+            </tbody>
+        </table>
+        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestination")</button>
+    </div>;
+
+    private void SetDestinationStation(Destination dest, ChangeEventArgs e)
+    {
+        if (StationById(e) is { } station) dest.Station = station;
+        Save();
+    }
+
+    private void SetDestinationPosition(Destination dest, ChangeEventArgs e)
+    {
+        dest.PositionInTrain = ParseInt(e) ?? dest.PositionInTrain;
+        Save();
+    }
+
+    private void SetDestinationMaxWagons(Destination dest, ChangeEventArgs e)
+    {
+        dest.MaxNumberOfWagons = ParseInt(e) ?? dest.MaxNumberOfWagons;
+        Save();
+    }
+
+    private void SetDestinationMaxAxles(Destination dest, ChangeEventArgs e)
+    {
+        dest.MaxNumberOfAxles = ParseInt(e) ?? dest.MaxNumberOfAxles;
+        Save();
+    }
+
+    private void SetDestinationAndRegions(Destination dest, ChangeEventArgs e) { dest.AndRegions = e.Value is true; Save(); }
+    private void SetDestinationAndBeyond(Destination dest, ChangeEventArgs e) { dest.AndBeyond = e.Value is true; Save(); }
+    private void SetDestinationAndLocal(Destination dest, ChangeEventArgs e) { dest.AndLocalDestinations = e.Value is true; Save(); }
+
+    private void AddDestination(CargoFlowOptions d)
+    {
+        if (StationChoices.FirstOrDefault() is not { } station) return;
+        d.Destinations.Add(new Destination { Station = station });
+        Save();
+    }
+
+    private void RemoveDestination(CargoFlowOptions d, Destination dest)
+    {
+        d.Destinations.Remove(dest);
+        Save();
+    }
+
+    // ---- Origins sub-table -----------------------------------------------------------------------
+
+    private RenderFragment OriginsTable(CargoFlowOptions d) => @<div class="sub">
+        <h4>@Translator("Origins")</h4>
+        <table class="sub-grid">
+            <thead>
+                <tr>
+                    <th>@Translator("Station")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var origin in d.Origins.ToList())
+                {
+                    <tr>
+                        <td>
+                            <select value="@origin.Station.Id" @onchange="e => SetOriginStation(origin, e)">
+                                @foreach (var s in StationChoices)
+                                {
+                                    <option value="@s.Id">@s.Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td><button class="danger small" @onclick="() => RemoveOrigin(d, origin)">@Translator("Delete")</button></td>
+                    </tr>
+                }
+                @if (d.Origins.Count == 0)
+                {
+                    <tr><td colspan="2" class="empty">@Translator("NoOrigins")</td></tr>
+                }
+            </tbody>
+        </table>
+        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOrigin")</button>
+    </div>;
+
+    private void SetOriginStation(Origin origin, ChangeEventArgs e)
+    {
+        if (StationById(e) is { } station) origin.Station = station;
+        Save();
+    }
+
+    private void AddOrigin(CargoFlowOptions d)
+    {
+        if (StationChoices.FirstOrDefault() is not { } station) return;
+        d.Origins.Add(new Origin { Station = station });
+        Save();
+    }
+
+    private void RemoveOrigin(CargoFlowOptions d, Origin origin)
+    {
+        d.Origins.Remove(origin);
+        Save();
+    }
+
+    // ---- Helpers ---------------------------------------------------------------------------------
+
+    private Station? StationById(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), out var id) ? StationChoices.FirstOrDefault(s => s.Id == id) : null;
+
+    private static int? ParseInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;
+
+    private void Save() => ScheduleState.SaveAndNotify();
+}

@@ -1137,4 +1137,85 @@
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Show a note at arrival stating which train this continues as, from the schedule.</value>
   </data>
+  <data name="CargoFlowNoSchedule" xml:space="preserve">
+    <value>Create or import a layout to plan cargo flows.</value>
+  </data>
+  <data name="CargoFlowDescription" xml:space="preserve">
+    <value>Plan cargo flows in two steps: define reusable cargo descriptions, then add cargo flows to trains.</value>
+  </data>
+  <data name="CargoDescriptions" xml:space="preserve">
+    <value>Cargo descriptions</value>
+  </data>
+  <data name="CargoTrains" xml:space="preserve">
+    <value>Cargo trains</value>
+  </data>
+  <data name="CargoTrainsComingSoon" xml:space="preserve">
+    <value>Adding cargo flows to trains is coming next.</value>
+  </data>
+  <data name="CargoDescriptionsDescription" xml:space="preserve">
+    <value>Reusable descriptions of where wagons are routed. A cargo flow on a train references one of these; editing a description updates every flow that uses it.</value>
+  </data>
+  <data name="AddCargoDescription" xml:space="preserve">
+    <value>Add cargo description</value>
+  </data>
+  <data name="NoCargoDescriptions" xml:space="preserve">
+    <value>No cargo descriptions yet.</value>
+  </data>
+  <data name="NewCargoDescriptionName" xml:space="preserve">
+    <value>New cargo description</value>
+  </data>
+  <data name="ToAllDestinations" xml:space="preserve">
+    <value>To all destinations</value>
+  </data>
+  <data name="Destinations" xml:space="preserve">
+    <value>Destinations</value>
+  </data>
+  <data name="Origins" xml:space="preserve">
+    <value>Origins</value>
+  </data>
+  <data name="CargoDescriptionReferenced" xml:space="preserve">
+    <value>Cannot delete: this cargo description is used by one or more cargo flows.</value>
+  </data>
+  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
+    <value>Delete cargo description '{0}'?</value>
+  </data>
+  <data name="PositionInTrainHint" xml:space="preserve">
+    <value>Position in the train (1 = front); 0 means anywhere.</value>
+  </data>
+  <data name="MaxWagons" xml:space="preserve">
+    <value>Max wagons</value>
+  </data>
+  <data name="MaxAxles" xml:space="preserve">
+    <value>Max axles</value>
+  </data>
+  <data name="AndRegions" xml:space="preserve">
+    <value>And regions</value>
+  </data>
+  <data name="AndRegionsHint" xml:space="preserve">
+    <value>Also list the regions attached to the destination station.</value>
+  </data>
+  <data name="AndBeyond" xml:space="preserve">
+    <value>And beyond</value>
+  </data>
+  <data name="AndBeyondHint" xml:space="preserve">
+    <value>Also include all locations beyond the destination station.</value>
+  </data>
+  <data name="AndLocal" xml:space="preserve">
+    <value>And local</value>
+  </data>
+  <data name="AndLocalDestinationsHint" xml:space="preserve">
+    <value>Also include local destinations served from the station.</value>
+  </data>
+  <data name="NoDestinations" xml:space="preserve">
+    <value>No destinations.</value>
+  </data>
+  <data name="AddDestination" xml:space="preserve">
+    <value>Add destination</value>
+  </data>
+  <data name="NoOrigins" xml:space="preserve">
+    <value>No origins.</value>
+  </data>
+  <data name="AddOrigin" xml:space="preserve">
+    <value>Add origin</value>
+  </data>
 </root>
