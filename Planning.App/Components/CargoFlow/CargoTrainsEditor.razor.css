@@ -1,5 +1,7 @@
 .cargo-trains {
-    --primary: #1a3a5c;
+    /* --primary / --primary-text come from MainLayout (the layout's signature colour and its
+       auto-contrasted text); do not override --primary here or the global themed header
+       (table.grid thead th) would get a mismatched text colour. */
     --danger: #c00;
     --border: #ddd;
     --hover: #f3f6fa;
@@ -20,9 +22,9 @@
     }
 
     button.primary {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: #fff;
+        background: var(--primary, #1a3a5c);
+        border-color: var(--primary, #1a3a5c);
+        color: var(--primary-text, #fff);
     }
 
     button.danger {
@@ -50,7 +52,7 @@
         padding: 0.1rem 0.3rem;
         font-size: 1rem;
         line-height: 1;
-        color: var(--primary);
+        color: var(--primary, #1a3a5c);
     }
 
     .hint {
@@ -70,24 +72,39 @@
         font-style: italic;
     }
 
+    /* Header background/text come from the app-wide themed rules in app.css (table.grid thead th).
+       Separate borders with a small horizontal gap give the segmented header look. */
     table.grid {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 2px 0;
         width: 100%;
+        max-width: 960px;
         font-size: 0.9rem;
     }
 
-    table.grid > thead th {
+    table.grid th,
+    table.grid td {
         text-align: left;
-        font-weight: 600;
-        white-space: nowrap;
         padding: 0.4rem 0.6rem;
-        border-bottom: 2px solid var(--border);
-    }
-
-    table.grid > tbody > tr.master > td {
-        padding: 0.3rem 0.6rem;
         border-bottom: 1px solid var(--border);
         vertical-align: middle;
+    }
+
+    table.grid thead th {
+        white-space: nowrap;
+    }
+
+    table.grid th.num,
+    table.grid td.num {
+        text-align: right;
+    }
+
+    table.grid th.expander,
+    table.grid td.expander {
+        width: 1.6rem;
+        text-align: center;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
     }
 
     table.grid > tbody > tr.master:hover {
@@ -96,19 +113,6 @@
 
     table.grid > tbody > tr.master.expanded {
         background: var(--detail-bg);
-    }
-
-    th.expander,
-    td.expander {
-        width: 1.6rem;
-        text-align: center;
-        padding-left: 0.2rem;
-        padding-right: 0.2rem;
-    }
-
-    th.num,
-    td.num {
-        text-align: right;
     }
 
     input,
