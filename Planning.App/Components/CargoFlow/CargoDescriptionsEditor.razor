@@ -23,7 +23,6 @@
         <table class="grid">
             <thead>
                 <tr>
-                    <th class="expander"></th>
                     <th>@Translator("Name")</th>
                     <th class="center">@Translator("ToAllDestinations")</th>
                     <th class="num">@Translator("Destinations")</th>
@@ -35,15 +34,12 @@
                 @foreach (var d in Descriptions)
                 {
                     <tr class="description @(IsExpanded(d) ? "expanded" : "")">
-                        <td class="expander">
-                            <button class="toggle" title="@Translator(IsExpanded(d) ? "Collapse" : "Expand")"
-                                    @onclick="() => ToggleExpanded(d)">@(IsExpanded(d) ? "▾" : "▸")</button>
-                        </td>
                         <td><input type="text" value="@d.Name" @onchange="e => SetName(d, e)" /></td>
                         <td class="center"><input type="checkbox" checked="@d.ToAllDestinations" @onchange="e => SetToAll(d, e)" /></td>
                         <td class="num">@d.Destinations.Count</td>
                         <td class="num">@d.Origins.Count</td>
                         <td class="actions">
+                            <button @onclick="() => ToggleExpanded(d)">@Translator(IsExpanded(d) ? "Close" : "Edit")</button>
                             @{ var deletion = Plan?.MayDelete(d); }
                             <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
                                 <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
@@ -54,7 +50,6 @@
                     @if (IsExpanded(d))
                     {
                         <tr class="detail">
-                            <td></td>
                             <td colspan="5">
                                 @DestinationsTable(d)
                                 @OriginsTable(d)

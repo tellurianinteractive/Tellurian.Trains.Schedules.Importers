@@ -162,18 +162,34 @@
         color: #556;
     }
 
+    /* Sub-table headers match the main grid: signature background with contrasted text. Setting the
+       background/colour explicitly also overrides the global "table.grid thead th" rule, which (via
+       descendant matching) otherwise reaches these nested headers and would show navy with the
+       wrong text colour. The 2px horizontal gap gives the same segmented look. */
     table.sub-grid {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 2px 0;
         margin-bottom: 0.4rem;
     }
 
-    table.sub-grid th {
+    table.sub-grid thead th {
+        background-color: var(--primary, #1a3a5c);
+        color: var(--primary-text, #fff);
         text-align: left;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.8rem;
-        color: #556;
         padding: 0.2rem 0.5rem;
         white-space: nowrap;
+    }
+
+    table.sub-grid th.num,
+    table.sub-grid td.num {
+        text-align: right;
+    }
+
+    table.sub-grid th.center,
+    table.sub-grid td.center {
+        text-align: center;
     }
 
     table.sub-grid td {
