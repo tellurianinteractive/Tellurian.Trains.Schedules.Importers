@@ -158,12 +158,8 @@
                 {
                     <tr>
                         <td>
-                            <select value="@dest.Station.Id" @onchange="e => SetDestinationStation(dest, e)">
-                                @foreach (var s in StationChoices)
-                                {
-                                    <option value="@s.Id">@s.Name</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(StationChoices.ToListItems())"
+                                         Value="dest.Station.Id" ValueChanged="id => SetDestinationStation(dest, id)" />
                         </td>
                         <td><input type="number" class="num" min="0" value="@dest.PositionInTrain" @onchange="e => SetDestinationPosition(dest, e)" /></td>
                         <td><input type="number" class="num" min="0" value="@dest.MaxNumberOfWagons" @onchange="e => SetDestinationMaxWagons(dest, e)" /></td>
@@ -183,9 +179,9 @@
         <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestination")</button>
     </div>;
 
-    private void SetDestinationStation(Destination dest, ChangeEventArgs e)
+    private void SetDestinationStation(Destination dest, int? id)
     {
-        if (StationById(e) is { } station) dest.Station = station;
+        if (StationChoices.FirstOrDefault(s => s.Id == id) is { } station) dest.Station = station;
         Save();
     }
 
@@ -240,12 +236,8 @@
                 {
                     <tr>
                         <td>
-                            <select value="@origin.Station.Id" @onchange="e => SetOriginStation(origin, e)">
-                                @foreach (var s in StationChoices)
-                                {
-                                    <option value="@s.Id">@s.Name</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(StationChoices.ToListItems())"
+                                         Value="origin.Station.Id" ValueChanged="id => SetOriginStation(origin, id)" />
                         </td>
                         <td><button class="danger small" @onclick="() => RemoveOrigin(d, origin)">@Translator("Delete")</button></td>
                     </tr>
@@ -259,9 +251,9 @@
         <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOrigin")</button>
     </div>;
 
-    private void SetOriginStation(Origin origin, ChangeEventArgs e)
+    private void SetOriginStation(Origin origin, int? id)
     {
-        if (StationById(e) is { } station) origin.Station = station;
+        if (StationChoices.FirstOrDefault(s => s.Id == id) is { } station) origin.Station = station;
         Save();
     }
 
@@ -279,9 +271,6 @@
     }
 
     // ---- Helpers ---------------------------------------------------------------------------------
-
-    private Station? StationById(ChangeEventArgs e) =>
-        int.TryParse(e.Value?.ToString(), out var id) ? StationChoices.FirstOrDefault(s => s.Id == id) : null;
 
     private static int? ParseInt(ChangeEventArgs e) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;

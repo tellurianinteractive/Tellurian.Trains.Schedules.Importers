@@ -63,14 +63,10 @@ else
                             }
                             <td>
                                 @{ var inheritedCompany = train.Category?.Company; }
-                                <select class="@(train.Company is null ? "inherited" : null)"
-                                        value="@(train.CompanyId?.ToString() ?? "")" @onchange="e => SetCompany(train, e)">
-                                    <option value="">@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")</option>
-                                    @foreach (var company in CompanyChoices)
-                                    {
-                                        <option value="@company.Id">@company.Name</option>
-                                    }
-                                </select>
+                                <ListBoxView Items="@(CompanyChoices.ToListItems())"
+                                             Value="train.CompanyId" ValueChanged="id => SetCompany(train, id)"
+                                             Class="@(train.Company is null ? "inherited" : null)"
+                                             Placeholder="@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")" />
                             </td>
                             <td>
                                 <input type="number" class="num" value="@train.Number" @onchange="e => SetNumber(train, e)" />
@@ -88,13 +84,9 @@ else
                                 </select>
                             </td>
                             <td>
-                                <select value="@(train.CategoryId?.ToString() ?? "")" @onchange="e => SetCategory(train, e)">
-                                    <option value="">—</option>
-                                    @foreach (var category in CategoryChoices)
-                                    {
-                                        <option value="@category.Id">@category.Name</option>
-                                    }
-                                </select>
+                                <ListBoxView Items="@(CategoryChoices.ToListItems())"
+                                             Value="train.CategoryId" ValueChanged="id => SetCategory(train, id)"
+                                             Placeholder="—" />
                             </td>
                             <td>
                                 <input type="number" class="num" min="0" value="@train.MaxSpeed"
@@ -248,16 +240,16 @@ else
         Save();
     }
 
-    private void SetCompany(Train train, ChangeEventArgs e)
+    private void SetCompany(Train train, int? id)
     {
-        train.Company = int.TryParse(e.Value?.ToString(), out var id) ? Layout!.Companies.FirstOrDefault(c => c.Id == id) : null;
+        train.Company = id is null ? null : Layout!.Companies.FirstOrDefault(c => c.Id == id);
         train.CompanyId = train.Company?.Id;
         Save();
     }
 
-    private void SetCategory(Train train, ChangeEventArgs e)
+    private void SetCategory(Train train, int? id)
     {
-        train.Category = int.TryParse(e.Value?.ToString(), out var id) ? Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id) : null;
+        train.Category = id is null ? null : Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id);
         train.CategoryId = train.Category?.Id;
         Save();
     }
@@ -317,12 +309,8 @@ else
                 {
                     <tr>
                         <td>
-                            <select value="@call.TrackId" @onchange="e => SetCallTrack(call, e)">
-                                @foreach (var track in TrackChoices)
-                                {
-                                    <option value="@track.Id">@TrackLabel(track)</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(TrackChoices.ToListItems())"
+                                         Value="call.TrackId" ValueChanged="id => SetCallTrack(call, id)" />
                         </td>
                         <td><input type="text" class="time" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
                         <td><input type="text" class="time" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
@@ -343,13 +331,9 @@ else
     private IEnumerable<StationTrack> TrackChoices =>
         (Layout?.StationTracks() ?? []).OrderBy(t => t.Station.Name, StringComparer.CurrentCulture).ThenBy(t => t.Number, StringComparer.CurrentCulture);
 
-    private static string TrackLabel(StationTrack track) => $"{track.Station.Name} {track.Number}";
-
-    private void SetCallTrack(StationCall call, ChangeEventArgs e)
+    private void SetCallTrack(StationCall call, int? id)
     {
-        if (!int.TryParse(e.Value?.ToString(), out var id)) return;
-        var track = TrackChoices.FirstOrDefault(t => t.Id == id);
-        if (track is null) return;
+        if (TrackChoices.FirstOrDefault(t => t.Id == id) is not { } track) return;
         call.Track.Calls.Remove(call);
         call.Track = track;
         call.TrackId = track.Id;
@@ -418,20 +402,12 @@ else
                     <tr>
                         <td><input type="number" class="num" min="1" value="@wg.PositionInTrain" @onchange="e => SetPosition(wg, e)" /></td>
                         <td>
-                            <select value="@wg.FromStationCallId" @onchange="e => SetWagonGroupFrom(train, wg, e)">
-                                @foreach (var call in CallChoices(train))
-                                {
-                                    <option value="@call.Id">@CallLabel(call)</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(CallChoices(train).ToListItems(c => c.SortTime))"
+                                         Value="wg.FromStationCallId" ValueChanged="id => SetWagonGroupFrom(train, wg, id)" />
                         </td>
                         <td>
-                            <select value="@wg.ToStationCallId" @onchange="e => SetWagonGroupTo(train, wg, e)">
-                                @foreach (var call in CallChoices(train))
-                                {
-                                    <option value="@call.Id">@CallLabel(call)</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(CallChoices(train).ToListItems(c => c.SortTime))"
+                                         Value="wg.ToStationCallId" ValueChanged="id => SetWagonGroupTo(train, wg, id)" />
                         </td>
                         <td><input type="text" class="remark" value="@wg.Remark" @onchange="e => SetWagonGroupRemark(wg, e)" /></td>
                         <td><button class="danger small" @onclick="() => RemoveWagonGroup(wg)">@Translator("Delete")</button></td>
@@ -448,17 +424,15 @@ else
 
     private static IEnumerable<StationCall> CallChoices(Train train) => train.Calls.OrderBy(c => c.SortTime);
 
-    private static string CallLabel(StationCall call) => $"{call.Station.Name} {call.SortTime.HHMM()}";
-
     private void SetPosition(WagonGroup wg, ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var position)) wg.PositionInTrain = position;
         Save();
     }
 
-    private void SetWagonGroupFrom(Train train, WagonGroup wg, ChangeEventArgs e)
+    private void SetWagonGroupFrom(Train train, WagonGroup wg, int? id)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
+        if (train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
         {
             wg.FromStationCall = call;
             wg.FromStationCallId = call.Id;
@@ -466,9 +440,9 @@ else
         Save();
     }
 
-    private void SetWagonGroupTo(Train train, WagonGroup wg, ChangeEventArgs e)
+    private void SetWagonGroupTo(Train train, WagonGroup wg, int? id)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
+        if (train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
         {
             wg.ToStationCall = call;
             wg.ToStationCallId = call.Id;

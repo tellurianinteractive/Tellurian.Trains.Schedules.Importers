@@ -42,6 +42,42 @@ public static class ListItemExtensions
 
     private static ListboxItem ToItem(CargoFlowOptions description) => new(description.Id.ToString(), description.Name);
 
+    // ---- OperationLocation (stations and other places); also covers IEnumerable<Station> by covariance ----
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<OperationLocation> locations) =>
+        SortedByDescription(locations.Select(ToItem));
+
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<OperationLocation> locations, Func<OperationLocation, TKey> sorting) =>
+        locations.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(OperationLocation location) => new(location.Id.ToString(), $"{location.Name} ({location.Signature})");
+
+    // ---- Company ----
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<Company> companies) =>
+        SortedByDescription(companies.Select(ToItem));
+
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<Company> companies, Func<Company, TKey> sorting) =>
+        companies.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(Company company) => new(company.Id.ToString(), company.Name);
+
+    // ---- TrainCategory ----
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<TrainCategory> categories) =>
+        SortedByDescription(categories.Select(ToItem));
+
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<TrainCategory> categories, Func<TrainCategory, TKey> sorting) =>
+        categories.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(TrainCategory category) => new(category.Id.ToString(), category.Name);
+
+    // ---- StationTrack ----
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationTrack> tracks) =>
+        SortedByDescription(tracks.Select(ToItem));
+
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<StationTrack> tracks, Func<StationTrack, TKey> sorting) =>
+        tracks.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(StationTrack track) => new(track.Id.ToString(), $"{track.Station.Name} {track.Number}");
+
     // The default order: by the text the user actually sees, using the current culture's rules.
     private static IEnumerable<ListboxItem> SortedByDescription(IEnumerable<ListboxItem> items) =>
         items.OrderBy(i => i.LocalizedDescription, StringComparer.CurrentCulture);

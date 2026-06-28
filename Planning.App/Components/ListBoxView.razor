@@ -1,0 +1,36 @@
+@* A <select> driven by a sequence of ListboxItem, hiding the option markup. The selected value is the
+   item's integer id; null is the optional leading placeholder ("none") option. Supports @bind-Value,
+   or pass Value + ValueChanged for per-row handlers. Build the items with the ToListItems extensions. *@
+<select value="@(Value?.ToString() ?? "")" class="@Class" @onchange="OnChangedAsync">
+    @if (Placeholder is not null)
+    {
+        <option value="">@Placeholder</option>
+    }
+    @foreach (var item in Items)
+    {
+        <option value="@item.Value">@item.LocalizedDescription</option>
+    }
+</select>
+
+@code {
+    /// <summary>The options to show; build with the ToListItems extensions.</summary>
+    [Parameter, EditorRequired] public IEnumerable<ListboxItem> Items { get; set; } = [];
+
+    /// <summary>The selected item's id; <c>null</c> selects the placeholder.</summary>
+    [Parameter] public int? Value { get; set; }
+
+    /// <summary>Raised with the newly selected id (enables <c>@bind-Value</c>).</summary>
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+
+    /// <summary>Optional leading option shown for "none" (its value is <c>null</c>), e.g. "—" or "Select…".</summary>
+    [Parameter] public string? Placeholder { get; set; }
+
+    /// <summary>Optional CSS class for the underlying select.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    private async Task OnChangedAsync(ChangeEventArgs e)
+    {
+        Value = int.TryParse(e.Value?.ToString(), out var id) ? id : null;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

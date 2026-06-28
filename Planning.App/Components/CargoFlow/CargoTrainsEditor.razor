@@ -17,14 +17,9 @@
     else
     {
         <div class="toolbar">
-            <select @bind="_addTrainId">
-                <option value="0">@Translator("SelectTrain")</option>
-                @foreach (var item in Timetable!.Trains.Where(Train.CanHostCargoFlow).ToListItems(t => t.Number))
-                {
-                    <option value="@item.Value">@item.LocalizedDescription</option>
-                }
-            </select>
-            <button class="primary" disabled="@(_addTrainId == 0)" @onclick="AddToSelectedTrain">@Translator("AddCargoFlow")</button>
+            <ListBoxView Items="@(Timetable!.Trains.Where(Train.CanHostCargoFlow).ToListItems(t => t.Number))"
+                         @bind-Value="_addTrainId" Placeholder="@Translator("SelectTrain")" />
+            <button class="primary" disabled="@(_addTrainId is null)" @onclick="AddToSelectedTrain">@Translator("AddCargoFlow")</button>
         </div>
 
         @if (Masters.Count == 0)
@@ -88,7 +83,7 @@
     private List<Train> Masters =>
         [.. (Timetable?.Trains ?? []).Where(t => t.CargoFlows.Count > 0).OrderBy(t => t.Number)];
 
-    private int _addTrainId;
+    private int? _addTrainId;
     private readonly HashSet<int> _expanded = [];
     private CargoFlowTrainPart? _deleteTarget;
 
@@ -155,28 +150,16 @@
                     <tr>
                         <td><input type="number" class="num" min="0" value="@flow.PositionInTrain" @onchange="e => SetPosition(flow, e)" /></td>
                         <td>
-                            <select value="@flow.From.Id" @onchange="e => SetFrom(flow, e)">
-                                @foreach (var item in train.DepartureCalls.ToListItems(c => c.SortTime))
-                                {
-                                    <option value="@item.Value">@item.LocalizedDescription</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(train.DepartureCalls.ToListItems(c => c.SortTime))"
+                                         Value="flow.From.Id" ValueChanged="id => SetFrom(flow, id)" />
                         </td>
                         <td>
-                            <select value="@flow.To.Id" @onchange="e => SetTo(flow, e)">
-                                @foreach (var item in train.ArrivalCallsAfter(flow.From).ToListItems(c => c.SortTime))
-                                {
-                                    <option value="@item.Value">@item.LocalizedDescription</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(train.ArrivalCallsAfter(flow.From).ToListItems(c => c.SortTime))"
+                                         Value="flow.To.Id" ValueChanged="id => SetTo(flow, id)" />
                         </td>
                         <td>
-                            <select value="@flow.CargoFlowOptionsId" @onchange="e => SetDescription(flow, e)">
-                                @foreach (var item in Descriptions.ToListItems())
-                                {
-                                    <option value="@item.Value">@item.LocalizedDescription</option>
-                                }
-                            </select>
+                            <ListBoxView Items="@(Descriptions.ToListItems())"
+                                         Value="flow.CargoFlowOptionsId" ValueChanged="id => SetDescription(flow, id)" />
                         </td>
                         <td><button class="danger small" @onclick="() => _deleteTarget = flow">@Translator("Delete")</button></td>
                     </tr>
@@ -192,10 +175,10 @@
         Save();
     }
 
-    private void SetFrom(CargoFlowTrainPart flow, ChangeEventArgs e)
+    private void SetFrom(CargoFlowTrainPart flow, int? id)
     {
         var train = flow.Train;
-        if (CallById(train, e) is not { } from) return;
+        if (train.Calls.FirstOrDefault(c => c.Id == id) is not { } from) return;
         flow.From = from;
         flow.FromId = from.Id;
         // Keep the to-call valid: it must be an arrival after the new from-call.
@@ -207,9 +190,9 @@
         Save();
     }
 
-    private void SetTo(CargoFlowTrainPart flow, ChangeEventArgs e)
+    private void SetTo(CargoFlowTrainPart flow, int? id)
     {
-        if (CallById(flow.Train, e) is { } to)
+        if (flow.Train.Calls.FirstOrDefault(c => c.Id == id) is { } to)
         {
             flow.To = to;
             flow.ToId = to.Id;
@@ -217,18 +200,15 @@
         Save();
     }
 
-    private void SetDescription(CargoFlowTrainPart flow, ChangeEventArgs e)
+    private void SetDescription(CargoFlowTrainPart flow, int? id)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id) && Descriptions.FirstOrDefault(d => d.Id == id) is { } description)
+        if (Descriptions.FirstOrDefault(d => d.Id == id) is { } description)
         {
             flow.CargoFlowOptions = description;
             flow.CargoFlowOptionsId = description.Id;
         }
         Save();
     }
-
-    private static StationCall? CallById(Train train, ChangeEventArgs e) =>
-        int.TryParse(e.Value?.ToString(), out var id) ? train.Calls.FirstOrDefault(c => c.Id == id) : null;
 
     private void Save() => ScheduleState.SaveAndNotify();
 }
