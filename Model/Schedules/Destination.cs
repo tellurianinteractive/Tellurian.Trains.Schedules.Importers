@@ -53,15 +53,15 @@ public class Destination
         $"{Station.Name} {AndText} {MaxLength}".TrimEnd();
 
     /// <summary>
-    /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips (see <see cref="Region.Display"/>).
+    /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips (see <see cref="Region.ToHtmlMarkup"/>).
     /// </summary>
-    public MarkupString Display => new(
+    public MarkupString ToHtmlMarkup => new(
         AndRegions && Station.Regions.Any() ?
         $"{Station.Name} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
         $"{Station.Name} {AndText} {MaxLength}".TrimEnd());
 
     private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Name)) : string.Empty;
-    private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Display.Value)) : string.Empty;
+    private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToHtmlMarkup.Value)) : string.Empty;
     private string AndText =>
         AndLocalDestinations && AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :
         AndBeyond ? NoteResources.AndBeyond :

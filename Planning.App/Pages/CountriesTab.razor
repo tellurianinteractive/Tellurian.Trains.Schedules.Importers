@@ -18,13 +18,7 @@ else
 
         <div class="toolbar">
             <label>@Translator("AddCountry")</label>
-            <select @bind="_toAdd">
-                <option value="">—</option>
-                @foreach (var c in AvailableToAdd)
-                {
-                    <option value="@c.Id">@Translator(c.ResourceKey)</option>
-                }
-            </select>
+            <ListBoxView Items="@(AvailableToAdd.ToListItems(Translator))" @bind-Value="_toAdd" Placeholder="—" />
             <button class="primary" disabled="@(_toAdd is null)" @onclick="AddCountry">@Translator("Add")</button>
         </div>
 

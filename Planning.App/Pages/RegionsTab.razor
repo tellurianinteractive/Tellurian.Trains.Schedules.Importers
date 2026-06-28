@@ -27,7 +27,7 @@ else
             else
             {
                 <QuickGrid Items="Regions" Class="grid" Theme="tellurian">
-                    <TemplateColumn Title='@Translator("Region")'>@context.Display</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Region")'>@context.ToHtmlMarkup</TemplateColumn>
                     <TemplateColumn Title='@Translator("Country")'>@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Edit(context)">@Translator("Edit")</button>
@@ -59,12 +59,8 @@ else
                     </div>
                     <div class="field">
                         <label>@Translator("Country")</label>
-                        <select @bind="Editing.CountryId" @bind:after="OnEdited">
-                            @foreach (var c in CountryChoices)
-                            {
-                                <option value="@c.Id">@Translator(c.ResourceKey)</option>
-                            }
-                        </select>
+                        <ListBoxView Items="@(CountryChoices.ToListItems(Translator))"
+                                     Value="Editing.CountryId" ValueChanged="@(id => { Editing!.CountryId = id; OnEdited(); })" />
                     </div>
                     <div class="field">
                         <HelpLabel For="BackgroundColor" />
@@ -80,7 +76,7 @@ else
                     </div>
                     <div class="field">
                         <label>@Translator("Region")</label>
-                        <span>@Editing.Display</span>
+                        <span>@Editing.ToHtmlMarkup</span>
                     </div>
                 </div>
 

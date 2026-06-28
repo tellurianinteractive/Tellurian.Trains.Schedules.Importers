@@ -45,7 +45,7 @@ else
                         {
                             @foreach (var region in regionStation.Regions)
                             {
-                                @region.Display
+                                @region.ToHtmlMarkup
                             }
                         }
                     </TemplateColumn>
@@ -59,7 +59,9 @@ else
                         <button @onclick="() => Edit(context)">@Translator("Edit")</button>
                         <button class="danger" disabled="@IsReferenced(context)"
                                 title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
-                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                                @onclick="() => _deleteTarget = context">
+                            @Translator("Delete")
+                        </button>
                     </TemplateColumn>
                 </QuickGrid>
             }
@@ -206,7 +208,9 @@ else
                                 <td>
                                     <button class="danger" disabled="@TrackReferenced(t)"
                                             title='@(TrackReferenced(t) ? string.Format(Culture, Translator("TrackReferencedByTrains"), t.Calls.Count) : null)'
-                                            @onclick="() => DeleteTrack(t)">@Translator("Delete")</button>
+                                            @onclick="() => DeleteTrack(t)">
+                                        @Translator("Delete")
+                                    </button>
                                 </td>
                             </tr>
                         }

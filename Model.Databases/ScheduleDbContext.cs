@@ -253,7 +253,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Property(e => e.BackgroundColor).HasMaxLength(20);
 
             // Computed members are not persisted.
-            entity.Ignore(e => e.Display);
+            entity.Ignore(e => e.ToHtmlMarkup);
         });
 
         // OperationLocation (Station) - TPH inheritance
@@ -682,7 +682,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 destination.HasKey("Id");
                 destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
                 // Computed markup rendering, not persisted.
-                destination.Ignore(x => x.Display);
+                destination.Ignore(x => x.ToHtmlMarkup);
             });
         });
 

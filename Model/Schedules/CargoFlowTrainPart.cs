@@ -90,7 +90,7 @@ public static class CargoFlowTrainPartExtensions
             }
         }
 
-        internal string CargoFlowDestinationsText
+        internal string ToPlainText
         {
             get
             {
@@ -100,12 +100,12 @@ public static class CargoFlowTrainPartExtensions
             }
         }
 
-        internal string CargoFlowDestinationsHtml
+        internal string ToHtml
         {
             get
             {
                 var options = trainPart.CargoFlowOptions;
-                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.Display.Value));
+                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.ToHtmlMarkup.Value));
             }
         }
     }

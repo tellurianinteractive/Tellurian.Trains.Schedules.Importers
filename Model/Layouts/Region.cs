@@ -38,10 +38,12 @@ public class Region
     /// Markup display: the <see cref="Name"/> as a coloured chip, with the text colour auto-contrasted
     /// from <see cref="BackgroundColor"/>.
     /// </summary>
-    public MarkupString Display =>
+    public MarkupString ToHtmlMarkup =>
         new($"""
             <span class="region" style="background-color: {BackgroundColor}; color: {BackgroundColor.TextColor}">{Name}</span>
             """);
+    /// <inheritdoc/>
+    public override string ToString() => Name;
 }
 
 /// <summary>

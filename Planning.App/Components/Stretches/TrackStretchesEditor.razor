@@ -85,21 +85,13 @@
             <div class="form-grid">
                 <div class="field">
                     <label>@Translator("From")</label>
-                    <select @bind="_startId">
-                        @foreach (var loc in Locations)
-                        {
-                            <option value="@loc.Id">@loc.Name (@loc.Signature)</option>
-                        }
-                    </select>
+                    <ListBoxView Items="@(Locations.ToListItems())" Value="_startId"
+                                 ValueChanged="id => _startId = id ?? _startId" />
                 </div>
                 <div class="field">
                     <label>@Translator("To")</label>
-                    <select @bind="_endId">
-                        @foreach (var loc in Locations)
-                        {
-                            <option value="@loc.Id">@loc.Name (@loc.Signature)</option>
-                        }
-                    </select>
+                    <ListBoxView Items="@(Locations.ToListItems())" Value="_endId"
+                                 ValueChanged="id => _endId = id ?? _endId" />
                 </div>
                 <div class="field">
                     <label>@Translator("DistanceKm")</label>

@@ -113,7 +113,14 @@
       "Bash(cp Model/Timetables/Timetable.cs            /tmp/stage2-backup/Timetable.cs)",
       "Bash(cp Model/Schedules/CargoFlowOptions.cs      /tmp/stage2-backup/CargoFlowOptions.cs)",
       "Bash(cp Model.Databases/ScheduleDbContext.cs     /tmp/stage2-backup/ScheduleDbContext.cs)",
-      "Bash(mv Model.Tests/CargoFlowOptionsCatalogueTests.cs /tmp/stage2-backup/CargoFlowOptionsCatalogueTests.cs)"
+      "Bash(mv Model.Tests/CargoFlowOptionsCatalogueTests.cs /tmp/stage2-backup/CargoFlowOptionsCatalogueTests.cs)",
+      "Bash(cp /tmp/stage2-backup/Timetable.cs        Model/Timetables/Timetable.cs)",
+      "Bash(cp /tmp/stage2-backup/CargoFlowOptions.cs  Model/Schedules/CargoFlowOptions.cs)",
+      "Bash(cp /tmp/stage2-backup/ScheduleDbContext.cs Model.Databases/ScheduleDbContext.cs)",
+      "Bash(mv /tmp/stage2-backup/CargoFlowOptionsCatalogueTests.cs Model.Tests/CargoFlowOptionsCatalogueTests.cs)",
+      "Bash(grep -rlE \"\\\\.sub-tabs|\\\\.sub-grid|\\\\.toolbar|\\\\.confirm\\\\b\" Planning.App/wwwroot)",
+      "Bash(ls Planning.App/wwwroot/css)",
+      "Bash(ls Planning.App/wwwroot/*.css)"
     ]
   }
 }

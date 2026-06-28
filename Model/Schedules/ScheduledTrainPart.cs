@@ -8,7 +8,8 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// wagons or fixed-schedule cargo are handled over the segment. A part may carry several option kinds
 /// at once; each slot is null when not applicable.
 /// </summary>
-public sealed class ScheduledTrainPart : TrainPart
+public sealed class
+    ScheduledTrainPart : TrainPart
 {
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]

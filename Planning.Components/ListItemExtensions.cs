@@ -1,3 +1,6 @@
+using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Planning.App.Translations;
+
 namespace Tellurian.Trains.Schedules.Planning.Components;
 
 /// <summary>
@@ -77,6 +80,11 @@ public static class ListItemExtensions
         tracks.OrderBy(sorting).Select(ToItem);
 
     private static ListboxItem ToItem(StationTrack track) => new(track.Id.ToString(), $"{track.Station.Name} {track.Number}");
+
+    // ---- Country (label is the localised name, so a Translator is required) ----
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<Country> countries, Translator translator) =>
+        countries.Select(c => new ListboxItem(c.Id.ToString(), translator(c.ResourceKey)))
+                 .OrderBy(i => i.LocalizedDescription, StringComparer.CurrentCulture);
 
     // The default order: by the text the user actually sees, using the current culture's rules.
     private static IEnumerable<ListboxItem> SortedByDescription(IEnumerable<ListboxItem> items) =>

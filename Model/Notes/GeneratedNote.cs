@@ -52,7 +52,7 @@ public static class GeneratedNoteExtensions
             ToParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitToParking, so),
             ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.Station, part.To.Station),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
-                NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsText),
+                NoteText.Format(NoteResources.BringsWagonsTo, part.ToPlainText),
             _ => string.Empty,
         };
 
@@ -64,7 +64,7 @@ public static class GeneratedNoteExtensions
         {
             // Specialised variant: destination regions are rendered as coloured chips (see Region.Display).
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
-                new($"""<span class="callnote">{NoteText.Format(NoteResources.BringsWagonsTo, part.CargoFlowDestinationsHtml)}</span>"""),
+                new($"""<span class="callnote">{NoteText.Format(NoteResources.BringsWagonsTo, part.ToHtml)}</span>"""),
             // Default: what the base note rendering does — wrap the plain text in a callnote span.
             _ => new($"""<span class="callnote">{note.TextOf}</span>"""),
         };
