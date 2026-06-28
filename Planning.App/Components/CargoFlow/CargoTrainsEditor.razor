@@ -19,9 +19,9 @@
         <div class="toolbar">
             <select @bind="_addTrainId">
                 <option value="0">@Translator("SelectTrain")</option>
-                @foreach (var train in AddableTrains)
+                @foreach (var item in ListItems.Trains(Timetable!.Trains, Train.CanHostCargoFlow))
                 {
-                    <option value="@train.Id">@TrainLabel(train)</option>
+                    <option value="@item.Value">@item.LocalizedDescription</option>
                 }
             </select>
             <button class="primary" disabled="@(_addTrainId == 0)" @onclick="AddToSelectedTrain">@Translator("AddCargoFlow")</button>
@@ -49,7 +49,7 @@
                                 <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
                                         @onclick="() => ToggleExpanded(train)">@(IsExpanded(train) ? "▾" : "▸")</button>
                             </td>
-                            <td>@TrainLabel(train)</td>
+                            <td>@train.ListLabel</td>
                             <td class="num">@train.CargoFlows.Count</td>
                         </tr>
                         @if (IsExpanded(train))
@@ -88,10 +88,6 @@
     private List<Train> Masters =>
         [.. (Timetable?.Trains ?? []).Where(t => t.CargoFlows.Count > 0).OrderBy(t => t.Number)];
 
-    // Trains a cargo flow can be added to: those with at least one departure call followed by an arrival.
-    private List<Train> AddableTrains =>
-        [.. (Timetable?.Trains ?? []).Where(CanHostCargoFlow).OrderBy(t => t.Number)];
-
     private int _addTrainId;
     private readonly HashSet<int> _expanded = [];
     private CargoFlowTrainPart? _deleteTarget;
@@ -113,24 +109,7 @@
         if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
     }
 
-    // ---- Call choices ----------------------------------------------------------------------------
-
-    // Where wagons can be connected: the train's departure calls, earliest first.
-    private static IEnumerable<StationCall> FromCallChoices(Train train) =>
-        train.Calls.Where(c => c.IsDeparture).OrderBy(c => c.SortTime);
-
-    // Where wagons can be disconnected: arrivals after the chosen from-call, latest first (the natural
-    // default is the final destination).
-    private static IEnumerable<StationCall> ToCallChoices(Train train, StationCall from) =>
-        train.Calls.Where(c => c.IsArrival && c.SortTime > from.SortTime).OrderByDescending(c => c.SortTime);
-
-    private static bool CanHostCargoFlow(Train train) =>
-        FromCallChoices(train).Any(from => ToCallChoices(train, from).Any());
-
     private static string CallLabel(StationCall call) => $"{call.Station.Name} {call.SortTime.HHMM()}";
-
-    private string TrainLabel(Train train) =>
-        train.EffectiveCompany is { } c ? $"{c.Signature} {train.Identity}".Trim() : train.Identity;
 
     // ---- Add / delete ----------------------------------------------------------------------------
 
@@ -142,9 +121,9 @@
     private void AddCargoFlow(Train train)
     {
         if (Descriptions.FirstOrDefault() is not { } description) return;
-        var from = FromCallChoices(train).FirstOrDefault(f => ToCallChoices(train, f).Any());
+        var from = train.DepartureCalls.FirstOrDefault(f => train.ArrivalCallsAfter(f).Any());
         if (from is null) return;
-        var to = ToCallChoices(train, from).First();
+        var to = train.ArrivalCallsAfter(from).First();
         train.CreateCargoFlow(NextCargoFlowId(), from, to, description);
         _expanded.Add(train.Id);
         Save();
@@ -179,7 +158,7 @@
                         <td><input type="number" class="num" min="0" value="@flow.PositionInTrain" @onchange="e => SetPosition(flow, e)" /></td>
                         <td>
                             <select value="@flow.From.Id" @onchange="e => SetFrom(flow, e)">
-                                @foreach (var call in FromCallChoices(train))
+                                @foreach (var call in train.DepartureCalls)
                                 {
                                     <option value="@call.Id">@CallLabel(call)</option>
                                 }
@@ -187,7 +166,7 @@
                         </td>
                         <td>
                             <select value="@flow.To.Id" @onchange="e => SetTo(flow, e)">
-                                @foreach (var call in ToCallChoices(train, flow.From))
+                                @foreach (var call in train.ArrivalCallsAfter(flow.From))
                                 {
                                     <option value="@call.Id">@CallLabel(call)</option>
                                 }
@@ -222,7 +201,7 @@
         flow.From = from;
         flow.FromId = from.Id;
         // Keep the to-call valid: it must be an arrival after the new from-call.
-        if (flow.To.SortTime <= from.SortTime && ToCallChoices(train, from).FirstOrDefault() is { } to)
+        if (flow.To.SortTime <= from.SortTime && train.ArrivalCallsAfter(from).FirstOrDefault() is { } to)
         {
             flow.To = to;
             flow.ToId = to.Id;

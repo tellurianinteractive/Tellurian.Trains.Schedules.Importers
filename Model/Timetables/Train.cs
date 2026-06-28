@@ -263,6 +263,39 @@ public static class TrainExtensions
         public Company? EffectiveCompany => train.Company ?? train.Category?.Company;
 
         /// <summary>
+        /// Gets a one-line label for the train suitable for a drop-down: its identity (with the
+        /// effective company signature) followed by the first and last call as station signatures and
+        /// times, e.g. "G 4321  Gbg 12:00→Snu 12:55". The from/to part is omitted when the train has
+        /// no calls.
+        /// </summary>
+        public string ListLabel
+        {
+            get
+            {
+                var identity = train.EffectiveCompany is { } c ? $"{c.Signature} {train.Identity}".Trim() : train.Identity;
+                if (train.Calls.Count == 0) return identity;
+                var ordered = train.Calls.OrderBy(call => call.SortTime).ToList();
+                var first = ordered[0];
+                var last = ordered[^1];
+                return $"{identity}  {first.Station.Signature} {first.Departure.HHMM()}→{last.Station.Signature} {last.Arrival.HHMM()}";
+            }
+        }
+
+        /// <summary>
+        /// Gets the train's calls where it departs (a wagon can be connected here), earliest first.
+        /// </summary>
+        public IEnumerable<StationCall> DepartureCalls =>
+            train.Calls.Where(c => c.IsDeparture).OrderBy(c => c.SortTime);
+
+        /// <summary>
+        /// Gets the train's arrival calls that fall after the given call (a wagon connected at
+        /// <paramref name="call"/> can be disconnected here), latest first.
+        /// </summary>
+        /// <param name="call">The call the later arrivals must follow.</param>
+        public IEnumerable<StationCall> ArrivalCallsAfter(StationCall call) =>
+            train.Calls.Where(c => c.IsArrival && c.SortTime > call.SortTime).OrderByDescending(c => c.SortTime);
+
+        /// <summary>
         /// Gets the effective scale speed (km/h) for this train on a track stretch:
         /// the lower of the train speed (its <see cref="Train.MaxSpeed"/>, or its category's
         /// <see cref="TrainCategory.DefaultSpeed"/> when unset) and the stretch's maximum speed.
