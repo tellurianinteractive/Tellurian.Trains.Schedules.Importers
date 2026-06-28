@@ -19,7 +19,7 @@
         <div class="toolbar">
             <select @bind="_addTrainId">
                 <option value="0">@Translator("SelectTrain")</option>
-                @foreach (var item in Timetable!.Trains.Where(Train.CanHostCargoFlow).OrderBy(t => t.Number).ToListItems())
+                @foreach (var item in Timetable!.Trains.Where(Train.CanHostCargoFlow).ToListItems(t => t.Number))
                 {
                     <option value="@item.Value">@item.LocalizedDescription</option>
                 }
@@ -156,7 +156,7 @@
                         <td><input type="number" class="num" min="0" value="@flow.PositionInTrain" @onchange="e => SetPosition(flow, e)" /></td>
                         <td>
                             <select value="@flow.From.Id" @onchange="e => SetFrom(flow, e)">
-                                @foreach (var item in train.DepartureCalls.ToListItems())
+                                @foreach (var item in train.DepartureCalls.ToListItems(c => c.SortTime))
                                 {
                                     <option value="@item.Value">@item.LocalizedDescription</option>
                                 }
@@ -164,7 +164,7 @@
                         </td>
                         <td>
                             <select value="@flow.To.Id" @onchange="e => SetTo(flow, e)">
-                                @foreach (var item in train.ArrivalCallsAfter(flow.From).ToListItems())
+                                @foreach (var item in train.ArrivalCallsAfter(flow.From).ToListItems(c => c.SortTime))
                                 {
                                     <option value="@item.Value">@item.LocalizedDescription</option>
                                 }

@@ -2,23 +2,47 @@ namespace Tellurian.Trains.Schedules.Planning.Components;
 
 /// <summary>
 /// Projects sequences of model objects to <see cref="ListboxItem"/>s for HTML select/options. One
-/// method per object type owns that type's option text. They are plain <c>this</c> extension methods,
-/// so filtering and ordering are applied first with LINQ (e.g.
-/// <c>trains.Where(Train.CanHostCargoFlow).OrderBy(t =&gt; t.Number).ToListItems()</c>), and a list that
-/// depends on another selection is re-projected from a freshly filtered sequence (e.g. the arrivals
-/// after a chosen departure: <c>train.ArrivalCallsAfter(from).ToListItems()</c>).
+/// projection per object type owns that type's option text. They are plain <c>this</c> extension
+/// methods, so filtering is applied first with LINQ, e.g.
+/// <c>trains.Where(Train.CanHostCargoFlow).ToListItems(t =&gt; t.Number)</c>.
+/// <para>
+/// Each type has two overloads: the no-argument one sorts by the displayed description; the keyed one
+/// sorts the source by the returned value before projecting — use it when the description does not sort
+/// correctly as text, e.g. a call shown as "Sti 14:30" must be sorted by its <c>SortTime</c>:
+/// <c>train.DepartureCalls.ToListItems(c =&gt; c.SortTime)</c>. A list that depends on another selection
+/// re-sorts naturally because it is re-projected each render from a freshly filtered sequence.
+/// </para>
 /// </summary>
 public static class ListItemExtensions
 {
-    /// <summary>Value = train id, description = <see cref="TrainExtensions.ListLabel"/>.</summary>
+    // ---- Train ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<Train> trains) =>
-        trains.Select(t => new ListboxItem(t.Id.ToString(), t.ListLabel));
+        SortedByDescription(trains.Select(ToItem));
 
-    /// <summary>Value = call id, description = station name and time.</summary>
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<Train> trains, Func<Train, TKey> sorting) =>
+        trains.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(Train train) => new(train.Id.ToString(), train.ListLabel);
+
+    // ---- StationCall ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationCall> calls) =>
-        calls.Select(c => new ListboxItem(c.Id.ToString(), $"{c.Station.Name} {c.SortTime.HHMM()}"));
+        SortedByDescription(calls.Select(ToItem));
 
-    /// <summary>Value = description id, description = its name.</summary>
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<StationCall> calls, Func<StationCall, TKey> sorting) =>
+        calls.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(StationCall call) => new(call.Id.ToString(), $"{call.Station.Name} {call.SortTime.HHMM()}");
+
+    // ---- CargoFlowOptions (cargo descriptions) ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions) =>
-        descriptions.Select(d => new ListboxItem(d.Id.ToString(), d.Name));
+        SortedByDescription(descriptions.Select(ToItem));
+
+    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<CargoFlowOptions> descriptions, Func<CargoFlowOptions, TKey> sorting) =>
+        descriptions.OrderBy(sorting).Select(ToItem);
+
+    private static ListboxItem ToItem(CargoFlowOptions description) => new(description.Id.ToString(), description.Name);
+
+    // The default order: by the text the user actually sees, using the current culture's rules.
+    private static IEnumerable<ListboxItem> SortedByDescription(IEnumerable<ListboxItem> items) =>
+        items.OrderBy(i => i.LocalizedDescription, StringComparer.CurrentCulture);
 }
