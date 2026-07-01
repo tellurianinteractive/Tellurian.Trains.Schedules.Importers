@@ -18,7 +18,7 @@
 .minute {
     font-size: 6pt;
     font-weight: bold;
-    color: black;
+    fill: black;
 }
 
     .minute.horizontal {
@@ -77,3 +77,9 @@
     .stationkm.vertical {
         text-anchor: middle;
     }
+
+.trainlabel {
+    font-size: 6pt;
+    font-weight: bold;
+    text-anchor: middle;
+}

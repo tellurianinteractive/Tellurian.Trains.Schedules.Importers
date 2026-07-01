@@ -15,10 +15,10 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | Type | Description |
 |------|-------------|
 | `Layout` | Physical track layout with stations, companies, and stretches |
-| `OperationLocation` | Abstract base class for locations where trains can stop or pass |
-| `Station` | A manned operation location (dispatcher present) |
-| `SignalControlledLocation` | An unmanned location controlled by another station |
-| `OtherLocation` | An unmanned location without signal control, for example a halt |
+| `OperationLocation` | Abstract base class for locations where trains can stop or pass. The type governs whether a train may stop: at a `Station` or `OtherLocation` it stops per the call's `IsStop`; at a `SignalControlledLocation` it never stops |
+| `Station` | A manned operation location (dispatcher present). A train stops per the call's `IsStop` — to meet, be overtaken, or exchange passengers or cargo |
+| `SignalControlledLocation` | An unmanned, signal-controlled location (block post or junction). A train **never** stops here; it always passes through regardless of the call's `IsStop` |
+| `OtherLocation` | An unmanned location without signal control, for example a halt. A train **may** stop per the call's `IsStop` (passenger exchange only, no cargo) |
 | `StationTrack` | Track within an operation location |
 | `TrackStretch` | Physical connection between two operation locations with distance and track count. i.e. single or double track |
 | `TimetableStretch` | A named sequence of track stretches for timetable display |
@@ -32,7 +32,7 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | `Timetable` | Holds a collection of trains running on the layout |
 | `Train` | Train with calls at operation locations, category, and optional wagon groups |
 | `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
-| `StationCall` | Scheduled stop at an operation location at a specific track with arrival/departure times |
+| `StationCall` | A train's call at an operation location track with arrival/departure times. `IsStop` (it arrives and/or departs) versus `IsPassthrough` (neither, the train passes without stopping) is the single source of truth — times are never compared to decide it. The location can override it: a train never stops at a `SignalControlledLocation`, so the effective stop is `IsStop && Station is not SignalControlledLocation` |
 | `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train |
 | `Sessions` | Representing which sessions/days a train runs |
 

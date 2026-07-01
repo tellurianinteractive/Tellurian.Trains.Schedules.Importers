@@ -46,7 +46,20 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// <summary>
     /// Gets or sets the type of this vehicle.
     /// </summary>
-    public ScheduledObjectType ObjectType { get; set; }
+    public ScheduledObjectType ObjectType
+    {
+        get; set
+        {
+            field = value;
+            if (field.IsTraction && TractionType == TractionType.None) TractionType = TractionType.Undefined;
+            else if (!field.IsTraction) TractionType = TractionType.None;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the traction type for traction units; otherwise None.
+    /// </summary>
+    public TractionType TractionType { get; set; } = TractionType.Undefined;
 
     /// <summary>
     /// Gets or sets the class designation of this vehicle.
@@ -202,6 +215,42 @@ public enum ScheduledObjectType
     /// A unit of cargo (non-rolling stock)
     /// </summary>
     Cargo,
+}
+
+/// <summary>
+/// Only applies to <see cref="ScheduledObject"/> that is a traction unit.
+/// </summary>
+
+public enum TractionType
+{
+    /// <summary>
+    /// Undefined, assumed can operate on all stretches. Also the default value for traction units.
+    /// </summary>
+    Undefined,
+    /// <summary>
+    /// Default and only value for non-traction units.
+    /// </summary>
+    None,
+    /// <summary>
+    /// Steam locomotive(s) or trainset(s)
+    /// </summary>
+    Steam,
+    /// <summary>
+    /// Diesel locomotive(s) or trainset(s)
+    /// </summary>
+    Diesel,
+    /// <summary>
+    /// Electric locomotive(s) or trainset(s), restricted to operate on electrified stretches.
+    /// </summary>
+    Electric,
+    /// <summary>
+    /// Locomotive that can operate both etectric and diesel modes.
+    /// </summary>
+    Dual,
+    /// <summary>
+    /// Battery powered locomotive(s) or trainset(s)
+    /// </summary>
+    Battery
 }
 
 /// <summary>

@@ -3,8 +3,12 @@ using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// A manned <see cref="OperationLocation"/>
+/// A manned <see cref="OperationLocation"/> (or driver-operated when <see cref="IsManned"/> is false).
 /// </summary>
+/// <remarks>
+/// A train stops here when the call says so (<see cref="Timetables.StationCall.IsStop"/>) — to meet,
+/// be overtaken, or exchange passengers or cargo. This is the only location type with cargo exchange.
+/// </remarks>
 public class Station : OperationLocation
 {
     /// <summary>
@@ -15,7 +19,7 @@ public class Station : OperationLocation
     /// <param name="signature"></param>
     public Station(int id, string name, string signature) : base(id, name, signature) { }
     /// <summary>
-    /// Gets or sets a value indicating whether this is a special type of yard (shadow yard) normally placed in the end of a line.
+    /// Gets or sets a value indicating whether this is a shadow yard — a terminal station representing external stations or regions beyond the modelled railway.
     /// </summary>
     public bool IsShadow { get; set; }
 
@@ -26,8 +30,8 @@ public class Station : OperationLocation
 
     /// <summary>
     /// Gets or sets the regions and countries represented by this station. Mostly meaningful for
-    /// shadow stations (<see cref="IsShadow"/>), which stand in for the outside world and
-    /// are used for cargo flow routing. Seldom used for for ordinary stations.
+    /// shadow stations (<see cref="IsShadow"/>), which represent external stations or regions and
+    /// are used for cargo flow routing. Seldom used for ordinary stations.
     /// </summary>
     public IList<Region> Regions { get; set; } = [];
 

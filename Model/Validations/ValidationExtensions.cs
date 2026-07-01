@@ -103,7 +103,7 @@ public static class ValidationExtensions
         if (me.Calls.Count == 0) return (false, null);
         if (me.Calls.Count == 2)
         {
-            if (me.Calls.First().Station.Equals(me.Calls.Last().Station))
+            if (me.Calls.First().OperationLocation.Equals(me.Calls.Last().OperationLocation))
                 return (false, null);
         }
         var conflictingCalls = withCalls
@@ -191,7 +191,7 @@ public static class ValidationExtensions
         {
             var c1 = calls[i];
             var c2 = calls[i + 1];
-            var maybeStretch = me.Layout.TrackStretch(c1.Station, c2.Station);
+            var maybeStretch = me.Layout.TrackStretch(c1.OperationLocation, c2.OperationLocation);
             if (maybeStretch.HasValue)
             {
                 var time = c2.Arrival.Subtract(c1.Departure);
@@ -201,12 +201,12 @@ public static class ValidationExtensions
                 if (speed == 0) continue;
                 if (speed < minTrainSpeedMetersPerClockMinute)
                 {
-                    var message = Message.Information(Strings.TrainSpeedBetweenCallsIsTooSlow, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length);
+                    var message = Message.Information(Strings.TrainSpeedBetweenCallsIsTooSlow, c1.Train!, c1.OperationLocation, c1.Departure.HHMM(), c2.OperationLocation, c2.Arrival.HHMM(), length);
                     result.Add(ValidationError.TrainSpeed(c1, c2, isTooSlow: true, message));
                 }
                 if (speed > maxTrainSpeedMetersPerClockMinute)
                 {
-                    var message = Message.Information(Strings.TrainSpeedBetweenCallsIsTooFast, c1.Train!, c1.Station, c1.Departure.HHMM(), c2.Station, c2.Arrival.HHMM(), length);
+                    var message = Message.Information(Strings.TrainSpeedBetweenCallsIsTooFast, c1.Train!, c1.OperationLocation, c1.Departure.HHMM(), c2.OperationLocation, c2.Arrival.HHMM(), length);
                     result.Add(ValidationError.TrainSpeed(c1, c2, isTooSlow: false, message));
                 }
             }
@@ -245,7 +245,7 @@ public static class ValidationExtensions
     private static List<(StationCall one, StationCall another)> GetConflicts(this Train me)
     {
         var result = new List<(StationCall, StationCall)>();
-        if (me.Calls.Count == 2 && me.Calls.First().Station.Equals(me.Calls.Last().Station))
+        if (me.Calls.Count == 2 && me.Calls.First().OperationLocation.Equals(me.Calls.Last().OperationLocation))
 
         {
             var c1 = me.Calls.First();
@@ -360,9 +360,9 @@ public static class ValidationExtensions
         var firstCall = calls[0];
         var firstPart = locomotiveParts.FirstOrDefault();
         if (firstPart != null && firstPart.From.Departure > firstCall.Departure &&
-            !firstCall.Station.Equals(firstPart.From.Station))
+            !firstCall.OperationLocation.Equals(firstPart.From.OperationLocation))
         {
-            var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, firstCall.Station, firstPart.From.Station);
+            var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, firstCall.OperationLocation, firstPart.From.OperationLocation);
             errors.Add(ValidationError.LocomotiveCoverageGap(train, firstCall, firstPart.From, message));
         }
 
@@ -375,9 +375,9 @@ public static class ValidationExtensions
             // There's a gap if the next part starts after the current part ends
             // BUT not if they're at the same station (locomotive change at same location is valid)
             if (nextPart.From.Departure > currentPart.To.Arrival &&
-                !currentPart.To.Station.Equals(nextPart.From.Station))
+                !currentPart.To.OperationLocation.Equals(nextPart.From.OperationLocation))
             {
-                var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, currentPart.To.Station, nextPart.From.Station);
+                var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, currentPart.To.OperationLocation, nextPart.From.OperationLocation);
                 errors.Add(ValidationError.LocomotiveCoverageGap(train, currentPart.To, nextPart.From, message));
             }
         }
@@ -387,9 +387,9 @@ public static class ValidationExtensions
         var lastCall = calls[^1];
         var lastPart = locomotiveParts.LastOrDefault();
         if (lastPart != null && lastPart.To.Arrival < lastCall.Arrival &&
-            !lastPart.To.Station.Equals(lastCall.Station))
+            !lastPart.To.OperationLocation.Equals(lastCall.OperationLocation))
         {
-            var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, lastPart.To.Station, lastCall.Station);
+            var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, lastPart.To.OperationLocation, lastCall.OperationLocation);
             errors.Add(ValidationError.LocomotiveCoverageGap(train, lastPart.To, lastCall, message));
         }
 

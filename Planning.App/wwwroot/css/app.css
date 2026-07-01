@@ -62,14 +62,17 @@ textarea:focus {
 table.grid thead th,
 table.tracks thead th,
 table.speed-map thead th {
+    padding: 0.3rem 4px;
     background-color: var(--primary, #1a3a5c);
     color: var(--primary-text, #fff);
     font-weight: 600;
 }
 
 /* The column title (a <div> when not sortable, a <button> when sortable) inherits the header colour
-   and drops the native button chrome. */
+   and drops the native button chrome. QuickGrid zeros the th padding and relies on .col-title for
+   spacing, so we set it here to get consistent left/right padding in all column types. */
 table.grid thead th .col-title {
+    padding: 0 4px;
     color: var(--primary-text, #fff);
     background: none;
     border: none;

@@ -35,6 +35,8 @@ public record GraphSettings
     public int KilometerSpacing { get; set; }
     public bool ShowArrivalMinutes { get; set; }
     public bool ShowDepartureMinutes { get; set; }
+    public bool ShowCompany { get; set; }
+    public bool ShowTrainCategory { get; set; }
 }
 
 public enum TimeAxisDirection

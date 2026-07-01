@@ -174,6 +174,15 @@
   <data name="Export" xml:space="preserve">
     <value>Eksporter</value>
   </data>
+  <data name="TimetableReport" xml:space="preserve">
+    <value>Rute</value>
+  </data>
+  <data name="Km" xml:space="preserve">
+    <value>Km</value>
+  </data>
+  <data name="TimetableNoSchedule" xml:space="preserve">
+    <value>Ingen rute lastet.</value>
+  </data>
   <data name="TurnusCards" xml:space="preserve">
     <value>Omløpskort</value>
   </data>
@@ -195,6 +204,12 @@
   <data name="To" xml:space="preserve">
     <value>Til</value>
   </data>
+  <data name="FromShort" xml:space="preserve">
+    <value>fra</value>
+  </data>
+  <data name="ToShort" xml:space="preserve">
+    <value>til</value>
+  </data>
   <data name="Turnus" xml:space="preserve">
     <value>Omløp</value>
   </data>
@@ -203,6 +218,9 @@
   </data>
   <data name="Class" xml:space="preserve">
     <value>Klasse</value>
+  </data>
+  <data name="Continued" xml:space="preserve">
+    <value>forts.</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Side</value>
@@ -280,7 +298,7 @@
     <value>Anleggets navn</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Bruk dager i stedet for økter</value>
+    <value>Bruk dager i stedet for økter?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Startdag</value>
@@ -304,10 +322,10 @@
     <value>Vertikal</value>
   </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
-    <value>Vis ankomstminutter</value>
+    <value>Vis ankomstminutter?</value>
   </data>
   <data name="ShowDepartureMinutes" xml:space="preserve">
-    <value>Vis avgangsminutter</value>
+    <value>Vis avgangsminutter?</value>
   </data>
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minuttavstand (px/min)</value>
@@ -325,13 +343,13 @@
     <value>Sporavstand (px)</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
-    <value>Vis togkategori</value>
+    <value>Vis togkategori?</value>
   </data>
   <data name="ShowCompany" xml:space="preserve">
-    <value>Vis selskap</value>
+    <value>Vis selskap?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Skjul økter/dager</value>
+    <value>Skjul økter/dager?</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Hurtigklokkefart (×)</value>
@@ -370,28 +388,28 @@
     <value>Togklarering (reelle min)</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
-    <value>Valider stasjonsopphold</value>
+    <value>Valider stasjonsopphold?</value>
   </data>
   <data name="ValidateStationTracks" xml:space="preserve">
-    <value>Valider stasjonsspor</value>
+    <value>Valider stasjonsspor?</value>
   </data>
   <data name="ValidateStretches" xml:space="preserve">
-    <value>Valider strekninger</value>
+    <value>Valider strekninger?</value>
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
-    <value>Valider toghastighet</value>
+    <value>Valider toghastighet?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
-    <value>Valider tognumre</value>
+    <value>Valider tognumre?</value>
   </data>
   <data name="ValidateSchedules" xml:space="preserve">
-    <value>Valider kjøretøysomløp</value>
+    <value>Valider kjøretøysomløp?</value>
   </data>
   <data name="ValidateLocomotiveCoverage" xml:space="preserve">
-    <value>Valider lokomotivdekning</value>
+    <value>Valider lokomotivdekning?</value>
   </data>
   <data name="ValidateDriverDuties" xml:space="preserve">
-    <value>Valider førertjenester</value>
+    <value>Valider førertjenester?</value>
   </data>
   <data name="Thresholds" xml:space="preserve">
     <value>Terskelverdier</value>
@@ -572,6 +590,9 @@
   </data>
   <data name="TimeMinutes" xml:space="preserve">
     <value>Tid (min)</value>
+  </data>
+  <data name="IsElectrified" xml:space="preserve">
+    <value>Elektrifisert?</value>
   </data>
   <data name="Via" xml:space="preserve">
     <value>Via</value>
@@ -832,7 +853,7 @@
     <value>Del dagen på dette tidspunktet. Den grafiske ruteplanen kan da skrives ut over flere sider og vises en halvdel om gangen på skjermen.</value>
   </data>
   <data name="ControlledBy" xml:space="preserve">
-    <value>Styres av</value>
+    <value>Styres fra</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
     <value>Den bemannede stasjonen hvis togekspeditør styrer dette signalstyrte stedet.</value>
@@ -877,28 +898,40 @@
     <value>Info</value>
   </data>
   <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
-    <value>Tog kan skifte retning</value>
+    <value>Tog kan skifte retning?</value>
   </data>
   <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
     <value>Om et tog kan snu her, noe som vanligvis krever en lokrundgang.</value>
   </data>
+  <data name="HasPassengerExchange" xml:space="preserve">
+    <value>Passasjerer?</value>
+  </data>
+  <data name="HasPassengerExchangeHelp" xml:space="preserve">
+    <value>Persontog kan stoppe her for av- og påstigning; billetter kan utstedes fra og til dette stedet.</value>
+  </data>
+  <data name="HasCargoExchange" xml:space="preserve">
+    <value>Gods?</value>
+  </data>
+  <data name="HasCargoExchangeHelp" xml:space="preserve">
+    <value>Godstog kan koble til og fra godsvogner her.</value>
+  </data>
   <data name="IsMain" xml:space="preserve">
-    <value>Hovedspor</value>
+    <value>Hovedspor?</value>
   </data>
   <data name="IsManned" xml:space="preserve">
-    <value>Bemannet</value>
+    <value>Bemannet?</value>
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om stasjonen betjenes av en togekspeditør i stedet for å være selvbetjent.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
-    <value>Planlagt</value>
+    <value>Planlagt?</value>
   </data>
   <data name="IsShadow" xml:space="preserve">
-    <value>Skyggestasjon</value>
+    <value>Skyggestasjon?</value>
   </data>
   <data name="IsShadowHelp" xml:space="preserve">
-    <value>En skjult stasjon i enden av en bane som representerer verden utenfor den modellerte jernbanen.</value>
+    <value>En skyggestasjon er en endestasjon som representerer eksterne stasjoner eller regioner utenfor den modellerte jernbanen.</value>
   </data>
   <data name="LayoutNameHelp" xml:space="preserve">
     <value>Navnet på dette anlegget, som vises i rapporter og eksporterte filer.</value>
@@ -966,6 +999,12 @@
   <data name="OwnerHelp" xml:space="preserve">
     <value>FREMO-moduleieren som tar med dette stedet. Valgfritt.</value>
   </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Tel.</value>
+  </data>
+  <data name="PhoneNumberHelp" xml:space="preserve">
+    <value>Kontakttelefonnummer til togekspeditøren på dette stedet. Valgfritt.</value>
+  </data>
   <data name="Region" xml:space="preserve">
     <value>Region</value>
   </data>
@@ -982,7 +1021,7 @@
     <value>Velg typen driftssted som skal legges til:</value>
   </data>
   <data name="Shadow" xml:space="preserve">
-    <value>Skygge</value>
+    <value>Skygge?</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Signatur</value>
@@ -1030,7 +1069,7 @@
     <value>Planlegg tog over flere navngitte driftsdager i stedet for en enkelt økt.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Skriv ut hvert rapportelement på sitt eget språk</value>
+    <value>Skriv ut hvert rapportelement på sitt eget språk?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>Når dette er på, gjengis hvert element i rapporter på språket som utledes fra elementet selv – for eksempel en førertjeneste på operatørselskapets språk. Grensesnittet, og alle elementer uten utledbart språk, fortsetter å bruke ditt foretrukne språk.</value>
@@ -1069,7 +1108,7 @@
     <value>Vogner</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fortsetter som</value>
+    <value>Fortsetter som?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Stopp</value>
@@ -1180,13 +1219,55 @@
     <value>Ny godsbeskrivelse</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
-    <value>Til alle destinasjoner</value>
+    <value>Til alle destinasjoner?</value>
+  </data>
+  <data name="CargoTo" xml:space="preserve">
+    <value>Gods til</value>
+  </data>
+  <data name="CargoFromTo" xml:space="preserve">
+    <value>Gods fra {0} til {1}</value>
+  </data>
+  <data name="WagonsTo" xml:space="preserve">
+    <value>Vogner til {0}</value>
+  </data>
+  <data name="WagonsFromTo" xml:space="preserve">
+    <value>Vogner fra {0} til {1}</value>
+  </data>
+  <data name="WagonClassesTo" xml:space="preserve">
+    <value>{0} vogner til {1}</value>
+  </data>
+  <data name="WagonClassesFromTo" xml:space="preserve">
+    <value>{0} fra {1} til {2}</value>
+  </data>
+  <data name="OnlyWagonClasses" xml:space="preserve">
+    <value>Bare vognklasser</value>
+  </data>
+  <data name="UsedInTrains" xml:space="preserve">
+    <value>Brukes i tog</value>
+  </data>
+  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+    <value>Brukes ikke av noe tog.</value>
+  </data>
+  <data name="OnlyWagonClassesHint" xml:space="preserve">
+    <value>Valgfrie UIC-vognklassebokstaver som begrenser hvilke vogner som tas med, f.eks. "U,Z". La stå tomt for alle vogner.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Destinasjoner</value>
   </data>
+  <data name="DestinationStation" xml:space="preserve">
+    <value>Destinasjonsstasjon</value>
+  </data>
+  <data name="DestinationStations" xml:space="preserve">
+    <value>Destinasjonsstasjoner</value>
+  </data>
   <data name="Origins" xml:space="preserve">
     <value>Opprinnelser</value>
+  </data>
+  <data name="OriginStation" xml:space="preserve">
+    <value>Opprinnelsesstasjon</value>
+  </data>
+  <data name="OriginStations" xml:space="preserve">
+    <value>Opprinnelsesstasjoner</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Kan ikke slette: denne godsbeskrivelsen brukes av en eller flere godsstrømmer.</value>
@@ -1204,19 +1285,19 @@
     <value>Maks. aksler</value>
   </data>
   <data name="AndRegions" xml:space="preserve">
-    <value>Og regioner</value>
+    <value>Og regioner?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
     <value>List også opp regionene som er knyttet til destinasjonsstasjonen.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
-    <value>Og videre</value>
+    <value>Og videre?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
     <value>Inkluder også alle steder utover destinasjonsstasjonen.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
-    <value>Og lokale</value>
+    <value>Og lokale?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
     <value>Inkluder også lokale destinasjoner som betjenes fra stasjonen.</value>
@@ -1227,11 +1308,23 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Legg til destinasjon</value>
   </data>
+  <data name="NoDestinationStations" xml:space="preserve">
+    <value>Ingen destinasjonsstasjoner.</value>
+  </data>
+  <data name="AddDestinationStation" xml:space="preserve">
+    <value>Legg til destinasjonsstasjon</value>
+  </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>Ingen opprinnelser.</value>
   </data>
   <data name="AddOrigin" xml:space="preserve">
     <value>Legg til opprinnelse</value>
+  </data>
+  <data name="NoOriginStations" xml:space="preserve">
+    <value>Ingen opprinnelsesstasjoner.</value>
+  </data>
+  <data name="AddOriginStation" xml:space="preserve">
+    <value>Legg til opprinnelsesstasjon</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Legg til godsstrømmer på tog: velg et tog, og angi deretter hvor vogner kobles til og fra, og hvilken godsbeskrivelse som gjelder.</value>
@@ -1258,19 +1351,19 @@
     <value>Slett denne godsstrømmen?</value>
   </data>
   <data name="CargoFlowCouple" xml:space="preserve">
-    <value>Kople til</value>
+    <value>Kople til?</value>
   </data>
   <data name="CargoFlowUncouple" xml:space="preserve">
-    <value>Kople fra</value>
+    <value>Kople fra?</value>
   </data>
   <data name="CargoFlowShuntBefore" xml:space="preserve">
-    <value>Skift før</value>
+    <value>Skift før?</value>
   </data>
   <data name="CargoFlowShuntAfter" xml:space="preserve">
-    <value>Skift etter</value>
+    <value>Skift etter?</value>
   </data>
   <data name="CargoFlowNoWagonsHere" xml:space="preserve">
-    <value>Ingen vogner herfra</value>
+    <value>Ingen vogner herfra?</value>
   </data>
   <data name="CargoFlowCoupleHint" xml:space="preserve">
     <value>Vis en tilkoblingsnotis for vognene ved avgangsanropet.</value>

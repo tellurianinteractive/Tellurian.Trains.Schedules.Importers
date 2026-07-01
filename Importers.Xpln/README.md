@@ -56,11 +56,36 @@ The XPLN SubType field determines which `OperationLocation` subclass is created:
 | Tag | Model Object | Description |
 |-----|--------------|-------------|
 | `traindef` | `Train` | Number, category (extracted from *Name* and color from row background color) |
-| `timetable` | `StationCall` | Station, track, arrival/departure times, remarks |
+| `timetable` | `StationCall` | Station, track, arrival/departure times, remarks (see *Station call conventions* below) |
 | `locomotive` | `TextCallNote` | Adds loco info as driver/station note on first call; sets train's operating company |
 | `trainset` | `TextCallNote` | Adds trainset info as driver note on first call |
 | `wheel` | `Train.Length` | Max train length in axles (meters not set) |
 | `group` | `Train.Groups` | Train classification (e.g., *P_Zug* = Passenger, *G_Zug* = Freight or else actual value) |
+
+#### Station call conventions
+
+The import derives each call's stop flags (`IsArrival`, `IsDeparture`) from its position and times:
+
+- The **first** call of a train is always its origin, so it is made **departure only** (`IsArrival = false`).
+- The **last** call of a train is always its terminus, so it is made **arrival only** (`IsDeparture = false`).
+  The origin and terminus are always stops; when either has **equal arrival and departure times** a 10-minute
+  dwell is synthesised (the origin's arrival is moved 10 minutes earlier, the terminus's departure 10 minutes
+  later) so the stop has a visible duration.
+- An **intermediate** call whose **arrival equals its departure** is a **pass-through**: the train passes
+  without stopping, so both flags are cleared and `IsStop` becomes `false`.
+- Any other intermediate call (arrival earlier than departure) is a normal stop with a dwell.
+
+The equal-times rule is *only* an import convention. Once imported, a call is a stop when `IsStop` is true
+and a pass-through when `IsStop` is false; the model never re-compares arrival and departure times to decide
+this. See `StationCall.IsStop` / `StationCall.IsPassthrough`, `TrainExtensions.WithOriginAndTerminusDwell`
+and `TrainExtensions.WithPassthroughCalls`.
+
+The location type adds a further rule, independent of the call flags:
+
+- At a **`Station`** (`Station` subtype) or an **`OtherLocation`** (other values), the train stops when the call's `IsStop` is true.
+- At a **`SignalControlledLocation`** (`Block` subtype), the train **never** stops — it always passes through, whatever the call flags say.
+
+So the effective stop is `call.IsStop && call.Station is not SignalControlledLocation`.
 
 ### Vehicle Schedules (from Trains worksheet)
 

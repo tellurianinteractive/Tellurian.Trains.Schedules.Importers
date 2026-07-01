@@ -67,6 +67,13 @@ public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<
 
     public bool HasSchedule => _schedule is not null;
 
+    /// <summary>
+    /// Whether the one-time restore from localStorage has already run (see <see cref="InitializeAsync"/>).
+    /// Lets the layout skip the "restoring your work" spinner when it is merely re-created — for example
+    /// after viewing a read-only report — rather than on a genuine cold start.
+    /// </summary>
+    public bool IsInitialized => _loaded;
+
     public IReadOnlyList<TimetableStretch> TimetableStretches =>
         _schedule?.Timetable?.Layout?.TimetableStretches is { } stretches
             ? [.. stretches.OrderBy(NumericOrderKey).ThenBy(s => s.Number, StringComparer.OrdinalIgnoreCase)]

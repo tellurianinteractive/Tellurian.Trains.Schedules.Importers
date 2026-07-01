@@ -47,5 +47,5 @@ public sealed record StretchPassing
 
     /// <inheritdoc/>
     public override string ToString() =>
-        string.Format(CultureInfo.CurrentCulture, "{0} {1}: {2} - {3}: {4}", Train.Identity, From.Station.Name, Departure.HHMM(), To.Station.Name, Arrival.HHMM());
+        string.Format(CultureInfo.CurrentCulture, "{0} {1}: {2} - {3}: {4}", Train.Identity, From.OperationLocation.Name, Departure.HHMM(), To.OperationLocation.Name, Arrival.HHMM());
 }

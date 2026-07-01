@@ -81,7 +81,7 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0}", this.FullDescription);
+    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "{0}", this.ForwardDescription);
 }
 
 /// <summary>
@@ -94,7 +94,11 @@ public static class TimetableStretchExtensions
         /// <summary>
         /// Includes stretch number, start and end station and an optional additional description.
         /// </summary>
-        public string FullDescription => $"{stretch.Number} {stretch.Description}: {stretch.Starts}-{stretch.Ends}".Trim();
+        public string ForwardDescription => $"{stretch.Number}: {stretch.Description} {stretch.Starts}-{stretch.Ends}".Trim();
+        /// <summary>
+        /// Includes stretch number, start and end station and an optional additional description.
+        /// </summary>
+        public string BackwardDescription => $"{stretch.Number}: {stretch.Description} {stretch.Ends}-{stretch.Starts}".Trim();
         /// <summary>
         /// Finds a station along the timetable stretch. A station may occur more than once on a
         /// stretch that revisits it (reversing or branching lines); the first occurrence is returned.
@@ -130,7 +134,13 @@ public static class TimetableStretchExtensions
             var to = stretch.GetStation(station);
             if (to.IsNone) return null;
             if (to.Value.Equals(stretch.Starts)) return 0.0;
-            return stretch.Stretches.Where(s => !s.Start.Equals(to.Value)).Sum(s => s.Distance);
+            var distance = 0.0;
+            foreach (var s in stretch.Stretches)
+            {
+                if (s.Start.Equals(to.Value)) break;
+                distance += s.Distance;
+            }
+            return distance;
         }
         /// <summary>
         /// The first track stretch that does not continue from the previous one (its <c>Start</c> differs

@@ -1,0 +1,151 @@
+.timetable-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0.5rem 0 0.3rem;
+}
+
+/* A section whose heading is dropped (it repeats the one above) gets a little top gap so the two
+   column groups don't run together where the heading would have separated them. */
+.timetable-section.no-title {
+    margin-top: 0.6rem;
+}
+
+table.timetable {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+table.timetable th,
+table.timetable td {
+    border-top: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
+    border-left: none;
+    border-right: none;
+    padding: 1px 4px;
+    white-space: nowrap;
+}
+
+table.timetable th {
+    text-align: center;
+    font-weight: 600;
+
+    &.km,
+    &.arr-dep,
+    &.stations {
+        text-align: left;
+    }
+
+    /* The Km and Stations column headings match the train-number size and are italic. */
+    &.km,
+    &.stations {
+        font-size: 0.7em;
+        font-style: italic;
+    }
+
+    &.train-header {
+        font-size: 0.7em;
+        width: 3.5rem;
+        min-width: 3.5rem;
+        max-width: 3.5rem;
+    }
+}
+
+table.timetable td {
+    &.km {
+        text-align: right;
+        width: 2.5rem;
+        color: #666;
+    }
+
+    &.arr-dep,
+    &.stations {
+        font-weight: 600;
+        padding-right: 0.5rem;
+    }
+
+    &.time {
+        text-align: center;
+        width: 3.5rem;
+        min-width: 3.5rem;
+        max-width: 3.5rem;
+    }
+}
+
+/* Connection rows are borrowed from a neighbouring stretch (where a train starts or ends); the whole
+   row is italic to set it apart from the stretch's own stations. */
+tr.connection td {
+    font-style: italic;
+}
+
+/* Suppress the border between the arrival sub-row and departure sub-row of the same station.
+   Only applies to .time cells — km and stations use rowspan=2 and must keep their outer borders.
+   border-style: hidden wins over all other border styles in border-collapse mode. */
+tr.arr-row td.time {
+    border-bottom-style: hidden;
+}
+
+tr.dep-row td.time {
+    border-top-style: hidden;
+}
+
+/* Print geometry pinning. Pagination (TimetablePaginator / PageGeometry) estimates page fit from
+   fixed millimetre constants, so both the printed row height AND the table width must be stable and
+   known. Heights: at 8pt / 1.2 a normal row is ~4 mm (RowHeightMm) and a split row ~8 mm. Widths:
+   the on-screen column widths are 3.5rem (tied to the 16px root, not the print font), which makes a
+   16-column tile ~287 mm — wider than the 277 mm A4-landscape printable area, so the browser would
+   spill the overflow onto an extra near-blank sheet. table-layout: fixed plus the explicit mm column
+   widths below pin a 15-column tile (PageGeometry.ColumnsPerPage) to ~260 mm so it fits with margin
+   to spare. A whole tile is sized by the paginator to fit one page, so break-inside: avoid stops the
+   browser splitting it. */
+@media print {
+    .timetable-section {
+        break-inside: avoid;
+    }
+
+    table.timetable {
+        font-size: 8pt;
+        table-layout: fixed;
+    }
+
+    table.timetable th,
+    table.timetable td {
+        padding: 0 3px;
+        line-height: 1.2;
+        overflow: hidden;
+    }
+
+    /* Fixed columns, repeated in every tile. */
+    table.timetable th.km,
+    table.timetable td.km {
+        width: 9mm;
+        min-width: 9mm;
+        max-width: 9mm;
+    }
+
+    table.timetable th.arr-dep,
+    table.timetable td.arr-dep {
+        width: 9mm;
+        min-width: 9mm;
+        max-width: 9mm;
+    }
+
+    table.timetable th.stations,
+    table.timetable td.stations {
+        width: 32mm;
+        min-width: 32mm;
+        max-width: 32mm;
+    }
+
+    /* Up to 15 train columns per tile: 15 × 14 mm = 210 mm, + 50 mm fixed ≈ 260 mm < 277 mm. */
+    table.timetable th.train-header,
+    table.timetable td.time {
+        width: 14mm;
+        min-width: 14mm;
+        max-width: 14mm;
+    }
+
+    .timetable-title {
+        font-size: 10pt;
+        margin: 2mm 0 1mm;
+    }
+}

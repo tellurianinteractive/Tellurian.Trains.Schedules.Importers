@@ -66,7 +66,7 @@ internal static class ScheduleExtensions
                     foreach (var call in train.Calls)
                     {
                         callNumber++;
-                        var station = stations.Single(s => s.Signature.Equals(call.Station.Signature, StringComparison.OrdinalIgnoreCase));
+                        var station = stations.Single(s => s.Signature.Equals(call.OperationLocation.Signature, StringComparison.OrdinalIgnoreCase));
                         if (station is not null)
                         {
                             var track = station.Tracks.SingleOrDefault(t => t.Number == call.Track.Number);
@@ -122,13 +122,13 @@ internal static class ScheduleExtensions
 
             foreach (var part in vehicleSchedule.Parts)
             {
-                var sql31 = $"SELECT [CallId] FROM [StationDepartures] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.From.Station.Signature}'";
-                var sql32 = $"SELECT [CallId] FROM [StationArrivals] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.To.Station.Signature}'";
+                var sql31 = $"SELECT [CallId] FROM [StationDepartures] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.From.OperationLocation.Signature}'";
+                var sql32 = $"SELECT [CallId] FROM [StationArrivals] WHERE [Number] = {part.Train.Number} AND [Signature] = '{part.To.OperationLocation.Signature}'";
                 var fromCommand = new OdbcCommand(sql31, connection);
                 var toCommand = new OdbcCommand(sql32, connection);
                 var fromCallId = (int?)fromCommand.ExecuteScalar() ?? 0;
                 var toCallId = (int?)toCommand.ExecuteScalar() ?? 0;
-                if (fromCallId == 0 || toCallId == 0) throw new ArgumentOutOfRangeException($"From {part.From.Station.Signature} fromCallId = {fromCallId} - To {part.To.Station.Signature} toCallId = {toCallId}");
+                if (fromCallId == 0 || toCallId == 0) throw new ArgumentOutOfRangeException($"From {part.From.OperationLocation.Signature} fromCallId = {fromCallId} - To {part.To.OperationLocation.Signature} toCallId = {toCallId}");
                 var sql3 = $"""
                     INSERT INTO [LocoScheduleTrain] ([LocoSchedule], [FromDeparture], [ToArrival], [FromParking], [ToParking], [ReverseLoco], [UseNote])
                     VALUES ({scheduleId}, {fromCallId}, {toCallId}, -1, -1, -1, -1)

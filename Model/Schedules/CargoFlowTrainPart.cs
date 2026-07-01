@@ -66,6 +66,17 @@ public sealed class CargoFlowTrainPart : TrainPart
     /// timetable). Editing the description affects every cargo flow that references it.
     /// </summary>
     public CargoFlowOptions CargoFlowOptions { get; set; } = default!;
+
+    /// <summary>
+    /// A cargo flow is an entity keyed by <see cref="TrainPart.Id"/>. Several cargo flows on the same
+    /// train may legitimately share the same from/to span (different cargo, position, or operations),
+    /// so identity — not the from/to geometry used by <see cref="TrainPart.Equals(TrainPart)"/> —
+    /// distinguishes them. This keeps adding and deleting flows with identical endpoints correct.
+    /// </summary>
+    public override bool Equals(object? obj) => obj is CargoFlowTrainPart other && other.Id == Id;
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => Id.GetHashCode();
 }
 
 /// <summary>

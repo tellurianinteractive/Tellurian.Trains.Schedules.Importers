@@ -120,7 +120,18 @@
       "Bash(mv /tmp/stage2-backup/CargoFlowOptionsCatalogueTests.cs Model.Tests/CargoFlowOptionsCatalogueTests.cs)",
       "Bash(grep -rlE \"\\\\.sub-tabs|\\\\.sub-grid|\\\\.toolbar|\\\\.confirm\\\\b\" Planning.App/wwwroot)",
       "Bash(ls Planning.App/wwwroot/css)",
-      "Bash(ls Planning.App/wwwroot/*.css)"
+      "Bash(ls Planning.App/wwwroot/*.css)",
+      "PowerShell($json = Get-Content 'C:\\\\Users\\\\Stefan\\\\Downloads\\\\Givskud-Modern-2025.json' | ConvertFrom-Json; $json.timetableStretches | ForEach-Object { Write-Host \"Stretch $\\($_.id\\): $\\($_.number\\) - $\\($_.description\\)\" })",
+      "PowerShell($json = Get-Content 'C:\\\\Users\\\\Stefan\\\\Downloads\\\\Givskud-Modern-2025.json' | ConvertFrom-Json; $json.Timetable | Get-Member -MemberType NoteProperty | Select-Object Name)",
+      "PowerShell($json = Get-Content 'C:\\\\Users\\\\Stefan\\\\Downloads\\\\Givskud-Modern-2025.json' | ConvertFrom-Json; $json.Timetable.Layout | Get-Member -MemberType NoteProperty | Select-Object Name)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft/Edge/Application/**)",
+      "Read(//c/Program Files/Microsoft/Edge/Application/**)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless --disable-gpu --screenshot=labels.png --window-size=780,660 --default-background-color=FFFFFFFF \"file://$\\(pwd\\)/labels.svg\")",
+      "Bash(ls -la labels.png)",
+      "Bash(git -C \"C:/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules\" ls-files Planning.Tests/LabelPlacementDiagnosticTests.cs)",
+      "PowerShell(dotnet test \"$PWD\\\\Importers.Xpln.Tests\\\\Xpln.Tests.csproj\" 2>&1 | Select-Object -Last 30)",
+      "PowerShell(Set-Location \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedules\"; \"Modified/added files: \" + \\(git status --porcelain | Measure-Object -Line\\).Lines; git status --short | Select-Object -First 60)"
     ]
   }
 }

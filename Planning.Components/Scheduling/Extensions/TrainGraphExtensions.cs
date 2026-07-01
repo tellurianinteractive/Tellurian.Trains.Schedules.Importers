@@ -11,4 +11,20 @@ internal static class TrainGraphExtensions
             yield return new StretchUse(train, callIndex);
         }
     }
+
+    /// <summary>Formats the train identity label for display on the graph according to the given settings.
+    /// Always includes the train number; optionally prepends the company signature and wraps with the
+    /// category prefix/suffix when the corresponding settings are enabled.</summary>
+    public static string GraphLabel(this Train train, GraphSettings settings)
+    {
+        var parts = new List<string>();
+        if (settings.ShowCompany && (train.Company ?? train.Category?.Company)?.Signature is { Length: > 0 } sig)
+            parts.Add(sig);
+        if (settings.ShowTrainCategory && train.Category?.Prefix is { Length: > 0 } prefix)
+            parts.Add(prefix);
+        parts.Add(train.Number.ToString());
+        if (settings.ShowTrainCategory && train.Category?.Suffix is { Length: > 0 } suffix)
+            parts.Add(suffix);
+        return string.Join(" ", parts);
+    }
 }

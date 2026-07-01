@@ -25,7 +25,7 @@ public class CargoFlowTrainPartTests
         var station = timetable.Layout.OperationLocations.OfType<Station>().First();
         var description = timetable.Add(new CargoFlowOptions
         {
-            Name = "Coal to the harbour",
+            OnlyWagonClasses = "U,Z",
             Destinations = { new Destination { Station = station } },
         });
         return (timetable, train, description);

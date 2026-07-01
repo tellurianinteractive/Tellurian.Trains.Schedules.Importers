@@ -1,3 +1,4 @@
+using System.Globalization;
 using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 
@@ -34,7 +35,7 @@ public static class ListItemExtensions
     public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<StationCall> calls, Func<StationCall, TKey> sorting) =>
         calls.OrderBy(sorting).Select(ToItem);
 
-    private static ListboxItem ToItem(StationCall call) => new(call.Id.ToString(), $"{call.Station.Name} {call.SortTime.HHMM()}");
+    private static ListboxItem ToItem(StationCall call) => new(call.Id.ToString(), $"{call.OperationLocation.Name} {call.SortTime.HHMM()}");
 
     // ---- CargoFlowOptions (cargo descriptions) ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions) =>
@@ -43,7 +44,31 @@ public static class ListItemExtensions
     public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<CargoFlowOptions> descriptions, Func<CargoFlowOptions, TKey> sorting) =>
         descriptions.OrderBy(sorting).Select(ToItem);
 
-    private static ListboxItem ToItem(CargoFlowOptions description) => new(description.Id.ToString(), description.Name);
+    private static ListboxItem ToItem(CargoFlowOptions description) => new(description.Id.ToString(), description.OnlyWagonClasses);
+
+    // Label describing the routing, leading with the wagon-class filter when set:
+    //   classes + origins -> "U,Z from <origins> to <destinations>"
+    //   classes, no origins -> "U,Z wagons to <destinations>"
+    //   no classes, origins -> "Wagons from <origins> to <destinations>"
+    //   no classes, no origins -> "Wagons to <destinations>"
+    // Needs a Translator for the localised, word-order-preserving format strings.
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions, Translator translator) =>
+        SortedByDescription(descriptions.Select(d => ToItem(d, translator)));
+
+    private static ListboxItem ToItem(CargoFlowOptions description, Translator translator)
+    {
+        var destinations = description.DestinationsSummary;
+        var origins = description.OriginStationNames;
+        var classes = description.OnlyWagonClasses.Trim();
+        var hasClasses = classes.Length > 0;
+        var hasOrigins = description.Origins.Count > 0;
+        var label =
+            hasOrigins && hasClasses ? string.Format(CultureInfo.CurrentCulture, translator("WagonClassesFromTo"), classes, origins, destinations) :
+            hasOrigins               ? string.Format(CultureInfo.CurrentCulture, translator("WagonsFromTo"), origins, destinations) :
+            hasClasses               ? string.Format(CultureInfo.CurrentCulture, translator("WagonClassesTo"), classes, destinations) :
+                                       string.Format(CultureInfo.CurrentCulture, translator("WagonsTo"), destinations);
+        return new(description.Id.ToString(), label);
+    }
 
     // ---- OperationLocation (stations and other places); also covers IEnumerable<Station> by covariance ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<OperationLocation> locations) =>

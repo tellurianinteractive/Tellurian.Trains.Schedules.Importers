@@ -97,7 +97,9 @@
 
     // Restoring state on startup (deserializing the persisted plan, restoring the dock and last route)
     // takes a moment on WebAssembly; show a spinner until it finishes instead of a blank/wrong tab.
-    private bool _initializing = true;
+    // Only on a genuine cold start, though: when this layout is merely re-created (e.g. returning from a
+    // read-only report, which uses PrintLayout) the singleton state is already loaded, so skip the spinner.
+    private bool _initializing;
 
     [Inject(Key = "Markdown")]
     public IResourceProvider MarkdownProvider { get; set; } = default!;
@@ -106,6 +108,8 @@
     {
         Dock.OnChanged += StateHasChanged;
         Nav.LocationChanged += OnLocationChanged;
+        // Show the restore spinner only when the app has not yet loaded its state (a cold start).
+        _initializing = !ScheduleState.IsInitialized;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -132,12 +136,19 @@
     private async Task RestoreLastRouteAsync()
     {
         if (!string.IsNullOrEmpty(Nav.ToBaseRelativePath(Nav.Uri))) return;
-        if (await UiPrefs.GetLastRouteAsync() is { Length: > 0 } last)
+        if (await UiPrefs.GetLastRouteAsync() is { Length: > 0 } last && IsRestorableRoute(last))
             Nav.NavigateTo(last);
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) =>
-        _ = UiPrefs.SetLastRouteAsync(Nav.ToBaseRelativePath(e.Location));
+    private static bool IsRestorableRoute(string route) =>
+        route == "workspace" || TabRegistry.Tabs.Any(t => t.Href == route);
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var route = Nav.ToBaseRelativePath(e.Location);
+        if (IsRestorableRoute(route))
+            _ = UiPrefs.SetLastRouteAsync(route);
+    }
 
     private async Task ToggleAbout()
     {

@@ -1,13 +1,23 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Resources;
-using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// Represents a railway station or other operation location where trains can stop or pass.
 /// </summary>
+/// <remarks>
+/// The location type governs whether a train may stop at all, on top of the per-call
+/// <see cref="Timetables.StationCall.IsStop"/> flags:
+/// <list type="bullet">
+/// <item><see cref="Station"/> — a train stops when the call says so (<see cref="Timetables.StationCall.IsStop"/>).</item>
+/// <item><see cref="OtherLocation"/> — a train may stop when the call says so (e.g. an unstaffed halt with passenger exchange).</item>
+/// <item><see cref="SignalControlledLocation"/> — a train <b>never</b> stops; it always passes through, whatever the call flags say.</item>
+/// </list>
+/// So the effective rule is: the train stops at a call when
+/// <c>call.IsStop &amp;&amp; call.Station is not SignalControlledLocation</c>.
+/// </remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(Station), "Station")]
 [JsonDerivedType(typeof(SignalControlledLocation), "SignalControlled")]
@@ -46,6 +56,11 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public string? Owner { get; set; }
 
     /// <summary>
+    /// Gets or sets the contact phone number for the station operator. Optional.
+    /// </summary>
+    public int? PhoneNumber { get; set; }
+
+    /// <summary>
     /// TODO: Reevaluate this property. This could instead indicae a <see cref="SignalControlledLocation"/>.
     /// </summary>
     public bool IsSignal { get; set; }
@@ -57,6 +72,20 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// <see cref="Station"/> and <see cref="SignalControlledLocation"/>.
     /// </summary>
     public virtual bool IsChangingTrainDirectionPossible { get; set; }
+
+    /// <summary>
+    /// Gets whether passenger trains can stop here to exchange passengers, i.e. tickets can be issued
+    /// from and to this location. Always false for <see cref="SignalControlledLocation"/>; configurable
+    /// for <see cref="Station"/> and <see cref="OtherLocation"/>.
+    /// </summary>
+    public virtual bool HasPassengerExchange { get; set; } = true;
+
+    /// <summary>
+    /// Gets whether freight trains can exchange cargo wagons here. Always false for
+    /// <see cref="SignalControlledLocation"/> and <see cref="OtherLocation"/>; configurable for
+    /// <see cref="Station"/>.
+    /// </summary>
+    public virtual bool HasCargoExchange { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the collection of tracks at this operation location.

@@ -48,6 +48,13 @@
     private string? _busyKey;
     private string? _result;
     private bool _resultOk;
+    private IJSObjectReference? _downloadModule;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _downloadModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+    }
 
     private void OpenSaveAs()
     {
@@ -76,13 +83,22 @@
     private async Task SaveJsonToDisk()
     {
         if (ScheduleState.Schedule is not { } plan) return;
+        if (_downloadModule is null) return;
+        var fileName = $"{SafeFileName(plan.Name)}.json";
+
+        // openSaveFilePicker must be called while user activation is live — before BeginBusy yields.
+        // Returns true (handle stored in JS), null (user cancelled), false (API not supported).
+        var pickerResult = await _downloadModule.InvokeAsync<bool?>("openSaveFilePicker", fileName, "application/json");
+        if (pickerResult == null) return; // user cancelled
+
         await BeginBusy("Saving");
         try
         {
             var json = Exporter.ToJson(plan);
-            var fileName = $"{SafeFileName(plan.Name)}.json";
-            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
-            await module.InvokeVoidAsync("downloadText", fileName, json, "application/json");
+            if (pickerResult == true)
+                await _downloadModule.InvokeVoidAsync("writePendingText", json);
+            else
+                await _downloadModule.InvokeVoidAsync("downloadText", fileName, json, "application/json");
             _showSaveAs = false;
         }
         catch (Exception ex)

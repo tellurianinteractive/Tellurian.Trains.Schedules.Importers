@@ -11,7 +11,7 @@ track layout, the trains and their timings, and the schedules and duties that go
   document (`.json`) or import an XPLN spreadsheet (`.ods` / `.xlsx`).
 
 Once a plan is loaded, the other tabs become useful: build trains on **Trains**, view the
-**Graphical timetable**, and assign vehicles and duties on **Schedules**.
+**Graphical timetable**, and assign vehicles and duties onto **Schedules**.
 
 ## The workspace tab
 
@@ -40,6 +40,20 @@ The tabs are ordered in the recommended steps to enter or import data:
 - **Schedules** — the vehicle schedules and driver duties that operate the trains.
 - **Vehicle Owners** — who brings which of the needed rolling stock.
 
+## Minimal Data Entry
+
+The minimal need for data before adding trains are:
+- **Settings** — values controlling visual appearance and timetable calculation; the layout name,
+  theme, scale and default country; and the API key for external services.
+  from the default country and add more as you need them.
+  from operation locations outside the layout.
+- **Operation Locations** — all stations and other places where a train's passing times are
+  recorded, each with its tracks.
+- **Stretches** — the track, dispatch and timetable stretches that connect the operation locations.
+- **Train Categories** — the types of train (such as passenger and freight), each with its prefix,
+  colour.
+
+
 ## Print Reports
 Printable content is prepared on the **Reports** tab and kept separate from the editing tabs.
 
@@ -51,5 +65,7 @@ Printable content is prepared on the **Reports** tab and kept separate from the 
 ## Use the Plan in Other Applications
 Share the plan with other tools, or save it to reopen later.
 
-- **Export** — save the whole plan as a planning document (`.json`) that you can reopen here later
+- **Export as JSON** — save the whole plan as a planning document (`.json`) that you can reopen here later
   or share with others.
+- **Export to SQL** - posts the JSON document to an online service that creates
+  an SQLite database, that can be dowloaded and used in other applications.

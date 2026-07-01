@@ -1,0 +1,44 @@
+@page "/timetable-report"
+@layout PrintLayout
+@using Tellurian.Trains.Schedules.Planning.Timetables
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@if (Pages.Count == 0)
+{
+    <DisplayedMessage ResourceKey="TimetableNoSchedule" />
+}
+else
+{
+    @foreach (var page in Pages)
+    {
+        <A4LPage Margin="10">
+            @foreach (var tile in page.Tiles)
+            {
+                <TimetableStretchTable Table="tile.Table" Continued="tile.IsContinued" ShowTitle="tile.ShowTitle" />
+            }
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<TimetablePage> Pages { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ScheduleState.InitializeAsync();
+        if (ScheduleState.Timetable is not { } timetable) return;
+
+        var trains = timetable.Trains;
+        // Stretch by stretch, both directions, in order: a stretch's Up and Down tables stay adjacent
+        // so the paginator can pack them onto one page (a hard break only happens when the stretch changes).
+        var tables = ScheduleState.TimetableStretches
+            .SelectMany(stretch =>
+                new[] { TrainGraphDirection.Upward, TrainGraphDirection.Downward }
+                    .Select(dir => TimetableTable.Create(stretch, trains, dir))
+                    .Where(t => t.Columns.Count > 0));
+
+        Pages = TimetablePaginator.BuildPages(tables, PageGeometry.A4Landscape);
+    }
+}

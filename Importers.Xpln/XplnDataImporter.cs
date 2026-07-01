@@ -704,7 +704,11 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             }
             else
             {
-                timetable.Add(train.WithFixedSingleCallTrain().WithFirstCallDepartureOnlyAndLastCallArrivalOnly());
+                timetable.Add(train
+                    .WithFixedSingleCallTrain()
+                    .WithOriginAndTerminusDwell()
+                    .WithFirstCallDepartureOnlyAndLastCallArrivalOnly()
+                    .WithPassthroughCalls());
                 return [];
             }
 
@@ -721,6 +725,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             return train;
         }
 
+        // Every call is created as a full stop (arrives and departs). The stop flags are then refined per the
+        // XPLN conventions once the whole train is known: the origin (first call) is always a departure and the
+        // terminus (last call) always an arrival, so when their times are equal a 10-minute dwell is synthesised
+        // (WithOriginAndTerminusDwell) to keep them as stops; the first call is then made departure only and the
+        // last call arrival only (WithFirstCallDepartureOnlyAndLastCallArrivalOnly); and any intermediate call
+        // whose arrival equals its departure becomes a pass-through with no stop (WithPassthroughCalls).
         static StationCall CreateCall(int rowNumber, string[] fields, StationTrack track)
         {
             return new(rowNumber, track, fields[Arrival].AsTime(), fields[Departure].AsTime(), fields[Remark])

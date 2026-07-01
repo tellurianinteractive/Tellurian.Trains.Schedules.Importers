@@ -11,9 +11,20 @@ The tracks you define here are referenced when planning station calls and when v
 train has somewhere to stand. Define your places and tracks before building trains so their calls
 have somewhere to go.
 
+### Where trains stop
+
+The location type decides whether a train may stop, on top of how you set each call:
+
+- At a **station**, a train stops when its call is marked to arrive and/or depart — to meet, be
+  overtaken, or exchange passengers or cargo.
+- At an **other location** (for example an unstaffed halt), a train may likewise stop per its call,
+  but only passengers are exchanged, never cargo.
+- At a **signal-controlled location**, a train **never** stops; it always passes through, whatever
+  the call says. Such calls show as a pass-through (a pipe) in the timetable, not as times.
+
 ## Working with the list
 
-The list shows each location's signature, name, type, owner, whether it is a shadow yard, and how
+The list shows each location's signature, name, type, owner, whether it is a shadow yard (terminal for external stations), and how
 many tracks it has. For each row you can:
 
 - **Info** — view all details, including the tracks, read-only.
@@ -32,5 +43,5 @@ trains use it. Reassign or remove those station calls first.
 ## Stations and regions
 
 A station can be linked to one or more **regions** from the layout's region catalogue (managed on the
-**Regions** tab). This is mainly used for shadow yards, which stand in for destinations beyond the
-modelled railway. If the layout has no regions yet, you can add the standard set from the form.
+**Regions** tab). This is mainly used for shadow yards, which represent external stations or regions
+beyond the modelled railway. If the layout has no regions yet, you can add the standard set from the form.

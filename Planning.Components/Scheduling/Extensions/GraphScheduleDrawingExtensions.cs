@@ -110,76 +110,345 @@ public static class GraphScheduleDrawingExtensions
         }
     }
 
-    public static Offset ArrivalMinuteOver(this GraphSchedule me, int stationIndex, StationCall stationCall)
+    /// <summary>
+    /// Enumerates every arrival/departure minute label to draw, each already positioned by a corner anchored
+    /// at its call point. Intended for a single final pass over all trains so the labels sit above every graph
+    /// line. A label is produced only for a stop (<see cref="StationCall.IsStop"/>, never a pass-through) on the matching side
+    /// (departure where the train departs, arrival where it arrives) when that minute kind is enabled and the
+    /// time is inside the visible window. Uses whose endpoints are not adjacent stations on this schedule are
+    /// omitted, matching the lines actually drawn.
+    /// </summary>
+    public static IEnumerable<MinuteLabel> MinuteLabels(this GraphSchedule me)
     {
-        var offset = me.MinuteOver(stationIndex, stationCall.Arrival.Value);
-        return me.AxisDirection switch
+        var trackArrays = new StationTrack[me.Stations.Length][];
+        for (var i = 0; i < me.Stations.Length; i++) trackArrays[i] = [.. me.Stations[i].Tracks];
+
+        int StationIndexOf(OperationLocation station)
         {
-            TimeAxisDirection.Horisontal => new Offset(offset.X - 13, offset.Y - 2),
-            TimeAxisDirection.Vertical => new Offset(offset.X - 10, offset.Y - 6),
-            _ => throw new NotSupportedException(me.AxisDirection.ToString())
-        };
+            for (var i = 0; i < me.Stations.Length; i++)
+                if (me.Stations[i].Equals(station)) return i;
+            return -1;
+        }
+
+        foreach (var train in me.Trains)
+        {
+            foreach (var use in train.StretchUses())
+            {
+                var fromStationIndex = StationIndexOf(use.From.Track.Station);
+                var toStationIndex = StationIndexOf(use.To.Track.Station);
+                if (fromStationIndex < 0 || toStationIndex < 0 || Math.Abs(fromStationIndex - toStationIndex) != 1) continue;
+
+                var fromTrackIndex = Array.IndexOf(trackArrays[fromStationIndex], use.From.Track);
+                var toTrackIndex = Array.IndexOf(trackArrays[toStationIndex], use.To.Track);
+                if (fromTrackIndex < 0 || toTrackIndex < 0) continue;
+
+                // The line descends on screen (cross-axis grows with time) when it runs to a later station.
+                var descending = toStationIndex > fromStationIndex;
+
+                if (me.GraphSettings.ShowDepartureMinutes && use.From.IsDeparture && use.From.IsStop && me.IsTimeVisible(use.From.Departure.Value))
+                {
+                    var point = me.MinuteAt(fromStationIndex, fromTrackIndex, use.From.Departure.Value);
+                    yield return me.MinuteLabelAt(point, use.From.Departure.MinutesText(), isDeparture: true, descending);
+                }
+
+                if (me.GraphSettings.ShowArrivalMinutes && use.To.IsArrival && use.To.IsStop && me.IsTimeVisible(use.To.Arrival.Value))
+                {
+                    var point = me.MinuteAt(toStationIndex, toTrackIndex, use.To.Arrival.Value);
+                    yield return me.MinuteLabelAt(point, use.To.Arrival.MinutesText(), isDeparture: false, descending);
+                }
+            }
+        }
     }
 
-    public static Offset ArrivalMinuteUnder(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall)
+    // Chooses which corner of the minute text touches the call point, following the requested placement:
+    // on a descending (down-slope) line the departure tucks its upper-left corner to its point and the
+    // arrival its lower-right; on an ascending (up-slope) line the departure uses its lower-right corner and
+    // the arrival its upper-right. The corner is expressed as the screen direction the text extends from the
+    // point (right/left, down/up); for a vertical time axis the two axes are transposed. The label is drawn
+    // semi-transparent in the final pass, so a corner sitting on a line stays readable without hiding it.
+    private static MinuteLabel MinuteLabelAt(this GraphSchedule me, Offset point, string text, bool isDeparture, bool descending)
     {
-        var offset = me.MinuteUnder(stationIndex, trackIndex, stationCall.Arrival.Value);
-        return me.AxisDirection switch
+        bool extendRight, extendDown;
+        if (isDeparture)
         {
-            TimeAxisDirection.Horisontal => new Offset(offset.X - 16, offset.Y + 7),
-            TimeAxisDirection.Vertical => new Offset(offset.X + 2, offset.Y - 7),
-            _ => throw new NotSupportedException(me.AxisDirection.ToString())
-        };
-    }
+            // descending: upper-left corner at point → text extends right+down; ascending: lower-right → left+up.
+            extendRight = descending;
+            extendDown = descending;
+        }
+        else
+        {
+            // descending: lower-right corner at point → text extends left+up; ascending: upper-right → left+down.
+            extendRight = false;
+            extendDown = !descending;
+        }
 
-    public static Offset DepartureMinuteOver(this GraphSchedule me, int stationIndex, StationCall stationCall)
-    {
-        var offset = me.MinuteOver(stationIndex, stationCall.Departure.Value);
-        return me.AxisDirection switch
-        {
-            TimeAxisDirection.Horisontal => new Offset(offset.X + 4, offset.Y - 2),
-            TimeAxisDirection.Vertical => new Offset(offset.X - 10, offset.Y + 10),
-            _ => throw new NotSupportedException(me.AxisDirection.ToString())
-        };
-    }
+        if (me.AxisDirection == TimeAxisDirection.Vertical) (extendRight, extendDown) = (extendDown, extendRight);
 
-    public static Offset DepartureMinuteUnder(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall)
-    {
-        var offset = me.MinuteUnder(stationIndex, trackIndex, stationCall.Departure.Value);
-        return me.AxisDirection switch
-        {
-            TimeAxisDirection.Horisontal => new Offset(offset.X + 4, offset.Y + 8),
-            TimeAxisDirection.Vertical => new Offset(offset.X + 1, offset.Y + 11),
-            _ => throw new NotSupportedException(me.AxisDirection.ToString())
-        };
+        var anchor = extendRight ? "start" : "end";
+        var baseline = extendDown ? "text-before-edge" : "text-after-edge";
+        return new MinuteLabel(point, text, anchor, baseline);
     }
 
     public static string MinutesText(this Time time) => time.Value.Minutes.ToString("D2");
 
-    private static Offset MinuteUnder(this GraphSchedule me, int stationIndex, int trackIndex, TimeSpan time)
+    /// <summary>
+    /// Returns the two endpoints of the inter-station train line running from
+    /// <paramref name="fromStationIndex"/>/<paramref name="fromTrackIndex"/> to
+    /// <paramref name="toStationIndex"/>/<paramref name="toTrackIndex"/> (in screen coordinates), together
+    /// with the fraction (0–1) along that line at which to centre the identity label. The label is rendered
+    /// along this segment with an SVG <c>&lt;textPath&gt;</c>, so it follows the line's real slope and sits
+    /// cleanly to one side of it for both travel directions — no manual rotation or perpendicular offset,
+    /// which previously made downward (forward) labels overlap their own line. The start is the departure
+    /// point, so the segment always runs forward in time and the text reads upright.
+    /// <para>
+    /// <paramref name="Offset"/> is not a plain 50%: with many tracks the section midpoint lands inside a
+    /// station band, so the label is instead centred on the open corridor between the two bands — halfway
+    /// between the stations' facing track edges. Because the segment is straight, the cross-axis position is
+    /// linear along it, so the corridor-centre fraction is simply where the line crosses that midpoint.
+    /// </para>
+    /// Returns <c>null</c> when either endpoint time falls outside the visible window (the label would land
+    /// off-canvas).
+    /// </summary>
+    public static (Offset Start, Offset End, double Offset)? TrainLabelPath(
+        this GraphSchedule me,
+        int fromStationIndex,
+        int fromTrackIndex,
+        int toStationIndex,
+        int toTrackIndex,
+        TimeSpan departure,
+        TimeSpan arrival)
     {
-        time = WrapTime(time);
-        var station = me.Stations[stationIndex];
-        var lastTrackIndex = station.Tracks.Count - 1;
+        var wrappedDep = WrapTime(departure);
+        var wrappedArr = WrapTime(arrival);
+        if (!me.IsTimeVisible(wrappedDep) || !me.IsTimeVisible(wrappedArr)) return null;
+
+        // The corridor sits between the two stations' facing track edges: the station higher on the axis
+        // (lower index) faces the gap with its last track, the lower station (higher index) with its first
+        // track. This is independent of travel direction, so it is derived from station order, not the
+        // from/to (departure/arrival) roles.
+        var fromFacingTrack = fromStationIndex < toStationIndex ? me.Stations[fromStationIndex].Tracks.Count - 1 : 0;
+        var toFacingTrack = toStationIndex < fromStationIndex ? me.Stations[toStationIndex].Tracks.Count - 1 : 0;
+
+        Offset start, end;
+        double crossFrom, crossTo, crossEnter, crossExit;
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
-            var x = me.TimeOffset(time).X + (lastTrackIndex - trackIndex);
-            var y = me.Y(stationIndex, lastTrackIndex);
-            return new Offset(x, y);
+            crossFrom = me.Y(fromStationIndex, fromTrackIndex);
+            crossTo = me.Y(toStationIndex, toTrackIndex);
+            crossEnter = me.Y(fromStationIndex, fromFacingTrack);
+            crossExit = me.Y(toStationIndex, toFacingTrack);
+            start = new Offset(me.TimeOffset(wrappedDep).X, (int)crossFrom);
+            end = new Offset(me.TimeOffset(wrappedArr).X, (int)crossTo);
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
-            var x = me.X(stationIndex, lastTrackIndex);
-            var y = me.TimeOffset(time).Y + (lastTrackIndex - trackIndex);
-            return new Offset(x, y);
+            crossFrom = me.X(fromStationIndex, fromTrackIndex);
+            crossTo = me.X(toStationIndex, toTrackIndex);
+            crossEnter = me.X(fromStationIndex, fromFacingTrack);
+            crossExit = me.X(toStationIndex, toFacingTrack);
+            start = new Offset((int)crossFrom, me.TimeOffset(wrappedDep).Y);
+            end = new Offset((int)crossTo, me.TimeOffset(wrappedArr).Y);
         }
-        throw new NotSupportedException(me.AxisDirection.ToString());
+        else throw new NotSupportedException(me.AxisDirection.ToString());
+
+        // Fraction along the segment where the cross-axis reaches the corridor midpoint. Linear because the
+        // segment is straight; clamped so a degenerate case never sends the label off the path.
+        var corridorMid = (crossEnter + crossExit) / 2.0;
+        var crossSpan = crossTo - crossFrom;
+        var offset = crossSpan == 0 ? 0.5 : (corridorMid - crossFrom) / crossSpan;
+        offset = Math.Clamp(offset, 0.0, 1.0);
+        return (start, end, offset);
     }
 
-    private static Offset MinuteOver(this GraphSchedule me, int stationIndex, TimeSpan time)
+    /// <summary>
+    /// Enumerates every train identity label to draw, each with the line segment its text follows. One label
+    /// is produced per train use of a stretch between two adjacent stations on this schedule, from the real
+    /// departure/arrival tracks via <see cref="TrainLabelPath"/>. Intended to be rendered in a single final
+    /// pass (each as an invisible path plus a <c>&lt;textPath&gt;</c>) so all labels sit on top of the graph
+    /// lines. Uses whose endpoints are not adjacent stations on this schedule (e.g. a skipped station) are
+    /// omitted, matching the lines actually drawn.
+    /// </summary>
+    public static IEnumerable<(Train Train, Offset Start, Offset End, double Offset)> TrainLabels(this GraphSchedule me)
+    {
+        var trackArrays = new StationTrack[me.Stations.Length][];
+        for (var i = 0; i < me.Stations.Length; i++) trackArrays[i] = [.. me.Stations[i].Tracks];
+
+        int StationIndexOf(OperationLocation station)
+        {
+            for (var i = 0; i < me.Stations.Length; i++)
+                if (me.Stations[i].Equals(station)) return i;
+            return -1;
+        }
+
+        foreach (var train in me.Trains)
+        {
+            foreach (var use in train.StretchUses())
+            {
+                var fromStationIndex = StationIndexOf(use.From.Track.Station);
+                var toStationIndex = StationIndexOf(use.To.Track.Station);
+                if (fromStationIndex < 0 || toStationIndex < 0 || Math.Abs(fromStationIndex - toStationIndex) != 1) continue;
+
+                var fromTrackIndex = Array.IndexOf(trackArrays[fromStationIndex], use.From.Track);
+                var toTrackIndex = Array.IndexOf(trackArrays[toStationIndex], use.To.Track);
+                if (fromTrackIndex < 0 || toTrackIndex < 0) continue;
+
+                if (me.TrainLabelPath(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, use.From.Departure.Value, use.To.Arrival.Value) is { } path)
+                    yield return (train, path.Start, path.End, path.Offset);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The train identity labels from <see cref="TrainLabels"/> with overlapping ones thinned out, so what is
+    /// drawn stays legible when many trains cross. Every train keeps its first and last label where possible;
+    /// once that is honoured, labels are dropped from the trains involved in the most overlaps, fairly: a train
+    /// is not thinned a second time until every other conflicting train has lost a label too (round-robin). A
+    /// train is never reduced below one visible label. Removal continues until no two visible labels overlap
+    /// (or only sole-survivor labels remain in conflict).
+    /// <para>
+    /// Overlap is judged from an oriented bounding box per label — centred on the label's anchor along its
+    /// segment, as wide as the estimated text and as tall as the font — tested with the separating-axis
+    /// theorem. The text width is estimated from glyph count and font size (no browser metrics are available
+    /// server-side), so <see cref="TrainLabelBoxPaddingFactor"/> pads it to stay conservative.
+    /// </para>
+    /// </summary>
+    public static IEnumerable<(Train Train, Offset Start, Offset End, double Offset)> VisibleTrainLabels(this GraphSchedule me)
+    {
+        var raw = me.TrainLabels().ToList();
+        if (raw.Count == 0) yield break;
+
+        var perTrainCount = raw.GroupBy(l => l.Train).ToDictionary(g => g.Key, g => g.Count());
+        var textLength = new Dictionary<Train, int>();
+        var indexInTrain = new Dictionary<Train, int>();
+
+        var nodes = new List<LabelNode>(raw.Count);
+        foreach (var l in raw)
+        {
+            if (!textLength.TryGetValue(l.Train, out var length))
+                textLength[l.Train] = length = l.Train.GraphLabel(me.GraphSettings).Length;
+            var index = indexInTrain.TryGetValue(l.Train, out var i) ? i : 0;
+            indexInTrain[l.Train] = index + 1;
+            nodes.Add(new LabelNode(l.Train, l.Start, l.End, l.Offset, index, perTrainCount[l.Train], LabelBox(l.Start, l.End, l.Offset, length)));
+        }
+
+        // The conflict graph is static: a label's box never moves when another is removed, so overlaps are
+        // computed once and removal just hides nodes, dropping their live edges.
+        var neighbours = new List<int>[nodes.Count];
+        for (var i = 0; i < nodes.Count; i++) neighbours[i] = [];
+        for (var i = 0; i < nodes.Count; i++)
+            for (var j = i + 1; j < nodes.Count; j++)
+                if (Overlaps(nodes[i].Box, nodes[j].Box)) { neighbours[i].Add(j); neighbours[j].Add(i); }
+
+        var removed = perTrainCount.Keys.ToDictionary(t => t, _ => 0);
+        var visibleCount = new Dictionary<Train, int>(perTrainCount);
+
+        int LiveDegree(int i)
+        {
+            var degree = 0;
+            foreach (var j in neighbours[i]) if (nodes[j].Visible) degree++;
+            return degree;
+        }
+
+        while (true)
+        {
+            var conflicting = new List<int>();
+            for (var i = 0; i < nodes.Count; i++)
+                if (nodes[i].Visible && LiveDegree(i) > 0) conflicting.Add(i);
+            if (conflicting.Count == 0) break;
+
+            // Round-robin gate: only thin trains that currently have the fewest removals among those in conflict.
+            var minRemoved = conflicting.Min(i => removed[nodes[i].Train]);
+
+            bool Removable(int i, bool allowEndpoint) =>
+                removed[nodes[i].Train] == minRemoved
+                && visibleCount[nodes[i].Train] > 1
+                && (allowEndpoint || !nodes[i].IsEndpoint);
+
+            // Prefer dropping interior labels; only sacrifice a first/last when interior ones cannot resolve it.
+            var pool = conflicting.Where(i => Removable(i, allowEndpoint: false)).ToList();
+            if (pool.Count == 0) pool = conflicting.Where(i => Removable(i, allowEndpoint: true)).ToList();
+            // Every remaining conflict is between sole-survivor labels: thinning further would erase a train, so stop.
+            if (pool.Count == 0) break;
+
+            // Resolve the most overlaps per removal; tie-break toward the most central label so survivors spread out.
+            var pick = pool
+                .OrderByDescending(LiveDegree)
+                .ThenBy(i => Math.Abs(nodes[i].Index - (nodes[i].Count - 1) / 2.0))
+                .First();
+
+            nodes[pick].Visible = false;
+            removed[nodes[pick].Train]++;
+            visibleCount[nodes[pick].Train]--;
+        }
+
+        foreach (var node in nodes)
+            if (node.Visible) yield return (node.Train, node.Start, node.End, node.Offset);
+    }
+
+    // Padding on the estimated label width/height, since server-side text size is estimated, not measured.
+    private const double TrainLabelBoxPaddingFactor = 1.1;
+    private const double PointsToPixels = 96.0 / 72.0;
+    private const double TrainLabelFontPoints = 6.0;          // matches .trainlabel font-size in the editor CSS
+    private const double TrainLabelGlyphWidthEm = 0.62;       // average advance of a bold digit/letter
+    private const double TrainLabelLiftPixels = 2.0;          // matches LabelOffsetDy in the editor
+
+    // An oriented bounding box: centre, the unit direction of its long (text) axis, and the half-extents along
+    // that axis (Hu) and the perpendicular (Hv).
+    private readonly record struct LabelObb(double Cx, double Cy, double Ux, double Uy, double Hu, double Hv);
+
+    private sealed class LabelNode(Train train, Offset start, Offset end, double offset, int index, int count, LabelObb box)
+    {
+        public Train Train { get; } = train;
+        public Offset Start { get; } = start;
+        public Offset End { get; } = end;
+        public double Offset { get; } = offset;
+        public int Index { get; } = index;
+        public int Count { get; } = count;
+        public LabelObb Box { get; } = box;
+        public bool Visible { get; set; } = true;
+        public bool IsEndpoint => Index == 0 || Index == Count - 1;
+    }
+
+    // Builds the oriented box a label occupies: centred on its anchor point along the segment (lifted off the
+    // line like the rendered text), as wide as the estimated text and as tall as the font.
+    private static LabelObb LabelBox(Offset start, Offset end, double offset, int textLength)
+    {
+        var fontPixels = TrainLabelFontPoints * PointsToPixels;
+        var halfWidth = Math.Max(1, textLength) * TrainLabelGlyphWidthEm * fontPixels * TrainLabelBoxPaddingFactor / 2.0;
+        var halfHeight = fontPixels * TrainLabelBoxPaddingFactor / 2.0;
+
+        double sx = end.X - start.X, sy = end.Y - start.Y;
+        var length = Math.Sqrt(sx * sx + sy * sy);
+        var (ux, uy) = length < 1e-6 ? (1.0, 0.0) : (sx / length, sy / length);
+        double nx = -uy, ny = ux; // unit normal
+
+        var anchorX = start.X + offset * sx;
+        var anchorY = start.Y + offset * sy;
+        return new LabelObb(anchorX + nx * -TrainLabelLiftPixels, anchorY + ny * -TrainLabelLiftPixels, ux, uy, halfWidth, halfHeight);
+    }
+
+    // Separating-axis test for two oriented boxes: they overlap unless some axis (the four box edge normals)
+    // separates them. The axes need not be unit vectors — the scale cancels between projection and distance.
+    private static bool Overlaps(in LabelObb a, in LabelObb b) =>
+        OverlapsOnAxis(a, b, a.Ux, a.Uy)
+        && OverlapsOnAxis(a, b, -a.Uy, a.Ux)
+        && OverlapsOnAxis(a, b, b.Ux, b.Uy)
+        && OverlapsOnAxis(a, b, -b.Uy, b.Ux);
+
+    private static bool OverlapsOnAxis(in LabelObb a, in LabelObb b, double ax, double ay)
+    {
+        var ra = a.Hu * Math.Abs(a.Ux * ax + a.Uy * ay) + a.Hv * Math.Abs(-a.Uy * ax + a.Ux * ay);
+        var rb = b.Hu * Math.Abs(b.Ux * ax + b.Uy * ay) + b.Hv * Math.Abs(-b.Uy * ax + b.Ux * ay);
+        var distance = Math.Abs((b.Cx - a.Cx) * ax + (b.Cy - a.Cy) * ay);
+        return distance <= ra + rb;
+    }
+
+    // The point on the train's own track line at the given time, so a minute label is placed beside the
+    // line the train actually runs on rather than above or below the whole station band. After-midnight
+    // times are wrapped into the current day to match how the line is positioned on the axis.
+    private static Offset MinuteAt(this GraphSchedule me, int stationIndex, int trackIndex, TimeSpan time)
     {
         time = WrapTime(time);
-        var trackIndex = 0;
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
             var x = me.TimeOffset(time).X;

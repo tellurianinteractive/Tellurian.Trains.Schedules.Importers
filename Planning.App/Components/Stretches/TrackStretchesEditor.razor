@@ -30,6 +30,7 @@
                         <th class="num">@Translator("Tracks")</th>
                         <th class="num">@Translator("SpeedKmh")</th>
                         <th class="num">@Translator("TimeMinutes")</th>
+                        <th class="bool">@Translator("IsElectrified")</th>
                         <th class="actions">@Translator("Actions")</th>
                     </tr>
                 </thead>
@@ -43,6 +44,7 @@
                             <td class="num">@s.TracksCount</td>
                             <td class="num">@s.Speed</td>
                             <td class="num">@s.Time</td>
+                            <td class="bool"><input type="checkbox" checked="@s.IsElectrified" disabled /></td>
                             <td class="actions">
                                 <button @onclick="() => Edit(s)">@Translator("Edit")</button>
                                 <button class="danger" disabled="@IsReferenced(s)"
@@ -109,6 +111,10 @@
                     <label>@Translator("TimeMinutes")</label>
                     <input type="number" min="0" @bind="_time" />
                 </div>
+                <div class="field">
+                    <label>@Translator("IsElectrified")</label>
+                    <input type="checkbox" @bind="_isElectrified" />
+                </div>
             </div>
 
             @if (_error is not null)
@@ -146,6 +152,7 @@
     // Edit-form fields, committed on Save.
     private int _startId, _endId, _tracks = 1, _speed = 100, _time;
     private double _distance;
+    private bool _isElectrified = true;
     private string _startName = "", _endName = "";
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
@@ -167,6 +174,7 @@
         _tracks = 1;
         _speed = 100;
         _time = 0;
+        _isElectrified = true;
         _mode = Mode.Edit;
     }
 
@@ -183,6 +191,7 @@
         _tracks = stretch.TracksCount;
         _speed = stretch.Speed;
         _time = stretch.Time;
+        _isElectrified = stretch.IsElectrified;
         _mode = Mode.Edit;
     }
 
@@ -215,7 +224,7 @@
 
         if (_isNew)
         {
-            Layout.Add(new TrackStretch(NextId(), start, end, _distance, _tracks, _speed, _time));
+            Layout.Add(new TrackStretch(NextId(), start, end, _distance, _tracks, _speed, _time) { IsElectrified = _isElectrified });
         }
         else if (_editing is not null)
         {
@@ -227,6 +236,7 @@
             _editing.TracksCount = _tracks;
             _editing.Speed = _speed;
             _editing.Time = _time;
+            _editing.IsElectrified = _isElectrified;
         }
         ScheduleState.SaveAndNotify();
         BackToList();

@@ -30,6 +30,8 @@ public static class GraphSettingsMapping
                 TrackSpacing = gt.TrackSpacing,
                 ShowArrivalMinutes = gt.ShowArrivalMinutes,
                 ShowDepartureMinutes = gt.ShowDepartureMinutes,
+                ShowCompany = gt.ShowCompany,
+                ShowTrainCategory = gt.ShowTrainCategory,
             };
         }
     }

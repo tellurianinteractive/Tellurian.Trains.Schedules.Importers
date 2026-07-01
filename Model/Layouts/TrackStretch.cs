@@ -116,6 +116,12 @@ public class TrackStretch : IEquatable<TrackStretch>
     public int Time { get; set; }
 
     /// <summary>
+    /// Gets or sets whether this stretch has overhead electrification, allowing electric traction units to run.
+    /// When false, the stretch is unelectrified and requires steam, diesel, or dual-mode traction.
+    /// </summary>
+    public bool IsElectrified { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets the foreign key to the layout.
     /// </summary>
     public int LayoutId { get; set; }
@@ -162,8 +168,8 @@ public static class TrackStretchExtensions
             var calls = train.Calls.ToArray();
             for (int i = 0; i < calls.Length - 1; i++)
             {
-                if (calls[i].Station.Equals(me.Start) && calls[i + 1].Station.Equals(me.End)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
-                if (calls[i].Station.Equals(me.End) && calls[i + 1].Station.Equals(me.Start)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
+                if (calls[i].OperationLocation.Equals(me.Start) && calls[i + 1].OperationLocation.Equals(me.End)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
+                if (calls[i].OperationLocation.Equals(me.End) && calls[i + 1].OperationLocation.Equals(me.Start)) result.Add(new StretchPassing(train, calls[i], calls[i + 1]));
             }
         }
         return result;

@@ -174,6 +174,15 @@
   <data name="Export" xml:space="preserve">
     <value>Export</value>
   </data>
+  <data name="TimetableReport" xml:space="preserve">
+    <value>Fahrplan</value>
+  </data>
+  <data name="Km" xml:space="preserve">
+    <value>Km</value>
+  </data>
+  <data name="TimetableNoSchedule" xml:space="preserve">
+    <value>Kein Fahrplan geladen.</value>
+  </data>
   <data name="TurnusCards" xml:space="preserve">
     <value>Umlaufkarten</value>
   </data>
@@ -195,6 +204,12 @@
   <data name="To" xml:space="preserve">
     <value>Nach</value>
   </data>
+  <data name="FromShort" xml:space="preserve">
+    <value>ab</value>
+  </data>
+  <data name="ToShort" xml:space="preserve">
+    <value>an</value>
+  </data>
   <data name="Turnus" xml:space="preserve">
     <value>Umlauf</value>
   </data>
@@ -203,6 +218,9 @@
   </data>
   <data name="Class" xml:space="preserve">
     <value>Klasse</value>
+  </data>
+  <data name="Continued" xml:space="preserve">
+    <value>Fortsetzung</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Seite</value>
@@ -280,7 +298,7 @@
     <value>Anlagenname</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Tage statt Sessions verwenden</value>
+    <value>Tage statt Sessions verwenden?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Starttag</value>
@@ -304,10 +322,10 @@
     <value>Vertikal</value>
   </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
-    <value>Ankunftsminuten anzeigen</value>
+    <value>Ankunftsminuten anzeigen?</value>
   </data>
   <data name="ShowDepartureMinutes" xml:space="preserve">
-    <value>Abfahrtsminuten anzeigen</value>
+    <value>Abfahrtsminuten anzeigen?</value>
   </data>
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minutenabstand (px/min)</value>
@@ -325,13 +343,13 @@
     <value>Gleisabstand (px)</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
-    <value>Zugkategorie anzeigen</value>
+    <value>Zugkategorie anzeigen?</value>
   </data>
   <data name="ShowCompany" xml:space="preserve">
-    <value>Gesellschaft anzeigen</value>
+    <value>Gesellschaft anzeigen?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Sessions/Tage ausblenden</value>
+    <value>Sessions/Tage ausblenden?</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Zeitraffer-Faktor (×)</value>
@@ -370,28 +388,28 @@
     <value>Zugfreigabe (reale Min)</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
-    <value>Stationshalte prüfen</value>
+    <value>Stationshalte prüfen?</value>
   </data>
   <data name="ValidateStationTracks" xml:space="preserve">
-    <value>Stationsgleise prüfen</value>
+    <value>Stationsgleise prüfen?</value>
   </data>
   <data name="ValidateStretches" xml:space="preserve">
-    <value>Strecken prüfen</value>
+    <value>Strecken prüfen?</value>
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
-    <value>Zuggeschwindigkeit prüfen</value>
+    <value>Zuggeschwindigkeit prüfen?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
-    <value>Zugnummern prüfen</value>
+    <value>Zugnummern prüfen?</value>
   </data>
   <data name="ValidateSchedules" xml:space="preserve">
-    <value>Fahrzeugumläufe prüfen</value>
+    <value>Fahrzeugumläufe prüfen?</value>
   </data>
   <data name="ValidateLocomotiveCoverage" xml:space="preserve">
-    <value>Lokomotivabdeckung prüfen</value>
+    <value>Lokomotivabdeckung prüfen?</value>
   </data>
   <data name="ValidateDriverDuties" xml:space="preserve">
-    <value>Triebfahrzeugführerdienste prüfen</value>
+    <value>Triebfahrzeugführerdienste prüfen?</value>
   </data>
   <data name="Thresholds" xml:space="preserve">
     <value>Schwellenwerte</value>
@@ -572,6 +590,9 @@
   </data>
   <data name="TimeMinutes" xml:space="preserve">
     <value>Zeit (Min.)</value>
+  </data>
+  <data name="IsElectrified" xml:space="preserve">
+    <value>Elektrifiziert?</value>
   </data>
   <data name="Via" xml:space="preserve">
     <value>Über</value>
@@ -877,28 +898,40 @@
     <value>Info</value>
   </data>
   <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
-    <value>Zug kann die Richtung wechseln</value>
+    <value>Zug kann die Richtung wechseln?</value>
   </data>
   <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
     <value>Ob ein Zug hier wenden kann, was üblicherweise ein Umsetzen der Lok erfordert.</value>
   </data>
+  <data name="HasPassengerExchange" xml:space="preserve">
+    <value>Reisende?</value>
+  </data>
+  <data name="HasPassengerExchangeHelp" xml:space="preserve">
+    <value>Reisezüge können hier zum Ein- und Aussteigen halten; Fahrkarten können von und zu diesem Ort ausgestellt werden.</value>
+  </data>
+  <data name="HasCargoExchange" xml:space="preserve">
+    <value>Fracht?</value>
+  </data>
+  <data name="HasCargoExchangeHelp" xml:space="preserve">
+    <value>Güterzüge können hier Güterwagen an- und abkuppeln.</value>
+  </data>
   <data name="IsMain" xml:space="preserve">
-    <value>Hauptgleis</value>
+    <value>Hauptgleis?</value>
   </data>
   <data name="IsManned" xml:space="preserve">
-    <value>Besetzt</value>
+    <value>Besetzt?</value>
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Ob die Station von einem Fahrdienstleiter bedient wird statt selbstbedient zu sein.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
-    <value>Geplant</value>
+    <value>Geplant?</value>
   </data>
   <data name="IsShadow" xml:space="preserve">
-    <value>Schattenbahnhof</value>
+    <value>Schattenbahnhof?</value>
   </data>
   <data name="IsShadowHelp" xml:space="preserve">
-    <value>Ein verborgener Bahnhof am Ende einer Strecke, der die Welt jenseits der modellierten Bahn darstellt.</value>
+    <value>Ein Schattenbahnhof stellt externe Bahnhöfe oder Regionen jenseits der modellierten Bahn dar.</value>
   </data>
   <data name="LayoutNameHelp" xml:space="preserve">
     <value>Der Name dieser Anlage, der in Berichten und exportierten Dateien angezeigt wird.</value>
@@ -966,6 +999,12 @@
   <data name="OwnerHelp" xml:space="preserve">
     <value>Der FREMO-Modulbesitzer, der diese Stelle mitbringt. Optional.</value>
   </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Tel.</value>
+  </data>
+  <data name="PhoneNumberHelp" xml:space="preserve">
+    <value>Kontakttelefonnummer des Fahrdienstleiters an diesem Ort. Optional.</value>
+  </data>
   <data name="Region" xml:space="preserve">
     <value>Region</value>
   </data>
@@ -982,7 +1021,7 @@
     <value>Wählen Sie den Typ der hinzuzufügenden Betriebsstelle:</value>
   </data>
   <data name="Shadow" xml:space="preserve">
-    <value>Schatten</value>
+    <value>Schatten?</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Signatur</value>
@@ -1030,7 +1069,7 @@
     <value>Züge über mehrere benannte Betriebstage statt einer einzelnen Sitzung planen.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Jedes Berichtselement in seiner eigenen Sprache drucken</value>
+    <value>Jedes Berichtselement in seiner eigenen Sprache drucken?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>Wenn aktiviert, werden Berichtselemente in der vom Element selbst abgeleiteten Sprache dargestellt – zum Beispiel ein Lokführerdienst in der Sprache des betreibenden Unternehmens. Die Oberfläche und alle Elemente ohne ableitbare Sprache verwenden weiterhin Ihre bevorzugte Sprache.</value>
@@ -1069,7 +1108,7 @@
     <value>Wagen</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fährt weiter als</value>
+    <value>Fährt weiter als?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Halte</value>
@@ -1180,13 +1219,55 @@
     <value>Neue Güterbeschreibung</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
-    <value>Zu allen Zielen</value>
+    <value>Zu allen Zielen?</value>
+  </data>
+  <data name="CargoTo" xml:space="preserve">
+    <value>Fracht nach</value>
+  </data>
+  <data name="CargoFromTo" xml:space="preserve">
+    <value>Fracht von {0} nach {1}</value>
+  </data>
+  <data name="WagonsTo" xml:space="preserve">
+    <value>Wagen nach {0}</value>
+  </data>
+  <data name="WagonsFromTo" xml:space="preserve">
+    <value>Wagen von {0} nach {1}</value>
+  </data>
+  <data name="WagonClassesTo" xml:space="preserve">
+    <value>{0} Wagen nach {1}</value>
+  </data>
+  <data name="WagonClassesFromTo" xml:space="preserve">
+    <value>{0} von {1} nach {2}</value>
+  </data>
+  <data name="OnlyWagonClasses" xml:space="preserve">
+    <value>Nur Wagenklassen</value>
+  </data>
+  <data name="UsedInTrains" xml:space="preserve">
+    <value>Verwendet in Zügen</value>
+  </data>
+  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+    <value>Von keinem Zug verwendet.</value>
+  </data>
+  <data name="OnlyWagonClassesHint" xml:space="preserve">
+    <value>Optionale UIC-Wagenklassen-Buchstaben, die einschränken, welche Wagen mitgenommen werden, z. B. "U,Z". Leer lassen für alle Wagen.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Ziele</value>
   </data>
+  <data name="DestinationStation" xml:space="preserve">
+    <value>Zielbahnhof</value>
+  </data>
+  <data name="DestinationStations" xml:space="preserve">
+    <value>Zielbahnhöfe</value>
+  </data>
   <data name="Origins" xml:space="preserve">
     <value>Herkünfte</value>
+  </data>
+  <data name="OriginStation" xml:space="preserve">
+    <value>Herkunftsbahnhof</value>
+  </data>
+  <data name="OriginStations" xml:space="preserve">
+    <value>Herkunftsbahnhöfe</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Löschen nicht möglich: Diese Güterbeschreibung wird von einem oder mehreren Wagenströmen verwendet.</value>
@@ -1204,19 +1285,19 @@
     <value>Max. Achsen</value>
   </data>
   <data name="AndRegions" xml:space="preserve">
-    <value>Und Regionen</value>
+    <value>Und Regionen?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
     <value>Auch die der Zielstation zugeordneten Regionen auflisten.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
-    <value>Und darüber hinaus</value>
+    <value>Und darüber hinaus?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
     <value>Auch alle Orte jenseits der Zielstation einbeziehen.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
-    <value>Und lokal</value>
+    <value>Und lokal?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
     <value>Auch lokale Ziele einbeziehen, die von der Station aus bedient werden.</value>
@@ -1227,11 +1308,23 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Ziel hinzufügen</value>
   </data>
+  <data name="NoDestinationStations" xml:space="preserve">
+    <value>Keine Zielbahnhöfe.</value>
+  </data>
+  <data name="AddDestinationStation" xml:space="preserve">
+    <value>Zielbahnhof hinzufügen</value>
+  </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>Keine Herkünfte.</value>
   </data>
   <data name="AddOrigin" xml:space="preserve">
     <value>Herkunft hinzufügen</value>
+  </data>
+  <data name="NoOriginStations" xml:space="preserve">
+    <value>Keine Herkunftsbahnhöfe.</value>
+  </data>
+  <data name="AddOriginStation" xml:space="preserve">
+    <value>Herkunftsbahnhof hinzufügen</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Wagenströme zu Zügen hinzufügen: Wählen Sie einen Zug und legen Sie dann fest, wo Wagen an- und abgekuppelt werden und welche Güterbeschreibung gilt.</value>
@@ -1258,19 +1351,19 @@
     <value>Diesen Wagenstrom löschen?</value>
   </data>
   <data name="CargoFlowCouple" xml:space="preserve">
-    <value>Kuppeln</value>
+    <value>Kuppeln?</value>
   </data>
   <data name="CargoFlowUncouple" xml:space="preserve">
-    <value>Abkuppeln</value>
+    <value>Abkuppeln?</value>
   </data>
   <data name="CargoFlowShuntBefore" xml:space="preserve">
-    <value>Rangieren vorher</value>
+    <value>Rangieren vorher?</value>
   </data>
   <data name="CargoFlowShuntAfter" xml:space="preserve">
-    <value>Rangieren danach</value>
+    <value>Rangieren danach?</value>
   </data>
   <data name="CargoFlowNoWagonsHere" xml:space="preserve">
-    <value>Keine Wagen von hier</value>
+    <value>Keine Wagen von hier?</value>
   </data>
   <data name="CargoFlowCoupleHint" xml:space="preserve">
     <value>Eine Ankuppel-Notiz für die Wagen am Abfahrtshalt anzeigen.</value>

@@ -30,7 +30,7 @@ internal static class XplnTrainExtensions
         private bool TryFindCall(string stationSignature, int rowNumber, Func<StationCall, bool> compare, out (Maybe<StationCall> call, int index) result)
         {
             var calls = train.Calls.Select((call, index) => (call, index))
-                .Where(item => item.call.Station.Signature.Equals(stationSignature, StringComparison.OrdinalIgnoreCase) && compare(item.call))
+                .Where(item => item.call.OperationLocation.Signature.Equals(stationSignature, StringComparison.OrdinalIgnoreCase) && compare(item.call))
                 .ToArray();
             if (calls.Length == 1)
             {

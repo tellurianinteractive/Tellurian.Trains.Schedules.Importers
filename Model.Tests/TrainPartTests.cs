@@ -42,8 +42,8 @@ public class TrainPartTests
     public void FromAndToStationsAreSet()
     {
         var target = Train.AsTrainPart(1, 2);
-        Assert.AreEqual("Ytterby", target.From.Station.Name);
-        Assert.AreEqual("Stenungsund", target.To.Station.Name);
+        Assert.AreEqual("Ytterby", target.From.OperationLocation.Name);
+        Assert.AreEqual("Stenungsund", target.To.OperationLocation.Name);
     }
 
     [TestMethod]

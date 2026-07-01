@@ -95,5 +95,5 @@ public abstract class TrainPart : IEquatable<TrainPart>
     public override int GetHashCode() => HashCode.Combine(From.GetHashCode(), To.GetHashCode());
 
     /// <inheritdoc/>
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", Train, From.Station, From.Departure.HHMM(), To.Station, To.Arrival.HHMM());
+    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", Train, From.OperationLocation, From.Departure.HHMM(), To.OperationLocation, To.Arrival.HHMM());
 }

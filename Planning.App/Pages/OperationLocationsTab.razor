@@ -51,8 +51,11 @@ else
                     </TemplateColumn>
                     <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@(context is Station { IsManned: true } ? "✓" : "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@(context is Station { IsShadow: true } ? "✓" : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@(context.HasPassengerExchange ? "✓" : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@(context.HasCargoExchange ? "✓" : "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Info(context)">@Translator("Info")</button>
@@ -104,12 +107,34 @@ else
                         <HelpLabel For="Owner" />
                         <input type="text" @bind="Editing.Owner" @bind:after="OnEdited" />
                     </div>
+                    <div class="field">
+                        <HelpLabel For="PhoneNumber" />
+                        <input type="number" class="num" @bind="Editing.PhoneNumber" @bind:after="OnEdited" />
+                    </div>
 
                     @if (Editing is not OtherLocation)
                     {
                         <div class="field">
                             <HelpLabel For="IsChangingTrainDirectionPossible" />
                             <input type="checkbox" @bind="Editing.IsChangingTrainDirectionPossible" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @* Passenger exchange is settable on every type except a signal-controlled location;
+                       cargo exchange only on a manned station. The model forces the others to false. *@
+                    @if (Editing is not SignalControlledLocation)
+                    {
+                        <div class="field">
+                            <HelpLabel For="HasPassengerExchange" />
+                            <input type="checkbox" @bind="Editing.HasPassengerExchange" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @if (Editing is Station)
+                    {
+                        <div class="field">
+                            <HelpLabel For="HasCargoExchange" />
+                            <input type="checkbox" @bind="Editing.HasCargoExchange" @bind:after="OnEdited" />
                         </div>
                     }
 
@@ -245,8 +270,14 @@ else
                     <dd>@Translator(TypeKey(_selected))</dd>
                     <dt>@Translator("Owner")</dt>
                     <dd>@(string.IsNullOrWhiteSpace(_selected.Owner) ? "—" : _selected.Owner)</dd>
+                    <dt>@Translator("PhoneNumber")</dt>
+                    <dd>@(_selected.PhoneNumber?.ToString(Culture) ?? "—")</dd>
                     <dt>@Translator("IsChangingTrainDirectionPossible")</dt>
                     <dd>@YesNo(_selected.IsChangingTrainDirectionPossible)</dd>
+                    <dt>@Translator("HasPassengerExchange")</dt>
+                    <dd>@YesNo(_selected.HasPassengerExchange)</dd>
+                    <dt>@Translator("HasCargoExchange")</dt>
+                    <dd>@YesNo(_selected.HasCargoExchange)</dd>
                     @if (_selected is Station infoStation)
                     {
                         <dt>@Translator("IsShadow")</dt>

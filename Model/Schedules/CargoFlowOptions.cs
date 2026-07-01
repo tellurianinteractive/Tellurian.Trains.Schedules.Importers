@@ -1,3 +1,5 @@
+using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
+
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
 /// <summary>
@@ -16,10 +18,11 @@ public sealed class CargoFlowOptions
     public int Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the catalogue display name shown when picking a cargo flow description
-    /// (for example "Coal to the harbour").
+    /// Optional UIC wagon-class letters that limit which wagons the cargo flow brings, e.g. "U,Z" to
+    /// bring only those classes. Empty means any wagon class. Used both to filter and to describe the
+    /// flow (it leads the routing summary, see <see cref="DestinationsSummary"/> consumers).
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string OnlyWagonClasses { get; set; } = string.Empty;
 
     /// <summary>
     /// The ultimate origin of the wagons. Wagons gathered at these origin stations are forwarded by the
@@ -37,6 +40,23 @@ public sealed class CargoFlowOptions
     /// </summary>
     public bool ToAllDestinations { get; set; }
 
+    /// <summary>
+    /// The comma-separated destination station names, for compact display in lists and drop-downs.
+    /// Empty when <see cref="ToAllDestinations"/> is set (use <see cref="DestinationsSummary"/> for that).
+    /// </summary>
+    public string DestinationStationNames => string.Join(", ", Destinations.Select(d => d.Station.Name));
+
+    /// <summary>
+    /// The comma-separated origin station names, for compact display in lists.
+    /// </summary>
+    public string OriginStationNames => string.Join(", ", Origins.Select(o => o.Station.Name));
+
+    /// <summary>
+    /// A short summary of where this cargo flow's wagons go: the localised "all destinations" text when
+    /// <see cref="ToAllDestinations"/> is set, otherwise the <see cref="DestinationStationNames"/>.
+    /// </summary>
+    public string DestinationsSummary => ToAllDestinations ? NoteResources.AllDestinations : DestinationStationNames;
+
     /// <inheritdoc/>
-    public override string ToString() => Name;
+    public override string ToString() => OnlyWagonClasses;
 }

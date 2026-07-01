@@ -1,0 +1,104 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+<div class="timetable-section @(ShowTitle ? "" : "no-title")">
+    @if (ShowTitle)
+    {
+        <h3 class="timetable-title">@DisplayTitle</h3>
+    }
+    <table class="timetable">
+        <thead>
+            <tr>
+                <th class="km">@Translator("Km")</th>
+                <th class="arr-dep"></th>
+                <th class="stations">@Translator("Stations")</th>
+                @foreach (var col in Table.Columns)
+                {
+                    <th class="train-header" style="color: @col.Color">@col.Header</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Table.Rows)
+            {
+                @if (row.IsSplit)
+                {
+                    <tr class="arr-row">
+                        <td class="km" rowspan="2">@row.Km</td>
+                        <td class="arr-dep">@Translator("ToShort")</td>
+                        <td class="stations">@row.StationName</td>
+                        @for (int i = 0; i < Table.Columns.Count; i++)
+                        {
+                            var cell = row.Cells[i];
+                            var bold = Table.Columns[i].IsPassenger;
+                            <td class="time">
+                                @if (cell.IsNotStopping) { <span>|</span> }
+                                else if (cell.Arrival is { } arr)
+                                {
+                                    if (bold) { <strong>@arr</strong> } else { @arr }
+                                }
+                            </td>
+                        }
+                    </tr>
+                    <tr class="dep-row">
+                        <td class="arr-dep">@Translator("FromShort")</td>
+                        <td class="stations">@row.StationName</td>
+                        @for (int i = 0; i < Table.Columns.Count; i++)
+                        {
+                            var cell = row.Cells[i];
+                            var bold = Table.Columns[i].IsPassenger;
+                            <td class="time">
+                                @if (cell.IsNotStopping) { <span>|</span> }
+                                else if (cell.Departure is { } dep)
+                                {
+                                    if (bold) { <strong>@dep</strong> } else { @dep }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+                else
+                {
+                    <tr class="@(row.IsConnection ? "connection" : "")">
+                        <td class="km">@row.Km</td>
+                        <td class="arr-dep">@ArrDepLabel(row)</td>
+                        <td class="stations">@row.StationName</td>
+                        @for (int i = 0; i < Table.Columns.Count; i++)
+                        {
+                            var cell = row.Cells[i];
+                            var bold = Table.Columns[i].IsPassenger;
+                            var time = cell.Departure ?? cell.Arrival;
+                            <td class="time">
+                                @if (cell.IsNotStopping) { <span>|</span> }
+                                else if (time is { } t)
+                                {
+                                    if (bold) { <strong>@t</strong> } else { @t }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TimetableTable Table { get; set; } = default!;
+
+    /// <summary>True when this tile continues the same table from the previous page; the title is then suffixed.</summary>
+    [Parameter] public bool Continued { get; set; }
+
+    /// <summary>When false, the heading is omitted because the tile directly above shows the same text.</summary>
+    [Parameter] public bool ShowTitle { get; set; } = true;
+
+    private string DisplayTitle => Continued ? $"{Table.Title}, {Translator("Continued")}" : Table.Title;
+
+    private string ArrDepLabel(TimetableTableRow row) => row.Kind switch
+    {
+        TimetableRowKind.OriginConnection => Translator("FromShort"),
+        TimetableRowKind.TerminalConnection => Translator("ToShort"),
+        _ => row.IsFirst ? Translator("FromShort") : row.IsLast ? Translator("ToShort") : "",
+    };
+}

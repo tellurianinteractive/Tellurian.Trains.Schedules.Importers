@@ -8,6 +8,103 @@
 @implements IDisposable
 
 <div class="cargo-descriptions">
+    @if (_infoTarget is { } info)
+    {
+        <div class="info">
+            <h2>@Translator("CargoDescription")</h2>
+            <dl>
+                <dt>@Translator("OnlyWagonClasses")</dt>
+                <dd>@(string.IsNullOrWhiteSpace(info.OnlyWagonClasses) ? "—" : info.OnlyWagonClasses)</dd>
+                <dt>@Translator("ToAllDestinations")</dt>
+                <dd>@YesNo(info.ToAllDestinations)</dd>
+            </dl>
+
+            <h3>@Translator(info.Origins.Count == 1 ? "OriginStation" : "OriginStations")</h3>
+            @if (info.Origins.Any())
+            {
+                <p>@info.OriginStationNames</p>
+            }
+            else
+            {
+                <p class="empty">@Translator("NoOriginStations")</p>
+            }
+
+            <h3>@Translator(info.Destinations.Count == 1 ? "DestinationStation" : "DestinationStations")</h3>
+            @if (info.ToAllDestinations)
+            {
+                <p>@info.DestinationsSummary</p>
+            }
+            else if (info.Destinations.Any())
+            {
+                <table class="sub-grid">
+                    <thead>
+                        <tr>
+                            <th>@Translator("Station")</th>
+                            <th class="num" title="@Translator("PositionInTrainHint")">@Translator("Position")</th>
+                            <th class="num">@Translator("MaxWagons")</th>
+                            <th class="num">@Translator("MaxAxles")</th>
+                            <th class="center" title="@Translator("AndRegionsHint")">@Translator("AndRegions")</th>
+                            <th class="center" title="@Translator("AndBeyondHint")">@Translator("AndBeyond")</th>
+                            <th class="center" title="@Translator("AndLocalDestinationsHint")">@Translator("AndLocal")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dest in info.Destinations)
+                        {
+                            <tr>
+                                <td>@dest.Station.Name</td>
+                                <td class="num">@dest.PositionInTrain</td>
+                                <td class="num">@dest.MaxNumberOfWagons</td>
+                                <td class="num">@dest.MaxNumberOfAxles</td>
+                                <td class="center">@(dest.AndRegions ? "✓" : "")</td>
+                                <td class="center">@(dest.AndBeyond ? "✓" : "")</td>
+                                <td class="center">@(dest.AndLocalDestinations ? "✓" : "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="empty">@Translator("NoDestinationStations")</p>
+            }
+
+            <h3>@Translator("UsedInTrains")</h3>
+            @{ var usages = UsagesOf(info).ToList(); }
+            @if (usages.Count > 0)
+            {
+                <table class="sub-grid">
+                    <thead>
+                        <tr>
+                            <th>@Translator("Train")</th>
+                            <th>@Translator("From")</th>
+                            <th>@Translator("To")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (train, flow) in usages)
+                        {
+                            <tr>
+                                <td>@train.Identity</td>
+                                <td>@flow.From.OperationLocation.Signature @flow.From.Departure.HHMM()</td>
+                                <td>@flow.To.OperationLocation.Signature @flow.To.Arrival.HHMM()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="empty">@Translator("CargoDescriptionNotUsed")</p>
+            }
+
+            <div class="form-actions">
+                <button class="primary" @onclick="() => _infoTarget = null">@Translator("Close")</button>
+            </div>
+        </div>
+    }
+    else
+    {
     <p class="hint">@Translator("CargoDescriptionsDescription")</p>
 
     <div class="toolbar">
@@ -23,10 +120,10 @@
         <table class="grid">
             <thead>
                 <tr>
-                    <th>@Translator("Name")</th>
+                    <th>@Translator("OriginStations")</th>
                     <th class="center">@Translator("ToAllDestinations")</th>
-                    <th class="num">@Translator("Destinations")</th>
-                    <th class="num">@Translator("Origins")</th>
+                    <th>@Translator("DestinationStations")</th>
+                    <th title="@Translator("OnlyWagonClassesHint")">@Translator("OnlyWagonClasses")</th>
                     <th class="actions"></th>
                 </tr>
             </thead>
@@ -34,11 +131,12 @@
                 @foreach (var d in Descriptions)
                 {
                     <tr class="description @(IsExpanded(d) ? "expanded" : "")">
-                        <td><input type="text" value="@d.Name" @onchange="e => SetName(d, e)" /></td>
+                        <td>@d.OriginStationNames</td>
                         <td class="center"><input type="checkbox" checked="@d.ToAllDestinations" @onchange="e => SetToAll(d, e)" /></td>
-                        <td class="num">@d.Destinations.Count</td>
-                        <td class="num">@d.Origins.Count</td>
+                        <td>@(d.ToAllDestinations ? "" : d.DestinationStationNames)</td>
+                        <td><input type="text" value="@d.OnlyWagonClasses" @onchange="e => SetOnlyWagonClasses(d, e)" /></td>
                         <td class="actions">
+                            <button @onclick="() => _infoTarget = d">@Translator("Info")</button>
                             <button @onclick="() => ToggleExpanded(d)">@Translator(IsExpanded(d) ? "Close" : "Edit")</button>
                             @{ var deletion = Plan?.MayDelete(d); }
                             <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
@@ -51,8 +149,11 @@
                     {
                         <tr class="detail">
                             <td colspan="5">
-                                @DestinationsTable(d)
                                 @OriginsTable(d)
+                                @if (!d.ToAllDestinations)
+                                {
+                                    @DestinationsTable(d)
+                                }
                             </td>
                         </tr>
                     }
@@ -64,10 +165,11 @@
     @if (_deleteTarget is not null)
     {
         <div class="confirm">
-            <span>@string.Format(Culture, Translator("DeleteCargoDescriptionConfirm"), _deleteTarget.Name)</span>
+            <span>@string.Format(Culture, Translator("DeleteCargoDescriptionConfirm"), _deleteTarget.DestinationsSummary)</span>
             <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
         </div>
+    }
     }
 </div>
 
@@ -79,13 +181,28 @@
     private Layout? Layout => ScheduleState.Layout;
 
     private List<CargoFlowOptions> Descriptions =>
-        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.Name, StringComparer.CurrentCulture)];
+        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.OnlyWagonClasses, StringComparer.CurrentCulture)];
 
     private IEnumerable<Station> StationChoices =>
-        (Layout?.OperationLocations.OfType<Station>() ?? []).OrderBy(s => s.Name, StringComparer.CurrentCulture);
+        (Layout?.OperationLocations.OfType<Station>() ?? [])
+            .Where(s => s.HasCargoExchange)
+            .OrderBy(s => s.Name, StringComparer.CurrentCulture);
 
     private readonly HashSet<int> _expanded = [];
     private CargoFlowOptions? _deleteTarget;
+    private CargoFlowOptions? _infoTarget;
+
+    private string YesNo(bool value) => Translator(value ? "Yes" : "No");
+
+    // The cargo flows that reference this description, with their owning train, ordered by train then
+    // by the connect time, for the Info panel's "used in trains" list.
+    private IEnumerable<(Train Train, CargoFlowTrainPart Flow)> UsagesOf(CargoFlowOptions d) =>
+        (Timetable?.Trains ?? [])
+            .SelectMany(t => t.CargoFlows
+                .Where(cf => cf.CargoFlowOptionsId == d.Id || ReferenceEquals(cf.CargoFlowOptions, d))
+                .Select(cf => (Train: t, Flow: cf)))
+            .OrderBy(x => x.Train.Number)
+            .ThenBy(x => x.Flow.From.SortTime);
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
@@ -106,9 +223,9 @@
 
     // ---- Description fields ----------------------------------------------------------------------
 
-    private void SetName(CargoFlowOptions d, ChangeEventArgs e)
+    private void SetOnlyWagonClasses(CargoFlowOptions d, ChangeEventArgs e)
     {
-        d.Name = e.Value?.ToString() ?? "";
+        d.OnlyWagonClasses = e.Value?.ToString() ?? "";
         Save();
     }
 
@@ -121,7 +238,7 @@
     private void AddDescription()
     {
         if (Timetable is not { } timetable) return;
-        var added = timetable.Add(new CargoFlowOptions { Name = Translator("NewCargoDescriptionName") });
+        var added = timetable.Add(new CargoFlowOptions());
         _expanded.Add(added.Id);
         Save();
     }
@@ -139,7 +256,7 @@
     // ---- Destinations sub-table ------------------------------------------------------------------
 
     private RenderFragment DestinationsTable(CargoFlowOptions d) => @<div class="sub">
-        <h4>@Translator("Destinations")</h4>
+        <h4>@Translator(d.Destinations.Count == 1 ? "DestinationStation" : "DestinationStations")</h4>
         <table class="sub-grid">
             <thead>
                 <tr>
@@ -172,11 +289,11 @@
                 }
                 @if (d.Destinations.Count == 0)
                 {
-                    <tr><td colspan="8" class="empty">@Translator("NoDestinations")</td></tr>
+                    <tr><td colspan="8" class="empty">@Translator("NoDestinationStations")</td></tr>
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestination")</button>
+        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestinationStation")</button>
     </div>;
 
     private void SetDestinationStation(Destination dest, int? id)
@@ -223,7 +340,7 @@
     // ---- Origins sub-table -----------------------------------------------------------------------
 
     private RenderFragment OriginsTable(CargoFlowOptions d) => @<div class="sub">
-        <h4>@Translator("Origins")</h4>
+        <h4>@Translator(d.Origins.Count == 1 ? "OriginStation" : "OriginStations")</h4>
         <table class="sub-grid">
             <thead>
                 <tr>
@@ -244,11 +361,11 @@
                 }
                 @if (d.Origins.Count == 0)
                 {
-                    <tr><td colspan="2" class="empty">@Translator("NoOrigins")</td></tr>
+                    <tr><td colspan="2" class="empty">@Translator("NoOriginStations")</td></tr>
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOrigin")</button>
+        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOriginStation")</button>
     </div>;
 
     private void SetOriginStation(Origin origin, int? id)

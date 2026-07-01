@@ -174,6 +174,15 @@
   <data name="Export" xml:space="preserve">
     <value>Exportera</value>
   </data>
+  <data name="TimetableReport" xml:space="preserve">
+    <value>Tidtabell</value>
+  </data>
+  <data name="Km" xml:space="preserve">
+    <value>Km</value>
+  </data>
+  <data name="TimetableNoSchedule" xml:space="preserve">
+    <value>Ingen tidtabell inläst.</value>
+  </data>
   <data name="TurnusCards" xml:space="preserve">
     <value>Omloppskort</value>
   </data>
@@ -195,6 +204,12 @@
   <data name="To" xml:space="preserve">
     <value>Till</value>
   </data>
+  <data name="FromShort" xml:space="preserve">
+    <value>fr</value>
+  </data>
+  <data name="ToShort" xml:space="preserve">
+    <value>t</value>
+  </data>
   <data name="Turnus" xml:space="preserve">
     <value>Omlopp</value>
   </data>
@@ -203,6 +218,9 @@
   </data>
   <data name="Class" xml:space="preserve">
     <value>Klass</value>
+  </data>
+  <data name="Continued" xml:space="preserve">
+    <value>forts.</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Sida</value>
@@ -280,7 +298,7 @@
     <value>Banans namn</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Använd dagar istället för sessioner</value>
+    <value>Använd dagar istället för sessioner?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Startdag</value>
@@ -304,10 +322,10 @@
     <value>Vertikal</value>
   </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
-    <value>Visa ankomstminuter</value>
+    <value>Visa ankomstminuter?</value>
   </data>
   <data name="ShowDepartureMinutes" xml:space="preserve">
-    <value>Visa avgångsminuter</value>
+    <value>Visa avgångsminuter?</value>
   </data>
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minutavstånd (px/min)</value>
@@ -325,13 +343,13 @@
     <value>Spåravstånd (px)</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
-    <value>Visa tågkategori</value>
+    <value>Visa tågkategori?</value>
   </data>
   <data name="ShowCompany" xml:space="preserve">
-    <value>Visa bolag</value>
+    <value>Visa bolag?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Dölj sessioner/dagar</value>
+    <value>Dölj sessioner/dagar?</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Snabbklockans fart (×)</value>
@@ -370,28 +388,28 @@
     <value>Tågklarering (verkliga min)</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
-    <value>Validera stationsuppehåll</value>
+    <value>Validera stationsuppehåll?</value>
   </data>
   <data name="ValidateStationTracks" xml:space="preserve">
-    <value>Validera stationsspår</value>
+    <value>Validera stationsspår?</value>
   </data>
   <data name="ValidateStretches" xml:space="preserve">
-    <value>Validera sträckor</value>
+    <value>Validera sträckor?</value>
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
-    <value>Validera tåghastighet</value>
+    <value>Validera tåghastighet?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
-    <value>Validera tågnummer</value>
+    <value>Validera tågnummer?</value>
   </data>
   <data name="ValidateSchedules" xml:space="preserve">
-    <value>Validera fordonsomlopp</value>
+    <value>Validera fordonsomlopp?</value>
   </data>
   <data name="ValidateLocomotiveCoverage" xml:space="preserve">
-    <value>Validera loktäckning</value>
+    <value>Validera loktäckning?</value>
   </data>
   <data name="ValidateDriverDuties" xml:space="preserve">
-    <value>Validera förartjänster</value>
+    <value>Validera förartjänster?</value>
   </data>
   <data name="Thresholds" xml:space="preserve">
     <value>Tröskelvärden</value>
@@ -572,6 +590,9 @@
   </data>
   <data name="TimeMinutes" xml:space="preserve">
     <value>Tid (min)</value>
+  </data>
+  <data name="IsElectrified" xml:space="preserve">
+    <value>Elektrifierat?</value>
   </data>
   <data name="Via" xml:space="preserve">
     <value>Via</value>
@@ -832,7 +853,7 @@
     <value>Dela dagen vid denna tid. Den grafiska tidtabellen kan då skrivas ut över flera sidor och visas en halva i taget på skärmen.</value>
   </data>
   <data name="ControlledBy" xml:space="preserve">
-    <value>Styrs av</value>
+    <value>Styrs från</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
     <value>Den bemannade driftplats vars tågklarerare styr denna signalreglerade plats.</value>
@@ -877,28 +898,40 @@
     <value>Info</value>
   </data>
   <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
-    <value>Tåg kan byta riktning</value>
+    <value>Tåg kan byta riktning?</value>
   </data>
   <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
     <value>Om ett tåg kan vända här, vilket vanligtvis kräver en lokrundgång.</value>
   </data>
+  <data name="HasPassengerExchange" xml:space="preserve">
+    <value>Resande?</value>
+  </data>
+  <data name="HasPassengerExchangeHelp" xml:space="preserve">
+    <value>Persontåg kan stanna här för av- och påstigning; biljetter kan utfärdas från och till denna plats.</value>
+  </data>
+  <data name="HasCargoExchange" xml:space="preserve">
+    <value>Gods?</value>
+  </data>
+  <data name="HasCargoExchangeHelp" xml:space="preserve">
+    <value>Godståg kan koppla till och från godsvagnar här.</value>
+  </data>
   <data name="IsMain" xml:space="preserve">
-    <value>Huvudspår</value>
+    <value>Huvudspår?</value>
   </data>
   <data name="IsManned" xml:space="preserve">
-    <value>Bemannad</value>
+    <value>Bemannad?</value>
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om driftplatsen sköts av en tågklarerare i stället för att vara självbetjänad.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
-    <value>Tidtabellslagd</value>
+    <value>Tidtabellslagd?</value>
   </data>
   <data name="IsShadow" xml:space="preserve">
-    <value>Skuggbangård</value>
+    <value>Magasin?</value>
   </data>
   <data name="IsShadowHelp" xml:space="preserve">
-    <value>En dold bangård i slutet av en bana som representerar världen bortom den modellerade järnvägen.</value>
+    <value>Ett magasin är en ändstation som representerar externa stationer eller regioner utanför den modellerade järnvägen.</value>
   </data>
   <data name="LayoutNameHelp" xml:space="preserve">
     <value>Namnet på banan, som visas i rapporter och exporterade filer.</value>
@@ -966,6 +999,12 @@
   <data name="OwnerHelp" xml:space="preserve">
     <value>Den FREMO-modulägare som tar med denna plats. Valfritt.</value>
   </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Tel.</value>
+  </data>
+  <data name="PhoneNumberHelp" xml:space="preserve">
+    <value>Kontakttelefonnummer till tågklareraren på denna plats. Valfritt.</value>
+  </data>
   <data name="Region" xml:space="preserve">
     <value>Region</value>
   </data>
@@ -982,7 +1021,7 @@
     <value>Välj vilken typ av driftplats som ska läggas till:</value>
   </data>
   <data name="Shadow" xml:space="preserve">
-    <value>Skugga</value>
+    <value>Skugga?</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Signatur</value>
@@ -1030,7 +1069,7 @@
     <value>Planera tåg över flera namngivna driftdagar i stället för ett enda pass.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Skriv ut varje rapportpost på sitt eget språk</value>
+    <value>Skriv ut varje rapportpost på sitt eget språk?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>När detta är på återges varje post i rapporter på det språk som härleds från posten själv – till exempel en förartjänst på dess operatörsföretags språk. Gränssnittet, och alla poster utan härledbart språk, fortsätter att använda ditt föredragna språk.</value>
@@ -1069,7 +1108,7 @@
     <value>Vagnar</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fortsätter som</value>
+    <value>Fortsätter som?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Uppehåll</value>
@@ -1180,13 +1219,55 @@
     <value>Ny godsbeskrivning</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
-    <value>Till alla destinationer</value>
+    <value>Till alla destinationer?</value>
+  </data>
+  <data name="CargoTo" xml:space="preserve">
+    <value>Gods till</value>
+  </data>
+  <data name="CargoFromTo" xml:space="preserve">
+    <value>Gods från {0} till {1}</value>
+  </data>
+  <data name="WagonsTo" xml:space="preserve">
+    <value>Vagnar till {0}</value>
+  </data>
+  <data name="WagonsFromTo" xml:space="preserve">
+    <value>Vagnar från {0} till {1}</value>
+  </data>
+  <data name="WagonClassesTo" xml:space="preserve">
+    <value>{0} vagnar till {1}</value>
+  </data>
+  <data name="WagonClassesFromTo" xml:space="preserve">
+    <value>{0} från {1} till {2}</value>
+  </data>
+  <data name="OnlyWagonClasses" xml:space="preserve">
+    <value>Endast vagnsklasser</value>
+  </data>
+  <data name="UsedInTrains" xml:space="preserve">
+    <value>Används i tåg</value>
+  </data>
+  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+    <value>Används inte av något tåg.</value>
+  </data>
+  <data name="OnlyWagonClassesHint" xml:space="preserve">
+    <value>Valfria UIC-vagnsklassbokstäver som begränsar vilka vagnar som tas med, t.ex. "U,Z". Lämna tomt för alla vagnar.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Destinationer</value>
   </data>
+  <data name="DestinationStation" xml:space="preserve">
+    <value>Destinationsstation</value>
+  </data>
+  <data name="DestinationStations" xml:space="preserve">
+    <value>Destinationsstationer</value>
+  </data>
   <data name="Origins" xml:space="preserve">
     <value>Ursprung</value>
+  </data>
+  <data name="OriginStation" xml:space="preserve">
+    <value>Ursprungsstation</value>
+  </data>
+  <data name="OriginStations" xml:space="preserve">
+    <value>Ursprungsstationer</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Kan inte ta bort: den här godsbeskrivningen används av ett eller flera godsflöden.</value>
@@ -1204,19 +1285,19 @@
     <value>Max axlar</value>
   </data>
   <data name="AndRegions" xml:space="preserve">
-    <value>Och regioner</value>
+    <value>Och regioner?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
     <value>Lista även regionerna som är kopplade till destinationsstationen.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
-    <value>Och vidare</value>
+    <value>Och vidare?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
     <value>Inkludera även alla platser bortom destinationsstationen.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
-    <value>Och lokala</value>
+    <value>Och lokala?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
     <value>Inkludera även lokala destinationer som trafikeras från stationen.</value>
@@ -1227,11 +1308,23 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Lägg till destination</value>
   </data>
+  <data name="NoDestinationStations" xml:space="preserve">
+    <value>Inga destinationsstationer.</value>
+  </data>
+  <data name="AddDestinationStation" xml:space="preserve">
+    <value>Lägg till destinationsstation</value>
+  </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>Inga ursprung.</value>
   </data>
   <data name="AddOrigin" xml:space="preserve">
     <value>Lägg till ursprung</value>
+  </data>
+  <data name="NoOriginStations" xml:space="preserve">
+    <value>Inga ursprungsstationer.</value>
+  </data>
+  <data name="AddOriginStation" xml:space="preserve">
+    <value>Lägg till ursprungsstation</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Lägg till godsflöden på tåg: välj ett tåg och ange sedan var vagnar kopplas till och från samt vilken godsbeskrivning som gäller.</value>
@@ -1258,19 +1351,19 @@
     <value>Ta bort det här godsflödet?</value>
   </data>
   <data name="CargoFlowCouple" xml:space="preserve">
-    <value>Koppla</value>
+    <value>Koppla?</value>
   </data>
   <data name="CargoFlowUncouple" xml:space="preserve">
-    <value>Koppla loss</value>
+    <value>Koppla loss?</value>
   </data>
   <data name="CargoFlowShuntBefore" xml:space="preserve">
-    <value>Växla före</value>
+    <value>Växla före?</value>
   </data>
   <data name="CargoFlowShuntAfter" xml:space="preserve">
-    <value>Växla efter</value>
+    <value>Växla efter?</value>
   </data>
   <data name="CargoFlowNoWagonsHere" xml:space="preserve">
-    <value>Inga vagnar härifrån</value>
+    <value>Inga vagnar härifrån?</value>
   </data>
   <data name="CargoFlowCoupleHint" xml:space="preserve">
     <value>Visa en notis om att koppla till vagnarna vid avgångsanropet.</value>

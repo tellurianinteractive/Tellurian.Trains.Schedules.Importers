@@ -73,7 +73,7 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// <summary>
     /// Gets the station where this call occurs.
     /// </summary>
-    public OperationLocation Station => Track.Station;
+    public OperationLocation OperationLocation => Track.Station;
 
     /// <summary>
     /// Gets or sets the arrival time at the station.
@@ -101,9 +101,23 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     public ICollection<CallNote> Notes { get; set; }
 
     /// <summary>
-    /// Gets a value indicating whether this is a scheduled stop (either arrival or departure).
+    /// Gets a value indicating whether the train stops here, as opposed to passing through.
+    /// A call is a stop when it arrives and/or departs <em>and</em> its location is not a
+    /// <see cref="Layouts.SignalControlledLocation"/> — a train never stops at a signal-controlled
+    /// location, so the location override is built in here as the single source of truth.
+    /// It never compares the arrival and departure times: equal times are only a convention used
+    /// by the XPLN import to decide whether to clear both flags (see <see cref="IsPassthrough"/>).
     /// </summary>
-    public bool IsStop => IsArrival || IsDeparture;
+    public bool IsStop => (IsArrival || IsDeparture) && OperationLocation is not SignalControlledLocation;
+
+    /// <summary>
+    /// Gets a value indicating whether the train passes the station without stopping.
+    /// A pass-through has neither <see cref="IsArrival"/> nor <see cref="IsDeparture"/> set
+    /// (so <see cref="IsStop"/> is <c>false</c>), regardless of its arrival and departure times.
+    /// The XPLN import expresses a pass-through this way for an intermediate call whose arrival
+    /// equals its departure; manual editing does so by clearing both the Arr and Dep flags.
+    /// </summary>
+    public bool IsPassthrough => !IsStop;
 
     /// <summary>
     /// Gets the time used for sorting (departure if this is a departure, otherwise arrival).
@@ -136,7 +150,7 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
 
     /// <inheritdoc/>
     public override string ToString() =>
-        string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackDuringTimes, Station, Track, Arrival.HHMM(), Departure.HHMM());
+        string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackDuringTimes, OperationLocation, Track, Arrival.HHMM(), Departure.HHMM());
 
     /// <inheritdoc/>
     public int CompareTo([AllowNull] StationCall other) =>

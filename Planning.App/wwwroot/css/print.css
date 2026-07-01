@@ -30,14 +30,13 @@
         display: none !important;
     }
 
-    /* One page wrapper = one printed page; the last one must not add a blank page. */
-    .a4l,
-    .a4p {
-        page-break-after: always;
-    }
-
-    .a4l:last-child,
-    .a4p:last-child {
-        page-break-after: auto;
+    /* One page wrapper = one printed page. Break BEFORE each wrapper that follows another wrapper,
+       rather than AFTER every wrapper: this way no break is ever emitted after the last page, so there
+       is no trailing blank page. The adjacent-sibling combinator skips the first wrapper and ignores
+       non-element nodes (e.g. the .no-print toolbar before them and Blazor comment markers between
+       them), so it does not depend on a wrapper being :first-child / :last-child of its parent. */
+    .a4l + .a4l,
+    .a4p + .a4p {
+        break-before: page;
     }
 }

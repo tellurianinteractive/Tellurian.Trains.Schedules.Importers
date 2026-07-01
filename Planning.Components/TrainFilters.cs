@@ -12,7 +12,10 @@ public static class TrainFilters
         /// <summary>Includes every train.</summary>
         public static Func<Train, bool> All => _ => true;
 
-        /// <summary>Includes trains that can carry a cargo flow: a departure call with a later arrival.</summary>
-        public static Func<Train, bool> CanHostCargoFlow => t => t.DepartureCalls.Any(f => t.ArrivalCallsAfter(f).Any());
+        /// <summary>
+        /// Includes trains that can carry a cargo flow: a cargo (freight) train with a departure call
+        /// that has a later arrival.
+        /// </summary>
+        public static Func<Train, bool> CanHostCargoFlow => t => t.IsCargo && t.DepartureCalls.Any(f => t.ArrivalCallsAfter(f).Any());
     }
 }

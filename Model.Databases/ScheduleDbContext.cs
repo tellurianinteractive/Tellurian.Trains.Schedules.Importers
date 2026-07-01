@@ -501,7 +501,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey(e => e.StationCallId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Ignore(e => e.Station);
+            entity.Ignore(e => e.OperationLocation);
             entity.Ignore(e => e.IsStop);
             entity.Ignore(e => e.SortTime);
         });
@@ -665,7 +665,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         modelBuilder.Entity<CargoFlowOptions>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.OnlyWagonClasses).HasMaxLength(50);
 
             entity.OwnsMany(c => c.Origins, origin =>
             {

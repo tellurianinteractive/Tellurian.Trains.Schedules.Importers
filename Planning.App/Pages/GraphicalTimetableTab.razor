@@ -20,11 +20,11 @@ else
             <span class="stretch-selector-label">@Translator("Stretches"):</span>
             @foreach (var stretch in ScheduleState.TimetableStretches)
             {
-                <label class="stretch-option" title="@stretch.FullDescription">
+                <label class="stretch-option" title="@stretch.ForwardDescription">
                     <input type="checkbox"
                            checked="@ScheduleState.IsSelected(stretch)"
                            @onchange="e => OnStretchToggled(stretch, e)" />
-                    <span>@stretch.FullDescription</span>
+                    <span>@stretch.ForwardDescription</span>
                 </label>
             }
         </div>

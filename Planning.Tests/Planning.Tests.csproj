@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Planning\Planning.csproj" />
+    <ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
   <ItemGroup>

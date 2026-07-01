@@ -77,7 +77,7 @@
     private Timetable? Timetable => ScheduleState.Timetable;
 
     private List<CargoFlowOptions> Descriptions =>
-        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.Name, StringComparer.CurrentCulture)];
+        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.OnlyWagonClasses, StringComparer.CurrentCulture)];
 
     // Trains that already have cargo flows, shown as the master rows.
     private List<Train> Masters =>
@@ -114,13 +114,21 @@
     private void AddCargoFlow(Train train)
     {
         if (Descriptions.FirstOrDefault() is not { } description) return;
-        var from = train.DepartureCalls.FirstOrDefault(f => train.ArrivalCallsAfter(f).Any());
+        var from = CargoDepartureCalls(train).FirstOrDefault(f => CargoArrivalCallsAfter(train, f).Any());
         if (from is null) return;
-        var to = train.ArrivalCallsAfter(from).First();
+        var to = CargoArrivalCallsAfter(train, from).First();
         train.CreateCargoFlow(NextCargoFlowId(), from, to, description);
         _expanded.Add(train.Id);
         Save();
     }
+
+    // Cargo flows attach freight wagons, so only calls at stations with cargo exchange are valid
+    // connect/disconnect points — further filtering the train's default departure/arrival stops.
+    private static IEnumerable<StationCall> CargoDepartureCalls(Train train) =>
+        train.DepartureCalls.Where(c => c.OperationLocation.HasCargoExchange);
+
+    private static IEnumerable<StationCall> CargoArrivalCallsAfter(Train train, StationCall from) =>
+        train.ArrivalCallsAfter(from).Where(c => c.OperationLocation.HasCargoExchange);
 
     private void DeleteConfirmed()
     {
@@ -138,14 +146,14 @@
             <thead>
                 <tr>
                     <th class="num" title="@Translator("PositionInTrainHint")">@Translator("Position")</th>
-                    <th>@Translator("From")</th>
-                    <th>@Translator("To")</th>
                     <th>@Translator("CargoDescription")</th>
-                    <th class="center" title="@Translator("CargoFlowCoupleHint")">@Translator("CargoFlowCouple")</th>
-                    <th class="center" title="@Translator("CargoFlowUncoupleHint")">@Translator("CargoFlowUncouple")</th>
-                    <th class="center" title="@Translator("CargoFlowShuntBeforeHint")">@Translator("CargoFlowShuntBefore")</th>
-                    <th class="center" title="@Translator("CargoFlowShuntAfterHint")">@Translator("CargoFlowShuntAfter")</th>
+                    <th>@Translator("From")</th>
                     <th class="center" title="@Translator("CargoFlowNoWagonsHereHint")">@Translator("CargoFlowNoWagonsHere")</th>
+                    <th class="center" title="@Translator("CargoFlowCoupleHint")">@Translator("CargoFlowCouple")</th>
+                    <th class="center" title="@Translator("CargoFlowShuntBeforeHint")">@Translator("CargoFlowShuntBefore")</th>
+                    <th>@Translator("To")</th>
+                    <th class="center" title="@Translator("CargoFlowUncoupleHint")">@Translator("CargoFlowUncouple")</th>
+                    <th class="center" title="@Translator("CargoFlowShuntAfterHint")">@Translator("CargoFlowShuntAfter")</th>
                     <th></th>
                 </tr>
             </thead>
@@ -155,22 +163,22 @@
                     <tr>
                         <td><input type="number" class="num" min="0" value="@flow.PositionInTrain" @onchange="e => SetPosition(flow, e)" /></td>
                         <td>
-                            <ListBoxView Items="@(train.DepartureCalls.ToListItems(c => c.SortTime))"
-                                         Value="flow.From.Id" ValueChanged="id => SetFrom(flow, id)" />
-                        </td>
-                        <td>
-                            <ListBoxView Items="@(train.ArrivalCallsAfter(flow.From).ToListItems(c => c.SortTime))"
-                                         Value="flow.To.Id" ValueChanged="id => SetTo(flow, id)" />
-                        </td>
-                        <td>
-                            <ListBoxView Items="@(Descriptions.ToListItems())"
+                            <ListBoxView Items="@(Descriptions.ToListItems(Translator))"
                                          Value="flow.CargoFlowOptionsId" ValueChanged="id => SetDescription(flow, id)" />
                         </td>
-                        <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
+                        <td>
+                            <ListBoxView Items="@(CargoDepartureCalls(train).ToListItems(c => c.SortTime))"
+                                         Value="flow.From.Id" ValueChanged="id => SetFrom(flow, id)" />
+                        </td>
+                        <td class="center"><input type="checkbox" checked="@flow.BringsNoWagonsFromHere" @onchange="e => SetNoWagonsFromHere(flow, e)" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.AlsoShuntBeforeDeparture" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.AlsoShuntBeforeDeparture = e.Value is true; Save(); }" /></td>
+                        <td>
+                            <ListBoxView Items="@(CargoArrivalCallsAfter(train, flow.From).ToListItems(c => c.SortTime))"
+                                         Value="flow.To.Id" ValueChanged="id => SetTo(flow, id)" />
+                        </td>
                         <td class="center"><input type="checkbox" checked="@flow.HasUncoupleNote" @onchange="e => { flow.HasUncoupleNote = e.Value is true; Save(); }" /></td>
-                        <td class="center"><input type="checkbox" checked="@flow.AlsoShuntBeforeDeparture" @onchange="e => { flow.AlsoShuntBeforeDeparture = e.Value is true; Save(); }" /></td>
                         <td class="center"><input type="checkbox" checked="@flow.AlsoShuntAfterArrival" @onchange="e => { flow.AlsoShuntAfterArrival = e.Value is true; Save(); }" /></td>
-                        <td class="center"><input type="checkbox" checked="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.BringsNoWagonsFromHere = e.Value is true; Save(); }" /></td>
                         <td><button class="danger small" @onclick="() => _deleteTarget = flow">@Translator("Delete")</button></td>
                     </tr>
                 }
@@ -192,7 +200,7 @@
         flow.From = from;
         flow.FromId = from.Id;
         // Keep the to-call valid: it must be an arrival after the new from-call.
-        if (flow.To.SortTime <= from.SortTime && train.ArrivalCallsAfter(from).FirstOrDefault() is { } to)
+        if (flow.To.SortTime <= from.SortTime && CargoArrivalCallsAfter(train, from).FirstOrDefault() is { } to)
         {
             flow.To = to;
             flow.ToId = to.Id;
@@ -206,6 +214,19 @@
         {
             flow.To = to;
             flow.ToId = to.Id;
+        }
+        Save();
+    }
+
+    // Couple and shunt-before-departure only make sense when wagons are taken from here; clearing and
+    // disabling them keeps the departure operations consistent.
+    private void SetNoWagonsFromHere(CargoFlowTrainPart flow, ChangeEventArgs e)
+    {
+        flow.BringsNoWagonsFromHere = e.Value is true;
+        if (flow.BringsNoWagonsFromHere)
+        {
+            flow.HasCoupleNote = false;
+            flow.AlsoShuntBeforeDeparture = false;
         }
         Save();
     }

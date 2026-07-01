@@ -96,7 +96,7 @@ public class DeletionRulesTests
     [TestMethod]
     public void CargoFlowOptionsCannotBeDeletedWhenReferencedByACargoFlow()
     {
-        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+        var description = Plan.Timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "Coal" });
         var calls = Train.Calls.OrderBy(c => c.SortTime).ToList();
         Train.CreateCargoFlow(1, calls.First(), calls.Last(), description);
 
@@ -109,7 +109,7 @@ public class DeletionRulesTests
     [TestMethod]
     public void CargoFlowOptionsIsDeletedWhenNotReferenced()
     {
-        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+        var description = Plan.Timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "Coal" });
 
         var result = Plan.TryDelete(description);
 
@@ -120,7 +120,7 @@ public class DeletionRulesTests
     [TestMethod]
     public void CargoFlowTrainPartIsDeleted()
     {
-        var description = Plan.Timetable.Add(new CargoFlowOptions { Name = "Coal" });
+        var description = Plan.Timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "Coal" });
         var calls = Train.Calls.OrderBy(c => c.SortTime).ToList();
         var cargoFlow = Train.CreateCargoFlow(1, calls.First(), calls.Last(), description);
 

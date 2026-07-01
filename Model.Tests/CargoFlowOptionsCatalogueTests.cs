@@ -23,8 +23,8 @@ public class CargoFlowOptionsCatalogueTests
         TestDataFactory.Init();
         var timetable = TestDataFactory.CreateTimetable();
 
-        var a = timetable.Add(new CargoFlowOptions { Name = "A" });
-        var b = timetable.Add(new CargoFlowOptions { Name = "B" });
+        var a = timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "A" });
+        var b = timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "B" });
 
         Assert.AreEqual(1, a.Id);
         Assert.AreEqual(2, b.Id);
@@ -40,7 +40,7 @@ public class CargoFlowOptionsCatalogueTests
 
         var description = timetable.Add(new CargoFlowOptions
         {
-            Name = "Coal to the harbour",
+            OnlyWagonClasses = "U,Z",
             Origins = { new Origin { Station = station } },
             Destinations = { new Destination { Station = station, MaxNumberOfWagons = 5, AndRegions = true } },
         });
@@ -55,7 +55,7 @@ public class CargoFlowOptionsCatalogueTests
 
         var restoredDescription = restoredCatalogue.First();
         Assert.AreEqual(description.Id, restoredDescription.Id);
-        Assert.AreEqual("Coal to the harbour", restoredDescription.Name);
+        Assert.AreEqual("U,Z", restoredDescription.OnlyWagonClasses);
         Assert.HasCount(1, restoredDescription.Origins);
         Assert.HasCount(1, restoredDescription.Destinations);
 

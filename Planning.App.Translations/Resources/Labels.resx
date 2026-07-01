@@ -1,76 +1,96 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-		Microsoft ResX Schema
+  <!--
+    Microsoft ResX Schema
 
-		Version 1.3
+    Version 2.0
 
-		The primary goals of this format is to allow a simple XML format 
-		that is mostly human readable. The generation and parsing of the 
-		various data types are done through the TypeConverter classes 
-		associated with the data types.
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
 
-		Example:
+    Example:
 
-		... ado.net/XML headers & schema ...
-		<resheader name="resmimetype">text/microsoft-resx</resheader>
-		<resheader name="version">1.3</resheader>
-		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-		<data name="Name1">this is my long string</data>
-		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-			[base64 mime encoded serialized .NET Framework object]
-		</data>
-		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-			[base64 mime encoded string representing a byte array form of the .NET Framework object]
-		</data>
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
 
-		There are any number of "resheader" rows that contain simple 
-		name/value pairs.
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
 
-		Each data row contains a name, and value. The row also contains a 
-		type or mimetype. Type corresponds to a .NET class that support 
-		text/value conversion through the TypeConverter architecture. 
-		Classes that don't support this are serialized and stored with the 
-		mimetype set.
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
 
-		The mimetype is used for serialized objects, and tells the 
-		ResXResourceReader how to depersist the object. This is currently not 
-		extensible. For a given mimetype the value must be set accordingly:
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
 
-		Note - application/x-microsoft.net.object.binary.base64 is the format 
-		that the ResXResourceWriter will generate, however the reader can 
-		read any of the formats listed below.
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
 
-		mimetype: application/x-microsoft.net.object.binary.base64
-		value   : The object must be serialized with 
-			: System.Serialization.Formatters.Binary.BinaryFormatter
-			: and then encoded with base64 encoding.
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
 
-		mimetype: application/x-microsoft.net.object.soap.base64
-		value   : The object must be serialized with 
-			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-			: and then encoded with base64 encoding.
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
 
-		mimetype: application/x-microsoft.net.object.bytearray.base64
-		value   : The object must be serialized into a byte array 
-			: using a System.ComponentModel.TypeConverter
-			: and then encoded with base64 encoding.
-	-->
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -89,13 +109,13 @@
     <value>text/microsoft-resx</value>
   </resheader>
   <resheader name="version">
-    <value>1.3</value>
+    <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppName" xml:space="preserve">
     <value>Timetable Planner</value>
@@ -154,6 +174,15 @@
   <data name="Export" xml:space="preserve">
     <value>Export</value>
   </data>
+  <data name="TimetableReport" xml:space="preserve">
+    <value>Timetable</value>
+  </data>
+  <data name="Km" xml:space="preserve">
+    <value>Km</value>
+  </data>
+  <data name="TimetableNoSchedule" xml:space="preserve">
+    <value>No schedule loaded.</value>
+  </data>
   <data name="TurnusCards" xml:space="preserve">
     <value>Turnus cards</value>
   </data>
@@ -172,6 +201,12 @@
   <data name="To" xml:space="preserve">
     <value>To</value>
   </data>
+  <data name="FromShort" xml:space="preserve">
+    <value>fr</value>
+  </data>
+  <data name="ToShort" xml:space="preserve">
+    <value>to</value>
+  </data>
   <data name="Turnus" xml:space="preserve">
     <value>Turnus</value>
   </data>
@@ -180,6 +215,9 @@
   </data>
   <data name="Class" xml:space="preserve">
     <value>Class</value>
+  </data>
+  <data name="Continued" xml:space="preserve">
+    <value>continued</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Page</value>
@@ -257,7 +295,7 @@
     <value>Layout name</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Use days instead of sessions</value>
+    <value>Use days instead of sessions?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Start day</value>
@@ -281,10 +319,10 @@
     <value>Vertical</value>
   </data>
   <data name="ShowArrivalMinutes" xml:space="preserve">
-    <value>Show arrival minutes</value>
+    <value>Show arrival minutes?</value>
   </data>
   <data name="ShowDepartureMinutes" xml:space="preserve">
-    <value>Show departure minutes</value>
+    <value>Show departure minutes?</value>
   </data>
   <data name="MinuteSpacing" xml:space="preserve">
     <value>Minute spacing (px/min)</value>
@@ -302,13 +340,13 @@
     <value>Track spacing (px)</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
-    <value>Show train category</value>
+    <value>Show train category?</value>
   </data>
   <data name="ShowCompany" xml:space="preserve">
-    <value>Show company</value>
+    <value>Show company?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Hide sessions/days</value>
+    <value>Hide sessions/days?</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Fast clock speed (×)</value>
@@ -347,28 +385,28 @@
     <value>Train clearance (real min)</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
-    <value>Validate station calls</value>
+    <value>Validate station calls?</value>
   </data>
   <data name="ValidateStationTracks" xml:space="preserve">
-    <value>Validate station tracks</value>
+    <value>Validate station tracks?</value>
   </data>
   <data name="ValidateStretches" xml:space="preserve">
-    <value>Validate stretches</value>
+    <value>Validate stretches?</value>
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
-    <value>Validate train speed</value>
+    <value>Validate train speed?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
-    <value>Validate train numbers</value>
+    <value>Validate train numbers?</value>
   </data>
   <data name="ValidateSchedules" xml:space="preserve">
-    <value>Validate vehicle schedules</value>
+    <value>Validate vehicle schedules?</value>
   </data>
   <data name="ValidateLocomotiveCoverage" xml:space="preserve">
-    <value>Validate locomotive coverage</value>
+    <value>Validate locomotive coverage?</value>
   </data>
   <data name="ValidateDriverDuties" xml:space="preserve">
-    <value>Validate driver duties</value>
+    <value>Validate driver duties?</value>
   </data>
   <data name="Thresholds" xml:space="preserve">
     <value>Thresholds</value>
@@ -470,29 +508,47 @@
   <data name="OwnerHelp" xml:space="preserve">
     <value>The FREMO module owner who brings this location. Optional.</value>
   </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="PhoneNumberHelp" xml:space="preserve">
+    <value>Contact phone number for the train dispatcher at this location. Optional.</value>
+  </data>
   <data name="Shadow" xml:space="preserve">
-    <value>Shadow</value>
+    <value>Shadow?</value>
   </data>
   <data name="IsShadow" xml:space="preserve">
-    <value>Shadow yard</value>
+    <value>Shadow yard?</value>
   </data>
   <data name="IsShadowHelp" xml:space="preserve">
-    <value>A hidden yard at the end of a line that stands in for the world beyond the modelled railway.</value>
+    <value>A terminal station that represents external stations or regions beyond the modelled railway.</value>
   </data>
   <data name="IsManned" xml:space="preserve">
-    <value>Manned</value>
+    <value>Manned?</value>
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Whether the station is operated by a dispatcher rather than self-operated.</value>
   </data>
   <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
-    <value>Train can change direction</value>
+    <value>Train can change direction?</value>
   </data>
   <data name="IsChangingTrainDirectionPossibleHelp" xml:space="preserve">
     <value>Whether a train can reverse here, which typically requires a locomotive runaround.</value>
   </data>
+  <data name="HasPassengerExchange" xml:space="preserve">
+    <value>Passengers?</value>
+  </data>
+  <data name="HasPassengerExchangeHelp" xml:space="preserve">
+    <value>Passenger trains can stop here to set down and pick up passengers; tickets can be issued from and to this location.</value>
+  </data>
+  <data name="HasCargoExchange" xml:space="preserve">
+    <value>Cargo?</value>
+  </data>
+  <data name="HasCargoExchangeHelp" xml:space="preserve">
+    <value>Freight trains can connect and disconnect cargo wagons here.</value>
+  </data>
   <data name="ControlledBy" xml:space="preserve">
-    <value>Controlled by</value>
+    <value>Controlled from</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
     <value>The manned station whose dispatcher controls this signal-controlled location.</value>
@@ -534,10 +590,10 @@
     <value>Order</value>
   </data>
   <data name="IsMain" xml:space="preserve">
-    <value>Main</value>
+    <value>Main?</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
-    <value>Scheduled</value>
+    <value>Scheduled?</value>
   </data>
   <data name="Length" xml:space="preserve">
     <value>Length (m)</value>
@@ -697,7 +753,7 @@
     <value>Help</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Print each report item in its own language</value>
+    <value>Print each report item in its own language?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>When on, reports render each item in the language derived from the item itself — for example, a driver duty in its operating company's language. The interface, and any item with no derivable language, keep using your preferred language.</value>
@@ -818,6 +874,9 @@
   </data>
   <data name="TimeMinutes" xml:space="preserve">
     <value>Time (min)</value>
+  </data>
+  <data name="IsElectrified" xml:space="preserve">
+    <value>Electrified?</value>
   </data>
   <data name="Via" xml:space="preserve">
     <value>Via</value>
@@ -1051,7 +1110,7 @@
     <value>Wagons</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Continues as</value>
+    <value>Continues as?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Calls</value>
@@ -1162,13 +1221,55 @@
     <value>New cargo description</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
-    <value>To all destinations</value>
+    <value>To all destinations?</value>
+  </data>
+  <data name="CargoTo" xml:space="preserve">
+    <value>Cargo to</value>
+  </data>
+  <data name="CargoFromTo" xml:space="preserve">
+    <value>Cargo from {0} to {1}</value>
+  </data>
+  <data name="WagonsTo" xml:space="preserve">
+    <value>Wagons to {0}</value>
+  </data>
+  <data name="WagonsFromTo" xml:space="preserve">
+    <value>Wagons from {0} to {1}</value>
+  </data>
+  <data name="WagonClassesTo" xml:space="preserve">
+    <value>{0} wagons to {1}</value>
+  </data>
+  <data name="WagonClassesFromTo" xml:space="preserve">
+    <value>{0} from {1} to {2}</value>
+  </data>
+  <data name="OnlyWagonClasses" xml:space="preserve">
+    <value>Only wagon classes</value>
+  </data>
+  <data name="UsedInTrains" xml:space="preserve">
+    <value>Used in trains</value>
+  </data>
+  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+    <value>Not used by any train.</value>
+  </data>
+  <data name="OnlyWagonClassesHint" xml:space="preserve">
+    <value>Optional UIC wagon-class letters limiting which wagons to bring, e.g. "U,Z". Leave empty for any wagon.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Destinations</value>
   </data>
+  <data name="DestinationStation" xml:space="preserve">
+    <value>Destination station</value>
+  </data>
+  <data name="DestinationStations" xml:space="preserve">
+    <value>Destination stations</value>
+  </data>
   <data name="Origins" xml:space="preserve">
     <value>Origins</value>
+  </data>
+  <data name="OriginStation" xml:space="preserve">
+    <value>Origin station</value>
+  </data>
+  <data name="OriginStations" xml:space="preserve">
+    <value>Origin stations</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Cannot delete: this cargo description is used by one or more cargo flows.</value>
@@ -1186,19 +1287,19 @@
     <value>Max axles</value>
   </data>
   <data name="AndRegions" xml:space="preserve">
-    <value>And regions</value>
+    <value>And regions?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
     <value>Also list the regions attached to the destination station.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
-    <value>And beyond</value>
+    <value>And beyond?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
     <value>Also include all locations beyond the destination station.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
-    <value>And local</value>
+    <value>And local?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
     <value>Also include local destinations served from the station.</value>
@@ -1209,11 +1310,23 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Add destination</value>
   </data>
+  <data name="NoDestinationStations" xml:space="preserve">
+    <value>No destination stations.</value>
+  </data>
+  <data name="AddDestinationStation" xml:space="preserve">
+    <value>Add destination station</value>
+  </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>No origins.</value>
   </data>
   <data name="AddOrigin" xml:space="preserve">
     <value>Add origin</value>
+  </data>
+  <data name="NoOriginStations" xml:space="preserve">
+    <value>No origin stations.</value>
+  </data>
+  <data name="AddOriginStation" xml:space="preserve">
+    <value>Add origin station</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Add cargo flows to trains: choose a train, then set where wagons are connected and disconnected and which cargo description applies.</value>
@@ -1240,19 +1353,19 @@
     <value>Delete this cargo flow?</value>
   </data>
   <data name="CargoFlowCouple" xml:space="preserve">
-    <value>Couple</value>
+    <value>Couple?</value>
   </data>
   <data name="CargoFlowUncouple" xml:space="preserve">
-    <value>Uncouple</value>
+    <value>Uncouple?</value>
   </data>
   <data name="CargoFlowShuntBefore" xml:space="preserve">
-    <value>Shunt before</value>
+    <value>Shunt before?</value>
   </data>
   <data name="CargoFlowShuntAfter" xml:space="preserve">
-    <value>Shunt after</value>
+    <value>Shunt after?</value>
   </data>
   <data name="CargoFlowNoWagonsHere" xml:space="preserve">
-    <value>No wagons here</value>
+    <value>No wagons from here?</value>
   </data>
   <data name="CargoFlowCoupleHint" xml:space="preserve">
     <value>Show a couple note for the wagons at the from-call.</value>

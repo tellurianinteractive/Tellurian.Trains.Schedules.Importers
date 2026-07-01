@@ -11,8 +11,10 @@ else
     <div class="graph-container">
         <svg style="border: 1pt solid black " height="@Current.Height()" width="@Current.Width()" @onclick="OnClick" @onmousedown="OnMouseDown">
             <defs>
-                <filter x="0" y="0" width="1" height="1" id="solid">
-                    <feFlood flood-color="white" result="bg" />
+                @* Semi-transparent white box behind a minute label: the train lines still show through, but the
+                   digits stay readable where a label sits on a line. Region is padded slightly around the text. *@
+                <filter x="-0.15" y="-0.05" width="1.3" height="1.1" id="minutebackground">
+                    <feFlood flood-color="white" flood-opacity="0.5" result="bg" />
                     <feMerge>
                         <feMergeNode in="bg" />
                         <feMergeNode in="SourceGraphic" />
@@ -103,7 +105,7 @@ else
                 }
             }
 
-            @* Draw trains between stations (reverse direction) with departure minutes *@
+            @* Draw trains between stations (reverse direction) *@
             @for (var fromStationIndex = Current.Stations.Length - 1; fromStationIndex > 0; fromStationIndex--)
             {
                 var toStationIndex = fromStationIndex - 1;
@@ -125,60 +127,34 @@ else
                             {
                                 <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
                             }
-                            var departure = Current.DepartureMinuteOver(fromStationIndex, stretch.From);
-                            @if (Current.GraphSettings.ShowDepartureMinutes && Current.IsTimeVisible(stretch.From.Departure.Value))
-                            {
-                                <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
-                                </text>
-                            }
-                            @if (Current.GraphSettings.ShowArrivalMinutes && Current.IsTimeVisible(stretch.To.Arrival.Value))
-                            {
-                                var arrival = Current.ArrivalMinuteUnder(toStationIndex, toTrackIndex, stretch.To);
-                                <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.MinutesText()</text>
-                                </text>
-                            }
                         }
                     }
                 }
             }
 
-            @* Draw departure/arrival minutes for forward direction *@
-            @for (var toStationIndex = 1; toStationIndex < Current.Stations.Length; toStationIndex++)
+            @* Draw all arrival/departure minute labels above the graph lines. Each is anchored by a corner at
+               its call point (chosen from the line's slope and whether it is an arrival or departure) and drawn
+               semi-transparent so the train lines stay visible through it. *@
+            @foreach (var minute in Current.MinuteLabels())
             {
-                var fromStationIndex = toStationIndex - 1;
-                var fromStation = Current.Stations[fromStationIndex];
-                var toStation = Current.Stations[toStationIndex];
-                var fromTracks = fromStation.Tracks.ToArray();
-                var toTracks = toStation.Tracks.ToArray();
+                <text>
+                    <text filter="url(#minutebackground)" class="@Current.AxisDirection.OrientationCss("minute")" x="@minute.Point.X" y="@minute.Point.Y" text-anchor="@minute.TextAnchor" dominant-baseline="@minute.DominantBaseline">@minute.Text</text>
+                </text>
+            }
 
-                @for (var fromTrackIndex = 0; fromTrackIndex < fromTracks.Length; fromTrackIndex++)
-                {
-                    var fromTrack = fromTracks[fromTrackIndex];
-                    for (var toTrackIndex = 0; toTrackIndex < toTracks.Length; toTrackIndex++)
-                    {
-                        var toTrack = toTracks[toTrackIndex];
-
-                        @foreach (var stretch in Current.Trains.SelectMany(t => t.StretchUses().Where(c => fromStation.Equals(c.From.Track.Station) && c.From.Track.Equals(fromTrack) && toStation.Equals(c.To.Track.Station) && c.To.Track.Equals(toTrack))))
-                        {
-                            var departure = Current.DepartureMinuteUnder(fromStationIndex, fromTrackIndex, stretch.From);
-                            @if (Current.GraphSettings.ShowDepartureMinutes && Current.IsTimeVisible(stretch.From.Departure.Value))
-                            {
-                                <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@departure.X" y="@departure.Y">@stretch.From.Departure.MinutesText()</text>
-                                </text>
-                            }
-                            @if (Current.GraphSettings.ShowArrivalMinutes && Current.IsTimeVisible(stretch.To.Arrival.Value))
-                            {
-                                var arrival = Current.ArrivalMinuteOver(toStationIndex, stretch.To);
-                                <text>
-                                    <text filter="url(#solid)" class="@Current.AxisDirection.OrientationCss("minute")" x="@arrival.X" y="@arrival.Y">@stretch.To.Arrival.MinutesText()</text>
-                                </text>
-                            }
-                        }
-                    }
-                }
+            @* Draw all train identity labels last so they sit on top of every graph line. Each label runs
+               along its own train-line segment via <textPath>, so it follows the line's real slope and sits
+               cleanly beside it for both travel directions. The path is invisible (the line itself is drawn
+               above); it exists only to lay out the text. *@
+            @{ var labelIndex = 0; }
+            @foreach (var label in Current.VisibleTrainLabels())
+            {
+                var pathId = $"trainlabelpath-{InstanceId}-{labelIndex++}";
+                var startOffset = (label.Offset * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+                <path id="@pathId" fill="none" stroke="none" d="M @label.Start.X,@label.Start.Y L @label.End.X,@label.End.Y"></path>
+                <text>
+                    <text class="trainlabel" dy="@LabelOffsetDy"><textPath href="#@pathId" startOffset="@startOffset%">@label.Train.GraphLabel(Current.GraphSettings)</textPath></text>
+                </text>
             }
         </svg>
     </div>
@@ -190,6 +166,12 @@ else
 
     GraphSchedule? Current;
 
+    // Unique per component instance so the <textPath> path IDs don't collide when several
+    // GraphicalScheduleEditor instances render into the same document. SVG resolves href="#id"
+    // to the first matching element, so duplicate IDs make later schedules lay their labels out
+    // along the first schedule's paths, scattering them.
+    readonly string InstanceId = Guid.NewGuid().ToString("N");
+
     // The first whole hour at or after the given time, computed in integer minutes to avoid
     // floating-point drift (so an exact whole hour is returned unchanged, not rounded up).
     static TimeSpan FirstWholeHour(TimeSpan time)
@@ -200,7 +182,13 @@ else
 
     string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
     string TrainStroke(Train t) => t.Category?.Color ?? "#000000";
-    string TrainStrokeWidth => "2";
+    const double TrainStrokeWidthValue = 2;
+    string TrainStrokeWidth => TrainStrokeWidthValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    // Fixed perpendicular lift (px) of a train identity label off its line, via <textPath> dy, so the
+    // digits sit just beside the line rather than on it. Negative lifts to the side the glyphs already
+    // occupy, consistently for both slope directions. 2px ≈ one graph-thickness.
+    const string LabelOffsetDy = "-2";
 
     protected override void OnParametersSet()
     {

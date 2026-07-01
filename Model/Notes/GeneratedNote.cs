@@ -50,7 +50,7 @@ public static class GeneratedNoteExtensions
             UncoupleNote(var so) => NoteText.Format(NoteResources.UncoupleFromTrain, so),
             FromParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitToParking, so),
-            ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.Station, part.To.Station),
+            ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 NoteText.Format(NoteResources.BringsWagonsTo, part.ToPlainText),
             _ => string.Empty,

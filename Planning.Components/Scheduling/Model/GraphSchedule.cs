@@ -20,13 +20,13 @@ public class GraphSchedule
         TrackStretches = [.. timetableStretch.Stretches];
 
         // Select trains that have at least one call at a station on this stretch.
-        Trains = [.. timetable.Trains.Where(t => t.Calls.Any(c => stretchStations.Contains(c.Station)))];
+        Trains = [.. timetable.Trains.Where(t => t.Calls.Any(c => stretchStations.Contains(c.OperationLocation)))];
 
         // A train may start before midnight and continue past it (calls at 24:00 or later). When any
         // call shown on this stretch runs to or past 24:00, the axis spans the full day 00:00–24:00 so
         // the after-midnight part can wrap to the start. See GraphScheduleDrawingExtensions wrapping.
         _crossesMidnight = Trains
-            .SelectMany(t => t.Calls.Where(c => stretchStations.Contains(c.Station)))
+            .SelectMany(t => t.Calls.Where(c => stretchStations.Contains(c.OperationLocation)))
             .Any(c => c.Arrival.Value >= OneDay || c.Departure.Value >= OneDay);
     }
 
@@ -38,7 +38,7 @@ public class GraphSchedule
     public GraphSettings GraphSettings { get; }
     public GraphHalf Half { get; }
     public TimeAxisDirection AxisDirection => GraphSettings.AxisDirection;
-    public string Description => TimetableStretch.FullDescription;
+    public string Description => TimetableStretch.ForwardDescription;
     public OperationLocation[] Stations { get; }
     public TrackStretch[] TrackStretches { get; }
     public Train[] Trains { get; }
@@ -71,3 +71,10 @@ public record StretchUse(Train Train, int FromCallIndex)
     public StationCall From => Train.Calls[FromCallIndex];
     public StationCall To => Train.Calls[FromCallIndex + 1];
 }
+
+/// <summary>
+/// A single arrival or departure minute label ready to render: the call point it anchors to, the two-digit
+/// minute text, and the SVG <c>text-anchor</c>/<c>dominant-baseline</c> that place the chosen text corner at
+/// that point. See <c>GraphScheduleDrawingExtensions.MinuteLabels</c>.
+/// </summary>
+public record MinuteLabel(Offset Point, string Text, string TextAnchor, string DominantBaseline);
