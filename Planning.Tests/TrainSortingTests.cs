@@ -1,5 +1,7 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging.Abstractions;
+using Tellurian.Trains.Schedules.Importers.Services;
+using Tellurian.Trains.Schedules.Importers.Xpln;
+using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
 using Tellurian.Trains.Schedules.Planning.Timetables;
 
 namespace Tellurian.Trains.Schedules.Planning.Tests;
@@ -7,33 +9,42 @@ namespace Tellurian.Trains.Schedules.Planning.Tests;
 [TestClass]
 public class TrainSortingTests
 {
-    private const string JsonFilePath = @"C:\Users\Stefan\Downloads\Givskud-Modern-2025.json";
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    // Import the stable, checked-in XPLN file rather than a volatile JSON export; the file is copied
+    // into the test output from Importers.Xpln.Tests via a linked item in the project file.
+    private const string ScheduleName = "Givskud-Modern-2025";
+    private static readonly string OdsFilePath =
+        Path.Combine("Test data", $"{ScheduleName}.da-DK.ods");
 
     private Plan _plan = default!;
 
     [TestInitialize]
-    public void Setup()
+    public async Task Setup()
     {
-        if (!File.Exists(JsonFilePath))
-            Assert.Inconclusive($"Test data file not found: {JsonFilePath}");
-        _plan = JsonSerializer.Deserialize<Plan>(File.ReadAllText(JsonFilePath), JsonOptions)!;
+        var file = new FileInfo(OdsFilePath);
+        if (!file.Exists)
+            Assert.Inconclusive($"Test data file not found: {file.FullName}");
+
+        var provider = new OdsDataSetProvider(NullLogger<OdsDataSetProvider>.Instance);
+        using var importer = new XplnDataImporter(
+            file, provider, new CompaniesFromJsonService(), new TrainCategoriesFromCsvService(),
+            NullLogger<XplnDataImporter>.Instance);
+        var result = await importer.ImportScheduleAsync(ScheduleName);
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+        _plan = result.Item;
     }
 
-    // Expected first 10 trains on stretch 2 in time order (as listed by the user).
-    private static readonly int[] ExpectedStretch2 = [710, 44780, 75510, 49214, 7520, 530, 482, 49222, 75530, 3726];
+    // Expected first 10 segments on stretch 2 in graphical left-to-right column order, per direction.
+    // A train may appear twice when it is split around an overtake (for example 44780 upward). Trains that
+    // start mid-stretch (for example 9906/912 at Padby) still belong to the column for their direction.
+    private static readonly int[] ExpectedStretch2Upward = [9906, 710, 44780, 44780, 75510, 912, 49214, 530, 7520, 7214];
+    private static readonly int[] ExpectedStretch2Downward = [42717, 75513, 41915, 41915, 371, 3709, 4411, 36, 925, 75537];
 
     [TestMethod]
     public void Stretch2_Upward_FirstTrainsAreSortedCorrectly()
     {
         var actual = SortedNumbers("2", TrainGraphDirection.Upward);
-        var prefix = actual.Take(ExpectedStretch2.Length).ToArray();
-        CollectionAssert.AreEqual(ExpectedStretch2, prefix,
+        var prefix = actual.Take(ExpectedStretch2Upward.Length).ToArray();
+        CollectionAssert.AreEqual(ExpectedStretch2Upward, prefix,
             $"Actual upward order: {string.Join(", ", actual)}");
     }
 
@@ -41,8 +52,8 @@ public class TrainSortingTests
     public void Stretch2_Downward_FirstTrainsAreSortedCorrectly()
     {
         var actual = SortedNumbers("2", TrainGraphDirection.Downward);
-        var prefix = actual.Take(ExpectedStretch2.Length).ToArray();
-        CollectionAssert.AreEqual(ExpectedStretch2, prefix,
+        var prefix = actual.Take(ExpectedStretch2Downward.Length).ToArray();
+        CollectionAssert.AreEqual(ExpectedStretch2Downward, prefix,
             $"Actual downward order: {string.Join(", ", actual)}");
     }
 

@@ -11,6 +11,14 @@ public sealed class GeneralSettings
     /// <summary>The weekday of the first session when <see cref="UseDays"/> is enabled. Default is <see cref="DayOfWeek.Monday"/>.</summary>
     public DayOfWeek StartDay { get; set; } = DayOfWeek.Monday;
 
+    /// <summary>
+    /// The number of operating sessions/days in the layout's period (1–14). Session/day <em>texts</em> ignore
+    /// any bits above this, so a value of 6 shows sessions <c>1-6</c> and days <c>Mo-Sa</c> (or <c>Su-Fr</c>
+    /// when the week starts on Sunday). Only the display is affected — a train's stored sessions are never
+    /// touched, so raising this again brings the hidden sessions back. Default is 14 (no capping).
+    /// </summary>
+    public int MaxSessions { get; set; } = 14;
+
     /// <summary>Fast-clock start hour of operation, used as the graphical timetable's time-axis start. Default is 06:00.</summary>
     public TimeSpan StartTime { get; set; } = TimeSpan.FromHours(6);
 

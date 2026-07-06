@@ -142,6 +142,26 @@ public static class TimetableStretchExtensions
             }
             return distance;
         }
+
+        /// <summary>
+        /// The displayed kilometre at the start of this timetable stretch. It is zero when the stretch begins at
+        /// a terminal station (one that is not a through point of any other timetable stretch); when the stretch
+        /// instead diverges from another line — its first station lies part-way along another timetable stretch —
+        /// it is that station's displayed kilometre on the diverged-from stretch, so the branch keeps counting
+        /// from where it leaves the main line. Divergences may chain (a branch off a branch); the offset then
+        /// accumulates along the chain, and shared stations that form a cycle are guarded against.
+        /// </summary>
+        public double StartKilometer => ComputeStartKilometer(stretch, []);
+
+        /// <summary>
+        /// The displayed kilometre at <paramref name="station"/>: its <c>DistanceToStation</c> along this
+        /// stretch shifted by <c>StartKilometer</c>, so a diverging branch continues counting from the
+        /// kilometre of its junction on the line it leaves. Zero when the station is not on this stretch.
+        /// </summary>
+        /// <param name="station">The target station.</param>
+        public double DisplayedDistanceToStation(OperationLocation station) =>
+            stretch.DistanceToStation(station) is { } local ? stretch.StartKilometer + local : 0.0;
+
         /// <summary>
         /// The first track stretch that does not continue from the previous one (its <c>Start</c> differs
         /// from the previous stretch's <c>End</c>), or <see langword="null"/> when the stretches form one
@@ -182,6 +202,23 @@ public static class TimetableStretchExtensions
                 return trackStretch;
             }
         }
+    }
+
+    // Walks the chain of stretches this one diverges from, summing each junction's distance. A stretch diverges
+    // from another when its start station is a through point (distance > 0) of that other stretch; the lowest
+    // stretch id is chosen when several qualify, matching how the timetable report attributes a shared station
+    // to its owning stretch. The visited set stops a cycle of mutually diverging stretches from recursing forever.
+    private static double ComputeStartKilometer(TimetableStretch stretch, HashSet<int> visited)
+    {
+        if (stretch.Stretches.Count == 0 || !visited.Add(stretch.Id)) return 0.0;
+        var start = stretch.Starts;
+        var divergedFrom = start.Layout.TimetableStretches
+            .Where(s => s.Id != stretch.Id)
+            .Select(s => (Stretch: s, Distance: s.DistanceToStation(start)))
+            .Where(x => x.Distance is > 0.0)
+            .OrderBy(x => x.Stretch.Id)
+            .FirstOrDefault();
+        return divergedFrom.Stretch is null ? 0.0 : ComputeStartKilometer(divergedFrom.Stretch, visited) + divergedFrom.Distance!.Value;
     }
 }
 

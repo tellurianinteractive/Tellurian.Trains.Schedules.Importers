@@ -18,7 +18,7 @@ public class TimetablePaginationTests
     {
         Title = "1: A-B",
         TableNumber = 1,
-        Columns = [.. Enumerable.Range(0, columns).Select(i => new TimetableTableColumn($"T{i}", IsPassenger: false))],
+        Columns = [.. Enumerable.Range(0, columns).Select(i => new TimetableTableColumn($"T{i}", IsPassenger: false, Sessions.All))],
         Rows = [.. Enumerable.Range(0, rows).Select(i =>
             new TimetableTableRow(i.ToString(), $"S{i}",
                 [.. Enumerable.Repeat(TimetableTimeCell.Empty, columns)]))],

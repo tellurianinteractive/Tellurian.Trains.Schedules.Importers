@@ -144,6 +144,9 @@
   <data name="Companies" xml:space="preserve">
     <value>Företag</value>
   </data>
+  <data name="Company" xml:space="preserve">
+    <value>Företag</value>
+  </data>
   <data name="CompaniesDescription" xml:space="preserve">
     <value>Företagen som kör banans tåg.</value>
   </data>
@@ -350,6 +353,9 @@
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
     <value>Dölj sessioner/dagar?</value>
+  </data>
+  <data name="TrainLabelFontSize" xml:space="preserve">
+    <value>Tågetikettstorlek (pt)</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Snabbklockans fart (×)</value>
@@ -1035,6 +1041,12 @@
   <data name="StartDayHelp" xml:space="preserve">
     <value>Tidtabellens första driftdag.</value>
   </data>
+  <data name="MaxSessions" xml:space="preserve">
+    <value>Antal sessioner/dagar</value>
+  </data>
+  <data name="MaxSessionsHelp" xml:space="preserve">
+    <value>Hur många sessioner eller dagar banan trafikeras. Sessions- och dagtexter ignorerar allt däröver; tågets lagrade sessioner ändras inte.</value>
+  </data>
   <data name="StartTimeHelp" xml:space="preserve">
     <value>Klockslaget då körpasset börjar.</value>
   </data>
@@ -1089,6 +1101,63 @@
   <data name="AddTrain" xml:space="preserve">
     <value>Lägg till tåg</value>
   </data>
+  <data name="AddTrainTitle" xml:space="preserve">
+    <value>Lägg till tåg</value>
+  </data>
+  <data name="RepeatTrains" xml:space="preserve">
+    <value>Upprepa tåg</value>
+  </data>
+  <data name="Repeat" xml:space="preserve">
+    <value>Upprepa?</value>
+  </data>
+  <data name="MinutesInterval" xml:space="preserve">
+    <value>Minuters intervall</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Skapa</value>
+  </data>
+  <data name="Abort" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="PreparationMinutes" xml:space="preserve">
+    <value>Förberedelseminuter</value>
+  </data>
+  <data name="FinishingMinutes" xml:space="preserve">
+    <value>Avslutsminuter</value>
+  </data>
+  <data name="NoPathBetweenStations" xml:space="preserve">
+    <value>Det finns ingen väg mellan de valda platserna.</value>
+  </data>
+  <data name="InvalidTime" xml:space="preserve">
+    <value>Ange en giltig tid (HH:MM).</value>
+  </data>
+  <data name="MoveTrains" xml:space="preserve">
+    <value>Flytta tåg</value>
+  </data>
+  <data name="CloneTrains" xml:space="preserve">
+    <value>Kopiera tåg</value>
+  </data>
+  <data name="MoveTrainsTitle" xml:space="preserve">
+    <value>Flytta tåg</value>
+  </data>
+  <data name="CloneTrainsTitle" xml:space="preserve">
+    <value>Kopiera tåg</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Flytta</value>
+  </data>
+  <data name="Clone" xml:space="preserve">
+    <value>Kopiera</value>
+  </data>
+  <data name="Minutes" xml:space="preserve">
+    <value>Minuter</value>
+  </data>
+  <data name="InvalidMinutes" xml:space="preserve">
+    <value>Ange ett heltal antal minuter, t.ex. 5, +5 eller -5.</value>
+  </data>
+  <data name="TrainsOutOfDayBounds" xml:space="preserve">
+    <value>Förflyttningen skulle ta ett valt tågs starttid utanför dygnet (00:00–23:59).</value>
+  </data>
   <data name="ExternalId" xml:space="preserve">
     <value>Externt id</value>
   </data>
@@ -1097,6 +1166,9 @@
   </data>
   <data name="Sessions" xml:space="preserve">
     <value>Sessioner</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>Dagar</value>
   </data>
   <data name="MaxSpeed" xml:space="preserve">
     <value>Maxhastighet</value>

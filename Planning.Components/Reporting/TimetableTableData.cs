@@ -19,7 +19,7 @@ public sealed record TimetableTimeCell
     public bool HasArrivalAndDeparture => Arrival is not null && Departure is not null;
 }
 
-public sealed record TimetableTableColumn(string Header, bool IsPassenger, string Color = "#000000");
+public sealed record TimetableTableColumn(string Header, bool IsPassenger, Sessions Sessions, string Color = "#000000");
 
 /// <summary>
 /// Distinguishes ordinary stretch rows from <em>connection</em> rows that show where the table's
@@ -64,7 +64,27 @@ public sealed class TimetableTable
     /// </summary>
     public required int TableNumber { get; init; }
 
-    public static TimetableTable Create(TimetableStretch stretch, IEnumerable<Train> trains, TrainGraphDirection direction)
+    /// <summary>
+    /// Whether the operating sessions/days are shown as session numbers (e.g. <c>1-5</c>) or as short
+    /// weekday names (e.g. <c>Mo-Fr</c>) in the sessions row. Mirrors the layout's <c>General.UseDays</c>.
+    /// </summary>
+    public bool UseDays { get; init; }
+
+    /// <summary>The number of operating sessions/days in the layout's period; higher session bits are ignored
+    /// when formatting the sessions row. Mirrors the layout's <c>General.MaxSessions</c> setting.</summary>
+    public int MaxSessions { get; init; } = 14;
+
+    /// <summary>The first weekday of the operating week, used to pick which weekdays fall within the period
+    /// when the sessions row shows days. Mirrors the layout's <c>General.StartDay</c> setting.</summary>
+    public DayOfWeek StartDay { get; init; } = DayOfWeek.Monday;
+
+    /// <summary>
+    /// True when at least one train in this table does not operate every session/day, so a row listing
+    /// each train's operating sessions/days is shown directly below the train-number header row.
+    /// </summary>
+    public bool ShowSessionsRow { get; init; }
+
+    public static TimetableTable Create(TimetableStretch stretch, IEnumerable<Train> trains, TrainGraphDirection direction, bool useDays = false, int maxSessions = 14, DayOfWeek startDay = DayOfWeek.Monday)
     {
         // SortedTrainSegments splits overtaken trains into multiple segments for the graph.
         // In the table each train occupies exactly one column, so deduplicate by train
@@ -83,14 +103,26 @@ public sealed class TimetableTable
         var stretchStations = stretch.Stations.ToHashSet();
 
         var columns = segments
-            .Select(s => new TimetableTableColumn(s.Train.Identity, s.Train.IsPassenger, s.Train.Category?.Color ?? "#000000"))
+            .Select(s => new TimetableTableColumn(s.Train.Identity, s.Train.IsPassenger, s.Train.Sessions, s.Train.Category?.Color ?? "#000000"))
             .ToList();
+
+        // A sessions row is shown only when at least one train does not operate every session/day within the
+        // layout's period; a table where every train runs the full pattern carries no information worth a row.
+        var fullDays = Math.Min(maxSessions, 7);
+        var showSessionsRow = columns.Any(c =>
+        {
+            var capped = c.Sessions.CappedForDisplay(useDays, maxSessions);
+            return useDays ? capped.DayCount != fullDays : capped.Numbers.Length != maxSessions;
+        });
 
         var lastIndex = stations.Count - 1;
         var rows = stations.Select((station, index) =>
         {
+            // stationKm stays a raw along-stretch distance for the SCL pass-through span test below (a
+            // constant offset would cancel there anyway); the displayed km carries the divergence offset so a
+            // branch continues counting from its junction on the line it leaves.
             var stationKm = stretch.DistanceToStation(station) ?? 0.0;
-            var km = stationKm.ToString("F1", CultureInfo.InvariantCulture);
+            var km = stretch.DisplayedDistanceToStation(station).ToString("F1", CultureInfo.InvariantCulture);
             var cells = (IReadOnlyList<TimetableTimeCell>)segments
                 .Select(s =>
                 {
@@ -121,6 +153,10 @@ public sealed class TimetableTable
             Columns = columns,
             Rows = [.. originRows, .. rows, .. terminalRows],
             TableNumber = stretch.Id,
+            UseDays = useDays,
+            MaxSessions = maxSessions,
+            StartDay = startDay,
+            ShowSessionsRow = showSessionsRow,
         };
     }
 

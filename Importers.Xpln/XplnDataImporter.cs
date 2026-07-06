@@ -889,7 +889,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                                 number: trainsetId.LocoNumber,
                                                 vehicleClass: fields[TrainsetClass],
                                                 externalId: trainsetId,
-                                                remark: fields[Object].WithQuotationMarksRemoved);
+                                                // Use the actual remark column, not the identifier. When it merely
+                                                // repeats the external id, the turnus card suppresses it (see TurnusData).
+                                                remark: fields[Remark].WithQuotationMarksRemoved);
                                             trainsetSchedules.Add(trainsetId, vehicleSchedule);
                                         }
                                         if (trainsetSchedules.TryGetValue(trainsetId, out var trainset))

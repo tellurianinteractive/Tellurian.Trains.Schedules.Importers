@@ -36,7 +36,7 @@ else
                         }
                         <th>@Translator("Company")</th>
                         <th>@Translator("Number")</th>
-                        <th>@Translator("Sessions")</th>
+                        <th>@Translator(UseDays ? "Days" : "Sessions")</th>
                         <th>@Translator("Category")</th>
                         <th>@Translator("MaxSpeed")</th>
                         <th>@Translator("Axles")</th>
@@ -145,6 +145,11 @@ else
                 <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
             </div>
         }
+
+        @if (_showAdd)
+        {
+            <AddTrainDialog OnCreated="OnTrainCreated" OnClosed="() => _showAdd = false" />
+        }
     </div>
 }
 
@@ -159,6 +164,8 @@ else
     private Layout? Layout => ScheduleState.Layout;
 
     private bool UseDays => Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => Layout?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private List<Train> Trains =>
         [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number)];
@@ -216,7 +223,7 @@ else
 
     // ---- Display helpers ------------------------------------------------------------------------
 
-    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator);
+    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator, MaxSessions, StartDay);
 
     private string SessionsKey(Train train) => SessionsDisplay.Key(train.Sessions);
 
@@ -483,14 +490,15 @@ else
 
     // ---- Add / delete train ---------------------------------------------------------------------
 
-    private void AddTrain()
+    private bool _showAdd;
+
+    private void AddTrain() => _showAdd = true;
+
+    // The dialog has already built the train, added it to the timetable and saved; just reveal it.
+    private void OnTrainCreated(Train train)
     {
-        var id = ((Timetable!.Trains.Select(t => t.Id)).DefaultIfEmpty(0).Max()) + 1;
-        var number = ((Timetable.Trains.Select(t => t.Number)).DefaultIfEmpty(0).Max()) + 1;
-        var train = new Train(id, number);
-        Timetable.Add(train);
+        _showAdd = false;
         _expanded.Add(train.Id);
-        Save();
     }
 
     private void DeleteConfirmed()

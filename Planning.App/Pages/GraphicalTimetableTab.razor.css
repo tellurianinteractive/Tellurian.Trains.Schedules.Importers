@@ -1,3 +1,24 @@
+/* Actions above the selectors; the anchor for train-adding (and future) buttons. */
+.graph-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem 0;
+
+    button.primary {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #1a3a5c;
+        border-radius: 4px;
+        background: #1a3a5c;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    button.primary:hover {
+        background: #234a73;
+    }
+}
+
 /* Lay the stretch and half selectors out side by side; each is a flex group that keeps its own
    items together, and the row wraps the second group below only when it does not fit. */
 .selectors {

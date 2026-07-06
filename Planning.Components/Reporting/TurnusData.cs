@@ -17,6 +17,9 @@ public record TurnusData
     public IEnumerable<TrainPart> TrainParts { get; init; } = [];
     public bool TurnForNextSession { get; init; } = false;
 
+    /// <summary>The first weekday of the operating week, used to name the operating days on the card.</summary>
+    public DayOfWeek StartDay { get; init; } = DayOfWeek.Monday;
+
     /// <summary>The turnus number, or the vehicle's external id when the number is 0 (no turnus number in XPLN).</summary>
     public string TurnusId => Number > 0 ? Number.ToString() : ExternalId;
 }
@@ -54,7 +57,7 @@ public static class TurnusDataExtensions
 
         public string OperatingSessions(Translator translator)
         {
-            var key = data.Sessions.ShortDayNamesResourceKey;
+            var key = data.Sessions.ShortDayNamesResourceKey(data.StartDay);
             var keys = key.Split('-', ',', StringSplitOptions.TrimEntries);
             if (keys.Length > 1)
             {
@@ -73,10 +76,8 @@ public static class TurnusDataExtensions
 
     extension(IEnumerable<ScheduledObject> items)
     {
-        public IEnumerable<TurnusData> ToTurnusData
+        public IEnumerable<TurnusData> ToTurnusData(DayOfWeek startDay)
         {
-            get
-            {
                 // One row per (vehicle, assignment); each row carries that assignment's train parts.
                 var rows = items.Where(i => i.HasTurnusCard)
                     .SelectMany(scheduledObject => scheduledObject.ScheduleAssignments.Select(assignment => new
@@ -89,7 +90,12 @@ public static class TurnusDataExtensions
                             Number = assignment.Number,
                             ExternalId = scheduledObject.ExternalId ?? string.Empty,
                             Sessions = assignment.Sessions,
-                            Remark = scheduledObject.Remark ?? string.Empty,
+                            StartDay = startDay,
+                            // Suppress a remark that only repeats the turnus (the external id), e.g. an
+                            // imported wagonset whose remark is a copy of its identifier.
+                            Remark = string.Equals(scheduledObject.Remark, scheduledObject.ExternalId, StringComparison.Ordinal)
+                                ? string.Empty
+                                : scheduledObject.Remark ?? string.Empty,
                         },
                         Parts = assignment.Schedule?.Parts ?? Enumerable.Empty<ScheduledTrainPart>(),
                     }));
@@ -117,4 +123,3 @@ public static class TurnusDataExtensions
             }
         }
     }
-}

@@ -11,11 +11,12 @@ public record GraphSettings
         KilometerAxisSpacing = new(100, 60),
         EndMargin = 20,
         TrackSpacing = 8,
-        MinStationSpacing = 40,
+        MinStationSpacing = 100,
         MinuteSpacing = 2,
-        KilometerSpacing = 10,
+        KilometerSpacing = 3,
         ShowArrivalMinutes = false,
         ShowDepartureMinutes = true,
+        TrainLabelFontPoints = 8,
     };
 
     public TimeAxisDirection AxisDirection { get; set; }
@@ -37,6 +38,26 @@ public record GraphSettings
     public bool ShowDepartureMinutes { get; set; }
     public bool ShowCompany { get; set; }
     public bool ShowTrainCategory { get; set; }
+
+    /// <summary>Whether the train's operating sessions/days badge is suppressed on its graph label.
+    /// Default is <c>false</c> (the badge is shown for trains that do not run every session/day).</summary>
+    public bool HideSessionsOrDays { get; set; }
+
+    /// <summary>Whether the operating pattern is presented as weekdays (e.g. <c>Mo-Fr</c>) rather than
+    /// session numbers (e.g. <c>1-5</c>). Mirrors the layout's <c>General.UseDays</c> setting.</summary>
+    public bool UseDays { get; set; }
+
+    /// <summary>The number of operating sessions/days in the layout's period (1–14); higher session bits are
+    /// ignored when formatting the label. Mirrors the layout's <c>General.MaxSessions</c> setting.</summary>
+    public int MaxSessions { get; set; } = 14;
+
+    /// <summary>The first weekday of the operating week, used to pick which weekdays fall within the period
+    /// when the label shows days. Mirrors the layout's <c>General.StartDay</c> setting.</summary>
+    public DayOfWeek StartDay { get; set; } = DayOfWeek.Monday;
+
+    /// <summary>Font size in points of the train identity labels along the train lines. Drives both the
+    /// rendered text and the label-thinning overlap estimate, so changing it re-thins on the next render.</summary>
+    public int TrainLabelFontPoints { get; set; }
 }
 
 public enum TimeAxisDirection

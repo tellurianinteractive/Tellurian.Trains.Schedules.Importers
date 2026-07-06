@@ -198,8 +198,10 @@ public static class GraphScheduleDrawingExtensions
     /// with the fraction (0–1) along that line at which to centre the identity label. The label is rendered
     /// along this segment with an SVG <c>&lt;textPath&gt;</c>, so it follows the line's real slope and sits
     /// cleanly to one side of it for both travel directions — no manual rotation or perpendicular offset,
-    /// which previously made downward (forward) labels overlap their own line. The start is the departure
-    /// point, so the segment always runs forward in time and the text reads upright.
+    /// which previously made downward (forward) labels overlap their own line. The segment normally starts at
+    /// the departure point, but is reversed (with the anchor mirrored to <c>1 - offset</c>) whenever it would
+    /// point leftward, since a leftward <c>&lt;textPath&gt;</c> renders upside-down; this keeps every label
+    /// upright, including reverse-direction trains in vertical orientation.
     /// <para>
     /// <paramref name="Offset"/> is not a plain 50%: with many tracks the section midpoint lands inside a
     /// station band, so the label is instead centred on the open corridor between the two bands — halfway
@@ -257,6 +259,17 @@ public static class GraphScheduleDrawingExtensions
         var crossSpan = crossTo - crossFrom;
         var offset = crossSpan == 0 ? 0.5 : (corridorMid - crossFrom) / crossSpan;
         offset = Math.Clamp(offset, 0.0, 1.0);
+
+        // SVG <textPath> lays text out in the path's direction, so a segment pointing leftward
+        // (end.X < start.X) renders the label upside-down. Reversing the segment flips the text upright and
+        // onto the other side of the line; the anchor mirrors to 1 - offset so it stays at the same point
+        // along the line. Horizontal forward-in-time segments always point rightward, so only reverse-
+        // direction labels in vertical orientation are affected.
+        if (end.X < start.X)
+        {
+            (start, end) = (end, start);
+            offset = 1.0 - offset;
+        }
         return (start, end, offset);
     }
 
@@ -328,7 +341,7 @@ public static class GraphScheduleDrawingExtensions
                 textLength[l.Train] = length = l.Train.GraphLabel(me.GraphSettings).Length;
             var index = indexInTrain.TryGetValue(l.Train, out var i) ? i : 0;
             indexInTrain[l.Train] = index + 1;
-            nodes.Add(new LabelNode(l.Train, l.Start, l.End, l.Offset, index, perTrainCount[l.Train], LabelBox(l.Start, l.End, l.Offset, length)));
+            nodes.Add(new LabelNode(l.Train, l.Start, l.End, l.Offset, index, perTrainCount[l.Train], LabelBox(l.Start, l.End, l.Offset, length, me.GraphSettings.TrainLabelFontPoints)));
         }
 
         // The conflict graph is static: a label's box never moves when another is removed, so overlaps are
@@ -367,6 +380,18 @@ public static class GraphScheduleDrawingExtensions
             // Prefer dropping interior labels; only sacrifice a first/last when interior ones cannot resolve it.
             var pool = conflicting.Where(i => Removable(i, allowEndpoint: false)).ToList();
             if (pool.Count == 0) pool = conflicting.Where(i => Removable(i, allowEndpoint: true)).ToList();
+            if (pool.Count == 0)
+            {
+                // Last resort: an overlap the ordinary passes can't touch because the immovable side is another
+                // train's sole surviving label (e.g. two trains meeting, their labels coincident). Free it by
+                // dropping a conflicting label from a train that still has more than one visible label, ignoring
+                // the round-robin gate and endpoint protection that otherwise deadlock here. A sole survivor is
+                // never dropped, so every train keeps at least one label.
+                pool = conflicting
+                    .Where(i => visibleCount[nodes[i].Train] > 1
+                                && neighbours[i].Any(j => nodes[j].Visible && visibleCount[nodes[j].Train] == 1))
+                    .ToList();
+            }
             // Every remaining conflict is between sole-survivor labels: thinning further would erase a train, so stop.
             if (pool.Count == 0) break;
 
@@ -388,7 +413,6 @@ public static class GraphScheduleDrawingExtensions
     // Padding on the estimated label width/height, since server-side text size is estimated, not measured.
     private const double TrainLabelBoxPaddingFactor = 1.1;
     private const double PointsToPixels = 96.0 / 72.0;
-    private const double TrainLabelFontPoints = 6.0;          // matches .trainlabel font-size in the editor CSS
     private const double TrainLabelGlyphWidthEm = 0.62;       // average advance of a bold digit/letter
     private const double TrainLabelLiftPixels = 2.0;          // matches LabelOffsetDy in the editor
 
@@ -410,10 +434,11 @@ public static class GraphScheduleDrawingExtensions
     }
 
     // Builds the oriented box a label occupies: centred on its anchor point along the segment (lifted off the
-    // line like the rendered text), as wide as the estimated text and as tall as the font.
-    private static LabelObb LabelBox(Offset start, Offset end, double offset, int textLength)
+    // line like the rendered text), as wide as the estimated text and as tall as the font. The font size (in
+    // points) comes from the user setting, so a larger label produces a larger box and thins more aggressively.
+    private static LabelObb LabelBox(Offset start, Offset end, double offset, int textLength, double fontPoints)
     {
-        var fontPixels = TrainLabelFontPoints * PointsToPixels;
+        var fontPixels = fontPoints * PointsToPixels;
         var halfWidth = Math.Max(1, textLength) * TrainLabelGlyphWidthEm * fontPixels * TrainLabelBoxPaddingFactor / 2.0;
         var halfHeight = fontPixels * TrainLabelBoxPaddingFactor / 2.0;
 
@@ -510,11 +535,14 @@ public static class GraphScheduleDrawingExtensions
             _ => 0
         };
 
+    // Horizontal: centre the hour on the tick (X unchanged; CSS text-anchor:middle) and lift it above the
+    // axis. Vertical: place it just left of the axis, right-justified against it (CSS text-anchor:end) and
+    // vertically centred on the tick (CSS dominant-baseline), keeping the Y on the tick.
     public static Offset TimeAxisLabelOffset(this GraphSchedule me, TimeSpan time) =>
        me.AxisDirection switch
        {
-           TimeAxisDirection.Horisontal => me.TimeLine(time).Start - new Offset(5, 5),
-           TimeAxisDirection.Vertical => me.TimeLine(time).Start - new Offset(me.GraphSettings.TimeAxisSpacing.X - 5, 0),
+           TimeAxisDirection.Horisontal => me.TimeLine(time).Start - new Offset(0, 5),
+           TimeAxisDirection.Vertical => me.TimeLine(time).Start - new Offset(5, 0),
            _ => throw new NotSupportedException()
        };
 

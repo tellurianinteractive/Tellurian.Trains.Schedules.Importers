@@ -20,16 +20,16 @@ public sealed class GraphicTimetableSettings
     /// <summary>
     /// Pixels per kilometre along the distance axis. This is the scale that sizes the graph's
     /// distance extent (its height for a horizontal time axis); stations are spaced in proportion
-    /// to their real <c>TrackStretch.Distance</c>. Default is 10.
+    /// to their real <c>TrackStretch.Distance</c>. Default is 3.
     /// </summary>
-    public int KilometerSpacing { get; set; } = 10;
+    public int KilometerSpacing { get; set; } = 3;
 
     /// <summary>
     /// Minimum pixel spacing between stations on the distance axis, applied when the distance-based
     /// spacing would be smaller. Ensures labels on train lines between close stations have room.
-    /// Default is 40.
+    /// Default is 100.
     /// </summary>
-    public int StationSpacing { get; set; } = 40;
+    public int StationSpacing { get; set; } = 100;
 
     /// <summary>Pixel spacing between individual tracks at a station. Default is 8.</summary>
     public int TrackSpacing { get; set; } = 8;
@@ -42,4 +42,8 @@ public sealed class GraphicTimetableSettings
 
     /// <summary>Whether the sessions/days suffix is hidden after the train number. Default is <c>false</c>.</summary>
     public bool HideSessionsOrDays { get; set; }
+
+    /// <summary>Font size in points of the train identity labels drawn along the train lines. Also feeds the
+    /// label-thinning overlap estimate, so a larger size drops more crossing labels. Default is 8.</summary>
+    public int TrainLabelFontSize { get; set; } = 8;
 }

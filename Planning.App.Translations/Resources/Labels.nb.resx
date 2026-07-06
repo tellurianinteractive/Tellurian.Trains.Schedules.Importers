@@ -144,6 +144,9 @@
   <data name="Companies" xml:space="preserve">
     <value>Selskaper</value>
   </data>
+  <data name="Company" xml:space="preserve">
+    <value>Selskap</value>
+  </data>
   <data name="CompaniesDescription" xml:space="preserve">
     <value>Selskapene som kjører anleggets tog.</value>
   </data>
@@ -350,6 +353,9 @@
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
     <value>Skjul økter/dager?</value>
+  </data>
+  <data name="TrainLabelFontSize" xml:space="preserve">
+    <value>Togetikettstørrelse (pt)</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Hurtigklokkefart (×)</value>
@@ -1035,6 +1041,12 @@
   <data name="StartDayHelp" xml:space="preserve">
     <value>Ruteplanens første driftsdag.</value>
   </data>
+  <data name="MaxSessions" xml:space="preserve">
+    <value>Antall økter/dager</value>
+  </data>
+  <data name="MaxSessionsHelp" xml:space="preserve">
+    <value>Hvor mange økter eller dager anlegget kjøres. Økt- og dagtekster ignorerer alt utover dette; togets lagrede økter endres ikke.</value>
+  </data>
   <data name="StartTimeHelp" xml:space="preserve">
     <value>Klokkeslettet da kjøreøkten begynner.</value>
   </data>
@@ -1089,6 +1101,63 @@
   <data name="AddTrain" xml:space="preserve">
     <value>Legg til tog</value>
   </data>
+  <data name="AddTrainTitle" xml:space="preserve">
+    <value>Legg til tog</value>
+  </data>
+  <data name="RepeatTrains" xml:space="preserve">
+    <value>Gjenta tog</value>
+  </data>
+  <data name="Repeat" xml:space="preserve">
+    <value>Gjenta?</value>
+  </data>
+  <data name="MinutesInterval" xml:space="preserve">
+    <value>Minutters intervall</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Opprett</value>
+  </data>
+  <data name="Abort" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="PreparationMinutes" xml:space="preserve">
+    <value>Forberedelsesminutter</value>
+  </data>
+  <data name="FinishingMinutes" xml:space="preserve">
+    <value>Avslutningsminutter</value>
+  </data>
+  <data name="NoPathBetweenStations" xml:space="preserve">
+    <value>Det finnes ingen rute mellom de valgte stedene.</value>
+  </data>
+  <data name="InvalidTime" xml:space="preserve">
+    <value>Angi et gyldig klokkeslett (HH:MM).</value>
+  </data>
+  <data name="MoveTrains" xml:space="preserve">
+    <value>Flytt tog</value>
+  </data>
+  <data name="CloneTrains" xml:space="preserve">
+    <value>Kopier tog</value>
+  </data>
+  <data name="MoveTrainsTitle" xml:space="preserve">
+    <value>Flytt tog</value>
+  </data>
+  <data name="CloneTrainsTitle" xml:space="preserve">
+    <value>Kopier tog</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Flytt</value>
+  </data>
+  <data name="Clone" xml:space="preserve">
+    <value>Kopier</value>
+  </data>
+  <data name="Minutes" xml:space="preserve">
+    <value>Minutter</value>
+  </data>
+  <data name="InvalidMinutes" xml:space="preserve">
+    <value>Angi et helt antall minutter, f.eks. 5, +5 eller -5.</value>
+  </data>
+  <data name="TrainsOutOfDayBounds" xml:space="preserve">
+    <value>Forskyvningen ville ta et valgt togs starttid utenfor døgnet (00:00–23:59).</value>
+  </data>
   <data name="ExternalId" xml:space="preserve">
     <value>Ekstern id</value>
   </data>
@@ -1097,6 +1166,9 @@
   </data>
   <data name="Sessions" xml:space="preserve">
     <value>Økter</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>Dager</value>
   </data>
   <data name="MaxSpeed" xml:space="preserve">
     <value>Maks hastighet</value>

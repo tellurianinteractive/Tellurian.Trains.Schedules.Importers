@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Globalization;
 using System.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Timetables;
@@ -29,8 +27,14 @@ public enum Days
 }
 
 /// <summary>
-/// Provides extension methods for working with <see cref="Days"/>.
+/// Provides extension methods for rendering a <see cref="Sessions"/> pattern as weekdays.
 /// </summary>
+/// <remarks>
+/// The session bits are positional: bit 0 is the first day of the operating week, bit 1 the second, and
+/// so on. Which calendar weekday each position names is decided by the layout's start day, so the same
+/// pattern reads as <c>Mo, We, Fr, Su</c> when the week starts on Monday and <c>Su, Tu, Th, Sa</c> when it
+/// starts on Sunday. Days are always listed in operating-week order (start day first).
+/// </remarks>
 public static class DaysExtensions
 {
     private static readonly ResourceManager ResourceManager = new(typeof(Resources.Days));
@@ -38,109 +42,95 @@ public static class DaysExtensions
     extension(Sessions sessions)
     {
         /// <summary>
-        /// Gets the days of the week that are active in these sessions.
+        /// Gets the active weekdays, mapping the first-week session bits so that bit 0 is
+        /// <paramref name="startDay"/>, bit 1 the next day, and so on, in operating-week order.
         /// </summary>
-        public Days[] Days =>
-    [.. new BitArray([sessions.Flags])
-            .Cast<bool>()
-            .Select((b, i) => (x: b, y: (byte)(i)))
-            .Take(7) // Only 7 bits are for days.
-            .Where(t => t.x)
-            .Select(t => _MondayToSunday[t.y+1])];
+        public Days[] ActiveDays(DayOfWeek startDay) =>
+            [.. sessions.DayOffsets.Select(offset => WeekdayAt(startDay, offset))];
 
         /// <summary>
-        /// Gets the active days ordered for display according to the current culture's first day of
-        /// week, which is treated as either Sunday or Monday. The stored bit pattern is unchanged;
-        /// only the print order of the days differs.
+        /// Gets the number of active days (session bits within the operating week). Independent of the
+        /// start day, so it is safe to use for counting without knowing which weekday each bit names.
         /// </summary>
-        public Days[] OrderedDays => [.. sessions.Days.OrderBy(DisplayOrder)];
+        public int DayCount => sessions.DayOffsets.Length;
 
         /// <summary>
-        /// Gets the active days as full day names translated in the current UI culture and ordered by
-        /// the current culture's first day of week. No active days yields the translated "no operating
-        /// days" text; all seven yields the translated "daily" text.
+        /// Gets the active days as full day names translated in the current UI culture and ordered from
+        /// <paramref name="startDay"/>. No active days yields the translated "no operating days" text; all
+        /// seven yields the translated "daily" text.
         /// </summary>
-        public string DaysFull => DaysText(sessions, useShort: false);
+        public string DaysFull(DayOfWeek startDay) => DaysText(sessions, startDay, useShort: false);
 
         /// <summary>
-        /// Gets the active days as short day names translated in the current UI culture and ordered by
-        /// the current culture's first day of week. No active days yields the short "none" text; all
-        /// seven yields the short "daily" text.
+        /// Gets the active days as short day names translated in the current UI culture and ordered from
+        /// <paramref name="startDay"/>. No active days yields the short "none" text; all seven yields the
+        /// short "daily" text.
         /// </summary>
-        public string DaysShort => DaysText(sessions, useShort: true);
+        public string DaysShort(DayOfWeek startDay) => DaysText(sessions, startDay, useShort: true);
+
+        /// <summary>
+        /// Gets a resource key (or comma/hyphen-joined keys) for the active days as full names, mapped from
+        /// <paramref name="startDay"/>. Consumers that translate with a non-default culture use this instead
+        /// of <c>DaysFull</c>.
+        /// </summary>
+        public string FullDayNamesResourceKey(DayOfWeek startDay) => DayNamesResourceKey(sessions, startDay, useShort: false);
+
+        /// <summary>
+        /// Gets a resource key (or comma/hyphen-joined keys) for the active days as short names, mapped from
+        /// <paramref name="startDay"/>. Consumers that translate with a non-default culture use this instead
+        /// of <c>DaysShort</c>.
+        /// </summary>
+        public string ShortDayNamesResourceKey(DayOfWeek startDay) => DayNamesResourceKey(sessions, startDay, useShort: true);
+
+        /// <summary>The 0-based operating-week positions (0–6) of the active first-week session bits, ascending.</summary>
+        internal int[] DayOffsets =>
+            [.. Enumerable.Range(0, 7).Where(offset => (sessions.Flags & (1 << offset)) != 0)];
     }
 
-    extension(Days days)
+    /// <summary>Maps an operating-week offset (0 = <paramref name="startDay"/>) to a calendar weekday flag.</summary>
+    private static Days WeekdayAt(DayOfWeek startDay, int offset)
     {
-        internal int DayNumber =>
-            _MondayToSunday.Single(kv => kv.Value == days).Key;
-
-        internal string Translated =>
-            ResourceManager.GetString(days.ToString()) ?? days.ToString();
-
+        var dayOfWeek = (DayOfWeek)(((int)startDay + offset) % 7);
+        return dayOfWeek == DayOfWeek.Sunday ? Days.Sunday : (Days)(1 << ((int)dayOfWeek - 1));
     }
 
-    /// <summary>
-    /// True when the current culture starts its week on Sunday; otherwise the week starts on Monday.
-    /// Only these two options are recognised for ordering days.
-    /// </summary>
-    private static bool SundayFirst =>
-        CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek == DayOfWeek.Sunday;
-
-    /// <summary>Gets the 1-based position of a day within the week as ordered for the current culture.</summary>
-    private static int DisplayOrder(Days day) =>
-        (SundayFirst ? _SundayToSaturday : _MondayToSunday).Single(kv => kv.Value == day).Key;
-
-    private static string Translate(string key) =>
-        ResourceManager.GetString(key) ?? key;
+    private static string Translate(string key) => ResourceManager.GetString(key) ?? key;
 
     private static string DayName(Days day, bool useShort) =>
         Translate(useShort ? day + "Short" : day.ToString());
 
-    /// <summary>
-    /// True when the days, taken in current-culture display order, form an unbroken run of two or more
-    /// (e.g. Monday–Friday). Consecutiveness is judged in display order, so the same set can be a range
-    /// when the week starts on one day but not the other.
-    /// </summary>
-    private static bool IsConsecutiveInDisplayOrder(Days[] orderedDays)
+    private static string DaysText(Sessions sessions, DayOfWeek startDay, bool useShort)
     {
-        if (orderedDays.Length < 2) return false;
-        for (var i = 1; i < orderedDays.Length; i++)
-            if (DisplayOrder(orderedDays[i]) != DisplayOrder(orderedDays[i - 1]) + 1) return false;
-        return true;
-    }
-
-    private static string DaysText(Sessions sessions, bool useShort)
-    {
-        var days = sessions.Days;
-        if (days.Length == 0) return Translate(useShort ? "NoneShort" : nameof(Days.None));
-        if (days.Length == 7) return Translate(useShort ? "DailyShort" : "Daily");
-        var ordered = sessions.OrderedDays;
-        if (!IsConsecutiveInDisplayOrder(ordered))
-            return string.Join(", ", ordered.Select(d => DayName(d, useShort)));
-        var (first, last) = (DayName(ordered[0], useShort), DayName(ordered[^1], useShort));
+        var offsets = sessions.DayOffsets;
+        if (offsets.Length == 0) return Translate(useShort ? "NoneShort" : nameof(Days.None));
+        if (offsets.Length == 7) return Translate(useShort ? "DailyShort" : "Daily");
+        var days = offsets.Select(offset => WeekdayAt(startDay, offset)).ToArray();
+        if (!AreConsecutive(offsets))
+            return string.Join(", ", days.Select(d => DayName(d, useShort)));
+        var (first, last) = (DayName(days[0], useShort), DayName(days[^1], useShort));
         // Short ranges use a hyphen (Mo-Fr); long ranges spell out the localised connector (Monday to Friday).
         return useShort ? $"{first}-{last}" : $"{first} {Translate("DayRangeConnector")} {last}";
     }
 
-    private static readonly Dictionary<int, Days> _MondayToSunday = new()
+    private static string DayNamesResourceKey(Sessions sessions, DayOfWeek startDay, bool useShort)
     {
-        {1, Days.Monday },
-        {2, Days.Tuesday },
-        {3, Days.Wednesday },
-        {4, Days.Thursday },
-        {5, Days.Friday },
-        {6, Days.Saturday },
-        {7, Days.Sunday },
-    };
-    private static readonly Dictionary<int, Days> _SundayToSaturday = new()
+        var offsets = sessions.DayOffsets;
+        var suffix = useShort ? "Short" : string.Empty;
+        return offsets.Length switch
+        {
+            0 => nameof(Days.None),
+            7 => "Daily" + suffix,
+            _ when AreConsecutive(offsets) => $"{WeekdayAt(startDay, offsets[0])}{suffix}-{WeekdayAt(startDay, offsets[^1])}{suffix}",
+            _ => string.Join(",", offsets.Select(offset => WeekdayAt(startDay, offset) + suffix)),
+        };
+    }
+
+    /// <summary>True when the operating-week offsets form an unbroken run of two or more.</summary>
+    private static bool AreConsecutive(int[] offsets)
     {
-        {1, Days.Sunday },
-        {2, Days.Monday },
-        {3, Days.Tuesday },
-        {4, Days.Wednesday },
-        {5, Days.Thursday },
-        {6, Days.Friday },
-        {7, Days.Saturday },
-    };
+        if (offsets.Length < 2) return false;
+        for (var i = 1; i < offsets.Length; i++)
+            if (offsets[i] != offsets[i - 1] + 1) return false;
+        return true;
+    }
 }

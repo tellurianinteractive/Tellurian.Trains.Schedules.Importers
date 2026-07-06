@@ -133,7 +133,7 @@ public static class TimetablePaginator
                 .Select(row => row with { Cells = row.Cells.Skip(start).Take(count).ToList() })
                 .ToList();
 
-            var available = geometry.PrintableHeightMm - geometry.HeaderHeightMm;
+            var available = geometry.PrintableHeightMm - geometry.HeaderHeightMm - SessionsRowHeightMm(table, geometry);
             var current = new List<TimetableTableRow>();
             var used = 0.0;
 
@@ -224,12 +224,20 @@ public static class TimetablePaginator
             Columns = columns,
             Rows = rows,
             TableNumber = source.TableNumber,
+            UseDays = source.UseDays,
+            MaxSessions = source.MaxSessions,
+            StartDay = source.StartDay,
+            ShowSessionsRow = source.ShowSessionsRow,
         };
-        var height = geometry.HeaderHeightMm + rows.Sum(row => RowHeightMm(row, geometry));
+        var height = geometry.HeaderHeightMm + SessionsRowHeightMm(source, geometry) + rows.Sum(row => RowHeightMm(row, geometry));
         return new TimetableTile(table, IsContinued: false, height);
     }
 
     // A split row prints two lines (arrival + departure); a plain row prints one.
     private static double RowHeightMm(TimetableTableRow row, PageGeometry geometry) =>
         (row.IsSplit ? 2 : 1) * geometry.RowHeightMm;
+
+    // The operating sessions/days row, when shown, adds one printed line to the repeated header.
+    private static double SessionsRowHeightMm(TimetableTable table, PageGeometry geometry) =>
+        table.ShowSessionsRow ? geometry.RowHeightMm : 0;
 }

@@ -31,7 +31,8 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is
         // loaded (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
-        Items = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData ?? [];
+        var startDay = ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+        Items = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData(startDay) ?? [];
     }
 
 }

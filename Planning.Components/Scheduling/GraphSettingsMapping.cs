@@ -32,6 +32,11 @@ public static class GraphSettingsMapping
                 ShowDepartureMinutes = gt.ShowDepartureMinutes,
                 ShowCompany = gt.ShowCompany,
                 ShowTrainCategory = gt.ShowTrainCategory,
+                HideSessionsOrDays = gt.HideSessionsOrDays,
+                UseDays = settings.General.UseDays,
+                MaxSessions = settings.General.MaxSessions,
+                StartDay = settings.General.StartDay,
+                TrainLabelFontPoints = gt.TrainLabelFontSize,
             };
         }
     }

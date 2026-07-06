@@ -79,11 +79,15 @@ else
                         <select @bind="g.StartDay" @bind:after="OnEdited">
                             @foreach (var day in Enum.GetValues<DayOfWeek>())
                             {
-                                <option value="@day">@day</option>
+                                <option value="@day">@DayName(day)</option>
                             }
                         </select>
                     </div>
                 }
+                <div class="field">
+                    <HelpLabel For="MaxSessions" />
+                    <input type="number" min="1" max="14" @bind="g.MaxSessions" @bind:after="OnEdited" />
+                </div>
 
                 @if (Timetable is not null)
                 {
@@ -183,6 +187,10 @@ else
                 <div class="field">
                     <label>@Translator("TrackSpacing")</label>
                     <input type="number" min="1" @bind="gt.TrackSpacing" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <label>@Translator("TrainLabelFontSize")</label>
+                    <input type="number" min="4" max="16" @bind="gt.TrainLabelFontSize" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <label>@Translator("ShowTrainCategory")</label>
@@ -328,7 +336,8 @@ else
     private readonly HashSet<Days> _newDays = [];
 
     private string SessionsText(Sessions sessions) =>
-        SessionsDisplay.Text(sessions, LayoutSettings?.General.UseDays ?? false, Translator);
+        SessionsDisplay.Text(sessions, LayoutSettings?.General.UseDays ?? false, Translator,
+            LayoutSettings?.General.MaxSessions ?? 14, LayoutSettings?.General.StartDay ?? DayOfWeek.Monday);
 
     private void ToggleNewDay(Days day, ChangeEventArgs e)
     {
@@ -388,6 +397,14 @@ else
         }
     }
 
+    // The weekday name in the current UI culture, capitalised for a drop-down (locales such as
+    // Swedish yield lower-case day names from the culture data).
+    private static string DayName(DayOfWeek day)
+    {
+        var culture = CultureInfo.CurrentCulture;
+        return culture.TextInfo.ToTitleCase(culture.DateTimeFormat.GetDayName(day));
+    }
+
     private static string ScaleLabel(Scale scale) =>
         string.IsNullOrEmpty(scale.Remark)
             ? $"{scale.Name} (1:{scale.Denominator})"
@@ -436,7 +453,13 @@ else
         set { if (LayoutSettings is not null) LayoutSettings.General.BreakTime = value?.ToTimeSpan(); }
     }
 
-    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        // Older/imported timetables (e.g. from XPLN) have no session catalogue yet; seed the standard
+        // patterns so they are always available here. Only persists when something was actually added.
+        if (Timetable is { } timetable && timetable.EnsureSessions()) ScheduleState.SaveAndNotify();
+    }
 
     protected override async Task OnInitializedAsync()
     {

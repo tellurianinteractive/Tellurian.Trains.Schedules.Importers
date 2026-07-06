@@ -50,6 +50,24 @@ table.timetable th {
     }
 }
 
+/* The operating sessions/days row sits directly under the train-number header. It is lighter than the
+   train numbers and drops the border above so it reads as a continuation of the header, not a data row. */
+tr.sessions-row th {
+    font-size: 0.6em;
+    font-weight: 400;
+    border-top-style: hidden;
+
+    &.train-sessions {
+        width: 3.5rem;
+        min-width: 3.5rem;
+        max-width: 3.5rem;
+    }
+
+    &.stations {
+        font-style: italic;
+    }
+}
+
 table.timetable td {
     &.km {
         text-align: right;
@@ -138,6 +156,7 @@ tr.dep-row td.time {
 
     /* Up to 15 train columns per tile: 15 × 14 mm = 210 mm, + 50 mm fixed ≈ 260 mm < 277 mm. */
     table.timetable th.train-header,
+    table.timetable th.train-sessions,
     table.timetable td.time {
         width: 14mm;
         min-width: 14mm;

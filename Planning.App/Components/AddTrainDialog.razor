@@ -1,0 +1,182 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Planning.Timetables
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@if (Timetable is not null && Layout is not null)
+{
+    <div class="add-train-backdrop">
+        <div class="add-train-dialog">
+            <h3>@Translator("AddTrainTitle")</h3>
+
+            <div class="field">
+                <label>@Translator("Category")</label>
+                <ListBoxView Items="@(CategoryChoices.ToListItems())"
+                             Value="_categoryId" ValueChanged="id => _categoryId = id"
+                             Placeholder="—" />
+            </div>
+            <div class="field">
+                <label>@Translator("From")</label>
+                <ListBoxView Items="@(LocationChoices.ToListItems())"
+                             Value="_fromId" ValueChanged="id => { _fromId = id; _error = null; }"
+                             Placeholder="—" />
+            </div>
+            <div class="field">
+                <label>@Translator("To")</label>
+                <ListBoxView Items="@(LocationChoices.ToListItems())"
+                             Value="_toId" ValueChanged="id => { _toId = id; _error = null; }"
+                             Placeholder="—" />
+            </div>
+            <div class="field">
+                <label>@Translator("StartTime")</label>
+                <input type="text" class="time" value="@_time" @onchange="e => _time = e.Value?.ToString() ?? _time" />
+            </div>
+            <div class="field">
+                <label>@Translator("Number")</label>
+                <input type="number" class="num" min="1" value="@_number" @onchange="SetNumber" />
+            </div>
+            <div class="field">
+                <label>@Translator("PreparationMinutes")</label>
+                <input type="number" class="num" min="0" value="@_preparationMinutes" @onchange="e => _preparationMinutes = ParseInt(e, _preparationMinutes)" />
+            </div>
+            <div class="field">
+                <label>@Translator("FinishingMinutes")</label>
+                <input type="number" class="num" min="0" value="@_finishingMinutes" @onchange="e => _finishingMinutes = ParseInt(e, _finishingMinutes)" />
+            </div>
+            <div class="field">
+                <label>@Translator("MaxSpeed") (km/h)</label>
+                <input type="number" class="num" min="1" value="@_speed" @onchange="e => _speed = ParseInt(e, _speed)" />
+            </div>
+
+            <fieldset class="repeat">
+                <legend>@Translator("RepeatTrains")</legend>
+                <div class="field">
+                    <label>@Translator("Repeat")</label>
+                    <input type="checkbox" checked="@_repeat" @onchange="e => _repeat = e.Value as bool? ?? false" />
+                </div>
+                @if (_repeat)
+                {
+                    <div class="field">
+                        <label>@Translator("EndTime")</label>
+                        <input type="text" class="time" value="@_endTime" @onchange="e => _endTime = e.Value?.ToString() ?? _endTime" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("MinutesInterval")</label>
+                        <input type="number" class="num" min="1" value="@_interval" @onchange="e => _interval = ParseInt(e, _interval)" />
+                    </div>
+                }
+            </fieldset>
+
+            @if (_error is not null)
+            {
+                <p class="error">@Translator(_error)</p>
+            }
+
+            <div class="actions">
+                <button class="primary" disabled="@(!CanCreate)" @onclick="Create">@Translator("Create")</button>
+                <button @onclick="Abort">@Translator("Abort")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Raised with the newly created train after it has been added to the timetable and saved.</summary>
+    [Parameter] public EventCallback<Train> OnCreated { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without creating a train.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+
+    private IEnumerable<TrainCategory> CategoryChoices =>
+        (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<OperationLocation> LocationChoices =>
+        (Layout?.OperationLocations ?? []).OrderBy(l => l.Name, StringComparer.CurrentCulture);
+
+    private int? _categoryId;
+    private int? _fromId;
+    private int? _toId;
+    private string _time = "";
+    private int _number = 1;
+    private int _preparationMinutes = 10;
+    private int _finishingMinutes = 10;
+    private int _speed = 100;
+    private bool _repeat;
+    private string _endTime = "";
+    private int _interval = 60;
+    private string? _error;
+
+    private bool CanCreate =>
+        _categoryId is not null && _fromId is not null && _toId is not null && _fromId != _toId;
+
+    protected override void OnInitialized()
+    {
+        _categoryId = CategoryChoices.FirstOrDefault()?.Id;
+        _time = (Layout?.Settings.General.StartTime ?? TimeSpan.FromHours(6)).ToString(@"hh\:mm", Culture);
+        _number = (Timetable?.Trains.Select(t => t.Number) ?? []).DefaultIfEmpty(0).Max() + 1;
+        _speed = Layout?.Settings.TimeAndSpeed.Normal.ScaleSpeedKmh ?? 100;
+        _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
+    }
+
+    private void SetNumber(ChangeEventArgs e) => _number = ParseInt(e, _number);
+
+    private async Task Create()
+    {
+        _error = null;
+        if (Plan is not { } plan || Timetable is not { } timetable || Layout is not { } layout) return;
+        if (timetable.TrainCategories.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
+        if (layout.OperationLocations.FirstOrDefault(l => l.Id == _fromId) is not { } from) return;
+        if (layout.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
+        if (!TryParseTime(_time, out var startTime)) { _error = "InvalidTime"; return; }
+
+        Train? first;
+        if (_repeat)
+        {
+            if (!TryParseTime(_endTime, out var endTime)) { _error = "InvalidTime"; return; }
+            if (_interval < 1) { _error = "InvalidMinutes"; return; }
+
+            var trains = plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed);
+            if (trains.Count == 0) { _error = "NoPathBetweenStations"; return; }
+
+            // CreateRepeating assigns sequential numbers; renumber from the one the planner chose.
+            var number = _number;
+            foreach (var t in trains) t.Number = number++;
+            first = trains[0];
+        }
+        else
+        {
+            first = plan.Create(category, from, to, startTime, _preparationMinutes, _finishingMinutes, _speed);
+            if (first is null) { _error = "NoPathBetweenStations"; return; }
+
+            // Create assigns the next free number; honour the number the planner chose in the dialog.
+            first.Number = _number;
+        }
+
+        ScheduleState.SaveAndNotify();
+        await OnCreated.InvokeAsync(first);
+    }
+
+    private Task Abort() => OnClosed.InvokeAsync();
+
+    private static int ParseInt(ChangeEventArgs e, int fallback) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var value) ? value : fallback;
+
+    private static bool TryParseTime(string text, out Time time)
+    {
+        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span))
+        {
+            time = Time.FromTimeSpan(span);
+            return true;
+        }
+        time = Time.Zero;
+        return false;
+    }
+}

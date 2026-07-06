@@ -144,6 +144,9 @@
   <data name="Companies" xml:space="preserve">
     <value>Gesellschaften</value>
   </data>
+  <data name="Company" xml:space="preserve">
+    <value>Gesellschaft</value>
+  </data>
   <data name="CompaniesDescription" xml:space="preserve">
     <value>Die Gesellschaften, die die Züge der Anlage betreiben.</value>
   </data>
@@ -350,6 +353,9 @@
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
     <value>Sessions/Tage ausblenden?</value>
+  </data>
+  <data name="TrainLabelFontSize" xml:space="preserve">
+    <value>Zugbeschriftungsgröße (pt)</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Zeitraffer-Faktor (×)</value>
@@ -1035,6 +1041,12 @@
   <data name="StartDayHelp" xml:space="preserve">
     <value>Der erste Betriebstag des Fahrplans.</value>
   </data>
+  <data name="MaxSessions" xml:space="preserve">
+    <value>Anzahl der Sessions/Tage</value>
+  </data>
+  <data name="MaxSessionsHelp" xml:space="preserve">
+    <value>Wie viele Sessions oder Tage die Anlage betreibt. Session- und Tagestexte ignorieren alles darüber; die gespeicherten Sessions eines Zuges bleiben unverändert.</value>
+  </data>
   <data name="StartTimeHelp" xml:space="preserve">
     <value>Die Uhrzeit, zu der die Betriebssitzung beginnt.</value>
   </data>
@@ -1089,6 +1101,63 @@
   <data name="AddTrain" xml:space="preserve">
     <value>Zug hinzufügen</value>
   </data>
+  <data name="AddTrainTitle" xml:space="preserve">
+    <value>Zug hinzufügen</value>
+  </data>
+  <data name="RepeatTrains" xml:space="preserve">
+    <value>Züge wiederholen</value>
+  </data>
+  <data name="Repeat" xml:space="preserve">
+    <value>Wiederholen?</value>
+  </data>
+  <data name="MinutesInterval" xml:space="preserve">
+    <value>Minutenintervall</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="Abort" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="PreparationMinutes" xml:space="preserve">
+    <value>Vorbereitungsminuten</value>
+  </data>
+  <data name="FinishingMinutes" xml:space="preserve">
+    <value>Abschlussminuten</value>
+  </data>
+  <data name="NoPathBetweenStations" xml:space="preserve">
+    <value>Es gibt keine Strecke zwischen den gewählten Orten.</value>
+  </data>
+  <data name="InvalidTime" xml:space="preserve">
+    <value>Geben Sie eine gültige Zeit ein (HH:MM).</value>
+  </data>
+  <data name="MoveTrains" xml:space="preserve">
+    <value>Züge verschieben</value>
+  </data>
+  <data name="CloneTrains" xml:space="preserve">
+    <value>Züge kopieren</value>
+  </data>
+  <data name="MoveTrainsTitle" xml:space="preserve">
+    <value>Züge verschieben</value>
+  </data>
+  <data name="CloneTrainsTitle" xml:space="preserve">
+    <value>Züge kopieren</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Verschieben</value>
+  </data>
+  <data name="Clone" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="Minutes" xml:space="preserve">
+    <value>Minuten</value>
+  </data>
+  <data name="InvalidMinutes" xml:space="preserve">
+    <value>Geben Sie eine ganze Zahl von Minuten ein, z. B. 5, +5 oder -5.</value>
+  </data>
+  <data name="TrainsOutOfDayBounds" xml:space="preserve">
+    <value>Die Verschiebung würde die Startzeit eines ausgewählten Zuges aus dem Tag (00:00–23:59) verschieben.</value>
+  </data>
   <data name="ExternalId" xml:space="preserve">
     <value>Externe ID</value>
   </data>
@@ -1097,6 +1166,9 @@
   </data>
   <data name="Sessions" xml:space="preserve">
     <value>Sessions</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>Tage</value>
   </data>
   <data name="MaxSpeed" xml:space="preserve">
     <value>Höchstgeschwindigkeit</value>

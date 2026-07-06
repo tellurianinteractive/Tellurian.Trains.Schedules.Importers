@@ -23,77 +23,80 @@ public class SessionsTests
     }
 
     [TestMethod]
-    public void OrderedDaysMondayFirstStartsOnMonday() => WithCulture("sv-SE", () =>
+    public void ActiveDaysStartingMondayMapsOddToMonWedFriSun()
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
         var expected = new[] { Days.Monday, Days.Wednesday, Days.Friday, Days.Sunday };
-        CollectionAssert.AreEqual(expected, target.OrderedDays);
-    });
+        CollectionAssert.AreEqual(expected, target.ActiveDays(DayOfWeek.Monday));
+    }
 
     [TestMethod]
-    public void OrderedDaysSundayFirstStartsOnSunday() => WithCulture("en-US", () =>
+    public void ActiveDaysStartingSundayMapsOddToSunTueThuSat()
+    {
+        // The session bits are positional: session 1 (bit 0) is the start day, so a Sunday start shifts
+        // the whole odd pattern to Sun, Tue, Thu, Sat.
+        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        var expected = new[] { Days.Sunday, Days.Tuesday, Days.Thursday, Days.Saturday };
+        CollectionAssert.AreEqual(expected, target.ActiveDays(DayOfWeek.Sunday));
+    }
+
+    [TestMethod]
+    public void DaysShortStartingSundayUsesEnglishShortNames() => WithCulture("en-US", () =>
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
-        var expected = new[] { Days.Sunday, Days.Monday, Days.Wednesday, Days.Friday };
-        CollectionAssert.AreEqual(expected, target.OrderedDays);
+        Assert.AreEqual("Su, Tu, Th, Sa", target.DaysShort(DayOfWeek.Sunday));
     });
 
     [TestMethod]
-    public void DaysShortSundayFirstUsesEnglishShortNames() => WithCulture("en-US", () =>
-    {
-        var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
-        Assert.AreEqual("Su, Mo, We, Fr", target.DaysShort);
-    });
-
-    [TestMethod]
-    public void DaysFullMondayFirstUsesSwedishNamesInWeekOrder() => WithCulture("sv-SE", () =>
+    public void DaysFullStartingMondayUsesSwedishNamesInWeekOrder() => WithCulture("sv-SE", () =>
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Even);
-        Assert.AreEqual("Tisdag, Torsdag, Lördag", target.DaysFull);
+        Assert.AreEqual("Tisdag, Torsdag, Lördag", target.DaysFull(DayOfWeek.Monday));
     });
 
     [TestMethod]
     public void DaysFullForAllSessionsIsTranslatedDaily() => WithCulture("sv-SE", () =>
     {
-        Assert.AreEqual("Dagligen", Sessions.All.DaysFull);
+        Assert.AreEqual("Dagligen", Sessions.All.DaysFull(DayOfWeek.Monday));
     });
 
     [TestMethod]
     public void DaysFullForNoDaysIsTranslatedNone() => WithCulture("sv-SE", () =>
     {
         var target = Sessions.FromSessionNumbers();
-        Assert.AreEqual("Inga kördagar", target.DaysFull);
+        Assert.AreEqual("Inga kördagar", target.DaysFull(DayOfWeek.Monday));
     });
 
     [TestMethod]
     public void ConsecutiveDaysAreShownAsRange() => WithCulture("en-US", () =>
     {
         var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
-        Assert.AreEqual("Mo-Fr", target.DaysShort);
-        Assert.AreEqual("Monday to Friday", target.DaysFull);
+        Assert.AreEqual("Mo-Fr", target.DaysShort(DayOfWeek.Monday));
+        Assert.AreEqual("Monday to Friday", target.DaysFull(DayOfWeek.Monday));
     });
 
     [TestMethod]
     public void LongRangeUsesLocalisedConnector() => WithCulture("sv-SE", () =>
     {
         var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
-        Assert.AreEqual("Måndag till Fredag", target.DaysFull);
+        Assert.AreEqual("Måndag till Fredag", target.DaysFull(DayOfWeek.Monday));
     });
 
     [TestMethod]
-    public void DaysConsecutiveOnlyWhenWeekStartsOnSunday() => WithCulture("en-US", () =>
+    public void FirstThreeSessionsAreConsecutiveFromAnyStartDay() => WithCulture("en-US", () =>
     {
-        // Sunday-first: Su, Mo, Tu is an unbroken run.
-        var target = Sessions.FromDays(Days.Sunday | Days.Monday | Days.Tuesday);
-        Assert.AreEqual("Su-Tu", target.DaysShort);
+        // Sessions 1-3 occupy positions 0-2, an unbroken run whatever weekday the week starts on.
+        var target = Sessions.FromSessionNumbers(1, 2, 3);
+        Assert.AreEqual("Su-Tu", target.DaysShort(DayOfWeek.Sunday));
+        Assert.AreEqual("Mo-We", target.DaysShort(DayOfWeek.Monday));
     });
 
     [TestMethod]
-    public void SameDaysAreNotConsecutiveWhenWeekStartsOnMonday() => WithCulture("sv-SE", () =>
+    public void NonAdjacentSessionPositionsAreListedNotRanged() => WithCulture("sv-SE", () =>
     {
-        // Monday-first: the same set is Mo, Tu, ... Su — broken, so listed not ranged.
-        var target = Sessions.FromDays(Days.Sunday | Days.Monday | Days.Tuesday);
-        Assert.AreEqual("M, Ti, S", target.DaysShort);
+        // Sessions 1, 2 and 7 sit at positions 0, 1 and 6 — a gap, so Mo, Ti, Sö is listed not ranged.
+        var target = Sessions.FromSessionNumbers(1, 2, 7);
+        Assert.AreEqual("M, Ti, S", target.DaysShort(DayOfWeek.Monday));
     });
 
     [TestMethod]
@@ -101,6 +104,71 @@ public class SessionsTests
     {
         var target = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
         Assert.AreEqual("1-5", target.SessionsNumbers);
+    }
+
+    [TestMethod]
+    public void SeparateRunsAreShownAsCommaSeparatedRanges()
+    {
+        // Mon-Fri stored as days mirrors the weekday bits into the upper session bits (1-5 and 8-12).
+        var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
+        Assert.AreEqual("1-5,8-12", target.SessionsNumbers);
+    }
+
+    [TestMethod]
+    public void CappingIgnoresHigherSessionBitsInText()
+    {
+        // A Mon-Fri days pattern mirrors into sessions 1-5 and 8-12; capping at 6 drops everything from
+        // session 7 up, leaving a clean 1-5.
+        var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
+        Assert.AreEqual("1-5", target.Capped(6).SessionsNumbers);
+    }
+
+    [TestMethod]
+    public void CappingLeavesTheStoredValueUnchanged()
+    {
+        var target = Sessions.FromSessionNumbers(1, 2, 3, 8);
+        _ = target.Capped(6);
+        Assert.AreEqual("1-3,8", target.SessionsNumbers, "Capping must not mutate the original value.");
+    }
+
+    [TestMethod]
+    public void CappingAtFourteenOrMoreIsANoOp()
+    {
+        var target = Sessions.FromSessionNumbers(1, 2, 8, 14);
+        Assert.AreEqual(target.SessionsNumbers, target.Capped(14).SessionsNumbers);
+    }
+
+    [TestMethod]
+    public void CappedForDisplayKeepsMondayToSaturdayWhenWeekStartsMonday() => WithCulture("sv-SE", () =>
+    {
+        // Every weekday, a six-day week starting Monday: Sunday falls outside the period.
+        var everyDay = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday | Days.Saturday | Days.Sunday);
+        var capped = everyDay.CappedForDisplay(useDays: true, maxSessions: 6);
+        Assert.AreEqual("M-L", capped.DaysShort(DayOfWeek.Monday));
+    });
+
+    [TestMethod]
+    public void CappedForDisplayKeepsSundayToFridayWhenWeekStartsSunday() => WithCulture("en-US", () =>
+    {
+        // Every weekday, a six-day week starting Sunday: Saturday falls outside the period.
+        var everyDay = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday | Days.Saturday | Days.Sunday);
+        var capped = everyDay.CappedForDisplay(useDays: true, maxSessions: 6);
+        Assert.AreEqual("Su-Fr", capped.DaysShort(DayOfWeek.Sunday));
+    });
+
+    [TestMethod]
+    public void CappedForDisplayShowsSessionRangeWhenNotUsingDays()
+    {
+        // A Mon-Fri days pattern mirrors into 1-5 and 8-12; as sessions capped at 6 it reads 1-5.
+        var target = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday);
+        Assert.AreEqual("1-5", target.CappedForDisplay(useDays: false, maxSessions: 6).SessionsNumbers);
+    }
+
+    [TestMethod]
+    public void LoneSessionsAreShownIndividuallyBetweenRanges()
+    {
+        var target = Sessions.FromSessionNumbers(1, 3, 4, 5, 7);
+        Assert.AreEqual("1,3-5,7", target.SessionsNumbers);
     }
 
     [TestMethod]
@@ -170,7 +238,7 @@ public class SessionsTests
     public void Daily()
     {
         var target = Sessions.FromBitPattern(CommonDayPatterns.Daily);
-        var actual = target.Days;
+        var actual = target.ActiveDays(DayOfWeek.Monday);
         Assert.HasCount(7, actual);
         Assert.AreEqual(Days.Monday, actual[0], "First day in week is Monday");
         Assert.AreEqual(Days.Sunday, actual[^1], "Last day in week is Sunday");
@@ -180,7 +248,7 @@ public class SessionsTests
     public void MondayWednesdayFridaySunday()
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
-        var actual = target.Days;
+        var actual = target.ActiveDays(DayOfWeek.Monday);
         Assert.HasCount(4, actual);
         Assert.AreEqual(Days.Monday, actual[0], "First day is Monday");
         Assert.AreEqual(Days.Sunday, actual[^1], "Last day is Sunday");
@@ -190,7 +258,7 @@ public class SessionsTests
     public void TuesdayThursdaySaturday()
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Even);
-        var actual = target.Days;
+        var actual = target.ActiveDays(DayOfWeek.Monday);
         Assert.HasCount(3, actual);
         Assert.AreEqual(Days.Tuesday, actual[0], "First day is Tuesday");
         Assert.AreEqual(Days.Saturday, actual[^1], "Last day is Saturday");
@@ -220,7 +288,7 @@ public class SessionsTests
     public void DayResourceNameIsConsequtive()
     {
         var target = Sessions.FromDays(Days.Tuesday | Days.Wednesday | Days.Thursday);
-        var actual = target.FullDayNamesResourceKey;
+        var actual = target.FullDayNamesResourceKey(DayOfWeek.Monday);
         Assert.AreEqual("Tuesday-Thursday", actual);
     }
 

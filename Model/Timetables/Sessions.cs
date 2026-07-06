@@ -112,6 +112,43 @@ public static class SessionsExtensions
         public bool Overlaps(Sessions other) => sessions.And(other).Flags > 0;
 
         /// <summary>
+        /// Returns a copy for display in which the session bits at or above <paramref name="maxSessions"/>
+        /// are cleared, so a layout with a shorter operating period ignores the higher bits. The stored
+        /// value is untouched — this only shapes the session/day texts, so raising the period again brings
+        /// the hidden sessions back. A <paramref name="maxSessions"/> of 14 or more (or below 1) returns the
+        /// value unchanged. The on-demand and days marker bits are preserved.
+        /// </summary>
+        /// <param name="maxSessions">The number of operating sessions/days to keep (1–14).</param>
+        public Sessions Capped(int maxSessions)
+        {
+            if (maxSessions is < 1 or >= 14) return sessions;
+            // Keep the low maxSessions session bits plus the two high marker bits (on-demand, days).
+            var mask = (ushort)(((1 << maxSessions) - 1) | 0b11_0000000_0000000);
+            return new() { Flags = (ushort)(sessions.Flags & mask) };
+        }
+
+        /// <summary>
+        /// Returns a copy for display capped to the layout's operating period of <paramref name="maxSessions"/>
+        /// sessions/days. For session texts (<paramref name="useDays"/> false) the higher session bits are
+        /// dropped, as in <c>Capped</c>. For day texts only the first <paramref name="maxSessions"/> days of the
+        /// operating week are kept — the session bits are positional, so a six-day week keeps bits 0–5 whatever
+        /// weekday the week starts on. The stored value is never changed; the on-demand and days marker bits
+        /// are preserved.
+        /// </summary>
+        /// <param name="useDays">Whether the value is displayed as weekdays rather than session numbers.</param>
+        /// <param name="maxSessions">The number of operating sessions/days in the period (1–14).</param>
+        public Sessions CappedForDisplay(bool useDays, int maxSessions)
+        {
+            if (!useDays) return sessions.Capped(maxSessions);
+            if (maxSessions is < 1 or >= 7) return sessions;
+            // Days occupy the low seven positions of the operating week; keep the first maxSessions of them.
+            // The mirrored upper session bits do not affect day texts, so only the in-week day bits and the
+            // marker bits are kept.
+            var mask = (ushort)(((1 << maxSessions) - 1) | 0b11_0000000_0000000);
+            return new() { Flags = (ushort)(sessions.Flags & mask) };
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this is an on-demand train.
         /// </summary>
         public bool IsOnDemand => (sessions.Flags & CommonSessionPatterns.OnDemand) > 0;
@@ -142,29 +179,18 @@ public static class SessionsExtensions
         public bool IsSingleSessionOrDay => sessions.Numbers.Length == 1;
 
 
-        internal bool IsConsequtiveSessions
-        {
-
-            get
-            {
-                var numbers = sessions.Numbers;
-                if (numbers.Length == 0) return false;
-                for (var i = 1; i < numbers.Length; i++)
-                {
-                    if (numbers[i] != numbers[i - 1] + 1) return false;
-                }
-                return true;
-            }
-        }
-
         /// <summary>
-        /// If sessions is days, gets the DaysResourceKey, otherwise SessionNumbers.
+        /// If sessions is days, gets the full day-names resource key (mapped from <paramref name="startDay"/>),
+        /// otherwise the session numbers.
         /// </summary>
-        public string FullNameResourceKey => sessions.IsDays ? sessions.FullDayNamesResourceKey : sessions.SessionsNumbers;
+        public string FullNameResourceKey(DayOfWeek startDay) =>
+            sessions.IsDays ? sessions.FullDayNamesResourceKey(startDay) : sessions.SessionsNumbers;
 
 
         /// <summary>
-        /// Gets a display string for the session numbers.
+        /// Gets a display string for the session numbers, collapsing each run of consecutive numbers into
+        /// a range and joining the runs with commas (e.g. <c>1-5,8-12</c>). A run of a single number is
+        /// shown as that number.
         /// </summary>
         public string SessionsNumbers
         {
@@ -175,63 +201,29 @@ public static class SessionsExtensions
                 {
                     0 => "None",
                     14 => "All",
-                    _ when sessions.IsConsequtiveSessions => $"{numbers.First()}-{numbers.Last()}",
-                    _ => string.Join(" ", numbers.Select(n => n.ToString())),
-                };
-            }
-        }
-
-        internal bool IsConsequtiveDays
-        {
-            get
-            {
-                var days = sessions.Days;
-                if (days.Length == 0) return false;
-                for (var i = 1; i < days.Length; i++)
-                {
-                    if (days[i].DayNumber != days[i - 1].DayNumber + 1) return false;
-                }
-                return true;
-
-            }
-        }
-
-        /// <summary>
-        /// Gets a resource key for displaying the days.
-        /// </summary>
-        public string FullDayNamesResourceKey
-        {
-            get
-            {
-                var days = sessions.Days;
-                return days.Length switch
-                {
-                    0 => nameof(Days.None),
-                    7 => "Daily",
-                    _ when sessions.IsConsequtiveDays => $"{days.First()}-{days.Last()}",
-                    _ => string.Join(",", days.Select(s => s.ToString())),
-                };
-            }
-        }
-        /// <summary>
-        /// Gets a resource key for displaying the days.
-        /// </summary>
-        public string ShortDayNamesResourceKey
-        {
-            get
-            {
-                var days = sessions.Days;
-                return days.Length switch
-                {
-                    0 => nameof(Days.None),
-                    7 => "DailyShort",
-                    _ when sessions.IsConsequtiveDays => $"{days.First()}Short-{days.Last()}Short",
-                    _ => string.Join(",", days.Select(s => s.ToString() + "Short")),
+                    _ => FormatSessions(numbers),
                 };
             }
         }
     }
 
+
+    // Collapses ascending session numbers into comma-separated ranges, each sequence of two or more
+    // consecutive numbers shown as "first-last" and a lone number as itself
+    // (e.g. 1,2,3,4,5,8,9,10,11,12 -> "1-5,8-12").
+    private static string FormatSessions(byte[] numbers)
+    {
+        var ranges = new List<string>();
+        var start = 0;
+        for (var i = 1; i <= numbers.Length; i++)
+        {
+            if (i < numbers.Length && numbers[i] == numbers[i - 1] + 1) continue;
+            var (first, last) = (numbers[start], numbers[i - 1]);
+            ranges.Add(first == last ? first.ToString() : $"{first}-{last}");
+            start = i;
+        }
+        return string.Join(",", ranges);
+    }
 
     extension(ushort flags)
     {

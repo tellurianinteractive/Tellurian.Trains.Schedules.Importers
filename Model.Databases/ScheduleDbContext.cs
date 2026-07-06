@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Tellurian.Trains.Schedules.Model.Databases;
@@ -379,11 +380,26 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             v => v.Flags,
             v => new Sessions(v));
 
+        // The timetable's session catalogue is a small list of value objects (each a bit pattern),
+        // referenced by value only, so it is persisted as a single comma-separated column of flags
+        // rather than a table. A value comparer is required because the property is a mutable collection.
+        var sessionsCatalogueConverter = new ValueConverter<IList<Sessions>, string>(
+            v => string.Join(',', v.Select(s => (int)s.Flags)),
+            v => ParseSessionsCatalogue(v));
+
+        var sessionsCatalogueComparer = new ValueComparer<IList<Sessions>>(
+            (a, b) => (a == null && b == null) || (a != null && b != null && a.SequenceEqual(b)),
+            v => v.Aggregate(0, (acc, s) => HashCode.Combine(acc, s.Flags)),
+            v => v.ToList());
+
         // Timetable
         modelBuilder.Entity<Timetable>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+
+            entity.Property(e => e.Sessions)
+                  .HasConversion(sessionsCatalogueConverter, sessionsCatalogueComparer);
 
             entity.HasOne(e => e.Layout)
                   .WithMany()
@@ -719,6 +735,11 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Property(e => e.Text).HasMaxLength(1000);
         });
     }
+
+    private static IList<Sessions> ParseSessionsCatalogue(string value) =>
+        string.IsNullOrEmpty(value)
+            ? []
+            : [.. value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => new Sessions(int.Parse(s)))];
 
     private static TrainLenght ParseTrainLength(string value)
     {

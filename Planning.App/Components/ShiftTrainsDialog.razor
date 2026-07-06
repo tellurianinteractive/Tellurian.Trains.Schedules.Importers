@@ -1,0 +1,106 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.Timetables
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@if (Timetable is not null)
+{
+    <div class="shift-trains-backdrop">
+        <div class="shift-trains-dialog">
+            <h3>@Translator(IsClone ? "CloneTrainsTitle" : "MoveTrainsTitle")</h3>
+
+            <div class="field">
+                <label>@Translator("Trains")</label>
+                <select multiple size="8" @onchange="OnSelectionChanged">
+                    @foreach (var train in TrainChoices)
+                    {
+                        <option value="@train.Id" selected="@_selectedIds.Contains(train.Id)">@train.ListLabel</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>@Translator("Minutes")</label>
+                <input type="text" class="minutes" value="@_minutes"
+                       @onchange="e => { _minutes = e.Value?.ToString() ?? _minutes; _error = null; }" />
+            </div>
+
+            @if (_error is not null)
+            {
+                <p class="error">@Translator(_error)</p>
+            }
+
+            <div class="actions">
+                <button class="primary" disabled="@(!CanApply)" @onclick="Apply">@Translator(IsClone ? "Clone" : "Move")</button>
+                <button @onclick="Abort">@Translator("Abort")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>When <c>true</c> the dialog clones the selected trains; otherwise it moves them in place.</summary>
+    [Parameter] public bool IsClone { get; set; }
+
+    /// <summary>Raised after the selected trains have been moved or cloned and the change has been saved.</summary>
+    [Parameter] public EventCallback OnApplied { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without changing anything.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+
+    private readonly HashSet<int> _selectedIds = [];
+    private string _minutes = "";
+    private string? _error;
+
+    // Trains ordered by number, the same order used elsewhere in the app.
+    private IEnumerable<Train> TrainChoices =>
+        (Timetable?.Trains ?? []).OrderBy(t => t.Number);
+
+    private bool CanApply => _selectedIds.Count > 0 && TryParseSignedMinutes(_minutes, out _);
+
+    private void OnSelectionChanged(ChangeEventArgs e)
+    {
+        _selectedIds.Clear();
+        // A multi-select posts the chosen option values as a string array.
+        if (e.Value is string[] values)
+        {
+            foreach (var value in values)
+                if (int.TryParse(value, out var id)) _selectedIds.Add(id);
+        }
+        else if (e.Value is string single && int.TryParse(single, out var onlyId))
+        {
+            _selectedIds.Add(onlyId);
+        }
+        _error = null;
+    }
+
+    private async Task Apply()
+    {
+        _error = null;
+        if (Plan is not { } plan || Timetable is not { } timetable) return;
+        if (!TryParseSignedMinutes(_minutes, out var minutes)) { _error = "InvalidMinutes"; return; }
+
+        var trains = timetable.Trains.Where(t => _selectedIds.Contains(t.Id)).ToList();
+
+        // Validate every train first so a move/clone is all-or-nothing: a moved train mutates in place,
+        // so we must not shift some and reject others.
+        if (trains.Any(t => !plan.FitsWhenMovedBy(t, minutes))) { _error = "TrainsOutOfDayBounds"; return; }
+
+        foreach (var train in trains)
+        {
+            if (IsClone) plan.Clone(train, minutes);
+            else plan.Move(train, minutes);
+        }
+
+        ScheduleState.SaveAndNotify();
+        await OnApplied.InvokeAsync();
+    }
+
+    private Task Abort() => OnClosed.InvokeAsync();
+
+    // Accepts a whole number of minutes with an optional leading sign: "5", "+5" or "-5".
+    private static bool TryParseSignedMinutes(string text, out int minutes) =>
+        int.TryParse(text?.Trim(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out minutes);
+}

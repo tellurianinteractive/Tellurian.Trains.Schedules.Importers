@@ -13,13 +13,15 @@ public static class SessionsDisplay
     /// <summary>
     /// Builds the display text for a session/day pattern. When <paramref name="useDays"/> is set the
     /// active weekdays are shown (using the short day-name resources); otherwise the active session
-    /// numbers are shown.
+    /// numbers are shown. Sessions/days outside the operating period of <paramref name="maxSessions"/>
+    /// (a week starting on <paramref name="startDay"/> for day texts) are ignored.
     /// </summary>
-    public static string Text(Sessions sessions, bool useDays, Translator translator)
+    public static string Text(Sessions sessions, bool useDays, Translator translator, int maxSessions = 14, DayOfWeek startDay = DayOfWeek.Monday)
     {
-        // Day names are translated and ordered (Sunday- or Monday-first) by the model using the
-        // current culture, so the printed order follows the user's locale.
-        if (useDays) return sessions.DaysShort;
+        sessions = sessions.CappedForDisplay(useDays, maxSessions);
+        // Day names are translated by the model and ordered from the layout's start day, so session 1
+        // is shown as the chosen start weekday and the run reads in operating-week order.
+        if (useDays) return sessions.DaysShort(startDay);
         // SessionsNumbers yields "All"/"None" as literals (translate those) and numeric strings otherwise.
         var text = sessions.SessionsNumbers;
         return text switch

@@ -1,5 +1,10 @@
+/* Keep each graph at its full SVG size. As a flex child, overflow:auto would set the
+   automatic minimum size to 0 and let flex shrink the container below the SVG, giving
+   every graph its own scrollbar. flex-shrink:0 prevents that, so a single ancestor
+   scrollbar scrolls all graphs together. */
 .graph-container {
     overflow: auto;
+    flex-shrink: 0;
 }
 
 .hour {
@@ -12,7 +17,8 @@
     }
 
     .hour.vertical {
-        text-anchor: start;
+        text-anchor: end;
+        dominant-baseline: central;
     }
 
 .minute {
@@ -78,6 +84,7 @@
         text-anchor: middle;
     }
 
+/* font-size is set inline per graph from the TrainLabelFontSize setting; 6pt here is the fallback default. */
 .trainlabel {
     font-size: 6pt;
     font-weight: bold;

@@ -144,6 +144,9 @@
   <data name="Companies" xml:space="preserve">
     <value>Companies</value>
   </data>
+  <data name="Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
   <data name="CompaniesDescription" xml:space="preserve">
     <value>The companies that operate the layout's trains.</value>
   </data>
@@ -347,6 +350,9 @@
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
     <value>Hide sessions/days?</value>
+  </data>
+  <data name="TrainLabelFontSize" xml:space="preserve">
+    <value>Train label size (pt)</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Fast clock speed (×)</value>
@@ -767,6 +773,12 @@
   <data name="StartDayHelp" xml:space="preserve">
     <value>The first operating day of the timetable.</value>
   </data>
+  <data name="MaxSessions" xml:space="preserve">
+    <value>Number of sessions/days</value>
+  </data>
+  <data name="MaxSessionsHelp" xml:space="preserve">
+    <value>How many sessions or days the layout operates. Session and day texts ignore anything beyond this; a train's stored sessions are not changed.</value>
+  </data>
   <data name="StartTimeHelp" xml:space="preserve">
     <value>The clock time at which the operating session begins.</value>
   </data>
@@ -1091,6 +1103,63 @@
   <data name="AddTrain" xml:space="preserve">
     <value>Add train</value>
   </data>
+  <data name="AddTrainTitle" xml:space="preserve">
+    <value>Add train</value>
+  </data>
+  <data name="RepeatTrains" xml:space="preserve">
+    <value>Repeat trains</value>
+  </data>
+  <data name="Repeat" xml:space="preserve">
+    <value>Repeat?</value>
+  </data>
+  <data name="MinutesInterval" xml:space="preserve">
+    <value>Minutes interval</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Abort" xml:space="preserve">
+    <value>Abort</value>
+  </data>
+  <data name="PreparationMinutes" xml:space="preserve">
+    <value>Preparation minutes</value>
+  </data>
+  <data name="FinishingMinutes" xml:space="preserve">
+    <value>Finishing minutes</value>
+  </data>
+  <data name="NoPathBetweenStations" xml:space="preserve">
+    <value>There is no route between the selected locations.</value>
+  </data>
+  <data name="InvalidTime" xml:space="preserve">
+    <value>Enter a valid time (HH:MM).</value>
+  </data>
+  <data name="MoveTrains" xml:space="preserve">
+    <value>Move trains</value>
+  </data>
+  <data name="CloneTrains" xml:space="preserve">
+    <value>Clone trains</value>
+  </data>
+  <data name="MoveTrainsTitle" xml:space="preserve">
+    <value>Move trains</value>
+  </data>
+  <data name="CloneTrainsTitle" xml:space="preserve">
+    <value>Clone trains</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="Clone" xml:space="preserve">
+    <value>Clone</value>
+  </data>
+  <data name="Minutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="InvalidMinutes" xml:space="preserve">
+    <value>Enter a whole number of minutes, e.g. 5, +5 or -5.</value>
+  </data>
+  <data name="TrainsOutOfDayBounds" xml:space="preserve">
+    <value>The shift would take a selected train's start time outside the day (00:00–23:59).</value>
+  </data>
   <data name="ExternalId" xml:space="preserve">
     <value>External Id</value>
   </data>
@@ -1099,6 +1168,9 @@
   </data>
   <data name="Sessions" xml:space="preserve">
     <value>Sessions</value>
+  </data>
+  <data name="Days" xml:space="preserve">
+    <value>Days</value>
   </data>
   <data name="MaxSpeed" xml:space="preserve">
     <value>Max speed</value>

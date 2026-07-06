@@ -15,6 +15,12 @@ else if (ScheduleState.TimetableStretches.Count == 0)
 }
 else
 {
+    <div class="graph-toolbar">
+        <button class="primary" @onclick="() => _showAdd = true">@Translator("AddTrain")</button>
+        <button @onclick="() => _showMove = true">@Translator("MoveTrains")</button>
+        <button @onclick="() => _showClone = true">@Translator("CloneTrains")</button>
+    </div>
+
     <div class="selectors">
         <div class="stretch-selector">
             <span class="stretch-selector-label">@Translator("Stretches"):</span>
@@ -59,11 +65,29 @@ else
             }
         </div>
     }
+
+    @if (_showAdd)
+    {
+        <AddTrainDialog OnCreated="() => _showAdd = false" OnClosed="() => _showAdd = false" />
+    }
+
+    @if (_showMove)
+    {
+        <ShiftTrainsDialog IsClone="false" OnApplied="() => _showMove = false" OnClosed="() => _showMove = false" />
+    }
+
+    @if (_showClone)
+    {
+        <ShiftTrainsDialog IsClone="true" OnApplied="() => _showClone = false" OnClosed="() => _showClone = false" />
+    }
 }
 
 @code {
     private List<GraphSchedule> _graphSchedules = [];
     private GraphHalf _half = GraphHalf.Whole;
+    private bool _showAdd;
+    private bool _showMove;
+    private bool _showClone;
 
     // The first/last-half selector is only meaningful when a break time is configured.
     private bool HasBreak => ScheduleState.Layout?.Settings.General.BreakTime is not null;

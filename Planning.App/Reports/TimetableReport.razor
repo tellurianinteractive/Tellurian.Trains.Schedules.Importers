@@ -31,12 +31,15 @@ else
         if (ScheduleState.Timetable is not { } timetable) return;
 
         var trains = timetable.Trains;
+        var useDays = ScheduleState.Layout?.Settings.General.UseDays ?? false;
+        var maxSessions = ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+        var startDay = ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
         // Stretch by stretch, both directions, in order: a stretch's Up and Down tables stay adjacent
         // so the paginator can pack them onto one page (a hard break only happens when the stretch changes).
         var tables = ScheduleState.TimetableStretches
             .SelectMany(stretch =>
                 new[] { TrainGraphDirection.Upward, TrainGraphDirection.Downward }
-                    .Select(dir => TimetableTable.Create(stretch, trains, dir))
+                    .Select(dir => TimetableTable.Create(stretch, trains, dir, useDays, maxSessions, startDay))
                     .Where(t => t.Columns.Count > 0));
 
         Pages = TimetablePaginator.BuildPages(tables, PageGeometry.A4Landscape);

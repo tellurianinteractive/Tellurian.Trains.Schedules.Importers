@@ -7,6 +7,16 @@
     <ProjectReference Include="..\Planning\Planning.csproj" />
     <ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
+    <ProjectReference Include="..\Importers.Services\Services.csproj" />
+    <ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Reuse the stable, checked-in XPLN test file as the sorting-test fixture. -->
+    <None Include="..\Importers.Xpln.Tests\Test data\Givskud-Modern-2025.da-DK.ods">
+      <Link>Test data\Givskud-Modern-2025.da-DK.ods</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.8.0" />
