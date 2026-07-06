@@ -78,7 +78,8 @@ public class PlanMoveCloneTrainTests
         Assert.IsTrue(plan.Timetable.Trains.Contains(clone));
         Assert.AreEqual(2, plan.Timetable.Trains.Count);
         Assert.AreEqual(train.Id + 1, clone.Id);
-        Assert.AreEqual(train.Number + 1, clone.Number);
+        // A clone runs the same route, so it keeps the source's parity: the next free even number, +2.
+        Assert.AreEqual(train.Number + 2, clone.Number);
         Assert.AreEqual(train.Category, clone.Category);
         Assert.AreEqual(train.Sessions, clone.Sessions);
 

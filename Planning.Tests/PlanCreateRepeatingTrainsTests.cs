@@ -64,7 +64,7 @@ public class PlanCreateRepeatingTrainsTests
     }
 
     [TestMethod]
-    public void AssignsSequentialTrainIdsAndNumbers()
+    public void AssignsSequentialTrainIdsAndSameParityNumbers()
     {
         var plan = SimplePlan();
 
@@ -74,8 +74,9 @@ public class PlanCreateRepeatingTrainsTests
 
         CollectionAssert.AreEqual(
             new[] { 1, 2, 3 }, trains.Select(t => t.Id).ToArray());
+        // M2 → Hm runs upward, so every train in the series takes the next free even number.
         CollectionAssert.AreEqual(
-            new[] { 1, 2, 3 }, trains.Select(t => t.Number).ToArray());
+            new[] { 2, 4, 6 }, trains.Select(t => t.Number).ToArray());
     }
 
     [TestMethod]

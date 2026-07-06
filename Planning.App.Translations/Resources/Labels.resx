@@ -777,7 +777,7 @@
     <value>The name of this layout, shown in reports and exported files.</value>
   </data>
   <data name="UseDaysHelp" xml:space="preserve">
-    <value>Plan trains across several named operating days rather than a single session.</value>
+    <value>Plan trains by named weekdays instead of session numbers.</value>
   </data>
   <data name="StartDayHelp" xml:space="preserve">
     <value>The first operating day of the timetable.</value>
@@ -1030,6 +1030,9 @@
   </data>
   <data name="Suffix" xml:space="preserve">
     <value>Suffix</value>
+  </data>
+  <data name="StartNumber" xml:space="preserve">
+    <value>Start number</value>
   </data>
   <data name="Passenger" xml:space="preserve">
     <value>Passenger</value>

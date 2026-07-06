@@ -49,6 +49,14 @@ public record TrainCategory
     public int DefaultSpeed { get; set; } = 100;
 
     /// <summary>
+    /// Gets or sets the lowest train number allotted to this category. New trains of this category are
+    /// numbered from here upwards, picking the next free number of the parity that matches their travel
+    /// direction (odd running downwards, even running upwards). A category can therefore be given its own
+    /// number band (for example freight from 5000), keeping each category's numbers distinct. Defaults to 1.
+    /// </summary>
+    public int StartNumber { get; set; } = 1;
+
+    /// <summary>
     /// Optional company that operates trains in this category.
     /// </summary>
     public Company? Company { get; set; }
@@ -89,18 +97,20 @@ public static class TrainCategoryExtensions
                 IsPassenger = d.IsPassenger,
                 IsFreight = !d.IsPassenger,
                 DefaultSpeed = d.DefaultSpeed,
+                StartNumber = d.StartNumber,
             });
     }
 
     // The localised names of the standard categories; used only when seeding a new timetable, after
-    // which each category keeps a single Name in the layout's default language.
+    // which each category keeps a single Name in the layout's default language. Passenger and freight
+    // start in separate number bands so their trains never collide.
     private static readonly TrainCategoryDefault[] Defaults =
     [
-        new(1, "P", "#CC0000", IsPassenger: true,  DefaultSpeed: 100, EN: "Passenger", DA: "Persontog", DE: "Reisezug",  NB: "Persontog", SV: "Persontåg"),
-        new(2, "G", "#000000", IsPassenger: false, DefaultSpeed: 80,  EN: "Freight",   DA: "Godstog",   DE: "Güterzug",  NB: "Godstog",   SV: "Godståg"),
+        new(1, "P", "#CC0000", IsPassenger: true,  DefaultSpeed: 100, StartNumber: 1,    EN: "Passenger", DA: "Persontog", DE: "Reisezug",  NB: "Persontog", SV: "Persontåg"),
+        new(2, "G", "#000000", IsPassenger: false, DefaultSpeed: 80,  StartNumber: 5000, EN: "Freight",   DA: "Godstog",   DE: "Güterzug",  NB: "Godstog",   SV: "Godståg"),
     ];
 
-    private sealed record TrainCategoryDefault(int Id, string Prefix, string Color, bool IsPassenger, int DefaultSpeed, string EN, string DA, string DE, string NB, string SV)
+    private sealed record TrainCategoryDefault(int Id, string Prefix, string Color, bool IsPassenger, int DefaultSpeed, int StartNumber, string EN, string DA, string DE, string NB, string SV)
     {
         public string NameFor(string language) => language switch
         {

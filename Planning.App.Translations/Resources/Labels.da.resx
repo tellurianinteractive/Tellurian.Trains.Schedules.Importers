@@ -235,7 +235,7 @@
     <value>Fortsætter næste dag</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Fortsætter næste session</value>
+    <value>Fortsætter næste køresession</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lokomotiv</value>
@@ -289,7 +289,7 @@
     <value>Generelt</value>
   </data>
   <data name="SessionDays" xml:space="preserve">
-    <value>Sessioner &amp; dage</value>
+    <value>Køresessioner &amp; dage</value>
   </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Tid &amp; hastighed</value>
@@ -304,7 +304,7 @@
     <value>Anlæggets navn</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Brug dage i stedet for sessioner?</value>
+    <value>Brug dage i stedet for køresessioner?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Startdag</value>
@@ -361,7 +361,7 @@
     <value>Vis selskab?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Skjul sessioner/dage?</value>
+    <value>Skjul køresessioner/dage?</value>
   </data>
   <data name="TrainLabelFontSize" xml:space="preserve">
     <value>Togetiketstørrelse (pt)</value>
@@ -478,7 +478,7 @@
     <value>Togkategorier med præfiks, farve og klassifikation.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Hvem medbringer hvilket rullende materiel til sessionen.</value>
+    <value>Hvem medbringer hvilket rullende materiel til køresessionen.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Byg køretøjsomløb og tildel lokomotiver, vogne og godsstrømme.</value>
@@ -774,6 +774,9 @@
   <data name="Suffix" xml:space="preserve">
     <value>Suffiks</value>
   </data>
+  <data name="StartNumber" xml:space="preserve">
+    <value>Startnummer</value>
+  </data>
   <data name="Passenger" xml:space="preserve">
     <value>Persontog</value>
   </data>
@@ -895,7 +898,7 @@
     <value>Rediger</value>
   </data>
   <data name="EndTimeHelp" xml:space="preserve">
-    <value>Klokkeslættet, hvor køreseancen slutter. Den kan løbe til eller forbi midnat.</value>
+    <value>Klokkeslættet, hvor køresessionen slutter. Den kan løbe til eller forbi midnat.</value>
   </data>
   <data name="English" xml:space="preserve">
     <value>Engelsk</value>
@@ -1051,13 +1054,13 @@
     <value>Køreplanens første driftsdag.</value>
   </data>
   <data name="MaxSessions" xml:space="preserve">
-    <value>Antal sessioner/dage</value>
+    <value>Antal køresessioner/dage</value>
   </data>
   <data name="MaxSessionsHelp" xml:space="preserve">
-    <value>Hvor mange sessioner eller dage anlægget køres. Sessions- og dagtekster ignorerer alt derover; togets gemte sessioner ændres ikke.</value>
+    <value>Hvor mange køresessioner eller dage anlægget køres. Køresessions- og dagtekster ignorerer alt derover; togets gemte køresessioner ændres ikke.</value>
   </data>
   <data name="StartTimeHelp" xml:space="preserve">
-    <value>Klokkeslættet, hvor køreseancen begynder.</value>
+    <value>Klokkeslættet, hvor køresessionen begynder.</value>
   </data>
   <data name="Swedish" xml:space="preserve">
     <value>Svensk</value>
@@ -1087,7 +1090,7 @@
     <value>Anvendelse</value>
   </data>
   <data name="UseDaysHelp" xml:space="preserve">
-    <value>Planlæg tog over flere navngivne driftsdage i stedet for en enkelt seance.</value>
+    <value>Planlæg tog med angivne ugedage i stedet for køresessionernes numre.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
     <value>Udskriv hvert rapportelement på sit eget sprog?</value>
@@ -1189,7 +1192,7 @@
     <value>Kategori</value>
   </data>
   <data name="Sessions" xml:space="preserve">
-    <value>Sessioner</value>
+    <value>Køresessioner</value>
   </data>
   <data name="Days" xml:space="preserve">
     <value>Dage</value>
@@ -1267,10 +1270,10 @@
     <value>Dagligt</value>
   </data>
   <data name="SessionPatterns" xml:space="preserve">
-    <value>Sessionsmønstre</value>
+    <value>Køresessionsmønstre</value>
   </data>
   <data name="SessionPatternHint" xml:space="preserve">
-    <value>Angiv de sessionskombinationer, tog kan bruge, f.eks. 1-3 eller 4 7.</value>
+    <value>Angiv de køresessionskombinationer, tog kan bruge, f.eks. 1-3 eller 4 7.</value>
   </data>
   <data name="DayPatternHint" xml:space="preserve">
     <value>Angiv de dagkombinationer, tog kan bruge.</value>

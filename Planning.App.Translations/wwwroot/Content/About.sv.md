@@ -9,7 +9,7 @@ fungerar även för fasta klubbanläggningar och hemmaanläggningar.
 - Definiera spårplaner med stationer, spår och sträckor.
 - Skapa och redigera tågtidtabeller med automatisk tidsberäkning.
 - Tilldela lokomotiv och tågsätt till tåg.
-- Planera lokförartjänster för driftsessioner.
+- Planera lokförartjänster för köromgångar.
 - Validera tidtabeller för konflikter och konsekvens.
 - Visa grafiska tidtabeller (tid-avståndsdiagram).
 - Generera utskrifter: tågkort, stationsböcker och tjänstgöringslistor.

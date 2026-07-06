@@ -14,19 +14,19 @@
             <div class="field">
                 <label>@Translator("Category")</label>
                 <ListBoxView Items="@(CategoryChoices.ToListItems())"
-                             Value="_categoryId" ValueChanged="id => _categoryId = id"
+                             Value="_categoryId" ValueChanged="id => { _categoryId = id; UpdateSuggestedNumber(); }"
                              Placeholder="—" />
             </div>
             <div class="field">
                 <label>@Translator("From")</label>
                 <ListBoxView Items="@(LocationChoices.ToListItems())"
-                             Value="_fromId" ValueChanged="id => { _fromId = id; _error = null; }"
+                             Value="_fromId" ValueChanged="id => { _fromId = id; _error = null; UpdateSuggestedNumber(); }"
                              Placeholder="—" />
             </div>
             <div class="field">
                 <label>@Translator("To")</label>
                 <ListBoxView Items="@(LocationChoices.ToListItems())"
-                             Value="_toId" ValueChanged="id => { _toId = id; _error = null; }"
+                             Value="_toId" ValueChanged="id => { _toId = id; _error = null; UpdateSuggestedNumber(); }"
                              Placeholder="—" />
             </div>
             <div class="field">
@@ -106,6 +106,7 @@
     private int? _toId;
     private string _time = "";
     private int _number = 1;
+    private bool _numberEdited;
     private int _preparationMinutes = 10;
     private int _finishingMinutes = 10;
     private int _speed = 100;
@@ -126,7 +127,26 @@
         _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
     }
 
-    private void SetNumber(ChangeEventArgs e) => _number = ParseInt(e, _number);
+    // The planner has typed a number, so stop overwriting it with the category/direction suggestion.
+    private void SetNumber(ChangeEventArgs e)
+    {
+        _number = ParseInt(e, _number);
+        _numberEdited = true;
+    }
+
+    // Fill the number field with the default for the chosen category and travel direction (odd downwards,
+    // even upwards), unless the planner has already typed a number. Does nothing until category and both
+    // distinct locations are chosen, or when no path connects them.
+    private void UpdateSuggestedNumber()
+    {
+        if (_numberEdited) return;
+        if (Plan is not { } plan) return;
+        if (CategoryChoices.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
+        if (Layout?.OperationLocations.FirstOrDefault(l => l.Id == _fromId) is not { } from) return;
+        if (Layout?.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
+        if (from.Equals(to)) return;
+        if (plan.SuggestTrainNumber(category, from, to) is { } suggested) _number = suggested;
+    }
 
     private async Task Create()
     {
@@ -143,21 +163,14 @@
             if (!TryParseTime(_endTime, out var endTime)) { _error = "InvalidTime"; return; }
             if (_interval < 1) { _error = "InvalidMinutes"; return; }
 
-            var trains = plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed);
+            var trains = plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed, _number);
             if (trains.Count == 0) { _error = "NoPathBetweenStations"; return; }
-
-            // CreateRepeating assigns sequential numbers; renumber from the one the planner chose.
-            var number = _number;
-            foreach (var t in trains) t.Number = number++;
             first = trains[0];
         }
         else
         {
-            first = plan.Create(category, from, to, startTime, _preparationMinutes, _finishingMinutes, _speed);
+            first = plan.Create(category, from, to, startTime, _preparationMinutes, _finishingMinutes, _speed, _number);
             if (first is null) { _error = "NoPathBetweenStations"; return; }
-
-            // Create assigns the next free number; honour the number the planner chose in the dialog.
-            first.Number = _number;
         }
 
         ScheduleState.SaveAndNotify();

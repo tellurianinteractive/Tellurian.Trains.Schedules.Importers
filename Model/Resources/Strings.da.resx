@@ -250,7 +250,7 @@
     <value>Tog {0} har overlappende lokomotivtildelinger: {1} og {2}.</value>
   </data>
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
-    <value>Køretøj {0} er dobbeltbooket: sessioner {1} overlapper med sessioner {2}.</value>
+    <value>Køretøj {0} er dobbeltbooket: køresessioner {1} overlapper med køresessioner {2}.</value>
   </data>
   <data name="Undefined" xml:space="preserve">
     <value>Udefineret</value>

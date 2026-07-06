@@ -250,7 +250,7 @@
     <value>Tåg {0} har överlappande loktilldelningar: {1} och {2}.</value>
   </data>
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
-    <value>Fordon {0} är dubbelbokat: sessioner {1} överlappar med sessioner {2}.</value>
+    <value>Fordon {0} är dubbelbokat: köromgångar {1} överlappar med köromgångar {2}.</value>
   </data>
   <data name="Undefined" xml:space="preserve">
     <value>Odefinierad</value>

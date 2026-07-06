@@ -219,4 +219,29 @@ public static class TimetableExtensions
     /// <param name="timetable">The timetable.</param>
     public static int NextCargoFlowOptionsId(this Timetable timetable) =>
         (timetable.CargoFlowOptions.Select(o => o.Id).DefaultIfEmpty(0).Max()) + 1;
+
+    /// <summary>
+    /// Gets the next free train number for a train of <paramref name="category"/> travelling in the given
+    /// direction: the lowest number at or above the category's <see cref="TrainCategory.StartNumber"/> that
+    /// has the required parity (odd when <paramref name="odd"/>, even otherwise) and is not already used by
+    /// another train of the same category. By convention trains running downwards are numbered odd and those
+    /// running upwards even, so opposing directions never share a number and every category keeps its own band.
+    /// </summary>
+    /// <param name="timetable">The timetable whose trains define which numbers are taken.</param>
+    /// <param name="category">The category whose start number and existing trains bound the search.</param>
+    /// <param name="odd"><c>true</c> for an odd number (downwards), <c>false</c> for an even number (upwards).</param>
+    /// <returns>The next free number of the requested parity.</returns>
+    public static int NextTrainNumber(this Timetable timetable, TrainCategory category, bool odd)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        ArgumentNullException.ThrowIfNull(category);
+        var used = timetable.Trains
+            .Where(t => t.CategoryId == category.Id)
+            .Select(t => t.Number)
+            .ToHashSet();
+        var number = Math.Max(category.StartNumber, 1);
+        if (number % 2 == 0 == odd) number++; // step up one to reach the required parity
+        while (used.Contains(number)) number += 2;
+        return number;
+    }
 }

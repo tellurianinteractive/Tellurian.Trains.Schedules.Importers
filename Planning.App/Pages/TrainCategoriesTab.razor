@@ -31,6 +31,7 @@ else
                     <PropertyColumn Property="c => c.Name" Title='@Translator("Name")' Sortable="true" />
                     <PropertyColumn Property="c => c.Prefix" Title='@Translator("Prefix")' />
                     <PropertyColumn Property="c => c.Suffix" Title='@Translator("Suffix")' />
+                    <PropertyColumn Property="c => c.StartNumber" Title='@Translator("StartNumber")' />
                     <TemplateColumn Title='@Translator("Type")'>@Translator(context.IsFreight ? "Freight" : "Passenger")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Color")'>
                         <span class="swatch" style="background-color:@context.Color"></span>
@@ -77,6 +78,10 @@ else
                     <div class="field">
                         <label>@Translator("Suffix")</label>
                         <input type="text" class="short" @bind="Editing.Suffix" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("StartNumber")</label>
+                        <input type="number" class="short" min="1" @bind="Editing.StartNumber" @bind:after="OnEdited" />
                     </div>
                     <div class="field">
                         <label>@Translator("Type")</label>

@@ -9,7 +9,7 @@ fungerer også til faste klubanlæg og hjemmeanlæg.
 - Definér sporplaner med stationer, spor og strækninger.
 - Opret og redigér togkøreplaner med automatisk tidsberegning.
 - Tildel lokomotiver og togstammer til tog.
-- Planlæg lokomotivførervagter til driftssessioner.
+- Planlæg lokomotivførervagter til køresessioner.
 - Validér køreplaner for konflikter og konsistens.
 - Vis grafiske køreplaner (tid-afstands-diagrammer).
 - Generér udskrifter: togkort, stationsbøger og vagtplaner.

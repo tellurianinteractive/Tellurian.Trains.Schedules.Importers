@@ -218,6 +218,26 @@ public static class PlanExtensions
         }
 
         /// <summary>
+        /// Suggests the default number for a new train of <paramref name="category"/> running from
+        /// <paramref name="from"/> to <paramref name="to"/>: the next free number for the category whose parity
+        /// matches the train's starting direction along the shortest path — odd when the first leg runs downwards
+        /// (towards the stretch start), even when it runs upwards (see <see cref="TimetableExtensions.NextTrainNumber"/>).
+        /// Returns <c>null</c> when no path exists between the two locations.
+        /// </summary>
+        /// <param name="category">The category the train will belong to.</param>
+        /// <param name="from">The origin location.</param>
+        /// <param name="to">The destination location.</param>
+        /// <returns>The suggested train number, or <c>null</c> when there is no path.</returns>
+        public int? SuggestTrainNumber(TrainCategory category, OperationLocation from, OperationLocation to)
+        {
+            ArgumentNullException.ThrowIfNull(category);
+            ArgumentNullException.ThrowIfNull(from);
+            ArgumentNullException.ThrowIfNull(to);
+            if (PathFinder.FindShortestPath(plan.Layout, from, to) is not { } path) return null;
+            return plan.Timetable.NextTrainNumber(category, IsDownward(path));
+        }
+
+        /// <summary>
         /// Creates a new train of the given <paramref name="category"/> running the shortest path from
         /// <paramref name="from"/> to <paramref name="to"/>, computes its run and stop times, assigns the next
         /// free id and number, and adds it to the plan's timetable.
@@ -243,10 +263,13 @@ public static class PlanExtensions
         /// <param name="finishingMinutes">The number of minutes required to finish the train after last arrival. Must be a non-negative value.</param>
         /// <param name="maxSpeed">The train's maximum scale speed in km/h, used to compute run times (capped per stretch by the
         /// stretch's own maximum speed). When <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
+        /// <param name="number">The train number to assign. When <c>null</c>, the default number for the category and the
+        /// train's starting direction is used (see <c>SuggestTrainNumber</c>): the next free number of the parity that
+        /// matches the first leg's direction — odd downwards, even upwards.</param>
         /// <returns>The created train, already added to the timetable, or <c>null</c> when no train could be built
         /// (origin equals destination, no path exists, or a location on the path has no track) or the finished
         /// train does not fit the plan's operating window (see <c>FitsWithinOperatingWindow</c>).</returns>
-        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null)
+        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
@@ -261,7 +284,8 @@ public static class PlanExtensions
             var settings = plan.Layout.Settings.TimeAndSpeed;
             var directionChanges = path.DirectionChanges.ToHashSet();
 
-            var train = new Train(NextTrainId(), category, NextTrainNumber()) { Sessions = Sessions.All, MaxSpeed = maxSpeed };
+            var trainNumber = number ?? plan.Timetable.NextTrainNumber(category, IsDownward(path));
+            var train = new Train(NextTrainId(), category, trainNumber) { Sessions = Sessions.All, MaxSpeed = maxSpeed };
             plan.Timetable.Add(train);
 
             var nextCallId = NextCallId();
@@ -323,7 +347,6 @@ public static class PlanExtensions
             return train;
 
             int NextTrainId() => plan.Timetable.Trains.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
-            int NextTrainNumber() => plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
             int NextCallId() => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
 
             // A train stops at a location when the category can exchange there; shadow stations always stop and
@@ -366,15 +389,17 @@ public static class PlanExtensions
         /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
         /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
+        /// <param name="number">The number for the first train; the rest follow as same-parity clones (see <c>Clone</c>).
+        /// When <c>null</c>, the first train takes the default number for its category and direction (see <c>Create</c>).</param>
         /// <returns>The created trains in departure order, already added to the timetable; empty when none could be built.</returns>
-        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null)
+        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
             ArgumentNullException.ThrowIfNull(to);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
 
-            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed) is not { } first)
+            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not { } first)
                 return [];
 
             return [first, .. plan.CloneMany(first, endTime, intervalMinutes)];
@@ -453,7 +478,7 @@ public static class PlanExtensions
             ArgumentNullException.ThrowIfNull(train);
             if (!plan.FitsWhenMovedBy(train, minutes)) return null;
 
-            var clone = new Train(NextTrainId(), NextTrainNumber())
+            var clone = new Train(NextTrainId(), NextCloneNumber())
             {
                 Category = train.Category,
                 CategoryId = train.CategoryId,
@@ -479,7 +504,12 @@ public static class PlanExtensions
             return clone;
 
             int NextTrainId() => plan.Timetable.Trains.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
-            int NextTrainNumber() => plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
+            // A clone runs the same route as its source, so it keeps that direction's parity: the next free
+            // number of the source's parity in its category. Falls back to the plain next number when the
+            // source has no category.
+            int NextCloneNumber() => train.Category is { } category
+                ? plan.Timetable.NextTrainNumber(category, train.Number % 2 != 0)
+                : plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
             int NextCallId() => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
         }
 
@@ -583,4 +613,9 @@ public static class PlanExtensions
                 (s.Start.Equals(a) && s.End.Equals(b)) || (s.Start.Equals(b) && s.End.Equals(a)));
 
     }
+
+    // A path starts downwards when its first leg runs from a stretch's End towards its Start (a Backward
+    // segment); by convention such trains are numbered odd, upward-starting trains even.
+    private static bool IsDownward(TrainPath path) =>
+        path.Segments[0].Direction == TrainPathDirection.Backward;
 }

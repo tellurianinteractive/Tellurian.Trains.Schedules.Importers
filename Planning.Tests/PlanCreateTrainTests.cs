@@ -43,7 +43,9 @@ public class PlanCreateTrainTests
         Assert.IsNotNull(train);
         Assert.IsTrue(plan.Timetable.Trains.Contains(train));
         Assert.AreEqual(1, train.Id);
-        Assert.AreEqual(1, train.Number);
+        // M2 → Hm runs upward (Start → End of each stretch), so the passenger train takes the next free
+        // even number from the category's start number of 1: 2.
+        Assert.AreEqual(2, train.Number);
         Assert.AreEqual(Passenger, train.Category);
         Assert.AreEqual(Sessions.All, train.Sessions);
     }
@@ -196,5 +198,82 @@ public class PlanCreateTrainTests
         var settings = plan.Layout.Settings.TimeAndSpeed;
         var runaroundFastMinutes = (settings.StationTimings.LocoRunaroundRealMinutes ?? 5) * settings.FastClockSpeed;
         Assert.AreEqual(runaroundFastMinutes, (int)(reversal.Departure.Value - reversal.Arrival.Value).TotalMinutes);
+    }
+
+    [TestMethod]
+    public void AnUpwardTrainGetsTheNextEvenNumberAndADownwardTrainTheNextOddNumber()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+
+        var upward = plan.Create(Passenger, m2, hm, Start);      // M2 → Hm runs upward → even
+        var downward = plan.Create(Passenger, hm, m2, Start);    // Hm → M2 runs downward → odd
+
+        Assert.IsNotNull(upward);
+        Assert.IsNotNull(downward);
+        Assert.AreEqual(2, upward.Number);
+        Assert.AreEqual(1, downward.Number);
+    }
+
+    [TestMethod]
+    public void ConsecutiveTrainsInTheSameDirectionAndCategoryTakeSuccessiveSameParityNumbers()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+
+        var first = plan.Create(Passenger, m2, hm, Start);
+        var second = plan.Create(Passenger, m2, hm, Start);
+
+        Assert.IsNotNull(first);
+        Assert.IsNotNull(second);
+        Assert.AreEqual(2, first.Number);
+        Assert.AreEqual(4, second.Number);
+    }
+
+    [TestMethod]
+    public void NumberingStartsFromTheCategoryStartNumber()
+    {
+        var plan = SimplePlan();
+        var category = new TrainCategory { Id = 3, Name = "Express", Prefix = "X", IsPassenger = true, DefaultSpeed = 100, StartNumber = 100 };
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+
+        var upward = plan.Create(category, m2, hm, Start);       // even, from 100 → 100
+        var downward = plan.Create(category, hm, m2, Start);     // odd, from 100 → 101
+
+        Assert.IsNotNull(upward);
+        Assert.IsNotNull(downward);
+        Assert.AreEqual(100, upward.Number);
+        Assert.AreEqual(101, downward.Number);
+    }
+
+    [TestMethod]
+    public void EachCategoryIsNumberedIndependently()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+
+        var passenger = plan.Create(Passenger, m2, hm, Start);
+        var freight = plan.Create(Freight, m2, hm, Start);
+
+        Assert.IsNotNull(passenger);
+        Assert.IsNotNull(freight);
+        // Both are the first upward train of their own category, so both take number 2.
+        Assert.AreEqual(2, passenger.Number);
+        Assert.AreEqual(2, freight.Number);
+    }
+
+    [TestMethod]
+    public void AnExplicitNumberOverridesTheDirectionDefault()
+    {
+        var plan = SimplePlan();
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start, number: 4321);
+
+        Assert.IsNotNull(train);
+        Assert.AreEqual(4321, train.Number);
     }
 }

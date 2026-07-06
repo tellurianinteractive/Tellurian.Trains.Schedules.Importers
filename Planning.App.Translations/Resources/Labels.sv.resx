@@ -235,7 +235,7 @@
     <value>Fortsätter nästa dag</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Fortsätter nästa session</value>
+    <value>Fortsätter nästa köromgång</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lok</value>
@@ -289,7 +289,7 @@
     <value>Allmänt</value>
   </data>
   <data name="SessionDays" xml:space="preserve">
-    <value>Sessioner &amp; dagar</value>
+    <value>Köromgångar &amp; dagar</value>
   </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Tid &amp; hastighet</value>
@@ -304,7 +304,7 @@
     <value>Banans namn</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Använd dagar istället för sessioner?</value>
+    <value>Använd dagar istället för köromgångar?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Startdag</value>
@@ -361,7 +361,7 @@
     <value>Visa bolag?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Dölj sessioner/dagar?</value>
+    <value>Dölj köromgångar/dagar?</value>
   </data>
   <data name="TrainLabelFontSize" xml:space="preserve">
     <value>Tågetikettstorlek (pt)</value>
@@ -478,7 +478,7 @@
     <value>Tågkategorier med prefix, färg och klassificering.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Vem tar med vilket rullande materiel till sessionen.</value>
+    <value>Vem tar med vilket rullande materiel till köromgången.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Bygg fordonsomlopp och tilldela lok, vagnar och godsflöden.</value>
@@ -774,6 +774,9 @@
   <data name="Suffix" xml:space="preserve">
     <value>Suffix</value>
   </data>
+  <data name="StartNumber" xml:space="preserve">
+    <value>Startnummer</value>
+  </data>
   <data name="Passenger" xml:space="preserve">
     <value>Persontåg</value>
   </data>
@@ -895,7 +898,7 @@
     <value>Redigera</value>
   </data>
   <data name="EndTimeHelp" xml:space="preserve">
-    <value>Klockslaget då körpasset slutar. Det kan sträcka sig till eller förbi midnatt.</value>
+    <value>Klockslaget då köromgången slutar. Det kan sträcka sig till eller förbi midnatt.</value>
   </data>
   <data name="English" xml:space="preserve">
     <value>Engelska</value>
@@ -1051,13 +1054,13 @@
     <value>Tidtabellens första driftdag.</value>
   </data>
   <data name="MaxSessions" xml:space="preserve">
-    <value>Antal sessioner/dagar</value>
+    <value>Antal köromgångar/dagar</value>
   </data>
   <data name="MaxSessionsHelp" xml:space="preserve">
-    <value>Hur många sessioner eller dagar banan trafikeras. Sessions- och dagtexter ignorerar allt däröver; tågets lagrade sessioner ändras inte.</value>
+    <value>Hur många köromgångar eller dagar banan trafikeras. Köromgångs- och dagtexter ignorerar allt däröver; tågets lagrade köromgångar ändras inte.</value>
   </data>
   <data name="StartTimeHelp" xml:space="preserve">
-    <value>Klockslaget då körpasset börjar.</value>
+    <value>Klockslaget då köromgången börjar.</value>
   </data>
   <data name="Swedish" xml:space="preserve">
     <value>Svenska</value>
@@ -1087,7 +1090,7 @@
     <value>Användning</value>
   </data>
   <data name="UseDaysHelp" xml:space="preserve">
-    <value>Planera tåg över flera namngivna driftdagar i stället för ett enda pass.</value>
+    <value>Planera tåg med angivna veckodagar istället för köromgångarnas nummer.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
     <value>Skriv ut varje rapportpost på sitt eget språk?</value>
@@ -1189,7 +1192,7 @@
     <value>Kategori</value>
   </data>
   <data name="Sessions" xml:space="preserve">
-    <value>Sessioner</value>
+    <value>Köromgångar</value>
   </data>
   <data name="Days" xml:space="preserve">
     <value>Dagar</value>
@@ -1267,10 +1270,10 @@
     <value>Dagligen</value>
   </data>
   <data name="SessionPatterns" xml:space="preserve">
-    <value>Sessionsmönster</value>
+    <value>Köromgångsmönster</value>
   </data>
   <data name="SessionPatternHint" xml:space="preserve">
-    <value>Ange sessionskombinationer som tåg kan använda, t.ex. 1-3 eller 4 7.</value>
+    <value>Ange köromgångskombinationer som tåg kan använda, t.ex. 1-3 eller 4 7.</value>
   </data>
   <data name="DayPatternHint" xml:space="preserve">
     <value>Ange dagkombinationer som tåg kan använda.</value>

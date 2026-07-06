@@ -235,7 +235,7 @@
     <value>Setzt am nächsten Tag fort</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Setzt sich in der nächsten Session fort</value>
+    <value>Setzt sich in der nächsten Fahrrunde fort</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lokomotive</value>
@@ -289,7 +289,7 @@
     <value>Allgemein</value>
   </data>
   <data name="SessionDays" xml:space="preserve">
-    <value>Sessions &amp; Tage</value>
+    <value>Fahrrunden &amp; Tage</value>
   </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Zeit &amp; Geschwindigkeit</value>
@@ -304,7 +304,7 @@
     <value>Anlagenname</value>
   </data>
   <data name="UseDays" xml:space="preserve">
-    <value>Tage statt Sessions verwenden?</value>
+    <value>Tage statt Fahrrunden verwenden?</value>
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Starttag</value>
@@ -361,7 +361,7 @@
     <value>Gesellschaft anzeigen?</value>
   </data>
   <data name="HideSessionsOrDays" xml:space="preserve">
-    <value>Sessions/Tage ausblenden?</value>
+    <value>Fahrrunden/Tage ausblenden?</value>
   </data>
   <data name="TrainLabelFontSize" xml:space="preserve">
     <value>Zugbeschriftungsgröße (pt)</value>
@@ -478,7 +478,7 @@
     <value>Zugkategorien mit Präfix, Farbe und Klassifizierung.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Wer bringt welches rollende Material zur Session mit.</value>
+    <value>Wer bringt welches rollende Material zur Fahrrunde mit.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Fahrzeugumläufe erstellen und Lokomotiven, Wagen und Frachtströmen zuweisen.</value>
@@ -774,6 +774,9 @@
   <data name="Suffix" xml:space="preserve">
     <value>Suffix</value>
   </data>
+  <data name="StartNumber" xml:space="preserve">
+    <value>Startnummer</value>
+  </data>
   <data name="Passenger" xml:space="preserve">
     <value>Reisezug</value>
   </data>
@@ -895,7 +898,7 @@
     <value>Bearbeiten</value>
   </data>
   <data name="EndTimeHelp" xml:space="preserve">
-    <value>Die Uhrzeit, zu der die Betriebssitzung endet. Sie kann bis Mitternacht oder darüber hinaus laufen.</value>
+    <value>Die Uhrzeit, zu der die Fahrrunde endet. Sie kann bis Mitternacht oder darüber hinaus laufen.</value>
   </data>
   <data name="English" xml:space="preserve">
     <value>Englisch</value>
@@ -1051,13 +1054,13 @@
     <value>Der erste Betriebstag des Fahrplans.</value>
   </data>
   <data name="MaxSessions" xml:space="preserve">
-    <value>Anzahl der Sessions/Tage</value>
+    <value>Anzahl der Fahrrunden/Tage</value>
   </data>
   <data name="MaxSessionsHelp" xml:space="preserve">
-    <value>Wie viele Sessions oder Tage die Anlage betreibt. Session- und Tagestexte ignorieren alles darüber; die gespeicherten Sessions eines Zuges bleiben unverändert.</value>
+    <value>Wie viele Fahrrunden oder Tage die Anlage betreibt. Fahrrunden- und Tagestexte ignorieren alles darüber; die gespeicherten Fahrrunden eines Zuges bleiben unverändert.</value>
   </data>
   <data name="StartTimeHelp" xml:space="preserve">
-    <value>Die Uhrzeit, zu der die Betriebssitzung beginnt.</value>
+    <value>Die Uhrzeit, zu der die Fahrrunde beginnt.</value>
   </data>
   <data name="Swedish" xml:space="preserve">
     <value>Schwedisch</value>
@@ -1087,7 +1090,7 @@
     <value>Verwendung</value>
   </data>
   <data name="UseDaysHelp" xml:space="preserve">
-    <value>Züge über mehrere benannte Betriebstage statt einer einzelnen Sitzung planen.</value>
+    <value>Züge mit angegebenen Wochentagen statt Fahrrundennummern planen.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
     <value>Jedes Berichtselement in seiner eigenen Sprache drucken?</value>
@@ -1189,7 +1192,7 @@
     <value>Kategorie</value>
   </data>
   <data name="Sessions" xml:space="preserve">
-    <value>Sessions</value>
+    <value>Fahrrunden</value>
   </data>
   <data name="Days" xml:space="preserve">
     <value>Tage</value>
@@ -1267,10 +1270,10 @@
     <value>Täglich</value>
   </data>
   <data name="SessionPatterns" xml:space="preserve">
-    <value>Session-Muster</value>
+    <value>Fahrrunden-Muster</value>
   </data>
   <data name="SessionPatternHint" xml:space="preserve">
-    <value>Legen Sie die Session-Kombinationen fest, die Züge nutzen können, z. B. 1-3 oder 4 7.</value>
+    <value>Legen Sie die Fahrrunden-Kombinationen fest, die Züge nutzen können, z. B. 1-3 oder 4 7.</value>
   </data>
   <data name="DayPatternHint" xml:space="preserve">
     <value>Legen Sie die Tageskombinationen fest, die Züge nutzen können.</value>
