@@ -132,7 +132,9 @@
       "Bash(git -C \"C:/Utveckling/Github/Tellurian.Trains/Tellurian.Trains.Schedules\" ls-files Planning.Tests/LabelPlacementDiagnosticTests.cs)",
       "PowerShell(dotnet test \"$PWD\\\\Importers.Xpln.Tests\\\\Xpln.Tests.csproj\" 2>&1 | Select-Object -Last 30)",
       "PowerShell(Set-Location \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedules\"; \"Modified/added files: \" + \\(git status --porcelain | Measure-Object -Line\\).Lines; git status --short | Select-Object -First 60)",
-      "PowerShell(Set-Location \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedules\"; git log --oneline -1; git status --short | Measure-Object -Line | ForEach-Object { \"Remaining changes: $\\($_.Lines\\)\" })"
+      "PowerShell(Set-Location \"C:\\\\Utveckling\\\\Github\\\\Tellurian.Trains\\\\Tellurian.Trains.Schedules\"; git log --oneline -1; git status --short | Measure-Object -Line | ForEach-Object { \"Remaining changes: $\\($_.Lines\\)\" })",
+      "Skill(run)",
+      "Bash(git grep *)"
     ]
   }
 }

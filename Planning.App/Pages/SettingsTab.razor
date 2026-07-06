@@ -69,6 +69,38 @@ else
                     </select>
                 </div>
                 <div class="field">
+                    <HelpLabel For="RunsOverMidnight" />
+                    <input type="checkbox" @bind="RunsOverMidnight" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="StartTime" />
+                    <input type="time" @bind="StartTime" @bind:after="OnEdited" disabled="@RunsOverMidnight" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="EndTime" />
+                    <input type="time" @bind="EndTime" @bind:after="OnEdited" disabled="@RunsOverMidnight" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="BreakForPrinting" />
+                    <span class="control">
+                        <input type="checkbox" @bind="UseBreak" @bind:after="OnEdited" />
+                        @if (UseBreak)
+                        {
+                            <input type="time" @bind="BreakTime" @bind:after="OnEdited" />
+                        }
+                    </span>
+                </div>
+
+                <div class="group-heading">@Translator("Reports")</div>
+                <div class="field">
+                    <HelpLabel For="UseObjectLanguageInReports" />
+                    <input type="checkbox" @bind="g.UseObjectLanguageInReports" @bind:after="OnEdited" />
+                </div>
+            }
+            else if (_section == SettingsSection.SessionDays)
+            {
+                var g = LayoutSettings.General;
+                <div class="field">
                     <HelpLabel For="UseDays" />
                     <input type="checkbox" @bind="g.UseDays" @bind:after="OnEdited" />
                 </div>
@@ -126,31 +158,6 @@ else
                         }
                     </div>
                 }
-
-                <div class="field">
-                    <HelpLabel For="StartTime" />
-                    <input type="time" @bind="StartTime" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <HelpLabel For="EndTime" />
-                    <input type="time" @bind="EndTime" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <HelpLabel For="BreakForPrinting" />
-                    <span class="control">
-                        <input type="checkbox" @bind="UseBreak" @bind:after="OnEdited" />
-                        @if (UseBreak)
-                        {
-                            <input type="time" @bind="BreakTime" @bind:after="OnEdited" />
-                        }
-                    </span>
-                </div>
-
-                <div class="group-heading">@Translator("Reports")</div>
-                <div class="field">
-                    <HelpLabel For="UseObjectLanguageInReports" />
-                    <input type="checkbox" @bind="g.UseObjectLanguageInReports" @bind:after="OnEdited" />
-                </div>
             }
             else if (_section == SettingsSection.GraphicTimetable)
             {
@@ -425,6 +432,26 @@ else
     private static TimeOnly ToTimeOfDay(TimeSpan value) =>
         TimeOnly.FromTimeSpan(value < TimeSpan.Zero ? TimeSpan.Zero : value > MaxTimeOfDay ? MaxTimeOfDay : value);
 
+    // When enabled, the operating window spans the whole day (00:00–23:59) and the start/end time
+    // fields are pinned to that range and disabled, so a timetable whose services run over midnight
+    // is graphed across the full day rather than a partial window.
+    private static readonly TimeSpan EndOfDay = new(23, 59, 0);
+
+    private bool RunsOverMidnight
+    {
+        get => LayoutSettings?.General.RunsOverMidnight ?? false;
+        set
+        {
+            if (LayoutSettings is null) return;
+            LayoutSettings.General.RunsOverMidnight = value;
+            if (value)
+            {
+                LayoutSettings.General.StartTime = TimeSpan.Zero;
+                LayoutSettings.General.EndTime = EndOfDay;
+            }
+        }
+    }
+
     private TimeOnly StartTime
     {
         get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.StartTime);
@@ -484,6 +511,7 @@ else
     private string SectionLabel(SettingsSection section) => Translator(section switch
     {
         SettingsSection.General => "General",
+        SettingsSection.SessionDays => "SessionDays",
         SettingsSection.GraphicTimetable => "GraphicalTimetable",
         SettingsSection.TimeAndSpeed => "TimeAndSpeed",
         SettingsSection.Validation => "Validation",
@@ -501,8 +529,9 @@ else
     private enum SettingsSection
     {
         General,
-        GraphicTimetable,
+        SessionDays,
         TimeAndSpeed,
+        GraphicTimetable,
         Validation,
         Integration
     }

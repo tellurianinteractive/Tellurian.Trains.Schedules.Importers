@@ -50,7 +50,13 @@ else
         else if (_mode == Mode.Edit && Editing is not null)
         {
             <div class="edit">
-                <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+                <div class="view-header">
+                    <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
+                    @if (!_isNew)
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
 
                 <div class="section">
                     <div class="field">
@@ -85,17 +91,13 @@ else
                     <p class="error">@_error</p>
                 }
 
-                <div class="form-actions">
-                    @if (_isNew)
-                    {
+                @if (_isNew)
+                {
+                    <div class="form-actions">
                         <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
                         <button @onclick="BackToList">@Translator("Cancel")</button>
-                    }
-                    else
-                    {
-                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         }
     </div>

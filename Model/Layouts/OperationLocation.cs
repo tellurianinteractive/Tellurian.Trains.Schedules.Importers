@@ -50,6 +50,15 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public string Signature { get; set; }
 
     /// <summary>
+    /// Gets or sets the <see cref="Country.Id"/> of the country this operation location is in, or
+    /// <c>null</c> when not specified. A new location defaults to the layout's default country
+    /// (see <c>IdentitySettings.DefaultCountryId</c>); the country is resolved through the layout's
+    /// saved catalogue (see <c>Layout.CountryById</c>). Not set by the XPLN import, which has no such
+    /// concept.
+    /// </summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>
     /// Gets or sets the module owner of this operation location. Used in FREMO meetings
     /// where stations are owned by the members who bring the modules. Optional.
     /// </summary>

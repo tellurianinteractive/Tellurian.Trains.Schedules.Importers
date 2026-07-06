@@ -1,0 +1,89 @@
+@using Tellurian.Trains.Schedules.Planning.Timetables
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@if (Timetable is not null)
+{
+    <div class="shift-trains-backdrop">
+        <div class="shift-trains-dialog">
+            <h3>@Translator("UpdateTimingsTitle")</h3>
+
+            <p class="hint">@Translator("UpdateTimingsHint")</p>
+
+            <div class="field">
+                <label>@Translator("Trains")</label>
+                <select multiple size="8" @onchange="OnSelectionChanged">
+                    @foreach (var train in TrainChoices)
+                    {
+                        <option value="@train.Id" selected="@_selectedIds.Contains(train.Id)">@train.ListLabel</option>
+                    }
+                </select>
+            </div>
+
+            @if (_error is not null)
+            {
+                <p class="error">@Translator(_error)</p>
+            }
+
+            <div class="actions">
+                <button class="primary" disabled="@(_selectedIds.Count == 0)" @onclick="Apply">@Translator("Update")</button>
+                <button @onclick="Abort">@Translator("Abort")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Raised after the selected trains' timings have been recomputed and the change has been saved.</summary>
+    [Parameter] public EventCallback OnApplied { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without changing anything.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+
+    private readonly HashSet<int> _selectedIds = [];
+    private string? _error;
+
+    // Trains ordered by number, the same order used elsewhere in the app.
+    private IEnumerable<Train> TrainChoices =>
+        (Timetable?.Trains ?? []).OrderBy(t => t.Number);
+
+    private void OnSelectionChanged(ChangeEventArgs e)
+    {
+        _selectedIds.Clear();
+        // A multi-select posts the chosen option values as a string array.
+        if (e.Value is string[] values)
+        {
+            foreach (var value in values)
+                if (int.TryParse(value, out var id)) _selectedIds.Add(id);
+        }
+        else if (e.Value is string single && int.TryParse(single, out var onlyId))
+        {
+            _selectedIds.Add(onlyId);
+        }
+        _error = null;
+    }
+
+    private async Task Apply()
+    {
+        _error = null;
+        if (Plan is not { } plan || Timetable is not { } timetable) return;
+
+        var trains = timetable.Trains.Where(t => _selectedIds.Contains(t.Id)).ToList();
+
+        // Each train is recomputed independently; report if any could not be updated (a missing stretch or a
+        // result that would fall outside the operating window), but keep the ones that succeeded.
+        var anyFailed = false;
+        foreach (var train in trains)
+            if (plan.UpdateTimings(train) is null) anyFailed = true;
+
+        ScheduleState.SaveAndNotify();
+
+        if (anyFailed) { _error = "TimingsUpdateFailed"; return; }
+        await OnApplied.InvokeAsync();
+    }
+
+    private Task Abort() => OnClosed.InvokeAsync();
+}

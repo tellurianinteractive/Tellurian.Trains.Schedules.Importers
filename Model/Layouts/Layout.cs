@@ -550,6 +550,7 @@ public static class LayoutOperationLocationConversionExtensions
             };
 
             // Carry over the shared base state and re-home the tracks (StationCall.Station follows Track.Station).
+            replacement.CountryId = existing.CountryId;
             replacement.Owner = existing.Owner;
             replacement.IsSignal = existing.IsSignal;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;

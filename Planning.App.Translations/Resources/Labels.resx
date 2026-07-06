@@ -285,6 +285,9 @@
   <data name="General" xml:space="preserve">
     <value>General</value>
   </data>
+  <data name="SessionDays" xml:space="preserve">
+    <value>Sessions &amp; Days</value>
+  </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Time &amp; Speed</value>
   </data>
@@ -302,6 +305,12 @@
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Start day</value>
+  </data>
+  <data name="RunsOverMidnight" xml:space="preserve">
+    <value>Runs over midnight?</value>
+  </data>
+  <data name="RunsOverMidnightHelp" xml:space="preserve">
+    <value>Span the whole day (00:00–23:59) so services running past midnight are graphed across the full day. The start and end times are then fixed and disabled.</value>
   </data>
   <data name="StartTime" xml:space="preserve">
     <value>Start time</value>
@@ -1150,6 +1159,21 @@
   </data>
   <data name="Clone" xml:space="preserve">
     <value>Clone</value>
+  </data>
+  <data name="UpdateTimings" xml:space="preserve">
+    <value>Update timings</value>
+  </data>
+  <data name="UpdateTimingsTitle" xml:space="preserve">
+    <value>Update timings</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="UpdateTimingsHint" xml:space="preserve">
+    <value>Recompute the run and dwell times of the selected trains from their current stop pattern, keeping each train's departure time fixed.</value>
+  </data>
+  <data name="TimingsUpdateFailed" xml:space="preserve">
+    <value>Some selected trains could not be updated because their new times would fall outside the plan's start or end times.</value>
   </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutes</value>

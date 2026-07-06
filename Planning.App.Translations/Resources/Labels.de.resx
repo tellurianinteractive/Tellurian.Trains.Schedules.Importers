@@ -288,6 +288,9 @@
   <data name="General" xml:space="preserve">
     <value>Allgemein</value>
   </data>
+  <data name="SessionDays" xml:space="preserve">
+    <value>Sessions &amp; Tage</value>
+  </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Zeit &amp; Geschwindigkeit</value>
   </data>
@@ -305,6 +308,12 @@
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Starttag</value>
+  </data>
+  <data name="RunsOverMidnight" xml:space="preserve">
+    <value>Läuft über Mitternacht?</value>
+  </data>
+  <data name="RunsOverMidnightHelp" xml:space="preserve">
+    <value>Umfasst den ganzen Tag (00:00–23:59), damit über Mitternacht verkehrende Züge über den gesamten Tag dargestellt werden. Start- und Endzeit sind dann fest und deaktiviert.</value>
   </data>
   <data name="StartTime" xml:space="preserve">
     <value>Startzeit</value>
@@ -1148,6 +1157,21 @@
   </data>
   <data name="Clone" xml:space="preserve">
     <value>Kopieren</value>
+  </data>
+  <data name="UpdateTimings" xml:space="preserve">
+    <value>Zeiten aktualisieren</value>
+  </data>
+  <data name="UpdateTimingsTitle" xml:space="preserve">
+    <value>Zeiten aktualisieren</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Aktualisieren</value>
+  </data>
+  <data name="UpdateTimingsHint" xml:space="preserve">
+    <value>Berechnet die Fahr- und Haltezeiten der ausgewählten Züge anhand ihres aktuellen Haltemusters neu, wobei die Abfahrtszeit jedes Zuges unverändert bleibt.</value>
+  </data>
+  <data name="TimingsUpdateFailed" xml:space="preserve">
+    <value>Einige ausgewählte Züge konnten nicht aktualisiert werden, weil ihre neuen Zeiten außerhalb der Start- oder Endzeit des Plans lägen.</value>
   </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minuten</value>

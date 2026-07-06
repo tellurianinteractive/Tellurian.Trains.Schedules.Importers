@@ -21,21 +21,25 @@ public class PlanOperatingWindowTests
     private static Train CreateTrain(Plan plan) =>
         plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start)!;
 
-    private static void SetWindow(Plan plan, TimeSpan start, TimeSpan end)
+    private static void SetWindow(Plan plan, TimeSpan start, TimeSpan end, bool runsOverMidnight = false)
     {
         plan.Layout.Settings.General.StartTime = start;
         plan.Layout.Settings.General.EndTime = end;
+        plan.Layout.Settings.General.RunsOverMidnight = runsOverMidnight;
     }
 
     [TestMethod]
-    public void IsWrappingMidnightIsTrueOnlyForTheWholeDayWindow()
+    public void IsWrappingMidnightIsDrivenByTheRunsOverMidnightFlag()
     {
         var plan = SimplePlan();
 
-        SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(20));
+        // A plain whole-day window does not wrap on its own: without the flag a train may not spill
+        // into the next day.
+        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0));
         Assert.IsFalse(plan.IsWrappingMidnight);
 
-        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0));
+        // The flag alone makes the window wrap.
+        plan.Layout.Settings.General.RunsOverMidnight = true;
         Assert.IsTrue(plan.IsWrappingMidnight);
     }
 
@@ -74,7 +78,7 @@ public class PlanOperatingWindowTests
     public void MoveMayTakeTheTrainPastMidnightWhenTheWindowWrapsMidnight()
     {
         var plan = SimplePlan();
-        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0));
+        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0), runsOverMidnight: true);
         var train = CreateTrain(plan);
 
         // Shift the start to 23:55; the train then runs on past midnight, which is allowed only because the
@@ -91,7 +95,7 @@ public class PlanOperatingWindowTests
     public void CloneMayTakeTheCopyPastMidnightWhenTheWindowWrapsMidnight()
     {
         var plan = SimplePlan();
-        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0));
+        SetWindow(plan, TimeSpan.Zero, new TimeSpan(23, 59, 0), runsOverMidnight: true);
         var train = CreateTrain(plan);
 
         var minutes = 23 * 60 + 55 - (int)train.DriverStartTime.Value.TotalMinutes;

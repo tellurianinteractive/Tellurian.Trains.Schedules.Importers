@@ -39,6 +39,7 @@ else
                 <QuickGrid Items="Locations" Class="grid" Theme="tellurian">
                     <PropertyColumn Property="o => o.Signature" Title='@Translator("Signature")' Sortable="true" />
                     <PropertyColumn Property="o => o.Name" Title='@Translator("Name")' Sortable="true" />
+                    <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<OperationLocation>.ByAscending(o => o.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Type")'>@Translator(TypeKey(context))</TemplateColumn>
                     <TemplateColumn Title='@Translator("Regions")'>
                         @if (context is Station { Regions.Count: > 0 } regionStation)
@@ -81,7 +82,13 @@ else
         else if (_mode == Mode.Edit && Editing is not null)
         {
             <div class="edit">
-                <h2>@(_isNew ? $"{Translator(TypeKey(Editing))} — {Translator("AddNew")}" : Editing.Name)</h2>
+                <div class="view-header">
+                    <h2>@(_isNew ? $"{Translator(TypeKey(Editing))} — {Translator("AddNew")}" : Editing.Name)</h2>
+                    @if (!_isNew)
+                    {
+                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    }
+                </div>
 
                 <div class="section">
                     @if (!_isNew)
@@ -102,6 +109,11 @@ else
                     <div class="field">
                         <HelpLabel For="Signature" />
                         <input type="text" @bind="Editing.Signature" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Country")</label>
+                        <ListBoxView Items="@(CountryChoices.ToListItems(Translator))" Placeholder="—"
+                                     Value="Editing.CountryId" ValueChanged="@(id => { Editing!.CountryId = id; OnEdited(); })" />
                     </div>
                     <div class="field">
                         <HelpLabel For="Owner" />
@@ -248,26 +260,27 @@ else
                     <p class="error">@_error</p>
                 }
 
-                <div class="form-actions">
-                    @if (_isNew)
-                    {
+                @if (_isNew)
+                {
+                    <div class="form-actions">
                         <button class="primary" @onclick="SaveNew">@Translator("Save")</button>
                         <button @onclick="BackToList">@Translator("Cancel")</button>
-                    }
-                    else
-                    {
-                        <button class="primary" @onclick="BackToList">@Translator("Close")</button>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         }
         else if (_mode == Mode.Info && _selected is not null)
         {
             <div class="info">
-                <h2>@_selected.Name (@_selected.Signature)</h2>
+                <div class="view-header">
+                    <h2>@_selected.Name (@_selected.Signature)</h2>
+                    <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                </div>
                 <dl>
                     <dt>@Translator("Type")</dt>
                     <dd>@Translator(TypeKey(_selected))</dd>
+                    <dt>@Translator("Country")</dt>
+                    <dd>@CountryName(_selected.CountryId)</dd>
                     <dt>@Translator("Owner")</dt>
                     <dd>@(string.IsNullOrWhiteSpace(_selected.Owner) ? "—" : _selected.Owner)</dd>
                     <dt>@Translator("PhoneNumber")</dt>
@@ -346,9 +359,6 @@ else
                     <p class="empty">—</p>
                 }
 
-                <div class="form-actions">
-                    <button class="primary" @onclick="BackToList">@Translator("Close")</button>
-                </div>
             </div>
         }
     </div>
@@ -374,9 +384,23 @@ else
     private OperationLocation? _deleteTarget;
     private string? _error;
 
-    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        // Make sure the countries this layout references are in its catalogue (older/imported layouts
+        // may not have them yet); only persist when something was actually added.
+        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+    }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // The location's country, shown in the current UI language; "—" when not set.
+    private string CountryName(int? countryId) =>
+        Layout!.CountryById(countryId) is { } c ? Translator(c.ResourceKey) : "—";
+
+    // Countries saved with the layout, sorted by their name in the current UI language.
+    private IEnumerable<Country> CountryChoices =>
+        Layout!.Countries.OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture);
 
     public void Dispose()
     {
@@ -416,6 +440,7 @@ else
         };
         created.Name = "";
         created.Signature = "";
+        created.CountryId = Layout!.Settings.Identity.DefaultCountryId;
         Editing = created;
         _isNew = true;
         _addingType = false;

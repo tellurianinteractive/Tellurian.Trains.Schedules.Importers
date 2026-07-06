@@ -19,6 +19,7 @@ else
         <button class="primary" @onclick="() => _showAdd = true">@Translator("AddTrain")</button>
         <button @onclick="() => _showMove = true">@Translator("MoveTrains")</button>
         <button @onclick="() => _showClone = true">@Translator("CloneTrains")</button>
+        <button @onclick="() => _showUpdateTimings = true">@Translator("UpdateTimings")</button>
     </div>
 
     <div class="selectors">
@@ -80,6 +81,11 @@ else
     {
         <ShiftTrainsDialog IsClone="true" OnApplied="() => _showClone = false" OnClosed="() => _showClone = false" />
     }
+
+    @if (_showUpdateTimings)
+    {
+        <UpdateTimingsDialog OnApplied="() => _showUpdateTimings = false" OnClosed="() => _showUpdateTimings = false" />
+    }
 }
 
 @code {
@@ -88,6 +94,7 @@ else
     private bool _showAdd;
     private bool _showMove;
     private bool _showClone;
+    private bool _showUpdateTimings;
 
     // The first/last-half selector is only meaningful when a break time is configured.
     private bool HasBreak => ScheduleState.Layout?.Settings.General.BreakTime is not null;

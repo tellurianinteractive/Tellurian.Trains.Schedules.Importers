@@ -26,6 +26,13 @@ public sealed class GeneralSettings
     public TimeSpan EndTime { get; set; } = TimeSpan.FromHours(20);
 
     /// <summary>
+    /// When <c>true</c>, the operating window spans the whole day: <see cref="StartTime"/> is pinned to
+    /// 00:00 and <see cref="EndTime"/> to 23:59, so a timetable whose services run over midnight is
+    /// graphed across the full day. The start/end time fields are disabled while this is set. Default is <c>false</c>.
+    /// </summary>
+    public bool RunsOverMidnight { get; set; }
+
+    /// <summary>
     /// Optional fast-clock break that splits the graphical timetable into two halves when printing:
     /// the first half is <see cref="StartTime"/>–<see cref="BreakTime"/>, the second half is
     /// <see cref="BreakTime"/>–<see cref="EndTime"/>. <c>null</c> means no break.

@@ -263,6 +263,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Signature).HasMaxLength(10).IsRequired();
+            entity.Property(e => e.CountryId);
 
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
 

@@ -288,6 +288,9 @@
   <data name="General" xml:space="preserve">
     <value>Generelt</value>
   </data>
+  <data name="SessionDays" xml:space="preserve">
+    <value>Sessioner &amp; dage</value>
+  </data>
   <data name="TimeAndSpeed" xml:space="preserve">
     <value>Tid &amp; hastighed</value>
   </data>
@@ -305,6 +308,12 @@
   </data>
   <data name="StartDay" xml:space="preserve">
     <value>Startdag</value>
+  </data>
+  <data name="RunsOverMidnight" xml:space="preserve">
+    <value>Kører over midnat?</value>
+  </data>
+  <data name="RunsOverMidnightHelp" xml:space="preserve">
+    <value>Omfatter hele døgnet (00:00–23:59), så tog der kører over midnat, vises over hele dagen. Start- og sluttidspunkt låses da og deaktiveres.</value>
   </data>
   <data name="StartTime" xml:space="preserve">
     <value>Starttidspunkt</value>
@@ -1148,6 +1157,21 @@
   </data>
   <data name="Clone" xml:space="preserve">
     <value>Kopiér</value>
+  </data>
+  <data name="UpdateTimings" xml:space="preserve">
+    <value>Opdatér tider</value>
+  </data>
+  <data name="UpdateTimingsTitle" xml:space="preserve">
+    <value>Opdatér tider</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Opdatér</value>
+  </data>
+  <data name="UpdateTimingsHint" xml:space="preserve">
+    <value>Genberegn køre- og opholdstiderne for de valgte tog ud fra deres nuværende stopmønster, med hvert togs afgangstid uændret.</value>
+  </data>
+  <data name="TimingsUpdateFailed" xml:space="preserve">
+    <value>Nogle valgte tog kunne ikke opdateres, fordi deres nye tider ville falde uden for planens start- eller sluttid.</value>
   </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutter</value>

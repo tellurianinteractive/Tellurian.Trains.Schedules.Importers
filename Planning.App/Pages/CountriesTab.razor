@@ -44,10 +44,12 @@ else
 
         @if (_deleteTarget is not null)
         {
-            <div class="confirm">
-                <span>@string.Format(Culture, Translator("DeleteCountryConfirm"), Translator(_deleteTarget.ResourceKey))</span>
-                <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
-                <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+            <div class="confirm-backdrop" @onclick="() => _deleteTarget = null">
+                <div class="confirm" @onclick:stopPropagation="true">
+                    <span>@string.Format(Culture, Translator("DeleteCountryConfirm"), Translator(_deleteTarget.ResourceKey))</span>
+                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
             </div>
         }
     </div>

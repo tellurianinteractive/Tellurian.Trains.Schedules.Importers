@@ -99,19 +99,47 @@
         pointer-events: none;
     }
 
-    .confirm {
+    /* Centred overlay so the confirmation is always in view, no matter how long the
+       list is or where the deleted item sits in it. */
+    .confirm-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 0.9rem;
-        padding: 0.6rem 0.75rem;
-        background: #fbeaea;
-        border: 1px solid #e0b4b4;
-        border-radius: 5px;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.35);
+
+        .confirm {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            max-width: 90vw;
+            padding: 0.9rem 1.1rem;
+            background: #fbeaea;
+            border: 1px solid #e0b4b4;
+            border-radius: 5px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
     }
 
     /* Edit form */
+    /* Title on the left, Close on the right, kept at the top of the view so it is
+       always reachable without scrolling past the form. */
+    .view-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .view-header h2 {
+        margin: 0;
+    }
+
     .edit h2 {
         color: var(--primary);
         font-size: 1.2rem;

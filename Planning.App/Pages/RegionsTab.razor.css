@@ -96,6 +96,20 @@
     }
 
     /* Edit form */
+    /* Title on the left, Close on the right, kept at the top of the view so it is
+       always reachable without scrolling past the form. */
+    .view-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .view-header h2 {
+        margin: 0;
+    }
+
     .edit h2 {
         color: var(--primary);
         font-size: 1.2rem;

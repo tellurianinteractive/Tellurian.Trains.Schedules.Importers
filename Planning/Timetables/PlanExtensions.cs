@@ -167,20 +167,13 @@ public static class PlanExtensions
     extension(Plan plan)
     {
         /// <summary>
-        /// Gets whether the plan's operating window wraps around midnight. This is the special case where the
-        /// window spans the whole day, from 00:00 to 23:59 (<see cref="Model.Settings.GeneralSettings.StartTime"/>
-        /// is midnight and <see cref="Model.Settings.GeneralSettings.EndTime"/> is 23:59). When it wraps, a train
-        /// may start before midnight and continue past it; otherwise every train must fit entirely within the
-        /// window (see <c>FitsWithinOperatingWindow</c>).
+        /// Gets whether the plan's operating window wraps around midnight, driven solely by
+        /// <see cref="Model.Settings.GeneralSettings.RunsOverMidnight"/>. When set, a train may start before
+        /// midnight and continue past it; otherwise every train must fit entirely within the window
+        /// (see <c>FitsWithinOperatingWindow</c>). A plain 00:00–23:59 window without the flag does not wrap,
+        /// so a train spilling into the next day is rejected.
         /// </summary>
-        public bool IsWrappingMidnight
-        {
-            get
-            {
-                var general = plan.Layout.Settings.General;
-                return general.StartTime == TimeSpan.Zero && general.EndTime == new TimeSpan(23, 59, 0);
-            }
-        }
+        public bool IsWrappingMidnight => plan.Layout.Settings.General.RunsOverMidnight;
 
         /// <summary>
         /// Gets whether <paramref name="train"/> fits within the plan's operating window: its whole span, from the
@@ -303,7 +296,7 @@ public static class PlanExtensions
                     }
                     else if (StopsAt(location))
                     {
-                        departure = arrival.AddMinutes(DwellMinutes(location, directionChanges.Contains(location)));
+                        departure = arrival.AddMinutes(plan.DwellMinutes(location, directionChanges.Contains(location)));
                         (isArrival, isDeparture) = (true, true);
                     }
                     else
@@ -342,16 +335,6 @@ public static class PlanExtensions
                 var passenger = category.IsPassenger && location.HasPassengerExchange;
                 var freight = category.IsFreight && location.HasCargoExchange;
                 return passenger || freight;
-            }
-
-            // Fast-clock dwell: at least the minimum stop; where the path reverses, at least the loco runaround
-            // (a real duration converted to fast-clock minutes).
-            int DwellMinutes(OperationLocation location, bool reverses)
-            {
-                var minimumStop = location.Timings.MinimumStopMinutes ?? settings.StationTimings.MinimumStopMinutes ?? 3;
-                if (!reverses) return minimumStop;
-                var runaroundReal = location.Timings.LocoRunaroundRealMinutes ?? settings.StationTimings.LocoRunaroundRealMinutes ?? 5;
-                return Math.Max(minimumStop, runaroundReal * settings.FastClockSpeed);
             }
 
             // Prefer a scheduled main track, then any scheduled track, then any track at all.
@@ -499,6 +482,105 @@ public static class PlanExtensions
             int NextTrainNumber() => plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
             int NextCallId() => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
         }
+
+        /// <summary>
+        /// Recomputes every call's arrival and departure times of <paramref name="train"/> from its current
+        /// stop pattern (the <see cref="StationCall.IsStop"/> flags), keeping the origin's departure fixed.
+        /// Use this after changing which stations a train stops at so the run and dwell times follow the new
+        /// pattern.
+        /// </summary>
+        /// <remarks>
+        /// The origin call is left untouched: its departure is the fixed anchor and its arrival keeps the
+        /// existing preparation dwell. From there each leg's run time is recomputed with
+        /// <see cref="TrainExtensions.ScheduledTravelMinutes"/> over the <see cref="TrackStretch"/> between the
+        /// two calls, using the train's effective speed. At a call that is now a stop the dwell is preserved
+        /// when the call already had one (so an intentional or terminus finishing dwell is kept); a call that
+        /// has just become a stop (its times were equal) is given the standard dwell from
+        /// <see cref="DwellMinutes"/>, including the loco runaround where the travel direction reverses. A call
+        /// that is now a pass-through gets equal arrival and departure times (no dwell). The change is
+        /// all-or-nothing: it is not applied and <c>null</c> is returned when two consecutive calls are not
+        /// joined by a track stretch, or when the recomputed train would fall outside the plan's operating
+        /// window (see <c>FitsWithinOperatingWindow</c>).
+        /// </remarks>
+        /// <param name="train">The train whose timings to recompute. Cannot be null.</param>
+        /// <returns>The updated train, or <c>null</c> when the timings could not be recomputed (a missing
+        /// stretch) or the result would not fit the operating window.</returns>
+        public Train? UpdateTimings(Train train)
+        {
+            ArgumentNullException.ThrowIfNull(train);
+            var calls = train.Calls.ToArray();
+            if (calls.Length < 2) return train;
+
+            var settings = plan.Layout.Settings.TimeAndSpeed;
+
+            // Resolve the stretch and its travel direction for each leg between consecutive calls.
+            var legs = new (TrackStretch Stretch, bool Forward)[calls.Length - 1];
+            for (var i = 0; i < legs.Length; i++)
+            {
+                var from = calls[i].OperationLocation;
+                var to = calls[i + 1].OperationLocation;
+                if (plan.StretchBetween(from, to) is not { } stretch) return null;
+                legs[i] = (stretch, stretch.Start.Equals(from));
+            }
+
+            // A call where the travel direction reverses needs a loco runaround (see DwellMinutes). Direction
+            // is taken relative to each stretch's own Start/End, the same convention the path finder uses.
+            var reverses = new bool[calls.Length];
+            for (var i = 1; i < legs.Length; i++)
+                reverses[i] = legs[i].Forward != legs[i - 1].Forward;
+
+            // Compute the new times into buffers first so the update is all-or-nothing.
+            var arrivals = new Time[calls.Length];
+            var departures = new Time[calls.Length];
+            arrivals[0] = calls[0].Arrival;      // origin keeps its preparation dwell
+            departures[0] = calls[0].Departure;  // origin departure is the fixed anchor
+
+            for (var i = 1; i < calls.Length; i++)
+            {
+                var runMinutes = Math.Max(1, (int)Math.Round(train.ScheduledTravelMinutes(legs[i - 1].Stretch, settings)));
+                arrivals[i] = departures[i - 1].AddMinutes(runMinutes);
+
+                var call = calls[i];
+                if (call.IsStop)
+                {
+                    // Keep a dwell the call already has (an intentional stop or the terminus finishing time);
+                    // give a newly-added stop (its times were equal) the standard dwell.
+                    var existingDwell = (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
+                    var dwell = existingDwell > 0 ? existingDwell : plan.DwellMinutes(call.OperationLocation, reverses[i]);
+                    departures[i] = arrivals[i].AddMinutes(dwell);
+                }
+                else
+                {
+                    departures[i] = arrivals[i]; // pass-through: no dwell
+                }
+            }
+
+            // The recomputed train must still fit the plan's operating window.
+            if (!plan.OperatingWindowContains(arrivals[0], departures[^1])) return null;
+
+            for (var i = 0; i < calls.Length; i++)
+            {
+                calls[i].Arrival = arrivals[i];
+                calls[i].Departure = departures[i];
+            }
+            return train;
+        }
+
+        // Fast-clock dwell: at least the minimum stop; where the path reverses, at least the loco runaround
+        // (a real duration converted to fast-clock minutes).
+        private int DwellMinutes(OperationLocation location, bool reverses)
+        {
+            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var minimumStop = location.Timings.MinimumStopMinutes ?? settings.StationTimings.MinimumStopMinutes ?? 3;
+            if (!reverses) return minimumStop;
+            var runaroundReal = location.Timings.LocoRunaroundRealMinutes ?? settings.StationTimings.LocoRunaroundRealMinutes ?? 5;
+            return Math.Max(minimumStop, runaroundReal * settings.FastClockSpeed);
+        }
+
+        // The single track stretch joining two locations, in either orientation; null when none exists.
+        private TrackStretch? StretchBetween(OperationLocation a, OperationLocation b) =>
+            plan.Layout.TrackStretches.FirstOrDefault(s =>
+                (s.Start.Equals(a) && s.End.Equals(b)) || (s.Start.Equals(b) && s.End.Equals(a)));
 
     }
 }
