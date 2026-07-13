@@ -11,14 +11,14 @@
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
   </Folder>
-  <Project Path="Importers.Access.Tests/Access.Tests.csproj" />
-  <Project Path="Importers.Access/Access.csproj" />
-  <Project Path="Importers.Interfaces.Tests/Interfaces.Tests.csproj" />
-  <Project Path="Importers.Interfaces/Interfaces.csproj" />
-  <Project Path="Importers.Services.Tests/Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
-  <Project Path="Importers.Services/Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
-  <Project Path="Importers.Xpln.Tests/Xpln.Tests.csproj" />
-  <Project Path="Importers.Xpln/Xpln.csproj" />
+  <Project Path="Importers.Access.Tests/Importers.Access.Tests.csproj" />
+  <Project Path="Importers.Access/Importers.Access.csproj" />
+  <Project Path="Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj" />
+  <Project Path="Importers.Interfaces/Importers.Interfaces.csproj" />
+  <Project Path="Importers.Services.Tests/Importers.Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
+  <Project Path="Importers.Services/Importers.Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
+  <Project Path="Importers.Xpln.Tests/Importers.Xpln.Tests.csproj" />
+  <Project Path="Importers.Xpln/Importers.Xpln.csproj" />
   <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
   <Project Path="Model.Databases/Model.Databases.csproj" />
   <Project Path="Model.Tests/Model.Tests.csproj" />

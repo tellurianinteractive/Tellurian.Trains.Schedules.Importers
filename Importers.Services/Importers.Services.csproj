@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<AssemblyName>Tellurian.Trains.Schedules.Importers.Services</AssemblyName>
 		<RootNamespace>Tellurian.Trains.Schedules.Importers.Services</RootNamespace>
@@ -23,7 +23,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
+	  <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
 	  <ProjectReference Include="..\Model\Model.csproj" />
 	</ItemGroup>
 	<ItemGroup>

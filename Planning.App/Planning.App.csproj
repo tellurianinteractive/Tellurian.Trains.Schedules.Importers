@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
 		<AssemblyName>Tellurian.Trains.Schedules.Planning.App</AssemblyName>
@@ -35,8 +35,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Importers.Services\Services.csproj" />
-		<ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+		<ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+		<ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
 		<ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
 		<ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
 	</ItemGroup>
