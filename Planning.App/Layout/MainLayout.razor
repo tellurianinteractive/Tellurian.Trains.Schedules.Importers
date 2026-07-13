@@ -15,6 +15,7 @@
     <header class="top-bar no-print">
         <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span></h1>
         <div class="top-bar-actions">
+            <ValidationIndicator />
             <LanguageSelector />
             <button class="header-btn" @onclick="ToggleAbout">@Translator("About")</button>
         </div>

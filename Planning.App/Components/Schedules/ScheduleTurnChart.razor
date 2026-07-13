@@ -28,7 +28,7 @@ else
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
                             <span class="chip" title="@Translator(vehicle.ObjectType.ToString())">
-                                @VehicleLabel(vehicle)
+                                @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
                                     <span class="sessions">@SessionsDisplay.Text(assignment.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
@@ -185,13 +185,6 @@ else
         var to = $"{part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
         return new Segment(from, identity, to, color, color.TextColor, $"{from} – {identity} – {to}");
     }
-
-    // The vehicle's external id is its identity everywhere else (e.g. "DB 101 01"); fall back to its
-    // class and number when a vehicle carries no external id.
-    private static string VehicleLabel(ScheduledObject vehicle) =>
-        !string.IsNullOrWhiteSpace(vehicle.ExternalId)
-            ? vehicle.ExternalId!
-            : $"{vehicle.Class} {vehicle.Number}".Trim();
 
     private sealed record Segment(string From, string Identity, string To, string Color, string TextColor, string Title);
 }

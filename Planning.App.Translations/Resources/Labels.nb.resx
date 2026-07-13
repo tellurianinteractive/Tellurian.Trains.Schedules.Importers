@@ -1548,4 +1548,10 @@
   <data name="ChooseExistingVehicle" xml:space="preserve">
     <value>Velg eksisterende kjøretøy</value>
   </data>
+  <data name="Conflicts" xml:space="preserve">
+    <value>Konflikter</value>
+  </data>
+  <data name="NoConflicts" xml:space="preserve">
+    <value>Ingen konflikter</value>
+  </data>
 </root>

@@ -261,4 +261,10 @@
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Fahrzeugplan {0}: {1} setzt nicht dort fort, wo der vorherige Teil bei {2} endete.</value>
   </data>
+  <data name="ScheduleDoesNotReturnToStart" xml:space="preserve">
+    <value>Fahrzeugplan {0} verkehrt in jeder Fahrrunde, kehrt aber nicht zu seinem Ausgangspunkt {1} zurück; er endet bei {2}.</value>
+  </data>
+  <data name="SessionCombinationDoesNotReturnToStart" xml:space="preserve">
+    <value>Fahrzeug {0} in den Fahrrunden {1} kehrt nicht zu seinem Ausgangspunkt {2} zurück; es endet bei {3}.</value>
+  </data>
 </root>

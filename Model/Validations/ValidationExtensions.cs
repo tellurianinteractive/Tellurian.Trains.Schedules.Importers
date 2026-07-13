@@ -23,7 +23,9 @@ public static class ValidationExtensions
             result.AddRange(plan.GetTimetableValidationErrors(options));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateScheduleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
+            if (options.ValidateDriverDuties) result.AddRange(plan.ValidateSessionCombinationClosure());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
             return result;
         }
@@ -113,12 +115,73 @@ public static class ValidationExtensions
 
                         if (a1.Sessions.Overlaps(a2.Sessions))
                         {
-                            var message = Message.Information(Strings.VehicleIsDoubleBooked, vehicle.Number, a1.Sessions.SessionsNumbers, a2.Sessions.SessionsNumbers);
+                            var message = Message.Information(Strings.VehicleIsDoubleBooked, vehicle.Designation, a1.Sessions.SessionsNumbers, a2.Sessions.SessionsNumbers);
                             yield return ValidationError.VehicleDoubleBooked(vehicle, a1, a2, message);
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Validates schedule circulation closure (rule S3): a vehicle schedule that runs the whole
+        /// operating period must return the vehicle to the station it started from, so it can repeat the
+        /// working next session. A schedule that runs only a subset of sessions is not checked here — it
+        /// may be closed by a complementary schedule on the remaining sessions. Schedules whose trains are
+        /// all on demand are exempt (they need not return), and cargo flows (waybill-directed, not a
+        /// returning circulation) are skipped.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateScheduleClosure()
+        {
+            var general = plan.Layout.Settings.General;
+            var errors = new List<ValidationError>();
+            foreach (var schedule in plan.Schedules)
+            {
+                if (schedule.Parts.Count == 0) continue;
+                // Circulation closure is a traction concept: a locomotive or trainset must return to be
+                // reused next session. Wagons and cargo flows are repositioned by other workings, so they
+                // are not required to close (see rule S3's "starting traction unit").
+                if (!schedule.Vehicles.Any(v => v.IsTraction)) continue;
+                if (schedule.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
+                if (!schedule.EffectiveSessions.CoversAllWithin(general.UseDays, general.MaxSessions)) continue;
+                var start = schedule.StartLocation;
+                var end = schedule.EndLocation;
+                if (start is null || end is null || start.Equals(end)) continue;
+                var message = Message.Information(Strings.ScheduleDoesNotReturnToStart, schedule.Number, start, end);
+                errors.Add(ValidationError.ScheduleNotClosed(schedule, message));
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates session-combination closure (rule S5): when a vehicle works different parts on
+        /// different sessions/days it has more than one session combination, and each such combination
+        /// must return the vehicle to its start station (each conforming to S3). A vehicle with a single
+        /// combination is already covered by <see cref="ValidateScheduleClosure"/>. On-demand combinations
+        /// and cargo flows are exempt.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateSessionCombinationClosure()
+        {
+            var general = plan.Layout.Settings.General;
+            var errors = new List<ValidationError>();
+            foreach (var vehicle in plan.ScheduledObjects)
+            {
+                // Closure applies to traction units (see S3); wagons and cargo flows are repositioned.
+                if (!vehicle.IsTraction) continue;
+                var combinations = vehicle.SessionCombinations(general.UseDays, general.MaxSessions);
+                if (combinations.Count < 2) continue; // single combination: covered by S3 on the schedule
+                foreach (var combination in combinations)
+                {
+                    if (combination.Parts.Count == 0) continue;
+                    if (combination.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
+                    var start = combination.Parts[0].From.OperationLocation;
+                    var end = combination.Parts[^1].To.OperationLocation;
+                    if (start.Equals(end)) continue;
+                    var message = Message.Information(Strings.SessionCombinationDoesNotReturnToStart, vehicle.Designation, combination.Sessions.SessionsNumbers, start, end);
+                    errors.Add(ValidationError.SessionCombinationNotClosed(vehicle, combination, message));
+                }
+            }
+            return errors;
         }
     }
 
@@ -130,9 +193,16 @@ public static class ValidationExtensions
         /// built through <see cref="ScheduleExtensions.Append"/> are contiguous by construction; this
         /// catches schedules assembled unconditionally (e.g. reconstructed from an XPLN import).
         /// </summary>
+        /// <remarks>
+        /// A schedule whose parts overlap in time is not a single vehicle's working (for example two
+        /// vehicles that an import merged under one identifier). Its overlap is already reported by S1
+        /// (<see cref="ValidateOverlappingParts"/>) and ordering its parts to test contiguity would only
+        /// produce misleading cascades, so such a schedule is skipped here.
+        /// </remarks>
         private List<ValidationError> ValidateContiguity()
         {
             var errors = new List<ValidationError>();
+            if (schedule.HasOverlappingParts()) return errors;
             var parts = schedule.OrderedParts;
             for (var i = 0; i < parts.Count - 1; i++)
             {
@@ -145,6 +215,21 @@ public static class ValidationExtensions
                 }
             }
             return errors;
+        }
+
+        /// <summary>
+        /// Determines whether any two of the schedule's parts overlap in time (one vehicle cannot be in
+        /// two places at once). Used to gate the contiguity check (S2), which is meaningful only for a
+        /// schedule that could be a single vehicle's working.
+        /// </summary>
+        private bool HasOverlappingParts()
+        {
+            var parts = schedule.Parts.ToArray();
+            for (var i = 0; i < parts.Length - 1; i++)
+                for (var j = i + 1; j < parts.Length; j++)
+                    if (parts[i].To.Arrival > parts[j].From.Departure && parts[i].From.Departure < parts[j].To.Arrival)
+                        return true;
+            return false;
         }
 
         private List<ValidationError> ValidateOverlappingParts()

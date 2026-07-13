@@ -123,6 +123,17 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public override int GetHashCode() => HashCode.Combine(ObjectType, ExternalId?.ToUpperInvariant());
 
     /// <summary>
+    /// The vehicle's identity for display and validation messages: its <see cref="ExternalId"/> (how a
+    /// vehicle is identified everywhere else in the app, e.g. "DBSCH EG 01"), falling back to its class
+    /// and number when it carries no external id. More informative and consistent than <see cref="Number"/>
+    /// alone, which is not unique across vehicle types.
+    /// </summary>
+    public string Designation =>
+        !string.IsNullOrWhiteSpace(ExternalId)
+            ? ExternalId
+            : $"{Class} {Number}".Trim();
+
+    /// <summary>
     /// Full description of <see cref="ScheduledObject"/>
     /// </summary>
     /// <returns></returns>

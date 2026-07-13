@@ -25,27 +25,45 @@ Passenger trains (defined in train catecory) bold text, other trains normal text
 - We may need to adjust the text size so single arrivals/departures don't wrap.
 - Train-identity is Company Prefix Number Suffix white-space trimmed, I think this function already exists.
 
-Now, a train is unique by its Company, Category, Train.Number AND train.Sessions.  When trains equals on Commpany+Category+Train.Number, each instance MUST operate on different non-overlapping sessions, otherwise it is a planning error that should ether be prevented or notified to the user to correct.
-
-There will be sitiations where trains will be groped on Company+Category+Train.Number with sessions OR'ed to create a common sessions. This grouping should only be permitted if sessions for the grouped trains are exclusive, e.g. 
+Now, a train is unique by its Company, Category, Train.Number AND train.Sessions.  When trains equals on Commpany+Category+Train.Number, each instance MUST operate on different non-overlapping sessions, otherwise it is a planning error that should ether be prevented or notified to the user to correct. There will be sitiations where trains will be groped on Company+Category+Train.Number with sessions OR'ed to create a common sessions. This grouping should only be permitted if sessions for the grouped trains are exclusive, e.g. 
 
 In the graphical timetable, if on one track stretch there are two or more trains that are equal (except sessions) and with same departue time/track and same arrival/track and only differts by the session, draw only one graph, and the session/days displayed should be the union of the trains sessions. Note that this should be applied per TRACK STRETCH, because in the next track stretch they may have a different timing.  
 
 Displaying scheduling conflicts. In the ValidationExtensions.cs there are methods that checks for planning conflicts or inconsistencies. I want these to show up in the appropriate gui components (e.g. graphical timetable, schedules tab etc).  One idea is to highlight in the graphical view itself, another is to display a warning icon in the toolbar, and show a list when hovering or clicking on it. Can you evaluate pros and cons with these two variants. I really want the yellow bacground highlight in the gui-components where hovering over it displays whats wrong, but there are challenges how to highlight. Maybe implement both variants? An example of location of an error list is first/above in the Gui-component pushing the rest content down.
 
+Examples of actions that can cause validation errors: 
+- Moving a train in time, causes overlapping trains in schedules.
+- Moving a train in time, causes train meets between station on a single track.
+- Shortening or extending a train, causing schedules to break that next train should start where the previous ends.
 
 
-Validation rules, the list below is not complete, byt should be compared with what's actually implemented:
-1. Trains can only meet at stations and on stretches that has at least two tracks.
+We should now work with Train and Schedule validation rules. Two goals: update the Requirements Specification and check what is missing or additional in the implemented Validation Rules. All validation rules follow the same patten
+0. Data consistency must be upheld, no dangling references, prevention of deleting objects that have dependencies
+Validation rules below can be violated but must be fixed before the plan is ready to publish.
+1. Trains can only meet at stations and stretches that has at least two tracks.
 2. Trains cannot meet at the same track on a station. 
-3. More that one train can end in the same track on a station.
+3. Only one train can occupy a station track at any given time.
 4. The maximum number of trains in any direction on a track stretch is equal to the number of tracks.
 5. Train call times must be ascending, and at an operation location arrival time must not be after departure time.
-6. All train's parts must be part of a schedule. Parts can be in different schedules, the same part can be in different schedules for different operating sessions. No part can be assigned to a schedule with sessions overlapping the same part in another schedule. 
-7. An all session/day schedule must start and end at the same station. If not, a schedule can be divided in two parts one starting at A and ends at B, the second starts at B and ends at A. Schedules can be split in any number of parts, but in the end the last part  must end where the first one starts. Schedule parts may overlap in time, and each part needs a starting traction unit.
+6. When trains equals on Commpany+Category+Train.Number, each instance must operate on different non-overlapping sessions. 
+7. All train's parts must be part of a schedule. Parts can be in different schedules, the same part can be in different schedules for different operating sessions. No part can be assigned to a schedule with sessions overlapping the same part in another schedule. 
+8. In schedules, a following train part must start from the same station where the previous train part ends.
+7. An all session/day schedule must start and end at the same station. If not, a multipart schedule is needed, where each part starts where the previous ended, and the final part ends where  a schedule can be divided in two parts one starting at A and ends at B, the second starts at B and ends at A. Schedules can be split in any number of parts, but in the end the last part  must end where the first one starts, and each schedule part must start where the previous ends. Schedule parts may overlap in time, and each part needs a starting traction unit. The first session vehicles have moved to the end of their respective schedule part, and continues from there the next session. The number of schedule parts is equal to the number of sessions the vehicles have to circulate to be back where they started 
 8. A schdule must have a traction unit assigned to all of it's sessions. They can be traction units assigned for different operating sessions/days.
+9. If trains in a schedule operates diffeerent sessions/days, these must be valid combinations: Each session must conform to rule 7.
 
-The effective operating sessions/days: trains may have session/days operating. When adding trains to a schedule, the operating sessions/days for that schedule becomes the session/days when all of these trains operate. This also implies that a train can't be added unless it operate at least one of the session/days the already added trains have in common. If the effective sessions/days is not all, the effective days of the scheudle should be inserted between the Delete button and the first train. On each train label, if the train does not operate all sessions/days, it should also display the sessions/days for that train.
 
+Handling wagonsets could be somewhat analogous with the Cargo Description / Cargo Train tabs. The difference is that under the Wagon Groups tab, the user creates wagon groups; either with a number of wagons, or a list with specified wagons (order in group, class, number, owner). Under the Trains tab, the user assigns 
+  wagonsets could be to defined WagonSets with optionally ordered individual wagons, and then assign them to trains in
+  the same fashion as for cargo trains. When some wagons only run partialy this will be separate Wagon Sets.
+  Regarding the ordering of wagons when there are more than one wagonset attached to a train, this can be achiecved by
+  1,2,3,4 in one wagon set and 5,6 in another. This should also work when revering the order.
+  
 
+Sort Schedules by vehicle displayed text in label, then by schedule effective sessions (by Session.Flags descending or by first day/session + number of effective sessions?). It is best if Sessions implement a sort order Integer value that best represents a sort order, then its also easy to improve it.
+Option to edit existing scheduled objects 
+
+To let the user verify the Layout, I suggest drawing a topology of it. It can be simple, each timetable stretch horizonally, and where a stretch diverges from/to another, a 45 degree line from the diverging operation location to the second operation location on the second timetable stretch. One rule: on a timetable stretch all track stretches must be in the same order, and in the topology all track stretches should be drawn from left to right.
+
+In FREMODERN-2023-Final-1-1: 'Information: Trains NOB RB62 62 and NOB RB62 62 have the same number but run on overlapping sessions All' is an import error, it misses the train number RB62 75509, RB62 75516 and so on. In XplnImporter on row 729, I have added a method that tries to extract the train number. I want you to implement the TODO's.
 

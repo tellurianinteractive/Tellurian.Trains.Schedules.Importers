@@ -57,6 +57,29 @@ public sealed record ValidationError
     public bool IsStretchConflict => !FromTrack.Equals(ToTrack);
 
     /// <summary>
+    /// The severity of the error, taken from its <see cref="Message"/>.
+    /// </summary>
+    public Severity Severity => Message.Severity;
+
+    /// <summary>
+    /// Determines whether the given train is one of the trains involved in this conflict.
+    /// Used by GUI components to highlight the offending train.
+    /// </summary>
+    public bool Involves(Train train) => Trains.Contains(train);
+
+    /// <summary>
+    /// Determines whether the given station track is where this conflict starts or ends.
+    /// Used by GUI components to highlight the offending track.
+    /// </summary>
+    public bool Involves(StationTrack track) => FromTrack.Equals(track) || ToTrack.Equals(track);
+
+    /// <summary>
+    /// Determines whether this conflict's time span overlaps the given time range (inclusive).
+    /// Used by GUI components (e.g. the graphical timetable) to hit-test a rendered region.
+    /// </summary>
+    public bool OverlapsTimeRange(Time from, Time to) => FromTime <= to && ToTime >= from;
+
+    /// <summary>
     /// Creates a station track conflict error.
     /// </summary>
     public static ValidationError StationTrackConflict(
@@ -284,6 +307,46 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates a non-closing schedule error: a schedule that runs the whole operating period does not
+    /// return the vehicle to the station it started from (rule S3).
+    /// </summary>
+    public static ValidationError ScheduleNotClosed(
+        Schedule schedule,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ScheduleNotClosed,
+            FromTrack = GetFirstTrack(schedule) ?? StationTrack.Example,
+            ToTrack = GetLastTrack(schedule) ?? StationTrack.Example,
+            FromTime = GetFirstDeparture(schedule) ?? Time.Zero,
+            ToTime = GetLastArrival(schedule) ?? Time.Zero,
+            Trains = [.. schedule.Parts.Select(p => p.Train).Distinct()],
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a non-closing session-combination error: a set of sessions on which a vehicle works a
+    /// distinct set of parts does not return it to its start station (rule S5).
+    /// </summary>
+    public static ValidationError SessionCombinationNotClosed(
+        ScheduledObject vehicle,
+        SessionCombination combination,
+        Message message)
+    {
+        var first = combination.Parts.OrderBy(p => p.From.Departure.Value).First();
+        var last = combination.Parts.OrderBy(p => p.To.Arrival.Value).Last();
+        return new()
+        {
+            ErrorType = ValidationErrorType.SessionCombinationNotClosed,
+            FromTrack = first.From.Track,
+            ToTrack = last.To.Track,
+            FromTime = first.From.Departure,
+            ToTime = last.To.Arrival,
+            Trains = [.. combination.Parts.Select(p => p.Train).Distinct()],
+            Message = message
+        };
+    }
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
@@ -348,4 +411,10 @@ public enum ValidationErrorType
 
     /// <summary>A vehicle schedule's parts are not geographically contiguous.</summary>
     ScheduleNotContiguous,
+
+    /// <summary>An all-session vehicle schedule does not return to its start station.</summary>
+    ScheduleNotClosed,
+
+    /// <summary>A vehicle's session combination does not return it to its start station.</summary>
+    SessionCombinationNotClosed,
 }
