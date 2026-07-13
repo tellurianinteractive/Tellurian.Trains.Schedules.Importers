@@ -1,4 +1,80 @@
 @page "/schedules"
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Components.Schedules
+@using Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@implements IDisposable
 
-<p>@Translator("SchedulesDescription")</p>
+@if (ScheduleState.Timetable is null)
+{
+    <p>@Translator("SchedulesNoSchedule")</p>
+}
+else
+{
+    <div class="schedules-tab">
+        <p class="intro">@Translator("SchedulesDescription")</p>
+
+        <div class="toolbar">
+            <button class="primary" @onclick="BuildAutomatically">@Translator("SchedulesBuildAutomatically")</button>
+            <button @onclick="NewSchedule">@Translator("SchedulesNewSchedule")</button>
+            @if (_buildMessage is not null)
+            {
+                <span class="build-result">@_buildMessage</span>
+            }
+        </div>
+
+        <ScheduleTurnChart Schedules="Schedules" Settings="GraphSettings" OnMessage="m => _buildMessage = m" />
+    </div>
+}
+
+@code {
+    // Vehicle schedules (turnus) of the current plan, in display order. Cargo-flow schedules are the
+    // circulation of freight consignments, not of a turning vehicle, so they are left out of the turn
+    // chart (they remain available as turnus cards in the reports). A newly created schedule has no
+    // number yet (Number 0); these are shown first, newest at the top, so a just-added schedule is
+    // obvious. Numbered schedules then follow in ascending number order.
+    private IReadOnlyList<Schedule> Schedules
+    {
+        get
+        {
+            if (ScheduleState.Schedule?.Schedules is not { } schedules) return [];
+            var visible = schedules.Where(s => !s.IsCargoFlow).ToList();
+            var unnumbered = visible.Where(s => s.Number == 0).OrderByDescending(s => s.Id);
+            var numbered = visible.Where(s => s.Number != 0).OrderBy(s => s.Number);
+            return [.. unnumbered, .. numbered];
+        }
+    }
+
+    // The turn-chart blocks format each train identity the same way the graphical timetable does
+    // (category prefix, company signature, sessions/days), taken from the layout's settings.
+    private GraphSettings GraphSettings => ScheduleState.Layout?.Settings.ToGraphSettings() ?? GraphSettings.Default;
+
+    private string? _buildMessage;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private void BuildAutomatically()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        var created = plan.BuildSchedulesAutomatically();
+        ScheduleState.SaveAndNotify();
+        _buildMessage = string.Format(CultureInfo.CurrentCulture, Translator("SchedulesBuildAutomaticallyResult"), created.Count);
+    }
+
+    private void NewSchedule()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        _buildMessage = null;
+        plan.CreateSchedule();
+        ScheduleState.SaveAndNotify();
+    }
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

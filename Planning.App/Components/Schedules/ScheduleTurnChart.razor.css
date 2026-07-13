@@ -1,0 +1,246 @@
+.turn-chart {
+    --border: #ddd;
+    --surface: #fff;
+    --primary: #1a3a5c;
+
+    /* Two aligned columns across all rows: the vehicle column sizes to its widest content (so a row's
+       vehicles and "+ vehicle" never wrap), the parts column takes the rest and wraps internally. */
+    display: grid;
+    grid-template-columns: auto 1fr;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    font-size: 0.85rem;
+
+    /* Column headers: two cells placed directly into the grid (like a row's cells), so they align with
+       the vehicle and parts columns below. */
+    .head {
+        padding: 0.35rem 0.5rem;
+        background: #f4f6f9;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .head.vehicle-head {
+        border-right: 1px solid var(--border);
+    }
+
+    /* A schedule row spans both grid columns; its two cells are placed by the grid. */
+    .sched-row {
+        display: contents;
+    }
+
+    /* Row separators live on the cells, since the row itself generates no box (display: contents). */
+    .sched-row:first-child .sched-vehicle,
+    .sched-row:first-child .parts {
+        border-top: none;
+    }
+
+    .sched-vehicle {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        padding: 0.4rem 0.5rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+    }
+
+    .vehicles {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.1rem 0.1rem 0.1rem 0.4rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #eef3f8;
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+    }
+
+    /* Sessions/days a partly-booked assignment covers, shown after the vehicle id on its chip. */
+    .chip .sessions {
+        font-weight: 400;
+        font-size: 0.72rem;
+        color: #367;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0 0.3rem;
+    }
+
+    /* The train parts of a schedule, in working order. They wrap to the next line when a schedule has
+       more parts than fit the width, keeping the chart compact. */
+    .parts {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.4rem;
+        border-top: 1px solid var(--border);
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .part {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.15rem 0.3rem 0.15rem 0.45rem;
+        border-radius: 3px;
+        white-space: nowrap;
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .part .ident {
+        font-weight: 700;
+    }
+
+    /* The train's own sessions/days, shown on the part only when it does not operate every session. */
+    .part .sessions {
+        font-weight: 600;
+        font-size: 0.68rem;
+        opacity: 0.85;
+        border: 1px solid currentColor;
+        border-radius: 8px;
+        padding: 0 0.25rem;
+    }
+
+    /* The schedule's effective (common) sessions/days, shown before the first part when the working does
+       not run on every session. Placed between the delete control and the first train block. */
+    .sched-sessions {
+        align-self: center;
+        font-weight: 600;
+        font-size: 0.72rem;
+        color: #367;
+        background: #eef3f8;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.05rem 0.35rem;
+        white-space: nowrap;
+    }
+
+    .part .from,
+    .part .to {
+        opacity: 0.9;
+    }
+
+    .part .sep {
+        opacity: 0.6;
+    }
+
+    /* Small inline remove control on chips and part blocks. */
+    .x {
+        border: none;
+        background: transparent;
+        color: inherit;
+        opacity: 0.6;
+        cursor: pointer;
+        font-size: 0.8rem;
+        line-height: 1;
+        padding: 0.1rem 0.2rem;
+        border-radius: 3px;
+    }
+
+    .x:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.12);
+    }
+
+    /* "Add vehicle" / "Add train" affordances. */
+    .add,
+    .add-train {
+        border: 1px dashed #b7c4d2;
+        background: transparent;
+        color: var(--primary);
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .add:hover,
+    .add-train:hover {
+        background: #eef3f8;
+    }
+
+    /* Delete-schedule control: the first item in the train sequence, so it plainly targets the whole
+       schedule (not a vehicle). */
+    .del-sched {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #a11;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .del-sched:hover,
+    .confirm .danger:hover {
+        background: #fbeaea;
+    }
+
+    /* Clone / complement controls: sit beside the delete control and target the whole schedule. */
+    .clone-sched,
+    .complement-sched {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--primary);
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .clone-sched:hover,
+    .complement-sched:hover {
+        background: #eef3f8;
+    }
+
+    .confirm {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+        font-size: 0.78rem;
+    }
+
+    .confirm .danger {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #a11;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.72rem;
+    }
+
+    .confirm button {
+        cursor: pointer;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.72rem;
+    }
+}
+
+/* Shown in place of the chart when there are no schedules (root-level element, outside .turn-chart). */
+.empty {
+    color: #667;
+    font-style: italic;
+    margin: 0.5rem 0;
+}

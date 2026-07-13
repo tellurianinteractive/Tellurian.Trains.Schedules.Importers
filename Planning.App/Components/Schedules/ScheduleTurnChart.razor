@@ -1,0 +1,197 @@
+@namespace Tellurian.Trains.Schedules.Planning.App.Components.Schedules
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Validations
+@using Tellurian.Trains.Schedules.Planning.App.Services
+@using Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@using Tellurian.Utilities.Web
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* Editable "turn chart": each vehicle schedule (turnus) is a row. The first column lists the vehicle(s)
+   assigned to the working (add/remove), followed by the train-part blocks in working order (each
+   removable, which truncates the tail). A trailing "+ train" appends the next (possibly partial) train. *@
+
+@if (Schedules.Count == 0)
+{
+    <p class="empty">@Translator("SchedulesEmpty")</p>
+}
+else
+{
+    <div class="turn-chart">
+        <div class="head vehicle-head">@Translator("Vehicles")</div>
+        <div class="head parts-head">@Translator("Trains")</div>
+        @foreach (var schedule in Schedules)
+        {
+            <div class="sched-row">
+                <div class="sched-vehicle">
+                    <div class="vehicles">
+                        @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
+                        {
+                            <span class="chip" title="@Translator(vehicle.ObjectType.ToString())">
+                                @VehicleLabel(vehicle)
+                                @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
+                                {
+                                    <span class="sessions">@SessionsDisplay.Text(assignment.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
+                                }
+                                <button class="x" title="@Translator("RemoveVehicle")"
+                                        @onclick="() => RemoveVehicle(assignment)"><i class="fa-solid fa-xmark"></i></button>
+                            </span>
+                        }
+                        <button class="add" title="@Translator("AddVehicle")" @onclick="() => _assignTarget = schedule"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="parts">
+                    @if (_deleteTarget == schedule)
+                    {
+                        <div class="confirm">
+                            <span>@Translator("DeleteScheduleConfirm")</span>
+                            <button class="danger" @onclick="() => DeleteSchedule(schedule)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <button class="clone-sched" title="@Translator("CloneSchedule")"
+                                @onclick="() => CloneSchedule(schedule)"><i class="fa-solid fa-copy"></i></button>
+                        @if (schedule.Parts.Count > 0)
+                        {
+                            <button class="complement-sched" title="@Translator("ComplementSchedule")"
+                                    @onclick="() => ComplementSchedule(schedule)"><i class="fa-solid fa-calendar-plus"></i></button>
+                        }
+                        <button class="del-sched danger" title="@Translator("DeleteSchedule")"
+                                @onclick="() => _deleteTarget = schedule"><i class="fa-solid fa-trash"></i></button>
+                    }
+                    @if (!schedule.EffectiveSessions.CoversAllWithin(UseDays, MaxSessions))
+                    {
+                        <span class="sched-sessions" title="@Translator("ScheduleOperatingSessions")">
+                            @SessionsDisplay.Text(schedule.EffectiveSessions, UseDays, Translator, MaxSessions, StartDay)
+                        </span>
+                    }
+                    @foreach (var part in schedule.OrderedParts)
+                    {
+                        var segment = BuildSegment(part);
+                        <div class="part" style="background:@segment.Color; color:@segment.TextColor" title="@segment.Title">
+                            <span class="from">@segment.From</span>
+                            <span class="sep">–</span>
+                            <span class="ident">@segment.Identity</span>
+                            <span class="sep">–</span>
+                            <span class="to">@segment.To</span>
+                            @if (!part.Train.Sessions.CoversAllWithin(UseDays, MaxSessions))
+                            {
+                                <span class="sessions">@SessionsDisplay.Text(part.Train.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
+                            }
+                            <button class="x" title="@Translator("RemovePart")" @onclick="() => RemovePart(schedule, part)"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    }
+                    <button class="add-train" @onclick="() => _addPartTarget = schedule"><i class="fa-solid fa-plus"></i> @Translator("AddTrainPart")</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (_addPartTarget is { } addTarget)
+{
+    <AddPartDialog Schedule="addTarget"
+                   OnAdded="() => _addPartTarget = null"
+                   OnClosed="() => _addPartTarget = null" />
+}
+@if (_assignTarget is { } assignTarget)
+{
+    <AssignVehicleDialog Schedule="assignTarget"
+                         OnAssigned="() => _assignTarget = null"
+                         OnClosed="() => _assignTarget = null" />
+}
+
+@code {
+    /// <summary>The vehicle schedules to chart, in the order they should appear (top to bottom).</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<Schedule> Schedules { get; set; } = [];
+
+    /// <summary>The graph settings that decide how a train identity is formatted (category prefix, company
+    /// signature, sessions/days), so the blocks match the graphical timetable's labels.</summary>
+    [Parameter] public GraphSettings Settings { get; set; } = GraphSettings.Default;
+
+    /// <summary>Raised with a status message to show (or <c>null</c> to clear it), e.g. when a complement
+    /// has nothing to add.</summary>
+    [Parameter] public EventCallback<string?> OnMessage { get; set; }
+
+    private Plan? Plan => ScheduleState.Schedule;
+
+    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+
+    private Schedule? _addPartTarget;
+    private Schedule? _assignTarget;
+    private Schedule? _deleteTarget;
+
+    // The vehicles worked to a schedule, paired with the assignment that links them (needed to unassign).
+    private IEnumerable<(ScheduledObject Vehicle, ScheduleAssignment Assignment)> VehiclesOf(Schedule schedule) =>
+        schedule.Vehicles
+            .Select(v => (Vehicle: v, Assignment: v.ScheduleAssignments.FirstOrDefault(a => schedule.Equals(a.Schedule))))
+            .Where(x => x.Assignment is not null)
+            .Select(x => (x.Vehicle, x.Assignment!));
+
+    private void RemoveVehicle(ScheduleAssignment assignment)
+    {
+        Plan?.TryDelete(assignment);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void RemovePart(Schedule schedule, ScheduledTrainPart part)
+    {
+        schedule.RemovePart(part);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void DeleteSchedule(Schedule schedule)
+    {
+        _deleteTarget = null;
+        Plan?.TryDelete(schedule);
+        ScheduleState.SaveAndNotify();
+    }
+
+    // Copies the whole working into a new schedule as a starting point the planner then edits.
+    private async Task CloneSchedule(Schedule schedule)
+    {
+        if (Plan is null) return;
+        Plan.CloneSchedule(schedule);
+        ScheduleState.SaveAndNotify();
+        await OnMessage.InvokeAsync(null);
+    }
+
+    // Creates the working for the sessions this schedule leaves out (its trains that run beyond its
+    // effective sessions). Reports when there is nothing to complement.
+    private async Task ComplementSchedule(Schedule schedule)
+    {
+        if (Plan is null) return;
+        var result = Plan.CreateComplementarySchedule(schedule);
+        if (result.HasValue)
+        {
+            ScheduleState.SaveAndNotify();
+            await OnMessage.InvokeAsync(null);
+        }
+        else
+        {
+            await OnMessage.InvokeAsync(Translator("SchedulesNothingToComplement"));
+        }
+    }
+
+    private Segment BuildSegment(ScheduledTrainPart part)
+    {
+        var color = part.Train.Category?.Color ?? "#000000";
+        var identity = part.Train.GraphLabel(Settings);
+        var from = $"{part.From.OperationLocation.Signature} {part.From.Departure.HHMM()}";
+        var to = $"{part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
+        return new Segment(from, identity, to, color, color.TextColor, $"{from} – {identity} – {to}");
+    }
+
+    // The vehicle's external id is its identity everywhere else (e.g. "DB 101 01"); fall back to its
+    // class and number when a vehicle carries no external id.
+    private static string VehicleLabel(ScheduledObject vehicle) =>
+        !string.IsNullOrWhiteSpace(vehicle.ExternalId)
+            ? vehicle.ExternalId!
+            : $"{vehicle.Class} {vehicle.Number}".Trim();
+
+    private sealed record Segment(string From, string Identity, string To, string Color, string TextColor, string Title);
+}

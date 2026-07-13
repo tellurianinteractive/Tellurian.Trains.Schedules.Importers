@@ -2,7 +2,7 @@ using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
-internal static class TrainGraphExtensions
+public static class TrainGraphExtensions
 {
     public static IEnumerable<StretchUse> StretchUses(this Train train)
     {
@@ -24,7 +24,9 @@ internal static class TrainGraphExtensions
             parts.Add(sig);
         if (settings.ShowTrainCategory && train.Category?.Prefix is { Length: > 0 } prefix)
             parts.Add(prefix);
-        parts.Add(train.Number.ToString());
+        // The XPLN import identifies trains by ExternalId and may leave Number at 0; fall back to the
+        // external id so the label reads sensibly instead of showing "0".
+        parts.Add(train.Number != 0 ? train.Number.ToString() : train.ExternalId);
         if (settings.ShowTrainCategory && train.Category?.Suffix is { Length: > 0 } suffix)
             parts.Add(suffix);
         if (train.GraphSessionsLabel(settings) is { } sessions)
