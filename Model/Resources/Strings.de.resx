@@ -255,4 +255,10 @@
   <data name="Undefined" xml:space="preserve">
     <value>Undefiniert</value>
   </data>
+  <data name="TrainsShareNumberOnOverlappingSessions" xml:space="preserve">
+    <value>Züge {0} und {1} haben dieselbe Nummer, verkehren aber in überlappenden Fahrrunden {2}.</value>
+  </data>
+  <data name="ScheduleIsNotContiguous" xml:space="preserve">
+    <value>Fahrzeugplan {0}: {1} setzt nicht dort fort, wo der vorherige Teil bei {2} endete.</value>
+  </data>
 </root>

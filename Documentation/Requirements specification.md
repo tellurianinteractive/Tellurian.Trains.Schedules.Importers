@@ -58,7 +58,7 @@ Snapshot of coverage by area (see each section for detail).
 | Vehicle Schedule Editor (§3.8) | ❌ | stub page |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | ❌ | |
-| Validation (§3.11) | 🟡 | organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T3, S1, P1/P3/P4 done; circulation S2/S3/S5 + duplicate-number T4 missing; S4/P2 partial; L1 emergent |
+| Validation (§3.11) | 🟡 | organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S2, P1/P3/P4 done; circulation S3/S5 missing; S4/P2 partial; L1 emergent |
 | Reports (§3.12) | 🟡 | shell + page formats present; 1 of 15 reports (Turnus Cards) built |
 
 ### Integration (§5)
@@ -486,14 +486,13 @@ with an option to lock individual times.
 
 > **Status:** 🟡 Partial (`Model/Validations/`, `Model/Settings/ValidationSettings.cs`).
 > Fully implemented: the Layout occupancy rules **L2–L3**, the Timetable train rules
-> **T1–T3**, the Schedule part-overlap rule **S1**, and the Plan consistency rules
-> **P1, P3, P4**, all with FR-3.11.6 output (severity, localised message, location +
-> time range, involved trains). Missing or partial: **L1** (emergent only), the
-> schedule/turnus **circulation rules S2, S3, S5**, the duplicate-number rule **T4**,
-> and the partial per-session traction (**S4**) and part-coverage (**P2**). The toggles
-> `ValidateTrainNumbers` (→ T4) and `ValidateDriverDuties` (→ S5) and the threshold
-> `MinMinutesBetweenTrackUsage` exist in `ValidationSettings` but have **no backing
-> validation yet**. See `Documentation/Validation.md`.
+> **T1–T4**, the Schedule part-overlap and contiguity rules **S1–S2**, and the Plan
+> consistency rules **P1, P3, P4**, all with FR-3.11.6 output (severity, localised
+> message, location + time range, involved trains). Missing or partial: **L1** (emergent
+> only), the schedule/turnus **circulation rules S3, S5**, and the partial per-session
+> traction (**S4**) and part-coverage (**P2**). The toggle `ValidateDriverDuties` (→ S5)
+> and the threshold `MinMinutesBetweenTrackUsage` exist in `ValidationSettings` but have
+> **no backing validation yet**. See `Documentation/Validation.md`.
 
 Validation rules are organised by the **model scope** they apply to, bottom-up through
 the model hierarchy — **Layout, Timetable, Schedule, Plan**. This mirrors the intended
@@ -537,7 +536,7 @@ individually and as a set.
 | **T1** | A train has **at least two station calls**. | ✅ | `CheckTrainTimeSequence` / `TrainTooFewCalls`. |
 | **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | `CheckTrainTimeSequence` + `StationCall.GetValidationErrors` (`StationCallTiming`). |
 | **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | `CheckTrainSpeed` (thresholds from `ValidationSettings`). |
-| **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ❌ Missing | `ValidateTrainNumbers` toggle exists; no logic. |
+| **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | `Timetable.ValidateTrainNumbers` groups by (company, category, number) and flags any pair with overlapping sessions (`DuplicateTrainNumber`). Gated by `ValidateTrainNumbers`. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
@@ -546,7 +545,7 @@ Each vehicle schedule (turnus) is a sequence of train parts forming a circulatio
 | Rule | Requirement | Status | Implementation / gap |
 | ---- | ----------- | ------ | -------------------- |
 | **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | `ValidateOverlappingParts`. |
-| **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ❌ Missing | No contiguity check on schedule parts. |
+| **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ✅ | `Schedule.ValidateContiguity` checks each part in working order starts where the previous ended (`ScheduleNotContiguous`). Gated by `ValidateSchedules`. `Append` already enforces this at entry; the check catches schedules assembled unconditionally (e.g. XPLN import). |
 | **S3** | **Circulation closure.** An all-session schedule starts and ends at the **same station**; otherwise it is split into parts that each start where the previous ended and close the loop, with **part count = sessions needed to return**, each part having a starting traction unit; parts may overlap in time. | ❌ Missing | No circulation/closure validation. |
 | **S4** | A **traction unit is assigned for all of the schedule's sessions** (may be different units for different sessions/days). | 🟡 Partial | `ValidateLocomotiveCoverage` (see P4) finds coverage gaps along a train, but not **per-session** traction across the whole schedule. |
 | **S5** | When the vehicles in a schedule run **different sessions/days**, the **session combinations must be valid** — each conforming to S3. | ❌ Missing | `ValidateDriverDuties` toggle exists; no logic. Relates to `ScheduledObject.SessionCombinations`. |

@@ -22,6 +22,7 @@ public static class ValidationExtensions
             var result = new List<ValidationError>();
             result.AddRange(plan.GetTimetableValidationErrors(options));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
+            if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
             return result;
@@ -38,6 +39,7 @@ public static class ValidationExtensions
             var timetable = plan.Timetable;
             result.AddRange(timetable.EnsureStationHasTrack());
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
+            if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
             if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetConflictingTrains()).Distinct());
@@ -122,6 +124,29 @@ public static class ValidationExtensions
 
     extension(Schedule schedule)
     {
+        /// <summary>
+        /// Validates that the schedule's parts are geographically contiguous (rule S2): each part, in
+        /// working order, starts from the operation location where the previous part ended. Schedules
+        /// built through <see cref="ScheduleExtensions.Append"/> are contiguous by construction; this
+        /// catches schedules assembled unconditionally (e.g. reconstructed from an XPLN import).
+        /// </summary>
+        private List<ValidationError> ValidateContiguity()
+        {
+            var errors = new List<ValidationError>();
+            var parts = schedule.OrderedParts;
+            for (var i = 0; i < parts.Count - 1; i++)
+            {
+                var previous = parts[i];
+                var next = parts[i + 1];
+                if (!next.From.OperationLocation.Equals(previous.To.OperationLocation))
+                {
+                    var message = Message.Information(Strings.ScheduleIsNotContiguous, schedule.Number, next, previous.To.OperationLocation);
+                    errors.Add(ValidationError.ScheduleNotContiguous(previous, next, message));
+                }
+            }
+            return errors;
+        }
+
         private List<ValidationError> ValidateOverlappingParts()
         {
             var errors = new List<ValidationError>();
@@ -170,6 +195,34 @@ public static class ValidationExtensions
             foreach (var train in timetable.Trains)
             {
                 result.AddRange(train.CheckTrainSpeed(minTrainSpeedMetersPerClockMinute, maxTrainSpeedMetersPerClockMinute));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Validates that trains sharing the same operating company, category and number run on
+        /// non-overlapping sessions (rule T4), so that a given train identity is never scheduled to run
+        /// twice at once. Trains that differ in company or category may reuse a number freely.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateTrainNumbers()
+        {
+            var result = new List<ValidationError>();
+            var duplicates = timetable.Trains
+                .GroupBy(t => (Company: t.EffectiveCompany?.Id, t.CategoryId, t.Number))
+                .Where(g => g.Count() > 1);
+            foreach (var group in duplicates)
+            {
+                var trains = group.ToArray();
+                for (var i = 0; i < trains.Length - 1; i++)
+                    for (var j = i + 1; j < trains.Length; j++)
+                    {
+                        if (trains[i].Sessions.Overlaps(trains[j].Sessions))
+                        {
+                            var overlap = trains[i].Sessions.And(trains[j].Sessions);
+                            var message = Message.Information(Strings.TrainsShareNumberOnOverlappingSessions, trains[i], trains[j], overlap.SessionsNumbers);
+                            result.Add(ValidationError.DuplicateTrainNumber(trains[i], trains[j], message));
+                        }
+                    }
             }
             return result;
         }

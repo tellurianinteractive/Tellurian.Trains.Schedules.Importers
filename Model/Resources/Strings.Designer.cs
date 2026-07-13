@@ -205,6 +205,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: {1} does not continue from where the previous part ended at {2}..
+        /// </summary>
+        internal static string ScheduleIsNotContiguous {
+            get {
+                return ResourceManager.GetString("ScheduleIsNotContiguous", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Signature of {0} is required..
         /// </summary>
         internal static string SignatureOfObjectIsRequired {
@@ -435,6 +444,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string TrainSpeedBetweenCallsIsTooSlow {
             get {
                 return ResourceManager.GetString("TrainSpeedBetweenCallsIsTooSlow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trains {0} and {1} have the same number but run on overlapping sessions {2}..
+        /// </summary>
+        internal static string TrainsShareNumberOnOverlappingSessions {
+            get {
+                return ResourceManager.GetString("TrainsShareNumberOnOverlappingSessions", resourceCulture);
             }
         }
         

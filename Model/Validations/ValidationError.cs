@@ -248,6 +248,42 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates a duplicate train-number error: two trains share the same operating company, category
+    /// and number but run on overlapping sessions (rule T4).
+    /// </summary>
+    public static ValidationError DuplicateTrainNumber(
+        Train train1,
+        Train train2,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DuplicateTrainNumber,
+            FromTrack = train1.Calls.FirstOrDefault()?.Track ?? StationTrack.Example,
+            ToTrack = train1.Calls.LastOrDefault()?.Track ?? StationTrack.Example,
+            FromTime = train1.Calls.FirstOrDefault()?.Departure ?? Time.Zero,
+            ToTime = train1.Calls.LastOrDefault()?.Arrival ?? Time.Zero,
+            Trains = [train1, train2],
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a non-contiguous schedule error: a part does not start from the station where the
+    /// previous part in the vehicle's working ended (rule S2).
+    /// </summary>
+    public static ValidationError ScheduleNotContiguous(
+        TrainPart previous,
+        TrainPart next,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ScheduleNotContiguous,
+            FromTrack = previous.To.Track,
+            ToTrack = next.From.Track,
+            FromTime = previous.To.Arrival,
+            ToTime = next.From.Departure,
+            Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
@@ -306,4 +342,10 @@ public enum ValidationErrorType
 
     /// <summary>Vehicle has overlapping schedule assignments (double-booked).</summary>
     VehicleDoubleBooked,
+
+    /// <summary>Two trains share company, category and number but run on overlapping sessions.</summary>
+    DuplicateTrainNumber,
+
+    /// <summary>A vehicle schedule's parts are not geographically contiguous.</summary>
+    ScheduleNotContiguous,
 }

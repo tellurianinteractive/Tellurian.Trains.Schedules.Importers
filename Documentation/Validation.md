@@ -162,8 +162,12 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 - `"Train {train} speed from {station1} {time1} to {station2} {time2} is too slow, length {distance} meters."`
 - `"Train {train} speed from {station1} {time1} to {station2} {time2} is too fast, length {distance} meters."`
 
-#### T4 — Duplicate train-number sessions ❌
-Trains equal on Company+Category+Number must run on disjoint sessions. `ValidateTrainNumbers` toggle exists; no logic.
+#### T4 — Duplicate train-number sessions ✅
+**Method**: `ValidateTrainNumbers(this Timetable me)`
+
+**Validates**: Trains equal on Company+Category+Number run on disjoint sessions. Trains are grouped by (company, category, number) and every pair whose sessions overlap is flagged. Gated by `ValidateTrainNumbers`.
+
+**Error**: `"Trains {train1} and {train2} have the same number but run on overlapping sessions {sessions}."` (`DuplicateTrainNumber`)
 
 ### Schedule scope (S) — vehicle schedule / turnus
 
@@ -174,8 +178,12 @@ Trains equal on Company+Category+Number must run on disjoint sessions. `Validate
 
 **Error**: `"Vehicle schedule {id} contains overlapping {trainPart1} and {trainPart2}."`
 
-#### S2 — Part contiguity ❌
-A following part must start where the previous part ended. Not checked.
+#### S2 — Part contiguity ✅
+**Method**: `ValidateContiguity(this Schedule me)`
+
+**Validates**: Each part, in working (departure) order, starts from the operation location where the previous part ended. `Append` enforces this at entry time; this check covers schedules assembled unconditionally with `Add` (e.g. reconstructed from XPLN import). Gated by `ValidateSchedules`.
+
+**Error**: `"Vehicle schedule {number}: {trainPart} does not continue from where the previous part ended at {location}."` (`ScheduleNotContiguous`)
 
 #### S3 — Circulation closure ❌
 All-session schedule starts/ends at the same station; otherwise split into chained parts closing the loop. Not checked.
@@ -294,9 +302,11 @@ Plan.GetValidationErrors(options)
   │     ├─► StationTrack.GetValidationErrors()[ValidateStationTracks]  L2
   │     ├─► StationCall.GetValidationErrors() [ValidateStationCalls]   T2
   │     ├─► TrackStretch.GetValidationErrors()[ValidateStretches]      L3
-  │     └─► CheckTrainSpeed()                 [ValidateTrainSpeed]     T3
+  │     ├─► CheckTrainSpeed()                 [ValidateTrainSpeed]     T3
+  │     └─► Timetable.ValidateTrainNumbers()  [ValidateTrainNumbers]   T4
   │
   ├─► Schedule.ValidateOverlappingParts()     [ValidateSchedules]      S1
+  ├─► Schedule.ValidateContiguity()           [ValidateSchedules]      S2
   ├─► Plan.ValidateVehicleDoubleBooking()     [ValidateSchedules]      P3
   └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4
 ```
@@ -304,16 +314,14 @@ Plan.GetValidationErrors(options)
 ## Known Issues / TODOs
 
 Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
-Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, S1, P1, P3, P4.
-Partial: L1 (emergent from L2/L3), S4, P2. Missing: T4, S2, S3, S5. Note L3 counts trains
+Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, S1, S2, P1,
+P3, P4. Partial: L1 (emergent from L2/L3), S4, P2. Missing: S3, S5. Note L3 counts trains
 on a stretch **direction-agnostically** (one train per track, both directions together) —
 the existing capacity check is correct as-is, not a direction bug.
 
-1. **T4 — same Company+Category+Number on non-overlapping sessions** (`ValidateTrainNumbers`) - Option exists but no implementation
-2. **S5 — valid session combinations for a schedule** (`ValidateDriverDuties`) - Option exists but no implementation
-3. **S2 — schedule part contiguity** - next part must start where the previous ended; not checked
-4. **S3 — schedule circulation closure** - start/end station and split-into-parts loop; not checked
-5. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
-6. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
-7. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
-8. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
+1. **S5 — valid session combinations for a schedule** (`ValidateDriverDuties`) - Option exists but no implementation
+2. **S3 — schedule circulation closure** - start/end station and split-into-parts loop; not checked
+3. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
+4. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
+5. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
+6. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
