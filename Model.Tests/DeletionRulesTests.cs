@@ -51,49 +51,6 @@ public class DeletionRulesTests
     }
 
     [TestMethod]
-    public void WagonGroupIsDeleted()
-    {
-        var calls = Train.Calls.ToList();
-        var wagonGroup = new WagonGroup
-        {
-            Id = 1,
-            FromStationCall = calls[0],
-            FromStationCallId = calls[0].Id,
-            ToStationCall = calls[^1],
-            ToStationCallId = calls[^1].Id,
-            PositionInTrain = 1,
-        };
-        Train.Add(wagonGroup);
-
-        var result = Plan.TryDelete(wagonGroup);
-
-        Assert.IsTrue(result.IsSuccess);
-        Assert.IsFalse(Train.WagonGroups.Contains(wagonGroup));
-    }
-
-    [TestMethod]
-    public void DeletingStationCallRemovesDependentWagonGroups()
-    {
-        var calls = Train.Calls.ToList();
-        var wagonGroup = new WagonGroup
-        {
-            Id = 1,
-            FromStationCall = calls[0],
-            FromStationCallId = calls[0].Id,
-            ToStationCall = calls[^1],
-            ToStationCallId = calls[^1].Id,
-            PositionInTrain = 1,
-        };
-        Train.Add(wagonGroup);
-
-        var result = Plan.TryDelete(calls[0]);
-
-        Assert.IsTrue(result.IsSuccess);
-        Assert.IsFalse(Train.Calls.Contains(calls[0]));
-        Assert.IsFalse(Train.WagonGroups.Contains(wagonGroup), "A wagon group that attached at the deleted call is removed.");
-    }
-
-    [TestMethod]
     public void CargoFlowOptionsCannotBeDeletedWhenReferencedByACargoFlow()
     {
         var description = Plan.Timetable.Add(new CargoFlowOptions { OnlyWagonClasses = "Coal" });

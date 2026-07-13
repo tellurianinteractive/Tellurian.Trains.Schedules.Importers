@@ -1,0 +1,474 @@
+using Tellurian.Trains.Schedules.Model.Validations;
+
+namespace Tellurian.Trains.Schedules.Model.Tests;
+
+[TestClass]
+public class ScheduleEditingTests
+{
+    // Forward 12:00 G→Yb→Snu (12:55), return 13:00 Snu→Yb→G (13:55): the return continues the forward run.
+    private static Plan CreatePlan()
+    {
+        TestDataFactory.Init();
+        var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
+        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
+        timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
+        return Plan.Create("Test", timetable);
+    }
+
+    private static Train Forward(Plan plan) => plan.Timetable.Trains.First(t => t.Number == 1);
+    private static Train Return(Plan plan) => plan.Timetable.Trains.First(t => t.Number == 2);
+
+    [TestMethod]
+    public void CreateScheduleAddsAnEmptyScheduleToThePlan()
+    {
+        var plan = CreatePlan();
+
+        var schedule = plan.CreateSchedule();
+
+        Assert.HasCount(1, plan.Schedules);
+        Assert.IsEmpty(schedule.Parts);
+        Assert.AreEqual(0, schedule.Number, "Number stays 0 until the first part is appended.");
+        Assert.AreEqual(schedule, plan.Schedules.Single());
+    }
+
+    [TestMethod]
+    public void CreateScheduleAllocatesDistinctIds()
+    {
+        var plan = CreatePlan();
+
+        var first = plan.CreateSchedule();
+        var second = plan.CreateSchedule();
+
+        Assert.AreNotEqual(first.Id, second.Id);
+    }
+
+    [TestMethod]
+    public void CandidateTrainsForEmptyScheduleAreAllSchedulableTrains()
+    {
+        var plan = CreatePlan();
+
+        var candidates = plan.CandidateTrainsFor(plan.CreateSchedule());
+
+        Assert.HasCount(2, candidates);
+    }
+
+    [TestMethod]
+    public void CandidateTrainsForWholeForwardScheduleIsOnlyTheReturn()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart); // G→Snu, arrives 12:55
+
+        var candidates = plan.CandidateTrainsFor(schedule);
+
+        Assert.HasCount(1, candidates);
+        Assert.AreEqual(2, candidates[0].Number, "Only the return train joins at Snu at/after 12:55; the forward train's only Snu call is its last.");
+    }
+
+    [TestMethod]
+    public void CandidateTrainsForPartialScheduleAllowsJoiningATrainMidRun()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart(0, 1)); // G→Yb, arrives 12:25
+
+        var candidates = plan.CandidateTrainsFor(schedule);
+
+        // The forward train can be rejoined at its middle call (Yb 12:30), continuing to Snu — the split case.
+        Assert.Contains(Forward(plan), candidates);
+        Assert.AreEqual(1, schedule.JoinCallIndexFor(Forward(plan)), "The forward train joins at its Yb call (index 1).");
+    }
+
+    [TestMethod]
+    public void AppendingThePartialContinuationRebuildsTheWholeRun()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart(0, 1)); // G→Yb
+
+        var result = schedule.Append(Forward(plan).AsTrainPart(1, 2)); // Yb→Snu
+
+        Assert.IsTrue(result.HasValue, result.Message);
+        Assert.HasCount(2, schedule.Parts);
+        Assert.AreEqual("Snu", schedule.EndLocation!.Signature, ignoreCase: true);
+    }
+
+    [TestMethod]
+    public void JoinCallIndexIsNullWhenTheTrainCannotContinueTheSchedule()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart); // ends at Snu 12:55
+
+        Assert.IsNull(schedule.JoinCallIndexFor(Forward(plan)), "Its only Snu call is the last, so it cannot continue.");
+    }
+
+    [TestMethod]
+    public void CreateVehicleAddsToPoolWithComposedExternalId()
+    {
+        var plan = CreatePlan();
+
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 12, null);
+
+        Assert.HasCount(1, plan.ScheduledObjects);
+        Assert.AreEqual(12, vehicle.Number);
+        Assert.AreEqual("BR 218 12", vehicle.ExternalId);
+    }
+
+    [TestMethod]
+    public void CreateVehicleFallsBackToItsIdWhenNumberIsZero()
+    {
+        var plan = CreatePlan();
+
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, null, 0, null);
+
+        Assert.AreEqual(vehicle.Id, vehicle.Number, "A vehicle with no number falls back to its unique id.");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(vehicle.ExternalId));
+    }
+
+    [TestMethod]
+    public void AssignVehicleCreatesAnAssignmentAndAppearsInScheduleVehicles()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+
+        var result = plan.AssignVehicle(schedule, vehicle);
+
+        Assert.IsTrue(result.HasValue);
+        Assert.HasCount(1, vehicle.ScheduleAssignments);
+        Assert.Contains(vehicle, schedule.Vehicles.ToList());
+    }
+
+    [TestMethod]
+    public void AssignVehicleIsIdempotentForTheSameVehicleAndSchedule()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+
+        plan.AssignVehicle(schedule, vehicle);
+        plan.AssignVehicle(schedule, vehicle);
+
+        Assert.HasCount(1, vehicle.ScheduleAssignments, "The same vehicle is not assigned twice to one schedule.");
+    }
+
+    [TestMethod]
+    public void RemovePartRemovesOnlyThatPartAndKeepsTheOthers()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        var first = schedule.Append(Forward(plan).AsTrainPart(0, 1)).Value; // G→Yb
+        schedule.Append(Forward(plan).AsTrainPart(1, 2)); // Yb→Snu
+
+        schedule.RemovePart(first);
+
+        Assert.HasCount(1, schedule.Parts, "Only the removed part is gone; the rest stay.");
+        Assert.AreEqual("Yb", schedule.StartLocation!.Signature, ignoreCase: true);
+        Assert.IsNull(first.Schedule, "The removed part is detached.");
+        Assert.IsNull(first.ScheduleId);
+    }
+
+    [TestMethod]
+    public void TruncateFromRemovesThePartAndEverythingAfterIt()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart(0, 1)); // G→Yb
+        var second = schedule.Append(Forward(plan).AsTrainPart(1, 2)).Value; // Yb→Snu
+
+        schedule.TruncateFrom(second);
+
+        Assert.HasCount(1, schedule.Parts);
+        Assert.AreEqual("Yb", schedule.EndLocation!.Signature, ignoreCase: true);
+    }
+
+    [TestMethod]
+    public void TryDeleteScheduleRemovesItAndUnassignsItsVehicles()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        plan.AssignVehicle(schedule, vehicle);
+
+        var result = plan.TryDelete(schedule);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.IsEmpty(plan.Schedules);
+        Assert.IsEmpty(vehicle.ScheduleAssignments, "The vehicle is unassigned but stays in the pool.");
+        Assert.HasCount(1, plan.ScheduledObjects);
+    }
+
+    [TestMethod]
+    public void AllSessionsCoverTheWholePeriodAndLeaveNothingFree()
+    {
+        Assert.IsTrue(Sessions.All.CoversAllWithin(useDays: false, maxSessions: 14));
+        Assert.IsEmpty(Sessions.All.ComplementWithin(useDays: false, maxSessions: 14).Numbers);
+    }
+
+    [TestMethod]
+    public void OddSessionsAreFreeOnTheEvenSessions()
+    {
+        var odd = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+
+        Assert.IsFalse(odd.CoversAllWithin(useDays: false, maxSessions: 14));
+        CollectionAssert.AreEqual(new byte[] { 2, 4, 6, 8, 10, 12, 14 },
+            odd.ComplementWithin(useDays: false, maxSessions: 14).Numbers);
+    }
+
+    [TestMethod]
+    public void AssignedSessionsIsTheUnionAcrossAVehiclesAssignments()
+    {
+        var plan = CreatePlan();
+        var odd = plan.CreateSchedule();
+        odd.Append(Forward(plan).AsTrainPart);
+        var even = plan.CreateSchedule();
+        even.Append(Return(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+
+        plan.AssignVehicle(odd, vehicle, Sessions.FromBitPattern(CommonSessionPatterns.Odd));
+        Assert.IsFalse(vehicle.AssignedSessions.CoversAllWithin(false, 14), "Only odd so far — even is still free.");
+
+        plan.AssignVehicle(even, vehicle, Sessions.FromBitPattern(CommonSessionPatterns.Even));
+        Assert.IsTrue(vehicle.AssignedSessions.CoversAllWithin(false, 14), "Odd plus even covers the whole period.");
+    }
+
+    [TestMethod]
+    public void EffectiveSessionsOfAnEmptyScheduleIsAllSessions()
+    {
+        var plan = CreatePlan();
+
+        var schedule = plan.CreateSchedule();
+
+        Assert.IsTrue(schedule.EffectiveSessions.CoversAllWithin(useDays: false, maxSessions: 14));
+    }
+
+    [TestMethod]
+    public void EffectiveSessionsIsTheIntersectionOfItsPartsTrains()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+
+        CollectionAssert.AreEqual(new byte[] { 1, 2, 3 }, schedule.EffectiveSessions.Numbers);
+    }
+
+    [TestMethod]
+    public void AppendRejectsATrainWithNoSessionInCommonWithTheSchedule()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        Return(plan).Sessions = Sessions.FromBitPattern(CommonSessionPatterns.Even);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart); // ends at Snu 12:55, operates odd sessions
+
+        var result = schedule.Append(Return(plan).AsTrainPart); // continues at Snu, but operates even sessions
+
+        Assert.IsTrue(result.IsNone, "A train that never runs on a session the schedule operates cannot join.");
+        Assert.HasCount(1, schedule.Parts);
+    }
+
+    [TestMethod]
+    public void CandidateTrainsExcludeTrainsWithNoSessionInCommon()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
+        Return(plan).Sessions = Sessions.FromBitPattern(CommonSessionPatterns.Even);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+
+        var candidates = plan.CandidateTrainsFor(schedule);
+
+        Assert.DoesNotContain(Return(plan), candidates, "The even-only return shares no session with the odd-only schedule.");
+    }
+
+    [TestMethod]
+    public void TryDeleteAssignmentUnassignsTheVehicleButKeepsTheSchedule()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        var assignment = plan.AssignVehicle(schedule, vehicle).Value;
+
+        plan.TryDelete(assignment);
+
+        Assert.IsEmpty(vehicle.ScheduleAssignments);
+        Assert.HasCount(1, plan.Schedules);
+        Assert.IsEmpty(schedule.Vehicles.ToList());
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleContainsOnlyTrainsRunningBeyondTheEffectiveSessions()
+    {
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.MaxSessions = 7;
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5); // limits the origin to 1-5
+        Return(plan).Sessions = Sessions.All;                                 // also runs on 6-7
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+
+        var result = plan.CreateComplementarySchedule(origin);
+
+        Assert.IsTrue(result.HasValue, result.Message);
+        var complement = result.Value;
+        Assert.HasCount(1, complement.Parts);
+        Assert.AreEqual(Return(plan), complement.Parts.Single().Train, "Only the all-sessions train also runs on sessions 6-7.");
+        Assert.Contains(complement, plan.Schedules);
+        Assert.AreNotEqual(origin, complement);
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleCopiesReferencesToTheOriginalTrains()
+    {
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.MaxSessions = 7;
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
+        Return(plan).Sessions = Sessions.All;
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+
+        var complement = plan.CreateComplementarySchedule(origin).Value;
+
+        Assert.IsTrue(ReferenceEquals(Return(plan), complement.Parts.Single().Train),
+            "The complement references the same train, it does not clone it.");
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleReturnsNoneWhenTheOriginCoversTheWholePeriod()
+    {
+        var plan = CreatePlan();
+        // Both trains default to Sessions.All and MaxSessions is 14, so the origin already covers everything.
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+
+        var result = plan.CreateComplementarySchedule(origin);
+
+        Assert.IsTrue(result.IsNone, "There is no session left for a complement.");
+        Assert.HasCount(1, plan.Schedules, "No complementary schedule is added.");
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleReturnsNoneForAnEmptySchedule()
+    {
+        var plan = CreatePlan();
+        var origin = plan.CreateSchedule();
+
+        var result = plan.CreateComplementarySchedule(origin);
+
+        Assert.IsTrue(result.IsNone);
+        Assert.HasCount(1, plan.Schedules, "The empty origin stays; no complement is added.");
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleKeepsAbsoluteSessionNumbers()
+    {
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.MaxSessions = 7;
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
+        Return(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6); // runs into session 6 only
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+
+        var complement = plan.CreateComplementarySchedule(origin).Value;
+
+        CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 6 }, complement.EffectiveSessions.Numbers,
+            "Sessions keep their absolute numbers — the surviving train still reports session 6.");
+    }
+
+    [TestMethod]
+    public void CloneScheduleCopiesEveryPartReferencingTheSameTrains()
+    {
+        var plan = CreatePlan();
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+
+        var clone = plan.CloneSchedule(origin);
+
+        Assert.AreNotEqual(origin, clone);
+        Assert.Contains(clone, plan.Schedules);
+        Assert.HasCount(2, clone.Parts);
+        CollectionAssert.AreEqual(
+            origin.OrderedParts.Select(p => p.Train).ToList(),
+            clone.OrderedParts.Select(p => p.Train).ToList(),
+            "The clone works the same trains in the same order.");
+        Assert.IsTrue(clone.OrderedParts.Zip(origin.OrderedParts).All(x => ReferenceEquals(x.First.Train, x.Second.Train)),
+            "The clone references the same trains, it does not clone them.");
+    }
+
+    [TestMethod]
+    public void CloneScheduleIsIndependentOfTheOrigin()
+    {
+        var plan = CreatePlan();
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        var clone = plan.CloneSchedule(origin);
+
+        clone.TruncateFrom(clone.OrderedParts[0]); // edit the clone
+
+        Assert.IsEmpty(clone.Parts);
+        Assert.HasCount(1, origin.Parts, "Editing the clone does not change the origin.");
+    }
+
+    [TestMethod]
+    public void CloneOfAnEmptyScheduleIsAnEmptySchedule()
+    {
+        var plan = CreatePlan();
+        var origin = plan.CreateSchedule();
+
+        var clone = plan.CloneSchedule(origin);
+
+        Assert.AreNotEqual(origin, clone);
+        Assert.IsEmpty(clone.Parts);
+        Assert.HasCount(2, plan.Schedules);
+    }
+
+    [TestMethod]
+    public void ComplementaryScheduleSharesTheOriginNumberAndVehicleOnTheLeftoverSessions()
+    {
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.MaxSessions = 7;
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
+        Return(plan).Sessions = Sessions.All;
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        origin.Add(Return(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        plan.AssignVehicle(origin, vehicle, Sessions.FromSessionNumbers(1, 2, 3, 4, 5));
+
+        var complement = plan.CreateComplementarySchedule(origin).Value;
+
+        Assert.AreEqual(origin.Number, complement.Number, "The complement is listed just below the origin, sharing its number.");
+        Assert.Contains(vehicle, complement.Vehicles.ToList(), "The same vehicle also works the complement.");
+        var assignment = vehicle.ScheduleAssignments.First(a => complement.Equals(a.Schedule));
+        CollectionAssert.AreEqual(new byte[] { 6, 7 }, assignment.Sessions.Numbers,
+            "The vehicle works the complement on the sessions the origin leaves out.");
+    }
+
+    [TestMethod]
+    public void ClonedScheduleSharesTheOriginNumberAndVehicleWithItsSessions()
+    {
+        var plan = CreatePlan();
+        var origin = plan.CreateSchedule();
+        origin.Add(Forward(plan).AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        plan.AssignVehicle(origin, vehicle, Sessions.FromSessionNumbers(1, 2, 3));
+
+        var clone = plan.CloneSchedule(origin);
+
+        Assert.AreEqual(origin.Number, clone.Number, "The clone is listed just below the origin, sharing its number.");
+        Assert.Contains(vehicle, clone.Vehicles.ToList(), "The same vehicle also works the clone.");
+        var assignment = vehicle.ScheduleAssignments.First(a => clone.Equals(a.Schedule));
+        CollectionAssert.AreEqual(new byte[] { 1, 2, 3 }, assignment.Sessions.Numbers,
+            "The clone keeps the origin assignment's sessions.");
+    }
+}

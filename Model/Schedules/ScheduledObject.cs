@@ -176,6 +176,53 @@ public static class ScheduledObjectExtensions
         /// Determines if a turnus card should be printed for this object.
         /// </summary>
         public bool HasTurnusCard => !scheduledObject.IsCargoFlow;
+
+        /// <summary>
+        /// Gets the union of the sessions across all this vehicle's <see cref="ScheduleAssignments"/> — the
+        /// sessions on which it is already working somewhere. Empty when the vehicle is not yet assigned.
+        /// </summary>
+        public Sessions AssignedSessions =>
+            scheduledObject.ScheduleAssignments.Select(a => a.Sessions).Aggregate(new Sessions(), (acc, s) => acc.Or(s));
+
+        /// <summary>
+        /// Gets the distinct session/day combinations this vehicle works, each paired with the train parts it
+        /// works on those sessions in departure order — one turnus card per combination. Every session/day of
+        /// the operating period is attributed to the parts the vehicle actually works on it, gathered across
+        /// <em>all</em> its <see cref="ScheduledObject.ScheduleAssignments"/> and restricted, per assignment, to the sessions the
+        /// assignment covers and to each part's own <see cref="Train.Sessions"/>. Sessions on which the vehicle
+        /// works the identical set of parts form one combination; sessions on which it works nothing yield none.
+        /// The combinations are ordered by their first session/day.
+        /// </summary>
+        /// <param name="useDays">Whether the operating period is measured in weekdays rather than session numbers.</param>
+        /// <param name="maxSessions">The number of sessions/days in the operating period (1-14).</param>
+        public IReadOnlyList<SessionCombination> SessionCombinations(bool useDays, int maxSessions)
+        {
+            var periodMax = Math.Clamp(maxSessions, 1, useDays ? 7 : 14);
+            var groups = new List<SessionCombinationBuilder>();
+            for (var number = 1; number <= periodMax; number++)
+            {
+                var parts = scheduledObject.ScheduleAssignments
+                    .Where(a => a.Sessions.Includes(number))
+                    .SelectMany(a => a.Schedule?.Parts ?? [])
+                    .Where(p => p.Train.Sessions.Includes(number))
+                    .ToHashSet();
+                if (parts.Count == 0) continue;
+                var group = groups.FirstOrDefault(g => g.Parts.SetEquals(parts));
+                if (group is null) groups.Add(group = new SessionCombinationBuilder(parts));
+                group.Numbers.Add(number);
+            }
+            return [.. groups.Select(g => new SessionCombination(
+                SessionsExtensions.FromPeriodNumbers(g.Numbers, useDays),
+                [.. g.Parts.OrderBy(p => p.Departure?.Value)]))];
+        }
+    }
+
+    // Accumulates the operating-period numbers on which a vehicle works one identical set of parts, while
+    // the numbers are grouped into session/day combinations.
+    private sealed class SessionCombinationBuilder(HashSet<ScheduledTrainPart> parts)
+    {
+        public HashSet<ScheduledTrainPart> Parts { get; } = parts;
+        public List<int> Numbers { get; } = [];
     }
 }
 

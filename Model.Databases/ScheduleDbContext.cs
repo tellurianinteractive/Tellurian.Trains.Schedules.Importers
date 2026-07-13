@@ -99,11 +99,6 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     /// </summary>
     public DbSet<StationCall> StationCalls => Set<StationCall>();
 
-    /// <summary>
-    /// Gets the set of wagon groups in the database.
-    /// </summary>
-    public DbSet<WagonGroup> WagonGroups => Set<WagonGroup>();
-
     #endregion
 
     #region Schedule Layer
@@ -475,34 +470,12 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.Layout);
             entity.Ignore(e => e.AsTrainPart);
 
-            entity.HasMany(e => e.WagonGroups)
-                  .WithOne(e => e.Train)
-                  .HasForeignKey(e => e.TrainId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
             // Cargo flows belong to the train (1:N). CargoFlowTrainPart has no Train navigation of its
             // own (Train is derived from its from-call), so the foreign key is a shadow property.
             entity.HasMany(e => e.CargoFlows)
                   .WithOne()
                   .HasForeignKey("TrainId")
                   .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // WagonGroup
-        modelBuilder.Entity<WagonGroup>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Remark).HasMaxLength(500);
-
-            entity.HasOne(e => e.FromStationCall)
-                  .WithMany()
-                  .HasForeignKey(e => e.FromStationCallId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.ToStationCall)
-                  .WithMany()
-                  .HasForeignKey(e => e.ToStationCallId)
-                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // StationCall

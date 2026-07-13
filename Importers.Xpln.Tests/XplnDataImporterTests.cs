@@ -248,6 +248,29 @@ public class XplnDataImporterTests
         }
     }
 
+    [TestMethod]
+    public async Task VehicleSchedulesResolveTheirVehicleAndCargoFlowsAreDistinguished()
+    {
+        // The Schedules turn chart labels each row with the vehicle that works the schedule and leaves
+        // out cargo-flow schedules (freight consignments, not turning vehicles). Both rely on
+        // Schedule.Vehicles resolving through the schedule assignments, so verify against real data.
+        Assert.IsTrue(IsScheduleFileExisting("Givskud-Modern-2025", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Givskud-Modern-2025");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+        var plan = result.Item;
+
+        // Every schedule resolves exactly the vehicle it was created for (XPLN is one vehicle per schedule).
+        Assert.IsTrue(plan.Schedules.All(s => s.Vehicles.Any()), "Every schedule should resolve at least one vehicle.");
+
+        // The chart's filter must drop exactly the cargo-flow schedules, and keep every other one.
+        var shown = plan.Schedules.Where(s => !s.IsCargoFlow).ToList();
+        var cargoFlowVehicleCount = plan.ScheduledObjects.Count(v => v.IsCargoFlow);
+        Assert.IsGreaterThan(0, cargoFlowVehicleCount, "The file should contain cargo flows to exclude.");
+        Assert.AreEqual(plan.Schedules.Count - cargoFlowVehicleCount, shown.Count, "Kept schedules");
+        Assert.IsFalse(shown.Any(s => s.Vehicles.All(v => v.IsCargoFlow)), "No cargo-flow schedule should be shown.");
+    }
+
     // The import language and country are taken from the culture in each test file's name
     // (for example "Barmstedt2022.de-DE.ods"); the importer falls back to the current culture
     // for a file without a culture segment (for example "DreamTrack2015.ods").

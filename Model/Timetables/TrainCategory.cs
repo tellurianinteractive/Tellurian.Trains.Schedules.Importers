@@ -57,6 +57,13 @@ public record TrainCategory
     public int StartNumber { get; set; } = 1;
 
     /// <summary>
+    /// Gets or sets whether trains of this category are excluded from automatic schedule building.
+    /// When <c>true</c>, the automatic builder never seeds or chains these trains; they can still be
+    /// added to a schedule manually. Defaults to <c>false</c>.
+    /// </summary>
+    public bool ExcludeFromAutomaticScheduling { get; set; }
+
+    /// <summary>
     /// Optional company that operates trains in this category.
     /// </summary>
     public Company? Company { get; set; }

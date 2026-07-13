@@ -112,6 +112,14 @@ public static class SessionsExtensions
         public bool Overlaps(Sessions other) => sessions.And(other).Flags > 0;
 
         /// <summary>
+        /// Determines whether the given 1-based session/day number is active. For day patterns the number
+        /// is the operating-week position (1 = the layout's start day); the mirrored upper bits are ignored.
+        /// </summary>
+        /// <param name="number">The session/day number (1-14).</param>
+        internal bool Includes(int number) =>
+            number is >= 1 and <= 14 && (sessions.Flags & (1 << (number - 1))) != 0;
+
+        /// <summary>
         /// Returns a copy for display in which the session bits at or above <paramref name="maxSessions"/>
         /// are cleared, so a layout with a shorter operating period ignores the higher bits. The stored
         /// value is untouched — this only shapes the session/day texts, so raising the period again brings
@@ -147,6 +155,26 @@ public static class SessionsExtensions
             var mask = (ushort)(((1 << maxSessions) - 1) | 0b11_0000000_0000000);
             return new() { Flags = (ushort)(sessions.Flags & mask) };
         }
+
+        /// <summary>
+        /// Gets the sessions within the layout's operating period (defined by <paramref name="useDays"/>
+        /// and <paramref name="maxSessions"/>) that these sessions do <em>not</em> cover — i.e. the free
+        /// sessions/days still available. Bits outside the period are ignored.
+        /// </summary>
+        public Sessions ComplementWithin(bool useDays, int maxSessions)
+        {
+            var free = FreeBits(sessions, useDays, maxSessions);
+            // Days are stored with the in-week bits mirrored into the upper session bits plus the days
+            // marker, so a day pattern round-trips and renders as weekdays.
+            var flags = useDays ? (ushort)(free | (free << 7) | DaysMarker) : free;
+            return new Sessions { Flags = flags };
+        }
+
+        /// <summary>
+        /// Determines whether these sessions cover every session/day of the layout's operating period
+        /// (defined by <paramref name="useDays"/> and <paramref name="maxSessions"/>), i.e. nothing is free.
+        /// </summary>
+        public bool CoversAllWithin(bool useDays, int maxSessions) => FreeBits(sessions, useDays, maxSessions) == 0;
 
         /// <summary>
         /// Gets a value indicating whether this is an on-demand train.
@@ -207,6 +235,32 @@ public static class SessionsExtensions
         }
     }
 
+
+    // The days marker bit (bit 15); set on day-based patterns so they render as weekdays.
+    private const ushort DaysMarker = 0b10_0000000_0000000;
+
+    // Builds a Sessions from operating-period session/day numbers (1-based). For day patterns the in-week
+    // bits are mirrored into the upper session bits and the days marker is set — exactly as ComplementWithin
+    // does — so the value renders as weekdays; for session patterns the numbers are simply the low bits.
+    internal static Sessions FromPeriodNumbers(IEnumerable<int> numbers, bool useDays)
+    {
+        ushort low = 0;
+        foreach (var number in numbers)
+            if (number is >= 1 and <= 14) low |= (ushort)(1 << (number - 1));
+        var flags = useDays ? (ushort)(low | (low << 7) | DaysMarker) : low;
+        return new Sessions { Flags = flags };
+    }
+
+    // The in-period session/day bits these sessions leave free: within the operating period (7 day bits
+    // when useDays, else up to 14 session bits), the bits of the period that are not set.
+    private static ushort FreeBits(Sessions sessions, bool useDays, int maxSessions)
+    {
+        var n = Math.Clamp(maxSessions, 1, useDays ? 7 : 14);
+        var full = (ushort)((1 << n) - 1);
+        var low = useDays ? (ushort)0b0000000_1111111 : (ushort)0b00_1111111_1111111;
+        var assigned = (ushort)(sessions.Flags & low & full);
+        return (ushort)(full & ~assigned);
+    }
 
     // Collapses ascending session numbers into comma-separated ranges, each sequence of two or more
     // consecutive numbers shown as "first-last" and a lone number as itself

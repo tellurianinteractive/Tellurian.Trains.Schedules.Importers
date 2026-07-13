@@ -79,9 +79,9 @@ public static class DeletionRules
 
         /// <summary>
         /// Deletes a <see cref="Train"/> from the timetable when nothing runs it: removes the train's
-        /// calls from the tracks that hold them, and removes the train (its calls and wagon groups go
-        /// with it). Returns the <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged
-        /// when it is still referenced, leaving the model untouched.
+        /// calls from the tracks that hold them, and removes the train (its calls go with it). Returns
+        /// the <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when it is still
+        /// referenced, leaving the model untouched.
         /// </summary>
         public DeletionResult TryDelete(Train train)
         {
@@ -93,8 +93,7 @@ public static class DeletionRules
 
         /// <summary>
         /// Determines whether a <see cref="StationCall"/> may be deleted from its train, i.e. no vehicle
-        /// schedule or driver duty part starts or ends at it. Wagon groups of the same train that attach
-        /// or detach at the call do not block deletion — <c>TryDelete</c> removes them.
+        /// schedule or driver duty part starts or ends at it.
         /// </summary>
         public DeletionResult MayDelete(StationCall call)
         {
@@ -106,9 +105,8 @@ public static class DeletionRules
 
         /// <summary>
         /// Deletes a <see cref="StationCall"/> from its train when no part uses it: removes the call from
-        /// its train and its track, and drops the train's wagon groups that referenced it. Returns the
-        /// <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when it is still
-        /// referenced, leaving the model untouched.
+        /// its train and its track. Returns the <see cref="DeletionResult.Failure"/> from
+        /// <c>MayDelete</c> unchanged when it is still referenced, leaving the model untouched.
         /// </summary>
         public DeletionResult TryDelete(StationCall call)
         {
@@ -116,24 +114,50 @@ public static class DeletionRules
             var train = call.Train;
             train.Calls.Remove(call);
             call.Track.Calls.Remove(call);
-            foreach (var wagonGroup in train.WagonGroups.Where(w => w.FromStationCallId == call.Id || w.ToStationCallId == call.Id).ToList())
-                train.WagonGroups.Remove(wagonGroup);
             return new DeletionResult.Success(call);
         }
 
         /// <summary>
-        /// A <see cref="WagonGroup"/> may always be deleted: nothing else references it.
+        /// A vehicle <see cref="Schedule"/> may always be deleted: it is a planner construct that nothing
+        /// outside it references (its assignments and parts are owned by it).
         /// </summary>
-        public DeletionResult MayDelete(WagonGroup wagonGroup) => new DeletionResult.Success(wagonGroup);
+        public DeletionResult MayDelete(Schedule schedule) => new DeletionResult.Success(schedule);
 
         /// <summary>
-        /// Deletes a <see cref="WagonGroup"/> from the train that owns it.
+        /// Deletes a vehicle <see cref="Schedule"/>: unassigns its vehicles (removes each
+        /// <see cref="ScheduleAssignment"/> from its <see cref="ScheduledObject"/>), detaches its train
+        /// parts, and removes it from the plan. The vehicles themselves stay in the pool.
         /// </summary>
-        public DeletionResult TryDelete(WagonGroup wagonGroup)
+        public DeletionResult TryDelete(Schedule schedule)
         {
-            // WagonGroup.Train is not persisted, so find the owner through the timetable.
-            plan.Timetable.Trains.FirstOrDefault(t => t.WagonGroups.Contains(wagonGroup))?.WagonGroups.Remove(wagonGroup);
-            return new DeletionResult.Success(wagonGroup);
+            foreach (var assignment in schedule.Vehicles
+                .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule)).ToList()))
+                assignment.ScheduledObject.ScheduleAssignments.Remove(assignment);
+            foreach (var part in schedule.Parts.ToList())
+            {
+                part.Schedule = null;
+                part.ScheduleId = null;
+            }
+            schedule.Parts.Clear();
+            plan.Schedules.Remove(schedule);
+            return new DeletionResult.Success(schedule);
+        }
+
+        /// <summary>
+        /// A <see cref="ScheduleAssignment"/> may always be removed: unassigning a vehicle from a schedule
+        /// references nothing else.
+        /// </summary>
+        public DeletionResult MayDelete(ScheduleAssignment assignment) => new DeletionResult.Success(assignment);
+
+        /// <summary>
+        /// Unassigns a vehicle by removing the <see cref="ScheduleAssignment"/> from its
+        /// <see cref="ScheduledObject"/>. The vehicle stays in the pool for reuse; the schedule and its
+        /// parts are untouched.
+        /// </summary>
+        public DeletionResult TryDelete(ScheduleAssignment assignment)
+        {
+            assignment.ScheduledObject.ScheduleAssignments.Remove(assignment);
+            return new DeletionResult.Success(assignment);
         }
 
         /// <summary>

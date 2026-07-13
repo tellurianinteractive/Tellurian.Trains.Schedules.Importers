@@ -218,5 +218,12 @@ public static class OperationLocationExtensions
             operationLocation.Tracks.Add(stationTrack);
             return stationTrack;
         }
+
+        /// <summary>
+        /// Decides whether trains can meet on an <see cref="Station"/>
+        /// </summary>
+        public bool CanHaveTrainsMeets =>
+            operationLocation is Station station &&
+            station.Tracks.Count(t => t.IsScheduled) > 1;
     }
 }

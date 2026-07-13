@@ -24,7 +24,6 @@ public class Train : IEquatable<Train>
         ExternalId = string.Empty;
         Timetable = default!;
         Calls = [];
-        WagonGroups = [];
         CargoFlows = [];
     }
 
@@ -42,7 +41,6 @@ public class Train : IEquatable<Train>
         ExternalId = externalId;
         Timetable = default!;
         Calls = [];
-        WagonGroups = [];
         CargoFlows = [];
     }
 
@@ -139,11 +137,6 @@ public class Train : IEquatable<Train>
     /// Gets or sets the collection of station calls for this train.
     /// </summary>
     public IList<StationCall> Calls { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of wagon groups in this train.
-    /// </summary>
-    public IList<WagonGroup> WagonGroups { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of cargo flows on this train. Each <see cref="CargoFlowTrainPart"/>
@@ -379,47 +372,6 @@ public static class TrainExtensions
                 Debugger.Break();
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Creates a wagon group for this train between two times.
-        /// </summary>
-        /// <param name="id">The unique identifier for the wagon group.</param>
-        /// <param name="from">The departure time.</param>
-        /// <param name="to">The arrival time.</param>
-        /// <param name="positionInTrain">The position of the wagon group in the train.</param>
-        /// <param name="remark">An optional remark.</param>
-        /// <returns>The created wagon group.</returns>
-        public WagonGroup CreateWagonGroup(int id, Time from, Time to, int positionInTrain, string? remark = null)
-        {
-            var fromCall = train.StationCall(from).ValueOrException(nameof(from));
-            var toCall = train.StationCall(to).ValueOrException(nameof(to));
-            return new()
-            {
-                Id = id,
-                FromStationCall = fromCall,
-                FromStationCallId = fromCall.Id,
-                ToStationCall = toCall,
-                ToStationCallId = toCall.Id,
-                PositionInTrain = positionInTrain,
-                Remark = remark
-            };
-        }
-
-        /// <summary>
-        /// Adds a wagon group to the train.
-        /// </summary>
-        /// <param name="wagonGroup">The wagon group to add.</param>
-        /// <returns>The added wagon group, or null if input was null.</returns>
-        public WagonGroup? Add(WagonGroup? wagonGroup)
-        {
-            if (wagonGroup is not null && !train.WagonGroups.Contains(wagonGroup))
-            {
-                wagonGroup.Train = train;
-                wagonGroup.TrainId = train.Id;
-                train.WagonGroups.Add(wagonGroup);
-            }
-            return wagonGroup;
         }
 
         /// <summary>
