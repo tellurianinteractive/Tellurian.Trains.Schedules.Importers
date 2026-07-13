@@ -58,7 +58,7 @@ Snapshot of coverage by area (see each section for detail).
 | Vehicle Schedule Editor (§3.8) | ❌ | stub page |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | ❌ | |
-| Validation (§3.11) | ✅ | all integrity rules + 7 conflict types; 2 toggles/1 threshold unused |
+| Validation (§3.11) | 🟡 | organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T3, S1, P1/P3/P4 done; circulation S2/S3/S5 + duplicate-number T4 missing; S4/P2 partial; L1 emergent |
 | Reports (§3.12) | 🟡 | shell + page formats present; 1 of 15 reports (Turnus Cards) built |
 
 ### Integration (§5)
@@ -484,46 +484,97 @@ with an option to lock individual times.
 
 ### 3.11 Validation
 
-> **Status:** ✅ Implemented (`Model/Validations/`, `Model/Settings/ValidationSettings.cs`).
-> All FR-3.11.1 integrity rules and all seven FR-3.11.2 conflict types are present,
-> with FR-3.11.4 output (severity, localized message, location + time range,
-> involved trains). See `Documentation/Validation.md`. **Caveat:** the toggles
-> `ValidateTrainNumbers` and `ValidateDriverDuties` and the threshold
-> `MinMinutesBetweenTrackUsage` exist in `ValidationSettings` but have no backing
-> validation yet.
+> **Status:** 🟡 Partial (`Model/Validations/`, `Model/Settings/ValidationSettings.cs`).
+> Fully implemented: the Layout occupancy rules **L2–L3**, the Timetable train rules
+> **T1–T3**, the Schedule part-overlap rule **S1**, and the Plan consistency rules
+> **P1, P3, P4**, all with FR-3.11.6 output (severity, localised message, location +
+> time range, involved trains). Missing or partial: **L1** (emergent only), the
+> schedule/turnus **circulation rules S2, S3, S5**, the duplicate-number rule **T4**,
+> and the partial per-session traction (**S4**) and part-coverage (**P2**). The toggles
+> `ValidateTrainNumbers` (→ T4) and `ValidateDriverDuties` (→ S5) and the threshold
+> `MinMinutesBetweenTrackUsage` exist in `ValidationSettings` but have **no backing
+> validation yet**. See `Documentation/Validation.md`.
 
-The system shall validate the schedule at two levels:
+Validation rules are organised by the **model scope** they apply to, bottom-up through
+the model hierarchy — **Layout, Timetable, Schedule, Plan**. This mirrors the intended
+implementation: each scope owns its own validation extension methods
+(`extension(Layout)`, `extension(Timetable)`, `extension(Schedule)`, `extension(Plan)`),
+into which the rules below are to be moved, improved, or newly implemented.
 
-#### FR-3.11.1 Data Integrity Validation (during data entry/import)
+Rules are numbered by scope: **L** = Layout, **T** = Timetable, **S** = Schedule,
+**P** = Plan. Two enforcement modes cut across the scopes:
 
-- All referenced station tracks exist in the layout
-- Train has at least two station calls
-- Arrival time ≤ departure time at each call
+- **Consistency (always enforced):** rule **P1** — data consistency is upheld
+  continuously and cannot be switched off.
+- **Publish-blocking (detected on demand):** every other rule *may* be violated while
+  editing but must be resolved before the plan is **published**. These are computed on
+  demand and surfaced as validation errors, not blocked at entry time.
 
-#### FR-3.11.2 Scheduling Conflict Detection (on demand)
+In each table the **Status** column records the current implementation; a ❌ or 🟡 rule
+is still a requirement, just not yet fully built.
 
-- **Station track conflicts** — two trains on the same track with overlapping times
-  (exception: trains sharing a vehicle schedule, e.g. loco change)
-- **Track stretch conflicts** — trains conflicting on single-track stretches
-- **Train time sequence** — calls not in chronological order
-- **Train speed** — speed between calls outside min/max thresholds
-- **Vehicle schedule overlaps** — a vehicle schedule with overlapping train parts
-- **Locomotive coverage** — gaps or overlaps in locomotive assignment across a train
-  (exception: loco change at same station)
-- **Vehicle double booking** — same vehicle assigned to overlapping sessions
+#### FR-3.11.1 Layout scope — infrastructure occupancy (L)
 
-#### FR-3.11.3 Validation Configuration
+How trains occupy the physical layout. A **meet** is two trains present at the same
+operation location, or on the same track stretch, at overlapping times.
 
-All validations shall be individually toggleable. Speed thresholds and timing
-parameters shall be configurable. These settings are stored on the layout as
-`Layout.Settings.Validation` (see §3.2).
+| Rule | Requirement | Status | Implementation / gap |
+| ---- | ----------- | ------ | -------------------- |
+| **L1** | Trains may only **meet** where there are **at least two tracks** — at an operation location or on a track stretch. A single-track location or stretch cannot host a meet. | 🟡 Emergent | Not asserted directly; follows from L2 (a meet at a single-track station forces both trains onto one track → conflict) and L3 (stretch capacity). No dedicated "a meet needs ≥2 tracks" diagnostic. |
+| **L2** | **At most one train may occupy a station track** at any time; two trains meeting must therefore stand on different tracks. | ✅ | `StationTrack.GetValidationErrors` → `StationTrackConflict` (overlapping calls, same track, different trains). Exception: calls sharing the same vehicle (e.g. a loco change) are allowed. |
+| **L3** | The number of trains **simultaneously on a track stretch** may not exceed the **number of tracks**, counting **both directions together**. Double track permits two concurrent trains (one each way, or two the same way). | ✅ | `TrackStretch.GetValidationErrors` compares passings against `TracksCount` direction-agnostically (an *i* vs *i + TracksCount* overlap test). |
 
-#### FR-3.11.4 Validation Output
+> Layout **structural** validity — consistent track-stretch directions and contiguous
+> timetable-stretch routes — is validated on the Stretches tab (see §3.4), not here.
+
+#### FR-3.11.2 Timetable scope — train rules (T)
+
+A timetable is the collection of trains on the layout; these rules validate the trains
+individually and as a set.
+
+| Rule | Requirement | Status | Implementation / gap |
+| ---- | ----------- | ------ | -------------------- |
+| **T1** | A train has **at least two station calls**. | ✅ | `CheckTrainTimeSequence` / `TrainTooFewCalls`. |
+| **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | `CheckTrainTimeSequence` + `StationCall.GetValidationErrors` (`StationCallTiming`). |
+| **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | `CheckTrainSpeed` (thresholds from `ValidationSettings`). |
+| **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ❌ Missing | `ValidateTrainNumbers` toggle exists; no logic. |
+
+#### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
+
+Each vehicle schedule (turnus) is a sequence of train parts forming a circulation.
+
+| Rule | Requirement | Status | Implementation / gap |
+| ---- | ----------- | ------ | -------------------- |
+| **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | `ValidateOverlappingParts`. |
+| **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ❌ Missing | No contiguity check on schedule parts. |
+| **S3** | **Circulation closure.** An all-session schedule starts and ends at the **same station**; otherwise it is split into parts that each start where the previous ended and close the loop, with **part count = sessions needed to return**, each part having a starting traction unit; parts may overlap in time. | ❌ Missing | No circulation/closure validation. |
+| **S4** | A **traction unit is assigned for all of the schedule's sessions** (may be different units for different sessions/days). | 🟡 Partial | `ValidateLocomotiveCoverage` (see P4) finds coverage gaps along a train, but not **per-session** traction across the whole schedule. |
+| **S5** | When the vehicles in a schedule run **different sessions/days**, the **session combinations must be valid** — each conforming to S3. | ❌ Missing | `ValidateDriverDuties` toggle exists; no logic. Relates to `ScheduledObject.SessionCombinations`. |
+
+#### FR-3.11.4 Plan scope — cross-object consistency (P)
+
+The plan is the aggregate root; these rules span the timetable, schedules and vehicles.
+
+| Rule | Requirement | Status | Implementation / gap |
+| ---- | ----------- | ------ | -------------------- |
+| **P1** | **Referential integrity (always enforced).** No dangling references; an object that others depend on cannot be deleted; every station track referenced by a train exists in the layout. | ✅ | `DeletionRules` (`MayDelete` / `TryDelete`) + `EnsureStationHasTrack`. |
+| **P2** | **Every train part belongs to a schedule.** A part may appear in several schedules only for **non-overlapping sessions**; no part may be in two schedules whose sessions overlap. | 🟡 Partial | Partly served by P4 (no traction → gap) and P3 (session overlap). Not checked: that *every* part is scheduled, and the *same part* across overlapping-session schedules. |
+| **P3** | **No vehicle is double-booked** — the same vehicle is not assigned to schedules with **overlapping sessions**. | ✅ | `ValidateVehicleDoubleBooking` (bitwise session overlap). |
+| **P4** | **Traction coverage** — each train's run is covered by traction schedules **without gaps or overlaps** (a loco change at the same station is allowed). | ✅ | `ValidateLocomotiveCoverage`. Complements the per-session view in S4. |
+
+#### FR-3.11.5 Validation Configuration
+
+All publish-blocking validations shall be **individually toggleable**. Speed thresholds
+and timing parameters shall be configurable. These settings are stored on the layout as
+`Layout.Settings.Validation` (see §3.2). The consistency rule P1 is always enforced and
+is not toggleable.
+
+#### FR-3.11.6 Validation Output
 
 Validation errors shall include:
 
 - Severity level (Information, Warning, Error, System)
-- Localized message text
+- Localised message text
 - Location (station track) and time range for graphical highlighting
 - Involved trains
 

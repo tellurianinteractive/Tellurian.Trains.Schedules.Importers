@@ -33,8 +33,8 @@ public sealed class Schedule : IEquatable<Schedule>
 
     /// <summary>
     /// Gets or sets the displayed schedule number. It defaults to the number of the first train added
-    /// to the schedule (see <see cref="VehicleScheduleExtensions.Add"/> and
-    /// <see cref="VehicleScheduleExtensions.Append"/>) and may then be freely changed by the user. It is
+    /// to the schedule (see <see cref="ScheduleExtensions.Add"/> and
+    /// <see cref="ScheduleExtensions.Append"/>) and may then be freely changed by the user. It is
     /// a label only and need not be unique — <see cref="Id"/> carries identity.
     /// </summary>
     public int Number { get; set; }
@@ -70,7 +70,7 @@ public sealed class Schedule : IEquatable<Schedule>
 /// <summary>
 /// Provides extension methods for <see cref="Schedule"/>.
 /// </summary>
-public static class VehicleScheduleExtensions
+public static class ScheduleExtensions
 {
     extension(Schedule schedule)
     {
@@ -209,6 +209,29 @@ public static class VehicleScheduleExtensions
             part.ScheduleId = schedule.Id;
             schedule.Parts.Add(part);
             if (schedule.Number == 0) schedule.Number = part.Train.Number;
+        }
+    }
+
+    extension(IEnumerable<Schedule> schedules)
+    {
+        internal bool HasSameVehicle(StationCall one, StationCall another)
+        {
+            var foundOne = schedules.FindVehicleSchedule(one);
+            var foundOther = schedules.FindVehicleSchedule(another);
+            return foundOne is not null && foundOther is not null && foundOne == foundOther;
+        }
+
+        internal Schedule? FindVehicleSchedule(StationCall call)
+        {
+            if (schedules == null) return null;
+            foreach (var schedule in schedules)
+            {
+                foreach (var part in schedule.Parts)
+                {
+                    if (part.ContainsCall(call)) return schedule;
+                }
+            }
+            return null;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// part), creating and assigning <see cref="ScheduledObject">vehicles</see>, and trimming a schedule.
 /// </summary>
 /// <remarks>
-/// Appending a (possibly partial) train goes through the guarded <see cref="VehicleScheduleExtensions.Append"/>
+/// Appending a (possibly partial) train goes through the guarded <see cref="ScheduleExtensions.Append"/>
 /// with <see cref="TrainExtensions.AsTrainPart(Train, int, int)"/>, which keeps a schedule a single
 /// contiguous, non-overlapping working. Automatic building lives in
 /// <see cref="PlanScheduleBuilderExtensions"/>; deletion lives in <c>DeletionRules</c>.
@@ -36,7 +36,7 @@ public static class ScheduleEditingExtensions
         /// schedule's <c>EffectiveSessions</c> is left out, as it could
         /// never work the whole run. Assigned trains are not
         /// excluded: the same train may supply a part to more than one schedule; the overlap guard in
-        /// <see cref="VehicleScheduleExtensions.Append"/> is what keeps a single schedule consistent.
+        /// <see cref="ScheduleExtensions.Append"/> is what keeps a single schedule consistent.
         /// </summary>
         /// <param name="schedule">The schedule being built.</param>
         /// <returns>The candidate trains, ordered by the departure at which they join, then by number.</returns>

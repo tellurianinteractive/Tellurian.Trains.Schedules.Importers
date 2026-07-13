@@ -103,115 +103,126 @@ IEnumerable<Message> GetValidationErrors(this Timetable timetable, Schedule sche
 - Comprehensive timetable validation
 - Calls sub-validators based on options
 
-## Entities Validated
+## Rules by scope
 
-### 1. Station Tracks (Referential Integrity)
-**Method**: `EnsureStationHasTrack(this Timetable me)`
+Validation rules are catalogued by **model scope** in the Requirements Specification
+§3.11 — Layout (**L**), Timetable (**T**), Schedule (**S**), Plan (**P**). The intended
+implementation gives each scope its own validation extension methods
+(`extension(Layout)`, `extension(Timetable)`, `extension(Schedule)`, `extension(Plan)`);
+the methods below are grouped by the scope they belong to, tagged with the rule id and
+status (✅ done · 🟡 partial · ❌ missing).
 
-**Validates**: All station tracks referenced in trains exist in the layout
+### Layout scope (L) — infrastructure occupancy
 
-**Error**: `"Track {track} in station {station} referred in train {train} is not in layout."`
+#### L2 — Station track conflicts ✅
+**Method**: `GetValidationErrors(this StationTrack me, IEnumerable<Schedule> vehicleSchedules)`
 
-### 2. Station Track Conflicts
-**Method**: `GetValidationErrors(this StationTrack me, IEnumerable<VehicleSchedule> vehicleSchedules)`
+**Validates**: At most one train may occupy a station track at a time (no overlapping calls by different trains)
 
-**Validates**: No conflicting train calls on the same track
-
-**Logic**:
-- Detects when different trains occupy the same track with overlapping times
-- Exception: Trains sharing the same vehicle are allowed (e.g., loco changes)
+**Exception**: Calls sharing the same vehicle are allowed (e.g. loco changes)
 
 **Error**: `"Train {train1} {time1} has conflicts with train {train2} {time2}."`
 
-### 3. Station Calls
-**Method**: `GetValidationErrors(this StationCall stationCall)`
-
-**Validates**: Arrival time ≤ Departure time at same station
-
-**Error**: `"At {station} arrival {arrival} is after departure {departure}."`
-
-### 4. Track Stretch Conflicts
+#### L3 — Track stretch conflicts ✅
 **Method**: `GetValidationErrors(this TrackStretch me)`
 
-**Validates**: No conflicting trains on the same stretch segment
+**Validates**: Trains simultaneously on a stretch ≤ track count, **both directions counted together**
 
-**Logic**:
-- Analyzes passings sorted by departure time
-- Considers number of tracks on stretch
-- Detects overlapping train movements
+**Logic**: Passings sorted by departure; an *i* vs *i + TracksCount* overlap test (direction-agnostic)
 
 **Error**: `"Train {train1} between {stretch1} is conflicting with train {train2} between {stretch2}."`
 
-### 5. Train Time Sequence
+#### L1 — Meet needs ≥2 tracks 🟡
+No dedicated diagnostic; emergent from L2 (single-track meet → same-track conflict) and L3.
+
+### Timetable scope (T) — train rules
+
+#### T1 + T2 — Train time sequence ✅
 **Method**: `CheckTrainTimeSequence(this Train me)`
 
-**Validates**:
-- Train has minimum 2 station calls
-- Calls are in correct time sequence
-
-**Checks for conflicts**:
-- Arrival after departure at next station
-- Arrival after another arrival
-- Departure before station arrival
-- Departure before departure
+**Validates**: Train has at least two station calls (T1); calls are ascending and arrival ≤ departure (T2)
 
 **Errors**:
 - `"Train {train} must stop at at least two stations."`
 - `"Train {train} calls {call1} and {call2} are conflicting."`
 
-### 6. Train Speed
+#### T2 — Station call timing ✅
+**Method**: `GetValidationErrors(this StationCall stationCall)`
+
+**Validates**: Arrival ≤ departure at the call
+
+**Error**: `"At {station} arrival {arrival} is after departure {departure}."`
+
+#### T3 — Train speed ✅
 **Method**: `CheckTrainSpeed(this Train me, ...)`
 
-**Validates**: Train speed is within realistic bounds
-
-**Formula**: `speed = distance / timeInMinutes`
-
-**Checks**:
-- Speed ≥ `MinTrainSpeedMetersPerClockMinute`
-- Speed ≤ `MaxTrainSpeedMetersPerClockMinute`
+**Validates**: Speed between consecutive calls within `Min`/`MaxTrainSpeedMetersPerClockMinute`
 
 **Errors**:
 - `"Train {train} speed from {station1} {time1} to {station2} {time2} is too slow, length {distance} meters."`
 - `"Train {train} speed from {station1} {time1} to {station2} {time2} is too fast, length {distance} meters."`
 
-### 7. Vehicle Schedule Overlaps
-**Method**: `ValidateOverlappingParts(this VehicleSchedule me)`
+#### T4 — Duplicate train-number sessions ❌
+Trains equal on Company+Category+Number must run on disjoint sessions. `ValidateTrainNumbers` toggle exists; no logic.
 
-**Validates**: Vehicle schedule has no overlapping train parts
+### Schedule scope (S) — vehicle schedule / turnus
 
-**Logic**: Compares all train part pairs in a vehicle schedule for time overlaps
+#### S1 — Overlapping parts ✅
+**Method**: `ValidateOverlappingParts(this Schedule me)`
+
+**Validates**: A schedule's train parts do not overlap in time (one vehicle, one place)
 
 **Error**: `"Vehicle schedule {id} contains overlapping {trainPart1} and {trainPart2}."`
 
-### 8. Locomotive Coverage
-**Method**: `ValidateLocomotiveCoverage(this Schedule schedule)`
+#### S2 — Part contiguity ❌
+A following part must start where the previous part ended. Not checked.
 
-**Validates**: Every train has complete locomotive coverage without gaps or overlaps
+#### S3 — Circulation closure ❌
+All-session schedule starts/ends at the same station; otherwise split into chained parts closing the loop. Not checked.
 
-**Logic**:
-1. Gets all locomotive vehicle schedules (via VehicleScheduleAssignments from Locomotives)
-2. For each train, collects all train parts assigned to locomotives
-3. Checks for gaps between parts (uncovered segments)
-4. Checks for overlaps between parts (double-booked locomotives)
+#### S4 — Per-session traction 🟡
+A traction unit for all of the schedule's sessions. Partly served by P4; not checked per session across the schedule.
 
-**Exception**: Locomotive changes at the same station are allowed. If one locomotive part ends and another begins at the same station (even with a time gap for the changeover), this is not reported as a coverage gap.
+#### S5 — Valid session combinations ❌
+Vehicles running different sessions/days must form valid combinations (conform to S3). `ValidateDriverDuties` toggle exists; no logic.
 
-**Errors**:
-- `"Train {0} has no locomotive assigned."` - No locomotive at all
-- `"Train {0} has a locomotive coverage gap between {1} and {2}."` - Gap in coverage between different stations
-- `"Train {0} has overlapping locomotive assignments: {1} and {2}."` - Overlap detected
+### Plan scope (P) — cross-object consistency
 
-### 9. Vehicle Double Booking
-**Method**: `ValidateVehicleDoubleBooking(this Schedule schedule)`
+#### P1 — Referential integrity ✅ (always enforced)
+**Methods**: `EnsureStationHasTrack(this Timetable me)`; `DeletionRules` `MayDelete` / `TryDelete`
 
-**Validates**: No vehicle has overlapping schedule assignments (sessions)
+**Validates**: Station tracks referenced in trains exist in the layout; a referenced object cannot be deleted
 
-**Logic**:
-1. For each vehicle, gets all VehicleScheduleAssignments
-2. Compares each pair of assignments for overlapping Sessions
-3. Uses bitwise AND on session flags to detect overlap
+**Error**: `"Track {track} in station {station} referred in train {train} is not in layout."`
+
+#### P3 — Vehicle double booking ✅
+**Method**: `ValidateVehicleDoubleBooking(this Plan plan)`
+
+**Validates**: No vehicle is assigned to schedules with overlapping sessions
+
+**Logic**: For each vehicle, compares assignment pairs for overlapping `Sessions` (bitwise AND on session flags)
 
 **Error**: `"Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}."`
+
+#### P4 — Locomotive / traction coverage ✅
+**Method**: `ValidateLocomotiveCoverage(this Plan plan)`
+
+**Validates**: Every train's run is covered by traction schedules without gaps or overlaps
+
+**Logic**:
+1. Gathers traction schedules (Locomotive/Trainset assignments)
+2. For each train, collects the parts assigned to traction
+3. Checks for gaps (uncovered segments) and overlaps (double-booked traction)
+
+**Exception**: A loco change at the same station is allowed — one part ending and another beginning at the same station (even with a changeover gap) is not a coverage gap.
+
+**Errors**:
+- `"Train {0} has no locomotive assigned."` — no traction at all
+- `"Train {0} has a locomotive coverage gap between {1} and {2}."` — gap between different stations
+- `"Train {0} has overlapping locomotive assignments: {1} and {2}."` — overlap detected
+
+#### P2 — Every part scheduled / no cross-schedule session overlap 🟡
+Every train part must belong to a schedule, and no part may be in two schedules with overlapping sessions. Partly served by P3 and P4; the full check is not implemented.
 
 ## Not Yet Implemented
 
@@ -274,24 +285,35 @@ if (result.IsSuccess)
 ## Validation Flow
 
 ```
-Schedule.GetValidationErrors(options)
+Plan.GetValidationErrors(options)
   │
-  ├─► Timetable.GetValidationErrors(schedule, options)
+  ├─► Timetable.GetValidationErrors(plan, options)
   │     │
-  │     ├─► EnsureStationHasTrack()           [always]
-  │     ├─► StationCall.GetValidationErrors() [if ValidateStationCalls]
-  │     ├─► StationTrack.GetValidationErrors()[if ValidateStationTracks]
-  │     ├─► TrackStretch.GetValidationErrors()[if ValidateStretches]
-  │     ├─► CheckTrainSpeed()                 [if ValidateTrainSpeed]
-  │     └─► CheckTrainTimeSequence()          [always]
+  │     ├─► EnsureStationHasTrack()           [always]        P1
+  │     ├─► CheckTrainTimeSequence()          [always]        T1, T2
+  │     ├─► StationTrack.GetValidationErrors()[ValidateStationTracks]  L2
+  │     ├─► StationCall.GetValidationErrors() [ValidateStationCalls]   T2
+  │     ├─► TrackStretch.GetValidationErrors()[ValidateStretches]      L3
+  │     └─► CheckTrainSpeed()                 [ValidateTrainSpeed]     T3
   │
-  └─► VehicleSchedule.ValidateOverlappingParts() [if ValidateVehicleSchedules]
+  ├─► Schedule.ValidateOverlappingParts()     [ValidateSchedules]      S1
+  ├─► Plan.ValidateVehicleDoubleBooking()     [ValidateSchedules]      P3
+  └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4
 ```
 
 ## Known Issues / TODOs
 
-1. **ValidateTrainNumbers** - Option exists but no implementation
-2. **ValidateDriverDuties** - Option exists but no implementation
-3. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
-4. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
-5. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
+Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
+Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, S1, P1, P3, P4.
+Partial: L1 (emergent from L2/L3), S4, P2. Missing: T4, S2, S3, S5. Note L3 counts trains
+on a stretch **direction-agnostically** (one train per track, both directions together) —
+the existing capacity check is correct as-is, not a direction bug.
+
+1. **T4 — same Company+Category+Number on non-overlapping sessions** (`ValidateTrainNumbers`) - Option exists but no implementation
+2. **S5 — valid session combinations for a schedule** (`ValidateDriverDuties`) - Option exists but no implementation
+3. **S2 — schedule part contiguity** - next part must start where the previous ended; not checked
+4. **S3 — schedule circulation closure** - start/end station and split-into-parts loop; not checked
+5. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
+6. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
+7. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
+8. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring

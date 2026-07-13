@@ -1030,7 +1030,7 @@
     <value>Den FREMO-modulejer, der medbringer dette sted. Valgfrit.</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>Telf.</value>
+    <value>Tel</value>
   </data>
   <data name="PhoneNumberHelp" xml:space="preserve">
     <value>Kontakttelefonnummer til togekspeditøren på dette sted. Valgfrit.</value>

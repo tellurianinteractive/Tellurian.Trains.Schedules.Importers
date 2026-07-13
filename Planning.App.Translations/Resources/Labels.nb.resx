@@ -223,7 +223,7 @@
     <value>Klasse</value>
   </data>
   <data name="Continued" xml:space="preserve">
-    <value>forts.</value>
+    <value>fortsat</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Side</value>
@@ -1030,7 +1030,7 @@
     <value>FREMO-moduleieren som tar med dette stedet. Valgfritt.</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>Tel.</value>
+    <value>Tel</value>
   </data>
   <data name="PhoneNumberHelp" xml:space="preserve">
     <value>Kontakttelefonnummer til togekspeditøren på dette stedet. Valgfritt.</value>

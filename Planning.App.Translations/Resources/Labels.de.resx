@@ -1030,7 +1030,7 @@
     <value>Der FREMO-Modulbesitzer, der diese Stelle mitbringt. Optional.</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>Tel.</value>
+    <value>Tel</value>
   </data>
   <data name="PhoneNumberHelp" xml:space="preserve">
     <value>Kontakttelefonnummer des Fahrdienstleiters an diesem Ort. Optional.</value>

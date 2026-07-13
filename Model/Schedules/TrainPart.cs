@@ -97,3 +97,17 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <inheritdoc/>
     public override string ToString() => string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", Train, From.OperationLocation, From.Departure.HHMM(), To.OperationLocation, To.Arrival.HHMM());
 }
+
+/// <summary>
+/// 
+/// </summary>
+public static class TrainPartExtensions
+{
+    extension(TrainPart trainPart)
+    {
+        internal bool ContainsCall(StationCall call)
+        {
+            return trainPart.Train == call.Train && trainPart.From.Departure <= call.Departure && trainPart.To.Arrival >= call.Arrival;
+        }
+    }
+}

@@ -223,7 +223,7 @@
     <value>Klass</value>
   </data>
   <data name="Continued" xml:space="preserve">
-    <value>forts.</value>
+    <value>fortssatt</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Sida</value>
@@ -1030,7 +1030,7 @@
     <value>Den FREMO-modulägare som tar med denna plats. Valfritt.</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>Tel.</value>
+    <value>Tel</value>
   </data>
   <data name="PhoneNumberHelp" xml:space="preserve">
     <value>Kontakttelefonnummer till tågklareraren på denna plats. Valfritt.</value>

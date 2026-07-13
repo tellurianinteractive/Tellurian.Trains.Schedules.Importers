@@ -178,7 +178,7 @@ public static class ScheduledObjectExtensions
         public bool HasTurnusCard => !scheduledObject.IsCargoFlow;
 
         /// <summary>
-        /// Gets the union of the sessions across all this vehicle's <see cref="ScheduleAssignments"/> — the
+        /// Gets the union of the sessions across all this vehicle's <see cref="ScheduleAssignment"/> — the
         /// sessions on which it is already working somewhere. Empty when the vehicle is not yet assigned.
         /// </summary>
         public Sessions AssignedSessions =>
