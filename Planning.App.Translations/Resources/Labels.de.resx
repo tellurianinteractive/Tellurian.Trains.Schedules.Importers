@@ -483,6 +483,18 @@
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Fahrzeugumläufe erstellen und Lokomotiven, Wagen und Frachtströmen zuweisen.</value>
   </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Umlauf</value>
+  </data>
+  <data name="SchedulesNoSchedule" xml:space="preserve">
+    <value>Kein Plan geladen. Erstellen oder öffnen Sie zuerst einen Plan.</value>
+  </data>
+  <data name="SchedulesEmpty" xml:space="preserve">
+    <value>Noch keine Fahrzeugumläufe.</value>
+  </data>
+  <data name="SchedulesNoParts" xml:space="preserve">
+    <value>Die Umläufe enthalten keine anzuzeigenden Zugteile.</value>
+  </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationen und ihre Gleise.</value>
   </data>
@@ -1212,9 +1224,6 @@
   <data name="Calls" xml:space="preserve">
     <value>Halte</value>
   </data>
-  <data name="WagonGroups" xml:space="preserve">
-    <value>Wagengruppen</value>
-  </data>
   <data name="Arrival" xml:space="preserve">
     <value>Ankunft</value>
   </data>
@@ -1245,14 +1254,8 @@
   <data name="NoCalls" xml:space="preserve">
     <value>Keine Halte.</value>
   </data>
-  <data name="NoWagonGroups" xml:space="preserve">
-    <value>Keine Wagengruppen.</value>
-  </data>
   <data name="AddCall" xml:space="preserve">
     <value>Halt hinzufügen</value>
-  </data>
-  <data name="AddWagonGroup" xml:space="preserve">
-    <value>Wagengruppe hinzufügen</value>
   </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Zug {0} löschen?</value>
@@ -1478,5 +1481,71 @@
   </data>
   <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
     <value>Keine Wagen von dieser Station mitnehmen; der Strom leitet dennoch Wagen von den Herkünften der Beschreibung weiter.</value>
+  </data>
+  <data name="SchedulesBuildAutomatically" xml:space="preserve">
+    <value>Automatisch erstellen</value>
+  </data>
+  <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
+    <value>{0} Umläufe erstellt</value>
+  </data>
+  <data name="SchedulesNewSchedule" xml:space="preserve">
+    <value>Neuer Umlauf</value>
+  </data>
+  <data name="AddTrainPart" xml:space="preserve">
+    <value>Zug hinzufügen</value>
+  </data>
+  <data name="AddVehicle" xml:space="preserve">
+    <value>Fahrzeug hinzufügen</value>
+  </data>
+  <data name="AssignVehicle" xml:space="preserve">
+    <value>Fahrzeug zuweisen</value>
+  </data>
+  <data name="CreateNewVehicle" xml:space="preserve">
+    <value>Neues Fahrzeug anlegen</value>
+  </data>
+  <data name="VehicleType" xml:space="preserve">
+    <value>Fahrzeugtyp</value>
+  </data>
+  <data name="Vehicle" xml:space="preserve">
+    <value>Fahrzeug</value>
+  </data>
+  <data name="Vehicles" xml:space="preserve">
+    <value>Fahrzeuge</value>
+  </data>
+  <data name="RemovePart" xml:space="preserve">
+    <value>Teil entfernen</value>
+  </data>
+  <data name="RemoveVehicle" xml:space="preserve">
+    <value>Fahrzeug entfernen</value>
+  </data>
+  <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
+    <value>Von automatischer Umlaufbildung ausschließen?</value>
+  </data>
+  <data name="Assign" xml:space="preserve">
+    <value>Zuweisen</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Frei</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Umlauf löschen</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Diesen Umlauf löschen?</value>
+  </data>
+  <data name="CloneSchedule" xml:space="preserve">
+    <value>Umlauf klonen</value>
+  </data>
+  <data name="ComplementSchedule" xml:space="preserve">
+    <value>Komplementumlauf erstellen</value>
+  </data>
+  <data name="SchedulesNothingToComplement" xml:space="preserve">
+    <value>Dieser Umlauf hat keinen Zug, der über seine Fahrrunden hinaus verkehrt.</value>
+  </data>
+  <data name="ScheduleOperatingSessions" xml:space="preserve">
+    <value>Fahrrunden/Tage, an denen der ganze Umlauf verkehrt</value>
+  </data>
+  <data name="ChooseExistingVehicle" xml:space="preserve">
+    <value>Vorhandenes Fahrzeug wählen</value>
   </data>
 </root>

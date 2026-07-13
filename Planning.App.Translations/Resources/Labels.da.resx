@@ -262,25 +262,25 @@
     <value>Reservevogn</value>
   </data>
   <data name="MondayShort" xml:space="preserve">
-    <value>Man</value>
+    <value>M</value>
   </data>
   <data name="TuesdayShort" xml:space="preserve">
-    <value>Tir</value>
+    <value>Ti</value>
   </data>
   <data name="WednesdayShort" xml:space="preserve">
-    <value>Ons</value>
+    <value>O</value>
   </data>
   <data name="ThursdayShort" xml:space="preserve">
-    <value>Tor</value>
+    <value>To</value>
   </data>
   <data name="FridayShort" xml:space="preserve">
-    <value>Fre</value>
+    <value>F</value>
   </data>
   <data name="SaturdayShort" xml:space="preserve">
-    <value>Lør</value>
+    <value>L</value>
   </data>
   <data name="SundayShort" xml:space="preserve">
-    <value>Søn</value>
+    <value>S</value>
   </data>
   <data name="SettingsNoSchedule" xml:space="preserve">
     <value>Ingen køreplan indlæst. Importér en fil under fanen Importér for at redigere indstillingerne.</value>
@@ -482,6 +482,18 @@
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Byg køretøjsomløb og tildel lokomotiver, vogne og godsstrømme.</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Omløb</value>
+  </data>
+  <data name="SchedulesNoSchedule" xml:space="preserve">
+    <value>Ingen plan indlæst. Opret eller åbn en plan først.</value>
+  </data>
+  <data name="SchedulesEmpty" xml:space="preserve">
+    <value>Ingen køretøjsomløb endnu.</value>
+  </data>
+  <data name="SchedulesNoParts" xml:space="preserve">
+    <value>Omløbene indeholder ingen togdele at vise.</value>
   </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationer og deres spor.</value>
@@ -1212,9 +1224,6 @@
   <data name="Calls" xml:space="preserve">
     <value>Stop</value>
   </data>
-  <data name="WagonGroups" xml:space="preserve">
-    <value>Vogngrupper</value>
-  </data>
   <data name="Arrival" xml:space="preserve">
     <value>Ankomst</value>
   </data>
@@ -1245,14 +1254,8 @@
   <data name="NoCalls" xml:space="preserve">
     <value>Ingen stop.</value>
   </data>
-  <data name="NoWagonGroups" xml:space="preserve">
-    <value>Ingen vogngrupper.</value>
-  </data>
   <data name="AddCall" xml:space="preserve">
     <value>Tilføj stop</value>
-  </data>
-  <data name="AddWagonGroup" xml:space="preserve">
-    <value>Tilføj vogngruppe</value>
   </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Slet tog {0}?</value>
@@ -1478,5 +1481,71 @@
   </data>
   <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
     <value>Medtag ingen vogne fra denne station; strømmen videresender stadig vogne fra beskrivelsens oprindelser.</value>
+  </data>
+  <data name="SchedulesBuildAutomatically" xml:space="preserve">
+    <value>Byg automatisk</value>
+  </data>
+  <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
+    <value>{0} omløb oprettet</value>
+  </data>
+  <data name="SchedulesNewSchedule" xml:space="preserve">
+    <value>Nyt omløb</value>
+  </data>
+  <data name="AddTrainPart" xml:space="preserve">
+    <value>Tilføj tog</value>
+  </data>
+  <data name="AddVehicle" xml:space="preserve">
+    <value>Tilføj køretøj</value>
+  </data>
+  <data name="AssignVehicle" xml:space="preserve">
+    <value>Tildel køretøj</value>
+  </data>
+  <data name="CreateNewVehicle" xml:space="preserve">
+    <value>Opret nyt køretøj</value>
+  </data>
+  <data name="VehicleType" xml:space="preserve">
+    <value>Køretøjstype</value>
+  </data>
+  <data name="Vehicle" xml:space="preserve">
+    <value>Køretøj</value>
+  </data>
+  <data name="Vehicles" xml:space="preserve">
+    <value>Køretøjer</value>
+  </data>
+  <data name="RemovePart" xml:space="preserve">
+    <value>Fjern del</value>
+  </data>
+  <data name="RemoveVehicle" xml:space="preserve">
+    <value>Fjern køretøj</value>
+  </data>
+  <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
+    <value>Udeluk fra automatisk planlægning?</value>
+  </data>
+  <data name="Assign" xml:space="preserve">
+    <value>Tildel</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Ledig</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Slet omløb</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Slet dette omløb?</value>
+  </data>
+  <data name="CloneSchedule" xml:space="preserve">
+    <value>Klon omløb</value>
+  </data>
+  <data name="ComplementSchedule" xml:space="preserve">
+    <value>Opret komplementomløb</value>
+  </data>
+  <data name="SchedulesNothingToComplement" xml:space="preserve">
+    <value>Dette omløb har intet tog, der kører ud over dets køresessioner.</value>
+  </data>
+  <data name="ScheduleOperatingSessions" xml:space="preserve">
+    <value>Køresessioner/dage hele omløbet kører</value>
+  </data>
+  <data name="ChooseExistingVehicle" xml:space="preserve">
+    <value>Vælg eksisterende køretøj</value>
   </data>
 </root>

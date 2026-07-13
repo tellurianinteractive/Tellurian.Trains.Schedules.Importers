@@ -130,13 +130,13 @@
     <value>Fredag</value>
   </data>
   <data name="FridayShort" xml:space="preserve">
-    <value>Fr</value>
+    <value>F</value>
   </data>
   <data name="Monday" xml:space="preserve">
     <value>Mandag</value>
   </data>
   <data name="MondayShort" xml:space="preserve">
-    <value>Ma</value>
+    <value>M</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>Ingen køredage</value>
@@ -154,13 +154,13 @@
     <value>Lørdag</value>
   </data>
   <data name="SaturdayShort" xml:space="preserve">
-    <value>Lø</value>
+    <value>L</value>
   </data>
   <data name="Sunday" xml:space="preserve">
     <value>Søndag</value>
   </data>
   <data name="SundayShort" xml:space="preserve">
-    <value>Sø</value>
+    <value>S</value>
   </data>
   <data name="Tuesday" xml:space="preserve">
     <value>Tirsdag</value>
@@ -178,6 +178,6 @@
     <value>Onsdag</value>
   </data>
   <data name="WednesdayShort" xml:space="preserve">
-    <value>On</value>
+    <value>O</value>
   </data>
 </root>

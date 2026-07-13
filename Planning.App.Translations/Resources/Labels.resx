@@ -259,25 +259,25 @@
     <value>Spare wagon</value>
   </data>
   <data name="MondayShort" xml:space="preserve">
-    <value>Mon</value>
+    <value>Mo</value>
   </data>
   <data name="TuesdayShort" xml:space="preserve">
-    <value>Tue</value>
+    <value>Tu</value>
   </data>
   <data name="WednesdayShort" xml:space="preserve">
-    <value>Wed</value>
+    <value>We</value>
   </data>
   <data name="ThursdayShort" xml:space="preserve">
-    <value>Thu</value>
+    <value>Th</value>
   </data>
   <data name="FridayShort" xml:space="preserve">
-    <value>Fri</value>
+    <value>Fr</value>
   </data>
   <data name="SaturdayShort" xml:space="preserve">
-    <value>Sat</value>
+    <value>Sa</value>
   </data>
   <data name="SundayShort" xml:space="preserve">
-    <value>Sun</value>
+    <value>Su</value>
   </data>
   <data name="SettingsNoSchedule" xml:space="preserve">
     <value>No schedule loaded. Import a file on the Import tab to edit its settings.</value>
@@ -479,6 +479,18 @@
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Build vehicle schedules and assign to locomotives, wagons, and cargo flows.</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Schedule</value>
+  </data>
+  <data name="SchedulesNoSchedule" xml:space="preserve">
+    <value>No plan loaded. Create or open a plan first.</value>
+  </data>
+  <data name="SchedulesEmpty" xml:space="preserve">
+    <value>No vehicle schedules yet.</value>
+  </data>
+  <data name="SchedulesNoParts" xml:space="preserve">
+    <value>The schedules contain no train parts to show.</value>
   </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stations and their tracks.</value>
@@ -1214,9 +1226,6 @@
   <data name="Calls" xml:space="preserve">
     <value>Calls</value>
   </data>
-  <data name="WagonGroups" xml:space="preserve">
-    <value>Wagon groups</value>
-  </data>
   <data name="Arrival" xml:space="preserve">
     <value>Arrival</value>
   </data>
@@ -1247,14 +1256,8 @@
   <data name="NoCalls" xml:space="preserve">
     <value>No calls.</value>
   </data>
-  <data name="NoWagonGroups" xml:space="preserve">
-    <value>No wagon groups.</value>
-  </data>
   <data name="AddCall" xml:space="preserve">
     <value>Add call</value>
-  </data>
-  <data name="AddWagonGroup" xml:space="preserve">
-    <value>Add wagon group</value>
   </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Delete train {0}?</value>
@@ -1480,5 +1483,71 @@
   </data>
   <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
     <value>Bring no wagons from this station; the flow still forwards wagons from the description's origins.</value>
+  </data>
+  <data name="SchedulesBuildAutomatically" xml:space="preserve">
+    <value>Build automatically</value>
+  </data>
+  <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
+    <value>{0} schedules built</value>
+  </data>
+  <data name="SchedulesNewSchedule" xml:space="preserve">
+    <value>New schedule</value>
+  </data>
+  <data name="AddTrainPart" xml:space="preserve">
+    <value>Add train</value>
+  </data>
+  <data name="AddVehicle" xml:space="preserve">
+    <value>Add vehicle</value>
+  </data>
+  <data name="AssignVehicle" xml:space="preserve">
+    <value>Assign vehicle</value>
+  </data>
+  <data name="CreateNewVehicle" xml:space="preserve">
+    <value>Create new vehicle</value>
+  </data>
+  <data name="VehicleType" xml:space="preserve">
+    <value>Vehicle type</value>
+  </data>
+  <data name="Vehicle" xml:space="preserve">
+    <value>Vehicle</value>
+  </data>
+  <data name="Vehicles" xml:space="preserve">
+    <value>Vehicles</value>
+  </data>
+  <data name="RemovePart" xml:space="preserve">
+    <value>Remove part</value>
+  </data>
+  <data name="RemoveVehicle" xml:space="preserve">
+    <value>Remove vehicle</value>
+  </data>
+  <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
+    <value>Exclude from automatic scheduling?</value>
+  </data>
+  <data name="Assign" xml:space="preserve">
+    <value>Assign</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Delete schedule</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Delete this schedule?</value>
+  </data>
+  <data name="CloneSchedule" xml:space="preserve">
+    <value>Clone schedule</value>
+  </data>
+  <data name="ComplementSchedule" xml:space="preserve">
+    <value>Create complementary schedule</value>
+  </data>
+  <data name="SchedulesNothingToComplement" xml:space="preserve">
+    <value>This schedule has no train running beyond its operating sessions.</value>
+  </data>
+  <data name="ScheduleOperatingSessions" xml:space="preserve">
+    <value>Sessions/days the whole schedule operates</value>
+  </data>
+  <data name="ChooseExistingVehicle" xml:space="preserve">
+    <value>Choose existing vehicle</value>
   </data>
 </root>

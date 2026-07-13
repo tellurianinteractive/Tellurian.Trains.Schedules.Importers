@@ -262,25 +262,25 @@
     <value>Reservvagn</value>
   </data>
   <data name="MondayShort" xml:space="preserve">
-    <value>Mån</value>
+    <value>M</value>
   </data>
   <data name="TuesdayShort" xml:space="preserve">
-    <value>Tis</value>
+    <value>Ti</value>
   </data>
   <data name="WednesdayShort" xml:space="preserve">
-    <value>Ons</value>
+    <value>O</value>
   </data>
   <data name="ThursdayShort" xml:space="preserve">
-    <value>Tor</value>
+    <value>To</value>
   </data>
   <data name="FridayShort" xml:space="preserve">
-    <value>Fre</value>
+    <value>F</value>
   </data>
   <data name="SaturdayShort" xml:space="preserve">
-    <value>Lör</value>
+    <value>L</value>
   </data>
   <data name="SundayShort" xml:space="preserve">
-    <value>Sön</value>
+    <value>S</value>
   </data>
   <data name="SettingsNoSchedule" xml:space="preserve">
     <value>Ingen tidtabell laddad. Importera en fil på fliken Importera för att redigera dess inställningar.</value>
@@ -482,6 +482,18 @@
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Bygg fordonsomlopp och tilldela lok, vagnar och godsflöden.</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Omlopp</value>
+  </data>
+  <data name="SchedulesNoSchedule" xml:space="preserve">
+    <value>Ingen plan är laddad. Skapa eller öppna en plan först.</value>
+  </data>
+  <data name="SchedulesEmpty" xml:space="preserve">
+    <value>Inga fordonsomlopp än.</value>
+  </data>
+  <data name="SchedulesNoParts" xml:space="preserve">
+    <value>Omloppen innehåller inga tågdelar att visa.</value>
   </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationer och deras spår.</value>
@@ -1212,9 +1224,6 @@
   <data name="Calls" xml:space="preserve">
     <value>Uppehåll</value>
   </data>
-  <data name="WagonGroups" xml:space="preserve">
-    <value>Vagngrupper</value>
-  </data>
   <data name="Arrival" xml:space="preserve">
     <value>Ankomst</value>
   </data>
@@ -1245,14 +1254,8 @@
   <data name="NoCalls" xml:space="preserve">
     <value>Inga uppehåll.</value>
   </data>
-  <data name="NoWagonGroups" xml:space="preserve">
-    <value>Inga vagngrupper.</value>
-  </data>
   <data name="AddCall" xml:space="preserve">
     <value>Lägg till uppehåll</value>
-  </data>
-  <data name="AddWagonGroup" xml:space="preserve">
-    <value>Lägg till vagngrupp</value>
   </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Ta bort tåg {0}?</value>
@@ -1478,5 +1481,71 @@
   </data>
   <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
     <value>Ta inga vagnar från denna station; flödet vidarebefordrar ändå vagnar från beskrivningens ursprung.</value>
+  </data>
+  <data name="SchedulesBuildAutomatically" xml:space="preserve">
+    <value>Bygg automatiskt</value>
+  </data>
+  <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
+    <value>{0} omlopp skapade</value>
+  </data>
+  <data name="SchedulesNewSchedule" xml:space="preserve">
+    <value>Nytt omlopp</value>
+  </data>
+  <data name="AddTrainPart" xml:space="preserve">
+    <value>Lägg till tåg</value>
+  </data>
+  <data name="AddVehicle" xml:space="preserve">
+    <value>Lägg till fordon</value>
+  </data>
+  <data name="AssignVehicle" xml:space="preserve">
+    <value>Tilldela fordon</value>
+  </data>
+  <data name="CreateNewVehicle" xml:space="preserve">
+    <value>Skapa nytt fordon</value>
+  </data>
+  <data name="VehicleType" xml:space="preserve">
+    <value>Fordonstyp</value>
+  </data>
+  <data name="Vehicle" xml:space="preserve">
+    <value>Fordon</value>
+  </data>
+  <data name="Vehicles" xml:space="preserve">
+    <value>Fordon</value>
+  </data>
+  <data name="RemovePart" xml:space="preserve">
+    <value>Ta bort del</value>
+  </data>
+  <data name="RemoveVehicle" xml:space="preserve">
+    <value>Ta bort fordon</value>
+  </data>
+  <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
+    <value>Uteslut från automatisk schemaläggning?</value>
+  </data>
+  <data name="Assign" xml:space="preserve">
+    <value>Tilldela</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Ledig</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Ta bort omlopp</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Ta bort detta omlopp?</value>
+  </data>
+  <data name="CloneSchedule" xml:space="preserve">
+    <value>Klona omlopp</value>
+  </data>
+  <data name="ComplementSchedule" xml:space="preserve">
+    <value>Skapa komplementomlopp</value>
+  </data>
+  <data name="SchedulesNothingToComplement" xml:space="preserve">
+    <value>Detta omlopp har inget tåg som trafikerar utöver dess köromgångar.</value>
+  </data>
+  <data name="ScheduleOperatingSessions" xml:space="preserve">
+    <value>Köromgångar/dagar hela omloppet trafikerar</value>
+  </data>
+  <data name="ChooseExistingVehicle" xml:space="preserve">
+    <value>Välj befintligt fordon</value>
   </data>
 </root>
