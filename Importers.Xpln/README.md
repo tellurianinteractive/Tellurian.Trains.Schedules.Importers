@@ -93,7 +93,7 @@ So the effective stop is `call.IsStop && call.Station is not SignalControlledLoc
 |-----|--------------|-------------|
 | `locomotive` | `Vehicle`, `VehicleSchedule` | All `locomotive` rows with same *Object Id* are combined into one locomotive with a vehicle schedule that runs all sessions  |
 | `trainset` | `VehicleSchedule` | All `trainset` rows with same *Object Id* are combined into one trainset with a vehicle schedule that runs all sessions  |
-| `trainset` | `WagonGroup` | When no *object ID* but a *remark* is given, a wagon group is created |
+| `trainset` | `CargoFlowTrainPart` | When no *object ID* but a *remark* is given, a cargo flow is created |
 | `trainset` | **Ignored** | When object ID and a remark are empty cells |
 
 

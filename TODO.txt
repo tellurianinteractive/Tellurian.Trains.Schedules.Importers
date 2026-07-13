@@ -1,0 +1,51 @@
+We can actually try .NET 11 previews. In .NET 11 there is experimental support for CoreCLR as a replacement for Mono. It will be fully supported fron .NET 12.
+
+Improving the Import tab's features. When selecting a file to import from, the user should have checkboxes of what to import: All (default), Operation locations, 
+
+We need to mve all UI-components in Planning.App to Planning.App.Components. Remember that we stated in the implementation strategy that all components should be placed there. For all docking and spli panel components I suggest a subfolder Docking to not clutter the Components folder.
+
+Make a reusable component of the HalfSelector.
+
+OperationLocation additional properties:
+HidePassings = hide trains not stopping at station (used in some reports). Always true for the other subtypes. 
+HideMeets=Don't consider this call when creating train meeting notes. Always true for the other subtypes.
+
+Do you need a PS1 config locally in this solution? What is the purpose? Can you write the desired config yourself?
+
+Can we add type-ahead in the ListboxView so that the items are filtered on starting charachers as I type?
+
+Can we refactor the code so that creation of TimtableCells are created to one place, preferably using a switch expression with pattern matching if possible instead of if-statements spread all over the place?
+
+A new report: Arrival/departure board for each station. Prints as A4 page.
+Heading: 'Train arrivals and depatures at 'station-name
+Two side by side blocks: Arrivals (white background) and Departures (light yellow background) using half available with each.
+-Arrival block shows arriving trains (that stops): arrival time, train-identity (colored by train catecory), Origin station (From) sorted by arrival time.
+- Departure block shows departuring trains (that stops): departure-time, train-identity (colored by train catecory), Destination station (To) sorted by departure time.
+Passenger trains (defined in train catecory) bold text, other trains normal text.
+- We may need to adjust the text size so single arrivals/departures don't wrap.
+- Train-identity is Company Prefix Number Suffix white-space trimmed, I think this function already exists.
+
+Now, a train is unique by its Company, Category, Train.Number AND train.Sessions.  When trains equals on Commpany+Category+Train.Number, each instance MUST operate on different non-overlapping sessions, otherwise it is a planning error that should ether be prevented or notified to the user to correct.
+
+There will be sitiations where trains will be groped on Company+Category+Train.Number with sessions OR'ed to create a common sessions. This grouping should only be permitted if sessions for the grouped trains are exclusive, e.g. 
+
+In the graphical timetable, if on one track stretch there are two or more trains that are equal (except sessions) and with same departue time/track and same arrival/track and only differts by the session, draw only one graph, and the session/days displayed should be the union of the trains sessions. Note that this should be applied per TRACK STRETCH, because in the next track stretch they may have a different timing.  
+
+Displaying scheduling conflicts. In the ValidationExtensions.cs there are methods that checks for planning conflicts or inconsistencies. I want these to show up in the appropriate gui components (e.g. graphical timetable, schedules tab etc).  One idea is to highlight in the graphical view itself, another is to display a warning icon in the toolbar, and show a list when hovering or clicking on it. Can you evaluate pros and cons with these two variants. I really want the yellow bacground highlight in the gui-components where hovering over it displays whats wrong, but there are challenges how to highlight. Maybe implement both variants? An example of location of an error list is first/above in the Gui-component pushing the rest content down.
+
+
+
+Validation rules, the list below is not complete, byt should be compared with what's actually implemented:
+1. Trains can only meet at stations and on stretches that has at least two tracks.
+2. Trains cannot meet at the same track on a station. 
+3. More that one train can end in the same track on a station.
+4. The maximum number of trains in any direction on a track stretch is equal to the number of tracks.
+5. Train call times must be ascending, and at an operation location arrival time must not be after departure time.
+6. All train's parts must be part of a schedule. Parts can be in different schedules, the same part can be in different schedules for different operating sessions. No part can be assigned to a schedule with sessions overlapping the same part in another schedule. 
+7. An all session/day schedule must start and end at the same station. If not, a schedule can be divided in two parts one starting at A and ends at B, the second starts at B and ends at A. Schedules can be split in any number of parts, but in the end the last part  must end where the first one starts. Schedule parts may overlap in time, and each part needs a starting traction unit.
+8. A schdule must have a traction unit assigned to all of it's sessions. They can be traction units assigned for different operating sessions/days.
+
+The effective operating sessions/days: trains may have session/days operating. When adding trains to a schedule, the operating sessions/days for that schedule becomes the session/days when all of these trains operate. This also implies that a train can't be added unless it operate at least one of the session/days the already added trains have in common. If the effective sessions/days is not all, the effective days of the scheudle should be inserted between the Delete button and the first train. On each train label, if the train does not operate all sessions/days, it should also display the sessions/days for that train.
+
+
+

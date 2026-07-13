@@ -827,21 +827,18 @@ Each train shall have an ordered sequence of station calls:
 
 #### DM-4.2.4 Wagon Groups
 
-> **Status:** 🟡 Partial (`Model/WagonGroup.cs`). All listed properties present;
-> direction-dependent ordering logic and schedule assignment of groups not yet wired.
+> **Status:** 🔴 Withdrawn. The standalone `WagonGroup` type was removed as redundant.
+> Its two real use cases are already covered: freight wagons a train couples and later
+> uncouples over a segment are a **cargo flow** (DM-4.2.5), and a wagonset running to a
+> schedule is a `TrainsetSchedule`. Listing the individual wagons that make up a wagonset —
+> including the direction-dependent ordering below — is folded into an optional feature on
+> the wagonset itself (`WagonSetOptions.WagonGroup`, a collection of `Wagon`), not a separate
+> train-level entity.
 
-The system shall track wagon groups within trains:
-
-
-| Property               | Description                                      |
-| ------------------------ | -------------------------------------------------- |
-| Position In Train      | Order within the consist                         |
-| From / To Station Call | Where the wagon group joins and leaves the train |
-| Remark                 | Description of the wagon group                   |
-
-**Direction-dependent ordering**: Wagon position is direction-dependent.
-A consist ordered 1-2-3-4 becomes 4-3-2-1 when the train reverses direction.
-The system must track and display the correct order based on current direction of travel.
+**Direction-dependent ordering** (to be built on `WagonSetOptions`): Wagon position is
+direction-dependent. A consist ordered 1-2-3-4 becomes 4-3-2-1 when the train reverses
+direction. The system must track and display the correct order based on current direction
+of travel.
 
 #### DM-4.2.5 Cargo Flows
 

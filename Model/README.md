@@ -30,10 +30,10 @@ dotnet add package Tellurian.Trains.Schedules.Model
 | Type | Description |
 |------|-------------|
 | `Timetable` | Holds a collection of trains running on the layout |
-| `Train` | Train with calls at operation locations, category, and optional wagon groups |
+| `Train` | Train with calls at operation locations, category, and optional cargo flows |
 | `TrainCategory` | Train type with prefix, suffix, color, and passenger/freight flags |
 | `StationCall` | A train's call at an operation location track with arrival/departure times. `IsStop` (it arrives and/or departs) versus `IsPassthrough` (neither, the train passes without stopping) is the single source of truth — times are never compared to decide it. The location can override it: a train never stops at a `SignalControlledLocation`, so the effective stop is `IsStop && Station is not SignalControlledLocation` |
-| `WagonGroup` | A group of (usually) freight wagons within a train, that runs part of or whole train, and are often ordered within the train |
+| `CargoFlowTrainPart` | Freight wagons a train couples at one call and uncouples at a later one, over a segment of its route, referencing a reusable `CargoFlowOptions` description |
 | `Sessions` | Representing which sessions/days a train runs |
 
 ### Schedule (Resource Assignments)
@@ -42,7 +42,7 @@ dotnet add package Tellurian.Trains.Schedules.Model
 |------|-------------|
 | `Schedule` | Holds vehicles, vehicle schedules, and driver duties |
 | `Vehicle` | Locomotive or trainset with type, number, and company |
-| `VehicleSchedule` | A schedule containing train parts for locomotives and trainsets (not wagon groups) |
+| `VehicleSchedule` | A schedule containing train parts for locomotives and trainsets |
 | `VehicleScheduleAssignment` | Links a vehicle to a vehicle schedule for specific sessions (usually all session) |
 | `TrainPart` | A portion of a train between two station calls (used in vehicle schedules), default is a train part for the whole train |
 | `DriverDuty` | Driver shift assignments to train parts |

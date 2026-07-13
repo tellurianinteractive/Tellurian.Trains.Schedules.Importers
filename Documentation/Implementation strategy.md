@@ -155,7 +155,6 @@ foreign keys in the data model.
 | Vehicle                          | Company + Number                    |                                                                                        |
 | VehicleSchedule                  | Sequence of trains                  | The actual train sequence defines the schedule's identity                              |
 | Wagon                            | Company + Number                    |                                                                                        |
-| WagonGroup                       | Company + Number                    |                                                                                        |
 | Timetable                        | Name                                | Single per layout in practice                                                          |
 | Schedule                         | Name                                | Top-level container                                                                    |
 
