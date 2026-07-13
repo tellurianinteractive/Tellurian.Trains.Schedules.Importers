@@ -50,17 +50,17 @@ else
                             }
                         }
                     </TemplateColumn>
-                    <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@(context is Station { IsManned: true } ? "✓" : "")</TemplateColumn>
-                    <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@(context is Station { IsShadow: true } ? "✓" : "")</TemplateColumn>
-                    <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@(context.HasPassengerExchange ? "✓" : "")</TemplateColumn>
-                    <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@(context.HasCargoExchange ? "✓" : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@if (context is Station { IsManned: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@if (context is Station { IsShadow: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@if (context.HasPassengerExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Info(context)">@Translator("Info")</button>
-                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
                         <button class="danger" disabled="@IsReferenced(context)"
                                 title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
                                 @onclick="() => _deleteTarget = context">
@@ -74,7 +74,7 @@ else
             {
                 <div class="confirm">
                     <span>@string.Format(Culture, Translator("DeleteLocationConfirm"), _deleteTarget.Name)</span>
-                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                 </div>
             }

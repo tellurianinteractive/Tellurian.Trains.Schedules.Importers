@@ -42,7 +42,7 @@
                         <tr class="master @(IsExpanded(train) ? "expanded" : "")">
                             <td class="expander">
                                 <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
-                                        @onclick="() => ToggleExpanded(train)">@(IsExpanded(train) ? "▾" : "▸")</button>
+                                        @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
                             </td>
                             <td>@train.ListLabel</td>
                             <td class="num">@train.CargoFlows.Count</td>
@@ -64,7 +64,7 @@
     {
         <div class="confirm">
             <span>@Translator("DeleteCargoFlowConfirm")</span>
-            <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+            <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
         </div>
     }
@@ -149,8 +149,8 @@
                     <th>@Translator("CargoDescription")</th>
                     <th>@Translator("From")</th>
                     <th class="center" title="@Translator("CargoFlowNoWagonsHereHint")">@Translator("CargoFlowNoWagonsHere")</th>
-                    <th class="center" title="@Translator("CargoFlowCoupleHint")">@Translator("CargoFlowCouple")</th>
                     <th class="center" title="@Translator("CargoFlowShuntBeforeHint")">@Translator("CargoFlowShuntBefore")</th>
+                    <th class="center" title="@Translator("CargoFlowCoupleHint")">@Translator("CargoFlowCouple")</th>
                     <th>@Translator("To")</th>
                     <th class="center" title="@Translator("CargoFlowUncoupleHint")">@Translator("CargoFlowUncouple")</th>
                     <th class="center" title="@Translator("CargoFlowShuntAfterHint")">@Translator("CargoFlowShuntAfter")</th>
@@ -171,15 +171,15 @@
                                          Value="flow.From.Id" ValueChanged="id => SetFrom(flow, id)" />
                         </td>
                         <td class="center"><input type="checkbox" checked="@flow.BringsNoWagonsFromHere" @onchange="e => SetNoWagonsFromHere(flow, e)" /></td>
-                        <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
                         <td class="center"><input type="checkbox" checked="@flow.AlsoShuntBeforeDeparture" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.AlsoShuntBeforeDeparture = e.Value is true; Save(); }" /></td>
+                        <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
                         <td>
                             <ListBoxView Items="@(CargoArrivalCallsAfter(train, flow.From).ToListItems(c => c.SortTime))"
                                          Value="flow.To.Id" ValueChanged="id => SetTo(flow, id)" />
                         </td>
                         <td class="center"><input type="checkbox" checked="@flow.HasUncoupleNote" @onchange="e => { flow.HasUncoupleNote = e.Value is true; Save(); }" /></td>
                         <td class="center"><input type="checkbox" checked="@flow.AlsoShuntAfterArrival" @onchange="e => { flow.AlsoShuntAfterArrival = e.Value is true; Save(); }" /></td>
-                        <td><button class="danger small" @onclick="() => _deleteTarget = flow">@Translator("Delete")</button></td>
+                        <td><button class="danger small" @onclick="() => _deleteTarget = flow"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
             </tbody>

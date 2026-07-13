@@ -39,11 +39,11 @@ else
                     <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Company>.ByAscending(c => c.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         @{ var deletion = ScheduleState.Schedule?.MayDelete(context); }
-                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
                         @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
                         <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CompanyReferenced", Translator)">
                             <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
-                                    @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                                    @onclick="() => _deleteTarget = context"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                         </span>
                     </TemplateColumn>
                 </QuickGrid>
@@ -54,7 +54,7 @@ else
                 <div class="confirm-backdrop" @onclick="() => _deleteTarget = null">
                     <div class="confirm" @onclick:stopPropagation="true">
                         <span>@string.Format(Culture, Translator("DeleteCompanyConfirm"), _deleteTarget.Name)</span>
-                        <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                        <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                         <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                     </div>
                 </div>

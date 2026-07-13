@@ -30,10 +30,10 @@ else
                     <TemplateColumn Title='@Translator("Region")'>@context.ToHtmlMarkup</TemplateColumn>
                     <TemplateColumn Title='@Translator("Country")'>@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
-                        <button @onclick="() => Edit(context)">@Translator("Edit")</button>
+                        <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
                         <button class="danger" disabled="@IsReferenced(context)"
                                 title='@(IsReferenced(context) ? Translator("RegionReferenced") : null)'
-                                @onclick="() => _deleteTarget = context">@Translator("Delete")</button>
+                                @onclick="() => _deleteTarget = context"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     </TemplateColumn>
                 </QuickGrid>
             }
@@ -42,7 +42,7 @@ else
             {
                 <div class="confirm">
                     <span>@string.Format(Culture, Translator("DeleteRegionConfirm"), _deleteTarget.Name)</span>
-                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                 </div>
             }

@@ -46,10 +46,10 @@
                             <td class="num">@s.Time</td>
                             <td class="bool"><input type="checkbox" checked="@s.IsElectrified" disabled /></td>
                             <td class="actions">
-                                <button @onclick="() => Edit(s)">@Translator("Edit")</button>
+                                <button @onclick="() => Edit(s)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
                                 <button class="danger" disabled="@IsReferenced(s)"
                                         title="@(IsReferenced(s) ? Translator("TrackStretchReferenced") : null)"
-                                        @onclick="() => _deleteTarget = s">@Translator("Delete")</button>
+                                        @onclick="() => _deleteTarget = s"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </td>
                         </tr>
                     }
@@ -60,7 +60,7 @@
             {
                 <div class="confirm">
                     <span>@string.Format(Translator("DeleteTrackStretchConfirm"), _deleteTarget.Start.Name, _deleteTarget.End.Name)</span>
-                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                 </div>
             }

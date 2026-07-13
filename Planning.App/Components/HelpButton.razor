@@ -9,7 +9,7 @@
 <span class="help-anchor">
     <button class="help-toggle @(_open ? "open" : "")" type="button" draggable="false"
             title="@Translator("AboutThisTab")" aria-label="@Translator("AboutThisTab")"
-            @onclick="ToggleAsync" @onclick:stopPropagation @onclick:preventDefault>?</button>
+            @onclick="ToggleAsync" @onclick:stopPropagation @onclick:preventDefault><i class="fa-solid fa-question"></i></button>
     @if (_open)
     {
         <div class="help-backdrop" @onclick="Close"></div>
@@ -18,7 +18,7 @@
                 <span class="help-popover-title">@Translator("AboutThisTab")</span>
                 <button class="help-popover-close" type="button"
                         title="@Translator("Close")" aria-label="@Translator("Close")"
-                        @onclick="Close">&times;</button>
+                        @onclick="Close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="help-popover-body">
                 @if (_loading)

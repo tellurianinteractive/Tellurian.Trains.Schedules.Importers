@@ -24,7 +24,7 @@
     {
         <div class="about" @onclick="ToggleAbout">
             <div class="panel" @onclick:stopPropagation>
-                <button class="close" @onclick="ToggleAbout">&times;</button>
+                <button class="close" @onclick="ToggleAbout"><i class="fa-solid fa-xmark"></i></button>
                 @((MarkupString)_aboutHtml)
             </div>
         </div>

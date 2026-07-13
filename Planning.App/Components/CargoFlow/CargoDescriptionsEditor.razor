@@ -56,9 +56,9 @@
                                 <td class="num">@dest.PositionInTrain</td>
                                 <td class="num">@dest.MaxNumberOfWagons</td>
                                 <td class="num">@dest.MaxNumberOfAxles</td>
-                                <td class="center">@(dest.AndRegions ? "✓" : "")</td>
-                                <td class="center">@(dest.AndBeyond ? "✓" : "")</td>
-                                <td class="center">@(dest.AndLocalDestinations ? "✓" : "")</td>
+                                <td class="center">@if (dest.AndRegions) { <i class="fa-solid fa-check"></i> }</td>
+                                <td class="center">@if (dest.AndBeyond) { <i class="fa-solid fa-check"></i> }</td>
+                                <td class="center">@if (dest.AndLocalDestinations) { <i class="fa-solid fa-check"></i> }</td>
                             </tr>
                         }
                     </tbody>
@@ -141,7 +141,7 @@
                             @{ var deletion = Plan?.MayDelete(d); }
                             <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
                                 <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
-                                        @onclick="() => _deleteTarget = d">@Translator("Delete")</button>
+                                        @onclick="() => _deleteTarget = d"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </span>
                         </td>
                     </tr>
@@ -166,7 +166,7 @@
     {
         <div class="confirm">
             <span>@string.Format(Culture, Translator("DeleteCargoDescriptionConfirm"), _deleteTarget.DestinationsSummary)</span>
-            <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+            <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
         </div>
     }
@@ -284,7 +284,7 @@
                         <td class="center"><input type="checkbox" checked="@dest.AndRegions" @onchange="e => SetDestinationAndRegions(dest, e)" /></td>
                         <td class="center"><input type="checkbox" checked="@dest.AndBeyond" @onchange="e => SetDestinationAndBeyond(dest, e)" /></td>
                         <td class="center"><input type="checkbox" checked="@dest.AndLocalDestinations" @onchange="e => SetDestinationAndLocal(dest, e)" /></td>
-                        <td><button class="danger small" @onclick="() => RemoveDestination(d, dest)">@Translator("Delete")</button></td>
+                        <td><button class="danger small" @onclick="() => RemoveDestination(d, dest)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
                 @if (d.Destinations.Count == 0)
@@ -356,7 +356,7 @@
                             <ListBoxView Items="@(StationChoices.ToListItems())"
                                          Value="origin.Station.Id" ValueChanged="id => SetOriginStation(origin, id)" />
                         </td>
-                        <td><button class="danger small" @onclick="() => RemoveOrigin(d, origin)">@Translator("Delete")</button></td>
+                        <td><button class="danger small" @onclick="() => RemoveOrigin(d, origin)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
                 @if (d.Origins.Count == 0)

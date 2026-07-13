@@ -52,7 +52,7 @@ else
                         <tr class="train @(IsExpanded(train) ? "expanded" : "")">
                             <td class="expander">
                                 <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
-                                        @onclick="() => ToggleExpanded(train)">@(IsExpanded(train) ? "▾" : "▸")</button>
+                                        @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
                             </td>
                             @if (ShowExternalId)
                             {
@@ -105,7 +105,7 @@ else
                                 @{ var deletion = Plan?.MayDelete(train); }
                                 <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
                                     <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
-                                            @onclick="() => _deleteTarget = train">@Translator("Delete")</button>
+                                            @onclick="() => _deleteTarget = train"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                                 </span>
                             </td>
                         </tr>
@@ -114,21 +114,7 @@ else
                             <tr class="detail">
                                 <td></td>
                                 <td colspan="@(ShowExternalId ? 11 : 10)">
-                                    <div class="sub-tabs">
-                                        @foreach (var view in SubViews)
-                                        {
-                                            <button class="sub-tab @(SubViewOf(train) == view ? "active" : "")"
-                                                    @onclick="() => SetSubView(train, view)">@SubViewLabel(view)</button>
-                                        }
-                                    </div>
-                                    @if (SubViewOf(train) == SubView.Calls)
-                                    {
-                                        @CallsTable(train)
-                                    }
-                                    else
-                                    {
-                                        @WagonGroupsTable(train)
-                                    }
+                                    @CallsTable(train)
                                 </td>
                             </tr>
                         }
@@ -142,7 +128,7 @@ else
             <div class="confirm-backdrop" @onclick="() => _deleteTarget = null">
                 <div class="confirm" @onclick:stopPropagation="true">
                     <span>@string.Format(Culture, Translator("DeleteTrainConfirm"), TrainLabel(_deleteTarget))</span>
-                    <button class="danger" @onclick="DeleteConfirmed">@Translator("Delete")</button>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                 </div>
             </div>
@@ -156,9 +142,6 @@ else
 }
 
 @code {
-    private enum SubView { Calls, WagonGroups }
-    private static readonly SubView[] SubViews = Enum.GetValues<SubView>();
-
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Plan? Plan => ScheduleState.Schedule;
@@ -185,7 +168,6 @@ else
         Timetable?.Sessions ?? [];
 
     private readonly HashSet<int> _expanded = [];
-    private readonly Dictionary<int, SubView> _subView = [];
     private Train? _deleteTarget;
 
     protected override void OnInitialized()
@@ -204,7 +186,7 @@ else
         ScheduleState.FlushPendingSave();
     }
 
-    // ---- Expansion / sub-view state -------------------------------------------------------------
+    // ---- Expansion state ------------------------------------------------------------------------
 
     private bool IsExpanded(Train train) => _expanded.Contains(train.Id);
 
@@ -212,16 +194,6 @@ else
     {
         if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
     }
-
-    private SubView SubViewOf(Train train) => _subView.TryGetValue(train.Id, out var v) ? v : SubView.Calls;
-
-    private void SetSubView(Train train, SubView view) => _subView[train.Id] = view;
-
-    private string SubViewLabel(SubView view) => Translator(view switch
-    {
-        SubView.Calls => "Calls",
-        _ => "WagonGroups",
-    });
 
     // ---- Display helpers ------------------------------------------------------------------------
 
@@ -325,7 +297,7 @@ else
                         <td><input type="text" class="time" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsArrival" @onchange="e => SetIsArrival(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
-                        <td><button class="danger small" @onclick="() => RemoveCall(call)">@Translator("Delete")</button></td>
+                        <td><button class="danger small" @onclick="() => RemoveCall(call)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
                 @if (train.Calls.Count == 0)
@@ -392,104 +364,6 @@ else
     private int NextCallId() =>
         ((Timetable?.Trains.SelectMany(t => t.Calls).Select(c => c.Id) ?? []).DefaultIfEmpty(0).Max()) + 1;
 
-    // ---- Wagon groups sub-table -----------------------------------------------------------------
-
-    private RenderFragment WagonGroupsTable(Train train) => @<div class="sub">
-        <table class="sub-grid">
-            <thead>
-                <tr>
-                    <th>@Translator("Position")</th>
-                    <th>@Translator("From")</th>
-                    <th>@Translator("To")</th>
-                    <th>@Translator("Remark")</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var wg in train.WagonGroups.OrderBy(w => w.PositionInTrain).ToList())
-                {
-                    <tr>
-                        <td><input type="number" class="num" min="1" value="@wg.PositionInTrain" @onchange="e => SetPosition(wg, e)" /></td>
-                        <td>
-                            <ListBoxView Items="@(CallChoices(train).ToListItems(c => c.SortTime))"
-                                         Value="wg.FromStationCallId" ValueChanged="id => SetWagonGroupFrom(train, wg, id)" />
-                        </td>
-                        <td>
-                            <ListBoxView Items="@(CallChoices(train).ToListItems(c => c.SortTime))"
-                                         Value="wg.ToStationCallId" ValueChanged="id => SetWagonGroupTo(train, wg, id)" />
-                        </td>
-                        <td><input type="text" class="remark" value="@wg.Remark" @onchange="e => SetWagonGroupRemark(wg, e)" /></td>
-                        <td><button class="danger small" @onclick="() => RemoveWagonGroup(wg)">@Translator("Delete")</button></td>
-                    </tr>
-                }
-                @if (train.WagonGroups.Count == 0)
-                {
-                    <tr><td colspan="5" class="empty">@Translator("NoWagonGroups")</td></tr>
-                }
-            </tbody>
-        </table>
-        <button class="small" disabled="@train.IsNullOrHasNoCalls()" @onclick="() => AddWagonGroup(train)">@Translator("AddWagonGroup")</button>
-    </div>;
-
-    private static IEnumerable<StationCall> CallChoices(Train train) => train.Calls.OrderBy(c => c.SortTime);
-
-    private void SetPosition(WagonGroup wg, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var position)) wg.PositionInTrain = position;
-        Save();
-    }
-
-    private void SetWagonGroupFrom(Train train, WagonGroup wg, int? id)
-    {
-        if (train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
-        {
-            wg.FromStationCall = call;
-            wg.FromStationCallId = call.Id;
-        }
-        Save();
-    }
-
-    private void SetWagonGroupTo(Train train, WagonGroup wg, int? id)
-    {
-        if (train.Calls.FirstOrDefault(c => c.Id == id) is { } call)
-        {
-            wg.ToStationCall = call;
-            wg.ToStationCallId = call.Id;
-        }
-        Save();
-    }
-
-    private void SetWagonGroupRemark(WagonGroup wg, ChangeEventArgs e)
-    {
-        wg.Remark = e.Value?.ToString();
-        Save();
-    }
-
-    private void AddWagonGroup(Train train)
-    {
-        if (train.IsNullOrHasNoCalls()) return;
-        var ordered = CallChoices(train).ToList();
-        var wg = new WagonGroup
-        {
-            Id = NextWagonGroupId(),
-            FromStationCall = ordered.First(),
-            FromStationCallId = ordered.First().Id,
-            ToStationCall = ordered.Last(),
-            ToStationCallId = ordered.Last().Id,
-            PositionInTrain = train.WagonGroups.Count + 1,
-        };
-        train.Add(wg);
-        Save();
-    }
-
-    private void RemoveWagonGroup(WagonGroup wg)
-    {
-        if (Plan?.TryDelete(wg).IsSuccess == true) Save();
-    }
-
-    private int NextWagonGroupId() =>
-        ((Timetable?.Trains.SelectMany(t => t.WagonGroups).Select(w => w.Id) ?? []).DefaultIfEmpty(0).Max()) + 1;
-
     // ---- Add / delete train ---------------------------------------------------------------------
 
     private bool _showAdd;
@@ -509,7 +383,6 @@ else
         if (plan.TryDelete(train).IsSuccess)
         {
             _expanded.Remove(train.Id);
-            _subView.Remove(train.Id);
             Save();
         }
         _deleteTarget = null;
