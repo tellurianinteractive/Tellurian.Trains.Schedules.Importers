@@ -8,43 +8,48 @@ namespace Tellurian.Trains.Schedules.Model.Validations;
 /// </summary>
 public static class ValidationExtensions
 {
-    /// <summary>
-    /// Validates a complete schedule, including its timetable, vehicle schedules and locomotive coverage.
-    /// </summary>
-    /// <param name="schedule">The schedule to validate.</param>
-    /// <param name="options">The options controlling which validations run.</param>
-    /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Plan schedule, ValidationSettings options)
+    extension(Plan plan)
     {
-        schedule = schedule.ValueOrException(nameof(schedule));
-        options = options.ValueOrException(nameof(options));
-        var result = new List<ValidationError>();
-        result.AddRange(schedule.Timetable.GetValidationErrors(schedule, options));
-        if (options.ValidateSchedules) result.AddRange(schedule.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
-        if (options.ValidateSchedules) result.AddRange(schedule.ValidateVehicleDoubleBooking());
-        if (options.ValidateLocomotiveCoverage) result.AddRange(schedule.ValidateLocomotiveCoverage());
-        return result;
+        /// <summary>
+        /// Validates a complete schedule, including its timetable, vehicle schedules and locomotive coverage.
+        /// </summary>
+        /// <param name="options">The options controlling which validations run.</param>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> GetValidationErrors(ValidationSettings options)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            options = options.ValueOrException(nameof(options));
+            var result = new List<ValidationError>();
+            result.AddRange(plan.Timetable.GetValidationErrors(plan, options));
+            if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
+            if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
+            return result;
+        }
+
+
     }
 
-    /// <summary>
-    /// Validates a timetable within its schedule (station tracks, station calls, stretches and train speed).
-    /// </summary>
-    /// <param name="timetable">The timetable to validate.</param>
-    /// <param name="schedule">The schedule the timetable belongs to.</param>
-    /// <param name="options">The options controlling which validations run.</param>
-    /// <returns>The validation errors found.</returns>
-    public static IEnumerable<ValidationError> GetValidationErrors(this Timetable timetable, Plan schedule, ValidationSettings options)
+    extension(Timetable timetable)
     {
-        timetable = timetable.ValueOrException(nameof(timetable));
-        options = options.ValueOrException(nameof(options));
-        var result = new List<ValidationError>();
-        result.AddRange(timetable.EnsureStationHasTrack());
-        result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
-        if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(schedule.Schedules)));
-        if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
-        if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetValidationErrors()).Distinct());
-        if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
-        return result;
+        /// <summary>
+        /// Validates a timetable within its schedule (station tracks, station calls, stretches and train speed).
+        /// </summary>
+        /// <param name="plan">The plan the timetable belongs to, used to resolve vehicle schedules.</param>
+        /// <param name="options">The options controlling which validations run.</param>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> GetValidationErrors(Plan plan, ValidationSettings options)
+        {
+            options = options.ValueOrException(nameof(options));
+            var result = new List<ValidationError>();
+            result.AddRange(timetable.EnsureStationHasTrack());
+            result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
+            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules)));
+            if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
+            if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetValidationErrors()).Distinct());
+            if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
+            return result;
+        }
     }
 
     #region Station
