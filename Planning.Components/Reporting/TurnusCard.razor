@@ -10,7 +10,14 @@
         <div class="content">
             <div class="schedule header">
                 <div><strong>@Item.CompanyNameOrEmpty</strong> @Item.ObjectTypeName(Translator)</div>
-                <div>@Translator("Turnus"):&nbsp;<strong>@Item.TurnusId&nbsp;@Item.OperatingSessions(Translator)</strong></div>
+                <div><strong>@Item.TurnusId</strong></div>
+                @{
+                    var operatingPeriod = Item.OperatingPeriod(Translator);
+                }
+                @if (operatingPeriod.Length > 0)
+                {
+                    <div>@Item.OperatingPeriodLabel(Translator):&nbsp;<strong>@operatingPeriod</strong></div>
+                }
                 @if (Item.HasClass)
                 {
                     <div>

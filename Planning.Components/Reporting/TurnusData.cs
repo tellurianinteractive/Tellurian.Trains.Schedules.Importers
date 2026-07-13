@@ -20,6 +20,12 @@ public record TurnusData
     /// <summary>The first weekday of the operating week, used to name the operating days on the card.</summary>
     public DayOfWeek StartDay { get; init; } = DayOfWeek.Monday;
 
+    /// <summary>Whether the operating period is shown as weekdays (true) or session numbers (false).</summary>
+    public bool UseDays { get; init; }
+
+    /// <summary>The number of sessions/days in the operating period, used to tell a whole-period card from a partial one.</summary>
+    public int MaxSessions { get; init; } = 14;
+
     /// <summary>The turnus number, or the vehicle's external id when the number is 0 (no turnus number in XPLN).</summary>
     public string TurnusId => Number > 0 ? Number.ToString() : ExternalId;
 }
@@ -50,63 +56,87 @@ public static class TurnusDataExtensions
         /// <summary>Turnus identity without sessions: external id for XPLN, else company.number.</summary>
         public string Key => data.Number == 0 ? data.ExternalId : $"{data.CompanyName}.{data.Number:D3}";
 
-        /// <summary>Full card identity: Key plus the operating sessions.</summary>
-        public string KeyWithSession => data.Number == 0 ? data.ExternalId : $"{data.CompanyName}.{data.Number:D3}.{data.Sessions}";
+        /// <summary>
+        /// Full card identity: <see cref="Key"/> plus the operating sessions. The sessions are always part of
+        /// the identity — a vehicle that works several distinct session/day combinations (e.g. a daily working
+        /// on Sat-Sun and a fuller working on Mo-Fr) yields one card per combination, and they must not merge
+        /// even when there is no turnus number (<see cref="TurnusData.Number"/> 0).
+        /// </summary>
+        public string KeyWithSession => data.Number == 0 ? $"{data.ExternalId}.{data.Sessions}" : $"{data.CompanyName}.{data.Number:D3}.{data.Sessions}";
 
         public string ObjectTypeName(Translator translator) => translator(data.ScheduledObjectType.ToString());
 
-        public string OperatingSessions(Translator translator)
+        /// <summary>The label for the operating-period line — "Days" for a day layout, else "Sessions".</summary>
+        public string OperatingPeriodLabel(Translator translator) => translator(data.UseDays ? "Days" : "Sessions");
+
+        /// <summary>
+        /// The sessions/days qualifying this card, as short weekday names (e.g. <c>Mo-Fr</c>) or session numbers
+        /// (e.g. <c>1-5</c>) per the layout. Empty when the card covers the whole operating period, so nothing
+        /// needs qualifying.
+        /// </summary>
+        public string OperatingPeriod(Translator translator)
         {
+            if (data.Sessions.CoversAllWithin(data.UseDays, data.MaxSessions)) return string.Empty;
+            if (!data.UseDays) return data.Sessions.SessionsNumbers;
             var key = data.Sessions.ShortDayNamesResourceKey(data.StartDay);
             var keys = key.Split('-', ',', StringSplitOptions.TrimEntries);
             if (keys.Length > 1)
-            {
-                if (key.Contains(','))
-                    return string.Join(",", keys.Select(rk => translator(rk)));
-                return string.Join("-", keys.Select(rk => translator(rk)));
-
-            }
-            else if (keys.Length == 1 && !key.StartsWith("Daily"))
-            {
-                return translator(key);
-            }
-            return string.Empty;
+                return key.Contains(',')
+                    ? string.Join(",", keys.Select(rk => translator(rk)))
+                    : string.Join("-", keys.Select(rk => translator(rk)));
+            return translator(key);
         }
     }
 
     extension(IEnumerable<ScheduledObject> items)
     {
-        public IEnumerable<TurnusData> ToTurnusData(DayOfWeek startDay)
+        /// <summary>
+        /// Projects the vehicles into turnus cards. A vehicle yields one card per unique session/day
+        /// combination it works (see <see cref="ScheduledObjectExtensions.SessionCombinations"/>): trains that
+        /// run beyond one another within a schedule, or assignments that give a vehicle different sessions to
+        /// different schedules, each produce their own card. A card whose turnus number also appears on another
+        /// session set is flagged as turning over.
+        /// </summary>
+        /// <param name="useDays">Whether the operating period is measured in weekdays rather than session numbers.</param>
+        /// <param name="maxSessions">The number of sessions/days in the operating period (1-14).</param>
+        /// <param name="startDay">The first weekday of the operating week, used to name the operating days.</param>
+        public IEnumerable<TurnusData> ToTurnusData(bool useDays, int maxSessions, DayOfWeek startDay)
         {
-                // One row per (vehicle, assignment); each row carries that assignment's train parts.
+                // One row per (vehicle, session/day combination); each row carries the parts worked on it.
                 var rows = items.Where(i => i.HasTurnusCard)
-                    .SelectMany(scheduledObject => scheduledObject.ScheduleAssignments.Select(assignment => new
-                    {
-                        Data = new TurnusData
+                    .SelectMany(scheduledObject => scheduledObject.SessionCombinations(useDays, maxSessions)
+                        .Select(combination => new TurnusData
                         {
                             ScheduledObjectType = scheduledObject.ObjectType,
                             CompanyName = scheduledObject.Company?.DisplayName ?? string.Empty,
                             Class = scheduledObject.Class,
-                            Number = assignment.Number,
+                            // The turnus number is carried by the assignment that covers these sessions; a
+                            // combination is drawn from a single assignment in practice.
+                            Number = scheduledObject.ScheduleAssignments
+                                .Where(a => a.Sessions.Overlaps(combination.Sessions))
+                                .Select(a => a.Number)
+                                .FirstOrDefault(),
                             ExternalId = scheduledObject.ExternalId ?? string.Empty,
-                            Sessions = assignment.Sessions,
+                            Sessions = combination.Sessions,
                             StartDay = startDay,
+                            UseDays = useDays,
+                            MaxSessions = maxSessions,
                             // Suppress a remark that only repeats the turnus (the external id), e.g. an
                             // imported wagonset whose remark is a copy of its identifier.
                             Remark = string.Equals(scheduledObject.Remark, scheduledObject.ExternalId, StringComparison.Ordinal)
                                 ? string.Empty
                                 : scheduledObject.Remark ?? string.Empty,
-                        },
-                        Parts = assignment.Schedule?.Parts ?? Enumerable.Empty<ScheduledTrainPart>(),
-                    }));
+                            TrainParts = combination.Parts,
+                        }));
 
-                // One card per full identity (KeyWithSession); merge the rows' train parts.
+                // One card per full identity (KeyWithSession); merge any rows that share it (e.g. several
+                // vehicles forming one turnus).
                 var cards = rows
-                    .GroupBy(row => row.Data.KeyWithSession)
-                    .Select(group => group.First().Data with
+                    .GroupBy(row => row.KeyWithSession)
+                    .Select(group => group.First() with
                     {
                         TrainParts = [.. group
-                            .SelectMany(row => row.Parts)
+                            .SelectMany(row => row.TrainParts)
                             .Distinct()
                             .OrderBy(part => part.Departure?.Value)],
                     })
