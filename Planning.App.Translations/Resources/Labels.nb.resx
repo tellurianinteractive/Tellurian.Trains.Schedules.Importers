@@ -232,10 +232,10 @@
     <value>Lager rapport…</value>
   </data>
   <data name="TurnForNextDay" xml:space="preserve">
-    <value>Fortsetter neste dag</value>
+    <value>Snu til neste dag?</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Fortsetter neste kjøresesjon</value>
+    <value>Snu til neste kjøresesjon?</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lok</value>

@@ -232,10 +232,10 @@
     <value>Bericht wird erstellt…</value>
   </data>
   <data name="TurnForNextDay" xml:space="preserve">
-    <value>Setzt am nächsten Tag fort</value>
+    <value>Für nächsten Tag wenden?</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Setzt sich in der nächsten Fahrrunde fort</value>
+    <value>Für nächste Fahrrunde wenden?</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lokomotive</value>

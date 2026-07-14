@@ -232,10 +232,10 @@
     <value>Skapar rapport…</value>
   </data>
   <data name="TurnForNextDay" xml:space="preserve">
-    <value>Fortsätter nästa dag</value>
+    <value>Vänd för nästa dag?</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Fortsätter nästa köromgång</value>
+    <value>Vänd för nästa köromgång?</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lok</value>

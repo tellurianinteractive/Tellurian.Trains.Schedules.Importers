@@ -54,7 +54,7 @@
             <div class="schedule alert">
                 @if (Item.TurnForNextSession)
                 {
-                    <span>@Translator("TurnForNextSession")</span>
+                    <span>@Translator(Item.UseDays ? "TurnForNextDay" : "TurnForNextSession")</span>
                 }
             </div>
         </div>

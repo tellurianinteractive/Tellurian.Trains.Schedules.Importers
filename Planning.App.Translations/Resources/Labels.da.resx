@@ -232,10 +232,10 @@
     <value>Opretter rapport…</value>
   </data>
   <data name="TurnForNextDay" xml:space="preserve">
-    <value>Fortsætter næste dag</value>
+    <value>Vend til næste dag?</value>
   </data>
   <data name="TurnForNextSession" xml:space="preserve">
-    <value>Fortsætter næste køresession</value>
+    <value>Vend til næste køresession?</value>
   </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lokomotiv</value>
