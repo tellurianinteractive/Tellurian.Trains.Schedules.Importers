@@ -181,18 +181,30 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 #### S2 — Part contiguity ✅
 **Method**: `ValidateContiguity(this Schedule me)`
 
-**Validates**: Each part, in working (departure) order, starts from the operation location where the previous part ended. `Append` enforces this at entry time; this check covers schedules assembled unconditionally with `Add` (e.g. reconstructed from XPLN import). Gated by `ValidateSchedules`.
+**Validates**: Each part, in working (departure) order, starts from the operation location where the previous part ended. `Append` enforces this at entry time; this check covers schedules assembled unconditionally with `Add` (e.g. reconstructed from XPLN import). Applies to all vehicle types (locomotives, trainsets, wagons, cargo). Gated by `ValidateSchedules`.
+
+**Skipped when the schedule's parts overlap in time** (`HasOverlappingParts`): such a schedule is not one vehicle's working — typically two vehicles an import merged under one identifier — so S1 already reports the overlap and ordering the parts for a contiguity test would only cascade misleading gaps.
 
 **Error**: `"Vehicle schedule {number}: {trainPart} does not continue from where the previous part ended at {location}."` (`ScheduleNotContiguous`)
 
-#### S3 — Circulation closure ❌
-All-session schedule starts/ends at the same station; otherwise split into chained parts closing the loop. Not checked.
+#### S3 — Circulation closure ✅
+**Method**: `ValidateScheduleClosure(this Plan plan)`
+
+**Validates**: A vehicle schedule that runs the whole operating period (`EffectiveSessions.CoversAllWithin(useDays, maxSessions)` from `Layout.Settings.General`) and whose vehicle is a **traction unit** must start and end at the **same station**. Scoped to traction (a loco/trainset must return to be reused; wagons/cargo flows are repositioned by other workings — rule S3's "starting traction unit"). **Exempt**: schedules whose trains are all on demand. A subset-session schedule is not checked here — it may be closed by a complementary schedule on the remaining sessions (the multi-session split/part-count case is deferred). Gated by `ValidateSchedules`.
+
+**Error**: `"Vehicle schedule {number} runs every session but does not return to its start {start}; it ends at {end}."` (`ScheduleNotClosed`)
+
+On-demand trains are marked at import (`XplnDataImporter.MarkSingleTrainWorkingsOnDemand`): a train that is the sole train of a single-train vehicle schedule and the sole train of a duty gets the on-demand session flag.
 
 #### S4 — Per-session traction 🟡
 A traction unit for all of the schedule's sessions. Partly served by P4; not checked per session across the schedule.
 
-#### S5 — Valid session combinations ❌
-Vehicles running different sessions/days must form valid combinations (conform to S3). `ValidateDriverDuties` toggle exists; no logic.
+#### S5 — Valid session combinations ✅
+**Method**: `ValidateSessionCombinationClosure(this Plan plan)`
+
+**Validates**: For a **traction** vehicle with **more than one** `SessionCombination` (it works different parts on different sessions/days), each combination must return the vehicle to its start station (each conforming to S3). A single-combination vehicle is already covered by S3, so the two do not double-report. On-demand combinations are exempt. Gated by `ValidateDriverDuties`.
+
+**Error**: `"Vehicle {number} on sessions {sessions} does not return to its start {start}; it ends at {end}."` (`SessionCombinationNotClosed`)
 
 ### Plan scope (P) — cross-object consistency
 
@@ -307,21 +319,22 @@ Plan.GetValidationErrors(options)
   │
   ├─► Schedule.ValidateOverlappingParts()     [ValidateSchedules]      S1
   ├─► Schedule.ValidateContiguity()           [ValidateSchedules]      S2
+  ├─► Plan.ValidateScheduleClosure()          [ValidateSchedules]      S3
   ├─► Plan.ValidateVehicleDoubleBooking()     [ValidateSchedules]      P3
+  ├─► Plan.ValidateSessionCombinationClosure()[ValidateDriverDuties]   S5
   └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4
 ```
 
 ## Known Issues / TODOs
 
 Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
-Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, S1, S2, P1,
-P3, P4. Partial: L1 (emergent from L2/L3), S4, P2. Missing: S3, S5. Note L3 counts trains
-on a stretch **direction-agnostically** (one train per track, both directions together) —
-the existing capacity check is correct as-is, not a direction bug.
+Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, S1, S2, S3,
+S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), S3 multi-session split, S4, P2. Note L3
+counts trains on a stretch **direction-agnostically** (one train per track, both directions
+together) — the existing capacity check is correct as-is, not a direction bug.
 
-1. **S5 — valid session combinations for a schedule** (`ValidateDriverDuties`) - Option exists but no implementation
-2. **S3 — schedule circulation closure** - start/end station and split-into-parts loop; not checked
-3. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
-4. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
-5. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
-6. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
+1. **S3 — multi-session split / part-count** - a subset-session schedule that doesn't close is left to its complementary schedule; the "part count = sessions needed to return" split is not yet validated
+2. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
+3. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
+4. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
+5. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring

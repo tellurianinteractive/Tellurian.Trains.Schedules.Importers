@@ -98,6 +98,20 @@
         background: var(--detail-bg);
     }
 
+    /* A train involved in a validation conflict: amber row tint (kept on hover) with an amber accent
+       down the first cell. Hovering the row shows the message via its title. */
+    table.trains > tbody > tr.train.has-conflict {
+        background: #fff8e1;
+    }
+
+    table.trains > tbody > tr.train.has-conflict:hover {
+        background: #ffefc2;
+    }
+
+    table.trains > tbody > tr.train.has-conflict > td:first-child {
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
     th.expander,
     td.expander {
         width: 1.6rem;

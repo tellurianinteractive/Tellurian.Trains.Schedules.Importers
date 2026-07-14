@@ -15,11 +15,11 @@
     <PackageReference Include="System.Data.Odbc" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Importers.Access\Access.csproj" />
-    <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
+    <ProjectReference Include="..\Importers.Access\Importers.Access.csproj" />
+    <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
-    <ProjectReference Include="..\Importers.Services\Services.csproj" />
-    <ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+    <ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+    <ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Test data\**\*.ods" CopyToOutputDirectory="Always" />

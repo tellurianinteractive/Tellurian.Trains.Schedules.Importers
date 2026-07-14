@@ -547,6 +547,25 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne(e => e.ScheduledObject)
                   .HasForeignKey(e => e.ScheduledObjectId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // The ordered rake of scheduled units. ScheduledUnit is a polymorphic hierarchy (Wagon,
+            // TractionUnit), which owned types cannot express, so it is a regular TPH entity related to
+            // the scheduled object through a shadow foreign key.
+            entity.HasMany(e => e.Units)
+                  .WithOne()
+                  .HasForeignKey("ScheduledObjectId")
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ScheduledUnit (TPH: Wagon, TractionUnit). The record hierarchy carries no key of its own, so a
+        // shadow key and shadow discriminator keep persistence concerns out of the domain type.
+        modelBuilder.Entity<ScheduledUnit>(entity =>
+        {
+            entity.Property<int>("Id").ValueGeneratedOnAdd();
+            entity.HasKey("Id");
+            entity.HasDiscriminator<string>("UnitType")
+                  .HasValue<Wagon>("Wagon")
+                  .HasValue<TractionUnit>("TractionUnit");
         });
 
         // ScheduleAssignment
@@ -629,17 +648,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         {
             entity.OwnsOne(e => e.TractionOptions, o => o.ToTable("TractionOptions"));
 
-            entity.OwnsOne(e => e.WagonSetOptions, o =>
-            {
-                o.ToTable("NonTractionOptions");
-                o.OwnsMany(n => n.WagonGroup, w =>
-                {
-                    w.ToTable("Wagons");
-                    // Sole auto-increment key so SQLite can generate it (a composite owned key cannot).
-                    w.Property<int>("Id").ValueGeneratedOnAdd();
-                    w.HasKey("Id");
-                });
-            });
+            entity.OwnsOne(e => e.WagonSetOptions, o => o.ToTable("NonTractionOptions"));
 
             entity.OwnsOne(e => e.CargoOnlyOptions, o =>
             {

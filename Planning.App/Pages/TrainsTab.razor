@@ -4,6 +4,7 @@
 @using Tellurian.Trains.Schedules.Model.Timetables
 @using Tellurian.Trains.Schedules.Model.Validations
 @inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
 @inject Translator Translator
 @implements IDisposable
 
@@ -49,7 +50,8 @@ else
                 <tbody>
                     @foreach (var train in Trains)
                     {
-                        <tr class="train @(IsExpanded(train) ? "expanded" : "")">
+                        var conflict = ConflictTitle(train);
+                        <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflict is not null ? "has-conflict" : "")" title="@conflict">
                             <td class="expander">
                                 <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
                                         @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
@@ -173,6 +175,7 @@ else
     protected override void OnInitialized()
     {
         ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
         // Older/imported timetables have no session catalogue yet; seed the standard patterns so the
         // Sessions drop-down is usable. Only persists when something was actually added.
         if (Timetable is { } timetable && timetable.EnsureSessions()) ScheduleState.SaveAndNotify();
@@ -180,9 +183,21 @@ else
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
+    // The validation messages for errors that involve this train, joined for a hover tooltip; null when clean.
+    private string? ConflictTitle(Train train)
+    {
+        var messages = ValidationState.Errors
+            .Where(e => e.Involves(train))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count == 0 ? null : string.Join("\n", messages);
+    }
+
     public void Dispose()
     {
         ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
         ScheduleState.FlushPendingSave();
     }
 

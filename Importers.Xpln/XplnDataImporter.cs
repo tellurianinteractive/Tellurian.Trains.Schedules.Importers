@@ -534,10 +534,32 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 vehicle.ObjectType = ScheduledObjectType.Wagonset;
     }
 
+    // XPLN convention: a vehicle schedule that works a single train, where that train is also the only
+    // train in a duty, is a special "driver's choice" working that runs on demand rather than on fixed
+    // sessions. Mark such trains on demand so the schedule/turnus rules treat them as unsessioned (in
+    // particular they need not close the loop back to their starting station).
+    private static void MarkSingleTrainWorkingsOnDemand(Plan schedule)
+    {
+        var onDemand = Sessions.FromBitPattern(CommonSessionPatterns.OnDemand);
+        foreach (var vehicleSchedule in schedule.Schedules)
+        {
+            var trains = vehicleSchedule.Parts.Select(p => p.Train).Distinct().ToList();
+            if (trains.Count != 1) continue;
+            var train = trains[0];
+            var isOnlyTrainInADuty = schedule.DriverDuties.Any(duty =>
+            {
+                var dutyTrains = duty.Parts.Select(p => p.Train).Distinct().ToList();
+                return dutyTrains.Count == 1 && dutyTrains[0].Equals(train);
+            });
+            if (isOnlyTrainInADuty) train.Sessions = onDemand;
+        }
+    }
+
     private ImportResult<Timetable> GetTimetable(string name, Layout layout)
     {
         const string WorkSheetNameAndObjects = "Trains:traindef,timetable,remarks";
         const string WorkSheetName = "Trains";
+        const int Number = 0;
         const int Station = 2;
         const int Track = 3;
         const int Arrival = 4;
@@ -716,13 +738,53 @@ public sealed class XplnDataImporter : IImportService, IDisposable
 
         static Train CreateTrain(int rowNumber, string[] fields, TrainCategory? category)
         {
-            var train = new Train(rowNumber, fields[Object].NumberOrZero, fields[Object])
+            var train = new Train(rowNumber, ExtractTrainNumber(rowNumber, fields), fields[Object])
             {
                 Remark = fields[Remark],
                 Category = category,
                 CategoryId = category?.Id
             };
             return train;
+        }
+
+        static int ExtractTrainNumber(int rowNumber, string[] fields)
+        {
+            var A = fields[Number];
+            var result = A.ToIntOrZero;
+            if (result > 0) return result;
+            // if chars after a space in A is only digits, its a train number ("RB62 75509" -> 75509)
+            var afterSpace = A[(A.LastIndexOf(' ') + 1)..];
+            if (afterSpace.Length > 0)
+            {
+                result = afterSpace.ToIntOrZero;
+                if (result > 0) return result;
+            }
+            // if A contains a single non-broken sequence of digits in any position, its a train number ("RB6201" -> 6201)
+            if (SingleDigitRun(A) is { } singleRun)
+            {
+                result = singleRun.ToIntOrZero;
+                if (result > 0) return result;
+            }
+            return rowNumber;
+
+            // Returns the one unbroken run of digits in value, or null when there is none or more than one.
+            static string? SingleDigitRun(string value)
+            {
+                string? run = null;
+                var start = -1;
+                for (var i = 0; i <= value.Length; i++)
+                {
+                    var isDigit = i < value.Length && char.IsDigit(value[i]);
+                    if (isDigit && start < 0) start = i;
+                    else if (!isDigit && start >= 0)
+                    {
+                        if (run is not null) return null; // a second run: not a single sequence
+                        run = value[start..i];
+                        start = -1;
+                    }
+                }
+                return run;
+            }
         }
 
         // Every call is created as a full stop (arrives and departs). The stop flags are then refined per the
@@ -784,8 +846,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int Type = 8;
         const int TrainName = 9;
         const int MinLength = 9;
-        const int LocoClass = 9;
-        const int TrainsetClass = 9;
         const int Remark = 10;
 
         var messages = new List<Message>();
@@ -849,7 +909,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                             id: rowNumber,
                                             vehicleType: ScheduledObjectType.Locomotive,
                                             number: locoId.LocoNumber,
-                                            vehicleClass: fields[LocoClass],
                                             company: company,
                                             externalId: locoId);
                                         locoSchedules.Add(locoId, vehicleSchedule);
@@ -887,7 +946,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                                 id: rowNumber,
                                                 vehicleType: ScheduledObjectType.Trainset,
                                                 number: trainsetId.LocoNumber,
-                                                vehicleClass: fields[TrainsetClass],
                                                 externalId: trainsetId,
                                                 // Use the actual remark column, not the identifier. When it merely
                                                 // repeats the external id, the turnus card suppresses it (see TurnusData).
@@ -970,6 +1028,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
         MergeRailcarsAndReclassifyTrainsets(schedule);
+        MarkSingleTrainWorkingsOnDemand(schedule);
         return ImportResult<Plan>.Success(schedule, messages);
 
         static TrainPartKeys GetTrainPartKeys(string[] fields, Train currentTrain, int rowNumber)

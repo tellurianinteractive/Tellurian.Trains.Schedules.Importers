@@ -205,11 +205,29 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0} runs every session but does not return to its start {1}; it ends at {2}..
+        /// </summary>
+        internal static string ScheduleDoesNotReturnToStart {
+            get {
+                return ResourceManager.GetString("ScheduleDoesNotReturnToStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle schedule {0}: {1} does not continue from where the previous part ended at {2}..
         /// </summary>
         internal static string ScheduleIsNotContiguous {
             get {
                 return ResourceManager.GetString("ScheduleIsNotContiguous", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} on sessions {1} does not return to its start {2}; it ends at {3}..
+        /// </summary>
+        internal static string SessionCombinationDoesNotReturnToStart {
+            get {
+                return ResourceManager.GetString("SessionCombinationDoesNotReturnToStart", resourceCulture);
             }
         }
         

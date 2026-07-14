@@ -36,6 +36,17 @@
         border-top: none;
     }
 
+    /* A working involved in a validation conflict: amber tint on both cells (the row generates no box)
+       plus an amber accent down the vehicle cell. Hovering either cell shows the message via title. */
+    .sched-row.has-conflict .sched-vehicle,
+    .sched-row.has-conflict .parts {
+        background: #fff8e1;
+    }
+
+    .sched-row.has-conflict .sched-vehicle {
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
     .sched-vehicle {
         display: flex;
         align-items: center;
@@ -64,6 +75,13 @@
         font-weight: 600;
         color: #333;
         white-space: nowrap;
+    }
+
+    /* A chip whose label is the raw external id (e.g. as imported): light yellow flags that it is worth
+       editing into a tidy company/class/number designation. A composed designation keeps the plain chip. */
+    .chip.external-id {
+        background: #fff8c5;
+        border-color: #e6d878;
     }
 
     /* Sessions/days a partly-booked assignment covers, shown after the vehicle id on its chip. */
@@ -139,8 +157,9 @@
         opacity: 0.6;
     }
 
-    /* Small inline remove control on chips and part blocks. */
-    .x {
+    /* Small inline edit / remove controls on chips and part blocks. */
+    .x,
+    .edit {
         border: none;
         background: transparent;
         color: inherit;
@@ -152,7 +171,8 @@
         border-radius: 3px;
     }
 
-    .x:hover {
+    .x:hover,
+    .edit:hover {
         opacity: 1;
         background: rgba(0, 0, 0, 0.12);
     }

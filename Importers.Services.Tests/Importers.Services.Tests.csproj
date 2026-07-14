@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSTest.Sdk/4.0.2">
+<Project Sdk="MSTest.Sdk/4.0.2">
 
 	<PropertyGroup>
 		<AssemblyName>Tellurian.Trains.Schedules.Importers.Services.Tests</AssemblyName>
@@ -15,10 +15,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
+		<ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
 		<ProjectReference Include="..\Model\Model.csproj" />
-		<ProjectReference Include="..\Importers.Services\Services.csproj" />
-		<ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+		<ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+		<ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -125,6 +127,135 @@ public class ScheduleEditingTests
 
         Assert.AreEqual(vehicle.Id, vehicle.Number, "A vehicle with no number falls back to its unique id.");
         Assert.IsFalse(string.IsNullOrWhiteSpace(vehicle.ExternalId));
+    }
+
+    [TestMethod]
+    public void UpdateVehicleKeepsAGivenExternalId()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 12, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "DBSCH EG 01", "EG", 1, null);
+
+        Assert.AreEqual("DBSCH EG 01", vehicle.ExternalId);
+        Assert.AreEqual("DBSCH EG 01", vehicle.Designation, "The external id is shown when present.");
+    }
+
+    [TestMethod]
+    public void UpdateVehicleClearsBlankExternalIdSoDesignationFallsBack()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 12, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Trainset, "  ", "Rc", 5, null);
+
+        Assert.IsNull(vehicle.ExternalId, "A blank external id is cleared to null.");
+        Assert.AreEqual(ScheduledObjectType.Trainset, vehicle.ObjectType);
+        Assert.AreEqual("Rc", vehicle.Class);
+        Assert.AreEqual(5, vehicle.Number);
+        Assert.AreEqual("Rc 05", vehicle.Designation, "With no external id the designation is company + class + zero-padded number.");
+    }
+
+    [TestMethod]
+    public void UpdateVehicleSetsTractionTypeAndNumberOfUnitsForATractionUnit()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 6, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "Rc 6", "Rc", 6, null, TractionType.Electric, 2);
+
+        Assert.AreEqual(TractionType.Electric, vehicle.TractionType);
+        Assert.AreEqual(2, vehicle.NumberOfUnits);
+    }
+
+    [TestMethod]
+    public void UpdateVehicleClampsNumberOfUnitsToAtLeastOne()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 1, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Wagonset, "Gbs", "Gbs", 1, null, numberOfUnits: 0);
+
+        Assert.AreEqual(1, vehicle.NumberOfUnits);
+    }
+
+    [TestMethod]
+    public void UpdateVehicleLeavesTractionTypeNoneForAWagonset()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 1, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Wagonset, "Gbs", "Gbs", 1, null, TractionType.Electric, 3);
+
+        Assert.AreEqual(TractionType.None, vehicle.TractionType, "A wagonset is never a traction unit.");
+    }
+
+    [TestMethod]
+    public void UpdateVehicleClearsWagonsWhenTypeIsNotWagonset()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 1, null);
+        vehicle.AddWagon("Gbs");
+        vehicle.AddWagon("Habis");
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "Rc 6", "Rc", 6, null);
+
+        Assert.IsEmpty(vehicle.Units, "The wagon rake belongs only to a wagonset.");
+    }
+
+    [TestMethod]
+    public void AddAndRemoveWagonKeepOrderInTrainContiguous()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 1, null);
+
+        var first = vehicle.AddWagon("A");
+        var second = vehicle.AddWagon("B");
+        var third = vehicle.AddWagon("C");
+        Assert.AreEqual(1, first.Position);
+        Assert.AreEqual(2, second.Position);
+        Assert.AreEqual(3, third.Position);
+
+        vehicle.RemoveUnit(second);
+
+        Assert.HasCount(2, vehicle.Units);
+        CollectionAssert.AreEqual(new[] { 1, 2 }, vehicle.Units.OrderBy(w => w.Position).Select(w => w.Position).ToArray());
+        Assert.AreEqual("C", vehicle.Units.OrderBy(w => w.Position).Last().Class);
+    }
+
+    [TestMethod]
+    public void WagonsOnAWagonsetSurviveJsonRoundTrip()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 1, null);
+        wagonset.AddWagon("Gbs", "1234", isCargo: true);
+        wagonset.AddWagon("Habis", isCargo: true);
+
+        // The same options the app's JsonExportService/JsonImportService use.
+        var options = new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve, MaxDepth = 256 };
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, options), options)!;
+
+        var restoredWagonset = restored.ScheduledObjects.Single(v => v.IsWagonSet);
+        var wagons = restoredWagonset.Units.OrderBy(w => w.Position).ToList();
+        Assert.HasCount(2, wagons);
+        Assert.AreEqual("Gbs", wagons[0].Class);
+        Assert.AreEqual("1234", wagons[0].Number);
+        Assert.AreEqual(2, wagons[1].Position);
+    }
+
+    [TestMethod]
+    public void VehiclesWithBlankExternalIdStayDistinctById()
+    {
+        var plan = CreatePlan();
+        var one = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        var two = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 2, null);
+
+        plan.UpdateVehicle(one, ScheduledObjectType.Locomotive, null, "BR 218", 1, null);
+        plan.UpdateVehicle(two, ScheduledObjectType.Locomotive, null, "BR 218", 2, null);
+
+        Assert.AreNotEqual(one, two, "Two vehicles with blank external ids must not merge.");
+        Assert.AreNotEqual(one.GetHashCode(), two.GetHashCode());
+        Assert.HasCount(2, plan.ScheduledObjects);
     }
 
     [TestMethod]

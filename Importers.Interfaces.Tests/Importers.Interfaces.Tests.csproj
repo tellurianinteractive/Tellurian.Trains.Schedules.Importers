@@ -5,9 +5,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
-    <ProjectReference Include="..\Importers.Interfaces\Interfaces.csproj" />
-    <ProjectReference Include="..\Importers.Services\Services.csproj" />
-    <ProjectReference Include="..\Importers.Xpln\Xpln.csproj" />
+    <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
+    <ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+    <ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Test data\**\*.ods" CopyToOutputDirectory="Always" />

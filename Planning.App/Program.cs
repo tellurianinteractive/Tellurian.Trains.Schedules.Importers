@@ -20,6 +20,7 @@ builder.Services.AddSingleton<BrowserStorageService>();
 builder.Services.AddSingleton<UiPreferenceService>();
 builder.Services.AddSingleton<DockLayoutState>();
 builder.Services.AddSingleton<ScheduleStateService>();
+builder.Services.AddSingleton<ValidationStateService>();
 builder.Services.AddScoped<ICompaniesService, CompaniesService>();
 builder.Services.AddScoped<ITrainCategoriesService, TrainCategoriesService>();
 builder.Services.AddScoped<ScheduleImportService>();

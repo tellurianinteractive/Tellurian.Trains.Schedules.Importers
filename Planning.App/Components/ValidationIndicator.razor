@@ -1,0 +1,100 @@
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ValidationStateService Validation
+@inject NavigationManager Nav
+@inject Translator Translator
+@implements IDisposable
+
+<div class="validation-indicator @SeverityCss">
+    <button class="header-btn indicator-btn" @onclick="Toggle" title="@Translator("Conflicts")">
+        <i class="fa-solid @IconCss"></i>
+        @if (Validation.HasErrors)
+        {
+            <span class="badge">@Validation.Count</span>
+        }
+    </button>
+
+    @if (_open)
+    {
+        <div class="panel-backdrop" @onclick="Close"></div>
+        <div class="panel" @onclick:stopPropagation>
+            <header class="panel-header">
+                <h3>@Translator("Conflicts")</h3>
+                <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            @if (!Validation.HasErrors)
+            {
+                <p class="empty">@Translator("NoConflicts")</p>
+            }
+            else
+            {
+                <ul class="conflict-list">
+                    @foreach (var error in Ordered)
+                    {
+                        <li class="conflict @SeverityClass(error.Severity)" @onclick="() => GoTo(error)">@error.Message.Text</li>
+                    }
+                </ul>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool _open;
+
+    protected override void OnInitialized() => Validation.OnValidationChanged += OnChanged;
+
+    // Most severe first, so the worst problems are read first.
+    private IEnumerable<ValidationError> Ordered => Validation.Errors.OrderByDescending(e => e.Severity);
+
+    private string IconCss => Validation.MaxSeverity switch
+    {
+        Severity.Error or Severity.System => "fa-circle-exclamation",
+        Severity.Warning => "fa-triangle-exclamation",
+        Severity.Information => "fa-circle-info",
+        _ => "fa-circle-check",
+    };
+
+    private string SeverityCss => SeverityClass(Validation.MaxSeverity);
+
+    private static string SeverityClass(Severity severity) => severity switch
+    {
+        Severity.Error or Severity.System => "sev-error",
+        Severity.Warning => "sev-warning",
+        Severity.Information => "sev-info",
+        _ => "sev-none",
+    };
+
+    private void Toggle() => _open = !_open;
+
+    private void Close() => _open = false;
+
+    // Jump to the tab where this kind of conflict is edited (and highlighted), then close the panel.
+    private void GoTo(ValidationError error)
+    {
+        _open = false;
+        Nav.NavigateTo(RouteFor(error.ErrorType));
+    }
+
+    private static string RouteFor(ValidationErrorType type) => type switch
+    {
+        ValidationErrorType.VehicleScheduleOverlap or
+        ValidationErrorType.VehicleDoubleBooked or
+        ValidationErrorType.ScheduleNotContiguous or
+        ValidationErrorType.ScheduleNotClosed or
+        ValidationErrorType.SessionCombinationNotClosed or
+        ValidationErrorType.LocomotiveCoverageGap or
+        ValidationErrorType.LocomotiveCoverageOverlap => "schedules",
+
+        ValidationErrorType.StationTrackConflict or
+        ValidationErrorType.TrackStretchConflict or
+        ValidationErrorType.TrainSpeedTooSlow or
+        ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",
+
+        // TrainTimeSequence, StationCallTiming, TrainTooFewCalls, MissingTrackReference, DuplicateTrainNumber
+        _ => "trains",
+    };
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Validation.OnValidationChanged -= OnChanged;
+}

@@ -1,5 +1,6 @@
 @page "/graphical-timetable"
 @inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
 @inject Translator Translator
 @inject UiPreferenceService UiPrefs
 @implements IDisposable
@@ -62,7 +63,7 @@ else
         <div class="graph-list @StackingCss">
             @foreach (var graphSchedule in _graphSchedules)
             {
-                <GraphicalScheduleEditor Schedule="graphSchedule" />
+                <GraphicalScheduleEditor Schedule="graphSchedule" Errors="ValidationState.Errors" />
             }
         </div>
     }
@@ -116,6 +117,7 @@ else
     protected override void OnInitialized()
     {
         ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnValidationChanged;
         BuildGraphSchedules();
     }
 
@@ -147,6 +149,10 @@ else
         InvokeAsync(StateHasChanged);
     }
 
+    // Validation recomputes on a debounce after an edit; re-render so the graph re-reads ValidationState.Errors
+    // and refreshes its conflict highlighting. The graph schedules themselves are unchanged, so don't rebuild them.
+    private void OnValidationChanged() => InvokeAsync(StateHasChanged);
+
     private void BuildGraphSchedules()
     {
         if (ScheduleState.Timetable is { } timetable)
@@ -166,5 +172,6 @@ else
     public void Dispose()
     {
         ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnValidationChanged;
     }
 }
