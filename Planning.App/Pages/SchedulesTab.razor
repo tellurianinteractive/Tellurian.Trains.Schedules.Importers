@@ -3,6 +3,7 @@
 @using Tellurian.Trains.Schedules.Planning.App.Components.Schedules
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
 @inject Translator Translator
 @implements IDisposable
 
@@ -52,7 +53,11 @@ else
 
     private string? _buildMessage;
 
-    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
+    }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
@@ -75,6 +80,7 @@ else
     public void Dispose()
     {
         ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
         ScheduleState.FlushPendingSave();
     }
 }

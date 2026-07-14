@@ -36,6 +36,17 @@
         border-top: none;
     }
 
+    /* A working involved in a validation conflict: amber tint on both cells (the row generates no box)
+       plus an amber accent down the vehicle cell. Hovering either cell shows the message via title. */
+    .sched-row.has-conflict .sched-vehicle,
+    .sched-row.has-conflict .parts {
+        background: #fff8e1;
+    }
+
+    .sched-row.has-conflict .sched-vehicle {
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
     .sched-vehicle {
         display: flex;
         align-items: center;

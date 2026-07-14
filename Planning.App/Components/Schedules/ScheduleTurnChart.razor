@@ -5,6 +5,7 @@
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @using Tellurian.Utilities.Web
 @inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
 @inject Translator Translator
 
 @* Editable "turn chart": each vehicle schedule (turnus) is a row. The first column lists the vehicle(s)
@@ -22,8 +23,9 @@ else
         <div class="head parts-head">@Translator("Trains")</div>
         @foreach (var schedule in Schedules)
         {
-            <div class="sched-row">
-                <div class="sched-vehicle">
+            var conflict = ConflictTitle(schedule);
+            <div class="sched-row @(conflict is not null ? "has-conflict" : null)">
+                <div class="sched-vehicle" title="@conflict">
                     <div class="vehicles">
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
@@ -40,7 +42,7 @@ else
                         <button class="add" title="@Translator("AddVehicle")" @onclick="() => _assignTarget = schedule"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <div class="parts">
+                <div class="parts" title="@conflict">
                     @if (_deleteTarget == schedule)
                     {
                         <div class="confirm">
@@ -124,6 +126,21 @@ else
     private Schedule? _addPartTarget;
     private Schedule? _assignTarget;
     private Schedule? _deleteTarget;
+
+    // The validation messages for errors that involve any train worked in this schedule, joined for a
+    // hover tooltip; null when the working is clean. Covers schedule-level errors (not closed, not
+    // contiguous, double-booked, overlaps) as well as any train problem within the working.
+    private string? ConflictTitle(Schedule schedule)
+    {
+        var trains = schedule.Parts.Select(p => p.Train).Distinct().ToList();
+        if (trains.Count == 0) return null;
+        var messages = ValidationState.Errors
+            .Where(e => trains.Any(t => e.Involves(t)))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count == 0 ? null : string.Join("\n", messages);
+    }
 
     // The vehicles worked to a schedule, paired with the assignment that links them (needed to unassign).
     private IEnumerable<(ScheduledObject Vehicle, ScheduleAssignment Assignment)> VehiclesOf(Schedule schedule) =>
