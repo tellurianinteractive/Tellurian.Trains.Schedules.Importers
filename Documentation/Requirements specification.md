@@ -1,14 +1,14 @@
 # Timetable Planning System — Requirements Specification
 
 > **Status:** Draft
-> **Last Updated:** 2026-06-14
+> **Last Updated:** 2026-07-14
 
 This is the main specification document for the Timetable Planning System,
 a single application for planning model railway operations based on schedules.
 
-> **Implementation status annotations.** As of 2026-06-14 this document is
+> **Implementation status annotations.** As of 2026-07-14 this document is
 > annotated with the state of the implementation in this solution. Each functional
-> (§3) and data-model (§4) subsection carries a `Status:` line, and the
+> (§3) and data-model (§4) subsection carries a **Status** line, and the
 > [Implementation Status Overview](#implementation-status-overview) below summarises
 > coverage. Legend:
 >
@@ -29,21 +29,21 @@ Snapshot of coverage by area (see each section for detail).
 
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
-| Operation locations + subtypes (§4.1.1) | ✅ | `Owner` on base; `Station.Regions` is `IList<Region>` (Name + CountryId + palette colour) |
+| Operation locations + subtypes (§4.1.1) | ✅ | owner on every location; a shadow station's regions are chosen from the layout's region catalogue (each region has a name, a country and a palette colour) |
 | Station tracks (§4.1.2) | ✅ | |
 | Track / Timetable / Dispatch stretches (§4.1.3–5) | ✅ | |
-| Companies (§4.1.6) | ✅ | `Company.CountryId` references a country in `Layout.Countries` |
-| Country catalogue (§4.1.7) | ✅ | `Layout.Countries` saved with the layout; referenced by `Company`/`Region`/`DefaultCountryId` |
-| Train (§4.2.1) | ✅ | `MaxSpeed` added |
-| Train categories (§4.2.2) | ✅ | `DefaultSpeed` added; catalogue on `Timetable.TrainCategories`, seeded Passenger/Freight |
-| Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | |
-| Cargo flows (§4.2.5) | 🟢 | reusable `Timetable.CargoFlowOptions` catalogue + `CargoFlowTrainPart` on `Train.CargoFlows`; **Cargo flow** tab (descriptions + per-train editor); destination note generated (report rendering pending) |
-| Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed formula wired (`Train.EffectiveScaleSpeed`/`…RealSpeed`, `TimeAndSpeedSettings.RealSpeedMetersPerSecond`) |
-| Schedule top level (§4.4.1) | ✅ | naming: spec *Schedule* = code `Plan`; spec *Vehicle Schedule* = code `Schedule` |
-| Vehicles inventory (§4.4.2) | ✅ | `DccAddress` added |
-| Vehicle schedules / driver duties (§4.4.3–4) | 🟡 | `Schedule.Parts` is `ICollection<TrainPart>`; type-specific data held in four nullable `TrainPart` option slots; wagon-group assignment editor still not wired |
-| Note generation system (§4.5.1–4) | ❌ | only manual `TextCallNote` exists |
-| Manual note translations (§4.5.5) | 🟡 | single language code, not a translation collection |
+| Companies (§4.1.6) | ✅ | each company names the country it operates in, chosen from the layout's country catalogue |
+| Country catalogue (§4.1.7) | ✅ | the layout saves the set of countries it uses; companies, regions and the default country all reference it |
+| Train (§4.2.1) | ✅ | maximum speed, train length (axles/wagons/metres) and train continuation |
+| Train categories (§4.2.2) | ✅ | default speed and start number; categories are a catalogue on the timetable, seeded with Passenger and Freight |
+| Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | station calls distinguish a stop from a pass-through; a wagonset's individual wagons are listed on the wagonset itself (§4.2.4); sessions are a catalogue on the timetable |
+| Cargo flows (§4.2.5) | 🟢 | reusable cargo-flow descriptions catalogue plus per-train occurrences; the **Cargo flow** tab (descriptions + per-train editor); destination note generated (report rendering pending) |
+| Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed calculation wired (train speed capped by stretch speed, mapped to a real model speed) |
+| Schedule top level (§4.4.1) | ✅ | terminology: what this document calls a *Schedule* (the whole operating plan) is called a *plan* in the data model; what it calls a *Vehicle Schedule* is called simply a *schedule* |
+| Vehicles inventory (§4.4.2) | ✅ | includes a DCC address |
+| Vehicle schedules / driver duties (§4.4.3–4) | 🟡 | a vehicle schedule is a reusable, type-agnostic sequence of train parts; interactive and automatic turnus building and session-aware vehicle assignment (§3.8); wagon-group assignment editor not wired |
+| Note generation system (§4.5.1–4) | ❌ | only manual free-text notes exist |
+| Manual note translations (§4.5.5) | 🟡 | a single language code, not a translation collection |
 
 ### Functional / UI (§3)
 
@@ -52,14 +52,14 @@ Snapshot of coverage by area (see each section for detail).
 | Settings tab (§3.2) | ✅ | all 5 groups + language selector |
 | Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor built; ModuleRegistry import (FR-3.3.1) missing |
 | Track/Dispatch/Timetable Stretches (§3.4) | ✅ | three sub-sections; direction warnings; auto dispatch + route builder |
-| Train Categories (§3.5) | ✅ | list + add/edit/delete on `Timetable.TrainCategories`; delete blocked when referenced by a train |
-| Trains (§3.6) | ❌ | stub page |
-| Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection; interaction (drag, context menu) is empty handlers |
-| Vehicle Schedule Editor (§3.8) | ❌ | stub page |
+| Train Categories (§3.5) | ✅ | list + add/edit/delete; delete blocked when referenced by a train; start number and exclude-from-automatic-scheduling editable |
+| Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; pass-through set via arrival/departure checkboxes; conflict highlighting |
+| Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection + conflict highlighting; interaction (drag, context menu) is still not built |
+| Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | ❌ | |
-| Validation (§3.11) | 🟡 | organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S3, S5, P1/P3/P4 done; S3 multi-session split + S4/P2 partial; L1 emergent |
-| Reports (§3.12) | 🟡 | shell + page formats present; 1 of 15 reports (Turnus Cards) built |
+| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S3, S5, P1/P3/P4 done; S3 multi-session split + S4/P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
+| Reports (§3.12) | 🟡 | shell + page formats present; 2 reports built — Turnus Cards and a paginated tabular Timetable report |
 
 ### Integration (§5)
 
@@ -89,7 +89,7 @@ module meetings, but also for fixed club layouts and home layouts.
 | **Incremental data entry**      | Data can be entered from scratch, imported from previous plans, or fetched from external services              |
 | **Multi-language**              | UI and validation messages in English, German, Danish, Norwegian, Swedish (at minimum)                         |
 | **Reports separated from editing** | Printable content is treated as *reports*, hosted in a dedicated print shell distinct from the interactive editor; the same content may be offered both as an editor and as a report |
-| **Settings on the layout**      | All configurable settings live on the layout (`Layout.Settings`), grouped by purpose, and are persisted and re-applied with it |
+| **Settings on the layout**      | All configurable settings live on the layout, grouped by purpose, and are persisted and re-applied with it |
 
 ### 1.3 Scope Boundaries
 
@@ -219,7 +219,7 @@ GUI language. The new layout is seeded with these defaults:
 | ---- | ------- |
 | Layout name | "New layout" (localised) |
 | Theme · Scale | European · H0 (1:87) |
-| Default country | derived from the GUI language (sv→Sweden, da→Denmark, de→Germany, nb→Norway, en→United Kingdom); also added to `Layout.Countries` |
+| Default country | derived from the GUI language (sv→Sweden, da→Denmark, de→Germany, nb→Norway, en→United Kingdom); also added to the layout's country catalogue |
 | Operating window | Start 06:00, End 18:00 |
 | Graphical timetable | Horizontal; minute spacing 3, kilometre spacing 2, station spacing 100, track spacing 10 |
 | Time & Speed | Clock speed 5; minimum station stop 2; speed points, loco runaround (5) and clearance (1) at their standard values |
@@ -233,13 +233,13 @@ Creating a new layout replaces any plan currently loaded (confirmed first when o
 
 ### 3.2 Settings
 
-> **Status:** ✅ Implemented (`Planning.App/Pages/Settings.razor`). All five groups
-> (General, GraphicTimetable, TimeAndSpeed, Validation, Integration) and the
-> top-bar language selector (localStorage) are present.
+> **Status:** ✅ Implemented (Settings tab). All five groups
+> (General, Graphical Timetable, Time & Speed, Validation, Import & Export) and the
+> top-bar language selector (saved in the browser) are present.
 
-All configurable settings are stored on the layout as `Layout.Settings` and are
+All configurable settings are stored on the layout and are
 persisted with it, so they are re-applied whenever the layout is reopened. Settings
-are organised into groups — each a separate type — surfaced as sub-sections of the
+are organised into groups by purpose, surfaced as sub-sections of the
 **Settings** tab:
 
 | Group               | Purpose                                                      | Detailed in  |
@@ -264,15 +264,15 @@ Start, end, and break time define the operating time window used by the graphica
 timetable (see §3.7).
 
 The **user-interface language** is a user-level preference, chosen via the language selector
-in the top bar and persisted in the browser (localStorage) — it is not stored per layout.
+in the top bar and persisted in the browser — it is not stored per layout.
 
 #### 3.2.2 Countries
 
-> **Status:** ✅ Built (`Planning.App/Pages/CountriesTab.razor`).
+> **Status:** ✅ Built (Countries tab).
 
-Each layout keeps a curated catalogue of countries in `Layout.Countries`, saved with the layout
-so a plan is self-contained. A `Company`, a `Region` and the layout's default country all
-reference an entry here by its stable `Country.Id`.
+Each layout keeps a curated catalogue of countries, saved with the layout
+so a plan is self-contained. A company, a region and the layout's default country all
+reference an entry here.
 
 - The catalogue starts with the layout's **default country** only (added when the layout is
   created); the user adds more on the Countries tab, choosing from **all predefined countries**
@@ -285,9 +285,9 @@ Countries tab selects a subset of it into the layout.
 
 ### 3.3 Layout Operational Places
 
-> **Status:** 🟡 Partial (`Planning.App/Pages/OperationLocationsTab.razor`). Entry and editing
+> **Status:** 🟡 Partial (Operation Locations tab). Entry and editing
 > of operation locations (stations, signal-controlled and other locations), their tracks, and
-> the manned/shadow flags are built. FR-3.3.1 ModuleRegistry import is **not** built (the
+> the manned/shadow flags are built. The ModuleRegistry import (FR-3.3.1) is **not** built (the
 > API-key field exists in Settings).
 
 The user adds, edits and deletes operation locations and their station tracks, and marks each
@@ -300,12 +300,9 @@ generation (§3.4.2).
 
 ### 3.4 Track, Dispatch and Timetable Stretches
 
-> **Status:** ✅ Built (`Planning.App/Pages/StretchesTab.razor` hosting three sub-section
-> components under `Planning.App/Components/Stretches/`). The page has three sub-sections —
+> **Status:** ✅ Built (Stretches tab). The tab has three sub-sections —
 > Track, Dispatch and Timetable stretches — with the active one remembered as a user
-> preference (`UiPreferenceService`). Direction consistency is checked
-> (`Layout.DirectionInconsistencies()`) and timetable-route contiguity is enforced
-> (`TimetableStretch.CanAppend`/`IsContiguous`).
+> preference. Direction consistency is checked and timetable-route contiguity is enforced.
 
 #### FR-3.4.1 Track stretches
 
@@ -315,14 +312,14 @@ locations are chosen from the layout's operation locations, so direction is expl
 
 All track stretches are expected to run in the same direction so trains traverse them without
 unintended reversals. The editor surfaces any inconsistency (a reversed pair or a directed cycle in
-the `Start → End` graph) as a **warning** that lists the offending stretches, but does not block
+the start-to-end direction graph) as a **warning** that lists the offending stretches, but does not block
 saving. A track stretch used by a timetable stretch cannot be deleted.
 
 #### FR-3.4.2 Dispatch stretches
 
 A **dispatch stretch** runs between two dispatch endpoints — a manned or a shadow station — passing
 through any unmanned locations between them. They are generated automatically from the track
-stretches (`Layout.CreateDispatchStretches()`), recording the ordered track stretches they comprise,
+stretches, recording the ordered track stretches they comprise,
 and presented read-only with a **Regenerate** action. Whether a station is manned or a shadow station
 is set on the Operation locations tab (§3.3).
 
@@ -336,32 +333,37 @@ one graph.
 
 ### 3.5 Train Categories
 
-> **Status:** ✅ Built (`Planning.App/Pages/TrainCategoriesTab.razor`).
+> **Status:** ✅ Built (Train Categories tab).
 
-The train categories are a catalogue saved on `Timetable.TrainCategories`. The user adds, edits
+The train categories are a catalogue saved on the timetable. The user adds, edits
 and deletes categories (name, prefix, suffix, passenger/freight, colour and an optional operating
 company). A category **cannot be deleted** while any train references it.
 
 A new timetable is seeded with two standard categories, named in the layout's default language:
-**Passenger** (prefix `P`) and **Freight** (prefix `G`), with no operating company (see
-`TrainCategory.DefaultsFor`).
+**Passenger** (prefix `P`) and **Freight** (prefix `G`), with no operating company.
 
 *Still to come: import of categories from file/web API.*
 
 ### 3.6 Trains
 
-> **Status:** ❌ Missing. `Planning.App/Pages/Trains.razor` is a stub. The
-> expandable trains → calls → notes editor is not built.
-
-*To be detailed — entry and editing of trains, station calls, and call-level notes.*
+> **Status:** ✅ Built (Trains tab). A table with inline-editable rows — identity,
+> company, number, sessions, category, maximum speed, train length (axles/wagons/metres)
+> and continuation (filtered to same-category trains starting after this one ends). Each
+> row expands to a fully editable **Calls** or **Wagon groups** sub-table. Trains can be
+> added, cloned and time-shifted. Station calls carry arrival/departure checkboxes that
+> set stop vs pass-through (see DM-4.2.3). Edits are saved immediately, and deletion is
+> blocked when other data depends on the train. Rows with scheduling conflicts are
+> highlighted (§3.11).
+>
+> *Still to come: call-level note editing (the note-generation system, §4.5, is not built).*
 
 ### 3.7 Graphical Timetable
 
-> **Status:** 🟡 Partial (`Planning.Components/Scheduling/Components/GraphicalScheduleEditor.razor`,
-> `Planning.App/Pages/GraphicalTimetableTab.razor`). SVG rendering, both orientations
+> **Status:** 🟡 Partial (Graphical Timetable tab). SVG rendering, both orientations
 > (FR-3.7.1), visual styling (FR-3.7.2), all display settings (FR-3.7.3) and the
-> stretch/time-window selection (FR-3.7.5) are built. Interaction (FR-3.7.4: drag
-> times, context menu) is **not** — the click/mouse handlers are empty stubs.
+> stretch/time-window selection (FR-3.7.5) are built, and trains with scheduling
+> conflicts are highlighted (§3.11). Interaction (FR-3.7.4: drag times, context menu)
+> is **not** built yet — no train selection, time dragging or context menu.
 
 The system shall display a graphical timetable for each timetable stretch:
 
@@ -406,15 +408,14 @@ The graphical timetable shall support the following configurable display paramet
 | Show company           | Also shows train company signature before train number     |
 | Hide sessions/days     | Hide sessions/days before train number                     |
 
-The display parameters are stored on the layout as `Layout.Settings.GraphicTimetable`
+The display parameters are stored on the layout with the other Graphical Timetable settings
 and re-applied when the layout is reopened. They are user preferences that apply to
 both on-screen viewing and printing. Start, end, and break time come from the General
 settings (see §3.2).
 
 #### FR-3.7.4 Interaction
 
-> **Status:** ❌ Missing. Event handlers in `GraphicalScheduleEditor.razor` are
-> empty; no train selection, time dragging, or context menu yet.
+> **Status:** ❌ Missing. No train selection, time dragging, or context menu yet.
 
 ##### Change timing of a train or part of train
 - Click to select a train: arrival and departure times become small draggable squares
@@ -427,7 +428,7 @@ Right-click on a train to show a context menu: edit, duplicate, remove, select c
 
 #### FR-3.7.5 Stretch and Time-Window Selection
 
-> **Status:** ✅ Built (`Planning.App/Pages/GraphicalTimetableTab.razor`).
+> **Status:** ✅ Built (Graphical Timetable tab).
 
 The user shall be able to choose what part of the timetable is drawn:
 
@@ -439,21 +440,28 @@ The user shall be able to choose what part of the timetable is drawn:
   smaller screens, especially with a vertical time axis. The selector is hidden when no
   break time is set. Train lines and minute labels are clipped to the visible window.
 
-The chosen half is a **user-level preference** persisted in the browser (localStorage),
+The chosen half is a **user-level preference** persisted in the browser,
 not stored in the plan document, so it is retained across restarts and is independent of
 which layout is open.
 
 ### 3.8 Vehicle Schedule Editor
 
-> **Status:** ❌ Missing. `Planning.App/Pages/Schedules.razor` is a stub. The
-> domain mechanism (`Schedule`, `ScheduleAssignment`, `TrainPart`) exists; the
-> editor does not.
-
-*To be detailed — building vehicle schedules and assigning them to locomotives, wagons, wagon groups, and cargo flows.*
+> **Status:** 🟡 Partial (Schedules tab). The vehicle-schedule (turnus) editor is built
+> as a Gantt-style **turn chart** — rows are schedules on a shared time axis, one block
+> per train part. It supports **manual** building (new schedule, add/remove parts,
+> including partial from/to-call selection) and **automatic** building (greedy contiguity
+> chaining, skipping categories flagged as excluded from automatic scheduling). Vehicles
+> are created and assigned **session-aware** (offering only the sessions a vehicle is
+> still free), and wagonsets can be given an individual **wagon rake** (§4.2.4).
+> Conflicting schedules are highlighted (§3.11). **Not yet wired:** assigning a schedule
+> to a wagon group via an editor.
+>
+> *Naming: this is the glossary's Vehicle Schedule; this document's top-level Schedule is
+> the whole operating plan (see DM-4.4.1).*
 
 ### 3.9 Vehicle Owners
 
-> **Status:** ❌ Missing. `Planning.App/Pages/VehicleOwners.razor` is a stub.
+> **Status:** ❌ Missing. The Vehicle Owners tab is a stub.
 
 *To be detailed — managing who brings what rolling stock for the session.*
 
@@ -467,8 +475,8 @@ the on-premise dispatch applications, so the inventory is complete without the p
 ### 3.10 Automatic Time Calculation
 
 > **Status:** ❌ Missing in the UI. The §4.3.1 effective-speed and travel-time
-> formula now exists in the model (`Train.ScheduledTravelMinutes`), but no UI uses
-> it to compute and propagate call times or to lock individual times.
+> calculation exists in the model, but no screen uses it to compute and propagate
+> call times or to lock individual times.
 
 The system shall calculate travel times between station calls using:
 
@@ -484,20 +492,25 @@ with an option to lock individual times.
 
 ### 3.11 Validation
 
-> **Status:** 🟡 Partial (`Model/Validations/`, `Model/Settings/ValidationSettings.cs`).
-> Fully implemented: the Layout occupancy rules **L2–L3**, the Timetable train rules
-> **T1–T4**, the Schedule rules **S1–S3, S5**, and the Plan consistency rules
-> **P1, P3, P4**, all with FR-3.11.6 output (severity, localised message, location + time
-> range, involved trains). Missing or partial: **L1** (emergent only), the S3 multi-session
-> split/part-count case, and the partial per-session traction (**S4**) and part-coverage
-> (**P2**). The threshold `MinMinutesBetweenTrackUsage` exists in `ValidationSettings` but
-> has **no backing validation yet**. See `Documentation/Validation.md`.
+> **Status:** 🟡 Partial. Fully implemented: the Layout occupancy rules **L2–L3**, the
+> Timetable train rules **T1–T4**, the Schedule rules **S1–S3, S5**, and the Plan
+> consistency rules **P1, P3, P4**, all with FR-3.11.6 output (severity, localised
+> message, location + time range, involved trains). Missing or partial: **L1** (emergent
+> only), the S3 multi-session split/part-count case, and the partial per-session traction
+> (**S4**) and part-coverage (**P2**). A configured minimum-minutes-between-track-usage
+> threshold exists but has **no backing validation yet**. See `Documentation/Validation.md`.
+>
+> **GUI feedback.** The conflicts are surfaced in the app: a briefly debounced recompute
+> feeds a toolbar icon with a count badge and a severity-ordered list. The list is the
+> source of truth, and offending objects are highlighted inline on the **graphical
+> timetable**, the **Trains** tab and the **Schedules** turn chart. List items are
+> click-to-locate (they navigate to the owning tab). Severity is derived per error type
+> (genuine conflicts = Warning; speed and traction-coverage = Information). See
+> `Documentation/Validation feedback plan.md`.
 
 Validation rules are organised by the **model scope** they apply to, bottom-up through
-the model hierarchy — **Layout, Timetable, Schedule, Plan**. This mirrors the intended
-implementation: each scope owns its own validation extension methods
-(`extension(Layout)`, `extension(Timetable)`, `extension(Schedule)`, `extension(Plan)`),
-into which the rules below are to be moved, improved, or newly implemented.
+the model hierarchy — **Layout, Timetable, Schedule, Plan**. Each scope owns its own
+validation logic, into which the rules below are to be moved, improved, or newly implemented.
 
 Rules are numbered by scope: **L** = Layout, **T** = Timetable, **S** = Schedule,
 **P** = Plan. Two enforcement modes cut across the scopes:
@@ -516,11 +529,11 @@ is still a requirement, just not yet fully built.
 How trains occupy the physical layout. A **meet** is two trains present at the same
 operation location, or on the same track stretch, at overlapping times.
 
-| Rule | Requirement | Status | Implementation / gap |
-| ---- | ----------- | ------ | -------------------- |
+| Rule | Requirement | Status | Notes / gap |
+| ---- | ----------- | ------ | ----------- |
 | **L1** | Trains may only **meet** where there are **at least two tracks** — at an operation location or on a track stretch. A single-track location or stretch cannot host a meet. | 🟡 Emergent | Not asserted directly; follows from L2 (a meet at a single-track station forces both trains onto one track → conflict) and L3 (stretch capacity). No dedicated "a meet needs ≥2 tracks" diagnostic. |
-| **L2** | **At most one train may occupy a station track** at any time; two trains meeting must therefore stand on different tracks. | ✅ | `StationTrack.GetValidationErrors` → `StationTrackConflict` (overlapping calls, same track, different trains). Exception: calls sharing the same vehicle (e.g. a loco change) are allowed. |
-| **L3** | The number of trains **simultaneously on a track stretch** may not exceed the **number of tracks**, counting **both directions together**. Double track permits two concurrent trains (one each way, or two the same way). | ✅ | `TrackStretch.GetValidationErrors` compares passings against `TracksCount` direction-agnostically (an *i* vs *i + TracksCount* overlap test). |
+| **L2** | **At most one train may occupy a station track** at any time; two trains meeting must therefore stand on different tracks. | ✅ | Overlapping calls on the same track by different trains are flagged. Exception: calls sharing the same vehicle (e.g. a loco change) are allowed. |
+| **L3** | The number of trains **simultaneously on a track stretch** may not exceed the **number of tracks**, counting **both directions together**. Double track permits two concurrent trains (one each way, or two the same way). | ✅ | Simultaneous passings on a stretch are compared against its track count, counting both directions together. |
 
 > Layout **structural** validity — consistent track-stretch directions and contiguous
 > timetable-stretch routes — is validated on the Stretches tab (see §3.4), not here.
@@ -530,41 +543,41 @@ operation location, or on the same track stretch, at overlapping times.
 A timetable is the collection of trains on the layout; these rules validate the trains
 individually and as a set.
 
-| Rule | Requirement | Status | Implementation / gap |
-| ---- | ----------- | ------ | -------------------- |
-| **T1** | A train has **at least two station calls**. | ✅ | `CheckTrainTimeSequence` / `TrainTooFewCalls`. |
-| **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | `CheckTrainTimeSequence` + `StationCall.GetValidationErrors` (`StationCallTiming`). |
-| **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | `CheckTrainSpeed` (thresholds from `ValidationSettings`). |
-| **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | `Timetable.ValidateTrainNumbers` groups by (company, category, number) and flags any pair with overlapping sessions (`DuplicateTrainNumber`). Gated by `ValidateTrainNumbers`. |
+| Rule | Requirement | Status | Notes / gap |
+| ---- | ----------- | ------ | ----------- |
+| **T1** | A train has **at least two station calls**. | ✅ | Checked. |
+| **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | Checked. |
+| **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | Checked against the configured min/max speed thresholds. |
+| **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | Trains equal on company, category and number are flagged when any pair has overlapping sessions. Can be toggled off. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
 Each vehicle schedule (turnus) is a sequence of train parts forming a circulation.
 
-| Rule | Requirement | Status | Implementation / gap |
-| ---- | ----------- | ------ | -------------------- |
-| **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | `ValidateOverlappingParts`. |
-| **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ✅ | `Schedule.ValidateContiguity` checks each part in working order starts where the previous ended (`ScheduleNotContiguous`); applies to all vehicle types. **Skipped when the schedule's parts overlap in time** (not one vehicle's working — S1 reports that instead). Gated by `ValidateSchedules`. `Append` already enforces contiguity at entry; the check catches schedules assembled unconditionally (e.g. XPLN import). |
-| **S3** | **Circulation closure.** An all-session schedule starts and ends at the **same station**; otherwise it is split into parts that each start where the previous ended and close the loop, with **part count = sessions needed to return**, each part having a starting traction unit; parts may overlap in time. **Exemption:** a schedule whose trains are all **on demand** need not close the loop (the sequence rule S2 still applies). | ✅ | `Plan.ValidateScheduleClosure` (`ScheduleNotClosed`): a schedule that runs the whole operating period (`EffectiveSessions.CoversAllWithin`) and whose vehicle is a **traction unit** must have start == end location. On-demand schedules are exempt; a subset-session schedule is left to its complementary schedule (not yet checked — the split/part-count case is deferred). Wagons/cargo flows are not required to close ("starting traction unit"). On-demand trains are marked at import: XPLN gives a train that is the sole train of a single-train vehicle schedule *and* the sole train of a duty the on-demand session flag. Gated by `ValidateSchedules`. |
-| **S4** | A **traction unit is assigned for all of the schedule's sessions** (may be different units for different sessions/days). | 🟡 Partial | `ValidateLocomotiveCoverage` (see P4) finds coverage gaps along a train, but not **per-session** traction across the whole schedule. |
-| **S5** | When the vehicles in a schedule run **different sessions/days**, the **session combinations must be valid** — each conforming to S3. | ✅ | `Plan.ValidateSessionCombinationClosure` (`SessionCombinationNotClosed`): for a traction vehicle with **more than one** `ScheduledObject.SessionCombinations` (it works different parts on different sessions), each combination must return to its start station. A single-combination vehicle is covered by S3. On-demand combinations are exempt. Gated by `ValidateDriverDuties`. |
+| Rule | Requirement | Status | Notes / gap |
+| ---- | ----------- | ------ | ----------- |
+| **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | Checked. |
+| **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ✅ | Each part, in working order, must start where the previous ended; applies to all vehicle types. **Skipped when the schedule's parts overlap in time** (S1 reports that instead). Entry already enforces contiguity; the check catches schedules assembled unconditionally, e.g. XPLN import. Can be toggled off. |
+| **S3** | **Circulation closure.** An all-session schedule starts and ends at the **same station**; otherwise it is split into parts that each start where the previous ended and close the loop, with **part count = sessions needed to return**, each part having a starting traction unit; parts may overlap in time. **Exemption:** a schedule whose trains are all **on demand** need not close the loop (the sequence rule S2 still applies). | ✅ | A schedule that runs the whole operating period and whose vehicle is a **traction unit** must start and end at the same station. On-demand schedules are exempt; a subset-session schedule is left to its complementary schedule (not yet checked — the split/part-count case is deferred). Wagons and cargo flows are not required to close. On-demand trains are marked at import. Can be toggled off. |
+| **S4** | A **traction unit is assigned for all of the schedule's sessions** (may be different units for different sessions/days). | 🟡 Partial | The traction-coverage check (see P4) finds coverage gaps along a train, but not **per-session** traction across the whole schedule. |
+| **S5** | When the vehicles in a schedule run **different sessions/days**, the **session combinations must be valid** — each conforming to S3. | ✅ | For a traction vehicle that works different parts on different sessions (more than one session combination), each combination must return to its start station. A single-combination vehicle is covered by S3. On-demand combinations are exempt. Can be toggled off. |
 
 #### FR-3.11.4 Plan scope — cross-object consistency (P)
 
 The plan is the aggregate root; these rules span the timetable, schedules and vehicles.
 
-| Rule | Requirement | Status | Implementation / gap |
-| ---- | ----------- | ------ | -------------------- |
-| **P1** | **Referential integrity (always enforced).** No dangling references; an object that others depend on cannot be deleted; every station track referenced by a train exists in the layout. | ✅ | `DeletionRules` (`MayDelete` / `TryDelete`) + `EnsureStationHasTrack`. |
+| Rule | Requirement | Status | Notes / gap |
+| ---- | ----------- | ------ | ----------- |
+| **P1** | **Referential integrity (always enforced).** No dangling references; an object that others depend on cannot be deleted; every station track referenced by a train exists in the layout. | ✅ | Deletion rules plus a check that every station track a train uses exists in the layout. |
 | **P2** | **Every train part belongs to a schedule.** A part may appear in several schedules only for **non-overlapping sessions**; no part may be in two schedules whose sessions overlap. | 🟡 Partial | Partly served by P4 (no traction → gap) and P3 (session overlap). Not checked: that *every* part is scheduled, and the *same part* across overlapping-session schedules. |
-| **P3** | **No vehicle is double-booked** — the same vehicle is not assigned to schedules with **overlapping sessions**. | ✅ | `ValidateVehicleDoubleBooking` (bitwise session overlap). |
-| **P4** | **Traction coverage** — each train's run is covered by traction schedules **without gaps or overlaps** (a loco change at the same station is allowed). | ✅ | `ValidateLocomotiveCoverage`. Complements the per-session view in S4. |
+| **P3** | **No vehicle is double-booked** — the same vehicle is not assigned to schedules that overlap in **both** sessions **and** clock time (a vehicle cannot be in two places at once). | ✅ | Requires both session overlap **and** clock-time overlap, so a vehicle working a morning then an afternoon turn on the same day is not flagged. |
+| **P4** | **Traction coverage** — each train's run is covered by traction schedules **without gaps or overlaps** (a loco change at the same station is allowed). | ✅ | Checked. Complements the per-session view in S4. |
 
 #### FR-3.11.5 Validation Configuration
 
 All publish-blocking validations shall be **individually toggleable**. Speed thresholds
-and timing parameters shall be configurable. These settings are stored on the layout as
-`Layout.Settings.Validation` (see §3.2). The consistency rule P1 is always enforced and
+and timing parameters shall be configurable. These settings are stored on the layout with
+the other Validation settings (see §3.2). The consistency rule P1 is always enforced and
 is not toggleable.
 
 #### FR-3.11.6 Validation Output
@@ -580,11 +593,12 @@ Validation errors shall include:
 
 ### 3.12 Output and Printing
 
-> **Status:** 🟡 Partial. The report shell (FR-3.12.0, `Planning.App/Layout/PrintLayout.razor`)
-> and page-format components A4L / A4P / Card (`Planning.Components/Reporting/`)
-> exist. Of the 15 reports in FR-3.12.1–3.12.6 only **Wagon/Turnus Cards**
-> (`Planning.App/Reports/TurnusCardsReport.razor`) is built; A5 / A3L / Label
-> formats are not yet created. See per-report markers below.
+> **Status:** 🟡 Partial. The report shell (FR-3.12.0) and the A4L / A4P / Card page
+> formats exist, and a **Reports** menu selects them. Two reports are built:
+> **Wagon/Turnus Cards** (one card per vehicle × session combination) and a paginated
+> **tabular Timetable report** (A4L, one table per stretch and direction; estimate-based
+> pagination, verified in Chrome and Edge). A5 / A3L / Label formats are not yet created.
+> See per-report markers below.
 
 The system shall generate printable reports in various page formats
 (A3 landscape, A4 portrait/landscape, A5, pocket cards).
@@ -625,8 +639,8 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Wagon/Turnus Cards           | Four cards per page showing specific wagon assignments                | Card   |
 | Graphic Locomotive Schedules | Graphical time-based view of locomotive assignments across turnus     | A3L    |
 
-> **Status:** 🟡 Only **Wagon/Turnus Cards** built (`TurnusCardsReport.razor`).
-> Locomotive Schedule Cards, Trainset Schedule Cards, Graphic Locomotive Schedules ❌.
+> **Status:** 🟡 Only **Wagon/Turnus Cards** built. Locomotive Schedule Cards,
+> Trainset Schedule Cards and Graphic Locomotive Schedules ❌.
 
 #### FR-3.12.3 Timetable Displays
 
@@ -636,8 +650,11 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Graphical Timetable | Time-distance diagram per timetable stretch, filterable by days    | A3L    |
 | Train Compositions  | Detailed car assignments per train with class, number, and routing | A4L    |
 
-> **Status:** ❌ Neither report built as a *report*. (The Graphical Timetable
-> exists as an interactive editor, §3.7, but not yet as an A3L print report.)
+> **Status:** 🟡 A **tabular** timetable report is built (A4L, per stretch and direction) —
+> a Buchfahrplan-style table of times per station, distinct from the A3L stringline. The
+> **A3L graphical** Timetable report and **Train Compositions** are not built. (The
+> graphical timetable still exists as an interactive editor, §3.7, but not yet as an A3L
+> print report.)
 
 #### FR-3.12.4 Operational Lists
 
@@ -657,7 +674,7 @@ excluded from the printed output. Each report sets its own page size and orienta
 | --------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
 | Vehicle Start Infos | Where vehicles must be at session start — multiple views: overview, per owner, per station, with DCC addresses | A4     |
 
-> **Status:** ❌ Report not built. Its `DccAddress` dependency now exists (§4.4.2).
+> **Status:** ❌ Report not built. Its DCC-address dependency exists (§4.4.2).
 
 #### FR-3.12.6 Planning Analysis
 
@@ -673,7 +690,7 @@ excluded from the printed output. Each report sets its own page size and orienta
 ### 3.13 Collaboration (Future Enhancement)
 
 > **Status:** ❌ Not started. The app runs in local mode only (FR-3.13.1 storage
-> via `BrowserStorageService`); online collaborative mode (FR-3.13.2) is not built.
+> in the browser); online collaborative mode (FR-3.13.2) is not built.
 
 #### FR-3.13.1 Local Planning Mode
 
@@ -695,22 +712,19 @@ This section describes the data entities, their properties, and how they relate 
 
 ### 4.1 Layout
 
-The layout carries all configurable settings as `Layout.Settings`, grouped by purpose
+The layout carries all configurable settings, grouped by purpose
 (see §3.2).
 
 #### DM-4.1.1 Operation Locations
 
-> **Status:** ✅ Implemented (`Model/OperationLocation.cs`, `Model/Station.cs`).
-> Name, Signature, subtypes (`Station`, `SignalControlledLocation`, `OtherLocation`),
-> `IsShadow` and `Timings` present. `Owner` is on the `OperationLocation` base;
-> The region catalogue is owned by the layout (`Layout.Regions`); a `Station`'s `Regions`
-> (`IList<Region>`, alongside `IsShadow`) references a subset of it. `Region`
-> (`Model/Layouts/Region.cs`) carries a single `Name` (written in the layout's default language),
-> a `CountryId` (the country it belongs to, defaulting to the layout's default country) and a
-> background colour chosen from a fixed palette (see DM-4.5.4). The standard regions
-> (`Region.DefaultsFor`) are named in the layout's default language.
-> Operation locations, their tracks, and region assignments are edited on the **Operation Locations**
-> tab (`Pages/OperationLocationsEditor.razor`).
+> **Status:** ✅ Implemented. Name, signature, subtypes (Station, Signal-Controlled and
+> Other Location), the shadow flag and per-station timings are present, and an owner is on
+> every operation location. The region catalogue is owned by the layout; a station's
+> regions reference a subset of it. A region carries a single name (in the layout's default
+> language), the country it belongs to (defaulting to the layout's default country) and a
+> background colour chosen from a fixed palette (see DM-4.5.4). The standard regions are
+> named in the layout's default language. Operation locations, their tracks and region
+> assignments are edited on the **Operation Locations** tab.
 
 
 
@@ -725,7 +739,7 @@ The system shall support defining operation locations with:
 | Owner     | Module owner (for FREMO)                             | No       |
 | Is Shadow | Hidden yard at line end                              | No       |
 | Regions   | Regions/countries represented (shadow stations only) | No       |
-| Timings   | Per-station operational time overrides (`OperationLocation.Timings`); each value optional, inheriting the layout default when unset (see §4.3.3) | No       |
+| Timings   | Per-station operational time overrides; each value optional, inheriting the layout default when unset (see §4.3.3) | No       |
 
 Subtypes:
 
@@ -737,7 +751,7 @@ Subtypes:
 
 #### DM-4.1.2 Station Tracks
 
-> **Status:** ✅ Implemented (`Model/StationTrack.cs`) — all properties present.
+> **Status:** ✅ Implemented — all properties present.
 
 Each operation location shall have one or more tracks:
 
@@ -753,7 +767,7 @@ Each operation location shall have one or more tracks:
 
 #### DM-4.1.3 Track Stretches
 
-> **Status:** ✅ Implemented (`Model/TrackStretch.cs`).
+> **Status:** ✅ Implemented.
 
 The system shall define physical connections between operation locations:
 
@@ -768,7 +782,7 @@ The system shall define physical connections between operation locations:
 
 #### DM-4.1.4 Timetable Stretches
 
-> **Status:** ✅ Implemented (`Model/TimetableStretch.cs`).
+> **Status:** ✅ Implemented.
 
 The system shall support grouping track stretches into named lines:
 
@@ -783,20 +797,19 @@ Timetable stretches are the unit for graphical timetable display.
 
 #### DM-4.1.5 Dispatch Stretches
 
-> **Status:** ✅ Implemented (`Model/DispatchStretch.cs`).
+> **Status:** ✅ Implemented.
 
 The system shall define dispatch territories between dispatch endpoints — manned or shadow stations.
-Besides its `From`/`To` endpoints, a dispatch stretch records the ordered `Stretches` (the contiguous
-track stretches it comprises) and exposes the unmanned `IntermediateLocations` it passes through.
-`Layout.CreateDispatchStretches()` generates them by following track stretches from each endpoint,
-passing through unmanned locations.
+Besides its from/to endpoints, a dispatch stretch records the ordered, contiguous track stretches it
+comprises and exposes the unmanned locations it passes through. They are generated by following track
+stretches from each endpoint, passing through unmanned locations.
 
 #### DM-4.1.6 Companies
 
-> **Status:** ✅ Implemented (`Model/Company.cs`). A company references its country by
-> `CountryId` (an entry in `Layout.Countries`), replacing the former `CountryCode` string.
-> A company operating in several countries is added once per country of operation; in a
-> selection drop-down it shows its name followed by the country, e.g. "DB Cargo Germany".
+> **Status:** ✅ Implemented. A company references its country (an entry in the layout's
+> country catalogue). A company operating in several countries is added once per country of
+> operation; in a selection drop-down it shows its name followed by the country, e.g.
+> "DB Cargo Germany".
 
 The system shall maintain railway companies operating on the layout:
 
@@ -805,18 +818,17 @@ The system shall maintain railway companies operating on the layout:
 | ---------- | :------------- | ------------------------------------------------------------- |
 | Name       | Company name   | Can be both real and fictive companies                        |
 | Signature  | Short code     | For real companies, use the UIC-assigned code; unique per layout |
-| Country    | `CountryId`    | References a country in `Layout.Countries`; drives report language |
+| Country    | Country        | References a country in the layout's country catalogue; drives report language |
 
 #### DM-4.1.7 Country catalogue
 
-> **Status:** ✅ Implemented (`Layout.Countries`, `Model/Country.cs`).
+> **Status:** ✅ Implemented.
 
-Each layout saves the set of countries it uses in `Layout.Countries`, a curated subset of the
-predefined `Country` catalogue (stable ids 1–14 from the Module Registry plus a 101+ overflow
-range; ids are never reused). `Company.CountryId`, `Region.CountryId` and
-`IdentitySettings.DefaultCountryId` all reference an entry by `Country.Id`. `Layout.CountryById`
-resolves an id (preferring the saved catalogue, falling back to the static list);
-`Layout.EnsureCountries` keeps referenced countries present.
+Each layout saves the set of countries it uses, a curated subset of the predefined country
+catalogue (stable ids 1–14 from the Module Registry plus a 101+ overflow range; ids are never
+reused). Companies, regions and the default country all reference an entry by its id. A lookup
+resolves an id (preferring the saved catalogue, falling back to the predefined list), and
+referenced countries are kept present.
 
 ---
 
@@ -824,9 +836,9 @@ resolves an id (preferring the saved catalogue, falling back to the static list)
 
 #### DM-4.2.1 Train Definition
 
-> **Status:** ✅ Implemented (`Model/Train.cs`). Number, Category, Company,
-> Sessions and `MaxSpeed` present. Code additionally has `ContinuesAs`/
-> `ContinuesFrom` (train continuation) and `Length`, not yet described here.
+> **Status:** ✅ Implemented. Number, category, company, sessions and maximum speed are
+> present. The model also has train continuation (continues-as / continues-from) and train
+> length.
 
 The system shall support creating trains with:
 
@@ -841,10 +853,11 @@ The system shall support creating trains with:
 
 #### DM-4.2.2 Train Categories
 
-> **Status:** ✅ Implemented (`Model/TrainCategory.cs`). Prefix, Suffix,
-> IsPassenger, IsFreight, Name (Display Name), Color and `DefaultSpeed` (default
-> 100 km/h) present. The catalogue is held on `Timetable.TrainCategories`;
-> `TrainCategory.DefaultsFor(language)` provides the seeded Passenger/Freight pair.
+> **Status:** ✅ Implemented. Prefix, suffix, passenger/freight flags, display name, colour
+> and default speed are present, plus start number (the first train number offered for the
+> category — seeded 1 for Passenger, 5000 for Freight) and exclude-from-automatic-scheduling
+> (skipped by the automatic turnus builder, §3.8). The catalogue is held on the timetable,
+> seeded with the Passenger/Freight pair.
 
 The system shall support configurable train categories:
 
@@ -856,10 +869,15 @@ The system shall support configurable train categories:
 | Color                     | Display color in graphical timetable and otherwise where color makes sense        |
 | Display Name              | Name of category                                                                  |
 | Default Speed             | Default scale speed for this category (km/h); used when no per-train speed is set |
+| Start Number              | First train number offered when adding a train of this category                   |
+| Exclude from auto-scheduling | When set, the automatic turnus builder never seeds or chains this category (manual add still allowed) |
 
 #### DM-4.2.3 Station Calls
 
-> **Status:** ✅ Implemented (`Model/StationCall.cs`).
+> **Status:** ✅ Implemented. A call models **stop vs pass-through** explicitly (it is a
+> stop when it has an arrival or a departure, otherwise a pass-through). Equal
+> arrival/departure times is only an XPLN **import convention**, not the stop test. A
+> signal-controlled location (block) is always a pass-through regardless of the flags.
 
 Each train shall have an ordered sequence of station calls:
 
@@ -867,41 +885,41 @@ Each train shall have an ordered sequence of station calls:
 | Property  | Description                      |
 | ----------- | ---------------------------------- |
 | Track     | The station track used           |
-| Arrival   | Arrival time (fast-clock time)   |
-| Departure | Departure time (fast-clock time) |
+| Arrival   | Arrival time (fast-clock time); cleared to mark a departure-only or pass-through call |
+| Departure | Departure time (fast-clock time); cleared to mark an arrival-only or pass-through call |
+| Is Stop   | Whether the train stops here (it has an arrival or a departure); otherwise it passes through |
 | Notes     | Call-specific notes              |
 
 - The first arrival time on a train is the last expected show-up time for the train driver
 - The last departure time on a train is the expected ready time for the train driver
+- On the Trains tab the arrival/departure checkboxes set stop vs pass-through per call
 
 #### DM-4.2.4 Wagon Groups
 
-> **Status:** 🔴 Withdrawn. The standalone `WagonGroup` type was removed as redundant.
-> Its two real use cases are already covered: freight wagons a train couples and later
-> uncouples over a segment are a **cargo flow** (DM-4.2.5), and a wagonset running to a
-> schedule is a `TrainsetSchedule`. Listing the individual wagons that make up a wagonset —
-> including the direction-dependent ordering below — is folded into an optional feature on
-> the wagonset itself (`WagonSetOptions.WagonGroup`, a collection of `Wagon`), not a separate
-> train-level entity.
+> **Status:** ✅ Implemented. The individual wagons of a wagonset are held as an ordered
+> rake on the wagonset (present only for wagonsets), running the whole schedule the wagonset
+> is assigned to. It is edited in the vehicle editor (number of wagons + a re-sequenceable
+> wagon list) and persisted with the plan. This is distinct from the per-part wagon group on
+> a train part. Freight wagons a train couples and later uncouples over a segment are
+> modelled as a **cargo flow** (DM-4.2.5) instead.
 
-**Direction-dependent ordering** (to be built on `WagonSetOptions`): Wagon position is
-direction-dependent. A consist ordered 1-2-3-4 becomes 4-3-2-1 when the train reverses
-direction. The system must track and display the correct order based on current direction
-of travel.
+**Direction-dependent ordering:** Wagon position is direction-dependent. A consist ordered
+1-2-3-4 becomes 4-3-2-1 when the train reverses direction. A tested helper splits the
+schedule into legs and flips the order at every travel-direction change. It has **no report
+consumer yet** — the Turnus Card does not apply direction changes — and will be wired into
+whichever report needs direction-aware wagon order once one is specified.
 
 #### DM-4.2.5 Cargo Flows
 
-> **Status:** 🟢 Implemented. A cargo flow's routing is a reusable `CargoFlowOptions`
-> description (name, `Destinations` with `AndRegions`/`AndBeyond`/`AndLocalDestinations`
-> and max wagons/axles, `Origins`, `ToAllDestinations`) held in the
-> `Timetable.CargoFlowOptions` catalogue, routing to the shadow-yard `Region`s on
-> `Station` (DM-4.1.1). Each occurrence is a `CargoFlowTrainPart` on `Train.CargoFlows`
-> (from-call/to-call, position, per-occurrence shunting/couple flags) referencing a
-> description. Edited on the **Cargo flow** tab (Cargo descriptions + Cargo trains
-> sub-tabs); deletion guarded by `DeletionRules`. The destination note
-> (`CargoFlowDestinationNote`) is generated from the part; rendering it in the printed
-> reports (§4.5.4) is still pending. The XPLN importer still creates a
-> `ScheduledObject(CargoFlow)`; migrating import to the new model is a later step.
+> **Status:** 🟢 Implemented. A cargo flow's routing is a reusable description (name;
+> destinations with the and-regions / and-beyond / and-local-destinations options and max
+> wagons/axles; origins; to-all-destinations) held in a catalogue on the timetable, routing
+> to the shadow-yard regions on a station (DM-4.1.1). Each occurrence references a
+> description and records its from-call/to-call, position and per-occurrence shunting/couple
+> flags. Edited on the **Cargo flow** tab (Cargo descriptions + Cargo trains sub-tabs);
+> deletion is guarded. The destination note is generated from the occurrence; rendering it
+> in the printed reports (§4.5.4) is pending. The XPLN importer creates a cargo-flow
+> scheduled object directly; aligning it with this catalogue model is pending.
 
 The system shall support cargo flow scheduling, which is distinct from wagon/vehicle scheduling.
 A cargo flow describes the movement of cargo to specific destinations, assigned to a
@@ -929,9 +947,8 @@ but assigned to a cargo flow object instead.
 
 #### DM-4.2.6 Sessions
 
-> **Status:** ✅ Implemented (`Model/Sessions.cs`, `Model/Resources/Days`). Bit
-> patterns 1–14, predefined patterns, day mapping, And/Or/overlap, and
-> number-or-day-name display all present.
+> **Status:** ✅ Implemented. Bit patterns 1–14, predefined patterns, day mapping,
+> and/or/overlap, and number-or-day-name display all present.
 
 The system shall support 1–14 operating sessions with:
 
@@ -947,13 +964,10 @@ The system shall support 1–14 operating sessions with:
 
 #### DM-4.3.1 Multi-Point Speed Mapping
 
-> **Status:** ✅ Implemented (`Model/Settings/SpeedPoint.cs`, `TimeAndSpeedSettings.cs`,
-> `Model/Train.cs`). The three configurable points, piecewise-linear interpolation
-> (`TimeAndSpeedSettings.RealSpeedMetersPerSecond`, clamped at the ends), and the
-> effective-speed formula (`Train.EffectiveScaleSpeed`,
-> `EffectiveRealSpeedMetersPerSecond`, `ScheduledTravelMinutes`) are wired and unit-
-> tested. *Note:* applying these to recalculate call times in the UI is the separate
-> §3.10 work, still ❌.
+> **Status:** ✅ Implemented. The three configurable points, piecewise-linear
+> interpolation (clamped at the ends) and the effective-speed and travel-time calculation
+> are wired and unit-tested. *Note:* applying these to recalculate call times in the UI is
+> the separate §3.10 work, still ❌.
 
 The system shall map scale speeds (km/h) to real model speeds (m/s) using a
 three-point curve:
@@ -971,8 +985,8 @@ interpolated linearly (piecewise) between the defined points.
 The effective speed for a train on a stretch is:
 
 ```
-effectiveScaleSpeed = min(train.MaxSpeed ?? train.Category.DefaultSpeed, stretch.MaxSpeed)
-effectiveRealSpeed = interpolate(effectiveScaleSpeed, speedMapping)
+effectiveScaleSpeed = min(train max speed, or the category default; stretch max speed)
+effectiveRealSpeed  = interpolate the effective scale speed on the speed mapping
 ```
 
 A train's speed defaults to its category's default speed if not set explicitly.
@@ -988,7 +1002,7 @@ concern during the running session.
 
 #### DM-4.3.2 Fast Clock
 
-> **Status:** ✅ Implemented (`TimeAndSpeedSettings.FastClockSpeed`, default 5).
+> **Status:** ✅ Implemented (default 5×).
 
 The system shall use an expected fast clock speed (integer multiplier, e.g. 5×)
 to convert between real time and scheduled (model) time:
@@ -1001,13 +1015,11 @@ All times in station calls and timetables are in fast-clock time.
 
 #### DM-4.3.3 Station Operational Times
 
-> **Status:** ✅ Implemented (`Model/Settings/StationTimings.cs`,
-> `OperationLocation.Timings`). Per-field null-inherits-default design is in place.
+> **Status:** ✅ Implemented. The per-field, unset-inherits-default design is in place.
 
 The following real-world durations are configurable. The layout-wide defaults are
-stored as `Layout.Settings.TimeAndSpeed.StationTimings`; each station may override
-any individual value via `OperationLocation.Timings`. Overrides are per field — an
-unset (null) value inherits the layout default — so imported stations can carry only
+stored on the layout; each station may override any individual value. Overrides are per
+field — an unset value inherits the layout default — so imported stations can carry only
 the timing values that differ.
 
 
@@ -1026,15 +1038,15 @@ fastClockMinutes = realMinutes × fastClockSpeed
 Stations override these defaults to reflect their specific infrastructure
 (e.g., a large station with a long runaround track takes longer).
 
-The per-field null-inherits-default design means defaults are resolved at the point of
-use, not copied onto each station. Imports must therefore **not** materialise the layout
-defaults into `OperationLocation.Timings`: a station with no explicit value keeps `null`
-so it continues to track the layout default if that default is later changed.
+The per-field, unset-inherits-default design means defaults are resolved at the point of
+use, not copied onto each station. Imports must therefore **not** copy the layout defaults
+onto each station: a station with no explicit value stays unset, so it continues to track
+the layout default if that default is later changed.
 
 When a future import refreshes layout operational locations into an existing plan (a merge,
-rather than the current full rebuild), it must **preserve any `Timings` already set** on a
-matching location — only locations new to the plan get their timings from the import. This
-keeps user-entered per-station overrides from being overwritten on re-import.
+rather than the current full rebuild), it must **preserve any timing overrides already set**
+on a matching location — only locations new to the plan get their timings from the import.
+This keeps user-entered per-station overrides from being overwritten on re-import.
 
 ---
 
@@ -1042,9 +1054,9 @@ keeps user-entered per-station overrides from being overwritten on re-import.
 
 #### DM-4.4.1 Schedule
 
-> **Status:** ✅ Implemented as `Model/Plan.cs`. **Naming difference:** the spec's
-> top-level *Schedule* (Umlaufplan) is the code's `Plan`; the code's `Schedule`
-> type is the spec's *Vehicle Schedule* (DM-4.4.3).
+> **Status:** ✅ Implemented. **Naming difference:** in the data model this document's
+> top-level *Schedule* (Umlaufplan) is called the *plan*, and a *Vehicle Schedule*
+> (DM-4.4.3) is called simply a *schedule*.
 
 A schedule is the top-level planning artifact combining:
 
@@ -1055,9 +1067,9 @@ A schedule is the top-level planning artifact combining:
 
 #### DM-4.4.2 Vehicles
 
-> **Status:** ✅ Implemented as `Model/ScheduledObject.cs` (an `ObjectType` enum:
-> Locomotive, Trainset, Wagonset, Cargo). `DccAddress` (nullable; motorised vehicles
-> only) present, feeding the Vehicle Start Infos report (FR-3.12.5).
+> **Status:** ✅ Implemented (a vehicle is one of: Locomotive, Trainset, Wagonset, Cargo).
+> The DCC address (optional; motorised vehicles only) is present, feeding the Vehicle Start
+> Infos report (FR-3.12.5).
 
 The system shall maintain a vehicle inventory:
 
@@ -1074,14 +1086,18 @@ The system shall maintain a vehicle inventory:
 
 #### DM-4.4.3 Vehicle Schedules
 
-> **Status:** 🟡 Partial (`Model/Schedule.cs`, `ScheduleAssignment.cs`,
-> `TrainPart.cs`, `TrainPartOptions.cs`). `Schedule.Parts` is `ICollection<TrainPart>` —
-> a reusable, type-agnostic sequence assigned to a `ScheduledObject` via
-> `ScheduleAssignment` (so one schedule can be reused across locomotives, wagons and
-> cargo). The object-type-specific data lives in four nullable, combinable option
-> slots on each `TrainPart` — `TractionOptions`, `NonTractionOptions`, `CargoFlowOptions`,
-> `CargoOnlyOptions` (all deriving from `TrainPartOptions`). Assignment to **wagon
-> groups via an editor is still not wired**.
+> **Status:** 🟡 Partial. A schedule is a reusable, type-agnostic sequence of train parts
+> assigned to a vehicle (so one schedule can be reused across locomotives, wagons and
+> cargo). The object-type-specific data lives in four optional, combinable option slots on
+> each train part (traction, non-traction, cargo-flow and cargo-only). The **editor**
+> (§3.8) builds schedules manually or automatically and assigns vehicles session-aware.
+> Assignment to **wagon groups via an editor is not wired**.
+>
+> Model capabilities for the editor: an unguarded append (for XPLN import) vs a
+> guarded append (enforcing contiguity, time overlap and shared sessions); a schedule's
+> effective sessions; the unique session/day combinations a vehicle works (one turnus card
+> each, §3.12.2); operating-period coverage/complement of a session pattern; and an
+> automatic schedule builder.
 
 A vehicle schedule defines a sequence of train parts forming a circulation pattern.
 The same schedule structure is used for all assignable objects.
@@ -1115,7 +1131,7 @@ Cargo flow assignments can additionally restrict the maximum number of wagons to
 
 #### DM-4.4.4 Driver Duties
 
-> **Status:** ✅ Implemented (`Model/DriverDuty.cs`, `DriverDutyNote.cs`).
+> **Status:** ✅ Implemented.
 
 The system shall support creating driver duties:
 
@@ -1132,11 +1148,10 @@ The system shall support creating driver duties:
 
 ### 4.5 Note Structure and Localized Text
 
-> **Status:** ❌ Largely missing. Only a manual `TextCallNote` (single language
-> code) and an abstract `CallNote` with intent flags exist (`Model/CallNote.cs`,
-> `TextCallNote.cs`). The data-driven note **generation engine, the 14 note types,
-> structured markup, and destination rendering are not implemented.** See per-item
-> markers below.
+> **Status:** ❌ Largely missing. Only a manual free-text note (with a single language
+> code) and an abstract note base with intent flags exist. The data-driven note
+> **generation engine, the 14 note types, structured markup, and destination rendering are
+> not implemented.** See per-item markers below.
 
 #### DM-4.5.1 Data-Driven Note Texts
 
@@ -1170,11 +1185,11 @@ The following note types shall be generated from station call data:
 
 #### DM-4.5.3 Note Formatting
 
-Notes shall be rendered as structured markup with semantic CSS classes,
-enabling consistent styling across screen display and printed output:
+Notes shall be rendered as structured markup with semantic styling,
+enabling consistent presentation across screen display and printed output:
 
 - **Days prefix** — when a note applies only to certain sessions/days
-- **Localized action text** — from language resource files (e.g. "Connect loco" / "Lok ankuppeln")
+- **Localized action text** — from the language resources (e.g. "Connect loco" / "Lok ankuppeln")
 - **Value** — the specific vehicle, train, or destination
 - **Remark** — optional additional information
 
@@ -1200,7 +1215,7 @@ color luminance to ensure readability.
 
 #### DM-4.5.5 Manual Notes with Multi-Language Support
 
-> **Status:** 🟡 Partial. `TextCallNote` carries `Text` + a single `LanguageCode`.
+> **Status:** 🟡 Partial. A manual note carries its text and a single language code.
 > The default-text-plus-translations collection (multiple translations per note) is
 > not yet modelled.
 
@@ -1218,8 +1233,7 @@ This section describes how data is exchanged with external systems and previous 
 
 ### 5.1 Import from Previous Plans
 
-> **Status:** ✅ Implemented via JSON round-trip
-> (`Planning.App/Services/ScheduleImportService.cs`, `Pages/Import.razor`).
+> **Status:** ✅ Implemented via a JSON round-trip (Import tab).
 
 The system shall support importing reusable data from saved plans:
 
@@ -1230,9 +1244,9 @@ The system shall support importing reusable data from saved plans:
 
 ### 5.2 External Service Import
 
-> **Status:** 🟡 Partial. Train categories (`TrainCategoriesService`, CSV) and the
-> ~9,700-company dataset (`CompaniesService`, JSON) are loaded. Module/station data
-> from the ModuleRegistry API (FR-3.3.1) is **not** implemented.
+> **Status:** 🟡 Partial. Train categories (from a CSV file) and the ~9,700-company
+> dataset (from a JSON file) are loaded. Module/station data from the ModuleRegistry API
+> (FR-3.3.1) is **not** implemented.
 
 The system shall support fetching reference data via web API:
 
@@ -1242,23 +1256,22 @@ The system shall support fetching reference data via web API:
 
 ### 5.3 XPLN Import (Legacy)
 
-> **Status:** ✅ Implemented (`Importers.Xpln/`, ODS + XLSX providers).
+> **Status:** ✅ Implemented (ODS + XLSX spreadsheets).
 
 The system shall support importing complete schedules from XPLN spreadsheets
-(ODS/XLSX format) as described in the existing Importers.Xpln project.
+(ODS/XLSX format) as described by the existing XPLN importer.
 
 ### 5.4 Export
 
-> **Status:** ✅ JSON export implemented (`ScheduleExportService`, `ExportMenu.razor`).
-> The "SQLite" option in the export dialog is a disabled placeholder; SQLite is produced
-> by an external online service, not by this application (see §5.5).
+> **Status:** ✅ JSON export implemented. The "SQLite" option in the export dialog is a
+> disabled placeholder; SQLite is produced by an external online service, not by this
+> application (see §5.5).
 
 The system shall export schedules in JSON to two destinations, chosen in the export dialog:
 
 - **Save to disk** — downloads a `.json` file for backup, archival or transfer to other users.
-- **Send to Module Registry** — POSTs the plan JSON to the Module Registry API (URL and key from
-  the **Import & Export** settings; `ModuleRegistryUploadService`), where it is converted and
-  distributed as SQLite (§5.5).
+- **Send to Module Registry** — sends the plan JSON to the Module Registry API (URL and key from
+  the **Import & Export** settings), where it is converted and distributed as SQLite (§5.5).
 
 Both show a progress indicator while the plan is serialised (a large graph) and sent. The export
 dialog also lists SQLite as a disabled, "via Module Registry" placeholder.
@@ -1269,21 +1282,21 @@ dialog also lists SQLite as a disabled, "via Module Registry" placeholder.
 > [Module Registry](https://moduleregistry.azurewebsites.net).
 
 On-premise applications used at module meetings (train dispatch, station displays, etc.) consume a
-**SQLite database** rather than JSON. Producing SQLite in the browser would require the EF Core
-SQLite provider to run under WebAssembly (a heavy native build); instead the conversion is delegated
-to an online service:
+**SQLite database** rather than JSON. Producing SQLite in the browser would require the database
+engine to run inside the browser (a heavy build); instead the conversion is delegated to an online
+service:
 
 1. The planner exports the plan as JSON (§5.4) and it is uploaded to the service.
-2. The service builds a SQLite database from the JSON using the **server-side** EF Core model
-   (`Model.Databases`, which already targets SQLite), and offers it for download as a `.db` file.
+2. The service builds a SQLite database from the JSON using the **server-side** database model
+   (which already targets SQLite), and offers it for download as a database file.
 3. The service may **enrich** the database with data collected online — in particular
    **vehicle-owner submissions** (§3.9): owners register the rolling stock they will bring, which is
    added to the downloadable database so the on-premise apps have the full inventory.
 
-The downloaded `.db` is one-way (downstream) output; it is **not** re-imported into the planner,
-which continues to import only JSON and XPLN (§5.1–5.3). This keeps the WebAssembly planner light
-and reuses the tested `Model.Databases` EF mapping on the server. The in-app "SQLite" export option
-remains a placeholder until this service exists.
+The downloaded database is one-way (downstream) output; it is **not** re-imported into the planner,
+which continues to import only JSON and XPLN (§5.1–5.3). This keeps the in-browser planner light
+and reuses the tested server-side database mapping. The in-app "SQLite" export option remains a
+placeholder until this service exists.
 
 ---
 
