@@ -317,6 +317,51 @@ public class ValidationTests
         Assert.IsEmpty(errors);
     }
 
+    // --- Vehicle double-booking: same day AND overlapping time, not merely overlapping sessions ---
+
+    private static (Plan plan, ScheduledObject loco) VehicleOnTwoForwardSchedules(int secondTrainStartHour)
+    {
+        var timetable = NewTimetable();
+        var category = Category;
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00))); // 12:00-12:55
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(secondTrainStartHour, 00)));
+        var plan = Plan.Create("Test", timetable);
+        var first = plan.CreateSchedule();
+        first.Add(plan.Timetable.Trains.First(t => t.Number == 1).AsTrainPart);
+        var second = plan.CreateSchedule();
+        second.Add(plan.Timetable.Trains.First(t => t.Number == 3).AsTrainPart);
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 1, null);
+        plan.AssignVehicle(first, loco);   // all sessions
+        plan.AssignVehicle(second, loco);  // all sessions
+        return (plan, loco);
+    }
+
+    [TestMethod]
+    public void VehicleOnTwoSchedulesAtDifferentTimesIsNotDoubleBooked()
+    {
+        // Both schedules run all sessions (so sessions overlap), but the second train runs 14:00-14:55,
+        // after the first ends at 12:55 - the loco does a morning turn then an afternoon turn.
+        var (plan, _) = VehicleOnTwoForwardSchedules(secondTrainStartHour: 14);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked);
+
+        Assert.IsEmpty(errors, "Two schedules on the same day at different times are a valid roster.");
+    }
+
+    [TestMethod]
+    public void VehicleOnTwoSchedulesOverlappingInTimeIsDoubleBooked()
+    {
+        // Both schedules run a forward train at 12:00-12:55 on all sessions: the loco cannot work both.
+        var (plan, _) = VehicleOnTwoForwardSchedules(secondTrainStartHour: 12);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+    }
+
     // --- ValidationError GUI predicates: used by components to highlight the offending object ---
 
     // A duplicate-train-number conflict is a compact source of a ValidationError that involves two

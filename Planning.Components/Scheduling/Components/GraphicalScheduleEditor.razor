@@ -1,5 +1,6 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @using Tellurian.Trains.Schedules.Model
+@using Tellurian.Trains.Schedules.Model.Validations
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
 
 @if (Current is null)
@@ -72,7 +73,7 @@ else
                     {
                         @foreach (var trackLine in Current.TrainAtStationLine(s, t, stationCall))
                         {
-                            <line stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                            <line class="@ConflictCss(stationCall.Train)" stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stationCall.Train) is { } ct) { <title>@ct</title> }</line>
                         }
                     }
                 }
@@ -98,7 +99,7 @@ else
                         {
                             @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
                             {
-                                <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                                <line class="@ConflictCss(stretch.Train)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch.Train) is { } ct) { <title>@ct</title> }</line>
                             }
                         }
                     }
@@ -125,7 +126,7 @@ else
                         {
                             @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
                             {
-                                <line stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                                <line class="@ConflictCss(stretch.Train)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch.Train) is { } ct) { <title>@ct</title> }</line>
                             }
                         }
                     }
@@ -164,7 +165,15 @@ else
 {
     [Parameter] public GraphSchedule? Schedule { get; set; }
 
+    /// <summary>Validation errors for the plan; the graph highlights the trains involved in those that
+    /// touch a track it shows. Passed from the tab, sourced from the shared ValidationStateService.</summary>
+    [Parameter] public IReadOnlyList<ValidationError> Errors { get; set; } = [];
+
     GraphSchedule? Current;
+
+    // Trains drawn in this graph that are involved in a validation error touching a track shown here,
+    // mapped to the newline-joined messages shown as a hover tooltip. Rebuilt when parameters change.
+    readonly Dictionary<Train, string> _conflictTitles = [];
 
     // Unique per component instance so the <textPath> path IDs don't collide when several
     // GraphicalScheduleEditor instances render into the same document. SVG resolves href="#id"
@@ -193,7 +202,30 @@ else
     protected override void OnParametersSet()
     {
         Current = Schedule;
+        BuildConflicts();
     }
+
+    private void BuildConflicts()
+    {
+        _conflictTitles.Clear();
+        if (Current is null || Errors.Count == 0) return;
+        // Restrict to errors whose location is on this stretch, so a train is not flagged on a graph
+        // where its conflict does not occur (the same train may run on several stretches).
+        var graphTracks = Current.Stations.SelectMany(s => s.Tracks).ToList();
+        foreach (var train in Current.Trains)
+        {
+            var messages = Errors
+                .Where(e => e.Involves(train) && graphTracks.Any(t => e.Involves(t)))
+                .Select(e => e.Message.Text)
+                .Distinct()
+                .ToList();
+            if (messages.Count > 0) _conflictTitles[train] = string.Join("\n", messages);
+        }
+    }
+
+    private string? ConflictCss(Train train) => _conflictTitles.ContainsKey(train) ? "conflict" : null;
+
+    private string? ConflictTitle(Train train) => _conflictTitles.GetValueOrDefault(train);
 
     void OnClick(MouseEventArgs e)
     {

@@ -99,7 +99,10 @@ public static class ValidationExtensions
         }
 
         /// <summary>
-        /// Validates that no vehicle has overlapping schedule assignments (double-booked).
+        /// Validates that no vehicle is double-booked: assigned to two schedules that run on the same
+        /// session/day AND overlap in clock time, so the vehicle would have to be in two places at once.
+        /// Two schedules on the same day at different times (for example a morning turn and an afternoon
+        /// turn) are a normal roster and are not a conflict.
         /// </summary>
         internal IEnumerable<ValidationError> ValidateVehicleDoubleBooking()
         {
@@ -113,13 +116,24 @@ public static class ValidationExtensions
                         var a1 = assignments[i];
                         var a2 = assignments[j];
 
-                        if (a1.Sessions.Overlaps(a2.Sessions))
+                        if (a1.Sessions.Overlaps(a2.Sessions) && SchedulesOverlapInTime(a1.Schedule, a2.Schedule))
                         {
                             var message = Message.Information(Strings.VehicleIsDoubleBooked, vehicle.Designation, a1.Sessions.SessionsNumbers, a2.Sessions.SessionsNumbers);
                             yield return ValidationError.VehicleDoubleBooked(vehicle, a1, a2, message);
                         }
                     }
                 }
+            }
+
+            // Two schedules overlap in time when any part of one runs at the same clock time as any part
+            // of the other (the standard half-open interval overlap used throughout these validations).
+            static bool SchedulesOverlapInTime(Schedule s1, Schedule s2)
+            {
+                foreach (var p1 in s1.Parts)
+                    foreach (var p2 in s2.Parts)
+                        if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
+                            return true;
+                return false;
             }
         }
 

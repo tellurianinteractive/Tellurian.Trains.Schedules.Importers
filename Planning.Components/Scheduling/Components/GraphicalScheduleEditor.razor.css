@@ -90,3 +90,10 @@
     font-weight: bold;
     text-anchor: middle;
 }
+
+/* A train line involved in a validation conflict: an amber glow around its own coloured line so it
+   reads as highlighted without hiding the category colour. Hovering shows the message via <title>. */
+.conflict {
+    filter: drop-shadow(0 0 2.5px #f5c518) drop-shadow(0 0 2.5px #f5c518);
+    cursor: help;
+}
