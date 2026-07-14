@@ -4,9 +4,9 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 
-@* Edits a vehicle already on a schedule: its identity (type, external id, class, number, company) and
-   the sessions/days its assignment covers on this schedule. The external id is a display override — when
-   left blank the vehicle is shown as its company signature, class and number instead. *@
+@* Edits a vehicle already on a schedule: its identity (type, external id, class, number, company),
+   an optional remark, and the sessions/days its assignment covers on this schedule. The external id is a
+   display override — when left blank the vehicle is shown as its company signature, class and number instead. *@
 
 @if (Plan is not null)
 {
@@ -35,10 +35,6 @@
                     </select>
                 </div>
             }
-            <div class="field">
-                <label>@Translator("ExternalId")</label>
-                <input type="text" value="@_externalId" @onchange="e => _externalId = e.Value?.ToString() ?? string.Empty" />
-            </div>
             <div class="field">
                 <label>@Translator("Class")</label>
                 <input type="text" value="@_class" @onchange="e => _class = e.Value?.ToString() ?? string.Empty" />
@@ -111,6 +107,14 @@
                     }
                 </select>
             </div>
+            <div class="field">
+                <label>@Translator("Remark")</label>
+                <input type="text" value="@_remark" @onchange="e => _remark = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="field">
+                <label>@Translator("ExternalId")</label>
+                <input type="text" value="@_externalId" @onchange="e => _externalId = e.Value?.ToString() ?? string.Empty" />
+            </div>
 
             <div class="actions">
                 <button class="primary" @onclick="Save">@Translator("Save")</button>
@@ -151,6 +155,7 @@
 
     private string _type = ScheduledObjectType.Locomotive.ToString();
     private string _externalId = "";
+    private string _remark = "";
     private string _class = "";
     private int _number;
     private int? _companyId;
@@ -174,6 +179,7 @@
     {
         _type = Vehicle.ObjectType.ToString();
         _externalId = Vehicle.ExternalId ?? "";
+        _remark = Vehicle.Remark ?? "";
         _class = Vehicle.Class;
         _number = Vehicle.Number;
         _companyId = Vehicle.CompanyId;
@@ -230,6 +236,7 @@
         var type = Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
         plan.UpdateVehicle(Vehicle, type, _externalId, _class, _number, company, _tractionType, EffectiveNumberOfUnits);
+        Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)
         {

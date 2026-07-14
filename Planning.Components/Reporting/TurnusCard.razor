@@ -9,21 +9,22 @@
         </svg>
         <div class="content">
             <div class="schedule header">
-                <div><strong>@Item.CompanyNameOrEmpty</strong> @Item.ObjectTypeName(Translator)</div>
-                <div><strong>@Item.TurnusId</strong></div>
+                <div>@Item.ObjectTypeName(Translator)</div>
+                <div><strong>@Item.Display</strong></div>
                 @{
                     var operatingPeriod = Item.OperatingPeriod(Translator);
+                }
+                @if (Item.HasClass)
+                {
+                    <div>
+                        <span>@Item.ClassOrContentLabel(Translator):&nbsp;<strong>@Item.Class</strong></span>
+                    </div>
                 }
                 @if (operatingPeriod.Length > 0)
                 {
                     <div>@Item.OperatingPeriodLabel(Translator):&nbsp;<strong>@operatingPeriod</strong></div>
                 }
-                @if (Item.HasClass)
-                {
-                    <div>
-                        <span>@Item.ClassOrContentLabel(Translator):&nbsp;<strong>@Item.ClassAndNumber</strong></span>
-                    </div>
-                }
+                
             </div>
             <div>
                 @Item.Remark

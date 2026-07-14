@@ -1,14 +1,15 @@
 
-using Tellurian.Localization;
-using Tellurian.Trains.Schedules.Model;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
+using Tellurian.Utilities;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting;
 
 public record TurnusData
 {
+    /// <summary>The vehicle's unique id, used as a last-resort card identity when it has neither a turnus number nor an external id.</summary>
+    public int Id { get; init; }
     public ScheduledObjectType ScheduledObjectType { get; init; }
-    public string CompanyName { get; init; } = string.Empty;
+    public string Company { get; init; } = string.Empty;
     public string Class { get; init; } = string.Empty;
     public int Number { get; init; }
     public string ExternalId { get; init; } = string.Empty;
@@ -26,25 +27,18 @@ public record TurnusData
     /// <summary>The number of sessions/days in the operating period, used to tell a whole-period card from a partial one.</summary>
     public int MaxSessions { get; init; } = 14;
 
-    /// <summary>The turnus number, or the vehicle's external id when the number is 0 (no turnus number in XPLN).</summary>
-    public string TurnusId => Number > 0 ? Number.ToString() : ExternalId;
 }
 
 public static class TurnusDataExtensions
 {
     extension(TurnusData data)
     {
-        public string ClassAndNumber =>
-            data.Number > 0 ? $"{data.Class} {data.Number}" : string.Empty;
-
+        public string Key => data.ExternalId.HasValue ? $"{data.ExternalId}-{data.ScheduledObjectType}" : $"{data.Company}-{data.Class}-{data.Number}-{data.ScheduledObjectType}";
+        public string Display => data.ExternalId.HasValue ? data.ExternalId : data.Number > 0 ? $"{data.Company} {data.Number:D2}" : $"{data.Company}";
         public bool HasClass => data.Class.HasValue && data.ExternalId.IsEmpty;
 
         public string ClassOrContentLabel(Translator translator) =>
             data.ScheduledObjectType == ScheduledObjectType.Cargo ? translator("Content") : translator("Class");
-
-        public string CompanyNameOrEmpty =>
-            data.ExternalId.HasValue ? string.Empty : data.CompanyName;
-
         public string CrossLineColor => data.ScheduledObjectType switch
         {
             ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset => "#ffc0cb",
@@ -53,16 +47,13 @@ public static class TurnusDataExtensions
             _ => "#cccccc"
         };
 
-        /// <summary>Turnus identity without sessions: external id for XPLN, else company.number.</summary>
-        public string Key => data.Number == 0 ? data.ExternalId : $"{data.CompanyName}.{data.Number:D3}";
-
         /// <summary>
         /// Full card identity: <see cref="Key"/> plus the operating sessions. The sessions are always part of
         /// the identity — a vehicle that works several distinct session/day combinations (e.g. a daily working
         /// on Sat-Sun and a fuller working on Mo-Fr) yields one card per combination, and they must not merge
         /// even when there is no turnus number (<see cref="TurnusData.Number"/> 0).
         /// </summary>
-        public string KeyWithSession => data.Number == 0 ? $"{data.ExternalId}.{data.Sessions}" : $"{data.CompanyName}.{data.Number:D3}.{data.Sessions}";
+        public string KeyWithSession => $"{data.Key}.{data.Sessions}";
 
         public string ObjectTypeName(Translator translator) => translator(data.ScheduledObjectType.ToString());
 
@@ -102,54 +93,52 @@ public static class TurnusDataExtensions
         /// <param name="startDay">The first weekday of the operating week, used to name the operating days.</param>
         public IEnumerable<TurnusData> ToTurnusData(bool useDays, int maxSessions, DayOfWeek startDay)
         {
-                // One row per (vehicle, session/day combination); each row carries the parts worked on it.
-                var rows = items.Where(i => i.HasTurnusCard)
-                    .SelectMany(scheduledObject => scheduledObject.SessionCombinations(useDays, maxSessions)
-                        .Select(combination => new TurnusData
-                        {
-                            ScheduledObjectType = scheduledObject.ObjectType,
-                            CompanyName = scheduledObject.Company?.DisplayName ?? string.Empty,
-                            Class = scheduledObject.Class,
-                            // The turnus number is carried by the assignment that covers these sessions; a
-                            // combination is drawn from a single assignment in practice.
-                            Number = scheduledObject.ScheduleAssignments
-                                .Where(a => a.Sessions.Overlaps(combination.Sessions))
-                                .Select(a => a.Number)
-                                .FirstOrDefault(),
-                            ExternalId = scheduledObject.ExternalId ?? string.Empty,
-                            Sessions = combination.Sessions,
-                            StartDay = startDay,
-                            UseDays = useDays,
-                            MaxSessions = maxSessions,
-                            // Suppress a remark that only repeats the turnus (the external id), e.g. an
-                            // imported wagonset whose remark is a copy of its identifier.
-                            Remark = string.Equals(scheduledObject.Remark, scheduledObject.ExternalId, StringComparison.Ordinal)
-                                ? string.Empty
-                                : scheduledObject.Remark ?? string.Empty,
-                            TrainParts = combination.Parts,
-                        }));
-
-                // One card per full identity (KeyWithSession); merge any rows that share it (e.g. several
-                // vehicles forming one turnus).
-                var cards = rows
-                    .GroupBy(row => row.KeyWithSession)
-                    .Select(group => group.First() with
+            // One row per (vehicle, session/day combination); each row carries the parts worked on it.
+            var rows = items.Where(i => i.HasTurnusCard)
+                .SelectMany(scheduledObject => scheduledObject.SessionCombinations(useDays, maxSessions)
+                    .Select(combination => new TurnusData
                     {
-                        TrainParts = [.. group
+                        Id = scheduledObject.Id,
+                        ScheduledObjectType = scheduledObject.ObjectType,
+                        Company = scheduledObject.Company?.Signature ?? string.Empty,
+                        Class = scheduledObject.Class,
+                        // The turnus number is carried by the assignment that covers these sessions; a
+                        // combination is drawn from a single assignment in practice.
+                        Number = scheduledObject.Number,
+                        ExternalId = scheduledObject.ExternalId ?? string.Empty,
+                        Sessions = combination.Sessions,
+                        StartDay = startDay,
+                        UseDays = useDays,
+                        MaxSessions = maxSessions,
+                        // Suppress a remark that only repeats the turnus (the external id), e.g. an
+                        // imported wagonset whose remark is a copy of its identifier.
+                        Remark = scheduledObject.Remark.EqualsCaseInsensitive(scheduledObject.ExternalId)
+                            ? string.Empty
+                            : scheduledObject.Remark ?? string.Empty,
+                        TrainParts = combination.Parts,
+                    }));
+
+            // One card per full identity (KeyWithSession); merge any rows that share it (e.g. several
+            // vehicles forming one turnus).
+            var cards = rows
+                .GroupBy(row => row.KeyWithSession)
+                .Select(group => group.First() with
+                {
+                    TrainParts = [.. group
                             .SelectMany(row => row.TrainParts)
                             .Distinct()
                             .OrderBy(part => part.Departure?.Value)],
-                    })
-                    .ToList();
+                })
+                .ToList();
 
-                // A turnus (Key, ignoring sessions) running on more than one session set turns over.
-                var sessionVariants = cards
-                    .GroupBy(card => card.Key)
-                    .ToDictionary(group => group.Key, group => group.Count());
+            // A turnus (Key, ignoring sessions) running on more than one session set turns over.
+            var sessionVariants = cards
+                .GroupBy(card => card.Key)
+                .ToDictionary(group => group.Key, group => group.Count());
 
-                return [.. cards
+            return [.. cards
                     .Select(card => card with { TurnForNextSession = sessionVariants[card.Key] > 1 })
                     .OrderBy(card => card.KeyWithSession)];
-            }
         }
     }
+}

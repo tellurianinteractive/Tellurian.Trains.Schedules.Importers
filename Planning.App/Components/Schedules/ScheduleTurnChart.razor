@@ -29,7 +29,8 @@ else
                     <div class="vehicles">
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
-                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null)" title="@Translator(vehicle.ObjectType.ToString())">
+                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null)" style="border-color:@vehicle.BorderColor"
+                                  title="@Translator(vehicle.ObjectType.ToString())">
                                 @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {

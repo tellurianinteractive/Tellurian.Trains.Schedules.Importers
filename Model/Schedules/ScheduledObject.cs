@@ -143,7 +143,7 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
         get
         {
             var number = Number.ToString("D2");
-            var @class = string.IsNullOrWhiteSpace(Class) ? number : $"{Class} {number}";
+            var @class = string.IsNullOrWhiteSpace(Class) ? number : $"{number} {Class} ";
             return $"{Company?.Signature} {@class}".Trim();
         }
     }
@@ -182,6 +182,37 @@ public static class ScheduledObjectExtensions
 {
     extension(ScheduledObject scheduledObject)
     {
+        /// <summary>
+        /// Color of the vehicle border
+        /// </summary>
+        public string BorderColor => scheduledObject.ObjectType switch
+        {
+            // Distinguishable darker red colours. The hue identifies the traction type (shared with the
+            // lighter trainset shades below); the darker lightness marks it as a locomotive.
+            ScheduledObjectType.Locomotive => scheduledObject.TractionType switch
+            {
+                TractionType.Electric => "hsl(345, 65%, 38%)",
+                TractionType.Diesel => "hsl(15, 60%, 38%)",
+                TractionType.Steam => "hsl(0, 55%, 32%)",
+                TractionType.Dual => "hsl(320, 55%, 38%)",
+                TractionType.Battery => "hsl(28, 60%, 40%)",
+                _ => "gray"
+            },
+            // Distinguishable lighter red colours. Same hue per traction type as the locomotive shades
+            // above, but lighter to mark it as a trainset.
+            ScheduledObjectType.Trainset => scheduledObject.TractionType switch
+            {
+                TractionType.Electric => "hsl(345, 70%, 68%)",
+                TractionType.Diesel => "hsl(15, 68%, 68%)",
+                TractionType.Steam => "hsl(0, 60%, 70%)",
+                TractionType.Dual => "hsl(320, 58%, 72%)",
+                TractionType.Battery => "hsl(28, 65%, 68%)",
+                _ => "gray"
+            },
+            ScheduledObjectType.Wagonset => "green",
+            ScheduledObjectType.Cargo => "yellow",
+            _ => "gray"
+        };
         /// <summary>
         /// True if <see cref="ScheduledObject"/> is a traction unit.
         /// </summary>
