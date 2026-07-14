@@ -64,3 +64,19 @@ The importers perform extensive validation in two phases:
 ### Language Support
 Validation messages are available in English, German, Danish, Norwegian, and Swedish.
 See the [Model README](Model/README.md#validation) for details on all validation checks.
+
+## Development
+
+### Line endings
+This repository uses **LF** line endings for all text files. This is enforced by two
+committed files, so it applies to everyone regardless of platform:
+
+- [`.gitattributes`](.gitattributes) — normalises files to LF in the repository.
+- [`.editorconfig`](.editorconfig) — tells your editor/IDE to save files with LF.
+
+Because both agree, no conversion happens and no warnings appear. To be safe on Windows,
+you can also disable Git's automatic conversion once per machine:
+
+```bash
+git config --global core.autocrlf false
+```
