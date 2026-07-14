@@ -77,6 +77,13 @@
         white-space: nowrap;
     }
 
+    /* A chip whose label is the raw external id (e.g. as imported): light yellow flags that it is worth
+       editing into a tidy company/class/number designation. A composed designation keeps the plain chip. */
+    .chip.external-id {
+        background: #fff8c5;
+        border-color: #e6d878;
+    }
+
     /* Sessions/days a partly-booked assignment covers, shown after the vehicle id on its chip. */
     .chip .sessions {
         font-weight: 400;
@@ -150,8 +157,9 @@
         opacity: 0.6;
     }
 
-    /* Small inline remove control on chips and part blocks. */
-    .x {
+    /* Small inline edit / remove controls on chips and part blocks. */
+    .x,
+    .edit {
         border: none;
         background: transparent;
         color: inherit;
@@ -163,7 +171,8 @@
         border-radius: 3px;
     }
 
-    .x:hover {
+    .x:hover,
+    .edit:hover {
         opacity: 1;
         background: rgba(0, 0, 0, 0.12);
     }

@@ -5,7 +5,6 @@ using System.Globalization;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
-using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Model.Databases.Tests;
 
@@ -178,7 +177,7 @@ public class ScheduleDbContextIntegrationTests
         var part = train.AsTrainPart(0, 1);
         part.Id = 1;
         part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true };
-        part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3, WagonGroup = { new Wagon(1, "Gbs") { Number = "1234" } } };
+        part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3 };
         part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
 
         // Act
@@ -191,7 +190,7 @@ public class ScheduleDbContextIntegrationTests
 
         var loaded = await context.TrainParts
             .OfType<ScheduledTrainPart>()
-            .Include(p => p.WagonSetOptions!).ThenInclude(n => n.WagonGroup)
+            .Include(p => p.WagonSetOptions!)
             .FirstAsync(CancellationToken);
 
         // Assert - each option kind persisted and read back from SQLite
@@ -202,13 +201,46 @@ public class ScheduleDbContextIntegrationTests
 
         Assert.IsNotNull(loaded.WagonSetOptions, "NonTractionOptions");
         Assert.AreEqual(3, loaded.WagonSetOptions!.OrderInTrain);
-        Assert.AreEqual(1, loaded.WagonSetOptions.WagonGroup.Count);
-        Assert.AreEqual("Gbs", loaded.WagonSetOptions.WagonGroup.First().Class);
-        Assert.AreEqual("1234", loaded.WagonSetOptions.WagonGroup.First().Number);
 
         Assert.IsNotNull(loaded.CargoOnlyOptions, "CargoOnlyOptions");
         Assert.AreEqual("Coal", loaded.CargoOnlyOptions!.CargoName);
         Assert.IsTrue(loaded.CargoOnlyOptions.Load, "Load is computed from HasCoupleNote");
+    }
+
+    [TestMethod]
+    public async Task RoundTripsWagonsetWagons()
+    {
+        var options = new DbContextOptionsBuilder<ScheduleDbContext>()
+            .UseSqlite("DataSource=:memory:")
+            .Options;
+
+        await using var context = new ScheduleDbContext(options);
+        await context.Database.OpenConnectionAsync(CancellationToken);
+        await context.Database.EnsureCreatedAsync(CancellationToken);
+
+        var layout = new Layout { Id = 1, Name = "L" };
+        var timetable = new Timetable("T", layout);
+        var plan = new Plan("P", timetable) { Id = 1 };
+        var wagonset = new ScheduledObject(1, ScheduledObjectType.Wagonset, 1) { PlanId = plan.Id, Plan = plan };
+        wagonset.AddWagon("Gbs", "1234", isCargo: true);
+        wagonset.AddWagon("Habis", isCargo: true);
+        plan.ScheduledObjects.Add(wagonset);
+
+        // Act
+        context.Plans.Add(plan);
+        await context.SaveChangesAsync(CancellationToken);
+        context.ChangeTracker.Clear();
+
+        var loaded = await context.ScheduledObjects
+            .Include(e => e.Units)
+            .FirstAsync(e => e.ObjectType == ScheduledObjectType.Wagonset, CancellationToken);
+
+        // Assert - the ordered rake persisted and read back from its own table
+        var wagons = loaded.Units.OrderBy(w => w.Position).ToList();
+        Assert.HasCount(2, wagons);
+        Assert.AreEqual("Gbs", wagons[0].Class);
+        Assert.AreEqual("1234", wagons[0].Number);
+        Assert.AreEqual(2, wagons[1].Position);
     }
 
     [TestMethod]

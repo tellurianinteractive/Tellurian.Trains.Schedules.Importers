@@ -32,20 +32,24 @@ else
 @code {
     // Vehicle schedules (turnus) of the current plan, in display order. Cargo-flow schedules are the
     // circulation of freight consignments, not of a turning vehicle, so they are left out of the turn
-    // chart (they remain available as turnus cards in the reports). A newly created schedule has no
-    // number yet (Number 0); these are shown first, newest at the top, so a just-added schedule is
-    // obvious. Numbered schedules then follow in ascending number order.
-    private IReadOnlyList<Schedule> Schedules
-    {
-        get
-        {
-            if (ScheduleState.Schedule?.Schedules is not { } schedules) return [];
-            var visible = schedules.Where(s => !s.IsCargoFlow).ToList();
-            var unnumbered = visible.Where(s => s.Number == 0).OrderByDescending(s => s.Id);
-            var numbered = visible.Where(s => s.Number != 0).OrderBy(s => s.Number);
-            return [.. unnumbered, .. numbered];
-        }
-    }
+    // chart (they remain available as turnus cards in the reports). Schedules read alphabetically by the
+    // vehicle label shown in their first column, then by their operating sessions/days (see
+    // Sessions.SortOrder), then by number/id for a stable order. A newly created schedule has no vehicle
+    // yet, so its blank label sorts it to the top where it is easy to find.
+    private IReadOnlyList<Schedule> Schedules =>
+        ScheduleState.Schedule?.Schedules is not { } schedules
+            ? []
+            : [.. schedules
+                .Where(s => !s.IsCargoFlow)
+                .OrderBy(VehicleKey, StringComparer.CurrentCulture)
+                .ThenBy(s => s.EffectiveSessions.SortOrder)
+                .ThenBy(s => s.Number)
+                .ThenBy(s => s.Id)];
+
+    // The vehicle label a schedule shows in its first column: the assigned vehicles' designations in the
+    // order they are listed, joined. Empty for an unassigned (e.g. just-created) schedule.
+    private static string VehicleKey(Schedule schedule) =>
+        string.Join(" ", schedule.Vehicles.Select(v => v.Designation));
 
     // The turn-chart blocks format each train identity the same way the graphical timetable does
     // (category prefix, company signature, sessions/days), taken from the layout's settings.

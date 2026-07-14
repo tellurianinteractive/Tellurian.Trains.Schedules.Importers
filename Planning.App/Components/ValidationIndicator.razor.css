@@ -94,6 +94,11 @@
                 border-left: 0.25rem solid transparent;
                 font-size: 0.9rem;
                 line-height: 1.35;
+                cursor: pointer;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.05);
+                }
 
                 & + .conflict {
                     border-top: 1px solid rgba(0, 0, 0, 0.06);
@@ -117,5 +122,6 @@
         .panel-header { border-bottom-color: rgba(255, 255, 255, 0.12); }
         .empty { color: #b3b3b3; }
         .conflict-list .conflict + .conflict { border-top-color: rgba(255, 255, 255, 0.08); }
+        .conflict-list .conflict:hover { background: rgba(255, 255, 255, 0.08); }
     }
 }

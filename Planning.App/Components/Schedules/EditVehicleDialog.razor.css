@@ -1,0 +1,134 @@
+.edit-vehicle-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+
+    .edit-vehicle-dialog {
+        --primary: #1a3a5c;
+        --border: #ddd;
+        min-width: 24rem;
+        max-width: 90vw;
+        padding: 1.25rem 1.5rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        font-size: 0.9rem;
+
+        h3 {
+            margin: 0 0 1rem 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .field {
+            display: grid;
+            grid-template-columns: 7rem 1fr;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .field > label {
+            color: #556;
+        }
+
+        input,
+        select {
+            font-size: 0.85rem;
+            padding: 0.2rem 0.35rem;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            background: #fff;
+        }
+
+        input.num {
+            width: 6rem;
+        }
+
+        .field.wagons {
+            align-items: start;
+        }
+
+        .wagon-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .wagon-row {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .wagon-row .pos {
+            width: 1.2rem;
+            text-align: right;
+            color: #889;
+            font-size: 0.8rem;
+        }
+
+        .wagon-row .wagon-class {
+            width: 5rem;
+        }
+
+        .wagon-row .wagon-number {
+            width: 5rem;
+        }
+
+        .wagon-row .wagon-kind {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.15rem;
+            font-size: 0.8rem;
+            color: #556;
+        }
+
+        .wagon-row button.move,
+        .wagon-row button.remove {
+            padding: 0.15rem 0.35rem;
+            font-size: 0.8rem;
+        }
+
+        .add-wagon {
+            align-self: flex-start;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 0.35rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: #ececec;
+        }
+
+        button.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #234a73;
+        }
+    }
+}

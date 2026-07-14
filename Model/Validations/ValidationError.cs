@@ -57,9 +57,25 @@ public sealed record ValidationError
     public bool IsStretchConflict => !FromTrack.Equals(ToTrack);
 
     /// <summary>
-    /// The severity of the error, taken from its <see cref="Message"/>.
+    /// The severity of the error, derived from its <see cref="ErrorType"/>. Centralised in
+    /// <see cref="SeverityOf"/> so the GUI's colour-coding (and the toolbar icon) classifies each kind of
+    /// conflict in one place.
     /// </summary>
-    public Severity Severity => Message.Severity;
+    public Severity Severity => SeverityOf(ErrorType);
+
+    /// <summary>
+    /// Classifies a validation error type by severity. Genuine planning conflicts that must be resolved
+    /// before publishing are warnings; advisory findings (speed heuristics, incomplete locomotive
+    /// coverage) are informational. Adjust the split here.
+    /// </summary>
+    public static Severity SeverityOf(ValidationErrorType errorType) => errorType switch
+    {
+        ValidationErrorType.TrainSpeedTooSlow or
+        ValidationErrorType.TrainSpeedTooFast or
+        ValidationErrorType.LocomotiveCoverageGap or
+        ValidationErrorType.LocomotiveCoverageOverlap => Severity.Information,
+        _ => Severity.Warning,
+    };
 
     /// <summary>
     /// Determines whether the given train is one of the trains involved in this conflict.

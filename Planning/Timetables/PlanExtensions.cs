@@ -608,7 +608,7 @@ public static class PlanExtensions
         }
 
         // The single track stretch joining two locations, in either orientation; null when none exists.
-        private TrackStretch? StretchBetween(OperationLocation a, OperationLocation b) =>
+        internal TrackStretch? StretchBetween(OperationLocation a, OperationLocation b) =>
             plan.Layout.TrackStretches.FirstOrDefault(s =>
                 (s.Start.Equals(a) && s.End.Equals(b)) || (s.Start.Equals(b) && s.End.Equals(a)));
 

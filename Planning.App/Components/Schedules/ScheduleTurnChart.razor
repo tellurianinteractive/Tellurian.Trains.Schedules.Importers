@@ -29,12 +29,14 @@ else
                     <div class="vehicles">
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
-                            <span class="chip" title="@Translator(vehicle.ObjectType.ToString())">
+                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null)" title="@Translator(vehicle.ObjectType.ToString())">
                                 @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
                                     <span class="sessions">@SessionsDisplay.Text(assignment.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
                                 }
+                                <button class="edit" title="@Translator("EditVehicle")"
+                                        @onclick="() => _editTarget = (schedule, vehicle, assignment)"><i class="fa-solid fa-pen"></i></button>
                                 <button class="x" title="@Translator("RemoveVehicle")"
                                         @onclick="() => RemoveVehicle(assignment)"><i class="fa-solid fa-xmark"></i></button>
                             </span>
@@ -104,6 +106,12 @@ else
                          OnAssigned="() => _assignTarget = null"
                          OnClosed="() => _assignTarget = null" />
 }
+@if (_editTarget is { } editTarget)
+{
+    <EditVehicleDialog Schedule="editTarget.Schedule" Vehicle="editTarget.Vehicle" Assignment="editTarget.Assignment"
+                       OnSaved="() => _editTarget = null"
+                       OnClosed="() => _editTarget = null" />
+}
 
 @code {
     /// <summary>The vehicle schedules to chart, in the order they should appear (top to bottom).</summary>
@@ -126,6 +134,7 @@ else
     private Schedule? _addPartTarget;
     private Schedule? _assignTarget;
     private Schedule? _deleteTarget;
+    private (Schedule Schedule, ScheduledObject Vehicle, ScheduleAssignment Assignment)? _editTarget;
 
     // The validation messages for errors that involve any train worked in this schedule, joined for a
     // hover tooltip; null when the working is clean. Covers schedule-level errors (not closed, not

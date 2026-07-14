@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -205,6 +206,32 @@ public static class SessionsExtensions
         /// True if only one session.
         /// </summary>
         public bool IsSingleSessionOrDay => sessions.Numbers.Length == 1;
+
+        /// <summary>
+        /// A single integer that orders session/day patterns for display. Patterns starting earlier in the
+        /// operating period sort first, and among those starting on the same session/day the one covering
+        /// more sessions/days sorts first (so a schedule running every session leads its variants). An
+        /// empty (<c>None</c>) pattern sorts last. The value compares meaningfully within one kind — a
+        /// layout is either day- or session-based throughout — and day patterns compare consistently
+        /// however they were built, because a day's mirrored upper bit scales in step with its in-week
+        /// bit. Keeping the order in one place makes it easy to refine later.
+        /// </summary>
+        public int SortOrder
+        {
+            get
+            {
+                // Mask off the two marker bits (on-demand, days); the low fourteen bits — a session
+                // pattern's sessions, or a day pattern's in-week days mirrored into the upper seven — drive
+                // the order. Day patterns therefore rank identically whether or not the days marker is set.
+                var bits = (ushort)(sessions.Flags & 0b00_1111111_1111111);
+                if (bits == 0) return int.MaxValue;
+                var first = BitOperations.TrailingZeroCount(bits);
+                var count = BitOperations.PopCount(bits);
+                // first * 16 keeps each start bucket clear of the next (count is at most 14); within a
+                // bucket, (14 - count) puts the broader pattern first.
+                return first * 16 + (14 - count);
+            }
+        }
 
 
         /// <summary>

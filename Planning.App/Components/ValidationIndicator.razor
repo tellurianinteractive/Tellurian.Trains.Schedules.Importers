@@ -1,5 +1,6 @@
 @using Tellurian.Trains.Schedules.Model.Validations
 @inject ValidationStateService Validation
+@inject NavigationManager Nav
 @inject Translator Translator
 @implements IDisposable
 
@@ -29,7 +30,7 @@
                 <ul class="conflict-list">
                     @foreach (var error in Ordered)
                     {
-                        <li class="conflict @SeverityClass(error.Severity)">@error.Message.Text</li>
+                        <li class="conflict @SeverityClass(error.Severity)" @onclick="() => GoTo(error)">@error.Message.Text</li>
                     }
                 </ul>
             }
@@ -66,6 +67,32 @@
     private void Toggle() => _open = !_open;
 
     private void Close() => _open = false;
+
+    // Jump to the tab where this kind of conflict is edited (and highlighted), then close the panel.
+    private void GoTo(ValidationError error)
+    {
+        _open = false;
+        Nav.NavigateTo(RouteFor(error.ErrorType));
+    }
+
+    private static string RouteFor(ValidationErrorType type) => type switch
+    {
+        ValidationErrorType.VehicleScheduleOverlap or
+        ValidationErrorType.VehicleDoubleBooked or
+        ValidationErrorType.ScheduleNotContiguous or
+        ValidationErrorType.ScheduleNotClosed or
+        ValidationErrorType.SessionCombinationNotClosed or
+        ValidationErrorType.LocomotiveCoverageGap or
+        ValidationErrorType.LocomotiveCoverageOverlap => "schedules",
+
+        ValidationErrorType.StationTrackConflict or
+        ValidationErrorType.TrackStretchConflict or
+        ValidationErrorType.TrainSpeedTooSlow or
+        ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",
+
+        // TrainTimeSequence, StationCallTiming, TrainTooFewCalls, MissingTrackReference, DuplicateTrainNumber
+        _ => "trains",
+    };
 
     private void OnChanged() => InvokeAsync(StateHasChanged);
 

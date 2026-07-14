@@ -418,10 +418,14 @@ public class ValidationTests
     }
 
     [TestMethod]
-    public void SeverityIsTakenFromTheMessage()
+    public void SeverityIsDerivedFromErrorType()
     {
         var error = DuplicateTrainNumberError(out _, out _);
 
-        Assert.AreEqual(error.Message.Severity, error.Severity);
+        // A genuine conflict is a warning; advisory findings (speed, loco coverage) are informational.
+        Assert.AreEqual(Severity.Warning, error.Severity);
+        Assert.AreEqual(Severity.Warning, ValidationError.SeverityOf(ValidationErrorType.StationTrackConflict));
+        Assert.AreEqual(Severity.Information, ValidationError.SeverityOf(ValidationErrorType.TrainSpeedTooSlow));
+        Assert.AreEqual(Severity.Information, ValidationError.SeverityOf(ValidationErrorType.LocomotiveCoverageGap));
     }
 }

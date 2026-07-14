@@ -1502,6 +1502,9 @@
   <data name="AssignVehicle" xml:space="preserve">
     <value>Assign vehicle</value>
   </data>
+  <data name="EditVehicle" xml:space="preserve">
+    <value>Edit vehicle</value>
+  </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Create new vehicle</value>
   </data>
@@ -1555,5 +1558,53 @@
   </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>No conflicts</value>
+  </data>
+  <data name="TractionType" xml:space="preserve">
+    <value>Traction type</value>
+  </data>
+  <data name="Undefined" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="Steam" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Diesel" xml:space="preserve">
+    <value>Diesel</value>
+  </data>
+  <data name="Electric" xml:space="preserve">
+    <value>Electric</value>
+  </data>
+  <data name="Dual" xml:space="preserve">
+    <value>Dual</value>
+  </data>
+  <data name="Battery" xml:space="preserve">
+    <value>Battery</value>
+  </data>
+  <data name="NumberOfUnits" xml:space="preserve">
+    <value>Number of units</value>
+  </data>
+  <data name="NumberOfWagons" xml:space="preserve">
+    <value>Number of wagons</value>
+  </data>
+  <data name="Wagon" xml:space="preserve">
+    <value>Wagon</value>
+  </data>
+  <data name="AddWagon" xml:space="preserve">
+    <value>Add wagon</value>
+  </data>
+  <data name="PassengerWagon" xml:space="preserve">
+    <value>Passenger wagon</value>
+  </data>
+  <data name="FreightWagon" xml:space="preserve">
+    <value>Freight wagon</value>
+  </data>
+  <data name="MoveUp" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="MoveDown" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="RemoveWagon" xml:space="preserve">
+    <value>Remove wagon</value>
   </data>
 </root>

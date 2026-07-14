@@ -293,6 +293,41 @@ public class SessionsTests
     }
 
     [TestMethod]
+    public void SortOrderPutsAllSessionsFirstAndNoneLast()
+    {
+        Assert.IsTrue(Sessions.All.SortOrder < Sessions.FromSessionNumbers(1).SortOrder,
+            "Every session should sort before a single session.");
+        Assert.AreEqual(int.MaxValue, Sessions.FromSessionNumbers().SortOrder,
+            "An empty pattern should sort last.");
+    }
+
+    [TestMethod]
+    public void SortOrderRanksEarlierStartFirst()
+    {
+        Assert.IsTrue(Sessions.FromSessionNumbers(1, 2, 3).SortOrder < Sessions.FromSessionNumbers(2, 3).SortOrder,
+            "A pattern starting on session 1 should sort before one starting on session 2.");
+    }
+
+    [TestMethod]
+    public void SortOrderRanksBroaderPatternFirstWithinTheSameStart()
+    {
+        Assert.IsTrue(Sessions.FromSessionNumbers(1, 2, 3).SortOrder < Sessions.FromSessionNumbers(1).SortOrder,
+            "Among patterns starting on session 1, the broader one should sort first.");
+    }
+
+    [TestMethod]
+    public void SortOrderRanksDayPatternsByFirstDayThenBreadth()
+    {
+        var monToWed = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday);
+        var monToTue = Sessions.FromDays(Days.Monday | Days.Tuesday);
+        var tueToWed = Sessions.FromDays(Days.Tuesday | Days.Wednesday);
+        Assert.IsTrue(monToWed.SortOrder < monToTue.SortOrder, "The broader Monday pattern should sort first.");
+        Assert.IsTrue(monToTue.SortOrder < tueToWed.SortOrder, "A Monday start should sort before a Tuesday start.");
+        var everyDay = Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday | Days.Saturday | Days.Sunday);
+        Assert.IsTrue(everyDay.SortOrder < monToWed.SortOrder, "Every day should sort first.");
+    }
+
+    [TestMethod]
     public void DefaultCatalogueHasTheSixStandardPatterns()
     {
         var catalogue = CommonSessionPatterns.DefaultCatalogue;

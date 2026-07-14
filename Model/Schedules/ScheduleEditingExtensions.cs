@@ -168,6 +168,45 @@ public static class ScheduleEditingExtensions
         }
 
         /// <summary>
+        /// Updates an existing <see cref="ScheduledObject">vehicle</see> in place: its type, external id,
+        /// class, number and company. The <see cref="ScheduledObject.ExternalId"/> is taken as given (a
+        /// blank value clears it, so the vehicle's displayed <see cref="ScheduledObject.Designation"/> then
+        /// falls back to its company signature, class and number). A number of 0 falls back to the vehicle's
+        /// id, matching <see cref="CreateVehicle"/>.
+        /// </summary>
+        /// <param name="vehicle">The vehicle to update.</param>
+        /// <param name="objectType">The kind of vehicle (locomotive, trainset, wagonset).</param>
+        /// <param name="externalId">The external id (identity/display override); blank clears it.</param>
+        /// <param name="class">The vehicle class, e.g. "BR 218"; may be empty.</param>
+        /// <param name="number">The vehicle number, or 0 to fall back to the vehicle's id.</param>
+        /// <param name="company">The operating company, or <c>null</c>.</param>
+        /// <param name="tractionType">The traction type; applied only to traction units (a non-traction
+        /// vehicle's <see cref="ScheduledObject.TractionType"/> is always <see cref="TractionType.None"/>).
+        /// <c>null</c> leaves it unchanged.</param>
+        /// <param name="numberOfUnits">The number of units making up the vehicle — locomotives in a consist,
+        /// cars in a multiple unit, or wagons in a wagonset. Values below 1 are clamped to 1. <c>null</c>
+        /// leaves it unchanged.</param>
+        /// <returns>The updated vehicle.</returns>
+        public ScheduledObject UpdateVehicle(ScheduledObject vehicle, ScheduledObjectType objectType, string? externalId, string? @class, int number, Company? company, TractionType? tractionType = null, int? numberOfUnits = null)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            vehicle = vehicle.ValueOrException(nameof(vehicle));
+            // Set the type first: its setter resets TractionType to None for non-traction vehicles and to
+            // Undefined for traction ones, so any explicit tractionType below overrides that default.
+            vehicle.ObjectType = objectType;
+            vehicle.ExternalId = string.IsNullOrWhiteSpace(externalId) ? null : externalId.Trim();
+            vehicle.Class = @class ?? string.Empty;
+            vehicle.Number = number == 0 ? vehicle.Id : number;
+            vehicle.Company = company;
+            vehicle.CompanyId = company?.Id;
+            if (tractionType is { } traction && vehicle.IsTraction) vehicle.TractionType = traction;
+            if (numberOfUnits is { } units) vehicle.NumberOfUnits = Math.Max(1, units);
+            // The individual-wagon rake belongs only to a wagonset; clear it when the type is anything else.
+            if (!objectType.IsWagonSet) vehicle.Units.Clear();
+            return vehicle;
+        }
+
+        /// <summary>
         /// Assigns a <see cref="ScheduledObject">vehicle</see> to a <see cref="Schedule"/> for the given
         /// sessions (all sessions by default), creating the <see cref="ScheduleAssignment"/>. A vehicle
         /// already assigned to the schedule is returned unchanged rather than duplicated.

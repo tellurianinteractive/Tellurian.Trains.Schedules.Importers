@@ -1500,6 +1500,9 @@
   <data name="AssignVehicle" xml:space="preserve">
     <value>Tildel kjøretøy</value>
   </data>
+  <data name="EditVehicle" xml:space="preserve">
+    <value>Rediger kjøretøy</value>
+  </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Opprett nytt kjøretøy</value>
   </data>
@@ -1553,5 +1556,53 @@
   </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
+  </data>
+  <data name="TractionType" xml:space="preserve">
+    <value>Trekkrafttype</value>
+  </data>
+  <data name="Undefined" xml:space="preserve">
+    <value>Vilkårlig</value>
+  </data>
+  <data name="Steam" xml:space="preserve">
+    <value>Damp</value>
+  </data>
+  <data name="Diesel" xml:space="preserve">
+    <value>Diesel</value>
+  </data>
+  <data name="Electric" xml:space="preserve">
+    <value>Elektrisk</value>
+  </data>
+  <data name="Dual" xml:space="preserve">
+    <value>Dobbel</value>
+  </data>
+  <data name="Battery" xml:space="preserve">
+    <value>Batteri</value>
+  </data>
+  <data name="NumberOfUnits" xml:space="preserve">
+    <value>Antall enheter</value>
+  </data>
+  <data name="NumberOfWagons" xml:space="preserve">
+    <value>Antall vogner</value>
+  </data>
+  <data name="Wagon" xml:space="preserve">
+    <value>Vogn</value>
+  </data>
+  <data name="AddWagon" xml:space="preserve">
+    <value>Legg til vogn</value>
+  </data>
+  <data name="PassengerWagon" xml:space="preserve">
+    <value>Personvogn</value>
+  </data>
+  <data name="FreightWagon" xml:space="preserve">
+    <value>Godsvogn</value>
+  </data>
+  <data name="MoveUp" xml:space="preserve">
+    <value>Flytt opp</value>
+  </data>
+  <data name="MoveDown" xml:space="preserve">
+    <value>Flytt ned</value>
+  </data>
+  <data name="RemoveWagon" xml:space="preserve">
+    <value>Fjern vogn</value>
   </data>
 </root>
