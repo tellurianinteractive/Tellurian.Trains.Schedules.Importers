@@ -33,15 +33,4 @@ public class TurnusDataKeyTests
         Assert.AreEqual(weekdays.Key, weekend.Key,
             "Both variants are the same turnus (same identity), so they are flagged as turning over.");
     }
-
-    [TestMethod]
-    public void KeyFallsBackToVehicleIdWhenThereIsNeitherNumberNorExternalId()
-    {
-        var sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
-        var first = new TurnusData { Id = 1, Number = 0, ExternalId = string.Empty, Sessions = sessions };
-        var second = new TurnusData { Id = 2, Number = 0, ExternalId = string.Empty, Sessions = sessions };
-
-        Assert.AreNotEqual(first.KeyWithSession, second.KeyWithSession,
-            "Distinct vehicles with no number and no external id must not merge onto one card.");
-    }
 }

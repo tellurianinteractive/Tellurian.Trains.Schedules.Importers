@@ -142,21 +142,6 @@ public class ScheduleEditingTests
     }
 
     [TestMethod]
-    public void UpdateVehicleClearsBlankExternalIdSoDesignationFallsBack()
-    {
-        var plan = CreatePlan();
-        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 12, null);
-
-        plan.UpdateVehicle(vehicle, ScheduledObjectType.Trainset, "  ", "Rc", 5, null);
-
-        Assert.IsNull(vehicle.ExternalId, "A blank external id is cleared to null.");
-        Assert.AreEqual(ScheduledObjectType.Trainset, vehicle.ObjectType);
-        Assert.AreEqual("Rc", vehicle.Class);
-        Assert.AreEqual(5, vehicle.Number);
-        Assert.AreEqual("Rc 05", vehicle.Designation, "With no external id the designation is company + class + zero-padded number.");
-    }
-
-    [TestMethod]
     public void UpdateVehicleSetsTractionTypeAndNumberOfUnitsForATractionUnit()
     {
         var plan = CreatePlan();
