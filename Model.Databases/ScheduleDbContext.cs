@@ -247,9 +247,6 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.BackgroundColor).HasMaxLength(20);
-
-            // Computed members are not persisted.
-            entity.Ignore(e => e.ToHtmlMarkup);
         });
 
         // OperationLocation (Station) - TPH inheritance

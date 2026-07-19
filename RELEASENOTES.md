@@ -1,5 +1,85 @@
 # Release Notes
 
+## Version 3.0.0
+
+This is a major release. It is source-breaking for consumers of the 2.x packages
+because the domain model namespaces have changed; the type names are unchanged, so
+upgrading is largely a matter of updating `using` directives.
+
+### Breaking Changes
+
+- **Model types moved into nested namespaces.** To keep the growing domain model
+  organised, types are now grouped under sub-namespaces instead of living in the
+  single `Tellurian.Trains.Schedules.Model` namespace:
+  - `Tellurian.Trains.Schedules.Model.Layouts` — `Layout`, `Station`, `TrackStretch`, `DispatchStretch`, `Theme`, `Scale`, `Region`, etc.
+  - `Tellurian.Trains.Schedules.Model.Timetables` — `Timetable`, `Train`, `StationCall`, `TrainCategory`, etc.
+  - `Tellurian.Trains.Schedules.Model.Schedules` — `Schedule`, `Plan`, `VehicleSchedule`, `TrainPart`, `ScheduledObject`, etc.
+  - `Tellurian.Trains.Schedules.Model.Notes` — call notes (see below).
+  - `Tellurian.Trains.Schedules.Model.Settings` — `LayoutSettings` and related settings.
+
+  Consuming code needs to add the relevant `using` directives; the type names
+  themselves are unchanged.
+
+- **`StationCall` stop detection.** Whether a call is a stop is now expressed solely
+  by `StationCall.IsStop` (with the inverse `IsPassthrough`); arrival and departure
+  times are no longer compared to infer it. A train never stops at a
+  `SignalControlledLocation` regardless of the flag.
+
+- **`TrainPart` is now abstract**, with `ScheduledTrainPart` as the concrete portion
+  used inside vehicle schedules.
+
+### New Features
+
+#### Vehicle-schedule (turnus) building
+
+New building blocks turn a timetable into vehicle working schedules (turnus):
+`Plan`, `PlanFactory`, `ScheduledObject`, `ScheduledTrainPart` and `ScheduledUnit`.
+`Plan.CreateComplementarySchedule` derives the turnus for the sessions an origin
+schedule leaves out, and `ScheduledObject.SessionCombinations` (with the
+`SessionCombination` record) enumerates the unique session/day combinations a
+vehicle works — one turnus card each.
+
+#### Cargo-flow planning
+
+`CargoFlowTrainPart` models freight wagons a train couples at one call and uncouples
+at a later one, referencing a reusable `CargoFlowOptions` description held on the
+`Timetable`.
+
+#### Call notes
+
+A new `Notes` model attaches localised instructions to station calls through the
+`ICallNote` hierarchy — `CoupleNote`, `UncoupleNote`, `ReinforcementNote`,
+`FromParkingNote`, `ToParkingNote`, `UseNote` and `TextCallNote` — with generated
+text available in all supported languages.
+
+#### Structured layout settings
+
+`LayoutSettings` gathers configuration into focused groups — `GeneralSettings`,
+`GraphicTimetableSettings`, `IdentitySettings`, `IntegrationSettings` and
+`TimeAndSpeedSettings` (including `StationTimings` and `SpeedPoint`).
+
+#### Layout identity and catalogues
+
+Layouts now carry a `Theme`, `Scale` and country/`Region` identity, backed by
+curated catalogues (countries, train categories and sessions) so new layouts and
+plans can be created from scratch via `PlanFactory`.
+
+#### Localised display names
+
+The `ITranslatable` convention provides localised class and note display names in
+all supported languages.
+
+### XPLN Importer Improvements
+
+- `XplnImportOptions` supplies the per-import language and country that an XPLN file
+  itself does not carry, read from a culture segment in the file name (for example
+  `Givskud2021.da-DK.ods`) and falling back to the current culture.
+- Station calls are imported as stops or pass-throughs, with origin/terminus dwell
+  handled correctly.
+- Fixes to importing routes, locomotives and trainsets.
+
+---
+
 ## Version 2.1.0
 
 ### Breaking Changes

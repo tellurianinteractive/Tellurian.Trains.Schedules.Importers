@@ -9,11 +9,11 @@ The following packages are published to [NuGet.org](https://www.nuget.org/):
 
 | Package | Description |
 |---------|-------------|
-| [Tellurian.Trains.Schedules.Model](Model/README.md) | Domain model for schedules, timetables, trains, layouts |
-| [Tellurian.Trains.Schedules.Importers.Interfaces](Importers.Interfaces/README.md) | Contracts for import/export operations |
-| [Tellurian.Trains.Schedules.Importers.Services](Importers.Services/README.md) | Shared import services (JSON/CSV data) |
-| [Tellurian.Trains.Schedules.Model.Databases](Model.Databases/README.md) | Entity Framework Core support |
-| [Tellurian.Trains.Schedules.Importers.Xpln](Importers.Xpln/README.md) | XPLN ODS/XLSX file importer |
+| [Tellurian.Trains.Schedules.Model](Model/README.md) | Domain model for layouts, timetables, trains, schedules, vehicle-schedule (turnus) building, cargo flow, call notes and validation |
+| [Tellurian.Trains.Schedules.Importers.Interfaces](Importers.Interfaces/README.md) | Contracts for import/export operations (`IImportService`, `ImportResult<T>`) |
+| [Tellurian.Trains.Schedules.Importers.Services](Importers.Services/README.md) | Shared import/export services for JSON schedule files and reference data |
+| [Tellurian.Trains.Schedules.Model.Databases](Model.Databases/README.md) | Entity Framework Core persistence (`ScheduleDbContext`) |
+| [Tellurian.Trains.Schedules.Importers.Xpln](Importers.Xpln/README.md) | XPLN ODS/XLSX file importer with two-phase validation |
 
 **Read more:** [Model](Model/README.md) | [Interfaces](Importers.Interfaces/README.md) | [Services](Importers.Services/README.md) | [Databases](Model.Databases/README.md) | [Xpln](Importers.Xpln/README.md)
 
@@ -24,11 +24,36 @@ The following packages are not yet published (experimental):
 | [Tellurian.Trains.Schedules.Importers.Access](Importers.Access/README.md) | Microsoft Access database importer (Windows-only) |
 | [Tellurian.Trains.Schedules.Planning](Planning/README.md) | Planning utilities for creating layouts and schedules |
 
+## Domain Model
+
+The **Model** package holds the whole railway domain, independent of any importer.
+See the [Model README](Model/README.md) for the full type reference. Key capabilities:
+
+- **Layouts** — stations, signal-controlled and other locations, track and timetable
+  stretches, dispatch stretches, and a `Theme`/`Scale`/country identity.
+- **Timetables** — trains with station calls, categories, and `IsStop`/`IsPassthrough`
+  as the single source of truth for whether a train stops.
+- **Schedules** — vehicles, driver duties, and vehicle schedules built from train parts.
+- **Vehicle-schedule (turnus) building** — turn a timetable into vehicle workings with
+  `Plan` and `PlanFactory`, derive complementary schedules for the sessions a plan
+  leaves out, and enumerate the unique session/day combinations a vehicle works.
+- **Cargo-flow planning** — model freight wagons coupled and uncoupled along a train's
+  route from a reusable cargo-flow catalogue on the timetable.
+- **Call notes** — localised coupling, parking, reinforcement and free-text instructions
+  attached to station calls.
+- **Structured settings** — layout, graphic-timetable, identity, integration and
+  time/speed settings grouped on the layout.
+- **Validation** — two-phase referential-integrity and scheduling-conflict checks with
+  multi-language messages.
+
 ## Import Data
 
 ### XPLN Importer
-Imports  and validates `ODS`/`XLSX` files containing XPLN planning data.
+Imports and validates `ODS`/`XLSX` files containing XPLN planning data.
 XPLN is the defacto tool within the FREMO community to create model railway schedules.
+Because an XPLN file carries no language or country, `XplnImportOptions` supplies these
+per import — read from a culture segment in the file name (for example
+`Givskud2021.da-DK.ods`) or falling back to the current culture.
 See the [Xpln README](Importers.Xpln/README.md) for detailed information.
 
 ### JSON Importer

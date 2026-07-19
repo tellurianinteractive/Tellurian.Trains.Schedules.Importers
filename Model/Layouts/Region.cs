@@ -48,8 +48,8 @@ public static class RegionExtensions
      /// Markup display with name and background color.
      /// </summary>
         public MarkupString ToHtmlMarkup =>
-    new($"""
-            <span class="region" style="background-color: {region.BackgroundColor}; color: {region.BackgroundColor.TextColor}">{region.Name}</span>
+            new($"""
+                <span class="region" style="background-color: {region.BackgroundColor}; color: {region.BackgroundColor.TextColor}">{region.Name}</span>
             """);
         /// <inheritdoc/>
 

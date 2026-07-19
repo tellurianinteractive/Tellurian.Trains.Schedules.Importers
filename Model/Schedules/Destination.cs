@@ -53,7 +53,7 @@ public class Destination
         $"{Station.Name} {AndText} {MaxLength}".TrimEnd();
 
     /// <summary>
-    /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips (see <see cref="Region.ToHtmlMarkup"/>).
+    /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips.
     /// </summary>
     public MarkupString ToHtmlMarkup => new(
         AndRegions && Station.Regions.Any() ?
