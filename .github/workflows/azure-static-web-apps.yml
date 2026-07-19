@@ -48,7 +48,6 @@ jobs:
           action: upload
           app_location: publish/wwwroot
           skip_app_build: true
-          skip_api_build: true
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
