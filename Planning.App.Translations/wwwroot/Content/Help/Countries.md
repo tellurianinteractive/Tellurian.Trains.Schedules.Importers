@@ -1,7 +1,7 @@
 The **Countries** tab manages the countries present on your layout — the source for the country
 choices shown wherever a country is selected, such as on the **Companies** and **Regions** tabs.
 
-## What a country is
+### What a country is
 
 Each country has:
 
@@ -12,7 +12,7 @@ Each country has:
 One country is marked as the **default country** — set on the **Settings** tab. The default country
 is shown with a badge and determines which companies and regions appear first in catalogues.
 
-## How countries are used
+### How countries are used
 
 Countries are used throughout the layout:
 
@@ -20,7 +20,7 @@ Countries are used throughout the layout:
 - **Regions** belong to a country and represent destinations outside the layout.
 - The default country determines which catalogue entries are suggested when you start a new layout.
 
-## Managing countries
+### Managing countries
 
 The list shows each country with its code and languages. Countries are drawn from a built-in
 catalogue — you pick which ones apply to your layout.

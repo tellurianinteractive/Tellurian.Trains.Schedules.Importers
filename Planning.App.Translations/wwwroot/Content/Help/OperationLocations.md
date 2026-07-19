@@ -5,7 +5,7 @@ An operational place is one of:
 
 - a **station**, with one or more tracks where trains can stop, meet or be overtaken;
 - a **signal-controlled location**, such as a block post or junction without platform tracks;
-- an **other location** used for timing but without operational tracks.
+- an **other location** used for timing but without operational tracks and optionally platforms.
 
 The tracks you define here are referenced when planning station calls and when validating that a
 train has somewhere to stand. Define your places and tracks before building trains so their calls
@@ -19,10 +19,10 @@ The location type decides whether a train may stop, on top of how you set each c
   overtaken, or exchange passengers or cargo.
 - At an **other location** (for example an unstaffed halt), a train may likewise stop per its call,
   but only passengers are exchanged, never cargo.
-- At a **signal-controlled location**, a train **never** stops; it always passes through, whatever
-  the call says. Such calls show as a pass-through (a pipe) in the timetable, not as times.
+- At a **signal-controlled location**, a train **never** has scheduled stops; it always passes through, whatever
+  the call says.
 
-## Working with the list
+### Working with the list
 
 The list shows each location's signature, name, type, owner, whether it is a shadow yard (terminal for external stations), and how
 many tracks it has. For each row you can:
@@ -34,13 +34,13 @@ many tracks it has. For each row you can:
 **Add new** asks for the type first (station, signal-controlled, or other location), then opens the
 edit form for that type. A new location is saved once its name and a unique signature are filled in.
 
-## Editing tracks
+#### Editing tracks
 
 The edit form lists the location's tracks, where you can add, edit and delete them. A track can only
 be deleted while no train references it; otherwise its delete button is disabled and shows how many
 trains use it. Reassign or remove those station calls first.
 
-## Stations and regions
+### Stations and regions
 
 A station can be linked to one or more **regions** from the layout's region catalogue (managed on the
 **Regions** tab). This is mainly used for shadow yards, which represent external stations or regions

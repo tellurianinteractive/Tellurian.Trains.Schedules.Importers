@@ -662,7 +662,7 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Report                   | Description                                                          | Format |
 | -------------------------- | ---------------------------------------------------------------------- | -------- |
 | Train Departure Labels   | Physical track labels with train number, operator, time, destination | Label  |
-| Block Destinations       | Signal block routing information for dispatching                     | A4     |
+| Cargo Flow Destinations  | Displays how freight trains should be built and the order of destinations | A4     |
 | Adjacent Dispatch Places | Contact list of neighbouring dispatch locations with phone numbers   | A4     |
 
 > **Status:** ❌ None of these three reports built yet.

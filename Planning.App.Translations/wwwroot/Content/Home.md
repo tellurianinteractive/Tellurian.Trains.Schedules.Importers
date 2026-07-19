@@ -6,7 +6,7 @@ track layout, the trains and their timings, and the schedules and duties that go
 
 - **Start from scratch** with the **New layout** button below — it creates a new plan with sensible
   defaults (in your language), ready for you to fill in, or
-- **Partially import** reusable data and then refine it and enter the rest, or
+- *Coming*: **Partially import** reusable data and then refine it and enter the rest, or
 - **Open an existing plan** on the **Import** tab. You can open a previously saved planning
   document (`.json`) or import an XPLN spreadsheet (`.ods` / `.xlsx`).
 
@@ -38,7 +38,7 @@ The tabs are ordered in the recommended steps to enter or import data:
 - **Trains** — the trains, their station calls and their times.
 - **Graphical Timetable** — the time–distance diagram for each timetable stretch.
 - **Schedules** — the vehicle schedules and driver duties that operate the trains.
-- **Vehicle Owners** — who brings which of the needed rolling stock.
+- *Coming*: **Vehicle Owners** — who brings which of the needed rolling stock.
 
 ## Minimal Data Entry
 
@@ -53,14 +53,21 @@ The minimal need for data before adding trains are:
 - **Train Categories** — the types of train (such as passenger and freight), each with its prefix,
   colour.
 
+**Sessions & Days**, **Countries**, **Regions** and **Companies** are optional but recommended to 
+create more realistic operations.
+
 
 ## Print Reports
 Printable content is prepared on the **Reports** tab and kept separate from the editing tabs.
 
+- **Timetable** for all timetable streches.
 - **Turnus Cards** for locomotives, trainsets, wagonsets and wagons.
+- *Coming*: Additional reports for graphical timetables, station displatch sheets,
+  Driver duties, Freight wagon order at stations, and more.
 
 ## Reuse Earlier Work
 - **Import** — open a saved plan (`.json`) or import an XPLN spreadsheet (`.ods` / `.xlsx`).
+- *Coming*: **Partial import** - reuse data of choice from older plans.
 
 ## Use the Plan in Other Applications
 Share the plan with other tools, or save it to reopen later.

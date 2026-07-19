@@ -8,3 +8,8 @@ used as a starting point and can be overridden per call.
 Trains drawn here appear as lines on the **Graphic timetable**, coloured by their category, and
 are checked against the validation rules in **Settings › Validation** (speeds, track usage, train
 numbers and so on).
+
+## Operating Sessions or Days
+The planning of trains can utilise the option to define what sessions (or weekdays) a train runs.
+The default is always All/Daily. You defined the different session patterns in **Settings > Session & Days**. 
+There are common predefined patters, but you can add your own.

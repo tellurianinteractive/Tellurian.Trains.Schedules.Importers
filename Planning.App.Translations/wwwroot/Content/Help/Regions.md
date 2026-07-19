@@ -2,7 +2,7 @@ The **Regions** tab defines the destinations *outside* your layout — the domes
 foreign countries that wagons can be routed to. Regions are used for cargo flow routing: they let a
 train's destination note say where its wagons are bound beyond the modelled railway.
 
-## What a region is
+### What a region is
 
 Each region has:
 
@@ -12,7 +12,7 @@ Each region has:
 - a **background colour**, used to render the region as a coloured chip in notes (the text colour is
   contrasted automatically for readability).
 
-## How regions are used
+### How regions are used
 
 A region on its own is just a label. It becomes meaningful once it is associated with a
 **station** — normally a **shadow yard**, a terminal station representing external stations and the
@@ -26,7 +26,7 @@ regions or countries.
 Define the regions you need here, then assign them to your shadow stations on the
 **Operation Locations** tab.
 
-## Managing regions
+### Managing regions
 
 The list shows each region as a coloured chip alongside its name and country.
 

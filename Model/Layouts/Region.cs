@@ -34,14 +34,6 @@ public class Region
     /// </summary>
     public string BackgroundColor { get; set; } = "#ffff00";
 
-    /// <summary>
-    /// Markup display: the <see cref="Name"/> as a coloured chip, with the text colour auto-contrasted
-    /// from <see cref="BackgroundColor"/>.
-    /// </summary>
-    public MarkupString ToHtmlMarkup =>
-        new($"""
-            <span class="region" style="background-color: {BackgroundColor}; color: {BackgroundColor.TextColor}">{Name}</span>
-            """);
     /// <inheritdoc/>
     public override string ToString() => Name;
 }
@@ -52,7 +44,15 @@ public class Region
 public static class RegionExtensions
 {
     extension(Region region)
-    {
+    {/// <summary>
+     /// Markup display with name and background color.
+     /// </summary>
+        public MarkupString ToHtmlMarkup =>
+    new($"""
+            <span class="region" style="background-color: {region.BackgroundColor}; color: {region.BackgroundColor.TextColor}">{region.Name}</span>
+            """);
+        /// <inheritdoc/>
+
         /// <summary>
         /// The colours permitted for a region: the seven standard region colours plus purple and pink.
         /// </summary>

@@ -1,7 +1,7 @@
 The **Stretches** tab defines how operation locations are connected and which connections make up
 each timetable. It has three sub-sections, worked through in order.
 
-## Track stretches
+### Track stretches
 
 A **track stretch** is the line between two adjacent operation locations, with its distance, number
 of tracks, speed and running time. Track stretches describe the physical network and provide the
@@ -17,7 +17,7 @@ the stretches that disagree — fix them by editing one so they all run the same
 A track stretch that is part of a timetable stretch cannot be deleted until it is removed from that
 timetable stretch.
 
-## Dispatch stretches
+### Dispatch stretches
 
 A **dispatch stretch** runs between two staffed control points — a **manned** station or a **shadow**
 station — passing straight through any unmanned locations in between. So `A→B` and `B→C` with `B`
@@ -28,7 +28,7 @@ track stretches** whenever you change the network or change which stations are m
 as manned or as a shadow station on the **Operation locations** tab. The *Via* column shows the
 unmanned locations a dispatch stretch passes through.
 
-## Timetable stretches
+### Timetable stretches
 
 A **timetable stretch** is an ordered series of contiguous track stretches that you want to plan and
 draw together — typically a line from one end station to another. Timetable stretches are what you
@@ -37,5 +37,7 @@ pick from on the **Graphic timetable** tab, and each becomes one graph.
 To build one, give it a number (and an optional description), then add track stretches to its route
 one at a time. Only track stretches that continue from where the route currently ends are offered, so
 the route always stays connected. The editor shows the resulting stations and total distance.
+
+### Recommended work order
 
 Define the track stretches first, then group them into the timetable stretches you want to work with.

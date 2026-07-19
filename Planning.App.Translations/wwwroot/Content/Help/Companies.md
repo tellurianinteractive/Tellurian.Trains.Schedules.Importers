@@ -2,23 +2,23 @@ The **Companies** tab lists the railway companies that operate on your layout â€
 trains, train categories, driver duties and vehicles can belong to. It is the source for the company
 choices shown wherever an operator is selected.
 
-## What a company is
+### What a company is
 
 Each company has:
 
 - a **name**, its full name as shown in lists and reports;
 - a **signature**, the short abbreviation used to identify it (for example *DB* or *SJ*). The
   signature must be unique within the layout;
-- a **country** it operates in. A company that operates in several countries is added once per
+- a **country** it operates in. A company that operates in several countries is added once without company or per
   country of operation, so each entry pairs a company with one country.
 
-## How companies are used
+### How companies are used
 
 A company on its own is just a catalogue entry. It becomes meaningful once it is assigned as the
 operator of something â€” a **train**, a **train category**, a **driver duty**, or a **vehicle**. The
 company's signature and country then appear wherever that object is shown.
 
-## Managing companies
+### Managing companies
 
 The list shows each company's name, signature and country.
 
