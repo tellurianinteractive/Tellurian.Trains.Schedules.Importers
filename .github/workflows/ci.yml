@@ -138,6 +138,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # pack evaluates every project in the solution, including the Blazor WASM
+      # Planning.App, so the same workload the build job uses is required here.
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+
       - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
