@@ -143,6 +143,12 @@ jobs:
         with:
           name: build-output
 
+      # The restore outputs (obj/project.assets.json) are not part of the uploaded
+      # build artifacts, and `pack --no-build` implies `--no-restore`, so restore
+      # here to recreate the assets file before packing the downloaded binaries.
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Pack
         run: dotnet pack --configuration Release --no-build --output ./nupkgs
 
