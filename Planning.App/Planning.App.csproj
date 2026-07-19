@@ -15,17 +15,24 @@
 		<!-- Required so the UI culture can be set dynamically at startup (see LanguageSelector). -->
 		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
 	</PropertyGroup>
-	<PropertyGroup> <DebugType>portable</DebugType> <DebugSymbols>true</DebugSymbols> <IncludeSymbols>true</IncludeSymbols> <PublishTrimmed>false</PublishTrimmed> </PropertyGroup>
+	<PropertyGroup> <DebugType>portable</DebugType> <DebugSymbols>true</DebugSymbols> <IncludeSymbols>true</IncludeSymbols> </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 		<IncludeSymbols>true</IncludeSymbols>
+		<!-- Keep dev publishes fast and untrimmed; AOT/trimming only apply to Release. -->
 		<PublishTrimmed>false</PublishTrimmed>
+		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DebugType>embedded</DebugType>
+		<!-- AOT requires IL trimming. TrimMode=partial only trims assemblies marked
+		     trimmable (the framework/BCL); every first-party assembly is preserved
+		     whole, so reflection and localisation resources stay intact. -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>partial</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
