@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/_framework/*",
+      "/_content/*",
+      "/css/*",
+      "/lib/*",
+      "/*.{png,jpg,jpeg,gif,svg,ico,json,js,mjs,css,webmanifest,wasm,dll,pdb,dat,blat,woff,woff2,ttf}"
+    ]
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".wasm": "application/wasm",
+    ".blat": "application/octet-stream",
+    ".dat": "application/octet-stream"
+  }
+}
