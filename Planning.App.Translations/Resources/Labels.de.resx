@@ -120,6 +120,9 @@
   <data name="AppName" xml:space="preserve">
     <value>Fahrplan Planner</value>
   </data>
+  <data name="NoActiveDocument" xml:space="preserve">
+    <value>Kein aktives Dokument</value>
+  </data>
   <data name="About" xml:space="preserve">
     <value>Über</value>
   </data>

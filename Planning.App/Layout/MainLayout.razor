@@ -14,6 +14,11 @@
 <div class="page" style="--primary: @Primary; --primary-text: @Primary.TextColor">@* signature colour + its auto-contrasted text, exposed app-wide for data-grid headers etc. *@
     <header class="top-bar no-print">
         <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span></h1>
+        @* The plan currently being worked on, centred so it reads as the document title of the window. *@
+        <div class="active-plan @(PlanName is null ? "none" : "")">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>@(PlanName ?? Translator("NoActiveDocument"))</span>
+        </div>
         <div class="top-bar-actions">
             <ValidationIndicator />
             <LanguageSelector />
@@ -102,12 +107,19 @@
     // read-only report, which uses PrintLayout) the singleton state is already loaded, so skip the spinner.
     private bool _initializing;
 
+    // The name shown in the top bar, or null when no plan is loaded (or it is still unnamed),
+    // in which case the bar falls back to the "no active document" caption.
+    private string? PlanName =>
+        ScheduleState.Schedule?.Name is { Length: > 0 } name ? name : null;
+
     [Inject(Key = "Markdown")]
     public IResourceProvider MarkdownProvider { get; set; } = default!;
 
     protected override void OnInitialized()
     {
         Dock.OnChanged += StateHasChanged;
+        // Keeps the plan name in the top bar current when a plan is loaded, created or renamed.
+        ScheduleState.OnChanged += StateHasChanged;
         Nav.LocationChanged += OnLocationChanged;
         // Show the restore spinner only when the app has not yet loaded its state (a cold start).
         _initializing = !ScheduleState.IsInitialized;
@@ -165,6 +177,7 @@
     public void Dispose()
     {
         Dock.OnChanged -= StateHasChanged;
+        ScheduleState.OnChanged -= StateHasChanged;
         Nav.LocationChanged -= OnLocationChanged;
     }
 }

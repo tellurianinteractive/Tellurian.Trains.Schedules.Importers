@@ -5,14 +5,39 @@
     height: 100vh;
 }
 
+/* Three columns rather than space-between, so the plan name in the middle stays centred on the
+   window regardless of how wide the title and the action buttons on either side are. */
 .top-bar {
     background-color: #1a3a5c;
     color: white;
     padding: 0.5rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* The plan being worked on, presented as the window's document title. */
+.active-plan {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.4rem;
+    min-width: 0;
+    font-size: 0.95rem;
 }
+
+    .active-plan span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* No plan loaded: the placeholder caption is dimmed so it reads as an empty state. */
+    .active-plan.none {
+        opacity: 0.6;
+        font-style: italic;
+    }
 
 .app-title {
     margin: 0;
@@ -28,6 +53,8 @@
 
 .top-bar-actions {
     display: flex;
+    justify-content: flex-end;
+    align-items: center;
     gap: 0.5rem;
 }
 

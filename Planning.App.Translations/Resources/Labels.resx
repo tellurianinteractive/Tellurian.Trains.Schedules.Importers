@@ -120,6 +120,9 @@
   <data name="AppName" xml:space="preserve">
     <value>Timetable Planner</value>
   </data>
+  <data name="NoActiveDocument" xml:space="preserve">
+    <value>No active document</value>
+  </data>
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>

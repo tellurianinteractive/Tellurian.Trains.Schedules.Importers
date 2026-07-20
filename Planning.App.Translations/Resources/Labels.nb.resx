@@ -120,6 +120,9 @@
   <data name="AppName" xml:space="preserve">
     <value>Kjøreplanlegger</value>
   </data>
+  <data name="NoActiveDocument" xml:space="preserve">
+    <value>Ikke noe aktivt dokument</value>
+  </data>
   <data name="About" xml:space="preserve">
     <value>Om</value>
   </data>
