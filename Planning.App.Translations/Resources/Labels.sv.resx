@@ -633,6 +633,15 @@
   <data name="TimetableStretches" xml:space="preserve">
     <value>Tidtabellssträckor</value>
   </data>
+  <data name="Topology" xml:space="preserve">
+    <value>Topologi</value>
+  </data>
+  <data name="TopologyHint" xml:space="preserve">
+    <value>En schematisk översikt över tidtabellssträckorna. Stationer placeras efter spåravstånd; grenar ansluter till sträckan de utgår från.</value>
+  </data>
+  <data name="TopologyNoStretches" xml:space="preserve">
+    <value>Definiera tidtabellssträckor för att se topologin.</value>
+  </data>
   <data name="StretchesNoSchedule" xml:space="preserve">
     <value>Öppna eller importera en plan för att redigera dess sträckor.</value>
   </data>
@@ -689,6 +698,15 @@
   </data>
   <data name="RemoveLast" xml:space="preserve">
     <value>Ta bort sista</value>
+  </data>
+  <data name="Reverse" xml:space="preserve">
+    <value>Vänd</value>
+  </data>
+  <data name="ReverseTimetableStretch" xml:space="preserve">
+    <value>Vänd riktningen på hela sträckan.</value>
+  </data>
+  <data name="ReverseTimetableStretchShared" xml:space="preserve">
+    <value>Kan inte vändas, eftersom bansträckorna {0} också används av en annan tidtabellssträcka.</value>
   </data>
   <data name="TimetableStretchNoContinuation" xml:space="preserve">
     <value>Ingen bansträcka fortsätter härifrån.</value>

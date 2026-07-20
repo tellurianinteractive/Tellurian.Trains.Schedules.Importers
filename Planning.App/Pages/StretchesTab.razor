@@ -35,13 +35,16 @@ else
                 case StretchSection.Timetable:
                     <TimetableStretchesEditor />
                     break;
+                case StretchSection.Topology:
+                    <TopologyView />
+                    break;
             }
         </div>
     </div>
 }
 
 @code {
-    private enum StretchSection { Track, Dispatch, Timetable }
+    private enum StretchSection { Track, Dispatch, Timetable, Topology }
 
     private StretchSection _section = StretchSection.Track;
     private static readonly StretchSection[] Sections = Enum.GetValues<StretchSection>();
@@ -67,6 +70,7 @@ else
         StretchSection.Track => "TrackStretches",
         StretchSection.Dispatch => "DispatchStretches",
         StretchSection.Timetable => "TimetableStretches",
+        StretchSection.Topology => "Topology",
         _ => section.ToString()
     });
 

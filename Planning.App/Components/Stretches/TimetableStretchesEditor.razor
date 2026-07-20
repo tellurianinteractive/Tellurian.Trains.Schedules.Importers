@@ -42,6 +42,7 @@
                             <td class="num">@TotalDistance(s)</td>
                             <td class="actions">
                                 <button @onclick="() => Edit(s)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
+                                <button @onclick="() => Reverse(s)" disabled="@(!s.CanReverse)" title="@ReverseTitle(s)"><i class="fa-solid fa-right-left"></i> @Translator("Reverse")</button>
                                 <button class="danger" @onclick="() => _deleteTarget = s"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </td>
                         </tr>
@@ -231,6 +232,19 @@
         ScheduleState.SaveAndNotify();
         BackToList();
     }
+
+    private void Reverse(TimetableStretch stretch)
+    {
+        if (!stretch.CanReverse) return;
+        stretch.Reverse();
+        ScheduleState.SaveAndNotify();
+    }
+
+    // Explains why reversing is unavailable: the shared track stretches are also used by another line.
+    private string ReverseTitle(TimetableStretch stretch) =>
+        stretch.CanReverse
+            ? Translator("ReverseTimetableStretch")
+            : string.Format(Translator("ReverseTimetableStretchShared"), string.Join(", ", stretch.SharedStretches().Select(ts => $"{ts.Start.Signature}-{ts.End.Signature}")));
 
     private void DeleteConfirmed()
     {

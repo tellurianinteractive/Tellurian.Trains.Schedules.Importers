@@ -189,6 +189,37 @@ public static class TimetableStretchExtensions
             stretch.Stretches.Count == 0 || stretch.Stretches.Last().End.Equals(trackStretch.Start);
 
         /// <summary>
+        /// Whether the timetable stretch may be reversed. Reversing turns each of its track stretches
+        /// around, and a track stretch is shared with the layout and with any other timetable stretch
+        /// that uses it, so reversal is only allowed when none of the track stretches belongs to
+        /// another timetable stretch.
+        /// </summary>
+        public bool CanReverse => stretch.Stretches.Count > 0 && stretch.SharedStretches().Count == 0;
+
+        /// <summary>
+        /// The track stretches of this timetable stretch that are also used by another timetable stretch,
+        /// and that therefore prevent it from being reversed. Empty when the stretch may be reversed.
+        /// </summary>
+        public IReadOnlyList<TrackStretch> SharedStretches()
+        {
+            if (stretch.Stretches.Count == 0) return [];
+            var others = stretch.Stretches.First().Layout.TimetableStretches.Where(t => t.Id != stretch.Id).ToList();
+            return [.. stretch.Stretches.Where(ts => others.Any(other => other.Stretches.Any(o => o.Id == ts.Id)))];
+        }
+
+        /// <summary>
+        /// Reverses the timetable stretch, so that it runs from its end station to its start station:
+        /// every track stretch is turned around and their order is reversed. Does nothing when the
+        /// stretch may not be reversed; see <c>CanReverse</c>.
+        /// </summary>
+        public void Reverse()
+        {
+            if (!stretch.CanReverse) return;
+            foreach (var trackStretch in stretch.Stretches) trackStretch.Reverse();
+            stretch.Stretches = [.. stretch.Stretches.Reverse()];
+        }
+
+        /// <summary>
         /// Adds a track stretch to the end of the timetable stretch.
         /// </summary>
         /// <param name="trackStretch">The track stretch to add.</param>

@@ -923,6 +923,15 @@
   <data name="TimetableStretches" xml:space="preserve">
     <value>Timetable stretches</value>
   </data>
+  <data name="Topology" xml:space="preserve">
+    <value>Topology</value>
+  </data>
+  <data name="TopologyHint" xml:space="preserve">
+    <value>A schematic overview of the timetable stretches. Stations are spaced by track distance; branches connect to the line they diverge from.</value>
+  </data>
+  <data name="TopologyNoStretches" xml:space="preserve">
+    <value>Define timetable stretches to see the topology.</value>
+  </data>
   <data name="StretchesNoSchedule" xml:space="preserve">
     <value>Open or import a plan to edit its stretches.</value>
   </data>
@@ -979,6 +988,15 @@
   </data>
   <data name="RemoveLast" xml:space="preserve">
     <value>Remove last</value>
+  </data>
+  <data name="Reverse" xml:space="preserve">
+    <value>Reverse</value>
+  </data>
+  <data name="ReverseTimetableStretch" xml:space="preserve">
+    <value>Reverse the direction of the whole route.</value>
+  </data>
+  <data name="ReverseTimetableStretchShared" xml:space="preserve">
+    <value>Cannot be reversed, because the track stretches {0} are also used by another timetable stretch.</value>
   </data>
   <data name="TimetableStretchNoContinuation" xml:space="preserve">
     <value>No track stretch continues from here.</value>

@@ -633,6 +633,15 @@
   <data name="TimetableStretches" xml:space="preserve">
     <value>Ruteplanstrekninger</value>
   </data>
+  <data name="Topology" xml:space="preserve">
+    <value>Topologi</value>
+  </data>
+  <data name="TopologyHint" xml:space="preserve">
+    <value>En skjematisk oversikt over ruteplanstrekningene. Stasjoner plasseres etter sporavstand; grener kobles til strekningen de går ut fra.</value>
+  </data>
+  <data name="TopologyNoStretches" xml:space="preserve">
+    <value>Definer ruteplanstrekninger for å se topologien.</value>
+  </data>
   <data name="StretchesNoSchedule" xml:space="preserve">
     <value>Åpne eller importer en plan for å redigere strekningene.</value>
   </data>
@@ -689,6 +698,15 @@
   </data>
   <data name="RemoveLast" xml:space="preserve">
     <value>Fjern siste</value>
+  </data>
+  <data name="Reverse" xml:space="preserve">
+    <value>Snu</value>
+  </data>
+  <data name="ReverseTimetableStretch" xml:space="preserve">
+    <value>Snu retningen på hele strekningen.</value>
+  </data>
+  <data name="ReverseTimetableStretchShared" xml:space="preserve">
+    <value>Kan ikke snus, fordi banestrekningene {0} også brukes av en annen ruteplanstrekning.</value>
   </data>
   <data name="TimetableStretchNoContinuation" xml:space="preserve">
     <value>Ingen banestrekning fortsetter herfra.</value>

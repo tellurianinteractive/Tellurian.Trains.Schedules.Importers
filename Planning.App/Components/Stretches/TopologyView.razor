@@ -1,0 +1,58 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+<div class="topology">
+    <p class="hint">@Translator("TopologyHint")</p>
+
+    @if (Layout is null || Layout.TimetableStretches.All(s => s.Stretches.Count == 0))
+    {
+        <p class="empty">@Translator("TopologyNoStretches")</p>
+    }
+    else
+    {
+        var diagram = TopologyDiagram.Build(Layout);
+        <div class="topology-scroll">
+            <svg class="topology-svg" viewBox="0 0 @F(diagram.Width) @F(diagram.Height)"
+                 width="@F(diagram.Width)" height="@F(diagram.Height)"
+                 xmlns="http://www.w3.org/2000/svg">
+                @foreach (var connector in diagram.Connectors)
+                {
+                    <line x1="@F(connector.X1)" y1="@F(connector.Y1)" x2="@F(connector.X2)" y2="@F(connector.Y2)"
+                          stroke="@LineColor" stroke-width="10" />
+                }
+                @foreach (var line in diagram.Lines)
+                {
+                    <line x1="@F(line.StartX)" y1="@F(line.Y)" x2="@F(line.EndX)" y2="@F(line.Y)"
+                          stroke="@LineColor" stroke-width="10" />
+                    <SvgText X="line.StartX - 20" Y="line.Y + 4" Anchor="end"
+                             Fill="@LineColor" FontSize="16.5" FontWeight="600" Text="@line.Number" />
+                    @foreach (var node in line.Nodes.Where(n => !n.Hidden))
+                    {
+                        <circle cx="@F(node.X)" cy="@F(node.Y)" r="5"
+                                fill="#fff" stroke="@LineColor" stroke-width="2" />
+                        <SvgText X="node.X" Y="node.Y - 10" Anchor="middle"
+                                 Fill="#223" FontSize="16.5" FontWeight="600" Text="@node.Signature" />
+                    }
+                }
+            </svg>
+        </div>
+    }
+</div>
+
+@code {
+    private const string LineColor = "#1a3a5c";
+
+    private Layout? Layout => ScheduleState.Layout;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // SVG requires '.' as the decimal separator regardless of UI culture.
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
+}

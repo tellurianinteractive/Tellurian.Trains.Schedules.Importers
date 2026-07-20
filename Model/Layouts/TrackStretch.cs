@@ -155,6 +155,18 @@ public class TrackStretch : IEquatable<TrackStretch>
 public static class TrackStretchExtensions
 {
     /// <summary>
+    /// Reverses the direction of the track stretch, so that it runs from its end station to its
+    /// start station. All other properties are unaffected.
+    /// </summary>
+    /// <param name="me">The track stretch.</param>
+    public static void Reverse(this TrackStretch me)
+    {
+        ArgumentNullException.ThrowIfNull(me);
+        (me.Start, me.End) = (me.End, me.Start);
+        (me.StartId, me.EndId) = (me.EndId, me.StartId);
+    }
+
+    /// <summary>
     /// Gets all train passings on the track stretch.
     /// </summary>
     /// <param name="me">The track stretch.</param>

@@ -633,6 +633,15 @@
   <data name="TimetableStretches" xml:space="preserve">
     <value>Fahrplanabschnitte</value>
   </data>
+  <data name="Topology" xml:space="preserve">
+    <value>Topologie</value>
+  </data>
+  <data name="TopologyHint" xml:space="preserve">
+    <value>Eine schematische Übersicht der Fahrplanabschnitte. Bahnhöfe werden nach Gleisabstand angeordnet; Abzweige verbinden sich mit dem Abschnitt, von dem sie ausgehen.</value>
+  </data>
+  <data name="TopologyNoStretches" xml:space="preserve">
+    <value>Definieren Sie Fahrplanabschnitte, um die Topologie zu sehen.</value>
+  </data>
   <data name="StretchesNoSchedule" xml:space="preserve">
     <value>Öffnen oder importieren Sie einen Plan, um dessen Abschnitte zu bearbeiten.</value>
   </data>
@@ -689,6 +698,15 @@
   </data>
   <data name="RemoveLast" xml:space="preserve">
     <value>Letzten entfernen</value>
+  </data>
+  <data name="Reverse" xml:space="preserve">
+    <value>Umkehren</value>
+  </data>
+  <data name="ReverseTimetableStretch" xml:space="preserve">
+    <value>Die Richtung der gesamten Strecke umkehren.</value>
+  </data>
+  <data name="ReverseTimetableStretchShared" xml:space="preserve">
+    <value>Kann nicht umgekehrt werden, weil die Streckenabschnitte {0} auch von einer anderen Fahrplanstrecke verwendet werden.</value>
   </data>
   <data name="TimetableStretchNoContinuation" xml:space="preserve">
     <value>Kein Streckenabschnitt setzt sich von hier fort.</value>

@@ -633,6 +633,15 @@
   <data name="TimetableStretches" xml:space="preserve">
     <value>Køreplansstrækninger</value>
   </data>
+  <data name="Topology" xml:space="preserve">
+    <value>Topologi</value>
+  </data>
+  <data name="TopologyHint" xml:space="preserve">
+    <value>Et skematisk overblik over køreplansstrækningerne. Stationer placeres efter sporafstand; grene forbindes til den strækning, de udgår fra.</value>
+  </data>
+  <data name="TopologyNoStretches" xml:space="preserve">
+    <value>Definer køreplansstrækninger for at se topologien.</value>
+  </data>
   <data name="StretchesNoSchedule" xml:space="preserve">
     <value>Åbn eller importér en plan for at redigere dens strækninger.</value>
   </data>
@@ -689,6 +698,15 @@
   </data>
   <data name="RemoveLast" xml:space="preserve">
     <value>Fjern sidste</value>
+  </data>
+  <data name="Reverse" xml:space="preserve">
+    <value>Vend</value>
+  </data>
+  <data name="ReverseTimetableStretch" xml:space="preserve">
+    <value>Vend retningen på hele strækningen.</value>
+  </data>
+  <data name="ReverseTimetableStretchShared" xml:space="preserve">
+    <value>Kan ikke vendes, fordi banestrækningerne {0} også bruges af en anden køreplansstrækning.</value>
   </data>
   <data name="TimetableStretchNoContinuation" xml:space="preserve">
     <value>Ingen banestrækning fortsætter herfra.</value>

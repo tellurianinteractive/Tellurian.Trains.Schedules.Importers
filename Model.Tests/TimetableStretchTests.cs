@@ -92,6 +92,52 @@ public class TimetableStretchTests
         Assert.AreEqual(20.0, subBranch.DisplayedDistanceToStation(e), "17 km junction plus D->E distance.");
     }
 
+    [TestMethod]
+    public void ReverseTurnsEveryTrackStretchAroundAndReversesTheirOrder()
+    {
+        var (layout, a, b, c, _, _) = BuildBranchingLayout();
+        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+
+        Assert.IsTrue(main.CanReverse, "No other timetable stretch uses A-B or B-C.");
+        main.Reverse();
+
+        Assert.AreEqual(c, main.Starts, "The stretch now starts where it ended.");
+        Assert.AreEqual(a, main.Ends, "The stretch now ends where it started.");
+        CollectionAssert.AreEqual(new[] { c, b, a }, main.Stations.ToArray(), "Stations in reversed order.");
+        Assert.IsTrue(main.IsContiguous, "The reversed route is still contiguous.");
+        Assert.AreEqual(25.0, main.DistanceToStation(a), "Distance is now measured from C.");
+    }
+
+    [TestMethod]
+    public void ReverseIsRepeatableAndRestoresTheOriginalRoute()
+    {
+        var (layout, a, b, c, _, _) = BuildBranchingLayout();
+        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+
+        main.Reverse();
+        main.Reverse();
+
+        CollectionAssert.AreEqual(new[] { a, b, c }, main.Stations.ToArray());
+    }
+
+    [TestMethod]
+    public void StretchSharingATrackStretchWithAnotherCannotBeReversed()
+    {
+        var (layout, a, b, _, _, _) = BuildBranchingLayout();
+        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        // A second line reusing A-B, the first track stretch of the main line.
+        var shared = new TimetableStretch(4, "shared");
+        shared.AddLast(layout.TrackStretches.Single(s => s.Start.Equals(a) && s.End.Equals(b)));
+        layout.TimetableStretches.Add(shared);
+
+        Assert.IsFalse(main.CanReverse, "A-B is used by another timetable stretch.");
+        Assert.AreEqual(1, main.SharedStretches().Count, "Only A-B is shared.");
+
+        main.Reverse();
+
+        Assert.AreEqual(a, main.Starts, "Reversing a shared stretch does nothing.");
+    }
+
     // A main line A-B-C (terminal A), a branch B-D diverging at B, and a sub-branch D-E diverging at D.
     private static (Layout Layout, Station A, Station B, Station C, Station D, Station E) BuildBranchingLayout()
     {
