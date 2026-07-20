@@ -1623,4 +1623,16 @@
   <data name="RemoveWagon" xml:space="preserve">
     <value>Fjern vogn</value>
   </data>
+  <data name="LocoDrivers" xml:space="preserve">
+    <value>Lokførere</value>
+  </data>
+  <data name="ExpectedLocoDrivers" xml:space="preserve">
+    <value>Forventet antall lokførere</value>
+  </data>
+  <data name="ExpectedLocoDriversHelp" xml:space="preserve">
+    <value>Antallet lokførere du regner med å ha tilgjengelig. Den grafiske ruteplanen viser for hvert minutt hvor mange lokførere togene faktisk krever, farget mot dette tallet: rødt over, grønt likt, gult én eller to under og grått tre eller flere under. Sett til 0 for å skjule søylene.</value>
+  </data>
+  <data name="RequiredLocoDrivers" xml:space="preserve">
+    <value>Nødvendige lokførere</value>
+  </data>
 </root>

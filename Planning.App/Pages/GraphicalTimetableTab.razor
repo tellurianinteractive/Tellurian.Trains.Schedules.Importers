@@ -16,12 +16,25 @@ else if (ScheduleState.TimetableStretches.Count == 0)
 }
 else
 {
-    <div class="graph-toolbar">
-        <button class="primary" @onclick="() => _showAdd = true">@Translator("AddTrain")</button>
-        <button @onclick="() => _showMove = true">@Translator("MoveTrains")</button>
-        <button @onclick="() => _showClone = true">@Translator("CloneTrains")</button>
-        <button @onclick="() => _showUpdateTimings = true">@Translator("UpdateTimings")</button>
-    </div>
+    @* The loco driver demand strip covers the whole timetable, so it is shown whether or not any stretch is graphed.
+       With a horizontal time axis it shares the graphs' x axis and goes above everything; with a vertical
+       axis it shares their y axis and is placed leftmost in the graph row instead (see below). *@
+    @if (ShowLocoDriverDemand && !IsVerticalAxis)
+    {
+        <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Settings="_graphSettings"
+                            Start="_driverWindow.Start" End="_driverWindow.End" />
+    }
+
+    @* The train actions all operate on what the graphs show, so they appear only once a stretch is graphed. *@
+    @if (_graphSchedules.Count > 0)
+    {
+        <div class="graph-toolbar">
+            <button class="primary" @onclick="() => _showAdd = true">@Translator("AddTrain")</button>
+            <button @onclick="() => _showMove = true">@Translator("MoveTrains")</button>
+            <button @onclick="() => _showClone = true">@Translator("CloneTrains")</button>
+            <button @onclick="() => _showUpdateTimings = true">@Translator("UpdateTimings")</button>
+        </div>
+    }
 
     <div class="selectors">
         <div class="stretch-selector">
@@ -54,18 +67,21 @@ else
         }
     </div>
 
+    <div class="graph-list @StackingCss">
+        @if (ShowLocoDriverDemand && IsVerticalAxis)
+        {
+            <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Settings="_graphSettings"
+                                Start="_driverWindow.Start" End="_driverWindow.End" />
+        }
+        @foreach (var graphSchedule in _graphSchedules)
+        {
+            <GraphicalScheduleEditor Schedule="graphSchedule" Errors="ValidationState.Errors" />
+        }
+    </div>
+
     @if (_graphSchedules.Count == 0)
     {
         <p>@Translator("SelectStretches")</p>
-    }
-    else
-    {
-        <div class="graph-list @StackingCss">
-            @foreach (var graphSchedule in _graphSchedules)
-            {
-                <GraphicalScheduleEditor Schedule="graphSchedule" Errors="ValidationState.Errors" />
-            }
-        </div>
     }
 
     @if (_showAdd)
@@ -91,6 +107,8 @@ else
 
 @code {
     private List<GraphSchedule> _graphSchedules = [];
+    private GraphSettings? _graphSettings;
+    private (TimeSpan Start, TimeSpan End) _driverWindow;
     private GraphHalf _half = GraphHalf.Whole;
     private bool _showAdd;
     private bool _showMove;
@@ -107,12 +125,15 @@ else
         (GraphHalf.Last, "LastHalf"),
     ];
 
+    // The loco driver demand strip needs a timetable, the shared axis geometry, and drivers to compare against; it
+    // hides itself when none are expected, but there is no point rendering it without the first two.
+    private bool ShowLocoDriverDemand => ScheduleState.Timetable is not null && _graphSettings is not null;
+
+    private bool IsVerticalAxis => _graphSettings?.AxisDirection == TimeAxisDirection.Vertical;
+
     // Horizontal time axis → graphs grow downward, so stack them vertically; a vertical
     // time axis makes graphs grow sideways, so stack them horizontally.
-    private string StackingCss =>
-        _graphSchedules.FirstOrDefault()?.AxisDirection == TimeAxisDirection.Vertical
-            ? "stack-horizontal"
-            : "stack-vertical";
+    private string StackingCss => IsVerticalAxis ? "stack-horizontal" : "stack-vertical";
 
     protected override void OnInitialized()
     {
@@ -157,15 +178,26 @@ else
     {
         if (ScheduleState.Timetable is { } timetable)
         {
-            var graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
+            _graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
             // A break may have been cleared since it was last selected; fall back to the whole graph.
             if (!HasBreak) _half = GraphHalf.Whole;
             _graphSchedules = [.. ScheduleState.SelectedStretches
-                .Select(stretch => new GraphSchedule(stretch, timetable, graphSettings, _half))];
+                .Select(stretch => new GraphSchedule(stretch, timetable, _graphSettings, _half))];
+
+            // The loco driver demand strip shares the graphs' time axis. Take the window from a drawn graph whenever
+            // there is one, so the two line up exactly; with nothing selected there is no graph to match, so
+            // derive the same window from the whole timetable instead.
+            _driverWindow = _graphSchedules.FirstOrDefault() is { } graph
+                ? (graph.StartTime, graph.EndTime)
+                : GraphSchedule.TimeWindow(
+                    _graphSettings ?? GraphSettings.Default,
+                    GraphSchedule.CrossesMidnight(timetable.Trains.SelectMany(t => t.Calls)),
+                    _half);
         }
         else
         {
             _graphSchedules = [];
+            _graphSettings = null;
         }
     }
 

@@ -1625,4 +1625,16 @@
   <data name="RemoveWagon" xml:space="preserve">
     <value>Remove wagon</value>
   </data>
+  <data name="LocoDrivers" xml:space="preserve">
+    <value>Loco drivers</value>
+  </data>
+  <data name="ExpectedLocoDrivers" xml:space="preserve">
+    <value>Expected loco drivers</value>
+  </data>
+  <data name="ExpectedLocoDriversHelp" xml:space="preserve">
+    <value>The number of loco drivers you expect to have available. The graphical timetable shows, for every minute, how many drivers the trains actually require, coloured against this number: red above it, green equal to it, yellow one or two below it and grey three or more below it. Set to 0 to hide the bars.</value>
+  </data>
+  <data name="RequiredLocoDrivers" xml:space="preserve">
+    <value>Required loco drivers</value>
+  </data>
 </root>

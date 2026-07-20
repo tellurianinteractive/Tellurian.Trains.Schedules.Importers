@@ -1,0 +1,42 @@
+/* The loco driver demand strip mirrors .graph-container: it must keep its full SVG size as a flex child so it
+   scrolls with the graphs rather than shrinking and growing its own scrollbar. */
+.loco-driver-demand {
+    overflow: auto;
+    flex-shrink: 0;
+    /* Anchors the absolutely positioned heading icon to the strip. */
+    position: relative;
+
+    /* Icon only, and taken out of flow so it costs the strip no width or height: it is placed over the
+       axis margin inside the SVG, from inline offsets the component computes per orientation. */
+    .loco-driver-demand-heading {
+        position: absolute;
+        font-size: 0.85rem;
+        line-height: 1;
+        color: #1a3a5c;
+    }
+
+    /* The expected level: dashed so it reads as a reference rather than as data. */
+    .expected {
+        stroke: #1a3a5c;
+        stroke-width: 1;
+        stroke-dasharray: 4 3;
+    }
+
+    .expected-label {
+        font-size: 7pt;
+        font-weight: bold;
+        fill: #1a3a5c;
+    }
+
+    /* The label sits just outside the time axis origin, tucked against the reference line: at the left
+       for a horizontal axis, above it for a vertical one, where the axes are transposed. */
+    &.horizontal .expected-label {
+        text-anchor: end;
+        dominant-baseline: central;
+    }
+
+    &.vertical .expected-label {
+        text-anchor: middle;
+        dominant-baseline: text-after-edge;
+    }
+}

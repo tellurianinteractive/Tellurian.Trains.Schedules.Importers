@@ -1,0 +1,159 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@inject Translator Translator
+
+@* A strip of bars showing how many train drivers the timetable actually requires at each minute of the
+   graphical schedule's time window, coloured by how that compares with the number expected to be available.
+   It shares the schedule's time axis geometry (origin and minute spacing), so it lines up with the graphs:
+   above them for a horizontal time axis, beside them for a vertical one. *@
+
+@if (_visible)
+{
+    <div class="loco-driver-demand @Orientation">
+        @* An icon rather than the full caption, and positioned over the strip's own axis margin — the area
+           the graph geometry leaves free before the time axis starts. It therefore costs no layout space in
+           either orientation, where a text heading would stretch the strip well past its bars. The caption
+           is the tooltip instead. *@
+        <div class="loco-driver-demand-heading" style="@HeadingStyle" title="@Heading">
+            <i class="fa-solid fa-users" role="img" aria-label="@Heading"></i>
+        </div>
+        <svg width="@_width" height="@_height">
+            @* The expected level, so it is obvious at a glance which bars rise above it. *@
+            <line class="expected" x1="@_expectedLine.Start.X" y1="@_expectedLine.Start.Y" x2="@_expectedLine.End.X" y2="@_expectedLine.End.Y"></line>
+            <text class="expected-label" x="@_expectedLabel.X" y="@_expectedLabel.Y">@_expected</text>
+
+            @foreach (var bar in _bars)
+            {
+                <rect fill="@BarFill(bar.Count)" x="@bar.X" y="@bar.Y" width="@bar.Width" height="@bar.Height">
+                    <title>@BarTitle(bar)</title>
+                </rect>
+            }
+        </svg>
+    </div>
+}
+
+@code {
+    /// <summary>The timetable the demand is computed from. Always the whole timetable, not only the trains
+    /// on the stretches currently graphed, since drivers are needed layout-wide.</summary>
+    [Parameter, EditorRequired] public Timetable? Timetable { get; set; }
+
+    /// <summary>The graph settings whose axis geometry the bars follow, so the strip lines up with the graphs
+    /// drawn from the same settings. Also carries the expected number of drivers to colour against.</summary>
+    [Parameter, EditorRequired] public GraphSettings? Settings { get; set; }
+
+    /// <summary>The visible time window, matching the graphs'. Taken from a drawn graph when there is one, so
+    /// the strip aligns with it exactly; derived from the layout's operating window when nothing is selected.</summary>
+    [Parameter] public TimeSpan Start { get; set; }
+
+    /// <inheritdoc cref="Start"/>
+    [Parameter] public TimeSpan End { get; set; }
+
+    // Extent of the strip perpendicular to the time axis: the full-scale bar length.
+    const int StripThickness = 48;
+
+    private readonly List<Bar> _bars = [];
+    private int _expected;
+    private int _width;
+    private int _height;
+    private bool _visible;
+    private (Offset Start, Offset End) _expectedLine;
+    private Offset _expectedLabel;
+
+    private string Heading => Translator("RequiredLocoDrivers");
+
+    private bool IsVertical => Settings?.AxisDirection == TimeAxisDirection.Vertical;
+
+    // Places the icon in the margin the axis geometry already leaves empty: for a horizontal time axis that
+    // is the band left of the axis origin (the graphs' kilometre-label column), where it is centred on the
+    // strip's own height; for a vertical axis it is the band above the origin, where it is centred across the
+    // strip's width and kept at the very top so it clears the expected-level label just below.
+    private string HeadingStyle =>
+        IsVertical
+            ? $"left:{StripThickness / 2}px;top:0;transform:translateX(-50%);"
+            : $"left:2px;top:{StripThickness / 2}px;transform:translateY(-50%);";
+
+    private string Orientation => IsVertical ? "vertical" : "horizontal";
+
+    // One run of consecutive minutes needing the same number of drivers, already placed in SVG coordinates.
+    private sealed record Bar(int Count, int FromMinute, int ToMinute, int X, int Y, int Width, int Height);
+
+    protected override void OnParametersSet() => Build();
+
+    private void Build()
+    {
+        _bars.Clear();
+        _visible = false;
+        if (Timetable is not { } timetable || Settings is not { } settings) return;
+
+        _expected = settings.ExpectedLocoDrivers;
+        // Without an expectation there is nothing to colour the demand against, so the strip stays hidden.
+        if (_expected <= 0) return;
+
+        var demand = timetable.RequiredLocoDriversPerMinute(Start, End, settings.UseDays, settings.MaxSessions);
+        if (demand.Length == 0) return;
+
+        var horizontal = !IsVertical;
+
+        // Full scale is the busiest minute, but never below the expected level, so the reference line stays
+        // on the strip even when the timetable never uses all the drivers available.
+        var scaleMax = Math.Max(demand.Max(), _expected);
+        double unit = (double)StripThickness / scaleMax;
+
+        // The strip's time axis starts where the graphs' does and advances at the same rate, so minute n sits
+        // at the same place on both. Bars grow from the edge nearest the graphs away from them: upwards from
+        // the bottom for a horizontal axis, leftwards from the right edge for a vertical one.
+        var origin = horizontal ? settings.KilometerAxisSpacing.X : settings.KilometerAxisSpacing.Y;
+        var extent = origin + (demand.Length * settings.MinuteSpacing) + settings.EndMargin;
+        _width = horizontal ? extent : StripThickness;
+        _height = horizontal ? StripThickness : extent;
+
+        foreach (var (count, from, to) in Runs(demand))
+        {
+            var length = (int)Math.Round(count * unit);
+            var along = origin + (from * settings.MinuteSpacing);
+            var thickness = (to - from) * settings.MinuteSpacing;
+            _bars.Add(horizontal
+                ? new Bar(count, from, to, along, StripThickness - length, thickness, length)
+                : new Bar(count, from, to, StripThickness - length, along, length, thickness));
+        }
+
+        var expectedAt = StripThickness - (int)Math.Round(_expected * unit);
+        var axisEnd = origin + (demand.Length * settings.MinuteSpacing);
+        _expectedLine = horizontal
+            ? (new Offset(origin, expectedAt), new Offset(axisEnd, expectedAt))
+            : (new Offset(expectedAt, origin), new Offset(expectedAt, axisEnd));
+        _expectedLabel = horizontal
+            ? new Offset(origin - 4, expectedAt)
+            : new Offset(expectedAt, origin - 4);
+        _visible = true;
+    }
+
+    // Collapses the per-minute demand into runs of equal count, so the strip draws a handful of wide bars
+    // rather than one narrow rect per minute. Minutes needing nobody produce no bar at all.
+    private static IEnumerable<(int Count, int From, int To)> Runs(int[] demand)
+    {
+        var from = 0;
+        for (var i = 1; i <= demand.Length; i++)
+        {
+            if (i < demand.Length && demand[i] == demand[from]) continue;
+            if (demand[from] > 0) yield return (demand[from], from, i);
+            from = i;
+        }
+    }
+
+    // Colour by how the demand compares with the drivers expected: needing more drivers than there are is the
+    // problem to spot, an exact match is ideal, a small surplus is reserve and a large one is idle drivers.
+    private string BarFill(int count)
+    {
+        var under = _expected - count;
+        return under < 0 ? "#d9534f"    // above expected — more drivers needed than available
+            : under == 0 ? "#5cb85c"    // exactly the expected number
+            : under <= 2 ? "#f0ad4e"    // one or two drivers spare
+            : "#adb5bd";                // three or more spare
+    }
+
+    private string BarTitle(Bar bar) =>
+        $"{Clock(bar.FromMinute)}–{Clock(bar.ToMinute)}: {bar.Count}/{_expected}";
+
+    private string Clock(int minute) => (Start + TimeSpan.FromMinutes(minute)).ToString(@"hh\:mm");
+}

@@ -36,6 +36,7 @@ public static class GraphSettingsMapping
                 UseDays = settings.General.UseDays,
                 MaxSessions = settings.General.MaxSessions,
                 StartDay = settings.General.StartDay,
+                ExpectedLocoDrivers = settings.General.ExpectedLocoDrivers,
                 TrainLabelFontPoints = gt.TrainLabelFontSize,
             };
         }

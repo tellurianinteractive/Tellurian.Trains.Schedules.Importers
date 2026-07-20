@@ -1492,10 +1492,10 @@
     <value>Visa en notis om att koppla loss vagnarna vid ankomstanropet.</value>
   </data>
   <data name="CargoFlowShuntBeforeHint" xml:space="preserve">
-    <value>Tågföraren växlar även de avgående vagnarna före avgång.</value>
+    <value>Lokföraren växlar även de avgående vagnarna före avgång.</value>
   </data>
   <data name="CargoFlowShuntAfterHint" xml:space="preserve">
-    <value>Tågföraren växlar även de ankomna vagnarna efter ankomst.</value>
+    <value>Lokföraren växlar även de ankomna vagnarna efter ankomst.</value>
   </data>
   <data name="CargoFlowNoWagonsHereHint" xml:space="preserve">
     <value>Ta inga vagnar från denna station; flödet vidarebefordrar ändå vagnar från beskrivningens ursprung.</value>
@@ -1622,5 +1622,17 @@
   </data>
   <data name="RemoveWagon" xml:space="preserve">
     <value>Ta bort vagn</value>
+  </data>
+  <data name="LocoDrivers" xml:space="preserve">
+    <value>Lokförare</value>
+  </data>
+  <data name="ExpectedLocoDrivers" xml:space="preserve">
+    <value>Förväntat antal lokförare</value>
+  </data>
+  <data name="ExpectedLocoDriversHelp" xml:space="preserve">
+    <value>Antalet lokförare du räknar med att ha tillgängliga. Den grafiska tidtabellen visar för varje minut hur många förare tågen faktiskt kräver, färgade mot detta antal: rött över, grönt lika med, gult en eller två under och grått tre eller fler under. Sätt till 0 för att dölja staplarna.</value>
+  </data>
+  <data name="RequiredLocoDrivers" xml:space="preserve">
+    <value>Behov av lokförare</value>
   </data>
 </root>

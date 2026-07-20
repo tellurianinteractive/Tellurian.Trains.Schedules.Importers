@@ -1623,4 +1623,16 @@
   <data name="RemoveWagon" xml:space="preserve">
     <value>Wagen entfernen</value>
   </data>
+  <data name="LocoDrivers" xml:space="preserve">
+    <value>Lokführer</value>
+  </data>
+  <data name="ExpectedLocoDrivers" xml:space="preserve">
+    <value>Erwartete Triebfahrzeugführer</value>
+  </data>
+  <data name="ExpectedLocoDriversHelp" xml:space="preserve">
+    <value>Die Anzahl der Triebfahrzeugführer, die voraussichtlich zur Verfügung stehen. Der Bildfahrplan zeigt für jede Minute, wie viele Triebfahrzeugführer die Züge tatsächlich benötigen, eingefärbt im Vergleich zu dieser Zahl: rot darüber, grün gleich, gelb ein oder zwei darunter und grau drei oder mehr darunter. Mit 0 werden die Balken ausgeblendet.</value>
+  </data>
+  <data name="RequiredLocoDrivers" xml:space="preserve">
+    <value>Benötigte Triebfahrzeugführer</value>
+  </data>
 </root>

@@ -40,6 +40,14 @@ public sealed class GeneralSettings
     public TimeSpan? BreakTime { get; set; }
 
     /// <summary>
+    /// The number of loco drivers expected to be available during operation. The graphical timetable
+    /// compares the drivers actually required minute by minute against this number, colouring each bar
+    /// by how far the demand is above or below it. <c>0</c> means no expectation is set, and the
+    /// demand bars are then not shown. Default is 0.
+    /// </summary>
+    public int ExpectedLocoDrivers { get; set; }
+
+    /// <summary>
     /// When <c>true</c>, reports render each item in the language derived from the item itself
     /// (for example, a driver duty in its operating company's language) rather than in the user's
     /// preferred interface language. The interface and any item without a derivable language keep

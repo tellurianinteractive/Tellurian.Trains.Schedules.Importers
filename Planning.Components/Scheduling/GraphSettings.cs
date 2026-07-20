@@ -55,6 +55,11 @@ public record GraphSettings
     /// when the label shows days. Mirrors the layout's <c>General.StartDay</c> setting.</summary>
     public DayOfWeek StartDay { get; set; } = DayOfWeek.Monday;
 
+    /// <summary>The number of loco drivers expected to be available, which the demand bars are coloured
+    /// against. <c>0</c> means no expectation is set and the bars are not shown. Mirrors the layout's
+    /// <c>General.ExpectedLocoDrivers</c> setting.</summary>
+    public int ExpectedLocoDrivers { get; set; }
+
     /// <summary>Font size in points of the train identity labels along the train lines. Drives both the
     /// rendered text and the label-thinning overlap estimate, so changing it re-thins on the next render.</summary>
     public int TrainLabelFontPoints { get; set; }

@@ -25,13 +25,33 @@ public class GraphSchedule
         // A train may start before midnight and continue past it (calls at 24:00 or later). When any
         // call shown on this stretch runs to or past 24:00, the axis spans the full day 00:00–24:00 so
         // the after-midnight part can wrap to the start. See GraphScheduleDrawingExtensions wrapping.
-        _crossesMidnight = Trains
-            .SelectMany(t => t.Calls.Where(c => stretchStations.Contains(c.OperationLocation)))
-            .Any(c => c.Arrival.Value >= OneDay || c.Departure.Value >= OneDay);
+        _crossesMidnight = CrossesMidnight(Trains
+            .SelectMany(t => t.Calls.Where(c => stretchStations.Contains(c.OperationLocation))));
     }
 
     private static readonly TimeSpan OneDay = TimeSpan.FromHours(24);
     private readonly bool _crossesMidnight;
+
+    /// <summary>Whether any of these calls runs to or past midnight, which forces the time axis to the full
+    /// day so the after-midnight part can wrap back to its start.</summary>
+    public static bool CrossesMidnight(IEnumerable<StationCall> calls) =>
+        calls.Any(c => c.Arrival.Value >= OneDay || c.Departure.Value >= OneDay);
+
+    /// <summary>
+    /// The visible time window for a graph drawn with these settings: the layout's operating window, widened
+    /// to the whole day when <paramref name="crossesMidnight"/>, then narrowed to the selected
+    /// <paramref name="half"/> if a break falls strictly inside it. Exposed so views that share the graphs'
+    /// time axis without owning a stretch (such as the staffing strip) can derive the same window.
+    /// </summary>
+    public static (TimeSpan Start, TimeSpan End) TimeWindow(GraphSettings settings, bool crossesMidnight, GraphHalf half)
+    {
+        var start = crossesMidnight ? TimeSpan.Zero : settings.DefaultStartTime;
+        var end = crossesMidnight ? OneDay : settings.DefaultEndTime;
+        TimeSpan? @break = settings.BreakTime is { } b && b > start && b < end ? b : null;
+        return (
+            half == GraphHalf.Last && @break is { } lastFrom ? lastFrom : start,
+            half == GraphHalf.First && @break is { } firstTo ? firstTo : end);
+    }
 
     public TimetableStretch TimetableStretch { get; }
     public Timetable Timetable { get; }
@@ -59,8 +79,8 @@ public class GraphSchedule
     /// <summary>Whether a break is configured for this schedule, so first/last half can be selected.</summary>
     public bool HasBreak => EffectiveBreak is not null;
 
-    public TimeSpan StartTime => Half == GraphHalf.Last && EffectiveBreak is { } b ? b : WindowStart;
-    public TimeSpan EndTime => Half == GraphHalf.First && EffectiveBreak is { } b ? b : WindowEnd;
+    public TimeSpan StartTime => TimeWindow(GraphSettings, _crossesMidnight, Half).Start;
+    public TimeSpan EndTime => TimeWindow(GraphSettings, _crossesMidnight, Half).End;
 }
 
 /// <summary>

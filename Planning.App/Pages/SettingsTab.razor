@@ -91,6 +91,12 @@ else
                     </span>
                 </div>
 
+                <div class="group-heading">@Translator("LocoDrivers")</div>
+                <div class="field">
+                    <HelpLabel For="ExpectedLocoDrivers" />
+                    <input type="number" min="0" max="99" @bind="g.ExpectedLocoDrivers" @bind:after="OnEdited" />
+                </div>
+
                 <div class="group-heading">@Translator("Reports")</div>
                 <div class="field">
                     <HelpLabel For="UseObjectLanguageInReports" />
