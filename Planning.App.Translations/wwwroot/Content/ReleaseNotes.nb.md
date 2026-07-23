@@ -1,5 +1,16 @@
 # Versjonsnyheter
 
+## Version 0.2.2
+
+### Feilrettinger
+
+- To tog som aldri kjører i samme driftsøkt, rapporteres ikke lenger som et møte på en
+  enkeltsporet strekning. Et tog som kjører økt 1, 3, 5, og ett som kjører 2, 4, 6, kan
+  nå dele samme spor uten en falsk advarsel, fordi de aldri er ute samtidig.
+- Konfliktkontrollen på dobbeltsporede (og flersporede) strekninger er nå presis: en
+  strekning merkes bare når det er flere tog på den samtidig enn den har spor, og bare
+  tog som kjører i en felles økt telles med.
+
 ## Version 0.2.1
 
 - Konfliktvarsler vises nå der du kan rette dem. Togkonflikter vises bare i den

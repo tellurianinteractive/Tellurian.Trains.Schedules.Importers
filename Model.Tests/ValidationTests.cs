@@ -558,6 +558,147 @@ public class ValidationTests
         Assert.HasCount(1, errors);
     }
 
+    // --- Stretch conflicts: two trains meet on a single-track stretch only on a common session ---
+
+    // Two trains occupy the same single-track stretch (G<->Yb) at the same clock time: the forward run
+    // 12:00-12:25 and an opposing run that departs Yb 12:00 and arrives G 12:25.
+    private static (Plan plan, Train forward, Train opposite) TrainsMeetingOnSingleTrackStretch()
+    {
+        var timetable = NewTimetable();
+        var category = Category;
+        var forward = TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00));  // G->Yb 12:00-12:25
+        var opposite = TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(11, 30)); // Yb->G 12:00-12:25
+        timetable.Add(forward);
+        timetable.Add(opposite);
+        return (Plan.Create("Test", timetable), forward, opposite);
+    }
+
+    [TestMethod]
+    public void TrainsMeetingOnSingleTrackOnCommonSessionsIsReported()
+    {
+        var (plan, forward, opposite) = TrainsMeetingOnSingleTrackStretch();
+        forward.Sessions = Sessions.FromSessionNumbers(1, 2, 3);
+        opposite.Sessions = Sessions.FromSessionNumbers(3, 4, 5); // overlaps on session 3
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrackStretchConflict);
+
+        Assert.IsNotEmpty(errors, "Two trains sharing a single-track stretch at the same time on a common session conflict.");
+    }
+
+    [TestMethod]
+    public void TrainsMeetingOnSingleTrackOnDisjointSessionsIsAllowed()
+    {
+        var (plan, forward, opposite) = TrainsMeetingOnSingleTrackStretch();
+        forward.Sessions = Sessions.FromSessionNumbers(1, 3, 5);
+        opposite.Sessions = Sessions.FromSessionNumbers(2, 4, 6); // never runs on the same session as forward
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrackStretchConflict);
+
+        Assert.IsEmpty(errors, "Trains that never share a session cannot meet, even though their clock times overlap.");
+    }
+
+    // A layout with a single double-track stretch G->Yb, and one G->Yb train per spec (departure, running
+    // minutes, sessions). Two trains may share the double track at once; only a third overlapping train on a
+    // common session is a conflict.
+    private static Plan DoubleTrackPlan(params (int number, Time departure, int minutes, Sessions sessions)[] specs)
+    {
+        TestDataFactory.Init();
+        var stations = TestDataFactory.Stations.ToArray();
+        var g = stations[0];
+        var yb = stations[1];
+        var layout = new Layout { Name = "Test" };
+        layout.Add(g);
+        layout.Add(yb);
+        var stretch = new TrackStretch(1, g, yb, 10, tracksCount: 2);
+        layout.Add(stretch);
+        var line = new TimetableStretch(1, "1");
+        line.AddLast(stretch);
+        layout.Add(line);
+        var timetable = new Timetable("Test", layout);
+        var gTrack = 1;
+        var ybTrack = 1;
+        foreach (var (number, departure, minutes, sessions) in specs)
+        {
+            var train = new Train(number, Category, number) { Category = Category, Sessions = sessions };
+            // Distinct tracks so overlapping trains do not also raise station-track conflicts.
+            _ = train.Add(new StationCall(2 * number - 1, g[gTrack.ToString()], departure, departure));
+            _ = train.Add(new StationCall(2 * number, yb[ybTrack.ToString()], departure.AddMinutes(minutes), departure.AddMinutes(minutes)));
+            timetable.Add(train);
+            gTrack = gTrack % 4 + 1;
+            ybTrack = ybTrack % 2 + 1;
+        }
+        return Plan.Create("Test", timetable);
+    }
+
+    private static IEnumerable<ValidationError> StretchConflicts(Plan plan) =>
+        plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.TrackStretchConflict);
+
+    [TestMethod]
+    public void TwoTrainsSharingADoubleTrackIsAllowed()
+    {
+        // Two trains overlap 12:05-12:25 on the double track — within its two-track capacity.
+        var plan = DoubleTrackPlan(
+            (1, Time.FromHourAndMinute(12, 00), 25, Sessions.All),
+            (2, Time.FromHourAndMinute(12, 05), 25, Sessions.All));
+
+        Assert.IsEmpty(StretchConflicts(plan), "Two trains fit on a double-track stretch.");
+    }
+
+    [TestMethod]
+    public void ThreeTrainsSharingADoubleTrackOnACommonSessionIsReported()
+    {
+        // All three overlap around 12:10 on the double track and all run session 3: one too many.
+        var plan = DoubleTrackPlan(
+            (1, Time.FromHourAndMinute(12, 00), 25, Sessions.FromSessionNumbers(1, 3, 5)),
+            (2, Time.FromHourAndMinute(12, 05), 25, Sessions.FromSessionNumbers(2, 3, 4)),
+            (3, Time.FromHourAndMinute(12, 10), 25, Sessions.FromSessionNumbers(3, 6, 9)));
+
+        Assert.IsNotEmpty(StretchConflicts(plan), "Three trains on a double track at once on a common session exceed capacity.");
+    }
+
+    [TestMethod]
+    public void ThreeTrainsSharingADoubleTrackButNoCommonSessionIsAllowed()
+    {
+        // All three overlap around 12:10, but only trains 1 and 3 ever run together (odd sessions); train 2
+        // runs even sessions. On any one session at most two trains share the stretch, so it stays in
+        // capacity — the case the endpoint-only check used to flag.
+        var plan = DoubleTrackPlan(
+            (1, Time.FromHourAndMinute(12, 00), 25, Sessions.FromSessionNumbers(1, 3, 5)),
+            (2, Time.FromHourAndMinute(12, 05), 25, Sessions.FromSessionNumbers(2, 4, 6)),
+            (3, Time.FromHourAndMinute(12, 10), 25, Sessions.FromSessionNumbers(1, 3, 5)));
+
+        Assert.IsEmpty(StretchConflicts(plan), "No session ever has three of these trains on the stretch at once.");
+    }
+
+    [TestMethod]
+    public void ShortMiddleTrainDoesNotCauseAFalseDoubleTrackConflict()
+    {
+        // Train 2 has cleared the stretch (12:05-12:07) before train 3 departs at 12:10, so only trains 1 and
+        // 3 share it then — two trains, within capacity. The endpoint-only check compared train 1 with train 3
+        // and wrongly flagged it; the sweep does not.
+        var plan = DoubleTrackPlan(
+            (1, Time.FromHourAndMinute(12, 00), 60, Sessions.All),  // 12:00-13:00, long
+            (2, Time.FromHourAndMinute(12, 05), 2, Sessions.All),   // 12:05-12:07, gone before 12:10
+            (3, Time.FromHourAndMinute(12, 10), 25, Sessions.All)); // 12:10-12:35
+
+        Assert.IsEmpty(StretchConflicts(plan), "Only two trains are ever on the stretch at once.");
+    }
+
+    [TestMethod]
+    public void FourTrainsSharingADoubleTrackOnACommonSessionIsReported()
+    {
+        // Four trains overlap around 12:15 on a double track, all on session 2: well over capacity.
+        var plan = DoubleTrackPlan(
+            (1, Time.FromHourAndMinute(12, 00), 25, Sessions.FromSessionNumbers(2)),
+            (2, Time.FromHourAndMinute(12, 05), 25, Sessions.FromSessionNumbers(2)),
+            (3, Time.FromHourAndMinute(12, 10), 25, Sessions.FromSessionNumbers(2)),
+            (4, Time.FromHourAndMinute(12, 15), 25, Sessions.FromSessionNumbers(2)));
+
+        Assert.IsNotEmpty(StretchConflicts(plan), "Four trains cannot share a double-track stretch at once.");
+    }
+
     // --- ValidationError GUI predicates: used by components to highlight the offending object ---
 
     // A duplicate-train-number conflict is a compact source of a ValidationError that involves two

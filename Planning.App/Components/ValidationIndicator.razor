@@ -2,7 +2,8 @@
 @inject ValidationStateService Validation
 @inject NavigationManager Nav
 @inject Translator Translator
-@implements IDisposable
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <div class="validation-indicator @SeverityCss">
     <button class="header-btn indicator-btn" @onclick="Toggle" title="@Translator("Conflicts")">
@@ -19,7 +20,15 @@
         <div class="panel" @onclick:stopPropagation>
             <header class="panel-header">
                 <h3>@Translator("Conflicts")</h3>
-                <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
+                <div class="header-actions">
+                    @if (Validation.HasErrors)
+                    {
+                        <button class="copy" @onclick="CopyToClipboard" title="@Translator("CopyToClipboard")">
+                            <i class="fa-solid @(_copied ? "fa-check" : "fa-copy")"></i>
+                        </button>
+                    }
+                    <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </header>
             @if (!Validation.HasErrors)
             {
@@ -40,8 +49,24 @@
 
 @code {
     private bool _open;
+    private bool _copied;
+    private IJSObjectReference? _clipboard;
 
     protected override void OnInitialized() => Validation.OnValidationChanged += OnChanged;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _clipboard = await JS.InvokeAsync<IJSObjectReference>("import", "./js/clipboard.js");
+    }
+
+    // Copy every conflict message, most severe first, one per line.
+    private async Task CopyToClipboard()
+    {
+        if (_clipboard is null) return;
+        var text = string.Join(Environment.NewLine, Ordered.Select(e => e.Message.Text));
+        _copied = await _clipboard.InvokeAsync<bool>("copyText", text);
+    }
 
     // Most severe first, so the worst problems are read first.
     private IEnumerable<ValidationError> Ordered => Validation.Errors.OrderByDescending(e => e.Severity);
@@ -64,9 +89,17 @@
         _ => "sev-none",
     };
 
-    private void Toggle() => _open = !_open;
+    private void Toggle()
+    {
+        _open = !_open;
+        _copied = false;
+    }
 
-    private void Close() => _open = false;
+    private void Close()
+    {
+        _open = false;
+        _copied = false;
+    }
 
     // Jump to the tab where this kind of conflict is edited (and highlighted), then close the panel.
     private void GoTo(ValidationError error)
@@ -94,5 +127,13 @@
 
     private void OnChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => Validation.OnValidationChanged -= OnChanged;
+    public async ValueTask DisposeAsync()
+    {
+        Validation.OnValidationChanged -= OnChanged;
+        if (_clipboard is not null)
+        {
+            try { await _clipboard.DisposeAsync(); }
+            catch (JSDisconnectedException) { /* circuit already gone */ }
+        }
+    }
 }

@@ -1583,6 +1583,9 @@
   <data name="Conflicts" xml:space="preserve">
     <value>Conflicts</value>
   </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Copy all to clipboard</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>No conflicts</value>
   </data>

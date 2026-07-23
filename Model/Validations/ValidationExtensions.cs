@@ -626,18 +626,51 @@ public static class ValidationExtensions
 
     extension(TrackStretch trackStretch)
     {
+        /// <summary>
+        /// Finds trains that exceed the stretch's capacity: on a stretch with <c>TracksCount</c> tracks,
+        /// up to that many trains may occupy it at once, so a conflict is the <c>(TracksCount + 1)</c>-th
+        /// train sharing the stretch at the same time. Two trains only meet if they run on a common
+        /// operating session — a train working sessions 1,3,5 never shares the stretch with one working
+        /// 2,4,6 — so capacity is judged per session: the conflict is more than <c>TracksCount</c> trains
+        /// present at one instant that all run one common session. A train occupies the stretch for the
+        /// half-open interval from when it departs the first station until it arrives at the second, so a
+        /// train arriving exactly as another departs (a meet at the station) does not count. Concurrency
+        /// only rises when a train departs, so testing every departure instant catches every peak.
+        /// </summary>
         internal IEnumerable<ValidationError> GetConflictingTrains()
         {
-            var result = new List<ValidationError>();
+            var tracks = trackStretch.TracksCount;
             var passings = trackStretch.Passings.OrderBy(p => p.Departure.Value).ToArray();
-            for (var i = 0; i < passings.Length - trackStretch.TracksCount; i++)
+            if (passings.Length <= tracks) return [];
+
+            var result = new List<ValidationError>();
+            var reported = new HashSet<(int, int)>();
+            for (var q = 0; q < passings.Length; q++)
             {
-                var first = passings[i];
-                var second = passings[i + trackStretch.TracksCount];
-                if (first.To.Train!.Number != second.To.Train!.Number && first.To.Arrival > second.From.Departure)
+                var entering = passings[q];
+                var instant = entering.Departure;
+                // The passings occupying the stretch at the instant this one departs, in departure order.
+                var active = new List<int>();
+                for (var k = 0; k < passings.Length; k++)
+                    if (passings[k].Departure <= instant && passings[k].Arrival > instant) active.Add(k);
+
+                for (var session = 1; session <= 14; session++)
                 {
+                    if (!entering.Train.Sessions.Includes(session)) continue;
+                    var onSession = active.Where(k => passings[k].Train.Sessions.Includes(session)).ToList();
+                    if (onSession.Count <= tracks) continue;
+
+                    // Over capacity on this session. Report the earliest-departing other train meeting the
+                    // one that tips the stretch over; the pair carries the span and trains for the GUI, and
+                    // is reported once however many sessions or instants surface it.
+                    var other = onSession.FirstOrDefault(k => passings[k].Train.Number != entering.Train.Number, -1);
+                    if (other < 0) continue;
+                    var key = other < q ? (other, q) : (q, other);
+                    if (!reported.Add(key)) continue;
+
+                    var first = passings[key.Item1];
+                    var second = passings[key.Item2];
                     var message = Message.Information(Strings.TrainBetweenPassingIsConflictingWithTrainBetweenPassing, first.From.Train!.Number, first, second.To.Train!.Number, second);
-                    // Use the tracks from the station calls for the conflict location
                     result.Add(ValidationError.StretchConflict(first.From.Track, first.To.Track, first, second, message));
                 }
             }

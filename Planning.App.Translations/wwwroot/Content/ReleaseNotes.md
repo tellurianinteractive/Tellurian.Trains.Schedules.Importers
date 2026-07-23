@@ -1,5 +1,17 @@
 # Release Notes
 
+## Version 0.2.2
+
+### Fixes
+
+- Two trains that never run on the same operating session are no longer reported as
+  meeting on a single-track stretch. A train running sessions 1, 3, 5 and one running
+  2, 4, 6 can now share the same track without a false warning, because they are never
+  out at the same time.
+- Conflict checks on double-track (and multi-track) stretches are now precise: a
+  stretch is flagged only when more trains occupy it at the same time than it has
+  tracks, and only counting trains that run a session in common.
+
 ## Version 0.2.1
 
 - Conflict warnings are now shown where you can act on them. Train conflicts appear

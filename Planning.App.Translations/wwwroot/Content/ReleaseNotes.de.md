@@ -1,5 +1,18 @@
 # Versionshinweise
 
+## Version 0.2.2
+
+### Fehlerbehebungen
+
+- Zwei Züge, die nie in derselben Betriebssitzung fahren, werden nicht mehr als
+  Begegnung auf einer eingleisigen Strecke gemeldet. Ein Zug, der in den Sitzungen
+  1, 3, 5 fährt, und einer, der in 2, 4, 6 fährt, können jetzt dasselbe Gleis nutzen,
+  ohne dass eine falsche Warnung erscheint, da sie nie gleichzeitig unterwegs sind.
+- Die Konfliktprüfung auf zweigleisigen (und mehrgleisigen) Strecken ist jetzt genau:
+  Eine Strecke wird nur gemeldet, wenn sich mehr Züge gleichzeitig auf ihr befinden,
+  als sie Gleise hat, und nur Züge gezählt werden, die in einer gemeinsamen Sitzung
+  fahren.
+
 ## Version 0.2.1
 
 - Konfliktwarnungen werden jetzt dort angezeigt, wo Sie sie beheben können.

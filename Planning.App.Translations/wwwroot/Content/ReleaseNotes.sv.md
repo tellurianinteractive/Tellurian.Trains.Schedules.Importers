@@ -1,5 +1,16 @@
 # Versionsnyheter
 
+## Version 0.2.2
+
+### Rättningar
+
+- Två tåg som aldrig går under samma köromgång rapporteras inte längre som ett möte på
+  en enkelspårig sträcka. Ett tåg som går köromgång 1, 3, 5 och ett som går 2, 4, 6 kan
+  nu dela samma spår utan falsk varning, eftersom de aldrig är ute samtidigt.
+- Konfliktkontrollen på dubbelspåriga (och flerspåriga) sträckor är nu exakt: en
+  sträcka flaggas endast när fler tåg befinner sig på den samtidigt än den har spår,
+  och endast tåg som går under en gemensam köromgång räknas.
+
 ## Version 0.2.1
 
 - Konfliktvarningar visas nu där du kan åtgärda dem. Tågkonflikter visas endast i

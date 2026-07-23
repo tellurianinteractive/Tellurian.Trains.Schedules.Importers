@@ -1578,6 +1578,9 @@
   <data name="Conflicts" xml:space="preserve">
     <value>Konflikter</value>
   </data>
+  <data name="CopyToClipboard" xml:space="preserve">
+    <value>Kopier alle til utklippstavlen</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
   </data>

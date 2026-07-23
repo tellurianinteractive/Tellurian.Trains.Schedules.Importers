@@ -1,5 +1,17 @@
 # Versionsnyheder
 
+## Version 0.2.2
+
+### Fejlrettelser
+
+- To tog, der aldrig kører i samme køresession, rapporteres ikke længere som et møde
+  på en enkeltsporet strækning. Et tog, der kører session 1, 3, 5, og et, der kører
+  2, 4, 6, kan nu dele samme spor uden en falsk advarsel, fordi de aldrig er ude
+  samtidig.
+- Konfliktkontrollen på dobbeltsporede (og flersporede) strækninger er nu præcis: en
+  strækning markeres kun, når der er flere tog på den samtidig, end den har spor, og
+  kun tog, der kører i en fælles session, tælles med.
+
 ## Version 0.2.1
 
 - Konfliktadvarsler vises nu, hvor du kan rette dem. Togkonflikter vises kun i den
