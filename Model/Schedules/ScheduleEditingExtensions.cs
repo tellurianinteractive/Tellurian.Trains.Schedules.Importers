@@ -29,14 +29,22 @@ public static class ScheduleEditingExtensions
 
         /// <summary>
         /// Gets the trains that can extend the given schedule, whole or in part. For an empty schedule
-        /// this is every schedulable train (a possible seed). For a non-empty schedule it is every train
-        /// that calls at the schedule's end location — at or after its last arrival, with at least one
-        /// later call — so a train may be joined <em>mid-run</em> (the case that lets one physical train be
-        /// split across two schedules at, say, an electrification boundary). A train sharing none of the
-        /// schedule's <c>EffectiveSessions</c> is left out, as it could
-        /// never work the whole run. Assigned trains are not
-        /// excluded: the same train may supply a part to more than one schedule; the overlap guard in
-        /// <see cref="ScheduleExtensions.Append"/> is what keeps a single schedule consistent.
+        /// the structural base is every schedulable train (a possible seed). For a non-empty schedule it is
+        /// every train that calls at the schedule's end location — at or after its last arrival, with at
+        /// least one later call — so a train may be joined <em>mid-run</em> (the case that lets one physical
+        /// train be split across two schedules at, say, an electrification boundary). A train sharing none of
+        /// the schedule's <c>EffectiveSessions</c> is left out, as it could never work the whole run.
+        /// <para>
+        /// Allocation is only filtered once a vehicle is assigned, because only then is the schedule's role
+        /// known: a train fully worked by a locomotive is still free for a wagonset, so while the schedule
+        /// has no vehicle the base list is returned whole. With a vehicle assigned, a train is left out when
+        /// it cannot share a session with the vehicle, or when its continuation is <em>fully allocated</em> —
+        /// already worked all the way to its last call, on every session this vehicle would work it, by other
+        /// schedules whose vehicles share the assigned vehicle's <see cref="VehicleRole"/>. A train left
+        /// unworked on some session (the complementary-schedule case) or with an unworked tail (the
+        /// boundary-split case) stays a candidate. The overlap guard in
+        /// <see cref="ScheduleExtensions.Append"/> keeps a single schedule consistent.
+        /// </para>
         /// </summary>
         /// <param name="schedule">The schedule being built.</param>
         /// <returns>The candidate trains, ordered by the departure at which they join, then by number.</returns>
@@ -44,19 +52,66 @@ public static class ScheduleEditingExtensions
         {
             plan = plan.ValueOrException(nameof(plan));
             schedule = schedule.ValueOrException(nameof(schedule));
-            if (schedule.EndLocation is not { } end || schedule.LastArrival is not { } lastArrival)
-                return [.. plan.SchedulableTrains().OrderBy(t => t.Calls[0].Departure.Value).ThenBy(t => t.Number)];
+
+            // The structural base: (train, join-call) pairs that can continue the schedule. The join index is
+            // 0 for an empty schedule (a seed may start anywhere) or the mid-run join call for a non-empty one.
+            IEnumerable<(Train train, int index)> candidates =
+                schedule.EndLocation is null || schedule.LastArrival is null
+                    ? plan.SchedulableTrains().Select(train => (train, index: 0))
+                    : plan.SchedulableTrains()
+                        .Select(train => (train, index: schedule.JoinCallIndexFor(train)))
+                        .Where(x => x.index is not null)
+                        .Where(x => schedule.EffectiveSessions.Overlaps(x.train.Sessions))
+                        .Select(x => (x.train, x.index!.Value));
+
+            // Only with a vehicle assigned is the schedule's allocation role known; until then every
+            // continuing train is offered (see remarks). With a vehicle we drop trains it shares no session
+            // with and trains already fully worked, on those sessions, by other schedules of the same role.
+            var roles = schedule.Vehicles.Select(v => v.Role).ToHashSet();
+            if (roles.Count > 0)
+            {
+                var vehicleSessions = schedule.AssignedSessions;
+                candidates = candidates.Where(x =>
+                {
+                    var want = schedule.EffectiveSessions.And(vehicleSessions).And(x.train.Sessions);
+                    return want.Flags != 0 && !plan.IsContinuationFullyAllocated(schedule, x.train, x.index, roles, want);
+                });
+            }
 
             return
             [
-                .. plan.SchedulableTrains()
-                    .Select(train => (train, index: schedule.JoinCallIndexFor(train)))
-                    .Where(x => x.index is not null)
-                    .Where(x => schedule.EffectiveSessions.Overlaps(x.train.Sessions))
-                    .OrderBy(x => x.train.Calls[x.index!.Value].Departure.Value)
+                .. candidates
+                    .OrderBy(x => x.train.Calls[x.index].Departure.Value)
                     .ThenBy(x => x.train.Number)
                     .Select(x => x.train)
             ];
+        }
+
+        // True when the continuation this schedule would take from the candidate train — from its join call
+        // through to its last call — is already worked, on every session in want, by one or more OTHER
+        // schedules whose vehicles share one of the given roles. Such a train is fully allocated for that
+        // role: adding it here would double-book it. Coverage counts only same-role assignments' booked
+        // sessions, so a train left unworked on some session — the complementary-schedule case — or with an
+        // unworked tail — the boundary-split case — or worked only in another role, stays a candidate.
+        private bool IsContinuationFullyAllocated(Schedule schedule, Train train, int joinIndex, IReadOnlySet<VehicleRole> roles, Sessions want)
+        {
+            if (want.Flags == 0) return false;
+            var joinDeparture = train.Calls[joinIndex].Departure;
+            var lastArrival = train.Calls[^1].Arrival;
+            var covered = new Sessions();
+            foreach (var other in plan.Schedules)
+            {
+                if (schedule.Equals(other)) continue;
+                if (!other.Parts.Any(p => p.Train.Equals(train) && p.From.Departure <= joinDeparture && p.To.Arrival >= lastArrival))
+                    continue;
+                var roleSessions = plan.ScheduledObjects
+                    .SelectMany(v => v.ScheduleAssignments)
+                    .Where(a => other.Equals(a.Schedule) && roles.Contains(a.ScheduledObject.Role))
+                    .Select(a => a.Sessions)
+                    .Aggregate(new Sessions(), (union, s) => union.Or(s));
+                covered = covered.Or(roleSessions);
+            }
+            return covered.Includes(want);
         }
 
         /// <summary>

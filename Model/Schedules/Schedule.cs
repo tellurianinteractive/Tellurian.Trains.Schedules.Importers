@@ -145,6 +145,20 @@ public static class ScheduleExtensions
                 : schedule.Parts.Select(p => p.Train.Sessions).Aggregate((common, s) => common.And(s));
 
         /// <summary>
+        /// Gets the sessions/days a vehicle is actually booked to work this schedule: the union of the
+        /// <see cref="ScheduleAssignment.Sessions"/> of every vehicle assigned to it. Empty when no vehicle
+        /// is assigned yet (the schedule is built but not worked). Unlike <c>EffectiveSessions</c> —
+        /// the sessions on which the schedule's trains all run — this is what a vehicle is booked for, which
+        /// may be a subset (one loco works the odd sessions, another the even).
+        /// </summary>
+        public Sessions AssignedSessions =>
+            (schedule.Plan?.ScheduledObjects ?? [])
+                .SelectMany(v => v.ScheduleAssignments)
+                .Where(a => schedule.Equals(a.Schedule))
+                .Select(a => a.Sessions)
+                .Aggregate(new Sessions(), (union, s) => union.Or(s));
+
+        /// <summary>
         /// Adds a train part to the schedule without continuity or overlap checks.
         /// </summary>
         /// <remarks>

@@ -121,6 +121,13 @@ public static class SessionsExtensions
             number is >= 1 and <= 14 && (sessions.Flags & (1 << (number - 1))) != 0;
 
         /// <summary>
+        /// Determines whether these sessions include every session/day of <paramref name="other"/>, i.e.
+        /// <paramref name="other"/> is a subset. An empty <paramref name="other"/> is always included.
+        /// </summary>
+        /// <param name="other">The sessions that must all be present.</param>
+        internal bool Includes(Sessions other) => sessions.And(other).Flags == other.Flags;
+
+        /// <summary>
         /// Returns a copy for display in which the session bits at or above <paramref name="maxSessions"/>
         /// are cleared, so a layout with a shorter operating period ignores the higher bits. The stored
         /// value is untouched — this only shapes the session/day texts, so raising the period again brings

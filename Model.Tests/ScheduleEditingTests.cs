@@ -402,6 +402,88 @@ public class ScheduleEditingTests
         Assert.DoesNotContain(Return(plan), candidates, "The even-only return shares no session with the odd-only schedule.");
     }
 
+    // Builds a schedule that works the forward train and assigns it a vehicle of the given type on the given
+    // sessions (all sessions by default), then returns a fresh empty schedule with that same kind of vehicle
+    // assigned — the "being built" schedule whose candidate list is under test.
+    private static (Plan plan, Schedule building) SetUpWorkedForwardAnd(ScheduledObjectType workedBy, ScheduledObjectType buildingWith, Sessions? workedSessions = null)
+    {
+        var plan = CreatePlan();
+        var worked = plan.CreateSchedule();
+        worked.Append(Forward(plan).AsTrainPart);
+        plan.AssignVehicle(worked, plan.CreateVehicle(workedBy, "A", 1, null), workedSessions);
+        var building = plan.CreateSchedule();
+        plan.AssignVehicle(building, plan.CreateVehicle(buildingWith, "B", 2, null));
+        return (plan, building);
+    }
+
+    [TestMethod]
+    public void CandidateTrainsExcludeATrainAlreadyFullyWorkedByTheSameKindOfVehicle()
+    {
+        var (plan, building) = SetUpWorkedForwardAnd(ScheduledObjectType.Locomotive, ScheduledObjectType.Locomotive);
+
+        var candidates = plan.CandidateTrainsFor(building);
+
+        Assert.DoesNotContain(Forward(plan), candidates,
+            "The forward train is already worked to its end, on every session, by a locomotive, so it is fully allocated for traction.");
+        Assert.Contains(Return(plan), candidates, "The return train is worked by no locomotive, so it is still available.");
+    }
+
+    [TestMethod]
+    public void CandidateTrainsKeepATrainFullyWorkedByADifferentKindOfVehicle()
+    {
+        // A locomotive already works the forward train; the schedule being built is for a wagonset.
+        var (plan, building) = SetUpWorkedForwardAnd(ScheduledObjectType.Locomotive, ScheduledObjectType.Wagonset);
+
+        var candidates = plan.CandidateTrainsFor(building);
+
+        Assert.Contains(Forward(plan), candidates,
+            "Traction allocation does not consume the wagonset role, so the train is still available for a wagonset schedule.");
+    }
+
+    [TestMethod]
+    public void CandidateTrainsKeepATrainStillUnworkedOnSomeSessions()
+    {
+        // The forward train runs every session, but the locomotive works it on the odd sessions only.
+        var (plan, building) = SetUpWorkedForwardAnd(ScheduledObjectType.Locomotive, ScheduledObjectType.Locomotive,
+            Sessions.FromBitPattern(CommonSessionPatterns.Odd));
+
+        var candidates = plan.CandidateTrainsFor(building);
+
+        Assert.Contains(Forward(plan), candidates,
+            "The even sessions are still unworked by a locomotive, so the train stays available for a complementary schedule.");
+    }
+
+    [TestMethod]
+    public void CandidateTrainsIncludeEveryTrainWhenNoVehicleIsAssigned()
+    {
+        var plan = CreatePlan();
+        var worked = plan.CreateSchedule();
+        worked.Append(Forward(plan).AsTrainPart);
+        plan.AssignVehicle(worked, plan.CreateVehicle(ScheduledObjectType.Locomotive, "A", 1, null));
+
+        // The schedule being built has no vehicle assigned, so its role is unknown and nothing is filtered.
+        var candidates = plan.CandidateTrainsFor(plan.CreateSchedule());
+
+        Assert.Contains(Forward(plan), candidates,
+            "Without an assigned vehicle the list holds every train, so a wagonset schedule can still use a traction-allocated train.");
+        Assert.Contains(Return(plan), candidates);
+    }
+
+    [TestMethod]
+    public void CandidateTrainsExcludeATrainTheAssignedVehicleSharesNoSessionWith()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromBitPattern(CommonSessionPatterns.Odd); // forward runs odd sessions
+        var building = plan.CreateSchedule();
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "B", 2, null);
+        plan.AssignVehicle(building, loco, Sessions.FromBitPattern(CommonSessionPatterns.Even)); // vehicle works even only
+
+        var candidates = plan.CandidateTrainsFor(building);
+
+        Assert.DoesNotContain(Forward(plan), candidates,
+            "The vehicle works only even sessions and the forward train runs only odd, so the vehicle can never work it.");
+    }
+
     [TestMethod]
     public void TryDeleteAssignmentUnassignsTheVehicleButKeepsTheSchedule()
     {

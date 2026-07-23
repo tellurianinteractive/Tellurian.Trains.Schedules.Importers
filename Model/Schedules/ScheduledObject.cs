@@ -235,6 +235,19 @@ public static class ScheduledObjectExtensions
         public bool HasTurnusCard => !scheduledObject.IsCargoFlow;
 
         /// <summary>
+        /// The broad operating <see cref="VehicleRole"/> of this vehicle: traction (locomotive or trainset),
+        /// wagonset, cargo flow or cargo. One train may be worked at the same time by one vehicle of each
+        /// role — a traction unit hauling it, a wagonset in its consist, cargo riding along — so a train's
+        /// allocation is tracked per role: fully worked by a locomotive, it is still free for a wagonset.
+        /// </summary>
+        public VehicleRole Role =>
+            scheduledObject.IsTraction ? VehicleRole.Traction
+            : scheduledObject.IsWagonSet ? VehicleRole.WagonSet
+            : scheduledObject.IsCargoFlow ? VehicleRole.CargoFlow
+            : scheduledObject.IsCargoOnly ? VehicleRole.Cargo
+            : VehicleRole.None;
+
+        /// <summary>
         /// <see cref="TractionUnit">Traction units</see> that makes up this <see cref="ScheduledObject"/>
         /// </summary>
         public IEnumerable<TractionUnit> TractionUnits => scheduledObject.Units.OfType<TractionUnit>();
@@ -355,6 +368,25 @@ public static class ScheduledObjectExtensions
         public HashSet<ScheduledTrainPart> Parts { get; } = parts;
         public List<int> Numbers { get; } = [];
     }
+}
+
+/// <summary>
+/// The broad operating role of a vehicle, used to decide whether two vehicles compete for the same
+/// allocation of a train. A train may be worked at once by one vehicle of each role, so allocation is
+/// tracked per role rather than per vehicle. See the vehicle's <c>Role</c>.
+/// </summary>
+public enum VehicleRole
+{
+    /// <summary>No recognised role (e.g. an unspecified vehicle type).</summary>
+    None,
+    /// <summary>A traction unit: a locomotive or a self-propelled trainset.</summary>
+    Traction,
+    /// <summary>A wagonset (one or more wagons worked as one).</summary>
+    WagonSet,
+    /// <summary>A cargo flow: wagons directed by waybill destinations.</summary>
+    CargoFlow,
+    /// <summary>A unit of cargo without rolling stock.</summary>
+    Cargo,
 }
 
 /// <summary>
