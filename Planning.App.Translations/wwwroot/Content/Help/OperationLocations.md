@@ -3,9 +3,9 @@ locations where trains run, stop or are controlled, together with their tracks.
 
 An operational place is one of:
 
-- a **station**, with one or more tracks where trains can stop, meet or be overtaken;
+- a **station**, with one or more tracks where trains can stop, meet, be overtaken or change direction.
 - a **signal-controlled location**, such as a block post or junction without platform tracks;
-- an **other location** used for timing but without operational tracks and optionally platforms.
+- an **other location** is any other timed location, for example a halt or a non-signal controlled junction.
 
 The tracks you define here are referenced when planning station calls and when validating that a
 train has somewhere to stand. Define your places and tracks before building trains so their calls

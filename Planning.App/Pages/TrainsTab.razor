@@ -187,7 +187,7 @@ else
     private string? ConflictTitle(Train train)
     {
         var messages = ValidationState.Errors
-            .Where(e => e.Involves(train))
+            .Where(e => e.Scope == ValidationScope.Train && e.Involves(train))
             .Select(e => e.Message.Text)
             .Distinct()
             .ToList();

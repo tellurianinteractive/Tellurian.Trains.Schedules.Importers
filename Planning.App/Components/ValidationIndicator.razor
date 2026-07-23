@@ -72,26 +72,24 @@
     private void GoTo(ValidationError error)
     {
         _open = false;
-        Nav.NavigateTo(RouteFor(error.ErrorType));
+        Nav.NavigateTo(RouteFor(error));
     }
 
-    private static string RouteFor(ValidationErrorType type) => type switch
+    // Schedule and vehicle conflicts are resolved on the Schedules tab; train conflicts on the graphical
+    // timetable (spatial/timing conflicts) or the Trains tab (per-train edits).
+    private static string RouteFor(ValidationError error) => error.Scope switch
     {
-        ValidationErrorType.VehicleScheduleOverlap or
-        ValidationErrorType.VehicleDoubleBooked or
-        ValidationErrorType.ScheduleNotContiguous or
-        ValidationErrorType.ScheduleNotClosed or
-        ValidationErrorType.SessionCombinationNotClosed or
-        ValidationErrorType.LocomotiveCoverageGap or
-        ValidationErrorType.LocomotiveCoverageOverlap => "schedules",
+        ValidationScope.Schedule or ValidationScope.Vehicle => "schedules",
+        _ => error.ErrorType switch
+        {
+            ValidationErrorType.StationTrackConflict or
+            ValidationErrorType.TrackStretchConflict or
+            ValidationErrorType.TrainSpeedTooSlow or
+            ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",
 
-        ValidationErrorType.StationTrackConflict or
-        ValidationErrorType.TrackStretchConflict or
-        ValidationErrorType.TrainSpeedTooSlow or
-        ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",
-
-        // TrainTimeSequence, StationCallTiming, TrainTooFewCalls, MissingTrackReference, DuplicateTrainNumber
-        _ => "trains",
+            // TrainTimeSequence, StationCallTiming, TrainTooFewCalls, MissingTrackReference, DuplicateTrainNumber
+            _ => "trains",
+        },
     };
 
     private void OnChanged() => InvokeAsync(StateHasChanged);

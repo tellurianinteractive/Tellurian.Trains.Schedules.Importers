@@ -261,10 +261,13 @@
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Vognløp {0}: {1} fortsetter ikke der forrige del sluttet ved {2}.</value>
   </data>
-  <data name="ScheduleDoesNotReturnToStart" xml:space="preserve">
-    <value>Vognløp {0} kjører hver sesjon men vender ikke tilbake til sitt utgangspunkt {1}; det slutter ved {2}.</value>
+  <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
+    <value>Vognløp {0} har ingen kjøretøy tildelt.</value>
   </data>
-  <data name="SessionCombinationDoesNotReturnToStart" xml:space="preserve">
-    <value>Kjøretøy {0} på sesjoner {1} vender ikke tilbake til sitt utgangspunkt {2}; det slutter ved {3}.</value>
+  <data name="TrainMissingTraction" xml:space="preserve">
+    <value>Tog {0} har ingen trekkraftenhet på sesjoner {1}.</value>
+  </data>
+  <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
+    <value>Kjøretøy {0} vender ikke tilbake til sitt utgangspunkt {1}; det slutter ved {2}.</value>
   </data>
 </root>

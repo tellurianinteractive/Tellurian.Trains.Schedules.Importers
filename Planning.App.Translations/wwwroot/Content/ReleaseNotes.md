@@ -1,5 +1,17 @@
 # Release Notes
 
+## Version 0.2.1
+
+- Conflict warnings are now shown where you can act on them. Train conflicts appear
+  only on the graphical timetable and the **Trains** tab; vehicle and schedule
+  conflicts appear only on the **Schedules** tab.
+- On the **Schedules** tab a vehicle conflict now highlights just the vehicle it
+  concerns, and a schedule conflict highlights just that schedule, so it is clear
+  which one needs attention.
+- The check that a vehicle returns to where it started now also covers wagonsets and
+  cargo, not only locomotives and trainsets, so a wagonset or cargo left out of place
+  at the end of the operating period is now reported.
+
 ## Version 0.2.0
 
 - The name of the plan you are currently working on is now shown in the top bar,

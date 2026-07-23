@@ -35,6 +35,14 @@ svg {
     width: 50mm;
 }
 
+.cal-icon {
+    position: static;
+    width: 1em;
+    height: 1em;
+    stroke-width: 2;
+    vertical-align: -0.15em;
+}
+
 .content {
     position: relative;
     z-index: 1;

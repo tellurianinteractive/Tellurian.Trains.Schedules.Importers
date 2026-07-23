@@ -42,9 +42,53 @@ public sealed record ValidationError
     public required IReadOnlyList<Train> Trains { get; init; }
 
     /// <summary>
+    /// The schedule (turnus) this error belongs to, when the error is attributed to a specific schedule
+    /// (rules S1, S2, orphan S4). Lets the Schedules tab mark the exact schedule's parts column instead
+    /// of matching by train intersection. Null for train-keyed schedule-scope errors (e.g. missing
+    /// traction), which are located via <see cref="Trains"/>.
+    /// </summary>
+    public Schedule? Schedule { get; init; }
+
+    /// <summary>
+    /// The vehicle (scheduled object) this error is attributed to, for <see cref="ValidationScope.Vehicle"/>
+    /// errors (double-booked, non-closing circulation). Lets the Schedules tab mark the exact vehicle chip
+    /// in the Vehicle column.
+    /// </summary>
+    public ScheduledObject? Vehicle { get; init; }
+
+    /// <summary>
     /// The localized message describing the error.
     /// </summary>
     public required Message Message { get; init; }
+
+    /// <summary>
+    /// Which planning surface this kind of conflict belongs to, derived from its <see cref="ErrorType"/>.
+    /// Train conflicts are highlighted in the graphical timetable and the Trains tab; schedule and vehicle
+    /// conflicts only in the Schedules tab (schedule → the parts column, vehicle → the Vehicle column). This
+    /// targeting is centralised in <see cref="ScopeOf"/> so each surface filters to exactly its own rules.
+    /// </summary>
+    public ValidationScope Scope => ScopeOf(ErrorType);
+
+    /// <summary>
+    /// Classifies a validation error type by the planning surface that should highlight it. Adjust the split
+    /// here. The three traction-coverage rules (missing traction, locomotive coverage gap/overlap) are keyed
+    /// to a train but are resolved by assigning vehicles, so they are Schedule scope and mark the schedules
+    /// that work the train.
+    /// </summary>
+    public static ValidationScope ScopeOf(ValidationErrorType errorType) => errorType switch
+    {
+        ValidationErrorType.VehicleDoubleBooked or
+        ValidationErrorType.VehicleNotClosed => ValidationScope.Vehicle,
+
+        ValidationErrorType.VehicleScheduleOverlap or
+        ValidationErrorType.ScheduleNotContiguous or
+        ValidationErrorType.ScheduleHasNoVehicle or
+        ValidationErrorType.TrainMissingTraction or
+        ValidationErrorType.LocomotiveCoverageGap or
+        ValidationErrorType.LocomotiveCoverageOverlap => ValidationScope.Schedule,
+
+        _ => ValidationScope.Train,
+    };
 
     /// <summary>
     /// True if the conflict is at a single station track.
@@ -88,6 +132,23 @@ public sealed record ValidationError
     /// Used by GUI components to highlight the offending track.
     /// </summary>
     public bool Involves(StationTrack track) => FromTrack.Equals(track) || ToTrack.Equals(track);
+
+    /// <summary>
+    /// Determines whether this schedule-scope conflict should mark the given schedule's parts column.
+    /// A schedule-keyed error (<see cref="Schedule"/> set) marks exactly that schedule; a train-keyed
+    /// schedule-scope error (e.g. missing traction) marks every schedule that works one of its trains.
+    /// Returns false for train- and vehicle-scope errors, so those never bleed into the parts column.
+    /// </summary>
+    public bool Involves(Schedule schedule) =>
+        Scope == ValidationScope.Schedule &&
+        (Schedule is not null ? Schedule.Equals(schedule) : schedule.Parts.Any(p => Involves(p.Train)));
+
+    /// <summary>
+    /// Determines whether this vehicle-scope conflict should mark the given vehicle's chip in the Vehicle
+    /// column. Returns false for train- and schedule-scope errors, so those never mark a vehicle.
+    /// </summary>
+    public bool Involves(ScheduledObject vehicle) =>
+        Scope == ValidationScope.Vehicle && Vehicle is not null && Vehicle.Equals(vehicle);
 
     /// <summary>
     /// Determines whether this conflict's time span overlaps the given time range (inclusive).
@@ -187,6 +248,7 @@ public sealed record ValidationError
     /// Creates a vehicle schedule overlap error.
     /// </summary>
     public static ValidationError VehicleScheduleOverlap(
+        Schedule schedule,
         TrainPart part1,
         TrainPart part2,
         Message message) => new()
@@ -197,6 +259,7 @@ public sealed record ValidationError
             FromTime = Time.Min(part1.From.Departure, part2.From.Departure),
             ToTime = Time.Max(part1.To.Arrival, part2.To.Arrival),
             Trains = [part1.Train, part2.Train],
+            Schedule = schedule,
             Message = message
         };
 
@@ -284,6 +347,7 @@ public sealed record ValidationError
             FromTime = GetFirstDeparture(assignment1.Schedule) ?? Time.Zero,
             ToTime = GetLastArrival(assignment2.Schedule) ?? Time.Zero,
             Trains = GetTrains(assignment1.Schedule, assignment2.Schedule),
+            Vehicle = vehicle,
             Message = message
         };
 
@@ -310,6 +374,7 @@ public sealed record ValidationError
     /// previous part in the vehicle's working ended (rule S2).
     /// </summary>
     public static ValidationError ScheduleNotContiguous(
+        Schedule schedule,
         TrainPart previous,
         TrainPart next,
         Message message) => new()
@@ -320,48 +385,65 @@ public sealed record ValidationError
             FromTime = previous.To.Arrival,
             ToTime = next.From.Departure,
             Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
+            Schedule = schedule,
             Message = message
         };
 
     /// <summary>
-    /// Creates a non-closing schedule error: a schedule that runs the whole operating period does not
-    /// return the vehicle to the station it started from (rule S3).
+    /// Creates a schedule-has-no-vehicle error: a schedule that runs regular sessions has no vehicle
+    /// assigned at all (rule S4).
     /// </summary>
-    public static ValidationError ScheduleNotClosed(
+    public static ValidationError ScheduleHasNoVehicle(
         Schedule schedule,
         Message message) => new()
         {
-            ErrorType = ValidationErrorType.ScheduleNotClosed,
+            ErrorType = ValidationErrorType.ScheduleHasNoVehicle,
             FromTrack = GetFirstTrack(schedule) ?? StationTrack.Example,
             ToTrack = GetLastTrack(schedule) ?? StationTrack.Example,
             FromTime = GetFirstDeparture(schedule) ?? Time.Zero,
             ToTime = GetLastArrival(schedule) ?? Time.Zero,
             Trains = [.. schedule.Parts.Select(p => p.Train).Distinct()],
+            Schedule = schedule,
             Message = message
         };
 
     /// <summary>
-    /// Creates a non-closing session-combination error: a set of sessions on which a vehicle works a
-    /// distinct set of parts does not return it to its start station (rule S5).
+    /// Creates a train-missing-traction error: a train runs on sessions for which it has no traction unit
+    /// (locomotive or self-propelled trainset) assigned through any schedule (rule S4).
     /// </summary>
-    public static ValidationError SessionCombinationNotClosed(
-        ScheduledObject vehicle,
-        SessionCombination combination,
-        Message message)
-    {
-        var first = combination.Parts.OrderBy(p => p.From.Departure.Value).First();
-        var last = combination.Parts.OrderBy(p => p.To.Arrival.Value).Last();
-        return new()
+    public static ValidationError TrainMissingTraction(
+        Train train,
+        Message message) => new()
         {
-            ErrorType = ValidationErrorType.SessionCombinationNotClosed,
-            FromTrack = first.From.Track,
-            ToTrack = last.To.Track,
-            FromTime = first.From.Departure,
-            ToTime = last.To.Arrival,
-            Trains = [.. combination.Parts.Select(p => p.Train).Distinct()],
+            ErrorType = ValidationErrorType.TrainMissingTraction,
+            FromTrack = train.Calls.FirstOrDefault()?.Track ?? StationTrack.Example,
+            ToTrack = train.Calls.LastOrDefault()?.Track ?? StationTrack.Example,
+            FromTime = train.Calls.FirstOrDefault()?.Departure ?? Time.Zero,
+            ToTime = train.Calls.LastOrDefault()?.Arrival ?? Time.Zero,
+            Trains = [train],
             Message = message
         };
-    }
+
+    /// <summary>
+    /// Creates a non-closing traction-unit error: over the operating period the unit's movements do not
+    /// balance at every station, so it does not return to a repeatable circulation (rules S3 + S5). The
+    /// error spans the station it departs more often than it returns to and the station it is left at.
+    /// </summary>
+    public static ValidationError VehicleNotClosed(
+        ScheduledObject vehicle,
+        ScheduledTrainPart fromPart,
+        ScheduledTrainPart toPart,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.VehicleNotClosed,
+            FromTrack = fromPart.From.Track,
+            ToTrack = toPart.To.Track,
+            FromTime = fromPart.From.Departure,
+            ToTime = toPart.To.Arrival,
+            Trains = [.. new[] { fromPart.Train, toPart.Train }.Distinct()],
+            Vehicle = vehicle,
+            Message = message
+        };
 
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
@@ -428,9 +510,31 @@ public enum ValidationErrorType
     /// <summary>A vehicle schedule's parts are not geographically contiguous.</summary>
     ScheduleNotContiguous,
 
-    /// <summary>An all-session vehicle schedule does not return to its start station.</summary>
-    ScheduleNotClosed,
+    /// <summary>A vehicle schedule that runs regular sessions has no vehicle assigned.</summary>
+    ScheduleHasNoVehicle,
 
-    /// <summary>A vehicle's session combination does not return it to its start station.</summary>
-    SessionCombinationNotClosed,
+    /// <summary>A train has no traction unit on some of the sessions it runs.</summary>
+    TrainMissingTraction,
+
+    /// <summary>A traction unit's circulation does not close over the operating period.</summary>
+    VehicleNotClosed,
+}
+
+/// <summary>
+/// The planning surface a validation conflict belongs to, so feedback is targeted: each surface
+/// highlights only the conflicts in its own scope.
+/// </summary>
+public enum ValidationScope
+{
+    /// <summary>A problem with a train itself (timing, speed, conflicts, numbering, missing track).
+    /// Highlighted in the graphical timetable and the Trains tab.</summary>
+    Train,
+
+    /// <summary>A problem with a vehicle schedule (turnus): overlapping/non-contiguous/orphan parts, or a
+    /// train left without traction. Marks the schedule's parts column in the Schedules tab.</summary>
+    Schedule,
+
+    /// <summary>A problem with a scheduled vehicle: double-booked, or a non-closing circulation. Marks the
+    /// vehicle's chip in the Vehicle column of the Schedules tab.</summary>
+    Vehicle,
 }

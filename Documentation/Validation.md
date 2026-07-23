@@ -51,6 +51,10 @@ public sealed record ValidationError
 | `LocomotiveCoverageGap` | Train has a gap in locomotive coverage |
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
 | `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
+| `ScheduleNotContiguous` | A schedule's parts are not geographically contiguous |
+| `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned |
+| `ScheduleMissingTraction` | A schedule has no traction unit on some sessions it operates |
+| `VehicleNotClosed` | A traction unit's circulation does not close over the period |
 
 ## ValidationSettings
 
@@ -187,24 +191,27 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 
 **Error**: `"Vehicle schedule {number}: {trainPart} does not continue from where the previous part ended at {location}."` (`ScheduleNotContiguous`)
 
-#### S3 — Circulation closure ✅
-**Method**: `ValidateScheduleClosure(this Plan plan)`
+#### S3 + S5 — Circulation closure (per vehicle) ✅
+**Method**: `ValidateVehicleClosure(this Plan plan)`
 
-**Validates**: A vehicle schedule that runs the whole operating period (`EffectiveSessions.CoversAllWithin(useDays, maxSessions)` from `Layout.Settings.General`) and whose vehicle is a **traction unit** must start and end at the **same station**. Scoped to traction (a loco/trainset must return to be reused; wagons/cargo flows are repositioned by other workings — rule S3's "starting traction unit"). **Exempt**: schedules whose trains are all on demand. A subset-session schedule is not checked here — it may be closed by a complementary schedule on the remaining sessions (the multi-session split/part-count case is deferred). Gated by `ValidateSchedules`.
+**Validates**: Over the operating period a **vehicle's** movements must **balance at every station** — it departs each station as often as it arrives — so the layout's vehicle distribution repeats and the working can run again. This is flow conservation: movements are counted **per session worked** (`+1` where the unit departs, `−1` where it arrives), so running a leg on more sessions than its return is caught. A unit that works both a forward and a return leg closes even when the legs run on **different sessions** and even when they are **split across several schedules** — the rotation case (forward on some sessions, return on others; position carries over between sessions). Applies to **traction units, wagonsets and cargo-only units**, each of which turns on its own working. **Exempt**: cargo flows (freight directed by waybills, not a turning vehicle) and units whose only working is on demand. Gated by `ValidateSchedules`.
 
-**Error**: `"Vehicle schedule {number} runs every session but does not return to its start {start}; it ends at {end}."` (`ScheduleNotClosed`)
+**Error**: `"Vehicle {vehicle} does not return to its start {start}; it ends at {end}."` (`VehicleNotClosed`) — `start` is the station it departs more often than it returns to, `end` the station it is left at.
+
+This single per-unit rule replaces the earlier per-schedule S3 and per-session-combination S5 checks, which required each schedule (or each session combination) to return to its start **in isolation** and so wrongly flagged rotation schemes that close only across sessions or across several schedules.
 
 On-demand trains are marked at import (`XplnDataImporter.MarkSingleTrainWorkingsOnDemand`): a train that is the sole train of a single-train vehicle schedule and the sole train of a duty gets the on-demand session flag.
 
-#### S4 — Per-session traction 🟡
-A traction unit for all of the schedule's sessions. Partly served by P4; not checked per session across the schedule.
+#### S4 — Per-session traction ✅
+**Method**: `ValidateTractionCoverage(this Plan plan)`
 
-#### S5 — Valid session combinations ✅
-**Method**: `ValidateSessionCombinationClosure(this Plan plan)`
+**Validates**: A schedule that runs regular (non on-demand) sessions must have a **traction unit assigned for every session it operates**. A schedule with **no vehicle at all** is reported separately from one that has vehicles but **lacks a traction unit on some of its sessions** (for example wagons but no locomotive, or a locomotive on only part of the period). The operating sessions are the union of the parts' trains' sessions within the period; traction coverage is the union of the `Sessions` of the schedule's traction assignments. **Exempt**: cargo flows (hauled across several trains, not a self-contained working) and on-demand-only workings. Gated by `ValidateSchedules`.
 
-**Validates**: For a **traction** vehicle with **more than one** `SessionCombination` (it works different parts on different sessions/days), each combination must return the vehicle to its start station (each conforming to S3). A single-combination vehicle is already covered by S3, so the two do not double-report. On-demand combinations are exempt. Gated by `ValidateDriverDuties`.
+**Errors**:
+- `"Vehicle schedule {number} has no vehicle assigned."` (`ScheduleHasNoVehicle`)
+- `"Vehicle schedule {number} has no traction unit on sessions {sessions}."` (`ScheduleMissingTraction`)
 
-**Error**: `"Vehicle {number} on sessions {sessions} does not return to its start {start}; it ends at {end}."` (`SessionCombinationNotClosed`)
+This is per-schedule and session-aware, complementing P4's per-train, time-based locomotive coverage (both are kept; they catch different gaps).
 
 ### Plan scope (P) — cross-object consistency
 
@@ -319,9 +326,9 @@ Plan.GetValidationErrors(options)
   │
   ├─► Schedule.ValidateOverlappingParts()     [ValidateSchedules]      S1
   ├─► Schedule.ValidateContiguity()           [ValidateSchedules]      S2
-  ├─► Plan.ValidateScheduleClosure()          [ValidateSchedules]      S3
+  ├─► Plan.ValidateTractionCoverage()         [ValidateSchedules]      S4
+  ├─► Plan.ValidateVehicleClosure()           [ValidateSchedules]      S3+S5
   ├─► Plan.ValidateVehicleDoubleBooking()     [ValidateSchedules]      P3
-  ├─► Plan.ValidateSessionCombinationClosure()[ValidateDriverDuties]   S5
   └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4
 ```
 
@@ -329,12 +336,16 @@ Plan.GetValidationErrors(options)
 
 Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
 Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, S1, S2, S3,
-S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), S3 multi-session split, S4, P2. Note L3
+S4, S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), P2. Note L3
 counts trains on a stretch **direction-agnostically** (one train per track, both directions
 together) — the existing capacity check is correct as-is, not a direction bug.
 
-1. **S3 — multi-session split / part-count** - a subset-session schedule that doesn't close is left to its complementary schedule; the "part count = sessions needed to return" split is not yet validated
-2. **S4 / P2 (partial)** - per-session traction coverage; every part scheduled; same part not in overlapping-session schedules
-3. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
-4. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
-5. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
+Closure (S3+S5) is judged **per vehicle** (traction units, wagonsets and cargo-only units) by
+flow conservation over the whole period, not per schedule or per session combination — so
+rotation schemes that close only across sessions or across several schedules are correctly
+allowed (see the S3+S5 section above). Cargo flows are exempt.
+
+1. **P2 (partial)** - every part scheduled; the same part not in two overlapping-session schedules is not fully checked
+2. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
+3. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
+4. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring

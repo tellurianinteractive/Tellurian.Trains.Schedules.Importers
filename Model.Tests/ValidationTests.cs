@@ -166,17 +166,125 @@ public class ValidationTests
         Assert.IsNotEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.VehicleScheduleOverlap), "S1 still reports the overlap.");
     }
 
-    // --- S3: an all-session traction schedule must return the vehicle to its start station ---
+    // --- S4: a schedule must have a traction unit on every session it operates ---
 
-    // Adds a locomotive worked to the schedule; closure (S3) only applies to traction schedules.
-    private static void AddLoco(Plan plan, Schedule schedule)
+    // Adds a locomotive to the schedule for the given sessions (all sessions by default).
+    private static ScheduledObject AddLoco(Plan plan, Schedule schedule, Sessions? sessions = null)
     {
         var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 1, null);
-        plan.AssignVehicle(schedule, vehicle);
+        plan.AssignVehicle(schedule, vehicle, sessions);
+        return vehicle;
     }
 
     [TestMethod]
-    public void AllSessionScheduleThatDoesNotReturnToStartIsReported()
+    public void ScheduleWithNoVehicleAssignedIsReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart); // no vehicle assigned at all
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.ScheduleHasNoVehicle)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+    }
+
+    [TestMethod]
+    public void TrainWithoutTractionOnEverySessionIsReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        forward.Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4); // runs on four sessions
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        AddLoco(plan, schedule, Sessions.FromSessionNumbers(1, 2)); // traction on 1,2 only — 3,4 uncovered
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainMissingTraction && e.Involves(forward))
+            .ToList();
+
+        Assert.HasCount(1, errors);
+    }
+
+    [TestMethod]
+    public void TrainHauledOnlyByWagonsIsReportedAsMissingTraction()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        plan.AssignVehicle(schedule, wagon);
+
+        var errors = plan.GetValidationErrors(Settings).ToList();
+
+        Assert.IsNotEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.TrainMissingTraction), "A wagon cannot haul the train; it needs a traction unit.");
+        Assert.IsNotEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed), "The wagon runs G->Snu without returning, so its circulation does not close.");
+    }
+
+    // A wagonset works its own turnus with no traction of its own; the train is hauled by the locomotive's
+    // separate turnus, so per-train traction coverage is satisfied and the wagonset turnus is not flagged.
+    [TestMethod]
+    public void WagonsetTurnusAlongsideALocoTurnusIsAllowed()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2);
+        var locoSchedule = plan.CreateSchedule();
+        locoSchedule.Add(forward.AsTrainPart);
+        locoSchedule.Add(@return.AsTrainPart);
+        AddLoco(plan, locoSchedule);
+        var wagonSchedule = plan.CreateSchedule();
+        wagonSchedule.Add(forward.AsTrainPart);
+        wagonSchedule.Add(@return.AsTrainPart);
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        plan.AssignVehicle(wagonSchedule, wagon);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType is ValidationErrorType.TrainMissingTraction or ValidationErrorType.ScheduleHasNoVehicle);
+
+        Assert.IsEmpty(errors, "The train is hauled by the loco turnus, so the parallel wagonset turnus needs no traction of its own.");
+    }
+
+    [TestMethod]
+    public void TrainWithTractionOnAllSessionsIsAllowed()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        schedule.Add(@return.AsTrainPart);
+        AddLoco(plan, schedule); // all sessions
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType is ValidationErrorType.ScheduleHasNoVehicle or ValidationErrorType.TrainMissingTraction);
+
+        Assert.IsEmpty(errors);
+    }
+
+    [TestMethod]
+    public void OnDemandTrainNeedsNoTraction()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        forward.Sessions = Sessions.FromBitPattern(CommonSessionPatterns.OnDemand);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart); // no vehicle, but on-demand only
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType is ValidationErrorType.ScheduleHasNoVehicle or ValidationErrorType.TrainMissingTraction)
+            .Where(e => e.Involves(forward));
+
+        Assert.IsEmpty(errors, "An on-demand train needs no reserved traction.");
+    }
+
+    // --- S3 + S5: a traction unit's circulation must close (flow-balance) over the operating period ---
+
+    [TestMethod]
+    public void TractionUnitThatDoesNotReturnIsReported()
     {
         var plan = PlanWithForwardAndReturn();
         var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu, runs all sessions
@@ -185,14 +293,14 @@ public class ValidationTests
         AddLoco(plan, schedule);
 
         var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed)
             .ToList();
 
         Assert.HasCount(1, errors);
     }
 
     [TestMethod]
-    public void ClosedScheduleIsAllowed()
+    public void ClosedCirculationIsAllowed()
     {
         var plan = PlanWithForwardAndReturn();
         var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu
@@ -203,13 +311,13 @@ public class ValidationTests
         AddLoco(plan, schedule);
 
         var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed);
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
 
         Assert.IsEmpty(errors);
     }
 
     [TestMethod]
-    public void OnDemandScheduleNeedNotReturnToStart()
+    public void OnDemandTractionNeedNotReturn()
     {
         var plan = PlanWithForwardAndReturn();
         var forward = plan.Timetable.Trains.First(t => t.Number == 1);
@@ -219,52 +327,43 @@ public class ValidationTests
         AddLoco(plan, schedule);
 
         var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed);
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
 
         Assert.IsEmpty(errors);
     }
 
+    // A loco that works the forward leg on some sessions and the return leg on equally many other sessions
+    // balances over the period (its position carries over between sessions): its circulation closes.
     [TestMethod]
-    public void WagonScheduleNeedNotReturnToStart()
-    {
-        var plan = PlanWithForwardAndReturn();
-        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu, does not return
-        var schedule = plan.CreateSchedule();
-        schedule.Add(forward.AsTrainPart);
-        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
-        plan.AssignVehicle(schedule, wagon);
-
-        var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed);
-
-        Assert.IsEmpty(errors, "Closure (S3) applies to traction units, not wagons.");
-    }
-
-    [TestMethod]
-    public void SubsetSessionScheduleThatDoesNotReturnIsNotCheckedByS3()
-    {
-        var plan = PlanWithForwardAndReturn();
-        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
-        forward.Sessions = Sessions.FromSessionNumbers(1, 2, 3); // a subset of the 14-session period
-        var schedule = plan.CreateSchedule();
-        schedule.Add(forward.AsTrainPart);
-        AddLoco(plan, schedule);
-
-        var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed);
-
-        Assert.IsEmpty(errors, "A subset-session schedule may be completed by a complementary schedule.");
-    }
-
-    // --- S5: each of a vehicle's session combinations must return it to its start ---
-
-    private static (Plan plan, ScheduledObject vehicle) VehicleSplitAcrossAlternatingSessions()
+    public void TractionUnitBalancedAcrossAlternatingSessionsIsAllowed()
     {
         var plan = PlanWithForwardAndReturn();
         var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu
         var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->G
-        forward.Sessions = Sessions.FromSessionNumbers(1, 3, 5, 7);
+        forward.Sessions = Sessions.FromSessionNumbers(1, 3, 5);
         @return.Sessions = Sessions.FromSessionNumbers(2, 4, 6);
+        var odd = plan.CreateSchedule();
+        odd.Add(forward.AsTrainPart);
+        var even = plan.CreateSchedule();
+        even.Add(@return.AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
+        plan.AssignVehicle(odd, vehicle, Sessions.FromSessionNumbers(1, 3, 5));
+        plan.AssignVehicle(even, vehicle, Sessions.FromSessionNumbers(2, 4, 6));
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
+
+        Assert.IsEmpty(errors, "Three forward legs and three return legs balance over the period.");
+    }
+
+    [TestMethod]
+    public void TractionUnitWithMoreForwardThanReturnLegsIsReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2);
+        forward.Sessions = Sessions.FromSessionNumbers(1, 3, 5, 7); // four forward legs
+        @return.Sessions = Sessions.FromSessionNumbers(2, 4, 6);    // only three return legs
         var odd = plan.CreateSchedule();
         odd.Add(forward.AsTrainPart);
         var even = plan.CreateSchedule();
@@ -272,30 +371,127 @@ public class ValidationTests
         var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
         plan.AssignVehicle(odd, vehicle, Sessions.FromSessionNumbers(1, 3, 5, 7));
         plan.AssignVehicle(even, vehicle, Sessions.FromSessionNumbers(2, 4, 6));
-        return (plan, vehicle);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed)
+            .ToList();
+
+        Assert.HasCount(1, errors, "One more forward than return leg leaves the unit stranded once.");
     }
 
+    // The reported case: two schedules (forward A>B and return B>A) with two locos, each loco assigned to
+    // BOTH schedules on complementary sessions. Every loco works both directions over the period, so each
+    // closes — no conflict, even though neither schedule on its own returns to its start.
     [TestMethod]
-    public void NonClosingSessionCombinationsAreReported()
+    public void TwoLocosEachWorkingBothDirectionsAreAllowed()
     {
-        var (plan, _) = VehicleSplitAcrossAlternatingSessions();
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // A>B
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2); // B>A
+        forward.Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6);
+        @return.Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6);
+        var fwd = plan.CreateSchedule();
+        fwd.Add(forward.AsTrainPart);
+        var rtn = plan.CreateSchedule();
+        rtn.Add(@return.AsTrainPart);
+        var loco1 = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 1, null);
+        var loco2 = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null);
+        // loco1: forward on 1,3,5 and return on 2,4,6
+        plan.AssignVehicle(fwd, loco1, Sessions.FromSessionNumbers(1, 3, 5));
+        plan.AssignVehicle(rtn, loco1, Sessions.FromSessionNumbers(2, 4, 6));
+        // loco2: forward on 2,4,6 and return on 1,3,5
+        plan.AssignVehicle(fwd, loco2, Sessions.FromSessionNumbers(2, 4, 6));
+        plan.AssignVehicle(rtn, loco2, Sessions.FromSessionNumbers(1, 3, 5));
 
         var errors = plan.GetValidationErrors(Settings).ToList();
 
-        // Two combinations (odd works G->Snu, even works Snu->G); neither returns to its own start.
-        Assert.HasCount(2, errors.Where(e => e.ErrorType == ValidationErrorType.SessionCombinationNotClosed).ToList());
-        // The schedules run subsets of sessions, so S3 does not also fire.
-        Assert.IsEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.ScheduleNotClosed));
+        Assert.IsEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed), "Each loco works both directions over the period, so its circulation closes.");
+        Assert.IsEmpty(errors.Where(e => e.ErrorType is ValidationErrorType.ScheduleHasNoVehicle or ValidationErrorType.TrainMissingTraction), "Both directions have traction on every session.");
+    }
+
+    // Closure also applies to wagonsets and cargo-only units: they each turn on their own working and must
+    // return to a repeatable circulation. Only cargo flows (waybill-directed freight) are exempt.
+
+    [TestMethod]
+    public void WagonsetThatDoesNotReturnIsReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);                              // G->Snu only
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        plan.AssignVehicle(schedule, wagon);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed && e.Involves(wagon))
+            .ToList();
+
+        Assert.HasCount(1, errors);
     }
 
     [TestMethod]
-    public void SessionCombinationValidationCanBeSwitchedOff()
+    public void ClosedWagonsetCirculationIsAllowed()
     {
-        var (plan, _) = VehicleSplitAcrossAlternatingSessions();
-        var settings = new ValidationSettings { ValidateDriverDuties = false };
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        schedule.Add(@return.AsTrainPart);                             // returns to G, closes
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        plan.AssignVehicle(schedule, wagon);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed && e.Involves(wagon));
+
+        Assert.IsEmpty(errors, "A wagonset that works both directions closes.");
+    }
+
+    [TestMethod]
+    public void CargoOnlyUnitThatDoesNotReturnIsReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        var cargo = plan.CreateVehicle(ScheduledObjectType.Cargo, "C", 1, null);
+        plan.AssignVehicle(schedule, cargo);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed && e.Involves(cargo))
+            .ToList();
+
+        Assert.HasCount(1, errors);
+    }
+
+    [TestMethod]
+    public void CargoFlowIsExemptFromClosure()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        var cargoFlow = plan.CreateVehicle(ScheduledObjectType.CargoFlow, "CF", 1, null);
+        plan.AssignVehicle(schedule, cargoFlow);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed && e.Involves(cargoFlow));
+
+        Assert.IsEmpty(errors, "A cargo flow is directed by waybills, not a turning vehicle, so closure does not apply.");
+    }
+
+    [TestMethod]
+    public void ClosureValidationCanBeSwitchedOff()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        AddLoco(plan, schedule);
+        var settings = new ValidationSettings { ValidateSchedules = false };
 
         var errors = plan.GetValidationErrors(settings)
-            .Where(e => e.ErrorType == ValidationErrorType.SessionCombinationNotClosed);
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
 
         Assert.IsEmpty(errors);
     }
@@ -427,5 +623,77 @@ public class ValidationTests
         Assert.AreEqual(Severity.Warning, ValidationError.SeverityOf(ValidationErrorType.StationTrackConflict));
         Assert.AreEqual(Severity.Information, ValidationError.SeverityOf(ValidationErrorType.TrainSpeedTooSlow));
         Assert.AreEqual(Severity.Information, ValidationError.SeverityOf(ValidationErrorType.LocomotiveCoverageGap));
+    }
+
+    // --- Scope: each rule is targeted to the planning surface that resolves it -------------------
+
+    [TestMethod]
+    public void ScopeOfClassifiesEachErrorTypeBySurface()
+    {
+        Assert.AreEqual(ValidationScope.Train, ValidationError.ScopeOf(ValidationErrorType.StationTrackConflict));
+        Assert.AreEqual(ValidationScope.Train, ValidationError.ScopeOf(ValidationErrorType.DuplicateTrainNumber));
+        Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.ScheduleNotContiguous));
+        Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.TrainMissingTraction));
+        Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.LocomotiveCoverageGap));
+        Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleDoubleBooked));
+        Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleNotClosed));
+    }
+
+    // A vehicle-scope error marks its own vehicle chip only — never the parts column or another vehicle.
+    [TestMethod]
+    public void VehicleScopeErrorMarksItsVehicleNotSchedule()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        var loco = AddLoco(plan, schedule);                             // G->Snu only, does not return
+        var other = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null);
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
+
+        Assert.AreEqual(ValidationScope.Vehicle, error.Scope);
+        Assert.IsTrue(error.Involves(loco), "The non-closing vehicle is marked.");
+        Assert.IsFalse(error.Involves(other), "An unrelated vehicle is not marked.");
+        Assert.IsFalse(error.Involves(schedule), "A vehicle-scope error must not mark the parts column.");
+    }
+
+    // A schedule-keyed error marks exactly its own schedule's parts column — not another schedule.
+    [TestMethod]
+    public void ScheduleScopeErrorMarksItsScheduleOnly()
+    {
+        var plan = PlanWithTwoForwardTrains();
+        var first = plan.Timetable.Trains.First(t => t.Number == 1);
+        var second = plan.Timetable.Trains.First(t => t.Number == 3);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(first.AsTrainPart);
+        schedule.Add(second.AsTrainPart);                               // non-contiguous
+        var other = plan.CreateSchedule();
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.ScheduleNotContiguous);
+
+        Assert.AreEqual(ValidationScope.Schedule, error.Scope);
+        Assert.IsTrue(error.Involves(schedule), "The non-contiguous schedule is marked.");
+        Assert.IsFalse(error.Involves(other), "Another schedule is not marked.");
+    }
+
+    // A train-keyed schedule-scope error (missing traction) marks every schedule that works the train.
+    [TestMethod]
+    public void TrainKeyedScheduleScopeErrorMarksSchedulesWorkingTheTrain()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        forward.Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart);
+        AddLoco(plan, schedule, Sessions.FromSessionNumbers(1, 2));      // 3,4 uncovered
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.TrainMissingTraction && e.Involves(forward));
+
+        Assert.AreEqual(ValidationScope.Schedule, error.Scope);
+        Assert.IsTrue(error.Involves(schedule), "A schedule working the under-covered train is marked.");
     }
 }

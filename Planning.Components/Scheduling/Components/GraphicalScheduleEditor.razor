@@ -215,7 +215,7 @@ else
         foreach (var train in Current.Trains)
         {
             var messages = Errors
-                .Where(e => e.Involves(train) && graphTracks.Any(t => e.Involves(t)))
+                .Where(e => e.Scope == ValidationScope.Train && e.Involves(train) && graphTracks.Any(t => e.Involves(t)))
                 .Select(e => e.Message.Text)
                 .Distinct()
                 .ToList();

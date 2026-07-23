@@ -58,7 +58,7 @@ Snapshot of coverage by area (see each section for detail).
 | Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | ❌ | |
-| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S3, S5, P1/P3/P4 done; S3 multi-session split + S4/P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
+| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S5, P1/P3/P4 done; closure (S3+S5) judged per traction unit by flow conservation; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
 | Reports (§3.12) | 🟡 | shell + page formats present; 2 reports built — Turnus Cards and a paginated tabular Timetable report |
 
 ### Integration (§5)
@@ -493,12 +493,14 @@ with an option to lock individual times.
 ### 3.11 Validation
 
 > **Status:** 🟡 Partial. Fully implemented: the Layout occupancy rules **L2–L3**, the
-> Timetable train rules **T1–T4**, the Schedule rules **S1–S3, S5**, and the Plan
+> Timetable train rules **T1–T4**, the Schedule rules **S1–S5**, and the Plan
 > consistency rules **P1, P3, P4**, all with FR-3.11.6 output (severity, localised
-> message, location + time range, involved trains). Missing or partial: **L1** (emergent
-> only), the S3 multi-session split/part-count case, and the partial per-session traction
-> (**S4**) and part-coverage (**P2**). A configured minimum-minutes-between-track-usage
-> threshold exists but has **no backing validation yet**. See `Documentation/Validation.md`.
+> message, location + time range, involved trains). Closure (**S3 + S5**) is judged **per
+> traction unit** by flow conservation over the operating period, so rotation schemes that
+> return across sessions or across several schedules are correctly allowed. Missing or
+> partial: **L1** (emergent only) and part-coverage (**P2**). A configured
+> minimum-minutes-between-track-usage threshold exists but has **no backing validation
+> yet**. See `Documentation/Validation.md`.
 >
 > **GUI feedback.** The conflicts are surfaced in the app: a briefly debounced recompute
 > feeds a toolbar icon with a count badge and a severity-ordered list. The list is the
@@ -558,9 +560,9 @@ Each vehicle schedule (turnus) is a sequence of train parts forming a circulatio
 | ---- | ----------- | ------ | ----------- |
 | **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | Checked. |
 | **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ✅ | Each part, in working order, must start where the previous ended; applies to all vehicle types. **Skipped when the schedule's parts overlap in time** (S1 reports that instead). Entry already enforces contiguity; the check catches schedules assembled unconditionally, e.g. XPLN import. Can be toggled off. |
-| **S3** | **Circulation closure.** An all-session schedule starts and ends at the **same station**; otherwise it is split into parts that each start where the previous ended and close the loop, with **part count = sessions needed to return**, each part having a starting traction unit; parts may overlap in time. **Exemption:** a schedule whose trains are all **on demand** need not close the loop (the sequence rule S2 still applies). | ✅ | A schedule that runs the whole operating period and whose vehicle is a **traction unit** must start and end at the same station. On-demand schedules are exempt; a subset-session schedule is left to its complementary schedule (not yet checked — the split/part-count case is deferred). Wagons and cargo flows are not required to close. On-demand trains are marked at import. Can be toggled off. |
-| **S4** | A **traction unit is assigned for all of the schedule's sessions** (may be different units for different sessions/days). | 🟡 Partial | The traction-coverage check (see P4) finds coverage gaps along a train, but not **per-session** traction across the whole schedule. |
-| **S5** | When the vehicles in a schedule run **different sessions/days**, the **session combinations must be valid** — each conforming to S3. | ✅ | For a traction vehicle that works different parts on different sessions (more than one session combination), each combination must return to its start station. A single-combination vehicle is covered by S3. On-demand combinations are exempt. Can be toggled off. |
+| **S3** | **Circulation closure.** Over the operating period a **traction unit** must return to where it began, so the layout's vehicle distribution repeats and the working can run again. **Exemption:** a unit whose trains are all **on demand** need not close (the sequence rule S2 still applies). | ✅ | Judged **per traction unit** by flow conservation: over every session worked, the unit must depart each station as often as it arrives there. A unit that works both a forward and a return leg closes even when the legs run on **different sessions** and even when they are **split across several schedules** (the rotation case). Wagons and cargo flows are not required to close. On-demand trains are marked at import. Can be toggled off. Implemented together with S5. |
+| **S4** | A **traction unit is assigned for all of a train's sessions** (may be different units for different sessions/days), and a schedule that runs regular sessions has a vehicle assigned. | ✅ | Per-train, session-aware: every train must be hauled by a traction unit on every session it runs, provided through any schedule that works it (a wagonset has its own turnus with no traction, hauled by the loco's turnus). An orphan schedule with no vehicle is reported. On-demand trains and cargo flows are exempt. Complements P4's per-train, time-based coverage. Can be toggled off. |
+| **S5** | When a traction unit works **different parts on different sessions/days**, its working across those sessions must still form a valid, closing circulation. | ✅ | Folded into the S3 per-unit closure check: because closure is judged over all the unit's parts across all sessions worked, a unit that runs different legs on different sessions closes as long as its movements balance overall. Can be toggled off. |
 
 #### FR-3.11.4 Plan scope — cross-object consistency (P)
 

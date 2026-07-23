@@ -36,14 +36,10 @@
         border-top: none;
     }
 
-    /* A working involved in a validation conflict: amber tint on both cells (the row generates no box)
-       plus an amber accent down the vehicle cell. Hovering either cell shows the message via title. */
-    .sched-row.has-conflict .sched-vehicle,
-    .sched-row.has-conflict .parts {
+    /* A schedule-scope conflict (overlapping/non-contiguous/orphan parts, or a train left without traction):
+       amber tint plus an amber accent down the parts column only. Hovering shows the message via title. */
+    .parts.has-schedule-conflict {
         background: #fff8e1;
-    }
-
-    .sched-row.has-conflict .sched-vehicle {
         box-shadow: inset 3px 0 0 #d9a406;
     }
 
@@ -82,6 +78,13 @@
     .chip.external-id {
         background: #fff8c5;
         border-color: #e6d878;
+    }
+
+    /* A vehicle-scope conflict (double-booked, non-closing circulation) marks the offending vehicle's chip
+       in the Vehicle column: amber tint and border. Placed after .external-id so it wins on a raw-id chip. */
+    .chip.conflict {
+        background: #fff8e1;
+        border-color: #d9a406 !important;
     }
 
     /* Sessions/days a partly-booked assignment covers, shown after the vehicle id on its chip. */

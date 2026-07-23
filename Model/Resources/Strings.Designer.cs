@@ -205,29 +205,11 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Vehicle schedule {0} runs every session but does not return to its start {1}; it ends at {2}..
-        /// </summary>
-        internal static string ScheduleDoesNotReturnToStart {
-            get {
-                return ResourceManager.GetString("ScheduleDoesNotReturnToStart", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Vehicle schedule {0}: {1} does not continue from where the previous part ended at {2}..
         /// </summary>
         internal static string ScheduleIsNotContiguous {
             get {
                 return ResourceManager.GetString("ScheduleIsNotContiguous", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Vehicle {0} on sessions {1} does not return to its start {2}; it ends at {3}..
-        /// </summary>
-        internal static string SessionCombinationDoesNotReturnToStart {
-            get {
-                return ResourceManager.GetString("SessionCombinationDoesNotReturnToStart", resourceCulture);
             }
         }
         
@@ -439,6 +421,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no traction unit on sessions {1}..
+        /// </summary>
+        internal static string TrainMissingTraction {
+            get {
+                return ResourceManager.GetString("TrainMissingTraction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Train {0} must stop at at least two stations..
         /// </summary>
         internal static string TrainMustHaveMinimumTwoCalls {
@@ -484,6 +475,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} does not return to its start {1}; it ends at {2}..
+        /// </summary>
+        internal static string VehicleDoesNotReturnToStart {
+            get {
+                return ResourceManager.GetString("VehicleDoesNotReturnToStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}..
         /// </summary>
         internal static string VehicleIsDoubleBooked {
@@ -498,6 +498,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string VehicleScheduleContainsOverlappingTrainParts {
             get {
                 return ResourceManager.GetString("VehicleScheduleContainsOverlappingTrainParts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0} has no vehicle assigned..
+        /// </summary>
+        internal static string VehicleScheduleHasNoVehicle {
+            get {
+                return ResourceManager.GetString("VehicleScheduleHasNoVehicle", resourceCulture);
             }
         }
         

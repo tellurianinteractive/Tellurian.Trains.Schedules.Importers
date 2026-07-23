@@ -23,14 +23,15 @@ else
         <div class="head parts-head">@Translator("Trains")</div>
         @foreach (var schedule in Schedules)
         {
-            var conflict = ConflictTitle(schedule);
-            <div class="sched-row @(conflict is not null ? "has-conflict" : null)">
-                <div class="sched-vehicle" title="@conflict">
+            var scheduleConflict = ScheduleConflictTitle(schedule);
+            <div class="sched-row">
+                <div class="sched-vehicle">
                     <div class="vehicles">
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
-                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null)" style="border-color:@vehicle.BorderColor"
-                                  title="@Translator(vehicle.ObjectType.ToString())">
+                            var vehicleConflict = VehicleConflictTitle(vehicle);
+                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null) @(vehicleConflict is not null ? "conflict" : null)" style="border-color:@vehicle.BorderColor"
+                                  title="@(vehicleConflict ?? Translator(vehicle.ObjectType.ToString()))">
                                 @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
@@ -45,7 +46,7 @@ else
                         <button class="add" title="@Translator("AddVehicle")" @onclick="() => _assignTarget = schedule"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <div class="parts" title="@conflict">
+                <div class="parts @(scheduleConflict is not null ? "has-schedule-conflict" : null)" title="@scheduleConflict">
                     @if (_deleteTarget == schedule)
                     {
                         <div class="confirm">
@@ -137,15 +138,26 @@ else
     private Schedule? _deleteTarget;
     private (Schedule Schedule, ScheduledObject Vehicle, ScheduleAssignment Assignment)? _editTarget;
 
-    // The validation messages for errors that involve any train worked in this schedule, joined for a
-    // hover tooltip; null when the working is clean. Covers schedule-level errors (not closed, not
-    // contiguous, double-booked, overlaps) as well as any train problem within the working.
-    private string? ConflictTitle(Schedule schedule)
+    // Schedule-scope conflicts for this working (overlapping/non-contiguous/orphan parts, or a train left
+    // without traction), joined for a hover tooltip on the parts column; null when clean. Train- and
+    // vehicle-scope errors are excluded by Involves(schedule), so they never mark the parts column.
+    private string? ScheduleConflictTitle(Schedule schedule)
     {
-        var trains = schedule.Parts.Select(p => p.Train).Distinct().ToList();
-        if (trains.Count == 0) return null;
         var messages = ValidationState.Errors
-            .Where(e => trains.Any(t => e.Involves(t)))
+            .Where(e => e.Involves(schedule))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count == 0 ? null : string.Join("\n", messages);
+    }
+
+    // Vehicle-scope conflicts for this vehicle (double-booked, non-closing circulation), joined for a hover
+    // tooltip on the vehicle's chip; null when clean. Only the offending chip is marked, in the Vehicle
+    // column.
+    private string? VehicleConflictTitle(ScheduledObject vehicle)
+    {
+        var messages = ValidationState.Errors
+            .Where(e => e.Involves(vehicle))
             .Select(e => e.Message.Text)
             .Distinct()
             .ToList();

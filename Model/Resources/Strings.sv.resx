@@ -261,10 +261,13 @@
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Fordonsomlopp {0}: {1} fortsätter inte där föregående del slutade vid {2}.</value>
   </data>
-  <data name="ScheduleDoesNotReturnToStart" xml:space="preserve">
-    <value>Fordonsomlopp {0} körs varje köromgång men återvänder inte till sin startplats {1}; det slutar vid {2}.</value>
+  <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
+    <value>Fordonsomlopp {0} har inget fordon tilldelat.</value>
   </data>
-  <data name="SessionCombinationDoesNotReturnToStart" xml:space="preserve">
-    <value>Fordon {0} på köromgångar {1} återvänder inte till sin startplats {2}; det slutar vid {3}.</value>
+  <data name="TrainMissingTraction" xml:space="preserve">
+    <value>Tåg {0} saknar dragfordon på köromgångar {1}.</value>
+  </data>
+  <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
+    <value>Fordon {0} återvänder inte till sin startplats {1}; det slutar vid {2}.</value>
   </data>
 </root>

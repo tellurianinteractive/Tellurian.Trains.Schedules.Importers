@@ -23,9 +23,9 @@ public static class ValidationExtensions
             result.AddRange(plan.GetTimetableValidationErrors(options));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
-            if (options.ValidateSchedules) result.AddRange(plan.ValidateScheduleClosure());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
-            if (options.ValidateDriverDuties) result.AddRange(plan.ValidateSessionCombinationClosure());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
             return result;
         }
@@ -138,62 +138,117 @@ public static class ValidationExtensions
         }
 
         /// <summary>
-        /// Validates schedule circulation closure (rule S3): a vehicle schedule that runs the whole
-        /// operating period must return the vehicle to the station it started from, so it can repeat the
-        /// working next session. A schedule that runs only a subset of sessions is not checked here — it
-        /// may be closed by a complementary schedule on the remaining sessions. Schedules whose trains are
-        /// all on demand are exempt (they need not return), and cargo flows (waybill-directed, not a
-        /// returning circulation) are skipped.
+        /// Validates traction coverage (rule S4). Two things must hold:
+        /// <list type="bullet">
+        /// <item>A schedule (turnus) that runs regular sessions must have at least one vehicle assigned; an
+        /// orphan working with no vehicle is reported.</item>
+        /// <item>Every train that operates must be hauled by a traction unit (a locomotive or a
+        /// self-propelled trainset) on <em>every</em> session it runs. The traction may be assigned through
+        /// any schedule that works the train — a wagonset has its own turnus with no traction of its own and
+        /// is hauled by the locomotive's separate turnus, so coverage is judged per train, not per
+        /// schedule.</item>
+        /// </list>
+        /// On-demand trains are exempt (they run only when needed), as are cargo flows.
         /// </summary>
-        internal IEnumerable<ValidationError> ValidateScheduleClosure()
+        internal IEnumerable<ValidationError> ValidateTractionCoverage()
         {
             var general = plan.Layout.Settings.General;
+            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
+
+            // A turnus that runs regular sessions but has no vehicle assigned at all is an orphan working.
             foreach (var schedule in plan.Schedules)
             {
                 if (schedule.Parts.Count == 0) continue;
-                // Circulation closure is a traction concept: a locomotive or trainset must return to be
-                // reused next session. Wagons and cargo flows are repositioned by other workings, so they
-                // are not required to close (see rule S3's "starting traction unit").
-                if (!schedule.Vehicles.Any(v => v.IsTraction)) continue;
+                if (schedule.IsCargoFlow) continue;
                 if (schedule.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
-                if (!schedule.EffectiveSessions.CoversAllWithin(general.UseDays, general.MaxSessions)) continue;
-                var start = schedule.StartLocation;
-                var end = schedule.EndLocation;
-                if (start is null || end is null || start.Equals(end)) continue;
-                var message = Message.Information(Strings.ScheduleDoesNotReturnToStart, schedule.Number, start, end);
-                errors.Add(ValidationError.ScheduleNotClosed(schedule, message));
+                if (schedule.Vehicles.Any()) continue;
+                var message = Message.Information(Strings.VehicleScheduleHasNoVehicle, schedule.Number);
+                errors.Add(ValidationError.ScheduleHasNoVehicle(schedule, message));
+            }
+
+            // Every train must have a traction unit on every session it runs, provided through any schedule
+            // that works it.
+            var tractionAssignments = plan.ScheduledObjects
+                .Where(v => v.IsTraction)
+                .SelectMany(v => v.ScheduleAssignments)
+                .ToList();
+            foreach (var train in plan.Timetable.Trains)
+            {
+                if (train.Calls.Count < 2) continue;
+                if (train.Sessions.IsOnDemand) continue;
+
+                var tractionSessions = tractionAssignments
+                    .Where(a => a.Schedule is not null && a.Schedule.Parts.Any(p => p.Train.Equals(train)))
+                    .Aggregate(new Sessions(), (acc, a) => acc.Or(a.Sessions));
+
+                var missing = new List<int>();
+                for (var number = 1; number <= periodMax; number++)
+                    if (train.Sessions.Includes(number) && !tractionSessions.Includes(number)) missing.Add(number);
+
+                if (missing.Count > 0)
+                {
+                    var missingSessions = SessionsExtensions.FromPeriodNumbers(missing, general.UseDays);
+                    var message = Message.Information(Strings.TrainMissingTraction, train, missingSessions.SessionsNumbers);
+                    errors.Add(ValidationError.TrainMissingTraction(train, message));
+                }
             }
             return errors;
         }
 
         /// <summary>
-        /// Validates session-combination closure (rule S5): when a vehicle works different parts on
-        /// different sessions/days it has more than one session combination, and each such combination
-        /// must return the vehicle to its start station (each conforming to S3). A vehicle with a single
-        /// combination is already covered by <see cref="ValidateScheduleClosure"/>. On-demand combinations
-        /// and cargo flows are exempt.
+        /// Validates vehicle circulation closure (rules S3 + S5): over the whole operating period a
+        /// vehicle's movements must balance at every station — it must depart each station as often
+        /// as it arrives there — so the layout's vehicle distribution repeats and the working can run
+        /// again. Movements are counted per session worked, so a unit that runs a leg on more sessions than
+        /// it runs the return is caught. A unit that works both a forward and a return leg is closed and is
+        /// not reported, even when the legs run on different sessions and even when they are split across
+        /// several schedules (the rotation case). Applies to traction units, wagonsets and cargo-only units,
+        /// each of which turns on its own working. On-demand-only units and cargo flows (freight directed by
+        /// waybills, not a turning vehicle) are exempt.
         /// </summary>
-        internal IEnumerable<ValidationError> ValidateSessionCombinationClosure()
+        internal IEnumerable<ValidationError> ValidateVehicleClosure()
         {
             var general = plan.Layout.Settings.General;
+            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
             foreach (var vehicle in plan.ScheduledObjects)
             {
-                // Closure applies to traction units (see S3); wagons and cargo flows are repositioned.
-                if (!vehicle.IsTraction) continue;
-                var combinations = vehicle.SessionCombinations(general.UseDays, general.MaxSessions);
-                if (combinations.Count < 2) continue; // single combination: covered by S3 on the schedule
-                foreach (var combination in combinations)
+                if (!(vehicle.IsTraction || vehicle.IsWagonSet || vehicle.IsCargoOnly)) continue;
+
+                // Flow conservation over every session worked: +1 where the unit departs, -1 where it
+                // arrives. A closed circulation nets to zero at every location.
+                var net = new Dictionary<OperationLocation, int>();
+                var departFrom = new Dictionary<OperationLocation, ScheduledTrainPart>();
+                var arriveAt = new Dictionary<OperationLocation, ScheduledTrainPart>();
+                var worksScheduled = false;
+                for (var number = 1; number <= periodMax; number++)
                 {
-                    if (combination.Parts.Count == 0) continue;
-                    if (combination.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
-                    var start = combination.Parts[0].From.OperationLocation;
-                    var end = combination.Parts[^1].To.OperationLocation;
-                    if (start.Equals(end)) continue;
-                    var message = Message.Information(Strings.SessionCombinationDoesNotReturnToStart, vehicle.Designation, combination.Sessions.SessionsNumbers, start, end);
-                    errors.Add(ValidationError.SessionCombinationNotClosed(vehicle, combination, message));
+                    foreach (var assignment in vehicle.ScheduleAssignments.Where(a => a.Sessions.Includes(number)))
+                    {
+                        foreach (var part in assignment.Schedule?.Parts ?? [])
+                        {
+                            if (!part.Train.Sessions.Includes(number)) continue;
+                            worksScheduled = true;
+                            var from = part.From.OperationLocation;
+                            var to = part.To.OperationLocation;
+                            net[from] = net.GetValueOrDefault(from) + 1;
+                            net[to] = net.GetValueOrDefault(to) - 1;
+                            departFrom.TryAdd(from, part);
+                            arriveAt.TryAdd(to, part);
+                        }
+                    }
                 }
+                if (!worksScheduled) continue; // no regular working (e.g. on-demand only)
+
+                var start = net.FirstOrDefault(kv => kv.Value > 0).Key; // departs more often than it returns
+                var end = net.FirstOrDefault(kv => kv.Value < 0).Key;   // arrives more often than it leaves
+                if (start is null && end is null) continue;             // balanced: the circulation closes
+
+                var fromPart = start is not null ? departFrom[start] : arriveAt[end!];
+                var toPart = end is not null ? arriveAt[end] : departFrom[start!];
+                var message = Message.Information(Strings.VehicleDoesNotReturnToStart, vehicle.Designation, (start ?? end)!, (end ?? start)!);
+                errors.Add(ValidationError.VehicleNotClosed(vehicle, fromPart, toPart, message));
             }
             return errors;
         }
@@ -225,7 +280,7 @@ public static class ValidationExtensions
                 if (!next.From.OperationLocation.Equals(previous.To.OperationLocation))
                 {
                     var message = Message.Information(Strings.ScheduleIsNotContiguous, schedule.Number, next, previous.To.OperationLocation);
-                    errors.Add(ValidationError.ScheduleNotContiguous(previous, next, message));
+                    errors.Add(ValidationError.ScheduleNotContiguous(schedule, previous, next, message));
                 }
             }
             return errors;
@@ -259,7 +314,7 @@ public static class ValidationExtensions
                     if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
                     {
                         var message = Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, schedule.Id, p1, p2));
-                        errors.Add(ValidationError.VehicleScheduleOverlap(p1, p2, message));
+                        errors.Add(ValidationError.VehicleScheduleOverlap(schedule, p1, p2, message));
                     }
                 }
             }
