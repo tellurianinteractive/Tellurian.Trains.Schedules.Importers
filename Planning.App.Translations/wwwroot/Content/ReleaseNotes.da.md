@@ -1,5 +1,17 @@
 # Versionsnyheder
 
+## Version 0.2.1
+
+- Konfliktadvarsler vises nu, hvor du kan rette dem. Togkonflikter vises kun i den
+  grafiske køreplan og på fanen **Tog**; køretøjs- og omløbskonflikter vises kun på
+  fanen **Omløb**.
+- På fanen **Omløb** fremhæver en køretøjskonflikt nu kun det pågældende køretøj, og
+  en omløbskonflikt fremhæver kun det pågældende omløb, så det er tydeligt, hvad der
+  kræver opmærksomhed.
+- Kontrollen af, at et køretøj vender tilbage til sit udgangspunkt, omfatter nu også
+  vognsæt og gods, ikke kun lokomotiver og togsæt, så et vognsæt eller gods, der
+  bliver efterladt det forkerte sted ved køresessionens slutning, nu rapporteres.
+
 ## Version 0.2.0
 
 - Navnet på den plan, du arbejder med, vises nu øverst i vinduet, så du altid kan

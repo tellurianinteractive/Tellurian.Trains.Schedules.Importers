@@ -1,5 +1,18 @@
 # Versionshinweise
 
+## Version 0.2.1
+
+- Konfliktwarnungen werden jetzt dort angezeigt, wo Sie sie beheben können.
+  Zugkonflikte erscheinen nur im Bildfahrplan und auf der Registerkarte **Züge**;
+  Fahrzeug- und Umlaufkonflikte nur auf der Registerkarte **Umläufe**.
+- Auf der Registerkarte **Umläufe** hebt ein Fahrzeugkonflikt jetzt nur das
+  betroffene Fahrzeug hervor und ein Umlaufkonflikt nur den betreffenden Umlauf,
+  sodass klar ist, was Aufmerksamkeit erfordert.
+- Die Prüfung, ob ein Fahrzeug zu seinem Ausgangspunkt zurückkehrt, umfasst jetzt
+  auch Wagengruppen und Fracht, nicht nur Lokomotiven und Triebzüge, sodass eine am
+  Ende der Betriebssitzung fehl am Platz stehende Wagengruppe oder Fracht jetzt
+  gemeldet wird.
+
 ## Version 0.2.0
 
 - Der Name des Plans, an dem Sie gerade arbeiten, wird jetzt in der oberen Leiste

@@ -1,5 +1,17 @@
 # Versionsnyheter
 
+## Version 0.2.1
+
+- Konfliktvarningar visas nu där du kan åtgärda dem. Tågkonflikter visas endast i
+  den grafiska tidtabellen och på fliken **Tåg**; fordons- och omloppskonflikter
+  visas endast på fliken **Omlopp**.
+- På fliken **Omlopp** markerar en fordonskonflikt nu bara det berörda fordonet, och
+  en omloppskonflikt markerar bara det omloppet, så att det tydligt framgår vad som
+  behöver åtgärdas.
+- Kontrollen att ett fordon återvänder till sin utgångspunkt omfattar nu även
+  vagngrupper och gods, inte bara lok och tågsätt, så att en vagngrupp eller gods som
+  blir kvar på fel plats vid köromgångens slut nu rapporteras.
+
 ## Version 0.2.0
 
 - Namnet på den plan du arbetar med visas nu överst i fönstret, så att du alltid

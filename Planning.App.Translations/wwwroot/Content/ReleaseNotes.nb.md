@@ -1,5 +1,17 @@
 # Versjonsnyheter
 
+## Version 0.2.1
+
+- Konfliktvarsler vises nå der du kan rette dem. Togkonflikter vises bare i den
+  grafiske ruteplanen og på fanen **Tog**; kjøretøy- og omløpskonflikter vises bare
+  på fanen **Omløp**.
+- På fanen **Omløp** fremhever en kjøretøykonflikt nå bare det aktuelle kjøretøyet,
+  og en omløpskonflikt fremhever bare det aktuelle omløpet, slik at det er tydelig
+  hva som krever oppmerksomhet.
+- Kontrollen av at et kjøretøy vender tilbake til utgangspunktet, omfatter nå også
+  vognsett og gods, ikke bare lok og togsett, slik at et vognsett eller gods som blir
+  stående på feil sted ved slutten av driftsøkten, nå rapporteres.
+
 ## Version 0.2.0
 
 - Navnet på planen du arbeider med, vises nå øverst i vinduet, slik at du alltid
