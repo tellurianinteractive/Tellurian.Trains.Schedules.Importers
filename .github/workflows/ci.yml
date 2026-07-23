@@ -3,8 +3,17 @@ name: CI
 on:
   push:
     branches: [master]
+    # Only run the NuGet build/test/publish pipeline when the version (or other
+    # packaging metadata) changes. Ordinary code commits are verified by the
+    # Azure Static Web Apps workflow, which builds Planning.App and therefore the
+    # referenced Model/Importers projects. Manual runs via workflow_dispatch
+    # ignore this filter.
+    paths:
+      - Directory.Build.props
   pull_request:
     branches: [master]
+    paths:
+      - Directory.Build.props
   workflow_dispatch:
 
 env:
