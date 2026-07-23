@@ -126,6 +126,9 @@
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="ReleaseNotes" xml:space="preserve">
+    <value>Release notes</value>
+  </data>
   <data name="Workspace" xml:space="preserve">
     <value>Workspace</value>
   </data>

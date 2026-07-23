@@ -51,6 +51,23 @@
     opacity: 0.7;
 }
 
+.version-notes {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.1rem 0.25rem;
+    margin-left: 0.15rem;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    line-height: 1;
+    vertical-align: baseline;
+}
+
+.version-notes:hover {
+    opacity: 1;
+}
+
 .top-bar-actions {
     display: flex;
     justify-content: flex-end;

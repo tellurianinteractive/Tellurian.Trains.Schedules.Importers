@@ -13,7 +13,7 @@
 
 <div class="page" style="--primary: @Primary; --primary-text: @Primary.TextColor">@* signature colour + its auto-contrasted text, exposed app-wide for data-grid headers etc. *@
     <header class="top-bar no-print">
-        <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span></h1>
+        <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span><button class="version-notes" type="button" title="@Translator("ReleaseNotes")" aria-label="@Translator("ReleaseNotes")" @onclick="ToggleReleaseNotes"><i class="fa-solid fa-bullhorn"></i></button></h1>
         @* The plan currently being worked on, centred so it reads as the document title of the window. *@
         <div class="active-plan @(PlanName is null ? "none" : "")">
             <i class="fa-solid fa-file-lines"></i>
@@ -35,6 +35,16 @@
             </div>
         </div>
 
+    }
+
+    @if (_showReleaseNotes)
+    {
+        <div class="about" @onclick="ToggleReleaseNotes">
+            <div class="panel" @onclick:stopPropagation>
+                <button class="close" @onclick="ToggleReleaseNotes"><i class="fa-solid fa-xmark"></i></button>
+                @((MarkupString)_releaseNotesHtml)
+            </div>
+        </div>
     }
 
     <nav class="tab-bar no-print">
@@ -100,6 +110,8 @@
     private const string Primary = "#1a3a5c";
     private bool _showAbout;
     private string _aboutHtml = "";
+    private bool _showReleaseNotes;
+    private string _releaseNotesHtml = "";
 
     // Restoring state on startup (deserializing the persisted plan, restoring the dock and last route)
     // takes a moment on WebAssembly; show a spinner until it finishes instead of a blank/wrong tab.
@@ -171,6 +183,17 @@
             var content = await MarkdownProvider.GetTranslationAsync(
                 "About", CultureInfo.CurrentUICulture);
             _aboutHtml = Markdig.Markdown.ToHtml(content.Text);
+        }
+    }
+
+    private async Task ToggleReleaseNotes()
+    {
+        _showReleaseNotes = !_showReleaseNotes;
+        if (_showReleaseNotes && string.IsNullOrEmpty(_releaseNotesHtml))
+        {
+            var content = await MarkdownProvider.GetTranslationAsync(
+                "ReleaseNotes", CultureInfo.CurrentUICulture);
+            _releaseNotesHtml = Markdig.Markdown.ToHtml(content.Text);
         }
     }
 
