@@ -176,6 +176,22 @@ public static class TimetableExtensions
     }
 
     /// <summary>
+    /// Rebuilds the per-track call index (<see cref="StationTrack.Calls"/>) from the single source of
+    /// truth, <see cref="Train.Calls"/>: every track's call collection is cleared and then repopulated
+    /// from the calls of the timetable's trains. A call whose train is not in <see cref="Timetable.Trains"/>
+    /// — an orphan left by an earlier import or a persisted plan — is thereby dropped and can never surface
+    /// as a phantom conflict on a track or stretch. Call this whenever a plan is loaded or restored, before
+    /// it is validated or displayed.
+    /// </summary>
+    /// <param name="timetable">The timetable whose per-track call index to rebuild.</param>
+    public static void RebuildStationCalls(this Timetable timetable)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        foreach (var track in timetable.Layout.OperationLocations.SelectMany(l => l.Tracks)) track.Calls.Clear();
+        foreach (var call in timetable.Trains.SelectMany(t => t.Calls)) call.Track.Add(call);
+    }
+
+    /// <summary>
     /// Adds a train to the timetable.
     /// </summary>
     /// <param name="timetable">The timetable to add the train to.</param>

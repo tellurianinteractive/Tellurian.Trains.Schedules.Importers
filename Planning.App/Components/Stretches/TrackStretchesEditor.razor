@@ -15,46 +15,30 @@
         {
             <p class="empty">@Translator("TrackStretchNeedsLocations")</p>
         }
-        else if (Stretches.Count == 0)
+        else if (!Stretches.Any())
         {
             <p class="empty">@Translator("NoTrackStretches")</p>
         }
         else
         {
-            <table class="grid">
-                <thead>
-                    <tr>
-                        <th>@Translator("From")</th>
-                        <th>@Translator("To")</th>
-                        <th class="num">@Translator("DistanceKm")</th>
-                        <th class="num">@Translator("Tracks")</th>
-                        <th class="num">@Translator("SpeedKmh")</th>
-                        <th class="num">@Translator("TimeMinutes")</th>
-                        <th class="bool">@Translator("IsElectrified")</th>
-                        <th class="actions">@Translator("Actions")</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in Stretches)
-                    {
-                        <tr>
-                            <td>@s.Start.Name</td>
-                            <td>@s.End.Name</td>
-                            <td class="num">@s.Distance</td>
-                            <td class="num">@s.TracksCount</td>
-                            <td class="num">@s.Speed</td>
-                            <td class="num">@s.Time</td>
-                            <td class="bool"><input type="checkbox" checked="@s.IsElectrified" disabled /></td>
-                            <td class="actions">
-                                <button @onclick="() => Edit(s)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
-                                <button class="danger" disabled="@IsReferenced(s)"
-                                        title="@(IsReferenced(s) ? Translator("TrackStretchReferenced") : null)"
-                                        @onclick="() => _deleteTarget = s"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <QuickGrid Items="Stretches" Class="grid" Theme="tellurian">
+                <PropertyColumn Property="s => s.Id" Title='@Translator("Id")' Sortable="true" IsDefaultSortColumn="true" Align="Align.Right" />
+                <PropertyColumn Property="s => s.Start.Name" Title='@Translator("From")' Sortable="true" />
+                <PropertyColumn Property="s => s.End.Name" Title='@Translator("To")' Sortable="true" />
+                <PropertyColumn Property="s => s.Distance" Title='@Translator("DistanceKm")' Sortable="true" Align="Align.Right" />
+                <PropertyColumn Property="s => s.TracksCount" Title='@Translator("Tracks")' Sortable="true" Align="Align.Right" />
+                <PropertyColumn Property="s => s.Speed" Title='@Translator("SpeedKmh")' Sortable="true" Align="Align.Right" />
+                <PropertyColumn Property="s => s.Time" Title='@Translator("TimeMinutes")' Sortable="true" Align="Align.Right" />
+                <TemplateColumn Title='@Translator("IsElectrified")' Align="Align.Center">
+                    <input type="checkbox" checked="@context.IsElectrified" disabled />
+                </TemplateColumn>
+                <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                    <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
+                    <button class="danger" disabled="@IsReferenced(context)"
+                            title="@(IsReferenced(context) ? Translator("TrackStretchReferenced") : null)"
+                            @onclick="() => _deleteTarget = context"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                </TemplateColumn>
+            </QuickGrid>
 
             @if (_deleteTarget is not null)
             {
@@ -138,8 +122,10 @@
     private Layout? Layout => ScheduleState.Layout;
     private IReadOnlyList<OperationLocation> Locations =>
         Layout is null ? [] : [.. Layout.OperationLocations.OrderBy(l => l.Name, StringComparer.CurrentCulture)];
-    private IReadOnlyList<TrackStretch> Stretches =>
-        Layout is null ? [] : [.. Layout.TrackStretches.OrderBy(s => s.Start.Name).ThenBy(s => s.End.Name)];
+    // Defaults to import/entry order (Id ascending, set as the grid's default sort column); the user
+    // can click any header to re-sort.
+    private IQueryable<TrackStretch> Stretches =>
+        (Layout?.TrackStretches ?? []).AsQueryable();
     private IReadOnlyList<IReadOnlyList<TrackStretch>> Inconsistencies =>
         Layout is null ? [] : Layout.DirectionInconsistencies();
 

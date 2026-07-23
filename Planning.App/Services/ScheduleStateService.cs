@@ -42,7 +42,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<
     public Plan? Schedule
     {
         get => _schedule;
-        set { _schedule = value; CancelPendingSave(); ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
+        set { _schedule = value; _schedule?.Timetable?.RebuildStationCalls(); CancelPendingSave(); ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
     }
 
     /// <summary>
@@ -112,6 +112,10 @@ public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<
         if (plan is null) return;
 
         _schedule = plan;
+        // A persisted plan may carry track calls whose train is no longer in the timetable (an orphan
+        // from an older save or import). Reconcile the per-track index with Train.Calls before anything
+        // validates or displays it, so orphans cannot surface as phantom conflicts.
+        _schedule.Timetable?.RebuildStationCalls();
         ResetSelectionToFirstStretch();
 
         var storedNumbers = await storage.GetStringAsync(SelectedStretchesStorageKey);

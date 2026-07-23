@@ -426,6 +426,8 @@ public static class TrainExtensions
                 }
 
                 train.Calls.Add(call);
+                // The train owns the call; keep the per-track call index in step as the call joins the train.
+                call.Track.Add(call);
             }
             return call;
         }

@@ -35,7 +35,11 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
         Id = id;
         Track = track.ValueOrException(nameof(track));
         TrackId = track.Id;
-        Track.Add(this);
+        // A call does not register itself on the track here. The single owner of a call is its train
+        // (see Train.Add), which registers the call on its track when the call joins the train; the
+        // per-track index is otherwise rebuilt from the timetable's trains (Timetable.RebuildStationCalls).
+        // Registering at construction would put a call on a track before (or without) it ever joining a
+        // train, which is exactly how orphaned track calls arise.
         Arrival = arrival;
         Departure = departure;
         Notes = [];
