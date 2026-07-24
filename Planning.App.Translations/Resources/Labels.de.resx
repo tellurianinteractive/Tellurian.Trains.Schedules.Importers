@@ -1660,19 +1660,19 @@
     <value>Benötigte Triebfahrzeugführer</value>
   </data>
   <data name="Duties" xml:space="preserve">
-    <value>Schichten</value>
+    <value>Dienste</value>
   </data>
   <data name="DutiesDescription" xml:space="preserve">
-    <value>Fahrerschichten planen – die Folge von Zugteilen, die ein Fahrer fährt. Fügen Sie die Zugteile nacheinander hinzu; der Fahrer geht zwischen den Zugteilen zu Fuß, sie müssen also nicht an derselben Station beginnen. Die Zugteile sind die bereits in den Fahrzeugumläufen definierten Triebfahrzeugabschnitte.</value>
+    <value>Fahrerdienste planen – die Folge von Zugteilen, die ein Fahrer fährt. Fügen Sie die Zugteile nacheinander hinzu; der Fahrer geht zwischen den Zugteilen zu Fuß, sie müssen also nicht an derselben Station beginnen. Die Zugteile sind die bereits in den Fahrzeugumläufen definierten Triebfahrzeugabschnitte.</value>
   </data>
   <data name="DutiesNoSchedule" xml:space="preserve">
-    <value>Öffnen oder importieren Sie einen Plan, um Fahrerschichten zu bearbeiten.</value>
+    <value>Öffnen oder importieren Sie einen Plan, um Fahrerdienste zu bearbeiten.</value>
   </data>
   <data name="DutiesEmpty" xml:space="preserve">
-    <value>Noch keine Fahrerschichten. Mit ‚Neue Schicht‘ eine hinzufügen.</value>
+    <value>Noch keine Fahrerdienste. Mit ‚Neuer Dienst‘ einen hinzufügen.</value>
   </data>
   <data name="NewDuty" xml:space="preserve">
-    <value>Neue Schicht</value>
+    <value>Neuer Dienst</value>
   </data>
   <data name="Duration" xml:space="preserve">
     <value>Dauer</value>
@@ -1687,7 +1687,7 @@
     <value>Neu nummerieren</value>
   </data>
   <data name="RenumberDutiesHelp" xml:space="preserve">
-    <value>Die Schichten nach Start- und dann Endzeit sortieren und ab 1 nummerieren.</value>
+    <value>Die Dienste nach Start- und dann Endzeit sortieren und ab 1 nummerieren.</value>
   </data>
   <data name="DutyTimesOverridden" xml:space="preserve">
     <value>Start- und/oder Endzeit überschrieben</value>
@@ -1696,16 +1696,16 @@
     <value>Zeiten als HH:mm eingeben.</value>
   </data>
   <data name="Duty" xml:space="preserve">
-    <value>Schicht</value>
+    <value>Dienst</value>
   </data>
   <data name="DutySessions" xml:space="preserve">
-    <value>Fahrrunden, an denen die Schicht gefahren wird</value>
+    <value>Fahrrunden, an denen der Dienst gefahren wird</value>
   </data>
   <data name="DeleteDuty" xml:space="preserve">
-    <value>Schicht löschen</value>
+    <value>Dienst löschen</value>
   </data>
   <data name="EditDuty" xml:space="preserve">
-    <value>Schicht bearbeiten</value>
+    <value>Dienst bearbeiten</value>
   </data>
   <data name="AddDutyPart" xml:space="preserve">
     <value>Zugteil hinzufügen</value>
@@ -1714,7 +1714,7 @@
     <value>Zugteil entfernen</value>
   </data>
   <data name="DutyNoCandidateParts" xml:space="preserve">
-    <value>Dieser Schicht können keine weiteren Zugteile hinzugefügt werden.</value>
+    <value>Diesem Dienst können keine weiteren Zugteile hinzugefügt werden.</value>
   </data>
   <data name="SelectTrainPart" xml:space="preserve">
     <value>Zugteil auswählen</value>
