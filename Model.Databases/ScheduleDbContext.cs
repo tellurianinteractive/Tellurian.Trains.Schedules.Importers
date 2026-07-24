@@ -154,6 +154,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
 
     #endregion
 
+    // A Time is a value object wrapping a TimeSpan; it is persisted as ticks (long). Shared across
+    // every Time property in the model, including the nullable duty overrides (EF Core applies a
+    // non-nullable converter to Time? automatically).
+    private static readonly ValueConverter<Time, long> TimeConverter = new(
+        v => v.Value.Ticks,
+        v => Time.FromTimeSpan(TimeSpan.FromTicks(v)));
+
     /// <summary>
     /// Configures the entity model for the database context.
     /// </summary>
@@ -365,10 +372,6 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     private static void ConfigureTimetable(ModelBuilder modelBuilder)
     {
         // Value converters
-        var timeConverter = new ValueConverter<Time, long>(
-            v => v.Value.Ticks,
-            v => Time.FromTimeSpan(TimeSpan.FromTicks(v)));
-
         var sessionsConverter = new ValueConverter<Sessions, int>(
             v => v.Flags,
             v => new Sessions(v));
@@ -480,8 +483,8 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         {
             entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.Arrival).HasConversion(timeConverter);
-            entity.Property(e => e.Departure).HasConversion(timeConverter);
+            entity.Property(e => e.Arrival).HasConversion(TimeConverter);
+            entity.Property(e => e.Departure).HasConversion(TimeConverter);
 
             entity.HasMany(e => e.Notes)
                   .WithOne(e => e.StationCall)
@@ -596,6 +599,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Property(e => e.Identity).HasMaxLength(50).IsRequired();
 
             entity.Property(e => e.Sessions).HasConversion(sessionsConverter);
+
+            // Effective start/end derive from the parts; only the optional manual overrides are stored.
+            entity.Property(e => e.OverriddenStartTime).HasConversion(TimeConverter);
+            entity.Property(e => e.OverriddenEndTime).HasConversion(TimeConverter);
 
             entity.HasOne(e => e.Company)
                   .WithMany()
