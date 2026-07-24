@@ -21,6 +21,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(Station), "Station")]
 [JsonDerivedType(typeof(SignalControlledLocation), "SignalControlled")]
+[JsonDerivedType(typeof(IndustrialArea), "IndustrialArea")]
 [JsonDerivedType(typeof(OtherLocation), "Other")]
 public abstract class OperationLocation : IEquatable<OperationLocation>
 {
@@ -73,6 +74,16 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// TODO: Reevaluate this property. This could instead indicae a <see cref="SignalControlledLocation"/>.
     /// </summary>
     public bool IsSignal { get; set; }
+
+    /// <summary>
+    /// Supress creating notes about trains meeding at this location.
+    /// </summary>
+    public bool HideMeets { get; set; }
+
+    /// <summary>
+    /// Supresses the display of trains not stopping at this location (used in some reports).
+    /// </summary>
+    public virtual bool HidePassings { get; set; }
 
     /// <summary>
     /// Gets whether a train can change direction at this location,

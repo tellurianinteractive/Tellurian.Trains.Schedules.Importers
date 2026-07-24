@@ -252,6 +252,12 @@
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}.</value>
   </data>
+  <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
+    <value>Train part {0} is worked by duty {1} and duty {2} on overlapping sessions.</value>
+  </data>
+  <data name="DutyHasOverlappingParts" xml:space="preserve">
+    <value>Driver duty {0} has overlapping train parts: {1} and {2}.</value>
+  </data>
   <data name="Undefined" xml:space="preserve">
     <value>Undefined</value>
   </data>

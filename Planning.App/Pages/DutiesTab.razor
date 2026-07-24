@@ -1,0 +1,69 @@
+@page "/duties"
+@using Tellurian.Trains.Schedules.Planning.App.Components.Duties
+@inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
+@inject Translator Translator
+@implements IDisposable
+
+@if (ScheduleState.Timetable is null)
+{
+    <p>@Translator("DutiesNoSchedule")</p>
+}
+else
+{
+    <div class="duties-tab">
+        <p class="intro">@Translator("DutiesDescription")</p>
+
+        <div class="toolbar">
+            <button @onclick="NewDuty">@Translator("NewDuty")</button>
+            <button @onclick="Renumber" disabled="@(Duties.Count == 0)" title="@Translator("RenumberDutiesHelp")">@Translator("RenumberDuties")</button>
+        </div>
+
+        <DutyChart Duties="Duties" />
+    </div>
+}
+
+@code {
+    // Driver duties of the current plan in running order: start time, then end time, then the duty's first
+    // session/day number so split-session variants of one duty sit together (a 1,3,5 duty before its 2,4,6
+    // twin), with identity as the final tiebreak. Empty duties (no start time) sort last. This matches the
+    // numbering the Renumber action applies.
+    private IReadOnlyList<DriverDuty> Duties =>
+        ScheduleState.Schedule?.DriverDuties is not { } duties
+            ? []
+            : [.. duties
+                .OrderBy(d => d.StartTime is null)
+                .ThenBy(d => d.StartTime)
+                .ThenBy(d => d.EndTime)
+                .ThenBy(d => d.Sessions.FirstNumber)
+                .ThenBy(d => d.Identity, StringComparer.CurrentCulture)];
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private void NewDuty()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        plan.CreateDriverDuty();
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void Renumber()
+    {
+        if (ScheduleState.Schedule is not { } plan) return;
+        plan.RenumberDriverDuties();
+        ScheduleState.SaveAndNotify();
+    }
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

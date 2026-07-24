@@ -34,16 +34,6 @@ public sealed class
     public Schedule? Schedule { get; set; }
 
     /// <summary>
-    /// Gets or sets the foreign key to the driver duty. Optional.
-    /// </summary>
-    public int? DutyId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the driver duty this train part is assigned to.
-    /// </summary>
-    public DriverDuty? Duty { get; set; }
-
-    /// <summary>
     /// Options applying when this part is operated by a traction unit (locomotive or trainset).
     /// Null when not applicable. A part may carry several option kinds at once.
     /// </summary>

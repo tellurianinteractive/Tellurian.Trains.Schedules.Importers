@@ -242,6 +242,21 @@ public static class SessionsExtensions
 
 
         /// <summary>
+        /// Gets the lowest active session/day number (1-based), or <see cref="int.MaxValue"/> when no session
+        /// is active (so empty patterns sort last, as with <see cref="SortOrder"/>). For a day pattern this is
+        /// the first in-week day position; the mirrored upper bits never precede it. This is the tiebreaker
+        /// that keeps split-session variants of one duty in order — a 1,3,5 duty before its 2,4,6 twin.
+        /// </summary>
+        public int FirstNumber
+        {
+            get
+            {
+                var bits = (ushort)(sessions.Flags & 0b00_1111111_1111111);
+                return bits == 0 ? int.MaxValue : BitOperations.TrailingZeroCount(bits) + 1;
+            }
+        }
+
+        /// <summary>
         /// If sessions is days, gets the full day-names resource key (mapped from <paramref name="startDay"/>),
         /// otherwise the session numbers.
         /// </summary>

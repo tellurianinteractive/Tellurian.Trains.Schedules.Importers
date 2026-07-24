@@ -555,6 +555,31 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         }
     }
 
+    // Links each imported Job segment to the existing traction schedule part(s) that cover it, so a driver
+    // duty references the same shared ScheduledTrainPart instances the vehicle schedules own (which is how
+    // a part's traction unit is resolved). For each segment, every traction part of the same train whose
+    // span lies within the segment is added to the duty — a segment spanning two traction parts (a loco
+    // change mid-Job) adds both, which is what produces the traction-exchange note. When no traction part
+    // matches (e.g. a deadhead/walk segment), a standalone part is added so no Job data is lost.
+    private static void LinkJobSegmentsToTractionParts(Plan plan, List<(DriverDuty Duty, StationCall From, StationCall To)> segments)
+    {
+        foreach (var (duty, from, to) in segments)
+        {
+            var matches = plan.Schedules
+                .SelectMany(s => s.Parts)
+                .Where(p => p.Train.Equals(from.Train)
+                    && p.From.Departure >= from.Departure
+                    && p.To.Arrival <= to.Arrival
+                    && plan.ScheduledObjectsFor(p).Any(so => so.IsTraction))
+                .OrderBy(p => p.From.Departure)
+                .ToList();
+            if (matches.Count > 0)
+                foreach (var part in matches) duty.Add(part);
+            else
+                duty.Add(new ScheduledTrainPart(from, to));
+        }
+    }
+
     private ImportResult<Timetable> GetTimetable(string name, Layout layout)
     {
         const string WorkSheetNameAndObjects = "Trains:traindef,timetable,remarks";
@@ -852,6 +877,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         var locoSchedules = new Dictionary<string, Schedule>(100);
         var trainsetSchedules = new Dictionary<string, Schedule>(200);
         var driverDuties = new Dictionary<string, DriverDuty>();
+        // Job rows are resolved to the existing traction schedule parts in a post-pass (see
+        // LinkJobSegmentsToTractionParts), once every loco/trainset schedule has been built. Each entry is
+        // the duty a Job row belongs to and the segment (from/to calls) it covers on its train.
+        var jobSegments = new List<(DriverDuty Duty, StationCall From, StationCall To)>();
 
         var trains = DataSet?.Tables[WorkSheetName];
         if (trains is null)
@@ -1009,8 +1038,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                         dutyMessages.AddRange(keys.Messages);
                                         if (dutyMessages.HasNoStoppingErrors())
                                         {
-                                            ScheduledTrainPart trainPart = new ScheduledTrainPart(keys.FromCall.Value, keys.ToCall.Value);
-                                            duty.Add(trainPart);
+                                            // Defer to the post-pass: link this segment to the existing traction
+                                            // schedule part(s) rather than minting a standalone part here.
+                                            jobSegments.Add((duty, keys.FromCall.Value, keys.ToCall.Value));
                                         }
                                     }
 
@@ -1028,6 +1058,10 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         // Vehicles and VehicleSchedules are already added by CreateVehicleWithAllSessionsSchedule
         foreach (var duty in driverDuties.Values) schedule.AddDriverDuty(duty);
         MergeRailcarsAndReclassifyTrainsets(schedule);
+        // With every traction schedule built and reclassified, link each imported Job segment to the
+        // traction schedule part(s) it is driven by, so a duty references the same shared parts as the
+        // schedules (before the on-demand pass, which reads the duties' parts).
+        LinkJobSegmentsToTractionParts(schedule, jobSegments);
         MarkSingleTrainWorkingsOnDemand(schedule);
         return ImportResult<Plan>.Success(schedule, messages);
 

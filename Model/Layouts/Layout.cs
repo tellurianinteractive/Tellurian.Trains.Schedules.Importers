@@ -496,6 +496,9 @@ public enum OperationLocationKind
     /// <summary>A <see cref="SignalControlledLocation"/>.</summary>
     SignalControlled,
 
+    /// <summary>An <see cref="IndustrialArea"/>.</summary>
+    IndustrialArea,
+
     /// <summary>An <see cref="OtherLocation"/>.</summary>
     Other,
 }
@@ -546,6 +549,7 @@ public static class LayoutOperationLocationConversionExtensions
                 {
                     ControlledBy = layout.PrecedingStation(existing),
                 },
+                OperationLocationKind.IndustrialArea => new IndustrialArea(existing.Id, existing.Name, existing.Signature),
                 _ => new OtherLocation(existing.Id, existing.Name, existing.Signature),
             };
 
@@ -553,6 +557,8 @@ public static class LayoutOperationLocationConversionExtensions
             replacement.CountryId = existing.CountryId;
             replacement.Owner = existing.Owner;
             replacement.IsSignal = existing.IsSignal;
+            replacement.HideMeets = existing.HideMeets;
+            replacement.HidePassings = existing.HidePassings;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;
             replacement.Timings = existing.Timings;
             replacement.Layout = existing.Layout;
@@ -585,6 +591,7 @@ public static class LayoutOperationLocationConversionExtensions
     {
         OperationLocationKind.Station => location is Station,
         OperationLocationKind.SignalControlled => location is SignalControlledLocation,
+        OperationLocationKind.IndustrialArea => location is IndustrialArea,
         _ => location is OtherLocation,
     };
 }

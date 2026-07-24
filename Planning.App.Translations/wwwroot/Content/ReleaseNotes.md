@@ -1,5 +1,28 @@
 # Release Notes
 
+## Version 0.2.4
+
+- A new **Duties** tab lets you plan driver duties — the work one loco driver performs
+  across a session, as a sequence of the train parts they drive. Each duty is a row: its
+  identity, company and operating sessions on the left, the train parts in running order
+  on the right.
+- Add the parts a driver works with **+ train part**. The picker offers the traction
+  parts a driver could take next — those that do not clash in time with the duty and, once
+  it has a part, those departing at or after it arrives. Parts need not join at the same
+  station: between two parts the driver simply walks to where the next one starts.
+- The same train part can be worked by several duties as long as they run on different
+  sessions, so one duty can cover the odd sessions and another the even ones.
+- Where two parts of the same train in a duty are worked by different traction units, the
+  tab now shows a note at the station where the traction unit is exchanged — you do not
+  enter it by hand.
+- You can give each duty an identity and operating company, choose the sessions it runs,
+  and add free-text notes that apply to the whole duty.
+- Duties imported from XPLN now share the train parts defined in the vehicle schedules, so
+  each part shows the traction unit that works it.
+- The plan is checked so that no train part is driven by two duties on the same session
+  and no duty has parts that overlap in time; any conflicts are listed and open on the
+  **Duties** tab. You can turn this check on or off under **Settings › Validation**.
+
 ## Version 0.2.2
 
 ### Fixes

@@ -65,6 +65,32 @@ public class OperationLocationTypeChangeTests
     }
 
     [TestMethod]
+    public void ChangingToIndustrialAreaReplacesTheInstanceAndForcesItsFixedFlags()
+    {
+        var (layout, _, b, _) = LineABC();
+
+        var replacement = (IndustrialArea)layout.ChangeOperationLocationType(b, OperationLocationKind.IndustrialArea);
+
+        Assert.AreSame(replacement, layout.OperationLocations.Single(o => o.Signature == "B"));
+        Assert.IsFalse(replacement.HasPassengerExchange, "no passenger exchange");
+        Assert.IsTrue(replacement.HasCargoExchange, "always has cargo exchange");
+        Assert.IsFalse(replacement.IsChangingTrainDirectionPossible, "no direction change");
+    }
+
+    [TestMethod]
+    public void ChangingTypeCarriesOverHideMeetsAndHidePassings()
+    {
+        var (layout, _, b, _) = LineABC();
+        b.HideMeets = true;
+        b.HidePassings = true;
+
+        var replacement = layout.ChangeOperationLocationType(b, OperationLocationKind.SignalControlled);
+
+        Assert.IsTrue(replacement.HideMeets);
+        Assert.IsTrue(replacement.HidePassings);
+    }
+
+    [TestMethod]
     public void ChangingToTheSameKindIsANoOp()
     {
         var (layout, _, b, _) = LineABC();

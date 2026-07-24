@@ -759,6 +759,9 @@
   <data name="SignalControlledLocation" xml:space="preserve">
     <value>Signalstyrt sted</value>
   </data>
+  <data name="IndustrialArea" xml:space="preserve">
+    <value>Industriområde</value>
+  </data>
   <data name="OtherLocation" xml:space="preserve">
     <value>Annet sted</value>
   </data>
@@ -968,6 +971,18 @@
   </data>
   <data name="HasCargoExchangeHelp" xml:space="preserve">
     <value>Godstog kan koble til og fra godsvogner her.</value>
+  </data>
+  <data name="HideMeets" xml:space="preserve">
+    <value>Skjul kryssinger?</value>
+  </data>
+  <data name="HideMeetsHelp" xml:space="preserve">
+    <value>Ikke opprett notater om tog som krysser på dette stedet.</value>
+  </data>
+  <data name="HidePassings" xml:space="preserve">
+    <value>Skjul gjennomkjøringer?</value>
+  </data>
+  <data name="HidePassingsHelp" xml:space="preserve">
+    <value>Ikke vis tog som kjører gjennom uten å stoppe (i noen rapporter).</value>
   </data>
   <data name="IsMain" xml:space="preserve">
     <value>Hovedspor?</value>
@@ -1643,5 +1658,83 @@
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Nødvendige lokførere</value>
+  </data>
+  <data name="Duties" xml:space="preserve">
+    <value>Tjenester</value>
+  </data>
+  <data name="DutiesDescription" xml:space="preserve">
+    <value>Planlegg førertjenester – rekkefølgen av togdeler en fører kjører. Legg til togdelene en fører kjører etter tur; føreren går mellom togdelene, så de trenger ikke starte på samme stasjon. Togdelene er trekkraftstrekningene som allerede er definert i kjøretøyenes turnuser.</value>
+  </data>
+  <data name="DutiesNoSchedule" xml:space="preserve">
+    <value>Åpne eller importer en plan for å redigere førertjenester.</value>
+  </data>
+  <data name="DutiesEmpty" xml:space="preserve">
+    <value>Ingen førertjenester ennå. Bruk ’Ny tjeneste’ for å legge til en.</value>
+  </data>
+  <data name="NewDuty" xml:space="preserve">
+    <value>Ny tjeneste</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Varighet</value>
+  </data>
+  <data name="DutyStartTime" xml:space="preserve">
+    <value>Starttid</value>
+  </data>
+  <data name="DutyEndTime" xml:space="preserve">
+    <value>Sluttid</value>
+  </data>
+  <data name="RenumberDuties" xml:space="preserve">
+    <value>Nummerer om</value>
+  </data>
+  <data name="RenumberDutiesHelp" xml:space="preserve">
+    <value>Sorter tjenestene etter starttid, deretter sluttid, og nummerer dem fra 1.</value>
+  </data>
+  <data name="DutyTimesOverridden" xml:space="preserve">
+    <value>Start- og/eller sluttid overstyrt</value>
+  </data>
+  <data name="InvalidTimeFormat" xml:space="preserve">
+    <value>Angi tider som HH:mm.</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Tjeneste</value>
+  </data>
+  <data name="DutySessions" xml:space="preserve">
+    <value>Øktene tjenesten kjøres</value>
+  </data>
+  <data name="DeleteDuty" xml:space="preserve">
+    <value>Slett tjeneste</value>
+  </data>
+  <data name="EditDuty" xml:space="preserve">
+    <value>Rediger tjeneste</value>
+  </data>
+  <data name="AddDutyPart" xml:space="preserve">
+    <value>Legg til togdel</value>
+  </data>
+  <data name="RemoveDutyPart" xml:space="preserve">
+    <value>Fjern togdel</value>
+  </data>
+  <data name="DutyNoCandidateParts" xml:space="preserve">
+    <value>Ingen flere togdeler kan legges til i denne tjenesten.</value>
+  </data>
+  <data name="SelectTrainPart" xml:space="preserve">
+    <value>Velg togdel</value>
+  </data>
+  <data name="TractionUnit" xml:space="preserve">
+    <value>Trekkraftenhet</value>
+  </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Bytte av trekkraftenhet</value>
+  </data>
+  <data name="DutyIdentity" xml:space="preserve">
+    <value>Betegnelse</value>
+  </data>
+  <data name="DutyNotes" xml:space="preserve">
+    <value>Merknader</value>
+  </data>
+  <data name="AddDutyNote" xml:space="preserve">
+    <value>Legg til merknad</value>
+  </data>
+  <data name="RemoveDutyNote" xml:space="preserve">
+    <value>Fjern merknad</value>
   </data>
 </root>

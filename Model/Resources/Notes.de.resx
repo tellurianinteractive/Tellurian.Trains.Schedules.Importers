@@ -79,6 +79,10 @@
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Verstärkt {0} zwischen {1} und {2}.</value>
   </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Wechsel des Triebfahrzeugs von {0} auf {1}.</value>
+    <comment>{0}=Triebfahrzeug bis hier, {1}=Triebfahrzeug weiter</comment>
+  </data>
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Bringt Wagen nach {0}</value>
   </data>

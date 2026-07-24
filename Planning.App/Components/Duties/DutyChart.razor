@@ -1,0 +1,175 @@
+@namespace Tellurian.Trains.Schedules.Planning.App.Components.Duties
+@using Tellurian.Trains.Schedules.Model.Notes
+@using Tellurian.Trains.Schedules.Model.Validations
+@using Tellurian.Trains.Schedules.Planning.App.Services
+@using Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@using Tellurian.Utilities.Web
+@inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
+@inject Translator Translator
+
+@* Editable duty chart: each driver duty is a row. The first column shows the duty identity, company and
+   the sessions it runs (with an edit control that also manages the duty's manual notes). The second column
+   lists the train-part blocks in the order the driver works them (each removable), a derived note where the
+   traction unit is exchanged mid-train, any manual duty notes, and a trailing "+ part" that appends the next
+   possible part. *@
+
+@if (Duties.Count == 0)
+{
+    <p class="empty">@Translator("DutiesEmpty")</p>
+}
+else
+{
+    <div class="duty-chart">
+        <div class="head duty-head">@Translator("Duty")</div>
+        <div class="head duration-head">@Translator("Duration")</div>
+        <div class="head parts-head">@Translator("Trains")</div>
+        @foreach (var duty in Duties)
+        {
+            var dutyConflict = DutyConflictTitle(duty);
+            <div class="duty-row">
+                <div class="duty-info">
+                    <span class="ident">@duty.Identity</span>
+                    @if (CompanyOf(duty) is { } company)
+                    {
+                        <span class="company">@company</span>
+                    }
+                    <span class="sessions" title="@Translator("DutySessions")">
+                        @SessionsDisplay.Text(duty.Sessions, UseDays, Translator, MaxSessions, StartDay)
+                    </span>
+                    <button class="edit" title="@Translator("EditDuty")" @onclick="() => _editTarget = duty"><i class="fa-solid fa-pen"></i></button>
+                    @if (_deleteTarget == duty)
+                    {
+                        <span class="confirm">
+                            <button class="danger" @onclick="() => DeleteDuty(duty)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                        </span>
+                    }
+                    else
+                    {
+                        <button class="del-duty danger" title="@Translator("DeleteDuty")" @onclick="() => _deleteTarget = duty"><i class="fa-solid fa-trash"></i></button>
+                    }
+                </div>
+                <div class="duty-duration">
+                    @if (duty.StartTime is { } start && duty.EndTime is { } end)
+                    {
+                        <span class="times">@start.HHMM()<span class="sep">–</span>@end.HHMM()</span>
+                        <span class="length">@DurationLength(start, end)</span>
+                        @if (duty.OverriddenStartTime is not null || duty.OverriddenEndTime is not null)
+                        {
+                            <i class="fa-solid fa-pen-nib overridden" title="@Translator("DutyTimesOverridden")"></i>
+                        }
+                    }
+                    else
+                    {
+                        <span class="none">—</span>
+                    }
+                </div>
+                <div class="parts @(dutyConflict is not null ? "has-duty-conflict" : null)" title="@dutyConflict">
+                    @foreach (var part in duty.OrderedParts)
+                    {
+                        var segment = BuildSegment(part);
+                        <div class="part" style="background:@segment.Color; color:@segment.TextColor" title="@segment.Title">
+                            <span class="from">@segment.From</span>
+                            <span class="sep">–</span>
+                            <span class="ident">@segment.Identity</span>
+                            <span class="sep">–</span>
+                            <span class="to">@segment.To</span>
+                            @if (segment.Traction is { } traction)
+                            {
+                                <span class="traction" title="@Translator("TractionUnit")">@traction</span>
+                            }
+                            <button class="x" title="@Translator("RemoveDutyPart")" @onclick="() => RemovePart(duty, part)"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    }
+                    <button class="add-part" @onclick="() => _addPartTarget = duty"><i class="fa-solid fa-plus"></i> @Translator("AddDutyPart")</button>
+
+                    @foreach (var note in duty.TractionExchangeNotes)
+                    {
+                        <div class="derived-note" title="@Translator("TractionUnitExchange")"><i class="fa-solid fa-right-left"></i> @note.At.Signature: @note.Text</div>
+                    }
+                    @foreach (var note in duty.Notes)
+                    {
+                        <div class="duty-note"><i class="fa-regular fa-note-sticky"></i> @note.Text</div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (_addPartTarget is { } addTarget)
+{
+    <AddDutyPartDialog Duty="addTarget"
+                       OnAdded="() => _addPartTarget = null"
+                       OnClosed="() => _addPartTarget = null" />
+}
+@if (_editTarget is { } editTarget)
+{
+    <EditDutyDialog Duty="editTarget"
+                    OnSaved="() => _editTarget = null"
+                    OnClosed="() => _editTarget = null" />
+}
+
+@code {
+    /// <summary>The driver duties to chart, in the order they should appear (top to bottom).</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<DriverDuty> Duties { get; set; } = [];
+
+    private Plan? Plan => ScheduleState.Schedule;
+
+    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+    private GraphSettings Settings => ScheduleState.Layout?.Settings.ToGraphSettings() ?? GraphSettings.Default;
+
+    private DriverDuty? _addPartTarget;
+    private DriverDuty? _editTarget;
+    private DriverDuty? _deleteTarget;
+
+    // Duty-scope conflicts for this duty (a part double-assigned across duties, or parts overlapping within
+    // the duty), joined for a hover tooltip on the parts column; null when clean.
+    private string? DutyConflictTitle(DriverDuty duty)
+    {
+        var messages = ValidationState.Errors
+            .Where(e => e.Involves(duty))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count == 0 ? null : string.Join("\n", messages);
+    }
+
+    private static string? CompanyOf(DriverDuty duty) => duty.Company?.Name;
+
+    // The elapsed working time between the duty's start and end, as H:mm (hours may exceed 24 for a duty
+    // running past midnight, so the whole-hours count is used rather than a wrapped clock time).
+    private static string DurationLength(Time start, Time end)
+    {
+        var span = end.Value - start.Value;
+        return $"{(int)span.TotalHours}:{span.Minutes:00}";
+    }
+
+    private void RemovePart(DriverDuty duty, ScheduledTrainPart part)
+    {
+        duty.RemovePart(part);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void DeleteDuty(DriverDuty duty)
+    {
+        _deleteTarget = null;
+        Plan?.TryDelete(duty);
+        ScheduleState.SaveAndNotify();
+    }
+
+    private Segment BuildSegment(ScheduledTrainPart part)
+    {
+        var color = part.Train.Category?.Color ?? "#000000";
+        var identity = part.Train.GraphLabel(Settings);
+        var from = $"{part.From.OperationLocation.Signature} {part.From.Departure.HHMM()}";
+        var to = $"{part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
+        var traction = Plan?.ScheduledObjectsFor(part).FirstOrDefault(so => so.IsTraction)?.Designation;
+        return new Segment(from, identity, to, traction, color, color.TextColor, $"{from} – {identity} – {to}");
+    }
+
+    private sealed record Segment(string From, string Identity, string To, string? Traction, string Color, string TextColor, string Title);
+}

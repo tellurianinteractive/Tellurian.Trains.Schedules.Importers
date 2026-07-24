@@ -1,5 +1,28 @@
 # Versionsnyheter
 
+## Version 0.2.4
+
+- En ny flik **Tjänster** låter dig planera förartjänster – det arbete en lokförare utför
+  under en köromgång, som en följd av de tågdelar hen kör. Varje tjänst är en rad: dess
+  beteckning, företag och köromgångar till vänster, tågdelarna i körordning till höger.
+- Lägg till de tågdelar en förare kör med **Lägg till tågdel**. Listan visar de
+  dragfordonssträckor en förare kan ta härnäst – de som inte krockar i tid med tjänsten
+  och, när den har en tågdel, de som avgår vid eller efter att den ankommer. Tågdelarna
+  behöver inte börja på samma station: mellan två tågdelar går föraren helt enkelt dit
+  nästa börjar.
+- Samma tågdel kan köras av flera tjänster så länge de går på olika köromgångar, så en
+  tjänst kan täcka de udda köromgångarna och en annan de jämna.
+- Där två tågdelar för samma tåg i en tjänst körs av olika dragfordon visar fliken nu en
+  anteckning vid stationen där dragfordonet byts – du behöver inte skriva den för hand.
+- Du kan ge varje tjänst en beteckning och ett företag, välja de köromgångar den körs och
+  lägga till fria anteckningar som gäller hela tjänsten.
+- Tjänster som importeras från XPLN delar nu de tågdelar som är definierade i fordonens
+  köromgångar, så varje tågdel visar det dragfordon som kör den.
+- Planen kontrolleras så att ingen tågdel körs av två tjänster under samma köromgång och
+  ingen tjänst har tågdelar som överlappar i tid; eventuella konflikter listas och öppnas
+  på fliken **Tjänster**. Du kan slå på eller av kontrollen under
+  **Inställningar › Validering**.
+
 ## Version 0.2.2
 
 ### Rättningar

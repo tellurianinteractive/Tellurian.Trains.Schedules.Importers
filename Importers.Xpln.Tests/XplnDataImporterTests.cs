@@ -81,6 +81,35 @@ public class XplnDataImporterTests
     }
 
     [TestMethod]
+    public async Task ImportedDutyPartsReferenceTheSharedScheduleParts()
+    {
+        // A driver duty is a sequence of the train parts already defined in the vehicle schedules. The Job
+        // import must link each duty segment to the existing traction schedule part(s), not mint a private
+        // copy — otherwise a duty part has no schedule and its traction unit cannot be resolved.
+        Assert.IsTrue(IsScheduleFileExisting("Rotebro2015", out var file));
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("Rotebro2015");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+        var plan = result.Item;
+
+        var scheduleParts = plan.Schedules.SelectMany(s => s.Parts).ToList();
+        var schedulePartInstances = new HashSet<ScheduledTrainPart>(scheduleParts, ReferenceEqualityComparer.Instance);
+        var tractionScheduleParts = scheduleParts
+            .Where(sp => plan.ScheduledObjectsFor(sp).Any(so => so.IsTraction))
+            .ToList();
+        var dutyParts = plan.DriverDuties.SelectMany(d => d.Parts).ToList();
+
+        Assert.IsNotEmpty(dutyParts, "The imported duties should have parts.");
+        Assert.IsTrue(dutyParts.Any(dp => schedulePartInstances.Contains(dp)),
+            "Imported duties must reference the schedule parts, not standalone copies.");
+        foreach (var dutyPart in dutyParts)
+        {
+            var duplicate = tractionScheduleParts.FirstOrDefault(sp => !ReferenceEquals(sp, dutyPart) && sp.Equals(dutyPart));
+            Assert.IsNull(duplicate, $"Duty part {dutyPart} duplicates a traction schedule part instead of referencing it.");
+        }
+    }
+
+    [TestMethod]
     public async Task MergesLocomotiveAndTrainsetWithSameIdIntoRailcar()
     {
         // In Kolding202009 the Swedish self-propelled X2000 is listed under both the locomotive and the

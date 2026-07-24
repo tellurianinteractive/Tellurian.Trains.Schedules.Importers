@@ -759,6 +759,9 @@
   <data name="SignalControlledLocation" xml:space="preserve">
     <value>Signalgesteuerte Stelle</value>
   </data>
+  <data name="IndustrialArea" xml:space="preserve">
+    <value>Industriegebiet</value>
+  </data>
   <data name="OtherLocation" xml:space="preserve">
     <value>Sonstige Stelle</value>
   </data>
@@ -968,6 +971,18 @@
   </data>
   <data name="HasCargoExchangeHelp" xml:space="preserve">
     <value>Güterzüge können hier Güterwagen an- und abkuppeln.</value>
+  </data>
+  <data name="HideMeets" xml:space="preserve">
+    <value>Zugkreuzungen ausblenden?</value>
+  </data>
+  <data name="HideMeetsHelp" xml:space="preserve">
+    <value>Keine Hinweise über sich hier kreuzende Züge erstellen.</value>
+  </data>
+  <data name="HidePassings" xml:space="preserve">
+    <value>Durchfahrten ausblenden?</value>
+  </data>
+  <data name="HidePassingsHelp" xml:space="preserve">
+    <value>Züge, die ohne Halt durchfahren, nicht auflisten (in einigen Berichten).</value>
   </data>
   <data name="IsMain" xml:space="preserve">
     <value>Hauptgleis?</value>
@@ -1643,5 +1658,83 @@
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Benötigte Triebfahrzeugführer</value>
+  </data>
+  <data name="Duties" xml:space="preserve">
+    <value>Schichten</value>
+  </data>
+  <data name="DutiesDescription" xml:space="preserve">
+    <value>Fahrerschichten planen – die Folge von Zugteilen, die ein Fahrer fährt. Fügen Sie die Zugteile nacheinander hinzu; der Fahrer geht zwischen den Zugteilen zu Fuß, sie müssen also nicht an derselben Station beginnen. Die Zugteile sind die bereits in den Fahrzeugumläufen definierten Triebfahrzeugabschnitte.</value>
+  </data>
+  <data name="DutiesNoSchedule" xml:space="preserve">
+    <value>Öffnen oder importieren Sie einen Plan, um Fahrerschichten zu bearbeiten.</value>
+  </data>
+  <data name="DutiesEmpty" xml:space="preserve">
+    <value>Noch keine Fahrerschichten. Mit ‚Neue Schicht‘ eine hinzufügen.</value>
+  </data>
+  <data name="NewDuty" xml:space="preserve">
+    <value>Neue Schicht</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Dauer</value>
+  </data>
+  <data name="DutyStartTime" xml:space="preserve">
+    <value>Startzeit</value>
+  </data>
+  <data name="DutyEndTime" xml:space="preserve">
+    <value>Endzeit</value>
+  </data>
+  <data name="RenumberDuties" xml:space="preserve">
+    <value>Neu nummerieren</value>
+  </data>
+  <data name="RenumberDutiesHelp" xml:space="preserve">
+    <value>Die Schichten nach Start- und dann Endzeit sortieren und ab 1 nummerieren.</value>
+  </data>
+  <data name="DutyTimesOverridden" xml:space="preserve">
+    <value>Start- und/oder Endzeit überschrieben</value>
+  </data>
+  <data name="InvalidTimeFormat" xml:space="preserve">
+    <value>Zeiten als HH:mm eingeben.</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Schicht</value>
+  </data>
+  <data name="DutySessions" xml:space="preserve">
+    <value>Fahrrunden, an denen die Schicht gefahren wird</value>
+  </data>
+  <data name="DeleteDuty" xml:space="preserve">
+    <value>Schicht löschen</value>
+  </data>
+  <data name="EditDuty" xml:space="preserve">
+    <value>Schicht bearbeiten</value>
+  </data>
+  <data name="AddDutyPart" xml:space="preserve">
+    <value>Zugteil hinzufügen</value>
+  </data>
+  <data name="RemoveDutyPart" xml:space="preserve">
+    <value>Zugteil entfernen</value>
+  </data>
+  <data name="DutyNoCandidateParts" xml:space="preserve">
+    <value>Dieser Schicht können keine weiteren Zugteile hinzugefügt werden.</value>
+  </data>
+  <data name="SelectTrainPart" xml:space="preserve">
+    <value>Zugteil auswählen</value>
+  </data>
+  <data name="TractionUnit" xml:space="preserve">
+    <value>Triebfahrzeug</value>
+  </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Triebfahrzeugwechsel</value>
+  </data>
+  <data name="DutyIdentity" xml:space="preserve">
+    <value>Bezeichnung</value>
+  </data>
+  <data name="DutyNotes" xml:space="preserve">
+    <value>Anmerkungen</value>
+  </data>
+  <data name="AddDutyNote" xml:space="preserve">
+    <value>Anmerkung hinzufügen</value>
+  </data>
+  <data name="RemoveDutyNote" xml:space="preserve">
+    <value>Anmerkung entfernen</value>
   </data>
 </root>

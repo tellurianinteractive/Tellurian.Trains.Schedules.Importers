@@ -124,6 +124,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Driver duty {0} has overlapping train parts: {1} and {2}..
+        /// </summary>
+        internal static string DutyHasOverlappingParts {
+            get {
+                return ResourceManager.GetString("DutyHasOverlappingParts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train part {0} is worked by duty {1} and duty {2} on overlapping sessions..
+        /// </summary>
+        internal static string DutyPartIsDoubleAssigned {
+            get {
+                return ResourceManager.GetString("DutyPartIsDoubleAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         internal static string Error {

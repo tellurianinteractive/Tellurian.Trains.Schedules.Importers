@@ -1,5 +1,33 @@
 # Versionshinweise
 
+## Version 0.2.4
+
+- Eine neue Registerkarte **Schichten** ermöglicht die Planung von Fahrerschichten – die
+  Arbeit, die ein Triebfahrzeugführer während einer Sitzung verrichtet, als Folge der
+  Zugteile, die er fährt. Jede Schicht ist eine Zeile: links Bezeichnung, Unternehmen und
+  Sitzungen, rechts die Zugteile in Fahrreihenfolge.
+- Fügen Sie die Zugteile mit **Zugteil hinzufügen** hinzu. Die Auswahl zeigt die
+  Triebfahrzeugabschnitte, die ein Fahrer als Nächstes übernehmen könnte – solche, die
+  zeitlich nicht mit der Schicht kollidieren, und, sobald sie einen Zugteil hat, solche,
+  die bei oder nach ihrer Ankunft abfahren. Zugteile müssen nicht an derselben Station
+  beginnen: zwischen zwei Zugteilen geht der Fahrer einfach dorthin, wo der nächste
+  beginnt.
+- Derselbe Zugteil kann von mehreren Schichten gefahren werden, solange sie an
+  verschiedenen Sitzungen laufen, sodass eine Schicht die ungeraden und eine andere die
+  geraden Sitzungen abdecken kann.
+- Wo zwei Zugteile desselben Zuges in einer Schicht von verschiedenen Triebfahrzeugen
+  gefahren werden, zeigt die Registerkarte nun einen Hinweis an der Station, an der das
+  Triebfahrzeug gewechselt wird – Sie geben ihn nicht von Hand ein.
+- Sie können jeder Schicht eine Bezeichnung und ein Unternehmen geben, die Sitzungen
+  wählen, an denen sie läuft, und freie Anmerkungen hinzufügen, die für die ganze Schicht
+  gelten.
+- Aus XPLN importierte Schichten teilen sich nun die in den Fahrzeugumläufen definierten
+  Zugteile, sodass jeder Zugteil das Triebfahrzeug zeigt, das ihn fährt.
+- Der Plan wird geprüft, damit kein Zugteil von zwei Schichten in derselben Sitzung
+  gefahren wird und keine Schicht zeitlich überlappende Zugteile hat; etwaige Konflikte
+  werden aufgelistet und auf der Registerkarte **Schichten** geöffnet. Sie können die
+  Prüfung unter **Einstellungen › Validierung** ein- oder ausschalten.
+
 ## Version 0.2.2
 
 ### Fehlerbehebungen

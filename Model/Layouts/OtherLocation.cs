@@ -45,4 +45,13 @@ public class OtherLocation : OperationLocation
         get => false;
         set { } // Ignore attempts to set
     }
+
+    /// <summary>
+    /// Always hide non-stoping trains (in some reports).
+    /// </summary>
+    public override bool HidePassings
+    {
+        get => false;
+        set { } // Ignore attempts to set
+    }
 }

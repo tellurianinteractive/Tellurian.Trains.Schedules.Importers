@@ -759,6 +759,9 @@
   <data name="SignalControlledLocation" xml:space="preserve">
     <value>Signalstyret sted</value>
   </data>
+  <data name="IndustrialArea" xml:space="preserve">
+    <value>Industriområde</value>
+  </data>
   <data name="OtherLocation" xml:space="preserve">
     <value>Andet sted</value>
   </data>
@@ -968,6 +971,18 @@
   </data>
   <data name="HasCargoExchangeHelp" xml:space="preserve">
     <value>Godstog kan til- og frakoble godsvogne her.</value>
+  </data>
+  <data name="HideMeets" xml:space="preserve">
+    <value>Skjul krydsninger?</value>
+  </data>
+  <data name="HideMeetsHelp" xml:space="preserve">
+    <value>Opret ikke noter om tog, der krydser på dette sted.</value>
+  </data>
+  <data name="HidePassings" xml:space="preserve">
+    <value>Skjul gennemkørsler?</value>
+  </data>
+  <data name="HidePassingsHelp" xml:space="preserve">
+    <value>Vis ikke tog, der kører igennem uden at standse (i nogle rapporter).</value>
   </data>
   <data name="IsMain" xml:space="preserve">
     <value>Hovedspor?</value>
@@ -1643,5 +1658,83 @@
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Nødvendige lokoførere</value>
+  </data>
+  <data name="Duties" xml:space="preserve">
+    <value>Tjenester</value>
+  </data>
+  <data name="DutiesDescription" xml:space="preserve">
+    <value>Planlæg førertjenester – rækkefølgen af togdele, en fører kører. Tilføj de togdele, en fører kører efter tur; føreren går mellem togdelene, så de behøver ikke starte på samme station. Togdelene er de trækkraftstrækninger, der allerede er defineret i køretøjernes omløb.</value>
+  </data>
+  <data name="DutiesNoSchedule" xml:space="preserve">
+    <value>Åbn eller importer en plan for at redigere førertjenester.</value>
+  </data>
+  <data name="DutiesEmpty" xml:space="preserve">
+    <value>Ingen førertjenester endnu. Brug ’Ny tjeneste’ for at tilføje en.</value>
+  </data>
+  <data name="NewDuty" xml:space="preserve">
+    <value>Ny tjeneste</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Varighed</value>
+  </data>
+  <data name="DutyStartTime" xml:space="preserve">
+    <value>Starttid</value>
+  </data>
+  <data name="DutyEndTime" xml:space="preserve">
+    <value>Sluttid</value>
+  </data>
+  <data name="RenumberDuties" xml:space="preserve">
+    <value>Nummerér om</value>
+  </data>
+  <data name="RenumberDutiesHelp" xml:space="preserve">
+    <value>Sortér tjenesterne efter starttid, derefter sluttid, og nummerér dem fra 1.</value>
+  </data>
+  <data name="DutyTimesOverridden" xml:space="preserve">
+    <value>Start- og/eller sluttid tilsidesat</value>
+  </data>
+  <data name="InvalidTimeFormat" xml:space="preserve">
+    <value>Angiv tider som HH:mm.</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Tjeneste</value>
+  </data>
+  <data name="DutySessions" xml:space="preserve">
+    <value>Sessioner tjenesten køres</value>
+  </data>
+  <data name="DeleteDuty" xml:space="preserve">
+    <value>Slet tjeneste</value>
+  </data>
+  <data name="EditDuty" xml:space="preserve">
+    <value>Rediger tjeneste</value>
+  </data>
+  <data name="AddDutyPart" xml:space="preserve">
+    <value>Tilføj togdel</value>
+  </data>
+  <data name="RemoveDutyPart" xml:space="preserve">
+    <value>Fjern togdel</value>
+  </data>
+  <data name="DutyNoCandidateParts" xml:space="preserve">
+    <value>Der kan ikke tilføjes flere togdele til denne tjeneste.</value>
+  </data>
+  <data name="SelectTrainPart" xml:space="preserve">
+    <value>Vælg togdel</value>
+  </data>
+  <data name="TractionUnit" xml:space="preserve">
+    <value>Trækkraftenhed</value>
+  </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Skift af trækkraftenhed</value>
+  </data>
+  <data name="DutyIdentity" xml:space="preserve">
+    <value>Betegnelse</value>
+  </data>
+  <data name="DutyNotes" xml:space="preserve">
+    <value>Noter</value>
+  </data>
+  <data name="AddDutyNote" xml:space="preserve">
+    <value>Tilføj note</value>
+  </data>
+  <data name="RemoveDutyNote" xml:space="preserve">
+    <value>Fjern note</value>
   </data>
 </root>

@@ -25,6 +25,7 @@ else
                     <span>@Translator("SelectLocationType")</span>
                     <button @onclick="() => AddNew(LocationType.Station)">@Translator("Station")</button>
                     <button @onclick="() => AddNew(LocationType.SignalControlled)">@Translator("SignalControlledLocation")</button>
+                    <button @onclick="() => AddNew(LocationType.IndustrialArea)">@Translator("IndustrialArea")</button>
                     <button @onclick="() => AddNew(LocationType.Other)">@Translator("OtherLocation")</button>
                     <button @onclick="() => _addingType = false">@Translator("Cancel")</button>
                 </div>
@@ -98,6 +99,7 @@ else
                             <select value="@TypeKey(Editing)" @onchange="OnTypeChanged">
                                 <option value="Station">@Translator("Station")</option>
                                 <option value="SignalControlledLocation">@Translator("SignalControlledLocation")</option>
+                                <option value="IndustrialArea">@Translator("IndustrialArea")</option>
                                 <option value="OtherLocation">@Translator("OtherLocation")</option>
                             </select>
                         </div>
@@ -124,7 +126,9 @@ else
                         <input type="number" class="num" @bind="Editing.PhoneNumber" @bind:after="OnEdited" />
                     </div>
 
-                    @if (Editing is not OtherLocation)
+                    @* Direction change is only configurable at a station or a signal-controlled location;
+                       the other kinds force it to false. *@
+                    @if (Editing is Station or SignalControlledLocation)
                     {
                         <div class="field">
                             <HelpLabel For="IsChangingTrainDirectionPossible" />
@@ -132,9 +136,9 @@ else
                         </div>
                     }
 
-                    @* Passenger exchange is settable on every type except a signal-controlled location;
-                       cargo exchange only on a manned station. The model forces the others to false. *@
-                    @if (Editing is not SignalControlledLocation)
+                    @* Passenger exchange is settable at a station or an other location; cargo exchange only
+                       at a station (an industrial area always has it). The model forces the rest. *@
+                    @if (Editing is Station or OtherLocation)
                     {
                         <div class="field">
                             <HelpLabel For="HasPassengerExchange" />
@@ -147,6 +151,20 @@ else
                         <div class="field">
                             <HelpLabel For="HasCargoExchange" />
                             <input type="checkbox" @bind="Editing.HasCargoExchange" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    <div class="field">
+                        <HelpLabel For="HideMeets" />
+                        <input type="checkbox" @bind="Editing.HideMeets" @bind:after="OnEdited" />
+                    </div>
+
+                    @* An other location always shows its passings; the model forces the flag off there. *@
+                    @if (Editing is not OtherLocation)
+                    {
+                        <div class="field">
+                            <HelpLabel For="HidePassings" />
+                            <input type="checkbox" @bind="Editing.HidePassings" @bind:after="OnEdited" />
                         </div>
                     }
 
@@ -291,6 +309,10 @@ else
                     <dd>@YesNo(_selected.HasPassengerExchange)</dd>
                     <dt>@Translator("HasCargoExchange")</dt>
                     <dd>@YesNo(_selected.HasCargoExchange)</dd>
+                    <dt>@Translator("HideMeets")</dt>
+                    <dd>@YesNo(_selected.HideMeets)</dd>
+                    <dt>@Translator("HidePassings")</dt>
+                    <dd>@YesNo(_selected.HidePassings)</dd>
                     @if (_selected is Station infoStation)
                     {
                         <dt>@Translator("IsShadow")</dt>
@@ -366,7 +388,7 @@ else
 
 @code {
     private enum Mode { List, Edit, Info }
-    private enum LocationType { Station, SignalControlled, Other }
+    private enum LocationType { Station, SignalControlled, IndustrialArea, Other }
 
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
@@ -412,6 +434,7 @@ else
     {
         Station => "Station",
         SignalControlledLocation => "SignalControlledLocation",
+        IndustrialArea => "IndustrialArea",
         _ => "OtherLocation"
     };
 
@@ -436,6 +459,7 @@ else
         {
             LocationType.Station => new Station(id, "x", "x") { IsManned = true },
             LocationType.SignalControlled => new SignalControlledLocation(id, "x", "x"),
+            LocationType.IndustrialArea => new IndustrialArea(id, "x", "x"),
             _ => new OtherLocation(id, "x", "x")
         };
         created.Name = "";
@@ -463,6 +487,7 @@ else
         var kind = (string?)e.Value switch
         {
             "SignalControlledLocation" => OperationLocationKind.SignalControlled,
+            "IndustrialArea" => OperationLocationKind.IndustrialArea,
             "OtherLocation" => OperationLocationKind.Other,
             _ => OperationLocationKind.Station
         };

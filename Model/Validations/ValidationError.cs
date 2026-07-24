@@ -57,6 +57,13 @@ public sealed record ValidationError
     public ScheduledObject? Vehicle { get; init; }
 
     /// <summary>
+    /// The driver duty this error is attributed to, for <see cref="ValidationScope.Duty"/> errors
+    /// (a part double-assigned across duties, or parts overlapping within a duty). Lets the Duties tab
+    /// mark the exact duty. Null for non-duty errors.
+    /// </summary>
+    public DriverDuty? Duty { get; init; }
+
+    /// <summary>
     /// The localized message describing the error.
     /// </summary>
     public required Message Message { get; init; }
@@ -79,6 +86,9 @@ public sealed record ValidationError
     {
         ValidationErrorType.VehicleDoubleBooked or
         ValidationErrorType.VehicleNotClosed => ValidationScope.Vehicle,
+
+        ValidationErrorType.DutyPartDoubleAssigned or
+        ValidationErrorType.DutyPartsOverlap => ValidationScope.Duty,
 
         ValidationErrorType.VehicleScheduleOverlap or
         ValidationErrorType.ScheduleNotContiguous or
@@ -149,6 +159,13 @@ public sealed record ValidationError
     /// </summary>
     public bool Involves(ScheduledObject vehicle) =>
         Scope == ValidationScope.Vehicle && Vehicle is not null && Vehicle.Equals(vehicle);
+
+    /// <summary>
+    /// Determines whether this duty-scope conflict should mark the given duty in the Duties tab. Returns
+    /// false for other scopes, so those never mark a duty.
+    /// </summary>
+    public bool Involves(DriverDuty duty) =>
+        Scope == ValidationScope.Duty && Duty is not null && Duty.Equals(duty);
 
     /// <summary>
     /// Determines whether this conflict's time span overlaps the given time range (inclusive).
@@ -445,6 +462,46 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates a duty double-assignment error: the same train part is worked by two duties whose sessions
+    /// overlap, so the segment would be driven by two drivers on a common session.
+    /// </summary>
+    public static ValidationError DutyPartDoubleAssigned(
+        DriverDuty duty,
+        DriverDuty otherDuty,
+        ScheduledTrainPart part,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyPartDoubleAssigned,
+            FromTrack = part.From.Track,
+            ToTrack = part.To.Track,
+            FromTime = part.From.Departure,
+            ToTime = part.To.Arrival,
+            Trains = [part.Train],
+            Duty = duty,
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a duty overlap error: two parts within one duty overlap in time, so the driver would have to
+    /// be in two places at once.
+    /// </summary>
+    public static ValidationError DutyPartsOverlap(
+        DriverDuty duty,
+        ScheduledTrainPart part1,
+        ScheduledTrainPart part2,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyPartsOverlap,
+            FromTrack = part1.From.Track,
+            ToTrack = part2.To.Track,
+            FromTime = Time.Min(part1.From.Departure, part2.From.Departure),
+            ToTime = Time.Max(part1.To.Arrival, part2.To.Arrival),
+            Trains = [.. new[] { part1.Train, part2.Train }.Distinct()],
+            Duty = duty,
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
@@ -518,6 +575,12 @@ public enum ValidationErrorType
 
     /// <summary>A traction unit's circulation does not close over the operating period.</summary>
     VehicleNotClosed,
+
+    /// <summary>The same train part is worked by two driver duties whose sessions overlap.</summary>
+    DutyPartDoubleAssigned,
+
+    /// <summary>Two train parts within one driver duty overlap in time.</summary>
+    DutyPartsOverlap,
 }
 
 /// <summary>
@@ -537,4 +600,8 @@ public enum ValidationScope
     /// <summary>A problem with a scheduled vehicle: double-booked, or a non-closing circulation. Marks the
     /// vehicle's chip in the Vehicle column of the Schedules tab.</summary>
     Vehicle,
+
+    /// <summary>A problem with a driver duty: a part double-assigned across duties, or parts overlapping
+    /// within a duty. Marks the offending duty in the Duties tab.</summary>
+    Duty,
 }

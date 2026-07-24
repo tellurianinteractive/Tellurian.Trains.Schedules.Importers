@@ -161,6 +161,24 @@ public static class DeletionRules
         }
 
         /// <summary>
+        /// A <see cref="DriverDuty"/> may always be deleted: it is a planner construct that nothing outside
+        /// it references (its parts are owned by the vehicle schedules and only referenced here; its notes
+        /// are owned by it).
+        /// </summary>
+        public DeletionResult MayDelete(DriverDuty duty) => new DeletionResult.Success(duty);
+
+        /// <summary>
+        /// Deletes a <see cref="DriverDuty"/>: releases its train parts (they stay owned by their vehicle
+        /// schedules and may still be worked by other duties) and removes it from the plan.
+        /// </summary>
+        public DeletionResult TryDelete(DriverDuty duty)
+        {
+            duty.Parts.Clear();
+            plan.DriverDuties.Remove(duty);
+            return new DeletionResult.Success(duty);
+        }
+
+        /// <summary>
         /// Determines whether a <see cref="CargoFlowOptions"/> description may be removed from the
         /// timetable catalogue, i.e. no cargo flow on any train references it.
         /// </summary>

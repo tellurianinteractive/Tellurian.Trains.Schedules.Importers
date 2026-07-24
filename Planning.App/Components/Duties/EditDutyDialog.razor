@@ -1,0 +1,182 @@
+@namespace Tellurian.Trains.Schedules.Planning.App.Components.Duties
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Services
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* Edits a driver duty: its identity, operating company, the sessions/days it runs, and its manual
+   duty-level notes (free text that applies to the whole duty, unlike the per-call and derived notes). *@
+
+@if (Plan is not null)
+{
+    <div class="edit-duty-backdrop">
+        <div class="edit-duty-dialog">
+            <h3>@Translator("EditDuty")</h3>
+
+            <div class="field">
+                <label>@Translator("DutyIdentity")</label>
+                <input type="text" value="@_identity" @onchange="e => _identity = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="field">
+                <label>@Translator("Company")</label>
+                <select value="@(_companyId?.ToString() ?? string.Empty)" @onchange="OnCompanyChanged">
+                    <option value="">@Translator("None")</option>
+                    @foreach (var company in Companies)
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>@Translator(UseDays ? "Days" : "Sessions")</label>
+                <select value="@_sessionsKey" @onchange="OnSessionsChanged">
+                    @if (!SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == _sessionsKey))
+                    {
+                        <option value="@_sessionsKey" selected>@SessionsText(_sessions)</option>
+                    }
+                    @foreach (var sessions in SessionsCatalogue)
+                    {
+                        <option value="@SessionsDisplay.Key(sessions)">@SessionsText(sessions)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label>@Translator("DutyStartTime")</label>
+                <input type="text" class="time" value="@_startOverride" placeholder="@DefaultStartText"
+                       @onchange="e => _startOverride = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="field">
+                <label>@Translator("DutyEndTime")</label>
+                <input type="text" class="time" value="@_endOverride" placeholder="@DefaultEndText"
+                       @onchange="e => _endOverride = e.Value?.ToString() ?? string.Empty" />
+            </div>
+
+            <div class="field notes">
+                <label>@Translator("DutyNotes")</label>
+                <div class="note-list">
+                    @for (var i = 0; i < _notes.Count; i++)
+                    {
+                        var index = i;
+                        <div class="note-row">
+                            <input type="text" value="@_notes[index]" @onchange="e => _notes[index] = e.Value?.ToString() ?? string.Empty" />
+                            <button type="button" class="remove" title="@Translator("RemoveDutyNote")" @onclick="() => _notes.RemoveAt(index)"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    }
+                    <button type="button" class="add-note" @onclick="() => _notes.Add(string.Empty)"><i class="fa-solid fa-plus"></i> @Translator("AddDutyNote")</button>
+                </div>
+            </div>
+
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+
+            <div class="actions">
+                <button class="primary" @onclick="Save">@Translator("Save")</button>
+                <button @onclick="Cancel">@Translator("Cancel")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>The duty being edited.</summary>
+    [Parameter, EditorRequired] public DriverDuty Duty { get; set; } = default!;
+
+    /// <summary>Raised after the edit has been applied and saved.</summary>
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without saving.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private Plan? Plan => ScheduleState.Schedule;
+
+    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+
+    private string _identity = "";
+    private int? _companyId;
+    private Sessions _sessions;
+    private string _sessionsKey = "";
+    private string _startOverride = "";
+    private string _endOverride = "";
+    private string? _error;
+    private readonly List<string> _notes = [];
+
+    protected override void OnInitialized()
+    {
+        _identity = Duty.Identity;
+        _companyId = Duty.CompanyId;
+        _sessions = Duty.Sessions;
+        _sessionsKey = SessionsDisplay.Key(_sessions);
+        _startOverride = Duty.OverriddenStartTime?.HHMM() ?? "";
+        _endOverride = Duty.OverriddenEndTime?.HHMM() ?? "";
+        _notes.AddRange(Duty.Notes.Select(n => n.Text));
+    }
+
+    // The derived times shown as placeholders, so the user sees what the override replaces.
+    private string DefaultStartText => Duty.DefaultStartTime?.HHMM() ?? "";
+    private string DefaultEndText => Duty.DefaultEndTime?.HHMM() ?? "";
+
+    // Parses a staged HH:mm override: blank clears the override (returns null in ok); an unparseable
+    // value fails so Save can surface it and leave the dialog open.
+    private static bool TryParseOverride(string text, out Time? value)
+    {
+        value = null;
+        if (string.IsNullOrWhiteSpace(text)) return true;
+        if (TimeSpan.TryParse(text.Trim(), CultureInfo.InvariantCulture, out var span))
+        {
+            value = Time.FromTimeSpan(span);
+            return true;
+        }
+        return false;
+    }
+
+    private IEnumerable<Company> Companies =>
+        (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<Sessions> SessionsCatalogue =>
+        ScheduleState.Timetable?.Sessions ?? [];
+
+    private void OnCompanyChanged(ChangeEventArgs e) =>
+        _companyId = int.TryParse(e.Value?.ToString(), out var id) ? id : null;
+
+    private void OnSessionsChanged(ChangeEventArgs e)
+    {
+        var key = e.Value?.ToString();
+        if (SessionsCatalogue.FirstOrDefault(s => SessionsDisplay.Key(s) == key) is { } match && key is not null)
+        {
+            _sessions = match;
+            _sessionsKey = key;
+        }
+    }
+
+    private async Task Save()
+    {
+        if (Plan is not { } plan) return;
+        if (!TryParseOverride(_startOverride, out var startOverride) || !TryParseOverride(_endOverride, out var endOverride))
+        {
+            _error = Translator("InvalidTimeFormat");
+            return;
+        }
+        Duty.Identity = string.IsNullOrWhiteSpace(_identity) ? Duty.Id.ToString() : _identity.Trim();
+        var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
+        Duty.Company = company;
+        Duty.CompanyId = company?.Id;
+        Duty.Sessions = _sessions;
+        Duty.OverriddenStartTime = startOverride;
+        Duty.OverriddenEndTime = endOverride;
+        // Rebuild the manual notes from the staged text (drop blank rows), preserving order.
+        Duty.Notes.Clear();
+        foreach (var text in _notes.Where(t => !string.IsNullOrWhiteSpace(t)))
+            Duty.AddNote(text.Trim());
+        ScheduleState.SaveAndNotify();
+        await OnSaved.InvokeAsync();
+    }
+
+    private Task Cancel() => OnClosed.InvokeAsync();
+
+    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator, MaxSessions, StartDay);
+}

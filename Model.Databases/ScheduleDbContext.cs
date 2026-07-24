@@ -602,10 +602,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .HasForeignKey(e => e.CompanyId)
                   .OnDelete(DeleteBehavior.Restrict);
 
+            // A train part may be worked by several duties (one per session), so this is a many-to-many via
+            // an implicit join table. The part stays owned by its vehicle schedule (Schedule/ScheduleId).
             entity.HasMany(e => e.Parts)
-                  .WithOne(e => e.Duty)
-                  .HasForeignKey(e => e.DutyId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany();
 
             entity.HasMany(e => e.Notes)
                   .WithOne(e => e.DriverDuty)

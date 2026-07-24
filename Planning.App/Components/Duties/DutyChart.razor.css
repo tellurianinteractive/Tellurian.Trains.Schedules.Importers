@@ -1,0 +1,253 @@
+.duty-chart {
+    --border: #ddd;
+    --surface: #fff;
+    --primary: #1a3a5c;
+
+    /* Three aligned columns across all rows: the duty and duration columns size to their content, the parts
+       column takes the rest and wraps internally. */
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    font-size: 0.85rem;
+
+    .head {
+        padding: 0.35rem 0.5rem;
+        background: #f4f6f9;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .head.duty-head,
+    .head.duration-head {
+        border-right: 1px solid var(--border);
+    }
+
+    /* A duty row spans all grid columns; its three cells are placed by the grid. */
+    .duty-row {
+        display: contents;
+    }
+
+    .duty-row:first-child .duty-info,
+    .duty-row:first-child .duty-duration,
+    .duty-row:first-child .parts {
+        border-top: none;
+    }
+
+    /* The duty's effective start–end times (default or overridden) and its elapsed length, on one line. */
+    .duty-duration {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        padding: 0.4rem 0.5rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+    }
+
+    .duty-duration .times {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .duty-duration .times .sep {
+        margin: 0 0.15rem;
+        opacity: 0.6;
+    }
+
+    .duty-duration .length {
+        font-size: 0.72rem;
+        color: #667;
+    }
+
+    .duty-duration .overridden {
+        color: #b7791f;
+        font-size: 0.7rem;
+    }
+
+    .duty-duration .none {
+        color: #99a;
+    }
+
+    /* A duty-scope conflict (part double-assigned across duties, or overlapping parts within a duty): amber
+       tint plus an amber accent down the parts column. Hovering shows the message via title. */
+    .parts.has-duty-conflict {
+        background: #fff8e1;
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
+    .duty-info {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        padding: 0.4rem 0.5rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+    }
+
+    .duty-info .ident {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .duty-info .company {
+        color: #445;
+        font-size: 0.78rem;
+    }
+
+    .duty-info .sessions {
+        font-weight: 600;
+        font-size: 0.72rem;
+        color: #367;
+        background: #eef3f8;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.05rem 0.35rem;
+    }
+
+    /* The train parts of a duty, in working order; they wrap to the next line when they overflow. */
+    .parts {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.4rem;
+        border-top: 1px solid var(--border);
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .part {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.15rem 0.3rem 0.15rem 0.45rem;
+        border-radius: 3px;
+        white-space: nowrap;
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .part .ident {
+        font-weight: 700;
+    }
+
+    /* The traction unit that works the part, shown as a chip on the block. */
+    .part .traction {
+        font-weight: 600;
+        font-size: 0.68rem;
+        background: rgba(255, 255, 255, 0.85);
+        color: #333;
+        border-radius: 8px;
+        padding: 0 0.3rem;
+    }
+
+    .part .from,
+    .part .to {
+        opacity: 0.9;
+    }
+
+    .part .sep {
+        opacity: 0.6;
+    }
+
+    /* Derived traction-exchange note and manual duty notes: full-width lines below the part blocks. */
+    .derived-note,
+    .duty-note {
+        flex-basis: 100%;
+        font-size: 0.74rem;
+        color: #445;
+    }
+
+    .derived-note {
+        color: #7a5a00;
+    }
+
+    .x,
+    .edit {
+        border: none;
+        background: transparent;
+        color: inherit;
+        opacity: 0.6;
+        cursor: pointer;
+        font-size: 0.8rem;
+        line-height: 1;
+        padding: 0.1rem 0.2rem;
+        border-radius: 3px;
+    }
+
+    .x:hover,
+    .edit:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.12);
+    }
+
+    .add-part {
+        border: 1px dashed #b7c4d2;
+        background: transparent;
+        color: var(--primary);
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .add-part:hover {
+        background: #eef3f8;
+    }
+
+    .del-duty {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #a11;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .del-duty:hover,
+    .confirm .danger:hover {
+        background: #fbeaea;
+    }
+
+    .confirm {
+        display: inline-flex;
+        gap: 0.3rem;
+        align-items: center;
+        font-size: 0.78rem;
+    }
+
+    .confirm .danger {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #a11;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.72rem;
+    }
+
+    .confirm button {
+        cursor: pointer;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.72rem;
+    }
+}
+
+/* Shown in place of the chart when there are no duties (root-level element, outside .duty-chart). */
+.empty {
+    color: #667;
+    font-style: italic;
+    margin: 0.5rem 0;
+}

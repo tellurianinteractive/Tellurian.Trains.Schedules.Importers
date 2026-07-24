@@ -252,6 +252,12 @@
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Kjøretøy {0} er dobbeltbooket: sesjoner {1} overlapper med sesjoner {2}.</value>
   </data>
+  <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
+    <value>Togdel {0} kjøres av tjeneste {1} og tjeneste {2} på overlappende sesjoner.</value>
+  </data>
+  <data name="DutyHasOverlappingParts" xml:space="preserve">
+    <value>Tjeneste {0} har overlappende togdeler: {1} og {2}.</value>
+  </data>
   <data name="Undefined" xml:space="preserve">
     <value>Udefinert</value>
   </data>

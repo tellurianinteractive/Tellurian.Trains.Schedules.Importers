@@ -252,6 +252,12 @@
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Fahrzeug {0} ist doppelt gebucht: Fahrrunden {1} überlappen mit Fahrrunden {2}.</value>
   </data>
+  <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
+    <value>Zugteil {0} wird von Schicht {1} und Schicht {2} an überlappenden Fahrrunden gefahren.</value>
+  </data>
+  <data name="DutyHasOverlappingParts" xml:space="preserve">
+    <value>Schicht {0} hat überlappende Zugteile: {1} und {2}.</value>
+  </data>
   <data name="Undefined" xml:space="preserve">
     <value>Undefiniert</value>
   </data>

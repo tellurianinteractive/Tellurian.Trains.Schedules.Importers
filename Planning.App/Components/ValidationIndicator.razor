@@ -113,6 +113,7 @@
     private static string RouteFor(ValidationError error) => error.Scope switch
     {
         ValidationScope.Schedule or ValidationScope.Vehicle => "schedules",
+        ValidationScope.Duty => "duties",
         _ => error.ErrorType switch
         {
             ValidationErrorType.StationTrackConflict or

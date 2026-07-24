@@ -1,5 +1,30 @@
 # Versionsnyheder
 
+## Version 0.2.4
+
+- En ny fane **Tjenester** lader dig planlægge førertjenester – det arbejde, en lokofører
+  udfører i løbet af en session, som en række af de togdele, føreren kører. Hver tjeneste
+  er en række: dens betegnelse, firma og sessioner til venstre, togdelene i køreorden til
+  højre.
+- Tilføj de togdele, en fører kører, med **Tilføj togdel**. Listen viser de
+  trækkraftstrækninger, en fører kan tage som det næste – dem, der ikke støder sammen i
+  tid med tjenesten, og, når den har en togdel, dem, der afgår ved eller efter, at den
+  ankommer. Togdelene behøver ikke starte på samme station: mellem to togdele går føreren
+  ganske enkelt hen, hvor den næste starter.
+- Den samme togdel kan køres af flere tjenester, så længe de kører i forskellige
+  sessioner, så én tjeneste kan dække de ulige sessioner og en anden de lige.
+- Hvor to togdele for samme tog i en tjeneste køres af forskellige trækkraftenheder,
+  viser fanen nu en note ved stationen, hvor trækkraftenheden skiftes – du indtaster den
+  ikke i hånden.
+- Du kan give hver tjeneste en betegnelse og et firma, vælge de sessioner, den kører, og
+  tilføje frie noter, der gælder hele tjenesten.
+- Tjenester importeret fra XPLN deler nu de togdele, der er defineret i køretøjernes
+  omløb, så hver togdel viser den trækkraftenhed, der kører den.
+- Planen kontrolleres, så ingen togdel køres af to tjenester i samme session, og ingen
+  tjeneste har togdele, der overlapper i tid; eventuelle konflikter vises og åbnes på
+  fanen **Tjenester**. Du kan slå kontrollen til eller fra under **Indstillinger ›
+  Validering**.
+
 ## Version 0.2.2
 
 ### Fejlrettelser

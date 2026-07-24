@@ -523,6 +523,9 @@
   <data name="SignalControlledLocation" xml:space="preserve">
     <value>Signal-controlled location</value>
   </data>
+  <data name="IndustrialArea" xml:space="preserve">
+    <value>Industrial area</value>
+  </data>
   <data name="OtherLocation" xml:space="preserve">
     <value>Other location</value>
   </data>
@@ -582,6 +585,18 @@
   </data>
   <data name="HasCargoExchangeHelp" xml:space="preserve">
     <value>Freight trains can connect and disconnect cargo wagons here.</value>
+  </data>
+  <data name="HideMeets" xml:space="preserve">
+    <value>Hide meets?</value>
+  </data>
+  <data name="HideMeetsHelp" xml:space="preserve">
+    <value>Do not create notes about trains meeting at this location.</value>
+  </data>
+  <data name="HidePassings" xml:space="preserve">
+    <value>Hide passings?</value>
+  </data>
+  <data name="HidePassingsHelp" xml:space="preserve">
+    <value>Do not list trains that pass through without stopping (in some reports).</value>
   </data>
   <data name="ControlledBy" xml:space="preserve">
     <value>Controlled from</value>
@@ -1648,5 +1663,83 @@
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Required loco drivers</value>
+  </data>
+  <data name="Duties" xml:space="preserve">
+    <value>Duties</value>
+  </data>
+  <data name="DutiesDescription" xml:space="preserve">
+    <value>Plan driver duties — the sequence of train parts a single driver runs. Add the parts a driver works in turn; the driver walks between parts, so they need not join at the same station. The parts are the traction segments already defined in the vehicle schedules.</value>
+  </data>
+  <data name="DutiesNoSchedule" xml:space="preserve">
+    <value>Open or import a plan to edit driver duties.</value>
+  </data>
+  <data name="DutiesEmpty" xml:space="preserve">
+    <value>No driver duties yet. Use ‘New duty’ to add one.</value>
+  </data>
+  <data name="NewDuty" xml:space="preserve">
+    <value>New duty</value>
+  </data>
+  <data name="Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="DutyStartTime" xml:space="preserve">
+    <value>Start time</value>
+  </data>
+  <data name="DutyEndTime" xml:space="preserve">
+    <value>End time</value>
+  </data>
+  <data name="RenumberDuties" xml:space="preserve">
+    <value>Renumber</value>
+  </data>
+  <data name="RenumberDutiesHelp" xml:space="preserve">
+    <value>Sort the duties by start time, then end time, and number them from 1.</value>
+  </data>
+  <data name="DutyTimesOverridden" xml:space="preserve">
+    <value>Start and/or end time overridden</value>
+  </data>
+  <data name="InvalidTimeFormat" xml:space="preserve">
+    <value>Enter times as HH:mm.</value>
+  </data>
+  <data name="Duty" xml:space="preserve">
+    <value>Duty</value>
+  </data>
+  <data name="DutySessions" xml:space="preserve">
+    <value>Sessions this duty runs</value>
+  </data>
+  <data name="DeleteDuty" xml:space="preserve">
+    <value>Delete duty</value>
+  </data>
+  <data name="EditDuty" xml:space="preserve">
+    <value>Edit duty</value>
+  </data>
+  <data name="AddDutyPart" xml:space="preserve">
+    <value>Add train part</value>
+  </data>
+  <data name="RemoveDutyPart" xml:space="preserve">
+    <value>Remove train part</value>
+  </data>
+  <data name="DutyNoCandidateParts" xml:space="preserve">
+    <value>No further train parts can be added to this duty.</value>
+  </data>
+  <data name="SelectTrainPart" xml:space="preserve">
+    <value>Select train part</value>
+  </data>
+  <data name="TractionUnit" xml:space="preserve">
+    <value>Traction unit</value>
+  </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Traction unit exchange</value>
+  </data>
+  <data name="DutyIdentity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="DutyNotes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="AddDutyNote" xml:space="preserve">
+    <value>Add note</value>
+  </data>
+  <data name="RemoveDutyNote" xml:space="preserve">
+    <value>Remove note</value>
   </data>
 </root>

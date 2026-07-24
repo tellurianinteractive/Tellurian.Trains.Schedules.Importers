@@ -79,6 +79,10 @@
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Förstärker {0} mellan {1} och {2}.</value>
   </data>
+  <data name="TractionUnitExchange" xml:space="preserve">
+    <value>Byte av dragfordon från {0} till {1}.</value>
+    <comment>{0}=dragfordon fram till här, {1}=dragfordon vidare</comment>
+  </data>
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Medför vagnar till {0}</value>
   </data>

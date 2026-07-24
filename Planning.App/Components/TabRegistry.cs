@@ -16,6 +16,7 @@ public static class TabRegistry
         new("CargoFlow", "cargo-flow", typeof(Pages.CargoFlowTab), HelpKey: "CargoFlow"),
         new("GraphicalTimetable", "graphical-timetable", typeof(Pages.GraphicalTimetableTab), HelpKey: "GraphicalTimetable"),
         new("Schedules", "schedules", typeof(Pages.SchedulesTab), HelpKey: "Schedules"),
+        new("Duties", "duties", typeof(Pages.DutiesTab), HelpKey: "Duties"),
         new("VehicleOwners", "vehicle-owners", typeof(Pages.VehicleOwnersTab), HelpKey: "VehicleOwners"),
         new("Import", "import", typeof(Pages.ImportTab), HelpKey: "Import"),
     ];

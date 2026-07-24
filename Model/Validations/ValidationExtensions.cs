@@ -26,6 +26,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
+            if (options.ValidateDriverDuties) result.AddRange(plan.ValidateDriverDuties());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
             return result;
         }
@@ -134,6 +135,51 @@ public static class ValidationExtensions
                         if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
                             return true;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Validates driver duties: a train part may not be worked by two duties whose sessions overlap
+        /// (the segment would need two drivers on a common session), and the parts within one duty may not
+        /// overlap in time (a driver cannot be in two places at once).
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateDriverDuties()
+        {
+            var duties = plan.DriverDuties.ToArray();
+
+            // A part shared by two duties whose sessions overlap.
+            for (var i = 0; i < duties.Length - 1; i++)
+            {
+                for (var j = i + 1; j < duties.Length; j++)
+                {
+                    var d1 = duties[i];
+                    var d2 = duties[j];
+                    if (!d1.Sessions.Overlaps(d2.Sessions)) continue;
+                    foreach (var part in d1.Parts.Where(p => d2.Parts.Contains(p)))
+                    {
+                        var message = Message.Information(Strings.DutyPartIsDoubleAssigned, part, d1.Identity, d2.Identity);
+                        yield return ValidationError.DutyPartDoubleAssigned(d1, d2, part, message);
+                    }
+                }
+            }
+
+            // Two parts within one duty overlapping in time.
+            foreach (var duty in duties)
+            {
+                var parts = duty.OrderedParts;
+                for (var i = 0; i < parts.Count - 1; i++)
+                {
+                    for (var j = i + 1; j < parts.Count; j++)
+                    {
+                        var p1 = parts[i];
+                        var p2 = parts[j];
+                        if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
+                        {
+                            var message = Message.Information(Strings.DutyHasOverlappingParts, duty.Identity, p1, p2);
+                            yield return ValidationError.DutyPartsOverlap(duty, p1, p2, message);
+                        }
+                    }
+                }
             }
         }
 
