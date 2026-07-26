@@ -561,7 +561,7 @@ public static class ValidationExtensions
                 {
                     result.AddRange(conflicts.Select(c =>
                     {
-                        var message = Message.Information(Strings.TrainHasConflictingCalls, train, c.one, c.another);
+                        var message = Message.Information(Strings.TrainHasCallsOverlappingInTime, train, c.one, c.another);
                         return ValidationError.TrainTimeSequence(c.one, c.another, message);
                     }));
                 }
@@ -641,7 +641,7 @@ public static class ValidationExtensions
             stationTrack is null ? [] :
             stationTrack.GetConflicts(vehicleSchedules).Select(c =>
             {
-                var message = Message.Information(Strings.CallAtStationHasConflictsWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another);
+                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another);
                 return ValidationError.StationTrackConflict(stationTrack, c.one, c.another, message);
             });
 
@@ -716,7 +716,7 @@ public static class ValidationExtensions
 
                     var first = passings[key.Item1];
                     var second = passings[key.Item2];
-                    var message = Message.Information(Strings.TrainBetweenPassingIsConflictingWithTrainBetweenPassing, first.From.Train!.Number, first, second.To.Train!.Number, second);
+                    var message = Message.Information(Strings.TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing, first.Train.Identity, first.SpanText, second.Train.Identity, second.SpanText);
                     result.Add(ValidationError.StretchConflict(first.From.Track, first.To.Track, first, second, message));
                 }
             }

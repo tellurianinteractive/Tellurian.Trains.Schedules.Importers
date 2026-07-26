@@ -120,8 +120,8 @@
   <data name="ArrivalIsAfterDeparture" xml:space="preserve">
     <value>Bei {0} ist Ankunft {1} nach Abfahrt {2}.</value>
   </data>
-  <data name="CallAtStationHasConflictsWithOtherCall" xml:space="preserve">
-    <value>Zug {0} {1} hat Konflikte mit Zug {2} {3}.</value>
+  <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
+    <value>Zug {0} {1} überschneidet sich zeitlich mit Zug {2} {3}.</value>
   </data>
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>bei {0} Gleis {1} an {2} ab {3}</value>
@@ -219,8 +219,8 @@
   <data name="TrackStretchIsAlreadyAssignedToExitNameAtStationName" xml:space="preserve">
     <value>Der Gleisabschnitt ist bereits der Ausfahrt {0} an der Station {1} zugewiesen.</value>
   </data>
-  <data name="TrainHasConflictingCalls" xml:space="preserve">
-    <value>Zug {0} Zeiten {1} und {2} sind widersprüchlich.</value>
+  <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
+    <value>Zug {0} Zeiten {1} und {2} überschneiden sich zeitlich.</value>
   </data>
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Zug {0} muss an mindestens zwei Bahnhöfen halten.</value>
@@ -237,8 +237,8 @@
   <data name="Warning" xml:space="preserve">
     <value>Warnung</value>
   </data>
-  <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
-    <value>Zug {0} zwischen {1} steht in Konflikt mit Zug {2} zwischen {3}.</value>
+  <data name="TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing" xml:space="preserve">
+    <value>Zug {0} zwischen {1} überschneidet sich zeitlich mit Zug {2} zwischen {3}.</value>
   </data>
   <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
     <value>Zug {0} hat keine Lok zugewiesen.</value>

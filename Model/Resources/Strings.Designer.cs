@@ -70,11 +70,11 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Train {0} {1} has conflicts with train {2} {3}..
+        ///   Looks up a localized string similar to Train {0} {1} overlaps in time with train {2} {3}..
         /// </summary>
-        internal static string CallAtStationHasConflictsWithOtherCall {
+        internal static string CallAtStationOverlapsInTimeWithOtherCall {
             get {
-                return ResourceManager.GetString("CallAtStationHasConflictsWithOtherCall", resourceCulture);
+                return ResourceManager.GetString("CallAtStationOverlapsInTimeWithOtherCall", resourceCulture);
             }
         }
         
@@ -394,20 +394,20 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Train {0} between {1} is conflicting with train {2} between {3}..
+        ///   Looks up a localized string similar to Train {0} between {1} overlaps in time with train {2} between {3}..
         /// </summary>
-        internal static string TrainBetweenPassingIsConflictingWithTrainBetweenPassing {
+        internal static string TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing {
             get {
-                return ResourceManager.GetString("TrainBetweenPassingIsConflictingWithTrainBetweenPassing", resourceCulture);
+                return ResourceManager.GetString("TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Train {0} calls {1} and {2} are conflicting..
+        ///   Looks up a localized string similar to Train {0} calls {1} and {2} overlap in time..
         /// </summary>
-        internal static string TrainHasConflictingCalls {
+        internal static string TrainHasCallsOverlappingInTime {
             get {
-                return ResourceManager.GetString("TrainHasConflictingCalls", resourceCulture);
+                return ResourceManager.GetString("TrainHasCallsOverlappingInTime", resourceCulture);
             }
         }
         

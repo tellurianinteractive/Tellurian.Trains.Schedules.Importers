@@ -138,8 +138,8 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Tåg {0} måste stanna vid minst två stationer.</value>
   </data>
-  <data name="CallAtStationHasConflictsWithOtherCall" xml:space="preserve">
-    <value>Tåg {0} {1} är i konflikt med tåg {2} {3}.</value>
+  <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
+    <value>Tåg {0} {1} överlappar i tid med tåg {2} {3}.</value>
   </data>
   <data name="ConflictOnStretchBetweenPassingTrains" xml:space="preserve">
     <value>Konflikt på sträckan {0} mellan {1} och {2}.</value>
@@ -186,8 +186,8 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>vid {0} spår {1} ank {2} avg {3}</value>
   </data>
-  <data name="TrainHasConflictingCalls" xml:space="preserve">
-    <value>Tåg {0} passagerna {1} och {2} är i konflikt.</value>
+  <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
+    <value>Tåg {0} passagerna {1} och {2} överlappar i tid.</value>
   </data>
   <data name="MoreThanOneStretchBetweenStations" xml:space="preserve">
     <value>Mer än en spårsträcka mellan {0} och {1}.</value>
@@ -237,8 +237,8 @@
   <data name="NoValue" xml:space="preserve">
     <value>Värde saknas.</value>
   </data>
-  <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
-    <value>Tåg {0} mellan {1} är i konflikt med tåg {2} mellan {3}.</value>
+  <data name="TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing" xml:space="preserve">
+    <value>Tåg {0} mellan {1} överlappar i tid med tåg {2} mellan {3}.</value>
   </data>
   <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
     <value>Tåg {0} har inget lok tilldelat.</value>

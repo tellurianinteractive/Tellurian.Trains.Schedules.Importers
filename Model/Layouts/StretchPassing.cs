@@ -45,6 +45,13 @@ public sealed record StretchPassing
     /// </summary>
     public Time Departure => From.Departure;
 
+    /// <summary>
+    /// Gets the stations and times of the passing without the train identity,
+    /// for use in messages where the identity is shown separately.
+    /// </summary>
+    public string SpanText =>
+        string.Format(CultureInfo.CurrentCulture, "{0} {1} - {2} {3}", From.OperationLocation.Name, Departure.HHMM(), To.OperationLocation.Name, Arrival.HHMM());
+
     /// <inheritdoc/>
     public override string ToString() =>
         string.Format(CultureInfo.CurrentCulture, "{0} {1}: {2} - {3}: {4}", Train.Identity, From.OperationLocation.Name, Departure.HHMM(), To.OperationLocation.Name, Arrival.HHMM());

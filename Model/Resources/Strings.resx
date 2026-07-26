@@ -120,8 +120,8 @@
   <data name="ArrivalIsAfterDeparture" xml:space="preserve">
     <value>At {0} arrival {1} is after departure {2}.</value>
   </data>
-  <data name="CallAtStationHasConflictsWithOtherCall" xml:space="preserve">
-    <value>Train {0} {1} has conflicts with train {2} {3}.</value>
+  <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
+    <value>Train {0} {1} overlaps in time with train {2} {3}.</value>
   </data>
   <data name="CallMustBeAfterPreviousCall" xml:space="preserve">
     <value>Call {0} must be after previous call {1} for train {2}.</value>
@@ -183,8 +183,8 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>at {0} track {1} arr {2} dep {3}</value>
   </data>
-  <data name="TrainHasConflictingCalls" xml:space="preserve">
-    <value>Train {0} calls {1} and {2} are conflicting.</value>
+  <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
+    <value>Train {0} calls {1} and {2} overlap in time.</value>
   </data>
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Train {0} must stop at at least two stations.</value>
@@ -237,8 +237,8 @@
   <data name="NoValue" xml:space="preserve">
     <value>Value is missing.</value>
   </data>
-  <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
-    <value>Train {0} between {1} is conflicting with train {2} between {3}.</value>
+  <data name="TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing" xml:space="preserve">
+    <value>Train {0} between {1} overlaps in time with train {2} between {3}.</value>
   </data>
   <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
     <value>Train {0} has no locomotive assigned.</value>

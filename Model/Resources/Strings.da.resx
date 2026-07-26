@@ -120,8 +120,8 @@
   <data name="ArrivalIsAfterDeparture" xml:space="preserve">
     <value>Ved {0} ankomst {1} er senere end afgang {2}.</value>
   </data>
-  <data name="CallAtStationHasConflictsWithOtherCall" xml:space="preserve">
-    <value>Tog {0} {1} er i konflikt med tog {2} {3}.</value>
+  <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
+    <value>Tog {0} {1} overlapper i tid med tog {2} {3}.</value>
   </data>
   <data name="CallMustBeAfterPreviousCall" xml:space="preserve">
     <value>Anløb {0} skal være senere en foregående anløb {1} for tog {2}.</value>
@@ -189,8 +189,8 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>ved {0} spor {1} ank {2} afg {3}</value>
   </data>
-  <data name="TrainHasConflictingCalls" xml:space="preserve">
-    <value>Tog {0} anløbene {1} og {2} er i konflikt.</value>
+  <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
+    <value>Tog {0} anløbene {1} og {2} overlapper i tid.</value>
   </data>
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Tog {0} skal standse ved mindst to stationer.</value>
@@ -237,8 +237,8 @@
   <data name="NoValue" xml:space="preserve">
     <value>Værdi mangler.</value>
   </data>
-  <data name="TrainBetweenPassingIsConflictingWithTrainBetweenPassing" xml:space="preserve">
-    <value>Tog {0} mellem {1} er i konflikt med tog {2} mellem {3}.</value>
+  <data name="TrainBetweenPassingOverlapsInTimeWithTrainBetweenPassing" xml:space="preserve">
+    <value>Tog {0} mellem {1} overlapper i tid med tog {2} mellem {3}.</value>
   </data>
   <data name="TrainHasNoLocomotiveAssigned" xml:space="preserve">
     <value>Tog {0} har ingen lokomotiv tildelt.</value>
