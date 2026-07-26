@@ -55,3 +55,23 @@ public sealed class GeneralSettings
     /// </summary>
     public bool UseObjectLanguageInReports { get; set; }
 }
+
+/// <summary>
+/// 
+/// </summary>
+public static class GeneralSettingsExtensions
+{
+    extension(GeneralSettings settings)
+    {
+        /// <summary>
+        /// Extracts <see cref="SessionsSettings"/> from <see cref="GeneralSettings"/> with default to use short weekday names.
+        /// </summary>
+        public SessionsSettings SessionSettings(bool useShortWeekdayNames = true) => new()
+        {
+            MaxNumberOfSessions = settings.MaxSessions,
+            UseDaysInsteadOfSessionNumbers = settings.UseDays,
+            SessionFirstWeekday = settings.StartDay,
+            UseShortWeekdayNames = useShortWeekdayNames,
+        };
+    }
+}

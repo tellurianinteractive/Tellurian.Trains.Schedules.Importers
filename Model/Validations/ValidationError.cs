@@ -266,8 +266,8 @@ public sealed record ValidationError
     /// </summary>
     public static ValidationError VehicleScheduleOverlap(
         Schedule schedule,
-        TrainPart part1,
-        TrainPart part2,
+        ScheduledTrainPart part1,
+        ScheduledTrainPart part2,
         Message message) => new()
         {
             ErrorType = ValidationErrorType.VehicleScheduleOverlap,
@@ -336,8 +336,8 @@ public sealed record ValidationError
     /// </summary>
     public static ValidationError LocomotiveCoverageOverlap(
         Train train,
-        TrainPart part1,
-        TrainPart part2,
+        ScheduledTrainPart part1,
+        ScheduledTrainPart part2,
         Message message) => new()
         {
             ErrorType = ValidationErrorType.LocomotiveCoverageOverlap,
@@ -392,8 +392,8 @@ public sealed record ValidationError
     /// </summary>
     public static ValidationError ScheduleNotContiguous(
         Schedule schedule,
-        TrainPart previous,
-        TrainPart next,
+        ScheduledTrainPart previous,
+        ScheduledTrainPart next,
         Message message) => new()
         {
             ErrorType = ValidationErrorType.ScheduleNotContiguous,

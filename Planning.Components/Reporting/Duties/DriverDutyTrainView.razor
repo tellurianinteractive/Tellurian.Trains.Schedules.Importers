@@ -1,0 +1,13 @@
+﻿
+@if (DutyTrainPart is not null)
+{
+    <TrainPartTractionView TractionData="DutyTrainPart.TractionData" />
+    <TrainPartWagonsetView />
+    <TrainPartCargoWagonsWithWaybillsView />
+    <TrainPartView/>
+
+}
+
+@code {
+    [Parameter] public DriverDutyPart? DutyTrainPart { get; set; }
+}

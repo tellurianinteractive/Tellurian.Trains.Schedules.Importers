@@ -180,3 +180,18 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// </summary>
     public static bool operator >=(StationCall? call1, StationCall? call2) => call1?.CompareTo(call2) <= 0;
 }
+
+/// <summary>
+/// 
+/// </summary>
+public static class StationCallExtensions
+{
+    extension(StationCall call)
+    {
+        /// <summary>
+        /// True then this is a call where trains stops and with an arrival time less that departure time.
+        /// </summary>
+        public bool HasDifferentArrivalAndDepartureTimes => call.IsStop && call.Arrival < call.Departure;
+
+    }
+}

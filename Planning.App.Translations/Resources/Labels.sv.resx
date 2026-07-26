@@ -1737,4 +1737,7 @@
   <data name="RemoveDutyNote" xml:space="preserve">
     <value>Ta bort anteckning</value>
   </data>
+  <data name="Id" xml:space="preserve">
+    <value>Id</value>
+  </data>
 </root>

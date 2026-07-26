@@ -4,7 +4,7 @@ using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 namespace Tellurian.Trains.Schedules.Model.Notes;
 
 /// <summary>
-/// Base type for the transient call notes generated on demand from a <see cref="TrainPart"/>'s options.
+/// Base type for the transient call notes generated on demand from a <see cref="ScheduledTrainPart"/>'s options.
 /// Unlike the persisted <see cref="CallNote"/> family, generated notes are never stored; they exist only
 /// to be rendered. Each note is a thin data carrier — the text and markup are produced by the switch
 /// expressions in <see cref="GeneratedNoteExtensions"/>.

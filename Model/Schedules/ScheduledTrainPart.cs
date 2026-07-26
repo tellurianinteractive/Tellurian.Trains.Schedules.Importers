@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
 /// <summary>
-/// A <see cref="TrainPart"/> that is assigned to a vehicle <see cref="Schedule"/> and/or a
+/// A <see cref="ScheduledTrainPart"/> that is assigned to a vehicle <see cref="Schedule"/> and/or a
 /// <see cref="DriverDuty"/>. It carries the per-part options describing how the assigned traction,
 /// wagons or fixed-schedule cargo are handled over the segment. A part may carry several option kinds
 /// at once; each slot is null when not applicable.
@@ -83,6 +83,21 @@ public static class ScheduledTrainPartExtensions
                 trainPart.AddWagonSetDepartureNotes(result);
                 result.AddRange(trainPart.From.Notes);
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates <see cref="ICallNote">notes</see> for the departure station call for traction units.
+        /// </summary>
+        public IEnumerable<ICallNote> TractionDepartureNotes
+        {
+            get
+            {
+                List<ICallNote> result = [];
+                trainPart.AddTractionUnitDepartureNotes(result);
+                result.AddRange(trainPart.From.Notes);
+                return result;
+
             }
         }
 

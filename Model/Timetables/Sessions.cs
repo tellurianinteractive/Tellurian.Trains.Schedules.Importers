@@ -64,7 +64,6 @@ public static class SessionsExtensions
 {
     extension(Sessions sessions)
     {
-
         /// <summary>
         /// Creates sessions from a set of days.
         /// </summary>
@@ -90,6 +89,14 @@ public static class SessionsExtensions
         /// Gets sessions that are active for all sessions.
         /// </summary>
         public static Sessions All => FromBitPattern(CommonSessionPatterns.All);
+
+        /// <summary>
+        /// Displays <see cref="Sessions"/> using session numbers or weekdays accoring the <see cref="SessionsSettings"/>
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        public string Display(SessionsSettings settings) =>
+            settings.UseDaysInsteadOfSessionNumbers ? "" : ""; // TODO: implement and use whenever sessions are displayed in gui and reports.
 
         /// <summary>
         /// Returns the intersection of this sessions with another.
@@ -243,7 +250,7 @@ public static class SessionsExtensions
 
         /// <summary>
         /// Gets the lowest active session/day number (1-based), or <see cref="int.MaxValue"/> when no session
-        /// is active (so empty patterns sort last, as with <see cref="SortOrder"/>). For a day pattern this is
+        /// is active (so empty patterns sort last, as with <see cref="get_SortOrder(Sessions)"/>. For a day pattern this is
         /// the first in-week day position; the mirrored upper bits never precede it. This is the tiebreaker
         /// that keeps split-session variants of one duty in order — a 1,3,5 duty before its 2,4,6 twin.
         /// </summary>
@@ -350,4 +357,53 @@ public static class SessionsExtensions
             }
         }
     }
+
+}
+/// <summary>
+/// 
+/// </summary>
+public class SessionsSettings()
+{
+    /// <summary>
+    /// The expected max number of sessions to run at a meeting.
+    /// </summary>
+    public int MaxNumberOfSessions { get; init; }
+    /// <summary>
+    /// If true: display weekday instead of session numbers.
+    /// </summary>
+    public bool UseDaysInsteadOfSessionNumbers { get; init; }
+    /// <summary>
+    /// If true: use short form of weekday names; otherwise use full weekday names.
+    /// </summary>
+    /// <remarks>Only applies if <see cref="UseDaysInsteadOfSessionNumbers"/> is true.</remarks>
+    public bool UseShortWeekdayNames { get; init; }
+    /// <summary>
+    /// Weekday of first session.
+    /// </summary>
+    /// <remarks>Only applies if <see cref="UseDaysInsteadOfSessionNumbers"/> is true.</remarks>
+    public DayOfWeek SessionFirstWeekday { get; init; }
+
+    /// <summary>
+    /// Creates a <see cref="SessionsSettings"/> for displaying sessions.
+    /// </summary>
+    /// <param name="maxNumberOfSessions"></param>
+    /// <returns></returns>
+    public static SessionsSettings UseSessions(int maxNumberOfSessions) => new()
+    {
+        MaxNumberOfSessions = maxNumberOfSessions,
+    };
+    /// <summary>
+    /// Creates a <see cref="SessionsSettings"/> for displaying weekdays.
+    /// </summary>
+    /// <param name="maxNumberOfSessions"></param>
+    /// <param name="useShortDayNames"></param>
+    /// <param name="sessionFirstWeekday"></param>
+    /// <returns></returns>
+    public static SessionsSettings UseWeekdays(int maxNumberOfSessions, bool useShortDayNames, DayOfWeek sessionFirstWeekday = DayOfWeek.Monday) => new()
+    {
+        MaxNumberOfSessions = maxNumberOfSessions,
+        UseDaysInsteadOfSessionNumbers = true,
+        UseShortWeekdayNames = useShortDayNames,
+        SessionFirstWeekday = sessionFirstWeekday,
+    };
 }

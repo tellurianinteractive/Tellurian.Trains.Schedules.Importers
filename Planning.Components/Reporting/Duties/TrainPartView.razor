@@ -1,0 +1,58 @@
+﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@if (TrainPart is not null)
+{
+    <h2>@Translator("TrainTimetable")</h2>
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">@Translator("Station")</th>
+                <th>@Translator("Track")</th>
+                <th>@Translator("Time")</th>
+                <th>@Translator("Note")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var call in TrainPart.Calls)
+            {
+                @if (call.HasDifferentArrivalAndDepartureTimes)
+                {
+                    <tr>
+                        <td>@Translator("Arr")</td>
+                        <td>@call.OperationLocation.Name</td>
+                        <td>@call.Track.Number</td>
+                        <td>@call.Arrival</td>
+                        <td>@("TODO: call arrival notes in here")</td>
+                    </tr>
+                    <tr>
+                        <td>@Translator("Dep")</td>
+                        <td>@call.OperationLocation.Name</td>
+                        <td>@call.Track.Number</td>
+                        <td>@call.Departure</td>
+                        <td>@("TODO: call arrival notes in here")</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td></td>
+                        <td>@call.OperationLocation.Name</td>
+                        <td>@call.Track.Number</td>
+                        <td>@call.Departure</td>
+                        <td>@("TODO: call arrival notes in here")</td>
+                    </tr>
+                }
+
+
+
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public ScheduledTrainPart? TrainPart { get; set; }
+
+}

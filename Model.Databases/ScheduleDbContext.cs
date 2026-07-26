@@ -131,7 +131,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     /// <summary>
     /// Gets the set of train parts in the database.
     /// </summary>
-    public DbSet<TrainPart> TrainParts => Set<TrainPart>();
+    public DbSet<ScheduledTrainPart> TrainParts => Set<ScheduledTrainPart>();
 
     #endregion
 
@@ -621,7 +621,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         });
 
         // TrainPart
-        modelBuilder.Entity<TrainPart>(entity =>
+        modelBuilder.Entity<ScheduledTrainPart>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.ExternalKey).HasMaxLength(100);

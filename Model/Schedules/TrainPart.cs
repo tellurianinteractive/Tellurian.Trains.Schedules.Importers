@@ -26,7 +26,7 @@ public abstract class TrainPart : IEquatable<TrainPart>
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="TrainPart"/> with the specified station calls.
+    /// Initializes a new instance of <see cref="ScheduledTrainPart"/> with the specified station calls.
     /// </summary>
     /// <param name="from">The departure station call.</param>
     /// <param name="to">The arrival station call.</param>
@@ -109,5 +109,11 @@ public static class TrainPartExtensions
         {
             return trainPart.Train == call.Train && trainPart.From.Departure <= call.Departure && trainPart.To.Arrival >= call.Arrival;
         }
+
+        /// <summary>
+        /// Subset of train's call that are on the train part.
+        /// </summary>
+        public IEnumerable<StationCall> Calls =>
+            trainPart.Train.Calls.Where(c => c.Departure >= trainPart.From.Departure && c.Arrival <= trainPart.To.Arrival).OrderBy(c => c.SortTime);
     }
 }

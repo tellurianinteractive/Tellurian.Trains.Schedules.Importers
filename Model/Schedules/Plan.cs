@@ -171,7 +171,7 @@ public static class PlanExtensions
         }
 
         /// <summary>
-        /// Gets all <see cref="ScheduledObject">schedule objects</see> associated with a <see cref="TrainPart"/>.
+        /// Gets all <see cref="ScheduledObject">schedule objects</see> associated with a <see cref="ScheduledTrainPart"/>.
         /// </summary>
         /// <param name="trainPart"></param>
         /// <returns></returns>

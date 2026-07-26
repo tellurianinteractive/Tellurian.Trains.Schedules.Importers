@@ -1,0 +1,23 @@
+﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
+@inject Translator Translator
+
+<A5PPage PageNumber="PageNumber">
+
+    @if (Parts is not null)
+    {
+        @foreach (var part in Parts)
+        {
+            <DriverDutyTrainView DutyTrainPart="part"></DriverDutyTrainView>
+        }
+    }
+
+</A5PPage>
+
+
+@code {
+    [Parameter] public IEnumerable<DriverDutyPart>? Parts { get; set; }
+    [Parameter] public int PageNumber { get; set; }
+
+    DriverDutyPart? Last => Parts is not null && Parts.Any() ? Parts.Last() : null;
+
+}

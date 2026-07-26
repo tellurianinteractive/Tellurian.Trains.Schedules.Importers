@@ -9,6 +9,7 @@
    `Margin` parameter (applied as padding), so margins are controlled per report. */
 @page a4l { size: A4 landscape; margin: 0; }
 @page a4p { size: A4 portrait;  margin: 0; }
+@page a4p { size: A5 portrait;  margin: 0; }
 
 /* Fallback if a browser ignores landscape `size` on a named page: keep A4 portrait paper
    but rotate the content. Replace the a4l rule above with:
@@ -16,6 +17,7 @@
 
 .a4l { page: a4l; }
 .a4p { page: a4p; }
+.a5p { page: a5p; }
 
 /* A row of cards within a printed page; wraps so the fixed-size cards flow across the
    page width. Orientation and page breaks come from the A4LPage/A4PPage wrapper. */
@@ -36,7 +38,8 @@
        non-element nodes (e.g. the .no-print toolbar before them and Blazor comment markers between
        them), so it does not depend on a wrapper being :first-child / :last-child of its parent. */
     .a4l + .a4l,
-    .a4p + .a4p {
+    .a4p + .a4p,
+    .a5p + .a5p {
         break-before: page;
     }
 }

@@ -34,7 +34,7 @@ public static class DriverDutyEditingExtensions
         /// <summary>
         /// Renumbers all driver duties in running order: sorted by effective start time
         /// (the <c>StartTime</c> extension), then end time, then the duty's first session/day number
-        /// (see <see cref="SessionsExtensions.FirstNumber"/>) so split-session variants of one duty stay in
+        /// so split-session variants of one duty stay in
         /// order — a 1,3,5 duty before its 2,4,6 twin. Each duty's <see cref="DriverDuty.Identity"/> is set
         /// to its ordinal — "1", "2", … Empty duties (no start time) sort last.
         /// </summary>

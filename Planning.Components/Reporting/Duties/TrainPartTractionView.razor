@@ -1,0 +1,40 @@
+﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@if (HasData)
+{
+    <h3>@Translator("TractionUnits")</h3>
+    <table class="dutytrain">
+        <thead>
+            <tr class="dutytrainheader">
+                <th>@Translator("Sessions")</th>
+                <th>@Translator("TractionUnit")</th>
+                <th>@Translator("From")</th>
+                <th>@Translator("Dep")</th>
+                <th>@Translator("To")</th>
+                <th>@Translator("Arr")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var unit in TractionData!.Units)
+            {
+                <tr class="dutytrainrow">
+                    <td>@unit.Sessions.Display(TractionData.SessionsSettings)</td>
+                    <td>@unit.TrainPart.ToString()</td>
+                    <td>@unit.TrainPart.From.OperationLocation.Name</td>
+                    <td>@unit.TrainPart.From.Departure</td>
+                    <td>@unit.TrainPart.To.OperationLocation.Name</td>
+                    <td>@unit.TrainPart.To.Arrival</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <hr/>
+}
+
+@code {
+    [Parameter] public TrainPartTractionData? TractionData { get; set; }
+
+    bool HasData => TractionData is not null && TractionData.Units.Any();
+}

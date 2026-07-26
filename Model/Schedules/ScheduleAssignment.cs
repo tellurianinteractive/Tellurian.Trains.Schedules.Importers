@@ -62,3 +62,4 @@ public class ScheduleAssignment
         Sessions = sessions ?? Sessions.All;
     }
 }
+

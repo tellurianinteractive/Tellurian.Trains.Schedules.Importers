@@ -15,7 +15,7 @@ public record TurnusData
     public string ExternalId { get; init; } = string.Empty;
     public Sessions Sessions { get; init; }
     public string Remark { get; init; } = string.Empty;
-    public IEnumerable<TrainPart> TrainParts { get; init; } = [];
+    public IEnumerable<ScheduledTrainPart> TrainParts { get; init; } = [];
     public bool TurnForNextSession { get; init; } = false;
 
     /// <summary>The first weekday of the operating week, used to name the operating days on the card.</summary>
