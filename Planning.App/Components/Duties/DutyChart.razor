@@ -35,7 +35,7 @@ else
                         <span class="company">@company</span>
                     }
                     <span class="sessions" title="@Translator("DutySessions")">
-                        @SessionsDisplay.Text(duty.Sessions, UseDays, Translator, MaxSessions, StartDay)
+                        <SessionsView Sessions="duty.Sessions" Settings="SessionSettings" />
                     </span>
                     <button class="edit" title="@Translator("EditDuty")" @onclick="() => _editTarget = duty"><i class="fa-solid fa-pen"></i></button>
                     @if (_deleteTarget == duty)
@@ -86,7 +86,7 @@ else
 
                     @foreach (var note in duty.TractionExchangeNotes)
                     {
-                        <div class="derived-note" title="@Translator("TractionUnitExchange")"><i class="fa-solid fa-right-left"></i> @note.At.Signature: @note.Text</div>
+                        <div class="derived-note" title="@Translator("TractionUnitExchange")"><i class="fa-solid fa-right-left"></i> @note.At.Signature: @note.ToText</div>
                     }
                     @foreach (var note in duty.Notes)
                     {
@@ -120,6 +120,9 @@ else
     private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
     private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
     private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
     private GraphSettings Settings => ScheduleState.Layout?.Settings.ToGraphSettings() ?? GraphSettings.Default;
 
     private DriverDuty? _addPartTarget;

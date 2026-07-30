@@ -1,0 +1,25 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@* Shows a sessions/days value in the one visual language used everywhere sessions appear: session
+   numbers as filled circles, weekday names as text. Session numbers are new to users, so the GUI and the
+   printed booklet must not disagree about what a session looks like — which is why every call site goes
+   through this component rather than formatting its own.
+
+   It is a thin wrapper: Sessions.ToHtml is the single source of the markup, because a Blazor component
+   cannot be embedded inside a MarkupString and notes need to render circles inline. Making one delegate
+   to the other keeps the circles drawn by one piece of code either way.
+
+   Where markup cannot go — an <option>, a title attribute — call Sessions.ToText instead. *@
+
+<span class="sessions-view">@Sessions.ToHtml(Settings)</span>
+
+@code {
+    /// <summary>The value to show.</summary>
+    [Parameter, EditorRequired] public Sessions Sessions { get; set; }
+
+    /// <summary>
+    /// Chooses sessions or days, the operating period and the day names. Build it from the layout with
+    /// <c>Layout.Settings.General.SessionSettings()</c>.
+    /// </summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+}

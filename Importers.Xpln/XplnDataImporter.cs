@@ -712,7 +712,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                                 if (current is null) break;
                                 if (int.TryParse(fields[Wheel], out var axles) && axles > 0)
                                 {
-                                    current.Length = TrainLenght.AxlesOnly(axles);
+                                    current.Length = TrainCapacity.AxlesOnly(axles);
                                 }
                             }
                             break;

@@ -28,6 +28,21 @@ upgrading is largely a matter of updating `using` directives.
 - **`TrainPart` is now abstract**, with `ScheduledTrainPart` as the concrete portion
   used inside vehicle schedules.
 
+- **XPLN import conventions moved out of the model.** The helpers that derive the stop
+  flags from the call times — `WithFixedSingleCallTrain`, `WithOriginAndTerminusDwell`,
+  `WithFirstCallDepartureOnlyAndLastCallArrivalOnly` and `WithPassthroughCalls`, along
+  with `SetFirstCallDepartureOnly` / `SetLastCallArrivalOnly` — are removed from the
+  public `TrainExtensions` in `Tellurian.Trains.Schedules.Model`. Equating arrival and
+  departure times with a pass-through is an XPLN convention only, so it now lives in the
+  XPLN importer as internal code and cannot be applied to non-XPLN data by mistake.
+
+- **One naming for rendering members.** Every model type that renders itself now
+  exposes the pair `ToText` (plain text) and `ToHtml` (`MarkupString` markup).
+  `ICallNote.Text` / `Html` are therefore renamed to `ToText` / `ToHtml`, on the
+  interface and on `CallNote`, `TextCallNote` and `GeneratedNote` alike; `Region` and
+  `Destination` lost the older `ToHtmlMarkup` spelling. Stored note *text* is
+  untouched — `DriverDutyNote.Text` remains the persisted value it always was.
+
 ### New Features
 
 #### Vehicle-schedule (turnus) building
@@ -51,6 +66,24 @@ A new `Notes` model attaches localised instructions to station calls through the
 `ICallNote` hierarchy — `CoupleNote`, `UncoupleNote`, `ReinforcementNote`,
 `FromParkingNote`, `ToParkingNote`, `UseNote` and `TextCallNote` — with generated
 text available in all supported languages.
+
+A generated note now describes itself once, as a localised format string plus the
+values substituted into it, and `ToText` and `ToHtml` are two renderings of that one
+description. The values are what varies in a note — the vehicle to fetch, the train
+to meet — so the markup form emphasises them: they render as
+`<b class="value">…</b>` inside the note's `callnote` span. Values that would dilute
+the emphasis (a position in the train, a meet time) and values that already carry a
+visual form (region chips, session circles) are excluded.
+
+Every value is now HTML-encoded on the way into the markup, so a station, vehicle or
+company name containing `&`, `<` or `>` produces a correct note instead of broken
+markup. The same applies to the region chip and the cargo destination.
+
+A manual note (`TextCallNote`) may use two Markdown emphases — `*italic*` and
+`**bold**` — so a planner can stress the part of a note that matters. They nest,
+`\*` escapes a literal asterisk, an unpaired asterisk stays literal, and underscores
+are not emphasis. `TextCallNote.Text` is the stored text with its markers, `ToText`
+the same text without them, and `ToHtml` the rendered markup.
 
 #### Structured layout settings
 

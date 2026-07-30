@@ -189,6 +189,9 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>ved {0} spor {1} ank {2} afg {3}</value>
   </data>
+  <data name="CallAtStationTrackOccupiedDuringTimes" xml:space="preserve">
+    <value>ved {0} spor {1} optaget {2}-{3}</value>
+  </data>
   <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
     <value>Tog {0} anløbene {1} og {2} overlapper i tid.</value>
   </data>
@@ -275,5 +278,17 @@
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Køretøj {0} vender ikke tilbage til sit udgangspunkt {1}; det slutter ved {2}.</value>
+  </data>
+  <data name="DutyIdentityIsHeldByTwoDuties" xml:space="preserve">
+    <value>Betegnelsen {0} bruges af to tjenester, der er undtaget fra omnummerering.</value>
+  </data>
+  <data name="DutyHasNoIdentityToHold" xml:space="preserve">
+    <value>En tjeneste er undtaget fra omnummerering, men har ingen betegnelse at beholde.</value>
+  </data>
+  <data name="DutyStaffCountIsOutOfRange" xml:space="preserve">
+    <value>Tjeneste {0} kræver {1} personer, hvilket ligger uden for det tilladte interval 1 til 3.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
+    <value>Tog {0} har ingen tjeneste på køresessioner {1} for delen fra {2} {3} til {4} {5}.</value>
   </data>
 </root>

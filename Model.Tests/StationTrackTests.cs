@@ -49,4 +49,31 @@ public class StationTrackTests
         Assert.AreEqual(0, validationErrors.Count());
         Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
     }
+
+    // Every case above is a NEGATIVE one, which is how the conflict check came to be dead without
+    // anyone noticing: its overlap predicate had both comparisons the wrong way round, so it reported
+    // nothing at all and every "is free" test passed for the wrong reason.
+    [TestMethod]
+    public void WhenCallsOverlapThenConflictIsReported()
+    {
+        Train1.Add(new StationCall(1, Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        Train2.Add(new StationCall(2, Target, Time.FromHourAndMinute(12, 15), Time.FromHourAndMinute(12, 45)));
+
+        var validationErrors = Target.GetValidationErrors([]).ToList();
+
+        Assert.HasCount(1, validationErrors);
+        Assert.IsFalse(validationErrors.Any(ve => string.IsNullOrWhiteSpace(ve.Message.Text)));
+    }
+
+    [TestMethod]
+    public void TrainsOnDifferentSessionsNeverContendForTheTrack()
+    {
+        Train1.Sessions = Sessions.FromSessionNumbers(1, 3, 5);
+        Train2.Sessions = Sessions.FromSessionNumbers(2, 4, 6);
+        Train1.Add(new StationCall(1, Target, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        Train2.Add(new StationCall(2, Target, Time.FromHourAndMinute(12, 15), Time.FromHourAndMinute(12, 45)));
+
+        // They are never at the station on the same day, so they cannot want the same track.
+        Assert.IsEmpty(Target.GetValidationErrors([]));
+    }
 }

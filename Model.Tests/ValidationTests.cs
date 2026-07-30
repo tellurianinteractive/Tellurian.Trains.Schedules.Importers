@@ -740,6 +740,10 @@ public class ValidationTests
     {
         var error = DuplicateTrainNumberError(out _, out _);
 
+        // A train-scope conflict always happens somewhere; only placeless errors (duty numbering) omit
+        // their tracks, so asserting presence here also pins that distinction down.
+        Assert.IsNotNull(error.FromTrack, "A train conflict is located at a track.");
+        Assert.IsNotNull(error.ToTrack, "A train conflict is located at a track.");
         Assert.IsTrue(error.Involves(error.FromTrack));
         Assert.IsTrue(error.Involves(error.ToTrack));
     }
@@ -749,7 +753,9 @@ public class ValidationTests
     {
         var error = DuplicateTrainNumberError(out _, out _);
 
-        Assert.IsTrue(error.OverlapsTimeRange(error.FromTime, error.ToTime), "The error's own span overlaps itself.");
+        Assert.IsNotNull(error.FromTime, "A train conflict happens at a time.");
+        Assert.IsNotNull(error.ToTime, "A train conflict happens at a time.");
+        Assert.IsTrue(error.OverlapsTimeRange(error.FromTime.Value, error.ToTime.Value), "The error's own span overlaps itself.");
         Assert.IsFalse(error.OverlapsTimeRange(Time.FromHourAndMinute(1, 00), Time.FromHourAndMinute(2, 00)), "A range entirely before the span does not overlap.");
         Assert.IsFalse(error.OverlapsTimeRange(Time.FromHourAndMinute(23, 00), Time.FromHourAndMinute(23, 30)), "A range entirely after the span does not overlap.");
     }

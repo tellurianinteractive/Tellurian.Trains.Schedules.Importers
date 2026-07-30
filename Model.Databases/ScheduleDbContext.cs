@@ -129,9 +129,11 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
     public DbSet<DriverDuty> DriverDuties => Set<DriverDuty>();
 
     /// <summary>
-    /// Gets the set of train parts in the database.
+    /// Gets the set of train parts in the database. This is the root of the train-part hierarchy;
+    /// use <c>OfType&lt;ScheduledTrainPart&gt;()</c> or <c>OfType&lt;CargoFlowTrainPart&gt;()</c> to
+    /// query a single kind.
     /// </summary>
-    public DbSet<ScheduledTrainPart> TrainParts => Set<ScheduledTrainPart>();
+    public DbSet<TrainPart> TrainParts => Set<TrainPart>();
 
     #endregion
 
@@ -244,6 +246,8 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Signature).HasMaxLength(20).IsRequired();
             entity.Property(e => e.CountryId);
+            // A data URI, capped in the editor at roughly 64 KB encoded.
+            entity.Property(e => e.Logo);
 
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
         });
@@ -265,6 +269,14 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Property(e => e.CountryId);
 
             entity.HasIndex(e => new { e.LayoutId, e.Signature }).IsUnique();
+
+            // The shunting yard whose local freight covers this location. Restrict rather than cascade:
+            // deleting a shunting yard must not take the stations it served with it.
+            entity.HasOne(e => e.CargoServedFrom)
+                  .WithMany()
+                  .HasForeignKey("CargoServedFromStationId")
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .IsRequired(false);
 
             entity.HasMany(e => e.Tracks)
                   .WithOne(e => e.Station)
@@ -508,6 +520,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            // Authored markdown of unbounded length; printed as its own booklet.
+            entity.Property(e => e.GeneralInstructions);
+            // Authored markdown of unbounded length; printed on that booklet's front page.
+            entity.Property(e => e.Program);
 
             entity.HasOne(e => e.Timetable)
                   .WithMany()
@@ -620,8 +636,12 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // TrainPart
-        modelBuilder.Entity<ScheduledTrainPart>(entity =>
+        // TrainPart: the abstract base carries the from/to geometry shared by both kinds and is the root
+        // of the table-per-hierarchy mapping. The kinds are siblings deriving from it, so the key, the
+        // station-call relationships and the discriminator must all be configured here — configuring them
+        // on ScheduledTrainPart would make that sealed leaf the root and leave CargoFlowTrainPart outside
+        // the hierarchy.
+        modelBuilder.Entity<TrainPart>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.ExternalKey).HasMaxLength(100);
@@ -685,7 +705,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 destination.HasKey("Id");
                 destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
                 // Computed markup rendering, not persisted.
-                destination.Ignore(x => x.ToHtmlMarkup);
+                destination.Ignore(x => x.ToHtml);
             });
         });
 
@@ -728,10 +748,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             ? []
             : [.. value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => new Sessions(int.Parse(s)))];
 
-    private static TrainLenght ParseTrainLength(string value)
+    private static TrainCapacity ParseTrainLength(string value)
     {
         var parts = value.Split('|');
-        return new TrainLenght
+        return new TrainCapacity
         {
             Axles = int.TryParse(parts[0], out var axles) ? axles : null,
             Meters = parts.Length > 1 && int.TryParse(parts[1], out var meters) ? meters : null

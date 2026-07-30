@@ -88,6 +88,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to at {0} track {1} occupied {2}-{3}.
+        /// </summary>
+        internal static string CallAtStationTrackOccupiedDuringTimes {
+            get {
+                return ResourceManager.GetString("CallAtStationTrackOccupiedDuringTimes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Call {0} must be after previous call {1} for train {2}..
         /// </summary>
         internal static string CallMustBeAfterPreviousCall {
@@ -124,6 +133,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A driver duty is excluded from renumbering but has no identity to hold..
+        /// </summary>
+        internal static string DutyHasNoIdentityToHold {
+            get {
+                return ResourceManager.GetString("DutyHasNoIdentityToHold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Driver duty {0} has overlapping train parts: {1} and {2}..
         /// </summary>
         internal static string DutyHasOverlappingParts {
@@ -133,11 +151,29 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Identity {0} is held by two driver duties excluded from renumbering..
+        /// </summary>
+        internal static string DutyIdentityIsHeldByTwoDuties {
+            get {
+                return ResourceManager.GetString("DutyIdentityIsHeldByTwoDuties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Train part {0} is worked by duty {1} and duty {2} on overlapping sessions..
         /// </summary>
         internal static string DutyPartIsDoubleAssigned {
             get {
                 return ResourceManager.GetString("DutyPartIsDoubleAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Driver duty {0} needs {1} people, which is outside the allowed range of 1 to 3..
+        /// </summary>
+        internal static string DutyStaffCountIsOutOfRange {
+            get {
+                return ResourceManager.GetString("DutyStaffCountIsOutOfRange", resourceCulture);
             }
         }
         
@@ -453,6 +489,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string TrainMustHaveMinimumTwoCalls {
             get {
                 return ResourceManager.GetString("TrainMustHaveMinimumTwoCalls", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}..
+        /// </summary>
+        internal static string TrainPartHasNoDriverDuty {
+            get {
+                return ResourceManager.GetString("TrainPartHasNoDriverDuty", resourceCulture);
             }
         }
         

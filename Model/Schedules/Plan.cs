@@ -67,6 +67,29 @@ public class Plan : IEquatable<Plan>
     public Timetable Timetable { get; set; }
 
     /// <summary>
+    /// Gets or sets the authored standing instructions for the whole meeting, as markdown: signalling
+    /// practice, radio or telephone use, shunting rules, what to do when running late, who to ask.
+    /// Empty when none have been written.
+    /// </summary>
+    /// <remarks>
+    /// These are printed as their own booklet and handed to every participant before the first session,
+    /// station staff included — not bound into each driver's duty booklet. Their audience is wider than
+    /// the drivers, they are identical in every duty, and they are read once beforehand rather than
+    /// carried through a session.
+    /// </remarks>
+    public string GeneralInstructions { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the authored programme for the meeting, as markdown: session times, breaks, meals,
+    /// and anything else participants need to know in advance. Empty when none has been written.
+    /// </summary>
+    /// <remarks>
+    /// Printed on the front page of the general instructions booklet, alongside the meeting name and
+    /// validity dates — the first thing a participant reads, before the standing instructions.
+    /// </remarks>
+    public string Program { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the collection of vehicles available in this schedule.
     /// </summary>
     public ICollection<ScheduledObject> ScheduledObjects { get; set; }

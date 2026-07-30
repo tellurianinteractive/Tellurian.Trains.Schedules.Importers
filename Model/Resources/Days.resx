@@ -181,4 +181,13 @@
   <data name="WednesdayShort" xml:space="preserve">
     <value>We</value>
   </data>
+  <data name="OnDemandOnly" xml:space="preserve">
+    <value>On demand only</value>
+  </data>
+  <data name="AllSessions" xml:space="preserve">
+    <value>All sessions</value>
+  </data>
+  <data name="NoSessions" xml:space="preserve">
+    <value>No sessions</value>
+  </data>
 </root>

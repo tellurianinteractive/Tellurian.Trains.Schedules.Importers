@@ -5,7 +5,7 @@ namespace Tellurian.Trains.Schedules.Model.Timetables;
 /// <summary>
 /// Represents train length restrictions specified in axles and/or meters.
 /// </summary>
-public readonly struct TrainLenght
+public readonly struct TrainCapacity
 {
     /// <summary>
     /// Specification of train length. There may be no limitation or any compination of limitations.
@@ -13,7 +13,7 @@ public readonly struct TrainLenght
     /// <param name="axles">Max number of axles.</param>
     /// <param name="wagons">Max number of wagons.</param>
     /// <param name="meters">Max length in meters.</param>
-    public TrainLenght(int? axles, int? wagons, double? meters)
+    public TrainCapacity(int? axles, int? wagons, double? meters)
     {
         Axles = axles;
         Wagons = wagons;
@@ -42,23 +42,23 @@ public readonly struct TrainLenght
 }
 
 /// <summary>
-/// Provides extension methods for <see cref="TrainLenght"/>.
+/// Provides extension methods for <see cref="TrainCapacity"/>.
 /// </summary>
 public static class TrainLengthExtensions
 {
-    extension(TrainLenght lenght)
+    extension(TrainCapacity lenght)
     {
         /// <summary>
         /// Gets an unspecified train length.
         /// </summary>
-        public static TrainLenght Unspecified => new();
+        public static TrainCapacity Unspecified => new();
 
         /// <summary>
         /// Creates a train length with only axle restriction.
         /// </summary>
         /// <param name="axles">The maximum number of axles.</param>
         /// <returns>A train length with axle restriction.</returns>
-        public static TrainLenght AxlesOnly(int axles) =>
+        public static TrainCapacity AxlesOnly(int axles) =>
             new() { Axles = axles };
 
         /// <summary>
@@ -66,7 +66,7 @@ public static class TrainLengthExtensions
         /// </summary>
         /// <param name="wagons"></param>
         /// <returns></returns>
-        public static TrainLenght WagonsOnly(int wagons) =>
+        public static TrainCapacity WagonsOnly(int wagons) =>
             new() { Wagons = wagons };
 
         /// <summary>
@@ -74,7 +74,7 @@ public static class TrainLengthExtensions
         /// </summary>
         /// <param name="meters">The maximum length in meters.</param>
         /// <returns>A train length with meter restriction.</returns>
-        public static TrainLenght MetersOnly(int meters) =>
+        public static TrainCapacity MetersOnly(int meters) =>
             new() { Meters = meters };
 
         /// <summary>
@@ -83,7 +83,7 @@ public static class TrainLengthExtensions
         /// <param name="axles">The maximum number of axles.</param>
         /// <param name="meters">The maximum length in meters.</param>
         /// <returns>A train length with both restrictions.</returns>
-        public static TrainLenght AxlesAndMeters(int axles, int meters) =>
+        public static TrainCapacity AxlesAndMeters(int axles, int meters) =>
             new() { Axles = axles, Meters = meters };
 
         /// <summary>

@@ -207,11 +207,12 @@
     }
 
     .sub {
-        max-width: 760px;
+        max-width: 1040px;
     }
 
     table.sub-grid {
         border-collapse: collapse;
+        width: 100%;
         margin-bottom: 0.4rem;
     }
 
@@ -233,6 +234,19 @@
         color: #889;
         font-style: italic;
         padding: 0.3rem 0.5rem;
+    }
+
+    /* The note takes whatever the fixed-width columns leave; the others are sized by their content,
+       so this one absorbs the rest of the sub-table's width. */
+    table.sub-grid th.note,
+    table.sub-grid td.note {
+        width: 100%;
+    }
+
+    /* Absorbing the slack squeezes the action cell to its minimum content width, which stacks the
+       delete button's icon above its label. Keep that cell on one line. */
+    table.sub-grid td:last-child {
+        white-space: nowrap;
     }
 
     /* Centred overlay so the confirmation is always in view, no matter how long the

@@ -255,7 +255,11 @@
 
     private Task Cancel() => OnClosed.InvokeAsync();
 
-    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator, MaxSessions, StartDay);
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+
+    // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
+    private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
 
     private static int ParseInt(ChangeEventArgs e, int fallback) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : fallback;

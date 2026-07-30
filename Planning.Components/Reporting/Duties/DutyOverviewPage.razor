@@ -1,0 +1,60 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* The layout overview — always the last page of a booklet.
+
+   Two graphical references, identical in every booklet, on the page a driver reaches by turning to the
+   back. Unlike the general instructions, which are read once before the meeting, these are consulted
+   DURING a run, which is why they stay bound into the booklet the driver is holding and why a fixed
+   position matters: they are turned to repeatedly, without knowing the page count.
+
+   Both answer questions that arise mid-duty — where does this line go, and which shunting yard does
+   this industry hang off. *@
+
+<div class="dutyoverview">
+    <h2>@Translator("Topology")</h2>
+    <TopologyDiagramView Layout="Layout" />
+
+    @if (ShuntingYards.Count > 0)
+    {
+        <h2>@Translator("ShuntingYards")</h2>
+        @* Three columns, because a shunting yard covers two different kinds of destination. Together
+           they answer the question a driver actually has holding a wagon card: where does this wagon go
+           from here, and is that on the layout or off it? Either column alone answers only half. *@
+        <table class="shunting-yards">
+            <thead>
+                <tr>
+                    <th>@Translator("ShuntingYards")</th>
+                    <th>@Translator("ServesLocations")</th>
+                    <th>@Translator("ServesRegions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shuntingYard in ShuntingYards)
+                {
+                    <tr>
+                        <td class="shunting-yard">@shuntingYard.Station.Name</td>
+                        <td>@string.Join(", ", shuntingYard.ServedLocations.Select(l => l.Name))</td>
+                        @* The same coloured chips as in the cargo notes, so this page reads as a key to
+                           those notes rather than as separate information. *@
+                        <td>
+                            @foreach (var region in shuntingYard.ServedRegions)
+                            {
+                                @region.ToHtml
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    /// <summary>The layout whose topology and shunting yards are shown.</summary>
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
+
+    private IReadOnlyList<ShuntingYard> ShuntingYards => Layout?.ShuntingYards ?? [];
+}

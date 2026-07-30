@@ -1,5 +1,173 @@
-﻿<h3>FrontDutyPage</h3>
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* The front page serves three readers, in the order they meet it.
+
+   The SORTER handles a closed booklet in a stack and needs the duty number and the sessions at a
+   glance; before each session the pile is sorted by hand, include/exclude by session and then into
+   numeric order, both decided without opening anything.
+
+   The CHOOSER handles several closed front pages mid-session — a participant works more than one duty
+   per session and returns to the pile to pick the next — and needs the start time and station, the
+   difficulty and the staffing.
+
+   The DRIVER has just picked the booklet up and needs confirmation of what they hold.
+
+   The first two read it closed and in bulk, which is why nothing they need may depend on opening the
+   booklet and why their fields sit in fixed positions rather than flowing with content length. The duty
+   notes are the only variable-height element, so they sit last and can only grow downwards into free
+   space without displacing anything. *@
+
+@if (Duty is not null)
+{
+    <div class="dutyfront">
+        <h1 class="layout">@LayoutName</h1>
+        @if (Validity is { Length: > 0 } validity)
+        {
+            <p class="validity">@validity</p>
+        }
+        <hr />
+
+        <p class="dutylabel">@Translator("DutyLabel")</p>
+        <p class="dutynumber">@Duty.Identity</p>
+
+        @* A participant who skips this is the case it exists for. It points at the separate general
+           instructions, which are handed out before the first session — not at a page of this booklet. *@
+        <p class="readfirst">@Translator("ReadGeneralInstructions")</p>
+
+        <p class="sessions"><SessionsView Sessions="Duty.Sessions" Settings="Settings" /></p>
+
+        @* Start time and station belong on one line: together they answer the chooser's question of
+           whether this duty starts soon enough and near enough to be worth taking now. *@
+        @if (Duty.StartTime is { } start)
+        {
+            <p class="extent">
+                <span class="label">@Translator("DutyStarts"):</span>
+                <strong>@start.HHMM()</strong>
+                <span class="label">@Translator("AtLocation")</span>
+                <strong>@(Duty.StartLocation?.Name ?? "")</strong>
+            </p>
+        }
+        @if (Duty.EndTime is { } end)
+        {
+            <p class="extent">
+                <span class="label">@Translator("DutyEnds"):</span>
+                <strong>@end.HHMM()</strong>
+                <span class="label">@Translator("AtLocation")</span>
+                <strong>@(Duty.EndLocation?.Name ?? "")</strong>
+            </p>
+        }
+
+        @if (Companies.Count > 0)
+        {
+            <p class="operators">
+                <span class="label">@Translator("Operator"):</span>
+                @if (UseLogos)
+                {
+                    @* Separated by a gap, not commas: between images a comma reads as stray punctuation. *@
+                    @foreach (var company in Companies)
+                    {
+                        <CompanyLogo Company="company" />
+                    }
+                }
+                else
+                {
+                    <strong>@string.Join(", ", Companies.Select(c => c.Signature))</strong>
+                }
+            </p>
+        }
+        <hr />
+
+        @if (CategoryNames is { Length: > 0 } categories)
+        {
+            <p class="categories">@categories</p>
+        }
+
+        <p class="grading">
+            @if (Duty.Difficulty is { } difficulty)
+            {
+                @* Colour-coded, but never colour alone: booklets are often printed in black and white,
+                   where green, orange and red all reduce to similar greys. The name survives that. *@
+                <span class="difficulty @difficulty.ToString().ToLowerInvariant()">
+                    @Translator("DutyDifficulty"): <strong>@Translator(difficulty.ToString())</strong>
+                </span>
+            }
+            @* Only when more than one. One is the overwhelming default, so printing it always would add
+               a line to every front page to state what the reader already assumes. At two or three it is
+               not a detail but an instruction: this duty cannot be started alone. *@
+            @if (Duty.StaffCount > 1)
+            {
+                <span class="staffing">
+                    @Translator("DutyStaffCount"):
+                    <strong>@string.Format(Culture, Translator("StaffingPersons"), Duty.StaffCount)</strong>
+                </span>
+            }
+        </p>
+
+        @if (Duty.Notes.Count > 0)
+        {
+            <ul class="dutynotes">
+                @foreach (var note in Duty.Notes)
+                {
+                    <li>@note.Text</li>
+                }
+            </ul>
+        }
+
+        @* What distinguishes a reprint from the booklet it replaces. This is the RENDER time, fixed when
+           the PDF is produced — a PDF printed a week later still carries the timestamp of the render it
+           came from, which is exactly what makes it identify a version. *@
+        <p class="printed">@string.Format(Culture, Translator("PrintedAt"), PrintedAt.ToString("yyyy-MM-dd HH:mm", Culture))</p>
+    </div>
+}
 
 @code {
+    /// <summary>The duty whose booklet this fronts.</summary>
+    [Parameter, EditorRequired] public DriverDuty? Duty { get; set; }
 
+    /// <summary>The layout name, shown as the largest heading.</summary>
+    [Parameter] public string LayoutName { get; set; } = "";
+
+    /// <summary>First day of the meeting, or null when none is booked.</summary>
+    [Parameter] public DateOnly? ValidFrom { get; set; }
+
+    /// <summary>Last day of the meeting.</summary>
+    [Parameter] public DateOnly? ValidTo { get; set; }
+
+    /// <summary>How the session indicator is rendered.</summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+
+    /// <summary>When the report was rendered. Fixed for the whole render, not read per page.</summary>
+    [Parameter] public DateTime PrintedAt { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    // Both the operator and the category lines follow one rule: project the duty's parts, take the
+    // distinct values, and keep them in WORKING order. The booklet is read in sequence, so the front
+    // page's summary runs in the same order as the part pages behind it and a driver checking one
+    // against the other finds them in step. OrderedParts is already in that order, so nothing sorts.
+    private IReadOnlyList<Company> Companies =>
+        Duty is null ? [] :
+        [.. Duty.OrderedParts.Select(p => p.Train.EffectiveCompany).OfType<Company>().Distinct()];
+
+    private string CategoryNames =>
+        Duty is null ? "" :
+        string.Join(", ", Duty.OrderedParts.Select(p => p.Train.Category?.Name).OfType<string>().Distinct());
+
+    // All or nothing, decided over the distinct companies of THIS duty. Mixing a graphic with a text
+    // abbreviation puts two incomparable things on one line, and the company without a logo then reads
+    // as a missing image rather than a deliberate choice. Falling back for all of them keeps the line
+    // internally consistent, which is what a reader actually sees.
+    private bool UseLogos =>
+        Companies.Count > 0 && Companies.All(c => !string.IsNullOrWhiteSpace(c.Logo));
+
+    // Omitted entirely when no meeting is booked, rather than printing a placeholder date.
+    private string Validity =>
+        ValidFrom is { } from && ValidTo is { } to
+            ? string.Format(Culture, Translator("ValidBetween"),
+                from.ToString("yyyy-MM-dd", Culture), to.ToString("yyyy-MM-dd", Culture))
+            : "";
 }

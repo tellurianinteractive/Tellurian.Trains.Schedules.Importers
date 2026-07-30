@@ -186,6 +186,9 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>vid {0} spår {1} ank {2} avg {3}</value>
   </data>
+  <data name="CallAtStationTrackOccupiedDuringTimes" xml:space="preserve">
+    <value>vid {0} spår {1} upptaget {2}-{3}</value>
+  </data>
   <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
     <value>Tåg {0} passagerna {1} och {2} överlappar i tid.</value>
   </data>
@@ -275,5 +278,17 @@
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Fordon {0} återvänder inte till sin startplats {1}; det slutar vid {2}.</value>
+  </data>
+  <data name="DutyIdentityIsHeldByTwoDuties" xml:space="preserve">
+    <value>Beteckningen {0} används av två tjänster som är undantagna från omnumrering.</value>
+  </data>
+  <data name="DutyHasNoIdentityToHold" xml:space="preserve">
+    <value>En tjänst är undantagen från omnumrering men har ingen beteckning att behålla.</value>
+  </data>
+  <data name="DutyStaffCountIsOutOfRange" xml:space="preserve">
+    <value>Tjänst {0} kräver {1} personer, vilket ligger utanför det tillåtna intervallet 1 till 3.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
+    <value>Tåg {0} saknar körande tjänst på köromgångar {1} för delen från {2} {3} till {4} {5}.</value>
   </data>
 </root>

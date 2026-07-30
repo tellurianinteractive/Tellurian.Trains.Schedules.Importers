@@ -1,8 +1,8 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
-namespace Tellurian.Trains.Schedules.Planning.App.Components.Stretches;
+namespace Tellurian.Trains.Schedules.Planning.Components.Shared;
 
 /// <summary>
 /// Renders an SVG <c>&lt;text&gt;</c> element. A dedicated component is needed because Razor treats a bare

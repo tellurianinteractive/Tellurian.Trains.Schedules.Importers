@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -179,5 +179,14 @@
   </data>
   <data name="TuesdayShort" xml:space="preserve">
     <value>Di</value>
+  </data>
+  <data name="OnDemandOnly" xml:space="preserve">
+    <value>Nur nach Bedarf</value>
+  </data>
+  <data name="AllSessions" xml:space="preserve">
+    <value>Alle Sessionen</value>
+  </data>
+  <data name="NoSessions" xml:space="preserve">
+    <value>Keine Sessionen</value>
   </data>
 </root>

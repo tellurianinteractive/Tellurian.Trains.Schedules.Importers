@@ -166,8 +166,12 @@
         var name = $"{vehicle.ExternalId} ({Translator(vehicle.ObjectType.ToString())})";
         if (!vehicle.ScheduleAssignments.Any()) return name;
         var free = vehicle.AssignedSessions.ComplementWithin(UseDays, MaxSessions);
-        return $"{name} — {Translator("Free")}: {SessionsDisplay.Text(free, UseDays, Translator, MaxSessions, StartDay)}";
+        // Part of an <option> label, so the text form rather than circles.
+        return $"{name} — {Translator("Free")}: {free.ToText(SessionSettings)}";
     }
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     private static int ParseInt(ChangeEventArgs e, int fallback) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : fallback;

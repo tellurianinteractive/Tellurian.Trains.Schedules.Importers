@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -75,11 +75,11 @@
     <comment>{0}=vehicle</comment>
   </data>
   <data name="MoveTractionUnitFromParkingToDepartureTrack" xml:space="preserve">
-    <value>Move traction unit {0} from parking to departure track.</value>
+    <value>Before departure, drive {0} from parking space to departure track.</value>
     <comment>{0}=traction unit</comment>
   </data>
   <data name="MoveTractionUnitToParking" xml:space="preserve">
-    <value>Move traction unit {0} to parking.</value>
+    <value>After arrival, drive {0} from arrival track to parking space.</value>
     <comment>{0}=traction unit</comment>
   </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
@@ -113,5 +113,23 @@
   <data name="Wagons" xml:space="preserve">
     <value>Wagons × {0}</value>
     <comment>{0}=maximum number of wagons</comment>
+  </data>
+  <data name="NoStop" xml:space="preserve">
+    <value>No stop</value>
+  </data>
+  <data name="Crosses" xml:space="preserve">
+    <value>Crosses {0}</value>
+  </data>
+  <data name="InSessions" xml:space="preserve">
+    <value>in sessions {0}</value>
+  </data>
+  <data name="MeetsInTheSameDirection" xml:space="preserve">
+    <value>Meets {0} in the same direction</value>
+  </data>
+  <data name="TrainMeetAtTime" xml:space="preserve">
+    <value>{0} {1}-{2}</value>
+  </data>
+  <data name="NoExchange" xml:space="preserve">
+    <value>No exchange</value>
   </data>
 </root>

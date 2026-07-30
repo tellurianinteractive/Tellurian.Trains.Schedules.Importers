@@ -74,6 +74,6 @@ public class CargoFlowTrainPartTests
 
         var note = cargoFlow.DepartureNotes.OfType<CargoFlowDestinationNote>().Single();
 
-        StringAssert.Contains(note.Text, "Göteborg");
+        StringAssert.Contains(note.ToText, "Göteborg");
     }
 }

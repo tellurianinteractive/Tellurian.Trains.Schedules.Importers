@@ -46,6 +46,33 @@ public class DriverDuty : IEquatable<DriverDuty>
     public Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
+    /// Gets or sets how demanding this duty is, or <c>null</c> when it has never been graded. The grade
+    /// lets a participant pick a duty matching their experience, both at the start of a session and at
+    /// every changeover, so an ungraded duty prints no difficulty line at all rather than appearing as
+    /// the easiest grade.
+    /// </summary>
+    public DutyDifficulty? Difficulty { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether <c>Plan.RenumberDriverDuties</c> leaves this duty's
+    /// <see cref="Identity"/> untouched, so a duty participants know by number from previous meetings
+    /// keeps it. Renumbering also reserves the held identity, so no renumbered duty is given the same
+    /// number.
+    /// </summary>
+    public bool IsExcludedFromRenumbering { get; set; }
+
+    /// <summary>
+    /// Gets or sets how many people are needed to work this duty: a loco driver alone, or a loco driver
+    /// and a conductor to work the wagon cards. One by default; the editor allows up to three.
+    /// </summary>
+    /// <remarks>
+    /// The initialiser is what makes plans saved before this property existed load correctly: their JSON
+    /// carries no value, so deserialisation leaves the <c>1</c> in place — the truth for almost every
+    /// duty. Neither constructor assigns the property, so nothing resets it to zero.
+    /// </remarks>
+    public int StaffCount { get; set; } = 1;
+
+    /// <summary>
     /// Gets or sets the collection of train parts in this duty.
     /// </summary>
     public ICollection<ScheduledTrainPart> Parts { get; set; }

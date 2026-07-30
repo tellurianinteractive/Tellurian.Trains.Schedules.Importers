@@ -47,7 +47,7 @@ else
                         {
                             @foreach (var region in regionStation.Regions)
                             {
-                                @region.ToHtmlMarkup
+                                @region.ToHtml
                             }
                         }
                     </TemplateColumn>
@@ -55,6 +55,7 @@ else
                     <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@if (context is Station { IsShadow: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@if (context.HasPassengerExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    <TemplateColumn Title='@Translator("CargoServedFrom")'>@(context.CargoServedFrom?.Name ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
@@ -187,6 +188,25 @@ else
                             <select @bind="ControlledById" @bind:after="OnEdited">
                                 <option value="">@Translator("NoneOption")</option>
                                 @foreach (var s in Stations)
+                                {
+                                    <option value="@s.Id">@s.Name (@s.Signature)</option>
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    @* Which shunting yard works this location's local freight. Offered only where it
+                       makes sense: the location must exchange cargo and must not itself be a shadow
+                       station, since a shadow station is where off-layout traffic originates rather than
+                       a delivery destination. The picker lists every station, shadow ones included — a
+                       shadow shunting yard is a perfectly ordinary origin for local freight. *@
+                    @if (Editing.CanBeCargoServed)
+                    {
+                        <div class="field">
+                            <HelpLabel For="CargoServedFrom" />
+                            <select @bind="CargoServedFromId" @bind:after="OnEdited">
+                                <option value="">@Translator("NoneOption")</option>
+                                @foreach (var s in CargoServingStations)
                                 {
                                     <option value="@s.Id">@s.Name (@s.Signature)</option>
                                 }
@@ -597,6 +617,22 @@ else
         {
             if (Editing is not SignalControlledLocation signal) return;
             signal.ControlledBy = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
+                ? Stations.FirstOrDefault(s => s.Id == id)
+                : null;
+        }
+    }
+
+    // Every station except the one being edited: a location cannot be served from itself.
+    private IEnumerable<Station> CargoServingStations =>
+        Editing is null ? [] : Layout?.CargoServingStationsFor(Editing) ?? [];
+
+    private string CargoServedFromId
+    {
+        get => Editing?.CargoServedFrom?.Id.ToString(Culture) ?? "";
+        set
+        {
+            if (Editing is null) return;
+            Editing.CargoServedFrom = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
                 ? Stations.FirstOrDefault(s => s.Id == id)
                 : null;
         }

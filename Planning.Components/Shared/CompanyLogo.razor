@@ -1,0 +1,22 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@* A company's uploaded logo.
+
+   Every accepted format — PNG, JPEG, WebP and SVG — goes through the same <img>, never an inlined
+   <svg>. Uploaded SVG is untrusted content and can carry <script>, which inlined into the page would
+   run in the application's own origin; inside an <img> a browser treats SVG as a static image, with no
+   script and no external fetches. One code path, and the difference that matters given users supply
+   these files themselves.
+
+   The alt text is the company signature, so a logo that fails to load degrades to exactly the text it
+   replaced rather than to a broken-image icon. *@
+
+@if (!string.IsNullOrWhiteSpace(Company?.Logo))
+{
+    <img class="company-logo" src="@Company.Logo" alt="@Company.Signature" title="@Company.Name" />
+}
+
+@code {
+    /// <summary>The company whose logo to show. Nothing is rendered when it has none.</summary>
+    [Parameter, EditorRequired] public Company? Company { get; set; }
+}

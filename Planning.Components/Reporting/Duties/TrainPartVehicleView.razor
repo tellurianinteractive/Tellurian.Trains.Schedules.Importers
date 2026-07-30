@@ -1,0 +1,53 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* One vehicle block of a train part — traction units or wagonsets. The two have the same six columns
+   and differ only in what they list, so one view serves both; the heading tells them apart.
+
+   An empty block is omitted entirely, heading and rule included, so a simple part stays short and
+   costs nothing in page fitting. *@
+
+@if (Data is { HasData: true })
+{
+    <h3>@Translator(Heading)</h3>
+    <table class="dutytrain">
+        <thead>
+            <tr>
+                <th>@Translator("Sessions")</th>
+                <th>@Translator(VehicleColumn)</th>
+                <th>@Translator("From")</th>
+                <th>@Translator("Dep")</th>
+                <th>@Translator("To")</th>
+                <th>@Translator("Arr")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vehicle in Data.Vehicles)
+            {
+                <tr>
+                    <td><SessionsView Sessions="vehicle.Sessions" Settings="Data.SessionsSettings" /></td>
+                    @* The identity written on the loco or wagonset card, so the driver can match it. *@
+                    <td class="designation">@vehicle.Designation</td>
+                    <td>@vehicle.TrainPart.From.OperationLocation.Name</td>
+                    <td>@vehicle.TrainPart.From.Departure.HHMM()</td>
+                    <td>@vehicle.TrainPart.To.OperationLocation.Name</td>
+                    <td>@vehicle.TrainPart.To.Arrival.HHMM()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <hr />
+}
+
+@code {
+    /// <summary>The vehicles to list. Nothing is rendered when the block is empty.</summary>
+    [Parameter, EditorRequired] public TrainPartVehicleData? Data { get; set; }
+
+    /// <summary>Resource key for the block heading.</summary>
+    [Parameter, EditorRequired] public string Heading { get; set; } = "";
+
+    /// <summary>Resource key for the vehicle column header.</summary>
+    [Parameter, EditorRequired] public string VehicleColumn { get; set; } = "";
+}

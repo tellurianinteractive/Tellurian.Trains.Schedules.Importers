@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -250,7 +250,7 @@
     <value>Tågsätt</value>
   </data>
   <data name="Wagonset" xml:space="preserve">
-    <value>Vagngrupp</value>
+    <value>Vagnsätt</value>
   </data>
   <data name="Cargo" xml:space="preserve">
     <value>Gods</value>
@@ -327,6 +327,12 @@
   <data name="EndTime" xml:space="preserve">
     <value>Sluttid</value>
   </data>
+  <data name="AllowPlanTimeExtend" xml:space="preserve">
+    <value>Utöka plantider automatiskt?</value>
+  </data>
+  <data name="AllowPlanTimeExtendHelp" xml:space="preserve">
+    <value>Utökar planens start- och sluttid för att täcka ett tågs faktiska tider istället för att blockera ändringen när de hamnar utanför tidsfönstret. Har ingen effekt när planen går över midnatt, eftersom fönstret då redan är obegränsat.</value>
+  </data>
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Brytpunkt (delar grafen i två halvor)</value>
   </data>
@@ -374,6 +380,12 @@
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Snabbklockans fart (×)</value>
+  </data>
+  <data name="DistanceFactor" xml:space="preserve">
+    <value>Avståndsfaktor (×)</value>
+  </data>
+  <data name="DistanceFactorHint" xml:space="preserve">
+    <value>Multiplicerar varje bansträckas avstånd (meter) till de kilometer som visas i rapporter och grafer. Standardvärdet 1 behåller befintliga avstånd oförändrade.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Hastighetsmappning</value>
@@ -615,8 +627,8 @@
   <data name="Route" xml:space="preserve">
     <value>Sträckning</value>
   </data>
-  <data name="DistanceKm" xml:space="preserve">
-    <value>Distans (km)</value>
+  <data name="DistanceMeters" xml:space="preserve">
+    <value>Distans (m)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Hastighet (km/h)</value>
@@ -833,9 +845,6 @@
   </data>
   <data name="TrainCategoryReferenced" xml:space="preserve">
     <value>Kan inte ta bort: kategorin används av ett eller flera tåg.</value>
-  </data>
-  <data name="TrainCategoryNameRequired" xml:space="preserve">
-    <value>Namnet krävs.</value>
   </data>
   <data name="AddFromCatalogue" xml:space="preserve">
     <value>Lägg till från katalog</value>
@@ -1227,6 +1236,12 @@
   <data name="TimingsUpdateFailed" xml:space="preserve">
     <value>Några valda tåg kunde inte uppdateras eftersom deras nya tider skulle hamna utanför planens start- eller sluttid.</value>
   </data>
+  <data name="UpdateAllTimings" xml:space="preserve">
+    <value>Uppdatera alla tider</value>
+  </data>
+  <data name="UpdateAllTimingsFailed" xml:space="preserve">
+    <value>Några tåg kunde inte uppdateras eftersom deras nya tider skulle hamna utanför planens start- eller sluttid.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minuter</value>
   </data>
@@ -1289,6 +1304,13 @@
   </data>
   <data name="Remark" xml:space="preserve">
     <value>Anmärkning</value>
+  </data>
+  <data name="AddCallNote" xml:space="preserve">
+    <value>Lägg till anmärkning</value>
+    <comment>Placeholder in the empty call note field.</comment>
+  </data>
+  <data name="CallNoteHint" xml:space="preserve">
+    <value>Anmärkning som visas vid detta uppehåll. Använd *kursiv* och **fet** för att framhäva; markeringen visas när du redigerar.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>Inga uppehåll.</value>
@@ -1369,7 +1391,7 @@
     <value>Gods från {0} till {1}</value>
   </data>
   <data name="WagonsTo" xml:space="preserve">
-    <value>Vagnar till {0}</value>
+    <value>Vagnar till</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Vagnar från {0} till {1}</value>
@@ -1739,5 +1761,170 @@
   </data>
   <data name="Id" xml:space="preserve">
     <value>Id</value>
+  </data>
+  <data name="DutyNotGraded" xml:space="preserve">
+    <value>Ej graderad</value>
+  </data>
+  <data name="ValidTo" xml:space="preserve">
+    <value>Gäller till</value>
+  </data>
+  <data name="ValidFromHelp" xml:space="preserve">
+    <value>Första dagen på den träff banan är planerad för. Skrivs ut på rapporter; lämna tomt om ingen träff är bokad.</value>
+  </data>
+  <data name="Easy" xml:space="preserve">
+    <value>Lätt</value>
+  </data>
+  <data name="ValidToHelp" xml:space="preserve">
+    <value>Sista dagen på den träff banan är planerad för.</value>
+  </data>
+  <data name="DutyDifficulty" xml:space="preserve">
+    <value>Svårighet</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medel</value>
+  </data>
+  <data name="DutyHasFixedNumber" xml:space="preserve">
+    <value>Fast nummer?</value>
+  </data>
+  <data name="Experienced" xml:space="preserve">
+    <value>Van</value>
+  </data>
+  <data name="ValidFrom" xml:space="preserve">
+    <value>Gäller från</value>
+  </data>
+  <data name="DutyStaffCount" xml:space="preserve">
+    <value>Bemanning</value>
+  </data>
+  <data name="GeneralInstructionsHint" xml:space="preserve">
+    <value>Stående instruktioner för hela träffen: signalgivning, radioanvändning, växlingsregler, vad man gör vid förseningar och vem man frågar. Skrivs ut som ett separat häfte och delas ut till alla deltagare före första passet, även stationspersonalen.</value>
+  </data>
+  <data name="RemoveLogo" xml:space="preserve">
+    <value>Ta bort logotyp</value>
+  </data>
+  <data name="CargoServedFromHelp" xml:space="preserve">
+    <value>Den rangerbangård vars lokalgods betjänar den här platsen. Lämna tomt om ingen betjänar den.</value>
+  </data>
+  <data name="ServesRegions" xml:space="preserve">
+    <value>Betjänar regioner</value>
+  </data>
+  <data name="LogoTooLarge" xml:space="preserve">
+    <value>Logotypen måste vara mindre än {0} kB. Den lagras i planen, så en stor bild gör varje sparning och inläsning långsammare.</value>
+  </data>
+  <data name="ServesLocations" xml:space="preserve">
+    <value>Betjänar platser</value>
+  </data>
+  <data name="CompanyLogo" xml:space="preserve">
+    <value>Logotyp</value>
+  </data>
+  <data name="GeneralInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Skrivs ut som ett separat häfte, inte i tjänstehäftena.</value>
+  </data>
+  <data name="GeneralInstructions" xml:space="preserve">
+    <value>Allmänna instruktioner</value>
+  </data>
+  <data name="Program" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="ProgramHint" xml:space="preserve">
+    <value>Träffens program: passtider, raster, måltider och annat deltagarna behöver veta i förväg. Skrivs ut på framsidan av häftet med allmänna instruktioner, före de stående instruktionerna.</value>
+  </data>
+  <data name="ProgramHelp" xml:space="preserve">
+    <value>Markdown. Skrivs ut på framsidan av häftet med allmänna instruktioner.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Instruktioner</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Banan</value>
+  </data>
+  <data name="ShuntingYards" xml:space="preserve">
+    <value>Rangerbangårdar</value>
+  </data>
+  <data name="CargoServedFrom" xml:space="preserve">
+    <value>Godsbetjänas från</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="LogoTypeNotSupported" xml:space="preserve">
+    <value>Endast SVG-, PNG-, JPEG- och WebP-bilder kan användas som logotyp.</value>
+  </data>
+  <data name="CompanyLogoHelp" xml:space="preserve">
+    <value>Visas på utskrivna förstasidor i stället för signaturen, men bara när alla bolag på sidan har en. SVG är att föredra: den skrivs ut med skrivarens upplösning. Högst 64 kB.</value>
+  </data>
+  <data name="ThisPageIsIntentionalBlank" xml:space="preserve">
+    <value>Denna sida är avsiktligt tom.</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operatör</value>
+  </data>
+  <data name="ReadGeneralInstructions" xml:space="preserve">
+    <value>Läs de allmänna instruktionerna innan du börjar!</value>
+  </data>
+  <data name="DutyStarts" xml:space="preserve">
+    <value>Startar</value>
+  </data>
+  <data name="StaffingPersons" xml:space="preserve">
+    <value>{0} personer</value>
+  </data>
+  <data name="AlsoShunt" xml:space="preserve">
+    <value>växla också</value>
+  </data>
+  <data name="StartsAtEndsAt" xml:space="preserve">
+    <value>Startar: {0} {1}, slutar {2} {3}</value>
+  </data>
+  <data name="DutyContinuesOnNextPage" xml:space="preserve">
+    <value>Tjänsten fortsätter på nästa sida!</value>
+  </data>
+  <data name="DutyLabel" xml:space="preserve">
+    <value>Tjänst</value>
+  </data>
+  <data name="CargoWagonsWithWaybills" xml:space="preserve">
+    <value>Godsvagnar med fraktsedlar</value>
+  </data>
+  <data name="DutyEnds" xml:space="preserve">
+    <value>Slutar</value>
+  </data>
+  <data name="PrintedAt" xml:space="preserve">
+    <value>Utskrivet {0}</value>
+  </data>
+  <data name="PositionInTrain" xml:space="preserve">
+    <value>Plats</value>
+  </data>
+  <data name="DutyInTrain" xml:space="preserve">
+    <value>Tjänst i {0} tåg {1}</value>
+  </data>
+  <data name="AtLocation" xml:space="preserve">
+    <value>vid</value>
+  </data>
+  <data name="ValidBetween" xml:space="preserve">
+    <value>Gäller {0} - {1}</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>Max längd</value>
+  </data>
+  <data name="ArrDep" xml:space="preserve">
+    <value>Ank/Avg</value>
+  </data>
+  <data name="WagonClasses" xml:space="preserve">
+    <value>Klasser</value>
+  </data>
+  <data name="AnyPositionInTrain" xml:space="preserve">
+    <value>Valfri</value>
+  </data>
+  <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
+    <value>Inga fler tåg i denna tjänst.</value>
+  </data>
+  <data name="WagonsFrom" xml:space="preserve">
+    <value>Vagnar från</value>
+  </data>
+  <data name="ScheduledWagonsets" xml:space="preserve">
+    <value>Planerade vagnsätt</value>
+  </data>
+  <data name="BookletPrintingHint" xml:space="preserve">
+    <value>Skriv först ut till PDF och korrekturläs den, skriv sedan ut PDF:en på papper: A4 liggande, dubbelsidigt, vänt längs kortsidan. Vik varje ark på mitten; häfta också om det är mer än ett ark.</value>
+  </data>
+  <data name="DriverDuties" xml:space="preserve">
+    <value>Förartjänster</value>
   </data>
 </root>

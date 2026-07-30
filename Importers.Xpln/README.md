@@ -75,10 +75,12 @@ The import derives each call's stop flags (`IsArrival`, `IsDeparture`) from its 
   without stopping, so both flags are cleared and `IsStop` becomes `false`.
 - Any other intermediate call (arrival earlier than departure) is a normal stop with a dwell.
 
-The equal-times rule is *only* an import convention. Once imported, a call is a stop when `IsStop` is true
-and a pass-through when `IsStop` is false; the model never re-compares arrival and departure times to decide
-this. See `StationCall.IsStop` / `StationCall.IsPassthrough`, `TrainExtensions.WithOriginAndTerminusDwell`
-and `TrainExtensions.WithPassthroughCalls`.
+The equal-times rule is *only* an import convention, and it lives entirely in this importer: the conventions
+are applied by the internal `XplnTrainExtensions` (`WithFixedSingleCallTrain`, `WithOriginAndTerminusDwell`,
+`WithFirstCallDepartureOnlyAndLastCallArrivalOnly`, `WithPassthroughCalls`) and are not part of the model's
+public API. Once imported, a call is a stop when `IsStop` is true and a pass-through when `IsStop` is false;
+the model never re-compares arrival and departure times to decide this. See `StationCall.IsStop` /
+`StationCall.IsPassthrough`.
 
 The location type adds a further rule, independent of the call flags:
 

@@ -61,6 +61,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All sessions.
+        /// </summary>
+        internal static string AllSessions {
+            get {
+                return ResourceManager.GetString("AllSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Daily.
         /// </summary>
         internal static string Daily {
@@ -124,6 +133,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No sessions.
+        /// </summary>
+        internal static string NoSessions {
+            get {
+                return ResourceManager.GetString("NoSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No operating days.
         /// </summary>
         internal static string None {
@@ -138,6 +156,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string NoneShort {
             get {
                 return ResourceManager.GetString("NoneShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to On demand only.
+        /// </summary>
+        internal static string OnDemandOnly {
+            get {
+                return ResourceManager.GetString("OnDemandOnly", resourceCulture);
             }
         }
         

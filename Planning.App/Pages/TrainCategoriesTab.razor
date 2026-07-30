@@ -111,11 +111,6 @@ else
                     </div>
                 </div>
 
-                @if (_error is not null)
-                {
-                    <p class="error">@_error</p>
-                }
-
                 @if (_isNew)
                 {
                     <div class="form-actions">
@@ -142,7 +137,6 @@ else
     private bool _isNew;
     private TrainCategory? Editing { get; set; }
     private TrainCategory? _deleteTarget;
-    private string? _error;
 
     private int? CategoryCompanyId
     {
@@ -177,7 +171,6 @@ else
     {
         Editing = new TrainCategory { Id = NextId(), Name = "", IsPassenger = true };
         _isNew = true;
-        _error = null;
         _mode = Mode.Edit;
     }
 
@@ -185,7 +178,6 @@ else
     {
         Editing = category;
         _isNew = false;
-        _error = null;
         _mode = Mode.Edit;
     }
 
@@ -194,27 +186,24 @@ else
         _mode = Mode.List;
         Editing = null;
         _isNew = false;
-        _error = null;
     }
 
     private void OnEdited()
     {
-        _error = null;
+        if (Editing is not null && string.IsNullOrWhiteSpace(Editing.Name)) Editing.Name = DefaultName(Editing);
         if (!_isNew) ScheduleState.SaveAndNotify();
     }
 
     private void SaveNew()
     {
         if (Editing is null) return;
-        if (string.IsNullOrWhiteSpace(Editing.Name))
-        {
-            _error = Translator("TrainCategoryNameRequired");
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(Editing.Name)) Editing.Name = DefaultName(Editing);
         Timetable!.TrainCategories.Add(Editing);
         ScheduleState.SaveAndNotify();
         BackToList();
     }
+
+    private string DefaultName(TrainCategory category) => Translator(category.IsFreight ? "Freight" : "Passenger");
 
     private void DeleteConfirmed()
     {

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using System.Net;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
@@ -54,14 +55,17 @@ public class Destination
 
     /// <summary>
     /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips.
+    /// The station name is encoded; it is planner-entered text embedded in note markup.
     /// </summary>
-    public MarkupString ToHtmlMarkup => new(
+    public MarkupString ToHtml => new(
         AndRegions && Station.Regions.Any() ?
-        $"{Station.Name} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
-        $"{Station.Name} {AndText} {MaxLength}".TrimEnd());
+        $"{StationNameHtml} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
+        $"{StationNameHtml} {AndText} {MaxLength}".TrimEnd());
+
+    private string StationNameHtml => WebUtility.HtmlEncode(Station.Name);
 
     private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Name)) : string.Empty;
-    private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToHtmlMarkup.Value)) : string.Empty;
+    private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToHtml.Value)) : string.Empty;
     private string AndText =>
         AndLocalDestinations && AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :
         AndBeyond ? NoteResources.AndBeyond :

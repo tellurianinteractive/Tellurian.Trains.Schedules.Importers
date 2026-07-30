@@ -26,8 +26,9 @@
                         <th>@Translator("Number")</th>
                         <th>@Translator("Route")</th>
                         <th>@Translator("Description")</th>
+                        <th>@Translator("Color")</th>
                         <th class="num">@Translator("TrackStretches")</th>
-                        <th class="num">@Translator("DistanceKm")</th>
+                        <th class="num">@Translator("DistanceMeters")</th>
                         <th class="actions">@Translator("Actions")</th>
                     </tr>
                 </thead>
@@ -38,6 +39,7 @@
                             <td>@s.Number</td>
                             <td>@RouteText(s)</td>
                             <td>@s.Description</td>
+                            <td><span class="swatch" style="background-color:@s.Color"></span></td>
                             <td class="num">@s.Stretches.Count</td>
                             <td class="num">@TotalDistance(s)</td>
                             <td class="actions">
@@ -74,6 +76,18 @@
                     <label>@Translator("Description")</label>
                     <input type="text" @bind="_description" />
                 </div>
+                <div class="field">
+                    <label>@Translator("Color")</label>
+                    <div class="palette">
+                        @foreach (var color in TimetableStretch.Palette)
+                        {
+                            <button type="button" title="@color"
+                                    class="swatch@(IsColorSelected(color) ? " selected" : "")"
+                                    style="background-color:@color"
+                                    @onclick="() => SelectColor(color)"></button>
+                        }
+                    </div>
+                </div>
             </div>
 
             <div class="route">
@@ -87,12 +101,12 @@
                     <ol class="route-list">
                         @foreach (var ts in _editing.Stretches)
                         {
-                            <li>@ts.Start.Name (@ts.Start.Signature) → @ts.End.Name (@ts.End.Signature) <span class="dim">@ts.Distance @Translator("DistanceKm")</span></li>
+                            <li>@ts.Start.Name (@ts.Start.Signature) → @ts.End.Name (@ts.End.Signature) <span class="dim">@ts.Distance @Translator("DistanceMeters")</span></li>
                         }
                     </ol>
                     <p class="summary">
                         @Translator("Stations"): @StationsText(_editing) &nbsp;·&nbsp;
-                        @Translator("DistanceKm"): @TotalDistance(_editing)
+                        @Translator("DistanceMeters"): @TotalDistance(_editing)
                     </p>
                 }
 
@@ -107,7 +121,7 @@
                             <option value="0">@Translator("SelectTrackStretch")</option>
                             @foreach (var ts in Appendable)
                             {
-                                <option value="@ts.Id">@ts.Start.Signature → @ts.End.Signature (@ts.Distance @Translator("DistanceKm"))</option>
+                                <option value="@ts.Id">@ts.Start.Signature → @ts.End.Signature (@ts.Distance @Translator("DistanceMeters"))</option>
                             }
                         </select>
                         <button @onclick="AppendSelected" disabled="@(_candidateId == 0)">@Translator("AddToRoute")</button>
@@ -188,6 +202,16 @@
         _editing = null;
         _isNew = false;
         _error = null;
+    }
+
+    private bool IsColorSelected(string color) =>
+        _editing is not null && string.Equals(_editing.Color, color, StringComparison.OrdinalIgnoreCase);
+
+    private void SelectColor(string color)
+    {
+        if (_editing is null) return;
+        _editing.Color = color;
+        if (!_isNew) ScheduleState.SaveAndNotify();
     }
 
     private void AppendSelected()

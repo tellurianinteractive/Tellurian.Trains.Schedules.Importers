@@ -1,0 +1,16 @@
+/* On screen there is no paged media, so without an explicit size the page div just stretches to fill
+   whatever contains it — the print @page rule (print.css) only takes effect once actually printing.
+   Fixing the size here to the real A4 landscape sheet turns the on-screen render into an actual print
+   preview: what does not fit within the box would not fit on paper either. Print itself is unaffected,
+   since this is @media screen only. */
+@media screen {
+    .a4l {
+        width: 297mm;
+        height: 210mm;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: 0 auto 10mm;
+        background: white;
+        box-shadow: 0 0 6px rgba(0, 0, 0, .5);
+    }
+}

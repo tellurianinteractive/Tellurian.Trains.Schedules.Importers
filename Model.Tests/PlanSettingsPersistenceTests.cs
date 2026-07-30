@@ -45,7 +45,7 @@ public class PlanSettingsPersistenceTests
         var restored = JsonSerializer.Deserialize<Notes.CallNote>(json, Options);
 
         Assert.IsNotNull(restored);
-        Assert.AreEqual("Hello", restored.Text);
+        Assert.AreEqual("Hello", restored.ToText);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class PlanSettingsPersistenceTests
         var note = JsonSerializer.Deserialize<Notes.TextCallNote>("{\"Texts\":[]}", Options);
 
         Assert.IsNotNull(note);
-        Assert.AreEqual(string.Empty, note.Text);
+        Assert.AreEqual(string.Empty, note.ToText);
         Assert.IsNotNull(JsonSerializer.Serialize(note, Options));
     }
 }

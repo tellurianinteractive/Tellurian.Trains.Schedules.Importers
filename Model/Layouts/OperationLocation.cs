@@ -76,7 +76,7 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public bool IsSignal { get; set; }
 
     /// <summary>
-    /// Supress creating notes about trains meeding at this location.
+    /// Supress creating notes about trains crossing or overtakning at this location.
     /// </summary>
     public bool HideMeets { get; set; }
 
@@ -106,6 +106,30 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// <see cref="Station"/>.
     /// </summary>
     public virtual bool HasCargoExchange { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the <see cref="Station"/> whose shunting yard works this location's local freight, or
+    /// <c>null</c> when nothing serves it. Offered only where <see cref="HasCargoExchange"/> is true.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The name says <em>cargo</em> deliberately: this relation is only about local freight — which
+    /// shunting yard the wagons for this location are worked from — not about every way one location
+    /// might be worked from another.
+    /// </para>
+    /// <para>
+    /// The relation is asymmetric. The <em>served</em> location must exchange cargo and must not be a
+    /// shadow station, because a shadow station is off-layout staging — where traffic comes <em>from</em>,
+    /// never somewhere local freight is delivered <em>to</em>. The <em>serving</em> station may be any
+    /// station, shadow ones included: a shadow shunting yard is a perfectly ordinary origin for local
+    /// freight.
+    /// </para>
+    /// <para>
+    /// A shunting yard is derived from this relation rather than declared with a flag, so no station can
+    /// be marked a shunting yard while serving nothing. See <c>Layout.ShuntingYards</c>.
+    /// </para>
+    /// </remarks>
+    public Station? CargoServedFrom { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of tracks at this operation location.

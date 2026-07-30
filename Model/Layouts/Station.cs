@@ -19,7 +19,7 @@ public class Station : OperationLocation
     /// <param name="signature"></param>
     public Station(int id, string name, string signature) : base(id, name, signature) { }
     /// <summary>
-    /// Gets or sets a value indicating whether this is a shadow yard — a terminal station representing external stations or regions beyond the modelled railway.
+    /// Gets or sets a value indicating whether this is a shadow station — a terminal station representing external stations or regions beyond the modelled railway.
     /// </summary>
     public bool IsShadow { get; set; }
 

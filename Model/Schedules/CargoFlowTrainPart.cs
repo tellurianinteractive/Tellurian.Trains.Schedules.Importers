@@ -96,12 +96,16 @@ public static class CargoFlowTrainPartExtensions
             {
                 List<ICallNote> result = [];
                 if (trainPart.HasCoupleNote && trainPart.CargoFlowOptions is not null)
-                    result.Add(new CargoFlowDestinationNote(trainPart));
+                    result.Add(new CargoFlowDestinationNote(trainPart) { IsForDeparture = true });
                 return result;
             }
         }
 
-        internal string ToPlainText
+        /// <summary>
+        /// Where this flow's wagons go, as plain text: the destinations joined with commas, or the
+        /// "all destinations" text when the flow is unrestricted.
+        /// </summary>
+        public string ToText
         {
             get
             {
@@ -111,12 +115,16 @@ public static class CargoFlowTrainPartExtensions
             }
         }
 
-        internal string ToHtml
+        /// <summary>
+        /// Where this flow's wagons go, as markup, with destination regions rendered as coloured chips.
+        /// This is exactly the "Wagons to" statement the cargo block of a duty booklet prints.
+        /// </summary>
+        public string ToHtml
         {
             get
             {
                 var options = trainPart.CargoFlowOptions;
-                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.ToHtmlMarkup.Value));
+                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.ToHtml.Value));
             }
         }
     }

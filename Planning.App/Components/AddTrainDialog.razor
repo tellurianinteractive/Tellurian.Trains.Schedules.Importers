@@ -121,7 +121,12 @@
     protected override void OnInitialized()
     {
         _categoryId = CategoryChoices.FirstOrDefault()?.Id;
-        _time = (Layout?.Settings.General.StartTime ?? TimeSpan.FromHours(6)).ToString(@"hh\:mm", Culture);
+        // The origin call's arrival — the driver's service start — is preparationMinutes before this
+        // departure (see Plan.Create), so defaulting straight to the plan's start time would place that
+        // arrival before it and fail the operating window. Add the preparation time so the earliest call
+        // lands exactly on the plan's start time.
+        var planStartTime = Layout?.Settings.General.StartTime ?? TimeSpan.FromHours(6);
+        _time = planStartTime.Add(TimeSpan.FromMinutes(_preparationMinutes)).ToString(@"hh\:mm", Culture);
         _number = (Timetable?.Trains.Select(t => t.Number) ?? []).DefaultIfEmpty(0).Max() + 1;
         _speed = Layout?.Settings.TimeAndSpeed.Normal.ScaleSpeedKmh ?? 100;
         _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);

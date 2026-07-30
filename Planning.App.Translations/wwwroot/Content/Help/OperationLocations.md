@@ -24,7 +24,7 @@ The location type decides whether a train may stop, on top of how you set each c
 
 ### Working with the list
 
-The list shows each location's signature, name, type, owner, whether it is a shadow yard (terminal for external stations), and how
+The list shows each location's signature, name, type, owner, whether it is a shadow station (terminal for external stations), and how
 many tracks it has. For each row you can:
 
 - **Info** — view all details, including the tracks, read-only.
@@ -43,5 +43,5 @@ trains use it. Reassign or remove those station calls first.
 ### Stations and regions
 
 A station can be linked to one or more **regions** from the layout's region catalogue (managed on the
-**Regions** tab). This is mainly used for shadow yards, which represent external stations or regions
+**Regions** tab). This is mainly used for shadow shunting yards, which represent external stations or regions
 beyond the modelled railway. If the layout has no regions yet, you can add the standard set from the form.

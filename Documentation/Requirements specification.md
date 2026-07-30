@@ -141,7 +141,7 @@ module meetings, but also for fixed club layouts and home layouts.
 | Company                    | Bahngesellschaft    | A railway company operating trains                                                                               |
 | Schedule                   | Umlaufplan          | The complete operational plan: timetable + vehicle assignments + driver duties                                   |
 | Vehicle Schedule           | Fahrzeugumlauf      | A sequence of train parts forming a circulation; assignable to locomotives, wagons, wagon groups, or cargo flows |
-| Driver Duty                | Schicht             | A continuous assignment of a driver to a sequence of train parts                                                 |
+| Driver Duty                | Dienst              | A continuous assignment of a driver to a sequence of train parts                                                 |
 | Train Part                 | Zugteil             | A segment of a train's journey used for assigning vehicles or drivers                                            |
 | Wagon Group                | Wagengruppe         | A group of wagons within a train, tracked between origin and destination                                         |
 | Cargo Flow                 | Güterverkehr       | A flow of cargo to specific destinations, scheduled like a vehicle but assigned to a cargo flow object           |
@@ -246,7 +246,7 @@ are organised into groups by purpose, surfaced as sub-sections of the
 | ------------------- | ------------------------------------------------------------ | ------------ |
 | General             | Session/day model and operating time window                  | this section |
 | Graphical Timetable | View and print preferences for the graphical timetable       | §3.7.3       |
-| Time & Speed        | Fast clock, speed mapping, default station operational times | §4.3         |
+| Time & Speed        | Fast clock, speed mapping, distance factor, default station operational times | §4.3         |
 | Validation          | Which validations run and their thresholds                   | §3.11.3      |
 | Import & Export     | Module Registry API URL and key (importing operation locations; sending the plan for conversion) | §3.3, §5.5 |
 
@@ -782,6 +782,9 @@ The system shall define physical connections between operation locations:
 | Speed        | Maximum permitted scale speed (km/h)                           |
 | Time         | Calculated travel time based on speed mapping                  |
 
+Reports and graphs convert this stored metre distance into a displayed kilometre
+figure using the distance factor (see §4.3.4).
+
 #### DM-4.1.4 Timetable Stretches
 
 > **Status:** ✅ Implemented.
@@ -916,7 +919,7 @@ whichever report needs direction-aware wagon order once one is specified.
 > **Status:** 🟢 Implemented. A cargo flow's routing is a reusable description (name;
 > destinations with the and-regions / and-beyond / and-local-destinations options and max
 > wagons/axles; origins; to-all-destinations) held in a catalogue on the timetable, routing
-> to the shadow-yard regions on a station (DM-4.1.1). Each occurrence references a
+> to the shadow-shunting-yard regions on a station (DM-4.1.1). Each occurrence references a
 > description and records its from-call/to-call, position and per-occurrence shunting/couple
 > flags. Edited on the **Cargo flow** tab (Cargo descriptions + Cargo trains sub-tabs);
 > deletion is guarded. The destination note is generated from the occurrence; rendering it
@@ -933,15 +936,15 @@ Each cargo flow has one or several destinations, which can be:
 | Destination Type       | Description                                              |
 | ------------------------ | ---------------------------------------------------------- |
 | Local                  | An operation location within the layout                  |
-| External               | Sent to the corresponding shadow yard                    |
-| To All Destinations    | Cargo goes to all destinations on the flow               |
-| And Local Destinations | Including local stops                                    |
-| And Regions            | Including specific regions attached to a shadow yard     |
-| And Abroad             | Including countries/regions represented by a shadow yard |
+| External               | Sent to the corresponding shadow shunting yard                    |
+| To All Destinations    | Cargo goes to all destinations on the flow                        |
+| And Local Destinations | Including local stops                                             |
+| And Regions            | Including specific regions attached to a shadow shunting yard     |
+| And Abroad             | Including countries/regions represented by a shadow shunting yard |
 
-Shadow yards represent parts of the outside world — specific regions and/or countries.
-Cargo destined externally is routed to the shadow yard that represents the relevant region.
-Region-to-shadow-yard mapping is configured per layout (see DM-4.1.1).
+Shadow shunting yards represent parts of the outside world — specific regions and/or countries.
+Cargo destined externally is routed to the shadow shunting yard that represents the relevant region.
+Region-to-shadow-shunting-yard mapping is configured per layout (see DM-4.1.1).
 
 A cargo flow is scheduled using the common vehicle schedule mechanism (see DM-4.4.3) —
 the same sequence-of-train-parts pattern used for locomotives and wagon groups,
@@ -1049,6 +1052,23 @@ When a future import refreshes layout operational locations into an existing pla
 rather than the current full rebuild), it must **preserve any timing overrides already set**
 on a matching location — only locations new to the plan get their timings from the import.
 This keeps user-entered per-station overrides from being overwritten on re-import.
+
+#### DM-4.3.4 Distance Display Factor
+
+> **Status:** ✅ Implemented (default 1×).
+
+A track stretch's distance is stored in metres (model scale). The system shall apply a
+configurable distance factor to convert that stored metre value into the kilometre
+figures shown in timetable reports and the graphical timetable's station markers:
+
+```
+displayedKilometres = storedMetres × distanceFactor
+```
+
+The factor defaults to 1, so reports show the same number as before this setting
+existed. Raising the factor lets a layout present a larger, more prototype-like
+kilometre count for the same physical stretch length; it has no effect on travel-time
+calculations, which use the stored metre value directly.
 
 ---
 
@@ -1454,6 +1474,6 @@ Resolved questions captured here for reference.
    Actual running times are dominated by operational factors outside the planner's control.
 4. **Collaborative conflict resolution**: Last-change-wins with fast propagation (see FR-3.13.2).
    Planners divide work by scope in practice.
-5. **Shadow yard region mapping**: Configured per layout, not per timetable (see DM-4.1.1).
+5. **Shadow shunting yard region mapping**: Configured per layout, not per timetable (see DM-4.1.1).
 6. **Vehicle schedule model**: Unified — one schedule structure assignable to locomotives,
    single wagons, wagon groups, or cargo flows (see DM-4.4.3).

@@ -4,10 +4,12 @@
     <File Path=".github/workflows/publish.yml" />
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
+    <File Path="Documentation/DriverDutiesReportSpecification.md" />
     <File Path="Documentation/Implementation strategy.md" />
     <File Path="Documentation/Model.md" />
     <File Path="Documentation/Requirements specification.md" />
     <File Path="Documentation/Validation.md" />
+    <File Path="global.json" />
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
   </Folder>

@@ -19,6 +19,19 @@ public sealed class GeneralSettings
     /// </summary>
     public int MaxSessions { get; set; } = 14;
 
+    /// <summary>
+    /// First day of the meeting this layout is planned for, or <c>null</c> when no meeting is booked.
+    /// Shown as the validity span on printed reports; a layout without dates simply omits the line
+    /// rather than printing a placeholder date.
+    /// </summary>
+    public DateOnly? ValidFrom { get; set; }
+
+    /// <summary>
+    /// Last day of the meeting this layout is planned for, or <c>null</c> when no meeting is booked.
+    /// See <see cref="ValidFrom"/>.
+    /// </summary>
+    public DateOnly? ValidTo { get; set; }
+
     /// <summary>Fast-clock start hour of operation, used as the graphical timetable's time-axis start. Default is 06:00.</summary>
     public TimeSpan StartTime { get; set; } = TimeSpan.FromHours(6);
 
@@ -38,6 +51,17 @@ public sealed class GeneralSettings
     /// <see cref="BreakTime"/>–<see cref="EndTime"/>. <c>null</c> means no break.
     /// </summary>
     public TimeSpan? BreakTime { get; set; }
+
+    /// <summary>
+    /// When <c>true</c>, a train that starts or ends outside <see cref="StartTime"/>–<see cref="EndTime"/>
+    /// widens the window to cover it instead of being rejected: creating, moving, cloning or retiming a
+    /// train that would otherwise fall outside the plan's operating window extends <see cref="StartTime"/>
+    /// and/or <see cref="EndTime"/> to include it, and the checks that would otherwise refuse the change
+    /// are skipped. The train must still start within the calendar day (00:00–24:00); only the plan's own
+    /// window is extended, not that day boundary. Has no effect while <see cref="RunsOverMidnight"/> is set,
+    /// since the window is then already unrestricted. Default is <c>false</c>.
+    /// </summary>
+    public bool AllowPlanTimeExtend { get; set; }
 
     /// <summary>
     /// The number of loco drivers expected to be available during operation. The graphical timetable

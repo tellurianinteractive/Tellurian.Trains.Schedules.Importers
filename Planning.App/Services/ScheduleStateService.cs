@@ -10,8 +10,10 @@ namespace Tellurian.Trains.Schedules.Planning.App.Services;
 /// across all pages as a singleton. The plan is persisted to browser localStorage and restored
 /// on startup, so it survives a language change (which force-reloads the WASM app) and closing
 /// and reopening the browser. All subscribing views re-render via <see cref="OnChanged"/>.
+/// A save also broadcasts to other windows on the same origin (<see cref="CrossWindowSyncService"/>),
+/// which reload the plan from storage and refresh their own views.
 /// </summary>
-public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<ScheduleStateService> logger)
+public sealed class ScheduleStateService(BrowserStorageService storage, CrossWindowSyncService sync, ILogger<ScheduleStateService> logger)
 {
     private const string ScheduleStorageKey = "planning.schedule.v2";
     private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v1";
@@ -107,6 +109,9 @@ public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<
     {
         if (_loaded) return;
         _loaded = true;
+
+        sync.OnMessage += OnRemoteScheduleChanged;
+        await sync.SubscribeAsync();
 
         var plan = await storage.GetAsync<Plan>(ScheduleStorageKey, JsonOptions);
         if (plan is null) return;
@@ -214,10 +219,32 @@ public sealed class ScheduleStateService(BrowserStorageService storage, ILogger<
                 await storage.RemoveAsync(ScheduleStorageKey);
             else
                 await storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
+            await sync.PostAsync(ScheduleStorageKey);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to persist the schedule to browser storage.");
+        }
+    }
+
+    /// <summary>
+    /// Applies a schedule saved by another window on the same origin: reloads the plan from storage
+    /// and refreshes subscribers. Unlike the <see cref="Schedule"/> setter, this does not reset the
+    /// selected stretches or re-persist/re-broadcast, since the change already came from storage.
+    /// </summary>
+    private async void OnRemoteScheduleChanged(string key)
+    {
+        if (key != ScheduleStorageKey) return;
+        try
+        {
+            var plan = await storage.GetAsync<Plan>(ScheduleStorageKey, JsonOptions);
+            _schedule = plan;
+            _schedule?.Timetable?.RebuildStationCalls();
+            NotifyChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to apply a cross-window schedule update.");
         }
     }
 

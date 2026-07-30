@@ -212,7 +212,11 @@ else
 
     // ---- Display helpers ------------------------------------------------------------------------
 
-    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator, MaxSessions, StartDay);
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+
+    // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
+    private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
 
     private string SessionsKey(Train train) => SessionsDisplay.Key(train.Sessions);
 
@@ -274,7 +278,7 @@ else
         // Train length in metres is kept to at most one decimal place.
         SetLength(train, train.Length with { Meters = ParseDouble(e) is double m ? Math.Round(m, 1, MidpointRounding.AwayFromZero) : null });
 
-    private void SetLength(Train train, TrainLenght length)
+    private void SetLength(Train train, TrainCapacity length)
     {
         train.Length = length;
         Save();
@@ -297,6 +301,7 @@ else
                     <th>@Translator("Departure")</th>
                     <th title="@Translator("IsArrival")">@Translator("Arr")</th>
                     <th title="@Translator("IsDeparture")">@Translator("Dep")</th>
+                    <th class="note" title="@Translator("CallNoteHint")">@Translator("Remark")</th>
                     <th></th>
                 </tr>
             </thead>
@@ -312,12 +317,16 @@ else
                         <td><input type="text" class="time" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsArrival" @onchange="e => SetIsArrival(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
+                        <td class="note">
+                            <CallNoteField Value="@call.ManualNoteText" ValueChanged="text => SetCallNote(call, text)"
+                                           Placeholder="@Translator("AddCallNote")" Title="@Translator("CallNoteHint")" />
+                        </td>
                         <td><button class="danger small" @onclick="() => RemoveCall(call)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
                 @if (train.Calls.Count == 0)
                 {
-                    <tr><td colspan="6" class="empty">@Translator("NoCalls")</td></tr>
+                    <tr><td colspan="7" class="empty">@Translator("NoCalls")</td></tr>
                 }
             </tbody>
         </table>
@@ -358,6 +367,14 @@ else
     private void SetIsDeparture(StationCall call, ChangeEventArgs e)
     {
         call.IsDeparture = e.Value is true;
+        Save();
+    }
+
+    // The model creates the note on first text, removes it when the text is cleared and writes it in
+    // the language being read — see StationCall.SetManualNote.
+    private void SetCallNote(StationCall call, string text)
+    {
+        call.SetManualNote(text);
         Save();
     }
 

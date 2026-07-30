@@ -314,16 +314,16 @@ public class ScheduleDbContextIntegrationTests
 
         var noteBefore = schedule.Timetable.Trains
             .SelectMany(t => t.Calls).SelectMany(c => c.Notes)
-            .FirstOrDefault(n => !string.IsNullOrEmpty(n.Text));
+            .FirstOrDefault(n => !string.IsNullOrEmpty(n.ToText));
         Assert.IsNotNull(noteBefore, "Expected at least one non-empty note in the imported plan.");
-        var expected = noteBefore.Text;
+        var expected = noteBefore.ToText;
 
         var restored = System.Text.Json.JsonSerializer.Deserialize<Plan>(
             System.Text.Json.JsonSerializer.Serialize(schedule, options), options);
 
         var matching = restored!.Timetable.Trains
             .SelectMany(t => t.Calls).SelectMany(c => c.Notes)
-            .Count(n => n.Text == expected);
+            .Count(n => n.ToText == expected);
         Assert.IsTrue(matching > 0, $"Note text '{expected}' was lost during the whole-plan round-trip.");
     }
 

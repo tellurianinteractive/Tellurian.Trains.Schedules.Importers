@@ -68,6 +68,17 @@ else
                         }
                     </select>
                 </div>
+                @* The meeting's date span, printed as the validity line on reports. Both are optional:
+                   a layout with no meeting booked omits the line rather than printing a placeholder. *@
+                <div class="field">
+                    <HelpLabel For="ValidFrom" />
+                    <input type="date" @bind="g.ValidFrom" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="ValidTo" />
+                    <input type="date" @bind="g.ValidTo" @bind:after="OnEdited" />
+                </div>
+
                 <div class="field">
                     <HelpLabel For="RunsOverMidnight" />
                     <input type="checkbox" @bind="RunsOverMidnight" @bind:after="OnEdited" />
@@ -79,6 +90,10 @@ else
                 <div class="field">
                     <HelpLabel For="EndTime" />
                     <input type="time" @bind="EndTime" @bind:after="OnEdited" disabled="@RunsOverMidnight" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="AllowPlanTimeExtend" />
+                    <input type="checkbox" @bind="g.AllowPlanTimeExtend" @bind:after="OnEdited" disabled="@RunsOverMidnight" />
                 </div>
                 <div class="field">
                     <HelpLabel For="BreakForPrinting" />
@@ -139,7 +154,7 @@ else
                         @foreach (var sessions in Timetable.Sessions.ToList())
                         {
                             <span class="chip">
-                                @SessionsText(sessions)
+                                <SessionsView Sessions="sessions" Settings="SessionSettings" />
                                 <button type="button" class="remove" title="@Translator("Delete")"
                                         @onclick="() => RemoveSessionPattern(sessions)">×</button>
                             </span>
@@ -225,6 +240,11 @@ else
                     <label>@Translator("FastClockSpeed")</label>
                     <input type="number" min="1" @bind="ts.FastClockSpeed" @bind:after="OnEdited" />
                 </div>
+                <div class="field">
+                    <label>@Translator("DistanceFactor")</label>
+                    <input type="number" min="0" step="0.01" @bind="ts.DistanceFactor" @bind:culture="Invariant" @bind:after="OnEdited" />
+                </div>
+                <p class="hint">@Translator("DistanceFactorHint")</p>
 
                 <div class="group-heading">@Translator("SpeedMapping")</div>
                 <table class="speed-map">
@@ -327,6 +347,32 @@ else
                     <input type="text" @bind="i.ModuleRegistryApiKey" @bind:after="OnEdited" />
                 </div>
             }
+            else if (_section == SettingsSection.Information)
+            {
+                @if (Plan is null)
+                {
+                    <p class="empty">@Translator("SettingsNoSchedule")</p>
+                }
+                else
+                {
+                    @* The meeting's programme: session times, breaks, meals. Printed on the front page
+                       of the general instructions booklet, before the standing instructions below. *@
+                    <p class="hint">@Translator("ProgramHint")</p>
+                    <div class="field instructions">
+                        <HelpLabel For="Program" />
+                        <textarea rows="8" @bind="Plan.Program" @bind:after="OnEdited"></textarea>
+                    </div>
+
+                    @* The standing instructions for the whole meeting. They are printed as their own
+                       booklet and handed to every participant before the first session — station staff
+                       included — rather than bound into each driver's duty booklet. *@
+                    <p class="hint">@Translator("GeneralInstructionsHint")</p>
+                    <div class="field instructions">
+                        <HelpLabel For="GeneralInstructions" />
+                        <textarea rows="24" @bind="Plan.GeneralInstructions" @bind:after="OnEdited"></textarea>
+                    </div>
+                }
+            }
         </div>
     </div>
 }
@@ -341,6 +387,8 @@ else
     private LayoutModel? Layout => ScheduleState.Layout;
     private LayoutSettings? LayoutSettings => Layout?.Settings;
     private Timetable? Timetable => ScheduleState.Timetable;
+    // The general instructions belong to the plan, not to the layout settings.
+    private Plan? Plan => ScheduleState.Schedule;
 
     private static readonly Days[] WeekDays =
         [Days.Monday, Days.Tuesday, Days.Wednesday, Days.Thursday, Days.Friday, Days.Saturday, Days.Sunday];
@@ -348,9 +396,8 @@ else
     private string _newSessionsText = "";
     private readonly HashSet<Days> _newDays = [];
 
-    private string SessionsText(Sessions sessions) =>
-        SessionsDisplay.Text(sessions, LayoutSettings?.General.UseDays ?? false, Translator,
-            LayoutSettings?.General.MaxSessions ?? 14, LayoutSettings?.General.StartDay ?? DayOfWeek.Monday);
+    private SessionsSettings SessionSettings =>
+        LayoutSettings?.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     private void ToggleNewDay(Days day, ChangeEventArgs e)
     {
@@ -522,6 +569,7 @@ else
         SettingsSection.TimeAndSpeed => "TimeAndSpeed",
         SettingsSection.Validation => "Validation",
         SettingsSection.Integration => "ImportExport",
+        SettingsSection.Information => "Information",
         _ => section.ToString()
     });
 
@@ -539,6 +587,7 @@ else
         TimeAndSpeed,
         GraphicTimetable,
         Validation,
-        Integration
+        Integration,
+        Information
     }
 }

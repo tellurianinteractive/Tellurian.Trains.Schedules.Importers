@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Components;
+using System.Net;
 using Tellurian.Utilities.Web;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// Describes a destination outside the layout — a domestic region or a foreign country —
-/// used for cargo flow routing. A <see cref="Station"/> (normally a shadow yard) can be
+/// used for cargo flow routing. A <see cref="Station"/> (normally a shadow shunting yard) can be
 /// associated with zero, one, or several regions.
 /// </summary>
 public class Region
@@ -44,12 +45,14 @@ public class Region
 public static class RegionExtensions
 {
     extension(Region region)
-    {/// <summary>
-     /// Markup display with name and background color.
-     /// </summary>
-        public MarkupString ToHtmlMarkup =>
+    {
+        /// <summary>
+        /// Markup display with name and background color. The name is encoded: it is text a planner
+        /// typed, and this chip is embedded in note markup where an ampersand would break the note.
+        /// </summary>
+        public MarkupString ToHtml =>
             new($"""
-                <span class="region" style="background-color: {region.BackgroundColor}; color: {region.BackgroundColor.TextColor}">{region.Name}</span>
+                <span class="region" style="background-color: {region.BackgroundColor}; color: {region.BackgroundColor.TextColor}">{WebUtility.HtmlEncode(region.Name)}</span>
             """);
         /// <inheritdoc/>
 

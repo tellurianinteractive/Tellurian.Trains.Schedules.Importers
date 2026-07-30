@@ -17,24 +17,35 @@ public sealed record ValidationError
     public required ValidationErrorType ErrorType { get; init; }
 
     /// <summary>
-    /// The minimum departure time of objects involved in the conflict.
+    /// The minimum departure time of objects involved in the conflict, or <c>null</c> when the conflict
+    /// happens at no particular time. See <see cref="FromTrack"/>.
     /// </summary>
-    public required Time FromTime { get; init; }
+    public required Time? FromTime { get; init; }
 
     /// <summary>
-    /// The maximum arrival time of objects involved in the conflict.
+    /// The maximum arrival time of objects involved in the conflict, or <c>null</c> when the conflict
+    /// happens at no particular time. See <see cref="FromTrack"/>.
     /// </summary>
-    public required Time ToTime { get; init; }
+    public required Time? ToTime { get; init; }
 
     /// <summary>
-    /// The station track where the conflict starts (or occurs if same as ToTrack).
+    /// The station track where the conflict starts (or occurs if same as <see cref="ToTrack"/>), or
+    /// <c>null</c> when the conflict has no place on the layout.
     /// </summary>
-    public required StationTrack FromTrack { get; init; }
+    /// <remarks>
+    /// Most conflicts are between things that happen somewhere at some time, and locating them is what
+    /// lets the graphical timetable highlight the offending region. A few are not: a duty numbering fault
+    /// is a property of the plan's duty list, with no track and no time. Those carry <c>null</c> rather
+    /// than an arbitrary track, which would highlight an innocent part of the layout. The property stays
+    /// <c>required</c> so every error still has to state its location, even when the answer is "nowhere".
+    /// </remarks>
+    public required StationTrack? FromTrack { get; init; }
 
     /// <summary>
-    /// The station track where the conflict ends (or occurs if same as FromTrack).
+    /// The station track where the conflict ends (or occurs if same as <see cref="FromTrack"/>), or
+    /// <c>null</c> when the conflict has no place on the layout.
     /// </summary>
-    public required StationTrack ToTrack { get; init; }
+    public required StationTrack? ToTrack { get; init; }
 
     /// <summary>
     /// The trains involved in the conflict.
@@ -88,7 +99,11 @@ public sealed record ValidationError
         ValidationErrorType.VehicleNotClosed => ValidationScope.Vehicle,
 
         ValidationErrorType.DutyPartDoubleAssigned or
-        ValidationErrorType.DutyPartsOverlap => ValidationScope.Duty,
+        ValidationErrorType.DutyPartsOverlap or
+        ValidationErrorType.DutyIdentityDuplicated or
+        ValidationErrorType.DutyIdentityMissing or
+        ValidationErrorType.DutyStaffCountOutOfRange or
+        ValidationErrorType.TrainPartMissingDriverDuty => ValidationScope.Duty,
 
         ValidationErrorType.VehicleScheduleOverlap or
         ValidationErrorType.ScheduleNotContiguous or
@@ -101,14 +116,16 @@ public sealed record ValidationError
     };
 
     /// <summary>
-    /// True if the conflict is at a single station track.
+    /// True if the conflict is at a single station track. False for a placeless conflict
+    /// (see <see cref="FromTrack"/>).
     /// </summary>
-    public bool IsStationConflict => FromTrack.Equals(ToTrack);
+    public bool IsStationConflict => FromTrack is not null && FromTrack.Equals(ToTrack);
 
     /// <summary>
-    /// True if the conflict spans a track stretch between stations.
+    /// True if the conflict spans a track stretch between stations. False for a placeless conflict
+    /// (see <see cref="FromTrack"/>).
     /// </summary>
-    public bool IsStretchConflict => !FromTrack.Equals(ToTrack);
+    public bool IsStretchConflict => FromTrack is not null && ToTrack is not null && !FromTrack.Equals(ToTrack);
 
     /// <summary>
     /// The severity of the error, derived from its <see cref="ErrorType"/>. Centralised in
@@ -139,9 +156,11 @@ public sealed record ValidationError
 
     /// <summary>
     /// Determines whether the given station track is where this conflict starts or ends.
-    /// Used by GUI components to highlight the offending track.
+    /// Used by GUI components to highlight the offending track. Always false for a placeless conflict
+    /// (see <see cref="FromTrack"/>).
     /// </summary>
-    public bool Involves(StationTrack track) => FromTrack.Equals(track) || ToTrack.Equals(track);
+    public bool Involves(StationTrack track) =>
+        FromTrack?.Equals(track) == true || ToTrack?.Equals(track) == true;
 
     /// <summary>
     /// Determines whether this schedule-scope conflict should mark the given schedule's parts column.
@@ -169,9 +188,11 @@ public sealed record ValidationError
 
     /// <summary>
     /// Determines whether this conflict's time span overlaps the given time range (inclusive).
-    /// Used by GUI components (e.g. the graphical timetable) to hit-test a rendered region.
+    /// Used by GUI components (e.g. the graphical timetable) to hit-test a rendered region. Always false
+    /// for a timeless conflict (see <see cref="FromTrack"/>).
     /// </summary>
-    public bool OverlapsTimeRange(Time from, Time to) => FromTime <= to && ToTime >= from;
+    public bool OverlapsTimeRange(Time from, Time to) =>
+        FromTime is { } start && ToTime is { } end && start <= to && end >= from;
 
     /// <summary>
     /// Creates a station track conflict error.
@@ -502,6 +523,81 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates a duplicate pinned-identity error: two duties excluded from renumbering hold the same
+    /// <see cref="DriverDuty.Identity"/>. No renumbering can separate them, so the pile would get two
+    /// booklets with the same number — and the pile is sorted by exactly that number.
+    /// </summary>
+    public static ValidationError DutyIdentityDuplicated(
+        DriverDuty duty,
+        DriverDuty otherDuty,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyIdentityDuplicated,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Duty = duty,
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a missing pinned-identity error: a duty excluded from renumbering has an empty
+    /// <see cref="DriverDuty.Identity"/>, so it is pinned to nothing and its front page carries no number
+    /// for the sorter or the chooser to read.
+    /// </summary>
+    public static ValidationError DutyIdentityMissing(
+        DriverDuty duty,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyIdentityMissing,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Duty = duty,
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a staffing range error: a duty's <see cref="DriverDuty.StaffCount"/> is outside 1–3. The
+    /// editor cannot produce this, so it guards a hand-edited plan file.
+    /// </summary>
+    public static ValidationError DutyStaffCountOutOfRange(
+        DriverDuty duty,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyStaffCountOutOfRange,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Duty = duty,
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a train-part-missing-driver-duty error: a train part with a traction unit assigned has no
+    /// driver duty rostered on some of the sessions the traction assignment runs, so nobody is assigned
+    /// to drive it.
+    /// </summary>
+    public static ValidationError TrainPartMissingDriverDuty(
+        ScheduledTrainPart part,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.TrainPartMissingDriverDuty,
+            FromTrack = part.From.Track,
+            ToTrack = part.To.Track,
+            FromTime = part.From.Departure,
+            ToTime = part.To.Arrival,
+            Trains = [part.Train],
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
@@ -581,6 +677,19 @@ public enum ValidationErrorType
 
     /// <summary>Two train parts within one driver duty overlap in time.</summary>
     DutyPartsOverlap,
+
+    /// <summary>Two duties excluded from renumbering hold the same identity.</summary>
+    DutyIdentityDuplicated,
+
+    /// <summary>A duty excluded from renumbering has no identity to hold.</summary>
+    DutyIdentityMissing,
+
+    /// <summary>A duty's staff count is outside the allowed range of 1–3.</summary>
+    DutyStaffCountOutOfRange,
+
+    /// <summary>A train part with a traction unit assigned has no driver duty on some of the sessions
+    /// the traction assignment runs.</summary>
+    TrainPartMissingDriverDuty,
 }
 
 /// <summary>

@@ -1,5 +1,95 @@
 # Versionshinweise
 
+## Version 0.3.0
+
+- Ein neuer Bericht, **Lokführerdienste**, druckt für jeden Dienst ein A5-Heft. Die
+  Titelseite zeigt die Dienstnummer, in welchen Sitzungen oder an welchen Tagen er
+  läuft, seine Start- und Endzeit und -bahnhöfe, einen Schwierigkeitsgrad, den
+  Besetzungsbedarf und etwaige Diensthinweise. Jeder Zugteil erhält seine eigene
+  Seite, mit den zu verwendenden Triebfahrzeugen, den mitzuführenden Wagengruppen und
+  den Zielen, zu denen Güterwagen mitgeführt werden, sowie den Fahrplan – jeweils in
+  einem eigenen, klar abgegrenzten Block dargestellt. Die letzte Seite jedes Heftes
+  zeigt den Gleisplan der Anlage und eine Tabelle der Rangierbahnhöfe, zum leichten
+  Nachschlagen während des Betriebs.
+- Ein neuer Bericht, **Allgemeine Anweisungen**, ist ein eigenes gedrucktes Heft mit
+  dem Programm des Treffens und Anweisungen, die für eine Anlage während des ganzen
+  Treffens gelten. Hier kann der Organisator des Treffens frei schreiben, was er
+  möchte – zum Beispiel Fahranweisungen, Signalgebung, Funk- und Telefonverkehr,
+  Verhalten bei Verspätung und wen man fragt – und es wird einmal an alle
+  ausgegeben.
+- Sowohl das Programm als auch die Anweisungen werden unter **Einstellungen ›
+  Information** geschrieben und lassen sich mit Markdown formatieren – Überschriften,
+  Listen, Fett- und Kursivschrift –, sodass auch ein langer Anweisungstext im Druck
+  lesbar bleibt.
+- Das Heft beginnt mit dem Namen des Treffens, den Daten seiner Gültigkeit und dem
+  Druckdatum, gefolgt vom Programm: Sitzungszeiten, Pausen und Mahlzeiten – das, was
+  jeder Teilnehmer vor der ersten Sitzung wissen muss.
+- Danach folgen die Anweisungen über so viele Seiten, wie sie benötigen. Umbrochen wird
+  zwischen Absätzen, und eine Überschrift bleibt immer bei dem Text, den sie einleitet.
+- Die letzte Seite zeigt den Gleisplan der Anlage und die Tabelle der Rangierbahnhöfe,
+  damit auch diejenigen, die nie ein Dienstheft in der Hand halten – vor allem das
+  Bahnhofspersonal –, einen Überblick über die Anlage bekommen.
+- Das Heft wird im selben A5-Format wie die Diensthefte gedruckt: A4 quer, beidseitig,
+  in der Mitte gefaltet, mit Leerseiten dort, wo sie nötig sind, damit die Bogen richtig
+  gefaltet werden.
+- Dienste können jetzt mit **Leicht**, **Mittel** oder **Erfahren** bewertet werden,
+  im Heft farblich gekennzeichnet, sodass ein Teilnehmer einen zu seiner Erfahrung
+  passenden Dienst wählen kann.
+- Ein Dienst kann jetzt angeben, dass er zwei oder drei Personen benötigt – zum
+  Beispiel einen Lokführer und einen Schaffner –, und dies wird im Heft angezeigt.
+- Ein Dienst kann mit einer **festen Nummer** versehen werden, sodass die
+  automatische Neunummerierung ihn unverändert lässt, zum Beispiel für
+  Sonderdienste, die ausgegeben werden, bevor eine Sitzung beginnt.
+- Der Plan wird jetzt auch geprüft, damit jeder Zugteil mit zugewiesener Lokomotive
+  oder zugewiesenem Triebzug in jeder Sitzung, in der er fährt, von einem Dienst
+  abgedeckt ist – ein Teil, für den niemand eingeteilt ist, wird sitzungsweise
+  gemeldet. Ein Dienst mit fester Nummer wird ebenfalls geprüft: Er muss eine Nummer
+  haben, und keine zwei Dienste mit fester Nummer dürfen dieselbe Nummer erhalten.
+- Unternehmen können jetzt ein hochgeladenes **Logo** haben, das in Berichten
+  anstelle der Textsignatur angezeigt wird.
+- Stationen können jetzt als der **Rangierbahnhof** gekennzeichnet werden, der den
+  Ortsgüterverkehr eines anderen Ortes bedient; die Anlage listet automatisch jeden
+  Rangierbahnhof und was er abdeckt auf, gezeigt auf der letzten Seite des
+  Diensthefts. Das hilft Stationspersonal und Güterzugführern zu wissen, wohin Wagen
+  mit einem bestimmten Frachtziel geschickt werden sollen.
+- Jedem Fahrplanabschnitt kann jetzt eine **Farbe** zugewiesen werden, mit der er im
+  Topologie-Diagramm gezeichnet wird.
+- Ein neuer **Entfernungsfaktor** (unter Einstellungen › Zeit & Geschwindigkeit)
+  lässt eine Anlage in Berichten und im grafischen Fahrplan eine andere – meist
+  größere, vorbildgetreuere – Kilometerangabe zeigen, als tatsächlich modelliert
+  ist, ohne dass dies eine Fahrzeitberechnung beeinflusst.
+- Die App hält jetzt mehrere geöffnete Browser-Tabs oder -Fenster miteinander
+  synchron. **Hinweis**: Dies funktioniert nur zwischen Fenstern auf demselben
+  Rechner im selben Browser.
+- Einstellungen können jetzt das **Gültig ab**- und **Gültig bis**-Datum des
+  Treffens speichern, gedruckt als Gültigkeitszeile auf Berichten; leer lassen,
+  solange noch kein Treffen gebucht ist.
+- Eine neue Option, **Planzeiten automatisch erweitern?** (unter Einstellungen ›
+  Allgemein), erweitert die Start- oder Endzeit des Plans, um einen Zug abzudecken,
+  anstatt die Änderung zu blockieren, wenn die eigene Zeit des Zuges außerhalb davon
+  liegt. Standardmäßig aus.
+- Eine neue Schaltfläche, **Alle Zeiten aktualisieren**, im grafischen Fahrplan
+  berechnet alle Züge des Fahrplans auf einmal neu, statt vorher eine Teilmenge
+  auswählen zu müssen.
+- Die Gleisbelegungsprüfung kann jetzt optional berücksichtigen, dass eine
+  Lokomotive oder ein Triebzug zwischen zwei Zügen auf einem Gleis steht, es sei
+  denn, sie ist zum oder vom Abstellgleis gebucht (unter Einstellungen ›
+  Validierung). Standardmäßig aus, da dies nur auf Anlagen sinnvoll ist, auf denen
+  das Abstellen bewusst modelliert wird – dort eingeschaltet, deckt sie einen
+  dritten Zug auf, der unbemerkt ein Gleis nutzt, das ein stehendes Fahrzeug bereits
+  belegt.
+- Jeder Halt im Reiter **Züge** hat jetzt ein Feld **Bemerkung** – ein Hinweis, der bei
+  diesem Halt gedruckt wird, zum Beispiel „Gegenzug abwarten“. Die Bemerkung erscheint
+  fertig formatiert und zeigt die eingegebene Auszeichnung, sobald man in das Feld geht, so
+  dass sich das Wesentliche hervorheben lässt: `*langsam*` für kursiv, `**erstes**` für
+  fett. Wird das Feld geleert, verschwindet die Bemerkung wieder.
+
+### Fehlerbehebungen
+
+- Beim Hinzufügen eines neuen Zuges wird die Standardstartzeit jetzt unter
+  Berücksichtigung der angegebenen Vorbereitungszeit gesetzt, sodass er nicht vor
+  der Startzeit des Plans beginnt.
+
 ## Version 0.2.4
 
 - Eine neue Registerkarte **Dienste** ermöglicht die Planung von Fahrerdiensten – die

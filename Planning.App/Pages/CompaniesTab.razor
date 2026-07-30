@@ -37,6 +37,9 @@ else
                     <PropertyColumn Property="c => c.Name" Title='@Translator("Name")' Sortable="true" />
                     <PropertyColumn Property="c => c.Signature" Title='@Translator("Signature")' Sortable="true" />
                     <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Company>.ByAscending(c => c.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
+                    @* A front page shows logos only when every company on it has one, so "which
+                       companies have a logo" is a question the planner needs answered at a glance. *@
+                    <TemplateColumn Title='@Translator("CompanyLogo")'><CompanyLogo Company="context" /></TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         @{ var deletion = ScheduleState.Schedule?.MayDelete(context); }
                         <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
@@ -84,6 +87,22 @@ else
                         <label>@Translator("Country")</label>
                         <ListBoxView Items="@(CountryChoices.ToListItems(Translator))" Placeholder="—"
                                      Value="Editing.CountryId" ValueChanged="@(id => { Editing!.CountryId = id; OnEdited(); })" />
+                    </div>
+                    @* The logo is stored inline in the plan, so it rides inside every save and load —
+                       hence the size cap. SVG is preferred because it prints at the printer's resolution
+                       rather than the screen's, and print is the only output that matters for it. *@
+                    <div class="field logo">
+                        <HelpLabel For="CompanyLogo" />
+                        <span class="control">
+                            <CompanyLogo Company="Editing" />
+                            <InputFile OnChange="OnLogoSelected" accept=".svg,.png,.jpg,.jpeg,.webp" />
+                            @if (!string.IsNullOrWhiteSpace(Editing.Logo))
+                            {
+                                <button type="button" class="danger" @onclick="ClearLogo">
+                                    <i class="fa-solid fa-trash"></i> @Translator("RemoveLogo")
+                                </button>
+                            }
+                        </span>
                     </div>
                 </div>
 
@@ -240,6 +259,60 @@ else
             Layout!.Add(new Company(NextId(), candidate.Name, candidate.Signature, candidate.CountryId));
         ScheduleState.SaveAndNotify();
         BackToList();
+    }
+
+    // Roughly 64 KB encoded. The logo travels inside every plan save and load, so a few unbounded
+    // images would bloat all of them; an oversized file is rejected with a message, never truncated.
+    private const int MaxLogoBytes = 64 * 1024;
+
+    private static readonly Dictionary<string, string> LogoMimeTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        [".svg"] = "image/svg+xml",
+        [".png"] = "image/png",
+        [".jpg"] = "image/jpeg",
+        [".jpeg"] = "image/jpeg",
+        [".webp"] = "image/webp",
+    };
+
+    // Reads the chosen image and stores it inline as a data URI, so the plan stays a single
+    // self-contained file that survives "Save as" and reopening on another computer.
+    private async Task OnLogoSelected(InputFileChangeEventArgs e)
+    {
+        if (Editing is null) return;
+        _error = null;
+        var file = e.File;
+        var extension = Path.GetExtension(file.Name);
+        if (!LogoMimeTypes.TryGetValue(extension, out var mimeType))
+        {
+            _error = Translator("LogoTypeNotSupported");
+            return;
+        }
+        if (file.Size > MaxLogoBytes)
+        {
+            _error = string.Format(Culture, Translator("LogoTooLarge"), MaxLogoBytes / 1024);
+            return;
+        }
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxLogoBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            Editing.Logo = $"data:{mimeType};base64,{Convert.ToBase64String(buffer.ToArray())}";
+            OnEdited();
+        }
+        catch (IOException)
+        {
+            // OpenReadStream throws when the file exceeds the declared limit.
+            _error = string.Format(Culture, Translator("LogoTooLarge"), MaxLogoBytes / 1024);
+        }
+    }
+
+    // A logo added by mistake must not be permanent.
+    private void ClearLogo()
+    {
+        if (Editing is null) return;
+        Editing.Logo = null;
+        OnEdited();
     }
 
     // Existing companies edit live and persist on each change; a new one is held until Save validates it.

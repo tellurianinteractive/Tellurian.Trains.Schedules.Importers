@@ -22,6 +22,13 @@ public sealed class TimeAndSpeedSettings
     public StationTimings StationTimings { get; set; } = StationTimings.LayoutDefaults;
 
     /// <summary>
+    /// Factor that converts a track stretch's stored distance (metres) into the kilometre figure
+    /// shown in timetable reports and graphs. Default is 1, so displayed kilometres equal the
+    /// stored metre value, matching distances entered before this factor existed.
+    /// </summary>
+    public double DistanceFactor { get; set; } = 1;
+
+    /// <summary>
     /// Maps a scale speed (km/h) to a real model speed (m/s) using the piecewise-linear curve
     /// defined by the <see cref="Slow"/>, <see cref="Normal"/> and <see cref="High"/> points.
     /// Speeds below the slowest or above the fastest point are clamped to that point's real speed.

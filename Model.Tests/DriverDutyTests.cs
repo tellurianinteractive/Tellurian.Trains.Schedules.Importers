@@ -196,6 +196,68 @@ public class DriverDutyTests
         Assert.IsEmpty(errors);
     }
 
+    // --- Driver duty coverage: a traction-assigned part must have a driver duty on every session it runs ---
+
+    [TestMethod]
+    public void TractionPartWithNoDriverDutyIsReported()
+    {
+        var plan = CreatePlan();
+        AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1); // traction on all sessions, no duty
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreEqual(ValidationScope.Duty, errors[0].Scope);
+        Assert.Contains(Forward(plan), errors[0].Trains);
+    }
+
+    [TestMethod]
+    public void TractionPartCoveredOnAllItsSessionsIsNotReported()
+    {
+        var plan = CreatePlan();
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var duty = plan.CreateDriverDuty();
+        duty.Append(part);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty);
+
+        Assert.IsEmpty(errors);
+    }
+
+    [TestMethod]
+    public void TractionPartCoveredOnOnlySomeSessionsReportsTheRemainder()
+    {
+        var plan = CreatePlan();
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1); // traction on all sessions
+        var duty = plan.CreateDriverDuty();
+        duty.Sessions = Sessions.FromSessionNumbers(1, 2); // driven on 1,2 only
+        duty.Add(part); // unguarded add so the plan can hold a partial-coverage duty for validation
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty);
+
+        Assert.AreEqual(ValidationScope.Duty, error.Scope);
+        StringAssert.Contains(error.Message.Text, "3");
+        StringAssert.Contains(error.Message.Text, "14", "The default operating period runs to session 14, so the uncovered sessions include the top of the range.");
+    }
+
+    [TestMethod]
+    public void WagonPartWithNoDriverDutyIsNotReported()
+    {
+        var plan = CreatePlan();
+        var wagonSchedule = plan.CreateSchedule();
+        wagonSchedule.Add(Forward(plan).AsTrainPart);
+        plan.AssignVehicle(wagonSchedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null));
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty);
+
+        Assert.IsEmpty(errors, "A driver drives traction, not wagons; a wagon-only part needs no duty.");
+    }
+
     [TestMethod]
     public void DutyStartAndEndTimesDeriveFromFirstArrivalAndLastDeparture()
     {
@@ -263,6 +325,154 @@ public class DriverDutyTests
 
         Assert.AreEqual("1", oddDuty.Identity, "The 1,3,5 variant has the lower first session, so it sorts first.");
         Assert.AreEqual("2", evenDuty.Identity);
+    }
+
+    [TestMethod]
+    public void RenumberLeavesAPinnedDutyAloneAndReservesItsNumber()
+    {
+        var plan = CreatePlan();
+        var forwardPart = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1); // starts ~12:00
+        var returnPart = AddLocoWorking(plan, Return(plan).AsTrainPart, locoNumber: 2);   // starts ~13:00
+        var earlier = plan.CreateDriverDuty();
+        earlier.Append(forwardPart);
+        var pinned = plan.CreateDriverDuty();
+        pinned.Append(returnPart);
+        pinned.Identity = "1";
+        pinned.IsExcludedFromRenumbering = true;
+
+        plan.RenumberDriverDuties();
+
+        Assert.AreEqual("1", pinned.Identity, "A pinned duty keeps its number.");
+        Assert.AreEqual("2", earlier.Identity,
+            "The ordinal walk steps over the reserved 1, so the first renumbered duty becomes 2 rather than colliding.");
+    }
+
+    [TestMethod]
+    public void RenumberIgnoresANonNumericPinnedIdentity()
+    {
+        var plan = CreatePlan();
+        var forwardPart = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var pinned = plan.CreateDriverDuty();
+        pinned.Identity = "L1";
+        pinned.IsExcludedFromRenumbering = true;
+        var ordinary = plan.CreateDriverDuty();
+        ordinary.Append(forwardPart);
+
+        plan.RenumberDriverDuties();
+
+        Assert.AreEqual("L1", pinned.Identity);
+        Assert.AreEqual("1", ordinary.Identity, "A non-numeric pin reserves nothing, so numbering starts at 1.");
+    }
+
+    [TestMethod]
+    public void PrintOrderIsNumericWithNonNumericIdentitiesLast()
+    {
+        var plan = CreatePlan();
+        var ten = plan.CreateDriverDuty();
+        ten.Identity = "10";
+        var two = plan.CreateDriverDuty();
+        two.Identity = "2";
+        var post = plan.CreateDriverDuty();
+        post.Identity = "Post";
+        var loco = plan.CreateDriverDuty();
+        loco.Identity = "L1";
+
+        var order = string.Join(",", plan.DriverDutiesInPrintOrder.Select(d => d.Identity));
+
+        // String ordering would put "10" before "2"; the pile is kept in numeric order.
+        Assert.AreEqual("2,10,L1,Post", order);
+    }
+
+    [TestMethod]
+    public void TwoPinnedDutiesSharingAnIdentityAreReported()
+    {
+        var plan = CreatePlan();
+        var a = plan.CreateDriverDuty();
+        a.Identity = "7";
+        a.IsExcludedFromRenumbering = true;
+        var b = plan.CreateDriverDuty();
+        b.Identity = "7";
+        b.IsExcludedFromRenumbering = true;
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyIdentityDuplicated)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreEqual(ValidationScope.Duty, errors[0].Scope);
+        Assert.IsNull(errors[0].FromTrack, "A numbering fault has no place on the layout to highlight.");
+    }
+
+    [TestMethod]
+    public void TwoUnpinnedDutiesSharingAnIdentityAreNotReported()
+    {
+        var plan = CreatePlan();
+        var a = plan.CreateDriverDuty();
+        a.Identity = "7";
+        var b = plan.CreateDriverDuty();
+        b.Identity = "7";
+
+        // Renumbering will resolve this on its own, so it is not worth reporting.
+        Assert.IsEmpty(plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyIdentityDuplicated));
+    }
+
+    [TestMethod]
+    public void APinnedDutyWithNoIdentityIsReported()
+    {
+        var plan = CreatePlan();
+        var duty = plan.CreateDriverDuty();
+        duty.Identity = "";
+        duty.IsExcludedFromRenumbering = true;
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyIdentityMissing);
+
+        Assert.HasCount(1, errors);
+    }
+
+    [TestMethod]
+    public void StaffCountDefaultsToOneAndIsReportedOutsideItsRange()
+    {
+        var plan = CreatePlan();
+        var duty = plan.CreateDriverDuty();
+
+        Assert.AreEqual(1, duty.StaffCount, "A new duty is worked by one loco driver.");
+        Assert.IsEmpty(plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyStaffCountOutOfRange));
+
+        duty.StaffCount = 4;
+
+        Assert.HasCount(1, plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyStaffCountOutOfRange));
+    }
+
+    [TestMethod]
+    public void StaffCountSurvivesAPlanSavedBeforeThePropertyExisted()
+    {
+        var plan = CreatePlan();
+        plan.CreateDriverDuty();
+        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve, MaxDepth = 256 };
+        // Strip the property from the JSON to stand in for a plan saved before it existed.
+        var json = JsonSerializer.Serialize(plan, options).Replace("\"StaffCount\":1,", "", StringComparison.Ordinal);
+
+        var restored = JsonSerializer.Deserialize<Plan>(json, options)!;
+
+        Assert.AreEqual(1, restored.DriverDuties.Single().StaffCount,
+            "The property initialiser holds, so an older plan does not load as zero people.");
+    }
+
+    [TestMethod]
+    public void DifficultyIsUnsetUntilGraded()
+    {
+        var plan = CreatePlan();
+        var duty = plan.CreateDriverDuty();
+
+        Assert.IsNull(duty.Difficulty, "An ungraded duty must not masquerade as the easiest grade.");
+
+        duty.Difficulty = DutyDifficulty.Experienced;
+
+        Assert.AreEqual(DutyDifficulty.Experienced, duty.Difficulty);
     }
 
     [TestMethod]

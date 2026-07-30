@@ -25,7 +25,7 @@
                 <PropertyColumn Property="s => s.Id" Title='@Translator("Id")' Sortable="true" IsDefaultSortColumn="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.Start.Name" Title='@Translator("From")' Sortable="true" />
                 <PropertyColumn Property="s => s.End.Name" Title='@Translator("To")' Sortable="true" />
-                <PropertyColumn Property="s => s.Distance" Title='@Translator("DistanceKm")' Sortable="true" Align="Align.Right" />
+                <PropertyColumn Property="s => s.Distance" Title='@Translator("DistanceMeters")' Sortable="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.TracksCount" Title='@Translator("Tracks")' Sortable="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.Speed" Title='@Translator("SpeedKmh")' Sortable="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.Time" Title='@Translator("TimeMinutes")' Sortable="true" Align="Align.Right" />
@@ -80,7 +80,7 @@
                                  ValueChanged="id => _endId = id ?? _endId" />
                 </div>
                 <div class="field">
-                    <label>@Translator("DistanceKm")</label>
+                    <label>@Translator("DistanceMeters")</label>
                     <input type="number" min="0" step="0.1" @bind="_distance" @bind:culture="Invariant" />
                 </div>
                 <div class="field">

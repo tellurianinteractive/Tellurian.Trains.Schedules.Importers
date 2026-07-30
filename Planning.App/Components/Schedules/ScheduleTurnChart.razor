@@ -35,7 +35,7 @@ else
                                 @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
-                                    <span class="sessions">@SessionsDisplay.Text(assignment.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
+                                    <span class="sessions"><SessionsView Sessions="assignment.Sessions" Settings="SessionSettings" /></span>
                                 }
                                 <button class="edit" title="@Translator("EditVehicle")"
                                         @onclick="() => _editTarget = (schedule, vehicle, assignment)"><i class="fa-solid fa-pen"></i></button>
@@ -70,7 +70,7 @@ else
                     @if (!schedule.EffectiveSessions.CoversAllWithin(UseDays, MaxSessions))
                     {
                         <span class="sched-sessions" title="@Translator("ScheduleOperatingSessions")">
-                            @SessionsDisplay.Text(schedule.EffectiveSessions, UseDays, Translator, MaxSessions, StartDay)
+                            <SessionsView Sessions="schedule.EffectiveSessions" Settings="SessionSettings" />
                         </span>
                     }
                     @foreach (var part in schedule.OrderedParts)
@@ -84,7 +84,7 @@ else
                             <span class="to">@segment.To</span>
                             @if (!part.Train.Sessions.CoversAllWithin(UseDays, MaxSessions))
                             {
-                                <span class="sessions">@SessionsDisplay.Text(part.Train.Sessions, UseDays, Translator, MaxSessions, StartDay)</span>
+                                <span class="sessions"><SessionsView Sessions="part.Train.Sessions" Settings="SessionSettings" /></span>
                             }
                             <button class="x" title="@Translator("RemovePart")" @onclick="() => RemovePart(schedule, part)"><i class="fa-solid fa-xmark"></i></button>
                         </div>
@@ -132,6 +132,9 @@ else
     private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
     private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
     private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     private Schedule? _addPartTarget;
     private Schedule? _assignTarget;

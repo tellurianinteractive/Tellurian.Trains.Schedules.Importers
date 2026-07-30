@@ -15,7 +15,7 @@ Each region has:
 ### How regions are used
 
 A region on its own is just a label. It becomes meaningful once it is associated with a
-**station** — normally a **shadow yard**, a terminal station representing external stations and the
+**station** — normally a **shadow shunting yard**, a terminal station representing external stations and the
 world beyond the modelled railway. A station can be associated with zero, one, or several regions;
 ordinary stations seldom need any.
 

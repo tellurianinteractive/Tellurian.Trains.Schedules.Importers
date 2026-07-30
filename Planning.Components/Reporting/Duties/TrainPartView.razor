@@ -1,58 +1,92 @@
-﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.App.Translations
 
 @inject Translator Translator
 
-@if (TrainPart is not null)
+@* The train timetable — where and when. It comes last of the four blocks because it is the one the
+   driver returns to repeatedly during the run, so it sits closest to the following part.
+
+   Arr/Dep has a column of its own: the prefix varies in presence and width, so sharing a column would
+   start the station names at three different positions, and the route reads as a list only when they
+   align on one left edge. A pass-through leaves the cell empty, which states "neither" more clearly
+   than a missing word.
+
+   The table is table-layout: fixed with declared column widths. With automatic layout the full-width
+   note rows would participate in width calculation, so one long note would widen the note column and
+   shift every other column — and column widths would then depend on content. *@
+
+@if (Rows is { Count: > 0 })
 {
-    <h2>@Translator("TrainTimetable")</h2>
-    <table>
+    <h3>@Translator("TrainTimetable")</h3>
+    <table class="dutycalls">
+        @* Fixed layout takes its widths from these, not from the first row: with Station spanning the
+           first two columns the header row can no longer state a width for each of the five. *@
+        <colgroup>
+            <col class="arrdep" />
+            <col class="station" />
+            <col class="track" />
+            <col class="time" />
+            <col class="note" />
+        </colgroup>
         <thead>
             <tr>
-                <th colspan="2">@Translator("Station")</th>
-                <th>@Translator("Track")</th>
-                <th>@Translator("Time")</th>
-                <th>@Translator("Note")</th>
+                @* The Arr/Dep column needs no heading of its own — every cell in it already says which
+                   it is — so Station heads the pair, over the two columns that together name the place. *@
+                <th class="station" colspan="2">@Translator("Station")</th>
+                <th class="track">@Translator("Track")</th>
+                <th class="time">@Translator("Time")</th>
+                <th class="note">@Translator("Note")</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var call in TrainPart.Calls)
+            @foreach (var row in Rows)
             {
-                @if (call.HasDifferentArrivalAndDepartureTimes)
+                @* The rule always falls below the whole group — the call row plus any notes stacked
+                   under it — never between a call and its own notes. *@
+                var stacked = row.StackedNotes.ToList();
+                <tr class="@RowClass(row) @(stacked.Count == 0 ? RuleClass(row) : null)">
+                    <td class="arrdep">@HalfLabel(row.Half)</td>
+                    @* Repeated on both rows of a two-row call, so a time is never read against a blank
+                       station cell. *@
+                    <td class="station">@row.StationName</td>
+                    <td class="track">@row.TrackNumber</td>
+                    <td class="time">@row.Time.HHMM()</td>
+                    <td class="note">@if (row.InlineNote is { } inline) { @inline.ToHtml }</td>
+                </tr>
+                @* Every further note gets a full-width row, so it has the whole page to run in and
+                   almost never wraps. It starts at the same offset as the station name — an empty
+                   Arr/Dep cell, then the note spanning the remaining four columns — so it reads as
+                   belonging to the call above rather than as a new one. *@
+                @for (var i = 0; i < stacked.Count; i++)
                 {
-                    <tr>
-                        <td>@Translator("Arr")</td>
-                        <td>@call.OperationLocation.Name</td>
-                        <td>@call.Track.Number</td>
-                        <td>@call.Arrival</td>
-                        <td>@("TODO: call arrival notes in here")</td>
-                    </tr>
-                    <tr>
-                        <td>@Translator("Dep")</td>
-                        <td>@call.OperationLocation.Name</td>
-                        <td>@call.Track.Number</td>
-                        <td>@call.Departure</td>
-                        <td>@("TODO: call arrival notes in here")</td>
+                    <tr class="note-row @(i == stacked.Count - 1 ? RuleClass(row) : null)">
+                        <td class="arrdep"></td>
+                        <td colspan="4">@stacked[i].ToHtml</td>
                     </tr>
                 }
-                else
-                {
-                    <tr>
-                        <td></td>
-                        <td>@call.OperationLocation.Name</td>
-                        <td>@call.Track.Number</td>
-                        <td>@call.Departure</td>
-                        <td>@("TODO: call arrival notes in here")</td>
-                    </tr>
-                }
-
-
-
             }
         </tbody>
     </table>
 }
 
 @code {
-    [Parameter] public ScheduledTrainPart? TrainPart { get; set; }
+    /// <summary>The rows to render, already built with the row-structure and note rules applied.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<TimetableRow>? Rows { get; set; }
 
+    private string HalfLabel(CallHalf half) => half switch
+    {
+        CallHalf.Arrival => Translator("Arr"),
+        CallHalf.Departure => Translator("Dep"),
+        _ => string.Empty,
+    };
+
+    // Two rule weights, so the eye reads the route as a list of places with the arrival/departure pair
+    // as a sub-structure inside one of them. An arrival is always followed by its own departure, so it
+    // takes the light rule; everything else ends a station and takes the heavy one — including a
+    // pass-through, which is a whole station in one row.
+    private static string RuleClass(TimetableRow row) =>
+        row.Half == CallHalf.Arrival ? "rule-light" : "rule-heavy";
+
+    // A half the driver does not work is shown cancelled rather than omitted, so the route still reads
+    // as the whole train and it is unmistakable which of it is theirs.
+    private static string? RowClass(TimetableRow row) => row.IsInPart ? null : "not-part";
 }

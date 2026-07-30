@@ -1,4 +1,5 @@
 @page "/graphical-timetable"
+@using Tellurian.Trains.Schedules.Planning.Timetables
 @inject ScheduleStateService ScheduleState
 @inject ValidationStateService ValidationState
 @inject Translator Translator
@@ -33,7 +34,13 @@ else
             <button @onclick="() => _showMove = true">@Translator("MoveTrains")</button>
             <button @onclick="() => _showClone = true">@Translator("CloneTrains")</button>
             <button @onclick="() => _showUpdateTimings = true">@Translator("UpdateTimings")</button>
+            <button @onclick="UpdateAllTimings">@Translator("UpdateAllTimings")</button>
         </div>
+
+        @if (_updateAllTimingsError is not null)
+        {
+            <p class="error">@Translator(_updateAllTimingsError)</p>
+        }
     }
 
     <div class="selectors">
@@ -114,6 +121,7 @@ else
     private bool _showMove;
     private bool _showClone;
     private bool _showUpdateTimings;
+    private string? _updateAllTimingsError;
 
     // The first/last-half selector is only meaningful when a break time is configured.
     private bool HasBreak => ScheduleState.Layout?.Settings.General.BreakTime is not null;
@@ -149,6 +157,21 @@ else
             _half = half;
             BuildGraphSchedules();
         }
+    }
+
+    // Recomputes every train in the timetable at once, unlike UpdateTimingsDialog which lets the user
+    // restrict the recompute to a chosen subset.
+    private void UpdateAllTimings()
+    {
+        _updateAllTimingsError = null;
+        if (ScheduleState.Schedule is not { } plan || ScheduleState.Timetable is not { } timetable) return;
+
+        var anyFailed = false;
+        foreach (var train in timetable.Trains)
+            if (plan.UpdateTimings(train) is null) anyFailed = true;
+
+        ScheduleState.SaveAndNotify();
+        if (anyFailed) _updateAllTimingsError = "UpdateAllTimingsFailed";
     }
 
     private void OnStretchToggled(TimetableStretch stretch, ChangeEventArgs e)

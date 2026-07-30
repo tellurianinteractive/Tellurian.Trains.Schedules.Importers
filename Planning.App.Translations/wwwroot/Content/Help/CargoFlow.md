@@ -9,9 +9,9 @@ the train and a maximum number of wagons or axles.
 #### Destinations
 
 A destination can also include the station's
-- everything **beyond** it, when a yard in the middle of the layout shunts wagons to later destinations,
+- everything **beyond** it, when a shunting yard in the middle of the layout shunts wagons to later destinations,
 - its **local** destinations, when the station is a hub for one or several local  freight servces.
-- **regions**, when a shadow yard represents some part of the rest of the world.
+- **regions**, when a shadow shunting yard represents some part of the rest of the world.
 
 A description may forward
 wagons from one or more **origin** stations, and can be marked as going to **all destinations**. The

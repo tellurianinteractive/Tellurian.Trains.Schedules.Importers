@@ -9,7 +9,7 @@
    `Margin` parameter (applied as padding), so margins are controlled per report. */
 @page a4l { size: A4 landscape; margin: 0; }
 @page a4p { size: A4 portrait;  margin: 0; }
-@page a4p { size: A5 portrait;  margin: 0; }
+@page a5p { size: A5 portrait;  margin: 0; }
 
 /* Fallback if a browser ignores landscape `size` on a named page: keep A4 portrait paper
    but rotate the content. Replace the a4l rule above with:

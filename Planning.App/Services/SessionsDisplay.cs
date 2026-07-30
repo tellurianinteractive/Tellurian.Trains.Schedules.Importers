@@ -1,37 +1,15 @@
-using Tellurian.Trains.Schedules.Planning.App.Translations;
-
 namespace Tellurian.Trains.Schedules.Planning.App.Services;
 
 /// <summary>
-/// Renders a <see cref="Sessions"/> pattern as human-readable text and parses the text a user types
-/// when adding a custom pattern to a timetable's session catalogue. The same value can be presented
-/// either as session numbers (e.g. <c>1-5</c>, <c>1 3 5</c>) or as weekdays, depending on the
-/// layout's <c>UseDays</c> setting.
+/// Identifies and parses <see cref="Sessions"/> patterns for the session catalogue drop-downs.
 /// </summary>
+/// <remarks>
+/// Rendering a pattern for display is <c>Sessions.ToText</c> and <c>Sessions.ToHtml</c> in the model,
+/// which every call site uses directly — in markup through the shared <c>SessionsView</c> component,
+/// and as text where markup cannot go, such as inside an <c>&lt;option&gt;</c>.
+/// </remarks>
 public static class SessionsDisplay
 {
-    /// <summary>
-    /// Builds the display text for a session/day pattern. When <paramref name="useDays"/> is set the
-    /// active weekdays are shown (using the short day-name resources); otherwise the active session
-    /// numbers are shown. Sessions/days outside the operating period of <paramref name="maxSessions"/>
-    /// (a week starting on <paramref name="startDay"/> for day texts) are ignored.
-    /// </summary>
-    public static string Text(Sessions sessions, bool useDays, Translator translator, int maxSessions = 14, DayOfWeek startDay = DayOfWeek.Monday)
-    {
-        sessions = sessions.CappedForDisplay(useDays, maxSessions);
-        // Day names are translated by the model and ordered from the layout's start day, so session 1
-        // is shown as the chosen start weekday and the run reads in operating-week order.
-        if (useDays) return sessions.DaysShort(startDay);
-        // SessionsNumbers yields "All"/"None" as literals (translate those) and numeric strings otherwise.
-        var text = sessions.SessionsNumbers;
-        return text switch
-        {
-            "All" => translator("All"),
-            "None" => translator("None"),
-            _ => text,
-        };
-    }
-
     /// <summary>
     /// A stable key for a pattern, used to match a train's <see cref="Sessions"/> against a catalogue
     /// entry in a drop-down and to de-duplicate the catalogue. Equal patterns share the same key.

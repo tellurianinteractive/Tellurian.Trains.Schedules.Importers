@@ -1,0 +1,47 @@
+/* The rendered and the editing form must occupy the same space, or the row jumps as the field is
+   entered and left. Both therefore carry the same box: same height, padding and border width — the
+   rendered one simply keeps its border transparent until hovered, so at rest the note reads as text
+   rather than as a form control. */
+.notefield {
+    --field-border: #ddd;
+
+    input,
+    .rendered {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 1.6rem;
+        padding: 0.15rem 0.3rem;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    input {
+        border-color: var(--field-border);
+        background: #fff;
+    }
+
+    .rendered {
+        cursor: text;
+        /* A long note stays on one line at rest so it cannot make its row taller than its neighbours;
+           the whole text is there to read once the field is entered. */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .rendered:hover {
+        border-color: var(--field-border);
+        background: #fff;
+    }
+
+    .rendered:focus {
+        outline: none;
+    }
+
+    .rendered.empty {
+        color: #889;
+        font-style: italic;
+    }
+}

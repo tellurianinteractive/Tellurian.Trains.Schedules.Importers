@@ -91,14 +91,6 @@ public static class SessionsExtensions
         public static Sessions All => FromBitPattern(CommonSessionPatterns.All);
 
         /// <summary>
-        /// Displays <see cref="Sessions"/> using session numbers or weekdays accoring the <see cref="SessionsSettings"/>
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public string Display(SessionsSettings settings) =>
-            settings.UseDaysInsteadOfSessionNumbers ? "" : ""; // TODO: implement and use whenever sessions are displayed in gui and reports.
-
-        /// <summary>
         /// Returns the intersection of this sessions with another.
         /// </summary>
         /// <param name="other">The other sessions.</param>

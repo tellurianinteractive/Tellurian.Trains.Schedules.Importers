@@ -1,13 +1,81 @@
-﻿
-@if (DutyTrainPart is not null)
-{
-    <TrainPartTractionView TractionData="DutyTrainPart.TractionData" />
-    <TrainPartWagonsetView />
-    <TrainPartCargoWagonsWithWaybillsView />
-    <TrainPartView/>
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
 
+@inject Translator Translator
+
+@* One train part: a header block followed by four table blocks, separated by rules.
+
+   The order matches how the driver works — what am I driving (traction), what am I pulling (wagonsets),
+   what is in it and where does it go (cargo), then where and when (the timetable).
+
+   The three tables exist to absorb facts that would otherwise have to be squeezed into the timetable's
+   note column, which is what made the prototype's notes long and repetitive exactly where a driver can
+   least afford it. So a note there either points at one of these tables or states a genuinely per-call
+   fact; anything longer is a sign the fact belongs in a table instead. *@
+
+@if (Part is not null)
+{
+    <div class="dutypart">
+        <h2>@Heading</h2>
+        @* Category and extent share one line, as the prototype had them: on a page where the type size
+           has a floor, lines are the scarce resource, and these two are read together as "what am I
+           driving and between where". *@
+        <p class="extent">
+            @if (Part.Train.Category?.Name is { Length: > 0 } category)
+            {
+                <span class="category">@category</span>
+            }
+            <span>@Extent</span>
+        </p>
+        @* Only the limits that are set, and no line at all when none are. *@
+        @if (Part.LimitsLine(key => Translator(key)) is { Length: > 0 } limits)
+        {
+            <p class="limits">@limits</p>
+        }
+        <hr />
+
+        <TrainPartVehicleView Data="Part.TractionData" Heading="TractionUnits" VehicleColumn="TractionUnit" />
+        <TrainPartVehicleView Data="Part.WagonsetData" Heading="ScheduledWagonsets" VehicleColumn="Wagonset" />
+        <TrainPartCargoWagonsWithWaybillsView Data="Part.CargoData" />
+        @if (ShowTimetable)
+        {
+            <TrainPartView Rows="Part.TimetableRows" />
+        }
+    </div>
 }
 
 @code {
-    [Parameter] public DriverDutyPart? DutyTrainPart { get; set; }
+    /// <summary>The part to render.</summary>
+    [Parameter, EditorRequired] public DriverDutyPart? Part { get; set; }
+
+    /// <summary>
+    /// When false the timetable block is left off, because the part is split across a spread and its
+    /// timetable is rendered on the facing page.
+    /// </summary>
+    [Parameter] public bool ShowTimetable { get; set; } = true;
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    // The train's OWN company signature, which need not be the duty's: a duty may work several
+    // operators' trains.
+    private string Heading =>
+        Part is null ? "" :
+        string.Format(Culture, Translator("DutyInTrain"),
+            Part.Train.EffectiveCompany?.Signature ?? "", Part.Train.Number).Trim();
+
+    // "Starts at" is the first call's ARRIVAL and "ends at" the last call's DEPARTURE: the gaps to the
+    // movement times are the driver's preparation and stand-down time, the same distinction the duty's
+    // own start and end times make.
+    private string Extent
+    {
+        get
+        {
+            if (Part is null) return "";
+            var from = Part.TrainPart.From;
+            var to = Part.TrainPart.To;
+            return string.Format(Culture, Translator("StartsAtEndsAt"),
+                from.OperationLocation.Name, from.Arrival.HHMM(),
+                to.OperationLocation.Name, to.Departure.HHMM());
+        }
+    }
 }

@@ -133,7 +133,34 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move traction unit {0} from parking to departure track..
+        ///   Looks up a localized string similar to Crosses {0}.
+        /// </summary>
+        internal static string Crosses {
+            get {
+                return ResourceManager.GetString("Crosses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to in sessions {0}.
+        /// </summary>
+        internal static string InSessions {
+            get {
+                return ResourceManager.GetString("InSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meets {0} in the same direction.
+        /// </summary>
+        internal static string MeetsInTheSameDirection {
+            get {
+                return ResourceManager.GetString("MeetsInTheSameDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before departure, drive {0} from parking space to departure track..
         /// </summary>
         internal static string MoveTractionUnitFromParkingToDepartureTrack {
             get {
@@ -142,11 +169,29 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move traction unit {0} to parking..
+        ///   Looks up a localized string similar to After arrival, drive {0} from arrival track to parking space..
         /// </summary>
         internal static string MoveTractionUnitToParking {
             get {
                 return ResourceManager.GetString("MoveTractionUnitToParking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No exchange.
+        /// </summary>
+        internal static string NoExchange {
+            get {
+                return ResourceManager.GetString("NoExchange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No stop.
+        /// </summary>
+        internal static string NoStop {
+            get {
+                return ResourceManager.GetString("NoStop", resourceCulture);
             }
         }
         
@@ -165,6 +210,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string TractionUnitExchange {
             get {
                 return ResourceManager.GetString("TractionUnitExchange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1}-{2}.
+        /// </summary>
+        internal static string TrainMeetAtTime {
+            get {
+                return ResourceManager.GetString("TrainMeetAtTime", resourceCulture);
             }
         }
         

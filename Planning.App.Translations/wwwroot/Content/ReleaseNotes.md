@@ -1,5 +1,83 @@
 # Release Notes
 
+## Version 0.3.0
+
+- A new **Driver Duties report** that prints one A5 booklet per duty. The front page shows
+  the duty number, which sessions or days it runs,
+  its start and end time and station, a difficulty grade, staffing needs and any duty
+  notes. Each train part gets its own page, with which traction units to use,
+  which wagonsets to bring, and to which destinations to bring cargo
+  wagons, and the timetable — each shown in its own clearly separated
+  block. The last page of every booklet shows the layout's track plan and a table of
+  shunting yards, for easy reference while running.
+- A new **General Instructions** report is a separate printed booklet with the meeting
+  programme and instructions that apply to a layout for the whole meeting. Here, the
+  meeting organiser is free to write anything — for example driving instructions,
+  signalling practice, radio/phone use, running late, who to ask — handed out once to
+  everyone.
+- The programme and the instructions are both written under **Settings › Information**,
+  and can be formatted with Markdown — headings, lists, bold and italics — so even a
+  long instruction text stays readable in print.
+- The booklet opens with the meeting name, the dates it is valid between and the print
+  date, followed by the programme: session times, breaks and meals — what every
+  participant needs to know before the first session.
+- The instructions follow over as many pages as they need. A page is broken between
+  paragraphs, and a heading always stays with the text it introduces.
+- The last page shows the layout's track plan and the table of shunting yards, so those
+  who never hold a duty booklet — station staff above all — still get an overview of the
+  layout.
+- The booklet prints in the same A5 format as the duty booklets: A4 landscape,
+  double-sided, folded down the middle, with blank pages added where needed so the
+  sheets fold correctly.
+- Duties can now be graded **Easy**, **Medium** or **Experienced**, shown
+  colour-coded on the booklet, so a participant can choose a duty that matches their
+  experience.
+- A duty can now specify that it needs two or three people — for example a loco
+  driver and a conductor — and this is shown on the booklet.
+- A duty can be pinned to a **fixed number** so automatic renumbering leaves it
+  untouched, for example special duties handed out in advance of a session starting.
+- The plan is now also checked so that every train part with a locomotive or
+  trainset assigned has a driver duty covering it on each session it runs — a part
+  nobody is rostered to drive is reported, session by session. A pinned duty is
+  checked too: it must have a number, and no two pinned duties can be given the
+  same number.
+- Companies can now have an uploaded **logo**, shown in reports in place of the text
+  signature.
+- Stations can now be marked as the **shunting yard** that handles another location's local
+  freight; the layout automatically lists every shunting yard and what it covers, shown on the
+  last page of the duty booklet. This helps station staff and freight train drivers
+  know where to send wagons with a given freight destination.
+- Each timetable stretch can now be given a **colour**, used to draw it in the
+  Topology diagram.
+- A new **distance display factor** (under Settings › Time and Speed) lets a layout
+  show a different — typically larger, more prototype-like — kilometre figure in
+  reports and the graphical timetable than the distance actually modelled, without
+  affecting any travel-time calculation.
+- The app now keeps multiple open browser tabs or windows in sync with each other.
+  **Note** that this only works across windows on the same machine in the same browser.
+- Settings can now record the meeting's **valid from** and **valid to** dates, printed
+  as a validity line on reports; leave them empty when no meeting is booked yet.
+- A new **extend plan times automatically** option (under Settings › General) widens
+  the plan's start or end time to cover a train instead of blocking the change when
+  the train's own time falls outside it. Off by default.
+- A new **update all timings** button on the graphical timetable recomputes every
+  train in the timetable in one go, instead of selecting a subset first.
+- Track occupancy checks can now optionally account for a locomotive or trainset
+  standing on a track between two trains, unless it is booked to or from parking
+  (under Settings › Validation). Off by default, since it only makes sense on
+  layouts where parking is modelled deliberately — turn it on there to catch a
+  third train quietly using a track a standing vehicle already occupies.
+- Every call in the **Trains** tab now has a **Remark** field for a note printed at that
+  call — for example "wait for the oncoming train". The note reads as finished text and
+  shows the markup you typed as soon as you enter the field, so you can emphasise the part
+  that matters: write `*slowly*` for italics and `**first**` for bold. Emptying the field
+  removes the note again.
+
+### Fixes
+
+- Adding a new train now sets its default start time to account for the given preparation
+  time, so it does not start before the plan's start time.
+
 ## Version 0.2.4
 
 - A new **Duties** tab lets you plan driver duties — the work one loco driver performs

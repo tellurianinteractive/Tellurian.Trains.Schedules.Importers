@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -327,6 +327,12 @@
   <data name="EndTime" xml:space="preserve">
     <value>End time</value>
   </data>
+  <data name="AllowPlanTimeExtend" xml:space="preserve">
+    <value>Extend plan times automatically?</value>
+  </data>
+  <data name="AllowPlanTimeExtendHelp" xml:space="preserve">
+    <value>Widens the plan's start and end time to cover a train's actual times instead of blocking the change when they fall outside the window. Has no effect while running over midnight, since the window is then already unrestricted.</value>
+  </data>
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Break time (splits the graph in two halves)</value>
   </data>
@@ -374,6 +380,12 @@
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Fast clock speed (×)</value>
+  </data>
+  <data name="DistanceFactor" xml:space="preserve">
+    <value>Distance factor (×)</value>
+  </data>
+  <data name="DistanceFactorHint" xml:space="preserve">
+    <value>Multiplies each track stretch's distance (metres) to give the kilometres shown in reports and graphs. Default 1 keeps existing distances unchanged.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Speed mapping</value>
@@ -923,8 +935,8 @@
   <data name="Route" xml:space="preserve">
     <value>Route</value>
   </data>
-  <data name="DistanceKm" xml:space="preserve">
-    <value>Distance (km)</value>
+  <data name="DistanceMeters" xml:space="preserve">
+    <value>Distance (m)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Speed (km/h)</value>
@@ -1106,9 +1118,6 @@
   <data name="TrainCategoryReferenced" xml:space="preserve">
     <value>Cannot delete: this category is used by one or more trains.</value>
   </data>
-  <data name="TrainCategoryNameRequired" xml:space="preserve">
-    <value>The name is required.</value>
-  </data>
   <data name="AddFromCatalogue" xml:space="preserve">
     <value>Add from catalogue</value>
   </data>
@@ -1232,6 +1241,12 @@
   <data name="TimingsUpdateFailed" xml:space="preserve">
     <value>Some selected trains could not be updated because their new times would fall outside the plan's start or end times.</value>
   </data>
+  <data name="UpdateAllTimings" xml:space="preserve">
+    <value>Update all timings</value>
+  </data>
+  <data name="UpdateAllTimingsFailed" xml:space="preserve">
+    <value>Some trains could not be updated because their new times would fall outside the plan's start or end times.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutes</value>
   </data>
@@ -1294,6 +1309,13 @@
   </data>
   <data name="Remark" xml:space="preserve">
     <value>Remark</value>
+  </data>
+  <data name="AddCallNote" xml:space="preserve">
+    <value>Add note</value>
+    <comment>Placeholder in the empty call note field.</comment>
+  </data>
+  <data name="CallNoteHint" xml:space="preserve">
+    <value>Note shown at this call. Use *italic* and **bold** for emphasis; the markup appears when you edit.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>No calls.</value>
@@ -1374,7 +1396,7 @@
     <value>Cargo from {0} to {1}</value>
   </data>
   <data name="WagonsTo" xml:space="preserve">
-    <value>Wagons to {0}</value>
+    <value>Wagons to</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Wagons from {0} to {1}</value>
@@ -1741,5 +1763,170 @@
   </data>
   <data name="RemoveDutyNote" xml:space="preserve">
     <value>Remove note</value>
+  </data>
+  <data name="DutyNotGraded" xml:space="preserve">
+    <value>Not graded</value>
+  </data>
+  <data name="ValidTo" xml:space="preserve">
+    <value>Valid to</value>
+  </data>
+  <data name="ValidFromHelp" xml:space="preserve">
+    <value>First day of the meeting this layout is planned for. Printed on reports; leave empty when no meeting is booked.</value>
+  </data>
+  <data name="Easy" xml:space="preserve">
+    <value>Easy</value>
+  </data>
+  <data name="ValidToHelp" xml:space="preserve">
+    <value>Last day of the meeting this layout is planned for.</value>
+  </data>
+  <data name="DutyDifficulty" xml:space="preserve">
+    <value>Difficulty</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="DutyHasFixedNumber" xml:space="preserve">
+    <value>Fixed number?</value>
+  </data>
+  <data name="Experienced" xml:space="preserve">
+    <value>Experienced</value>
+  </data>
+  <data name="ValidFrom" xml:space="preserve">
+    <value>Valid from</value>
+  </data>
+  <data name="DutyStaffCount" xml:space="preserve">
+    <value>Staffing</value>
+  </data>
+  <data name="GeneralInstructionsHint" xml:space="preserve">
+    <value>Standing instructions for the whole meeting: signalling practice, radio use, shunting rules, what to do when running late, and who to ask. Printed as a separate booklet and handed to every participant before the first session, station staff included.</value>
+  </data>
+  <data name="RemoveLogo" xml:space="preserve">
+    <value>Remove logo</value>
+  </data>
+  <data name="CargoServedFromHelp" xml:space="preserve">
+    <value>The shunting yard whose local freight covers this location. Leave empty when nothing serves it.</value>
+  </data>
+  <data name="ServesRegions" xml:space="preserve">
+    <value>Serves regions</value>
+  </data>
+  <data name="LogoTooLarge" xml:space="preserve">
+    <value>The logo must be smaller than {0} kB. It is stored inside the plan, so a large image would slow every save and load.</value>
+  </data>
+  <data name="ServesLocations" xml:space="preserve">
+    <value>Serves locations</value>
+  </data>
+  <data name="CompanyLogo" xml:space="preserve">
+    <value>Logo</value>
+  </data>
+  <data name="GeneralInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Printed as a separate booklet, not inside the duty booklets.</value>
+  </data>
+  <data name="GeneralInstructions" xml:space="preserve">
+    <value>General instructions</value>
+  </data>
+  <data name="Program" xml:space="preserve">
+    <value>Programme</value>
+  </data>
+  <data name="ProgramHint" xml:space="preserve">
+    <value>The meeting's programme: session times, breaks, meals, and anything else participants need to know in advance. Printed on the front page of the general instructions booklet, before the standing instructions.</value>
+  </data>
+  <data name="ProgramHelp" xml:space="preserve">
+    <value>Markdown. Printed on the front page of the general instructions booklet.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Instructions</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="ShuntingYards" xml:space="preserve">
+    <value>Shunting Yards</value>
+  </data>
+  <data name="CargoServedFrom" xml:space="preserve">
+    <value>Cargo served from</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="LogoTypeNotSupported" xml:space="preserve">
+    <value>Only SVG, PNG, JPEG and WebP images can be used as a logo.</value>
+  </data>
+  <data name="CompanyLogoHelp" xml:space="preserve">
+    <value>Shown on printed front pages instead of the signature, but only when every company on that page has one. SVG is preferred: it prints at the printer's resolution. Maximum 64 kB.</value>
+  </data>
+  <data name="ThisPageIsIntentionalBlank" xml:space="preserve">
+    <value>This page is intentionally blank.</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="ReadGeneralInstructions" xml:space="preserve">
+    <value>Read the general instructions before you start!</value>
+  </data>
+  <data name="DutyStarts" xml:space="preserve">
+    <value>Starts</value>
+  </data>
+  <data name="StaffingPersons" xml:space="preserve">
+    <value>{0} people</value>
+  </data>
+  <data name="AlsoShunt" xml:space="preserve">
+    <value>also shunt</value>
+  </data>
+  <data name="StartsAtEndsAt" xml:space="preserve">
+    <value>Starts at: {0} {1}, ends at {2} {3}</value>
+  </data>
+  <data name="DutyContinuesOnNextPage" xml:space="preserve">
+    <value>Duty continues on next page!</value>
+  </data>
+  <data name="DutyLabel" xml:space="preserve">
+    <value>Duty</value>
+  </data>
+  <data name="CargoWagonsWithWaybills" xml:space="preserve">
+    <value>Cargo wagons with waybills</value>
+  </data>
+  <data name="DutyEnds" xml:space="preserve">
+    <value>Ends</value>
+  </data>
+  <data name="PrintedAt" xml:space="preserve">
+    <value>Printed {0}</value>
+  </data>
+  <data name="PositionInTrain" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="DutyInTrain" xml:space="preserve">
+    <value>Duty in {0} train {1}</value>
+  </data>
+  <data name="AtLocation" xml:space="preserve">
+    <value>at</value>
+  </data>
+  <data name="ValidBetween" xml:space="preserve">
+    <value>Valid {0} - {1}</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>Max length</value>
+  </data>
+  <data name="ArrDep" xml:space="preserve">
+    <value>Arr/Dep</value>
+  </data>
+  <data name="WagonClasses" xml:space="preserve">
+    <value>Classes</value>
+  </data>
+  <data name="AnyPositionInTrain" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
+    <value>No more trains in this duty.</value>
+  </data>
+  <data name="WagonsFrom" xml:space="preserve">
+    <value>Wagons from</value>
+  </data>
+  <data name="ScheduledWagonsets" xml:space="preserve">
+    <value>Scheduled wagonsets</value>
+  </data>
+  <data name="BookletPrintingHint" xml:space="preserve">
+    <value>Print to PDF first and proof-read it, then print the PDF on paper: A4 landscape, double-sided, flipped on the short edge. Fold each sheet down the middle; staple as well when there is more than one.</value>
+  </data>
+  <data name="DriverDuties" xml:space="preserve">
+    <value>Driver duties</value>
   </data>
 </root>

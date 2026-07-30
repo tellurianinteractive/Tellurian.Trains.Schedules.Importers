@@ -87,6 +87,16 @@ public static class DaysExtensions
             [.. Enumerable.Range(0, 7).Where(offset => (sessions.Flags & (1 << offset)) != 0)];
     }
 
+    /// <summary>
+    /// The translated name of the day at an operating-week offset (0 = <paramref name="startDay"/>).
+    /// Shared with <c>SessionsFormatting</c> so both day renderings name a day the same way.
+    /// </summary>
+    internal static string DayNameAt(DayOfWeek startDay, int offset, bool useShort) =>
+        DayName(WeekdayAt(startDay, offset), useShort);
+
+    /// <summary>The translated text for a resource key in the day resources.</summary>
+    internal static string DayResource(string key) => Translate(key);
+
     /// <summary>Maps an operating-week offset (0 = <paramref name="startDay"/>) to a calendar weekday flag.</summary>
     private static Days WeekdayAt(DayOfWeek startDay, int offset)
     {

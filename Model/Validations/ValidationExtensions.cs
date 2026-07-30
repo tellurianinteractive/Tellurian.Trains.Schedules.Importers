@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
@@ -27,6 +27,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
             if (options.ValidateDriverDuties) result.AddRange(plan.ValidateDriverDuties());
+            if (options.ValidateDriverDuties) result.AddRange(plan.ValidateDriverDutyCoverage());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
             return result;
         }
@@ -43,7 +44,7 @@ public static class ValidationExtensions
             result.AddRange(timetable.EnsureStationHasTrack());
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
-            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules)));
+            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
             if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetConflictingTrains()).Distinct());
             if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
@@ -141,11 +142,40 @@ public static class ValidationExtensions
         /// <summary>
         /// Validates driver duties: a train part may not be worked by two duties whose sessions overlap
         /// (the segment would need two drivers on a common session), and the parts within one duty may not
-        /// overlap in time (a driver cannot be in two places at once).
+        /// overlap in time (a driver cannot be in two places at once). Also checks the identities that
+        /// renumbering cannot fix and the staffing range.
         /// </summary>
         internal IEnumerable<ValidationError> ValidateDriverDuties()
         {
             var duties = plan.DriverDuties.ToArray();
+
+            // A pinned identity renumbering cannot repair: empty, or shared with another pinned duty.
+            // Both end as two booklets the pile cannot be sorted by, which is the one thing its number
+            // is for.
+            var pinned = duties.Where(d => d.IsExcludedFromRenumbering).ToArray();
+            foreach (var duty in pinned.Where(d => string.IsNullOrWhiteSpace(d.Identity)))
+            {
+                var message = Message.Information(Strings.DutyHasNoIdentityToHold);
+                yield return ValidationError.DutyIdentityMissing(duty, message);
+            }
+            for (var i = 0; i < pinned.Length - 1; i++)
+            {
+                for (var j = i + 1; j < pinned.Length; j++)
+                {
+                    var (d1, d2) = (pinned[i], pinned[j]);
+                    if (string.IsNullOrWhiteSpace(d1.Identity)) continue;
+                    if (!d1.Identity.Equals(d2.Identity, StringComparison.OrdinalIgnoreCase)) continue;
+                    var message = Message.Information(Strings.DutyIdentityIsHeldByTwoDuties, d1.Identity);
+                    yield return ValidationError.DutyIdentityDuplicated(d1, d2, message);
+                }
+            }
+
+            // The editor offers 1–3 only, so this guards a hand-edited plan file.
+            foreach (var duty in duties.Where(d => d.StaffCount is < 1 or > 3))
+            {
+                var message = Message.Information(Strings.DutyStaffCountIsOutOfRange, duty.Identity, duty.StaffCount);
+                yield return ValidationError.DutyStaffCountOutOfRange(duty, message);
+            }
 
             // A part shared by two duties whose sessions overlap.
             for (var i = 0; i < duties.Length - 1; i++)
@@ -181,6 +211,61 @@ public static class ValidationExtensions
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Validates driver duty coverage: every train part hauled by a traction unit must also be
+        /// covered by a driver duty on every session that traction assignment actually runs — otherwise
+        /// nobody is rostered to drive it. A part with no traction assigned is out of scope here (that
+        /// gap is <see cref="ValidateTractionCoverage"/>'s concern); a part with traction but only partial
+        /// duty coverage is reported for exactly the sessions the duty gap leaves open.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateDriverDutyCoverage()
+        {
+            var general = plan.Layout.Settings.General;
+            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
+            var errors = new List<ValidationError>();
+
+            var tractionAssignments = plan.ScheduledObjects
+                .Where(v => v.IsTraction)
+                .SelectMany(v => v.ScheduleAssignments)
+                .ToList();
+            var duties = plan.DriverDuties.ToArray();
+
+            // The sessions each traction-assigned part actually runs traction on: the assignment's
+            // sessions, narrowed to the sessions the train itself runs. Several assignments (different
+            // traction units taking over on different sessions) can cover the same part, so their
+            // sessions are unioned.
+            var tractionSessionsByPart = new Dictionary<ScheduledTrainPart, Sessions>();
+            foreach (var assignment in tractionAssignments)
+            {
+                foreach (var part in assignment.Schedule?.Parts ?? [])
+                {
+                    var sessions = assignment.Sessions.And(part.Train.Sessions);
+                    tractionSessionsByPart[part] = tractionSessionsByPart.TryGetValue(part, out var existing)
+                        ? existing.Or(sessions)
+                        : sessions;
+                }
+            }
+
+            foreach (var (part, tractionSessions) in tractionSessionsByPart)
+            {
+                var dutySessions = duties
+                    .Where(d => d.Parts.Contains(part))
+                    .Aggregate(new Sessions(), (acc, d) => acc.Or(d.Sessions));
+
+                var missing = new List<int>();
+                for (var number = 1; number <= periodMax; number++)
+                    if (tractionSessions.Includes(number) && !dutySessions.Includes(number)) missing.Add(number);
+
+                if (missing.Count > 0)
+                {
+                    var missingSessions = SessionsExtensions.FromPeriodNumbers(missing, general.UseDays);
+                    var message = Message.Information(Strings.TrainPartHasNoDriverDuty, part.Train, missingSessions.SessionsNumbers, part.From.OperationLocation, part.From.Departure.HHMM(), part.To.OperationLocation, part.To.Arrival.HHMM());
+                    errors.Add(ValidationError.TrainPartMissingDriverDuty(part, message));
+                }
+            }
+            return errors;
         }
 
         /// <summary>
@@ -619,15 +704,37 @@ public static class ValidationExtensions
             return result;
         }
 
-        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules)
+        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, bool extendByVehicleStay = false)
         {
             var result = new List<(StationCall, StationCall)>();
-            var conflictingWithMe = remaining.Where(r => r.Track.Equals(stationCall.Track) && !r.Train!.Equals(stationCall.Train) && r.Arrival > stationCall.Departure && r.Departure < stationCall.Arrival && !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
+            // The schedules are still needed when the extension is off: they are what tells two calls of
+            // the same vehicle apart from two vehicles contending for the track.
+            var occupancySchedules = extendByVehicleStay ? vehicleSchedules : null;
+            var mine = stationCall.TrackOccupancy(occupancySchedules);
+            var conflictingWithMe = remaining.Where(r =>
+                r.Track.Equals(stationCall.Track) &&
+                !r.Train!.Equals(stationCall.Train) &&
+                // Trains that never run on a common session are never there together, so they cannot
+                // contend for the track — the same rule the stretch capacity check already applies.
+                r.Train!.Sessions.Overlaps(stationCall.Train!.Sessions) &&
+                r.TrackOccupancy(occupancySchedules).OverlapsInTime(mine) &&
+                !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
-            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules));
+            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, extendByVehicleStay));
             return result;
         }
 
+        /// <summary>
+        /// Describes the span this call actually occupies its track for, rather than the call's own
+        /// arrival and departure — the two differ when a traction unit staying on for the next train
+        /// extends the occupancy (<see cref="TrackOccupancyExtensions.TrackOccupancy"/>), which is the
+        /// span a reported conflict needs to show to make sense of a meet the calls' own times do not.
+        /// </summary>
+        internal string TrackOccupancySpanText(IEnumerable<Schedule>? vehicleSchedules)
+        {
+            var (from, to) = stationCall.TrackOccupancy(vehicleSchedules);
+            return string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationCall.OperationLocation, stationCall.Track, from.HHMM(), to.HHMM());
+        }
     }
 
     extension(StationTrack stationTrack)
@@ -636,19 +743,27 @@ public static class ValidationExtensions
         /// Validates a station track for conflicting calls, using the schedule's vehicle schedules to tell whether conflicting calls share a vehicle.
         /// </summary>
         /// <param name="vehicleSchedules">The vehicle schedules used to determine whether conflicting calls share a vehicle.</param>
+        /// <param name="extendOccupancyByVehicleStay">Whether a traction unit waiting between two trains
+        /// counts as occupying the track; see <see cref="ValidationSettings.ExtendTrackOccupancyByVehicleStay"/>.</param>
         /// <returns>The validation errors found.</returns>
-        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules) =>
+        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false) =>
             stationTrack is null ? [] :
-            stationTrack.GetConflicts(vehicleSchedules).Select(c =>
+            stationTrack.GetConflicts(vehicleSchedules, extendOccupancyByVehicleStay).Select(c =>
             {
-                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, c.one.Train!, c.one, c.another.Train!, c.another);
+                // Same occupancy the conflict was detected with, not each call's own arrival/departure,
+                // so a conflict caused by a traction unit's stay (rather than the calls' own times) still
+                // shows the span that actually overlaps.
+                var occupancySchedules = extendOccupancyByVehicleStay ? vehicleSchedules : null;
+                var oneSpan = c.one.TrackOccupancySpanText(occupancySchedules);
+                var anotherSpan = c.another.TrackOccupancySpanText(occupancySchedules);
+                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, c.one.Train!, oneSpan, c.another.Train!, anotherSpan);
                 return ValidationError.StationTrackConflict(stationTrack, c.one, c.another, message);
             });
 
-        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules)
+        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay)
         {
             if (stationTrack.Calls.Count < 2) return [];
-            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules);
+            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, extendOccupancyByVehicleStay);
             return result.Distinct();
         }
 

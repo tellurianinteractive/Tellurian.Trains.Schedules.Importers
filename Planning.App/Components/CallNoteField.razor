@@ -1,0 +1,95 @@
+@using Tellurian.Trains.Schedules.Model.Notes
+
+@* A manual call note that reads as formatted text and edits as the markup behind it: the rendered
+   emphasis is what a planner sees at rest, and entering the field swaps in a plain input holding the
+   *asterisks* they typed. Two elements rather than a contenteditable, because the stored value is
+   markup-free text and a rich-text surface would invite pasted markup this note cannot carry. *@
+<div class="notefield">
+    @if (_editing)
+    {
+        <input type="text" @ref="_input" value="@_draft" title="@Title"
+               @oninput="e => _draft = e.Value?.ToString() ?? string.Empty"
+               @onblur="Commit" @onkeydown="OnKeyDown" />
+    }
+    else
+    {
+        @* tabindex makes the rendered form a tab stop, so the field is reachable without a mouse; focus
+           and click both open it, which is the same gesture either way. *@
+        <div class="rendered @(HasText ? null : "empty")" tabindex="0" role="textbox" title="@Title"
+             @onfocus="StartEditing" @onclick="StartEditing">
+            @if (HasText)
+            {
+                <span class="callnote">@Rendered</span>
+            }
+            else
+            {
+                @Placeholder
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The note text as stored, Markdown emphasis included.</summary>
+    [Parameter] public string Value { get; set; } = "";
+
+    /// <summary>Raised with the edited text when the field is left or Enter is pressed.</summary>
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>Shown in place of the text while the note is empty.</summary>
+    [Parameter] public string? Placeholder { get; set; }
+
+    /// <summary>Hover text, normally explaining the emphasis syntax.</summary>
+    [Parameter] public string? Title { get; set; }
+
+    private ElementReference _input;
+    private string _draft = "";
+    private bool _editing;
+    private bool _focusPending;
+
+    private bool HasText => !string.IsNullOrWhiteSpace(Value);
+
+    private MarkupString Rendered => new(NoteMarkdown.ToHtml(Value));
+
+    // While editing, the draft is the truth; a parameter set from elsewhere must not overwrite what is
+    // being typed.
+    protected override void OnParametersSet()
+    {
+        if (!_editing) _draft = Value;
+    }
+
+    // The input does not exist until the swap has rendered, so focus is deferred to after that render.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusPending) return;
+        _focusPending = false;
+        await _input.FocusAsync();
+    }
+
+    private void StartEditing()
+    {
+        if (_editing) return;
+        _draft = Value;
+        _editing = true;
+        _focusPending = true;
+    }
+
+    private async Task Commit()
+    {
+        // Enter commits and closes the field; the blur that follows must not commit a second time.
+        if (!_editing) return;
+        _editing = false;
+        if (_draft == Value) return;
+        await ValueChanged.InvokeAsync(_draft);
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Commit();
+        else if (e.Key == "Escape")
+        {
+            _draft = Value;
+            _editing = false;
+        }
+    }
+}

@@ -92,7 +92,8 @@ public class TrackStretch : IEquatable<TrackStretch>
     public OperationLocation End { get; set; }
 
     /// <summary>
-    /// Gets or sets the distance of this stretch in kilometers.
+    /// Gets or sets the distance of this stretch in metres. Timetable reports and graphs convert
+    /// this to a displayed kilometre figure via the layout's <c>TimeAndSpeedSettings.DistanceFactor</c>.
     /// </summary>
     [DataMember(IsRequired = true, Order = 4)]
     public double Distance { get; set; }

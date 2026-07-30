@@ -8,7 +8,9 @@
     <button @onclick="Close">@Translator("Close")</button>
 </div>
 
-@Body
+<div class="print-canvas">
+    @Body
+</div>
 
 @code {
     private async Task Print() => await JS.InvokeVoidAsync("window.print");

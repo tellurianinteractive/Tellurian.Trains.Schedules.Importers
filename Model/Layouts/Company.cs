@@ -55,6 +55,19 @@ public class Company : IEquatable<Company>
     public int? CountryId { get; set; }
 
     /// <summary>
+    /// Gets or sets the company's logo as a complete data URI (for example
+    /// <c>data:image/svg+xml;base64,…</c>), or <c>null</c> when none has been uploaded.
+    /// </summary>
+    /// <remarks>
+    /// Stored inline rather than as a file path so the plan stays a single self-contained JSON file: a
+    /// path would resolve on the machine that set it and nowhere else, while inline content survives
+    /// "Save as", reopening on another computer and the whole export/import round trip. Rendered through
+    /// an <c>&lt;img&gt;</c> for every format — an uploaded SVG inlined into the page could carry script,
+    /// which inside an <c>&lt;img&gt;</c> a browser refuses to run.
+    /// </remarks>
+    public string? Logo { get; set; }
+
+    /// <summary>
     /// Gets or sets the foreign key to the associated layout.
     /// </summary>
     public int LayoutId { get; set; }

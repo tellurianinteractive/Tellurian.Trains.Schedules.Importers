@@ -106,4 +106,54 @@ public class PlanOperatingWindowTests
         Assert.IsTrue(clone.DriverEndTime.Value >= TimeSpan.FromHours(24),
             "The cloned train should spill over midnight.");
     }
+
+    [TestMethod]
+    public void CreateExtendsTheWindowInsteadOfRejectingWhenAllowPlanTimeExtendIsSet()
+    {
+        var plan = SimplePlan();
+        // The train departs at 08:00 and runs for the better part of an hour, so a window ending at 08:00
+        // would normally reject it.
+        SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(8));
+        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.AreEqual(1, plan.Timetable.Trains.Count);
+        Assert.IsTrue(plan.Layout.Settings.General.EndTime >= train.DriverEndTime.Value,
+            "EndTime should have been widened to cover the train.");
+    }
+
+    [TestMethod]
+    public void MoveExtendsTheWindowInsteadOfRejectingWhenAllowPlanTimeExtendIsSet()
+    {
+        var plan = SimplePlan();
+        SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(20));
+        var train = CreateTrain(plan);
+        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+
+        // Shift the start to 19:55, so the train necessarily finishes after 20:00.
+        var minutes = 19 * 60 + 55 - (int)train.DriverStartTime.Value.TotalMinutes;
+        var moved = plan.Move(train, minutes);
+
+        Assert.IsNotNull(moved);
+        Assert.IsTrue(plan.Layout.Settings.General.EndTime >= train.DriverEndTime.Value,
+            "EndTime should have been widened to cover the moved train.");
+    }
+
+    [TestMethod]
+    public void AllowPlanTimeExtendDoesNotAllowATrainToStartOutsideTheCalendarDay()
+    {
+        var plan = SimplePlan();
+        SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(20));
+        var train = CreateTrain(plan);
+        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+
+        // A shift past midnight would make the train start on the next calendar day, which stays
+        // rejected even when AllowPlanTimeExtend is set.
+        var minutes = (int)TimeSpan.FromHours(24).TotalMinutes - (int)train.DriverStartTime.Value.TotalMinutes + 5;
+        var moved = plan.Move(train, minutes);
+
+        Assert.IsNull(moved);
+    }
 }

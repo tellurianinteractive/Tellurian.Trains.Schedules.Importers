@@ -21,3 +21,14 @@
 .report-toolbar button:hover {
     background: #24507e;
 }
+
+/* A grey backdrop behind the sheets, so each fixed-size page (A4LPage.razor.css etc.) reads as a
+   separate printed page rather than as content flowing edge-to-edge in the browser window. Print-only
+   rules still apply on top of this — the backdrop itself is never printed, since it is @media screen. */
+@media screen {
+    .print-canvas {
+        background: #d9d9d9;
+        min-height: 100vh;
+        padding: 10mm 0;
+    }
+}

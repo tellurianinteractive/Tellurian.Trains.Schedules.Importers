@@ -13,9 +13,16 @@
         <div class="edit-duty-dialog">
             <h3>@Translator("EditDuty")</h3>
 
+            @* The identity is editable only while it is pinned: otherwise renumbering owns it, and a
+               value typed here would be silently overwritten the next time the plan is renumbered. *@
             <div class="field">
                 <label>@Translator("DutyIdentity")</label>
-                <input type="text" value="@_identity" @onchange="e => _identity = e.Value?.ToString() ?? string.Empty" />
+                <input type="text" value="@_identity" disabled="@(!_isExcludedFromRenumbering)"
+                       @onchange="e => _identity = e.Value?.ToString() ?? string.Empty" />
+            </div>
+            <div class="field">
+                <label>@Translator("DutyHasFixedNumber")</label>
+                <input type="checkbox" @bind="_isExcludedFromRenumbering" />
             </div>
             <div class="field">
                 <label>@Translator("Company")</label>
@@ -50,6 +57,28 @@
                 <label>@Translator("DutyEndTime")</label>
                 <input type="text" class="time" value="@_endOverride" placeholder="@DefaultEndText"
                        @onchange="e => _endOverride = e.Value?.ToString() ?? string.Empty" />
+            </div>
+
+            @* Difficulty and staffing both answer "what kind of commitment is this?", which is what a
+               participant reads when picking the next duty, so they are edited together. *@
+            <div class="field">
+                <label>@Translator("DutyDifficulty")</label>
+                <select value="@(_difficulty?.ToString() ?? string.Empty)" @onchange="OnDifficultyChanged">
+                    <option value="">@Translator("DutyNotGraded")</option>
+                    @foreach (var grade in Enum.GetValues<DutyDifficulty>())
+                    {
+                        <option value="@grade">@Translator(grade.ToString())</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>@Translator("DutyStaffCount")</label>
+                <select @bind="_staffCount">
+                    @foreach (var count in StaffCounts)
+                    {
+                        <option value="@count">@count</option>
+                    }
+                </select>
             </div>
 
             <div class="field notes">
@@ -102,8 +131,15 @@
     private string _sessionsKey = "";
     private string _startOverride = "";
     private string _endOverride = "";
+    private bool _isExcludedFromRenumbering;
+    private DutyDifficulty? _difficulty;
+    private int _staffCount = 1;
     private string? _error;
     private readonly List<string> _notes = [];
+
+    // A small select rather than a number field: three options need no validation message and offer no
+    // way to type 7. Beyond three people it is not one duty.
+    private static readonly int[] StaffCounts = [1, 2, 3];
 
     protected override void OnInitialized()
     {
@@ -113,8 +149,14 @@
         _sessionsKey = SessionsDisplay.Key(_sessions);
         _startOverride = Duty.OverriddenStartTime?.HHMM() ?? "";
         _endOverride = Duty.OverriddenEndTime?.HHMM() ?? "";
+        _isExcludedFromRenumbering = Duty.IsExcludedFromRenumbering;
+        _difficulty = Duty.Difficulty;
+        _staffCount = Duty.StaffCount;
         _notes.AddRange(Duty.Notes.Select(n => n.Text));
     }
+
+    private void OnDifficultyChanged(ChangeEventArgs e) =>
+        _difficulty = Enum.TryParse<DutyDifficulty>(e.Value?.ToString(), out var grade) ? grade : null;
 
     // The derived times shown as placeholders, so the user sees what the override replaces.
     private string DefaultStartText => Duty.DefaultStartTime?.HHMM() ?? "";
@@ -168,6 +210,9 @@
         Duty.Sessions = _sessions;
         Duty.OverriddenStartTime = startOverride;
         Duty.OverriddenEndTime = endOverride;
+        Duty.IsExcludedFromRenumbering = _isExcludedFromRenumbering;
+        Duty.Difficulty = _difficulty;
+        Duty.StaffCount = _staffCount;
         // Rebuild the manual notes from the staged text (drop blank rows), preserving order.
         Duty.Notes.Clear();
         foreach (var text in _notes.Where(t => !string.IsNullOrWhiteSpace(t)))
@@ -178,5 +223,9 @@
 
     private Task Cancel() => OnClosed.InvokeAsync();
 
-    private string SessionsText(Sessions sessions) => SessionsDisplay.Text(sessions, UseDays, Translator, MaxSessions, StartDay);
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+
+    // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
+    private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
 }

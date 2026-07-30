@@ -1,5 +1,86 @@
 # Versionsnyheter
 
+## Version 0.3.0
+
+- En ny rapport, **Förartjänster**, skriver ut ett A5-häfte per tjänst. Framsidan visar
+  tjänstens nummer, vilka köromgångar eller dagar den körs, dess start- och sluttid och
+  stationer, en svårighetsgrad, bemanningsbehov och eventuella tjänsteanteckningar.
+  Varje tågdel får sin egen sida, med vilka dragfordon som ska användas, vilka vagnsätt
+  som ska tas med och till vilka destinationer godsvagnar ska tas med, samt tidtabellen
+  – var och en visad i sitt eget tydligt avgränsade block. Häftets sista sida visar
+  banans spårplan och en tabell över rangerbangårdar, för enkel referens under
+  körningen.
+- En ny rapport, **Allmänna instruktioner**, är ett separat utskrivet häfte med träffens
+  program och instruktioner som gäller för en bana under hela träffen. Här är
+  träffarrangören fri att skriva vad som helst – till exempel körinstruktioner,
+  signalgivning, radio-/telefonanvändning, vad man gör vid förseningar och vem man
+  frågar – och delas ut en gång till alla.
+- Både programmet och instruktionerna skrivs under **Inställningar › Information** och
+  kan formateras med Markdown – rubriker, listor, fet och kursiv stil – så att även en
+  lång instruktionstext blir läsbar i utskrift.
+- Häftet inleds med träffens namn, vilka datum den gäller och utskriftsdatum, följt av
+  programmet: köromgångarnas tider, raster och måltider – det varje deltagare behöver
+  veta före den första köromgången.
+- Instruktionerna följer sedan över så många sidor som de behöver. Sidbrytningar sker
+  mellan stycken, och en rubrik hålls alltid ihop med texten den inleder.
+- Sista sidan visar banans spårplan och tabellen över rangerbangårdar, så att även de
+  som aldrig håller i ett tjänstehäfte – framför allt stationspersonalen – får en
+  överblick över banan.
+- Häftet skrivs ut i samma A5-format som tjänstehäftena: A4 liggande, dubbelsidigt,
+  vikt på mitten, med tomma sidor tillagda där det behövs så att arken viks rätt.
+- Tjänster kan nu graderas **Lätt**, **Medel** eller **Van**, visat färgkodat på
+  häftet, så att en deltagare kan välja en tjänst som matchar sin erfarenhet.
+- En tjänst kan nu ange att den behöver två eller tre personer – till exempel en
+  lokförare och en konduktör – och detta visas på häftet.
+- En tjänst kan fästas med ett **fast nummer** så att automatisk omnumrering lämnar
+  den orörd, till exempel särskilda tjänster som delas ut innan en köromgång börjar.
+- Planen kontrolleras nu även så att varje tågdel med ett lok eller tågsätt tilldelat
+  har en förartjänst som täcker den under varje köromgång den körs – en del som ingen
+  är schemalagd att köra rapporteras, köromgång för köromgång. En tjänst med fast
+  nummer kontrolleras också: den måste ha ett nummer, och inga två tjänster med fast
+  nummer kan ges samma nummer.
+- Företag kan nu ha en uppladdad **logotyp**, visad i rapporter i stället för
+  textsignaturen.
+- Stationer kan nu markeras som den **rangerbangård** som betjänar en annan orts
+  lokalgods; banan listar automatiskt varje rangerbangård och vad den täcker, visat på
+  tjänstehäftets sista sida. Detta hjälper stationspersonal och godstågförare att veta
+  vart vagnar med en viss godsdestination ska skickas.
+- Varje tidtabellssträcka kan nu ges en **färg**, som används för att rita den i
+  Topologi-diagrammet.
+- En ny **avståndsfaktor** (under Inställningar › Tid & hastighet) låter en bana visa
+  en annan – vanligtvis större, mer förebildslik – kilometersiffra i rapporter och den
+  grafiska tidtabellen än det avstånd som faktiskt är modellerat, utan att det
+  påverkar någon körtidsberäkning.
+- Appen håller nu flera öppna webbläsarflikar eller -fönster synkroniserade med
+  varandra. **Observera** att detta bara fungerar mellan fönster på samma dator i
+  samma webbläsare.
+- Inställningar kan nu spara träffens **gäller från**- och **gäller till**-datum,
+  utskrivna som en giltighetsrad på rapporter; lämna dem tomma om ingen träff är
+  bokad ännu.
+- En ny inställning, **utöka plantider automatiskt?** (under Inställningar ›
+  Allmänt), utvidgar planens start- eller sluttid för att täcka ett tåg i stället för
+  att blockera ändringen när tågets egen tid hamnar utanför den. Avstängd som
+  standard.
+- En ny knapp, **uppdatera alla tider**, i den grafiska tidtabellen räknar om alla
+  tåg i tidtabellen på en gång, i stället för att man först måste välja ut en
+  delmängd.
+- Spårbeläggningskontrollen kan nu valfritt ta hänsyn till ett lok eller tågsätt som
+  står på ett spår mellan två tåg, såvida det inte är bokat till eller från
+  uppställning (under Inställningar › Validering). Avstängd som standard, eftersom
+  det bara är meningsfullt på banor där uppställning modelleras avsiktligt – slå på
+  den där för att upptäcka ett tredje tåg som i tysthet använder ett spår som ett
+  stillastående fordon redan upptar.
+- Varje uppehåll i fliken **Tåg** har nu ett fält för **Anmärkning** – en notering som
+  skrivs ut vid det uppehållet, till exempel ”vänta på mötande tåg”. Anmärkningen visas
+  färdigformaterad och byter till den råa märkningen så snart du går in i fältet, så att du
+  kan framhäva det som är viktigt: skriv `*sakta*` för kursiv och `**första**` för fet stil.
+  Tömmer du fältet försvinner anmärkningen igen.
+
+### Rättningar
+
+- Att lägga till ett nytt tåg sätter nu dess standardstarttid med hänsyn till den
+  angivna förberedelsetiden, så att den inte börjar före planens starttid.
+
 ## Version 0.2.4
 
 - En ny flik **Tjänster** låter dig planera förartjänster – det arbete en lokförare utför

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -327,6 +327,12 @@
   <data name="EndTime" xml:space="preserve">
     <value>Endzeit</value>
   </data>
+  <data name="AllowPlanTimeExtend" xml:space="preserve">
+    <value>Planzeiten automatisch erweitern?</value>
+  </data>
+  <data name="AllowPlanTimeExtendHelp" xml:space="preserve">
+    <value>Erweitert die Start- und Endzeit des Plans, um die tatsächlichen Zeiten eines Zuges abzudecken, anstatt die Änderung zu blockieren, wenn sie außerhalb des Zeitfensters liegen. Hat keine Wirkung, wenn der Plan über Mitternacht läuft, da das Zeitfenster dann bereits unbegrenzt ist.</value>
+  </data>
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Umbruchzeit (teilt den Bildfahrplan in zwei Hälften)</value>
   </data>
@@ -374,6 +380,12 @@
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Zeitraffer-Faktor (×)</value>
+  </data>
+  <data name="DistanceFactor" xml:space="preserve">
+    <value>Entfernungsfaktor (×)</value>
+  </data>
+  <data name="DistanceFactorHint" xml:space="preserve">
+    <value>Multipliziert die Entfernung (Meter) jedes Streckenabschnitts zu den in Berichten und Grafiken angezeigten Kilometern. Der Standardwert 1 lässt bestehende Entfernungen unverändert.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Geschwindigkeitszuordnung</value>
@@ -615,8 +627,8 @@
   <data name="Route" xml:space="preserve">
     <value>Laufweg</value>
   </data>
-  <data name="DistanceKm" xml:space="preserve">
-    <value>Entfernung (km)</value>
+  <data name="DistanceMeters" xml:space="preserve">
+    <value>Entfernung (m)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Geschwindigkeit (km/h)</value>
@@ -833,9 +845,6 @@
   </data>
   <data name="TrainCategoryReferenced" xml:space="preserve">
     <value>Löschen nicht möglich: Diese Kategorie wird von einem oder mehreren Zügen verwendet.</value>
-  </data>
-  <data name="TrainCategoryNameRequired" xml:space="preserve">
-    <value>Der Name ist erforderlich.</value>
   </data>
   <data name="AddFromCatalogue" xml:space="preserve">
     <value>Aus Katalog hinzufügen</value>
@@ -1227,6 +1236,12 @@
   <data name="TimingsUpdateFailed" xml:space="preserve">
     <value>Einige ausgewählte Züge konnten nicht aktualisiert werden, weil ihre neuen Zeiten außerhalb der Start- oder Endzeit des Plans lägen.</value>
   </data>
+  <data name="UpdateAllTimings" xml:space="preserve">
+    <value>Alle Zeiten aktualisieren</value>
+  </data>
+  <data name="UpdateAllTimingsFailed" xml:space="preserve">
+    <value>Einige Züge konnten nicht aktualisiert werden, weil ihre neuen Zeiten außerhalb der Start- oder Endzeit des Plans lägen.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minuten</value>
   </data>
@@ -1289,6 +1304,13 @@
   </data>
   <data name="Remark" xml:space="preserve">
     <value>Bemerkung</value>
+  </data>
+  <data name="AddCallNote" xml:space="preserve">
+    <value>Bemerkung hinzufügen</value>
+    <comment>Placeholder in the empty call note field.</comment>
+  </data>
+  <data name="CallNoteHint" xml:space="preserve">
+    <value>Bemerkung, die bei diesem Halt angezeigt wird. Mit *kursiv* und **fett** hervorheben; die Auszeichnung erscheint beim Bearbeiten.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>Keine Halte.</value>
@@ -1369,7 +1391,7 @@
     <value>Fracht von {0} nach {1}</value>
   </data>
   <data name="WagonsTo" xml:space="preserve">
-    <value>Wagen nach {0}</value>
+    <value>Wagen nach</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Wagen von {0} nach {1}</value>
@@ -1739,5 +1761,170 @@
   </data>
   <data name="Id" xml:space="preserve">
     <value>Id</value>
+  </data>
+  <data name="DutyNotGraded" xml:space="preserve">
+    <value>Nicht bewertet</value>
+  </data>
+  <data name="ValidTo" xml:space="preserve">
+    <value>Gültig bis</value>
+  </data>
+  <data name="ValidFromHelp" xml:space="preserve">
+    <value>Erster Tag des Treffens, für das diese Anlage geplant ist. Wird auf Berichten gedruckt; leer lassen, wenn kein Treffen gebucht ist.</value>
+  </data>
+  <data name="Easy" xml:space="preserve">
+    <value>Leicht</value>
+  </data>
+  <data name="ValidToHelp" xml:space="preserve">
+    <value>Letzter Tag des Treffens, für das diese Anlage geplant ist.</value>
+  </data>
+  <data name="DutyDifficulty" xml:space="preserve">
+    <value>Schwierigkeit</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Mittel</value>
+  </data>
+  <data name="DutyHasFixedNumber" xml:space="preserve">
+    <value>Feste Nummer?</value>
+  </data>
+  <data name="Experienced" xml:space="preserve">
+    <value>Erfahren</value>
+  </data>
+  <data name="ValidFrom" xml:space="preserve">
+    <value>Gültig ab</value>
+  </data>
+  <data name="DutyStaffCount" xml:space="preserve">
+    <value>Besetzung</value>
+  </data>
+  <data name="GeneralInstructionsHint" xml:space="preserve">
+    <value>Ständige Anweisungen für das ganze Treffen: Signalgebung, Funkverkehr, Rangierregeln, Verhalten bei Verspätung und wen man fragt. Wird als eigenes Heft gedruckt und vor der ersten Session an alle Teilnehmer ausgegeben, auch an das Stationspersonal.</value>
+  </data>
+  <data name="RemoveLogo" xml:space="preserve">
+    <value>Logo entfernen</value>
+  </data>
+  <data name="CargoServedFromHelp" xml:space="preserve">
+    <value>Der Rangierbahnhof, von dem aus der Ortsgüterverkehr dieses Orts bedient wird. Leer lassen, wenn ihn niemand bedient.</value>
+  </data>
+  <data name="ServesRegions" xml:space="preserve">
+    <value>Bedient Regionen</value>
+  </data>
+  <data name="LogoTooLarge" xml:space="preserve">
+    <value>Das Logo muss kleiner als {0} kB sein. Es wird im Plan gespeichert, sodass ein großes Bild jedes Speichern und Laden verlangsamt.</value>
+  </data>
+  <data name="ServesLocations" xml:space="preserve">
+    <value>Bedient Orte</value>
+  </data>
+  <data name="CompanyLogo" xml:space="preserve">
+    <value>Logo</value>
+  </data>
+  <data name="GeneralInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Wird als eigenes Heft gedruckt, nicht in den Dienstheften.</value>
+  </data>
+  <data name="GeneralInstructions" xml:space="preserve">
+    <value>Allgemeine Anweisungen</value>
+  </data>
+  <data name="Program" xml:space="preserve">
+    <value>Programm</value>
+  </data>
+  <data name="ProgramHint" xml:space="preserve">
+    <value>Das Programm des Treffens: Session-Zeiten, Pausen, Mahlzeiten und alles andere, was die Teilnehmer im Voraus wissen müssen. Wird auf der Titelseite des Heftes mit den allgemeinen Anweisungen gedruckt, vor den ständigen Anweisungen.</value>
+  </data>
+  <data name="ProgramHelp" xml:space="preserve">
+    <value>Markdown. Wird auf der Titelseite des Heftes mit den allgemeinen Anweisungen gedruckt.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Anweisungen</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Anlage</value>
+  </data>
+  <data name="ShuntingYards" xml:space="preserve">
+    <value>Rangierbahnhöfe</value>
+  </data>
+  <data name="CargoServedFrom" xml:space="preserve">
+    <value>Güterbedienung von</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="LogoTypeNotSupported" xml:space="preserve">
+    <value>Nur SVG-, PNG-, JPEG- und WebP-Bilder können als Logo verwendet werden.</value>
+  </data>
+  <data name="CompanyLogoHelp" xml:space="preserve">
+    <value>Wird auf gedruckten Titelseiten statt der Signatur gezeigt, aber nur wenn jede Gesellschaft auf der Seite eines hat. SVG wird bevorzugt: es druckt in der Auflösung des Druckers. Höchstens 64 kB.</value>
+  </data>
+  <data name="ThisPageIsIntentionalBlank" xml:space="preserve">
+    <value>Diese Seite ist absichtlich leer.</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Betreiber</value>
+  </data>
+  <data name="ReadGeneralInstructions" xml:space="preserve">
+    <value>Lies die allgemeinen Anweisungen, bevor du beginnst!</value>
+  </data>
+  <data name="DutyStarts" xml:space="preserve">
+    <value>Beginnt</value>
+  </data>
+  <data name="StaffingPersons" xml:space="preserve">
+    <value>{0} Personen</value>
+  </data>
+  <data name="AlsoShunt" xml:space="preserve">
+    <value>auch rangieren</value>
+  </data>
+  <data name="StartsAtEndsAt" xml:space="preserve">
+    <value>Beginnt: {0} {1}, endet {2} {3}</value>
+  </data>
+  <data name="DutyContinuesOnNextPage" xml:space="preserve">
+    <value>Dienst wird auf der nächsten Seite fortgesetzt!</value>
+  </data>
+  <data name="DutyLabel" xml:space="preserve">
+    <value>Dienst</value>
+  </data>
+  <data name="CargoWagonsWithWaybills" xml:space="preserve">
+    <value>Güterwagen mit Frachtbriefen</value>
+  </data>
+  <data name="DutyEnds" xml:space="preserve">
+    <value>Endet</value>
+  </data>
+  <data name="PrintedAt" xml:space="preserve">
+    <value>Gedruckt {0}</value>
+  </data>
+  <data name="PositionInTrain" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="DutyInTrain" xml:space="preserve">
+    <value>Dienst in {0} Zug {1}</value>
+  </data>
+  <data name="AtLocation" xml:space="preserve">
+    <value>in</value>
+  </data>
+  <data name="ValidBetween" xml:space="preserve">
+    <value>Gültig {0} - {1}</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>Max. Länge</value>
+  </data>
+  <data name="ArrDep" xml:space="preserve">
+    <value>An/Ab</value>
+  </data>
+  <data name="WagonClasses" xml:space="preserve">
+    <value>Klassen</value>
+  </data>
+  <data name="AnyPositionInTrain" xml:space="preserve">
+    <value>Beliebig</value>
+  </data>
+  <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
+    <value>Keine weiteren Züge in diesem Dienst.</value>
+  </data>
+  <data name="WagonsFrom" xml:space="preserve">
+    <value>Wagen von</value>
+  </data>
+  <data name="ScheduledWagonsets" xml:space="preserve">
+    <value>Geplante Wagengruppen</value>
+  </data>
+  <data name="BookletPrintingHint" xml:space="preserve">
+    <value>Zuerst als PDF ausgeben und Korrektur lesen, dann das PDF auf Papier drucken: A4 quer, beidseitig, an der kurzen Kante gewendet. Jeden Bogen in der Mitte falten; bei mehr als einem Bogen zusätzlich heften.</value>
+  </data>
+  <data name="DriverDuties" xml:space="preserve">
+    <value>Lokführerdienste</value>
   </data>
 </root>

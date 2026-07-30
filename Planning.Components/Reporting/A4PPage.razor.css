@@ -1,0 +1,12 @@
+/* See A4LPage.razor.css for why this is screen-only and fixed to the physical sheet size. */
+@media screen {
+    .a4p {
+        width: 210mm;
+        height: 297mm;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: 0 auto 10mm;
+        background: white;
+        box-shadow: 0 0 6px rgba(0, 0, 0, .5);
+    }
+}

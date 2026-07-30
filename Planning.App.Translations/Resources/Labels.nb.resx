@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -327,6 +327,12 @@
   <data name="EndTime" xml:space="preserve">
     <value>Sluttid</value>
   </data>
+  <data name="AllowPlanTimeExtend" xml:space="preserve">
+    <value>Utvid plantider automatisk?</value>
+  </data>
+  <data name="AllowPlanTimeExtendHelp" xml:space="preserve">
+    <value>Utvider planens start- og sluttid til å dekke et togs faktiske tider i stedet for å blokkere endringen når de faller utenfor tidsvinduet. Har ingen effekt når planen går over midnatt, siden vinduet da allerede er ubegrenset.</value>
+  </data>
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Delepunkt (deler grafen i to halvdeler)</value>
   </data>
@@ -374,6 +380,12 @@
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
     <value>Hurtigklokkefart (×)</value>
+  </data>
+  <data name="DistanceFactor" xml:space="preserve">
+    <value>Avstandsfaktor (×)</value>
+  </data>
+  <data name="DistanceFactorHint" xml:space="preserve">
+    <value>Multipliserer hver banestreknings avstand (meter) til kilometerne som vises i rapporter og grafer. Standardverdien 1 beholder eksisterende avstander uendret.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Hastighetstilordning</value>
@@ -615,8 +627,8 @@
   <data name="Route" xml:space="preserve">
     <value>Strekning</value>
   </data>
-  <data name="DistanceKm" xml:space="preserve">
-    <value>Distanse (km)</value>
+  <data name="DistanceMeters" xml:space="preserve">
+    <value>Distanse (m)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Hastighet (km/t)</value>
@@ -833,9 +845,6 @@
   </data>
   <data name="TrainCategoryReferenced" xml:space="preserve">
     <value>Kan ikke slette: kategorien brukes av ett eller flere tog.</value>
-  </data>
-  <data name="TrainCategoryNameRequired" xml:space="preserve">
-    <value>Navnet er påkrevd.</value>
   </data>
   <data name="AddFromCatalogue" xml:space="preserve">
     <value>Legg til fra katalog</value>
@@ -1227,6 +1236,12 @@
   <data name="TimingsUpdateFailed" xml:space="preserve">
     <value>Noen valgte tog kunne ikke oppdateres fordi de nye tidene ville falle utenfor planens start- eller sluttid.</value>
   </data>
+  <data name="UpdateAllTimings" xml:space="preserve">
+    <value>Oppdater alle tider</value>
+  </data>
+  <data name="UpdateAllTimingsFailed" xml:space="preserve">
+    <value>Noen tog kunne ikke oppdateres fordi de nye tidene ville falle utenfor planens start- eller sluttid.</value>
+  </data>
   <data name="Minutes" xml:space="preserve">
     <value>Minutter</value>
   </data>
@@ -1289,6 +1304,13 @@
   </data>
   <data name="Remark" xml:space="preserve">
     <value>Merknad</value>
+  </data>
+  <data name="AddCallNote" xml:space="preserve">
+    <value>Legg til merknad</value>
+    <comment>Placeholder in the empty call note field.</comment>
+  </data>
+  <data name="CallNoteHint" xml:space="preserve">
+    <value>Merknad som vises ved dette oppholdet. Bruk *kursiv* og **fet** for utheving; oppmerkingen vises når du redigerer.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>Ingen stopp.</value>
@@ -1369,7 +1391,7 @@
     <value>Gods fra {0} til {1}</value>
   </data>
   <data name="WagonsTo" xml:space="preserve">
-    <value>Vogner til {0}</value>
+    <value>Vogner til</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Vogner fra {0} til {1}</value>
@@ -1420,10 +1442,10 @@
     <value>Posisjon i toget (1 = fremst); 0 betyr hvor som helst.</value>
   </data>
   <data name="MaxWagons" xml:space="preserve">
-    <value>Maks. vogner</value>
+    <value>Maks vogner</value>
   </data>
   <data name="MaxAxles" xml:space="preserve">
-    <value>Maks. aksler</value>
+    <value>Maks aksler</value>
   </data>
   <data name="AndRegions" xml:space="preserve">
     <value>Og regioner?</value>
@@ -1739,5 +1761,170 @@
   </data>
   <data name="Id" xml:space="preserve">
     <value>Id</value>
+  </data>
+  <data name="DutyNotGraded" xml:space="preserve">
+    <value>Ikke gradert</value>
+  </data>
+  <data name="ValidTo" xml:space="preserve">
+    <value>Gjelder til</value>
+  </data>
+  <data name="ValidFromHelp" xml:space="preserve">
+    <value>Første dag på treffet anlegget er planlagt for. Skrives ut på rapporter; la stå tomt hvis ikke noe treff er booket.</value>
+  </data>
+  <data name="Easy" xml:space="preserve">
+    <value>Lett</value>
+  </data>
+  <data name="ValidToHelp" xml:space="preserve">
+    <value>Siste dag på treffet anlegget er planlagt for.</value>
+  </data>
+  <data name="DutyDifficulty" xml:space="preserve">
+    <value>Vanskelighetsgrad</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Middels</value>
+  </data>
+  <data name="DutyHasFixedNumber" xml:space="preserve">
+    <value>Fast nummer?</value>
+  </data>
+  <data name="Experienced" xml:space="preserve">
+    <value>Erfaren</value>
+  </data>
+  <data name="ValidFrom" xml:space="preserve">
+    <value>Gjelder fra</value>
+  </data>
+  <data name="DutyStaffCount" xml:space="preserve">
+    <value>Bemanning</value>
+  </data>
+  <data name="GeneralInstructionsHint" xml:space="preserve">
+    <value>Stående instruksjoner for hele treffet: signalgiving, radiobruk, skifteregler, hva man gjør ved forsinkelser, og hvem man spør. Skrives ut som et eget hefte og deles ut til alle deltakere før første økt, også stasjonspersonalet.</value>
+  </data>
+  <data name="RemoveLogo" xml:space="preserve">
+    <value>Fjern logo</value>
+  </data>
+  <data name="CargoServedFromHelp" xml:space="preserve">
+    <value>Skiftestasjonen som betjener dette stedet med lokalgods. La stå tomt hvis ingen betjener det.</value>
+  </data>
+  <data name="ServesRegions" xml:space="preserve">
+    <value>Betjener regioner</value>
+  </data>
+  <data name="LogoTooLarge" xml:space="preserve">
+    <value>Logoen må være mindre enn {0} kB. Den lagres inne i planen, så et stort bilde gjør hver lagring og innlasting tregere.</value>
+  </data>
+  <data name="ServesLocations" xml:space="preserve">
+    <value>Betjener steder</value>
+  </data>
+  <data name="CompanyLogo" xml:space="preserve">
+    <value>Logo</value>
+  </data>
+  <data name="GeneralInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Skrives ut som et eget hefte, ikke inne i tjenesteheftene.</value>
+  </data>
+  <data name="GeneralInstructions" xml:space="preserve">
+    <value>Generelle instruksjoner</value>
+  </data>
+  <data name="Program" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="ProgramHint" xml:space="preserve">
+    <value>Treffets program: økttider, pauser, måltider og annet deltakerne bør vite på forhånd. Skrives ut på forsiden av heftet med generelle instruksjoner, før de stående instruksjonene.</value>
+  </data>
+  <data name="ProgramHelp" xml:space="preserve">
+    <value>Markdown. Skrives ut på forsiden av heftet med generelle instruksjoner.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Instruksjoner</value>
+  </data>
+  <data name="Layout" xml:space="preserve">
+    <value>Anlegg</value>
+  </data>
+  <data name="ShuntingYards" xml:space="preserve">
+    <value>Skiftestasjoner</value>
+  </data>
+  <data name="CargoServedFrom" xml:space="preserve">
+    <value>Godsbetjenes fra</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Informasjon</value>
+  </data>
+  <data name="LogoTypeNotSupported" xml:space="preserve">
+    <value>Bare SVG-, PNG-, JPEG- og WebP-bilder kan brukes som logo.</value>
+  </data>
+  <data name="CompanyLogoHelp" xml:space="preserve">
+    <value>Vises på trykte forsider i stedet for signaturen, men bare når alle selskapene på siden har en. SVG foretrekkes: den skrives ut i skriverens oppløsning. Høyst 64 kB.</value>
+  </data>
+  <data name="ThisPageIsIntentionalBlank" xml:space="preserve">
+    <value>Denne siden er med hensikt tom.</value>
+  </data>
+  <data name="Operator" xml:space="preserve">
+    <value>Operatør</value>
+  </data>
+  <data name="ReadGeneralInstructions" xml:space="preserve">
+    <value>Les de generelle instruksjonene før du starter!</value>
+  </data>
+  <data name="DutyStarts" xml:space="preserve">
+    <value>Starter</value>
+  </data>
+  <data name="StaffingPersons" xml:space="preserve">
+    <value>{0} personer</value>
+  </data>
+  <data name="AlsoShunt" xml:space="preserve">
+    <value>skift også</value>
+  </data>
+  <data name="StartsAtEndsAt" xml:space="preserve">
+    <value>Starter: {0} {1}, slutter {2} {3}</value>
+  </data>
+  <data name="DutyContinuesOnNextPage" xml:space="preserve">
+    <value>Tjenesten fortsetter på neste side!</value>
+  </data>
+  <data name="DutyLabel" xml:space="preserve">
+    <value>Tjeneste</value>
+  </data>
+  <data name="CargoWagonsWithWaybills" xml:space="preserve">
+    <value>Godsvogner med fraktbrev</value>
+  </data>
+  <data name="DutyEnds" xml:space="preserve">
+    <value>Slutter</value>
+  </data>
+  <data name="PrintedAt" xml:space="preserve">
+    <value>Utskrevet {0}</value>
+  </data>
+  <data name="PositionInTrain" xml:space="preserve">
+    <value>Plass</value>
+  </data>
+  <data name="DutyInTrain" xml:space="preserve">
+    <value>Tjeneste i {0} tog {1}</value>
+  </data>
+  <data name="AtLocation" xml:space="preserve">
+    <value>ved</value>
+  </data>
+  <data name="ValidBetween" xml:space="preserve">
+    <value>Gjelder {0} - {1}</value>
+  </data>
+  <data name="MaxLength" xml:space="preserve">
+    <value>Maks lengde</value>
+  </data>
+  <data name="ArrDep" xml:space="preserve">
+    <value>Ank/Avg</value>
+  </data>
+  <data name="WagonClasses" xml:space="preserve">
+    <value>Klasser</value>
+  </data>
+  <data name="AnyPositionInTrain" xml:space="preserve">
+    <value>Vilkårlig</value>
+  </data>
+  <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
+    <value>Ingen flere tog i denne tjenesten.</value>
+  </data>
+  <data name="WagonsFrom" xml:space="preserve">
+    <value>Vogner fra</value>
+  </data>
+  <data name="ScheduledWagonsets" xml:space="preserve">
+    <value>Planlagte vognsett</value>
+  </data>
+  <data name="BookletPrintingHint" xml:space="preserve">
+    <value>Skriv først ut til PDF og korrekturles den, skriv deretter ut PDF-en på papir: A4 liggende, tosidig, vendt om kortsiden. Brett hvert ark på midten; stift også hvis det er mer enn ett ark.</value>
+  </data>
+  <data name="DriverDuties" xml:space="preserve">
+    <value>Førertjenester</value>
   </data>
 </root>

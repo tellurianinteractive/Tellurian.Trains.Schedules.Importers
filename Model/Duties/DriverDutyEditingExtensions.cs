@@ -38,19 +38,57 @@ public static class DriverDutyEditingExtensions
         /// order — a 1,3,5 duty before its 2,4,6 twin. Each duty's <see cref="DriverDuty.Identity"/> is set
         /// to its ordinal — "1", "2", … Empty duties (no start time) sort last.
         /// </summary>
+        /// <remarks>
+        /// Duties with <see cref="DriverDuty.IsExcludedFromRenumbering"/> keep their identity, and the
+        /// ordinal walk steps over the numbers they hold. Excluding the duty alone would not be enough:
+        /// the walk would hand a pinned duty's number to somebody else and produce two booklets with the
+        /// same number, which is worse than not renumbering at all — the pile is sorted by exactly that
+        /// number. Reserved identities are compared as strings, so a non-numeric pin such as "L1"
+        /// reserves nothing and simply never collides.
+        /// </remarks>
         public void RenumberDriverDuties()
         {
             plan = plan.ValueOrException(nameof(plan));
+
+            var reserved = plan.DriverDuties
+                .Where(d => d.IsExcludedFromRenumbering)
+                .Select(d => d.Identity)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             var ordered = plan.DriverDuties
+                .Where(d => !d.IsExcludedFromRenumbering)
                 .OrderBy(d => d.StartTime is null)
                 .ThenBy(d => d.StartTime)
                 .ThenBy(d => d.EndTime)
                 .ThenBy(d => d.Sessions.FirstNumber)
                 .ToList();
+
             var number = 1;
             foreach (var duty in ordered)
+            {
+                while (reserved.Contains(number.ToString(CultureInfo.InvariantCulture))) number++;
                 duty.Identity = number++.ToString(CultureInfo.InvariantCulture);
+            }
         }
+
+        /// <summary>
+        /// The plan's driver duties in the order their booklets are printed and the pile is kept:
+        /// numeric identities first in numeric order, then any non-numeric identity alphabetically.
+        /// </summary>
+        /// <remarks>
+        /// This is deliberately not the running order used by <c>RenumberDriverDuties</c>. Renumbering
+        /// used to make the two identical, so printing in running order produced a number-ordered stack
+        /// by coincidence; a pinned number (<see cref="DriverDuty.IsExcludedFromRenumbering"/>) breaks
+        /// that, and the pile order is the one that must win — the stack should need no hand-sorting.
+        /// Sorting on the parsed number is what keeps "10" after "2" rather than before it.
+        /// </remarks>
+        public IReadOnlyList<DriverDuty> DriverDutiesInPrintOrder =>
+        [
+            .. plan.DriverDuties
+                .OrderBy(d => int.TryParse(d.Identity, NumberStyles.Integer, CultureInfo.InvariantCulture, out _) ? 0 : 1)
+                .ThenBy(d => int.TryParse(d.Identity, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) ? n : 0)
+                .ThenBy(d => d.Identity, StringComparer.CurrentCulture)
+        ];
 
         /// <summary>
         /// Gets the train parts that can be added to the given duty: the traction parts (worked by a

@@ -6,8 +6,8 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// <summary>
 /// Base type for the transient call notes generated on demand from a <see cref="ScheduledTrainPart"/>'s options.
 /// Unlike the persisted <see cref="CallNote"/> family, generated notes are never stored; they exist only
-/// to be rendered. Each note is a thin data carrier — the text and markup are produced by the switch
-/// expressions in <see cref="GeneratedNoteExtensions"/>.
+/// to be rendered. Each note is a thin data carrier — what it says is produced by the switch
+/// expression in <see cref="GeneratedNoteExtensions"/>.
 /// </summary>
 public abstract record GeneratedNote : ICallNote
 {
@@ -26,48 +26,91 @@ public abstract record GeneratedNote : ICallNote
     public bool IsShuntingNote { get; init; }
 
     /// <inheritdoc/>
-    public string Text => this.TextOf;
+    public bool IsForArrival { get; init; }
 
     /// <inheritdoc/>
-    public MarkupString Html => this.HtmlOf;
+    public bool IsForDeparture { get; init; }
+
+    /// <inheritdoc/>
+    public string ToText => this.TextOf;
+
+    /// <inheritdoc/>
+    public MarkupString ToHtml => this.HtmlOf;
 }
 
 /// <summary>
-///
+/// What each generated note says, and the two forms it is read in.
 /// </summary>
 public static class GeneratedNoteExtensions
 {
     extension(GeneratedNote note)
     {
         /// <summary>
-        /// Plain-text rendering of the note.
+        /// What the note says: its localised format string and the values substituted into it. One
+        /// switch, not one per output form — see <see cref="NoteTemplate"/> for why.
         /// </summary>
-        internal string TextOf => note switch
+        /// <remarks>
+        /// Values are emphasised in the markup form unless the arm says otherwise. A position in the
+        /// train is <see cref="NoteArg.Plain(object?)"/> because it stands beside the vehicle that
+        /// carries the emphasis; destinations and meets are <see cref="NoteArg.Markup(string, string)"/>
+        /// because they render themselves as coloured chips and session circles.
+        /// </remarks>
+        internal NoteTemplate TemplateOf => note switch
         {
-            UseNote(var so) => NoteText.Format(NoteResources.Use, so),
-            CoupleNote(var so, 0) => NoteText.Format(NoteResources.CoupleToTrain, so),
-            CoupleNote(var so, var position) => NoteText.Format(NoteResources.CoupleToTrainInPosition, so, position),
-            UncoupleNote(var so) => NoteText.Format(NoteResources.UncoupleFromTrain, so),
-            FromParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
-            ToParkingNote(var so) => NoteText.Format(NoteResources.MoveTractionUnitToParking, so),
-            ReinforcementNote(_, var part) => NoteText.Format(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
-            TractionUnitExchangeNote(_, var from, var to) => NoteText.Format(NoteResources.TractionUnitExchange, from, to),
+            UseNote(var so) => new(NoteResources.Use, so),
+            CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, so),
+            CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, so, NoteArg.Plain(position)),
+            UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
+            FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
+            ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
+            ReinforcementNote(_, var part) => new(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
+            TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
-                NoteText.Format(NoteResources.BringsWagonsTo, part.ToPlainText),
-            _ => string.Empty,
+                new(NoteResources.BringsWagonsTo, NoteArg.Markup(part.ToText, part.ToHtml)),
+            NoStopNote => new(NoteResources.NoStop),
+            NoExchangeNote => new(NoteResources.NoExchange),
+            CrossingNote(var meets, var settings) => new(NoteResources.Crosses, MeetList(meets, settings)),
+            OvertakingNote(var meets, var settings) => new(NoteResources.MeetsInTheSameDirection, MeetList(meets, settings)),
+            _ => new(string.Empty),
         };
 
         /// <summary>
-        /// HTML/CSS markup rendering of the note. Most notes simply wrap their text in a
-        /// <c>callnote</c> span; notes that contain coloured elements such as regions render a specialised variant.
+        /// Plain-text rendering of the note.
         /// </summary>
-        internal MarkupString HtmlOf => note switch
+        internal string TextOf => note.TemplateOf.ToText;
+
+        /// <summary>
+        /// HTML/CSS markup rendering of the note: the same content with the substituted values
+        /// emphasised, wrapped in the <c>callnote</c> span every note is styled through.
+        /// </summary>
+        internal MarkupString HtmlOf => new($"""<span class="callnote">{note.TemplateOf.ToHtml}</span>""");
+    }
+
+    /// <summary>
+    /// Every train met, each with the window in which both are present and a session qualifier when
+    /// that meet does not happen on every session the reader's duty runs.
+    /// </summary>
+    /// <remarks>
+    /// A composed argument rather than a note of its own: the list is built in both forms here and
+    /// substituted into the crossing or overtaking note as one value. The train is named with
+    /// <c>Train.ToString()</c>, which composes the company signature, category prefix, number and
+    /// suffix and resolves the <em>effective</em> company — so a train inheriting its category's company
+    /// is still named correctly — and is emphasised, since it is what the driver is looking for. The
+    /// times are not: they sit beside the name and the reader already has them in the time column.
+    /// <paramref name="meets"/> is already in display order (see <c>MeetNoteExtensions.MeetNotes</c>);
+    /// this only renders it.
+    /// </remarks>
+    private static NoteArg MeetList(IReadOnlyList<Meet> meets, SessionsSettings? settings)
+    {
+        var items = meets.Select(meet =>
         {
-            // Specialised variant: destination regions are rendered as coloured chips (see Region.Display).
-            CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
-                new($"""<span class="callnote">{NoteText.Format(NoteResources.BringsWagonsTo, part.ToHtml)}</span>"""),
-            // Default: what the base note rendering does — wrap the plain text in a callnote span.
-            _ => new($"""<span class="callnote">{note.TextOf}</span>"""),
-        };
+            var item = new NoteTemplate(NoteResources.TrainMeetAtTime, meet.Other, NoteArg.Plain(meet.From.HHMM()), NoteArg.Plain(meet.To.HHMM()));
+            if (meet.Sessions is not { } qualifier || settings is null) return NoteArg.Markup(item.ToText, item.ToHtml);
+            var sessions = new NoteTemplate(NoteResources.InSessions, NoteArg.Markup(qualifier.ToText(settings), qualifier.ToHtml(settings)));
+            return NoteArg.Markup($"{item.ToText} {sessions.ToText}", $"{item.ToHtml} {sessions.ToHtml}");
+        }).ToList();
+        return NoteArg.Markup(
+            string.Join(", ", items.Select(item => item.Text)),
+            string.Join(", ", items.Select(item => item.Html)));
     }
 }

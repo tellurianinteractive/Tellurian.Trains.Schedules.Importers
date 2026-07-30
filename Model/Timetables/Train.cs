@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json.Serialization;
-using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Timetables;
 
@@ -82,7 +81,7 @@ public class Train : IEquatable<Train>
     /// <summary>
     /// Gets or sets the length restrictions for this train.
     /// </summary>
-    public TrainLenght Length { get; set; }
+    public TrainCapacity Length { get; set; }
 
     /// <summary>
     /// Gets or sets the foreign key to the operating company. Optional.
@@ -432,100 +431,6 @@ public static class TrainExtensions
             return call;
         }
 
-        /// <summary>
-        /// Fixes a train that has only one call by duplicating it as arrival and departure.
-        /// </summary>
-        /// <returns>The train with fixed calls.</returns>
-        public Train WithFixedSingleCallTrain()
-        {
-            if (train.Calls.Count == 1)
-            {
-                var departure = train.Calls[0];
-                departure.Track.Calls.Remove(departure);
-                var arrival = new StationCall(departure.Id, departure.Track, departure.Arrival, departure.Arrival);
-                departure = new StationCall(departure.Id + 1, departure.Track, departure.Departure, departure.Departure);
-                train.Calls.Clear();
-                train.Add(arrival);
-                train.Add(departure);
-            }
-            return train;
-        }
-
-        /// <summary>
-        /// Ensures the origin and terminus have a visible dwell so they remain proper stops.
-        /// </summary>
-        /// <remarks>
-        /// The first call of a train is always its departure (origin) and the last call is always its arrival
-        /// (terminus), but XPLN sometimes gives these calls equal arrival and departure times. Equal times
-        /// otherwise mark a pass-through (see <see cref="WithPassthroughCalls"/>), so to keep the origin and
-        /// terminus as stops a synthetic dwell is added: when the first call's times are equal its arrival is
-        /// moved 10 minutes earlier, and when the last call's times are equal its departure is moved 10 minutes
-        /// later. Run this before <see cref="WithPassthroughCalls"/> so those calls are no longer equal-times
-        /// and are not cleared to pass-throughs.
-        /// </remarks>
-        /// <returns>The train with origin/terminus dwells ensured.</returns>
-        public Train WithOriginAndTerminusDwell()
-        {
-            const int dwellMinutes = 10;
-            var first = train.Calls.First();
-            if (first.Arrival.Equals(first.Departure))
-                first.Arrival = first.Departure.AddMinutes(-dwellMinutes);
-            var last = train.Calls.Last();
-            if (last.Arrival.Equals(last.Departure))
-                last.Departure = last.Arrival.AddMinutes(dwellMinutes);
-            return train;
-        }
-
-        /// <summary>
-        /// Sets the first call as departure only and the last call as arrival only.
-        /// </summary>
-        /// <remarks>
-        /// This is an XPLN import convention: the first call is where the train originates (departure only)
-        /// and the last call is where it terminates (arrival only). It does not look at the times.
-        /// </remarks>
-        /// <returns>The train with adjusted call flags.</returns>
-        public Train WithFirstCallDepartureOnlyAndLastCallArrivalOnly()
-        {
-            train.SetFirstCallDepartureOnly();
-            train.SetLastCallArrivalOnly();
-            return train;
-        }
-
-        /// <summary>
-        /// Marks every intermediate call where the train does not stop as a pass-through.
-        /// </summary>
-        /// <remarks>
-        /// This is an XPLN import convention used to derive the stop flags from the times: a call whose
-        /// arrival equals its departure means the train passes without stopping, so both
-        /// <see cref="StationCall.IsArrival"/> and <see cref="StationCall.IsDeparture"/> are cleared and
-        /// <see cref="StationCall.IsStop"/> becomes <c>false</c>. The origin and terminus are exempt: they are
-        /// always a departure and an arrival respectively, and <see cref="WithOriginAndTerminusDwell"/> has
-        /// already given them a dwell so their times are no longer equal. After import, consumers detect a
-        /// pass-through from <see cref="StationCall.IsStop"/> alone and never re-compare the times.
-        /// </remarks>
-        /// <returns>The train with pass-through calls marked.</returns>
-        public Train WithPassthroughCalls()
-        {
-            foreach (var call in train.Calls)
-            {
-                if (call.Arrival.Equals(call.Departure))
-                {
-                    call.IsArrival = false;
-                    call.IsDeparture = false;
-                }
-            }
-            return train;
-        }
-
-        /// <summary>
-        /// Sets the first call to be departure only (no arrival).
-        /// </summary>
-        public void SetFirstCallDepartureOnly() => train.Calls.First().IsArrival = false;
-
-        /// <summary>
-        /// Sets the last call to be arrival only (no departure).
-        /// </summary>
-        public void SetLastCallArrivalOnly() => train.Calls.Last().IsDeparture = false;
     }
 
     /// <summary>

@@ -1,5 +1,51 @@
-﻿<h3>TrainPartCargoWagonsWithWaybillsView</h3>
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* The cargo wagons with waybills carried over this part. When a duty needs two people this is the
+   conductor's working document — which wagons to bring, which to set off, and where they sit in the
+   train — and the one block a non-driving reader uses on its own.
+
+   Position leads the columns here, unlike the two blocks above, because it is the sort key: the
+   repeated 1, 1, 2, 2, 3 then reads as grouping. With sessions first, the sorted column would sit
+   second under a leading column in no order at all, which reads as an unsorted table. *@
+
+@if (Data is { HasData: true })
+{
+    <h3>@Translator("CargoWagonsWithWaybills")</h3>
+    <table class="dutytrain cargo">
+        <thead>
+            <tr>
+                <th>@Translator("PositionInTrain")</th>
+                <th>@Translator("Sessions")</th>
+                <th>@Translator("WagonsFrom")</th>
+                <th>@Translator("WagonClasses")</th>
+                <th>@Translator("WagonsTo")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Data.Flows)
+            {
+                <tr>
+                    <td>@row.PositionText(Translator("AnyPositionInTrain"))</td>
+                    <td><SessionsView Sessions="row.Sessions" Settings="Data.SessionsSettings" /></td>
+                    <td>@row.From(AlsoShunt)</td>
+                    @* Empty means no restriction, printed as nothing rather than "all" or a dash. *@
+                    <td>@row.WagonClasses</td>
+                    <td>@row.To(AlsoShunt)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <hr />
+}
 
 @code {
+    /// <summary>The cargo flows to list. Nothing is rendered when the block is empty.</summary>
+    [Parameter, EditorRequired] public TrainPartCargoData? Data { get; set; }
 
+    // Appended to the column it qualifies rather than given one of its own, which would be empty on
+    // most rows. Either way it means the driver performs the shunting themselves.
+    private string AlsoShunt => Translator("AlsoShunt");
 }

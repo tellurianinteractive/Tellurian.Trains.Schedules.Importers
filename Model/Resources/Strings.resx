@@ -183,6 +183,9 @@
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>at {0} track {1} arr {2} dep {3}</value>
   </data>
+  <data name="CallAtStationTrackOccupiedDuringTimes" xml:space="preserve">
+    <value>at {0} track {1} occupied {2}-{3}</value>
+  </data>
   <data name="TrainHasCallsOverlappingInTime" xml:space="preserve">
     <value>Train {0} calls {1} and {2} overlap in time.</value>
   </data>
@@ -275,5 +278,17 @@
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Vehicle {0} does not return to its start {1}; it ends at {2}.</value>
+  </data>
+  <data name="DutyIdentityIsHeldByTwoDuties" xml:space="preserve">
+    <value>Identity {0} is held by two driver duties excluded from renumbering.</value>
+  </data>
+  <data name="DutyHasNoIdentityToHold" xml:space="preserve">
+    <value>A driver duty is excluded from renumbering but has no identity to hold.</value>
+  </data>
+  <data name="DutyStaffCountIsOutOfRange" xml:space="preserve">
+    <value>Driver duty {0} needs {1} people, which is outside the allowed range of 1 to 3.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
+    <value>Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}.</value>
   </data>
 </root>

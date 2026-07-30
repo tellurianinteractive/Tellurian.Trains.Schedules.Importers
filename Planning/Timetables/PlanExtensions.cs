@@ -181,7 +181,9 @@ public static class PlanExtensions
         /// (<see cref="Train.DriverEndTime"/>), must lie within
         /// <see cref="Model.Settings.GeneralSettings.StartTime"/>–<see cref="Model.Settings.GeneralSettings.EndTime"/>.
         /// When the window wraps midnight (see <c>IsWrappingMidnight</c>) the train's end may spill past
-        /// midnight, so only the start is required to stay within the day. A train with no calls never fits.
+        /// midnight, so only the start is required to stay within the day. When
+        /// <see cref="Model.Settings.GeneralSettings.AllowPlanTimeExtend"/> is set, the train always fits: the
+        /// window's start and/or end are widened to cover it as a side effect. A train with no calls never fits.
         /// </summary>
         /// <param name="train">The train to test. Cannot be null.</param>
         /// <returns><c>true</c> when the train fits the operating window; otherwise <c>false</c>.</returns>
@@ -194,7 +196,9 @@ public static class PlanExtensions
         /// <summary>
         /// Gets whether <paramref name="train"/> would still fit the plan's operating window after being shifted by
         /// <paramref name="minutes"/> (see <c>FitsWithinOperatingWindow</c>). Used to validate a move or clone
-        /// before it happens, without mutating the train.
+        /// before it happens, without mutating the train — though when
+        /// <see cref="Model.Settings.GeneralSettings.AllowPlanTimeExtend"/> is set, the operating window itself
+        /// is widened as a side effect and the shift always fits.
         /// </summary>
         /// <param name="train">The train to test. Cannot be null.</param>
         /// <param name="minutes">The number of minutes to shift; negative is earlier, positive later.</param>
@@ -208,12 +212,19 @@ public static class PlanExtensions
 
         // The shared operating-window rule. The start must always lie within the operating day (00:00–24:00);
         // when the window wraps midnight the end may spill past it, otherwise the whole span must fall within
-        // [StartTime, EndTime].
+        // [StartTime, EndTime] — unless AllowPlanTimeExtend is set, in which case StartTime and/or EndTime are
+        // widened to cover the span instead of rejecting it.
         private bool OperatingWindowContains(Time start, Time end)
         {
             if (start.Value < TimeSpan.Zero || start.Value >= TimeSpan.FromDays(1)) return false;
             if (plan.IsWrappingMidnight) return true;
             var general = plan.Layout.Settings.General;
+            if (general.AllowPlanTimeExtend)
+            {
+                if (start.Value < general.StartTime) general.StartTime = start.Value;
+                if (end.Value > general.EndTime) general.EndTime = end.Value;
+                return true;
+            }
             return start.Value >= general.StartTime && end.Value <= general.EndTime;
         }
 

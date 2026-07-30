@@ -122,22 +122,22 @@ public static class ScheduledTrainPartExtensions
             if (options.FromParking)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new FromParkingNote(so)));
+                    .Select(so => new FromParkingNote(so) { IsForDeparture = true }));
             }
             else if (options.HasCoupleNote)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new CoupleNote(so)));
+                    .Select(so => new CoupleNote(so) { IsForDeparture = true }));
             }
             else if (options.DisplayUseNote)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new UseNote(so)));
+                    .Select(so => new UseNote(so) { IsForDeparture = true }));
             }
             if (options.IsReinforcement)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new ReinforcementNote(so, trainPart) { DisplayOrder = 800 }));
+                    .Select(so => new ReinforcementNote(so, trainPart) { DisplayOrder = 800, IsForDeparture = true }));
 
             }
         }
@@ -149,12 +149,12 @@ public static class ScheduledTrainPartExtensions
             if (options.ToParking)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new ToParkingNote(so)));
+                    .Select(so => new ToParkingNote(so) { IsForArrival = true }));
             }
             else if (options.HasUncoupleNote)
             {
                 callNotes.AddRange(trainPart.TractionUnits
-                    .Select(so => new UncoupleNote(so)));
+                    .Select(so => new UncoupleNote(so) { IsForArrival = true }));
             }
 
         }
@@ -166,17 +166,20 @@ public static class ScheduledTrainPartExtensions
             if (options.HasCoupleNote)
             {
                 callNotes.AddRange(trainPart.WagonSets
-                    .Select(so => new CoupleNote(so)));
+                    .Select(so => new CoupleNote(so) { IsForDeparture = true }));
             }
         }
 
-        private IEnumerable<ScheduledObject> ScheduledObjects =>
+        /// <summary>The vehicles working this part, resolved through the plan that owns its schedule.</summary>
+        public IEnumerable<ScheduledObject> ScheduledObjects =>
             trainPart.Schedule?.Plan.ScheduledObjectsFor(trainPart) ?? [];
 
-        private IEnumerable<ScheduledObject> TractionUnits =>
+        /// <summary>The locomotives and trainsets hauling this part.</summary>
+        public IEnumerable<ScheduledObject> TractionUnits =>
             trainPart.ScheduledObjects.Where(so => so.IsTraction);
 
-        private IEnumerable<ScheduledObject> WagonSets =>
+        /// <summary>The wagonsets this part carries.</summary>
+        public IEnumerable<ScheduledObject> WagonSets =>
             trainPart.ScheduledObjects.Where(so => so.IsWagonSet);
     }
 }

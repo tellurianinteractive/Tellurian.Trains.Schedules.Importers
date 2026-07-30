@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Planning.App.Components.Stretches;
+﻿namespace Tellurian.Trains.Schedules.Planning.Components.Shared;
 
 /// <summary>
 /// A station drawn as a circle on a timetable-stretch line, positioned proportionally to its distance
@@ -10,7 +10,7 @@ public sealed record TopologyNode(double X, double Y, string Signature, bool Hid
 /// <summary>
 /// A timetable stretch drawn as a horizontal line with its stations as evenly-distance-spaced nodes.
 /// </summary>
-public sealed record TopologyLine(string Number, string Description, double Y, IReadOnlyList<TopologyNode> Nodes)
+public sealed record TopologyLine(string Number, string Description, string Color, double Y, IReadOnlyList<TopologyNode> Nodes)
 {
     /// <summary>The x-coordinate of the first station on the line.</summary>
     public double StartX => Nodes.Count > 0 ? Nodes[0].X : 0.0;
@@ -21,8 +21,9 @@ public sealed record TopologyLine(string Number, string Description, double Y, I
 
 /// <summary>
 /// A 45°/-45° line linking a branching stretch to the junction it diverges from (or merges into) on its parent line.
+/// Drawn in the branching (child) stretch's colour.
 /// </summary>
-public sealed record TopologyConnector(double X1, double Y1, double X2, double Y2);
+public sealed record TopologyConnector(double X1, double Y1, double X2, double Y2, string Color);
 
 /// <summary>
 /// A laid-out topology of a layout's timetable stretches: horizontal lines with station circles, and
@@ -49,7 +50,7 @@ public sealed record TopologyDiagram(
     /// Lays out the layout's timetable stretches. Root lines are stacked from the top; a stretch that
     /// diverges from another is placed on a row below the line it leaves and linked by a diagonal connector.
     /// </summary>
-    public static TopologyDiagram Build(global::Tellurian.Trains.Schedules.Model.Layouts.Layout layout)
+    public static TopologyDiagram Build(Layout layout)
     {
         var all = layout.TimetableStretches.Where(s => s.Stretches.Count > 0).OrderBy(s => s.Id).ToList();
         if (all.Count == 0) return new TopologyDiagram(LeftMargin + RightMargin, TopMargin + BottomMargin, [], []);
@@ -89,7 +90,7 @@ public sealed record TopologyDiagram(
                     // Leads out: start sits on the parent line, branch drops away at +45° (dx == dy).
                     startX = junctionX + dy;
                     hiddenIndex = 0;
-                    connectors.Add(new TopologyConnector(junctionX, parentY, startX, y));
+                    connectors.Add(new TopologyConnector(junctionX, parentY, startX, y, stretch.Color));
                 }
                 else if (link.Side == JunctionSide.End && parentNodes.TryGetValue(stretch.Ends.Signature, out var junctionEndX))
                 {
@@ -97,7 +98,7 @@ public sealed record TopologyDiagram(
                     var endX = junctionEndX - dy;
                     startX = endX - span;
                     hiddenIndex = stations.Count - 1;
-                    connectors.Add(new TopologyConnector(endX, y, junctionEndX, parentY));
+                    connectors.Add(new TopologyConnector(endX, y, junctionEndX, parentY, stretch.Color));
                 }
             }
 
@@ -112,7 +113,7 @@ public sealed record TopologyDiagram(
 
             lineY[stretch.Id] = y;
             nodeX[stretch.Id] = map;
-            lines.Add(new TopologyLine(stretch.Number, stretch.Description, y, nodes));
+            lines.Add(new TopologyLine(stretch.Number, stretch.Description, stretch.Color, y, nodes));
         }
 
         return Normalize(lines, connectors, order.Count);

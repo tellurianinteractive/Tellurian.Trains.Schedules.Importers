@@ -1,0 +1,52 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+@using System.Globalization
+
+@* The schematic of the layout's timetable stretches, drawn from the pure TopologyDiagram.Build result.
+
+   Shared between the Stretches tab and the duty booklet's overview page, so a driver meets the same
+   diagram on paper that the planner drew on screen. Being SVG it prints reliably: browsers drop
+   background colours when printing, but strokes and fills always print. *@
+
+@if (Diagram is { } diagram)
+{
+    <svg class="topology-svg" viewBox="0 0 @F(diagram.Width) @F(diagram.Height)"
+         width="100%" preserveAspectRatio="xMidYMid meet"
+         xmlns="http://www.w3.org/2000/svg">
+        @foreach (var connector in diagram.Connectors)
+        {
+            <line x1="@F(connector.X1)" y1="@F(connector.Y1)" x2="@F(connector.X2)" y2="@F(connector.Y2)"
+                  stroke="@connector.Color" stroke-width="10" />
+        }
+        @foreach (var line in diagram.Lines)
+        {
+            <line x1="@F(line.StartX)" y1="@F(line.Y)" x2="@F(line.EndX)" y2="@F(line.Y)"
+                  stroke="@line.Color" stroke-width="10" />
+            <SvgText X="line.StartX - 20" Y="line.Y + 4" Anchor="end"
+                     Fill="@TextColor" FontSize="16.5" FontWeight="600" Text="@line.Number" />
+            @foreach (var node in line.Nodes.Where(n => !n.Hidden))
+            {
+                <circle cx="@F(node.X)" cy="@F(node.Y)" r="5"
+                        fill="#fff" stroke="@line.Color" stroke-width="2" />
+                <SvgText X="node.X" Y="node.Y - 10" Anchor="middle"
+                         Fill="@TextColor" FontSize="16.5" FontWeight="600" Text="@node.Signature" />
+            }
+        }
+    </svg>
+}
+
+@code {
+    /// <summary>The layout to draw. Nothing is rendered when it has no stretches to show.</summary>
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
+
+    // Text stays a neutral black regardless of each line's colour, so labels never clash with a
+    // similarly-coloured line and remain equally legible across the whole diagram.
+    private const string TextColor = "#223";
+
+    private TopologyDiagram? Diagram =>
+        Layout is null || Layout.TimetableStretches.All(s => s.Stretches.Count == 0)
+            ? null
+            : TopologyDiagram.Build(Layout);
+
+    // SVG requires '.' as the decimal separator regardless of UI culture.
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

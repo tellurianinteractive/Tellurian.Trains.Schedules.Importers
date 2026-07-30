@@ -5,3 +5,4 @@ global using Tellurian.Trains.Schedules.Model.Timetables;
 global using Tellurian.Trains.Schedules.Model.Notes;
 global using Tellurian.Trains.Schedules.Model.Duties;
 global using Tellurian.Trains.Schedules.Model.Schedules;
+global using Tellurian.Trains.Schedules.Model.Settings;

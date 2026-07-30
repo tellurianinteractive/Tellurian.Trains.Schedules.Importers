@@ -27,7 +27,7 @@ else
             else
             {
                 <QuickGrid Items="Regions" Class="grid" Theme="tellurian">
-                    <TemplateColumn Title='@Translator("Region")'>@context.ToHtmlMarkup</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Region")'>@context.ToHtml</TemplateColumn>
                     <TemplateColumn Title='@Translator("Country")'>@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
@@ -82,7 +82,7 @@ else
                     </div>
                     <div class="field">
                         <label>@Translator("Region")</label>
-                        <span>@Editing.ToHtmlMarkup</span>
+                        <span>@Editing.ToHtml</span>
                     </div>
                 </div>
 

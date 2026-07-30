@@ -24,13 +24,56 @@ public class GeneratedNoteTests
         // Confirms the Notes.resx is embedded and resolves (not a silent fall-back to the key):
         // "Use {0}." formatted with the vehicle, rather than the bare key "Use".
         ICallNote note = new UseNote(Loco);
-        Assert.AreEqual(string.Format(CultureInfo.CurrentCulture, "Use {0}.", Loco), note.Text);
+        Assert.AreEqual(string.Format(CultureInfo.CurrentCulture, "Use {0}.", Loco), note.ToText);
     }
 
     [TestMethod]
     public void CoupleNoteWithPositionUsesTheArityTwoKey()
     {
         ICallNote note = new CoupleNote(Loco, 3);
-        Assert.AreEqual(string.Format(CultureInfo.CurrentCulture, "Couple {0} to train in position {1}.", Loco, 3), note.Text);
+        Assert.AreEqual(string.Format(CultureInfo.CurrentCulture, "Couple {0} to train in position {1}.", Loco, 3), note.ToText);
+    }
+
+    [TestMethod]
+    public void SubstitutedValueIsEmphasisedInTheMarkupForm()
+    {
+        // The whole point of the markup form: the vehicle the driver must fetch stands out from the
+        // sentence around it, and the sentence itself carries no emphasis.
+        ICallNote note = new UseNote(Loco);
+        Assert.AreEqual($"""<span class="callnote">Use <b class="value">{Loco}</b>.</span>""", note.ToHtml.Value);
+    }
+
+    [TestMethod]
+    public void PositionInTrainIsNotEmphasised()
+    {
+        // A position stands beside the vehicle that already carries the emphasis; bolding both would
+        // leave the reader nothing to land on.
+        ICallNote note = new CoupleNote(Loco, 3);
+        Assert.AreEqual($"""<span class="callnote">Couple <b class="value">{Loco}</b> to train in position 3.</span>""", note.ToHtml.Value);
+    }
+
+    [TestMethod]
+    public void NoteWithoutValuesGetsNoEmphasis()
+    {
+        ICallNote note = new NoStopNote();
+        Assert.AreEqual("""<span class="callnote">No stop</span>""", note.ToHtml.Value);
+    }
+
+    [TestMethod]
+    public void SubstitutedValueIsHtmlEncoded()
+    {
+        // A vehicle class containing an ampersand used to be written into the markup raw, which
+        // produced a broken note rather than a wrong one.
+        var loco = new ScheduledObject(0, ScheduledObjectType.Locomotive, 42) { Class = "T44 & Co" };
+        ICallNote note = new UseNote(loco);
+        StringAssert.Contains(note.ToHtml.Value, "T44 &amp; Co");
+        Assert.IsFalse(note.ToHtml.Value.Contains("T44 & Co", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void PlainTextFormCarriesNoMarkup()
+    {
+        ICallNote note = new UseNote(Loco);
+        Assert.IsFalse(note.ToText.Contains('<', StringComparison.Ordinal));
     }
 }

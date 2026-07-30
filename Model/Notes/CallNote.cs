@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Notes;
@@ -77,13 +78,18 @@ public abstract class CallNote : IEquatable<CallNote>, ICallNote
     /// <summary>
     /// Plain-text rendering of the note.
     /// </summary>
-    public abstract string Text { get; }
+    public abstract string ToText { get; }
 
     /// <summary>
-    /// HTML/CSS markup rendering of the note. The default wraps <see cref="Text"/> in a
+    /// HTML/CSS markup rendering of the note. The default wraps <see cref="ToText"/> in a
     /// <c>callnote</c> span; subclasses override only where specialised markup is needed.
     /// </summary>
-    public virtual MarkupString Html =>
-        new($"""<span class="callnote">{Text}</span>""");
+    /// <remarks>
+    /// The text is encoded, because a persisted note is text a planner typed or an import carried over:
+    /// a station or vehicle name containing an ampersand would otherwise produce broken markup.
+    /// <see cref="TextCallNote"/> overrides this to render its Markdown emphasis, encoding as it goes.
+    /// </remarks>
+    public virtual MarkupString ToHtml =>
+        new($"""<span class="callnote">{WebUtility.HtmlEncode(ToText)}</span>""");
 
 }

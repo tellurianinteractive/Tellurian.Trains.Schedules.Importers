@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -71,10 +71,10 @@
     <value>Koppla loss {0} från tåget.</value>
   </data>
   <data name="MoveTractionUnitFromParkingToDepartureTrack" xml:space="preserve">
-    <value>Flytta dragfordon {0} från uppställning till avgångsspår.</value>
+    <value>Före avgång, kör {0} från uppställningsplatsen till avgångsspåret.</value>
   </data>
   <data name="MoveTractionUnitToParking" xml:space="preserve">
-    <value>Flytta dragfordon {0} till uppställning.</value>
+    <value>Efter ankomst, kör {0} från ankomstspåret till uppställningsplatsen.</value>
   </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Förstärker {0} mellan {1} och {2}.</value>
@@ -103,5 +103,23 @@
   </data>
   <data name="Wagons" xml:space="preserve">
     <value>Vagnar × {0}</value>
+  </data>
+  <data name="NoStop" xml:space="preserve">
+    <value>Ej uppehåll</value>
+  </data>
+  <data name="Crosses" xml:space="preserve">
+    <value>Möter {0}</value>
+  </data>
+  <data name="InSessions" xml:space="preserve">
+    <value>i pass {0}</value>
+  </data>
+  <data name="MeetsInTheSameDirection" xml:space="preserve">
+    <value>Möter {0} i samma riktning</value>
+  </data>
+  <data name="TrainMeetAtTime" xml:space="preserve">
+    <value>{0} {1}-{2}</value>
+  </data>
+  <data name="NoExchange" xml:space="preserve">
+    <value>Inget utbyte</value>
   </data>
 </root>

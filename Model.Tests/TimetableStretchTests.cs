@@ -1,4 +1,6 @@
-﻿namespace Tellurian.Trains.Schedules.Model.Tests;
+﻿using Tellurian.Utilities.Web;
+
+namespace Tellurian.Trains.Schedules.Model.Tests;
 
 [TestClass]
 public class TimetableStretchTests
@@ -24,6 +26,20 @@ public class TimetableStretchTests
     {
         Assert.AreEqual("10", Target.Number);
         Assert.AreEqual("Ten", Target.Description);
+    }
+
+    [TestMethod]
+    public void DefaultColorIsFirstPaletteEntry()
+    {
+        Assert.AreEqual(TimetableStretch.Palette[0], Target.Color);
+    }
+
+    [TestMethod]
+    public void EveryPaletteColorIsDark()
+    {
+        // Lines are drawn thin against a white background, so every choice must stay legible.
+        foreach (var color in TimetableStretch.Palette)
+            Assert.IsTrue(color.IsDark, $"{color} is not dark.");
     }
 
     [TestMethod]
@@ -90,6 +106,18 @@ public class TimetableStretchTests
         // subbranch starts at D (branch km 17), which itself starts at B (main km 10): the offsets accumulate.
         Assert.AreEqual(17.0, subBranch.StartKilometer);
         Assert.AreEqual(20.0, subBranch.DisplayedDistanceToStation(e), "17 km junction plus D->E distance.");
+    }
+
+    [TestMethod]
+    public void DistanceFactorScalesDisplayedButNotRawDistance()
+    {
+        var (layout, a, b, c, _, _) = BuildBranchingLayout();
+        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        layout.Settings.TimeAndSpeed.DistanceFactor = 2.0;
+
+        Assert.AreEqual(25.0, main.DistanceToStation(c), "Raw distance stays in metres, unscaled.");
+        Assert.AreEqual(50.0, main.DisplayedDistanceToStation(c), "Displayed km is raw metres times the factor.");
+        Assert.AreEqual(20.0, main.DisplayedDistanceToStation(b));
     }
 
     [TestMethod]

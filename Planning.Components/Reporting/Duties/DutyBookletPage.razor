@@ -1,0 +1,104 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@* One A5 page body of a duty booklet, chosen by the page's kind. Not an A5PPage wrapper: two of these
+   sit side by side inside one A4 landscape sheet, which is what actually gets printed. *@
+
+<div class="dutypage">
+    @switch (Page.Kind)
+    {
+        case DutyPageKind.Front:
+            <FrontDutyPage Duty="Page.Duty" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                           Settings="Settings" PrintedAt="PrintedAt" />
+            break;
+
+        case DutyPageKind.Overview:
+            <DutyOverviewPage Layout="Layout" />
+            break;
+
+        case DutyPageKind.Blank:
+            @* So a driver does not think pages are missing. *@
+            <p class="blank">@Translator("ThisPageIsIntentionalBlank")</p>
+            break;
+
+        case DutyPageKind.Part:
+            @foreach (var part in Page.Parts)
+            {
+                @* On the facing page of a split part only the timetable is shown; its header and tables
+                   are on the left-hand page, in view without turning. *@
+                @if (Page.IsTimetableContinuation)
+                {
+                    <TrainPartView Rows="part.TimetableRows" />
+                }
+                else
+                {
+                    <DriverDutyTrainView Part="part" ShowTimetable="!Page.IsSplitFirstHalf" />
+                }
+            }
+            @* The failure this prevents is real and already observed: a participant works the parts
+               they can see, does not turn the page, and never works the last train of the duty.
+
+               Placed per PAGE, under the last part on it — not under every non-final part, which would
+               claim "on next page" for a part sitting three centimetres below on the same page. A
+               notice that is sometimes false is one drivers learn to ignore.
+
+               A split part's first page carries none: the part is not finished there and its timetable
+               is already on the facing page, so there is nothing to warn about. *@
+            @if (!Page.IsSplitFirstHalf)
+            {
+                @if (HasMoreParts)
+                {
+                    <p class="continues">@Translator("DutyContinuesOnNextPage")</p>
+                }
+                else
+                {
+                    @* Tells the driver the trailing blanks hide nothing, which is the doubt that makes
+                       someone flip back and forth. Not red: red must keep meaning "act on this". *@
+                    <p class="terminal">@Translator("NoMoreTrainsInThisDuty")</p>
+                }
+            }
+            break;
+    }
+
+    @* Every page but the front carries the booklet's identity. The prototype proved this: pages are
+       read out of context, and a sheet that comes loose from a folded booklet has to be identifiable
+       without hunting for the front page. The front page is exempt because identifying the booklet is
+       already its whole job, at a much larger size. *@
+    @if (Page.Kind != DutyPageKind.Front && Page.Duty is { } duty)
+    {
+        <div class="pagefooter">
+            @Translator("DutyLabel") @duty.Identity
+            <span class="sep">–</span>
+            @duty.Sessions.ToText(Settings)
+            <span class="sep">–</span>
+            <strong>@Translator("Page") @Page.PageNumber</strong>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The page to render.</summary>
+    [Parameter, EditorRequired] public DutyPage Page { get; set; } = default!;
+
+    /// <summary>Whether any train part of this duty follows this page.</summary>
+    [Parameter] public bool HasMoreParts { get; set; }
+
+    /// <summary>The layout, for the overview page and the front page's heading.</summary>
+    [Parameter] public Layout? Layout { get; set; }
+
+    /// <summary>The layout name shown on the front page.</summary>
+    [Parameter] public string LayoutName { get; set; } = "";
+
+    /// <summary>First day of the meeting.</summary>
+    [Parameter] public DateOnly? ValidFrom { get; set; }
+
+    /// <summary>Last day of the meeting.</summary>
+    [Parameter] public DateOnly? ValidTo { get; set; }
+
+    /// <summary>How sessions are displayed.</summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+
+    /// <summary>The render time shown on the front page.</summary>
+    [Parameter] public DateTime PrintedAt { get; set; }
+}

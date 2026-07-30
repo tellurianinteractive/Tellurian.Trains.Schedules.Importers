@@ -62,6 +62,13 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public string Description { get; set; }
 
     /// <summary>
+    /// Gets or sets the colour used to draw this timetable stretch as a line in the layout's topology
+    /// diagram and other schematic reports. Chosen from <c>Palette</c>, which contains only dark
+    /// colours so a line stays legible drawn thin against a white background.
+    /// </summary>
+    public string Color { get; set; } = "#000000";
+
+    /// <summary>
     /// Gets or sets the collection of track stretches that make up this timetable stretch.
     /// </summary>
     public ICollection<TrackStretch> Stretches { get; set; }
@@ -91,6 +98,25 @@ public static class TimetableStretchExtensions
 {
     extension(TimetableStretch stretch)
     {
+        /// <summary>
+        /// The colours available for a timetable stretch's line: chosen so every entry is dark
+        /// (see <c>Tellurian.Utilities.Web.ColorExtensions.IsDark</c>), keeping each line legible when
+        /// drawn thin against a white background in the topology diagram and other schematic reports.
+        /// </summary>
+        public static IReadOnlyList<string> Palette =>
+        [
+            "#000000", // Black
+            "#1a3a5c", // Dark blue
+            "#8B0000", // Dark red
+            "#006400", // Dark green
+            "#4B0082", // Indigo
+            "#8B4513", // Saddle brown
+            "#2E8B57", // Sea green
+            "#8B008B", // Dark magenta
+            "#556B2F", // Dark olive
+            "#B22222", // Firebrick
+        ];
+
         /// <summary>
         /// Includes stretch number, start and end station and an optional additional description.
         /// </summary>
@@ -128,7 +154,8 @@ public static class TimetableStretchExtensions
         /// Calculates the distance from the start of the timetable stretch to the specified station.
         /// </summary>
         /// <param name="station">The target station.</param>
-        /// <returns>The distance in kilometers, or null if the station is not found.</returns>
+        /// <returns>The raw distance in metres, or null if the station is not found. Unscaled by
+        /// <c>DistanceFactor</c>; see <c>DisplayedDistanceToStation</c> for the displayed kilometre.</returns>
         public double? DistanceToStation(OperationLocation station)
         {
             var to = stretch.GetStation(station);
@@ -149,18 +176,20 @@ public static class TimetableStretchExtensions
         /// instead diverges from another line — its first station lies part-way along another timetable stretch —
         /// it is that station's displayed kilometre on the diverged-from stretch, so the branch keeps counting
         /// from where it leaves the main line. Divergences may chain (a branch off a branch); the offset then
-        /// accumulates along the chain, and shared stations that form a cycle are guarded against.
+        /// accumulates along the chain, and shared stations that form a cycle are guarded against. The raw
+        /// metre offset is scaled by the layout's <c>TimeAndSpeedSettings.DistanceFactor</c>.
         /// </summary>
-        public double StartKilometer => ComputeStartKilometer(stretch, []);
+        public double StartKilometer => ComputeStartKilometer(stretch, []) * DistanceFactor(stretch);
 
         /// <summary>
         /// The displayed kilometre at <paramref name="station"/>: its <c>DistanceToStation</c> along this
-        /// stretch shifted by <c>StartKilometer</c>, so a diverging branch continues counting from the
-        /// kilometre of its junction on the line it leaves. Zero when the station is not on this stretch.
+        /// stretch, scaled by the layout's <c>TimeAndSpeedSettings.DistanceFactor</c> and shifted by
+        /// <c>StartKilometer</c>, so a diverging branch continues counting from the kilometre of its
+        /// junction on the line it leaves. Zero when the station is not on this stretch.
         /// </summary>
         /// <param name="station">The target station.</param>
         public double DisplayedDistanceToStation(OperationLocation station) =>
-            stretch.DistanceToStation(station) is { } local ? stretch.StartKilometer + local : 0.0;
+            stretch.DistanceToStation(station) is { } local ? stretch.StartKilometer + (local * DistanceFactor(stretch)) : 0.0;
 
         /// <summary>
         /// The first track stretch that does not continue from the previous one (its <c>Start</c> differs
@@ -234,6 +263,11 @@ public static class TimetableStretchExtensions
             }
         }
     }
+
+    // The layout's distance-display factor (Settings > Time & Speed), or 1 when the stretch has no track
+    // stretches yet (e.g. a newly created, unsaved timetable stretch).
+    private static double DistanceFactor(TimetableStretch stretch) =>
+        stretch.Stretches.Count > 0 ? stretch.Stretches.First().Layout.Settings.TimeAndSpeed.DistanceFactor : 1.0;
 
     // Walks the chain of stretches this one diverges from, summing each junction's distance. A stretch diverges
     // from another when its start station is a through point (distance > 0) of that other stretch; the lowest

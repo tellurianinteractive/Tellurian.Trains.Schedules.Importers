@@ -1,5 +1,84 @@
 # Versjonsnyheter
 
+## Version 0.3.0
+
+- En ny rapport, **Førertjenester**, skriver ut ett A5-hefte per tjeneste. Forsiden
+  viser tjenestens nummer, hvilke økter eller dager den kjøres, dens start- og
+  sluttid og -stasjoner, en vanskelighetsgrad, bemanningsbehov og eventuelle
+  tjenestemerknader. Hver togdel får sin egen side, med hvilke trekkraftenheter som
+  skal brukes, hvilke vognsett som skal tas med, og til hvilke destinasjoner
+  godsvogner skal tas med, samt ruteplanen – hver vist i sin egen tydelig
+  avgrensede blokk. Siste side i hvert hefte viser anleggets sporplan og en tabell
+  over skiftestasjoner, for enkelt oppslag under kjøringen.
+- En ny rapport, **Generelle instruksjoner**, er et eget trykt hefte med treffets
+  program og instruksjoner som gjelder for et anlegg gjennom hele treffet. Her står
+  treffarrangøren fritt til å skrive hva som helst – for eksempel
+  kjøreinstruksjoner, signalgiving, radio-/telefonbruk, hva man gjør ved
+  forsinkelser og hvem man spør – og det deles ut én gang til alle.
+- Både programmet og instruksjonene skrives under **Innstillinger › Informasjon** og
+  kan formateres med Markdown – overskrifter, lister, fet og kursiv – slik at også en
+  lang instruksjonstekst blir lesbar på trykk.
+- Heftet innledes med treffets navn, hvilke datoer det gjelder, og utskriftsdatoen, fulgt
+  av programmet: øktenes tider, pauser og måltider – det hver deltaker trenger å vite
+  før den første økten.
+- Instruksjonene følger deretter over så mange sider som de trenger. Det brytes side
+  mellom avsnitt, og en overskrift holdes alltid sammen med teksten den innleder.
+- Siste side viser anleggets sporplan og tabellen over skiftestasjoner, slik at også de
+  som aldri holder et tjenestehefte – først og fremst stasjonspersonalet – får en
+  oversikt over anlegget.
+- Heftet skrives ut i samme A5-format som tjenesteheftene: A4 liggende, tosidig,
+  brettet på midten, med tomme sider lagt til der det trengs slik at arkene brettes
+  riktig.
+- Tjenester kan nå graderes **Lett**, **Middels** eller **Erfaren**, vist
+  fargekodet på heftet, slik at en deltaker kan velge en tjeneste som passer
+  erfaringen deres.
+- En tjeneste kan nå angi at den trenger to eller tre personer – for eksempel en
+  lokfører og en konduktør – og dette vises på heftet.
+- En tjeneste kan festes til et **fast nummer** slik at automatisk omnummerering
+  lar den være urørt, for eksempel spesielle tjenester som deles ut før en økt
+  starter.
+- Planen kontrolleres nå også slik at hver togdel med lokomotiv eller togsett
+  tildelt har en førertjeneste som dekker den i hver økt den kjøres – en del ingen
+  er satt opp til å kjøre, rapporteres økt for økt. En tjeneste med fast nummer
+  kontrolleres også: den må ha et nummer, og ingen to tjenester med fast nummer
+  kan få samme nummer.
+- Selskaper kan nå ha en opplastet **logo**, vist i rapporter i stedet for
+  tekstsignaturen.
+- Stasjoner kan nå merkes som den **skiftestasjonen** som betjener en annen
+  stasjons lokalgods; anlegget lister automatisk opp hver skiftestasjon og hva den
+  dekker, vist på tjenesteheftets siste side. Dette hjelper stasjonspersonale og
+  godstogførere med å vite hvor vogner med en gitt godsdestinasjon skal sendes.
+- Hver ruteplanstrekning kan nå gis en **farge**, brukt til å tegne den i
+  Topologi-diagrammet.
+- En ny **avstandsfaktor** (under Innstillinger › Tid & hastighet) lar et anlegg
+  vise et annet – typisk større, mer forbildetro – kilometertall i rapporter og
+  den grafiske ruteplanen enn avstanden som faktisk er modellert, uten at det
+  påvirker noen kjøretidsberegning.
+- Appen holder nå flere åpne nettleserfaner eller -vinduer synkronisert med
+  hverandre. **Merk** at dette bare fungerer mellom vinduer på samme maskin i
+  samme nettleser.
+- Innstillinger kan nå lagre treffets **gjelder fra**- og **gjelder til**-datoer,
+  skrevet ut som en gyldighetslinje på rapporter; la dem stå tomme hvis ikke noe
+  treff er booket ennå.
+- En ny innstilling, **utvid plantider automatisk?** (under Innstillinger ›
+  Generelt), utvider planens start- eller sluttid for å dekke et tog i stedet
+  for å blokkere endringen når togets egen tid faller utenfor den. Av som
+  standard.
+- En ny knapp, **oppdater alle tider**, i den grafiske ruteplanen beregner alle
+  tog i ruteplanen på nytt samtidig, i stedet for å måtte velge en delmengde
+  først.
+- Sporbelegningskontrollen kan nå valgfritt ta hensyn til at et lokomotiv eller
+  togsett står på et spor mellom to tog, med mindre det er booket til eller fra
+  hensetting (under Innstillinger › Validering). Av som standard, siden det bare
+  gir mening på anlegg der hensetting er modellert bevisst – slå den på der for å
+  oppdage et tredje tog som i det stille bruker et spor et stillestående kjøretøy
+  allerede opptar.
+
+### Feilrettinger
+
+- Når man legger til et nytt tog, settes nå standard starttid under hensyn til
+  den angitte forberedelsestiden, slik at det ikke starter før planens starttid.
+
 ## Version 0.2.4
 
 - En ny fane **Tjenester** lar deg planlegge førertjenester – arbeidet en lokfører utfører

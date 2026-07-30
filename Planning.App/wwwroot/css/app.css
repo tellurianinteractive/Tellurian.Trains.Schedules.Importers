@@ -93,13 +93,473 @@ table.grid thead th .sort-indicator {
 }
 
 /* Coloured region chip rendered from Region.Display (shared markup, used wherever a region is shown).
-   The background/text colours are set inline; this provides the chip shape and spacing. */
+   The background/text colours are set inline; this provides the chip shape and spacing.
+   print-color-adjust is required, not cosmetic: the inline text colour is computed to contrast with
+   the background, so if printing drops the background (which it does by default) a light-on-dark
+   chip becomes light text on white paper — invisible. Regions reach printed reports through cargo
+   notes, so the chip must keep its background on paper. The driver's greyscale/colour choice in the
+   print dialogue still applies. */
 .region {
     display: inline-block;
     padding: 1px 2px;
     margin: 1px;
     font-size: 0.85rem;
     white-space: nowrap;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* --- Session numbers ---
+   The circles are emitted as raw SVG from the model (Sessions.ToHtml), so these rules must be global:
+   Blazor CSS isolation rewrites selectors with [b-xxxxx] attributes, which markup injected through a
+   MarkupString never carries. Sizing is in em with no width/height on the SVG itself, so a circle is
+   always as tall as the text beside it and a caller that wants larger circles simply raises the font
+   size — no size parameter at any call site. */
+/* Not nested under .sessions-view: circles also appear inside note markup, which has no wrapper. */
+.sessionnumber {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+}
+
+.sessions-view {
+    white-space: nowrap;
+}
+
+/* --- Call notes ---
+   The span every note is wrapped in by the model (CallNote.ToHtml / GeneratedNote.ToHtml). Global for
+   the same reason as the rules above: markup injected through a MarkupString carries no [b-xxxxx]
+   scoping attribute.
+
+   Emphasis inside a note comes from two places and is deliberately styled as one thing. A generated
+   note emboldens its substituted values — the vehicle to fetch, the train to meet — as
+   <b class="value">; a manual note emboldens whatever the planner marked as **bold**. Both are the
+   same statement to the reader: this is the part you must not miss.
+
+   The b element already carries the emphasis without a stylesheet, which is what the model relies on
+   for consumers that are not this app. This rule only tunes the weight: 600 rather than the browser's
+   700, because the booklet's note column sets small and full bold blocks up into a dark smudge at that
+   size. Raise it to 700 here if it reads too light on paper. */
+.callnote {
+    b {
+        font-weight: 600;
+    }
+}
+
+/* --- Driver duty booklet: the printed sheet ---
+   One A4 landscape sheet carries two A5 portrait page bodies side by side. Two A5 portrait pages are
+   296 x 210 mm against A4 landscape's 297 x 210 mm, so they fit exactly. */
+.dutysheet {
+    display: flex;
+    /* A definite height in millimetres, NOT 100%: nothing above this sets a height — the .a4l wrapper,
+       body and html are all content-height — so a percentage computes to auto, the two page bodies
+       shrink to their content, and everything positioned against their bottom edge (the page footer,
+       the continuation and terminal messages) rides up under the last line of text instead of sitting
+       at the foot of the A5 page. A4 landscape is 210 mm tall and the printed @page margin is 0, so
+       this is exactly the sheet; it must change with the paper size, not with the content. */
+    height: 210mm;
+    gap: 0;
+
+    .dutypage {
+        position: relative;
+        width: 50%;
+        height: 100%;
+        padding: 8mm;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    /* The fold line, so the sheet can be folded accurately by hand. */
+    .dutypage:first-child {
+        border-right: 1px dashed #bbb;
+    }
+
+    .blank {
+        margin-top: 40%;
+        text-align: center;
+        font-style: italic;
+        color: #666;
+    }
+
+    /* Sits at the foot of the page, under the last part on it — above the page footer. */
+    .continues,
+    .terminal {
+        position: absolute;
+        left: 8mm;
+        right: 8mm;
+        bottom: 14mm;
+        margin: 0;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    /* A region chip must not decide the height of the table row it sits in. As an inline-block it
+       brings its own leading and a vertical margin, which together push the line box about 4 px past
+       the surrounding text — so a call carrying a destination note stood taller than its neighbours and
+       the route stopped reading as an evenly spaced list. Flattening both makes the chip sit inside the
+       line, exactly as the session circles beside it already do. Horizontal margin is kept: that one
+       separates the chip from adjacent words and costs no height. Set for the whole booklet, not just
+       the timetable, because the overview page's shunting yard list is a table of chips with the same
+       problem.
+       Scoped to the sheet, so chips on screen keep the roomier spacing they were given. */
+    .region {
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1;
+    }
+
+    /* Identifies the booklet from any page, so a loose sheet can be put back. */
+    .pagefooter {
+        position: absolute;
+        left: 8mm;
+        right: 8mm;
+        bottom: 5mm;
+        text-align: center;
+        font-size: 0.8rem;
+
+        .sep {
+            margin: 0 0.4em;
+            color: #666;
+        }
+    }
+
+    /* Only the warning is red: red must keep meaning "act on this", and the terminal message says the
+       opposite. Colour is emphasis only here — the words carry the meaning, so greyscale loses nothing. */
+    .continues {
+        color: #c00;
+    }
+}
+
+/* --- Driver duty booklet: the front page --- */
+.dutyfront {
+    text-align: center;
+
+    .layout {
+        margin: 0;
+        font-size: 1.6rem;
+        color: #1a3a5c;
+    }
+
+    .validity {
+        margin: 0 0 0.3em;
+        color: #1a3a5c;
+    }
+
+    .dutylabel {
+        margin: 0.4em 0 0;
+        font-size: 1.2rem;
+    }
+
+    /* The dominant element of the page: what the pile is sorted by, read off a closed booklet. */
+    .dutynumber {
+        margin: 0;
+        font-size: 4.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* Boxed and red, because a participant who skips it is the case it exists for. */
+    .readfirst {
+        margin: 0.4em auto;
+        padding: 0.3em 0.5em;
+        border: 2px solid #c00;
+        color: #c00;
+        font-weight: 700;
+    }
+
+    /* Read at arm's length off a closed booklet in a stack, so it is set large. */
+    .sessions {
+        margin: 0.4em 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    .extent,
+    .operators,
+    .categories {
+        margin: 0.15em 0;
+    }
+
+    .label {
+        font-weight: 400;
+    }
+
+    .grading {
+        margin: 0.4em 0;
+
+        .difficulty,
+        .staffing {
+            margin: 0 0.5em;
+        }
+
+        /* Coloured text, not a coloured background: text colour prints reliably even where printing
+           drops backgrounds. The grade name sits beside it, so greyscale loses only scanning speed. */
+        .difficulty.easy { color: #009933; }
+        .difficulty.medium { color: #cc7000; }
+        .difficulty.experienced { color: #c00; }
+    }
+
+    /* The only variable-height element on the page, so it sits last and grows into free space without
+       displacing anything the pile-sorter reads from a fixed position. */
+    .dutynotes {
+        margin: 0.5em 0;
+        padding-left: 1.2em;
+        text-align: left;
+    }
+
+    .printed {
+        margin-top: 0.6em;
+        font-size: 0.75rem;
+        color: #666;
+    }
+}
+
+/* --- General instructions booklet: the front page ---
+   Page 1. Only the facts every reader needs before the meeting: what this is, when it runs, and when
+   it was printed — plus the programme, the one thing that has nowhere else in the booklet to go. No
+   duty number, sessions, operator or grading: this booklet is not any one duty's. */
+.instructionsfront {
+    text-align: center;
+
+    .meetingname {
+        margin: 0;
+        font-size: 1.6rem;
+        color: #1a3a5c;
+    }
+
+    .validity {
+        margin: 0.3em 0 0;
+        color: #1a3a5c;
+    }
+
+    .printed {
+        margin-top: 0.6em;
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    .programme {
+        text-align: left;
+        margin-top: 0.8em;
+
+        /* Centred like the rest of the front page, even though the programme text below it is not. */
+        .section-title {
+            text-align: center;
+        }
+    }
+}
+
+/* --- General instructions booklet: shared section titles ---
+   "Instructions", "Layout" and "Programme" — one per booklet section, always the first thing on its
+   section's first page. Set larger than any heading the author can write inside their own markdown
+   (see .instructions-body below), so a section title is never mistaken for one of theirs. */
+.section-title {
+    margin: 0 0 0.4em;
+    font-size: 1.6rem;
+    color: #1a3a5c;
+    border-bottom: 1px solid #1a3a5c;
+    padding-bottom: 0.15em;
+}
+
+/* --- General instructions booklet ---
+   Rendered markdown of unbounded length, split across pages at block boundaries. */
+.instructions-body {
+    font-size: 0.9rem;
+
+    h1 { font-size: 1.2rem; margin: 0 0 0.3em; }
+    h2 { font-size: 1.05rem; margin: 0.5em 0 0.2em; }
+    h3 { font-size: 0.95rem; margin: 0.4em 0 0.15em; }
+
+    p, li { margin: 0 0 0.4em; }
+
+    ul, ol { padding-left: 1.2em; margin: 0 0 0.4em; }
+}
+
+/* --- General instructions booklet: the layout page ---
+   Wraps the shared DutyOverviewPage component (topology + shunting yards) with this booklet's own
+   "Layout" section title. The duty booklet's own overview page carries no such heading, so it lives
+   here rather than inside the shared component. */
+.instructions-overview {
+    .section-title {
+        margin-bottom: 0.3em;
+    }
+}
+
+/* --- Driver duty booklet: the overview page --- */
+.dutyoverview {
+    h2 {
+        margin: 0 0 0.2em;
+        font-size: 1.05rem;
+    }
+
+    .topology-svg {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .shunting-yards {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+
+        th {
+            text-align: left;
+            border-bottom: 1px solid #000;
+            padding: 0.1em 0.25em;
+        }
+
+        td {
+            padding: 0.1em 0.25em;
+            vertical-align: top;
+        }
+
+        .shunting-yard {
+            font-weight: 600;
+        }
+    }
+}
+
+/* --- Driver duty booklet ---
+   Global rather than component-scoped: call notes arrive as raw markup from the model, so they never
+   carry the [b-xxxxx] attribute CSS isolation rewrites selectors with. Type size has a floor here —
+   text too small to read at arm's length has failed however much it lets us fit on the page. */
+.dutypart {
+    /* The line the driver scans for when leafing through the booklet ("Dienst in DBSCH Zug 44780"), so
+       it is set half again as large as the rest and given air above it — which also separates a second
+       part on the same page from the tables of the part before. Two row units in the page budget; see
+       DutyPagination.HeaderHeight, which must be re-tuned if this size changes. */
+    h2 {
+        margin: 0 0 0.1em;
+        padding-top: 0.3em;
+        font-size: 1.725rem;
+    }
+
+    p {
+        margin: 0 0 0.15em;
+        font-size: 0.9rem;
+    }
+
+    /* Category and extent share a line; the category leads it. */
+    .extent .category {
+        font-weight: 600;
+        margin-right: 0.5em;
+    }
+
+    h3 {
+        margin: 0.4em 0 0.15em;
+        font-size: 0.95rem;
+    }
+
+    hr {
+        margin: 0.3em 0;
+        border: 0;
+        border-top: 1px solid #000;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+
+        /* Bold is the browser default for a th, but stated here so a future reset cannot quietly take
+           it away: on paper the column headings are what orient a driver in a table of bare figures. */
+        th {
+            text-align: left;
+            border-bottom: 1px solid #000;
+            padding: 0.1em 0.35em;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.1em 0.25em;
+            vertical-align: top;
+        }
+    }
+
+    /* The identity the driver matches against the loco card, so it must not be cramped. */
+    .designation {
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    /* Fixed layout is required, not cosmetic: with automatic layout the full-width colspan note rows
+       would take part in width calculation, so one long note would widen the note column and shift
+       every other column. Fixed widths also make the wrap width a known constant, which is what makes
+       estimating page height sound rather than merely convenient. */
+    .dutycalls {
+        table-layout: fixed;
+
+        .arrdep { width: 3.2em; }
+        .track { width: 3.2em; }
+        .time { width: 3.4em; }
+        .station { width: auto; }
+        .note { width: 40%; }
+
+        /* The Track heading is as wide as "Track"/"Gleis" gets, in a column otherwise sized for a
+           one- or two-digit number — left-aligned it would sit hard against Time with no gap between
+           the words, so it is centred instead, the way a narrow numeric column reads best. */
+        th.track {
+            text-align: center;
+        }
+
+        /* The three facts the driver reads at a glance — where, which track, when — are set bold. The
+           Arr/Dep prefix and the notes stay regular, so the eye lands on the data rather than on the
+           words qualifying it. */
+        td.station,
+        td.track,
+        td.time {
+            font-weight: 700;
+        }
+
+        /* A note on its own row starts at the station column — the Arr/Dep cell stays empty — so it
+           aligns with the station name above it rather than being indented by an arbitrary amount. */
+
+        /* Every row reserves the rule, and only its colour says whether one is drawn. A rule falls on
+           the LAST row of a group, so a call whose notes stack below it carries none — and with the
+           border declared only on the ruled rows, that row came out half a pixel shorter than its
+           neighbours, because a collapsed border is shared between the two rows it separates. Half a
+           pixel is nothing on its own; a table where a row's height depends on whether it happens to
+           carry notes is not, and it is what breaks the even rhythm the route is read by. */
+        td {
+            border-bottom: 1px solid transparent;
+        }
+
+        /* Two rule weights, so the route reads as a list of places. The heavy rule closes a station;
+           the light one separates an arrival from its own departure within one. Both are drawn on the
+           LAST row of a group, so a call is never cut off from the notes belonging to it. */
+        tr.rule-heavy td {
+            border-bottom-color: #000;
+        }
+
+        tr.rule-light td {
+            border-bottom-color: #c8c8c8;
+        }
+
+        /* A stretch of the train the driver does not work: shown, so the route reads as the whole
+           train, but visibly cancelled so it cannot be mistaken for theirs. Struck through as well as
+           greyed, because grey alone survives neither a worn photocopy nor a hurried glance — and this
+           is the one distinction on the page that must never be misread. Qualified by the rule classes
+           so it recolours a rule that is drawn rather than revealing one that is not. */
+        tr.not-part td {
+            color: #808080;
+            text-decoration: line-through;
+        }
+
+        tr.not-part.rule-heavy td,
+        tr.not-part.rule-light td {
+            border-bottom-color: #808080;
+        }
+    }
+}
+
+/* --- Company logos ---
+   Height-normalised in em, width automatic: logos of wildly different aspect ratios then line up on a
+   common baseline, several sit side by side without one dwarfing the rest, and the whole thing scales
+   with the surrounding font size instead of needing a size parameter at each call site. */
+.company-logo {
+    height: 2em;
+    width: auto;
+    vertical-align: middle;
 }
 
 /* --- Validation --- */
@@ -399,6 +859,35 @@ code {
     .form-grid input[type="text"] {
         width: 22rem;
         max-width: 100%;
+    }
+
+    .swatch {
+        display: inline-block;
+        width: 1.4rem;
+        height: 1.4rem;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        vertical-align: middle;
+    }
+
+    .palette {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .palette .swatch {
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border: 2px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .palette .swatch.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary);
     }
 
     .route {
