@@ -23,13 +23,26 @@ public sealed record CrossingNote(
     SessionsSettings? Settings) : GeneratedNote;
 
 /// <summary>
-/// Every other train that passes the driver's train in the <em>same</em> direction at this location,
-/// at most one per call: see <see cref="CrossingNote"/> for why these aggregate rather than repeat.
+/// Every other train the driver's train overtakes here — it was already standing when this train
+/// arrived and is still standing when it leaves — at most one per call: see <see cref="CrossingNote"/>
+/// for why these aggregate rather than repeat.
 /// </summary>
-/// <param name="Meets">The trains doing the overtaking, or being overtaken, ordered by
-/// <see cref="Meet.From"/>, then <see cref="Meet.To"/>, then the other train's number.</param>
+/// <param name="Meets">The trains being overtaken, ordered by <see cref="Meet.From"/>, then
+/// <see cref="Meet.To"/>, then the other train's number.</param>
 /// <param name="Settings">How each meet's <see cref="Meet.Sessions"/> qualifier is rendered.</param>
-public sealed record OvertakingNote(
+public sealed record OvertakesNote(
+    IReadOnlyList<Meet> Meets,
+    SessionsSettings? Settings) : GeneratedNote;
+
+/// <summary>
+/// Every other train that overtakes the driver's train here — it arrives after this train and leaves
+/// before it — at most one per call: see <see cref="CrossingNote"/> for why these aggregate rather
+/// than repeat.
+/// </summary>
+/// <param name="Meets">The trains doing the overtaking, ordered by <see cref="Meet.From"/>, then
+/// <see cref="Meet.To"/>, then the other train's number.</param>
+/// <param name="Settings">How each meet's <see cref="Meet.Sessions"/> qualifier is rendered.</param>
+public sealed record IsOvertakenNote(
     IReadOnlyList<Meet> Meets,
     SessionsSettings? Settings) : GeneratedNote;
 
@@ -64,9 +77,13 @@ public enum TravelDirection
 /// </summary>
 /// <remarks>
 /// <para>
-/// Both notes come from one overlap test — each train arrives before the other departs — with the
-/// relative direction alone deciding which note applies. Deriving them from a single predicate keeps the
-/// pair consistent by construction.
+/// The relative direction decides which question is asked. Trains running <em>towards</em> each other
+/// cross whenever they overlap — each arrives before the other departs. Trains running the
+/// <em>same</em> way only meet when one of them passes the other: the overtaken train must arrive
+/// before the overtaking one and leave after it. Merely overlapping in the same direction is no event
+/// at all — both simply stand here for a while — and produces no note. The same containment predicate
+/// answers both same-direction cases with its arguments swapped, which keeps the pair consistent by
+/// construction.
 /// </para>
 /// <para>
 /// Comparing directions across <em>different</em> stretches only means anything because all track
@@ -81,8 +98,8 @@ public static class MeetNoteExtensions
     extension(StationCall call)
     {
         /// <summary>
-        /// The crossing and overtaking notes for this call: one per other train that is present at the
-        /// same location at the same time, naming that train and the window in which it is there.
+        /// The crossing and overtaking notes for this call: one per other train that crosses this one,
+        /// or passes it, here — naming that train and the window in which both are present.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -92,13 +109,14 @@ public static class MeetNoteExtensions
         /// routine, one flag silences both at once.
         /// </para>
         /// <para>
-        /// A train's own origin and terminus produce neither either, and not merely because a meet there
-        /// would be uninteresting. At those two calls one of the times is not a movement at all: the
-        /// first call's arrival is when the driver reports, before the train departs, and the last call's
-        /// departure is when they stand down, after it has arrived — the two times <c>DriverDuty</c>
-        /// derives its start and end from. Testing presence across that span invents meets in time the
-        /// train is not running: one arriving at 18:00 whose duty ends at 18:10 was met by everything
-        /// that called there in between. A meet is a meet only while the train is on its way.
+        /// A train's origin and terminus produce neither either — neither its own, nor the other
+        /// train's — and not merely because a meet there would be uninteresting. At those two calls one
+        /// of the times is not a movement at all: the first call's arrival is when the driver reports,
+        /// before the train departs, and the last call's departure is when they stand down, after it has
+        /// arrived — the two times <c>DriverDuty</c> derives its start and end from. Testing presence
+        /// across that span invents meets in time the train is not running: one arriving at 18:00 whose
+        /// duty ends at 18:10 was met by everything that called there in between. A meet is a meet only
+        /// while both trains are on their way.
         /// </para>
         /// </remarks>
         /// <param name="readerSessions">The sessions the reader's duty runs. A meet restricted to
@@ -115,16 +133,30 @@ public static class MeetNoteExtensions
             if (direction is null) yield break;
 
             var crossings = new List<Meet>();
-            var overtakings = new List<Meet>();
+            var overtakes = new List<Meet>();
+            var isOvertaken = new List<Meet>();
 
             foreach (var other in call.OperationLocation.Calls())
             {
                 if (other.Train is not { } otherTrain) continue;
                 if (otherTrain.Equals(train)) continue;
-                if (!Overlaps(call, other)) continue;
+
+                // The same rule read from the other side: a train that begins or ends its run here is
+                // not running, so it can be neither crossed nor passed. One event has two readings, and
+                // both must agree — otherwise a train would be told it overtook one that never moved.
+                if (other.IsTrainOriginOrTerminus) continue;
 
                 var otherDirection = other.DirectionInto;
                 if (otherDirection is null) continue;
+
+                // Which of the three events this is — or none, when two trains going the same way
+                // merely share the location for a while without either passing the other.
+                var meets =
+                    otherDirection != direction ? Overlaps(call, other) ? crossings : null :
+                    IsOvertaken(other, call) ? overtakes :
+                    IsOvertaken(call, other) ? isOvertaken :
+                    null;
+                if (meets is null) continue;
 
                 // The trains must also share at least one session to meet at all.
                 var shared = train.Sessions.And(otherTrain.Sessions);
@@ -138,8 +170,7 @@ public static class MeetNoteExtensions
                 // A qualifier repeating the duty's own sessions says nothing, so it is omitted.
                 var qualifier = shared.Flags == readerSessions.Flags ? (Sessions?)null : shared;
 
-                var meet = new Meet(otherTrain, from, to, qualifier);
-                (direction == otherDirection ? overtakings : crossings).Add(meet);
+                meets.Add(new Meet(otherTrain, from, to, qualifier));
             }
 
             // At most one note per kind, aggregating every train met — not one row each — ordered the
@@ -147,8 +178,10 @@ public static class MeetNoteExtensions
             // other train's number, which is deterministic even when two meets start and end together.
             if (crossings.Count > 0)
                 yield return new CrossingNote(Order(crossings), settings) { IsForArrival = true };
-            if (overtakings.Count > 0)
-                yield return new OvertakingNote(Order(overtakings), settings) { IsForArrival = true };
+            if (overtakes.Count > 0)
+                yield return new OvertakesNote(Order(overtakes), settings) { IsForArrival = true };
+            if (isOvertaken.Count > 0)
+                yield return new IsOvertakenNote(Order(isOvertaken), settings) { IsForArrival = true };
         }
 
         /// <summary>
@@ -200,6 +233,13 @@ public static class MeetNoteExtensions
     // Two trains occupy a location together when each arrives before the other departs.
     private static bool Overlaps(StationCall mine, StationCall other) =>
         other.Arrival < mine.Departure && other.Departure > mine.Arrival;
+
+    // One train passes another going the same way only when it arrives after the other and leaves
+    // before it: the overtaken train is standing here for the whole of the overtaking train's visit,
+    // which is what lets the second get ahead of the first. Equal times at either end are not enough —
+    // then neither is unambiguously in front — and share the fate of a plain overlap: no note.
+    private static bool IsOvertaken(StationCall overtaken, StationCall overtaker) =>
+        overtaken.Arrival < overtaker.Arrival && overtaken.Departure > overtaker.Departure;
 
     // The order the driver reads a group of simultaneous meets in: by start, then end, then the other
     // train's number, so the order is deterministic even when two meets start and end together.

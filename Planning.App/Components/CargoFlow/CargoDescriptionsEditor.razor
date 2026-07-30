@@ -140,7 +140,7 @@
                             <button @onclick="() => ToggleExpanded(d)">@Translator(IsExpanded(d) ? "Close" : "Edit")</button>
                             @{ var deletion = Plan?.MayDelete(d); }
                             <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
-                                <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                                <button class="danger" disabled="@(deletion?.IsDenied == true)"
                                         @onclick="() => _deleteTarget = d"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </span>
                         </td>

@@ -1318,6 +1318,15 @@
   <data name="AddCall" xml:space="preserve">
     <value>Halt hinzufügen</value>
   </data>
+  <data name="CallNotAtTrainEnd" xml:space="preserve">
+    <value>Löschen nicht möglich: Nur der erste und der letzte Halt können gelöscht werden. Ein Zug hat an jeder Betriebsstelle entlang seines Laufwegs einen Halt.</value>
+  </data>
+  <data name="CallReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Dieser Halt wird von Fahrzeugumläufen oder Diensten verwendet.</value>
+  </data>
+  <data name="ClearCallNote" xml:space="preserve">
+    <value>Bemerkung löschen.</value>
+  </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Zug {0} löschen?</value>
   </data>
@@ -1744,6 +1753,9 @@
   <data name="TractionUnit" xml:space="preserve">
     <value>Triebfahrzeug</value>
   </data>
+  <data name="TractionUnits" xml:space="preserve">
+    <value>Triebfahrzeuge</value>
+  </data>
   <data name="TractionUnitExchange" xml:space="preserve">
     <value>Triebfahrzeugwechsel</value>
   </data>
@@ -1881,6 +1893,15 @@
   </data>
   <data name="CargoWagonsWithWaybills" xml:space="preserve">
     <value>Güterwagen mit Frachtbriefen</value>
+  </data>
+  <data name="TrainTimetable" xml:space="preserve">
+    <value>Fahrplan</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Zeit</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Bemerkung</value>
   </data>
   <data name="DutyEnds" xml:space="preserve">
     <value>Endet</value>

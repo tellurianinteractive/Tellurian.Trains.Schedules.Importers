@@ -14,8 +14,10 @@
          xmlns="http://www.w3.org/2000/svg">
         @foreach (var connector in diagram.Connectors)
         {
-            <line x1="@F(connector.X1)" y1="@F(connector.Y1)" x2="@F(connector.X2)" y2="@F(connector.Y2)"
-                  stroke="@connector.Color" stroke-width="10" />
+            @* Diagonal and the first bit of the branch's own line in one path: a rounded join fills the
+               corner between them, which two separate strokes butting together leave notched. *@
+            <path d="M @F(connector.JunctionX) @F(connector.JunctionY) L @F(connector.LineX) @F(connector.LineY) L @F(connector.StubX) @F(connector.LineY)"
+                  fill="none" stroke="@connector.Color" stroke-width="10" stroke-linejoin="round" />
         }
         @foreach (var line in diagram.Lines)
         {

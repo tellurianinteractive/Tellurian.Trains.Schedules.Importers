@@ -1318,6 +1318,15 @@
   <data name="AddCall" xml:space="preserve">
     <value>Legg til stopp</value>
   </data>
+  <data name="CallNotAtTrainEnd" xml:space="preserve">
+    <value>Kan ikke slette: bare det første og det siste stoppet kan slettes. Et tog har et stopp ved hvert driftssted langs ruten.</value>
+  </data>
+  <data name="CallReferenced" xml:space="preserve">
+    <value>Kan ikke slette: stoppet brukes av materiellomløp eller førertjenester.</value>
+  </data>
+  <data name="ClearCallNote" xml:space="preserve">
+    <value>Fjern merknaden.</value>
+  </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Slette tog {0}?</value>
   </data>
@@ -1744,6 +1753,9 @@
   <data name="TractionUnit" xml:space="preserve">
     <value>Trekkraftenhet</value>
   </data>
+  <data name="TractionUnits" xml:space="preserve">
+    <value>Trekkraftenheter</value>
+  </data>
   <data name="TractionUnitExchange" xml:space="preserve">
     <value>Bytte av trekkraftenhet</value>
   </data>
@@ -1881,6 +1893,15 @@
   </data>
   <data name="CargoWagonsWithWaybills" xml:space="preserve">
     <value>Godsvogner med fraktbrev</value>
+  </data>
+  <data name="TrainTimetable" xml:space="preserve">
+    <value>Ruteplan</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Tid</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Merknad</value>
   </data>
   <data name="DutyEnds" xml:space="preserve">
     <value>Slutter</value>

@@ -70,7 +70,8 @@ public static class GeneratedNoteExtensions
             NoStopNote => new(NoteResources.NoStop),
             NoExchangeNote => new(NoteResources.NoExchange),
             CrossingNote(var meets, var settings) => new(NoteResources.Crosses, MeetList(meets, settings)),
-            OvertakingNote(var meets, var settings) => new(NoteResources.MeetsInTheSameDirection, MeetList(meets, settings)),
+            OvertakesNote(var meets, var settings) => new(NoteResources.Overtakes, MeetList(meets, settings)),
+            IsOvertakenNote(var meets, var settings) => new(NoteResources.IsOvertakenBy, MeetList(meets, settings)),
             _ => new(string.Empty),
         };
 
@@ -104,7 +105,7 @@ public static class GeneratedNoteExtensions
     {
         var items = meets.Select(meet =>
         {
-            var item = new NoteTemplate(NoteResources.TrainMeetAtTime, meet.Other, NoteArg.Plain(meet.From.HHMM()), NoteArg.Plain(meet.To.HHMM()));
+            var item = new NoteTemplate(NoteResources.TrainMeetAtTime, meet.Other, NoteArg.Plain(When(meet)));
             if (meet.Sessions is not { } qualifier || settings is null) return NoteArg.Markup(item.ToText, item.ToHtml);
             var sessions = new NoteTemplate(NoteResources.InSessions, NoteArg.Markup(qualifier.ToText(settings), qualifier.ToHtml(settings)));
             return NoteArg.Markup($"{item.ToText} {sessions.ToText}", $"{item.ToHtml} {sessions.ToHtml}");
@@ -113,4 +114,11 @@ public static class GeneratedNoteExtensions
             string.Join(", ", items.Select(item => item.Text)),
             string.Join(", ", items.Select(item => item.Html)));
     }
+
+    /// <summary>
+    /// When a meet happens: the window both trains are present, or a single time when the other train
+    /// only passes through and there is no interval to state.
+    /// </summary>
+    private static string When(Meet meet) =>
+        meet.From == meet.To ? meet.From.HHMM() : $"{meet.From.HHMM()}-{meet.To.HHMM()}";
 }

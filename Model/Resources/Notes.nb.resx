@@ -113,11 +113,14 @@
   <data name="InSessions" xml:space="preserve">
     <value>i økt {0}</value>
   </data>
-  <data name="MeetsInTheSameDirection" xml:space="preserve">
-    <value>Møter {0} i samme retning</value>
+  <data name="Overtakes" xml:space="preserve">
+    <value>Kjører forbi {0}</value>
+  </data>
+  <data name="IsOvertakenBy" xml:space="preserve">
+    <value>Blir forbikjørt av {0}</value>
   </data>
   <data name="TrainMeetAtTime" xml:space="preserve">
-    <value>{0} {1}-{2}</value>
+    <value>{0} {1}</value>
   </data>
   <data name="NoExchange" xml:space="preserve">
     <value>Ingen utveksling</value>

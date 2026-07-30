@@ -250,12 +250,20 @@ table.grid thead th .sort-indicator {
         font-size: 1.2rem;
     }
 
-    /* The dominant element of the page: what the pile is sorted by, read off a closed booklet. */
+    /* The dominant element of the page: what the pile is sorted by, read off a closed booklet.
+       Set in a vivid violet as well as large, so the number is found by colour before it is read —
+       the sorter scans a stack for one value and nothing else on the page carries this hue.
+       Violet, not red, for two reasons: red already means "act on this" in the warning box below and
+       in the hardest difficulty grade, so a red number would compete with both; and violet is mixed
+       from cyan and magenta where red draws magenta and yellow, which spreads the load over the
+       cartridges instead of emptying the same ones on every front page of a print run. Colour is a
+       shortcut, never the message: at this size the digits carry themselves in greyscale. */
     .dutynumber {
         margin: 0;
-        font-size: 4.5rem;
+        font-size: 9rem;
         font-weight: 700;
         line-height: 1;
+        color: #7a00cc;
     }
 
     /* Boxed and red, because a participant who skips it is the case it exists for. */
@@ -274,7 +282,17 @@ table.grid thead th .sort-indicator {
         font-weight: 700;
     }
 
-    .extent,
+    /* Second only to the duty number in size: after the number, when and where the duty starts is
+       what the chooser reads off a closed front page mid-session, deciding whether this duty starts
+       soon enough and near enough to take now. The label scales with the line but stays light, so
+       the time and the station keep the weight. Long station names may wrap; the tighter leading
+       keeps a wrapped line from opening a gap in the block. */
+    .extent {
+        margin: 0.15em 0;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
     .operators,
     .categories {
         margin: 0.15em 0;

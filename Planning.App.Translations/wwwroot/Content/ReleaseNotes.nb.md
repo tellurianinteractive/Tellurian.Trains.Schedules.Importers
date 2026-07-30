@@ -1,5 +1,23 @@
 # Versjonsnyheter
 
+## Version 0.3.1
+
+- Avsnittet **Trekkraftenheter** på en togdelsside i heftet Førertjenester har nå overskriften
+  sin på det valgte språket. Det var den eneste overskriften i heftet uten oversettelse, så
+  avsnittet var ikke til å kjenne igjen som trekkraftenhetene.
+- Trekkraftenheten skrives nå ut for hver togdel som har en. I planer importert med en tidligere
+  versjon viste noen togdeler en trekkraftenhet under **Tjenester** men ingen i heftet.
+- Merknader om tog i samme retning sier nå hvilket tog som kommer forbi det andre —
+  **Kjører forbi GD 42757 12:02-12:05** eller **Blir forbikjørt av GD 42757 12:02** — i stedet for
+  det tidligere *"Møter GD 42757 i samme retning"*, som aldri sa hvilket tog som kom foran. To tog
+  som bare står på samme stasjon samtidig gir ingen merknad i det hele tatt, for ingen av dem har
+  kommet forbi det andre.
+- Et møte uten varighet — det andre toget kjører gjennom uten opphold — skrives som ett klokkeslett
+  i stedet for et intervall fra et tidspunkt til seg selv.
+- Et tog som begynner eller avslutter kjøringen sin på en stasjon, tas ikke lenger med som møtt,
+  krysset eller forbikjørt der. Disse tidene er når lokføreren møter til tjeneste eller går av,
+  ikke når toget kjører.
+
 ## Version 0.3.0
 
 - En ny rapport, **Førertjenester**, skriver ut ett A5-hefte per tjeneste. Forsiden
@@ -73,6 +91,11 @@
   gir mening på anlegg der hensetting er modellert bevisst – slå den på der for å
   oppdage et tredje tog som i det stille bruker et spor et stillestående kjøretøy
   allerede opptar.
+- Hvert opphold i fanen **Tog** har nå et felt for **Merknad** – en merknad som skrives ut
+  ved det oppholdet, for eksempel «vent på møtende tog». Merknaden vises ferdig formatert
+  og bytter til den rå oppmerkingen så snart du går inn i feltet, slik at du kan utheve det
+  som betyr noe: skriv `*sakte*` for kursiv og `**første**` for fet. Tømmer du feltet,
+  fjernes merknaden igjen.
 
 ### Feilrettinger
 

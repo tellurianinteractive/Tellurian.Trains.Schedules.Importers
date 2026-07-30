@@ -106,7 +106,7 @@ else
                             <td class="actions">
                                 @{ var deletion = Plan?.MayDelete(train); }
                                 <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
-                                    <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                                    <button class="danger" disabled="@(deletion?.IsDenied == true)"
                                             @onclick="() => _deleteTarget = train"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                                 </span>
                             </td>
@@ -319,9 +319,16 @@ else
                         <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
                         <td class="note">
                             <CallNoteField Value="@call.ManualNoteText" ValueChanged="text => SetCallNote(call, text)"
-                                           Placeholder="@Translator("AddCallNote")" Title="@Translator("CallNoteHint")" />
+                                           Placeholder="@Translator("AddCallNote")" Title="@Translator("CallNoteHint")"
+                                           ClearTitle="@Translator("ClearCallNote")" />
                         </td>
-                        <td><button class="danger small" @onclick="() => RemoveCall(call)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
+                        <td>
+                            @{ var callDeletion = Plan?.MayDelete(call); }
+                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(callDeletion, "CallReferenced", Translator)">
+                                <button class="danger small" disabled="@(callDeletion?.IsDenied == true)"
+                                        @onclick="() => RemoveCall(call)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            </span>
+                        </td>
                     </tr>
                 }
                 @if (train.Calls.Count == 0)

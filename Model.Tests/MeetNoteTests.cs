@@ -2,8 +2,8 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 
 /// <summary>
 /// Covers the crossing and overtaking derivation — the one thing about a driver's booklet the model did
-/// not already express. Both notes come from a single overlap test, with the relative direction alone
-/// deciding which applies.
+/// not already express. Trains running towards each other cross whenever they overlap; trains running
+/// the same way meet only when one passes the other, which the containment test decides.
 /// </summary>
 [TestClass]
 public class MeetNoteTests
@@ -21,6 +21,19 @@ public class MeetNoteTests
     private static StationCall CallAtYtterby(Train train) =>
         train.Calls.Single(c => c.OperationLocation.Signature == "Yb");
 
+    // A forward train whose Ytterby call the test dictates — the only way to state an overtaking, since
+    // that needs one train's stay to contain the other's. Its ends are far enough away to stay out of
+    // the way, and are where the origin-and-terminus rule applies rather than at Ytterby.
+    private static Train ForwardTrainAtYtterby(int number, Time arrival, Time departure)
+    {
+        var stations = TestDataFactory.Stations.ToArray();
+        var train = new Train(number, Category, number) { Category = Category };
+        _ = train.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(11, 00), Time.FromHourAndMinute(11, 00)));
+        _ = train.Add(new StationCall(2, stations[1]["2"], arrival, departure));
+        _ = train.Add(new StationCall(3, stations[2]["1"], Time.FromHourAndMinute(14, 00), Time.FromHourAndMinute(14, 00)));
+        return train;
+    }
+
     [TestMethod]
     public void TrainsInOppositeDirectionsCross()
     {
@@ -34,24 +47,92 @@ public class MeetNoteTests
 
         var crossing = notes.OfType<CrossingNote>().Single();
         Assert.AreEqual(opposite, crossing.Meets.Single().Other);
-        Assert.IsEmpty(notes.OfType<OvertakingNote>());
+        Assert.IsEmpty(notes.OfType<OvertakesNote>());
+        Assert.IsEmpty(notes.OfType<IsOvertakenNote>());
     }
 
     [TestMethod]
-    public void TrainsInTheSameDirectionOvertake()
+    public void ATrainThatPassesAStandingTrainOvertakesIt()
+    {
+        var timetable = CreateTimetable();
+        // The standing train is there before the passing one arrives and after it leaves, which is
+        // exactly what lets the second get ahead of the first.
+        var standing = ForwardTrainAtYtterby(1, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30));
+        var passing = ForwardTrainAtYtterby(2, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 05));
+        timetable.Add(standing);
+        timetable.Add(passing);
+
+        var notes = CallAtYtterby(passing).MeetNotes(Sessions.All, Settings).ToList();
+
+        var overtakes = notes.OfType<OvertakesNote>().Single();
+        Assert.AreEqual(standing, overtakes.Meets.Single().Other);
+        Assert.IsEmpty(notes.OfType<IsOvertakenNote>());
+        Assert.IsEmpty(notes.OfType<CrossingNote>());
+    }
+
+    [TestMethod]
+    public void TheStandingTrainReadsTheSameEventAsBeingOvertaken()
+    {
+        var timetable = CreateTimetable();
+        var standing = ForwardTrainAtYtterby(1, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30));
+        var passing = ForwardTrainAtYtterby(2, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 05));
+        timetable.Add(standing);
+        timetable.Add(passing);
+
+        var notes = CallAtYtterby(standing).MeetNotes(Sessions.All, Settings).ToList();
+
+        // One event, two readings: which train the note names depends on whose booklet it is in.
+        var overtaken = notes.OfType<IsOvertakenNote>().Single();
+        Assert.AreEqual(passing, overtaken.Meets.Single().Other);
+        Assert.IsEmpty(notes.OfType<OvertakesNote>());
+    }
+
+    [TestMethod]
+    public void OverlappingInTheSameDirectionWithoutPassingIsNotAMeetAtAll()
     {
         var timetable = CreateTimetable();
         var first = TestDataFactory.CreateTrainInForwardDirection(Category, 1, Time.FromHourAndMinute(12, 00));
-        // Two minutes behind, so both stand at Ytterby together (12:25-12:30 against 12:27-12:32).
+        // Two minutes behind, so both stand at Ytterby together (12:25-12:30 against 12:27-12:32) —
+        // but neither gets past the other, so nothing has happened worth a note.
         var second = TestDataFactory.CreateTrainInForwardDirection(Category, 2, Time.FromHourAndMinute(12, 02));
         timetable.Add(first);
         timetable.Add(second);
 
-        var notes = CallAtYtterby(first).MeetNotes(Sessions.All, Settings).ToList();
+        Assert.IsEmpty(CallAtYtterby(first).MeetNotes(Sessions.All, Settings));
+        Assert.IsEmpty(CallAtYtterby(second).MeetNotes(Sessions.All, Settings));
+    }
 
-        var overtaking = notes.OfType<OvertakingNote>().Single();
-        Assert.AreEqual(second, overtaking.Meets.Single().Other);
-        Assert.IsEmpty(notes.OfType<CrossingNote>());
+    [TestMethod]
+    public void ArrivingOrLeavingTogetherIsNotAnOvertaking()
+    {
+        var timetable = CreateTimetable();
+        var standing = ForwardTrainAtYtterby(1, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30));
+        // Inside the standing train's stay at one end but level with it at the other: neither is
+        // unambiguously in front, so this shares the plain overlap's fate.
+        var sameArrival = ForwardTrainAtYtterby(2, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 05));
+        var sameDeparture = ForwardTrainAtYtterby(3, Time.FromHourAndMinute(12, 25), Time.FromHourAndMinute(12, 30));
+        timetable.Add(standing);
+        timetable.Add(sameArrival);
+        timetable.Add(sameDeparture);
+
+        Assert.IsEmpty(CallAtYtterby(standing).MeetNotes(Sessions.All, Settings));
+    }
+
+    [TestMethod]
+    public void APassThroughOvertakesAStandingTrainInASingleMoment()
+    {
+        var timetable = CreateTimetable();
+        var standing = ForwardTrainAtYtterby(1, Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30));
+        // The classic overtaking: the fast train does not stop at all.
+        var runningThrough = ForwardTrainAtYtterby(2, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 02));
+        timetable.Add(standing);
+        timetable.Add(runningThrough);
+
+        var meet = CallAtYtterby(standing).MeetNotes(Sessions.All, Settings)
+            .OfType<IsOvertakenNote>().Single().Meets.Single();
+
+        Assert.AreEqual(runningThrough, meet.Other);
+        Assert.AreEqual(meet.From, meet.To, "There is no interval: the other train is there for an instant.");
     }
 
     [TestMethod]
@@ -86,11 +167,11 @@ public class MeetNoteTests
     {
         var timetable = CreateTimetable();
         var forward = TestDataFactory.CreateTrainInForwardDirection(Category, 1, Time.FromHourAndMinute(12, 00));
-        var second = TestDataFactory.CreateTrainInForwardDirection(Category, 2, Time.FromHourAndMinute(12, 02));
+        var opposite = TestDataFactory.CreateTrainInOppositeDirection(Category, 2, Time.FromHourAndMinute(12, 02));
         timetable.Add(forward);
-        timetable.Add(second);
+        timetable.Add(opposite);
 
-        var note = CallAtYtterby(forward).MeetNotes(Sessions.All, Settings).OfType<OvertakingNote>().Single();
+        var note = CallAtYtterby(forward).MeetNotes(Sessions.All, Settings).OfType<CrossingNote>().Single();
         var meet = note.Meets.Single();
 
         // Mine 12:25-12:30, theirs 12:27-12:32: both are there 12:27-12:30, which is what the driver needs.
@@ -152,7 +233,7 @@ public class MeetNoteTests
         var notes = CallAtYtterby(forward).MeetNotes(Sessions.All, Settings).ToList();
 
         var crossing = notes.OfType<CrossingNote>().Single();
-        Assert.IsEmpty(notes.OfType<OvertakingNote>(), "All three meets are opposite-direction crossings.");
+        Assert.IsEmpty(notes.OfType<OvertakesNote>(), "All three meets are opposite-direction crossings.");
         Assert.HasCount(3, crossing.Meets);
         Assert.AreEqual(2, crossing.Meets[0].Other.Number, "Earliest end time (12:28) sorts first.");
         Assert.AreEqual(3, crossing.Meets[1].Other.Number, "Same window as the next; lower number sorts first.");
@@ -188,6 +269,32 @@ public class MeetNoteTests
             "At its origin the train has not started, so another train there is not an event on this run.");
         Assert.IsEmpty(train.Calls[^1].MeetNotes(Sessions.All, Settings),
             "At its terminus the run is over, so the same holds.");
+    }
+
+    [TestMethod]
+    public void AMeetAtTheOtherTrainsOriginOrTerminusProducesNoNoteEither()
+    {
+        var timetable = CreateTimetable();
+        var stations = TestDataFactory.Stations.ToArray();
+
+        // This train's run ends at Ytterby: it arrives at 12:00 and its driver stands down at 12:30.
+        // The stock stands there, but the train is no longer running.
+        var terminating = new Train(1, Category, 1) { Category = Category };
+        _ = terminating.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(11, 00), Time.FromHourAndMinute(11, 00)));
+        _ = terminating.Add(new StationCall(2, stations[1]["2"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 30)));
+        timetable.Add(terminating);
+
+        // One train that would pass it and one that would cross it during that stand-down span; the two
+        // are never there together themselves, so anything they report is about the terminating train.
+        var passing = ForwardTrainAtYtterby(2, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 05));
+        var opposite = TestDataFactory.CreateTrainInOppositeDirection(Category, 3, Time.FromHourAndMinute(11, 45));
+        timetable.Add(passing);
+        timetable.Add(opposite);
+
+        Assert.IsEmpty(CallAtYtterby(passing).MeetNotes(Sessions.All, Settings),
+            "Nothing was overtaken: the other train had already finished its run.");
+        Assert.IsEmpty(CallAtYtterby(opposite).MeetNotes(Sessions.All, Settings),
+            "Nor crossed, for the same reason.");
     }
 
     [TestMethod]

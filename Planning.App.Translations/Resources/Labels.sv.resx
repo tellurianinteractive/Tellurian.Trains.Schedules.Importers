@@ -1318,6 +1318,15 @@
   <data name="AddCall" xml:space="preserve">
     <value>Lägg till uppehåll</value>
   </data>
+  <data name="CallNotAtTrainEnd" xml:space="preserve">
+    <value>Kan inte ta bort: bara det första och det sista uppehållet kan tas bort. Ett tåg har ett uppehåll vid varje driftplats längs sin väg.</value>
+  </data>
+  <data name="CallReferenced" xml:space="preserve">
+    <value>Kan inte ta bort: uppehållet används av fordonsturer eller förartjänster.</value>
+  </data>
+  <data name="ClearCallNote" xml:space="preserve">
+    <value>Ta bort anmärkningen.</value>
+  </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Ta bort tåg {0}?</value>
   </data>
@@ -1744,6 +1753,9 @@
   <data name="TractionUnit" xml:space="preserve">
     <value>Dragfordon</value>
   </data>
+  <data name="TractionUnits" xml:space="preserve">
+    <value>Dragfordon</value>
+  </data>
   <data name="TractionUnitExchange" xml:space="preserve">
     <value>Byte av dragfordon</value>
   </data>
@@ -1881,6 +1893,15 @@
   </data>
   <data name="CargoWagonsWithWaybills" xml:space="preserve">
     <value>Godsvagnar med fraktsedlar</value>
+  </data>
+  <data name="TrainTimetable" xml:space="preserve">
+    <value>Tidtabell</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Tid</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Anmärkning</value>
   </data>
   <data name="DutyEnds" xml:space="preserve">
     <value>Slutar</value>

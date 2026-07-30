@@ -76,4 +76,30 @@ public class GeneratedNoteTests
         ICallNote note = new UseNote(Loco);
         Assert.IsFalse(note.ToText.Contains('<', StringComparison.Ordinal));
     }
+
+    [TestMethod]
+    public void OvertakingNotesSayWhichTrainPassesTheOther()
+    {
+        // The two readings of one event, and the whole reason they are separate note types: a driver
+        // cannot act on "meets in the same direction", but can on who is getting past whom.
+        var other = OtherTrain;
+        var meet = new Meet(other, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 05), null);
+
+        Assert.AreEqual($"Overtakes {other} 12:02-12:05", new OvertakesNote([meet], null).ToText);
+        Assert.AreEqual($"Is overtaken by {other} 12:02-12:05", new IsOvertakenNote([meet], null).ToText);
+    }
+
+    [TestMethod]
+    public void AMeetLastingNoTimeIsShownAsASingleTime()
+    {
+        // A train running through is there for an instant; "12:02-12:02" states an interval that does
+        // not exist.
+        var other = OtherTrain;
+        var meet = new Meet(other, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 02), null);
+
+        Assert.AreEqual($"Is overtaken by {other} 12:02", new IsOvertakenNote([meet], null).ToText);
+    }
+
+    private static Train OtherTrain =>
+        new(1, new TrainCategory { Id = 1, Name = "Freight", Prefix = "GD" }, 42757);
 }

@@ -1,5 +1,24 @@
 # Versionshinweise
 
+## Version 0.3.1
+
+- Der Abschnitt **Triebfahrzeuge** auf einer Zugteilseite im Heft Lokführerdienste hat seine
+  Überschrift jetzt in der gewählten Sprache. Es war die einzige Überschrift im Heft ohne
+  Übersetzung, sodass der Abschnitt nicht als die Triebfahrzeuge zu erkennen war.
+- Das Triebfahrzeug wird jetzt für jeden Zugteil gedruckt, der eines hat. In Plänen, die mit
+  einer früheren Version importiert wurden, zeigten manche Zugteile unter **Dienste** ein
+  Triebfahrzeug, im Heft aber keines.
+- Hinweise zu Zügen in gleicher Richtung sagen jetzt, welcher Zug am anderen vorbeikommt —
+  **Überholt GD 42757 12:02-12:05** oder **Wird überholt von GD 42757 12:02** — statt des
+  bisherigen *"Trifft GD 42757 in gleicher Richtung"*, das nie sagte, welcher Zug vorankam. Zwei
+  Züge, die nur gleichzeitig im selben Bahnhof stehen, ergeben gar keinen Hinweis mehr, denn keiner
+  ist am anderen vorbeigekommen.
+- Eine Begegnung ohne Dauer — der andere Zug fährt ohne Halt durch — wird als eine einzelne Uhrzeit
+  gedruckt statt als Zeitraum von einer Uhrzeit zu sich selbst.
+- Ein Zug, der in einem Bahnhof seine Fahrt beginnt oder beendet, wird dort nicht mehr als
+  getroffen, gekreuzt oder überholt aufgeführt. Diese Zeiten sind der Dienstantritt und das
+  Dienstende seines Lokführers, nicht die Fahrt des Zuges.
+
 ## Version 0.3.0
 
 - Ein neuer Bericht, **Lokführerdienste**, druckt für jeden Dienst ein A5-Heft. Die

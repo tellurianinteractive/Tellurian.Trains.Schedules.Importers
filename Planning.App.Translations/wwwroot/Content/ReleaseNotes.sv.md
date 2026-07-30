@@ -1,5 +1,23 @@
 # Versionsnyheter
 
+## Version 0.3.1
+
+- Avsnittet **Dragfordon** på ett tågdelsuppslag i häftet Förartjänster har nu sin rubrik på
+  det valda språket. Det var den enda rubriken i häftet som inte var översatt, så avsnittet
+  gick inte att känna igen som dragfordonen.
+- Dragfordonet skrivs nu ut för varje tågdel som har ett. I planer som importerats med en
+  tidigare version visade en del tågdelar ett dragfordon under **Tjänster** men inget i häftet.
+- Anteckningar om tåg i samma riktning talar nu om vilket tåg som passerar det andra —
+  **Förbigår GD 42757 12:02-12:05** eller **Förbigås av GD 42757 12:02** — i stället för det
+  tidigare *"Möter GD 42757 i samma riktning"*, som aldrig sa vilket tåg som kom före. Två tåg som
+  bara står på samma station samtidigt ger ingen anteckning alls, eftersom inget av dem har
+  passerat det andra.
+- Ett möte som inte varar någon tid — det andra tåget passerar utan uppehåll — skrivs som en enda
+  tid i stället för ett intervall från en tid till sig själv.
+- Ett tåg som börjar eller slutar sin gång på en station redovisas inte längre som mött, korsat
+  eller förbigånget där. De tiderna är när dess lokförare anmäler sig eller avslutar tjänsten, inte
+  när tåget är i gång.
+
 ## Version 0.3.0
 
 - En ny rapport, **Förartjänster**, skriver ut ett A5-häfte per tjänst. Framsidan visar

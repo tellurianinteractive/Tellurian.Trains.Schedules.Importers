@@ -1,5 +1,22 @@
 # Release Notes
 
+## Version 0.3.1
+
+- The **Traction units** section on a train part page in the Driver Duties booklet now has its
+  heading in the chosen language. It was previously the only heading in the booklet left
+  untranslated, so the section did not read as the traction units at all.
+- The traction unit is now printed for every train part that has one. In plans imported with an
+  earlier version, some parts showed a traction unit under **Duties** but none in the booklet.
+- Notes about trains going the same way now say who passes whom — **Overtakes GD 42757 12:02-12:05**
+  or **Is overtaken by GD 42757 12:02** — instead of the old *"Meets GD 42757 in the same
+  direction"*, which never said which train got ahead. Two trains that merely stand at the same
+  station at the same time give no note at all, since neither has passed the other.
+- A meet that lasts no time — the other train runs through without stopping — is printed as a single
+  time instead of an interval from a time to itself.
+- A train that begins or ends its run at a station is no longer reported as met, crossed or
+  overtaken there. Those times are when its loco driver reports for duty or stands down, not when
+  the train is running.
+
 ## Version 0.3.0
 
 - A new **Driver Duties report** that prints one A5 booklet per duty. The front page shows

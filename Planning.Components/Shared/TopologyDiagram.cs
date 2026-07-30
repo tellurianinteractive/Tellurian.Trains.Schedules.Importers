@@ -1,4 +1,4 @@
-﻿namespace Tellurian.Trains.Schedules.Planning.Components.Shared;
+namespace Tellurian.Trains.Schedules.Planning.Components.Shared;
 
 /// <summary>
 /// A station drawn as a circle on a timetable-stretch line, positioned proportionally to its distance
@@ -20,10 +20,14 @@ public sealed record TopologyLine(string Number, string Description, string Colo
 }
 
 /// <summary>
-/// A 45°/-45° line linking a branching stretch to the junction it diverges from (or merges into) on its parent line.
-/// Drawn in the branching (child) stretch's colour.
+/// A 45°/-45° line linking a branching stretch to the junction it diverges from (or merges into) on its
+/// parent line, drawn in the branching (child) stretch's colour. It runs from the junction on the parent
+/// down to <see cref="LineX"/>, where the branch's own horizontal line begins, and then continues a short
+/// way along that line to <see cref="StubX"/>. The stub is there so the renderer can draw the corner as a
+/// single joined path: a diagonal and a horizontal stroke merely butted together leave a notch — a small
+/// white triangle — on the outside of the 135° corner between them.
 /// </summary>
-public sealed record TopologyConnector(double X1, double Y1, double X2, double Y2, string Color);
+public sealed record TopologyConnector(double JunctionX, double JunctionY, double LineX, double LineY, double StubX, string Color);
 
 /// <summary>
 /// A laid-out topology of a layout's timetable stretches: horizontal lines with station circles, and
@@ -42,34 +46,48 @@ public sealed record TopologyDiagram(
     private const double RowGap = 72.0;
     private const double TargetSpan = 640.0;
 
+    // What a line occupies beyond its own stations and must therefore keep clear of its row neighbours:
+    // its number label to the left of the first station, and the last station's signature to the right.
+    private const double LabelGutter = 56.0;
+    private const double SignatureGutter = 24.0;
+
+    // How far a diagonal connector must stay from a line it passes on its way down, and how far it runs
+    // on along the branch's own line so that the corner between them is a join rather than a butt.
+    private const double ConnectorClearance = 16.0;
+    private const double StubLength = 10.0;
+
     // Which end of a branching stretch sits on its parent line: its start (it leads out, drawn +45°)
     // or its end (it leads into, drawn -45°).
     private enum JunctionSide { Start, End }
 
+    // A stretch that already has a row, and where its stations ended up, so a branch off it can find the
+    // x-coordinate of the junction it leaves from.
+    private sealed record PlacedLine(int Row, double Y, IReadOnlyDictionary<string, double> NodeX);
+
     /// <summary>
-    /// Lays out the layout's timetable stretches. Root lines are stacked from the top; a stretch that
-    /// diverges from another is placed on a row below the line it leaves and linked by a diagonal connector.
+    /// Lays out the layout's timetable stretches. A stretch that diverges from another is placed below the
+    /// line it leaves and linked by a diagonal connector; every stretch takes the topmost row on which it
+    /// overlaps nothing already drawn, so unrelated lines share a row and the diagram stays as low as it can.
     /// </summary>
     public static TopologyDiagram Build(Layout layout)
     {
         var all = layout.TimetableStretches.Where(s => s.Stretches.Count > 0).OrderBy(s => s.Id).ToList();
         if (all.Count == 0) return new TopologyDiagram(LeftMargin + RightMargin, TopMargin + BottomMargin, [], []);
 
-        var parent = BuildParentMap(all);
-        var order = OrderDepthFirst(all, parent);
+        var parents = BuildParentMap(all);
+        var order = OrderDepthFirst(all, parents);
 
         var maxSpan = all.Max(s => s.Stretches.Sum(t => t.Distance));
         var pxPerUnit = maxSpan > 0 ? TargetSpan / maxSpan : 1.0;
 
-        var lineY = new Dictionary<int, double>();
-        var nodeX = new Dictionary<int, Dictionary<string, double>>();
+        var placed = new Dictionary<int, PlacedLine>(order.Count);
+        var rows = new List<List<(double From, double To)>>();
+        var crossings = new List<(int Row, double X)>();
         var lines = new List<TopologyLine>(order.Count);
         var connectors = new List<TopologyConnector>();
 
-        for (var row = 0; row < order.Count; row++)
+        foreach (var stretch in order)
         {
-            var stretch = order[row];
-            var y = TopMargin + row * RowGap;
             var stations = stretch.Stations.ToList();
             var track = stretch.Stretches.ToList();
 
@@ -77,46 +95,102 @@ public sealed record TopologyDiagram(
             for (var i = 1; i < stations.Count; i++) distance[i] = distance[i - 1] + track[i - 1].Distance;
             var span = distance[^1] * pxPerUnit;
 
-            var startX = LeftMargin;
-            // The station shared with the parent line (a branch's junction) is drawn on the parent only,
-            // so hide it here: the start for a leads-out branch, the end for a leads-into branch.
-            var hiddenIndex = -1;
-            if (parent.TryGetValue(stretch.Id, out var link) && nodeX.TryGetValue(link.Parent.Id, out var parentNodes))
+            var hasParent = parents.TryGetValue(stretch.Id, out var link);
+            var junction = hasParent && placed.TryGetValue(link.Parent.Id, out var parentLine) ? parentLine : null;
+
+            // Where the stretch would sit were it put on a given row, along with the station it shares with
+            // its parent — drawn on the parent only, so hidden here — and the connector up to that parent.
+            // A branch is pushed as far to the right as it is pushed down, its connector being drawn at 45°.
+            (double StartX, int Hidden, TopologyConnector? Connector) At(int row)
             {
-                var parentY = lineY[link.Parent.Id];
-                var dy = y - parentY;
-                if (link.Side == JunctionSide.Start && parentNodes.TryGetValue(stretch.Starts.Signature, out var junctionX))
+                if (junction is null) return (LeftMargin, -1, null);
+                var run = (row - junction.Row) * RowGap;
+                if (link.Side == JunctionSide.Start && junction.NodeX.TryGetValue(stretch.Starts.Signature, out var divergeX))
                 {
-                    // Leads out: start sits on the parent line, branch drops away at +45° (dx == dy).
-                    startX = junctionX + dy;
-                    hiddenIndex = 0;
-                    connectors.Add(new TopologyConnector(junctionX, parentY, startX, y, stretch.Color));
+                    // Leads out: its start is the junction, so the branch drops away from the parent at +45°.
+                    var startX = divergeX + run;
+                    return (startX, 0, LinkTo(divergeX, junction.Y, startX, RowY(row), span, stretch.Color));
                 }
-                else if (link.Side == JunctionSide.End && parentNodes.TryGetValue(stretch.Ends.Signature, out var junctionEndX))
+                if (link.Side == JunctionSide.End && junction.NodeX.TryGetValue(stretch.Ends.Signature, out var mergeX))
                 {
-                    // Leads into: end sits on the parent line, branch climbs to it at -45° (dx == dy).
-                    var endX = junctionEndX - dy;
-                    startX = endX - span;
-                    hiddenIndex = stations.Count - 1;
-                    connectors.Add(new TopologyConnector(endX, y, junctionEndX, parentY, stretch.Color));
+                    // Leads into: its end is the junction, so the branch climbs to the parent at -45°.
+                    var endX = mergeX - run;
+                    return (endX - span, stations.Count - 1, LinkTo(mergeX, junction.Y, endX, RowY(row), -span, stretch.Color));
                 }
+                return (LeftMargin, -1, null);
             }
 
+            var chosen = -1;
+            var firstFree = -1;
+            for (var row = junction is null ? 0 : junction.Row + 1; row <= rows.Count; row++)
+            {
+                var candidate = At(row);
+                if (!IsRowFree(rows, crossings, row, candidate.StartX - LabelGutter, candidate.StartX + span + SignatureGutter)) continue;
+                if (firstFree < 0) firstFree = row;
+                if (IsPathFree(rows, candidate.Connector, junction?.Row ?? row, row)) { chosen = row; break; }
+            }
+            // Pushing a branch further down does not move the connector where it crosses the rows above it,
+            // so when every reachable row is crossed we settle for the topmost row the line itself fits on.
+            if (chosen < 0) chosen = firstFree < 0 ? rows.Count : firstFree;
+
+            var (startX, hidden, connector) = At(chosen);
+            var y = RowY(chosen);
             var nodes = new List<TopologyNode>(stations.Count);
-            var map = new Dictionary<string, double>(stations.Count);
+            var nodeX = new Dictionary<string, double>(stations.Count);
             for (var i = 0; i < stations.Count; i++)
             {
                 var x = startX + distance[i] * pxPerUnit;
-                nodes.Add(new TopologyNode(x, y, stations[i].Signature, i == hiddenIndex));
-                map[stations[i].Signature] = x;
+                nodes.Add(new TopologyNode(x, y, stations[i].Signature, i == hidden));
+                nodeX[stations[i].Signature] = x;
             }
 
-            lineY[stretch.Id] = y;
-            nodeX[stretch.Id] = map;
+            while (rows.Count <= chosen) rows.Add([]);
+            rows[chosen].Add((startX - LabelGutter, startX + span + SignatureGutter));
+            if (connector is not null)
+            {
+                connectors.Add(connector);
+                for (var crossed = junction!.Row + 1; crossed < chosen; crossed++)
+                    crossings.Add((crossed, CrossingX(connector, crossed)));
+            }
+
+            placed[stretch.Id] = new PlacedLine(chosen, y, nodeX);
             lines.Add(new TopologyLine(stretch.Number, stretch.Description, stretch.Color, y, nodes));
         }
 
-        return Normalize(lines, connectors, order.Count);
+        return Normalize(lines, connectors, rows.Count);
+    }
+
+    private static double RowY(int row) => TopMargin + row * RowGap;
+
+    // The connector down to a branch, continued a short way along the branch's own line. Reach says where
+    // that line runs from the corner: to the right when positive, to the left when negative. A line shorter
+    // than the stub is followed only to its far end, so the stub never sticks out beyond it.
+    private static TopologyConnector LinkTo(double junctionX, double junctionY, double lineX, double lineY, double reach, string color)
+    {
+        var stub = reach == 0.0 ? StubLength : Math.Min(StubLength, Math.Abs(reach));
+        return new TopologyConnector(junctionX, junctionY, lineX, lineY, lineX + (reach < 0.0 ? -stub : stub), color);
+    }
+
+    // Where a connector passes through one of the rows between its junction and its branch.
+    private static double CrossingX(TopologyConnector connector, int row) =>
+        connector.JunctionX + ((RowY(row) - connector.JunctionY) / (connector.LineY - connector.JunctionY) * (connector.LineX - connector.JunctionX));
+
+    // Whether the horizontal space a line would take on a row is free: no other line there, and no
+    // connector coming down through it.
+    private static bool IsRowFree(List<List<(double From, double To)>> rows, List<(int Row, double X)> crossings, int row, double from, double to) =>
+        (row >= rows.Count || !rows[row].Any(taken => from < taken.To && to > taken.From))
+        && !crossings.Any(c => c.Row == row && c.X > from - ConnectorClearance && c.X < to + ConnectorClearance);
+
+    // Whether a connector clears the lines on the rows it passes through on its way down to its branch.
+    private static bool IsPathFree(List<List<(double From, double To)>> rows, TopologyConnector? connector, int junctionRow, int row)
+    {
+        if (connector is null) return true;
+        for (var crossed = junctionRow + 1; crossed < row && crossed < rows.Count; crossed++)
+        {
+            var x = CrossingX(connector, crossed);
+            if (rows[crossed].Any(taken => x > taken.From - ConnectorClearance && x < taken.To + ConnectorClearance)) return false;
+        }
+        return true;
     }
 
     // Links each stretch to the one it branches from: a stretch diverges when its start is a through
@@ -158,7 +232,7 @@ public sealed record TopologyDiagram(
     }
 
     // Roots first (lowest id), each immediately followed by the subtree of stretches that branch off it,
-    // so a branch always lands on a row below the line it leaves.
+    // so a branch is always laid out after the line it leaves.
     private static List<TimetableStretch> OrderDepthFirst(IReadOnlyList<TimetableStretch> all, Dictionary<int, (TimetableStretch Parent, JunctionSide Side)> parent)
     {
         var children = all.Where(s => parent.ContainsKey(s.Id))
@@ -189,20 +263,20 @@ public sealed record TopologyDiagram(
         }
         foreach (var c in connectors)
         {
-            minX = Math.Min(minX, Math.Min(c.X1, c.X2));
-            maxX = Math.Max(maxX, Math.Max(c.X1, c.X2));
+            minX = Math.Min(minX, Math.Min(c.JunctionX, Math.Min(c.LineX, c.StubX)));
+            maxX = Math.Max(maxX, Math.Max(c.JunctionX, Math.Max(c.LineX, c.StubX)));
         }
 
         var shift = minX < LeftMargin ? LeftMargin - minX : 0.0;
         var width = maxX + shift + RightMargin;
-        var height = TopMargin + (rowCount - 1) * RowGap + BottomMargin;
+        var height = TopMargin + ((rowCount - 1) * RowGap) + BottomMargin;
         if (shift == 0.0) return new TopologyDiagram(width, height, lines, connectors);
 
         var shiftedLines = lines
             .Select(l => l with { Nodes = l.Nodes.Select(n => n with { X = n.X + shift }).ToList() })
             .ToList();
         var shiftedConnectors = connectors
-            .Select(c => c with { X1 = c.X1 + shift, X2 = c.X2 + shift })
+            .Select(c => c with { JunctionX = c.JunctionX + shift, LineX = c.LineX + shift, StubX = c.StubX + shift })
             .ToList();
         return new TopologyDiagram(width, height, shiftedLines, shiftedConnectors);
     }

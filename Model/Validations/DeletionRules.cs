@@ -92,11 +92,15 @@ public static class DeletionRules
         }
 
         /// <summary>
-        /// Determines whether a <see cref="StationCall"/> may be deleted from its train, i.e. no vehicle
-        /// schedule or driver duty part starts or ends at it.
+        /// Determines whether a <see cref="StationCall"/> may be deleted from its train: only the train's
+        /// first and last call may go, and only when no vehicle schedule or driver duty part starts or
+        /// ends at it. A train calls at every operating location along its route, so a call in between is
+        /// not the train's to skip — deleting one would leave a gap in the route. Shortening the route at
+        /// either end is what deleting a call means.
         /// </summary>
         public DeletionResult MayDelete(StationCall call)
         {
+            if (!call.IsAtTrainEnd) return new DeletionResult.NotAllowed(call, "CallNotAtTrainEnd");
             var references = ReferencesTo(plan, call);
             return references.Count == 0
                 ? new DeletionResult.Success(call)
@@ -104,16 +108,36 @@ public static class DeletionRules
         }
 
         /// <summary>
-        /// Deletes a <see cref="StationCall"/> from its train when no part uses it: removes the call from
-        /// its train and its track. Returns the <see cref="DeletionResult.Failure"/> from
-        /// <c>MayDelete</c> unchanged when it is still referenced, leaving the model untouched.
+        /// Deletes a <see cref="StationCall"/> from its train when the rules allow it: removes the call
+        /// from its train and its track, and hands its end-of-route role to the neighbour that takes its
+        /// place. Returns the refusing result from <c>MayDelete</c> unchanged when the call may not be
+        /// deleted, leaving the model untouched.
         /// </summary>
+        /// <remarks>
+        /// A train's first call departs only and its last call arrives only, and each carries the driver's
+        /// service time as its dwell: the origin's arrival is the start of preparing the train, the
+        /// terminus's departure the end of finishing it up (see <c>Plan.Create</c>). Deleting an end call
+        /// therefore promotes its neighbour to that role and moves the service time across, so the train
+        /// keeps a valid shape without the planner having to redo it by hand.
+        /// </remarks>
         public DeletionResult TryDelete(StationCall call)
         {
-            if (plan.MayDelete(call) is DeletionResult.Failure failure) return failure;
+            if (plan.MayDelete(call) is { IsDenied: true } denied) return denied;
+
             var train = call.Train;
+            // Insertion order is not run order; the ends are the earliest and latest call (StationCall.SortTime).
+            var ordered = train.Calls.OrderBy(c => c.SortTime).ToList();
+            var isFirst = ReferenceEquals(call, ordered[0]);
+            var serviceMinutes = DwellMinutes(call);
+
             train.Calls.Remove(call);
             call.Track.Calls.Remove(call);
+
+            if (ordered.Count > 1)
+            {
+                if (isFirst) MakeOrigin(ordered[1], serviceMinutes);
+                else MakeTerminus(ordered[^2], serviceMinutes);
+            }
             return new DeletionResult.Success(call);
         }
 
@@ -217,6 +241,29 @@ public static class DeletionRules
             plan.Timetable.Trains.FirstOrDefault(t => t.CargoFlows.Contains(cargoFlow))?.CargoFlows.Remove(cargoFlow);
             return new DeletionResult.Success(cargoFlow);
         }
+    }
+
+    // The minutes a call stands still: a dwell at an intermediate stop, and the driver's preparation or
+    // finishing-up time at the train's origin or terminus.
+    private static int DwellMinutes(StationCall call) =>
+        (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
+
+    // Makes a call the train's origin: it only departs, and its departure is the anchor, so the
+    // preparation time is counted backwards from it.
+    private static void MakeOrigin(StationCall call, int preparationMinutes)
+    {
+        call.Arrival = call.Departure.AddMinutes(-preparationMinutes);
+        call.IsArrival = false;
+        call.IsDeparture = true;
+    }
+
+    // Makes a call the train's terminus: it only arrives, and its arrival is the anchor, so the
+    // finishing-up time is counted forwards from it.
+    private static void MakeTerminus(StationCall call, int finishingMinutes)
+    {
+        call.Departure = call.Arrival.AddMinutes(finishingMinutes);
+        call.IsArrival = true;
+        call.IsDeparture = false;
     }
 
     // Company is referenced by its Id (Train, ScheduledObject, DriverDuty foreign keys) and, for train

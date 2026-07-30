@@ -45,7 +45,7 @@ else
                         <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
                         @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
                         <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CompanyReferenced", Translator)">
-                            <button class="danger" disabled="@(deletion is DeletionResult.Failure)"
+                            <button class="danger" disabled="@(deletion?.IsDenied == true)"
                                     @onclick="() => _deleteTarget = context"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                         </span>
                     </TemplateColumn>

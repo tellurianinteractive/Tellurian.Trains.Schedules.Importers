@@ -83,7 +83,17 @@ A manual note (`TextCallNote`) may use two Markdown emphases — `*italic*` and
 `**bold**` — so a planner can stress the part of a note that matters. They nest,
 `\*` escapes a literal asterisk, an unpaired asterisk stays literal, and underscores
 are not emphasis. `TextCallNote.Text` is the stored text with its markers, `ToText`
-the same text without them, and `ToHtml` the rendered markup.
+the same text without them, and `ToHtml` the rendered markup. `NoteMarkdown` renders
+the same two forms for text that is not yet a note, which is what an editing field
+needs. A run of three or more markers is ambiguous without a full Markdown parser and
+is left as literal text.
+
+`StationCall.ManualNote`, `ManualNoteText` and `SetManualNote` read and write the
+manual note of a call: the note is created on first text, updated in the language it
+is read back in, and removed when the text is cleared, so no caller edits
+`StationCall.Notes` directly. `TextCallNote.SetText` replaces one translation, and
+treats a stored text with no language code — as the XPLN import leaves a remark — as
+text to replace rather than a translation to keep.
 
 #### Structured layout settings
 

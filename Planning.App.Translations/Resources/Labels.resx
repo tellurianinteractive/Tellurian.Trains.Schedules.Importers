@@ -1323,6 +1323,15 @@
   <data name="AddCall" xml:space="preserve">
     <value>Add call</value>
   </data>
+  <data name="CallNotAtTrainEnd" xml:space="preserve">
+    <value>Cannot delete: only the first and the last call can be deleted. A train has a call at every operation location along its route.</value>
+  </data>
+  <data name="CallReferenced" xml:space="preserve">
+    <value>Cannot delete: this call is used by vehicle schedules or driver duties.</value>
+  </data>
+  <data name="ClearCallNote" xml:space="preserve">
+    <value>Clear the remark.</value>
+  </data>
   <data name="DeleteTrainConfirm" xml:space="preserve">
     <value>Delete train {0}?</value>
   </data>
@@ -1749,6 +1758,9 @@
   <data name="TractionUnit" xml:space="preserve">
     <value>Traction unit</value>
   </data>
+  <data name="TractionUnits" xml:space="preserve">
+    <value>Traction units</value>
+  </data>
   <data name="TractionUnitExchange" xml:space="preserve">
     <value>Traction unit exchange</value>
   </data>
@@ -1883,6 +1895,15 @@
   </data>
   <data name="CargoWagonsWithWaybills" xml:space="preserve">
     <value>Cargo wagons with waybills</value>
+  </data>
+  <data name="TrainTimetable" xml:space="preserve">
+    <value>Timetable</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
   </data>
   <data name="DutyEnds" xml:space="preserve">
     <value>Ends</value>

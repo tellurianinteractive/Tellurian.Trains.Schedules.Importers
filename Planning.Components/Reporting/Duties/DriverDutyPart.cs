@@ -37,7 +37,7 @@ public static class DriverDutyPartExtensions
         {
             Vehicles =
             [
-                .. dutyPart.TrainPart.TractionUnits
+                .. dutyPart.Vehicles.Where(vehicle => vehicle.IsTraction)
                     .Select(unit => new TrainPartVehicle
                     {
                         Vehicle = unit,
@@ -58,7 +58,7 @@ public static class DriverDutyPartExtensions
         {
             Vehicles =
             [
-                .. dutyPart.TrainPart.WagonSets
+                .. dutyPart.Vehicles.Where(vehicle => vehicle.IsWagonSet)
                     .Select(set => new TrainPartVehicle
                     {
                         Vehicle = set,
@@ -115,6 +115,22 @@ public static class DriverDutyPartExtensions
             ];
             return string.Join(". ", limits.OfType<string>());
         }
+
+        /// <summary>
+        /// The vehicles working this part, resolved through the duty's plan.
+        /// </summary>
+        /// <remarks>
+        /// The plan is asked, not the part's own <see cref="ScheduledTrainPart.Schedule"/> back-reference,
+        /// because that reference is cleared when a schedule drops a part a duty still works — and the
+        /// booklet would then print no traction unit for a part the Duties editor plainly shows one for.
+        /// The plan matches the part by value, so it answers in both cases. It is also the resolution the
+        /// rest of the application uses; the duty always knows its plan, whereas a part need not know its
+        /// schedule.
+        /// </remarks>
+        private IEnumerable<ScheduledObject> Vehicles =>
+            dutyPart.Duty.Plan is { } plan
+                ? plan.ScheduledObjectsFor(dutyPart.TrainPart)
+                : dutyPart.TrainPart.ScheduledObjects;
 
         // A cargo flow belongs on this part's page when it is carried over any of the part's span.
         private bool Covers(CargoFlowTrainPart flow) =>

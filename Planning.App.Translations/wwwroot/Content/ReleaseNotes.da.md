@@ -1,5 +1,23 @@
 # Versionsnyheder
 
+## Version 0.3.1
+
+- Afsnittet **Trækkraftenheder** på en togdelsside i hæftet Førertjenester har nu sin
+  overskrift på det valgte sprog. Det var den eneste overskrift i hæftet uden oversættelse, så
+  afsnittet kunne ikke genkendes som trækkraftenhederne.
+- Trækkraftenheden udskrives nu for hver togdel, der har en. I planer importeret med en
+  tidligere version viste nogle togdele en trækkraftenhed under **Tjenester** men ingen i hæftet.
+- Noter om tog i samme retning fortæller nu, hvilket tog der kommer forbi det andet —
+  **Overhaler GD 42757 12:02-12:05** eller **Overhales af GD 42757 12:02** — i stedet for det
+  hidtidige *"Møder GD 42757 i samme retning"*, der aldrig sagde, hvilket tog der kom foran. To
+  tog, der blot står på samme station samtidig, giver ingen note overhovedet, for ingen af dem er
+  kommet forbi det andet.
+- Et møde uden varighed — det andet tog kører igennem uden ophold — skrives som ét klokkeslæt i
+  stedet for et interval fra et tidspunkt til sig selv.
+- Et tog, der begynder eller afslutter sin kørsel på en station, medtages ikke længere som mødt,
+  krydset eller overhalet der. De tidspunkter er, når dets lokofører møder ind eller går af, ikke
+  når toget kører.
+
 ## Version 0.3.0
 
 - En ny rapport, **Førertjenester**, udskriver ét A5-hæfte pr. tjeneste. Forsiden

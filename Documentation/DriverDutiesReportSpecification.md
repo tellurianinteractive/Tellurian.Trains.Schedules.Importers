@@ -1092,19 +1092,24 @@ Mapping the outline's notes against what the model already has:
 | *Brings cargo wagons from here, see above.* | `CargoFlowDestinationNote` | Exists as *"Brings wagons to …"*; the "from here, see above" form is new |
 | *No stop* | — | **Missing** — derived: `!IsStop` and equal times |
 | *No exchange.* | — | **Missing** — derived: `!IsStop` and arrival &lt; departure |
-| *Meets SB 4321 in sessions 1,3,5* | — | **Missing** — two types, see below |
+| *Meets SB 4321 in sessions 1,3,5* | — | **Missing** — three types, see below |
 
 The existing generated family — `UseNote`, `CoupleNote`, `UncoupleNote`, `FromParkingNote`,
 `ToParkingNote`, `ReinforcementNote`, `TractionUnitExchangeNote`, `CargoFlowDestinationNote` —
 already covers the traction and cargo cases. Scope is the outline's notes; further types can follow
 later without changing the report, since everything renders through `ICallNote`.
 
-**Crossings and overtakings are two separate note types**, not one "meet":
+**Crossings and overtakings are three separate note types**, not one "meet":
 
 | Note type | Condition |
 |---|---|
 | Crossing | Another train passes the driver's train **in the opposite direction** at this location |
-| Overtaking | Another train passes the driver's train **in the same direction** |
+| Overtaking | The driver's train passes another that stands here for the whole of its visit |
+| Being overtaken | Another train passes the driver's train while it stands here |
+
+The last two are the same event read from either cab, and they must be named that way: *"meets in
+the same direction"* tells the driver nothing they can act on, whereas *"overtakes"* and *"is
+overtaken by"* say who is getting past whom (D112).
 
 **Both are suppressed by the single flag `OperationLocation.HideMeets`**, whose documented meaning
 is exactly this — *"Suppress creating notes about trains meeting or overtaking at this location"*.
@@ -1116,27 +1121,42 @@ stopping at this location"* — whether non-stopping trains are listed at all, w
 reports rather than the notes on a driver's call. Its bearing on this report, if any, is a separate
 question: see Q31.
 
-**The derivation is one overlap test plus a direction comparison.** Both note types share the same
-condition for *"both trains are at this location at the same time"*; only the direction differs:
+**The direction decides which question is asked.** Trains running towards each other cross whenever
+they are at the location together; trains running the same way meet only when one actually passes the
+other, which takes more than an overlap (D111):
 
 ```csharp
-// The two trains occupy the location together when each arrives before the other departs.
+// Opposite directions: the two trains occupy the location together when each arrives before the
+// other departs.
 bool Overlaps(StationCall mine, StationCall other) =>
     other.Arrival < mine.Departure && other.Departure > mine.Arrival;
+
+// Same direction: one train passes another only when the overtaken train arrives before the
+// overtaking one and leaves after it — it stands here for the whole of the other's visit.
+bool IsOvertaken(StationCall overtaken, StationCall overtaker) =>
+    overtaken.Arrival < overtaker.Arrival && overtaken.Departure > overtaker.Departure;
 ```
 
-| Both at the location | Direction | Note |
+| Direction | Condition | Note |
 |---|---|---|
-| yes | opposite | **Crossing** |
-| yes | same | **Overtaking** |
-| no | — | none |
+| opposite | overlap | **Crossing** |
+| same | the other train's stay contains this train's | **Overtaking** |
+| same | this train's stay contains the other train's | **Being overtaken** |
+| same | overlap without containment | **none** — both simply stand here for a while |
+| — | no overlap | none |
+
+The last same-direction row is the point of the containment test: two trains standing at the same
+station at the same time, one behind the other, is not an event. Neither has got past the other, so
+there is nothing for either driver to note. Equal times at either end fall the same way — then
+neither train is unambiguously in front.
 
 **Each meet carries the shared interval and the other train.** The interval is when both are actually
 present — `max(arrivals)` to `min(departures)` — not either train's own dwell, because what the
-driver needs is the window in which the other train is there to be met. A call can be crossed or
-overtaken by more than one train at once, so these aggregate into at most one `CrossingNote` and one
-`OvertakingNote` per call, each listing every meet of its kind (D108) rather than repeating a row per
-other train.
+driver needs is the window in which the other train is there to be met. When those two times are
+equal the interval is printed as a single time (D113): a train running through is there for an
+instant, and *"12:02-12:02"* states a span that does not exist. A call can be crossed or overtaken by
+more than one train at once, so these aggregate into at most one note of each kind per call, each
+listing every meet of its kind (D108) rather than repeating a row per other train.
 
 The other train is named by **`Train.ToString()`**, which already composes exactly what is wanted:
 
@@ -1187,8 +1207,8 @@ outbound one instead — its direction of travel is still well defined by where 
 This is the one derivation the model does not already express, and the only genuinely new logic the
 report requires.
 
-**Both notes attach to the arrival** (`IsForArrival`), matching the direction they are derived from:
-the driver reads *"who am I meeting here"* on pulling in, not on leaving.
+**All three notes attach to the arrival** (`IsForArrival`), matching the direction they are derived
+from: the driver reads *"who am I meeting here"* on pulling in, not on leaving.
 
 A crossing at a location the driver runs through is a real event — the overlap test is satisfied
 whenever the other train is standing there at that instant — and a pass-through renders as a single
@@ -1200,16 +1220,19 @@ Two further rules, unchanged:
 - **Relative to the driver's own train only.** The note names the *other* train, and only trains
   that actually cross or overtake the one being driven produce one. Other traffic at the location
   is not the driver's concern.
+- **Neither train may be at its own origin or terminus.** The rule that silences a driver's first and
+  last call applies just as much to the train being met (D114): at those calls one of the times is
+  the driver reporting or standing down rather than a movement, so a train sitting there has already
+  finished, or not yet begun, its run. Reading the same event from either cab must give the same
+  answer, and a train cannot overtake one that never moved.
 - **Restricted to shared sessions.** The other train may run on only some of the sessions this duty
   runs, which is why the example reads *"in sessions 1,3,5"*. The session set is the intersection of
   the two trains' sessions; when it equals the duty's own sessions the qualifier is redundant and
   should be omitted. Sessions render as circles in the note's `Html` (D34), following the
   region-chip precedent.
 
-*One refinement worth considering later, not now:* a same-direction overlap is symmetric, so the
-rule produces a note whether the other train gets ahead or the driver's does. If the two cases ever
-need different wording — *"overtakes you"* versus *"you overtake"* — the discriminator is which
-train departs first. The specified rule prints one note for both.
+*Resolved, 2026-07-30:* the two same-direction cases carry different wording, and the discriminator
+is containment rather than mere overlap — see D111 and D112.
 
 #### 5.3.7 Height contributions
 
@@ -2392,7 +2415,7 @@ a dash (D15).*
 | D91 | A cargo row is one **`CargoFlowTrainPart`**, not one destination. | A flow's destinations belong together as one statement of where these wagons go, and `CargoFlowTrainPart` also carries the per-occurrence behaviour the row must show — position, shunting, whether wagons are taken here. One object, one row. | 2026-07-29 |
 | D92 | Position comes from `CargoFlowTrainPart.PositionInTrain` and prints **"Any" when 0**. | Zero means anywhere in the train; a cell showing `0` would be read as a position at the front. Note `Destination.PositionInTrain` is a different property of the same name and type — the row's position is the flow's. | 2026-07-29 |
 | D93 | "Wagons from" is the **de-duplicated union** of `CargoFlowOptions.Origins` and the from-station, the latter included unless `BringsNoWagonsFromHere`. "Also shunt" is appended to the column it qualifies — from for `AlsoShuntBeforeDeparture`, to for `AlsoShuntAfterArrival`. Wagon classes get their own column; empty means no restriction and prints nothing. | The flag removes one of two sources, never the column. De-duplication matters because an origin list may already include the from-station. Appending the shunt qualifier avoids a column that would be empty on most rows, and an absent class restriction says more by being absent (D70). | 2026-07-29 |
-| D94 | Crossings and overtakings share one overlap test — `other.Arrival < mine.Departure && other.Departure > mine.Arrival` — with **direction alone** deciding which note. | The two events differ only in relative direction; deriving them from one predicate keeps them consistent by construction and makes the pair impossible to get subtly out of step. | 2026-07-29 |
+| D94 | *(superseded by D111)* Crossings and overtakings share one overlap test — `other.Arrival < mine.Departure && other.Departure > mine.Arrival` — with **direction alone** deciding which note. | The two events differ only in relative direction; deriving them from one predicate keeps them consistent by construction and makes the pair impossible to get subtly out of step. | 2026-07-29 |
 | D95 | The note carries the **shared interval** — `max(arrivals)` to `min(departures)` — and the other train as **`Train.ToString()`**. | The window in which the other train is actually there is what the driver needs, not either train's own dwell. `Train.ToString()` already composes company signature, category prefix, number and suffix, and resolves `EffectiveCompany`, so a train inheriting its category's company is still named correctly. | 2026-07-29 |
 | D96 | Direction is **the sense in which the train traverses the `TrackStretch` it arrives on** — `Start → End` or `End → Start`. A train originating at the station falls back to its outbound stretch. | Nothing in the model states a train's direction, but a stretch has a `Start` and an `End`, and traversal sense is exactly what distinguishes a crossing from an overtaking. Taking the **inbound** stretch gives one unambiguous answer even where a train reverses (`IsChangingTrainDirectionPossible`) — and it is the right one, since what the driver meets is the train that came towards them. | 2026-07-29 |
 | D97 | Senses are comparable across different stretches because **all track stretches are defined in the same direction**, a rule `Layout.DirectionInconsistencies()` already validates. | Two trains meeting at a station arrive on different stretches, one from each side, so the comparison would be meaningless without layout-wide consistent orientation. This makes an existing consistency check a precondition of the report: an inconsistent layout yields *wrong* crossing and overtaking notes, not missing ones, which the validation message should say. | 2026-07-29 |
@@ -2406,9 +2429,13 @@ a dash (D15).*
 | D105 | *(answers Q37)* `DriverDuty.Difficulty` is **nullable**, and an ungraded duty prints no difficulty line at all. | The chooser reads this field at every changeover (D59), so an ungraded duty rendered as grade 1 would actively mislead. The same rule as the validity dates and the limits line: an absent line says "not set" unambiguously, where a printed value cannot be told from a deliberate one. | 2026-07-29 |
 | D106 | *(answers Q38)* The codebase unifies on **`ToText` / `ToHtml`**. `Region.ToHtmlMarkup` and `Destination.ToHtmlMarkup` were renamed, and `CargoFlowTrainPart.ToPlainText` became `ToText`. `ICallNote.Text` / `Html` stay as they are. | Cheapest while the call sites are few, and it removes a third spelling rather than adding one. `ToHtml` was already the name on `CargoFlowTrainPart`, so this settles on what the codebase had started doing. The `ICallNote` pair are interface properties rather than conversions, so they are not the same thing. | 2026-07-29 |
 | D107 | *(answers Q34)* The general instructions report **appends the topology and the shunting yards table**. | The people who receive it and never hold a duty booklet — station staff above all — get no layout overview from anywhere else. Both are existing components, so it costs almost nothing, and the duplication is harmless because the two documents are held by different people. | 2026-07-29 |
-| D108 | **At most one `CrossingNote` and one `OvertakingNote` per call**, each carrying every train met of that kind, not one note per other train. Listed as *"Crosses G 44780 05:50-05:52, IC 912 05:50-06:02, RE 75510 05:56-06:02"*, ordered by start time, then end time, then the other train's number. | A busy junction can be crossed or overtaken by several trains in the same window; one row each would read as several unrelated events instead of the one fact that this call meets a group of trains. The three-key sort keeps the order deterministic even when two meets start and end together. | 2026-07-30 |
+| D108 | **At most one note of each kind per call**, each carrying every train met of that kind, not one note per other train. Listed as *"Crosses G 44780 05:50-05:52, IC 912 05:50-06:02, RE 75510 05:56-06:02"*, ordered by start time, then end time, then the other train's number. | A busy junction can be crossed or overtaken by several trains in the same window; one row each would read as several unrelated events instead of the one fact that this call meets a group of trains. The three-key sort keeps the order deterministic even when two meets start and end together. | 2026-07-30 |
 | D109 | **A full-width note row starts at the station column**, not the Arr/Dep column: the Arr/Dep cell is left empty and the note spans the remaining four columns. | Aligning the note's left edge with the station name above it reads as "this belongs to that place," which an arbitrary indent (the previous `padding-left: 2.5em`) only approximated. | 2026-07-30 |
 | D110 | *(supersedes the exception in D106)* The notes join the unification: `ICallNote.Text` / `Html` became **`ToText` / `ToHtml`**, on the interface, on `CallNote`, on `TextCallNote` and on `GeneratedNote`. | D106 exempted them on the grounds that a property is not a conversion, but the distinction was invisible where it mattered: a reader moving between `Destination.ToHtml` and `note.Html` in the same expression met two spellings of one idea. The pair is a rendering wherever it appears, so it carries one name. Persisted note *data* keeps its own name — `TextCallNote.Texts` and `DriverDutyNote.Text` are stored values, not renderings, and renaming those would move a database column and a JSON key. | 2026-07-30 |
+| D111 | *(supersedes D94)* A same-direction meet needs **containment, not overlap**: the overtaken train must arrive before the overtaking one and depart after it. Overlapping in the same direction without that produces **no note of any kind**. | Two trains standing at a station together, one behind the other, is not an event — neither has got past the other, and calling it a meet tells the driver to look for something that did not happen. Only containment says one train ran by while the other stood. Equal times at either end leave neither in front and fall the same way. Crossings keep the overlap test: a train coming the other way is met whenever both are there. | 2026-07-30 |
+| D112 | The same-direction case is **two note types** — *"Overtakes G 4012 12:02-12:05"* and *"Is overtaken by G 4012 12:02"* — replacing the single *"Meets G 4012 in the same direction"*. | The old wording was the one thing in the booklet a driver could not act on: it named an event without saying who was getting past whom, which is the whole content of an overtaking. Which of the two applies is already decided by D111's containment test with its arguments swapped, so one predicate still keeps the pair consistent. Two record types rather than one with a flag, because the report and the tests select notes by type. | 2026-07-30 |
+| D113 | A meet whose shared interval is **zero-length prints as a single time**, not `12:02-12:02`. | The interval collapses exactly when the other train runs through — the commonest overtaking of all — and an interval between a time and itself states a span that does not exist. The reader stops to work out what the repetition means, and there is nothing to find. | 2026-07-30 |
+| D114 | **Neither train may be at its own origin or terminus** — the rule that silences the driver's own first and last call applies equally to the train being met. | Those two times are the driver reporting and standing down, not movements (§5.3.6.1), so a train sitting there has finished or not yet begun its run and can be neither crossed nor passed. Applied to one side only, the same event read from the two cabs would disagree — one booklet claiming an overtaking the other's does not record — and the train said to be overtaken never moved. | 2026-07-30 |
 
 ---
 

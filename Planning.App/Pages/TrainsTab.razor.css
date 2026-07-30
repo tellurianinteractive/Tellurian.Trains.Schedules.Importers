@@ -135,6 +135,12 @@
         display: inline-block;
     }
 
+    /* The disabled Delete button would otherwise swallow the hover; letting it pass through means the
+       wrapping span receives the hover and shows its title tooltip (the blocked-delete reason). */
+    .delete-wrap > button:disabled {
+        pointer-events: none;
+    }
+
     input,
     select {
         font-size: 0.85rem;

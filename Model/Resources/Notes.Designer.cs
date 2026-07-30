@@ -151,11 +151,11 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Meets {0} in the same direction.
+        ///   Looks up a localized string similar to Is overtaken by {0}.
         /// </summary>
-        internal static string MeetsInTheSameDirection {
+        internal static string IsOvertakenBy {
             get {
-                return ResourceManager.GetString("MeetsInTheSameDirection", resourceCulture);
+                return ResourceManager.GetString("IsOvertakenBy", resourceCulture);
             }
         }
         
@@ -196,6 +196,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Overtakes {0}.
+        /// </summary>
+        internal static string Overtakes {
+            get {
+                return ResourceManager.GetString("Overtakes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reinforces {0} between {1} and {2}..
         /// </summary>
         internal static string ReinforcesBetweenAnd {
@@ -214,7 +223,7 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} {1}-{2}.
+        ///   Looks up a localized string similar to {0} {1}.
         /// </summary>
         internal static string TrainMeetAtTime {
             get {

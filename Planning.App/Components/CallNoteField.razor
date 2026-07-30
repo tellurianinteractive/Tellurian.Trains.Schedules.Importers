@@ -26,6 +26,12 @@
                 @Placeholder
             }
         </div>
+        @* Clearing is the one edit that needs no typing, so it is one click from the rendered form.
+           It only appears once there is something to clear. *@
+        @if (HasText)
+        {
+            <button type="button" class="clear" title="@ClearTitle" @onclick="Clear"><i class="fa-solid fa-xmark"></i></button>
+        }
     }
 </div>
 
@@ -41,6 +47,9 @@
 
     /// <summary>Hover text, normally explaining the emphasis syntax.</summary>
     [Parameter] public string? Title { get; set; }
+
+    /// <summary>Hover text for the button that clears a written note.</summary>
+    [Parameter] public string? ClearTitle { get; set; }
 
     private ElementReference _input;
     private string _draft = "";
@@ -81,6 +90,14 @@
         _editing = false;
         if (_draft == Value) return;
         await ValueChanged.InvokeAsync(_draft);
+    }
+
+    // Clearing is a commit of empty text, not an edit: the field stays closed, so the note simply
+    // disappears and leaves the placeholder behind.
+    private async Task Clear()
+    {
+        _draft = "";
+        await ValueChanged.InvokeAsync("");
     }
 
     private async Task OnKeyDown(KeyboardEventArgs e)

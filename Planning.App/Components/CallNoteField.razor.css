@@ -4,11 +4,17 @@
    rather than as a form control. */
 .notefield {
     --field-border: #ddd;
+    /* The clear button sits beside the note and takes its own width; the field itself takes the rest. */
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
 
     input,
     .rendered {
         box-sizing: border-box;
-        width: 100%;
+        flex: 1;
+        /* Without this a flex item refuses to shrink below its content, and the ellipsis never appears. */
+        min-width: 0;
         min-height: 1.6rem;
         padding: 0.15rem 0.3rem;
         border: 1px solid transparent;
@@ -43,5 +49,22 @@
     .rendered.empty {
         color: #889;
         font-style: italic;
+    }
+
+    /* Quiet at rest so the row still reads as text, and only darkens once it is aimed at. */
+    .clear {
+        flex: none;
+        padding: 0 0.25rem;
+        border: none;
+        background: none;
+        color: #889;
+        font-size: 0.8rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .clear:hover,
+    .clear:focus {
+        color: #b00;
     }
 }

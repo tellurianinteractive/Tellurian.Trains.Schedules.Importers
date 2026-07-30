@@ -1201,8 +1201,8 @@ The following note types shall be generated from station call data:
 | Passenger pickup               | Passenger service at departure          | "Pick up passengers"                          |
 | Passenger interchange          | Passenger transfer at station           | "Passenger interchange"                       |
 | Train continuation             | Train number change                     | "Continues as IC 2045"                        |
-| Train meets                    | Trains meeting from opposite directions | "Meets G 4012 at 14:23"                       |
-| Train overtaking               | Train passing another in same direction | "Overtakes G 4012"                            |
+| Train meets                    | Trains meeting from opposite directions | "Crosses G 4012 14:23-14:28"                  |
+| Train overtaking               | Train passing another that stands still | "Overtakes G 4012 14:23-14:28", "Is overtaken by G 4012 14:25" |
 | Manual note                    | User-entered per language               | Free text, stored per language code           |
 
 #### DM-4.5.3 Note Formatting
