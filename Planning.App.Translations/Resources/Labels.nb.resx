@@ -1681,8 +1681,17 @@
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Kopier alle til utklippstavlen</value>
   </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>Planen kunne ikke lagres</value>
+  </data>
+  <data name="SaveFailedHint" xml:space="preserve">
+    <value>De siste endringene dine blir ikke tatt vare på. Angre den siste endringen — som regel et tog med færre enn to stopp eller en strekning uten banestrekninger — og se etter at advarselen forsvinner. Inntil da går alt du gjør tapt når siden lastes inn på nytt.</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
+  </data>
+  <data name="ShowConflicts" xml:space="preserve">
+    <value>Vis konflikter</value>
   </data>
   <data name="TractionType" xml:space="preserve">
     <value>Trekkrafttype</value>

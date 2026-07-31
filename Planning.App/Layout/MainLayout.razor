@@ -20,6 +20,7 @@
             <span>@(PlanName ?? Translator("NoActiveDocument"))</span>
         </div>
         <div class="top-bar-actions">
+            <SaveFailureIndicator />
             <ValidationIndicator />
             <LanguageSelector />
             <button class="header-btn" @onclick="ToggleAbout">@Translator("About")</button>
@@ -103,7 +104,7 @@
 </div>
 
 @code {
-    private const string AppVersion = "0.3.2";
+    private const string AppVersion = "0.3.3";
 
     // The app's signature colour. Exposed (with its auto-contrasted text colour) as the --primary /
     // --primary-text CSS variables on the page root, so data-grid headers and similar can use them.

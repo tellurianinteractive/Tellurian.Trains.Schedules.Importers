@@ -75,8 +75,10 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     public Train Train { get; set; } = default!;
 
     /// <summary>
-    /// Gets the station where this call occurs.
+    /// Gets the station where this call occurs. Read from the track the call is on, so it is never
+    /// stored separately.
     /// </summary>
+    [JsonIgnore]
     public OperationLocation OperationLocation => Track.Station;
 
     /// <summary>
@@ -112,6 +114,7 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// It never compares the arrival and departure times: equal times are only a convention used
     /// by the XPLN import to decide whether to clear both flags (see <see cref="IsPassthrough"/>).
     /// </summary>
+    [JsonIgnore]
     public bool IsStop => (IsArrival || IsDeparture) && OperationLocation is not SignalControlledLocation;
 
     /// <summary>
@@ -121,11 +124,13 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// The XPLN import expresses a pass-through this way for an intermediate call whose arrival
     /// equals its departure; manual editing does so by clearing both the Arr and Dep flags.
     /// </summary>
+    [JsonIgnore]
     public bool IsPassthrough => !IsStop;
 
     /// <summary>
     /// Gets the time used for sorting (departure if this is a departure, otherwise arrival).
     /// </summary>
+    [JsonIgnore]
     public Time SortTime => IsDeparture ? Departure : Arrival;
 
     /// <summary>

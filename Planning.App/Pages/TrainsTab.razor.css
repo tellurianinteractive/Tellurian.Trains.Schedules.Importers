@@ -139,7 +139,7 @@
     }
 
     /* A train involved in a validation conflict: amber row tint (kept on hover) with an amber accent
-       down the first cell. Hovering the row shows the message via its title. */
+       down the first cell, where the conflict badge that opens the messages also sits. */
     table.trains > tbody > tr.train.has-conflict {
         background: #fff8e1;
     }
@@ -152,9 +152,11 @@
         box-shadow: inset 3px 0 0 #d9a406;
     }
 
+    /* Wide enough for the expander toggle and, beside it, the conflict badge of a row that has one. */
     th.expander,
     td.expander {
-        width: 2.7rem;
+        width: 4.6rem;
+        white-space: nowrap;
         text-align: center;
         padding-left: 0.2rem;
         padding-right: 0.2rem;

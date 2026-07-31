@@ -1,5 +1,44 @@
 # Versionsnyheter
 
+## Version 0.3.3
+
+- **Konflikter går nu att läsa där de visas.** En rad med konflikter — ett tåg eller en tågkategori
+  under **Tåg**, ett omlopp eller ett av dess fordon under **Omlopp**, en tjänst under **Tjänster** —
+  har nu en varningssymbol, och ett klick på den öppnar meddelandena i en lista som går att läsa.
+  Symbolen får sin färg av den allvarligaste konflikten och räknar dem när de är fler än en. Tidigare
+  fanns meddelandena bara i en ruta som visades när muspekaren vilade på raden — lätt att missa och
+  svår att läsa.
+- **En tågkategori visar konflikterna för tågen i den**, så att de inte längre döljs när kategorin
+  fälls ihop.
+- **Fliken Tåg öppnas nu på listan över tågkategorier**, med tågen i varje kategori dolda tills du
+  öppnar den, så att en plan med många tåg blir lättare att överblicka. *Expandera alla* öppnar alla
+  på en gång, och en kategori öppnas av sig själv när du lägger till ett tåg i den eller flyttar ett
+  tåg dit.
+- **Att redigera en tågdel i ett omlopp visar nu vilka slags fordon omloppet gäller** — lok, tågsätt
+  eller vagnsätt. Delar flera fordon på samma omlopp nämns varje slag en gång, och pekar du på det
+  visas fordonen själva.
+
+### Rättningar
+
+- **Appen kunde sluta spara ditt arbete utan att säga till.** Planen sparas i webbläsaren medan du
+  arbetar, och en plan som appen inte kunde skriva ut — ett tåg med färre än två uppehåll, eller en
+  sträckning under **Sträckor › Tidtabellssträckor** där alla bandelar tagits bort — fick det
+  sparandet att misslyckas tyst. Allt som gjordes därefter låg kvar på skärmen men sparades aldrig, så
+  när webbläsaren öppnades igen låg planen kvar som före: med driftplatserna men utan de sträckor och
+  tåg som lagts till sedan dess. Båda planerna går nu att spara, och om ett sparande ändå misslyckas
+  säger överraden det direkt, så att du kan ångra ändringen i stället för att förlora arbetet.
+
+- **En sparad planfil är omkring 40 % mindre.** Varje uppehåll skrevs två gånger — en gång i sitt tåg och
+  en gång under spåret det ligger på — och den andra kopian drog med sig stora delar av resten av planen.
+  En plan sparad med en tidigare version går fortfarande att öppna.
+
+- **Ett tåg som lämnats utan dragkraft på en del av sitt lopp rapporteras nu.** Kontrollen frågade
+  bara om ett lok eller tågsätt körde tåget *någonstans*, så när ett omlopp kortades av i ena änden
+  blev resten av tåget utan dragkraft utan att något sades. Nu kontrolleras varje sträcka tåget kör,
+  för varje köromgång det körs, och konflikten säger mellan vilka driftplatser och för vilka
+  köromgångar tåget saknar dragkraft. Planer som såg rena ut kan rapportera detta nu — luckan har
+  alltid funnits där.
+
 ## Version 0.3.2
 
 - Under **Godsflöde › Godsbeskrivningar** kan ett ursprung eller en destination nu vara vilken

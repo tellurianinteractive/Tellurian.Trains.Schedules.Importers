@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 
 /// <summary>
@@ -12,11 +14,13 @@ public sealed class CargoOnlyOptions : TrainPartOptions
     /// <summary>
     /// If true, the cargo should be loaded at the train part's from-station.
     /// </summary>
+    [JsonIgnore]
     public bool Load => base.HasCoupleNote;
 
     /// <summary>
     /// If true, the cargo should be unloaded at the train part's to-station.
     /// </summary>
+    [JsonIgnore]
     public bool Unload => base.HasUncoupleNote;
 }
 

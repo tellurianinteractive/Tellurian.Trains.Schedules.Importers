@@ -53,6 +53,7 @@ public class TextCallNote : CallNote
     /// The stored text with its emphasis markers removed — what a plain-text reader should see, and
     /// what the printed booklet must measure, since the markers occupy no width on the page.
     /// </remarks>
+    [JsonIgnore]
     public override string ToText => NoteMarkdown.ToText(Text);
 
     /// <inheritdoc/>
@@ -60,6 +61,7 @@ public class TextCallNote : CallNote
     /// A planner may stress part of a manual note with <c>*italic*</c> or <c>**bold**</c>; everything
     /// else in the text is encoded, since it is free text and not markup. See <see cref="NoteMarkdown"/>.
     /// </remarks>
+    [JsonIgnore]
     public override MarkupString ToHtml =>
         new($"""<span class="callnote">{NoteMarkdown.ToHtml(Text)}</span>""");
 

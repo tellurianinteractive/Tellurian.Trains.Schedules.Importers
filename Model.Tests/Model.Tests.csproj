@@ -15,6 +15,10 @@
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- A plan document written by an earlier version, kept so that reading it stays a tested promise. -->
+    <Content Include="TestData\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
   </ItemGroup>
   <ItemGroup>

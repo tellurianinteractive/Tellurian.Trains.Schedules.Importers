@@ -1686,8 +1686,17 @@
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Copy all to clipboard</value>
   </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>The plan could not be saved</value>
+  </data>
+  <data name="SaveFailedHint" xml:space="preserve">
+    <value>Your latest changes are not being kept. Undo the last change — a train left with fewer than two calls, or a route with no track stretches, is the usual cause — and check that this warning disappears. Until it does, everything you do will be lost when the page is reloaded.</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>No conflicts</value>
+  </data>
+  <data name="ShowConflicts" xml:space="preserve">
+    <value>Show conflicts</value>
   </data>
   <data name="TractionType" xml:space="preserve">
     <value>Traction type</value>

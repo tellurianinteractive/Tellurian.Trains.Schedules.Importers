@@ -12,6 +12,12 @@
     overflow: hidden;
     font-size: 0.85rem;
 
+    /* A leading conflict column is opened only while some duty in the chart has a conflict, so a clean
+       plan keeps the three-column chart it always had. */
+    &.with-conflicts {
+        grid-template-columns: auto auto auto 1fr;
+    }
+
     .head {
         padding: 0.35rem 0.5rem;
         background: #f4f6f9;
@@ -19,9 +25,29 @@
         color: var(--primary);
     }
 
+    .head.conflict-head,
     .head.duty-head,
     .head.duration-head {
         border-right: 1px solid var(--border);
+    }
+
+    /* The conflict column: one narrow cell per duty, holding its badge. Kept a column of its own so the
+       badges line up down the chart and the duty identities all start at the same place. Only the cells of
+       duties that actually have a conflict are tinted. */
+    .conflict-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.9rem;
+        padding: 0.4rem 0.25rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+    }
+
+    .conflict-cell.has-conflict {
+        background: #fff8e1;
+        box-shadow: inset 3px 0 0 #d9a406;
     }
 
     /* A duty row spans all grid columns; its three cells are placed by the grid. */
@@ -29,6 +55,7 @@
         display: contents;
     }
 
+    .duty-row:first-child .conflict-cell,
     .duty-row:first-child .duty-info,
     .duty-row:first-child .duty-duration,
     .duty-row:first-child .parts {
@@ -72,7 +99,8 @@
     }
 
     /* A duty-scope conflict (part double-assigned across duties, or overlapping parts within a duty): amber
-       tint plus an amber accent down the parts column. Hovering shows the message via title. */
+       tint plus an amber accent down the parts column too, since that is where the problem is — the
+       conflict column says which duty, the parts column says what about it. */
     .parts.has-duty-conflict {
         background: #fff8e1;
         box-shadow: inset 3px 0 0 #d9a406;

@@ -1,0 +1,811 @@
+{
+  "$id": "1",
+  "Id": 0,
+  "Name": "Test",
+  "TimetableId": 0,
+  "Timetable": {
+    "$id": "2",
+    "LayoutId": 0,
+    "Layout": {
+      "$id": "3",
+      "Id": 0,
+      "Name": "Test",
+      "Settings": {
+        "$id": "4",
+        "Identity": {
+          "$id": "5",
+          "Theme": 1,
+          "ScaleId": 3,
+          "DefaultCountryId": 4
+        },
+        "General": {
+          "$id": "6",
+          "UseDays": false,
+          "StartDay": 1,
+          "MaxSessions": 14,
+          "ValidFrom": null,
+          "ValidTo": null,
+          "StartTime": "06:00:00",
+          "EndTime": "18:00:00",
+          "RunsOverMidnight": false,
+          "BreakTime": null,
+          "AllowPlanTimeExtend": true,
+          "ExpectedLocoDrivers": 0,
+          "UseObjectLanguageInReports": false
+        },
+        "GraphicTimetable": {
+          "$id": "7",
+          "Orientation": 0,
+          "ShowArrivalMinutes": false,
+          "ShowDepartureMinutes": true,
+          "MinuteSpacing": 3,
+          "KilometerSpacing": 2,
+          "StationSpacing": 100,
+          "TrackSpacing": 10,
+          "ShowTrainCategory": false,
+          "ShowCompany": false,
+          "HideSessionsOrDays": false,
+          "TrainLabelFontSize": 8
+        },
+        "TimeAndSpeed": {
+          "$id": "8",
+          "FastClockSpeed": 5,
+          "Slow": {
+            "$id": "9",
+            "ScaleSpeedKmh": 60,
+            "RealSpeedMetersPerSecond": 0.15
+          },
+          "Normal": {
+            "$id": "10",
+            "ScaleSpeedKmh": 100,
+            "RealSpeedMetersPerSecond": 0.25
+          },
+          "High": {
+            "$id": "11",
+            "ScaleSpeedKmh": 200,
+            "RealSpeedMetersPerSecond": 0.35
+          },
+          "StationTimings": {
+            "$id": "12",
+            "MinimumStopMinutes": 2,
+            "LocoRunaroundRealMinutes": 5,
+            "TrainClearanceRealMinutes": 1
+          },
+          "DistanceFactor": 1
+        },
+        "Validation": {
+          "$id": "13",
+          "ValidateStationCalls": true,
+          "ValidateStationTracks": true,
+          "ValidateStretches": true,
+          "ValidateTrainSpeed": true,
+          "ValidateRouteContinuity": true,
+          "ValidateTrainNumbers": true,
+          "ValidateSchedules": true,
+          "ValidateLocomotiveCoverage": true,
+          "ValidateDriverDuties": true,
+          "MinTrainSpeedMetersPerClockMinute": 0.3,
+          "MaxTrainSpeedMetersPerClockMinute": 10,
+          "MinMinutesBetweenTrackUsage": 0,
+          "ExtendTrackOccupancyByVehicleStay": false
+        },
+        "Integration": {
+          "$id": "14",
+          "ModuleRegistryApiUrl": "https://moduleregistry.azurewebsites.net",
+          "ModuleRegistryApiKey": null
+        }
+      },
+      "Countries": {
+        "$id": "15",
+        "$values": [
+          {
+            "$id": "16",
+            "Id": 4,
+            "ResourceKey": "Germany",
+            "Languages": "de",
+            "CountryCode": "DE"
+          }
+        ]
+      },
+      "Companies": {
+        "$id": "17",
+        "$values": []
+      },
+      "OperationLocations": {
+        "$id": "18",
+        "$values": [
+          {
+            "$id": "19",
+            "$type": "Station",
+            "IsShadow": false,
+            "IsManned": true,
+            "Regions": {
+              "$id": "20",
+              "$values": []
+            },
+            "LayoutId": 0,
+            "Layout": {
+              "$ref": "3"
+            },
+            "Id": 1,
+            "Name": "Alpha",
+            "Signature": "A",
+            "CountryId": null,
+            "Owner": null,
+            "PhoneNumber": null,
+            "IsSignal": false,
+            "HideMeets": false,
+            "HidePassings": false,
+            "IsChangingTrainDirectionPossible": false,
+            "HasPassengerExchange": true,
+            "HasCargoExchange": true,
+            "CargoServedFrom": null,
+            "Tracks": {
+              "$id": "21",
+              "$values": [
+                {
+                  "$id": "22",
+                  "Id": 11,
+                  "Number": "1",
+                  "DisplayOrder": 0,
+                  "IsScheduled": true,
+                  "IsMain": true,
+                  "Length": 0,
+                  "Usage": "",
+                  "StationId": 1,
+                  "Station": {
+                    "$ref": "19"
+                  },
+                  "Calls": {
+                    "$id": "23",
+                    "$values": [
+                      {
+                        "$id": "24",
+                        "Id": 1,
+                        "TrackId": 11,
+                        "Track": {
+                          "$ref": "22"
+                        },
+                        "TrainId": 1,
+                        "Train": {
+                          "$id": "25",
+                          "Id": 1,
+                          "Number": 2,
+                          "ExternalId": "",
+                          "Remark": null,
+                          "Length": {
+                            "Axles": null,
+                            "Wagons": null,
+                            "Meters": null
+                          },
+                          "CompanyId": null,
+                          "Company": null,
+                          "CategoryId": 1,
+                          "Category": {
+                            "$id": "26",
+                            "Id": 1,
+                            "Prefix": "P",
+                            "Suffix": "",
+                            "IsPassenger": true,
+                            "IsFreight": false,
+                            "Name": "Reisezug",
+                            "Color": "#CC0000",
+                            "DefaultSpeed": 100,
+                            "StartNumber": 1,
+                            "ExcludeFromAutomaticScheduling": false,
+                            "Company": null
+                          },
+                          "MaxSpeed": null,
+                          "Sessions": 16383,
+                          "TimetableId": 0,
+                          "Timetable": {
+                            "$ref": "2"
+                          },
+                          "ShowContinuesAs": false,
+                          "Calls": {
+                            "$id": "27",
+                            "$values": [
+                              {
+                                "$ref": "24"
+                              },
+                              {
+                                "$id": "28",
+                                "Id": 2,
+                                "TrackId": 21,
+                                "Track": {
+                                  "$id": "29",
+                                  "Id": 21,
+                                  "Number": "1",
+                                  "DisplayOrder": 0,
+                                  "IsScheduled": true,
+                                  "IsMain": true,
+                                  "Length": 0,
+                                  "Usage": "",
+                                  "StationId": 2,
+                                  "Station": {
+                                    "$id": "30",
+                                    "$type": "Station",
+                                    "IsShadow": false,
+                                    "IsManned": true,
+                                    "Regions": {
+                                      "$id": "31",
+                                      "$values": []
+                                    },
+                                    "LayoutId": 0,
+                                    "Layout": {
+                                      "$ref": "3"
+                                    },
+                                    "Id": 2,
+                                    "Name": "Beta",
+                                    "Signature": "B",
+                                    "CountryId": null,
+                                    "Owner": null,
+                                    "PhoneNumber": null,
+                                    "IsSignal": false,
+                                    "HideMeets": false,
+                                    "HidePassings": false,
+                                    "IsChangingTrainDirectionPossible": false,
+                                    "HasPassengerExchange": true,
+                                    "HasCargoExchange": true,
+                                    "CargoServedFrom": null,
+                                    "Tracks": {
+                                      "$id": "32",
+                                      "$values": [
+                                        {
+                                          "$ref": "29"
+                                        },
+                                        {
+                                          "$id": "33",
+                                          "Id": 22,
+                                          "Number": "2",
+                                          "DisplayOrder": 0,
+                                          "IsScheduled": true,
+                                          "IsMain": false,
+                                          "Length": 0,
+                                          "Usage": "",
+                                          "StationId": 2,
+                                          "Station": {
+                                            "$ref": "30"
+                                          },
+                                          "Calls": {
+                                            "$id": "34",
+                                            "$values": []
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "Timings": {
+                                      "$id": "35",
+                                      "MinimumStopMinutes": null,
+                                      "LocoRunaroundRealMinutes": null,
+                                      "TrainClearanceRealMinutes": null
+                                    }
+                                  },
+                                  "Calls": {
+                                    "$id": "36",
+                                    "$values": [
+                                      {
+                                        "$ref": "28"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "TrainId": 1,
+                                "Train": {
+                                  "$ref": "25"
+                                },
+                                "OperationLocation": {
+                                  "$ref": "30"
+                                },
+                                "Arrival": "08:03:00",
+                                "Departure": "08:05:00",
+                                "IsArrival": true,
+                                "IsDeparture": true,
+                                "Notes": {
+                                  "$id": "37",
+                                  "$values": []
+                                },
+                                "IsStop": true,
+                                "IsPassthrough": false,
+                                "SortTime": "08:05:00"
+                              },
+                              {
+                                "$id": "38",
+                                "Id": 3,
+                                "TrackId": 31,
+                                "Track": {
+                                  "$id": "39",
+                                  "Id": 31,
+                                  "Number": "1",
+                                  "DisplayOrder": 0,
+                                  "IsScheduled": true,
+                                  "IsMain": true,
+                                  "Length": 0,
+                                  "Usage": "",
+                                  "StationId": 3,
+                                  "Station": {
+                                    "$id": "40",
+                                    "$type": "Station",
+                                    "IsShadow": false,
+                                    "IsManned": true,
+                                    "Regions": {
+                                      "$id": "41",
+                                      "$values": []
+                                    },
+                                    "LayoutId": 0,
+                                    "Layout": {
+                                      "$ref": "3"
+                                    },
+                                    "Id": 3,
+                                    "Name": "Cesium",
+                                    "Signature": "C",
+                                    "CountryId": null,
+                                    "Owner": null,
+                                    "PhoneNumber": null,
+                                    "IsSignal": false,
+                                    "HideMeets": false,
+                                    "HidePassings": false,
+                                    "IsChangingTrainDirectionPossible": false,
+                                    "HasPassengerExchange": true,
+                                    "HasCargoExchange": true,
+                                    "CargoServedFrom": null,
+                                    "Tracks": {
+                                      "$id": "42",
+                                      "$values": [
+                                        {
+                                          "$ref": "39"
+                                        },
+                                        {
+                                          "$id": "43",
+                                          "Id": 32,
+                                          "Number": "2",
+                                          "DisplayOrder": 0,
+                                          "IsScheduled": true,
+                                          "IsMain": false,
+                                          "Length": 0,
+                                          "Usage": "",
+                                          "StationId": 3,
+                                          "Station": {
+                                            "$ref": "40"
+                                          },
+                                          "Calls": {
+                                            "$id": "44",
+                                            "$values": []
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "Timings": {
+                                      "$id": "45",
+                                      "MinimumStopMinutes": null,
+                                      "LocoRunaroundRealMinutes": null,
+                                      "TrainClearanceRealMinutes": null
+                                    }
+                                  },
+                                  "Calls": {
+                                    "$id": "46",
+                                    "$values": [
+                                      {
+                                        "$ref": "38"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "TrainId": 1,
+                                "Train": {
+                                  "$ref": "25"
+                                },
+                                "OperationLocation": {
+                                  "$ref": "40"
+                                },
+                                "Arrival": "08:08:00",
+                                "Departure": "08:18:00",
+                                "IsArrival": true,
+                                "IsDeparture": false,
+                                "Notes": {
+                                  "$id": "47",
+                                  "$values": []
+                                },
+                                "IsStop": true,
+                                "IsPassthrough": false,
+                                "SortTime": "08:08:00"
+                              }
+                            ]
+                          },
+                          "CargoFlows": {
+                            "$id": "48",
+                            "$values": []
+                          },
+                          "DriverStartTime": "07:50:00",
+                          "DriverEndTime": "08:18:00",
+                          "Layout": {
+                            "$ref": "3"
+                          },
+                          "AsTrainPart": {
+                            "$id": "49",
+                            "ScheduleId": null,
+                            "Schedule": null,
+                            "TractionOptions": null,
+                            "WagonSetOptions": null,
+                            "CargoOnlyOptions": null,
+                            "Id": 0,
+                            "ExternalKey": null,
+                            "FromId": 1,
+                            "From": {
+                              "$ref": "24"
+                            },
+                            "ToId": 3,
+                            "To": {
+                              "$ref": "38"
+                            },
+                            "Train": {
+                              "$ref": "25"
+                            },
+                            "Departure": "08:00:00",
+                            "Arrival": "08:08:00"
+                          }
+                        },
+                        "OperationLocation": {
+                          "$ref": "19"
+                        },
+                        "Arrival": "07:50:00",
+                        "Departure": "08:00:00",
+                        "IsArrival": false,
+                        "IsDeparture": true,
+                        "Notes": {
+                          "$id": "50",
+                          "$values": [
+                            {
+                              "$id": "51",
+                              "$type": "TextCallNote",
+                              "Texts": {
+                                "$id": "52",
+                                "$values": [
+                                  {
+                                    "$id": "53",
+                                    "Text": "Vorsicht",
+                                    "LanguageCode": "sv"
+                                  }
+                                ]
+                              },
+                              "ToText": "Vorsicht",
+                              "ToHtml": {
+                                "Value": "\u003Cspan class=\u0022callnote\u0022\u003EVorsicht\u003C/span\u003E"
+                              },
+                              "Id": 0,
+                              "DisplayOrder": 1000,
+                              "IsDriverNote": true,
+                              "IsStationNote": true,
+                              "IsShuntingNote": true,
+                              "IsForArrival": false,
+                              "IsForDeparture": false,
+                              "StationCallId": 0,
+                              "StationCall": null
+                            }
+                          ]
+                        },
+                        "IsStop": true,
+                        "IsPassthrough": false,
+                        "SortTime": "08:00:00"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$id": "54",
+                  "Id": 12,
+                  "Number": "2",
+                  "DisplayOrder": 0,
+                  "IsScheduled": true,
+                  "IsMain": false,
+                  "Length": 0,
+                  "Usage": "",
+                  "StationId": 1,
+                  "Station": {
+                    "$ref": "19"
+                  },
+                  "Calls": {
+                    "$id": "55",
+                    "$values": []
+                  }
+                }
+              ]
+            },
+            "Timings": {
+              "$id": "56",
+              "MinimumStopMinutes": null,
+              "LocoRunaroundRealMinutes": null,
+              "TrainClearanceRealMinutes": null
+            }
+          },
+          {
+            "$ref": "30"
+          },
+          {
+            "$ref": "40"
+          }
+        ]
+      },
+      "Regions": {
+        "$id": "57",
+        "$values": [
+          {
+            "$id": "58",
+            "Id": 1,
+            "Name": "S\u00FCden",
+            "CountryId": 4,
+            "BackgroundColor": "#ffff00"
+          },
+          {
+            "$id": "59",
+            "Id": 2,
+            "Name": "Westen",
+            "CountryId": 4,
+            "BackgroundColor": "#009933"
+          },
+          {
+            "$id": "60",
+            "Id": 3,
+            "Name": "Osten",
+            "CountryId": 4,
+            "BackgroundColor": "#CC0000"
+          },
+          {
+            "$id": "61",
+            "Id": 4,
+            "Name": "Rhen-Main",
+            "CountryId": 4,
+            "BackgroundColor": "#996600"
+          },
+          {
+            "$id": "62",
+            "Id": 5,
+            "Name": "Rhurgebeit",
+            "CountryId": 4,
+            "BackgroundColor": "#000000"
+          },
+          {
+            "$id": "63",
+            "Id": 6,
+            "Name": "Norden",
+            "CountryId": 4,
+            "BackgroundColor": "#0066FF"
+          },
+          {
+            "$id": "64",
+            "Id": 7,
+            "Name": "St\u00FCckgut",
+            "CountryId": 4,
+            "BackgroundColor": "#FF9933"
+          }
+        ]
+      },
+      "TrackStretches": {
+        "$id": "65",
+        "$values": [
+          {
+            "$id": "66",
+            "Id": 1,
+            "StartId": 1,
+            "Start": {
+              "$ref": "19"
+            },
+            "EndId": 2,
+            "End": {
+              "$ref": "30"
+            },
+            "Distance": 10,
+            "TracksCount": 1,
+            "Speed": 100,
+            "Time": 5,
+            "IsElectrified": true,
+            "LayoutId": 0,
+            "Layout": {
+              "$ref": "3"
+            },
+            "Passings": {
+              "$id": "67",
+              "$values": [
+                {
+                  "$id": "68",
+                  "Train": {
+                    "$ref": "25"
+                  },
+                  "From": {
+                    "$ref": "24"
+                  },
+                  "To": {
+                    "$ref": "28"
+                  },
+                  "Arrival": "08:03:00",
+                  "Departure": "08:00:00",
+                  "SpanText": "Alpha 08:00 - Beta 08:03"
+                }
+              ]
+            }
+          },
+          {
+            "$id": "69",
+            "Id": 2,
+            "StartId": 2,
+            "Start": {
+              "$ref": "30"
+            },
+            "EndId": 3,
+            "End": {
+              "$ref": "40"
+            },
+            "Distance": 10,
+            "TracksCount": 1,
+            "Speed": 100,
+            "Time": 5,
+            "IsElectrified": true,
+            "LayoutId": 0,
+            "Layout": {
+              "$ref": "3"
+            },
+            "Passings": {
+              "$id": "70",
+              "$values": [
+                {
+                  "$id": "71",
+                  "Train": {
+                    "$ref": "25"
+                  },
+                  "From": {
+                    "$ref": "28"
+                  },
+                  "To": {
+                    "$ref": "38"
+                  },
+                  "Arrival": "08:08:00",
+                  "Departure": "08:05:00",
+                  "SpanText": "Beta 08:05 - Cesium 08:08"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "TimetableStretches": {
+        "$id": "72",
+        "$values": [
+          {
+            "$id": "73",
+            "Id": 1,
+            "Number": "1",
+            "Description": "Alpha-Cesium",
+            "Color": "#000000",
+            "Stretches": {
+              "$id": "74",
+              "$values": [
+                {
+                  "$ref": "66"
+                },
+                {
+                  "$ref": "69"
+                }
+              ]
+            },
+            "Stations": {
+              "$id": "75",
+              "$values": [
+                {
+                  "$ref": "19"
+                },
+                {
+                  "$ref": "30"
+                },
+                {
+                  "$ref": "40"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "DispatchStretches": {
+        "$id": "76",
+        "$values": [
+          {
+            "$id": "77",
+            "Id": 1,
+            "From": {
+              "$ref": "19"
+            },
+            "To": {
+              "$ref": "30"
+            },
+            "Stretches": {
+              "$id": "78",
+              "$values": [
+                {
+                  "$ref": "66"
+                }
+              ]
+            }
+          },
+          {
+            "$id": "79",
+            "Id": 2,
+            "From": {
+              "$ref": "30"
+            },
+            "To": {
+              "$ref": "40"
+            },
+            "Stretches": {
+              "$id": "80",
+              "$values": [
+                {
+                  "$ref": "69"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Id": 0,
+    "Name": "Test",
+    "Trains": {
+      "$id": "81",
+      "$values": [
+        {
+          "$ref": "25"
+        }
+      ]
+    },
+    "TrainCategories": {
+      "$id": "82",
+      "$values": [
+        {
+          "$ref": "26"
+        },
+        {
+          "$id": "83",
+          "Id": 2,
+          "Prefix": "G",
+          "Suffix": "",
+          "IsPassenger": false,
+          "IsFreight": true,
+          "Name": "G\u00FCterzug",
+          "Color": "#000000",
+          "DefaultSpeed": 80,
+          "StartNumber": 5000,
+          "ExcludeFromAutomaticScheduling": false,
+          "Company": null
+        }
+      ]
+    },
+    "Sessions": {
+      "$id": "84",
+      "$values": [
+        16383,
+        5461,
+        10922,
+        4681,
+        9362,
+        2340
+      ]
+    },
+    "CargoFlowOptions": {
+      "$id": "85",
+      "$values": []
+    }
+  },
+  "GeneralInstructions": "",
+  "Program": "",
+  "ScheduledObjects": {
+    "$id": "86",
+    "$values": []
+  },
+  "Schedules": {
+    "$id": "87",
+    "$values": []
+  },
+  "DriverDuties": {
+    "$id": "88",
+    "$values": []
+  }
+}

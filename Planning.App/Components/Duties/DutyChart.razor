@@ -20,14 +20,28 @@
 }
 else
 {
-    <div class="duty-chart">
+    @* Each row's conflicts are read once here: the badge needs them, and so does the decision whether the
+       chart carries a conflict column at all. *@
+    var rows = Duties.Select(d => (Duty: d, Conflicts: ConflictsOf(d))).ToList();
+    var showConflictColumn = rows.Any(r => r.Conflicts.Count > 0);
+
+    <div class="duty-chart @(showConflictColumn ? "with-conflicts" : null)">
+        @if (showConflictColumn)
+        {
+            <div class="head conflict-head"></div>
+        }
         <div class="head duty-head">@Translator("Duty")</div>
         <div class="head duration-head">@Translator("Duration")</div>
         <div class="head parts-head">@Translator("Trains")</div>
-        @foreach (var duty in Duties)
+        @foreach (var (duty, dutyConflicts) in rows)
         {
-            var dutyConflict = DutyConflictTitle(duty);
             <div class="duty-row">
+                @if (showConflictColumn)
+                {
+                    <div class="conflict-cell @(dutyConflicts.Count > 0 ? "has-conflict" : null)">
+                        <ConflictBadge Errors="dutyConflicts" For="@duty.Identity" />
+                    </div>
+                }
                 <div class="duty-info">
                     <span class="ident">@duty.Identity</span>
                     @if (CompanyOf(duty) is { } company)
@@ -65,7 +79,7 @@ else
                         <span class="none">—</span>
                     }
                 </div>
-                <div class="parts @(dutyConflict is not null ? "has-duty-conflict" : null)" title="@dutyConflict">
+                <div class="parts @(dutyConflicts.Count > 0 ? "has-duty-conflict" : null)">
                     @foreach (var part in duty.OrderedParts)
                     {
                         var segment = BuildSegment(part);
@@ -130,16 +144,9 @@ else
     private DriverDuty? _deleteTarget;
 
     // Duty-scope conflicts for this duty (a part double-assigned across duties, or parts overlapping within
-    // the duty), joined for a hover tooltip on the parts column; null when clean.
-    private string? DutyConflictTitle(DriverDuty duty)
-    {
-        var messages = ValidationState.Errors
-            .Where(e => e.Involves(duty))
-            .Select(e => e.Message.Text)
-            .Distinct()
-            .ToList();
-        return messages.Count == 0 ? null : string.Join("\n", messages);
-    }
+    // the duty): they tint the parts column and fill the badge that opens them.
+    private IReadOnlyList<ValidationError> ConflictsOf(DriverDuty duty) =>
+        [.. ValidationState.Errors.Where(e => e.Involves(duty))];
 
     private static string? CompanyOf(DriverDuty duty) => duty.Company?.Name;
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using System.Net;
+using System.Text.Json.Serialization;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
@@ -59,6 +60,7 @@ public class Destination
     /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips.
     /// The location name is encoded; it is planner-entered text embedded in note markup.
     /// </summary>
+    [JsonIgnore]
     public MarkupString ToHtml => new(
         HasRegions ?
         $"{LocationNameHtml} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :

@@ -1,5 +1,43 @@
 # Versionsnyheder
 
+## Version 0.3.3
+
+- **Konflikter kan nu læses dér, hvor de vises.** En række med konflikter — et tog eller en togkategori
+  under **Tog**, et omløb eller et af dets køretøjer under **Omløb**, en tjeneste under **Tjenester** —
+  har nu et advarselssymbol, og et klik på det åbner meddelelserne som en læsbar liste. Symbolet får
+  farve efter den alvorligste konflikt og tæller dem, når der er mere end én. Hidtil stod
+  meddelelserne kun i et lille felt, der kom frem, mens markøren hvilede på rækken — nemt at overse og
+  svært at læse.
+- **En togkategori viser konflikterne for togene i den**, så de ikke længere skjules, når kategorien
+  lukkes.
+- **Fanen Tog åbner nu på listen over togkategorier**, hvor togene i hver kategori er skjult, indtil du
+  åbner den, så en plan med mange tog er lettere at overskue. *Udvid alle* åbner dem alle på én gang,
+  og en kategori åbner af sig selv, når du føjer et tog til den eller flytter et tog derind.
+- **Når en togdel i et omløb redigeres, står der nu, hvilke slags køretøjer omløbet gælder** —
+  lokomotiv, togsæt eller vognsæt. Deler flere køretøjer det samme omløb, nævnes hver slags én gang, og
+  peger du på den, nævnes køretøjerne selv.
+
+### Fejlrettelser
+
+- **Appen kunne holde op med at gemme dit arbejde uden at sige det.** Planen gemmes i browseren, mens
+  du arbejder, og en plan, appen ikke kunne skrive ud — et tog med færre end to standsninger eller en
+  strækning under **Strækninger › Køreplansstrækninger**, hvor alle banestykker var fjernet — fik den
+  lagring til at mislykkes lydløst. Alt derefter blev stående på skærmen, men blev aldrig gemt, så når
+  browseren blev åbnet igen, lå planen som før: med driftsstederne, men uden de strækninger og tog, der
+  var kommet til siden. Begge planer kan nu gemmes, og mislykkes en lagring alligevel, siger den øverste
+  linje det med det samme, så du kan fortryde ændringen i stedet for at miste arbejdet.
+
+- **En gemt planfil er omkring 40 % mindre.** Hver standsning blev skrevet to gange — én gang i sit tog og
+  én gang under det spor, den ligger på — og den anden kopi trak store dele af resten af planen med sig.
+  En plan gemt med en tidligere version kan stadig åbnes.
+
+- **Et tog, der er efterladt uden trækkraft på en del af sit løb, rapporteres nu.** Kontrollen spurgte
+  kun, om et lokomotiv eller togsæt kørte toget *et eller andet sted*, så når et omløb blev afkortet i
+  den ene ende, stod resten af toget uden trækkraft, uden at der blev sagt noget. Nu kontrolleres hver
+  strækning, toget kører, for hver køresession det køres, og konflikten siger, mellem hvilke
+  driftssteder og i hvilke køresessioner toget mangler trækkraft. Planer, der så rene ud, kan nu
+  rapportere dette — hullet har altid været der.
+
 ## Version 0.3.2
 
 - Under **Godsstrøm › Godsbeskrivelser** kan en oprindelse eller en destination nu være et hvilket

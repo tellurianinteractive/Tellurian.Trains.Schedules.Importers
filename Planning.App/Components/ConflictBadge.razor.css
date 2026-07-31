@@ -1,0 +1,118 @@
+/* The badge sits inside table rows and chart cells, which are dense and may scroll or clip. Only the icon
+   takes part in that layout; the pop-up is a fixed, centred overlay, so nothing can cut its text off. */
+.conflict-badge {
+    display: inline-flex;
+    vertical-align: middle;
+
+    .badge-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        padding: 0.1rem 0.25rem;
+        border: none;
+        border-radius: 3px;
+        background: none;
+        cursor: pointer;
+        font-size: 1em;
+        line-height: 1;
+        color: inherit;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* How many conflicts the pop-up will list, so a row with several is recognisable before opening it. */
+        .count {
+            font-size: 0.7em;
+            font-weight: 700;
+        }
+    }
+
+    /* Icon tint by the highest severity among this item's conflicts, matching the toolbar indicator. */
+    &.sev-error .badge-btn { color: #c0392b; }
+    &.sev-warning .badge-btn { color: #d9a406; }
+    &.sev-info .badge-btn { color: #2c7bb6; }
+
+    .popup-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.35);
+    }
+
+    .popup {
+        width: min(38rem, 92vw);
+        max-height: 80vh;
+        overflow-y: auto;
+        background: #fff;
+        color: #1a1a1a;
+        border: 1px solid #d8d8d8;
+        border-radius: 5px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        text-align: left;
+        font-size: 1rem;
+        font-weight: 400;
+        white-space: normal;
+        cursor: default;
+
+        header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.6rem 0.9rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+            h4 {
+                margin: 0;
+                font-size: 1rem;
+                color: #1a3a5c;
+            }
+
+            /* The item the conflicts belong to, so the message is not detached from its row. */
+            .for {
+                margin-left: 0.4rem;
+                font-weight: 400;
+                color: #445;
+            }
+
+            .close {
+                border: none;
+                background: none;
+                cursor: pointer;
+                font-size: 1rem;
+                color: inherit;
+                padding: 0.15rem 0.35rem;
+                border-radius: 3px;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.08);
+                }
+            }
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0.3rem 0;
+        }
+
+        li {
+            padding: 0.5rem 0.9rem 0.5rem 0.65rem;
+            border-left: 0.25rem solid transparent;
+            font-size: 0.95rem;
+            line-height: 1.45;
+
+            & + li {
+                border-top: 1px solid rgba(0, 0, 0, 0.07);
+            }
+
+            &.sev-error { border-left-color: #c0392b; }
+            &.sev-warning { border-left-color: #d9a406; }
+            &.sev-info { border-left-color: #2c7bb6; }
+        }
+    }
+}

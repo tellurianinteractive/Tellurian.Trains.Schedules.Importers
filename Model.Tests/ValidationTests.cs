@@ -415,6 +415,77 @@ public class ValidationTests
         Assert.IsEmpty(errors, "An on-demand train needs no reserved traction.");
     }
 
+    private static StationCall CallAt(Train train, string signature) =>
+        train.Calls.First(c => c.OperationLocation.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase));
+
+    // Shortening a scheduled part leaves the rest of the train unworked. The vehicle runs G->Yb only, so
+    // the forward train's Yb->Snu leg and the return train's Snu->Yb leg have no vehicle at all, even
+    // though each train still has a part in the turnus.
+    [TestMethod]
+    public void TrainLegsLeftUncoveredByAShortenedPartAreReported()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Yb->Snu
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->Yb->G
+        var schedule = plan.CreateSchedule();
+        var outward = schedule.Add(forward.AsTrainPart);
+        schedule.Add(@return.AsTrainPart);
+        AddLoco(plan, schedule);
+
+        // Shorten the outward part to G->Yb; the return part follows and starts at Yb.
+        var edit = schedule.EditPart(outward, outward.From, CallAt(forward, "Yb"));
+        Assert.IsTrue(edit.HasValue, edit.Message);
+
+        var errors = plan.GetValidationErrors(Settings).ToList();
+
+        var uncovered = errors.Where(e => e.ErrorType == ValidationErrorType.TrainMissingTraction).ToList();
+        Assert.HasCount(1, uncovered.Where(e => e.Involves(forward)), "The forward train's Yb->Snu leg has no vehicle.");
+        Assert.HasCount(1, uncovered.Where(e => e.Involves(@return)), "The return train's Snu->Yb leg has no vehicle.");
+    }
+
+    // The same shortening, but on a train whose calls were added in another order than it runs them.
+    [TestMethod]
+    public void TrainLegLeftUncoveredIsReportedWhenCallsAreOutOfRunOrder()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var category = Category;
+        var stations = TestDataFactory.Stations.ToArray();
+        // G 12:00 added first, terminus Snu 12:55 second, and the Yb stop in between added last.
+        var train = new Train(9, category, 9) { Category = category };
+        train.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 00)));
+        train.Add(new StationCall(2, stations[2]["1"], Time.FromHourAndMinute(12, 55), Time.FromHourAndMinute(12, 55)));
+        train.Add(new StationCall(3, stations[1]["2"], Time.FromHourAndMinute(12, 25), Time.FromHourAndMinute(12, 30)));
+        plan.Timetable.Add(train);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(train.AsTrainPart(0, 1)); // G->Yb only; Yb->Snu is left unworked
+        AddLoco(plan, schedule);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainMissingTraction && e.Involves(train))
+            .ToList();
+
+        Assert.HasCount(1, errors, "The Yb->Snu leg has no vehicle, whatever order the calls were added in.");
+    }
+
+    // The message must name where the unworked stretch starts and ends, so the planner can see which part
+    // of the run to give a vehicle.
+    [TestMethod]
+    public void MissingTractionMessageNamesTheUnworkedStretch()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Yb->Snu
+        var schedule = plan.CreateSchedule();
+        schedule.Add(forward.AsTrainPart(0, 1)); // G->Yb only
+        AddLoco(plan, schedule);
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.TrainMissingTraction && e.Involves(forward));
+
+        StringAssert.Contains(error.Message.Text, "Ytterby");
+        StringAssert.Contains(error.Message.Text, "Stenungsund");
+        Assert.DoesNotContain("{", error.Message.Text, "Every placeholder in the message is filled in.");
+    }
+
     // --- S3 + S5: a traction unit's circulation must close (flow-balance) over the operating period ---
 
     [TestMethod]

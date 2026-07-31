@@ -18,25 +18,40 @@
 }
 else
 {
-    <div class="turn-chart">
+    @* Each row's conflicts are read once here: the badge needs them, and so does the decision whether the
+       chart carries a conflict column at all. *@
+    var rows = Schedules.Select(s => (Schedule: s, Conflicts: ConflictsOf(s))).ToList();
+    var showConflictColumn = rows.Any(r => r.Conflicts.Count > 0);
+
+    <div class="turn-chart @(showConflictColumn ? "with-conflicts" : null)">
+        @if (showConflictColumn)
+        {
+            <div class="head conflict-head"></div>
+        }
         <div class="head vehicle-head">@Translator("Vehicles")</div>
         <div class="head parts-head">@Translator("Trains")</div>
-        @foreach (var schedule in Schedules)
+        @foreach (var (schedule, scheduleConflicts) in rows)
         {
-            var scheduleConflict = ScheduleConflictTitle(schedule);
             <div class="sched-row">
+                @if (showConflictColumn)
+                {
+                    <div class="conflict-cell @(scheduleConflicts.Count > 0 ? "has-conflict" : null)">
+                        <ConflictBadge Errors="scheduleConflicts" For="@ScheduleLabel(schedule)" />
+                    </div>
+                }
                 <div class="sched-vehicle">
                     <div class="vehicles">
                         @foreach (var (vehicle, assignment) in VehiclesOf(schedule))
                         {
-                            var vehicleConflict = VehicleConflictTitle(vehicle);
-                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null) @(vehicleConflict is not null ? "conflict" : null)" style="border-color:@vehicle.BorderColor"
-                                  title="@(vehicleConflict ?? Translator(vehicle.ObjectType.ToString()))">
+                            var vehicleConflicts = ConflictsOf(vehicle);
+                            <span class="chip @(vehicle.HasExternalId ? "external-id" : null) @(vehicleConflicts.Count > 0 ? "conflict" : null)" style="border-color:@vehicle.BorderColor"
+                                  title="@Translator(vehicle.ObjectType.ToString())">
                                 @vehicle.Designation
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
                                     <span class="sessions"><SessionsView Sessions="assignment.Sessions" Settings="SessionSettings" /></span>
                                 }
+                                <ConflictBadge Errors="vehicleConflicts" For="@vehicle.Designation" />
                                 <button class="edit" title="@Translator("EditVehicle")"
                                         @onclick="() => _editTarget = (schedule, vehicle, assignment)"><i class="fa-solid fa-pen"></i></button>
                                 <button class="x" title="@Translator("RemoveVehicle")"
@@ -46,7 +61,7 @@ else
                         <button class="add" title="@Translator("AddVehicle")" @onclick="() => _assignTarget = schedule"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <div class="parts @(scheduleConflict is not null ? "has-schedule-conflict" : null)" title="@scheduleConflict">
+                <div class="parts @(scheduleConflicts.Count > 0 ? "has-schedule-conflict" : null)">
                     @if (_deleteTarget == schedule)
                     {
                         <div class="confirm">
@@ -151,29 +166,23 @@ else
     private (Schedule Schedule, ScheduledObject Vehicle, ScheduleAssignment Assignment)? _editTarget;
 
     // Schedule-scope conflicts for this working (overlapping/non-contiguous/orphan parts, or a train left
-    // without traction), joined for a hover tooltip on the parts column; null when clean. Train- and
+    // without traction): they tint the parts column and fill the badge that opens them. Train- and
     // vehicle-scope errors are excluded by Involves(schedule), so they never mark the parts column.
-    private string? ScheduleConflictTitle(Schedule schedule)
-    {
-        var messages = ValidationState.Errors
-            .Where(e => e.Involves(schedule))
-            .Select(e => e.Message.Text)
-            .Distinct()
-            .ToList();
-        return messages.Count == 0 ? null : string.Join("\n", messages);
-    }
+    private IReadOnlyList<ValidationError> ConflictsOf(Schedule schedule) =>
+        [.. ValidationState.Errors.Where(e => e.Involves(schedule))];
 
-    // Vehicle-scope conflicts for this vehicle (double-booked, non-closing circulation), joined for a hover
-    // tooltip on the vehicle's chip; null when clean. Only the offending chip is marked, in the Vehicle
-    // column.
-    private string? VehicleConflictTitle(ScheduledObject vehicle)
+    // Vehicle-scope conflicts for this vehicle (double-booked, non-closing circulation). Only the offending
+    // chip is marked, in the Vehicle column.
+    private IReadOnlyList<ValidationError> ConflictsOf(ScheduledObject vehicle) =>
+        [.. ValidationState.Errors.Where(e => e.Involves(vehicle))];
+
+    // How the conflict pop-up names a working: by the vehicles worked to it, since that is what the row
+    // reads as. A schedule with no vehicle yet has only its number to go by — and that missing vehicle is
+    // itself one of the conflicts the pop-up may be listing.
+    private static string ScheduleLabel(Schedule schedule)
     {
-        var messages = ValidationState.Errors
-            .Where(e => e.Involves(vehicle))
-            .Select(e => e.Message.Text)
-            .Distinct()
-            .ToList();
-        return messages.Count == 0 ? null : string.Join("\n", messages);
+        var vehicles = string.Join(" ", schedule.Vehicles.Select(v => v.Designation));
+        return vehicles.Length > 0 ? vehicles : $"#{schedule.Number}";
     }
 
     // The vehicles worked to a schedule, paired with the assignment that links them (needed to unassign).

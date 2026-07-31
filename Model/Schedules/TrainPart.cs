@@ -73,6 +73,7 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <summary>
     /// Gets the train this train part belongs to.
     /// </summary>
+    [JsonIgnore]
     public Train Train => From.Train!;
 
     /// <summary>
@@ -97,11 +98,13 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <summary>
     /// Gets the departure time for this train part.
     /// </summary>
+    [JsonIgnore]
     public Time? Departure => From.Departure;
 
     /// <summary>
     /// Gets the arrival time for this train part.
     /// </summary>
+    [JsonIgnore]
     public Time? Arrival => To.Arrival;
 
     /// <inheritdoc/>

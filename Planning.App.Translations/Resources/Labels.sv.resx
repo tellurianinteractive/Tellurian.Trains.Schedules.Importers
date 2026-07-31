@@ -1681,8 +1681,17 @@
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Kopiera alla till urklipp</value>
   </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>Planen kunde inte sparas</value>
+  </data>
+  <data name="SaveFailedHint" xml:space="preserve">
+    <value>Dina senaste ändringar sparas inte. Ångra den senaste ändringen — oftast ett tåg med färre än två uppehåll eller en sträckning utan bandelar — och se efter att varningen försvinner. Till dess går allt du gör förlorat när sidan laddas om.</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Inga konflikter</value>
+  </data>
+  <data name="ShowConflicts" xml:space="preserve">
+    <value>Visa konflikter</value>
   </data>
   <data name="TractionType" xml:space="preserve">
     <value>Dragkraftstyp</value>

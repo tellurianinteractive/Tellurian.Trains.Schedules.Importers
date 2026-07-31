@@ -1,5 +1,42 @@
 # Release Notes
 
+## Version 0.3.3
+
+- **Conflicts can now be read where they are shown.** A row that has conflicts — a train or a train
+  category under **Trains**, a working or one of its vehicles under **Schedules**, a duty under
+  **Duties** — now carries a warning symbol, and clicking it opens the messages in a list you can
+  read. The symbol takes the colour of the most serious conflict and counts them when there is more
+  than one. The messages were previously only in a tooltip that appeared while the pointer rested on
+  the row, easy to miss and hard to read.
+- **A train category shows the conflicts of the trains inside it**, so closing the category no longer
+  hides them.
+- **The Trains tab now opens on the list of train categories**, with the trains in each one hidden
+  until you open it, so a plan with many trains is easier to find your way around. *Expand all* opens
+  them all at once, and a category opens by itself when you add a train to it or move a train into it.
+- **Editing a train part in a working now says which kinds of vehicle the working is for** —
+  locomotive, trainset or wagonset. Where several vehicles share a working, each kind is named once,
+  and pointing at it names the vehicles themselves.
+
+### Fixes
+
+- **The app could stop saving your work without telling you.** The plan is saved to the browser as you
+  work, and a plan the app could not write out — a train left with fewer than two calls, or a route in
+  **Stretches › Timetable stretches** whose track stretches had all been removed — failed that save
+  silently. Everything done from that moment on stayed on screen but was never kept, so reopening the
+  browser showed the plan as it was before, with the operation locations but without the stretches and
+  trains added since. Both plans now save, and if a save ever fails again the top bar says so
+  straight away, so you can undo the change that caused it instead of losing the work.
+
+- **A saved plan file is about 40 % smaller.** Each stop was written twice — once in its train and once
+  under the track it stands on — and the second copy dragged much of the rest of the plan along with it.
+  A plan saved by an earlier version still opens.
+
+- **A train left part of its run without a traction unit is now reported.** The check asked only
+  whether a locomotive or trainset worked the train *somewhere*, so shortening a working at one end
+  left the rest of the train unworked without a word. Every stretch the train runs is now checked, on
+  every session it runs it, and the conflict says between which locations, and on which sessions, the
+  train has no traction unit. Plans that looked clean may report this now — the gap was always there.
+
 ## Version 0.3.2
 
 - Under **Cargo flow › Cargo descriptions**, an origin or a destination can now be any operation

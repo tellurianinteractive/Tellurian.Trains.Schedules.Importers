@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
@@ -44,17 +45,20 @@ public sealed class CargoFlowOptions
     /// The comma-separated destination location names, for compact display in lists and drop-downs.
     /// Empty when <see cref="ToAllDestinations"/> is set (use <see cref="DestinationsSummary"/> for that).
     /// </summary>
+    [JsonIgnore]
     public string DestinationLocationNames => string.Join(", ", Destinations.Select(d => d.Location.Name));
 
     /// <summary>
     /// The comma-separated origin location names, for compact display in lists.
     /// </summary>
+    [JsonIgnore]
     public string OriginLocationNames => string.Join(", ", Origins.Select(o => o.Location.Name));
 
     /// <summary>
     /// A short summary of where this cargo flow's wagons go: the localised "all destinations" text when
     /// <see cref="ToAllDestinations"/> is set, otherwise the <see cref="DestinationLocationNames"/>.
     /// </summary>
+    [JsonIgnore]
     public string DestinationsSummary => ToAllDestinations ? NoteResources.AllDestinations : DestinationLocationNames;
 
     /// <inheritdoc/>

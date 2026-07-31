@@ -49,12 +49,12 @@ public sealed record ValidationError
 | `TrainTooFewCalls` | Train must have at least two station calls |
 | `TrainRouteNotConnected` | Two calls the train runs one after the other have no track stretch between them |
 | `VehicleScheduleOverlap` | Vehicle schedule has overlapping train parts |
-| `LocomotiveCoverageGap` | Train has a gap in locomotive coverage |
+| `LocomotiveCoverageGap` | Train has a gap in locomotive coverage — **no longer produced**, superseded by `TrainMissingTraction` |
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
 | `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
 | `ScheduleNotContiguous` | A schedule's parts are not geographically contiguous |
 | `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned |
-| `ScheduleMissingTraction` | A schedule has no traction unit on some sessions it operates |
+| `TrainMissingTraction` | A stretch of a train's run has no traction unit on some sessions it runs |
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
 
 ## ValidationSettings
@@ -238,13 +238,20 @@ On-demand trains are marked at import (`XplnDataImporter.MarkSingleTrainWorkings
 #### S4 — Per-session traction ✅
 **Method**: `ValidateTractionCoverage(this Plan plan)`
 
-**Validates**: A schedule that runs regular (non on-demand) sessions must have a **traction unit assigned for every session it operates**. A schedule with **no vehicle at all** is reported separately from one that has vehicles but **lacks a traction unit on some of its sessions** (for example wagons but no locomotive, or a locomotive on only part of the period). The operating sessions are the union of the parts' trains' sessions within the period; traction coverage is the union of the `Sessions` of the schedule's traction assignments. **Exempt**: cargo flows (hauled across several trains, not a self-contained working) and on-demand-only workings. Gated by `ValidateSchedules`.
+**Validates**: Two things.
+
+1. A schedule (turnus) that runs regular (non on-demand) sessions must have **at least one vehicle assigned**; an orphan working with no vehicle at all is reported.
+2. **Every leg a train runs** must be hauled by a traction unit on **every session the train runs it**. Traction may come from any schedule that works the train, so a wagonset turnus alongside a loco turnus is fine — coverage is judged per train, not per schedule.
+
+**Exempt**: cargo flows (hauled across several trains, not a self-contained working) and on-demand trains. Gated by `ValidateSchedules`.
+
+**Logic**: For each train, the legs are the pairs of calls in **run order** (`CallsInRunOrder`) — insertion order would pair up calls the train does not run one after the other. Each traction assignment whose schedule has a part spanning a leg contributes its `Sessions` to that leg; the leg is short of traction on the sessions the train runs but no assignment covers. Consecutive legs missing the same sessions are coalesced into one span, so a train with no traction at all gives one error over its whole run rather than one per leg.
+
+Coverage is judged **leg by leg, not by whether the train appears in some turnus at all**. Shortening a turnus part (A→C down to A→B) leaves B→C unworked while the train still has a part in the turnus; the earlier per-train check passed such a plan silently.
 
 **Errors**:
 - `"Vehicle schedule {number} has no vehicle assigned."` (`ScheduleHasNoVehicle`)
-- `"Vehicle schedule {number} has no traction unit on sessions {sessions}."` (`ScheduleMissingTraction`)
-
-This is per-schedule and session-aware, complementing P4's per-train, time-based locomotive coverage (both are kept; they catch different gaps).
+- `"Train {0} has no traction unit between {1} and {2} on sessions {3}."` (`TrainMissingTraction`)
 
 ### Plan scope (P) — cross-object consistency
 
@@ -264,22 +271,19 @@ This is per-schedule and session-aware, complementing P4's per-train, time-based
 
 **Error**: `"Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}."`
 
-#### P4 — Locomotive / traction coverage ✅
+#### P4 — Overlapping locomotive assignments ✅
 **Method**: `ValidateLocomotiveCoverage(this Plan plan)`
 
-**Validates**: Every train's run is covered by traction schedules without gaps or overlaps
+**Validates**: No train is assigned two traction units over the same stretch of its run
 
 **Logic**:
 1. Gathers traction schedules (Locomotive/Trainset assignments)
-2. For each train, collects the parts assigned to traction
-3. Checks for gaps (uncovered segments) and overlaps (double-booked traction)
+2. For each train, collects the parts assigned to traction (matched by train `Id`, so runs sharing a category and number are not merged)
+3. Checks for pairs of parts that overlap in time
 
-**Exception**: A loco change at the same station is allowed — one part ending and another beginning at the same station (even with a changeover gap) is not a coverage gap.
+**Error**: `"Train {0} has overlapping locomotive assignments: {1} and {2}."`
 
-**Errors**:
-- `"Train {0} has no locomotive assigned."` — no traction at all
-- `"Train {0} has a locomotive coverage gap between {1} and {2}."` — gap between different stations
-- `"Train {0} has overlapping locomotive assignments: {1} and {2}."` — overlap detected
+**Coverage gaps are not checked here.** S4 judges the same thing per leg and per session, correctly allows a traction change at a station, and reads the calls in run order; the time-based gap check this rule used to carry reported each gap a second time and missed the gap entirely on a train whose calls were added in another order than it runs them. `ValidationErrorType.LocomotiveCoverageGap` is no longer produced.
 
 #### P2 — Every part scheduled / no cross-schedule session overlap 🟡
 Every train part must belong to a schedule, and no part may be in two schedules with overlapping sessions. Partly served by P3 and P4; the full check is not implemented.
@@ -363,7 +367,7 @@ Plan.GetValidationErrors(options)
   ├─► Plan.ValidateTractionCoverage()         [ValidateSchedules]      S4
   ├─► Plan.ValidateVehicleClosure()           [ValidateSchedules]      S3+S5
   ├─► Plan.ValidateVehicleDoubleBooking()     [ValidateSchedules]      P3
-  └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4
+  └─► Plan.ValidateLocomotiveCoverage()       [ValidateLocomotiveCoverage]  P4 (overlaps only)
 ```
 
 ## Known Issues / TODOs

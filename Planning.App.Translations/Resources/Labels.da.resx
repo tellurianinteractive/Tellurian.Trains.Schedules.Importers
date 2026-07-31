@@ -1681,8 +1681,17 @@
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Kopiér alle til udklipsholder</value>
   </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>Planen kunne ikke gemmes</value>
+  </data>
+  <data name="SaveFailedHint" xml:space="preserve">
+    <value>Dine seneste ændringer bliver ikke gemt. Fortryd den seneste ændring — som regel et tog med færre end to standsninger eller en strækning uden banestykker — og se efter, at advarslen forsvinder. Indtil da går alt, hvad du gør, tabt, når siden genindlæses.</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
+  </data>
+  <data name="ShowConflicts" xml:space="preserve">
+    <value>Vis konflikter</value>
   </data>
   <data name="TractionType" xml:space="preserve">
     <value>Trækkrafttype</value>

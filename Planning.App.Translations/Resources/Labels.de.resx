@@ -1681,8 +1681,17 @@
   <data name="CopyToClipboard" xml:space="preserve">
     <value>Alle in die Zwischenablage kopieren</value>
   </data>
+  <data name="SaveFailed" xml:space="preserve">
+    <value>Der Plan konnte nicht gespeichert werden</value>
+  </data>
+  <data name="SaveFailedHint" xml:space="preserve">
+    <value>Ihre letzten Änderungen werden nicht gesichert. Machen Sie die letzte Änderung rückgängig — meist ein Zug mit weniger als zwei Halten oder ein Laufweg ohne Streckenabschnitte — und prüfen Sie, ob diese Warnung verschwindet. Bis dahin geht alles verloren, was Sie tun, sobald die Seite neu geladen wird.</value>
+  </data>
   <data name="NoConflicts" xml:space="preserve">
     <value>Keine Konflikte</value>
+  </data>
+  <data name="ShowConflicts" xml:space="preserve">
+    <value>Konflikte anzeigen</value>
   </data>
   <data name="TractionType" xml:space="preserve">
     <value>Traktionsart</value>

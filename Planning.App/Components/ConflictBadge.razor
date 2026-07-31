@@ -1,0 +1,93 @@
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject Translator Translator
+
+@* Marks one item of a table-like view — a train, a train category, a vehicle schedule, a vehicle or a
+   driver duty — as having validation conflicts, and opens a readable pop-up listing them. A row has no
+   room to print the message itself, and the native tooltip that used to carry it was easy to miss and
+   hard to read, so the icon is the visible affordance and the pop-up carries the text. Renders nothing
+   when the item is clean, so a badge in a row always means "there is something to read here". *@
+
+@if (_conflicts.Count > 0)
+{
+    <span class="conflict-badge @SeverityClass(MaxSeverity)">
+        <button type="button" class="badge-btn" title="@Translator("ShowConflicts")"
+                @onclick="Open" @onclick:stopPropagation="true">
+            <i class="fa-solid @IconCss"></i>
+            @if (_conflicts.Count > 1)
+            {
+                <span class="count">@_conflicts.Count</span>
+            }
+        </button>
+
+        @if (_open)
+        {
+            <div class="popup-backdrop" @onclick="Close">
+                <div class="popup" @onclick:stopPropagation="true">
+                    <header>
+                        <h4>
+                            <i class="fa-solid @IconCss"></i>
+                            @Translator("Conflicts")
+                            @if (!string.IsNullOrWhiteSpace(For))
+                            {
+                                <span class="for">@For</span>
+                            }
+                        </h4>
+                        <button type="button" class="close" title="@Translator("Close")" @onclick="Close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </header>
+                    <ul>
+                        @foreach (var conflict in _conflicts)
+                        {
+                            <li class="@SeverityClass(conflict.Severity)">@conflict.Text</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    </span>
+}
+
+@code {
+    /// <summary>The validation errors that belong to this item. An empty set renders nothing at all.</summary>
+    [Parameter, EditorRequired] public IEnumerable<ValidationError> Errors { get; set; } = [];
+
+    /// <summary>What the conflicts are about (train identity, category name, vehicle designation, duty
+    /// identity), shown in the pop-up header so the message stays attached to the row it came from.</summary>
+    [Parameter] public string? For { get; set; }
+
+    // One line per distinct message, most severe first. Two rules can word the same problem identically
+    // (both trains of a conflicting pair, say), and repeating that line tells the planner nothing new.
+    private IReadOnlyList<(Severity Severity, string Text)> _conflicts = [];
+    private bool _open;
+
+    protected override void OnParametersSet() =>
+        _conflicts =
+        [
+            .. Errors
+                .OrderByDescending(e => e.Severity)
+                .Select(e => (e.Severity, e.Message.Text))
+                .DistinctBy(c => c.Text)
+        ];
+
+    // The list is sorted most severe first, so the icon takes its colour from the head of it.
+    private Severity MaxSeverity => _conflicts[0].Severity;
+
+    private string IconCss => MaxSeverity switch
+    {
+        Severity.Error or Severity.System => "fa-circle-exclamation",
+        Severity.Warning => "fa-triangle-exclamation",
+        _ => "fa-circle-info",
+    };
+
+    private static string SeverityClass(Severity severity) => severity switch
+    {
+        Severity.Error or Severity.System => "sev-error",
+        Severity.Warning => "sev-warning",
+        _ => "sev-info",
+    };
+
+    private void Open() => _open = true;
+
+    private void Close() => _open = false;
+}

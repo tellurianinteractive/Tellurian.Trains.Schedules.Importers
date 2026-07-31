@@ -133,8 +133,10 @@ public class TrackStretch : IEquatable<TrackStretch>
     public Layout Layout { get; set; }
 
     /// <summary>
-    /// Gets all train passings on this track stretch.
+    /// Gets all train passings on this track stretch. Derived from the trains calling at both ends, so
+    /// it is computed on demand and never stored.
     /// </summary>
+    [JsonIgnore]
     public IEnumerable<StretchPassing> Passings => [.. this.GetStretchPassings()];
 
     /// <inheritdoc/>

@@ -24,6 +24,18 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
 
     public event Action? OnChanged;
 
+    /// <summary>
+    /// The error from the last attempt to save the plan, or <c>null</c> when it was written. Set when a
+    /// save fails and cleared by the next one that succeeds, so a view can tell the planner that their
+    /// work is no longer being kept — see <c>SaveFailureIndicator</c>.
+    /// </summary>
+    /// <remarks>
+    /// The save is fire-and-forget, so nothing else would notice: a plan that cannot be serialized (a
+    /// half-finished shape a computed property cannot read) or storage that refuses the write would
+    /// otherwise let the planner work on for hours and lose it all when the browser is closed.
+    /// </remarks>
+    public string? SaveError { get; private set; }
+
     private Plan? _schedule;
     private readonly HashSet<TimetableStretch> _selectedStretches = [];
     private bool _loaded;
@@ -204,7 +216,9 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
 
     // Persistence is fire-and-forget so it never blocks the UI, but the task MUST be observed: a
     // throwing serialize (e.g. a model getter that throws) would otherwise be swallowed silently and
-    // break persistence with no trace — exactly the failure this logging is here to prevent.
+    // break persistence with no trace — exactly the failure this logging is here to prevent. The
+    // planner is told as well (see SaveError); a log line in the browser console is not something
+    // anyone sees while they work.
     private async Task PersistScheduleAsync()
     {
         try
@@ -214,11 +228,20 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
             else
                 await storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
             await sync.PostAsync(ScheduleStorageKey);
+            SetSaveError(null);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to persist the schedule to browser storage.");
+            SetSaveError(ex.Message);
         }
+    }
+
+    private void SetSaveError(string? error)
+    {
+        if (SaveError == error) return;
+        SaveError = error;
+        NotifyChanged();
     }
 
     /// <summary>

@@ -12,8 +12,14 @@
     overflow: hidden;
     font-size: 0.85rem;
 
-    /* Column headers: two cells placed directly into the grid (like a row's cells), so they align with
-       the vehicle and parts columns below. */
+    /* A leading conflict column is opened only while some working in the chart has a conflict, so a clean
+       plan keeps the two-column chart it always had. */
+    &.with-conflicts {
+        grid-template-columns: auto auto 1fr;
+    }
+
+    /* Column headers: cells placed directly into the grid (like a row's cells), so they align with
+       the columns below. */
     .head {
         padding: 0.35rem 0.5rem;
         background: #f4f6f9;
@@ -21,23 +27,45 @@
         color: var(--primary);
     }
 
+    .head.conflict-head,
     .head.vehicle-head {
         border-right: 1px solid var(--border);
     }
 
-    /* A schedule row spans both grid columns; its two cells are placed by the grid. */
+    /* The conflict column: one narrow cell per working, holding its badge. Kept a column of its own so the
+       badges line up down the chart and the vehicle chips all start at the same place. Only the cells of
+       workings that actually have a conflict are tinted. */
+    .conflict-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.9rem;
+        padding: 0.4rem 0.25rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
+    }
+
+    .conflict-cell.has-conflict {
+        background: #fff8e1;
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
+    /* A schedule row spans every grid column; its cells are placed by the grid. */
     .sched-row {
         display: contents;
     }
 
     /* Row separators live on the cells, since the row itself generates no box (display: contents). */
+    .sched-row:first-child .conflict-cell,
     .sched-row:first-child .sched-vehicle,
     .sched-row:first-child .parts {
         border-top: none;
     }
 
     /* A schedule-scope conflict (overlapping/non-contiguous/orphan parts, or a train left without traction):
-       amber tint plus an amber accent down the parts column only. Hovering shows the message via title. */
+       amber tint plus an amber accent down the parts column too, since that is where the problem is —
+       the conflict column says which working, the parts column says what about it. */
     .parts.has-schedule-conflict {
         background: #fff8e1;
         box-shadow: inset 3px 0 0 #d9a406;

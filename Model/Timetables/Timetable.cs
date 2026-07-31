@@ -8,7 +8,7 @@ namespace Tellurian.Trains.Schedules.Model.Timetables;
 /// <remarks>
 /// A timetable defines all scheduled trains for a particular track layout during a specific operating period.
 /// </remarks>
-public sealed class Timetable : IEquatable<Timetable>
+public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
 {
     /// <summary>
     /// Gets or sets the foreign key to the associated layout.
@@ -83,6 +83,18 @@ public sealed class Timetable : IEquatable<Timetable>
         Sessions = [];
         CargoFlowOptions = [];
     }
+
+    /// <summary>
+    /// Rebuilds the per-track call index as soon as a timetable has been read, so a plan is never
+    /// looked at through a stale one.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Layouts.StationTrack.Calls"/> is derived from <see cref="Train.Calls"/> and is no
+    /// longer written to the document (see <c>PlanJson</c>), so it has to be built after every read —
+    /// and a document written by an earlier version may carry an index holding calls of trains that
+    /// are no longer in the timetable. Doing it here means no reading path can forget.
+    /// </remarks>
+    void IJsonOnDeserialized.OnDeserialized() => this.RebuildStationCalls();
 
     /// <inheritdoc/>
     public bool Equals(Timetable? other) => other is not null && Id == other.Id;

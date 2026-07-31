@@ -123,6 +123,7 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// external id (as imported, and usually worth editing into a tidy designation); when false the
     /// designation is the composed company signature, class and number.
     /// </summary>
+    [JsonIgnore]
     public bool HasExternalId => !string.IsNullOrWhiteSpace(ExternalId);
 
     /// <summary>
@@ -131,6 +132,7 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// composed identity of the operating company's signature, class and number. More informative and
     /// consistent than <see cref="Number"/> alone, which is not unique across vehicle types.
     /// </summary>
+    [JsonIgnore]
     public string Designation =>
         !string.IsNullOrWhiteSpace(ExternalId) ? ExternalId : ComposedIdentity;
 

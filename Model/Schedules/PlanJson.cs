@@ -12,7 +12,8 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// <remarks>
 /// The object graph contains reference cycles, so <see cref="ReferenceHandler.Preserve"/> and a deep
 /// <see cref="JsonSerializerOptions.MaxDepth"/> are both required to round-trip it. Reading also
-/// accepts property names used by earlier versions, see <see cref="AcceptLegacyNames"/>.
+/// accepts property names used by earlier versions, see <see cref="AcceptLegacyNames"/>, and the
+/// shapes that only ever repeated what is stored elsewhere, see <see cref="WriteCallsOnlyWithTheirTrain"/>.
 /// </remarks>
 public static class PlanJson
 {
@@ -25,8 +26,34 @@ public static class PlanJson
         WriteIndented = writeIndented,
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { AcceptLegacyNames } },
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { AcceptLegacyNames, WriteCallsOnlyWithTheirTrain } },
     };
+
+    /// <summary>
+    /// Writes a station call only where it belongs — in its train — and not a second time under the
+    /// track it stands on. <see cref="Layouts.StationTrack.Calls"/> is an index into
+    /// <see cref="Timetables.Train.Calls"/>, rebuilt from it whenever a timetable is read
+    /// (<see cref="Timetables.TimetableExtensions.RebuildStationCalls"/>), so writing it stored nothing
+    /// that was not stored already.
+    /// </summary>
+    /// <remarks>
+    /// Only writing is turned off (<see cref="JsonPropertyInfo.ShouldSerialize"/>), never reading: a
+    /// plan written by an earlier version put the calls under the track first — the layout is written
+    /// before the trains — and half the plan hangs below them there, referred to by <c>$ref</c>
+    /// everywhere else. Skipping that on read would leave every one of those references dangling.
+    /// Reading it costs nothing, since the index is rebuilt afterwards either way.
+    /// <para>
+    /// Not writing it also flattens the document. Descending from a track into its calls, on into their
+    /// trains and back again through each call's track was what drove the nesting deep enough to need
+    /// <see cref="JsonSerializerOptions.MaxDepth"/> raised far above the default.
+    /// </para>
+    /// </remarks>
+    private static void WriteCallsOnlyWithTheirTrain(JsonTypeInfo typeInfo)
+    {
+        if (typeInfo.Type != typeof(Layouts.StationTrack)) return;
+        if (typeInfo.Properties.FirstOrDefault(p => p.Name == nameof(Layouts.StationTrack.Calls)) is not { } calls) return;
+        calls.ShouldSerialize = static (_, _) => false;
+    }
 
     /// <summary>
     /// Lets a plan written by an earlier version still be read, by accepting the property names that

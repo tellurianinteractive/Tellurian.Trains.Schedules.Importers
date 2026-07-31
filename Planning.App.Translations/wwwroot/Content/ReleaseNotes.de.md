@@ -1,5 +1,45 @@
 # Versionshinweise
 
+## Version 0.3.3
+
+- **Konflikte lassen sich jetzt dort lesen, wo sie angezeigt werden.** Eine Zeile mit Konflikten — ein
+  Zug oder eine Zugkategorie unter **Züge**, ein Umlauf oder eines seiner Fahrzeuge unter **Umläufe**,
+  ein Dienst unter **Dienste** — trägt jetzt ein Warnsymbol, und ein Klick darauf öffnet die Meldungen
+  als lesbare Liste. Das Symbol nimmt die Farbe des schwersten Konflikts an und zählt sie, wenn es mehr
+  als einer ist. Bisher standen die Meldungen nur in einem Kurzinfofenster, das erschien, während der
+  Zeiger auf der Zeile ruhte — leicht zu übersehen und schwer zu lesen.
+- **Eine Zugkategorie zeigt die Konflikte der Züge in ihr**, sodass sie beim Zuklappen der Kategorie
+  nicht mehr verschwinden.
+- **Der Reiter Züge öffnet jetzt mit der Liste der Zugkategorien**; die Züge einer Kategorie bleiben
+  verborgen, bis Sie sie aufklappen, wodurch ein Plan mit vielen Zügen übersichtlicher wird. *Alle
+  aufklappen* öffnet alle auf einmal, und eine Kategorie klappt von selbst auf, wenn Sie ihr einen Zug
+  hinzufügen oder einen Zug in sie verschieben.
+- **Beim Bearbeiten eines Zugteils in einem Umlauf steht jetzt, für welche Fahrzeugarten der Umlauf
+  gilt** — Lokomotive, Triebzug oder Wagengruppe. Teilen sich mehrere Fahrzeuge einen Umlauf, wird jede
+  Art einmal genannt; zeigen Sie darauf, werden die Fahrzeuge selbst genannt.
+
+### Fehlerbehebungen
+
+- **Die App konnte aufhören, Ihre Arbeit zu speichern, ohne es zu sagen.** Der Plan wird beim Arbeiten
+  laufend im Browser gespeichert. Konnte die App einen Plan nicht schreiben — ein Zug mit weniger als
+  zwei Halten oder ein Laufweg unter **Strecken › Fahrplanabschnitte**, aus dem alle Streckenabschnitte
+  entfernt wurden —, schlug dieses Speichern stillschweigend fehl. Alles danach blieb am Bildschirm
+  stehen, wurde aber nie gesichert: Nach dem erneuten Öffnen des Browsers war der Plan wieder auf dem
+  Stand davor — mit den Betriebsstellen, aber ohne die seither angelegten Strecken und Züge. Beide
+  Pläne lassen sich jetzt speichern, und schlägt ein Speichern doch einmal fehl, sagt es die Kopfzeile
+  sofort, sodass Sie die verursachende Änderung rückgängig machen können, statt die Arbeit zu verlieren.
+
+- **Eine gespeicherte Plandatei ist rund 40 % kleiner.** Jeder Halt wurde zweimal geschrieben — einmal
+  beim Zug und einmal unter dem Gleis, an dem er liegt —, und die zweite Fassung zog einen Großteil des
+  übrigen Plans mit sich. Ein mit einer früheren Version gespeicherter Plan lässt sich weiterhin öffnen.
+
+- **Ein Zug, der auf einem Teil seines Laufs ohne Triebfahrzeug bleibt, wird jetzt gemeldet.** Die
+  Prüfung fragte nur, ob *irgendwo* eine Lokomotive oder ein Triebzug den Zug fuhr; wurde ein Umlauf an
+  einem Ende gekürzt, blieb der Rest des Zuges kommentarlos ohne Fahrzeug. Jetzt wird jeder Abschnitt
+  geprüft, den der Zug fährt, und zwar für jede Fahrrunde, in der er fährt; der Konflikt nennt,
+  zwischen welchen Betriebsstellen und in welchen Fahrrunden dem Zug das Triebfahrzeug fehlt. Pläne,
+  die sauber aussahen, können das jetzt melden — die Lücke war immer da.
+
 ## Version 0.3.2
 
 - Unter **Güterverkehr › Güterbeschreibungen** kann eine Herkunft oder ein Ziel jetzt jede

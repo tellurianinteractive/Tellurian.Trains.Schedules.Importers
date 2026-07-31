@@ -41,6 +41,26 @@
             color: var(--primary);
         }
 
+        .kinds {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+
+            .kind {
+                padding: 0.05rem 0.4rem;
+                border: 2px solid gray;
+                border-radius: 10px;
+                background: #fff;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+        }
+
+        .no-vehicle {
+            color: #778;
+            font-style: italic;
+        }
+
         select {
             font-size: 0.85rem;
             padding: 0.2rem 0.35rem;

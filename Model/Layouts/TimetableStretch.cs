@@ -74,9 +74,12 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     public ICollection<TrackStretch> Stretches { get; set; }
 
     /// <summary>
-    /// Gets all stations along this timetable stretch in order.
+    /// Gets all stations along this timetable stretch in order. Empty while the stretch has no route,
+    /// which it has not while one is being put together.
     /// </summary>
-    public IEnumerable<OperationLocation> Stations => Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
+    [JsonIgnore]
+    public IEnumerable<OperationLocation> Stations =>
+        Stretches.Count == 0 ? [] : Stretches.Select(s => s.Start).Concat([Stretches.Last().End]);
 
     /// <inheritdoc/>
     public bool Equals(TimetableStretch? other) => other != null && Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase);

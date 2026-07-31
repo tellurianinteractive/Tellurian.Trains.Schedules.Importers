@@ -277,7 +277,7 @@
     <value>Fordonsomlopp {0} har inget fordon tilldelat.</value>
   </data>
   <data name="TrainMissingTraction" xml:space="preserve">
-    <value>Tåg {0} saknar dragfordon på köromgångar {1}.</value>
+    <value>Tåg {0} saknar dragfordon mellan {1} och {2} på köromgångar {3}.</value>
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Fordon {0} återvänder inte till sin startplats {1}; det slutar vid {2}.</value>

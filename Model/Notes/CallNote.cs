@@ -76,8 +76,10 @@ public abstract class CallNote : IEquatable<CallNote>, ICallNote
     public override int GetHashCode() => Id.GetHashCode();
 
     /// <summary>
-    /// Plain-text rendering of the note.
+    /// Plain-text rendering of the note. Rendered from what the note stores, so it is never persisted
+    /// itself.
     /// </summary>
+    [JsonIgnore]
     public abstract string ToText { get; }
 
     /// <summary>
@@ -89,6 +91,7 @@ public abstract class CallNote : IEquatable<CallNote>, ICallNote
     /// a station or vehicle name containing an ampersand would otherwise produce broken markup.
     /// <see cref="TextCallNote"/> overrides this to render its Markdown emphasis, encoding as it goes.
     /// </remarks>
+    [JsonIgnore]
     public virtual MarkupString ToHtml =>
         new($"""<span class="callnote">{WebUtility.HtmlEncode(ToText)}</span>""");
 

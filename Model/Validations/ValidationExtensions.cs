@@ -53,8 +53,14 @@ public static class ValidationExtensions
         }
 
         /// <summary>
-        /// Validates that all trains have complete locomotive coverage without gaps or overlaps.
+        /// Validates that no train is assigned two traction units over the same stretch of its run
+        /// (rule P4).
         /// </summary>
+        /// <remarks>
+        /// Coverage <em>gaps</em> are not checked here: <see cref="ValidateTractionCoverage"/> (S4) judges
+        /// the same thing per leg and per session, and correctly allows a traction change at a station,
+        /// so a second time-based gap check would only report each gap twice.
+        /// </remarks>
         internal IEnumerable<ValidationError> ValidateLocomotiveCoverage()
         {
             var errors = new List<ValidationError>();
@@ -80,21 +86,8 @@ public static class ValidationExtensions
                     .OrderBy(p => p.From.Departure.Value)
                     .ToList();
 
-                if (locomotiveParts.Count == 0)
-                {
-                    // No locomotive assigned at all - report gap for entire train
-                    if (train.Calls.Count >= 2)
-                    {
-                        var message = Message.Information(Strings.TrainHasNoLocomotiveAssigned, train);
-                        errors.Add(ValidationError.LocomotiveCoverageGap(train, train.Calls.First(), train.Calls.Last(), message));
-                    }
-                    continue;
-                }
+                if (locomotiveParts.Count == 0) continue; // no traction at all: S4's concern, not an overlap
 
-                // Check for gaps
-                errors.AddRange(CheckLocomotiveCoverageGaps(train, locomotiveParts));
-
-                // Check for overlaps
                 errors.AddRange(CheckLocomotiveCoverageOverlaps(train, locomotiveParts));
             }
 
@@ -274,14 +267,21 @@ public static class ValidationExtensions
         /// <list type="bullet">
         /// <item>A schedule (turnus) that runs regular sessions must have at least one vehicle assigned; an
         /// orphan working with no vehicle is reported.</item>
-        /// <item>Every train that operates must be hauled by a traction unit (a locomotive or a
-        /// self-propelled trainset) on <em>every</em> session it runs. The traction may be assigned through
-        /// any schedule that works the train — a wagonset has its own turnus with no traction of its own and
-        /// is hauled by the locomotive's separate turnus, so coverage is judged per train, not per
+        /// <item>Every leg a train runs must be hauled by a traction unit (a locomotive or a self-propelled
+        /// trainset) on <em>every</em> session the train runs. The traction may be assigned through any
+        /// schedule that works the train — a wagonset has its own turnus with no traction of its own and is
+        /// hauled by the locomotive's separate turnus, so coverage is judged per train, not per
         /// schedule.</item>
         /// </list>
-        /// On-demand trains are exempt (they run only when needed), as are cargo flows.
         /// </summary>
+        /// <remarks>
+        /// Coverage is judged leg by leg, not by whether the train appears in some turnus at all: shortening
+        /// a turnus part leaves the rest of the train unworked, and the train still has a part. The legs are
+        /// the pairs of calls in run order (CallsInRunOrder) — insertion order would pair up calls the train
+        /// does not run one after the other. Consecutive legs missing the same sessions are reported as one
+        /// span, so a train with no traction at all gives one error over its whole run rather than one per
+        /// leg. On-demand trains are exempt (they run only when needed), as are cargo flows.
+        /// </remarks>
         internal IEnumerable<ValidationError> ValidateTractionCoverage()
         {
             var general = plan.Layout.Settings.General;
@@ -299,8 +299,8 @@ public static class ValidationExtensions
                 errors.Add(ValidationError.ScheduleHasNoVehicle(schedule, message));
             }
 
-            // Every train must have a traction unit on every session it runs, provided through any schedule
-            // that works it.
+            // Every leg a train runs must have a traction unit on every session it runs it, provided through
+            // any schedule that works it.
             var tractionAssignments = plan.ScheduledObjects
                 .Where(v => v.IsTraction)
                 .SelectMany(v => v.ScheduleAssignments)
@@ -310,22 +310,61 @@ public static class ValidationExtensions
                 if (train.Calls.Count < 2) continue;
                 if (train.Sessions.IsOnDemand) continue;
 
-                var tractionSessions = tractionAssignments
-                    .Where(a => a.Schedule is not null && a.Schedule.Parts.Any(p => p.Train.Equals(train)))
-                    .Aggregate(new Sessions(), (acc, a) => acc.Or(a.Sessions));
+                var calls = train.CallsInRunOrder;
+                var legCount = calls.Count - 1;
 
-                var missing = new List<int>();
-                for (var number = 1; number <= periodMax; number++)
-                    if (train.Sessions.Includes(number) && !tractionSessions.Includes(number)) missing.Add(number);
-
-                if (missing.Count > 0)
+                // The sessions each leg is hauled on, unioned over every traction assignment whose schedule
+                // has a part spanning that leg. Parts are matched to the train by Id, not value equality:
+                // several runs can share category and number (a clock-face service), and value equality
+                // would credit one run's traction to another's legs.
+                var hauled = new Sessions[legCount];
+                foreach (var assignment in tractionAssignments)
                 {
-                    var missingSessions = SessionsExtensions.FromPeriodNumbers(missing, general.UseDays);
-                    var message = Message.Information(Strings.TrainMissingTraction, train, missingSessions.SessionsNumbers);
-                    errors.Add(ValidationError.TrainMissingTraction(train, message));
+                    foreach (var part in assignment.Schedule?.Parts ?? [])
+                    {
+                        if (part.Train.Id != train.Id) continue;
+                        var from = IndexOfCall(calls, part.From);
+                        var to = IndexOfCall(calls, part.To);
+                        if (from < 0 || to < 0) continue;
+                        for (var leg = from; leg < to; leg++) hauled[leg] = hauled[leg].Or(assignment.Sessions);
+                    }
+                }
+
+                var missingPerLeg = new List<int>[legCount];
+                for (var leg = 0; leg < legCount; leg++)
+                {
+                    missingPerLeg[leg] = [];
+                    // Two successive calls at the same operating location travel no stretch — a train
+                    // changing track there — so nothing has to haul it, exactly as CheckRouteContinuity
+                    // does not call that pair a gap in the route.
+                    if (calls[leg].OperationLocation.Equals(calls[leg + 1].OperationLocation)) continue;
+                    for (var number = 1; number <= periodMax; number++)
+                        if (train.Sessions.Includes(number) && !hauled[leg].Includes(number)) missingPerLeg[leg].Add(number);
+                }
+
+                for (var leg = 0; leg < legCount;)
+                {
+                    if (missingPerLeg[leg].Count == 0) { leg++; continue; }
+
+                    // Run on over the following legs missing exactly the same sessions, so an unworked
+                    // stretch is one error naming where it starts and ends.
+                    var last = leg;
+                    while (last + 1 < legCount && missingPerLeg[last + 1].SequenceEqual(missingPerLeg[leg])) last++;
+
+                    var (from, to) = (calls[leg], calls[last + 1]);
+                    var missingSessions = SessionsExtensions.FromPeriodNumbers(missingPerLeg[leg], general.UseDays);
+                    var message = Message.Information(Strings.TrainMissingTraction, train, from.OperationLocation, to.OperationLocation, missingSessions.SessionsNumbers);
+                    errors.Add(ValidationError.TrainMissingTraction(train, from, to, message));
+                    leg = last + 1;
                 }
             }
             return errors;
+
+            static int IndexOfCall(IReadOnlyList<StationCall> calls, StationCall call)
+            {
+                for (var i = 0; i < calls.Count; i++) if (calls[i].Equals(call)) return i;
+                return -1;
+            }
         }
 
         /// <summary>
@@ -569,53 +608,6 @@ public static class ValidationExtensions
             return result;
         }
 
-        private IEnumerable<ValidationError> CheckLocomotiveCoverageGaps(List<ScheduledTrainPart> locomotiveParts)
-        {
-            var errors = new List<ValidationError>();
-            var calls = train.Calls.ToArray();
-            if (calls.Length < 2) yield break;
-
-            // Check if first call is covered
-            // Skip if at same station (locomotive may start later at same location)
-            var firstCall = calls[0];
-            var firstPart = locomotiveParts.FirstOrDefault();
-            if (firstPart != null && firstPart.From.Departure > firstCall.Departure &&
-                !firstCall.OperationLocation.Equals(firstPart.From.OperationLocation))
-            {
-                var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, firstCall.OperationLocation, firstPart.From.OperationLocation);
-                errors.Add(ValidationError.LocomotiveCoverageGap(train, firstCall, firstPart.From, message));
-            }
-
-            // Check for gaps between consecutive locomotive parts
-            for (var i = 0; i < locomotiveParts.Count - 1; i++)
-            {
-                var currentPart = locomotiveParts[i];
-                var nextPart = locomotiveParts[i + 1];
-
-                // There's a gap if the next part starts after the current part ends
-                // BUT not if they're at the same station (locomotive change at same location is valid)
-                if (nextPart.From.Departure > currentPart.To.Arrival &&
-                    !currentPart.To.OperationLocation.Equals(nextPart.From.OperationLocation))
-                {
-                    var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, currentPart.To.OperationLocation, nextPart.From.OperationLocation);
-                    errors.Add(ValidationError.LocomotiveCoverageGap(train, currentPart.To, nextPart.From, message));
-                }
-            }
-
-            // Check if last call is covered
-            // Skip if at same station (locomotive may end earlier at same location)
-            var lastCall = calls[^1];
-            var lastPart = locomotiveParts.LastOrDefault();
-            if (lastPart != null && lastPart.To.Arrival < lastCall.Arrival &&
-                !lastPart.To.OperationLocation.Equals(lastCall.OperationLocation))
-            {
-                var message = Message.Information(Strings.TrainHasLocomotiveCoverageGap, train, lastPart.To.OperationLocation, lastCall.OperationLocation);
-                errors.Add(ValidationError.LocomotiveCoverageGap(train, lastPart.To, lastCall, message));
-            }
-
-            foreach (var error in errors) yield return error;
-        }
-
         private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<ScheduledTrainPart> locomotiveParts)
         {
             for (var i = 0; i < locomotiveParts.Count - 1; i++)
@@ -642,11 +634,13 @@ public static class ValidationExtensions
         {
             var result = new List<ValidationError>();
             var calls = train.CallsInRunOrder;
+            // A train with no calls belongs to no layout, and so has no stretches to measure a speed on.
+            if (train.Layout is not { } layout) return result;
             for (var i = 0; i < calls.Count - 1; i++)
             {
                 var c1 = calls[i];
                 var c2 = calls[i + 1];
-                var maybeStretch = train.Layout.TrackStretch(c1.OperationLocation, c2.OperationLocation);
+                var maybeStretch = layout.TrackStretch(c1.OperationLocation, c2.OperationLocation);
                 if (maybeStretch.HasValue)
                 {
                     var time = c2.Arrival.Subtract(c1.Departure);

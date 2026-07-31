@@ -148,13 +148,17 @@ public class Train : IEquatable<Train>
     /// Gets the driver's start time (arrival time of first call). The first call is the one the train
     /// runs first; <see cref="Calls"/> is in insertion order, which need not be the run order.
     /// </summary>
-    public Time DriverStartTime => Calls.MinBy(c => c.SortTime)!.Arrival;
+    /// <exception cref="InvalidOperationException">Thrown when the train has no calls.</exception>
+    [JsonIgnore]
+    public Time DriverStartTime => Calls.MinBy(c => c.SortTime) is { } first ? first.Arrival : throw NoCalls();
 
     /// <summary>
     /// Gets the driver's end time (departure time of last call). The last call is the one the train runs
     /// last; <see cref="Calls"/> is in insertion order, which need not be the run order.
     /// </summary>
-    public Time DriverEndTime => Calls.MaxBy(c => c.SortTime)!.Departure;
+    /// <exception cref="InvalidOperationException">Thrown when the train has no calls.</exception>
+    [JsonIgnore]
+    public Time DriverEndTime => Calls.MaxBy(c => c.SortTime) is { } last ? last.Departure : throw NoCalls();
 
     /// <summary>
     /// Gets the station call at the specified index.
@@ -169,15 +173,25 @@ public class Train : IEquatable<Train>
     internal IEnumerable<StationTrack> Tracks => Calls.OrderBy(c => c.Arrival.Value).Select(c => c.Track).Distinct();
 
     /// <summary>
-    /// Gets the layout from the first station call.
+    /// Gets the layout from the first station call, or <c>null</c> when the train has no calls yet and
+    /// so belongs to no layout.
     /// </summary>
-    public Layout Layout => Calls[0].OperationLocation.Layout;
+    [JsonIgnore]
+    public Layout? Layout => Calls.Count > 0 ? Calls[0].OperationLocation.Layout : null;
 
     /// <summary>
     /// Gets this train as a train part covering all station calls, from where it starts its run to
     /// where it ends it.
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the train has fewer than two calls,
+    /// which is too few to span a part.</exception>
+    [JsonIgnore]
     public ScheduledTrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
+
+    // A train under construction may have no calls at all. Everything derived from where it runs is
+    // then undefined rather than zero, so it says so instead of failing with a null reference.
+    private InvalidOperationException NoCalls() =>
+        new($"Train {Number} has no calls, so it has no run to derive times from.");
 
     /// <inheritdoc/>
     public bool Equals(Train? other) =>

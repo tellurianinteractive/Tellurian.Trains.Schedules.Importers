@@ -18,6 +18,22 @@
             <span class="train">@Part.Train.Identity</span>
         </div>
         <div class="field">
+            <label>@Translator("Vehicles")</label>
+            @if (VehicleKinds.Count == 0)
+            {
+                <span class="no-vehicle">@Translator("None")</span>
+            }
+            else
+            {
+                <span class="kinds">
+                    @foreach (var kind in VehicleKinds)
+                    {
+                        <span class="kind" style="border-color:@kind.Color" title="@kind.Designations">@Translator(kind.Type.ToString())</span>
+                    }
+                </span>
+            }
+        </div>
+        <div class="field">
             <label>@Translator("From")</label>
             <select value="@_from" @onchange="SetFrom">
                 @for (var i = 0; i < Calls.Count - 1; i++)
@@ -85,6 +101,19 @@
     // The train's calls in run order, so the index order in the lists is the order the train works them.
     private IReadOnlyList<StationCall> Calls => Part.Train.CallsInRunOrder;
 
+    // The kinds of vehicle working this part, one entry per distinct type in type order. Several vehicles
+    // of different kinds may share a working — a locomotive hauling a wagonset, say — and what shortening
+    // or extending the part means differs per kind, so every kind is named, not just the first. The
+    // vehicles of a kind are named in the chip's tooltip.
+    private IReadOnlyList<VehicleKind> VehicleKinds =>
+        [.. Schedule.Vehicles
+            .GroupBy(v => v.ObjectType)
+            .OrderBy(g => g.Key)
+            .Select(g => new VehicleKind(
+                g.Key,
+                g.First().BorderColor,
+                string.Join(", ", g.Select(v => v.Designation))))];
+
     // What the current selection would do, or null while the selection is incomplete. Nothing is changed
     // until the planner saves.
     private PartEdit? Preview
@@ -146,4 +175,8 @@
 
     private static string SpanText(StationCall from, StationCall to) =>
         $"{CallText(from, departure: true)} → {CallText(to, departure: false)}";
+
+    // One distinct vehicle type on the schedule: the type itself, the colour it is drawn in (taken from
+    // the first vehicle of that type, as the turn chart draws it) and the designations of its vehicles.
+    private sealed record VehicleKind(ScheduledObjectType Type, string Color, string Designations);
 }

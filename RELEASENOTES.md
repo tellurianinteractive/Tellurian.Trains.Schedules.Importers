@@ -50,6 +50,49 @@
 
 ### Fixes
 
+- **A plan is serializable in every shape it can be edited into.** Derived properties were written to
+  the plan document along with the stored state, and several of them throw on a half-finished plan: a
+  train left with fewer than two calls (`Train.AsTrainPart`, `DriverStartTime`, `DriverEndTime`,
+  `Layout`) or a timetable stretch whose route has been emptied (`TimetableStretch.Stations`). One such
+  read failed the whole serialize, which in Planning.App silently ended persistence — the planner
+  worked on and lost everything from that point when the browser was reopened. Every derived property
+  in the plan graph now carries `[JsonIgnore]`, so only stored state is written (`TrackStretch.Passings`,
+  `StationCall.OperationLocation/IsStop/IsPassthrough/SortTime`, `TrainPart.Train/Departure/Arrival`,
+  the note rendering forms, and the cargo-flow and vehicle display names among them). Nothing is lost:
+  none of them has a setter, so none was ever read back. Saved documents get noticeably smaller.
+
+  **Breaking:** `Train.Layout` is now `Layout?` and is `null` when the train has no calls, rather than
+  throwing; `Train.DriverStartTime` and `DriverEndTime` throw `InvalidOperationException` instead of
+  `NullReferenceException` for a train with no calls; `TimetableStretch.Stations` is empty for a
+  stretch with no route instead of throwing.
+
+- **A station call is written once, in its train.** `StationTrack.Calls` is an index into `Train.Calls`,
+  rebuilt from it by `Timetable.RebuildStationCalls()`, but it was written to the plan document as well
+  — and written *first*, since the layout precedes the trains. Half the plan therefore hung below the
+  tracks: a track's calls, their trains, those trains' categories and cargo flows, and back through each
+  call's track again, which is what drove the nesting deep enough to need `MaxDepth = 256`. `PlanJson`
+  now omits it when writing, and `Timetable` implements `IJsonOnDeserialized` so the index is rebuilt
+  after every read rather than only where a caller remembered to. Documents get about 40 % smaller. The
+  property is still *read*, so a plan written by an earlier version — where those objects took their
+  `$id` under a track — still loads; `Model.Tests/TestData/Plan.0.3.2.json` keeps that a tested promise.
+
+- **Traction coverage (rule S4) is judged leg by leg instead of per train.** The check asked only
+  whether a train had *some* part in a traction unit's turnus, so a train left half-worked passed
+  silently — shorten a part from A→C to A→B (and the next from C→A to B→A) and B→C had no vehicle
+  yet nothing was reported. Coverage is now computed for every leg the train runs, on every session
+  it runs it, from any schedule that works it; consecutive unworked legs are reported as one span, so
+  a train with no traction at all still gives a single error. Legs between two calls at the same
+  operating location — a train changing track there — travel no stretch and need no traction.
+  `ValidationErrorType.TrainMissingTraction` now carries the span rather than the whole train, and its
+  message reads *"Train {0} has no traction unit between {1} and {2} on sessions {3}."*
+  `ValidationError.TrainMissingTraction` takes the two calls: **breaking** for anyone constructing one.
+
+- **`Plan.ValidateLocomotiveCoverage` (rule P4) no longer checks coverage gaps**, only overlapping
+  locomotive assignments. Its gap check read `Train.Calls` in insertion order, so on a hand-edited
+  train it missed the very gap it was for, and where it did fire it reported what S4 now reports.
+  `ValidationErrorType.LocomotiveCoverageGap` is kept but is no longer produced. Coverage gaps are
+  reported whenever `ValidateSchedules` is on, no longer only when `ValidateLocomotiveCoverage` is.
+
 - **The train speed check (rule T3) now covers a train's last leg.** Its loop stopped one leg short,
   so the run into the terminus was never checked and a two-call train was not checked at all. Plans
   with slow or fast final legs will report findings that were previously silent.

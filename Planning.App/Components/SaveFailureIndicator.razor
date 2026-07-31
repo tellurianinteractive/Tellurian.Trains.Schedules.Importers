@@ -1,0 +1,41 @@
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@implements IDisposable
+
+@* Shown only when the plan could not be saved. The save is fire-and-forget, so without this the
+   planner would keep working on a plan that is no longer being kept and lose it all on reload. *@
+@if (ScheduleState.SaveError is { } error)
+{
+    <div class="save-failure">
+        <button class="header-btn indicator-btn" @onclick="Toggle" title="@Translator("SaveFailed")">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="label">@Translator("SaveFailed")</span>
+        </button>
+
+        @if (_open)
+        {
+            <div class="panel-backdrop" @onclick="Close"></div>
+            <div class="panel" @onclick:stopPropagation>
+                <header class="panel-header">
+                    <h3>@Translator("SaveFailed")</h3>
+                    <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
+                </header>
+                <p>@Translator("SaveFailedHint")</p>
+                <p class="detail">@error</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool _open;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private void Toggle() => _open = !_open;
+    private void Close() => _open = false;
+
+    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
+}

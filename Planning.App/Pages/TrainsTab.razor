@@ -25,8 +25,8 @@ else
             <button class="primary" @onclick="AddTrain">@Translator("AddTrain")</button>
             @if (groups.Count > 1)
             {
-                <button @onclick="ExpandAllCategories"><i class="fa-solid fa-angles-down"></i> @Translator("ExpandAll")</button>
-                <button @onclick="() => CollapseAllCategories(groups)"><i class="fa-solid fa-angles-up"></i> @Translator("CollapseAll")</button>
+                <button @onclick="() => ExpandAllCategories(groups)"><i class="fa-solid fa-angles-down"></i> @Translator("ExpandAll")</button>
+                <button @onclick="CollapseAllCategories"><i class="fa-solid fa-angles-up"></i> @Translator("CollapseAll")</button>
             }
         </div>
 
@@ -60,10 +60,12 @@ else
                     @foreach (var group in groups)
                     {
                         var groupExpanded = IsExpanded(group);
-                        <tr class="category @(group.Trains.Any(HasConflict) ? "has-conflict" : "")">
+                        var groupConflicts = ConflictsOf(group);
+                        <tr class="category @(groupConflicts.Count > 0 ? "has-conflict" : "")">
                             <td class="expander">
                                 <button class="toggle" title="@Translator(groupExpanded ? "Collapse" : "Expand")"
                                         @onclick="() => ToggleExpanded(group)"><i class="fa-solid @(groupExpanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                                <ConflictBadge Errors="groupConflicts" For="@GroupName(group)" />
                             </td>
                             <td colspan="@(ColumnCount - 1)">
                                 @if (group.Category is { } groupCategory)
@@ -78,11 +80,12 @@ else
                         {
                             foreach (var train in group.Trains)
                             {
-                                var conflict = ConflictTitle(train);
-                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflict is not null ? "has-conflict" : "")" title="@conflict">
+                                var conflicts = ConflictsOf(train);
+                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflicts.Count > 0 ? "has-conflict" : "")">
                                     <td class="expander">
                                         <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
                                                 @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                                        <ConflictBadge Errors="conflicts" For="@TrainLabel(train)" />
                                     </td>
                                     @if (ShowExternalId)
                                     {
@@ -209,7 +212,7 @@ else
         Timetable?.Sessions ?? [];
 
     private readonly HashSet<int> _expanded = [];
-    private readonly HashSet<int> _collapsedCategories = [];
+    private readonly HashSet<int> _expandedCategories = [];
     private Train? _deleteTarget;
 
     // ---- Category grouping ----------------------------------------------------------------------
@@ -257,21 +260,15 @@ else
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
-    // True when any validation error involves this train. Used to mark a category whose trains have
-    // conflicts, which is the only sign of them left once that category is collapsed.
-    private bool HasConflict(Train train) =>
-        ValidationState.Errors.Any(e => e.Scope == ValidationScope.Train && e.Involves(train));
+    // The train-scope conflicts that involve this train; they tint its row and fill its conflict badge.
+    private IReadOnlyList<ValidationError> ConflictsOf(Train train) =>
+        [.. ValidationState.Errors.Where(e => e.Scope == ValidationScope.Train && e.Involves(train))];
 
-    // The validation messages for errors that involve this train, joined for a hover tooltip; null when clean.
-    private string? ConflictTitle(Train train)
-    {
-        var messages = ValidationState.Errors
-            .Where(e => e.Scope == ValidationScope.Train && e.Involves(train))
-            .Select(e => e.Message.Text)
-            .Distinct()
-            .ToList();
-        return messages.Count == 0 ? null : string.Join("\n", messages);
-    }
+    // Every conflict of the category's trains, gathered on the group header: once the category is collapsed
+    // that header is the only place the conflicts inside it can be seen, and read.
+    private IReadOnlyList<ValidationError> ConflictsOf(TrainGroup group) =>
+        [.. ValidationState.Errors
+            .Where(e => e.Scope == ValidationScope.Train && group.Trains.Any(t => e.Involves(t)))];
 
     public void Dispose()
     {
@@ -289,20 +286,20 @@ else
         if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
     }
 
-    // Categories start out expanded, so the table opens on the same trains as before the grouping.
-    private bool IsExpanded(TrainGroup group) => !_collapsedCategories.Contains(group.Key);
+    // Categories start out collapsed, so the tab opens on the list of categories rather than on every train.
+    private bool IsExpanded(TrainGroup group) => _expandedCategories.Contains(group.Key);
 
     private void ToggleExpanded(TrainGroup group)
     {
-        if (!_collapsedCategories.Remove(group.Key)) _collapsedCategories.Add(group.Key);
+        if (!_expandedCategories.Remove(group.Key)) _expandedCategories.Add(group.Key);
     }
 
-    private void ExpandAllCategories() => _collapsedCategories.Clear();
-
-    private void CollapseAllCategories(IEnumerable<TrainGroup> groups)
+    private void ExpandAllCategories(IEnumerable<TrainGroup> groups)
     {
-        foreach (var group in groups) _collapsedCategories.Add(group.Key);
+        foreach (var group in groups) _expandedCategories.Add(group.Key);
     }
+
+    private void CollapseAllCategories() => _expandedCategories.Clear();
 
     // ---- Display helpers ------------------------------------------------------------------------
 
@@ -346,7 +343,7 @@ else
         train.Category = id is null ? null : Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id);
         train.CategoryId = train.Category?.Id;
         // The train moves to the group of its new category; open that group so it does not vanish from view.
-        _collapsedCategories.Remove(train.CategoryId ?? 0);
+        _expandedCategories.Add(train.CategoryId ?? 0);
         Save();
     }
 
@@ -527,7 +524,7 @@ else
     private void OnTrainCreated(Train train)
     {
         _showAdd = false;
-        _collapsedCategories.Remove(train.CategoryId ?? 0);
+        _expandedCategories.Add(train.CategoryId ?? 0);
         _expanded.Add(train.Id);
     }
 

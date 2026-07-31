@@ -465,18 +465,22 @@ public sealed record ValidationError
         };
 
     /// <summary>
-    /// Creates a train-missing-traction error: a train runs on sessions for which it has no traction unit
-    /// (locomotive or self-propelled trainset) assigned through any schedule (rule S4).
+    /// Creates a train-missing-traction error: over the stretch from <paramref name="from"/> to
+    /// <paramref name="to"/> the train runs on sessions for which it has no traction unit (locomotive or
+    /// self-propelled trainset) assigned through any schedule (rule S4). The stretch is the run of
+    /// consecutive legs left unworked, which for a train with no traction at all is its whole run.
     /// </summary>
     public static ValidationError TrainMissingTraction(
         Train train,
+        StationCall from,
+        StationCall to,
         Message message) => new()
         {
             ErrorType = ValidationErrorType.TrainMissingTraction,
-            FromTrack = train.Calls.FirstOrDefault()?.Track ?? StationTrack.Example,
-            ToTrack = train.Calls.LastOrDefault()?.Track ?? StationTrack.Example,
-            FromTime = train.Calls.FirstOrDefault()?.Departure ?? Time.Zero,
-            ToTime = train.Calls.LastOrDefault()?.Arrival ?? Time.Zero,
+            FromTrack = from.Track,
+            ToTrack = to.Track,
+            FromTime = from.Departure,
+            ToTime = to.Arrival,
             Trains = [train],
             Message = message
         };
@@ -670,7 +674,11 @@ public enum ValidationErrorType
     /// <summary>Vehicle schedule has overlapping train parts.</summary>
     VehicleScheduleOverlap,
 
-    /// <summary>Train has a gap in locomotive coverage.</summary>
+    /// <summary>
+    /// Train has a gap in locomotive coverage. No longer produced: <see cref="TrainMissingTraction"/>
+    /// reports an unworked stretch per leg and per session, which subsumes it. Kept so existing callers
+    /// of <see cref="ValidationError.LocomotiveCoverageGap"/> still compile.
+    /// </summary>
     LocomotiveCoverageGap,
 
     /// <summary>Train has overlapping locomotive assignments.</summary>
