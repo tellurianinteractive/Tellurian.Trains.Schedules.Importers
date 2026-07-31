@@ -1,5 +1,52 @@
 # Release Notes
 
+## Version 0.3.2
+
+- Under **Cargo flow › Cargo descriptions**, an origin or a destination can now be any operation
+  location that exchanges cargo, not only a station. An industrial area always handles cargo
+  wagons but could not be chosen before. The same lists now say **location** where they said *station*, since stations are no longer the
+  only thing they hold.
+- The calls of a train are always listed in the **order the train travels** them.
+- Editing a call time in the **Trains** tab now **takes the rest of the train with it**. A **departure**
+  works forwards, the way the train runs: hold a train five minutes longer at one station and it reaches
+  every later station five minutes later. An **arrival** works backwards: ask a train to arrive five
+  minutes later and it leaves every earlier station five minutes later, so the run up to the change
+  follows it. Either way the times on the other side stay where they are, the run and dwell times are
+  kept, and the change is refused — with the field falling back — if it would take the train outside the
+  plan's operating times.
+- A train whose route **jumps a location** — two calls in a row with no track stretch between them — is
+  now reported as a conflict. It can be switched off under **Settings › Validation**.
+- A train part in a **schedule** can now be **edited**: the pen on a part opens its from- and to-stop,
+  so a working can be reshaped without removing everything after it. A neighbouring part that joins
+  the one you change follows along — shorten a part from A–C to A–B and the return working becomes
+  B–A by itself. A neighbour whose own train does not call at the new stop is left as it is, and the
+  gap it leaves is reported as a conflict for you to resolve.
+
+- **Add train** can now create the **return train** at the same time. Tick *Return?* and the train back
+  from the destination is created together with the outbound one, running the same route in reverse with
+  the same category and speed, and taking the next number of the opposite direction. Its departure is
+  either *as soon as possible* — the outbound train's arrival plus the finishing and preparation times —
+  or a time you enter, which may be earlier or later than the outbound train's own departure. Combined
+  with *Repeat?*, both directions are repeated, so a whole two-way service is planned in one go.
+
+### Fixes
+
+- The **kilometre figures** in the printed timetable and along the graphical timetable are now rounded
+  to whole kilometres. They were printed with a decimal, and the distance factor under **Settings ›
+  Time & Speed** could turn a stretch length into an odd fraction of a kilometre. A branch line now
+  also shows the same kilometre as the line it leaves at their junction station.
+- Everything that reads a train's route now follows the **order the train runs its stops**, not the
+  order they were entered. On a train whose stops went in out of order — one added after a stop it
+  only reaches later — the **Graphical Timetable** drew zig-zag lines between stops the train never
+  runs between and could place the train in the wrong direction's column; the printed **timetable
+  table** could show a departure where the train arrives; **Build automatically** did not chain the
+  train at all, since it appeared to start where it does not; **repeating a train** measured the
+  interval from the wrong stop; and recomputing its times after a stop change failed outright.
+  Picking part of a train when adding it to a schedule also lists its stops in running order.
+  Imported plans were never affected — there the two orders are the same.
+- **Train speed is now checked on the last leg too**, into the station where the train ends its run.
+  That leg was skipped before.
+
 ## Version 0.3.1
 
 - The **Traction units** section on a train part page in the Driver Duties booklet now has its

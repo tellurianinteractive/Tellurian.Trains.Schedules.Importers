@@ -385,7 +385,7 @@
     <value>Entfernungsfaktor (×)</value>
   </data>
   <data name="DistanceFactorHint" xml:space="preserve">
-    <value>Multipliziert die Entfernung (Meter) jedes Streckenabschnitts zu den in Berichten und Grafiken angezeigten Kilometern. Der Standardwert 1 lässt bestehende Entfernungen unverändert.</value>
+    <value>Multipliziert die Entfernung (Meter) jedes Streckenabschnitts zu den in Berichten und Grafiken angezeigten Kilometern, auf ganze Kilometer gerundet. Der Standardwert 1 lässt bestehende Entfernungen unverändert.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Geschwindigkeitszuordnung</value>
@@ -431,6 +431,9 @@
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Zuggeschwindigkeit prüfen?</value>
+  </data>
+  <data name="ValidateRouteContinuity" xml:space="preserve">
+    <value>Zusammenhängende Laufwege prüfen?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
     <value>Zugnummern prüfen?</value>
@@ -1185,6 +1188,21 @@
   <data name="MinutesInterval" xml:space="preserve">
     <value>Minutenintervall</value>
   </data>
+  <data name="ReturnTrain" xml:space="preserve">
+    <value>Gegenzug</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Gegenzug?</value>
+  </data>
+  <data name="AsSoonAsPossible" xml:space="preserve">
+    <value>So früh wie möglich?</value>
+  </data>
+  <data name="DepartureTime" xml:space="preserve">
+    <value>Abfahrtszeit</value>
+  </data>
+  <data name="CouldNotCreateTrainPair" xml:space="preserve">
+    <value>Der Zug und sein Gegenzug konnten nicht erstellt werden. Prüfen Sie, ob es einen Weg zwischen den Orten gibt und ob die Abfahrtszeit des Gegenzugs innerhalb der Start- und Endzeit des Plans liegt.</value>
+  </data>
   <data name="Create" xml:space="preserve">
     <value>Erstellen</value>
   </data>
@@ -1336,6 +1354,15 @@
   <data name="Collapse" xml:space="preserve">
     <value>Zuklappen</value>
   </data>
+  <data name="ExpandAll" xml:space="preserve">
+    <value>Alle aufklappen</value>
+  </data>
+  <data name="CollapseAll" xml:space="preserve">
+    <value>Alle zuklappen</value>
+  </data>
+  <data name="NoCategory" xml:space="preserve">
+    <value>Ohne Kategorie</value>
+  </data>
   <data name="All" xml:space="preserve">
     <value>Alle</value>
   </data>
@@ -1426,20 +1453,23 @@
   <data name="Destinations" xml:space="preserve">
     <value>Ziele</value>
   </data>
-  <data name="DestinationStation" xml:space="preserve">
-    <value>Zielbahnhof</value>
+  <data name="OperationLocation" xml:space="preserve">
+    <value>Betriebsstelle</value>
   </data>
-  <data name="DestinationStations" xml:space="preserve">
-    <value>Zielbahnhöfe</value>
+  <data name="DestinationLocation" xml:space="preserve">
+    <value>Zielbetriebsstelle</value>
+  </data>
+  <data name="DestinationLocations" xml:space="preserve">
+    <value>Zielbetriebsstellen</value>
   </data>
   <data name="Origins" xml:space="preserve">
     <value>Herkünfte</value>
   </data>
-  <data name="OriginStation" xml:space="preserve">
-    <value>Herkunftsbahnhof</value>
+  <data name="OriginLocation" xml:space="preserve">
+    <value>Herkunftsbetriebsstelle</value>
   </data>
-  <data name="OriginStations" xml:space="preserve">
-    <value>Herkunftsbahnhöfe</value>
+  <data name="OriginLocations" xml:space="preserve">
+    <value>Herkunftsbetriebsstellen</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Löschen nicht möglich: Diese Güterbeschreibung wird von einem oder mehreren Wagenströmen verwendet.</value>
@@ -1460,19 +1490,19 @@
     <value>Und Regionen?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
-    <value>Auch die der Zielstation zugeordneten Regionen auflisten.</value>
+    <value>Auch die der Zielbetriebsstelle zugeordneten Regionen auflisten.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
     <value>Und darüber hinaus?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
-    <value>Auch alle Orte jenseits der Zielstation einbeziehen.</value>
+    <value>Auch alle Orte jenseits der Zielbetriebsstelle einbeziehen.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
     <value>Und lokal?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Auch lokale Ziele einbeziehen, die von der Station aus bedient werden.</value>
+    <value>Auch lokale Ziele einbeziehen, die von der Betriebsstelle aus bedient werden.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>Keine Ziele.</value>
@@ -1480,11 +1510,11 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Ziel hinzufügen</value>
   </data>
-  <data name="NoDestinationStations" xml:space="preserve">
-    <value>Keine Zielbahnhöfe.</value>
+  <data name="NoDestinationLocations" xml:space="preserve">
+    <value>Keine Zielbetriebsstellen.</value>
   </data>
-  <data name="AddDestinationStation" xml:space="preserve">
-    <value>Zielbahnhof hinzufügen</value>
+  <data name="AddDestinationLocation" xml:space="preserve">
+    <value>Zielbetriebsstelle hinzufügen</value>
   </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>Keine Herkünfte.</value>
@@ -1492,11 +1522,11 @@
   <data name="AddOrigin" xml:space="preserve">
     <value>Herkunft hinzufügen</value>
   </data>
-  <data name="NoOriginStations" xml:space="preserve">
-    <value>Keine Herkunftsbahnhöfe.</value>
+  <data name="NoOriginLocations" xml:space="preserve">
+    <value>Keine Herkunftsbetriebsstellen.</value>
   </data>
-  <data name="AddOriginStation" xml:space="preserve">
-    <value>Herkunftsbahnhof hinzufügen</value>
+  <data name="AddOriginLocation" xml:space="preserve">
+    <value>Herkunftsbetriebsstelle hinzufügen</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Wagenströme zu Zügen hinzufügen: Wählen Sie einen Zug und legen Sie dann fest, wo Wagen an- und abgekuppelt werden und welche Güterbeschreibung gilt.</value>
@@ -1563,6 +1593,30 @@
   </data>
   <data name="AddTrainPart" xml:space="preserve">
     <value>Zug hinzufügen</value>
+  </data>
+  <data name="EditTrainPart" xml:space="preserve">
+    <value>Zugteil bearbeiten</value>
+  </data>
+  <data name="PreviousPart" xml:space="preserve">
+    <value>Vorheriger Teil</value>
+  </data>
+  <data name="NextPart" xml:space="preserve">
+    <value>Nächster Teil</value>
+  </data>
+  <data name="PartEditAdapted" xml:space="preserve">
+    <value>angepasst</value>
+  </data>
+  <data name="PartEditGapBefore" xml:space="preserve">
+    <value>Der vorherige Teil endet nicht dort, wo dieser Teil beginnt.</value>
+  </data>
+  <data name="PartEditGapAfter" xml:space="preserve">
+    <value>Der nächste Teil beginnt nicht dort, wo dieser Teil endet.</value>
+  </data>
+  <data name="PartEditOverlapBefore" xml:space="preserve">
+    <value>Der vorherige Teil ist noch nicht angekommen, wenn dieser Teil abfährt.</value>
+  </data>
+  <data name="PartEditOverlapAfter" xml:space="preserve">
+    <value>Der nächste Teil fährt ab, bevor dieser Teil ankommt.</value>
   </data>
   <data name="AddVehicle" xml:space="preserve">
     <value>Fahrzeug hinzufügen</value>

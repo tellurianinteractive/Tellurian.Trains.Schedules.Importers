@@ -198,6 +198,9 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Tog {0} må stoppe på minst to stasjoner.</value>
   </data>
+  <data name="TrainHasNoStretchBetweenCalls" xml:space="preserve">
+    <value>Tog {0} kjører fra {1} {2} til {3} {4}, men anlegget har ingen strekning mellom disse driftsstedene.</value>
+  </data>
   <data name="TrainSpeedBetweenCallsIsTooFast" xml:space="preserve">
     <value>Hastigheten for tog {0} fra {1} {2} til {3} {4} er for høg, lengde {5:F1} meter.</value>
   </data>

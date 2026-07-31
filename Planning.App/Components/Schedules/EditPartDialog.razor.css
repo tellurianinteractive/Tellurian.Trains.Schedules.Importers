@@ -1,4 +1,4 @@
-.add-train-backdrop {
+.edit-part-backdrop {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -7,10 +7,10 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.35);
 
-    .add-train-dialog {
+    .edit-part-dialog {
         --primary: #1a3a5c;
         --border: #ddd;
-        min-width: 22rem;
+        min-width: 24rem;
         max-width: 90vw;
         padding: 1.25rem 1.5rem;
         background: #fff;
@@ -26,7 +26,7 @@
 
         .field {
             display: grid;
-            grid-template-columns: 9rem 1fr;
+            grid-template-columns: 7rem 1fr;
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 0.6rem;
@@ -36,7 +36,11 @@
             color: #556;
         }
 
-        input,
+        .train {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
         select {
             font-size: 0.85rem;
             padding: 0.2rem 0.35rem;
@@ -45,27 +49,31 @@
             background: #fff;
         }
 
-        input.num,
-        input.time {
-            width: 5rem;
-        }
-
-        input:disabled {
-            background: #f2f2f2;
-            color: #999;
-        }
-
-        fieldset {
-            margin: 0.8rem 0 0 0;
-            padding: 0.6rem 0.8rem 0.2rem 0.8rem;
-            border: 1px solid var(--border);
+        .preview {
+            margin: 0.4rem 0 0 0;
+            padding: 0.4rem 0.6rem;
+            background: #eef3f8;
             border-radius: 5px;
+            font-weight: 600;
+            color: var(--primary);
+        }
 
-            legend {
-                padding: 0 0.4rem;
-                color: var(--primary);
-                font-weight: 600;
-            }
+        .adapts {
+            margin: 0.3rem 0 0 0;
+            padding: 0.3rem 0.6rem;
+            background: #f2f6f2;
+            border-left: 3px solid #7aa77a;
+            border-radius: 3px;
+            color: #3d5c3d;
+        }
+
+        .warning {
+            margin: 0.3rem 0 0 0;
+            padding: 0.35rem 0.6rem;
+            color: #8a6100;
+            background: #fdf6e3;
+            border: 1px solid #e8d9a8;
+            border-radius: 5px;
         }
 
         .error {

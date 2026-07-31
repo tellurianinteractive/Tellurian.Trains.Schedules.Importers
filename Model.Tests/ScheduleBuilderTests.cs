@@ -14,6 +14,35 @@ public class ScheduleBuilderTests
         return Plan.Create("Test", timetable);
     }
 
+    // The return run Snu 13:00 → Yb 13:25/13:30 → G 13:55, with its calls added in another order than it
+    // runs them: the intermediate stop first, then the origin, then the terminus.
+    private static Train CreateReturnWithCallsAddedOutOfRunOrder(TrainCategory category)
+    {
+        var stations = TestDataFactory.Stations.ToArray();
+        var train = new Train(2, category, 2) { Category = category };
+        _ = train.Add(new StationCall(1, stations[1]["1"], Time.FromHourAndMinute(13, 25), Time.FromHourAndMinute(13, 30)));
+        _ = train.Add(new StationCall(2, stations[2]["2"], Time.FromHourAndMinute(13, 00), Time.FromHourAndMinute(13, 00)));
+        _ = train.Add(new StationCall(3, stations[0]["3"], Time.FromHourAndMinute(13, 55), Time.FromHourAndMinute(13, 55)));
+        return train;
+    }
+
+    [TestMethod]
+    public void ATrainIsChainedByWhereItRunsFromNotByItsFirstAddedCall()
+    {
+        TestDataFactory.Init();
+        var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
+        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00))); // G 12:00 → Snu 12:55
+        timetable.Add(CreateReturnWithCallsAddedOutOfRunOrder(category));
+        var plan = Plan.Create("Test", timetable);
+
+        var schedules = plan.BuildSchedulesAutomatically();
+
+        Assert.HasCount(1, schedules,
+            "The return train starts its run at Snu, where the forward train ends, though its Snu call was not the one added first.");
+        Assert.HasCount(2, schedules[0].Parts);
+    }
+
     [TestMethod]
     public void ChainsSameCategoryContinuationIntoOneSchedule()
     {

@@ -4,7 +4,7 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 
 /// <summary>
 /// A reusable description of where a cargo flow's wagons are routed: the destinations they are brought
-/// to and, optionally, the origin stations whose wagons are forwarded. Held in the timetable catalogue
+/// to and, optionally, the origin locations whose wagons are forwarded. Held in the timetable catalogue
 /// (<see cref="Tellurian.Trains.Schedules.Model.Timetables.Timetable.CargoFlowOptions"/>) and referenced
 /// by one or more <see cref="CargoFlowTrainPart"/>s; editing a description updates every cargo flow that
 /// uses it. Per-occurrence behaviour (where wagons are connected/disconnected, shunting, couple notes)
@@ -25,7 +25,7 @@ public sealed class CargoFlowOptions
     public string OnlyWagonClasses { get; set; } = string.Empty;
 
     /// <summary>
-    /// The ultimate origin of the wagons. Wagons gathered at these origin stations are forwarded by the
+    /// The ultimate origin of the wagons. Wagons gathered at these origin locations are forwarded by the
     /// cargo flow (in addition to, or instead of, wagons from the train part's from-station).
     /// </summary>
     public ICollection<Origin> Origins { get; set; } = [];
@@ -41,21 +41,21 @@ public sealed class CargoFlowOptions
     public bool ToAllDestinations { get; set; }
 
     /// <summary>
-    /// The comma-separated destination station names, for compact display in lists and drop-downs.
+    /// The comma-separated destination location names, for compact display in lists and drop-downs.
     /// Empty when <see cref="ToAllDestinations"/> is set (use <see cref="DestinationsSummary"/> for that).
     /// </summary>
-    public string DestinationStationNames => string.Join(", ", Destinations.Select(d => d.Station.Name));
+    public string DestinationLocationNames => string.Join(", ", Destinations.Select(d => d.Location.Name));
 
     /// <summary>
-    /// The comma-separated origin station names, for compact display in lists.
+    /// The comma-separated origin location names, for compact display in lists.
     /// </summary>
-    public string OriginStationNames => string.Join(", ", Origins.Select(o => o.Station.Name));
+    public string OriginLocationNames => string.Join(", ", Origins.Select(o => o.Location.Name));
 
     /// <summary>
     /// A short summary of where this cargo flow's wagons go: the localised "all destinations" text when
-    /// <see cref="ToAllDestinations"/> is set, otherwise the <see cref="DestinationStationNames"/>.
+    /// <see cref="ToAllDestinations"/> is set, otherwise the <see cref="DestinationLocationNames"/>.
     /// </summary>
-    public string DestinationsSummary => ToAllDestinations ? NoteResources.AllDestinations : DestinationStationNames;
+    public string DestinationsSummary => ToAllDestinations ? NoteResources.AllDestinations : DestinationLocationNames;
 
     /// <inheritdoc/>
     public override string ToString() => OnlyWagonClasses;

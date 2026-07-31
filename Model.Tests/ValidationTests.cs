@@ -91,6 +91,140 @@ public class ValidationTests
         Assert.IsEmpty(errors);
     }
 
+    // --- T5: a train's route must be continuous over the layout's track stretches ---
+
+    // The test layout connects G-Yb and Yb-Snu only, so a train calling at G and then Snu jumps Yb.
+    private static Train TrainCallingAt(params (int stationIndex, string track, int minutesPastNoon)[] calls)
+    {
+        var stations = TestDataFactory.Stations.ToArray();
+        var train = new Train(1, Category, 1);
+        var id = 1;
+        foreach (var (stationIndex, track, minutesPastNoon) in calls)
+        {
+            var time = Time.FromHourAndMinute(12, 00).AddMinutes(minutesPastNoon);
+            train.Add(new StationCall(id++, stations[stationIndex][track], time, time));
+        }
+        return train;
+    }
+
+    private static IEnumerable<ValidationError> RouteErrors(Train train, ValidationSettings? settings = null)
+    {
+        var timetable = NewTimetableWith(train);
+        return Plan.Create("Test", timetable).GetValidationErrors(settings ?? Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainRouteNotConnected);
+    }
+
+    // NewTimetable() re-initialises the station instances, so the train must be built after it.
+    private static Timetable NewTimetableWith(Train train)
+    {
+        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        timetable.Add(train);
+        return timetable;
+    }
+
+    [TestMethod]
+    public void RouteThatJumpsAnOperationLocationIsReported()
+    {
+        TestDataFactory.Init();
+        var train = TrainCallingAt((0, "3", 0), (2, "1", 55)); // G -> Snu, with no stretch between them
+
+        var errors = RouteErrors(train).ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.IsTrue(errors[0].Involves(train));
+    }
+
+    [TestMethod]
+    public void ContinuousRouteIsNotReported()
+    {
+        TestDataFactory.Init();
+        var train = TrainCallingAt((0, "3", 0), (1, "2", 25), (2, "1", 55)); // G -> Yb -> Snu
+
+        Assert.IsEmpty(RouteErrors(train));
+    }
+
+    [TestMethod]
+    public void RouteIsCheckedInRunOrderNotInInsertionOrder()
+    {
+        TestDataFactory.Init();
+        // Added G, Snu, Yb, but run G -> Yb -> Snu, which is what the times say and what the layout allows.
+        var train = TrainCallingAt((0, "3", 0), (2, "1", 55), (1, "2", 25));
+
+        Assert.IsEmpty(RouteErrors(train));
+    }
+
+    [TestMethod]
+    public void TwoSuccessiveCallsAtTheSameLocationTravelNoStretchAndAreNotReported()
+    {
+        TestDataFactory.Init();
+        // The train changes track at G before running on to Yb.
+        var train = TrainCallingAt((0, "3", 0), (0, "1", 10), (1, "2", 35));
+
+        Assert.IsEmpty(RouteErrors(train));
+    }
+
+    [TestMethod]
+    public void RouteContinuityValidationCanBeSwitchedOff()
+    {
+        TestDataFactory.Init();
+        var train = TrainCallingAt((0, "3", 0), (2, "1", 55));
+
+        Assert.IsEmpty(RouteErrors(train, new ValidationSettings { ValidateRouteContinuity = false }));
+    }
+
+    // --- T2 + T3: successive calls are the pairs in run order, and every leg is checked ---
+
+    [TestMethod]
+    public void SpeedOnTheLastLegIsChecked()
+    {
+        TestDataFactory.Init();
+        var train = TestDataFactory.CreateTrainInForwardDirection(Category, 1, Time.FromHourAndMinute(12, 00));
+        // Two hours for the last stretch, Yb 12:30 -> Snu 14:30: far below the minimum speed.
+        var last = train.CallsInRunOrder[^1];
+        last.Arrival = Time.FromHourAndMinute(14, 30);
+        last.Departure = Time.FromHourAndMinute(14, 30);
+
+        var errors = Plan.Create("Test", NewTimetableWith(train)).GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainSpeedTooSlow)
+            .ToList();
+
+        Assert.HasCount(1, errors, "The leg to the terminus is a leg like any other.");
+    }
+
+    [TestMethod]
+    public void CallsTimedOutOfInsertionOrderAreNotATimeSequenceConflict()
+    {
+        TestDataFactory.Init();
+        var train = TrainCallingAt((0, "3", 0), (2, "1", 55), (1, "2", 25));
+
+        var errors = Plan.Create("Test", NewTimetableWith(train)).GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainTimeSequence);
+
+        Assert.IsEmpty(errors, "In run order the calls ascend; only the order they were added differs.");
+    }
+
+    [TestMethod]
+    public void TrainReachingTheNextLocationBeforeItHasLeftThePreviousIsReported()
+    {
+        TestDataFactory.Init();
+        var stations = TestDataFactory.Stations.ToArray();
+        var train = new Train(1, Category, 1);
+        train.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 00)));
+        // Arrives at Yb at 11:50, ten minutes before it departs from G.
+        var second = new StationCall(2, stations[1]["2"], Time.FromHourAndMinute(11, 50), Time.FromHourAndMinute(12, 10))
+        {
+            IsArrival = true,
+            IsDeparture = true,
+        };
+        train.Add(second);
+
+        var errors = Plan.Create("Test", NewTimetableWith(train)).GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainTimeSequence)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+    }
+
     // --- S2: a schedule's parts must be geographically contiguous ---
 
     private static Plan PlanWithTwoForwardTrains()

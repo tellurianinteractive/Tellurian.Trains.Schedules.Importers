@@ -125,8 +125,8 @@ public static class DeletionRules
             if (plan.MayDelete(call) is { IsDenied: true } denied) return denied;
 
             var train = call.Train;
-            // Insertion order is not run order; the ends are the earliest and latest call (StationCall.SortTime).
-            var ordered = train.Calls.OrderBy(c => c.SortTime).ToList();
+            // Insertion order is not run order; the ends are the earliest and latest call (CallsInRunOrder).
+            var ordered = train.CallsInRunOrder;
             var isFirst = ReferenceEquals(call, ordered[0]);
             var serviceMinutes = DwellMinutes(call);
 

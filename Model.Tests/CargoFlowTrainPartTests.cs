@@ -26,7 +26,7 @@ public class CargoFlowTrainPartTests
         var description = timetable.Add(new CargoFlowOptions
         {
             OnlyWagonClasses = "U,Z",
-            Destinations = { new Destination { Station = station } },
+            Destinations = { new Destination { Location = station } },
         });
         return (timetable, train, description);
     }

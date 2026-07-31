@@ -335,6 +335,25 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a route-continuity error: the train runs straight from one call to the next, but the layout
+    /// has no track stretch between those two operating locations, so there is no way to run the leg
+    /// (rule T5).
+    /// </summary>
+    public static ValidationError TrainRouteNotConnected(
+        StationCall from,
+        StationCall to,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.TrainRouteNotConnected,
+            FromTrack = from.Track,
+            ToTrack = to.Track,
+            FromTime = from.Departure,
+            ToTime = to.Arrival,
+            Trains = [from.Train!],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a locomotive coverage gap error.
     /// </summary>
     public static ValidationError LocomotiveCoverageGap(
@@ -644,6 +663,9 @@ public enum ValidationErrorType
 
     /// <summary>Train must have at least two station calls.</summary>
     TrainTooFewCalls,
+
+    /// <summary>Two calls the train runs one after the other have no track stretch between them.</summary>
+    TrainRouteNotConnected,
 
     /// <summary>Vehicle schedule has overlapping train parts.</summary>
     VehicleScheduleOverlap,

@@ -1,6 +1,5 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.App.Services;
@@ -19,14 +18,9 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v1";
 
     /// <summary>
-    /// JSON options matching the schedule importer/exporter: the object graph contains reference
-    /// cycles, so <see cref="ReferenceHandler.Preserve"/> and a deep max depth are required to round-trip.
+    /// JSON options matching the schedule importer/exporter, see <see cref="PlanJson"/>.
     /// </summary>
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions();
 
     public event Action? OnChanged;
 

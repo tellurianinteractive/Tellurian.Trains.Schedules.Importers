@@ -81,7 +81,7 @@ public static class ScheduleEditingExtensions
             return
             [
                 .. candidates
-                    .OrderBy(x => x.train.Calls[x.index].Departure.Value)
+                    .OrderBy(x => x.train.CallsInRunOrder[x.index].Departure.Value)
                     .ThenBy(x => x.train.Number)
                     .Select(x => x.train)
             ];
@@ -96,8 +96,9 @@ public static class ScheduleEditingExtensions
         private bool IsContinuationFullyAllocated(Schedule schedule, Train train, int joinIndex, IReadOnlySet<VehicleRole> roles, Sessions want)
         {
             if (want.Flags == 0) return false;
-            var joinDeparture = train.Calls[joinIndex].Departure;
-            var lastArrival = train.Calls[^1].Arrival;
+            var calls = train.CallsInRunOrder;
+            var joinDeparture = calls[joinIndex].Departure;
+            var lastArrival = calls[^1].Arrival;
             var covered = new Sessions();
             foreach (var other in plan.Schedules)
             {
@@ -307,17 +308,89 @@ public static class ScheduleEditingExtensions
         /// earliest call at the schedule's end location that departs at or after the schedule's last
         /// arrival and is followed by at least one later call. Returns <c>null</c> when the train cannot
         /// join, or when the schedule is empty (the caller then lets the planner choose the from-call).
+        /// The index is a position in the train's calls <em>in run order</em>, as
+        /// <see cref="TrainExtensions.AsTrainPart(Train, int, int)"/> takes them.
         /// </summary>
         public int? JoinCallIndexFor(Train train)
         {
             train = train.ValueOrException(nameof(train));
             if (schedule.EndLocation is not { } end || schedule.LastArrival is not { } lastArrival) return null;
-            for (var i = 0; i < train.Calls.Count - 1; i++)
+            var calls = train.CallsInRunOrder;
+            for (var i = 0; i < calls.Count - 1; i++)
             {
-                var call = train.Calls[i];
+                var call = calls[i];
                 if (call.OperationLocation.Equals(end) && !(call.Departure < lastArrival)) return i;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Changes the span of a part already in the schedule, adapting the neighbouring part it meets so
+        /// the vehicle's working still hangs together, and returns what the edit did.
+        /// </summary>
+        /// <remarks>
+        /// The part keeps its train and its identity — only its from- and to-calls change — so the driver
+        /// duties working it follow the change. Where the edited part meets a neighbour today, the
+        /// neighbour is adapted to the new joint: changing the start moves the previous part's arrival,
+        /// changing the end moves the next part's departure (a neighbour may be extended as well as
+        /// shortened). The adaptation is one step only and never reaches past the neighbour, whose own far
+        /// end is untouched. It applies only when the neighbour's own train calls at the new joint
+        /// location and only where the parts already met: a working that is broken at that joint (as an
+        /// import may be) keeps its gap rather than being silently rewritten. Anything the edit leaves
+        /// inconsistent — a gap the neighbour could not follow, or a joint the vehicle cannot make in time
+        /// — is applied as asked and reported by the schedule validations (S1, S2).
+        /// </remarks>
+        /// <param name="part">The part to change; it must be in this schedule.</param>
+        /// <param name="from">The call the part is to depart from.</param>
+        /// <param name="to">The call the part is to arrive at.</param>
+        /// <returns>A <see cref="Maybe{T}"/> with the applied <see cref="PartEdit"/>, or a message
+        /// explaining why the edit was rejected.</returns>
+        public Maybe<PartEdit> EditPart(ScheduledTrainPart part, StationCall from, StationCall to)
+        {
+            var planned = schedule.PlanPartEdit(part, from, to);
+            if (planned.IsNone) return planned;
+            var edit = planned.Value;
+            edit.Part.SetSpan(edit.From, edit.To);
+            if (edit is { Previous: { } previous, PreviousTo: { } previousTo }) previous.SetSpan(previous.From, previousTo);
+            if (edit is { Next: { } next, NextFrom: { } nextFrom }) next.SetSpan(nextFrom, next.To);
+            return planned;
+        }
+
+        /// <summary>
+        /// Works out what <see cref="EditPart"/> would do, changing nothing. An editor uses it to show the
+        /// resulting spans — and what the edit would leave inconsistent — before the planner commits.
+        /// </summary>
+        /// <param name="part">The part to change; it must be in this schedule.</param>
+        /// <param name="from">The call the part is to depart from.</param>
+        /// <param name="to">The call the part is to arrive at.</param>
+        /// <returns>A <see cref="Maybe{T}"/> with the planned <see cref="PartEdit"/>, or a message
+        /// explaining why the edit would be rejected.</returns>
+        public Maybe<PartEdit> PlanPartEdit(ScheduledTrainPart part, StationCall from, StationCall to)
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
+            part = part.ValueOrException(nameof(part));
+            from = from.ValueOrException(nameof(from));
+            to = to.ValueOrException(nameof(to));
+
+            var parts = schedule.OrderedParts;
+            // Identity, not equality: only the very object in the schedule can be edited in place, so that
+            // the duties referencing it follow the change.
+            var index = parts.TakeWhile(p => !ReferenceEquals(p, part)).Count();
+            if (index == parts.Count)
+                return new Maybe<PartEdit>($"Part {part} is not in schedule {schedule.Number}.");
+            if (!part.Train.Calls.Contains(from) || !part.Train.Calls.Contains(to))
+                return new Maybe<PartEdit>($"Both calls must be calls of train {part.Train}.");
+            if (!(from.SortTime < to.SortTime))
+                return new Maybe<PartEdit>($"A train part must run from {from} to a later call, but {to} is not later.");
+            if (parts.Any(p => !ReferenceEquals(p, part) && p.From.Equals(from) && p.To.Equals(to)))
+                return new Maybe<PartEdit>($"Schedule {schedule.Number} already works {part.Train} from {from} to {to}.");
+
+            var previous = index > 0 ? parts[index - 1] : null;
+            var next = index < parts.Count - 1 ? parts[index + 1] : null;
+            return new Maybe<PartEdit>(new PartEdit(
+                part, from, to,
+                previous, AdaptedArrival(previous, part.From, from),
+                next, AdaptedDeparture(next, part.To, to)));
         }
 
         /// <summary>
@@ -353,5 +426,36 @@ public static class ScheduleEditingExtensions
                 removed.ScheduleId = null;
             }
         }
+    }
+
+    // The call the previous part is adapted to arrive at, so the vehicle hands over to the edited part at
+    // its new start location: the latest call there the vehicle still reaches in time, or — when every such
+    // call is too late — the earliest one, leaving the timing to be reported as a conflict. Null when there
+    // is nothing to adapt: no previous part, a joint that is already broken (an existing gap is kept rather
+    // than silently closed), an unchanged start location, or a train that does not call there after the
+    // previous part's own start (adapting it would leave that part with no run at all).
+    private static StationCall? AdaptedArrival(ScheduledTrainPart? previous, StationCall oldFrom, StationCall newFrom)
+    {
+        if (previous is null) return null;
+        if (!previous.To.OperationLocation.Equals(oldFrom.OperationLocation)) return null;
+        if (newFrom.OperationLocation.Equals(oldFrom.OperationLocation)) return null;
+        var candidates = previous.Train.CallsInRunOrder
+            .Where(c => c.SortTime > previous.From.SortTime && c.OperationLocation.Equals(newFrom.OperationLocation))
+            .ToList();
+        return candidates.LastOrDefault(c => !(c.Arrival > newFrom.Departure)) ?? candidates.FirstOrDefault();
+    }
+
+    // The mirror of AdaptedArrival: the call the next part is adapted to depart from, so the vehicle takes
+    // it over where the edited part now ends. The earliest call there the vehicle can still catch, or — when
+    // every such call is too early — the latest one. Null when there is nothing to adapt (see above).
+    private static StationCall? AdaptedDeparture(ScheduledTrainPart? next, StationCall oldTo, StationCall newTo)
+    {
+        if (next is null) return null;
+        if (!next.From.OperationLocation.Equals(oldTo.OperationLocation)) return null;
+        if (newTo.OperationLocation.Equals(oldTo.OperationLocation)) return null;
+        var candidates = next.Train.CallsInRunOrder
+            .Where(c => c.SortTime < next.To.SortTime && c.OperationLocation.Equals(newTo.OperationLocation))
+            .ToList();
+        return candidates.FirstOrDefault(c => !(c.Departure < newTo.Arrival)) ?? candidates.LastOrDefault();
     }
 }

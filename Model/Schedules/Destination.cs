@@ -10,9 +10,11 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 public class Destination
 {
     /// <summary>
-    /// Station that is destination.
+    /// The operation location that is the destination. Any location exchanging cargo qualifies
+    /// (see <see cref="OperationLocation.HasCargoExchange"/>), not only a <see cref="Layouts.Station"/> —
+    /// an <see cref="IndustrialArea"/> is a destination for freight wagons as much as a station is.
     /// </summary>
-    public required Station Station { get; set; }
+    public required OperationLocation Location { get; set; }
 
     /// <summary>
     /// The destinations position in train.
@@ -27,13 +29,13 @@ public class Destination
     public int MaxNumberOfWagons { get; set; }
 
     /// <summary>
-    /// The maximum number of total axles for all wagons to bring to this station.
+    /// The maximum number of total axles for all wagons to bring to this location.
     /// </summary>
     /// <remarks>Zero means any number of axles. If axles are specified, it overrides any value in <see cref="MaxNumberOfWagons"/></remarks>
     public int MaxNumberOfAxles { get; set; }
 
     /// <summary>
-    /// If true, the destination's note should contain the regions at the station.
+    /// If true, the destination's note should contain the regions at the location.
     /// </summary>
     public bool AndRegions { get; set; }
 
@@ -49,23 +51,27 @@ public class Destination
 
     /// <inheritdoc/>
     public override string ToString() =>
-        AndRegions && Station.Regions.Any() ?
-        $"{Station.Name} {AndText}, {Regions} {MaxLength}".TrimEnd() :
-        $"{Station.Name} {AndText} {MaxLength}".TrimEnd();
+        HasRegions ?
+        $"{Location.Name} {AndText}, {Regions} {MaxLength}".TrimEnd() :
+        $"{Location.Name} {AndText} {MaxLength}".TrimEnd();
 
     /// <summary>
     /// Markup version of <see cref="ToString"/> in which regions are rendered as coloured chips.
-    /// The station name is encoded; it is planner-entered text embedded in note markup.
+    /// The location name is encoded; it is planner-entered text embedded in note markup.
     /// </summary>
     public MarkupString ToHtml => new(
-        AndRegions && Station.Regions.Any() ?
-        $"{StationNameHtml} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
-        $"{StationNameHtml} {AndText} {MaxLength}".TrimEnd());
+        HasRegions ?
+        $"{LocationNameHtml} {AndText}, {RegionsHtml} {MaxLength}".TrimEnd() :
+        $"{LocationNameHtml} {AndText} {MaxLength}".TrimEnd());
 
-    private string StationNameHtml => WebUtility.HtmlEncode(Station.Name);
+    private string LocationNameHtml => WebUtility.HtmlEncode(Location.Name);
 
-    private string Regions => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.Name)) : string.Empty;
-    private string RegionsHtml => AndRegions ? string.Join(", ", Station.Regions.Select(r => r.ToHtml.Value)) : string.Empty;
+    // Only a Station has regions; other cargo-serving locations, e.g. an industrial area, have none.
+    private IEnumerable<Region> LocationRegions => Location is Station station ? station.Regions : [];
+    private bool HasRegions => AndRegions && LocationRegions.Any();
+
+    private string Regions => AndRegions ? string.Join(", ", LocationRegions.Select(r => r.Name)) : string.Empty;
+    private string RegionsHtml => AndRegions ? string.Join(", ", LocationRegions.Select(r => r.ToHtml.Value)) : string.Empty;
     private string AndText =>
         AndLocalDestinations && AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :
         AndBeyond ? NoteResources.AndBeyond :

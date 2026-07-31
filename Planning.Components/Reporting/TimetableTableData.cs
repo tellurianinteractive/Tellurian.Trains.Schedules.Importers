@@ -122,7 +122,7 @@ public sealed class TimetableTable
             // constant offset would cancel there anyway); the displayed km carries the divergence offset so a
             // branch continues counting from its junction on the line it leaves.
             var stationKm = stretch.DistanceToStation(station) ?? 0.0;
-            var km = stretch.DisplayedDistanceToStation(station).ToString("F1", CultureInfo.InvariantCulture);
+            var km = stretch.DisplayedDistanceToStation(station).ToString("F0", CultureInfo.InvariantCulture);
             var cells = (IReadOnlyList<TimetableTimeCell>)segments
                 .Select(s =>
                 {
@@ -188,7 +188,9 @@ public sealed class TimetableTable
         var terminalSteps = new Dictionary<OperationLocation, int>();
         foreach (var train in trains)
         {
-            var calls = train.Calls;
+            // In run order: how many calls the train makes before it reaches the stretch and after it
+            // leaves it, which is the step used to order the connection rows.
+            var calls = train.CallsInRunOrder;
             var firstOn = -1;
             var lastOn = -1;
             for (var i = 0; i < calls.Count; i++)
@@ -260,7 +262,8 @@ public sealed class TimetableTable
     // station reads consistently whichever table it appears in.
     private static TimetableTimeCell BuildCell(Train train, OperationLocation station)
     {
-        var calls = train.Calls;
+        // In run order, so "first call" and "last call" are where the train starts and ends its run.
+        var calls = train.CallsInRunOrder;
         for (var i = 0; i < calls.Count; i++)
         {
             var call = calls[i];
@@ -280,7 +283,8 @@ public sealed class TimetableTable
     // meaning the train passes through that point even without an explicit station call there.
     private static bool TrainSpansKm(GraphicalTrainSegment segment, double km, TimetableStretch stretch, HashSet<OperationLocation> stretchStations)
     {
-        var calls = segment.Train.Calls;
+        // A segment's indices are positions in the train's calls in run order.
+        var calls = segment.Train.CallsInRunOrder;
         var before = false;
         var after = false;
         for (var i = segment.FromCallIndex; i <= segment.ToCallIndex; i++)

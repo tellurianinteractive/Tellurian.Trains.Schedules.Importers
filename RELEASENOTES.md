@@ -1,5 +1,98 @@
 # Release Notes
 
+## Version 3.1.0
+
+### New Features
+
+- **Route continuity validation (rule T5).** `CheckRouteContinuity(this Train)` checks that every
+  leg a train runs — each pair of calls in run order — is a `TrackStretch` of the layout. A train
+  travels a stretch by departing its start and arriving at its end, so it calls at both ends of every
+  stretch on its way; two successive calls with no stretch between them are a route that jumps a
+  location. Reported as the new `ValidationErrorType.TrainRouteNotConnected`, at `Warning` severity
+  and `ValidationScope.Train`. Two successive calls at the same operating location travel no stretch
+  and are not reported. Gated by the new `ValidationSettings.ValidateRouteContinuity` (default on),
+  and run from both `Plan.GetTimetableValidationErrors` and `Train.GetValidationErrors`.
+
+  This is the rule behind `DeletionRules.MayDelete(StationCall)` allowing only a train's first or
+  last call to be deleted.
+
+- **`Train.CallsInRunOrder`** returns a train's calls in the order it runs them, ordered by
+  `StationCall.SortTime`. `Train.Calls` is in insertion order, which is not run order — a call added
+  last can be timed first — so anything reasoning about the route reads it through this property.
+
+- **`Schedule.EditPart(part, from, to)`** changes the span of a part already in a schedule and adapts
+  the neighbouring part it meets, so a working can be reshaped without truncating it. The part keeps
+  its train and its identity — only `TrainPart.From` and `TrainPart.To` change — so the driver duties
+  referencing it follow the change. Where the edited part meets a neighbour today and that
+  neighbour's own train calls at the new joint, the neighbour is adapted to it (extended as readily
+  as shortened); the adaptation is one step only and never reaches past the neighbour. A joint that
+  is already broken keeps its gap rather than being rewritten, and anything the edit leaves
+  inconsistent is applied as asked and reported by the schedule validations (S1, S2).
+  **`Schedule.PlanPartEdit`** returns the same `PartEdit` without changing anything, so an editor can
+  show what an edit would do — and what it would leave behind (`LeavesGapBefore`, `OverlapsNext`,
+  `IsConsistent`) — before it is applied.
+
+- **`Layout.IsConnected(from, to)`** answers whether a track stretch joins two operating locations,
+  in either direction. Unlike `Layout.TrackStretch(from, to)` it tolerates a layout holding more than
+  one stretch between the same pair.
+
+- **`Plan.SetDeparture(call, time)` and `Plan.SetArrival(call, time)`** set one call time and push the
+  times on one side of it by the same number of minutes, so that part of the run follows the change with
+  its run and dwell times kept. The two are mirrors: a departure works forwards, the direction the train
+  runs, moving every later time and leaving the call's own arrival where it is; an arrival works
+  backwards, moving every earlier time and leaving the call's own departure where it is. Either way the
+  stand at the edited call absorbs the change and the times on the other side are untouched. At the
+  train's origin nothing precedes the call, so setting its arrival only changes the driver's preparation
+  time; at the terminus nothing follows it, so setting its departure only changes the finishing time.
+  All-or-nothing: nothing is written and `null` is returned when the result would leave the plan's
+  operating window (the same rule `Plan.Move` follows). A time that leaves the train inconsistent — a
+  departure set before its own arrival — is applied as asked and reported by the validation rules.
+
+### Fixes
+
+- **The train speed check (rule T3) now covers a train's last leg.** Its loop stopped one leg short,
+  so the run into the terminus was never checked and a two-call train was not checked at all. Plans
+  with slow or fast final legs will report findings that were previously silent.
+
+- **The call time-sequence check (rule T2) and the speed check (rule T3) now compare calls in run
+  order** instead of insertion order. On a hand-edited train the two differ, and pairing calls the
+  train does not run one after the other reported conflicts that were not conflicts.
+
+- **`TrackStretch.Passings` reads a train's calls in run order** for the same reason, so a stretch
+  capacity conflict (rule L3) is not missed on a train whose calls were added in another order than
+  it runs them. Imported plans are unaffected: there the two orders coincide.
+
+- **`Train.DriverStartTime` and `Train.DriverEndTime` take the train's first and last call in run
+  order.** They read `Calls[0]` and `Calls[^1]`, so on a hand-edited train the driver's service window
+  — and with it `Plan.FitsWithinOperatingWindow`, which decides whether a train may be created, moved
+  or cloned — was measured between two calls in the middle of the run.
+
+- **The planning and graph helpers pair a train's calls in run order.** `TimetableStretch.InferDirection`
+  could put a train in the opposite direction's column, `GraphicalTrainSegment`'s indices are now
+  positions in `Train.CallsInRunOrder` (so overtake splitting and the extrapolated sort key follow the
+  route), `Plan.UpdateTimings` recomputes along the legs the train runs instead of failing on a pair
+  with no track stretch between it, and `Plan.CloneMany` measures its interval from the train's own
+  departure.
+
+- **Automatic schedule building reads a train's origin in run order.** `BuildSchedulesAutomatically`
+  and `ContinuationsFor` took the train's start location and departure from its first *added* call, so
+  a hand-edited train was chained from the wrong end — usually not chained at all, since it appeared
+  to start where it does not.
+
+- **`Train.AsTrainPart(fromCallIndex, toCallIndex)` and `Schedule.JoinCallIndexFor(train)` now index a
+  train's calls in run order** instead of insertion order. The two are positions in the same list —
+  the join index is fed straight back into `AsTrainPart` — so on a hand-edited train the picker built
+  a part between the wrong two calls, and `Train.AsTrainPart` (the whole train) could end at a call
+  the train does not run last. `Plan.CandidateTrainsFor` orders its candidates by the same run-order
+  call. Imported plans are unaffected: there the two orders coincide.
+
+- **Displayed kilometres are whole numbers.** `TimetableStretch.DisplayedDistanceToStation` and
+  `TimetableStretch.StartKilometer` round the stored metre distance scaled by
+  `TimeAndSpeedSettings.DistanceFactor` to the nearest kilometre (halves upwards) instead of
+  returning a fractional figure. A diverging stretch adds its junction offset in metres before
+  scaling, so the branch and the line it leaves round the junction station to the same kilometre.
+  `DistanceToStation` still returns the raw, unscaled metre distance.
+
 ## Version 3.0.0
 
 This is a major release. It is source-breaking for consumers of the 2.x packages

@@ -32,7 +32,9 @@ else
         @* Settings bind directly to the shared Layout model. Each field uses @bind:after="OnEdited"
            so every edit is saved to storage and broadcast: docked views (e.g. the graphical timetable)
            re-render via ScheduleState.OnChanged, and the change survives a reload. *@
-        <div class="section">
+        @* The information section holds markdown editors, each showing its text and a preview side
+           by side; they need the full width rather than the reading width the labelled fields use. *@
+        <div class="section @(_section == SettingsSection.Information ? "wide" : "")">
             @if (_section == SettingsSection.General)
             {
                 var g = LayoutSettings.General;
@@ -305,6 +307,10 @@ else
                     <input type="checkbox" @bind="v.ValidateTrainSpeed" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
+                    <label>@Translator("ValidateRouteContinuity")</label>
+                    <input type="checkbox" @bind="v.ValidateRouteContinuity" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
                     <label>@Translator("ValidateTrainNumbers")</label>
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>
@@ -360,7 +366,8 @@ else
                     <p class="hint">@Translator("ProgramHint")</p>
                     <div class="field instructions">
                         <HelpLabel For="Program" />
-                        <textarea rows="8" @bind="Plan.Program" @bind:after="OnEdited"></textarea>
+                        <MarkdownEditor Rows="8" PreviewClass="instructions-body"
+                                        @bind-Value="Plan.Program" @bind-Value:after="OnEdited" />
                     </div>
 
                     @* The standing instructions for the whole meeting. They are printed as their own
@@ -369,7 +376,8 @@ else
                     <p class="hint">@Translator("GeneralInstructionsHint")</p>
                     <div class="field instructions">
                         <HelpLabel For="GeneralInstructions" />
-                        <textarea rows="24" @bind="Plan.GeneralInstructions" @bind:after="OnEdited"></textarea>
+                        <MarkdownEditor Rows="24" PreviewClass="instructions-body"
+                                        @bind-Value="Plan.GeneralInstructions" @bind-Value:after="OnEdited" />
                     </div>
                 }
             }

@@ -6,7 +6,9 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 public class Origin
 {
     /// <summary>
-    /// Station that is origin.
+    /// The operation location that is the origin. Any location exchanging cargo qualifies
+    /// (see <see cref="OperationLocation.HasCargoExchange"/>), not only a <see cref="Layouts.Station"/> —
+    /// an <see cref="IndustrialArea"/> is an origin of freight wagons as much as a station is.
     /// </summary>
-    public required Station Station { get; set; }
+    public required OperationLocation Location { get; set; }
 }

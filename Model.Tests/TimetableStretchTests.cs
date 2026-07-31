@@ -121,6 +121,27 @@ public class TimetableStretchTests
     }
 
     [TestMethod]
+    public void DisplayedKilometreIsRoundedToAWholeNumber()
+    {
+        var (layout, a, b, c, d, e) = BuildBranchingLayout();
+        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        var branch = layout.TimetableStretches.Single(s => s.Number == "branch");
+        var subBranch = layout.TimetableStretches.Single(s => s.Number == "subbranch");
+        layout.Settings.TimeAndSpeed.DistanceFactor = 0.75;
+
+        Assert.AreEqual(0.0, main.DisplayedDistanceToStation(a));
+        Assert.AreEqual(8.0, main.DisplayedDistanceToStation(b), "7.5 km rounds upwards.");
+        Assert.AreEqual(19.0, main.DisplayedDistanceToStation(c), "18.75 km rounds to 19.");
+
+        // The junction must read the same on both lines, so the branch's offset is added before scaling.
+        Assert.AreEqual(8.0, branch.StartKilometer, "Same rounded km as B on the main line.");
+        Assert.AreEqual(8.0, branch.DisplayedDistanceToStation(b));
+        Assert.AreEqual(13.0, branch.DisplayedDistanceToStation(d), "17 metres scaled to 12.75 rounds to 13.");
+        Assert.AreEqual(13.0, subBranch.StartKilometer, "Same rounded km as D on the branch.");
+        Assert.AreEqual(15.0, subBranch.DisplayedDistanceToStation(e), "20 metres scaled to 15.");
+    }
+
+    [TestMethod]
     public void ReverseTurnsEveryTrackStretchAroundAndReversesTheirOrder()
     {
         var (layout, a, b, c, _, _) = BuildBranchingLayout();

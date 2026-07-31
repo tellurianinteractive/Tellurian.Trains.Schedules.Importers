@@ -86,6 +86,8 @@ else
                             {
                                 <span class="sessions"><SessionsView Sessions="part.Train.Sessions" Settings="SessionSettings" /></span>
                             }
+                            <button class="edit" title="@Translator("EditTrainPart")"
+                                    @onclick="() => _editPartTarget = (schedule, part)"><i class="fa-solid fa-pen"></i></button>
                             <button class="x" title="@Translator("RemovePart")" @onclick="() => RemovePart(schedule, part)"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                     }
@@ -101,6 +103,12 @@ else
     <AddPartDialog Schedule="addTarget"
                    OnAdded="() => _addPartTarget = null"
                    OnClosed="() => _addPartTarget = null" />
+}
+@if (_editPartTarget is { } editPartTarget)
+{
+    <EditPartDialog Schedule="editPartTarget.Schedule" Part="editPartTarget.Part"
+                    OnSaved="() => _editPartTarget = null"
+                    OnClosed="() => _editPartTarget = null" />
 }
 @if (_assignTarget is { } assignTarget)
 {
@@ -137,6 +145,7 @@ else
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     private Schedule? _addPartTarget;
+    private (Schedule Schedule, ScheduledTrainPart Part)? _editPartTarget;
     private Schedule? _assignTarget;
     private Schedule? _deleteTarget;
     private (Schedule Schedule, ScheduledObject Vehicle, ScheduleAssignment Assignment)? _editTarget;

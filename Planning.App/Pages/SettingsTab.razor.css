@@ -47,6 +47,12 @@
         grid-column: 1 / -1;
     }
 
+    /* A section of markdown editors: each pane is half the width, so the reading width that suits
+       labelled fields would leave both too narrow. */
+    .section.wide {
+        max-width: none;
+    }
+
     .field {
         display: grid;
         grid-template-columns: subgrid;
@@ -105,6 +111,27 @@
     .field input[type="text"] {
         width: 22rem;
         max-width: 100%;
+    }
+
+    /* The markdown fields carry an editor that needs the whole width for its two panes, so they step
+       out of the label/control columns: the label goes on its own line above the editor, without the
+       dotted leader that ties a label to a control beside it. */
+    .field.instructions {
+        display: block;
+        grid-column: 1 / -1;
+    }
+
+    .field.instructions:hover {
+        background: transparent;
+    }
+
+    .field.instructions ::deep .help-label {
+        width: auto;
+        margin-bottom: 0.3rem;
+    }
+
+    .field.instructions ::deep .help-label::after {
+        display: none;
     }
 
     .group-heading {

@@ -76,6 +76,25 @@ public abstract class TrainPart : IEquatable<TrainPart>
     public Train Train => From.Train!;
 
     /// <summary>
+    /// Changes the part's span in place, keeping the foreign keys in sync.
+    /// </summary>
+    /// <remarks>
+    /// The part keeps its identity, so everything referencing it — its vehicle
+    /// <see cref="ScheduledTrainPart.Schedule">schedule</see>, the driver duties working it, and its
+    /// per-part options — follows the change instead of being left on a discarded object. Both calls
+    /// must be calls of the part's own train; the callers in <c>ScheduleEditingExtensions</c> check that.
+    /// </remarks>
+    /// <param name="from">The call the part departs from.</param>
+    /// <param name="to">The call the part arrives at.</param>
+    internal void SetSpan(StationCall from, StationCall to)
+    {
+        From = from.ValueOrException(nameof(from));
+        To = to.ValueOrException(nameof(to));
+        FromId = From.Id;
+        ToId = To.Id;
+    }
+
+    /// <summary>
     /// Gets the departure time for this train part.
     /// </summary>
     public Time? Departure => From.Departure;

@@ -1,0 +1,149 @@
+@namespace Tellurian.Trains.Schedules.Planning.App.Components.Schedules
+@using Tellurian.Trains.Schedules.Model.Timetables
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* Changes the span of a part already in a schedule. The part keeps its train — the planner picks the new
+   stops from its run — so the driver duties working it follow the change. Every stop is offered: where a
+   neighbouring part meets this one and its own train calls at the new joint, the neighbour is adapted with
+   it; where it cannot follow, the edit is applied all the same and what it leaves behind is shown here and
+   reported as a conflict. *@
+
+<div class="edit-part-backdrop">
+    <div class="edit-part-dialog">
+        <h3>@Translator("EditTrainPart")</h3>
+
+        <div class="field">
+            <label>@Translator("Train")</label>
+            <span class="train">@Part.Train.Identity</span>
+        </div>
+        <div class="field">
+            <label>@Translator("From")</label>
+            <select value="@_from" @onchange="SetFrom">
+                @for (var i = 0; i < Calls.Count - 1; i++)
+                {
+                    <option value="@i">@CallText(Calls[i], departure: true)</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label>@Translator("To")</label>
+            <select value="@_to" @onchange="SetTo">
+                @for (var i = _from + 1; i < Calls.Count; i++)
+                {
+                    <option value="@i">@CallText(Calls[i], departure: false)</option>
+                }
+            </select>
+        </div>
+
+        @if (Preview is { } edit)
+        {
+            <p class="preview">@SpanText(edit.From, edit.To)</p>
+            @if (edit.AdaptsPrevious)
+            {
+                <p class="adapts">@Translator("PreviousPart"): @SpanText(edit.Previous!.From, edit.PreviousEnd!) (@Translator("PartEditAdapted"))</p>
+            }
+            @if (edit.AdaptsNext)
+            {
+                <p class="adapts">@Translator("NextPart"): @SpanText(edit.NextStart!, edit.Next!.To) (@Translator("PartEditAdapted"))</p>
+            }
+            @foreach (var warning in Warnings(edit))
+            {
+                <p class="warning">@warning</p>
+            }
+        }
+
+        @if (_error is not null)
+        {
+            <p class="error">@_error</p>
+        }
+
+        <div class="actions">
+            <button class="primary" @onclick="Save">@Translator("Save")</button>
+            <button @onclick="Abort">@Translator("Abort")</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>The schedule the part is worked in.</summary>
+    [Parameter, EditorRequired] public Schedule Schedule { get; set; } = default!;
+
+    /// <summary>The part to change.</summary>
+    [Parameter, EditorRequired] public ScheduledTrainPart Part { get; set; } = default!;
+
+    /// <summary>Raised after the edit has been applied and saved.</summary>
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without changing anything.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private int _from;
+    private int _to;
+    private string? _error;
+
+    // The train's calls in run order, so the index order in the lists is the order the train works them.
+    private IReadOnlyList<StationCall> Calls => Part.Train.CallsInRunOrder;
+
+    // What the current selection would do, or null while the selection is incomplete. Nothing is changed
+    // until the planner saves.
+    private PartEdit? Preview
+    {
+        get
+        {
+            var calls = Calls;
+            if (_to <= _from || _to >= calls.Count) return null;
+            var planned = Schedule.PlanPartEdit(Part, calls[_from], calls[_to]);
+            return planned.HasValue ? planned.Value : null;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        var calls = Calls;
+        _from = calls.TakeWhile(c => !ReferenceEquals(c, Part.From)).Count();
+        _to = calls.TakeWhile(c => !ReferenceEquals(c, Part.To)).Count();
+        if (_from >= calls.Count - 1) _from = calls.Count - 2;
+        if (_to <= _from || _to >= calls.Count) _to = _from + 1;
+    }
+
+    private void SetFrom(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var i)) _from = i;
+        if (_to <= _from) _to = _from + 1;
+        _error = null;
+    }
+
+    private void SetTo(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var i)) _to = i;
+        _error = null;
+    }
+
+    private IEnumerable<string> Warnings(PartEdit edit)
+    {
+        if (edit.LeavesGapBefore) yield return Translator("PartEditGapBefore");
+        if (edit.LeavesGapAfter) yield return Translator("PartEditGapAfter");
+        if (edit.OverlapsPrevious) yield return Translator("PartEditOverlapBefore");
+        if (edit.OverlapsNext) yield return Translator("PartEditOverlapAfter");
+    }
+
+    private async Task Save()
+    {
+        _error = null;
+        var calls = Calls;
+        if (_to <= _from || _to >= calls.Count) return;
+        var result = Schedule.EditPart(Part, calls[_from], calls[_to]);
+        if (result.IsNone) { _error = result.Message; return; }
+        ScheduleState.SaveAndNotify();
+        await OnSaved.InvokeAsync();
+    }
+
+    private Task Abort() => OnClosed.InvokeAsync();
+
+    private static string CallText(StationCall call, bool departure) =>
+        $"{call.OperationLocation.Signature} {(departure ? call.Departure : call.Arrival).HHMM()}";
+
+    private static string SpanText(StationCall from, StationCall to) =>
+        $"{CallText(from, departure: true)} → {CallText(to, departure: false)}";
+}

@@ -59,7 +59,7 @@ public sealed class TrainPartCargoFlow
     /// <param name="alsoShuntText">Appended when the driver also shunts before departure.</param>
     public string From(string alsoShuntText)
     {
-        IEnumerable<string> names = Flow.CargoFlowOptions.Origins.Select(o => o.Station.Name);
+        IEnumerable<string> names = Flow.CargoFlowOptions.Origins.Select(o => o.Location.Name);
         if (!Flow.BringsNoWagonsFromHere) names = names.Append(Flow.From.OperationLocation.Name);
         var text = string.Join(", ", names.Distinct());
         // The qualifier belongs beside the movement it qualifies, rather than in a column of its own

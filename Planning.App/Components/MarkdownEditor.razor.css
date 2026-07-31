@@ -1,0 +1,48 @@
+/* Source and preview side by side and equally wide, so the two readings of the same text line up.
+   The text area's rows give the pair their height; both grow together when the rendered text needs
+   more room, which keeps the page as the only thing that scrolls. */
+.markdown-editor {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: stretch;
+    width: 100%;
+
+    textarea {
+        width: 100%;
+        resize: vertical;
+    }
+
+    /* Bordered like the field beside it so the pair reads as one control, but flat and quiet: this
+       is a result to look at, not a second box to type in. */
+    .preview {
+        min-width: 0;
+        padding: 0.375rem 0.6rem;
+        border: 1px solid #e2e6ea;
+        border-radius: 3px;
+        background: #fafbfc;
+    }
+
+    /* The rendered markdown arrives as markup, so it carries no scope attribute of its own; ::deep
+       reaches it through the preview element, which does. */
+    .preview ::deep > :first-child {
+        margin-top: 0;
+    }
+
+    .preview ::deep img {
+        max-width: 100%;
+    }
+
+    /* Long words and links cannot widen the pane; the columns are shared with the text area. */
+    .preview ::deep * {
+        overflow-wrap: break-word;
+    }
+}
+
+/* Narrower than this the two panes are each too cramped to read, so the preview moves below the
+   text area instead of beside it. */
+@media (max-width: 900px) {
+    .markdown-editor {
+        grid-template-columns: 1fr;
+    }
+}

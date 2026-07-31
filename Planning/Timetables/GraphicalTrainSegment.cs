@@ -6,6 +6,8 @@ namespace Tellurian.Trains.Schedules.Planning.Timetables;
 /// it is split into two or more segments so the visual order in the diagram is correct.
 /// </summary>
 /// <param name="Train">The train this segment belongs to.</param>
-/// <param name="FromCallIndex">Index into <see cref="Train.Calls"/> where this segment starts.</param>
-/// <param name="ToCallIndex">Index into <see cref="Train.Calls"/> where this segment ends.</param>
+/// <param name="FromCallIndex">Index into the train's calls <em>in run order</em> where this segment
+/// starts. <see cref="Train.Calls"/> is in insertion order, which on a hand-edited train is not the order
+/// the train works its calls, so segments are cut from <c>Train.CallsInRunOrder</c>.</param>
+/// <param name="ToCallIndex">Index into the train's calls in run order where this segment ends.</param>
 public sealed record GraphicalTrainSegment(Train Train, int FromCallIndex, int ToCallIndex);

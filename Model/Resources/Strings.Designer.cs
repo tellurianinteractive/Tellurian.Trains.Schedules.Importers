@@ -473,7 +473,16 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
                 return ResourceManager.GetString("TrainHasNoLocomotiveAssigned", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} runs from {1} {2} to {3} {4}, but the layout has no track stretch between these locations..
+        /// </summary>
+        internal static string TrainHasNoStretchBetweenCalls {
+            get {
+                return ResourceManager.GetString("TrainHasNoStretchBetweenCalls", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Train {0} has no traction unit on sessions {1}..
         /// </summary>

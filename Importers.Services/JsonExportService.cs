@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model;
 
@@ -13,12 +12,7 @@ public class JsonExportService(FileInfo destination) : IExportService
 {
     private readonly FileInfo _destination = destination;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions(writeIndented: true);
 
     /// <summary>
     /// Exports the specified schedule asynchronously as JSON to the configured file.

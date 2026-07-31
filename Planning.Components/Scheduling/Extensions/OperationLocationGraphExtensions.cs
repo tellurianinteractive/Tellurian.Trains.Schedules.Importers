@@ -10,6 +10,6 @@ public static class OperationLocationGraphExtensions
     public static MarkupString KmLabel(this OperationLocation me, TimetableStretch stretch)
     {
         var distance = stretch.DisplayedDistanceToStation(me);
-        return new($"{distance:F1} km");
+        return new($"{distance:F0} km");
     }
 }

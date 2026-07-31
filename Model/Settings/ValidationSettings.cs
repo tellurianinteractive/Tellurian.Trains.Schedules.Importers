@@ -13,6 +13,11 @@ public sealed class ValidationSettings
     public bool ValidateStretches { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether train speeds between calls are validated.</summary>
     public bool ValidateTrainSpeed { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's route is validated for continuity, i.e. that
+    /// every leg it runs is a track stretch of the layout.
+    /// </summary>
+    public bool ValidateRouteContinuity { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether train numbers are validated.</summary>
     public bool ValidateTrainNumbers { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>

@@ -40,23 +40,24 @@ public static class PlanExtensions
                 timetableStretch.ExtrapolatedTimeAtFirstStation(s, direction).TotalMinutes)];
         }
 
+        // The direction is read from the order the train runs its calls, not the order they were added.
         private TrainGraphDirection? InferDirection(Train train)
         {
-            var calls = train.Calls.ToArray();
+            var calls = train.CallsInRunOrder;
             foreach (var ts in timetableStretch.Stretches)
             {
-                for (var i = 0; i < calls.Length - 1; i++)
+                for (var i = 0; i < calls.Count - 1; i++)
                 {
                     // Skip intermediate SCL stops, but stop immediately at any SCL that
                     // is itself a track stretch endpoint (ts.Start or ts.End), so that
                     // stretches whose endpoint is a signal box are still matched.
                     var j = i + 1;
-                    while (j < calls.Length
+                    while (j < calls.Count
                            && calls[j].OperationLocation is SignalControlledLocation
                            && !calls[j].OperationLocation.Equals(ts.Start)
                            && !calls[j].OperationLocation.Equals(ts.End))
                         j++;
-                    if (j >= calls.Length) continue;
+                    if (j >= calls.Count) continue;
 
                     if (calls[i].OperationLocation.Equals(ts.Start) && calls[j].OperationLocation.Equals(ts.End))
                         return TrainGraphDirection.Upward;
@@ -99,14 +100,16 @@ public static class PlanExtensions
         // Returns the call index in overridden where overrider passes through while overridden is stopped.
         private int? FindOvertakeIndex(GraphicalTrainSegment overridden, GraphicalTrainSegment overrider)
         {
+            var overriddenCalls = overridden.Train.CallsInRunOrder;
+            var overriderCalls = overrider.Train.CallsInRunOrder;
             for (var i = overridden.FromCallIndex; i <= overridden.ToCallIndex; i++)
             {
-                var call = overridden.Train.Calls[i];
+                var call = overriddenCalls[i];
                 if (!timetableStretch.DistanceToStation(call.OperationLocation).HasValue) continue;
 
                 for (var j = overrider.FromCallIndex; j <= overrider.ToCallIndex; j++)
                 {
-                    var other = overrider.Train.Calls[j];
+                    var other = overriderCalls[j];
                     if (!other.OperationLocation.Equals(call.OperationLocation)) continue;
 
                     // overrider passes overridden: overridden arrived first (or same time)
@@ -151,9 +154,10 @@ public static class PlanExtensions
         private IEnumerable<(double Distance, Time Time)> StretchCallsForSegment(
             Train train, int fromIdx, int toIdx)
         {
+            var calls = train.CallsInRunOrder;
             for (var i = fromIdx; i <= toIdx; i++)
             {
-                var call = train.Calls[i];
+                var call = calls[i];
                 var dist = timetableStretch.DistanceToStation(call.OperationLocation);
                 if (dist is { } d)
                 {
@@ -417,6 +421,118 @@ public static class PlanExtensions
         }
 
         /// <summary>
+        /// Creates the return working of <paramref name="train"/>: a new train of the same category and speed
+        /// running the shortest path back from the train's terminus to its origin, built with <c>Create</c>.
+        /// </summary>
+        /// <remarks>
+        /// When <paramref name="departureTime"/> is <c>null</c> the return departs as soon as it can: the
+        /// train's arrival at its terminus, plus <paramref name="finishingMinutes"/> to finish that train and
+        /// <paramref name="preparationMinutes"/> to prepare this one. Any other departure time is taken as
+        /// given and may fall before the train's own departure, which simply makes the return the earlier of
+        /// the two workings. The return takes the next free number of its own direction's parity, so it and
+        /// the train it returns from are numbered as a pair.
+        /// </remarks>
+        /// <param name="train">The train to return from. Cannot be null; it needs a category and at least two calls.</param>
+        /// <param name="departureTime">The return's departure time from the train's terminus, or <c>null</c> to depart as soon as possible.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare the return before it departs. Must be non-negative.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish a train after its last arrival. Must be non-negative.</param>
+        /// <param name="number">The number to assign to the return train. When <c>null</c>, the default for its category and direction is used (see <c>Create</c>).</param>
+        /// <returns>The return train, already added to the timetable, or <c>null</c> when it could not be built
+        /// (see <c>Create</c>) or <paramref name="train"/> has no category or fewer than two calls.</returns>
+        public Train? CreateReturn(Train train, Time? departureTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? number = null)
+        {
+            ArgumentNullException.ThrowIfNull(train);
+            if (train.Category is not { } category) return null;
+
+            // In run order: the last call is where the train ends and where its return begins.
+            var calls = train.CallsInRunOrder;
+            if (calls.Count < 2) return null;
+
+            var departure = departureTime ?? calls[^1].Arrival.AddMinutes(finishingMinutes + preparationMinutes);
+
+            return plan.Create(category, calls[^1].OperationLocation, calls[0].OperationLocation,
+                departure, preparationMinutes, finishingMinutes, train.MaxSpeed, number);
+        }
+
+        /// <summary>
+        /// Creates a train running from <paramref name="from"/> to <paramref name="to"/> together with its
+        /// return working back again (see <c>CreateReturn</c>), as one all-or-nothing pair: when the return
+        /// cannot be built the outbound train is removed again and nothing is added to the timetable.
+        /// </summary>
+        /// <param name="category">The category of both trains.</param>
+        /// <param name="from">The origin location the outbound train departs from and the return train travels to.</param>
+        /// <param name="to">The destination the outbound train travels to and the return train departs from.</param>
+        /// <param name="startTime">The scheduled departure time of the outbound train.</param>
+        /// <param name="returnTime">The return train's departure time, or <c>null</c> to depart as soon as possible (see <c>CreateReturn</c>).</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
+        /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
+        /// <param name="number">The number for the outbound train; the return takes the default for the opposite direction. When <c>null</c>, both take their direction's default (see <c>Create</c>).</param>
+        /// <returns>The outbound train followed by its return, both already added to the timetable; empty when
+        /// either of them could not be built.</returns>
+        public IReadOnlyList<Train> CreateWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time? returnTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        {
+            ArgumentNullException.ThrowIfNull(category);
+            ArgumentNullException.ThrowIfNull(from);
+            ArgumentNullException.ThrowIfNull(to);
+
+            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not { } outbound)
+                return [];
+
+            if (plan.CreateReturn(outbound, returnTime, preparationMinutes, finishingMinutes) is not { } back)
+            {
+                plan.Timetable.Trains.Remove(outbound);
+                return [];
+            }
+
+            return [outbound, back];
+        }
+
+        /// <summary>
+        /// Creates a repeating service in both directions: an outbound train and its return working (see
+        /// <c>CreateWithReturn</c>), each then repeated every <paramref name="intervalMinutes"/> until
+        /// <paramref name="endTime"/> (see <c>CloneMany</c>).
+        /// </summary>
+        /// <remarks>
+        /// Both trains are created first and only then cloned, so each direction repeats from its own
+        /// departure and the two directions take alternating numbers: the outbound and its return are the
+        /// first pair, their clones the next, and so on. Each direction stops repeating on its own terms —
+        /// the return departs later than the outbound, so it may get fewer clones before
+        /// <paramref name="endTime"/>. The result is the outbound train and its clones, followed by the
+        /// return train and its clones. When the pair cannot be built the result is empty.
+        /// </remarks>
+        /// <param name="category">The category of all the trains.</param>
+        /// <param name="from">The origin location the outbound trains depart from and the return trains travel to.</param>
+        /// <param name="to">The destination the outbound trains travel to and the return trains depart from.</param>
+        /// <param name="startTime">The scheduled departure time of the first outbound train.</param>
+        /// <param name="endTime">The latest departure time; no train departs after it.</param>
+        /// <param name="intervalMinutes">The number of minutes between consecutive departures in each direction. Must be greater than zero.</param>
+        /// <param name="returnTime">The first return train's departure time, or <c>null</c> to depart as soon as possible (see <c>CreateReturn</c>).</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
+        /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
+        /// <param name="number">The number for the first outbound train; the rest follow as same-parity clones (see <c>Clone</c>).</param>
+        /// <returns>The created trains, already added to the timetable; empty when none could be built.</returns>
+        public IReadOnlyList<Train> CreateRepeatingWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, Time? returnTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        {
+            ArgumentNullException.ThrowIfNull(category);
+            ArgumentNullException.ThrowIfNull(from);
+            ArgumentNullException.ThrowIfNull(to);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
+
+            if (plan.CreateWithReturn(category, from, to, startTime, returnTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not [var outbound, var back])
+                return [];
+
+            return
+            [
+                outbound,
+                .. plan.CloneMany(outbound, endTime, intervalMinutes),
+                back,
+                .. plan.CloneMany(back, endTime, intervalMinutes),
+            ];
+        }
+
+        /// <summary>
         /// Adds a repeating sequence of clones of <paramref name="train"/> to the plan's timetable: one clone
         /// every <paramref name="intervalMinutes"/> after the train's departure, until the next clone's
         /// departure would fall after <paramref name="endTime"/>. Each clone is a shifted copy made by
@@ -437,7 +553,8 @@ public static class PlanExtensions
             ArgumentNullException.ThrowIfNull(train);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
 
-            var startTime = train.Calls.First(c => c.IsDeparture).Departure;
+            // The train's own departure: the first departing call it runs, not the first one added.
+            var startTime = train.CallsInRunOrder.First(c => c.IsDeparture).Departure;
             var clones = new List<Train>();
             for (var offset = intervalMinutes; startTime.AddMinutes(offset).Value <= endTime.Value; offset += intervalMinutes)
             {
@@ -468,6 +585,101 @@ public static class PlanExtensions
             {
                 call.Arrival = call.Arrival.AddMinutes(minutes);
                 call.Departure = call.Departure.AddMinutes(minutes);
+            }
+            return train;
+        }
+
+        /// <summary>
+        /// Sets a call's departure time and pushes every later time of the train by the same amount, so the
+        /// rest of the run follows the change: hold a train five minutes longer at one station and it reaches
+        /// every station after it five minutes later.
+        /// </summary>
+        /// <remarks>
+        /// The call's own arrival stays where it is — what changed is how long the train stands here — and the
+        /// run and dwell times after it are kept, each later call moving by the same number of minutes. The
+        /// times before it are untouched: the edit works forwards, the direction the train runs, and
+        /// <c>SetArrival</c> mirrors it backwards.
+        /// <para>
+        /// The change is all-or-nothing: nothing is written and <c>null</c> is returned when the result would
+        /// take the train outside the plan's operating window (see <c>FitsWithinOperatingWindow</c>). A
+        /// departure set before the call's own arrival is applied as asked and reported by the validation
+        /// rules, in keeping with how the rest of the editing works.
+        /// </para>
+        /// </remarks>
+        /// <param name="call">The call whose departure to set. Cannot be null.</param>
+        /// <param name="departure">The new departure time.</param>
+        /// <returns>The train, or <c>null</c> when the change would take it outside the operating window.</returns>
+        public Train? SetDeparture(StationCall call, Time departure)
+        {
+            ArgumentNullException.ThrowIfNull(call);
+            return plan.ApplyCallTimes(call, call.Arrival, departure, MinutesBetween(call.Departure, departure), CallEditDirection.Forwards);
+        }
+
+        /// <summary>
+        /// Sets a call's arrival time and pulls every earlier time of the train with it by the same amount, so
+        /// the run up to the change follows it: ask a train to arrive five minutes later at one station and it
+        /// leaves every station before it five minutes later.
+        /// </summary>
+        /// <remarks>
+        /// An arrival is where the run leading up to the call ends, so the edit works backwards, against the
+        /// direction the train runs — the mirror of <c>SetDeparture</c>. The call's own departure stays where
+        /// it is — what changed is how long the train stands here — and the run and dwell times before it are
+        /// kept, each earlier call moving by the same number of minutes. The times after it are untouched. At
+        /// the train's origin there is nothing before the call, so setting its arrival only changes the
+        /// driver's preparation time before the departure that anchors the train.
+        /// <para>
+        /// The change is all-or-nothing, on the same terms as <c>SetDeparture</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="call">The call whose arrival to set. Cannot be null.</param>
+        /// <param name="arrival">The new arrival time.</param>
+        /// <returns>The train, or <c>null</c> when the change would take it outside the operating window.</returns>
+        public Train? SetArrival(StationCall call, Time arrival)
+        {
+            ArgumentNullException.ThrowIfNull(call);
+            return plan.ApplyCallTimes(call, arrival, call.Departure, MinutesBetween(call.Arrival, arrival), CallEditDirection.Backwards);
+        }
+
+        // Writes new times to one call and moves the calls on one side of it by the same number of minutes, as
+        // one all-or-nothing change: a departure edit carries the rest of the run with it, an arrival edit the
+        // run leading up to it. The times are computed into buffers first so a result that leaves the operating
+        // window can be abandoned without having touched the train.
+        private Train? ApplyCallTimes(StationCall call, Time arrival, Time departure, int shiftMinutes, CallEditDirection direction)
+        {
+            var train = call.Train;
+            if (train is null) return null;
+            var calls = train.CallsInRunOrder;
+            var index = IndexOfCall(calls, call);
+            if (index < 0) return null;
+
+            var arrivals = new Time[calls.Count];
+            var departures = new Time[calls.Count];
+            for (var i = 0; i < calls.Count; i++)
+            {
+                if (i == index)
+                {
+                    arrivals[i] = arrival;
+                    departures[i] = departure;
+                }
+                else if (direction == CallEditDirection.Forwards ? i > index : i < index)
+                {
+                    arrivals[i] = calls[i].Arrival.AddMinutes(shiftMinutes);
+                    departures[i] = calls[i].Departure.AddMinutes(shiftMinutes);
+                }
+                else
+                {
+                    arrivals[i] = calls[i].Arrival;
+                    departures[i] = calls[i].Departure;
+                }
+            }
+
+            // The train's span is the driver's: from the first call's arrival to the last call's departure.
+            if (!plan.OperatingWindowContains(arrivals[0], departures[^1])) return null;
+
+            for (var i = 0; i < calls.Count; i++)
+            {
+                calls[i].Arrival = arrivals[i];
+                calls[i].Departure = departures[i];
             }
             return train;
         }
@@ -549,7 +761,8 @@ public static class PlanExtensions
         public Train? UpdateTimings(Train train)
         {
             ArgumentNullException.ThrowIfNull(train);
-            var calls = train.Calls.ToArray();
+            // In run order: the legs are the pairs the train actually runs, and calls[0] is its origin.
+            var calls = train.CallsInRunOrder.ToArray();
             if (calls.Length < 2) return train;
 
             var settings = plan.Layout.Settings.TimeAndSpeed;
@@ -629,4 +842,21 @@ public static class PlanExtensions
     // segment); by convention such trains are numbered odd, upward-starting trains even.
     private static bool IsDownward(TrainPath path) =>
         path.Segments[0].Direction == TrainPathDirection.Backward;
+
+    // How far a time moves, in whole minutes; negative when the new time is earlier.
+    // Which side of an edited call follows the change: a departure edit carries the rest of the run with it,
+    // an arrival edit the run leading up to it.
+    private enum CallEditDirection { Forwards, Backwards }
+
+    private static int MinutesBetween(Time from, Time to) =>
+        (int)Math.Round((to.Value - from.Value).TotalMinutes);
+
+    // The call's position in the train's run, by identity: two calls of the same train can compare equal,
+    // so IndexOf would find the wrong one.
+    private static int IndexOfCall(IReadOnlyList<StationCall> calls, StationCall call)
+    {
+        for (var i = 0; i < calls.Count; i++)
+            if (ReferenceEquals(calls[i], call)) return i;
+        return -1;
+    }
 }

@@ -1,5 +1,56 @@
 # Versionsnyheter
 
+## Version 0.3.2
+
+- Under **Godsflöde › Godsbeskrivningar** kan ett ursprung eller en destination nu vara vilken
+  driftplats som helst som utväxlar gods, inte bara en station. Ett industriområde hanterar
+  alltid godsvagnar men gick tidigare inte att välja, så gods till och från en industri fick
+  beskrivas som om det gick till närmaste station.
+- Samma listor säger nu **driftplats** där de sa *station*, eftersom de inte längre bara
+  innehåller stationer.
+- Att ändra en tid för ett uppehåll i fliken **Tåg** **tar nu med sig resten av tåget**. En **avgång**
+  verkar framåt, åt det håll tåget går: låt ett tåg stå fem minuter längre vid en driftplats, och det
+  kommer fram fem minuter senare till alla senare driftplatser. En **ankomst** verkar bakåt: begär att
+  tåget ska ankomma fem minuter senare, så avgår det fem minuter senare från alla tidigare driftplatser,
+  så att gången fram till ändringen följer med. Tiderna på andra sidan ligger kvar, gång- och
+  uppehållstiderna behålls, och ändringen avvisas — och fältet återgår — om den skulle föra tåget utanför
+  planens drifttider.
+- Ett tågs uppehåll listas alltid i den **ordning tåget går** genom dem.
+- Ett tåg vars tågväg **hoppar över en driftplats** — två uppehåll i följd utan någon sträcka emellan —
+  rapporteras nu som en konflikt. Den kan stängas av under **Inställningar › Validering**.
+- **Tåghastigheten kontrolleras nu även på den sista sträckan**, in till den driftplats där tåget slutar
+  sitt lopp. Den sträckan hoppades tidigare över.
+
+- En tågdel i ett **omlopp** går nu att **redigera**: pennan på en tågdel öppnar dess från- och
+  tilluppehåll, så ett omlopp kan formas om utan att allt efter det tas bort. En angränsande tågdel
+  som ansluter till den du ändrar följer med — korta av en del från A–C till A–B, så blir returen
+  B–A av sig själv. En angränsande del vars eget tåg inte gör uppehåll på den nya driftplatsen
+  lämnas orörd, och glappet rapporteras som en konflikt att lösa.
+
+- Allt som läser ett tågs tågväg följer nu **den ordning tåget kör sina uppehåll**, inte den ordning de
+  matades in. För ett tåg vars uppehåll lagts in i fel ordning — ett uppehåll tillagt efter ett som
+  tåget kommer till först senare — sicksackade **grafisk tidtabell** mellan uppehåll som tåget aldrig
+  kör mellan och kunde placera tåget i fel riktnings kolumn; den utskrivna **tidtabellen** kunde visa
+  en avgång där tåget ankommer; **bygg automatiskt** kedjade inte tåget alls, eftersom det såg ut att
+  starta där det inte startar; **upprepa tåg** mätte intervallet från fel uppehåll; och att räkna om
+  tiderna efter en ändrad uppehållsbild misslyckades helt. Att välja en del av ett tåg vid tillägg
+  till ett omlopp visar också uppehållen i körordning. Importerade planer har aldrig berörts — där är
+  de båda ordningarna desamma.
+
+- **Lägg till tåg** kan nu skapa **returtåget** samtidigt. Kryssa i *Retur?* så skapas tåget tillbaka
+  från destinationen tillsammans med det första, med samma sträcka i motsatt riktning, samma tågsort
+  och hastighet, och nästa nummer i motsatt riktning. Avgången är antingen *så tidigt som möjligt* —
+  det första tågets ankomst plus efterarbets- och förberedelsetiden — eller en tid du skriver in, som
+  får ligga både före och efter det första tågets avgång. Tillsammans med *Upprepa?* upprepas båda
+  riktningarna, så en hel trafik i båda riktningarna planeras på en gång.
+
+### Rättningar
+
+- **Kilometertalen** i den utskrivna tidtabellen och längs den grafiska tidtabellen avrundas nu till
+  hela kilometer. De skrevs ut med en decimal, och avståndsfaktorn under **Inställningar › Tid &
+  hastighet** kunde göra en sträckas längd till en udda del av en kilometer. En bibana visar nu också
+  samma kilometertal som banan den utgår från vid förgreningsstationen.
+
 ## Version 0.3.1
 
 - Avsnittet **Dragfordon** på ett tågdelsuppslag i häftet Förartjänster har nu sin rubrik på

@@ -1,5 +1,55 @@
 # Versionsnyheder
 
+## Version 0.3.2
+
+- Under **Godsstrøm › Godsbeskrivelser** kan en oprindelse eller en destination nu være et hvilket
+  som helst driftssted, der udveksler gods, ikke kun en station. Et industriområde håndterer
+  altid godsvogne, men kunne ikke vælges før, så gods til og fra en industri måtte beskrives, som
+  om det gik til den nærmeste station.
+- De samme lister siger nu **driftssted**, hvor de sagde *station*, da de ikke længere kun
+  indeholder stationer.
+- At ændre en tid for et ophold i fanen **Tog** **tager nu resten af toget med sig**. En **afgang** virker
+  fremad, den vej toget kører: lad et tog stå fem minutter længere ved et driftssted, og det ankommer fem
+  minutter senere til alle senere driftssteder. En **ankomst** virker baglæns: bed toget om at ankomme fem
+  minutter senere, og det afgår fem minutter senere fra alle tidligere driftssteder, så løbet frem til
+  ændringen følger med. Tiderne på den anden side bliver stående, køre- og opholdstiderne bevares, og
+  ændringen afvises — og feltet falder tilbage — hvis den ville føre toget uden for planens driftstider.
+- Et togs ophold vises altid i den **rækkefølge, toget kører** dem.
+- Et tog, hvis togvej **springer et driftssted over** — to ophold i rækkefølge uden en strækning imellem —
+  rapporteres nu som en konflikt. Den kan slås fra under **Indstillinger › Validering**.
+- **Toghastigheden kontrolleres nu også på den sidste strækning**, ind til det driftssted, hvor toget
+  slutter sit løb. Den strækning blev sprunget over før.
+
+- En togdel i et **omløb** kan nu **redigeres**: pennen på en togdel åbner dens fra- og til-stop, så
+  et omløb kan formes om, uden at alt efter det fjernes. En tilstødende togdel, der slutter til den,
+  du ændrer, følger med — afkort en del fra A–C til A–B, og returløbet bliver B–A af sig selv. En
+  nabodel, hvis eget tog ikke standser på det nye stop, står uændret, og hullet rapporteres som en
+  konflikt, du selv løser.
+
+- Alt, der læser et togs togvej, følger nu **den rækkefølge, toget kører sine stop i**, ikke den
+  rækkefølge, de blev indtastet. For et tog, hvis stop er indtastet i forkert rækkefølge — et stop
+  tilføjet efter et, toget først når senere — gik linjen i den **grafiske køreplan** i siksak mellem
+  stop, som toget aldrig kører imellem, og toget kunne havne i den forkerte retnings kolonne; den
+  udskrevne **køreplan** kunne vise en afgang, hvor toget ankommer; **byg automatisk** kædede slet
+  ikke toget, da det så ud til at starte et andet sted; **gentag tog** målte intervallet fra det
+  forkerte stop; og genberegning af tiderne efter en ændret standsningsplan mislykkedes helt. Valg af
+  en del af et tog viser også stoppene i køreorden. Importerede planer har aldrig været berørt — der
+  er de to rækkefølger ens.
+
+- **Tilføj tog** kan nu oprette **returtoget** samtidig. Sæt kryds i *Retur?*, så oprettes toget tilbage
+  fra destinationen sammen med det første, med samme strækning i modsat retning, samme togart og
+  hastighed og det næste nummer i den modsatte retning. Afgangen er enten *så tidligt som muligt* — det
+  første togs ankomst plus efterarbejds- og forberedelsestiden — eller et tidspunkt, du indtaster, som
+  gerne må ligge både før og efter det første togs afgang. Sammen med *Gentag?* gentages begge
+  retninger, så en hel trafik i begge retninger planlægges på én gang.
+
+### Fejlrettelser
+
+- **Kilometertallene** i den udskrevne køreplan og langs den grafiske køreplan afrundes nu til hele
+  kilometer. De blev skrevet med en decimal, og afstandsfaktoren under **Indstillinger › Tid &
+  hastighed** kunne gøre en stræknings længde til en skæv del af en kilometer. En sidebane viser nu
+  også samme kilometertal som den bane, den udgår fra, ved forgreningsstationen.
+
 ## Version 0.3.1
 
 - Afsnittet **Trækkraftenheder** på en togdelsside i hæftet Førertjenester har nu sin

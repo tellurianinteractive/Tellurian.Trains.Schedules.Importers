@@ -50,7 +50,27 @@
                 <input type="number" class="num" min="1" value="@_speed" @onchange="e => _speed = ParseInt(e, _speed)" />
             </div>
 
-            <fieldset class="repeat">
+            <fieldset>
+                <legend>@Translator("ReturnTrain")</legend>
+                <div class="field">
+                    <label>@Translator("Return")</label>
+                    <input type="checkbox" checked="@_return" @onchange="e => _return = e.Value as bool? ?? false" />
+                </div>
+                @if (_return)
+                {
+                    <div class="field">
+                        <label>@Translator("AsSoonAsPossible")</label>
+                        <input type="checkbox" checked="@_returnAsSoonAsPossible" @onchange="SetReturnAsSoonAsPossible" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("DepartureTime")</label>
+                        <input type="text" class="time" value="@_returnTime" disabled="@_returnAsSoonAsPossible"
+                               @onchange="e => _returnTime = e.Value?.ToString() ?? _returnTime" />
+                    </div>
+                }
+            </fieldset>
+
+            <fieldset>
                 <legend>@Translator("RepeatTrains")</legend>
                 <div class="field">
                     <label>@Translator("Repeat")</label>
@@ -113,6 +133,11 @@
     private bool _repeat;
     private string _endTime = "";
     private int _interval = 60;
+    private bool _return;
+    // The earliest possible return departure cannot be worked out before the outbound train exists, so the
+    // planner starts on "as soon as possible" and only types a time when they want a different one.
+    private bool _returnAsSoonAsPossible = true;
+    private string _returnTime = "";
     private string? _error;
 
     private bool CanCreate =>
@@ -130,6 +155,14 @@
         _number = (Timetable?.Trains.Select(t => t.Number) ?? []).DefaultIfEmpty(0).Max() + 1;
         _speed = Layout?.Settings.TimeAndSpeed.Normal.ScaleSpeedKmh ?? 100;
         _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
+    }
+
+    // "As soon as possible" leaves nothing to enter, so the departure time is emptied and locked while it is set.
+    private void SetReturnAsSoonAsPossible(ChangeEventArgs e)
+    {
+        _returnAsSoonAsPossible = e.Value as bool? ?? false;
+        if (_returnAsSoonAsPossible) _returnTime = "";
+        _error = null;
     }
 
     // The planner has typed a number, so stop overwriting it with the category/direction suggestion.
@@ -162,14 +195,30 @@
         if (layout.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
         if (!TryParseTime(_time, out var startTime)) { _error = "InvalidTime"; return; }
 
+        // Null asks the return train to depart as soon as possible; any entered time is used as it stands.
+        Time? returnTime = null;
+        if (_return && !_returnAsSoonAsPossible)
+        {
+            if (!TryParseTime(_returnTime, out var entered)) { _error = "InvalidTime"; return; }
+            returnTime = entered;
+        }
+
         Train? first;
         if (_repeat)
         {
             if (!TryParseTime(_endTime, out var endTime)) { _error = "InvalidTime"; return; }
             if (_interval < 1) { _error = "InvalidMinutes"; return; }
 
-            var trains = plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed, _number);
-            if (trains.Count == 0) { _error = "NoPathBetweenStations"; return; }
+            var trains = _return
+                ? plan.CreateRepeatingWithReturn(category, from, to, startTime, endTime, _interval, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number)
+                : plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed, _number);
+            if (trains.Count == 0) { _error = _return ? "CouldNotCreateTrainPair" : "NoPathBetweenStations"; return; }
+            first = trains[0];
+        }
+        else if (_return)
+        {
+            var trains = plan.CreateWithReturn(category, from, to, startTime, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number);
+            if (trains.Count == 0) { _error = "CouldNotCreateTrainPair"; return; }
             first = trains[0];
         }
         else

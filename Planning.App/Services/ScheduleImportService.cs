@@ -1,5 +1,4 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln;
@@ -13,11 +12,7 @@ public sealed class ScheduleImportService(
     ITrainCategoriesService categoriesService,
     ILoggerFactory loggerFactory)
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions();
 
     public async Task<ImportResult<Plan>> ImportFromJsonAsync(Stream stream, string name)
     {

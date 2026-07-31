@@ -4,11 +4,15 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
 public static class TrainGraphExtensions
 {
+    /// <summary>The legs the train runs: each consecutive pair of its calls <em>in run order</em>.
+    /// <see cref="Train.Calls"/> is in insertion order, which on a hand-edited train pairs calls the
+    /// train does not run one after the other, drawing lines the train never travels.</summary>
     public static IEnumerable<StretchUse> StretchUses(this Train train)
     {
-        for (var callIndex = 0; callIndex < train.Calls.Count - 1; callIndex++)
+        var calls = train.CallsInRunOrder;
+        for (var callIndex = 0; callIndex < calls.Count - 1; callIndex++)
         {
-            yield return new StretchUse(train, callIndex);
+            yield return new StretchUse(train, calls[callIndex], calls[callIndex + 1]);
         }
     }
 

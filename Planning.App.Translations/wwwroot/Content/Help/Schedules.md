@@ -19,6 +19,12 @@ On a row,
 - **+ train** appends the next train — choose only part of it (a from/to stop)
 when a train must be split between vehicles, for example at a change from electric to diesel
 traction. 
+- The **pen** on a train part changes how much of its train the schedule works: pick a new from- or
+to-stop. The train itself stays; to work a different train, remove the part and add the other one.
+The neighbouring part that joins the one you change follows along, so the working stays whole —
+shorten a part from A–C to A–B and the return working becomes B–A by itself. When the neighbour's
+own train does not call at the new stop it is left as it is, and the gap is reported as a conflict
+for you to resolve.
 -  **+ vehicle** assigns a vehicle, creating a new one when needed; a schedule may carry
 several vehicles (such as a locomotive and its coach set). Cargo flows are shown as turnus cards in
 the reports rather than here.

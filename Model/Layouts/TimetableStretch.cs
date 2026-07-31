@@ -177,19 +177,21 @@ public static class TimetableStretchExtensions
         /// it is that station's displayed kilometre on the diverged-from stretch, so the branch keeps counting
         /// from where it leaves the main line. Divergences may chain (a branch off a branch); the offset then
         /// accumulates along the chain, and shared stations that form a cycle are guarded against. The raw
-        /// metre offset is scaled by the layout's <c>TimeAndSpeedSettings.DistanceFactor</c>.
+        /// metre offset is scaled by the layout's <c>TimeAndSpeedSettings.DistanceFactor</c> and rounded
+        /// to a whole kilometre.
         /// </summary>
-        public double StartKilometer => ComputeStartKilometer(stretch, []) * DistanceFactor(stretch);
+        public double StartKilometer => Kilometer(ComputeStartKilometer(stretch, []), stretch);
 
         /// <summary>
         /// The displayed kilometre at <paramref name="station"/>: its <c>DistanceToStation</c> along this
-        /// stretch, scaled by the layout's <c>TimeAndSpeedSettings.DistanceFactor</c> and shifted by
-        /// <c>StartKilometer</c>, so a diverging branch continues counting from the kilometre of its
-        /// junction on the line it leaves. Zero when the station is not on this stretch.
+        /// stretch, shifted by the metre offset behind <c>StartKilometer</c> so a diverging branch continues
+        /// counting from the kilometre of its junction on the line it leaves, then scaled by the layout's
+        /// <c>TimeAndSpeedSettings.DistanceFactor</c> and rounded to a whole kilometre. Zero when the station
+        /// is not on this stretch.
         /// </summary>
         /// <param name="station">The target station.</param>
         public double DisplayedDistanceToStation(OperationLocation station) =>
-            stretch.DistanceToStation(station) is { } local ? stretch.StartKilometer + (local * DistanceFactor(stretch)) : 0.0;
+            stretch.DistanceToStation(station) is { } local ? Kilometer(ComputeStartKilometer(stretch, []) + local, stretch) : 0.0;
 
         /// <summary>
         /// The first track stretch that does not continue from the previous one (its <c>Start</c> differs
@@ -268,6 +270,12 @@ public static class TimetableStretchExtensions
     // stretches yet (e.g. a newly created, unsaved timetable stretch).
     private static double DistanceFactor(TimetableStretch stretch) =>
         stretch.Stretches.Count > 0 ? stretch.Stretches.First().Layout.Settings.TimeAndSpeed.DistanceFactor : 1.0;
+
+    // Scales a raw metre distance to the displayed kilometre. Kilometres are whole numbers, so the scaled
+    // value is rounded; the whole metre offset is added before scaling, so that a branch and the line it
+    // leaves round the junction to the same kilometre.
+    private static double Kilometer(double meters, TimetableStretch stretch) =>
+        Math.Round(meters * DistanceFactor(stretch), MidpointRounding.AwayFromZero);
 
     // Walks the chain of stretches this one diverges from, summing each junction's distance. A stretch diverges
     // from another when its start station is a through point (distance > 0) of that other stretch; the lowest

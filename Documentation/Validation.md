@@ -47,6 +47,7 @@ public sealed record ValidationError
 | `TrainSpeedTooSlow` | Train speed is too slow between calls |
 | `TrainSpeedTooFast` | Train speed is too fast between calls |
 | `TrainTooFewCalls` | Train must have at least two station calls |
+| `TrainRouteNotConnected` | Two calls the train runs one after the other have no track stretch between them |
 | `VehicleScheduleOverlap` | Vehicle schedule has overlapping train parts |
 | `LocomotiveCoverageGap` | Train has a gap in locomotive coverage |
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
@@ -68,10 +69,11 @@ public sealed class ValidationSettings
     public bool ValidateStationTracks { get; set; } = true;
     public bool ValidateStretches { get; set; } = true;
     public bool ValidateTrainSpeed { get; set; } = true;
-    public bool ValidateTrainNumbers { get; set; } = true;      // Not implemented
-    public bool ValidateVehicleSchedules { get; set; } = true;
+    public bool ValidateRouteContinuity { get; set; } = true;
+    public bool ValidateTrainNumbers { get; set; } = true;
+    public bool ValidateSchedules { get; set; } = true;
     public bool ValidateLocomotiveCoverage { get; set; } = true;
-    public bool ValidateDriverDuties { get; set; } = true;      // Not implemented
+    public bool ValidateDriverDuties { get; set; } = true;
 
     // Threshold values
     public double MinTrainSpeedMetersPerClockMinute { get; set; } = 0.3;
@@ -132,7 +134,9 @@ status (✅ done · 🟡 partial · ❌ missing).
 
 **Validates**: Trains simultaneously on a stretch ≤ track count, **both directions counted together**
 
-**Logic**: Passings sorted by departure; an *i* vs *i + TracksCount* overlap test (direction-agnostic)
+**Logic**: Passings sorted by departure; an *i* vs *i + TracksCount* overlap test (direction-agnostic).
+A train's passings are its pairs of calls in run order (`Train.CallsInRunOrder`), so a leg is not missed
+on a train whose calls were added in another order than it runs them.
 
 **Error**: `"Train {train1} between {stretch1} is conflicting with train {train2} between {stretch2}."`
 
@@ -145,6 +149,13 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 **Method**: `CheckTrainTimeSequence(this Train me)`
 
 **Validates**: Train has at least two station calls (T1); calls are ascending and arrival ≤ departure (T2)
+
+**Successive calls** are the pairs of `Train.CallsInRunOrder` — the calls ordered by `SortTime`, which is
+the order the train runs them and the order the Trains tab lists them. `Train.Calls` is in insertion
+order, which is not run order (a call added last can be timed first), so pairing calls in that order
+would report conflicts between calls the train does not run one after the other. What remains a conflict
+after ordering is a train whose times contradict themselves — above all one that reaches the next location
+before it has left the previous one.
 
 **Errors**:
 - `"Train {train} must stop at at least two stations."`
@@ -160,7 +171,9 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 #### T3 — Train speed ✅
 **Method**: `CheckTrainSpeed(this Train me, ...)`
 
-**Validates**: Speed between consecutive calls within `Min`/`MaxTrainSpeedMetersPerClockMinute`
+**Validates**: Speed between consecutive calls within `Min`/`MaxTrainSpeedMetersPerClockMinute`. Every leg
+in run order is checked, the one into the terminus included; a leg whose locations have no track stretch is
+skipped here and reported by T5 instead.
 
 **Errors**:
 - `"Train {train} speed from {station1} {time1} to {station2} {time2} is too slow, length {distance} meters."`
@@ -172,6 +185,26 @@ No dedicated diagnostic; emergent from L2 (single-track meet → same-track conf
 **Validates**: Trains equal on Company+Category+Number run on disjoint sessions. Trains are grouped by (company, category, number) and every pair whose sessions overlap is flagged. Gated by `ValidateTrainNumbers`.
 
 **Error**: `"Trains {train1} and {train2} have the same number but run on overlapping sessions {sessions}."` (`DuplicateTrainNumber`)
+
+#### T5 — Route continuity ✅
+**Method**: `CheckRouteContinuity(this Train me)`
+
+**Validates**: Every leg the train runs — each pair of calls in run order — is a track stretch of the
+layout. A train travels a stretch by departing its start and arriving at its end, so it must call at both
+ends of every stretch on its way; two successive calls with no stretch between them are a route that jumps
+a location, which no train can run. Gated by `ValidateRouteContinuity`.
+
+**Not a gap**: two successive calls at the same operating location (a train changing track there) travel no
+stretch. Connectivity is judged in either direction, a stretch being bidirectional.
+
+**Error**: `"Train {train} runs from {location1} {time1} to {location2} {time2}, but the layout has no track
+stretch between these locations."` (`TrainRouteNotConnected`)
+
+This rule is why a call in the middle of a route may not be deleted, only one at either end: removing an
+intermediate call would leave the route jumping the location it stood for. The deletion rule
+(`DeletionRules.MayDelete(StationCall)`) enforces that up front, so the planner cannot create the fault by
+deleting; T5 reports it in a plan that already has it — from a hand-edited file, a re-pointed call, or a
+stretch removed from the layout under a train that used it.
 
 ### Schedule scope (S) — vehicle schedule / turnus
 
@@ -318,6 +351,7 @@ Plan.GetValidationErrors(options)
   │     │
   │     ├─► EnsureStationHasTrack()           [always]        P1
   │     ├─► CheckTrainTimeSequence()          [always]        T1, T2
+  │     ├─► CheckRouteContinuity()            [ValidateRouteContinuity] T5
   │     ├─► StationTrack.GetValidationErrors()[ValidateStationTracks]  L2
   │     ├─► StationCall.GetValidationErrors() [ValidateStationCalls]   T2
   │     ├─► TrackStretch.GetValidationErrors()[ValidateStretches]      L3
@@ -335,7 +369,7 @@ Plan.GetValidationErrors(options)
 ## Known Issues / TODOs
 
 Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
-Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, S1, S2, S3,
+Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, T5, S1, S2, S3,
 S4, S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), P2. Note L3
 counts trains on a stretch **direction-agnostically** (one train per track, both directions
 together) — the existing capacity check is correct as-is, not a direction bug.

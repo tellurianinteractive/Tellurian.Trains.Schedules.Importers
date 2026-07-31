@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -668,5 +669,233 @@ public class ScheduleEditingTests
         var assignment = vehicle.ScheduleAssignments.First(a => clone.Equals(a.Schedule));
         CollectionAssert.AreEqual(new byte[] { 1, 2, 3 }, assignment.Sessions.Numbers,
             "The clone keeps the origin assignment's sessions.");
+    }
+
+    // Editing a part's span. The stations are G – Yb – Snu; the forward train runs G 12:00 → Yb 12:25/12:30
+    // → Snu 12:55 and the return train Snu 13:00 → Yb 13:25/13:30 → G 13:55.
+    private static string Span(ScheduledTrainPart part) =>
+        $"{part.From.OperationLocation.Signature}–{part.To.OperationLocation.Signature}";
+
+    private static StationCall CallAt(Train train, string signature) =>
+        train.Calls.First(c => c.OperationLocation.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase));
+
+    // The whole forward run followed by the whole return run: G–Snu, Snu–G.
+    private static (Schedule Schedule, ScheduledTrainPart Out, ScheduledTrainPart Back) CreateOutAndBack(Plan plan)
+    {
+        var schedule = plan.CreateSchedule();
+        var outward = schedule.Add(Forward(plan).AsTrainPart);
+        var back = schedule.Add(Return(plan).AsTrainPart);
+        return (schedule, outward, back);
+    }
+
+    // A train whose calls were added in another order than it runs them: the origin G 12:00 first, then
+    // the terminus Snu 12:55, and only then the Yb stop in between — so Calls and CallsInRunOrder differ.
+    private static Train CreateTrainWithCallsAddedOutOfRunOrder(Plan plan, TrainCategory category)
+    {
+        var stations = TestDataFactory.Stations.ToArray();
+        var train = new Train(9, category, 9) { Category = category };
+        train.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 00)));
+        train.Add(new StationCall(2, stations[2]["1"], Time.FromHourAndMinute(12, 55), Time.FromHourAndMinute(12, 55)));
+        train.Add(new StationCall(3, stations[1]["2"], Time.FromHourAndMinute(12, 25), Time.FromHourAndMinute(12, 30)));
+        plan.Timetable.Add(train);
+        return train;
+    }
+
+    [TestMethod]
+    public void ATrainPartIsTakenFromTheCallsInRunOrderNotInsertionOrder()
+    {
+        var plan = CreatePlan();
+        var train = CreateTrainWithCallsAddedOutOfRunOrder(plan, Forward(plan).Category!);
+
+        var part = train.AsTrainPart(0, 1);
+
+        Assert.AreEqual("G–Yb", Span(part), "Index 1 is the stop the train runs second, not the call added second.");
+        Assert.AreEqual("G–Snu", Span(train.AsTrainPart), "The whole train still runs from its first stop to its last.");
+    }
+
+    [TestMethod]
+    public void TheJoinCallIndexIsAPositionInTheRunOrderedCalls()
+    {
+        var plan = CreatePlan();
+        var category = Forward(plan).Category!;
+        var earlier = TestDataFactory.CreateTrainInForwardDirection(category, 4, Time.FromHourAndMinute(11, 00));
+        plan.Timetable.Add(earlier);
+        var train = CreateTrainWithCallsAddedOutOfRunOrder(plan, category);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(earlier.AsTrainPart(0, 1)); // G–Yb, arriving 11:25
+
+        var index = schedule.JoinCallIndexFor(train);
+
+        Assert.AreEqual(1, index, "Yb is the train's second stop in run order, though its call was added last.");
+        Assert.AreEqual("Yb–Snu", Span(train.AsTrainPart(index!.Value, 2)),
+            "The picker builds the part from that same index, so it gets the run the planner sees.");
+    }
+
+    [TestMethod]
+    public void ChangingAPartStartMovesThePreviousPartEndToMeetIt()
+    {
+        var plan = CreatePlan();
+        var (schedule, outward, back) = CreateOutAndBack(plan);
+
+        var edit = schedule.EditPart(back, CallAt(Return(plan), "Yb"), back.To);
+
+        Assert.IsTrue(edit.HasValue, edit.Message);
+        Assert.AreEqual("Yb–G", Span(back), "The edited part starts where it was asked to.");
+        Assert.AreEqual("G–Yb", Span(outward), "The previous part is shortened to end where the next one now starts.");
+        Assert.IsTrue(edit.Value.AdaptsPrevious);
+        Assert.IsTrue(edit.Value.IsConsistent, "The working is still a single contiguous, non-overlapping run.");
+    }
+
+    [TestMethod]
+    public void ChangingAPartEndMovesTheNextPartStartToMeetIt()
+    {
+        var plan = CreatePlan();
+        var (schedule, outward, back) = CreateOutAndBack(plan);
+
+        var edit = schedule.EditPart(outward, outward.From, CallAt(Forward(plan), "Yb"));
+
+        Assert.IsTrue(edit.HasValue, edit.Message);
+        Assert.AreEqual("G–Yb", Span(outward));
+        Assert.AreEqual("Yb–G", Span(back), "The next part is adapted to start where the previous one now ends.");
+        Assert.IsTrue(edit.Value.AdaptsNext);
+        Assert.IsTrue(edit.Value.IsConsistent);
+    }
+
+    [TestMethod]
+    public void ANeighbourIsExtendedWhenTheJointMovesFurtherAlongItsRun()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        var outward = schedule.Add(Forward(plan).AsTrainPart(0, 1)); // G–Yb
+        var back = schedule.Add(Return(plan).AsTrainPart(1, 2));     // Yb–G
+
+        var edit = schedule.EditPart(back, CallAt(Return(plan), "Snu"), back.To);
+
+        Assert.IsTrue(edit.HasValue, edit.Message);
+        Assert.AreEqual("Snu–G", Span(back));
+        Assert.AreEqual("G–Snu", Span(outward), "A neighbour is extended as readily as it is shortened.");
+        Assert.IsTrue(edit.Value.IsConsistent);
+    }
+
+    [TestMethod]
+    public void AdaptingANeighbourLeavesTheRestOfTheWorkingAlone()
+    {
+        var plan = CreatePlan();
+        var category = Forward(plan).Category!;
+        var second = TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(14, 00));
+        plan.Timetable.Add(second);
+        var schedule = plan.CreateSchedule();
+        var outward = schedule.Add(Forward(plan).AsTrainPart); // G–Snu
+        var back = schedule.Add(Return(plan).AsTrainPart);     // Snu–G
+        var last = schedule.Add(second.AsTrainPart);           // G–Snu, from 14:00
+
+        schedule.EditPart(back, CallAt(Return(plan), "Yb"), back.To);
+
+        Assert.AreEqual("G–Yb", Span(outward), "Only the neighbour's joint end moves...");
+        Assert.AreEqual("G", outward.From.OperationLocation.Signature, "...its own far end stays where it was.");
+        Assert.AreEqual("G–Snu", Span(last), "The part after the edited one is untouched when only the start changed.");
+    }
+
+    [TestMethod]
+    public void AnEditTheNeighbourCannotFollowIsAppliedAndLeavesAGap()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        var outward = schedule.Add(Forward(plan).AsTrainPart(1, 2)); // Yb–Snu
+        var back = schedule.Add(Return(plan).AsTrainPart);           // Snu–G
+
+        // The previous part's train calls at Yb only where that part itself starts, so it cannot end there.
+        var edit = schedule.EditPart(back, CallAt(Return(plan), "Yb"), back.To);
+
+        Assert.IsTrue(edit.HasValue, edit.Message);
+        Assert.AreEqual("Yb–G", Span(back), "The edit the planner asked for is applied...");
+        Assert.AreEqual("Yb–Snu", Span(outward), "...and the neighbour that cannot follow is left as it was.");
+        Assert.IsFalse(edit.Value.AdaptsPrevious);
+        Assert.IsTrue(edit.Value.LeavesGapBefore);
+        var errors = plan.GetValidationErrors(new ValidationSettings());
+        Assert.Contains(ValidationErrorType.ScheduleNotContiguous, errors.Select(e => e.ErrorType).ToList(),
+            "The gap is reported as a conflict for the planner to resolve.");
+    }
+
+    [TestMethod]
+    public void AGapThatWasAlreadyThereIsNotClosedAsASideEffect()
+    {
+        var plan = CreatePlan();
+        var category = Forward(plan).Category!;
+        var earlier = TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(11, 00));
+        plan.Timetable.Add(earlier);
+        var schedule = plan.CreateSchedule();
+        var first = schedule.Add(earlier.AsTrainPart);        // G–Snu, 11:00–11:55
+        var second = schedule.Add(Forward(plan).AsTrainPart); // G–Snu, 12:00–12:55: the working is broken here
+
+        var edit = schedule.EditPart(second, CallAt(Forward(plan), "Yb"), second.To);
+
+        Assert.IsTrue(edit.HasValue, edit.Message);
+        Assert.AreEqual("Yb–Snu", Span(second));
+        Assert.AreEqual("G–Snu", Span(first), "A working already broken at the joint keeps its gap rather than being rewritten.");
+        Assert.IsFalse(edit.Value.AdaptsPrevious);
+    }
+
+    [TestMethod]
+    public void AnEditedPartKeepsItsIdentitySoADriverDutyFollowsIt()
+    {
+        var plan = CreatePlan();
+        var (schedule, _, back) = CreateOutAndBack(plan);
+        var duty = plan.CreateDriverDuty();
+        duty.Add(back);
+
+        schedule.EditPart(back, CallAt(Return(plan), "Yb"), back.To);
+
+        Assert.AreEqual("Yb–G", Span(duty.Parts.Single()), "The duty works the part the vehicle works.");
+    }
+
+    [TestMethod]
+    public void PlanningAnEditChangesNothing()
+    {
+        var plan = CreatePlan();
+        var (schedule, outward, back) = CreateOutAndBack(plan);
+
+        var planned = schedule.PlanPartEdit(back, CallAt(Return(plan), "Yb"), back.To);
+
+        Assert.IsTrue(planned.HasValue, planned.Message);
+        Assert.IsTrue(planned.Value.AdaptsPrevious, "The preview tells that the previous part would be adapted...");
+        Assert.AreEqual("Snu–G", Span(back), "...but nothing is changed until the edit is applied.");
+        Assert.AreEqual("G–Snu", Span(outward));
+    }
+
+    [TestMethod]
+    public void EditIsRejectedWhenTheCallsAreNotOnThePartsOwnTrain()
+    {
+        var plan = CreatePlan();
+        var (schedule, _, back) = CreateOutAndBack(plan);
+
+        var edit = schedule.EditPart(back, CallAt(Forward(plan), "G"), back.To);
+
+        Assert.IsTrue(edit.IsNone, "A part keeps its train; only its span can be changed.");
+        Assert.AreEqual("Snu–G", Span(back));
+    }
+
+    [TestMethod]
+    public void EditIsRejectedWhenTheArrivalIsNotAfterTheDeparture()
+    {
+        var plan = CreatePlan();
+        var (schedule, _, back) = CreateOutAndBack(plan);
+
+        var edit = schedule.EditPart(back, back.To, back.From);
+
+        Assert.IsTrue(edit.IsNone, "A part must cover at least one leg.");
+        Assert.AreEqual("Snu–G", Span(back));
+    }
+
+    [TestMethod]
+    public void EditIsRejectedForAPartThatIsNotInTheSchedule()
+    {
+        var plan = CreatePlan();
+        var (schedule, _, _) = CreateOutAndBack(plan);
+        var other = Forward(plan).AsTrainPart(0, 1);
+
+        var edit = schedule.EditPart(other, other.From, other.To);
+
+        Assert.IsTrue(edit.IsNone);
     }
 }

@@ -684,7 +684,8 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         });
 
         // CargoFlowOptions: a reusable cargo flow description in the timetable catalogue, referenced by
-        // CargoFlowTrainParts. Owns its origin and destination collections (each referencing a Station).
+        // CargoFlowTrainParts. Owns its origin and destination collections (each referencing a cargo-
+        // exchanging OperationLocation, which may be a Station or an IndustrialArea).
         modelBuilder.Entity<CargoFlowOptions>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -695,7 +696,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 origin.ToTable("CargoFlowOrigins");
                 origin.Property<int>("Id").ValueGeneratedOnAdd();
                 origin.HasKey("Id");
-                origin.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                origin.HasOne(x => x.Location).WithMany().OnDelete(DeleteBehavior.Restrict);
             });
 
             entity.OwnsMany(c => c.Destinations, destination =>
@@ -703,7 +704,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 destination.ToTable("CargoFlowDestinations");
                 destination.Property<int>("Id").ValueGeneratedOnAdd();
                 destination.HasKey("Id");
-                destination.HasOne(x => x.Station).WithMany().OnDelete(DeleteBehavior.Restrict);
+                destination.HasOne(x => x.Location).WithMany().OnDelete(DeleteBehavior.Restrict);
                 // Computed markup rendering, not persisted.
                 destination.Ignore(x => x.ToHtml);
             });

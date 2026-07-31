@@ -23,21 +23,22 @@
 
             @if (SelectedTrain is { } train)
             {
+                var calls = train.CallsInRunOrder;
                 <div class="field">
                     <label>@Translator("From")</label>
                     <select value="@_from" disabled="@FromFixed" @onchange="e => SetFrom(e)">
-                        @for (var i = 0; i < train.Calls.Count - 1; i++)
+                        @for (var i = 0; i < calls.Count - 1; i++)
                         {
-                            <option value="@i">@CallText(train.Calls[i], departure: true)</option>
+                            <option value="@i">@CallText(calls[i], departure: true)</option>
                         }
                     </select>
                 </div>
                 <div class="field">
                     <label>@Translator("To")</label>
                     <select value="@_to" @onchange="e => SetTo(e)">
-                        @for (var i = _from + 1; i < train.Calls.Count; i++)
+                        @for (var i = _from + 1; i < calls.Count; i++)
                         {
-                            <option value="@i">@CallText(train.Calls[i], departure: false)</option>
+                            <option value="@i">@CallText(calls[i], departure: false)</option>
                         }
                     </select>
                 </div>
@@ -119,6 +120,9 @@
     private static string CallText(StationCall call, bool departure) =>
         $"{call.OperationLocation.Signature} {(departure ? call.Departure : call.Arrival).HHMM()}";
 
-    private string PreviewText(Train train) =>
-        $"{CallText(train.Calls[_from], departure: true)} → {CallText(train.Calls[_to], departure: false)}";
+    private string PreviewText(Train train)
+    {
+        var calls = train.CallsInRunOrder;
+        return $"{CallText(calls[_from], departure: true)} → {CallText(calls[_to], departure: false)}";
+    }
 }

@@ -391,6 +391,22 @@ public static class LayoutTracksExtensions
                 (ts.Start.Equals(to) && ts.End.Equals(from))),
                 string.Format(CultureInfo.CurrentCulture, Strings.MoreThanOneStretchBetweenStations, from, to));
 
+        /// <summary>
+        /// Determines whether a track stretch joins the two operating locations, so a train can run
+        /// directly between them. A stretch is bidirectional, so the order of the arguments does not matter.
+        /// </summary>
+        /// <param name="from">One end.</param>
+        /// <param name="to">The other end.</param>
+        /// <remarks>
+        /// Answers the question <c>TrackStretch(from, to)</c> does, but tolerates a layout that has more
+        /// than one stretch between the same pair — a fault of its own, not a reason for a caller asking
+        /// about connectivity to fail.
+        /// </remarks>
+        public bool IsConnected(OperationLocation from, OperationLocation to) =>
+            layout.TrackStretches.Any(ts =>
+                (ts.Start.Equals(from) && ts.End.Equals(to)) ||
+                (ts.Start.Equals(to) && ts.End.Equals(from)));
+
 
         /// <summary>
         /// Finds a track stretch between two stations by name or signature.

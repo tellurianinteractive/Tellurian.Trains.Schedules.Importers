@@ -43,6 +43,7 @@ public static class ValidationExtensions
             var timetable = plan.Timetable;
             result.AddRange(timetable.EnsureStationHasTrack());
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
+            if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
@@ -527,6 +528,44 @@ public static class ValidationExtensions
             List<ValidationError> result = [];
             result.AddRange(train.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             result.AddRange(train.CheckTrainTimeSequence());
+            if (options.ValidateRouteContinuity) result.AddRange(train.CheckRouteContinuity());
+            return result;
+        }
+
+        /// <summary>
+        /// Checks that the train's route is continuous: every leg it runs — each pair of calls it runs one
+        /// after the other — is a track stretch of the layout (rule T5).
+        /// </summary>
+        /// <remarks>
+        /// A train travels a stretch by departing its start and arriving at its end, so it must call at both
+        /// ends of every stretch on its way; a pair of successive calls with no stretch between them is a
+        /// route that jumps a location, which no train can run. This is why a call in the middle of a route
+        /// may not be deleted, only one at either end (see <c>DeletionRules.MayDelete(StationCall)</c>).
+        /// <para>
+        /// Two successive calls at the same operating location travel no stretch (a train changing track
+        /// there, for instance), so they are not a gap. Connectivity is judged by whether any stretch joins
+        /// the two locations, in either direction — a stretch is bidirectional.
+        /// </para>
+        /// </remarks>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckRouteContinuity()
+        {
+            var calls = train.CallsInRunOrder;
+            if (calls.Count < 2) return [];
+            // Connectivity is a question only the layout can answer; a train whose locations are not on one
+            // (a fragment under construction) is left to the referential-integrity rules.
+            if (train.Layout is not { } layout) return [];
+            var result = new List<ValidationError>();
+            for (var i = 0; i < calls.Count - 1; i++)
+            {
+                var from = calls[i];
+                var to = calls[i + 1];
+                if (from.OperationLocation.Equals(to.OperationLocation)) continue;
+                if (layout.IsConnected(from.OperationLocation, to.OperationLocation)) continue;
+                var message = Message.Information(Strings.TrainHasNoStretchBetweenCalls,
+                    train, from.OperationLocation, from.Departure.HHMM(), to.OperationLocation, to.Arrival.HHMM());
+                result.Add(ValidationError.TrainRouteNotConnected(from, to, message));
+            }
             return result;
         }
 
@@ -596,11 +635,14 @@ public static class ValidationExtensions
             }
         }
 
+        // Every leg the train runs is checked, the last one included, and the legs are the pairs of calls in
+        // run order (CallsInRunOrder) — insertion order would pair up calls the train does not run one after
+        // the other.
         private List<ValidationError> CheckTrainSpeed(double minTrainSpeedMetersPerClockMinute, double maxTrainSpeedMetersPerClockMinute)
         {
             var result = new List<ValidationError>();
-            var calls = train.Calls.ToArray();
-            for (var i = 0; i < calls.Length - 2; i++)
+            var calls = train.CallsInRunOrder;
+            for (var i = 0; i < calls.Count - 1; i++)
             {
                 var c1 = calls[i];
                 var c2 = calls[i + 1];
@@ -654,33 +696,23 @@ public static class ValidationExtensions
             return result;
         }
 
+        // Successive calls are the pairs in run order (CallsInRunOrder). Insertion order is not run order —
+        // a call added last can be timed first — and pairing calls the train does not run one after the
+        // other reports a conflict that is not one. What remains a conflict after ordering is a train whose
+        // times contradict themselves, above all one that reaches the next location before it has left the
+        // previous one.
         private List<(StationCall one, StationCall another)> GetCallConflicts()
         {
             var result = new List<(StationCall, StationCall)>();
-            if (train.Calls.Count == 2 && train.Calls.First().OperationLocation.Equals(train.Calls.Last().OperationLocation))
+            var calls = train.CallsInRunOrder;
+            for (var i = 0; i < calls.Count - 1; i++)
             {
-                var c1 = train.Calls.First();
-                var c2 = train.Calls.Last();
+                var c1 = calls[i];
+                var c2 = calls[i + 1];
                 if (c1.Arrival > c2.Departure) result.Add((c1, c2));
                 else if (c1.Arrival > c2.Arrival) result.Add((c1, c2));
                 else if (c1.Departure > c2.Arrival) result.Add((c1, c2));
                 else if (c1.Departure > c2.Departure) result.Add((c1, c2));
-
-                return result;
-            }
-            var calls = train.Calls.ToArray();
-
-            for (var i = 0; i < calls.Length - 1; i++)
-            {
-                var c1 = calls[i];
-                var c2 = calls[i + 1];
-                if (c2 != null)
-                {
-                    if (c1.Arrival > c2.Departure) result.Add((c1, c2));
-                    else if (c1.Arrival > c2.Arrival) result.Add((c1, c2));
-                    else if (c1.Departure > c2.Arrival) result.Add((c1, c2));
-                    else if (c1.Departure > c2.Departure) result.Add((c1, c2));
-                }
             }
             return result;
         }

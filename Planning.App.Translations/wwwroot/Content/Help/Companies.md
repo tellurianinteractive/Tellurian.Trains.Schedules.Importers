@@ -8,7 +8,8 @@ Each company has:
 
 - a **name**, its full name as shown in lists and reports;
 - a **signature**, the short abbreviation used to identify it (for example *DB* or *SJ*). The
-  signature must be unique within the layout;
+  signature must be unique within the layout.
+- a **logotype**, an image that can be uploaded.
 - a **country** it operates in. A company that operates in several countries is added once without company or per
   country of operation, so each entry pairs a company with one country.
 

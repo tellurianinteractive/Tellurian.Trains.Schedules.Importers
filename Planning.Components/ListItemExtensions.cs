@@ -58,7 +58,7 @@ public static class ListItemExtensions
     private static ListboxItem ToItem(CargoFlowOptions description, Translator translator)
     {
         var destinations = description.DestinationsSummary;
-        var origins = description.OriginStationNames;
+        var origins = description.OriginLocationNames;
         var classes = description.OnlyWagonClasses.Trim();
         var hasClasses = classes.Length > 0;
         var hasOrigins = description.Origins.Count > 0;

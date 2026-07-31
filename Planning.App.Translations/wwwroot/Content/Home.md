@@ -36,8 +36,10 @@ The tabs are ordered in the recommended steps to enter or import data:
 - **Train Categories** — the types of train (such as passenger and freight), each with its prefix,
   colour and optional operating company.
 - **Trains** — the trains, their station calls and their times.
+- **Cargo flows** - the description of how freight wagons with waybills should be transported.
 - **Graphical Timetable** — the time–distance diagram for each timetable stretch.
 - **Schedules** — the vehicle schedules and driver duties that operate the trains.
+- **Duties** - the work description for train drivers.
 - *Coming*: **Vehicle Owners** — who brings which of the needed rolling stock.
 
 ## Minimal Data Entry
@@ -60,14 +62,18 @@ create more realistic operations.
 ## Print Reports
 Printable content is prepared on the **Reports** tab and kept separate from the editing tabs.
 
+- **General Information** with programme, instructions and layout information.
 - **Timetable** for all timetable streches.
 - **Turnus Cards** for locomotives, trainsets, wagonsets and wagons.
-- *Coming*: Additional reports for graphical timetables, station displatch sheets,
-  Driver duties, Freight wagon order at stations, and more.
+- **Driver Duties**, a booklet with work instructions for train drivers.
+- *Coming*: **Graphical Timetable** print out.
+- *Coming*: **Dispatch sheets** for train dispatches at stations that also includes station instructions.
+- *Coming*: **Wagon destination order** in freight trains at selected stations, primarily for building freight trains at shadow yards.
 
 ## Reuse Earlier Work
 - **Import** — open a saved plan (`.json`) or import an XPLN spreadsheet (`.ods` / `.xlsx`).
 - *Coming*: **Partial import** - reuse data of choice from older plans.
+- *Coming*: Import of **Operation locations** for a meeting layouyt from the *Module Registry*.
 
 ## Use the Plan in Other Applications
 Share the plan with other tools, or save it to reopen later.

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model;
 
@@ -13,11 +12,7 @@ public class JsonImportService(FileInfo source) : IImportService
 {
     private readonly FileInfo _source = source;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions();
 
     /// <summary>
     /// Imports a schedule from a JSON file asynchronously.

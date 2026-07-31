@@ -84,13 +84,10 @@ public class GraphSchedule
 }
 
 /// <summary>
-/// Represents a train's use of a stretch between two consecutive station calls.
+/// Represents a train's use of a stretch between two consecutive station calls, in the order the train
+/// runs them (see <c>TrainGraphExtensions.StretchUses</c>).
 /// </summary>
-public record StretchUse(Train Train, int FromCallIndex)
-{
-    public StationCall From => Train.Calls[FromCallIndex];
-    public StationCall To => Train.Calls[FromCallIndex + 1];
-}
+public record StretchUse(Train Train, StationCall From, StationCall To);
 
 /// <summary>
 /// A single arrival or departure minute label ready to render: the call point it anchors to, the two-digit

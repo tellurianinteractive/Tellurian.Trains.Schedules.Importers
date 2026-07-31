@@ -303,19 +303,25 @@ public class XplnDataImporterTests
     // The import language and country are taken from the culture in each test file's name
     // (for example "Barmstedt2022.de-DE.ods"); the importer falls back to the current culture
     // for a file without a culture segment (for example "DreamTrack2015.ods").
+    //
+    // The expected validation-warning counts for H0e-Schutterwald2013 (9 -> 11),
+    // Kolding_Epoke_III_2022 (35 -> 49) and Langhurst 2019 (32 -> 43) rose when the speed check started
+    // covering a train's last leg, which it used to skip. The added findings are all slow final legs in
+    // the imported data. No file reports a route-continuity warning: every imported route runs over
+    // stretches of its layout.
     [TestMethod()]
     [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 29)]
     [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 2)]
     [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 44)]
     [DataRow("FREMODERN-2023-Norge", 10, 41, 13, 0, 0, 20, 10, 1)]
     [DataRow("Givskud2021", 25, 143, 49, 74, 80, 109, 25, 31)]
-    [DataRow("H0e-Schutterwald2013", 10, 26, 6, 0, 20, 25, 10, 9)]
+    [DataRow("H0e-Schutterwald2013", 10, 26, 6, 0, 20, 25, 10, 11)]
     [DataRow("Hellerup2015", 18, 60, 24, 0, 87, 20, 18, 9)]
-    [DataRow("Kolding_Epoke_III_2022", 19, 60, 16, 15, 18, 38, 19, 35)]
+    [DataRow("Kolding_Epoke_III_2022", 19, 60, 16, 15, 18, 38, 19, 49)]
     [DataRow("Kolding202009", 5, 38, 13, 1, 4, 28, 5, 2)]
     [DataRow("Kolding2022", 14, 73, 26, 6, 10, 55, 14, 3)]
     [DataRow("KoldingNorge2019", 13, 56, 17, 0, 0, 56, 13, 10)]
-    [DataRow("Langhurst 2019", 6, 15, 4, 7, 11, 4, 6, 32)]
+    [DataRow("Langhurst 2019", 6, 15, 4, 7, 11, 4, 6, 43)]
     [DataRow("LTK2020", 0, 0, 0, 0, 0, 0, 0, 0, 18)]
     [DataRow("Magdeburg_v_DB33_DSB32_WTB11", 0, 0, 0, 0, 0, 0, 0, 0, 40)]
     [DataRow("Montan2023H0e", 5, 32, 3, 4, 24, 3, 5, 1)]

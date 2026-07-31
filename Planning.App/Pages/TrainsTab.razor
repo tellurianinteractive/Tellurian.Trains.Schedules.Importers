@@ -3,6 +3,7 @@
 @using Tellurian.Trains.Schedules.Model.Layouts
 @using Tellurian.Trains.Schedules.Model.Timetables
 @using Tellurian.Trains.Schedules.Model.Validations
+@using Tellurian.Trains.Schedules.Planning.Timetables
 @inject ScheduleStateService ScheduleState
 @inject ValidationStateService ValidationState
 @inject Translator Translator
@@ -14,14 +15,22 @@
 }
 else
 {
-    <div class="trains-editor">
+    @* The widest external id sets the width of that column, so imported ids are not clipped. *@
+    <div class="trains-editor" style="--ext-width:@ExternalIdWidth">
         <p class="hint">@Translator("TrainsDescription")</p>
+
+        @{ var groups = TrainGroups; }
 
         <div class="toolbar">
             <button class="primary" @onclick="AddTrain">@Translator("AddTrain")</button>
+            @if (groups.Count > 1)
+            {
+                <button @onclick="ExpandAllCategories"><i class="fa-solid fa-angles-down"></i> @Translator("ExpandAll")</button>
+                <button @onclick="() => CollapseAllCategories(groups)"><i class="fa-solid fa-angles-up"></i> @Translator("CollapseAll")</button>
+            }
         </div>
 
-        @if (Trains.Count == 0)
+        @if (groups.Count == 0)
         {
             <p class="empty">@Translator("NoTrains")</p>
         }
@@ -48,77 +57,98 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var train in Trains)
+                    @foreach (var group in groups)
                     {
-                        var conflict = ConflictTitle(train);
-                        <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflict is not null ? "has-conflict" : "")" title="@conflict">
+                        var groupExpanded = IsExpanded(group);
+                        <tr class="category @(group.Trains.Any(HasConflict) ? "has-conflict" : "")">
                             <td class="expander">
-                                <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
-                                        @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                                <button class="toggle" title="@Translator(groupExpanded ? "Collapse" : "Expand")"
+                                        @onclick="() => ToggleExpanded(group)"><i class="fa-solid @(groupExpanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
                             </td>
-                            @if (ShowExternalId)
-                            {
-                                <td>
-                                    <input type="text" class="ext" value="@train.ExternalId"
-                                           @onchange="e => SetExternalId(train, e)" />
-                                </td>
-                            }
-                            <td>
-                                @{ var inheritedCompany = train.Category?.Company; }
-                                <ListBoxView Items="@(CompanyChoices.ToListItems())"
-                                             Value="train.CompanyId" ValueChanged="id => SetCompany(train, id)"
-                                             Class="@(train.Company is null ? "inherited" : null)"
-                                             Placeholder="@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")" />
-                            </td>
-                            <td>
-                                <input type="number" class="num" value="@train.Number" @onchange="e => SetNumber(train, e)" />
-                            </td>
-                            <td>
-                                <select value="@SessionsKey(train)" @onchange="e => SetSessions(train, e)">
-                                    @if (!SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == SessionsKey(train)))
-                                    {
-                                        <option value="@SessionsKey(train)" selected>@SessionsText(train.Sessions)</option>
-                                    }
-                                    @foreach (var sessions in SessionsCatalogue)
-                                    {
-                                        <option value="@SessionsDisplay.Key(sessions)">@SessionsText(sessions)</option>
-                                    }
-                                </select>
-                            </td>
-                            <td>
-                                <ListBoxView Items="@(CategoryChoices.ToListItems())"
-                                             Value="train.CategoryId" ValueChanged="id => SetCategory(train, id)"
-                                             Placeholder="—" />
-                            </td>
-                            <td>
-                                <input type="number" class="num" min="0" value="@train.MaxSpeed"
-                                       placeholder="@(train.Category?.DefaultSpeed.ToString(Culture))"
-                                       @onchange="e => SetMaxSpeed(train, e)" />
-                            </td>
-                            <td><input type="number" class="num3" min="0" value="@train.Length.Axles" @onchange="e => SetAxles(train, e)" /></td>
-                            <td><input type="number" class="num3" min="0" value="@train.Length.Wagons" @onchange="e => SetWagons(train, e)" /></td>
-                            <td><input type="text" class="num3"
-                                       value="@train.Length.Meters?.ToString("0.#", Culture)" @onchange="e => SetMeters(train, e)" /></td>
-                            <td class="continues">
-                                <input type="checkbox" checked="@train.ShowContinuesAs"
-                                       title="@Translator("ShowContinuesAsHint")" @onchange="e => SetShowContinuesAs(train, e)" />
-                            </td>
-                            <td class="actions">
-                                @{ var deletion = Plan?.MayDelete(train); }
-                                <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
-                                    <button class="danger" disabled="@(deletion?.IsDenied == true)"
-                                            @onclick="() => _deleteTarget = train"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
-                                </span>
+                            <td colspan="@(ColumnCount - 1)">
+                                @if (group.Category is { } groupCategory)
+                                {
+                                    <span class="swatch" style="background-color:@groupCategory.Color"></span>
+                                }
+                                <span class="name">@GroupName(group)</span>
+                                <span class="count">(@group.Trains.Count)</span>
                             </td>
                         </tr>
-                        @if (IsExpanded(train))
+                        @if (groupExpanded)
                         {
-                            <tr class="detail">
-                                <td></td>
-                                <td colspan="@(ShowExternalId ? 11 : 10)">
-                                    @CallsTable(train)
-                                </td>
-                            </tr>
+                            foreach (var train in group.Trains)
+                            {
+                                var conflict = ConflictTitle(train);
+                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflict is not null ? "has-conflict" : "")" title="@conflict">
+                                    <td class="expander">
+                                        <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
+                                                @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                                    </td>
+                                    @if (ShowExternalId)
+                                    {
+                                        <td>
+                                            <input type="text" class="ext" value="@train.ExternalId"
+                                                   @onchange="e => SetExternalId(train, e)" />
+                                        </td>
+                                    }
+                                    <td>
+                                        @{ var inheritedCompany = train.Category?.Company; }
+                                        <ListBoxView Items="@(CompanyChoices.ToListItems())"
+                                                     Value="train.CompanyId" ValueChanged="id => SetCompany(train, id)"
+                                                     Class="@(train.Company is null ? "inherited" : null)"
+                                                     Placeholder="@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="num" value="@train.Number" @onchange="e => SetNumber(train, e)" />
+                                    </td>
+                                    <td>
+                                        <select value="@SessionsKey(train)" @onchange="e => SetSessions(train, e)">
+                                            @if (!SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == SessionsKey(train)))
+                                            {
+                                                <option value="@SessionsKey(train)" selected>@SessionsText(train.Sessions)</option>
+                                            }
+                                            @foreach (var sessions in SessionsCatalogue)
+                                            {
+                                                <option value="@SessionsDisplay.Key(sessions)">@SessionsText(sessions)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <ListBoxView Items="@(CategoryChoices.ToListItems())"
+                                                     Value="train.CategoryId" ValueChanged="id => SetCategory(train, id)"
+                                                     Placeholder="—" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="num" min="0" value="@train.MaxSpeed"
+                                               placeholder="@(train.Category?.DefaultSpeed.ToString(Culture))"
+                                               @onchange="e => SetMaxSpeed(train, e)" />
+                                    </td>
+                                    <td><input type="number" class="num3" min="0" value="@train.Length.Axles" @onchange="e => SetAxles(train, e)" /></td>
+                                    <td><input type="number" class="num3" min="0" value="@train.Length.Wagons" @onchange="e => SetWagons(train, e)" /></td>
+                                    <td><input type="text" class="num3"
+                                               value="@train.Length.Meters?.ToString("0.#", Culture)" @onchange="e => SetMeters(train, e)" /></td>
+                                    <td class="continues">
+                                        <input type="checkbox" checked="@train.ShowContinuesAs"
+                                               title="@Translator("ShowContinuesAsHint")" @onchange="e => SetShowContinuesAs(train, e)" />
+                                    </td>
+                                    <td class="actions">
+                                        @{ var deletion = Plan?.MayDelete(train); }
+                                        <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
+                                            <button class="danger" disabled="@(deletion?.IsDenied == true)"
+                                                    @onclick="() => _deleteTarget = train"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                                        </span>
+                                    </td>
+                                </tr>
+                                @if (IsExpanded(train))
+                                {
+                                    <tr class="detail">
+                                        <td></td>
+                                        <td colspan="@(ColumnCount - 1)">
+                                            @CallsTable(train)
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         }
                     }
                 </tbody>
@@ -160,6 +190,15 @@ else
     // The ExternalId column is only meaningful for imported trains; hide it when nothing uses it.
     private bool ShowExternalId => Trains.Any(t => !string.IsNullOrWhiteSpace(t.ExternalId));
 
+    // External ids are as long as the system they were imported from made them, so the field is sized to
+    // the longest one instead of clipping every id to a fixed width. Bounded so that neither a very short
+    // nor a stray very long id makes the column look wrong.
+    private string ExternalIdWidth =>
+        $"{Math.Clamp(Trains.Select(t => t.ExternalId.Length).DefaultIfEmpty(0).Max() + 2, 8, 32)}ch";
+
+    // Expander, the optional ExternalId, the nine train fields and the actions cell.
+    private int ColumnCount => ShowExternalId ? 12 : 11;
+
     private IEnumerable<Company> CompanyChoices =>
         (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
 
@@ -170,7 +209,42 @@ else
         Timetable?.Sessions ?? [];
 
     private readonly HashSet<int> _expanded = [];
+    private readonly HashSet<int> _collapsedCategories = [];
     private Train? _deleteTarget;
+
+    // ---- Category grouping ----------------------------------------------------------------------
+
+    // The trains of one category, which is the level the tab is organised by: category > train > calls.
+    // A null category is the group of trains that have not been given one; they are kept together at the
+    // end rather than left out of the table.
+    private sealed record TrainGroup(TrainCategory? Category, IReadOnlyList<Train> Trains)
+    {
+        // Category ids start at one, so zero identifies the group without a category.
+        public int Key => Category?.Id ?? 0;
+    }
+
+    // Grouped by category id rather than by the category itself: TrainCategory is a record, so grouping on
+    // the instance would merge two categories that happen to hold the same values.
+    private IReadOnlyList<TrainGroup> TrainGroups
+    {
+        get
+        {
+            var trains = Trains;
+            List<TrainGroup> groups =
+            [
+                .. trains
+                    .Where(t => t.Category is not null)
+                    .GroupBy(t => t.Category!.Id)
+                    .Select(g => new TrainGroup(g.First().Category, [.. g]))
+                    .OrderBy(g => g.Category!.Name, StringComparer.CurrentCulture)
+            ];
+            var uncategorised = trains.Where(t => t.Category is null).ToList();
+            if (uncategorised.Count > 0) groups.Add(new TrainGroup(null, uncategorised));
+            return groups;
+        }
+    }
+
+    private string GroupName(TrainGroup group) => group.Category?.Name ?? Translator("NoCategory");
 
     protected override void OnInitialized()
     {
@@ -182,6 +256,11 @@ else
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // True when any validation error involves this train. Used to mark a category whose trains have
+    // conflicts, which is the only sign of them left once that category is collapsed.
+    private bool HasConflict(Train train) =>
+        ValidationState.Errors.Any(e => e.Scope == ValidationScope.Train && e.Involves(train));
 
     // The validation messages for errors that involve this train, joined for a hover tooltip; null when clean.
     private string? ConflictTitle(Train train)
@@ -208,6 +287,21 @@ else
     private void ToggleExpanded(Train train)
     {
         if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
+    }
+
+    // Categories start out expanded, so the table opens on the same trains as before the grouping.
+    private bool IsExpanded(TrainGroup group) => !_collapsedCategories.Contains(group.Key);
+
+    private void ToggleExpanded(TrainGroup group)
+    {
+        if (!_collapsedCategories.Remove(group.Key)) _collapsedCategories.Add(group.Key);
+    }
+
+    private void ExpandAllCategories() => _collapsedCategories.Clear();
+
+    private void CollapseAllCategories(IEnumerable<TrainGroup> groups)
+    {
+        foreach (var group in groups) _collapsedCategories.Add(group.Key);
     }
 
     // ---- Display helpers ------------------------------------------------------------------------
@@ -251,6 +345,8 @@ else
     {
         train.Category = id is null ? null : Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id);
         train.CategoryId = train.Category?.Id;
+        // The train moves to the group of its new category; open that group so it does not vanish from view.
+        _collapsedCategories.Remove(train.CategoryId ?? 0);
         Save();
     }
 
@@ -306,15 +402,22 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var call in train.Calls.OrderBy(c => c.SortTime).ToList())
+                @* The calls are listed in the order the train travels them, which is what CallsInRunOrder
+                   gives: the route runs from the earliest call to the latest, over the track stretches
+                   between them. Editing a time therefore moves the row to where the train now runs it, and
+                   times that do not ascend are reported as a conflict on the train (rules T2 and T5). *@
+                @foreach (var call in train.CallsInRunOrder)
                 {
                     <tr>
                         <td>
                             <ListBoxView Items="@(TrackChoices.ToListItems())"
                                          Value="call.TrackId" ValueChanged="id => SetCallTrack(call, id)" />
                         </td>
-                        <td><input type="text" class="time" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
-                        <td><input type="text" class="time" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
+                        @* Keyed on _timeEdits so a refused or unreadable time is discarded: without a changed
+                           key Blazor's diff sees the model value it already rendered and leaves what was
+                           typed standing in the field. *@
+                        <td><input type="text" class="time" @key="_timeEdits" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
+                        <td><input type="text" class="time" @key="_timeEdits" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsArrival" @onchange="e => SetIsArrival(call, e)" /></td>
                         <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
                         <td class="note">
@@ -353,15 +456,26 @@ else
         Save();
     }
 
+    // A time is not edited on its own: the calls on one side of it follow. Setting a departure carries the
+    // rest of the run with it, setting an arrival the run leading up to it, each of those calls moving by the
+    // same amount so their run and dwell times are kept (Plan.SetDeparture / Plan.SetArrival). The change is
+    // refused as a whole — and the field falls back to the stored time — when it would take the train outside
+    // the plan's operating window.
+    // Counts the times entered, only to key the time fields: bumping it on a refused edit rebuilds them
+    // from the model, which is what makes the field fall back to the stored time.
+    private int _timeEdits;
+
     private void SetArrival(StationCall call, ChangeEventArgs e)
     {
-        if (TryParseTime(e, out var time)) call.Arrival = time;
+        var applied = Plan is { } plan && TryParseTime(e, out var time) && plan.SetArrival(call, time) is not null;
+        if (!applied) _timeEdits++;
         Save();
     }
 
     private void SetDeparture(StationCall call, ChangeEventArgs e)
     {
-        if (TryParseTime(e, out var time)) call.Departure = time;
+        var applied = Plan is { } plan && TryParseTime(e, out var time) && plan.SetDeparture(call, time) is not null;
+        if (!applied) _timeEdits++;
         Save();
     }
 
@@ -413,6 +527,7 @@ else
     private void OnTrainCreated(Train train)
     {
         _showAdd = false;
+        _collapsedCategories.Remove(train.CategoryId ?? 0);
         _expanded.Add(train.Id);
     }
 

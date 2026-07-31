@@ -145,14 +145,16 @@ public class Train : IEquatable<Train>
     public IList<CargoFlowTrainPart> CargoFlows { get; set; }
 
     /// <summary>
-    /// Gets the driver's start time (arrival time of first call).
+    /// Gets the driver's start time (arrival time of first call). The first call is the one the train
+    /// runs first; <see cref="Calls"/> is in insertion order, which need not be the run order.
     /// </summary>
-    public Time DriverStartTime => this[0].Arrival;
+    public Time DriverStartTime => Calls.MinBy(c => c.SortTime)!.Arrival;
 
     /// <summary>
-    /// Gets the driver's end time (departure time of last call).
+    /// Gets the driver's end time (departure time of last call). The last call is the one the train runs
+    /// last; <see cref="Calls"/> is in insertion order, which need not be the run order.
     /// </summary>
-    public Time DriverEndTime => this[^1].Departure;
+    public Time DriverEndTime => Calls.MaxBy(c => c.SortTime)!.Departure;
 
     /// <summary>
     /// Gets the station call at the specified index.
@@ -172,7 +174,8 @@ public class Train : IEquatable<Train>
     public Layout Layout => Calls[0].OperationLocation.Layout;
 
     /// <summary>
-    /// Gets this train as a train part covering all station calls.
+    /// Gets this train as a train part covering all station calls, from where it starts its run to
+    /// where it ends it.
     /// </summary>
     public ScheduledTrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
 
@@ -226,6 +229,11 @@ public static class TrainExtensions
         /// <summary>
         /// Creates a train part from the train between the specified call indices.
         /// </summary>
+        /// <remarks>
+        /// The indices are positions in <c>CallsInRunOrder</c> — the order the train works its calls —
+        /// so a part always runs forwards along the route. <see cref="Train.Calls"/> is in insertion
+        /// order, which on a hand-edited train is not the run order.
+        /// </remarks>
         /// <param name="fromCallIndex">The index of the departure call.</param>
         /// <param name="toCallIndex">The index of the arrival call.</param>
         /// <returns>A new train part.</returns>
@@ -233,10 +241,10 @@ public static class TrainExtensions
         public ScheduledTrainPart AsTrainPart(int fromCallIndex, int toCallIndex)
         {
             var t = train.ValueOrException(nameof(train));
-            var c = t.Calls.Count;
+            var calls = t.CallsInRunOrder;
+            var c = calls.Count;
             (fromCallIndex < 0 || fromCallIndex > c - 2).IfTrueThrows(nameof(fromCallIndex));
             (toCallIndex <= fromCallIndex || toCallIndex > c - 1).IfTrueThrows(nameof(toCallIndex));
-            var calls = t.Calls.ToArray();
             return new ScheduledTrainPart(calls[fromCallIndex], calls[toCallIndex]);
         }
         /// <summary>
@@ -272,6 +280,17 @@ public static class TrainExtensions
                 return $"{identity}  {first.OperationLocation.Signature} {first.Departure.HHMM()}→{last.OperationLocation.Signature} {last.Arrival.HHMM()}";
             }
         }
+
+        /// <summary>
+        /// Gets the train's calls in the order it runs them, earliest first.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Train.Calls"/> is in insertion order, which is not the run order: a call added last
+        /// can be timed first, and editing a time reorders the route without touching the collection.
+        /// Anything reasoning about the route — where it starts and ends, which legs it travels — must read
+        /// the calls through here, ordered by <see cref="StationCall.SortTime"/>.
+        /// </remarks>
+        public IReadOnlyList<StationCall> CallsInRunOrder => [.. train.Calls.OrderBy(c => c.SortTime)];
 
         /// <summary>
         /// Gets whether this is a passenger train, from its <see cref="Train.Category"/>. A train may be

@@ -1,5 +1,61 @@
 # Versionshinweise
 
+## Version 0.3.2
+
+- Unter **Güterverkehr › Güterbeschreibungen** kann eine Herkunft oder ein Ziel jetzt jede
+  Betriebsstelle sein, die Güter austauscht, nicht nur ein Bahnhof. Ein Industriegebiet behandelt
+  immer Güterwagen, war aber bisher nicht wählbar, sodass Güter von und zu einer Industrie so
+  beschrieben werden mussten, als gingen sie zum nächstgelegenen Bahnhof.
+- Dieselben Listen sagen jetzt **Betriebsstelle** statt *Bahnhof*, da sie nicht mehr nur Bahnhöfe
+  enthalten.
+- Das Ändern einer Haltzeit im Reiter **Züge** **nimmt jetzt den übrigen Zug mit**. Eine **Abfahrt** wirkt
+  vorwärts, in Fahrtrichtung: lässt man einen Zug an einer Betriebsstelle fünf Minuten länger stehen,
+  erreicht er jede folgende Betriebsstelle fünf Minuten später. Eine **Ankunft** wirkt rückwärts: soll der
+  Zug fünf Minuten später ankommen, fährt er an jeder vorherigen Betriebsstelle fünf Minuten später ab, so
+  dass der Lauf bis zur Änderung mitgeht. Die Zeiten auf der anderen Seite bleiben stehen, die Fahr- und
+  Aufenthaltszeiten bleiben erhalten, und die Änderung wird abgelehnt — das Feld fällt zurück —, wenn sie
+  den Zug aus den Betriebszeiten des Plans führen würde.
+- Die Halte eines Zuges sind immer in der **Reihenfolge seines Laufwegs** aufgelistet.
+- Ein Zug, dessen Laufweg eine **Betriebsstelle überspringt** — zwei aufeinanderfolgende Halte ohne
+  Strecke dazwischen —, wird jetzt als Konflikt gemeldet. Die Prüfung lässt sich unter
+  **Einstellungen › Validierung** abschalten.
+- **Die Zuggeschwindigkeit wird jetzt auch auf der letzten Strecke geprüft**, bis zu der Betriebsstelle, an
+  der der Zug endet. Diese Strecke wurde bisher übersprungen.
+
+- Ein Zugteil in einem **Umlauf** lässt sich jetzt **bearbeiten**: Der Stift an einem Zugteil öffnet
+  seinen Anfangs- und Endhalt, sodass ein Umlauf umgeformt werden kann, ohne alles danach zu
+  entfernen. Ein benachbarter Zugteil, der an den geänderten anschließt, passt sich mit an — wird
+  ein Teil von A–C auf A–B verkürzt, wird der Gegenlauf von selbst zu B–A. Ein Nachbar, dessen
+  eigener Zug am neuen Halt nicht hält, bleibt unverändert, und die entstandene Lücke wird als
+  Konflikt gemeldet.
+
+- Alles, was den Laufweg eines Zuges liest, folgt jetzt **der Reihenfolge, in der der Zug seine Halte
+  befährt**, nicht der Eingabereihenfolge. Bei einem Zug, dessen Halte in falscher Reihenfolge
+  eingegeben wurden — ein Halt, der nach einem erst später erreichten hinzugefügt wurde — verlief die
+  Linie im **Bildfahrplan** im Zickzack zwischen Halten, zwischen denen der Zug nie fährt, und der Zug
+  konnte in der Spalte der falschen Richtung landen; der gedruckte **Fahrplan** konnte eine Abfahrt
+  dort zeigen, wo der Zug ankommt; **Automatisch erstellen** verkettete den Zug gar nicht, da er
+  scheinbar anderswo beginnt; **Zug wiederholen** maß den Abstand ab dem falschen Halt; und das
+  Neuberechnen der Zeiten nach einer geänderten Halteabfolge schlug ganz fehl. Auch die Auswahl eines
+  Zugteils beim Hinzufügen listet die Halte in Fahrtreihenfolge. Importierte Pläne waren nie
+  betroffen — dort sind beide Reihenfolgen gleich.
+
+- **Zug hinzufügen** kann jetzt den **Gegenzug** gleich mit anlegen. Mit *Gegenzug?* entsteht neben dem
+  ersten Zug auch der Zug zurück vom Ziel: dieselbe Strecke in Gegenrichtung, dieselbe Zuggattung und
+  Geschwindigkeit und die nächste Nummer der Gegenrichtung. Seine Abfahrt ist entweder *so früh wie
+  möglich* — die Ankunft des ersten Zuges plus Abschluss- und Vorbereitungszeit — oder eine Zeit, die
+  Sie eingeben und die vor oder nach der Abfahrt des ersten Zuges liegen darf. Zusammen mit
+  *Wiederholen?* werden beide Richtungen wiederholt, sodass ein ganzer Verkehr in beiden Richtungen in
+  einem Zug geplant wird.
+
+### Fehlerbehebungen
+
+- Die **Kilometerangaben** im gedruckten Fahrplan und am Bildfahrplan werden jetzt auf ganze Kilometer
+  gerundet. Sie wurden mit einer Nachkommastelle gedruckt, und der Entfernungsfaktor unter
+  **Einstellungen › Zeit & Geschwindigkeit** konnte aus einer Streckenlänge einen krummen
+  Kilometerbruchteil machen. Eine Zweigstrecke zeigt jetzt außerdem am Abzweigbahnhof dieselbe
+  Kilometerangabe wie die Strecke, von der sie abzweigt.
+
 ## Version 0.3.1
 
 - Der Abschnitt **Triebfahrzeuge** auf einer Zugteilseite im Heft Lokführerdienste hat seine

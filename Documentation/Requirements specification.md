@@ -53,12 +53,12 @@ Snapshot of coverage by area (see each section for detail).
 | Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor built; ModuleRegistry import (FR-3.3.1) missing |
 | Track/Dispatch/Timetable Stretches (§3.4) | ✅ | three sub-sections; direction warnings; auto dispatch + route builder |
 | Train Categories (§3.5) | ✅ | list + add/edit/delete; delete blocked when referenced by a train; start number and exclude-from-automatic-scheduling editable |
-| Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; pass-through set via arrival/departure checkboxes; conflict highlighting |
+| Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; calls listed in travel order, editing a departure shifts the times after it and an arrival the times before it; pass-through set via arrival/departure checkboxes; conflict highlighting |
 | Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection + conflict highlighting; interaction (drag, context menu) is still not built |
 | Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
 | Vehicle Owners (§3.9) | ❌ | stub page |
-| Automatic time calculation UI (§3.10) | ❌ | |
-| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T4, S1–S5, P1/P3/P4 done; closure (S3+S5) judged per traction unit by flow conservation; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
+| Automatic time calculation UI (§3.10) | 🟡 | editing a call time shifts the times on one side of it — after a departure, before an arrival — keeping run and dwell times; locking individual times and recomputing from the travel-time calculation while editing not built |
+| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T5, S1–S5, P1/P3/P4 done; closure (S3+S5) judged per traction unit by flow conservation; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
 | Reports (§3.12) | 🟡 | shell + page formats present; 2 reports built — Turnus Cards and a paginated tabular Timetable report |
 
 ### Integration (§5)
@@ -355,6 +355,14 @@ A new timetable is seeded with two standard categories, named in the layout's de
 > blocked when other data depends on the train. Rows with scheduling conflicts are
 > highlighted (§3.11).
 >
+> The **Calls** sub-table always lists the calls in the order the train travels them, from the
+> first to the last. Editing a departure shifts the times after it and editing an arrival the
+> times before it (see §3.10), so the run follows the change and the order is kept. Times that do not ascend, and a route that jumps
+> a location instead of following the track stretches, are reported as conflicts on the train
+> (rules T2 and T5 in §3.11). Only the **first or last** call may be deleted, which shortens the
+> route at that end; a call in between is an operating location on the way, which the train
+> cannot skip.
+>
 > *Still to come: call-level note editing (the note-generation system, §4.5, is not built).*
 
 ### 3.7 Graphical Timetable
@@ -419,7 +427,8 @@ settings (see §3.2).
 
 ##### Change timing of a train or part of train
 - Click to select a train: arrival and departure times become small draggable squares
-- When dragging an arrival or departure time, only the dragged time and all later times are affected
+- When dragging a departure, the dragged time and all later times are affected; when dragging an
+  arrival, the dragged time and all earlier times (as in the Trains tab, see §3.10)
 - To move a whole train in time, drag the first arrival time
 - Click outside draggable squares to stop editing times
 
@@ -448,11 +457,15 @@ which layout is open.
 
 > **Status:** 🟡 Partial (Schedules tab). The vehicle-schedule (turnus) editor is built
 > as a Gantt-style **turn chart** — rows are schedules on a shared time axis, one block
-> per train part. It supports **manual** building (new schedule, add/remove parts,
+> per train part. It supports **manual** building (new schedule, add/remove/edit parts,
 > including partial from/to-call selection) and **automatic** building (greedy contiguity
 > chaining, skipping categories flagged as excluded from automatic scheduling). Vehicles
 > are created and assigned **session-aware** (offering only the sessions a vehicle is
 > still free), and wagonsets can be given an individual **wagon rake** (§4.2.4).
+> A part already in a schedule can be **reshaped** by changing its from- or to-stop; the
+> neighbouring part that joins it is adapted to the new joint where its own train calls
+> there, so shortening one part turns the return working round at the new place by itself.
+> An edit the neighbour cannot follow is applied all the same and reported as a conflict.
 > Conflicting schedules are highlighted (§3.11). **Not yet wired:** assigning a schedule
 > to a wagon group via an editor.
 >
@@ -474,9 +487,21 @@ the on-premise dispatch applications, so the inventory is complete without the p
 
 ### 3.10 Automatic Time Calculation
 
-> **Status:** ❌ Missing in the UI. The §4.3.1 effective-speed and travel-time
-> calculation exists in the model, but no screen uses it to compute and propagate
-> call times or to lock individual times.
+> **Status:** 🟡 Partial. Editing a call time in the Trains tab now shifts the times on
+> one side of it, in the direction the edited time belongs to. A **departure** carries
+> the rest of the run with it: the times after the call move by the same number of
+> minutes, and the train stands here for as long as the change. An **arrival** works
+> backwards and carries the run leading up to the call: the times before it move by the
+> same number of minutes, and the stand at the call absorbs the change. Either way the
+> calls that move keep the run and dwell times they already have, and the calls on the
+> other side stay where they are. At the train's origin there is nothing before the
+> call, so setting its arrival only changes the driver's preparation time; at the
+> terminus there is nothing after it, so setting its departure only changes the
+> finishing time. The change is refused as a whole when it would take the train outside
+> the plan's operating window. **Not built:** locking individual times, and recomputing times
+> from the §4.3.1 travel-time calculation while editing — that calculation exists in
+> the model and is applied on demand by **update all timings** on the graphical
+> timetable, but a time typed by hand is shifted as typed, not recomputed.
 
 The system shall calculate travel times between station calls using:
 
@@ -493,7 +518,7 @@ with an option to lock individual times.
 ### 3.11 Validation
 
 > **Status:** 🟡 Partial. Fully implemented: the Layout occupancy rules **L2–L3**, the
-> Timetable train rules **T1–T4**, the Schedule rules **S1–S5**, and the Plan
+> Timetable train rules **T1–T5**, the Schedule rules **S1–S5**, and the Plan
 > consistency rules **P1, P3, P4**, all with FR-3.11.6 output (severity, localised
 > message, location + time range, involved trains). Closure (**S3 + S5**) is judged **per
 > traction unit** by flow conservation over the operating period, so rotation schemes that
@@ -548,9 +573,10 @@ individually and as a set.
 | Rule | Requirement | Status | Notes / gap |
 | ---- | ----------- | ------ | ----------- |
 | **T1** | A train has **at least two station calls**. | ✅ | Checked. |
-| **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | Checked. |
+| **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | Checked. The calls are read in the order the train runs them, which is the order of their times, so what is reported is a train whose times contradict themselves — above all one that reaches the next location before it has left the previous one. |
 | **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | Checked against the configured min/max speed thresholds. |
 | **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | Trains equal on company, category and number are flagged when any pair has overlapping sessions. Can be toggled off. |
+| **T5** | A train's route must be **continuous**: every leg it runs, from one call to the next, must be a **track stretch of the layout**. A train travels a stretch by departing its start and arriving at its end, so it calls at both ends of every stretch on its way. | ✅ | Two successive calls with no stretch between them are flagged as a route that jumps a location. Two successive calls at the same location (a change of track) travel no stretch and are not flagged. This is also why only the first or last call of a train may be deleted: removing one in between would leave the route jumping the location it stood for. Can be toggled off. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
@@ -1062,8 +1088,13 @@ configurable distance factor to convert that stored metre value into the kilomet
 figures shown in timetable reports and the graphical timetable's station markers:
 
 ```
-displayedKilometres = storedMetres × distanceFactor
+displayedKilometres = round(storedMetres × distanceFactor)
 ```
+
+Kilometre figures are always whole numbers, so the scaled value is rounded to the
+nearest kilometre (halves rounded upwards). For a stretch that branches off another
+line, the offset from the junction is added before scaling, so both lines show the
+same kilometre at the junction station.
 
 The factor defaults to 1, so reports show the same number as before this setting
 existed. Raising the factor lets a layout present a larger, more prototype-like

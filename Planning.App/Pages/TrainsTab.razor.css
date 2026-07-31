@@ -84,10 +84,50 @@
         border-bottom: 2px solid var(--border);
     }
 
+    /* Category group header: one row per train category, collapsible, carrying the category's graph
+       colour so the grouping reads the same as in the graphical timetable. */
+    table.trains > tbody > tr.category > td {
+        padding: 0.35rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+        background: #e9eff6;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    table.trains > tbody > tr.category .swatch {
+        display: inline-block;
+        width: 0.75rem;
+        height: 0.75rem;
+        margin-right: 0.45rem;
+        border: 1px solid #99a;
+        border-radius: 2px;
+        vertical-align: baseline;
+    }
+
+    table.trains > tbody > tr.category .count {
+        margin-left: 0.4rem;
+        font-weight: 400;
+        color: #667;
+    }
+
+    /* A collapsed category hides its trains, so the conflict tint has to carry up to the header. */
+    table.trains > tbody > tr.category.has-conflict > td {
+        background: #f7ecd2;
+    }
+
+    table.trains > tbody > tr.category.has-conflict > td:first-child {
+        box-shadow: inset 3px 0 0 #d9a406;
+    }
+
     table.trains > tbody > tr.train > td {
         padding: 0.3rem 0.6rem;
         border-bottom: 1px solid var(--border);
         vertical-align: middle;
+    }
+
+    /* Trains sit one level in from their category header. */
+    table.trains > tbody > tr.train > td.expander {
+        padding-left: 1.1rem;
     }
 
     table.trains > tbody > tr.train:hover {
@@ -114,7 +154,7 @@
 
     th.expander,
     td.expander {
-        width: 1.6rem;
+        width: 2.7rem;
         text-align: center;
         padding-left: 0.2rem;
         padding-right: 0.2rem;
@@ -156,8 +196,9 @@
         font-style: italic;
     }
 
+    /* Sized from the longest external id in the table; the fallback only applies before that is known. */
     input.ext {
-        width: 7rem;
+        width: var(--ext-width, 7rem);
     }
 
     input.num {

@@ -1,0 +1,57 @@
+@* A markdown field shown twice: the source in a text area, and beside it the text as it will be
+   rendered. The preview follows a local draft of the text, so it keeps up with every character typed
+   or deleted without the model hearing about it.
+
+   The edited text is handed back when the field is left, not on each keystroke, because saving is
+   what the caller does with it and saving serialises the whole plan — far more work than a single
+   character warrants. That is also what a plain @bind on a text area does, so callers can keep
+   using @bind-Value:after as before.
+
+   Rendered with the same Markdig call the printed reports use, so what the preview shows is what
+   the print gets — give it the print's own class through PreviewClass and the styling matches too. *@
+<div class="markdown-editor">
+    <textarea rows="@Rows" value="@_draft"
+              @oninput="e => _draft = e.Value?.ToString() ?? string.Empty"
+              @onchange="Commit"></textarea>
+    <div class="preview @PreviewClass">@Rendered</div>
+</div>
+
+@code {
+    /// <summary>The markdown source as stored.</summary>
+    [Parameter] public string Value { get; set; } = "";
+
+    /// <summary>Raised with the edited markdown when the text area is left.</summary>
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>Visible lines of the text area, which is what gives both panes their height.</summary>
+    [Parameter] public int Rows { get; set; } = 12;
+
+    /// <summary>Optional class for the preview pane, normally the class the print uses for the same
+    /// text, so the preview is styled the way it will be printed.</summary>
+    [Parameter] public string? PreviewClass { get; set; }
+
+    private string _draft = "";
+    private string _lastValue = "";
+
+    private MarkupString Rendered => new(Markdig.Markdown.ToHtml(_draft));
+
+    // Anything else that re-renders the page (a docked view refreshing, another edit being saved)
+    // hands the same value back while typing is still in progress; only a value that has genuinely
+    // changed elsewhere may replace the draft.
+    protected override void OnParametersSet()
+    {
+        if (Value == _lastValue) return;
+        _lastValue = Value;
+        _draft = Value;
+    }
+
+    private async Task Commit(ChangeEventArgs e)
+    {
+        _draft = e.Value?.ToString() ?? string.Empty;
+        if (_draft == Value) return;
+        // Remember what was sent, so the value coming back from the caller is not mistaken for an
+        // edit made elsewhere.
+        _lastValue = _draft;
+        await ValueChanged.InvokeAsync(_draft);
+    }
+}

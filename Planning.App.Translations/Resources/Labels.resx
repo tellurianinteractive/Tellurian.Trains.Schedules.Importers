@@ -385,7 +385,7 @@
     <value>Distance factor (×)</value>
   </data>
   <data name="DistanceFactorHint" xml:space="preserve">
-    <value>Multiplies each track stretch's distance (metres) to give the kilometres shown in reports and graphs. Default 1 keeps existing distances unchanged.</value>
+    <value>Multiplies each track stretch's distance (metres) to give the kilometres shown in reports and graphs, rounded to whole kilometres. Default 1 keeps existing distances unchanged.</value>
   </data>
   <data name="SpeedMapping" xml:space="preserve">
     <value>Speed mapping</value>
@@ -431,6 +431,9 @@
   </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validate train speed?</value>
+  </data>
+  <data name="ValidateRouteContinuity" xml:space="preserve">
+    <value>Validate continuous train routes?</value>
   </data>
   <data name="ValidateTrainNumbers" xml:space="preserve">
     <value>Validate train numbers?</value>
@@ -1190,6 +1193,21 @@
   <data name="MinutesInterval" xml:space="preserve">
     <value>Minutes interval</value>
   </data>
+  <data name="ReturnTrain" xml:space="preserve">
+    <value>Return train</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Return?</value>
+  </data>
+  <data name="AsSoonAsPossible" xml:space="preserve">
+    <value>As soon as possible?</value>
+  </data>
+  <data name="DepartureTime" xml:space="preserve">
+    <value>Departure time</value>
+  </data>
+  <data name="CouldNotCreateTrainPair" xml:space="preserve">
+    <value>The train and its return could not be created. Check that there is a route between the locations and that the return's departure time falls within the plan's start and end times.</value>
+  </data>
   <data name="Create" xml:space="preserve">
     <value>Create</value>
   </data>
@@ -1341,6 +1359,15 @@
   <data name="Collapse" xml:space="preserve">
     <value>Collapse</value>
   </data>
+  <data name="ExpandAll" xml:space="preserve">
+    <value>Expand all</value>
+  </data>
+  <data name="CollapseAll" xml:space="preserve">
+    <value>Collapse all</value>
+  </data>
+  <data name="NoCategory" xml:space="preserve">
+    <value>No category</value>
+  </data>
   <data name="All" xml:space="preserve">
     <value>All</value>
   </data>
@@ -1431,20 +1458,23 @@
   <data name="Destinations" xml:space="preserve">
     <value>Destinations</value>
   </data>
-  <data name="DestinationStation" xml:space="preserve">
-    <value>Destination station</value>
+  <data name="OperationLocation" xml:space="preserve">
+    <value>Operation location</value>
   </data>
-  <data name="DestinationStations" xml:space="preserve">
-    <value>Destination stations</value>
+  <data name="DestinationLocation" xml:space="preserve">
+    <value>Destination location</value>
+  </data>
+  <data name="DestinationLocations" xml:space="preserve">
+    <value>Destination locations</value>
   </data>
   <data name="Origins" xml:space="preserve">
     <value>Origins</value>
   </data>
-  <data name="OriginStation" xml:space="preserve">
-    <value>Origin station</value>
+  <data name="OriginLocation" xml:space="preserve">
+    <value>Origin location</value>
   </data>
-  <data name="OriginStations" xml:space="preserve">
-    <value>Origin stations</value>
+  <data name="OriginLocations" xml:space="preserve">
+    <value>Origin locations</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Cannot delete: this cargo description is used by one or more cargo flows.</value>
@@ -1465,19 +1495,19 @@
     <value>And regions?</value>
   </data>
   <data name="AndRegionsHint" xml:space="preserve">
-    <value>Also list the regions attached to the destination station.</value>
+    <value>Also list the regions attached to the destination location.</value>
   </data>
   <data name="AndBeyond" xml:space="preserve">
     <value>And beyond?</value>
   </data>
   <data name="AndBeyondHint" xml:space="preserve">
-    <value>Also include all locations beyond the destination station.</value>
+    <value>Also include all locations beyond the destination location.</value>
   </data>
   <data name="AndLocal" xml:space="preserve">
     <value>And local?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Also include local destinations served from the station.</value>
+    <value>Also include local destinations served from the location.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>No destinations.</value>
@@ -1485,11 +1515,11 @@
   <data name="AddDestination" xml:space="preserve">
     <value>Add destination</value>
   </data>
-  <data name="NoDestinationStations" xml:space="preserve">
-    <value>No destination stations.</value>
+  <data name="NoDestinationLocations" xml:space="preserve">
+    <value>No destination locations.</value>
   </data>
-  <data name="AddDestinationStation" xml:space="preserve">
-    <value>Add destination station</value>
+  <data name="AddDestinationLocation" xml:space="preserve">
+    <value>Add destination location</value>
   </data>
   <data name="NoOrigins" xml:space="preserve">
     <value>No origins.</value>
@@ -1497,11 +1527,11 @@
   <data name="AddOrigin" xml:space="preserve">
     <value>Add origin</value>
   </data>
-  <data name="NoOriginStations" xml:space="preserve">
-    <value>No origin stations.</value>
+  <data name="NoOriginLocations" xml:space="preserve">
+    <value>No origin locations.</value>
   </data>
-  <data name="AddOriginStation" xml:space="preserve">
-    <value>Add origin station</value>
+  <data name="AddOriginLocation" xml:space="preserve">
+    <value>Add origin location</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
     <value>Add cargo flows to trains: choose a train, then set where wagons are connected and disconnected and which cargo description applies.</value>
@@ -1568,6 +1598,30 @@
   </data>
   <data name="AddTrainPart" xml:space="preserve">
     <value>Add train</value>
+  </data>
+  <data name="EditTrainPart" xml:space="preserve">
+    <value>Edit train part</value>
+  </data>
+  <data name="PreviousPart" xml:space="preserve">
+    <value>Previous part</value>
+  </data>
+  <data name="NextPart" xml:space="preserve">
+    <value>Next part</value>
+  </data>
+  <data name="PartEditAdapted" xml:space="preserve">
+    <value>adapted</value>
+  </data>
+  <data name="PartEditGapBefore" xml:space="preserve">
+    <value>The previous part does not end where this part starts.</value>
+  </data>
+  <data name="PartEditGapAfter" xml:space="preserve">
+    <value>The next part does not start where this part ends.</value>
+  </data>
+  <data name="PartEditOverlapBefore" xml:space="preserve">
+    <value>The previous part has not arrived when this part departs.</value>
+  </data>
+  <data name="PartEditOverlapAfter" xml:space="preserve">
+    <value>The next part departs before this part arrives.</value>
   </data>
   <data name="AddVehicle" xml:space="preserve">
     <value>Add vehicle</value>

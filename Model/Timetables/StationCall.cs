@@ -198,16 +198,16 @@ public static class StationCallExtensions
         /// in between are the operating locations the train passes on the way, which it cannot skip.
         /// </summary>
         /// <remarks>
-        /// <see cref="Train.Calls"/> is in insertion order, so the ends are found by
-        /// <see cref="StationCall.SortTime"/> — the order the calls are run and shown in. Calls are
-        /// matched by identity, because two calls of the same train can compare equal.
+        /// The ends are the first and last of <c>Train.CallsInRunOrder</c>, not of
+        /// <see cref="Train.Calls"/>, which is in insertion order. Calls are matched by identity, because
+        /// two calls of the same train can compare equal.
         /// </remarks>
         public bool IsAtTrainEnd
         {
             get
             {
                 if (call.Train.IsNullOrHasNoCalls()) return true;
-                var ordered = call.Train.Calls.OrderBy(c => c.SortTime).ToList();
+                var ordered = call.Train.CallsInRunOrder;
                 return ReferenceEquals(call, ordered[0]) || ReferenceEquals(call, ordered[^1]);
             }
         }

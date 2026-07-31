@@ -19,17 +19,17 @@
                 <dd>@YesNo(info.ToAllDestinations)</dd>
             </dl>
 
-            <h3>@Translator(info.Origins.Count == 1 ? "OriginStation" : "OriginStations")</h3>
+            <h3>@Translator(info.Origins.Count == 1 ? "OriginLocation" : "OriginLocations")</h3>
             @if (info.Origins.Any())
             {
-                <p>@info.OriginStationNames</p>
+                <p>@info.OriginLocationNames</p>
             }
             else
             {
-                <p class="empty">@Translator("NoOriginStations")</p>
+                <p class="empty">@Translator("NoOriginLocations")</p>
             }
 
-            <h3>@Translator(info.Destinations.Count == 1 ? "DestinationStation" : "DestinationStations")</h3>
+            <h3>@Translator(info.Destinations.Count == 1 ? "DestinationLocation" : "DestinationLocations")</h3>
             @if (info.ToAllDestinations)
             {
                 <p>@info.DestinationsSummary</p>
@@ -39,7 +39,7 @@
                 <table class="sub-grid">
                     <thead>
                         <tr>
-                            <th>@Translator("Station")</th>
+                            <th>@Translator("OperationLocation")</th>
                             <th class="num" title="@Translator("PositionInTrainHint")">@Translator("Position")</th>
                             <th class="num">@Translator("MaxWagons")</th>
                             <th class="num">@Translator("MaxAxles")</th>
@@ -52,7 +52,7 @@
                         @foreach (var dest in info.Destinations)
                         {
                             <tr>
-                                <td>@dest.Station.Name</td>
+                                <td>@dest.Location.Name</td>
                                 <td class="num">@dest.PositionInTrain</td>
                                 <td class="num">@dest.MaxNumberOfWagons</td>
                                 <td class="num">@dest.MaxNumberOfAxles</td>
@@ -66,7 +66,7 @@
             }
             else
             {
-                <p class="empty">@Translator("NoDestinationStations")</p>
+                <p class="empty">@Translator("NoDestinationLocations")</p>
             }
 
             <h3>@Translator("UsedInTrains")</h3>
@@ -120,9 +120,9 @@
         <table class="grid">
             <thead>
                 <tr>
-                    <th>@Translator("OriginStations")</th>
+                    <th>@Translator("OriginLocations")</th>
                     <th class="center">@Translator("ToAllDestinations")</th>
-                    <th>@Translator("DestinationStations")</th>
+                    <th>@Translator("DestinationLocations")</th>
                     <th title="@Translator("OnlyWagonClassesHint")">@Translator("OnlyWagonClasses")</th>
                     <th class="actions"></th>
                 </tr>
@@ -131,9 +131,9 @@
                 @foreach (var d in Descriptions)
                 {
                     <tr class="description @(IsExpanded(d) ? "expanded" : "")">
-                        <td>@d.OriginStationNames</td>
+                        <td>@d.OriginLocationNames</td>
                         <td class="center"><input type="checkbox" checked="@d.ToAllDestinations" @onchange="e => SetToAll(d, e)" /></td>
-                        <td>@(d.ToAllDestinations ? "" : d.DestinationStationNames)</td>
+                        <td>@(d.ToAllDestinations ? "" : d.DestinationLocationNames)</td>
                         <td><input type="text" value="@d.OnlyWagonClasses" @onchange="e => SetOnlyWagonClasses(d, e)" /></td>
                         <td class="actions">
                             <button @onclick="() => _infoTarget = d">@Translator("Info")</button>
@@ -183,10 +183,12 @@
     private List<CargoFlowOptions> Descriptions =>
         [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.OnlyWagonClasses, StringComparer.CurrentCulture)];
 
-    private IEnumerable<Station> StationChoices =>
-        (Layout?.OperationLocations.OfType<Station>() ?? [])
-            .Where(s => s.HasCargoExchange)
-            .OrderBy(s => s.Name, StringComparer.CurrentCulture);
+    // Wagons can be routed from and to any location that exchanges cargo — an industrial area just as
+    // much as a station — so the choices are all such operation locations, not only the stations.
+    private IEnumerable<OperationLocation> LocationChoices =>
+        (Layout?.OperationLocations ?? [])
+            .Where(l => l.HasCargoExchange)
+            .OrderBy(l => l.Name, StringComparer.CurrentCulture);
 
     private readonly HashSet<int> _expanded = [];
     private CargoFlowOptions? _deleteTarget;
@@ -256,11 +258,11 @@
     // ---- Destinations sub-table ------------------------------------------------------------------
 
     private RenderFragment DestinationsTable(CargoFlowOptions d) => @<div class="sub">
-        <h4>@Translator(d.Destinations.Count == 1 ? "DestinationStation" : "DestinationStations")</h4>
+        <h4>@Translator(d.Destinations.Count == 1 ? "DestinationLocation" : "DestinationLocations")</h4>
         <table class="sub-grid">
             <thead>
                 <tr>
-                    <th>@Translator("Station")</th>
+                    <th>@Translator("OperationLocation")</th>
                     <th class="num" title="@Translator("PositionInTrainHint")">@Translator("Position")</th>
                     <th class="num">@Translator("MaxWagons")</th>
                     <th class="num">@Translator("MaxAxles")</th>
@@ -275,8 +277,8 @@
                 {
                     <tr>
                         <td>
-                            <ListBoxView Items="@(StationChoices.ToListItems())"
-                                         Value="dest.Station.Id" ValueChanged="id => SetDestinationStation(dest, id)" />
+                            <ListBoxView Items="@(LocationChoices.ToListItems())"
+                                         Value="dest.Location.Id" ValueChanged="id => SetDestinationLocation(dest, id)" />
                         </td>
                         <td><input type="number" class="num" min="0" value="@dest.PositionInTrain" @onchange="e => SetDestinationPosition(dest, e)" /></td>
                         <td><input type="number" class="num" min="0" value="@dest.MaxNumberOfWagons" @onchange="e => SetDestinationMaxWagons(dest, e)" /></td>
@@ -289,16 +291,16 @@
                 }
                 @if (d.Destinations.Count == 0)
                 {
-                    <tr><td colspan="8" class="empty">@Translator("NoDestinationStations")</td></tr>
+                    <tr><td colspan="8" class="empty">@Translator("NoDestinationLocations")</td></tr>
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestinationStation")</button>
+        <button class="small" disabled="@(!LocationChoices.Any())" @onclick="() => AddDestination(d)">@Translator("AddDestinationLocation")</button>
     </div>;
 
-    private void SetDestinationStation(Destination dest, int? id)
+    private void SetDestinationLocation(Destination dest, int? id)
     {
-        if (StationChoices.FirstOrDefault(s => s.Id == id) is { } station) dest.Station = station;
+        if (LocationChoices.FirstOrDefault(l => l.Id == id) is { } location) dest.Location = location;
         Save();
     }
 
@@ -326,8 +328,8 @@
 
     private void AddDestination(CargoFlowOptions d)
     {
-        if (StationChoices.FirstOrDefault() is not { } station) return;
-        d.Destinations.Add(new Destination { Station = station });
+        if (LocationChoices.FirstOrDefault() is not { } location) return;
+        d.Destinations.Add(new Destination { Location = location });
         Save();
     }
 
@@ -340,11 +342,11 @@
     // ---- Origins sub-table -----------------------------------------------------------------------
 
     private RenderFragment OriginsTable(CargoFlowOptions d) => @<div class="sub">
-        <h4>@Translator(d.Origins.Count == 1 ? "OriginStation" : "OriginStations")</h4>
+        <h4>@Translator(d.Origins.Count == 1 ? "OriginLocation" : "OriginLocations")</h4>
         <table class="sub-grid">
             <thead>
                 <tr>
-                    <th>@Translator("Station")</th>
+                    <th>@Translator("OperationLocation")</th>
                     <th></th>
                 </tr>
             </thead>
@@ -353,31 +355,31 @@
                 {
                     <tr>
                         <td>
-                            <ListBoxView Items="@(StationChoices.ToListItems())"
-                                         Value="origin.Station.Id" ValueChanged="id => SetOriginStation(origin, id)" />
+                            <ListBoxView Items="@(LocationChoices.ToListItems())"
+                                         Value="origin.Location.Id" ValueChanged="id => SetOriginLocation(origin, id)" />
                         </td>
                         <td><button class="danger small" @onclick="() => RemoveOrigin(d, origin)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button></td>
                     </tr>
                 }
                 @if (d.Origins.Count == 0)
                 {
-                    <tr><td colspan="2" class="empty">@Translator("NoOriginStations")</td></tr>
+                    <tr><td colspan="2" class="empty">@Translator("NoOriginLocations")</td></tr>
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!StationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOriginStation")</button>
+        <button class="small" disabled="@(!LocationChoices.Any())" @onclick="() => AddOrigin(d)">@Translator("AddOriginLocation")</button>
     </div>;
 
-    private void SetOriginStation(Origin origin, int? id)
+    private void SetOriginLocation(Origin origin, int? id)
     {
-        if (StationChoices.FirstOrDefault(s => s.Id == id) is { } station) origin.Station = station;
+        if (LocationChoices.FirstOrDefault(l => l.Id == id) is { } location) origin.Location = location;
         Save();
     }
 
     private void AddOrigin(CargoFlowOptions d)
     {
-        if (StationChoices.FirstOrDefault() is not { } station) return;
-        d.Origins.Add(new Origin { Station = station });
+        if (LocationChoices.FirstOrDefault() is not { } location) return;
+        d.Origins.Add(new Origin { Location = location });
         Save();
     }
 
