@@ -48,7 +48,10 @@ internal sealed class CountryByIdConverter : JsonConverter<Country>
                 case nameof(Country.ResourceKey): resourceKey = reader.GetString() ?? ""; break;
                 case nameof(Country.Languages): languages = reader.GetString() ?? ""; break;
                 case nameof(Country.CountryCode): countryCode = reader.GetString() ?? ""; break;
-                default: reader.Skip(); break;
+                // TrySkip, not Skip: a plan read from a stream arrives in blocks, and Skip refuses to
+                // work on a reader that has not yet seen the end of the document. The whole object is
+                // in the buffer before a value converter is called, so this always succeeds.
+                default: reader.TrySkip(); break;
             }
         }
         if (id is not int countryId) return null;

@@ -1,5 +1,21 @@
 # Versjonsnyheter
 
+## Version 0.3.5
+
+### Feilrettinger
+
+- **En lagret plan kunne nekte å åpne seg.** Å åpne en plan appen nettopp hadde lagret, stoppet med en
+  feil om et land, og ingenting ble lest inn — det fantes ingen vei forbi. En fil leses et stykke om
+  gangen mens den kommer inn, og lesingen av landene i den snublet i det. En allerede lagret plan
+  åpnes som den er; du trenger ikke gjøre noe med den.
+
+- **En lagret planfil er omtrent sju ganger mindre.** Å lagre en plan til en fil skrev den i en annen
+  form enn den som holdes i nettleseren, så gevinstene fra de to siste versjonene nådde aldri fram til
+  filen: hvert opphold ble skrevet to ganger, og hver togkategori, hver operatør og hvert land om igjen
+  ved hvert tog, hvert kjøretøy og hver tjeneste som brukte det. En fil som tok 8 MB, tar nå godt over
+  1 MB, og lagres og åpnes tilsvarende raskere. En plan lagret av en tidligere versjon kan fortsatt
+  åpnes.
+
 ## Version 0.3.4
 
 - **Feltene Ank og Avg på et stopp følger nå hvor toget faktisk kan stoppe.** Et tog stopper for å

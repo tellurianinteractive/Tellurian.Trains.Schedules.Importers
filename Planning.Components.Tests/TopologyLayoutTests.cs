@@ -5,13 +5,28 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 
 /// <summary>
 /// Verifies how the topology diagram stacks timetable stretches: lines that do not overlap horizontally
-/// share a row so the diagram stays as low as possible, lines that do overlap are pushed apart, and every
-/// branch is linked to its parent by a 45° connector that continues a short way along the branch's own line.
+/// share a row so the diagram stays as compact as possible, lines that do overlap are pushed apart, and
+/// every branch is linked to what it leaves by a 45° connector that continues a short way along the
+/// branch's own line. Above all, nothing may cross anything else.
 /// </summary>
 [TestClass]
 public class TopologyLayoutTests
 {
     private static readonly string[] Colors = ["#000000", "#1a3a5c", "#8B0000", "#006400", "#4B0082", "#8B4513"];
+
+    // A real layout that cannot be drawn with every branch below the line it leaves. Rub sends a branch out
+    // to the right and Ful, only 17 units further on, takes one in from the left: their connectors both fall
+    // at 45° and so meet less than a row below the line, whichever rows the two branches end up on. On top
+    // of that, two stretches lead into Ful from the same side.
+    private static readonly string[] Kolding =
+    [
+        "Klb Forgr1@10 Rub@12 Ful@17 Mkd@18 Forgr2@15 Sbg@10",
+        "Mir Hvn@2 Forgr1@4",
+        "Rub Kst@10 Cb@6 Alk@4",
+        "Forgr2 Htaas@9",
+        "Idp Ins@4 Ful@6",
+        "FulT Ins@3 Ful@6",
+    ];
 
     // Builds a layout from one line per spec, each spec a space-separated run of station signatures.
     // Stations of the same signature are shared between lines, which is what makes one line a branch of another.
@@ -84,37 +99,104 @@ public class TopologyLayoutTests
     }
 
     [TestMethod]
-    public void ABranchNeverFallsThroughALineOnItsWayDown()
+    public void ABranchNeverCutsAcrossALineOnItsWayOut()
     {
         // The long branch off B lies right across the path of the short branch off C: whichever row the
         // short one is put on, its connector reaches that row at the same place. It is only clear of the
         // long branch because the long one is pushed below it.
-        AssertNoConnectorCrossesALine(TopologyDiagram.Build(CreateLayout("A B C D E F G H I J", "B P Q R S T", "C X")));
+        AssertNothingCrosses(TopologyDiagram.Build(CreateLayout("A B C D E F G H I J", "B P Q R S T", "C X")));
 
         // The diagram of a real layout: six stretches, two of them branching off a branch.
-        AssertNoConnectorCrossesALine(TopologyDiagram.Build(CreateLayout(
+        AssertNothingCrosses(TopologyDiagram.Build(CreateLayout(
             "Klb Forgr1@13.3 Rub@15.5 Ful@22.5 Mkd@23.5 Forgr2@19.5 Sbg@13.5",
             "Forgr1 Hvl@6 Mir@3",
             "Rub Kst@13 Cb@7.5 Alk@6",
             "Forgr2 Htås@16.8",
             "Ful Ins@8 Idp@5",
             "Cb Ing@7.5 FulT@4")));
+
+        // The same layout with three of its stretches running the other way round, which turns their
+        // branches from leading out of the main line into leading into it.
+        AssertNothingCrosses(TopologyDiagram.Build(CreateLayout(Kolding)));
     }
 
-    // A connector drops at 45° from its junction to the line it leads to. Every row it passes on the way
-    // must be clear where it crosses, or the diagram shows a branch running straight through another line.
-    private static void AssertNoConnectorCrossesALine(TopologyDiagram diagram)
+    [TestMethod]
+    public void ABranchIsDrawnAboveTheLineItLeavesWhenNothingBelowIsClear()
+    {
+        var diagram = TopologyDiagram.Build(CreateLayout(Kolding));
+        var main = Line(diagram, "1").Y;
+
+        Assert.IsTrue(diagram.Lines.Any(l => l.Y < main), "A branch with no clear path below must be drawn above instead.");
+        Assert.IsTrue(diagram.Lines.Any(l => l.Y > main), "Branches that do have a clear path below must stay below.");
+        AssertNothingCrosses(diagram);
+    }
+
+    [TestMethod]
+    public void BranchesMeetingAtOneStationHangOffEachOtherRatherThanOverlapping()
+    {
+        // Three stretches all leading into station C from the same side. Hung from C itself they would be
+        // drawn one on top of another: every connector leaving a junction at 45° reaches a given row at the
+        // same point, so each would run straight down the one before it and through its corner.
+        var diagram = TopologyDiagram.Build(CreateLayout("A B C D E F G H I J", "P Q C", "R S C", "T U C"));
+
+        Assert.AreEqual(3, diagram.Connectors.Count);
+        Assert.AreEqual(3, diagram.Connectors.Select(c => (c.JunctionX, c.JunctionY)).Distinct().Count(),
+            "Each branch must hang off the corner of the one before it, so no two connectors start at the same point.");
+        AssertNothingCrosses(diagram);
+    }
+
+    // A connector runs at 45° from its junction to the line it leads to, falling to a branch drawn below and
+    // climbing to one drawn above. Nothing may lie in its way: not a line on a row it passes — that would
+    // show a branch running straight through another line — and not another connector, which would show two
+    // branches crossing in mid-air.
+    private static void AssertNothingCrosses(TopologyDiagram diagram)
     {
         foreach (var connector in diagram.Connectors)
         {
-            foreach (var line in diagram.Lines.Where(l => l.Y > connector.JunctionY && l.Y < connector.LineY))
+            var top = Math.Min(connector.JunctionY, connector.LineY);
+            var bottom = Math.Max(connector.JunctionY, connector.LineY);
+            foreach (var line in diagram.Lines.Where(l => l.Y > top && l.Y < bottom))
             {
                 var x = connector.JunctionX
                     + ((line.Y - connector.JunctionY) / (connector.LineY - connector.JunctionY) * (connector.LineX - connector.JunctionX));
-                Assert.IsFalse(x > line.StartX && x < line.EndX,
+                Assert.IsFalse(x >= line.StartX && x <= line.EndX,
                     $"The connector of the line coloured {connector.Color} crosses line {line.Number} at {x:0}.");
             }
         }
+
+        for (var i = 0; i < diagram.Connectors.Count; i++)
+            for (var j = i + 1; j < diagram.Connectors.Count; j++)
+            {
+                var a = diagram.Connectors[i];
+                var b = diagram.Connectors[j];
+                // Connectors that share an end meet at a station: they are chained, not crossing.
+                if (Joined(a, b)) continue;
+                Assert.IsFalse(Crosses(a, b),
+                    $"The connectors of the lines coloured {a.Color} and {b.Color} cross each other.");
+            }
+    }
+
+    private static bool Joined(TopologyConnector a, TopologyConnector b) =>
+        Near(a.JunctionX, a.JunctionY, b.JunctionX, b.JunctionY)
+        || Near(a.JunctionX, a.JunctionY, b.LineX, b.LineY)
+        || Near(a.LineX, a.LineY, b.JunctionX, b.JunctionY);
+
+    private static bool Near(double ax, double ay, double bx, double by) =>
+        Math.Abs(ax - bx) < 0.5 && Math.Abs(ay - by) < 0.5;
+
+    private static bool Crosses(TopologyConnector a, TopologyConnector b)
+    {
+        // Each endpoint of one connector falls on one side of the other's line or the other; they cross
+        // only when both pairs straddle.
+        static double SideOf(TopologyConnector c, double px, double py) =>
+            ((c.LineX - c.JunctionX) * (py - c.JunctionY)) - ((c.LineY - c.JunctionY) * (px - c.JunctionX));
+
+        var d1 = SideOf(b, a.JunctionX, a.JunctionY);
+        var d2 = SideOf(b, a.LineX, a.LineY);
+        var d3 = SideOf(a, b.JunctionX, b.JunctionY);
+        var d4 = SideOf(a, b.LineX, b.LineY);
+        return ((d1 > 0.0 && d2 < 0.0) || (d1 < 0.0 && d2 > 0.0))
+            && ((d3 > 0.0 && d4 < 0.0) || (d3 < 0.0 && d4 > 0.0));
     }
 
     [TestMethod]
@@ -214,10 +296,18 @@ public class TopologyLayoutTests
     public void SignaturesAndLineNumbersFitInsideTheDiagram()
     {
         // Line 3 leads into the main line early on, which places it left of where a line normally starts.
-        var diagram = TopologyDiagram.Build(CreateLayout("Klb Forgr1 Rub Ful Mkd Forgr2 Sbg", "Rub Kst Cb Alk", "Htås Forgr1"));
+        AssertEverythingFitsInside(TopologyDiagram.Build(CreateLayout("Klb Forgr1 Rub Ful Mkd Forgr2 Sbg", "Rub Kst Cb Alk", "Htås Forgr1")));
 
+        // A layout that has to put branches above the main line, which places them above its top row.
+        AssertEverythingFitsInside(TopologyDiagram.Build(CreateLayout(Kolding)));
+    }
+
+    private static void AssertEverythingFitsInside(TopologyDiagram diagram)
+    {
         foreach (var line in diagram.Lines)
         {
+            Assert.IsTrue(line.Y - TopologyDiagram.FontSize - 10.0 >= 0.0, $"Line {line.Number} is drawn above the top edge.");
+            Assert.IsTrue(line.Y <= diagram.Height, $"Line {line.Number} is drawn below the bottom edge.");
             Assert.IsTrue(line.StartX - TopologyDiagram.NumberOffset - line.Number.Length * TopologyDiagram.FontSize * 0.5 > 0.0,
                 $"The number of line {line.Number} is cut off at the left edge.");
             foreach (var node in line.Nodes)

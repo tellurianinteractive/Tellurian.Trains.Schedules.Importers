@@ -1,5 +1,20 @@
 # Release Notes
 
+## Version 0.3.5
+
+### Fixes
+
+- **A saved plan could refuse to open.** Opening a plan the app had just saved stopped with an error
+  naming a country, and nothing was loaded — there was no way past it. A file is read a piece at a time
+  as it arrives, and reading the countries in it tripped over that. A plan already saved opens as it
+  stands; there is nothing you need to do to it.
+
+- **A saved plan file is about seven times smaller.** Saving a plan to a file wrote it in a different
+  form from the one kept in the browser, so the savings the last two versions made never reached the
+  file: every stop was written twice, and every train category, operator and country again at each
+  train, vehicle and duty that used it. A file that took 8 MB now takes a little over 1 MB, and saves
+  and opens correspondingly faster. A plan saved by an earlier version still opens.
+
 ## Version 0.3.4
 
 - **The Arr and Dep boxes on a call now follow where the train can actually stop.** A train stops

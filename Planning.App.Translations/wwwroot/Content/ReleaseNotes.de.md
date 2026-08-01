@@ -1,5 +1,19 @@
 # Versionshinweise
 
+## Version 0.3.5
+
+### Fehlerbehebungen
+
+- **Gespeicherte Fahrpläne ließen sich unter Umständen nicht öffnen.** Beim Öffnen eines gerade gespeicherten Fahrplans trat ein Fehler auf,
+der beim Benennen eines Landes auftrat. Es wurden keine Daten geladen – es gab keine Möglichkeit, diesen Fehler zu beheben. Eine Datei wird stückweise gelesen,
+sobald sie eintrifft, und das Lesen der darin enthaltenen Länder führte zu diesem Problem. Ein bereits gespeicherter Fahrplan wird direkt geöffnet,
+sodass Sie nichts weiter tun müssen.
+
+- **Eine gespeicherte Fahrplandatei ist etwa siebenmal kleiner.** Das Speichern eines Fahrplans in einer Datei erfolgte in einem anderen Format als im Browser,
+sodass die Einsparungen der letzten beiden Versionen nicht in der Datei ankamen:
+Jeder Halt wurde doppelt gespeichert, und jede Zugkategorie, jeder Betreiber und jedes Land wurde für jeden Zug, jedes Fahrzeug und jede Aufgabe erneut gespeichert.
+Eine Datei, die zuvor 8 MB groß war, benötigt nun nur noch etwas über 1 MB und lässt sich entsprechend schneller speichern und öffnen.
+Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öffnen.
 ## Version 0.3.4
 
 - **Die Felder Ank und Abf eines Halts richten sich jetzt danach, wo der Zug tatsächlich halten

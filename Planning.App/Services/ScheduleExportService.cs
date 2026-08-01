@@ -1,6 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.App.Services;
 
@@ -10,12 +8,10 @@ namespace Tellurian.Trains.Schedules.Planning.App.Services;
 /// </summary>
 public sealed class ScheduleExportService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
-    };
+    // The settings every other persistence path uses, so a downloaded plan is written exactly as
+    // browser storage writes it: a country as its id, and a station call and a catalogue entry each
+    // stored once. Indented, because this is the copy a person may open and read.
+    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions(writeIndented: true);
 
     /// <summary>
     /// Serialises the plan to JSON using the same reference-preserving format the importer reads,

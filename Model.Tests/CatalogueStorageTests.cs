@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -164,6 +165,27 @@ public class CatalogueStorageTests
         Assert.AreEqual("DSB", trains[0].Company?.Signature, "The company written on the train is still read.");
         Assert.AreEqual("DB", trains[1].Company?.Signature);
         Assert.IsNotNull(trains[0].Category, "The category written on the train is still read.");
+    }
+
+    /// <summary>
+    /// A plan is opened from a file with <c>DeserializeAsync</c>, which hands the reader one block at a
+    /// time. A reader that has not yet seen the end of the document refuses to skip a token, so a
+    /// converter reading past a property it does not know must not ask it to.
+    /// </summary>
+    [TestMethod]
+    public async Task APlanWrittenWithWholeCountriesStillReadsFromAStream()
+    {
+        var plan = CreatePlan(out _, out _);
+        plan.Layout.EnsureCountries();
+        var expectedCountries = plan.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray();
+        Assert.IsNotEmpty(expectedCountries, "Precondition: the layout uses at least one country.");
+
+        using var legacyJson = new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(plan, LegacyOptions)));
+
+        var restored = await JsonSerializer.DeserializeAsync<Plan>(legacyJson, Options);
+
+        Assert.IsNotNull(restored);
+        CollectionAssert.AreEqual(expectedCountries, restored.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray());
     }
 
     private static int CountOf(string text, string value)

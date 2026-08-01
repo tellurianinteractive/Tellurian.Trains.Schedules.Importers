@@ -1,5 +1,20 @@
 # Versionsnyheder
 
+## Version 0.3.5
+
+### Fejlrettelser
+
+- **En gemt plan kunne nægte at åbne.** At åbne en plan, som appen lige havde gemt, blev afbrudt med en
+  fejl om et land, og der blev ikke indlæst noget — der var ingen vej udenom. En fil læses et stykke ad
+  gangen, mens den kommer ind, og læsningen af landene i den snublede over det. En allerede gemt plan
+  åbnes, som den er; du behøver ikke gøre noget ved den.
+
+- **En gemt planfil er omkring syv gange mindre.** At gemme en plan til en fil skrev den i en anden
+  form end den, der holdes i browseren, så gevinsterne fra de to seneste versioner nåede aldrig frem
+  til filen: hvert ophold blev skrevet to gange, og hver togkategori, hver operatør og hvert land igen
+  ved hvert tog, hvert køretøj og hver tjeneste, der brugte det. En fil, der fyldte 8 MB, fylder nu godt
+  1 MB og gemmes og åbnes tilsvarende hurtigere. En plan gemt af en tidligere version kan stadig åbnes.
+
 ## Version 0.3.4
 
 - **Felterne Ank og Afg på et stop følger nu, hvor toget faktisk kan standse.** Et tog standser for

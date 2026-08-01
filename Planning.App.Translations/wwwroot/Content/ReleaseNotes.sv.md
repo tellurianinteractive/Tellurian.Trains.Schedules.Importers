@@ -1,5 +1,21 @@
 # Versionsnyheter
 
+## Version 0.3.5
+
+### Rättningar
+
+- **En sparad plan kunde vägra att öppnas.** Att öppna en plan som appen just hade sparat avbröts med
+  ett felmeddelande om ett land, och ingenting lästes in — det fanns ingen väg förbi. En fil läses en
+  bit i taget medan den kommer in, och läsningen av länderna i den snubblade på det. En redan sparad
+  plan öppnas som den är; du behöver inte göra något med den.
+
+- **En sparad planfil är omkring sju gånger mindre.** Att spara en plan till fil skrev den i en annan
+  form än den som hålls i webbläsaren, så vinsterna från de två senaste versionerna nådde aldrig fram
+  till filen: varje uppehåll skrevs två gånger, och varje tågkategori, operatör och land om igen vid
+  varje tåg, fordon och förartur som använde det. En fil som tog 8 MB tar nu drygt 1 MB, och sparas
+  och öppnas i motsvarande grad snabbare. En plan sparad av en tidigare version går fortfarande att
+  öppna.
+
 ## Version 0.3.4
 
 - **Rutorna Ank och Avg på ett uppehåll följer nu var tåget verkligen kan stanna.** Ett tåg stannar
