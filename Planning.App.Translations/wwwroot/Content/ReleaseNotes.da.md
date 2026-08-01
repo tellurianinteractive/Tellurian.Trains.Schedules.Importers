@@ -1,5 +1,87 @@
 # Versionsnyheder
 
+## Version 0.3.4
+
+- **Felterne Ank og Afg på et stop følger nu, hvor toget faktisk kan standse.** Et tog standser for
+  at udveksle noget og har derfor brug for et sted at udveksle det: et persontog hvor driftsstedet
+  tager imod passagerer, et godstog hvor det tager imod gods, og ingen af delene på et signalstyret
+  driftssted. Hvor toget ikke kan standse, vises begge felter tomme og kan ikke sættes, og stoppet er
+  en gennemkørsel i køreplanen og i grafen. Intet af det, du har planlagt, smides væk — slå
+  udvekslingen til igen, så er stoppene der. En skyggebanegård har altid udveksling af både passagerer
+  og gods, da den repræsenterer alt uden for anlægget, så dens to felter vises satte og låste.
+
+- **Et stop, som noget afhænger af, kan ikke længere fjernes.** En togdel går fra et stop, hvor toget
+  afgår, til et, hvor det ankommer, så begge ender skal være stop. Togets eget første og sidste stop,
+  og enderne på hver togdel, som et materielomløb, en tjeneste eller et godsflow er planlagt over,
+  beholder nu deres felt sat og låst; hold markøren over det, så fortælles det, hvad der holder det.
+  Hvor en togdel slutter et sted, toget ikke kan standse — en plan lavet før denne regel — siges det
+  ligeud, så du kan flytte stoppet eller togdelen.
+
+- **En togkategori bærer nu de forberedelses- og afslutningstider, dens tog planlægges med.** Hvert
+  nyt tog i kategorien gøres klar så mange minutter før det afgår og sættes væk så mange minutter
+  efter det er ankommet, så du ikke længere skal skrive de samme to tal for hvert tog. Ved siden af
+  hvert af de to felter er der en knap *Anvend igen*, som giver den ene tid til alle de tog,
+  kategorien allerede har, og fortæller hvor mange der blev ændret. De to er hver sin handling, så du
+  kan ændre forberedelsestiden uden at røre afslutningstiden. At anvende igen flytter kun minutterne
+  yderst på et tog: det afgår, holder og ankommer stadig præcis på de tider, det gjorde.
+
+- **Operatørerne er lettere at læse på forsiden af et tjenestehæfte.** Linjen sættes nu i dobbelt
+  størrelse i forhold til før, så et logo er stort nok til at genkendes med et blik og en signatur stor
+  nok til at læses tværs over et bord. Har alle operatører i tjenesten et logo, udelades ordet
+  *Operatør* — logoerne siger det selv. Mangler en af dem et logo, står alle stadig med signatur, med
+  fed skrift og med etiketten bevaret.
+
+### Fejlrettelser
+
+- **Et tjenestehæfte kunne udskrive en togdel ud over sidens nederste kant.** Rapporten beregner før
+  udskriften, hvor mange togdele der er plads til på en side, og regnede med omkring halvdelen mere
+  plads, end en A5-side faktisk har. Det, der går ud over sidekanten, skæres væk uden varsel: den anden
+  togdel på en sådan side manglede slutningen af sin køreplan — eller manglede helt, så en lokofører
+  stod med en tjeneste, hvor det sidste tog manglede. Togdele måles nu mod det, siden faktisk rummer,
+  og en togdel, der ikke er plads til, flyttes til næste side. Nogle hæfter får derfor et ark mere end
+  før.
+
+- **Topologi-diagrammet kunne skrive signaturerne for to driftssteder oven på hinanden.** Driftsstederne
+  blev placeret alene efter afstanden mellem dem, så to, der ligger tæt på hinanden på en lang
+  strækning, blev tegnet næsten samme sted, og deres signaturer løb ind i hinanden. De tegnes nu aldrig
+  tættere på hinanden, end deres to signaturer har brug for, mens resten af strækningen beholder sine
+  virkelige proportioner. En lang signatur ved diagrammets kant bliver heller ikke længere skåret væk.
+
+- **En gren i Topologi-diagrammet kunne tegnes tværs gennem en anden strækning.** En gren falder væk fra
+  den strækning, den forlader, i en fast vinkel, så en gren, der mødte en strækning i vejen, aldrig kunne
+  komme forbi den, uanset hvor langt ned i diagrammet den blev skubbet — den blev simpelthen tegnet tværs
+  over den. De grene, der forlader en strækning længst ude, tegnes nu først, hvilket giver dem bagved en
+  fri vej nedad. En lang gren kan derfor nu blive tegnet under en kort gren, der forlader strækningen
+  længere ude.
+
+- **En plan kunne vise sine tog under togkategorier, som fanen Togkategorier ikke havde.** Et tog bærer
+  sin kategori med sig, så en plan gemt af en tidligere version blev åbnet med togene grupperet efter
+  kategori, mens listen over kategorier var tom: kategorimenuen havde ingenting at tilbyde, og intet tog
+  kunne flyttes til en anden kategori. Flere kategorier kunne også tages for en og samme, så deres tog
+  blev samlet under en enkelt overskrift, og to tog af forskellige kategorier med samme nummer blev
+  meldt som ét nummer brugt to gange. Når en plan åbnes, fyldes listen over kategorier nu op med de
+  kategorier, togene bruger, og hver kategori holdes adskilt fra de andre.
+
+- **To selskaber, der aldrig havde fået deres eget nummer, blev taget for den samme operatør.** Et
+  selskab kendes fra de andre på et nummer, appen fører for det, og en plan kunne indeholde flere, der
+  aldrig havde fået et. Tog fra forskellige selskaber, der delte tognummer, blev så meldt som ét nummer
+  brugt to gange. Hvert selskab får nu sit eget nummer, når en plan åbnes eller gemmes; et selskab fra
+  Module Registry beholder det nummer, det kom med.
+
+- **En plan gemte sine togkategorier, selskaber og lande flere steder.** Hver enkelt blev skrevet der,
+  hvor den først blev mødt ved gemningen — som regel inde i det første tog, der brugte den — mens
+  listen, den hører hjemme i, ikke indeholdt mere end en henvisning til den. Sådan kunne en plan få tog
+  i kategorier, som fanen Togkategorier ikke kendte. Hver enkelt skrives nu én gang, i sin egen liste,
+  og alt, der bruger den, beholder kun en henvisning. Lande kopieres slet ikke længere ind i planen, så
+  en rettelse af et lands sprog nu også når planer, der er gemt forinden. En plan gemt af en tidligere
+  version læses som før og bliver rettet, næste gang den gemmes.
+
+- **Et tjenestehæfte angav kun tognummeret i overskriften for en togdel.** Et tog identificeres lige
+  så meget af kategoriens præfiks og suffiks som af nummeret — Gt 1234, ikke 1234 — og en lokofører,
+  der sammenligner hæftet med køreplanen eller med det, der råbes op, har kun den overskrift at gå
+  efter. Overskriften viser nu hele togidentiteten, præfiks og suffiks med, efter operatørens
+  signatur.
+
 ## Version 0.3.3
 
 - **Konflikter kan nu læses dér, hvor de vises.** En række med konflikter — et tog eller en togkategori

@@ -1,5 +1,89 @@
 # Release Notes
 
+## Version 0.3.4
+
+- **The Arr and Dep boxes on a call now follow where the train can actually stop.** A train stops
+  somewhere to exchange something, so it needs somewhere to exchange it: a passenger train where the
+  place takes passengers, a freight train where it takes cargo, and neither at a signal-controlled
+  location. Where a train cannot stop, both boxes are shown cleared and cannot be ticked, and the
+  call is a pass-through in the timetable and on the graph. Nothing you planned is thrown away — turn
+  the exchange back on and the stops are there again. A shadow yard always exchanges both, since it
+  stands for everything beyond the layout, so its two exchange boxes are ticked and disabled.
+
+- **A stop something depends on can no longer be taken away.** A train part runs from a call the
+  train departs to a call it arrives at, so both ends have to be stops. The train's own first and
+  last call, and the ends of every part a vehicle schedule, a driver duty or a cargo flow is planned
+  over, now keep their box ticked and disabled; hovering says what is holding it. Where a part ends
+  somewhere its train cannot stop — a plan made before this rule — the box says so plainly, so you
+  can move the call or the part.
+
+- **A train category now carries the preparation and finishing-up times its trains are planned with.**
+  Every new train of the category is made ready that many minutes before it departs and put away that
+  many minutes after it arrives, so you no longer type the same two numbers for every train. Beside
+  each of the two fields is a *Reapply* button that gives that one time to all the trains the category
+  already has, and says how many were changed. The two are separate actions, so you can change the
+  preparation time without disturbing the finishing-up time. Reapplying moves only the minutes at the
+  very ends of a train: it still departs, calls and arrives at exactly the times it did.
+
+- **The operators are easier to read on the front page of a duty booklet.** The line is now set at
+  twice the size it was, so a logo is large enough to be recognised at a glance and a signature large
+  enough to be read across a table. Where every operator of the duty has a logo, the word *Operator*
+  is left out — the logos say it themselves. Where any one of them has no logo, all are still given as
+  signatures, in bold and with the label kept.
+
+### Fixes
+
+- **A duty booklet could print a train part off the foot of the page.** The report works out how many
+  train parts fit on a page before it prints them, and it was crediting each page with about half as
+  much room again as an A5 page really has. Anything past the foot of the page is cut away without a
+  word, so the second train part on such a page lost the end of its timetable — or did not appear at
+  all, leaving a loco driver holding a duty whose last train was missing. Train parts are now measured
+  against what the page really holds, and one that does not fit is carried to the next page. Some
+  booklets will therefore need a sheet more than before.
+
+- **The Topology diagram could print the signatures of two operation locations on top of each other.**
+  Operation locations were placed purely by the distance between them, so two that lie close together
+  on a long stretch were drawn almost in the same place and their signatures ran into one another.
+  They are now never drawn closer together than their two signatures need, while the rest of the
+  stretch keeps its true proportions. A long signature at the edge of the diagram is no longer cut
+  off either.
+
+- **A branch in the Topology diagram could be drawn straight through another stretch.** A branch falls
+  away from the stretch it leaves at a fixed angle, so a branch that met a stretch in its way could
+  never get past it, however far down the diagram it was pushed — it was simply drawn across it. The
+  branches that leave furthest along a stretch are now drawn first, which leaves the ones behind them
+  a clear way down. A long branch may therefore now be drawn below a short one that leaves the stretch
+  further along.
+
+- **A plan could show its trains under train categories the Train Categories tab did not list.** A
+  train carries its category with it, so a plan saved by an earlier version opened with its trains
+  grouped by category while the list of categories was empty: the category drop-down had nothing to
+  offer, and no train could be moved to another category. Several categories could also be taken for
+  one and the same, gathering their trains under a single heading and reporting two trains of
+  different categories that share a number as one number used twice. When a plan is opened, the list
+  of categories is now completed from the categories its trains use, and every category is kept apart
+  from the others.
+
+- **Two companies that had never been given a number of their own were taken for the same operator.**
+  A company is told apart from the others by a number the app keeps for it, and a plan could hold
+  several that had never been given one. Trains of different companies that shared a train number were
+  then reported as one number used twice. Every company is now given a number of its own when a plan is
+  opened or saved; a company that came from the Module Registry keeps the number it came with.
+
+- **A plan stored its train categories, companies and countries in more than one place.** Each was
+  written wherever it was first met on the way out — usually inside the first train that used it —
+  while the list it belongs to held no more than a pointer to it. That is how a plan could come to have
+  trains in categories the Train Categories tab knew nothing about. Each is now written once, in its
+  own list, and everything that uses one keeps only a reference. Countries are no longer copied into
+  the plan at all, so a correction to a country's languages now reaches plans that were saved before
+  it. A plan saved by an earlier version is read as before and put right the next time it is saved.
+
+- **A duty booklet gave only the train number in the heading of a train part.** A train is identified
+  by the prefix and suffix of its category as much as by its number — Gt 1234, not 1234 — and a loco
+  driver comparing the booklet with the timetable, or with what is called out, has only that heading
+  to go by. The heading now carries the whole train identity, prefix and suffix included, after the
+  operator's signature.
+
 ## Version 0.3.3
 
 - **Conflicts can now be read where they are shown.** A row that has conflicts — a train or a train

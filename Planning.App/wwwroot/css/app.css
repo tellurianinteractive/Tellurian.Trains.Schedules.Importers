@@ -293,9 +293,30 @@ table.grid thead th .sort-indicator {
         line-height: 1.2;
     }
 
-    .operators,
     .categories {
         margin: 0.15em 0;
+    }
+
+    /* Set at double the body size, which the sizing of both variants follows from: the signatures grow
+       with the font, and the logo height is expressed in em, so it doubles from the same rule. The line
+       is the last thing the chooser reads before committing to a duty and it belongs to a company
+       recognised at a glance, either by its mark or by its letters — at body size neither carries that
+       far, and a logo shrunk to text height loses the detail it is recognised by. */
+    .operators {
+        margin: 0.15em 0;
+        font-size: 2rem;
+        line-height: 1.2;
+
+        /* Only signatures need this: the logos are already a solid mark, so weight applies to the
+           letter groups that stand in for one. */
+        strong {
+            font-weight: 700;
+        }
+
+        /* Spacing that does not depend on the source whitespace between two adjacent images. */
+        .company-logo {
+            margin: 0 0.25em;
+        }
     }
 
     .label {
@@ -444,8 +465,10 @@ table.grid thead th .sort-indicator {
 .dutypart {
     /* The line the driver scans for when leafing through the booklet ("Dienst in DBSCH Zug 44780"), so
        it is set half again as large as the rest and given air above it — which also separates a second
-       part on the same page from the tables of the part before. Two row units in the page budget; see
-       DutyPagination.HeaderHeight, which must be re-tuned if this size changes. */
+       part on the same page from the tables of the part before. Just over two table rows of height, and the
+       largest single term in DutyPagination.HeaderHeight, which must be re-derived if this size
+       changes: the page budget there is counted in table rows, and every constant in it is a pixel
+       figure taken from these rules. */
     h2 {
         margin: 0 0 0.1em;
         padding-top: 0.3em;
@@ -457,10 +480,18 @@ table.grid thead th .sort-indicator {
         font-size: 0.9rem;
     }
 
-    /* Category and extent share a line; the category leads it. */
-    .extent .category {
-        font-weight: 600;
-        margin-right: 0.5em;
+    /* Category and extent share a line; the category leads it. The stations and times are set bold as
+       well — they are what a driver picks off the line — but at the category's weight rather than the
+       browser's heavier default, so the line carries one level of emphasis and not two. */
+    .extent {
+        .category {
+            font-weight: 600;
+            margin-right: 0.5em;
+        }
+
+        b {
+            font-weight: 600;
+        }
     }
 
     h3 {
@@ -559,13 +590,13 @@ table.grid thead th .sort-indicator {
            is the one distinction on the page that must never be misread. Qualified by the rule classes
            so it recolours a rule that is drawn rather than revealing one that is not. */
         tr.not-part td {
-            color: #808080;
+            color: #a8a8a8;
             text-decoration: line-through;
         }
 
         tr.not-part.rule-heavy td,
         tr.not-part.rule-light td {
-            border-bottom-color: #808080;
+            border-bottom-color: #a8a8a8;
         }
     }
 }

@@ -571,6 +571,9 @@
   <data name="Shadow" xml:space="preserve">
     <value>Shadow?</value>
   </data>
+  <data name="ShadowExchangesEverything" xml:space="preserve">
+    <value>A shadow yard always exchanges both passengers and cargo: it stands for everything beyond the modelled layout.</value>
+  </data>
   <data name="IsShadow" xml:space="preserve">
     <value>Shadow yard?</value>
   </data>
@@ -1344,6 +1347,15 @@
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Cannot delete: only the first and the last call can be deleted. A train has a call at every operation location along its route.</value>
   </data>
+  <data name="CallCannotBeStop" xml:space="preserve">
+    <value>The train cannot stop here: this operation location is signal controlled, or it exchanges neither passengers nor cargo for this kind of train.</value>
+  </data>
+  <data name="CallStopRequired" xml:space="preserve">
+    <value>This stop cannot be removed: the train's run, or a train part planned over it, starts or ends here.</value>
+  </data>
+  <data name="CallStopRequiredButImpossible" xml:space="preserve">
+    <value>A train part starts or ends here, but the train cannot stop at this operation location. Move the call or the train part.</value>
+  </data>
   <data name="CallReferenced" xml:space="preserve">
     <value>Cannot delete: this call is used by vehicle schedules or driver duties.</value>
   </data>
@@ -1652,6 +1664,24 @@
   </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Exclude from automatic scheduling?</value>
+  </data>
+  <data name="DefaultPreparationMinutes" xml:space="preserve">
+    <value>Preparation minutes</value>
+  </data>
+  <data name="DefaultFinishingMinutes" xml:space="preserve">
+    <value>Finishing minutes</value>
+  </data>
+  <data name="Reapply" xml:space="preserve">
+    <value>Reapply</value>
+  </data>
+  <data name="ReapplyPreparationMinutesTitle" xml:space="preserve">
+    <value>Give every train in this category this preparation time. Each train is made ready this many minutes before it departs; it runs exactly as before.</value>
+  </data>
+  <data name="ReapplyFinishingMinutesTitle" xml:space="preserve">
+    <value>Give every train in this category this finishing-up time. Each train is put away this many minutes after it arrives; it runs exactly as before.</value>
+  </data>
+  <data name="ReappliedToTrains" xml:space="preserve">
+    <value>Changed {0} train(s).</value>
   </data>
   <data name="Assign" xml:space="preserve">
     <value>Assign</value>

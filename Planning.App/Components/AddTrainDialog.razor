@@ -14,7 +14,7 @@
             <div class="field">
                 <label>@Translator("Category")</label>
                 <ListBoxView Items="@(CategoryChoices.ToListItems())"
-                             Value="_categoryId" ValueChanged="id => { _categoryId = id; UpdateSuggestedNumber(); }"
+                             Value="_categoryId" ValueChanged="id => { _categoryId = id; UpdateCategoryDefaults(); UpdateSuggestedNumber(); }"
                              Placeholder="—" />
             </div>
             <div class="field">
@@ -146,6 +146,7 @@
     protected override void OnInitialized()
     {
         _categoryId = CategoryChoices.FirstOrDefault()?.Id;
+        UpdateCategoryDefaults();
         // The origin call's arrival — the driver's service start — is preparationMinutes before this
         // departure (see Plan.Create), so defaulting straight to the plan's start time would place that
         // arrival before it and fail the operating window. Add the preparation time so the earliest call
@@ -163,6 +164,16 @@
         _returnAsSoonAsPossible = e.Value as bool? ?? false;
         if (_returnAsSoonAsPossible) _returnTime = "";
         _error = null;
+    }
+
+    // Fill the preparation and finishing-up minutes with the chosen category's defaults. Unlike the train
+    // number, these follow the category every time one is picked: they are the category's times, and the
+    // planner types over them afterwards when this train is to differ.
+    private void UpdateCategoryDefaults()
+    {
+        if (CategoryChoices.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
+        _preparationMinutes = category.DefaultPreparationMinutes;
+        _finishingMinutes = category.DefaultFinishingMinutes;
     }
 
     // The planner has typed a number, so stop overwriting it with the category/direction suggestion.

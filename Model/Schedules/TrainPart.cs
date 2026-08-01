@@ -127,6 +127,37 @@ public static class TrainPartExtensions
 {
     extension(TrainPart trainPart)
     {
+        /// <summary>
+        /// The span for which this part ties up the vehicles and the driver working it: the running time
+        /// from departure to arrival, extended at the train's origin by the preparation time and at its
+        /// destination by the finishing-up time. Those two are real pieces of work — the train is being
+        /// made ready, or being put away — so anything scheduled over them clashes just as much as
+        /// something scheduled over the run itself.
+        /// </summary>
+        /// <remarks>
+        /// Only the train's own ends are extended. A part that starts or ends at an intermediate call
+        /// hands over to the neighbouring part of the same train there, and stretching both across that
+        /// stop would turn the handover into an overlap. Where a train records no preparation or
+        /// finishing-up time — its end call arrives and departs at the same minute — the span is the
+        /// running time, exactly as before.
+        /// </remarks>
+        public (Time From, Time To) WorkingSpan => (trainPart.From.WorkStart, trainPart.To.WorkEnd);
+
+        /// <summary>
+        /// The part written with the times of its <c>WorkingSpan</c> rather than its departure and
+        /// arrival, so that a reported overlap shows the times the overlap was judged on: at the train's
+        /// origin the arrival, where preparing it begins, and at its destination the departure, where
+        /// finishing it up ends. Anywhere else the departure and arrival are the working times already.
+        /// </summary>
+        public string WorkingSpanText
+        {
+            get
+            {
+                var (from, to) = trainPart.WorkingSpan;
+                return string.Format(CultureInfo.CurrentCulture, "'{0}' {1} {2}->{3} {4}", trainPart.Train, trainPart.From.OperationLocation, from.HHMM(), trainPart.To.OperationLocation, to.HHMM());
+            }
+        }
+
         internal bool ContainsCall(StationCall call)
         {
             return trainPart.Train == call.Train && trainPart.From.Departure <= call.Departure && trainPart.To.Arrival >= call.Arrival;

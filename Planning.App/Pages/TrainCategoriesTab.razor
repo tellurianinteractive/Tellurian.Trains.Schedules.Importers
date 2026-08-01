@@ -60,11 +60,11 @@ else
         {
             <div class="edit">
                 <div class="view-header">
-                    <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
                     @if (!_isNew)
                     {
                         <button class="primary" @onclick="BackToList">@Translator("Close")</button>
                     }
+                    <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
                 </div>
 
                 <div class="section">
@@ -106,10 +106,31 @@ else
                         </select>
                     </div>
                     <div class="field">
+                        <label>@Translator("DefaultPreparationMinutes")</label>
+                        <span class="with-action">
+                            <input type="number" class="short" min="0" @bind="Editing.DefaultPreparationMinutes" @bind:after="OnEdited" />
+                            <button disabled="@(_isNew || TrainCount == 0)" title='@Translator("ReapplyPreparationMinutesTitle")'
+                                    @onclick="ReapplyPreparationMinutes"><i class="fa-solid fa-rotate"></i> @Translator("Reapply")</button>
+                        </span>
+                    </div>
+                    <div class="field">
+                        <label>@Translator("DefaultFinishingMinutes")</label>
+                        <span class="with-action">
+                            <input type="number" class="short" min="0" @bind="Editing.DefaultFinishingMinutes" @bind:after="OnEdited" />
+                            <button disabled="@(_isNew || TrainCount == 0)" title='@Translator("ReapplyFinishingMinutesTitle")'
+                                    @onclick="ReapplyFinishingMinutes"><i class="fa-solid fa-rotate"></i> @Translator("Reapply")</button>
+                        </span>
+                    </div>
+                    <div class="field">
                         <label>@Translator("ExcludeFromAutomaticScheduling")</label>
                         <input type="checkbox" @bind="Editing.ExcludeFromAutomaticScheduling" @bind:after="OnEdited" />
                     </div>
                 </div>
+
+                @if (_reapplied is not null)
+                {
+                    <p class="reapplied">@string.Format(Culture, Translator("ReappliedToTrains"), _reapplied)</p>
+                }
 
                 @if (_isNew)
                 {
@@ -137,6 +158,12 @@ else
     private bool _isNew;
     private TrainCategory? Editing { get; set; }
     private TrainCategory? _deleteTarget;
+    // How many trains the last reapply changed, or null while none has been done on this category.
+    private int? _reapplied;
+
+    // How many trains the category being edited has; nothing can be reapplied to a category without any.
+    private int TrainCount =>
+        Editing is null ? 0 : Timetable?.TrainsIn(Editing).Count() ?? 0;
 
     private int? CategoryCompanyId
     {
@@ -171,6 +198,7 @@ else
     {
         Editing = new TrainCategory { Id = NextId(), Name = "", IsPassenger = true };
         _isNew = true;
+        _reapplied = null;
         _mode = Mode.Edit;
     }
 
@@ -178,6 +206,7 @@ else
     {
         Editing = category;
         _isNew = false;
+        _reapplied = null;
         _mode = Mode.Edit;
     }
 
@@ -186,11 +215,31 @@ else
         _mode = Mode.List;
         Editing = null;
         _isNew = false;
+        _reapplied = null;
+    }
+
+    // Gives every train of the category the default preparation time, moving each train's first arrival
+    // that many minutes before it departs. The train runs as it did; only the time it is made ready changes.
+    private void ReapplyPreparationMinutes()
+    {
+        if (Editing is null || Timetable is null) return;
+        _reapplied = Timetable.ApplyDefaultPreparationMinutes(Editing);
+        ScheduleState.SaveAndNotify();
+    }
+
+    // The same for the finishing-up time, which moves each train's last departure after it arrives.
+    private void ReapplyFinishingMinutes()
+    {
+        if (Editing is null || Timetable is null) return;
+        _reapplied = Timetable.ApplyDefaultFinishingMinutes(Editing);
+        ScheduleState.SaveAndNotify();
     }
 
     private void OnEdited()
     {
         if (Editing is not null && string.IsNullOrWhiteSpace(Editing.Name)) Editing.Name = DefaultName(Editing);
+        // The count of the last reapply says nothing about the values as they now stand.
+        _reapplied = null;
         if (!_isNew) ScheduleState.SaveAndNotify();
     }
 

@@ -80,10 +80,12 @@ public static class ValidationExtensions
                 // Match by Id, not value equality: several runs can share the same category and number
                 // (e.g. a clock-face service), and value equality would merge their parts and emit the
                 // same gap/overlap warnings once per run.
+                // In the order the locomotive starts work on each part — the times an overlap message
+                // shows — so a reported pair reads earliest first.
                 var locomotiveParts = locomotiveSchedules
                     .SelectMany(ls => ls.Parts)
                     .Where(p => p.Train.Id == train.Id)
-                    .OrderBy(p => p.From.Departure.Value)
+                    .OrderBy(p => p.WorkingSpan.From)
                     .ToList();
 
                 if (locomotiveParts.Count == 0) continue; // no traction at all: S4's concern, not an overlap
@@ -121,14 +123,19 @@ public static class ValidationExtensions
                 }
             }
 
-            // Two schedules overlap in time when any part of one runs at the same clock time as any part
-            // of the other (the standard half-open interval overlap used throughout these validations).
+            // Two schedules overlap in time when any part of one is worked at the same clock time as any
+            // part of the other. Each part is taken over its WorkingSpan — running time plus the
+            // preparation and finishing-up time at the train's ends — as everywhere else overlap is
+            // judged.
             static bool SchedulesOverlapInTime(Schedule s1, Schedule s2)
             {
+                var spans2 = s2.Parts.Select(p => p.WorkingSpan).ToArray();
                 foreach (var p1 in s1.Parts)
-                    foreach (var p2 in s2.Parts)
-                        if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
-                            return true;
+                {
+                    var span1 = p1.WorkingSpan;
+                    foreach (var span2 in spans2)
+                        if (span1.OverlapsInTime(span2)) return true;
+                }
                 return false;
             }
         }
@@ -187,19 +194,23 @@ public static class ValidationExtensions
                 }
             }
 
-            // Two parts within one duty overlapping in time.
+            // Two parts within one duty overlapping in time, counting the preparation and finishing-up
+            // time at the trains' ends: a driver still making one train ready cannot be driving another.
             foreach (var duty in duties)
             {
-                var parts = duty.OrderedParts;
+                // In the order the driver starts work on each part — the times the message shows — so a
+                // reported pair reads earliest first.
+                var parts = duty.Parts.OrderBy(p => p.WorkingSpan.From).ToList();
+                var spans = parts.Select(p => p.WorkingSpan).ToArray();
                 for (var i = 0; i < parts.Count - 1; i++)
                 {
                     for (var j = i + 1; j < parts.Count; j++)
                     {
                         var p1 = parts[i];
                         var p2 = parts[j];
-                        if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
+                        if (spans[i].OverlapsInTime(spans[j]))
                         {
-                            var message = Message.Information(Strings.DutyHasOverlappingParts, duty.Identity, p1, p2);
+                            var message = Message.Information(Strings.DutyHasOverlappingParts, duty.Identity, p1.WorkingSpanText, p2.WorkingSpanText);
                             yield return ValidationError.DutyPartsOverlap(duty, p1, p2, message);
                         }
                     }
@@ -464,27 +475,39 @@ public static class ValidationExtensions
         /// </summary>
         private bool HasOverlappingParts()
         {
-            var parts = schedule.Parts.ToArray();
-            for (var i = 0; i < parts.Length - 1; i++)
-                for (var j = i + 1; j < parts.Length; j++)
-                    if (parts[i].To.Arrival > parts[j].From.Departure && parts[i].From.Departure < parts[j].To.Arrival)
+            var spans = schedule.Parts.Select(p => p.WorkingSpan).ToArray();
+            for (var i = 0; i < spans.Length - 1; i++)
+                for (var j = i + 1; j < spans.Length; j++)
+                    if (spans[i].OverlapsInTime(spans[j]))
                         return true;
             return false;
         }
 
+        /// <summary>
+        /// Reports the schedule's parts that overlap in time (rule S1). Each part is taken over its
+        /// <c>WorkingSpan</c>, so the preparation time at a train's origin and the finishing-up time at
+        /// its destination count as occupied: the vehicle is being made ready or put away, and cannot at
+        /// the same time be working another train.
+        /// </summary>
+        /// <remarks>
+        /// The parts are taken in the order the vehicle starts work on them — the same times the message
+        /// shows — so each reported pair reads earliest first and the overlap between the two is easy to
+        /// see.
+        /// </remarks>
         private List<ValidationError> ValidateOverlappingParts()
         {
             var errors = new List<ValidationError>();
-            var parts = schedule.Parts.ToArray();
-            for (var i = 0; i < parts.Length - 1; i++)
+            var parts = schedule.Parts.OrderBy(p => p.WorkingSpan.From).ToList();
+            var spans = parts.Select(p => p.WorkingSpan).ToArray();
+            for (var i = 0; i < parts.Count - 1; i++)
             {
-                for (var j = i + 1; j < parts.Length; j++)
+                for (var j = i + 1; j < parts.Count; j++)
                 {
                     var p1 = parts[i];
                     var p2 = parts[j];
-                    if (p1.To.Arrival > p2.From.Departure && p1.From.Departure < p2.To.Arrival)
+                    if (spans[i].OverlapsInTime(spans[j]))
                     {
-                        var message = Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, schedule.Id, p1, p2));
+                        var message = Message.Information(string.Format(CultureInfo.CurrentCulture, Strings.VehicleScheduleContainsOverlappingTrainParts, schedule.Id, p1.WorkingSpanText, p2.WorkingSpanText));
                         errors.Add(ValidationError.VehicleScheduleOverlap(schedule, p1, p2, message));
                     }
                 }
@@ -610,6 +633,10 @@ public static class ValidationExtensions
 
         private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<ScheduledTrainPart> locomotiveParts)
         {
+            // Each part is taken over its WorkingSpan: the running time plus the preparation time at the
+            // train's origin and the finishing-up time at its destination, which are as much a claim on
+            // the locomotive as the run between them.
+            var spans = locomotiveParts.Select(p => p.WorkingSpan).ToArray();
             for (var i = 0; i < locomotiveParts.Count - 1; i++)
             {
                 for (var j = i + 1; j < locomotiveParts.Count; j++)
@@ -617,10 +644,9 @@ public static class ValidationExtensions
                     var part1 = locomotiveParts[i];
                     var part2 = locomotiveParts[j];
 
-                    // Check for overlap: part1 ends after part2 starts AND part1 starts before part2 ends
-                    if (part1.To.Arrival > part2.From.Departure && part1.From.Departure < part2.To.Arrival)
+                    if (spans[i].OverlapsInTime(spans[j]))
                     {
-                        var message = Message.Information(Strings.TrainHasLocomotiveCoverageOverlap, train, part1, part2);
+                        var message = Message.Information(Strings.TrainHasLocomotiveCoverageOverlap, train, part1.WorkingSpanText, part2.WorkingSpanText);
                         yield return ValidationError.LocomotiveCoverageOverlap(train, part1, part2, message);
                     }
                 }
@@ -780,10 +806,13 @@ public static class ValidationExtensions
                 // so a conflict caused by a traction unit's stay (rather than the calls' own times) still
                 // shows the span that actually overlaps.
                 var occupancySchedules = extendOccupancyByVehicleStay ? vehicleSchedules : null;
-                var oneSpan = c.one.TrackOccupancySpanText(occupancySchedules);
-                var anotherSpan = c.another.TrackOccupancySpanText(occupancySchedules);
-                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, c.one.Train!, oneSpan, c.another.Train!, anotherSpan);
-                return ValidationError.StationTrackConflict(stationTrack, c.one, c.another, message);
+                // The call that takes the track first is named first, so the two spans in the message read
+                // in time order and the overlap between them is easy to see.
+                var (first, second) = c.one.TrackOccupancy(occupancySchedules).From <= c.another.TrackOccupancy(occupancySchedules).From ? (c.one, c.another) : (c.another, c.one);
+                var firstSpan = first.TrackOccupancySpanText(occupancySchedules);
+                var secondSpan = second.TrackOccupancySpanText(occupancySchedules);
+                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan);
+                return ValidationError.StationTrackConflict(stationTrack, first, second, message);
             });
 
         private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay)

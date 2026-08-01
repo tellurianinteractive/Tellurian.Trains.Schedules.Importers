@@ -23,14 +23,14 @@
         {
             <line x1="@F(line.StartX)" y1="@F(line.Y)" x2="@F(line.EndX)" y2="@F(line.Y)"
                   stroke="@line.Color" stroke-width="10" />
-            <SvgText X="line.StartX - 20" Y="line.Y + 4" Anchor="end"
-                     Fill="@TextColor" FontSize="16.5" FontWeight="600" Text="@line.Number" />
+            <SvgText X="line.StartX - TopologyDiagram.NumberOffset" Y="line.Y + 4" Anchor="end"
+                     Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@line.Number" />
             @foreach (var node in line.Nodes.Where(n => !n.Hidden))
             {
                 <circle cx="@F(node.X)" cy="@F(node.Y)" r="5"
                         fill="#fff" stroke="@line.Color" stroke-width="2" />
                 <SvgText X="node.X" Y="node.Y - 10" Anchor="middle"
-                         Fill="@TextColor" FontSize="16.5" FontWeight="600" Text="@node.Signature" />
+                         Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@node.Signature" />
             }
         }
     </svg>

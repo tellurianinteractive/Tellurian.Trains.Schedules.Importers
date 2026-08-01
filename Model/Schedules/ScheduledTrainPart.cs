@@ -64,11 +64,17 @@ public static class ScheduledTrainPartExtensions
         /// Overlap only applies to scheduled parts (vehicle circulations and driver duties); a cargo
         /// flow is not subject to it.
         /// </summary>
+        /// <remarks>
+        /// The parts are compared over their <c>WorkingSpan</c>, so the preparation time at a train's
+        /// origin and the finishing-up time at its destination count as occupied: a vehicle or driver
+        /// still making one train ready cannot be working another.
+        /// </remarks>
         /// <param name="otherTrainParts">The collection of train parts to check against.</param>
         /// <returns><c>true</c> if there is any overlap; otherwise, <c>false</c>.</returns>
         public bool IsOverlapping(IEnumerable<ScheduledTrainPart> otherTrainParts)
         {
-            return otherTrainParts.Any(o => o.Arrival > trainPart.Departure && o.Departure < trainPart.Arrival);
+            var span = trainPart.WorkingSpan;
+            return otherTrainParts.Any(o => span.OverlapsInTime(o.WorkingSpan));
         }
 
         /// <summary>

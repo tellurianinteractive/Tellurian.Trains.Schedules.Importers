@@ -182,6 +182,36 @@ public class DutyPaginationTests
     }
 
     [TestMethod]
+    public void NoPageIsPackedBeyondTheBudget()
+    {
+        // The invariant the whole estimate exists for. A page packed past the budget does not print
+        // short: the page body is overflow: hidden, so the surplus is taken away silently, and a driver
+        // is handed a duty whose last train is missing.
+        foreach (var callsPerTrain in new[] { 2, 4, 6, 9 })
+        {
+            var pages = Pages(CreateDuty(partCount: 5, callsPerTrain));
+            foreach (var page in pages.Where(p => p.Parts.Count > 0 && !p.IsSplitFirstHalf && !p.IsTimetableContinuation))
+            {
+                var used = page.Parts.Sum(p => DutyPagination.HeightOf(p, Translate));
+                Assert.IsTrue(used <= DutyPagination.PageBudget,
+                    $"Page {page.PageNumber} holds {used:F2} row units of a {DutyPagination.PageBudget} budget.");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void TwoPartsWithFullTimetablesDoNotShareAPage()
+    {
+        // The case that overflowed in print: a part of a six-call train is 16 row units, so a second
+        // cannot follow it onto a page holding 28. This failed while the budget was counted in 16 px
+        // lines and the rows charged against it were 24 px table rows — each part then measured 20
+        // units against a budget of 43, and both were packed onto a page that fits neither.
+        var pages = Pages(CreateDuty(partCount: 2, callsPerTrain: 6));
+
+        Assert.HasCount(2, pages.Where(p => p.Parts.Count == 1));
+    }
+
+    [TestMethod]
     public void ASuppressedBlockCostsNoHeight()
     {
         var duty = CreateDuty(partCount: 1);

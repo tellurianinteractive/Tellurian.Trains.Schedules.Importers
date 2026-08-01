@@ -17,7 +17,9 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageTags>model-trains scheduling timetables FREMO XPLN</PackageTags>
-		<PackageReleaseNotes>3.0.0: Breaking — Model types moved into nested namespaces (Layouts, Timetables, Schedules, Notes, Settings); consuming code must update its using directives. StationCall stop detection is now via IsStop; TrainPart is abstract. Added vehicle-schedule (turnus) building, cargo-flow planning, localised call notes, and structured layout settings. XPLN import gains XplnImportOptions for per-import language/country. See RELEASENOTES.md for details.</PackageReleaseNotes>
+		<PackageReleaseNotes>
+			3.1.0: See release note document.
+		</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>

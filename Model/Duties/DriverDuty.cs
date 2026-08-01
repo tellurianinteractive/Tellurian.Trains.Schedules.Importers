@@ -95,14 +95,19 @@ public class DriverDuty : IEquatable<DriverDuty>
     public Time? OverriddenEndTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the foreign key to the company performing this duty. Optional.
+    /// Gets or sets the foreign key to the company performing this duty. Optional. Follows
+    /// <see cref="Company"/> while one is set, so assigning the company is enough to keep the two in
+    /// step; the stored value is what a plan is read with, before the company itself has been
+    /// resolved from the catalogue.
     /// </summary>
-    public int? CompanyId { get; set; }
+    public int? CompanyId { get => Company?.Id ?? field; set; }
 
     /// <summary>
-    /// Gets or sets the company performing this duty.
+    /// Gets or sets the company performing this duty. Written to a plan as <see cref="CompanyId"/>
+    /// alone; the company itself is stored once, in the layout's company catalogue. Setting no company
+    /// clears the key too, so the duty is not given the old one back the next time the plan is read.
     /// </summary>
-    public Company? Company { get; set; }
+    public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>
     /// Gets or sets the foreign key to the owning schedule.

@@ -274,8 +274,10 @@ public static class PlanExtensions
         /// <param name="from">The origin location from which the train will depart.</param>
         /// <param name="to">The destination location to which the train will travel.</param>
         /// <param name="startTime">The scheduled departure time for the train from the origin location.</param>
-        /// <param name="preparationMinutes">The number of minutes required to prepare the train before first departure. Must be a non-negative value.</param>
-        /// <param name="finishingMinutes">The number of minutes required to finish the train after last arrival. Must be a non-negative value.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare the train before first departure.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultPreparationMinutes"/> is used.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish the train after last arrival.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The train's maximum scale speed in km/h, used to compute run times (capped per stretch by the
         /// stretch's own maximum speed). When <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The train number to assign. When <c>null</c>, the default number for the category and the
@@ -284,11 +286,14 @@ public static class PlanExtensions
         /// <returns>The created train, already added to the timetable, or <c>null</c> when no train could be built
         /// (origin equals destination, no path exists, or a location on the path has no track) or the finished
         /// train does not fit the plan's operating window (see <c>FitsWithinOperatingWindow</c>).</returns>
-        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
             ArgumentNullException.ThrowIfNull(to);
+
+            var preparation = preparationMinutes ?? category.DefaultPreparationMinutes;
+            var finishing = finishingMinutes ?? category.DefaultFinishingMinutes;
 
             var path = PathFinder.FindShortestPath(plan.Layout, from, to);
             if (path is null) return null;
@@ -316,9 +321,9 @@ public static class PlanExtensions
 
                 if (i == 0)
                 {
-                    // Origin: prepared for departure, so the driver's service starts preparationMinutes before.
+                    // Origin: prepared for departure, so the driver's service starts the preparation time before.
                     departure = startTime;
-                    arrival = startTime.AddMinutes(-preparationMinutes);
+                    arrival = startTime.AddMinutes(-preparation);
                     (isArrival, isDeparture) = (false, true);
                 }
                 else
@@ -329,8 +334,8 @@ public static class PlanExtensions
 
                     if (i == locations.Count - 1)
                     {
-                        // Terminus: the driver's service ends finishingMinutes after last arrival.
-                        departure = arrival.AddMinutes(finishingMinutes);
+                        // Terminus: the driver's service ends the finishing-up time after last arrival.
+                        departure = arrival.AddMinutes(finishing);
                         (isArrival, isDeparture) = (true, false);
                     }
                     else if (StopsAt(location))
@@ -401,13 +406,15 @@ public static class PlanExtensions
         /// <param name="startTime">The scheduled departure time of the first train.</param>
         /// <param name="endTime">The latest departure time; no train departs after it.</param>
         /// <param name="intervalMinutes">The number of minutes between consecutive departures. Must be greater than zero.</param>
-        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
-        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultPreparationMinutes"/> is used.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the first train; the rest follow as same-parity clones (see <c>Clone</c>).
         /// When <c>null</c>, the first train takes the default number for its category and direction (see <c>Create</c>).</param>
         /// <returns>The created trains in departure order, already added to the timetable; empty when none could be built.</returns>
-        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
@@ -434,12 +441,14 @@ public static class PlanExtensions
         /// </remarks>
         /// <param name="train">The train to return from. Cannot be null; it needs a category and at least two calls.</param>
         /// <param name="departureTime">The return's departure time from the train's terminus, or <c>null</c> to depart as soon as possible.</param>
-        /// <param name="preparationMinutes">The number of minutes required to prepare the return before it departs. Must be non-negative.</param>
-        /// <param name="finishingMinutes">The number of minutes required to finish a train after its last arrival. Must be non-negative.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare the return before it departs.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultPreparationMinutes"/> is used.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish a train after its last arrival.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="number">The number to assign to the return train. When <c>null</c>, the default for its category and direction is used (see <c>Create</c>).</param>
         /// <returns>The return train, already added to the timetable, or <c>null</c> when it could not be built
         /// (see <c>Create</c>) or <paramref name="train"/> has no category or fewer than two calls.</returns>
-        public Train? CreateReturn(Train train, Time? departureTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? number = null)
+        public Train? CreateReturn(Train train, Time? departureTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(train);
             if (train.Category is not { } category) return null;
@@ -448,7 +457,9 @@ public static class PlanExtensions
             var calls = train.CallsInRunOrder;
             if (calls.Count < 2) return null;
 
-            var departure = departureTime ?? calls[^1].Arrival.AddMinutes(finishingMinutes + preparationMinutes);
+            var preparation = preparationMinutes ?? category.DefaultPreparationMinutes;
+            var finishing = finishingMinutes ?? category.DefaultFinishingMinutes;
+            var departure = departureTime ?? calls[^1].Arrival.AddMinutes(finishing + preparation);
 
             return plan.Create(category, calls[^1].OperationLocation, calls[0].OperationLocation,
                 departure, preparationMinutes, finishingMinutes, train.MaxSpeed, number);
@@ -464,13 +475,15 @@ public static class PlanExtensions
         /// <param name="to">The destination the outbound train travels to and the return train departs from.</param>
         /// <param name="startTime">The scheduled departure time of the outbound train.</param>
         /// <param name="returnTime">The return train's departure time, or <c>null</c> to depart as soon as possible (see <c>CreateReturn</c>).</param>
-        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
-        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultPreparationMinutes"/> is used.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the outbound train; the return takes the default for the opposite direction. When <c>null</c>, both take their direction's default (see <c>Create</c>).</param>
         /// <returns>The outbound train followed by its return, both already added to the timetable; empty when
         /// either of them could not be built.</returns>
-        public IReadOnlyList<Train> CreateWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time? returnTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
@@ -508,12 +521,14 @@ public static class PlanExtensions
         /// <param name="endTime">The latest departure time; no train departs after it.</param>
         /// <param name="intervalMinutes">The number of minutes between consecutive departures in each direction. Must be greater than zero.</param>
         /// <param name="returnTime">The first return train's departure time, or <c>null</c> to depart as soon as possible (see <c>CreateReturn</c>).</param>
-        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure. Must be non-negative.</param>
-        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival. Must be non-negative.</param>
+        /// <param name="preparationMinutes">The number of minutes required to prepare each train before first departure.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultPreparationMinutes"/> is used.</param>
+        /// <param name="finishingMinutes">The number of minutes required to finish each train after last arrival.
+        /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the first outbound train; the rest follow as same-parity clones (see <c>Clone</c>).</param>
         /// <returns>The created trains, already added to the timetable; empty when none could be built.</returns>
-        public IReadOnlyList<Train> CreateRepeatingWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, Time? returnTime = null, int preparationMinutes = 10, int finishingMinutes = 10, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateRepeatingWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);

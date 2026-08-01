@@ -51,11 +51,11 @@ else
         {
             <div class="edit">
                 <div class="view-header">
-                    <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
                     @if (!_isNew)
                     {
                         <button class="primary" @onclick="BackToList">@Translator("Close")</button>
                     }
+                    <h2>@(_isNew ? Translator("AddNew") : Editing.Name)</h2>
                 </div>
 
                 <div class="section">

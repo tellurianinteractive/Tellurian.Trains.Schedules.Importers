@@ -1008,6 +1008,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Planlagt?</value>
   </data>
+  <data name="ShadowExchangesEverything" xml:space="preserve">
+    <value>En skyggestasjon har alltid utveksling av både passasjerer og gods: den representerer alt utenfor anlegget.</value>
+  </data>
   <data name="IsShadow" xml:space="preserve">
     <value>Skyggestasjon?</value>
   </data>
@@ -1339,6 +1342,15 @@
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Kan ikke slette: bare det første og det siste stoppet kan slettes. Et tog har et stopp ved hvert driftssted langs ruten.</value>
   </data>
+  <data name="CallCannotBeStop" xml:space="preserve">
+    <value>Toget kan ikke stoppe her: driftsstedet er signalstyrt, eller det har verken passasjer- eller godsutveksling for denne slags tog.</value>
+  </data>
+  <data name="CallStopRequired" xml:space="preserve">
+    <value>Dette stoppet kan ikke fjernes: togets løp, eller en togdel planlagt over det, begynner eller slutter her.</value>
+  </data>
+  <data name="CallStopRequiredButImpossible" xml:space="preserve">
+    <value>En togdel begynner eller slutter her, men toget kan ikke stoppe på dette driftsstedet. Flytt stoppet eller togdelen.</value>
+  </data>
   <data name="CallReferenced" xml:space="preserve">
     <value>Kan ikke slette: stoppet brukes av materiellomløp eller førertjenester.</value>
   </data>
@@ -1647,6 +1659,24 @@
   </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Utelat fra automatisk planlegging?</value>
+  </data>
+  <data name="DefaultPreparationMinutes" xml:space="preserve">
+    <value>Forberedelsesminutter</value>
+  </data>
+  <data name="DefaultFinishingMinutes" xml:space="preserve">
+    <value>Avslutningsminutter</value>
+  </data>
+  <data name="Reapply" xml:space="preserve">
+    <value>Bruk på nytt</value>
+  </data>
+  <data name="ReapplyPreparationMinutesTitle" xml:space="preserve">
+    <value>Gi alle tog i kategorien denne forberedelsestiden. Hvert tog gjøres klart så mange minutter før det går; det kjører nøyaktig som før.</value>
+  </data>
+  <data name="ReapplyFinishingMinutesTitle" xml:space="preserve">
+    <value>Gi alle tog i kategorien denne avslutningstiden. Hvert tog settes bort så mange minutter etter at det er kommet fram; det kjører nøyaktig som før.</value>
+  </data>
+  <data name="ReappliedToTrains" xml:space="preserve">
+    <value>{0} tog ble endret.</value>
   </data>
   <data name="Assign" xml:space="preserve">
     <value>Tildel</value>

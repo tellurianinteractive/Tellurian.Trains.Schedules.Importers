@@ -9,7 +9,7 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// A schedule is the top-level container for all railway operation planning data.
 /// It associates a timetable with the vehicles and personnel needed to operate the trains.
 /// </remarks>
-public class Plan : IEquatable<Plan>
+public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
 {
     // Private parameterless constructor for EF Core and JSON deserialization
     [JsonConstructor]
@@ -104,6 +104,41 @@ public class Plan : IEquatable<Plan>
     /// </summary>
     public ICollection<DriverDuty> DriverDuties { get; set; }
 
+    /// <summary>
+    /// Completes a plan as soon as it has been read, so it is never looked at half-resolved.
+    /// </summary>
+    /// <remarks>
+    /// The vehicles and the driver duties are read after the timetable, so their companies can only be
+    /// resolved here — <see cref="Timetable"/> has already reconciled its own by the time this runs.
+    /// The company catalogue is reconciled first, because a plan written by an earlier version stored
+    /// its companies on whatever referred to them rather than in the catalogue.
+    /// </remarks>
+    /// <summary>
+    /// Completes both catalogues before a plan is written, so that writing one can never lose what it
+    /// holds.
+    /// </summary>
+    /// <remarks>
+    /// A category and a company are written only in their catalogue (see <c>PlanJson</c>), so a plan
+    /// whose catalogue does not yet hold everything its trains, vehicles and duties use would write
+    /// those entries nowhere at all and read back without them. That is the state an importer leaves a
+    /// plan in, and the state every plan saved before the catalogues were kept was read in — reconciling
+    /// on the way out means no path can save a plan that has not been put right first.
+    /// </remarks>
+    void IJsonOnSerializing.OnSerializing()
+    {
+        Timetable?.RebuildTrainCategories();
+        this.RebuildCompanies();
+    }
+
+    void IJsonOnDeserialized.OnDeserialized()
+    {
+        this.RebuildCompanies();
+        this.ResolveCatalogueReferences();
+        // Only here can the stop flags the train parts depend on be put right: the parts the vehicle
+        // schedules and driver duties are planned over are read after the timetable.
+        this.ApplyStopRules();
+    }
+
     /// <inheritdoc/>
     public bool Equals(Plan? other) => other is not null && Id == other.Id;
 
@@ -128,6 +163,78 @@ public static class PlanExtensions
         /// Returns the <see cref="Layout"/> for the plan.
         /// </summary>
         public Layout Layout => plan.Timetable.Layout;
+
+        /// <summary>
+        /// Reconciles the company catalogue (<see cref="Layouts.Layout.Companies"/>) with the companies
+        /// the plan's trains, train categories, vehicles and driver duties actually refer to: a company
+        /// referred to but not in the catalogue is added to it, and every company is then given an id
+        /// that is unique and greater than zero. Call this whenever a plan is loaded or imported.
+        /// </summary>
+        /// <remarks>
+        /// A company is stored once, in the catalogue, and everything that operates under it keeps only
+        /// its id — so two companies sharing an id are one company as far as a saved plan is concerned.
+        /// They already were as far as anything reading the id was: a plan carrying two companies left
+        /// on id zero had their trains counted as one operator when checked for duplicate train numbers.
+        /// A company that means something outside the plan keeps the id it came with; only those with
+        /// none of their own are numbered.
+        /// </remarks>
+        public void RebuildCompanies()
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            if (plan.Timetable?.Layout is not { } layout) return;
+            Catalogue.Reconcile(
+                layout.Companies,
+                plan.Timetable.TrainCategories.Select(c => c.Company)
+                    .Concat(plan.Timetable.Trains.Select(t => t.Company))
+                    .Concat(plan.ScheduledObjects.Select(v => v.Company))
+                    .Concat(plan.DriverDuties.Select(d => d.Company)),
+                company => company.Id,
+                (company, id) => company.Id = id);
+        }
+
+        /// <summary>
+        /// Re-establishes the company on each vehicle and driver duty from the id it is stored with.
+        /// The timetable resolves its own (see
+        /// <see cref="Timetables.TimetableExtensions.ResolveCatalogueReferences"/>); these are read
+        /// after it, so they can only be resolved once the whole plan is there. A company that survived
+        /// the reading — from a plan written by an earlier version — is left alone.
+        /// </summary>
+        public void ResolveCatalogueReferences()
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            if (plan.Timetable?.Layout?.Companies is not { } companies) return;
+            foreach (var vehicle in plan.ScheduledObjects)
+                vehicle.Company ??= companies.FirstOrDefault(c => c.Id == vehicle.CompanyId);
+            foreach (var duty in plan.DriverDuties)
+                duty.Company ??= companies.FirstOrDefault(c => c.Id == duty.CompanyId);
+        }
+
+        /// <summary>
+        /// Brings a whole plan into a consistent state, before anything validates, displays or saves it:
+        /// the per-track call index is rebuilt from the trains, the catalogue references are put back,
+        /// the category and company catalogues are reconciled with what the plan actually uses, and the
+        /// stop flags the train parts depend on are set (see <see cref="Validations.StopRules"/>).
+        /// Idempotent.
+        /// </summary>
+        /// <remarks>
+        /// Reading a plan does all of this on its way (see the <c>OnDeserialized</c> of
+        /// <see cref="Plan"/> and <see cref="Timetables.Timetable"/>), so this is for the plans that
+        /// arrive some other way — from an importer above all, which builds a plan rather than reading
+        /// one, and need not have filled either catalogue in.
+        /// </remarks>
+        public void Reconcile()
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            if (plan.Timetable is { } timetable)
+            {
+                timetable.RebuildStationCalls();
+                timetable.ResolveCatalogueReferences();
+                timetable.RebuildTrainCategories();
+            }
+            plan.RebuildCompanies();
+            plan.ResolveCatalogueReferences();
+            plan.ApplyStopRules();
+        }
         /// <summary>
         /// Adds a vehicle to the schedule.
         /// </summary>

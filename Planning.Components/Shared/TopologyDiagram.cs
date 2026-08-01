@@ -39,17 +39,30 @@ public sealed record TopologyDiagram(
     IReadOnlyList<TopologyLine> Lines,
     IReadOnlyList<TopologyConnector> Connectors)
 {
+    /// <summary>
+    /// The size, in SVG user units, that station signatures and line numbers are drawn at. The layout
+    /// reserves label space from it, so the renderer must draw at this size for the two to agree.
+    /// </summary>
+    public const double FontSize = 16.5;
+
+    /// <summary>
+    /// How far to the left of a line's first station the renderer must end the line's number. The layout
+    /// keeps that much room clear, so a line packed onto the same row cannot run into the number.
+    /// </summary>
+    public const double NumberOffset = 20.0;
+
     private const double LeftMargin = 56.0;
-    private const double RightMargin = 32.0;
     private const double TopMargin = 40.0;
     private const double BottomMargin = 28.0;
     private const double RowGap = 72.0;
     private const double TargetSpan = 640.0;
+    private const double EdgePadding = 8.0;
 
-    // What a line occupies beyond its own stations and must therefore keep clear of its row neighbours:
-    // its number label to the left of the first station, and the last station's signature to the right.
-    private const double LabelGutter = 56.0;
-    private const double SignatureGutter = 24.0;
+    // Label space is estimated, never measured: the diagram is laid out where no browser text metrics are
+    // available. A signature is centred on its station, a line number sits to the left of its first one.
+    private const double GlyphWidth = FontSize * 0.62;   // average advance of a semibold letter or digit
+    private const double NodeRadius = 5.0;               // the station circle, and half the line's thickness
+    private const double LabelGap = 10.0;                // clear space kept between two neighbouring labels
 
     // How far a diagonal connector must stay from a line it passes on its way down, and how far it runs
     // on along the branch's own line so that the corner between them is a join rather than a butt.
@@ -72,7 +85,7 @@ public sealed record TopologyDiagram(
     public static TopologyDiagram Build(Layout layout)
     {
         var all = layout.TimetableStretches.Where(s => s.Stretches.Count > 0).OrderBy(s => s.Id).ToList();
-        if (all.Count == 0) return new TopologyDiagram(LeftMargin + RightMargin, TopMargin + BottomMargin, [], []);
+        if (all.Count == 0) return new TopologyDiagram(LeftMargin + EdgePadding, TopMargin + BottomMargin, [], []);
 
         var parents = BuildParentMap(all);
         var order = OrderDepthFirst(all, parents);
@@ -91,33 +104,49 @@ public sealed record TopologyDiagram(
             var stations = stretch.Stations.ToList();
             var track = stretch.Stretches.ToList();
 
-            var distance = new double[stations.Count];
-            for (var i = 1; i < stations.Count; i++) distance[i] = distance[i - 1] + track[i - 1].Distance;
-            var span = distance[^1] * pxPerUnit;
-
             var hasParent = parents.TryGetValue(stretch.Id, out var link);
             var junction = hasParent && placed.TryGetValue(link.Parent.Id, out var parentLine) ? parentLine : null;
 
-            // Where the stretch would sit were it put on a given row, along with the station it shares with
-            // its parent — drawn on the parent only, so hidden here — and the connector up to that parent.
-            // A branch is pushed as far to the right as it is pushed down, its connector being drawn at 45°.
-            (double StartX, int Hidden, TopologyConnector? Connector) At(int row)
+            // The station a branch shares with its parent is drawn on the parent only; here it is merely the
+            // corner where the connector meets this line, so it is hidden and claims no label space.
+            var hidden =
+                junction is null ? -1
+                : link.Side == JunctionSide.Start && junction.NodeX.ContainsKey(stretch.Starts.Signature) ? 0
+                : link.Side == JunctionSide.End && junction.NodeX.ContainsKey(stretch.Ends.Signature) ? stations.Count - 1
+                : -1;
+
+            // Stations sit as far apart as their distance makes them, but never closer than their signatures
+            // need: on a stretch that mixes a long haul with a couple of neighbouring yards, distance alone
+            // would print the two yards' signatures on top of each other.
+            var offset = new double[stations.Count];
+            for (var i = 1; i < stations.Count; i++)
+                offset[i] = offset[i - 1] + Math.Max(
+                    track[i - 1].Distance * pxPerUnit,
+                    HalfWidth(stations[i - 1].Signature, i - 1 == hidden) + HalfWidth(stations[i].Signature, i == hidden) + LabelGap);
+            var span = offset[^1];
+
+            // What the line claims beyond its own stations, and must therefore keep clear of its row
+            // neighbours: its number to the left of the first station, and both end signatures.
+            var leftReach = Math.Max(NumberReach(stretch.Number), HalfWidth(stations[0].Signature, hidden == 0)) + LabelGap;
+            var rightReach = HalfWidth(stations[^1].Signature, hidden == stations.Count - 1) + LabelGap;
+
+            // Where the stretch would sit were it put on a given row, along with the connector up to its
+            // parent. A branch is pushed as far to the right as it is pushed down, its connector being at 45°.
+            (double StartX, TopologyConnector? Connector) At(int row)
             {
-                if (junction is null) return (LeftMargin, -1, null);
-                var run = (row - junction.Row) * RowGap;
-                if (link.Side == JunctionSide.Start && junction.NodeX.TryGetValue(stretch.Starts.Signature, out var divergeX))
+                if (hidden < 0) return (LeftMargin, null);
+                var run = (row - junction!.Row) * RowGap;
+                if (link.Side == JunctionSide.Start)
                 {
                     // Leads out: its start is the junction, so the branch drops away from the parent at +45°.
+                    var divergeX = junction.NodeX[stretch.Starts.Signature];
                     var startX = divergeX + run;
-                    return (startX, 0, LinkTo(divergeX, junction.Y, startX, RowY(row), span, stretch.Color));
+                    return (startX, LinkTo(divergeX, junction.Y, startX, RowY(row), span, stretch.Color));
                 }
-                if (link.Side == JunctionSide.End && junction.NodeX.TryGetValue(stretch.Ends.Signature, out var mergeX))
-                {
-                    // Leads into: its end is the junction, so the branch climbs to the parent at -45°.
-                    var endX = mergeX - run;
-                    return (endX - span, stations.Count - 1, LinkTo(mergeX, junction.Y, endX, RowY(row), -span, stretch.Color));
-                }
-                return (LeftMargin, -1, null);
+                // Leads into: its end is the junction, so the branch climbs to the parent at -45°.
+                var mergeX = junction.NodeX[stretch.Ends.Signature];
+                var endX = mergeX - run;
+                return (endX - span, LinkTo(mergeX, junction.Y, endX, RowY(row), -span, stretch.Color));
             }
 
             var chosen = -1;
@@ -125,7 +154,7 @@ public sealed record TopologyDiagram(
             for (var row = junction is null ? 0 : junction.Row + 1; row <= rows.Count; row++)
             {
                 var candidate = At(row);
-                if (!IsRowFree(rows, crossings, row, candidate.StartX - LabelGutter, candidate.StartX + span + SignatureGutter)) continue;
+                if (!IsRowFree(rows, crossings, row, candidate.StartX - leftReach, candidate.StartX + span + rightReach)) continue;
                 if (firstFree < 0) firstFree = row;
                 if (IsPathFree(rows, candidate.Connector, junction?.Row ?? row, row)) { chosen = row; break; }
             }
@@ -133,19 +162,19 @@ public sealed record TopologyDiagram(
             // so when every reachable row is crossed we settle for the topmost row the line itself fits on.
             if (chosen < 0) chosen = firstFree < 0 ? rows.Count : firstFree;
 
-            var (startX, hidden, connector) = At(chosen);
+            var (startX, connector) = At(chosen);
             var y = RowY(chosen);
             var nodes = new List<TopologyNode>(stations.Count);
             var nodeX = new Dictionary<string, double>(stations.Count);
             for (var i = 0; i < stations.Count; i++)
             {
-                var x = startX + distance[i] * pxPerUnit;
+                var x = startX + offset[i];
                 nodes.Add(new TopologyNode(x, y, stations[i].Signature, i == hidden));
                 nodeX[stations[i].Signature] = x;
             }
 
             while (rows.Count <= chosen) rows.Add([]);
-            rows[chosen].Add((startX - LabelGutter, startX + span + SignatureGutter));
+            rows[chosen].Add((startX - leftReach, startX + span + rightReach));
             if (connector is not null)
             {
                 connectors.Add(connector);
@@ -161,6 +190,14 @@ public sealed record TopologyDiagram(
     }
 
     private static double RowY(int row) => TopMargin + row * RowGap;
+
+    // How far a station's signature reaches to either side of its circle, the label being centred on it.
+    // A hidden node has no signature drawn, so it takes no more room than the line running through it.
+    private static double HalfWidth(string signature, bool hidden) =>
+        hidden ? NodeRadius : Math.Max(NodeRadius, signature.Length * GlyphWidth / 2.0);
+
+    // How far a line's number reaches to the left of the line's first station.
+    private static double NumberReach(string number) => NumberOffset + number.Length * GlyphWidth;
 
     // The connector down to a branch, continued a short way along the branch's own line. Reach says where
     // that line runs from the corner: to the right when positive, to the left when negative. A line shorter
@@ -237,7 +274,7 @@ public sealed record TopologyDiagram(
     {
         var children = all.Where(s => parent.ContainsKey(s.Id))
             .GroupBy(s => parent[s.Id].Parent.Id)
-            .ToDictionary(g => g.Key, g => g.OrderBy(s => s.Id).ToList());
+            .ToDictionary(g => g.Key, g => g.OrderBy(s => Outermost(s, parent[s.Id])).ThenBy(s => s.Id).ToList());
 
         var order = new List<TimetableStretch>(all.Count);
         void Visit(TimetableStretch stretch)
@@ -250,16 +287,31 @@ public sealed record TopologyDiagram(
         return order;
     }
 
+    // Where a branch leaves its parent, ordered so that the branch furthest along the direction it drops
+    // away in comes first. Every branch falls at the same 45°, so a branch and a line it cannot clear at
+    // one row cannot clear it at any row either: pushing both down moves them equally far sideways. Taking
+    // the outermost branch first keeps that from happening — its neighbours nearer the parent's other end
+    // then fall past the outside of it, where there is nothing in the way.
+    private static double Outermost(TimetableStretch stretch, (TimetableStretch Parent, JunctionSide Side) link)
+    {
+        var atStart = link.Side == JunctionSide.Start;
+        var distance = link.Parent.DistanceToStation(atStart ? stretch.Starts : stretch.Ends) ?? 0.0;
+        return atStart ? -distance : distance;
+    }
+
     // A stretch that leads into another can be positioned left of the margin; shift everything right so
-    // the whole diagram sits within its bounds, then size the canvas to fit.
+    // the whole diagram sits within its bounds, then size the canvas to fit. Bounds are taken from the
+    // labels rather than the stations they belong to, so no signature or line number is cut off at an edge.
     private static TopologyDiagram Normalize(List<TopologyLine> lines, List<TopologyConnector> connectors, int rowCount)
     {
         var minX = double.MaxValue;
         var maxX = double.MinValue;
+        foreach (var line in lines) minX = Math.Min(minX, line.StartX - NumberReach(line.Number));
         foreach (var node in lines.SelectMany(l => l.Nodes))
         {
-            minX = Math.Min(minX, node.X);
-            maxX = Math.Max(maxX, node.X);
+            var half = HalfWidth(node.Signature, node.Hidden);
+            minX = Math.Min(minX, node.X - half);
+            maxX = Math.Max(maxX, node.X + half);
         }
         foreach (var c in connectors)
         {
@@ -267,8 +319,8 @@ public sealed record TopologyDiagram(
             maxX = Math.Max(maxX, Math.Max(c.JunctionX, Math.Max(c.LineX, c.StubX)));
         }
 
-        var shift = minX < LeftMargin ? LeftMargin - minX : 0.0;
-        var width = maxX + shift + RightMargin;
+        var shift = minX < EdgePadding ? EdgePadding - minX : 0.0;
+        var width = maxX + shift + EdgePadding;
         var height = TopMargin + ((rowCount - 1) * RowGap) + BottomMargin;
         if (shift == 0.0) return new TopologyDiagram(width, height, lines, connectors);
 

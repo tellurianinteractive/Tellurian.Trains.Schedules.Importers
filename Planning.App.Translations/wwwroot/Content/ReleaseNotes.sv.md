@@ -1,5 +1,85 @@
 # Versionsnyheter
 
+## Version 0.3.4
+
+- **Rutorna Ank och Avg på ett uppehåll följer nu var tåget verkligen kan stanna.** Ett tåg stannar
+  för att utväxla något, och behöver därför någonstans att utväxla det: ett persontåg där driftplatsen
+  tar emot resande, ett godståg där den tar emot gods, och inget av det på en signalreglerad
+  driftplats. Där tåget inte kan stanna visas båda rutorna tomma och går inte att kryssa i, och
+  uppehållet blir en genomfart i tidtabellen och i grafen. Inget av det du planerat kastas bort — slå
+  på utbytet igen så finns uppehållen där. Ett magasin har alltid utbyte av både resande och gods,
+  eftersom det representerar allt utanför banan, så dess två rutor visas ikryssade och låsta.
+
+- **Ett uppehåll som något hänger på går inte längre att ta bort.** En tågdel går från ett uppehåll
+  där tåget avgår till ett där det ankommer, så båda ändarna måste vara uppehåll. Tågets eget första
+  och sista uppehåll, och ändarna på varje tågdel som ett fordonsomlopp, en förartur eller ett
+  godsflöde planerats över, behåller nu sin ruta ikryssad och låst; håll pekaren över den så sägs det
+  vad som håller den. Där en tågdel slutar någonstans tåget inte kan stanna — en plan gjord före den
+  här regeln — sägs det rent ut, så att du kan flytta uppehållet eller tågdelen.
+
+- **En tågkategori bär nu de förberedelse- och avslutstider som dess tåg planeras med.** Varje nytt
+  tåg i kategorin görs klart så många minuter innan det avgår och avvecklas så många minuter efter att
+  det ankommit, så du behöver inte längre skriva samma två tal för varje tåg. Bredvid vart och ett av
+  de två fälten finns en knapp *Tillämpa på nytt* som ger den tiden till alla tåg kategorin redan har,
+  och berättar hur många som ändrades. De två är skilda åtgärder, så du kan ändra förberedelsetiden
+  utan att röra avslutstiden. Att tillämpa på nytt flyttar bara minuterna allra ytterst på ett tåg:
+  det avgår, uppehåller sig och ankommer fortfarande precis på de tider det gjorde.
+
+- **Operatörerna är lättare att läsa på framsidan av ett tjänstehäfte.** Raden sätts nu i dubbel
+  storlek mot förut, så att en logotyp är stor nog att kännas igen med en blick och en signatur stor
+  nog att läsas tvärs över ett bord. Har alla operatörer i tjänsten en logotyp utelämnas ordet
+  *Operatör* — logotyperna säger det själva. Saknar någon av dem logotyp anges alla fortfarande med
+  signatur, i fetstil och med etiketten kvar.
+
+### Rättningar
+
+- **Ett tjänstehäfte kunde skriva ut en tågdel utanför sidans nederkant.** Rapporten räknar före
+  utskriften ut hur många tågdelar som får plats på en sida, och räknade med ungefär hälften mer
+  utrymme än en A5-sida faktiskt har. Det som hamnar utanför sidkanten klipps bort utan förvarning:
+  den andra tågdelen på en sådan sida saknade slutet av sin tidtabell — eller saknades helt, så att en
+  lokförare stod med en tjänst där det sista tåget fattades. Tågdelar mäts nu mot vad sidan verkligen
+  rymmer, och en tågdel som inte får plats flyttas till nästa sida. Vissa häften behöver därför ett ark
+  mer än förut.
+
+- **Topologi-diagrammet kunde skriva signaturerna för två driftplatser ovanpå varandra.** Driftplatserna
+  placerades enbart efter avståndet mellan dem, så två som ligger nära varandra på en lång sträcka
+  ritades nästan på samma ställe och deras signaturer gick in i varandra. De ritas nu aldrig närmare
+  varandra än vad deras två signaturer behöver, medan resten av sträckan behåller sina verkliga
+  proportioner. En lång signatur vid diagrammets kant klipps inte längre bort heller.
+
+- **En gren i Topologi-diagrammet kunde ritas rakt genom en annan sträcka.** En gren faller bort från
+  den sträcka den lämnar i en fast vinkel, så en gren som mötte en sträcka i vägen kunde aldrig ta sig
+  förbi den, hur långt ner i diagrammet den än sköts — den ritades helt enkelt tvärs över den. De grenar
+  som lämnar en sträcka längst bort ritas nu först, vilket ger dem bakom en fri väg nedåt. En lång gren
+  kan därför nu ritas under en kort gren som lämnar sträckan längre bort.
+
+- **En plan kunde visa sina tåg under tågkategorier som fliken Tågkategorier inte hade.** Ett tåg bär
+  med sig sin kategori, så en plan sparad av en tidigare version öppnades med tågen grupperade efter
+  kategori medan listan över kategorier var tom: kategorimenyn hade ingenting att erbjuda, och inget
+  tåg kunde flyttas till en annan kategori. Flera kategorier kunde också tas för en och samma, så att
+  deras tåg samlades under en enda rubrik och två tåg av olika kategorier med samma nummer
+  rapporterades som ett nummer använt två gånger. När en plan öppnas fylls listan över kategorier nu på
+  med de kategorier som tågen använder, och varje kategori hålls isär från de andra.
+
+- **Två företag som aldrig hade fått ett eget nummer togs för samma operatör.** Ett företag skiljs från
+  de andra på ett nummer som appen håller för det, och en plan kunde innehålla flera som aldrig hade
+  fått något. Tåg från olika företag som delade tågnummer rapporterades då som ett nummer använt två
+  gånger. Varje företag får nu ett eget nummer när en plan öppnas eller sparas; ett företag som kommer
+  från Module Registry behåller det nummer det kom med.
+
+- **En plan lagrade sina tågkategorier, företag och länder på mer än ett ställe.** Var och en skrevs
+  där den först påträffades vid sparandet — oftast inne i det första tåg som använde den — medan listan
+  den hör hemma i inte innehöll mer än en hänvisning till den. Det är så en plan kunde få tåg i
+  kategorier som fliken Tågkategorier inte kände till. Var och en skrivs nu en gång, i sin egen lista,
+  och allt som använder den behåller bara en hänvisning. Länder kopieras inte längre in i planen alls,
+  så en rättelse av ett lands språk når nu även planer som sparats dessförinnan. En plan sparad av en
+  tidigare version läses som förut och rättas nästa gång den sparas.
+
+- **Ett tjänstehäfte angav bara tågnumret i rubriken för en tågdel.** Ett tåg identifieras lika mycket
+  av kategorins prefix och suffix som av numret — Gt 1234, inte 1234 — och en lokförare som jämför
+  häftet med tidtabellen, eller med det som ropas ut, har bara den rubriken att gå efter. Rubriken
+  visar nu hela tågidentiteten, prefix och suffix inräknade, efter operatörens signatur.
+
 ## Version 0.3.3
 
 - **Konflikter går nu att läsa där de visas.** En rad med konflikter — ett tåg eller en tågkategori

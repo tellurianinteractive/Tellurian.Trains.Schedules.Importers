@@ -126,12 +126,11 @@
     }
 
     /* Edit form */
-    /* Title on the left, Close on the right, kept at the top of the view so it is
-       always reachable without scrolling past the form. */
+    /* Close first and the title after it, both at the top left: on a wide screen a button parked at
+       the far right is easy to miss, so it stays where the eye starts reading. */
     .view-header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 1rem;
         margin-bottom: 0.6rem;
     }

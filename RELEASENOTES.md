@@ -4,6 +4,43 @@
 
 ### New Features
 
+- **A train stops only where it can exchange what it carries.** `Train.CanStopAt(location)` answers
+  whether a train may stop at an operation location at all: never at a `SignalControlledLocation`,
+  and elsewhere only where a passenger train finds `HasPassengerExchange` or a freight train
+  `HasCargoExchange` (a category that is both needs either; one that is neither — empty stock, a
+  light engine — is restricted by the location type alone). `StationCall.CanBeStop` asks it for a
+  call, and **`StationCall.IsStop` now answers through it**, so the rule is applied everywhere at
+  once, the same way the signal-controlled rule already was. The `IsArrival` and `IsDeparture` flags
+  are never cleared: restore a location's exchange and any stop planned over it is there again.
+
+  A **shadow station** (`Station.IsShadow`) now always has both exchanges, whatever the two
+  properties were set to. It stands for everything beyond the modelled layout, so whatever a train
+  brings there has somewhere to come from and go to.
+
+- **`StopRules`** (in `Model.Validations`) holds the other half of the rule: a train part runs from a
+  call the train departs to one it arrives at, so both ends must be stops. `Plan.IsDepartureRequired(call)`
+  and `Plan.IsArrivalRequired(call)` say whether a flag is held up by the train's own run or by a part
+  a vehicle schedule, a driver duty or a cargo flow is planned over — an editor uses them to disable
+  the flag rather than let it be taken away. `Plan.ApplyStopRules()` sets what the parts need, clears
+  nothing, and returns how many calls changed; it runs from `Plan.Reconcile()` and when a plan is
+  read, so no reading path can forget it.
+
+- **`TrainCategory.DefaultPreparationMinutes` and `TrainCategory.DefaultFinishingMinutes`** hold the
+  preparation and finishing-up times, in minutes, that trains of a category are planned with (both
+  default to 10). `Plan.Create` and the other creating methods take these as `int?` and fall back to
+  the category's defaults when given `null`, in the same way `maxSpeed` already falls back to
+  `TrainCategory.DefaultSpeed`.
+
+  **`Timetable.ApplyDefaultPreparationMinutes(category)`** and
+  **`Timetable.ApplyDefaultFinishingMinutes(category)`** give a category's default to the trains of
+  that category which already exist, and return how many were changed. They are separate operations,
+  so one time can be reapplied without touching the other. Underneath, **`Train.SetPreparationMinutes`**
+  moves a train's origin arrival that many minutes before its departure and
+  **`Train.SetFinishingMinutes`** moves its destination departure that many minutes after its arrival;
+  nothing else moves, so the run itself is untouched. A preparation reaching back before midnight is
+  refused rather than applied. **`Train.PreparationMinutes`** and **`Train.FinishingMinutes`** read the
+  two times back, and **`Timetable.TrainsIn(category)`** gets a category's trains.
+
 - **Route continuity validation (rule T5).** `CheckRouteContinuity(this Train)` checks that every
   leg a train runs — each pair of calls in run order — is a `TrackStretch` of the layout. A train
   travels a stretch by departing its start and arriving at its end, so it calls at both ends of every
@@ -135,6 +172,51 @@
   returning a fractional figure. A diverging stretch adds its junction offset in metres before
   scaling, so the branch and the line it leaves round the junction station to the same kilometre.
   `DistanceToStation` still returns the raw, unscaled metre distance.
+
+- **`Timetable.TrainCategories` is reconciled with the categories the trains use.** The new
+  `RebuildTrainCategories(this Timetable)` adds every category a train holds that the catalogue does
+  not know, then gives each category an id that is unique and greater than zero. A `Train` carries its
+  `Category` as part of itself, so a plan written before the catalogue existed — or by an importer
+  that did not fill it in — read back with trains that have categories and a catalogue that has none,
+  and with every category left on the default id zero. A category is picked out by `Train.CategoryId`,
+  so those categories were taken for one another and for the trains that have no category at all;
+  `ValidateTrainNumbers` (rule T4) reported trains of different categories sharing a number as a
+  duplicate identity.
+  Run from `Timetable.OnDeserialized` alongside `RebuildStationCalls`, so every reading path gets it.
+  `TrainCategory.Id` is settable for this, where it was init-only.
+
+- **A catalogue entry is written only in its catalogue.** `Train.Category`, `Train.Company`,
+  `TrainCategory.Company`, `ScheduledObject.Company` and `DriverDuty.Company` are no longer written to
+  a plan (`PlanJson.WriteCatalogueEntriesOnlyInTheirCatalogue`); each is kept as its foreign key alone
+  and put back on read by `Timetable.ResolveCatalogueReferences` and `Plan.ResolveCatalogueReferences`.
+  `ReferenceHandler.Preserve` wrote each entry once already, but wherever the writer first met it —
+  under the first train that used it — leaving `Timetable.TrainCategories` and `Layout.Companies` as
+  lists of `$ref`. The catalogues are now declared, and so written, before what refers to them.
+  As with `StationTrack.Calls`, only writing is turned off: a plan written by an earlier version
+  defines its entries under a train and points everything else at that copy.
+
+- **`Plan.RebuildCompanies`** reconciles `Layout.Companies` with the companies the trains, categories,
+  vehicles and duties refer to, in the same way and by the same helper as `RebuildTrainCategories`.
+  Companies left on id zero were already indistinguishable to anything reading `CompanyId` — trains of
+  two such companies counted as one operator in `ValidateTrainNumbers`. A company with an id of its own
+  (a Module Registry id) keeps it. `TrainCategory.CompanyId` is new, for the same reason.
+
+- **A foreign key follows its navigation.** `Train.CategoryId`, `Train.CompanyId`,
+  `TrainCategory.CompanyId`, `ScheduledObject.CompanyId` and `DriverDuty.CompanyId` now read
+  `Navigation?.Id ?? stored`, so assigning the object is enough to keep the two in step. Several call
+  sites set only the navigation, which would have silently dropped the reference once the key became
+  the only thing written.
+
+- **`Plan.Reconcile`** performs the whole sequence — rebuild the call index, resolve the catalogue
+  references, reconcile both catalogues — for plans that arrive from an importer rather than from a
+  reader. `Plan.OnSerializing` reconciles the catalogues before a plan is written, so no path can save
+  a plan whose catalogue does not yet hold everything it uses.
+
+- **A `Country` is stored as its id** (`CountryByIdConverter`) and read back through `Country.ById`.
+  A country's name, languages and code belong to the catalogue in the code; copying them into every
+  plan meant a correction could never reach a plan already saved. Reading still accepts the whole
+  object an earlier version wrote, and falls back to its stored values for an id the catalogue no
+  longer offers.
 
 ## Version 3.0.0
 

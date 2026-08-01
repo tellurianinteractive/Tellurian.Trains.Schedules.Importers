@@ -112,6 +112,19 @@
     }
 
     /* Edit form */
+    /* Close first and the title after it, both at the top left: on a wide screen a button parked at
+       the far right is easy to miss, so it stays where the eye starts reading. */
+    .view-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .view-header h2 {
+        margin: 0;
+    }
+
     .edit h2,
     .info h2 {
         color: var(--primary);

@@ -22,6 +22,15 @@ The location type decides whether a train may stop, on top of how you set each c
 - At a **signal-controlled location**, a train **never** has scheduled stops; it always passes through, whatever
   the call says.
 
+A train also needs something to exchange. A passenger train stops only where **Passengers** is
+ticked, a freight train only where **Cargo** is ticked, and a train that is both stops where either
+is. Where a train cannot stop, its Arr and Dep boxes on the **Trains** tab are shown cleared and
+cannot be ticked. Nothing is thrown away: turn the exchange back on and any stops planned earlier
+are there again.
+
+A **shadow yard** always exchanges both, whatever the two boxes say, because it stands for
+everything beyond the modelled layout — so the boxes are shown ticked and disabled for one.
+
 ### Working with the list
 
 The list shows each location's signature, name, type, owner, whether it is a shadow station (terminal for external stations), and how

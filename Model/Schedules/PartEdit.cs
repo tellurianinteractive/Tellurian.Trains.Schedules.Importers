@@ -56,16 +56,17 @@ public sealed record PartEdit(
         NextStart is { } start && !start.OperationLocation.Equals(To.OperationLocation);
 
     /// <summary>
-    /// True when the previous part still runs while the edited part departs, so the vehicle would be in
-    /// two places at once (validation rule S1).
+    /// True when the previous part is still being worked when the edited part starts, so the vehicle
+    /// would be in two places at once (validation rule S1). The preparation and finishing-up time at the
+    /// trains' ends count as worked, the same as everywhere else overlap is judged.
     /// </summary>
-    public bool OverlapsPrevious => PreviousEnd is { } end && end.Arrival > From.Departure;
+    public bool OverlapsPrevious => PreviousEnd is { } end && end.WorkEnd > From.WorkStart;
 
     /// <summary>
-    /// True when the next part departs before the edited part arrives, so the vehicle would be in two
-    /// places at once (validation rule S1).
+    /// True when the next part starts before the edited part is finished with, so the vehicle would be in
+    /// two places at once (validation rule S1).
     /// </summary>
-    public bool OverlapsNext => NextStart is { } start && To.Arrival > start.Departure;
+    public bool OverlapsNext => NextStart is { } start && To.WorkEnd > start.WorkStart;
 
     /// <summary>True when the edit leaves the schedule a single contiguous, non-overlapping working.</summary>
     public bool IsConsistent => !(LeavesGapBefore || LeavesGapAfter || OverlapsPrevious || OverlapsNext);

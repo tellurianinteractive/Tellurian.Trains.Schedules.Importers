@@ -111,6 +111,19 @@
     }
 
     /* Edit form */
+    /* Close first and the title after it, both at the top left: on a wide screen a button parked at
+       the far right is easy to miss, so it stays where the eye starts reading. */
+    .view-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .view-header h2 {
+        margin: 0;
+    }
+
     .edit h2 {
         color: var(--primary);
         font-size: 1.2rem;
@@ -151,8 +164,16 @@
         max-width: 100%;
     }
 
-    .field input[type="text"].short {
+    .field input[type="text"].short,
+    .field input[type="number"].short {
         width: 5rem;
+    }
+
+    /* A value with an action that works on it, side by side in the field's value column. */
+    .field .with-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
     }
 
     .field select {
@@ -169,6 +190,12 @@
     .error {
         color: var(--danger);
         font-weight: 500;
+    }
+
+    .reapplied {
+        margin: 0.6rem 0 0;
+        font-size: 0.9rem;
+        color: var(--primary);
     }
 
     .form-actions {

@@ -31,16 +31,22 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the catalogue of train categories available in this timetable. A <see cref="Train"/>'s
+    /// <see cref="Train.Category"/> references an entry here. Seeded with default Passenger and Freight
+    /// categories for a new timetable (see <c>TrainCategory.DefaultsFor</c>), and reconciled with the
+    /// categories the trains actually use whenever a plan is read (see
+    /// <see cref="TimetableExtensions.RebuildTrainCategories"/>).
+    /// </summary>
+    /// <remarks>
+    /// Declared before <see cref="Trains"/> so that it is also written before them: a category is
+    /// written where it is first met, and this is the one place it belongs.
+    /// </remarks>
+    public ICollection<TrainCategory> TrainCategories { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of trains in this timetable.
     /// </summary>
     public ICollection<Train> Trains { get; set; }
-
-    /// <summary>
-    /// Gets or sets the catalogue of train categories available in this timetable. A <see cref="Train"/>'s
-    /// <see cref="Train.Category"/> references an entry here. Seeded with default Passenger and Freight
-    /// categories for a new timetable (see <c>TrainCategory.DefaultsFor</c>).
-    /// </summary>
-    public ICollection<TrainCategory> TrainCategories { get; set; }
 
     /// <summary>
     /// Gets or sets the catalogue of session (or day) patterns available in this timetable. A
@@ -94,7 +100,12 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     /// and a document written by an earlier version may carry an index holding calls of trains that
     /// are no longer in the timetable. Doing it here means no reading path can forget.
     /// </remarks>
-    void IJsonOnDeserialized.OnDeserialized() => this.RebuildStationCalls();
+    void IJsonOnDeserialized.OnDeserialized()
+    {
+        this.RebuildStationCalls();
+        this.ResolveCatalogueReferences();
+        this.RebuildTrainCategories();
+    }
 
     /// <inheritdoc/>
     public bool Equals(Timetable? other) => other is not null && Id == other.Id;
@@ -201,6 +212,114 @@ public static class TimetableExtensions
         timetable = timetable.ValueOrException(nameof(timetable));
         foreach (var track in timetable.Layout.OperationLocations.SelectMany(l => l.Tracks)) track.Calls.Clear();
         foreach (var call in timetable.Trains.SelectMany(t => t.Calls)) call.Track.Add(call);
+    }
+
+    /// <summary>
+    /// Re-establishes the catalogue entries a timetable is read without: a <see cref="Train"/>'s
+    /// <see cref="Train.Category"/> and <see cref="Train.Company"/>, and a
+    /// <see cref="TrainCategory"/>'s <see cref="TrainCategory.Company"/>, are each looked up by their
+    /// foreign key in the catalogue that owns them. Call this whenever a plan is read, before
+    /// <see cref="RebuildTrainCategories"/>.
+    /// </summary>
+    /// <remarks>
+    /// These are the only place a category or a company belongs, so they are the only place either is
+    /// written (see <c>PlanJson</c>) and everything that uses one keeps just its id. A reference that
+    /// survived the reading — a plan written by an earlier version, which stored the whole category or
+    /// company on the train — is left alone, so nothing is lost by resolving against a catalogue that
+    /// version never filled in.
+    /// </remarks>
+    /// <param name="timetable">The timetable whose catalogue references to re-establish.</param>
+    public static void ResolveCatalogueReferences(this Timetable timetable)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        var categories = timetable.TrainCategories;
+        var companies = timetable.Layout.Companies;
+
+        foreach (var category in categories)
+            category.Company ??= companies.FirstOrDefault(c => c.Id == category.CompanyId);
+        foreach (var train in timetable.Trains)
+        {
+            train.Category ??= categories.FirstOrDefault(c => c.Id == train.CategoryId);
+            train.Company ??= companies.FirstOrDefault(c => c.Id == train.CompanyId);
+        }
+    }
+
+    /// <summary>
+    /// Reconciles the train category catalogue (<see cref="Timetable.TrainCategories"/>) with the
+    /// categories the trains actually use: a category a train holds but the catalogue does not know is
+    /// added to it, and every category is then given an id that is unique and greater than zero.
+    /// Call this whenever a plan is loaded or imported, before it is displayed.
+    /// </summary>
+    /// <remarks>
+    /// A plan written by an earlier version stored the whole category on the train rather than in the
+    /// catalogue, so it reads back with trains that have categories and a catalogue that has none. The
+    /// Trains tab then groups the trains under categories its own category drop-down cannot offer, and
+    /// no train can be moved to another category.
+    /// <para>
+    /// The ids matter as much as the membership, because a category is picked out by
+    /// <see cref="Train.CategoryId"/> rather than by the object: categories left sharing id zero would be
+    /// shown as a single category holding all their trains, be taken for the same category when trains
+    /// are checked for duplicate numbers, and be confused with the trains that have no category at all.
+    /// Now that a plan stores only the id, they would also all read back as the same category.
+    /// </para>
+    /// </remarks>
+    /// <param name="timetable">The timetable whose category catalogue to reconcile.</param>
+    public static void RebuildTrainCategories(this Timetable timetable)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        Catalogue.Reconcile(
+            timetable.TrainCategories,
+            timetable.Trains.Select(t => t.Category),
+            category => category.Id,
+            (category, id) => category.Id = id);
+    }
+
+    /// <summary>
+    /// Gets the timetable's trains of <paramref name="category"/>, matched on
+    /// <see cref="Train.CategoryId"/> so that a train reading back before its category has been resolved
+    /// from the catalogue is found too.
+    /// </summary>
+    /// <param name="timetable">The timetable whose trains to look through.</param>
+    /// <param name="category">The category the trains must belong to.</param>
+    public static IEnumerable<Train> TrainsIn(this Timetable timetable, TrainCategory category)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        ArgumentNullException.ThrowIfNull(category);
+        return timetable.Trains.Where(t => t.CategoryId == category.Id);
+    }
+
+    /// <summary>
+    /// Reapplies <see cref="TrainCategory.DefaultPreparationMinutes"/> to every train of
+    /// <paramref name="category"/>, moving each train's origin arrival that many minutes before its
+    /// departure (see <c>Train.SetPreparationMinutes</c>). Only the preparation time changes: no train
+    /// departs or arrives anywhere at another time than it did.
+    /// </summary>
+    /// <param name="timetable">The timetable whose trains to reapply the default to.</param>
+    /// <param name="category">The category whose default to reapply.</param>
+    /// <returns>The number of trains changed. A train already prepared for that long is not counted.</returns>
+    public static int ApplyDefaultPreparationMinutes(this Timetable timetable, TrainCategory category)
+    {
+        var changed = 0;
+        foreach (var train in timetable.TrainsIn(category))
+            if (train.SetPreparationMinutes(category.DefaultPreparationMinutes)) changed++;
+        return changed;
+    }
+
+    /// <summary>
+    /// Reapplies <see cref="TrainCategory.DefaultFinishingMinutes"/> to every train of
+    /// <paramref name="category"/>, moving each train's destination departure that many minutes after its
+    /// arrival (see <c>Train.SetFinishingMinutes</c>). Only the finishing-up time changes: no train
+    /// departs or arrives anywhere at another time than it did.
+    /// </summary>
+    /// <param name="timetable">The timetable whose trains to reapply the default to.</param>
+    /// <param name="category">The category whose default to reapply.</param>
+    /// <returns>The number of trains changed. A train already finished in that time is not counted.</returns>
+    public static int ApplyDefaultFinishingMinutes(this Timetable timetable, TrainCategory category)
+    {
+        var changed = 0;
+        foreach (var train in timetable.TrainsIn(category))
+            if (train.SetFinishingMinutes(category.DefaultFinishingMinutes)) changed++;
+        return changed;
     }
 
     /// <summary>

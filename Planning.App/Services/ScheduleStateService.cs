@@ -50,7 +50,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     public Plan? Schedule
     {
         get => _schedule;
-        set { _schedule = value; _schedule?.Timetable?.RebuildStationCalls(); CancelPendingSave(); ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
+        set { _schedule = value; Reconcile(_schedule); CancelPendingSave(); ResetSelectionToFirstStretch(); PersistSchedule(); NotifyChanged(); }
     }
 
     /// <summary>
@@ -91,6 +91,13 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
 
     public Tellurian.Trains.Schedules.Model.Layouts.Layout? Layout => _schedule?.Timetable?.Layout;
 
+    /// <summary>
+    /// Brings a plan into a consistent state before anything validates, displays or saves it. A plan
+    /// may reach here from an import as well as from storage, so this cannot be left to the reading of
+    /// a plan alone (see <c>Plan.Reconcile</c>).
+    /// </summary>
+    private static void Reconcile(Plan? plan) => plan?.Reconcile();
+
     private void ResetSelectionToFirstStretch()
     {
         _selectedStretches.Clear();
@@ -123,10 +130,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         if (plan is null) return;
 
         _schedule = plan;
-        // A persisted plan may carry track calls whose train is no longer in the timetable (an orphan
-        // from an older save or import). Reconcile the per-track index with Train.Calls before anything
-        // validates or displays it, so orphans cannot surface as phantom conflicts.
-        _schedule.Timetable?.RebuildStationCalls();
+        Reconcile(_schedule);
         ResetSelectionToFirstStretch();
 
         var storedNumbers = await storage.GetStringAsync(SelectedStretchesStorageKey);
@@ -256,7 +260,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         {
             var plan = await storage.GetAsync<Plan>(ScheduleStorageKey, JsonOptions);
             _schedule = plan;
-            _schedule?.Timetable?.RebuildStationCalls();
+            Reconcile(_schedule);
             NotifyChanged();
         }
         catch (Exception ex)

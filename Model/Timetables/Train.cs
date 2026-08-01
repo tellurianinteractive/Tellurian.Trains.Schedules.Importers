@@ -84,24 +84,31 @@ public class Train : IEquatable<Train>
     public TrainCapacity Length { get; set; }
 
     /// <summary>
-    /// Gets or sets the foreign key to the operating company. Optional.
+    /// Gets or sets the foreign key to the operating company. Optional. Follows <see cref="Company"/>
+    /// while one is set, so assigning the company is enough to keep the two in step; the stored value
+    /// is what a plan is read with, before the company itself has been resolved from the catalogue.
     /// </summary>
-    public int? CompanyId { get; set; }
+    public int? CompanyId { get => Company?.Id ?? field; set; }
 
     /// <summary>
-    /// Gets or sets the company operating this train.
+    /// Gets or sets the company operating this train. Written to a plan as <see cref="CompanyId"/>
+    /// alone; the company itself is stored once, in the layout's company catalogue. Setting no company
+    /// clears the key too, so the train is not given the old one back the next time the plan is read.
     /// </summary>
-    public Company? Company { get; set; }
+    public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>
-    /// Gets or sets the foreign key to the train category. Optional.
+    /// Gets or sets the foreign key to the train category. Optional. Follows <see cref="Category"/>
+    /// while one is set, in the same way as <see cref="CompanyId"/>.
     /// </summary>
-    public int? CategoryId { get; set; }
+    public int? CategoryId { get => Category?.Id ?? field; set; }
 
     /// <summary>
-    /// Gets or sets the category of this train.
+    /// Gets or sets the category of this train. Written to a plan as <see cref="CategoryId"/> alone;
+    /// the category itself is stored once, in the timetable's category catalogue. Setting no category
+    /// clears the key too, so the train is not given the old one back the next time the plan is read.
     /// </summary>
-    public TrainCategory? Category { get; set; }
+    public TrainCategory? Category { get => field; set { field = value; if (value is null) CategoryId = null; } }
 
     /// <summary>
     /// Gets or sets this train's maximum scale speed in km/h. Optional; when unset,
@@ -307,6 +314,61 @@ public static class TrainExtensions
         public IReadOnlyList<StationCall> CallsInRunOrder => [.. train.Calls.OrderBy(c => c.SortTime)];
 
         /// <summary>
+        /// The train's preparation time in minutes: the gap at its origin call between the arrival, where
+        /// the vehicles and the loco driver are first tied up, and the departure. Zero when the train has
+        /// no calls.
+        /// </summary>
+        public int PreparationMinutes =>
+            train.Calls.Count == 0 ? 0 : MinutesBetween(train.CallsInRunOrder[0]);
+
+        /// <summary>
+        /// The train's finishing-up time in minutes: the gap at its destination call between the arrival
+        /// and the departure, where the vehicles and the loco driver are freed again. Zero when the train
+        /// has no calls.
+        /// </summary>
+        public int FinishingMinutes =>
+            train.Calls.Count == 0 ? 0 : MinutesBetween(train.CallsInRunOrder[^1]);
+
+        /// <summary>
+        /// Sets the train's preparation time by moving its origin call's arrival <paramref name="minutes"/>
+        /// before that call's departure. Nothing else moves, so the train runs exactly as it did.
+        /// </summary>
+        /// <param name="minutes">The preparation time in minutes. Must be non-negative.</param>
+        /// <returns><c>true</c> when the origin arrival was changed; <c>false</c> when it already was that
+        /// many minutes before the departure, when the train has fewer than two calls (it then has no run
+        /// to prepare for), or when the preparation would start before midnight of the operating day.</returns>
+        public bool SetPreparationMinutes(int minutes)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(minutes);
+            if (train.Calls.Count < 2) return false;
+            var origin = train.CallsInRunOrder[0];
+            var arrival = origin.Departure.AddMinutes(-minutes);
+            if (arrival.Value < TimeSpan.Zero || arrival == origin.Arrival) return false;
+            origin.Arrival = arrival;
+            return true;
+        }
+
+        /// <summary>
+        /// Sets the train's finishing-up time by moving its destination call's departure
+        /// <paramref name="minutes"/> after that call's arrival. Nothing else moves, so the train runs
+        /// exactly as it did.
+        /// </summary>
+        /// <param name="minutes">The finishing-up time in minutes. Must be non-negative.</param>
+        /// <returns><c>true</c> when the destination departure was changed; <c>false</c> when it already
+        /// was that many minutes after the arrival, or when the train has fewer than two calls (it then
+        /// has no run to finish).</returns>
+        public bool SetFinishingMinutes(int minutes)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(minutes);
+            if (train.Calls.Count < 2) return false;
+            var destination = train.CallsInRunOrder[^1];
+            var departure = destination.Arrival.AddMinutes(minutes);
+            if (departure == destination.Departure) return false;
+            destination.Departure = departure;
+            return true;
+        }
+
+        /// <summary>
         /// Gets whether this is a passenger train, from its <see cref="Train.Category"/>. A train may be
         /// both a passenger and a cargo train at the same time.
         /// </summary>
@@ -317,6 +379,27 @@ public static class TrainExtensions
         /// be both a passenger and a cargo train at the same time.
         /// </summary>
         public bool IsCargo => train.Category?.IsFreight ?? false;
+
+        /// <summary>
+        /// Gets whether this train is able to stop at <paramref name="location"/> at all, whatever a call
+        /// there says. A train stops to exchange something, so it needs somewhere to exchange it: a
+        /// passenger train needs <see cref="Layouts.OperationLocation.HasPassengerExchange"/>, a cargo
+        /// train <see cref="Layouts.OperationLocation.HasCargoExchange"/>, and a train that is both needs
+        /// either. Nowhere can a train stop at a <see cref="SignalControlledLocation"/>, which exists for
+        /// block and dispatch boundaries only.
+        /// </summary>
+        /// <remarks>
+        /// A train whose category is neither passenger nor cargo — empty stock, a light engine, a category
+        /// not yet filled in — carries nothing to exchange, so no exchange is demanded of the location and
+        /// only the location type restricts it. A shadow station always exchanges both (see
+        /// <see cref="Station.HasPassengerExchange"/>), so it needs no case of its own here.
+        /// </remarks>
+        /// <param name="location">The operation location to test.</param>
+        public bool CanStopAt(OperationLocation? location) =>
+            location is not null and not SignalControlledLocation &&
+            ((train.IsPassenger && location.HasPassengerExchange) ||
+             (train.IsCargo && location.HasCargoExchange) ||
+             (!train.IsPassenger && !train.IsCargo));
 
         /// <summary>
         /// Gets the train's calls where it stops to depart (a wagon can be connected here), earliest first.
@@ -465,6 +548,11 @@ public static class TrainExtensions
         }
 
     }
+
+    // The minutes a call is held, from its arrival to its departure. At a train's origin that is its
+    // preparation time and at its destination its finishing-up time.
+    private static int MinutesBetween(StationCall call) =>
+        (int)call.Departure.Subtract(call.Arrival).TotalMinutes;
 
     /// <summary>
     /// Determines whether the train is null or has no station calls.

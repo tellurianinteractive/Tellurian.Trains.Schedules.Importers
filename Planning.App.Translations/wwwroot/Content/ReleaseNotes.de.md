@@ -1,5 +1,96 @@
 # Versionshinweise
 
+## Version 0.3.4
+
+- **Die Felder Ank und Abf eines Halts richten sich jetzt danach, wo der Zug tatsächlich halten
+  kann.** Ein Zug hält, um etwas auszutauschen, und braucht dafür einen Ort, der das kann: ein
+  Reisezug dort, wo die Betriebsstelle Reisende annimmt, ein Güterzug dort, wo sie Fracht annimmt, und
+  beides nicht an einer signalgesteuerten Betriebsstelle. Wo der Zug nicht halten kann, werden beide
+  Felder leer und gesperrt gezeigt, und der Halt ist im Fahrplan wie im Bildfahrplan eine Durchfahrt.
+  Nichts von dem, was Sie geplant haben, geht verloren — schalten Sie den Austausch wieder ein, und die
+  Halte sind wieder da. Ein Schattenbahnhof hat immer beides, da er für alles außerhalb der Anlage
+  steht; seine beiden Felder werden daher gesetzt und gesperrt gezeigt.
+
+- **Ein Halt, an dem etwas hängt, lässt sich nicht mehr entfernen.** Ein Zugteil läuft von einem Halt,
+  an dem der Zug abfährt, zu einem, an dem er ankommt, also müssen beide Enden Halte sein. Der erste
+  und der letzte Halt des Zuges selbst sowie die Enden jedes Zugteils, über den ein Fahrzeugumlauf,
+  ein Dienst oder ein Frachtfluss geplant ist, behalten ihr Feld nun gesetzt und gesperrt; der
+  Mauszeiger darauf sagt, was es hält. Wo ein Zugteil dort endet, wo sein Zug nicht halten kann — ein
+  Plan aus der Zeit vor dieser Regel —, wird das offen gesagt, damit Sie den Halt oder den Zugteil
+  verschieben können.
+
+- **Eine Zugkategorie trägt jetzt die Vorbereitungs- und Abschlusszeiten, mit denen ihre Züge geplant
+  werden.** Jeder neue Zug der Kategorie wird so viele Minuten vor der Abfahrt bereitgestellt und so
+  viele Minuten nach der Ankunft abgestellt, sodass Sie dieselben zwei Zahlen nicht mehr für jeden Zug
+  eingeben müssen. Neben jedem der beiden Felder steht eine Schaltfläche *Erneut anwenden*, die diese
+  eine Zeit allen Zügen gibt, die die Kategorie bereits hat, und meldet, wie viele geändert wurden.
+  Beides sind getrennte Aktionen, sodass Sie die Vorbereitungszeit ändern können, ohne die
+  Abschlusszeit anzurühren. Das erneute Anwenden verschiebt nur die Minuten ganz an den Enden eines
+  Zuges: Er fährt, hält und kommt weiterhin genau zu den Zeiten, zu denen er es tat.
+
+- **Die Betreiber sind auf der Titelseite eines Dienstheftes leichter zu lesen.** Die Zeile ist jetzt
+  doppelt so groß gesetzt wie bisher, sodass ein Logo auf einen Blick zu erkennen und eine Signatur
+  über einen Tisch hinweg zu lesen ist. Haben alle Betreiber des Dienstes ein Logo, entfällt das Wort
+  *Betreiber* — die Logos sagen es selbst. Fehlt einem von ihnen das Logo, stehen weiterhin alle als
+  Signatur da, fett und mit der Beschriftung davor.
+
+### Fehlerbehebungen
+
+- **Ein Dienstheft konnte einen Zugteil über den unteren Seitenrand hinaus drucken.** Der Bericht
+  berechnet vor dem Druck, wie viele Zugteile auf eine Seite passen, und rechnete dabei mit rund der
+  Hälfte mehr Platz, als eine A5-Seite tatsächlich hat. Was über den Seitenrand hinausragt, wird
+  kommentarlos abgeschnitten: Dem zweiten Zugteil einer solchen Seite fehlte das Ende seines Fahrplans
+  — oder er fehlte ganz, sodass ein Lokführer einen Dienst in der Hand hielt, dessen letzter Zug fehlte.
+  Zugteile werden jetzt an dem gemessen, was die Seite wirklich fasst, und ein Zugteil, der nicht mehr
+  passt, kommt auf die nächste Seite. Manche Hefte brauchen dadurch ein Blatt mehr als bisher.
+
+- **Das Topologie-Diagramm konnte die Signaturen zweier Betriebsstellen übereinander drucken.** Die
+  Betriebsstellen wurden allein nach ihrem Abstand gesetzt, sodass zwei nah beieinander liegende
+  Betriebsstellen auf einer langen Strecke fast an derselben Stelle gezeichnet wurden und ihre
+  Signaturen ineinander liefen. Sie werden jetzt nie enger gezeichnet, als es ihre beiden Signaturen
+  brauchen, während der Rest der Strecke seine wahren Verhältnisse behält. Auch eine lange Signatur am
+  Rand des Diagramms wird nicht mehr abgeschnitten.
+
+- **Eine Abzweigung im Topologie-Diagramm konnte quer durch eine andere Strecke gezeichnet werden.**
+  Eine Abzweigung fällt in einem festen Winkel von der Strecke ab, die sie verlässt; traf sie dabei auf
+  eine Strecke im Weg, kam sie nie an ihr vorbei, wie weit sie im Diagramm auch nach unten geschoben
+  wurde — sie wurde einfach quer darüber gezeichnet. Die Abzweigungen, die eine Strecke am weitesten
+  hinten verlassen, werden jetzt zuerst gezeichnet, was den dahinter liegenden einen freien Weg nach
+  unten lässt. Eine lange Abzweigung kann daher jetzt unter einer kurzen gezeichnet werden, die die
+  Strecke weiter hinten verlässt.
+
+- **Ein Plan konnte seine Züge unter Zugkategorien zeigen, die das Register Zugkategorien nicht
+  führte.** Ein Zug trägt seine Kategorie bei sich, deshalb öffnete sich ein von einer früheren Version
+  gespeicherter Plan mit nach Kategorie gruppierten Zügen, während die Liste der Kategorien leer war:
+  das Kategorien-Auswahlfeld hatte nichts anzubieten, und kein Zug ließ sich in eine andere Kategorie
+  verschieben. Mehrere Kategorien konnten außerdem für ein und dieselbe gehalten werden, sodass ihre
+  Züge unter einer einzigen Überschrift zusammenkamen und zwei Züge verschiedener Kategorien mit
+  derselben Nummer als eine doppelt vergebene Nummer gemeldet wurden. Beim Öffnen eines Plans wird die
+  Liste der Kategorien nun aus den Kategorien seiner Züge vervollständigt, und jede Kategorie bleibt
+  von den anderen getrennt.
+
+- **Zwei Gesellschaften ohne eigene Nummer wurden für denselben Betreiber gehalten.** Eine Gesellschaft
+  wird an einer Nummer erkannt, die die App für sie führt, und ein Plan konnte mehrere enthalten, die
+  nie eine bekommen hatten. Züge verschiedener Gesellschaften mit derselben Zugnummer wurden dann als
+  eine doppelt vergebene Nummer gemeldet. Jede Gesellschaft erhält nun eine eigene Nummer, sobald ein
+  Plan geöffnet oder gespeichert wird; eine Gesellschaft aus dem Module Registry behält die Nummer, mit
+  der sie gekommen ist.
+
+- **Ein Plan speicherte seine Zugkategorien, Gesellschaften und Länder an mehr als einer Stelle.** Jede
+  wurde dort geschrieben, wo sie beim Speichern zuerst angetroffen wurde — meist im ersten Zug, der sie
+  verwendete —, während die Liste, in die sie gehört, nicht mehr als einen Verweis darauf enthielt. So
+  konnte ein Plan Züge in Kategorien bekommen, die das Register Zugkategorien nicht kannte. Jede wird
+  jetzt einmal geschrieben, in ihrer eigenen Liste, und alles, was sie verwendet, behält nur einen
+  Verweis. Länder werden gar nicht mehr in den Plan kopiert, sodass eine Korrektur der Sprachen eines
+  Landes jetzt auch Pläne erreicht, die davor gespeichert wurden. Ein von einer früheren Version
+  gespeicherter Plan wird wie bisher gelesen und beim nächsten Speichern in Ordnung gebracht.
+
+- **Ein Dienstheft nannte in der Überschrift eines Zugteils nur die Zugnummer.** Ein Zug wird durch
+  Präfix und Suffix seiner Zugkategorie ebenso bezeichnet wie durch seine Nummer — Gt 1234, nicht
+  1234 — und ein Lokführer, der das Heft mit dem Fahrplan oder mit dem Ausgerufenen vergleicht, hat
+  nur diese Überschrift. Die Überschrift trägt jetzt die vollständige Zugbezeichnung mit Präfix und
+  Suffix, hinter der Signatur des Betreibers.
+
 ## Version 0.3.3
 
 - **Konflikte lassen sich jetzt dort lesen, wo sie angezeigt werden.** Eine Zeile mit Konflikten — ein

@@ -85,11 +85,11 @@ else
         {
             <div class="edit">
                 <div class="view-header">
-                    <h2>@(_isNew ? $"{Translator(TypeKey(Editing))} — {Translator("AddNew")}" : Editing.Name)</h2>
                     @if (!_isNew)
                     {
                         <button class="primary" @onclick="BackToList">@Translator("Close")</button>
                     }
+                    <h2>@(_isNew ? $"{Translator(TypeKey(Editing))} — {Translator("AddNew")}" : Editing.Name)</h2>
                 </div>
 
                 <div class="section">
@@ -138,20 +138,22 @@ else
                     }
 
                     @* Passenger exchange is settable at a station or an other location; cargo exchange only
-                       at a station (an industrial area always has it). The model forces the rest. *@
+                       at a station (an industrial area always has it). The model forces the rest — including
+                       a shadow station, which stands for everything beyond the layout and so exchanges both. *@
+                    @{ var shadow = Editing is Station { IsShadow: true }; }
                     @if (Editing is Station or OtherLocation)
                     {
-                        <div class="field">
+                        <div class="field" title="@(shadow ? Translator("ShadowExchangesEverything") : null)">
                             <HelpLabel For="HasPassengerExchange" />
-                            <input type="checkbox" @bind="Editing.HasPassengerExchange" @bind:after="OnEdited" />
+                            <input type="checkbox" @bind="Editing.HasPassengerExchange" @bind:after="OnEdited" disabled="@shadow" />
                         </div>
                     }
 
                     @if (Editing is Station)
                     {
-                        <div class="field">
+                        <div class="field" title="@(shadow ? Translator("ShadowExchangesEverything") : null)">
                             <HelpLabel For="HasCargoExchange" />
-                            <input type="checkbox" @bind="Editing.HasCargoExchange" @bind:after="OnEdited" />
+                            <input type="checkbox" @bind="Editing.HasCargoExchange" @bind:after="OnEdited" disabled="@shadow" />
                         </div>
                     }
 
@@ -311,8 +313,8 @@ else
         {
             <div class="info">
                 <div class="view-header">
-                    <h2>@_selected.Name (@_selected.Signature)</h2>
                     <button class="primary" @onclick="BackToList">@Translator("Close")</button>
+                    <h2>@_selected.Name (@_selected.Signature)</h2>
                 </div>
                 <dl>
                     <dt>@Translator("Type")</dt>

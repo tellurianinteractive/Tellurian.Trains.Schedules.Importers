@@ -1,4 +1,5 @@
 @using System.Globalization
+@using System.Net
 @using Tellurian.Trains.Schedules.Planning.App.Translations
 
 @inject Translator Translator
@@ -57,25 +58,35 @@
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     // The train's OWN company signature, which need not be the duty's: a duty may work several
-    // operators' trains.
+    // operators' trains. The number alone does not identify a train — the category prefix and suffix
+    // are part of what is called out and written on the train describer — so the heading carries the
+    // full identity. The double space is collapsed for the trains that have no company at all.
     private string Heading =>
         Part is null ? "" :
         string.Format(Culture, Translator("DutyInTrain"),
-            Part.Train.EffectiveCompany?.Signature ?? "", Part.Train.Number).Trim();
+            Part.Train.EffectiveCompany?.Signature ?? "", Part.Train.Identity)
+            .Replace("  ", " ", StringComparison.Ordinal).Trim();
 
     // "Starts at" is the first call's ARRIVAL and "ends at" the last call's DEPARTURE: the gaps to the
     // movement times are the driver's preparation and stand-down time, the same distinction the duty's
     // own start and end times make.
-    private string Extent
+    //
+    // The stations and times are set in bold and the words around them left light: those four values
+    // are what a driver picks off the line at a glance, and the connecting words only say which is
+    // which. Only the values are encoded — the format string is our own resource, the values are text
+    // a planner typed.
+    private MarkupString Extent
     {
         get
         {
-            if (Part is null) return "";
+            if (Part is null) return default;
             var from = Part.TrainPart.From;
             var to = Part.TrainPart.To;
-            return string.Format(Culture, Translator("StartsAtEndsAt"),
-                from.OperationLocation.Name, from.Arrival.HHMM(),
-                to.OperationLocation.Name, to.Departure.HHMM());
+            return new(string.Format(Culture, Translator("StartsAtEndsAt"),
+                Bold(from.OperationLocation.Name), Bold(from.Arrival.HHMM()),
+                Bold(to.OperationLocation.Name), Bold(to.Departure.HHMM())));
         }
     }
+
+    private static string Bold(string value) => $"<b>{WebUtility.HtmlEncode(value)}</b>";
 }

@@ -6,9 +6,11 @@ namespace Tellurian.Trains.Schedules.Model.Timetables;
 public record TrainCategory
 {
     /// <summary>
-    /// Gets or initializes the unique identifier for this train category.
+    /// Gets or sets the unique identifier for this train category. Unique within the timetable's
+    /// catalogue and greater than zero; a category read from a plan that breaks either is renumbered
+    /// (see <c>Timetable.RebuildTrainCategories</c>).
     /// </summary>
-    public int Id { get; init; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the prefix shown before train number (e.g., "P" for passenger, "G" for goods).
@@ -57,6 +59,23 @@ public record TrainCategory
     public int StartNumber { get; set; } = 1;
 
     /// <summary>
+    /// Gets or sets the default preparation time in minutes for trains of this category: how long before
+    /// its first departure the train is made ready, which is where the vehicles and the loco driver are
+    /// first tied up. A new train of this category is created with it, and it can be reapplied to the
+    /// trains that already exist (see <c>TimetableExtensions.ApplyDefaultPreparationMinutes</c>).
+    /// Defaults to 10.
+    /// </summary>
+    public int DefaultPreparationMinutes { get; set; } = 10;
+
+    /// <summary>
+    /// Gets or sets the default finishing-up time in minutes for trains of this category: how long after
+    /// its last arrival the train is put away, which is where the vehicles and the loco driver are freed
+    /// again. A new train of this category is created with it, and it can be reapplied to the trains that
+    /// already exist (see <c>TimetableExtensions.ApplyDefaultFinishingMinutes</c>). Defaults to 10.
+    /// </summary>
+    public int DefaultFinishingMinutes { get; set; } = 10;
+
+    /// <summary>
     /// Gets or sets whether trains of this category are excluded from automatic schedule building.
     /// When <c>true</c>, the automatic builder never seeds or chains these trains; they can still be
     /// added to a schedule manually. Defaults to <c>false</c>.
@@ -64,9 +83,20 @@ public record TrainCategory
     public bool ExcludeFromAutomaticScheduling { get; set; }
 
     /// <summary>
-    /// Optional company that operates trains in this category.
+    /// Gets or sets the foreign key to the company that operates trains in this category. Optional.
+    /// Follows <see cref="Company"/> while one is set, so assigning the company is enough to keep the
+    /// two in step; the stored value is what a plan is read with, before the company itself has been
+    /// resolved from the catalogue.
     /// </summary>
-    public Company? Company { get; set; }
+    public int? CompanyId { get => Company?.Id ?? field; set; }
+
+    /// <summary>
+    /// Optional company that operates trains in this category. Written to a plan as
+    /// <see cref="CompanyId"/> alone; the company itself is stored once, in the layout's company
+    /// catalogue. Setting no company clears the key too, so the category is not given the old one back
+    /// the next time the plan is read.
+    /// </summary>
+    public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <inheritdoc/>
     public override string ToString() => Name;

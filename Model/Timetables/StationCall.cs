@@ -108,14 +108,20 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
 
     /// <summary>
     /// Gets a value indicating whether the train stops here, as opposed to passing through.
-    /// A call is a stop when it arrives and/or departs <em>and</em> its location is not a
-    /// <see cref="Layouts.SignalControlledLocation"/> — a train never stops at a signal-controlled
-    /// location, so the location override is built in here as the single source of truth.
+    /// A call is a stop when it arrives and/or departs <em>and</em> the train is able to stop at its
+    /// location at all (see <c>CanBeStop</c>) — a train never stops at a signal-controlled location, and
+    /// stops elsewhere only where it can exchange what it carries. Those location rules are built in here
+    /// as the single source of truth, so nothing has to remember to apply them.
     /// It never compares the arrival and departure times: equal times are only a convention used
     /// by the XPLN import to decide whether to clear both flags (see <see cref="IsPassthrough"/>).
     /// </summary>
+    /// <remarks>
+    /// The flags themselves are left as the planner set them, never cleared, so a stop planned while a
+    /// location still exchanged passengers or cargo comes back if the exchange is restored. Only the
+    /// answer given here changes with the location.
+    /// </remarks>
     [JsonIgnore]
-    public bool IsStop => (IsArrival || IsDeparture) && OperationLocation is not SignalControlledLocation;
+    public bool IsStop => (IsArrival || IsDeparture) && this.CanBeStop;
 
     /// <summary>
     /// Gets a value indicating whether the train passes the station without stopping.
@@ -199,6 +205,22 @@ public static class StationCallExtensions
         public bool HasDifferentArrivalAndDepartureTimes => call.IsStop && call.Arrival < call.Departure;
 
         /// <summary>
+        /// True when the train is able to stop at this call's location at all — the location is not
+        /// signal controlled and it exchanges what this train carries (see <c>Train.CanStopAt</c>).
+        /// Where this is false the call can only ever be a pass-through, whatever
+        /// <see cref="StationCall.IsArrival"/> and <see cref="StationCall.IsDeparture"/> say, so the
+        /// editor shows those two cleared and disabled.
+        /// </summary>
+        /// <remarks>
+        /// What may be exchanged is a property of the train, so a call not yet joined to one is judged on
+        /// its location alone.
+        /// </remarks>
+        public bool CanBeStop =>
+            call.Train is { } train
+                ? train.CanStopAt(call.OperationLocation)
+                : call.OperationLocation is not SignalControlledLocation;
+
+        /// <summary>
         /// True when this is the train's first or last call, where it starts or ends its run. The calls
         /// in between are the operating locations the train passes on the way, which it cannot skip.
         /// </summary>
@@ -216,5 +238,35 @@ public static class StationCallExtensions
                 return ReferenceEquals(call, ordered[0]) || ReferenceEquals(call, ordered[^1]);
             }
         }
+
+        /// <summary>
+        /// True when this is the train's first call, where it starts its run. Nothing precedes it, so the
+        /// gap from its arrival to its departure is the train's preparation time.
+        /// </summary>
+        /// <remarks>See the <c>IsAtTrainEnd</c> extension for how the ends are determined.</remarks>
+        public bool IsTrainOrigin =>
+            call.Train.IsNullOrHasNoCalls() || ReferenceEquals(call, call.Train.CallsInRunOrder[0]);
+
+        /// <summary>
+        /// True when this is the train's last call, where it ends its run. Nothing follows it, so the gap
+        /// from its arrival to its departure is the train's finishing-up time.
+        /// </summary>
+        /// <remarks>See the <c>IsAtTrainEnd</c> extension for how the ends are determined.</remarks>
+        public bool IsTrainDestination =>
+            call.Train.IsNullOrHasNoCalls() || ReferenceEquals(call, call.Train.CallsInRunOrder[^1]);
+
+        /// <summary>
+        /// The time from which a working that starts at this call ties up the vehicles and the driver. At
+        /// the train's origin that is the <see cref="StationCall.Arrival"/>: preparing the train is real
+        /// work, done before it moves. Anywhere else the working starts when the train departs.
+        /// </summary>
+        public Time WorkStart => call.IsTrainOrigin ? call.Arrival : call.Departure;
+
+        /// <summary>
+        /// The time until which a working that ends at this call ties up the vehicles and the driver. At
+        /// the train's destination that is the <see cref="StationCall.Departure"/>: finishing the train up
+        /// is real work, done after it has stopped. Anywhere else the working ends when the train arrives.
+        /// </summary>
+        public Time WorkEnd => call.IsTrainDestination ? call.Departure : call.Arrival;
     }
 }

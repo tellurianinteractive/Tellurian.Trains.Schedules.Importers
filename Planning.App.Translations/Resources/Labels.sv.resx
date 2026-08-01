@@ -1008,6 +1008,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Tidtabellslagd?</value>
   </data>
+  <data name="ShadowExchangesEverything" xml:space="preserve">
+    <value>Ett magasin har alltid utbyte av både resande och gods: det representerar allt utanför banan.</value>
+  </data>
   <data name="IsShadow" xml:space="preserve">
     <value>Magasin?</value>
   </data>
@@ -1339,6 +1342,15 @@
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Kan inte ta bort: bara det första och det sista uppehållet kan tas bort. Ett tåg har ett uppehåll vid varje driftplats längs sin väg.</value>
   </data>
+  <data name="CallCannotBeStop" xml:space="preserve">
+    <value>Tåget kan inte göra uppehåll här: driftplatsen är signalreglerad, eller så har den varken utbyte av resande eller gods för den här sortens tåg.</value>
+  </data>
+  <data name="CallStopRequired" xml:space="preserve">
+    <value>Uppehållet kan inte tas bort: tågets väg, eller en tågdel som planerats över det, börjar eller slutar här.</value>
+  </data>
+  <data name="CallStopRequiredButImpossible" xml:space="preserve">
+    <value>En tågdel börjar eller slutar här, men tåget kan inte göra uppehåll på den här driftplatsen. Flytta uppehållet eller tågdelen.</value>
+  </data>
   <data name="CallReferenced" xml:space="preserve">
     <value>Kan inte ta bort: uppehållet används av fordonsturer eller förartjänster.</value>
   </data>
@@ -1647,6 +1659,24 @@
   </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Uteslut från automatisk schemaläggning?</value>
+  </data>
+  <data name="DefaultPreparationMinutes" xml:space="preserve">
+    <value>Förberedelseminuter</value>
+  </data>
+  <data name="DefaultFinishingMinutes" xml:space="preserve">
+    <value>Avslutsminuter</value>
+  </data>
+  <data name="Reapply" xml:space="preserve">
+    <value>Tillämpa på nytt</value>
+  </data>
+  <data name="ReapplyPreparationMinutesTitle" xml:space="preserve">
+    <value>Ge alla tåg i kategorin denna förberedelsetid. Varje tåg görs klart så här många minuter innan det avgår; det går precis som förut.</value>
+  </data>
+  <data name="ReapplyFinishingMinutesTitle" xml:space="preserve">
+    <value>Ge alla tåg i kategorin denna avslutstid. Varje tåg avvecklas så här många minuter efter att det ankommit; det går precis som förut.</value>
+  </data>
+  <data name="ReappliedToTrains" xml:space="preserve">
+    <value>{0} tåg ändrades.</value>
   </data>
   <data name="Assign" xml:space="preserve">
     <value>Tilldela</value>

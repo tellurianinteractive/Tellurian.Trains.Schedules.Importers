@@ -60,10 +60,15 @@ public class PlanUpdateTimingsTests
     public void AddingAnIntermediateStopGivesItADwellAndPushesTheTerminusLater()
     {
         var plan = SimplePlan();
-        // Eslöv cannot exchange cargo, so a freight train passes it without stopping.
-        ((Station)Location(plan, "E")).HasCargoExchange = false;
         var train = plan.Create(Freight, Location(plan, "M2"), Location(plan, "Hm"), Start)!;
         var eslöv = Call(train, "E");
+
+        // Start from a pass-through: the freight is planned through Eslöv without stopping. Eslöv keeps
+        // its cargo exchange, because a train that cannot stop at a location can never be made to
+        // (see the model's StopRules) — the stop pattern is the only thing being changed here.
+        eslöv.IsArrival = false;
+        eslöv.IsDeparture = false;
+        plan.UpdateTimings(train);
         Assert.IsTrue(eslöv.IsPassthrough, "Precondition: the freight passes Eslöv.");
         var terminusArrivalBefore = train.Calls[^1].Arrival;
 

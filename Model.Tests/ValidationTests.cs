@@ -300,6 +300,26 @@ public class ValidationTests
         Assert.IsNotEmpty(errors.Where(e => e.ErrorType == ValidationErrorType.VehicleScheduleOverlap), "S1 still reports the overlap.");
     }
 
+    [TestMethod]
+    public void OverlappingPartsAreReportedInTimeOrder()
+    {
+        var timetable = NewTimetable();
+        var category = Category;
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00))); // 12:00-12:55
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(12, 30))); // 12:30-13:25, overlaps
+        var plan = Plan.Create("Test", timetable);
+        var schedule = plan.CreateSchedule();
+        // Added later train first: the report must still name the earlier one first.
+        schedule.Add(plan.Timetable.Trains.First(t => t.Number == 3).AsTrainPart);
+        schedule.Add(plan.Timetable.Trains.First(t => t.Number == 1).AsTrainPart);
+
+        var error = plan.GetValidationErrors(Settings).Single(e => e.ErrorType == ValidationErrorType.VehicleScheduleOverlap);
+
+        Assert.AreEqual(1, error.Trains.First().Number, "The earliest departing train is named first.");
+        var text = error.Message.Text;
+        Assert.IsLessThan(text.IndexOf("13:25", StringComparison.Ordinal), text.IndexOf("12:00", StringComparison.Ordinal), "The earlier part's times come first in the message.");
+    }
+
     // --- S4: a schedule must have a traction unit on every session it operates ---
 
     // Adds a locomotive to the schedule for the given sessions (all sessions by default).

@@ -64,10 +64,12 @@
         @if (Companies.Count > 0)
         {
             <p class="operators">
-                <span class="label">@Translator("Operator"):</span>
                 @if (UseLogos)
                 {
-                    @* Separated by a gap, not commas: between images a comma reads as stray punctuation. *@
+                    @* No label: a logo already says "operator" to anyone who recognises it, and to anyone
+                       who does not the word adds nothing they can act on. Dropping it leaves the marks
+                       alone on the line, which is how they are read anyway.
+                       Separated by a gap, not commas: between images a comma reads as stray punctuation. *@
                     @foreach (var company in Companies)
                     {
                         <CompanyLogo Company="company" />
@@ -75,6 +77,9 @@
                 }
                 else
                 {
+                    @* The label stays for signatures: bare letter groups like "DB, SJ" need naming as
+                       operators, where a logo does not. *@
+                    <span class="label">@Translator("Operator"):</span>
                     <strong>@string.Join(", ", Companies.Select(c => c.Signature))</strong>
                 }
             </p>

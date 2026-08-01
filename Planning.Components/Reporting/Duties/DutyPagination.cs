@@ -12,36 +12,70 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties;
 /// <para>
 /// Heights are <em>estimated</em>, never measured — abstract row units against a fixed page budget. That
 /// is deterministic, testable without a browser, and reliable under print preview, where measurement is
-/// not. The constants are empirical: they encode what actually fits on an A5 page in this typography and
-/// must be re-tuned if the type size or the page margin changes.
+/// not. The unit is <em>one table row</em>: 0.85 rem of text at the booklet's line-height of 1.5, plus
+/// the cell padding and the row rule — 24.1 px at the 16 px root size, and the same for a vehicle, cargo
+/// and timetable row alike. Rows are what a page is mostly made of and what varies from part to part, so
+/// they cost exactly 1 and everything else is stated against them.
+/// </para>
+/// <para>
+/// Every constant below is a pixel figure taken from the booklet's CSS (<c>.dutypage</c>,
+/// <c>.dutypart</c> in <c>app.css</c>) divided by that 24.1 px and rounded up, so each can be re-derived
+/// on its own. They must be re-derived if the type size, the line-height or the page padding changes —
+/// a constant that no longer matches the stylesheet does not print short, it prints past the foot of the
+/// page, where <c>overflow: hidden</c> takes the rest of the part away without a word.
 /// </para>
 /// </remarks>
 public static class DutyPagination
 {
     /// <summary>Row units available on one A5 page body.</summary>
     /// <remarks>
-    /// Already reduced by the continuation marker, which is reserved once per page rather than charged
-    /// to a part: whether a part is last on its page is decided <em>by</em> the packing the height feeds
-    /// into, so charging it per part would be circular. Reserving it in the budget costs only a slightly
-    /// conservative page and errs towards unused space rather than overflow.
+    /// <para>
+    /// A5 is 210 mm — 793.7 px — tall, the page body takes 8 mm of padding at the top, and the
+    /// continuation marker sits 14 mm from the foot with a 24 px line of its own. What is left for parts
+    /// is 793.7 − 30.2 − 52.9 − 24 = 686.6 px, or 28.5 rows.
+    /// </para>
+    /// <para>
+    /// The marker is reserved here rather than charged to a part: whether a part is last on its page is
+    /// decided <em>by</em> the packing the height feeds into, so charging it per part would be circular.
+    /// </para>
     /// </remarks>
-    public const double PageBudget = 43;
+    public const double PageBudget = 28;
 
-    /// <summary>Row units for a part's header block: heading, category, extent, limits.</summary>
+    /// <summary>
+    /// Row units for a part's header block: heading, category and extent, limits, and the rule closing
+    /// the block.
+    /// </summary>
     /// <remarks>
-    /// More than the four printed lines suggest, and deliberately so. The heading alone is set half
-    /// again as large as the body text and padded above, and the block is followed by a rule and the
-    /// margins around it; charging the lines only left parts running past the foot of the page. The
-    /// figure is empirical — measured against a real print, not derived — so it must be re-checked if
-    /// the heading size or the page margin changes.
+    /// 109.7 px, which is 4.55 rows: the heading is set half again as large as the body text and padded
+    /// above (49.7 px), the two 0.9 rem lines take 21.6 px each, the rule 1 px, and the collapsed margins
+    /// between them the remaining 15.8 px. Taken as 4.75 so the block is never charged short.
     /// </remarks>
-    public const double HeaderHeight = 8;
+    public const double HeaderHeight = 4.75;
 
-    /// <summary>Row units a table costs before its data rows: heading, header row and rule.</summary>
-    public const double TableOverhead = 3;
+    /// <summary>
+    /// Row units a vehicle or cargo table costs before its data rows: heading, column headings, and the
+    /// rule that closes the block.
+    /// </summary>
+    /// <remarks>
+    /// 61.1 px, which is 2.53 rows: the 0.95 rem heading with its margins (25.1 px), the column headings
+    /// (24.1 px — a row like any other) and the closing rule with its margins (11.9 px).
+    /// </remarks>
+    public const double TableOverhead = 2.75;
+
+    /// <summary>Row units the timetable costs before its rows: heading and column headings.</summary>
+    /// <remarks>
+    /// 49.2 px, which is 2.04 rows — less than <see cref="TableOverhead"/> because the timetable ends the
+    /// part and so carries no closing rule.
+    /// </remarks>
+    public const double TimetableOverhead = 2.25;
 
     /// <summary>Characters that fit on one full-width note row before it wraps.</summary>
-    public const int CharactersPerNoteRow = 80;
+    /// <remarks>
+    /// A full-width note starts at the station column, so it runs the page width less the Arr/Dep column
+    /// and its own padding — about 449 px. At 0.85 rem these notes average some 7 px a character, being
+    /// full of times, train numbers and capitals, all wider than lower-case prose.
+    /// </remarks>
+    public const int CharactersPerNoteRow = 65;
 
     /// <summary>
     /// The height of one train part in row units, counting only what is actually printed: a suppressed
@@ -54,6 +88,7 @@ public static class DutyPagination
         part = part.ValueOrException(nameof(part));
 
         var height = HeaderHeight;
+        // The limits line and the margin under it come to 23.8 px — one row, near enough to state as one.
         if (part.LimitsLine(translator).Length == 0) height -= 1;
 
         height += TableHeight(part.TractionData.Vehicles.Count);
@@ -70,7 +105,7 @@ public static class DutyPagination
         var rows = part.TimetableRows;
         if (rows.Count == 0) return 0;
 
-        double height = TableOverhead + rows.Count;
+        double height = TimetableOverhead + rows.Count;
         foreach (var row in rows)
         {
             // One unit per stacked note — counting rather than measuring, because a full page width

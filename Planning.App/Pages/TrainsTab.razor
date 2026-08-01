@@ -405,6 +405,11 @@ else
                    times that do not ascend are reported as a conflict on the train (rules T2 and T5). *@
                 @foreach (var call in train.CallsInRunOrder)
                 {
+                    @* A call is only the planner's to make a stop where the train can stop at all, and the
+                       two flags a train part hangs on cannot be taken away — see the model's StopRules. *@
+                    var canBeStop = call.CanBeStop;
+                    var arrivalRequired = Plan?.IsArrivalRequired(call) == true;
+                    var departureRequired = Plan?.IsDepartureRequired(call) == true;
                     <tr>
                         <td>
                             <ListBoxView Items="@(TrackChoices.ToListItems())"
@@ -415,8 +420,16 @@ else
                            typed standing in the field. *@
                         <td><input type="text" class="time" @key="_timeEdits" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
                         <td><input type="text" class="time" @key="_timeEdits" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
-                        <td><input type="checkbox" checked="@call.IsArrival" @onchange="e => SetIsArrival(call, e)" /></td>
-                        <td><input type="checkbox" checked="@call.IsDeparture" @onchange="e => SetIsDeparture(call, e)" /></td>
+                        @* The title sits on the cell: a disabled input takes no pointer events, so a title
+                           on it would never be seen. *@
+                        <td title="@StopFlagHint(canBeStop, arrivalRequired)">
+                            <input type="checkbox" checked="@(arrivalRequired || (canBeStop && call.IsArrival))" disabled="@(!canBeStop || arrivalRequired)"
+                                   @onchange="e => SetIsArrival(call, e)" />
+                        </td>
+                        <td title="@StopFlagHint(canBeStop, departureRequired)">
+                            <input type="checkbox" checked="@(departureRequired || (canBeStop && call.IsDeparture))" disabled="@(!canBeStop || departureRequired)"
+                                   @onchange="e => SetIsDeparture(call, e)" />
+                        </td>
                         <td class="note">
                             <CallNoteField Value="@call.ManualNoteText" ValueChanged="text => SetCallNote(call, text)"
                                            Placeholder="@Translator("AddCallNote")" Title="@Translator("CallNoteHint")"
@@ -476,17 +489,29 @@ else
         Save();
     }
 
+    // The two flags are the planner's only where the train can stop and nothing depends on the stop; the
+    // checkbox is disabled otherwise, and these guards keep a stale event from getting past it.
     private void SetIsArrival(StationCall call, ChangeEventArgs e)
     {
+        if (!call.CanBeStop || Plan?.IsArrivalRequired(call) == true) return;
         call.IsArrival = e.Value is true;
         Save();
     }
 
     private void SetIsDeparture(StationCall call, ChangeEventArgs e)
     {
+        if (!call.CanBeStop || Plan?.IsDepartureRequired(call) == true) return;
         call.IsDeparture = e.Value is true;
         Save();
     }
+
+    // Explains a disabled Arr or Dep checkbox. Both rules can hold at once — a train part ending where its
+    // train cannot stop — and that is the one worth saying plainly, because only moving the call or the
+    // part will put it right.
+    private string? StopFlagHint(bool canBeStop, bool required) =>
+        canBeStop ? (required ? Translator("CallStopRequired") : null) :
+        required ? Translator("CallStopRequiredButImpossible") :
+        Translator("CallCannotBeStop");
 
     // The model creates the note on first text, removes it when the text is cleared and writes it in
     // the language being read — see StationCall.SetManualNote.
@@ -541,7 +566,14 @@ else
 
     // ---- Parsing helpers ------------------------------------------------------------------------
 
-    private void Save() => ScheduleState.SaveAndNotify();
+    // Every edit here can move a train part's ends: adding, deleting or retiming a call changes where the
+    // train starts and finishes, so the flags those ends depend on are set again before the plan is saved
+    // (see the model's StopRules).
+    private void Save()
+    {
+        Plan?.ApplyStopRules();
+        ScheduleState.SaveAndNotify();
+    }
 
     private static int? ParseInt(ChangeEventArgs e) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;

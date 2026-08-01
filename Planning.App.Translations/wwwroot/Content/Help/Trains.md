@@ -9,6 +9,14 @@ Trains drawn here appear as lines on the **Graphic timetable**, coloured by thei
 are checked against the validation rules in **Settings › Validation** (speeds, track usage, train
 numbers and so on).
 
+## Start- and End Time of Working on a Train
+Two times have a special meaning to let the planner specify preparation and finishing-up time:
+- **First arrival** time is the start time of the preparation time.
+  A driver starts work on a train this time. This is the time for picking up a loco from parking,
+  or check that all wagon cards matches the wagons in the train, etc.
+- **Last departure** time is the end time of finishing up. 
+  A driver ends work on a train this time. This is the time driving the loco to parking, etc.
+
 ## Editing a Call Time
 
 A time is never changed on its own — the rest of the train comes with it, keeping the run and dwell
@@ -18,6 +26,21 @@ ask the train to arrive five minutes later and it leaves every earlier place fiv
 times on the other side of the call you edit stay where they are, so what changes at that call is how
 long the train stands there. A change that would take the train outside the plan's operating times is
 refused as a whole, and the field falls back to the time already stored.
+
+## Stops and Pass-throughs
+
+The **Arr** and **Dep** boxes on a call say whether the train stops there. Tick neither and it passes
+through. Two things take the choice out of your hands:
+
+- **Where the train cannot stop at all**, both boxes are cleared and disabled. That is any
+  signal-controlled location, and any place that exchanges nothing the train carries — a passenger
+  train needs **Passengers** ticked for the place, a freight train **Cargo** (see **Operation
+  locations**). A shadow yard always exchanges both. Turning the exchange back on brings any stop
+  you planned earlier back with it, so nothing is lost by trying.
+- **Where something depends on the stop**, the box is ticked and disabled. A train part runs from a
+  call the train departs to a call it arrives at, so both ends must be stops: the train's own first
+  and last call, and the ends of every part a vehicle schedule, a driver duty or a cargo flow is
+  planned over. To free the box, move the call or the part that ends there.
 
 ## Add Train Dialogue
 

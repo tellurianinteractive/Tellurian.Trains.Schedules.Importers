@@ -36,6 +36,27 @@ public class Station : OperationLocation
     public IList<Region> Regions { get; set; } = [];
 
     /// <summary>
+    /// Always true at a shadow station, otherwise as configured. A shadow station stands for everything
+    /// beyond the modelled railway, so whatever a train brings there has somewhere to come from and go
+    /// to — passengers included.
+    /// </summary>
+    public override bool HasPassengerExchange
+    {
+        get => IsShadow || base.HasPassengerExchange;
+        set => base.HasPassengerExchange = value;
+    }
+
+    /// <summary>
+    /// Always true at a shadow station, otherwise as configured. See
+    /// <see cref="HasPassengerExchange"/> for why a shadow station exchanges everything.
+    /// </summary>
+    public override bool HasCargoExchange
+    {
+        get => IsShadow || base.HasCargoExchange;
+        set => base.HasCargoExchange = value;
+    }
+
+    /// <summary>
     /// Parameterless constructor for EF Core and JSON deserialization
     /// </summary>
     [JsonConstructor]

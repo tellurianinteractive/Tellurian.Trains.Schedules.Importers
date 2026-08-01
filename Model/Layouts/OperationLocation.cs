@@ -15,8 +15,10 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// <item><see cref="OtherLocation"/> — a train may stop when the call says so (e.g. an unstaffed halt with passenger exchange).</item>
 /// <item><see cref="SignalControlledLocation"/> — a train <b>never</b> stops; it always passes through, whatever the call flags say.</item>
 /// </list>
-/// So the effective rule is: the train stops at a call when
-/// <c>call.IsStop &amp;&amp; call.Station is not SignalControlledLocation</c>.
+/// On top of the location type, a train needs somewhere to exchange what it carries: a passenger train
+/// needs <see cref="HasPassengerExchange"/>, a cargo train <see cref="HasCargoExchange"/>. Both rules are
+/// built into <see cref="Timetables.StationCall.IsStop"/> (through <c>Train.CanStopAt</c>), so asking that
+/// one property is enough — nothing has to re-apply them.
 /// </remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(Station), "Station")]
@@ -95,15 +97,16 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
 
     /// <summary>
     /// Gets whether passenger trains can stop here to exchange passengers, i.e. tickets can be issued
-    /// from and to this location. Always false for <see cref="SignalControlledLocation"/>; configurable
-    /// for <see cref="Station"/> and <see cref="OtherLocation"/>.
+    /// from and to this location. Always false for <see cref="SignalControlledLocation"/> and
+    /// <see cref="IndustrialArea"/>, always true for a shadow station; configurable for
+    /// <see cref="Station"/> and <see cref="OtherLocation"/>.
     /// </summary>
     public virtual bool HasPassengerExchange { get; set; } = true;
 
     /// <summary>
     /// Gets whether freight trains can exchange cargo wagons here. Always false for
-    /// <see cref="SignalControlledLocation"/> and <see cref="OtherLocation"/>; configurable for
-    /// <see cref="Station"/>.
+    /// <see cref="SignalControlledLocation"/> and <see cref="OtherLocation"/>, always true for an
+    /// <see cref="IndustrialArea"/> and for a shadow station; configurable for <see cref="Station"/>.
     /// </summary>
     public virtual bool HasCargoExchange { get; set; } = true;
 
