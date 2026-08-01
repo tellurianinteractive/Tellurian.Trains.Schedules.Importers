@@ -64,7 +64,7 @@ public class XplnDataImporterTests
     [TestMethod]
     public async Task ImportsGivskudModern2025()
     {
-        await Import("Givskud-Modern-2025", 11, 125, 32, 8, 54, 73, 11, 8, 0);
+        await Import("Givskud-Modern-2025", 11, 125, 32, 8, 54, 73, 11, 43, 0);
     }
 
     [TestMethod]
@@ -310,26 +310,26 @@ public class XplnDataImporterTests
     // the imported data. No file reports a route-continuity warning: every imported route runs over
     // stretches of its layout.
     [TestMethod()]
-    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 29)]
-    [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 2)]
-    [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 44)]
-    [DataRow("FREMODERN-2023-Norge", 10, 41, 13, 0, 0, 20, 10, 1)]
-    [DataRow("Givskud2021", 25, 143, 49, 74, 80, 109, 25, 31)]
-    [DataRow("H0e-Schutterwald2013", 10, 26, 6, 0, 20, 25, 10, 11)]
-    [DataRow("Hellerup2015", 18, 60, 24, 0, 87, 20, 18, 9)]
-    [DataRow("Kolding_Epoke_III_2022", 19, 60, 16, 15, 18, 38, 19, 49)]
-    [DataRow("Kolding202009", 5, 38, 13, 1, 4, 28, 5, 2)]
-    [DataRow("Kolding2022", 14, 73, 26, 6, 10, 55, 14, 3)]
-    [DataRow("KoldingNorge2019", 13, 56, 17, 0, 0, 56, 13, 10)]
-    [DataRow("Langhurst 2019", 6, 15, 4, 7, 11, 4, 6, 43)]
+    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 72)]
+    [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 16)]
+    [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 66)]
+    [DataRow("FREMODERN-2023-Norge", 10, 41, 13, 0, 0, 20, 10, 4)]
+    [DataRow("Givskud2021", 25, 143, 49, 74, 80, 109, 25, 63)]
+    [DataRow("H0e-Schutterwald2013", 10, 26, 6, 0, 20, 25, 10, 12)]
+    [DataRow("Hellerup2015", 18, 60, 24, 0, 87, 20, 18, 17)]
+    [DataRow("Kolding_Epoke_III_2022", 19, 60, 16, 15, 18, 38, 19, 64)]
+    [DataRow("Kolding202009", 5, 38, 13, 1, 4, 28, 5, 8)]
+    [DataRow("Kolding2022", 14, 73, 26, 6, 10, 55, 14, 11)]
+    [DataRow("KoldingNorge2019", 13, 56, 17, 0, 0, 56, 13, 12)]
+    [DataRow("Langhurst 2019", 6, 15, 4, 7, 11, 4, 6, 48)]
     [DataRow("LTK2020", 0, 0, 0, 0, 0, 0, 0, 0, 18)]
     [DataRow("Magdeburg_v_DB33_DSB32_WTB11", 0, 0, 0, 0, 0, 0, 0, 0, 40)]
-    [DataRow("Montan2023H0e", 5, 32, 3, 4, 24, 3, 5, 1)]
-    [DataRow("Rotebro2015", 12, 39, 15, 0, 0, 31, 12, 42)]
-    [DataRow("Rotebro2016", 16, 32, 12, 0, 0, 24, 16, 7)]
-    [DataRow("Timmele2015", 12, 37, 13, 0, 0, 33, 12, 20)]
-    [DataRow("Värnamo2016", 8, 40, 13, 0, 0, 27, 8, 0)]
-    [DataRow("Värnamo2017", 9, 40, 12, 0, 0, 29, 9, 0)]
+    [DataRow("Montan2023H0e", 5, 32, 3, 4, 24, 3, 5, 19)]
+    [DataRow("Rotebro2015", 12, 39, 15, 0, 0, 31, 12, 63)]
+    [DataRow("Rotebro2016", 16, 32, 12, 0, 0, 24, 16, 14)]
+    [DataRow("Timmele2015", 12, 37, 13, 0, 0, 33, 12, 31)]
+    [DataRow("Värnamo2016", 8, 40, 13, 0, 0, 27, 8, 23)]
+    [DataRow("Värnamo2017", 9, 40, 12, 0, 0, 29, 9, 17)]
 
     public async Task Import(string scheduleName, int expectedTrackStretches, int expectedTrains, int expectedLocos, int expectedWagonsets, int expectedCargoFlows, int expectedDuties, int expectedDispatchStretches, int expectedValidationWarnings = 0, int expectedStoppingErrors = 0)
     {
