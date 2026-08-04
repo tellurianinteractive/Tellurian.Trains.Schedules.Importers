@@ -200,9 +200,9 @@
         var start = Layout.OperationLocations.Single(l => l.Id == _startId);
         var end = Layout.OperationLocations.Single(l => l.Id == _endId);
 
-        // A stretch is identified by its endpoints (direction included); block a second one the same way.
-        var duplicate = Layout.TrackStretches.FirstOrDefault(s => s.Start.Equals(start) && s.End.Equals(end));
-        if (duplicate is not null && !ReferenceEquals(duplicate, _editing))
+        // A stretch is bidirectional infrastructure, so a pair of locations may be joined by only one:
+        // an existing stretch the opposite way round joins the same pair and blocks this one too.
+        if (Layout.StretchBetween(start, end, excluding: _editing) is not null)
         {
             _error = Translator("TrackStretchDuplicate");
             return;

@@ -21,15 +21,30 @@
         }
         @foreach (var line in diagram.Lines)
         {
-            <line x1="@F(line.StartX)" y1="@F(line.Y)" x2="@F(line.EndX)" y2="@F(line.Y)"
-                  stroke="@line.Color" stroke-width="10" />
+            @foreach (var section in line.Sections)
+            {
+                @* A double-track section is drawn as the two tracks it has, a single-track one as one line.
+                   Timetable stretches sharing a section are laid over it as dashes instead of as further
+                   lines, which would be read as more tracks than the section really has. *@
+                @foreach (var offset in TrackOffsets(section.Tracks))
+                {
+                    <line x1="@F(section.FromX)" y1="@F(line.Y + offset)" x2="@F(section.ToX)" y2="@F(line.Y + offset)"
+                          stroke="@section.Color" stroke-width="@F(TrackWidth(section.Tracks))" />
+                }
+                @foreach (var (shared, index) in section.SharedColors.Select((c, i) => (c, i)))
+                {
+                    <line x1="@F(section.FromX)" y1="@F(line.Y)" x2="@F(section.ToX)" y2="@F(line.Y)"
+                          stroke="@shared" stroke-width="@F(SharedWidth)" stroke-linecap="butt"
+                          stroke-dasharray="@DashPattern" stroke-dashoffset="@F(index * DashStep)" />
+                }
+            }
             <SvgText X="line.StartX - TopologyDiagram.NumberOffset" Y="line.Y + 4" Anchor="end"
                      Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@line.Number" />
             @foreach (var node in line.Nodes.Where(n => !n.Hidden))
             {
                 <circle cx="@F(node.X)" cy="@F(node.Y)" r="5"
                         fill="#fff" stroke="@line.Color" stroke-width="2" />
-                <SvgText X="node.X" Y="node.Y - 10" Anchor="middle"
+                <SvgText X="node.X" Y="node.Y + (node.LabelBelow ? LabelDrop : -LabelRise)" Anchor="middle"
                          Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@node.Signature" />
             }
         }
@@ -43,6 +58,32 @@
     // Text stays a neutral black regardless of each line's colour, so labels never clash with a
     // similarly-coloured line and remain equally legible across the whole diagram.
     private const string TextColor = "#223";
+
+    // A section is drawn to the same overall weight whether it is single or double track, so that the number
+    // of tracks reads from the gap between them rather than from the line getting heavier. Two tracks of
+    // TrackWidth centred TrackGap apart leave a clear gap between them and still span the single line's 10.
+    private const double SectionWidth = 10.0;
+    private const double TrackGap = 6.5;
+
+    // Where a station's signature sits relative to its circle. Above it by default; below it — far enough
+    // down to clear the circle and sit on its own baseline — where a branch climbs away from that station.
+    private const double LabelRise = 10.0;
+    private const double LabelDrop = 22.0;
+
+    // Dashes of a sharing stretch's colour laid over a section: short enough to read as an overlay rather
+    // than as the section's own colour, and stepped so two sharing stretches do not fall on each other.
+    private const double SharedWidth = 5.0;
+    private const double DashStep = 8.0;
+    private const string DashPattern = "5 11";
+
+    // Where each track of a section sits relative to the line: one track on the line itself, two straddling
+    // it evenly. More than two are spread the same way, out from the middle.
+    private static IEnumerable<double> TrackOffsets(int tracks) =>
+        tracks <= 1
+            ? [0.0]
+            : Enumerable.Range(0, tracks).Select(i => (i - ((tracks - 1) / 2.0)) * TrackGap);
+
+    private static double TrackWidth(int tracks) => tracks <= 1 ? SectionWidth : 4.0;
 
     private TopologyDiagram? Diagram =>
         Layout is null || Layout.TimetableStretches.All(s => s.Stretches.Count == 0)

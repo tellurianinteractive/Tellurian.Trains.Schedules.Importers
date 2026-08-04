@@ -1,5 +1,54 @@
 # Release Notes
 
+## Version 3.2.0
+
+### New Features
+
+- **Two operation locations are joined by one track stretch.** A track stretch is bidirectional
+  infrastructure, so one defined the opposite way round joins the same pair and is the same connection:
+  a second stretch between them would duplicate what the layout already holds.
+  **`Layout.StretchBetween(from, to, excluding)`** finds the stretch that already joins a pair, matching
+  either direction, and returns `null` when nothing does. Its `excluding` argument is the stretch being
+  edited, compared by reference, so a stretch is never reported as its own duplicate while its own
+  endpoints are being changed. `Layout.IsConnected` now answers through it, so connectivity and duplicate
+  detection share one definition of what "joined" means. Where a layout already holds more than one
+  stretch between a pair — a fault of its own — the first is returned rather than the caller failing.
+
+  `Layout.Add(TrackStretch)` is unchanged: it still ignores an exact duplicate and still accepts a
+  reversed one, so a route that reverses at a station and comes back can be expressed.
+
+### XPLN Importer Improvements
+
+- **A section two lines share is imported as one track stretch.** A line is listed in the Routes
+  worksheet one section per row, so two lines running over the same section list it once each. The
+  importer built a second `TrackStretch` for the repeat, gave it to the second line, and then had
+  `Layout.Add` drop it as a duplicate — leaving that line running over a stretch the layout did not
+  hold. A repeat that agrees with the existing stretch on direction, distance, tracks, speed and time
+  now joins the second line to that same stretch. `FREMODERN-2023-Final-1-1`, whose two lines both leave
+  Ing over the section to Wei, is the file this shows on.
+
+- **A section defined twice with different data is an import error.** Where a repeated pair disagrees
+  with what the layout already holds, or is defined the opposite way round, the file contradicts itself
+  and there is no saying which of the two the layout should take, so the row is reported
+  (`TrackStretchAlreadyExists`) rather than silently resolved. `Magdeburg_v_DB33_DSB32_WTB11` has such a
+  pair: its Routes rows 26 and 29 both join Fgr and Pa, one over 1.4 km on three tracks and the other
+  over 7.4 km on two.
+
+- **A message now names the worksheet and the row number the spreadsheet shows.** A message read
+  `Row 81: …`; it now reads `Trains row 87: …`. Both halves of that changed. The worksheet is new — a
+  bare row number does not say which of the three to open. The row number was also wrong: the ODS reader
+  does not carry a blank row into its table, and the importer's counter also passed over rows it
+  skipped, so the number quoted was how many rows had been taken in rather than the row in the file, and
+  it drifted further behind with every blank row above. `OdsDataSetProvider` now records the number the
+  spreadsheet shows for each row it keeps, and every message quotes that. In `LTK2020` the drift was six
+  rows: what was reported as row 81, an unrelated train's row, is row 87.
+
+  The row prefix now lives in one resource per language (`WorksheetRow`) instead of being repeated in
+  each of the eighteen row-scoped messages. The German prefix is `Zeile` — the term for a spreadsheet
+  row — where the repeated form had said `Reihe`.
+
+---
+
 ## Version 3.1.0
 
 ### New Features

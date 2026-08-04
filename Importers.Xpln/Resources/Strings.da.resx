@@ -127,13 +127,13 @@
     <value>Funktion {0} er ikke supporteret.</value>
   </data>
   <data name="ObjectAtStationWithArrivalDoNotRefersToAnExistingTimeInTrain" xml:space="preserve">
-    <value>Række {0}: Objekt '{1}' ved station {2} ank {3} refererer til en tid der ikke findes i tog {4}.</value>
+    <value>{0}: Objekt '{1}' ved station {2} ank {3} refererer til en tid der ikke findes i tog {4}.</value>
   </data>
   <data name="ObjectAtStationWithDepartureDoNotRefersToAnExistingTimeInTrain" xml:space="preserve">
-    <value>Række {0}: Objekt '{1}' ved station {2} afg {3} refererer til en tid der ikke findes i tog {4}.</value>
+    <value>{0}: Objekt '{1}' ved station {2} afg {3} refererer til en tid der ikke findes i tog {4}.</value>
   </data>
   <data name="ObjectInTrainHasWrongTimingEndStartionIsBeforeStartStation" xml:space="preserve">
-    <value>Række {0}: Objekt '{1}' i tog {2} har tider i forkert rækkefølge. Afgang {3} er inden ankomst {4}.</value>
+    <value>{0}: Objekt '{1}' i tog {2} har tider i forkert rækkefølge. Afgang {3} er inden ankomst {4}.</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Advarsel</value>
@@ -142,16 +142,16 @@
     <value>Fejl</value>
   </data>
   <data name="TrainHasNoCallsAtStation" xml:space="preserve">
-    <value>Række {0}: Tog {1} passerer ikke station {2}.</value>
+    <value>{0}: Tog {1} passerer ikke station {2}.</value>
   </data>
   <data name="WorksheetNotFound" xml:space="preserve">
     <value>Arbejdsark {0} blev ikke fundet.</value>
   </data>
   <data name="UnsupportedType" xml:space="preserve">
-    <value>Række {0}: Type {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
+    <value>{0}: Type {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
   </data>
   <data name="NotAllFieldsArePresent" xml:space="preserve">
-    <value>Række {0}: Ikke alle felter er til stede, forventet antal er {1}, faktisk antal er {2}.</value>
+    <value>{0}: Ikke alle felter er til stede, forventet antal er {1}, faktisk antal er {2}.</value>
   </data>
   <data name="UseLoco" xml:space="preserve">
     <value>Brug lok {0}.</value>
@@ -163,45 +163,51 @@
     <value>Information</value>
   </data>
   <data name="TrainHasOverlappingTimesAtStation" xml:space="preserve">
-    <value>Række {0}: Tog {1} har overlappende tider ved {2}.</value>
+    <value>{0}: Tog {1} har overlappende tider ved {2}.</value>
   </data>
   <data name="ColumnMustHaveAValue" xml:space="preserve">
-    <value>Række {0}: Kolonne {1} skal indeholde en værdi.</value>
+    <value>{0}: Kolonne {1} skal indeholde en værdi.</value>
   </data>
   <data name="UnsupportedSubType" xml:space="preserve">
-    <value>Række {0}: SubType {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
+    <value>{0}: SubType {1} understøttes ikke. Kontakt venligst udvikleren, hvis du mangler en type.</value>
   </data>
   <data name="ColumnMustBeANumber" xml:space="preserve">
-    <value>Række {0}: Kolonne {1} skal indeholde et tal, den aktuelle værdi er '{2}'.</value>
+    <value>{0}: Kolonne {1} skal indeholde et tal, den aktuelle værdi er '{2}'.</value>
   </data>
   <data name="ColumnIsNotSpecified" xml:space="preserve">
-    <value>Række {0}: Kolonne {1} er ikke angivet.</value>
+    <value>{0}: Kolonne {1} er ikke angivet.</value>
   </data>
   <data name="ColumnMustBeATime" xml:space="preserve">
-    <value>Række {0}: Kolonne {1} skal være et tidspunkt, den aktuelle værdi er '{2}'.</value>
+    <value>{0}: Kolonne {1} skal være et tidspunkt, den aktuelle værdi er '{2}'.</value>
   </data>
   <data name="TrainHasNoCalls" xml:space="preserve">
-    <value>Række {0}: Tog {1} har ingen tidspunkter på stationer.</value>
+    <value>{0}: Tog {1} har ingen tidspunkter på stationer.</value>
   </data>
   <data name="StationNotFoundInLayout" xml:space="preserve">
-    <value>Række {0}: Station '{1}' blev ikke fundet i det aktuelle layout.</value>
+    <value>{0}: Station '{1}' blev ikke fundet i det aktuelle layout.</value>
   </data>
   <data name="RouteNotFoundInLayout" xml:space="preserve">
-    <value>Række {0}: Rute '{1}' blev ikke fundet i det aktuelle layout.</value>
+    <value>{0}: Rute '{1}' blev ikke fundet i det aktuelle layout.</value>
+  </data>
+  <data name="TrackStretchAlreadyExists" xml:space="preserve">
+    <value>{0}: Der findes allerede en banestrækning mellem '{1}' og '{2}'.</value>
   </data>
   <data name="RouteNumberIsMissingUsingDefault" xml:space="preserve">
-    <value>Række {0}: Rutenummer mangler, bruger standardværdi '{1}'.</value>
+    <value>{0}: Rutenummer mangler, bruger standardværdi '{1}'.</value>
   </data>
   <data name="ReadingWorksheet" xml:space="preserve">
     <value>Læser arbejdsark {0}...</value>
   </data>
   <data name="RowMessage" xml:space="preserve">
-    <value>Række {0}: {1}.</value>
+    <value>{0}: {1}</value>
   </data>
   <data name="ThereIsNoStation" xml:space="preserve">
     <value>Der er ingen station '{0}'.</value>
   </data>
   <data name="TheTrackIsItNotInStation" xml:space="preserve">
     <value>Sporet '{0}' er ikke på stationen '{1}'.</value>
+  </data>
+  <data name="WorksheetRow" xml:space="preserve">
+    <value>{0} række {1}</value>
   </data>
 </root>

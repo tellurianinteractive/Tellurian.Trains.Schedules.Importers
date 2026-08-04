@@ -392,6 +392,28 @@ public static class LayoutTracksExtensions
                 string.Format(CultureInfo.CurrentCulture, Strings.MoreThanOneStretchBetweenStations, from, to));
 
         /// <summary>
+        /// The track stretch that already joins the two operating locations, or <see langword="null"/>
+        /// when nothing joins them yet. A stretch is bidirectional, so one defined the opposite way joins
+        /// the same pair and is found too; adding a second stretch between the same pair — in either
+        /// direction — would duplicate infrastructure that already exists.
+        /// </summary>
+        /// <param name="from">One end.</param>
+        /// <param name="to">The other end.</param>
+        /// <param name="excluding">
+        /// A stretch to disregard, typically the one being edited: a stretch is never a duplicate of itself.
+        /// Compared by reference, so another stretch with the same endpoints is still reported.
+        /// </param>
+        /// <remarks>
+        /// Tolerates a layout that already holds more than one stretch between the same pair — a fault of
+        /// its own — by returning the first, rather than failing the caller asking about it.
+        /// </remarks>
+        public TrackStretch? StretchBetween(OperationLocation from, OperationLocation to, TrackStretch? excluding = null) =>
+            layout.TrackStretches.FirstOrDefault(ts =>
+                !ReferenceEquals(ts, excluding) &&
+                ((ts.Start.Equals(from) && ts.End.Equals(to)) ||
+                 (ts.Start.Equals(to) && ts.End.Equals(from))));
+
+        /// <summary>
         /// Determines whether a track stretch joins the two operating locations, so a train can run
         /// directly between them. A stretch is bidirectional, so the order of the arguments does not matter.
         /// </summary>
@@ -403,9 +425,7 @@ public static class LayoutTracksExtensions
         /// about connectivity to fail.
         /// </remarks>
         public bool IsConnected(OperationLocation from, OperationLocation to) =>
-            layout.TrackStretches.Any(ts =>
-                (ts.Start.Equals(from) && ts.End.Equals(to)) ||
-                (ts.Start.Equals(to) && ts.End.Equals(from)));
+            layout.StretchBetween(from, to) is not null;
 
 
         /// <summary>

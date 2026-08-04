@@ -123,34 +123,39 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
             Logger.LogInformation("Reading table {table}.", worksheetConfiguration.WorksheetName);
 
         var dataTable = new DataTable(name);
+        // A row that holds nothing is not carried into the table, so a row's position in the table stops
+        // matching its position in the spreadsheet as soon as one blank row has been passed. Its number as
+        // the spreadsheet shows it is recorded alongside, so a message can name the row the user must open.
+        var sheetRows = new List<int>();
+        var sheetRow = 1;
         while (reader.Read())
         {
             if (reader.NodeType != XmlNodeType.Element) continue;
             if (reader.LocalName == "table-row" && reader.NamespaceURI == TableNs)
             {
-                bool keepReading;
+                var rowsRepeated = reader.GetAttribute("number-rows-repeated", TableNs);
+                var repeat = rowsRepeated is null ? 1 : Convert.ToInt32(rowsRepeated, CultureInfo.InvariantCulture);
+                if (repeat > worksheetConfiguration.MaxRowRepetitions) break; // the run of blank rows past the end
                 using (var rowReader = reader.ReadSubtree())
                 {
                     rowReader.Read(); // position on <table:table-row>
-                    keepReading = ReadRow(rowReader, dataTable, worksheetConfiguration, styleColors);
+                    ReadRow(rowReader, dataTable, worksheetConfiguration, styleColors, sheetRow, repeat, sheetRows);
                 }
-                if (!keepReading) break;
+                sheetRow += repeat;
             }
         }
         if (dataTable.Rows.Count == 0) // Just add an empty row with one column if no data was found.
         {
             dataTable.Rows.Add(dataTable.NewRow());
             dataTable.Columns.Add();
+            sheetRows.Add(1);
         }
+        dataTable.SetSheetRows(sheetRows);
         return dataTable;
     }
 
-    private static bool ReadRow(XmlReader reader, DataTable dataTable, WorksheetConfiguration configuration, Dictionary<string, string> styleColors)
+    private static void ReadRow(XmlReader reader, DataTable dataTable, WorksheetConfiguration configuration, Dictionary<string, string> styleColors, int firstSheetRow, int repeat, List<int> sheetRows)
     {
-        var rowsRepeated = reader.GetAttribute("number-rows-repeated", TableNs);
-        var repeat = rowsRepeated is null ? 1 : Convert.ToInt32(rowsRepeated, CultureInfo.InvariantCulture);
-        if (repeat > configuration.MaxRowRepetitions) return false;
-
         while (dataTable.Columns.Count <= configuration.MaxReadColumns + 1)
             dataTable.Columns.Add();
 
@@ -162,9 +167,12 @@ public sealed class OdsDataSetProvider(ILogger<OdsDataSetProvider> logger) : IDa
             for (var c = 0; c < configuration.MaxReadColumns; c++)
                 if (cells[c] is not null) row[c] = cells[c];
             if (backgroundColor is not null) row[configuration.BackgroundColorColumIndex] = backgroundColor;
-            if (row.GetRowFields().Any(f => f.HasValue)) dataTable.Rows.Add(row);
+            if (row.GetRowFields().Any(f => f.HasValue))
+            {
+                dataTable.Rows.Add(row);
+                sheetRows.Add(firstSheetRow + i);
+            }
         }
-        return true;
     }
 
     private static (string?[] cells, string? backgroundColor) ReadRowCells(XmlReader reader, WorksheetConfiguration configuration, Dictionary<string, string> styleColors)

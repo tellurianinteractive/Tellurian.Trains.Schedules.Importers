@@ -241,6 +241,15 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Row {0}: There is already a track stretch between &apos;{1}&apos; and &apos;{2}&apos;..
+        /// </summary>
+        internal static string TrackStretchAlreadyExists {
+            get {
+                return ResourceManager.GetString("TrackStretchAlreadyExists", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Row {0}: Train {1} has no times at stations..
         /// </summary>
         internal static string TrainHasNoCalls {
@@ -318,6 +327,15 @@ namespace Tellurian.Trains.Schedules.Importers.Xpln.Resources {
         internal static string WorksheetNotFound {
             get {
                 return ResourceManager.GetString("WorksheetNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} row {1}.
+        /// </summary>
+        internal static string WorksheetRow {
+            get {
+                return ResourceManager.GetString("WorksheetRow", resourceCulture);
             }
         }
     }

@@ -4,14 +4,41 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Shared;
 /// A station drawn as a circle on a timetable-stretch line, positioned proportionally to its distance
 /// from the start of the stretch. A <see cref="Hidden"/> node is a junction shared with the line this one
 /// hangs from: it still anchors this line's end, but its circle and label are drawn on that line only,
-/// not repeated here.
+/// not repeated here. A signature is normally printed above its circle; <see cref="LabelBelow"/> asks for
+/// it below instead, which is what keeps it clear of a branch climbing away from that very station.
 /// </summary>
-public sealed record TopologyNode(double X, double Y, string Signature, bool Hidden = false);
+public sealed record TopologyNode(double X, double Y, string Signature, bool Hidden = false, bool LabelBelow = false);
 
 /// <summary>
-/// A timetable stretch drawn as a horizontal line with its stations as evenly-distance-spaced nodes.
+/// The track between two neighbouring stations on a drawn line — one section of the layout, however many
+/// timetable stretches run over it and however many times the data repeats it.
 /// </summary>
-public sealed record TopologyLine(string Number, string Description, string Color, double Y, IReadOnlyList<TopologyNode> Nodes)
+/// <param name="FromX">The x-coordinate of the station the section runs from.</param>
+/// <param name="ToX">The x-coordinate of the station the section runs to.</param>
+/// <param name="Tracks">
+/// How many parallel tracks the section has. A double track is drawn as two lines, which is why track
+/// shared between timetable stretches may not be: see <paramref name="SharedColors"/>.
+/// </param>
+/// <param name="Color">The colour of the timetable stretch the section is drawn for.</param>
+/// <param name="SharedColors">
+/// The colours of the other timetable stretches that also run over this same track, if any. The renderer
+/// lays them over the section as dashes rather than as further parallel lines, which would read as extra
+/// tracks: several lines sharing one track is not the same thing as one line having several tracks.
+/// </param>
+public sealed record TopologySection(double FromX, double ToX, int Tracks, string Color, IReadOnlyList<string> SharedColors);
+
+/// <summary>
+/// A run of the layout's track drawn as a horizontal line, with its stations as evenly-distance-spaced
+/// nodes and the track between them as sections. Track that several timetable stretches run over is drawn
+/// once, on the line of the first stretch that claims it, so no station and no section appears twice.
+/// </summary>
+public sealed record TopologyLine(
+    string Number,
+    string Description,
+    string Color,
+    double Y,
+    IReadOnlyList<TopologyNode> Nodes,
+    IReadOnlyList<TopologySection> Sections)
 {
     /// <summary>The x-coordinate of the first station on the line.</summary>
     public double StartX => Nodes.Count > 0 ? Nodes[0].X : 0.0;
@@ -90,14 +117,40 @@ public sealed record TopologyDiagram(
     private const int Below = 1;
     private const int Above = -1;
 
-    // A stretch that already has a row, and where its stations ended up, so a branch off it can find the
+    // A chain that already has a row, and where its stations ended up, so a branch off it can find the
     // x-coordinate of the junction it leaves from. Growth is the side of its own parent it grew out on;
     // its children try that same side first, so a subtree keeps growing away from the trunk.
-    private sealed record PlacedLine(int Row, double Y, int Growth, IReadOnlyDictionary<string, double> NodeX);
+    private sealed record PlacedLine(int Id, int Row, double Y, int Growth, IReadOnlyDictionary<string, double> NodeX);
 
     // The point a branch's connector starts from: a junction on the line it leaves, or the corner of a
     // sibling that already reaches that same station on the same side and in the same direction.
     private sealed record Anchor(double X, double Y, int Row, int Line);
+
+    // One section of the layout's track, between two neighbouring stations, together with the timetable
+    // stretches that run over it. The data may hold the same section more than once — a stretch that
+    // shares track with another often carries its own copy of it — so sections are gathered by the pair
+    // of stations they join, not by their identity.
+    private sealed class Section
+    {
+        public required string From { get; init; }
+        public required string To { get; init; }
+        public double Distance { get; set; }
+        public int Tracks { get; set; }
+        public List<TimetableStretch> Used { get; } = [];
+    }
+
+    // A run of track drawn as one horizontal line: the stations along it and the section between each
+    // neighbouring pair. A timetable stretch yields one chain per unbroken run of the sections it is the
+    // first to claim, so a stretch that shares part of its route with one already drawn appears only as
+    // the parts that are its own.
+    private sealed record Chain(
+        int Id,
+        int Owner,
+        string Number,
+        string Description,
+        string Color,
+        IReadOnlyList<OperationLocation> Stations,
+        IReadOnlyList<(double Distance, int Tracks, IReadOnlyList<string> SharedColors)> Sections);
 
     // The space a drawn line claims: its own extent widened by the room its number and signatures need,
     // and tall enough to cover the signatures printed above it. Connectors must stay clear of it.
@@ -112,13 +165,14 @@ public sealed record TopologyDiagram(
     /// </summary>
     public static TopologyDiagram Build(Layout layout)
     {
-        var all = layout.TimetableStretches.Where(s => s.Stretches.Count > 0).OrderBy(s => s.Id).ToList();
+        var stretches = layout.TimetableStretches.Where(s => s.Stretches.Count > 0).OrderBy(s => s.Id).ToList();
+        var all = BuildChains(stretches);
         if (all.Count == 0) return new TopologyDiagram(LeftMargin + EdgePadding, TopMargin + BottomMargin, [], []);
 
         var parents = BuildParentMap(all);
         var order = OrderDepthFirst(all, parents);
 
-        var maxSpan = all.Max(s => s.Stretches.Sum(t => t.Distance));
+        var maxSpan = all.Max(c => c.Sections.Sum(s => s.Distance));
         var pxPerUnit = maxSpan > 0 ? TargetSpan / maxSpan : 1.0;
 
         var placed = new Dictionary<int, PlacedLine>(order.Count);
@@ -130,16 +184,15 @@ public sealed record TopologyDiagram(
         var lowest = 0;
         var highest = 0;
 
-        foreach (var stretch in order)
+        foreach (var chain in order)
         {
-            var stations = stretch.Stations.ToList();
-            var track = stretch.Stretches.ToList();
+            var stations = chain.Stations;
 
-            // The line this one hangs from and the station they share. A stretch whose parent has not been
-            // drawn, or whose shared station did not end up on it, is laid out as a line of its own.
-            var hasParent = parents.TryGetValue(stretch.Id, out var link);
+            // The line this one hangs from and the station they meet at. A chain whose parent has not been
+            // drawn, or whose junction station did not end up on it, is laid out as a line of its own.
+            var hasParent = parents.TryGetValue(chain.Id, out var link);
             var side = hasParent ? link.Side : JunctionSide.Start;
-            var junctionStation = hasParent ? (side == JunctionSide.Start ? stretch.Starts : stretch.Ends).Signature : string.Empty;
+            var junctionStation = hasParent ? (side == JunctionSide.Start ? stations[0] : stations[^1]).Signature : string.Empty;
             var parent = hasParent && placed.TryGetValue(link.Parent.Id, out var found) && found.NodeX.ContainsKey(junctionStation)
                 ? found
                 : null;
@@ -154,13 +207,13 @@ public sealed record TopologyDiagram(
             var offset = new double[stations.Count];
             for (var i = 1; i < stations.Count; i++)
                 offset[i] = offset[i - 1] + Math.Max(
-                    track[i - 1].Distance * pxPerUnit,
+                    chain.Sections[i - 1].Distance * pxPerUnit,
                     HalfWidth(stations[i - 1].Signature, i - 1 == hidden) + HalfWidth(stations[i].Signature, i == hidden) + LabelGap);
             var span = offset[^1];
 
             // What the line claims beyond its own stations, and must therefore keep clear of its row
             // neighbours: its number to the left of the first station, and both end signatures.
-            var leftReach = Math.Max(NumberReach(stretch.Number), HalfWidth(stations[0].Signature, hidden == 0)) + LabelGap;
+            var leftReach = Math.Max(NumberReach(chain.Number), HalfWidth(stations[0].Signature, hidden == 0)) + LabelGap;
             var rightReach = HalfWidth(stations[^1].Signature, hidden == stations.Count - 1) + LabelGap;
 
             // Where the stretch would sit were it hung from a given anchor on a given row, along with the
@@ -175,11 +228,11 @@ public sealed record TopologyDiagram(
                 {
                     // Leads out: its start is the junction, so the branch leaves the anchor to the right.
                     var startX = anchor.X + run;
-                    return (startX, LinkTo(anchor, startX, y, span, stretch.Color));
+                    return (startX, LinkTo(anchor, startX, y, span, chain.Color));
                 }
                 // Leads into: its end is the junction, so the branch reaches the anchor from the left.
                 var endX = anchor.X - run;
-                return (endX - span, LinkTo(anchor, endX, y, -span, stretch.Color));
+                return (endX - span, LinkTo(anchor, endX, y, -span, chain.Color));
             }
 
             Box BoxAt(double startX, int row) =>
@@ -211,9 +264,9 @@ public sealed record TopologyDiagram(
                 // so a branch stays as close to the line it leaves as it can.
                 foreach (var growth in new[] { parent.Growth, -parent.Growth })
                 {
-                    var anchor = chains.TryGetValue((link.Parent.Id, junctionStation, side, growth), out var chained)
+                    var anchor = chains.TryGetValue((parent.Id, junctionStation, side, growth), out var chained)
                         ? chained
-                        : new Anchor(parent.NodeX[junctionStation], parent.Y, parent.Row, link.Parent.Id);
+                        : new Anchor(parent.NodeX[junctionStation], parent.Y, parent.Row, parent.Id);
 
                     // One row past everything drawn in this direction is always free of other lines, so the
                     // search is bounded; beyond it there is nothing left to gain.
@@ -251,27 +304,144 @@ public sealed record TopologyDiagram(
                 nodeX[stations[i].Signature] = x;
             }
 
+            // The track between each neighbouring pair of stations, drawn in this line's own colour and
+            // carrying the colours of any other stretches that run over the same section.
+            var sections = new List<TopologySection>(chain.Sections.Count);
+            for (var i = 0; i < chain.Sections.Count; i++)
+                sections.Add(new TopologySection(
+                    nodes[i].X, nodes[i + 1].X, chain.Sections[i].Tracks, chain.Color, chain.Sections[i].SharedColors));
+
             if (!rows.TryGetValue(chosenRow, out var taken)) rows[chosenRow] = taken = [];
             taken.Add((finalStartX - leftReach, finalStartX + span + rightReach));
-            boxes.Add((stretch.Id, BoxAt(finalStartX, chosenRow)));
+            boxes.Add((chain.Id, BoxAt(finalStartX, chosenRow)));
             lowest = Math.Min(lowest, chosenRow);
             highest = Math.Max(highest, chosenRow);
 
             var grew = chosenAnchor is null ? Below : Math.Sign(chosenRow - chosenAnchor.Row);
             if (finalConnector is not null)
             {
-                connectors.Add((stretch.Id, finalConnector));
+                connectors.Add((chain.Id, finalConnector));
                 // The next branch reaching this same station from this same side and direction hangs off
                 // this line's corner rather than off the junction, so their connectors chain end to end
                 // instead of the deeper one being drawn straight over the shallower one.
-                chains[(link.Parent.Id, junctionStation, side, grew)] = new Anchor(finalConnector.LineX, y, chosenRow, stretch.Id);
+                chains[(parent!.Id, junctionStation, side, grew)] = new Anchor(finalConnector.LineX, y, chosenRow, chain.Id);
             }
 
-            placed[stretch.Id] = new PlacedLine(chosenRow, y, grew == 0 ? Below : grew, nodeX);
-            lines.Add(new TopologyLine(stretch.Number, stretch.Description, stretch.Color, y, nodes));
+            placed[chain.Id] = new PlacedLine(chain.Id, chosenRow, y, grew == 0 ? Below : grew, nodeX);
+            lines.Add(new TopologyLine(chain.Number, chain.Description, chain.Color, y, nodes, sections));
         }
 
-        return Normalize(lines, [.. connectors.Select(c => c.Connector)], lowest, highest);
+        return Normalize(DodgeClimbingBranches(lines, connectors), [.. connectors.Select(c => c.Connector)], lowest, highest);
+    }
+
+    // A signature is printed above its station, which is exactly where a branch climbing away from that
+    // station runs. Those few signatures are moved below their line instead, so a branch drawn above the
+    // line it leaves does not strike out the name of the junction it leaves from.
+    private static List<TopologyLine> DodgeClimbingBranches(
+        List<TopologyLine> lines,
+        List<(int Line, TopologyConnector Connector)> connectors)
+    {
+        var climbing = connectors
+            .Where(c => c.Connector.LineY < c.Connector.JunctionY)
+            .Select(c => (c.Connector.JunctionX, c.Connector.JunctionY))
+            .ToList();
+        if (climbing.Count == 0) return lines;
+
+        return [.. lines.Select(line => line with
+        {
+            Nodes = [.. line.Nodes.Select(node => climbing.Any(at =>
+                Math.Abs(at.JunctionX - node.X) < JoinTolerance && Math.Abs(at.JunctionY - node.Y) < JoinTolerance)
+                    ? node with { LabelBelow = true }
+                    : node)],
+        })];
+    }
+
+    // The two stations a section joins, in a fixed order, so that the same piece of track is recognised as
+    // one section however the data happens to have stored it — including the other way round.
+    private static (string, string) Between(string a, string b) =>
+        string.CompareOrdinal(a, b) <= 0 ? (a, b) : (b, a);
+
+    // The layout's track, gathered from every timetable stretch that runs over it. Two stretches sharing a
+    // section usually each carry their own copy of it, so the copies are merged here into the one section
+    // they both describe, recording every stretch that uses it.
+    private static Dictionary<(string, string), Section> GatherTrack(IReadOnlyList<TimetableStretch> all)
+    {
+        var track = new Dictionary<(string, string), Section>();
+        foreach (var stretch in all)
+        {
+            foreach (var ts in stretch.Stretches)
+            {
+                var between = Between(ts.Start.Signature, ts.End.Signature);
+                if (!track.TryGetValue(between, out var section))
+                    track[between] = section = new Section { From = ts.Start.Signature, To = ts.End.Signature };
+                // Copies of one section should agree; where they do not, the longer distance and the wider
+                // formation are kept, so track is never shown as shorter or narrower than the data claims.
+                section.Distance = Math.Max(section.Distance, ts.Distance);
+                section.Tracks = Math.Max(section.Tracks, ts.TracksCount);
+                if (!section.Used.Any(u => u.Id == stretch.Id)) section.Used.Add(stretch);
+            }
+        }
+        return track;
+    }
+
+    // The lines to draw. Every section of track is drawn exactly once, by the first timetable stretch that
+    // runs over it; a stretch whose route is broken up by sections another one already claimed contributes
+    // one chain per unbroken run that is left to it. Two stretches that run together therefore share the
+    // track between them on the page as they do on the layout, instead of each drawing its own copy.
+    private static List<Chain> BuildChains(IReadOnlyList<TimetableStretch> all)
+    {
+        var track = GatherTrack(all);
+        var claimed = new Dictionary<(string, string), int>();
+        foreach (var stretch in all)
+            foreach (var ts in stretch.Stretches)
+                claimed.TryAdd(Between(ts.Start.Signature, ts.End.Signature), stretch.Id);
+
+        var chains = new List<Chain>();
+        foreach (var stretch in all)
+        {
+            var stations = new List<OperationLocation>();
+            var sections = new List<(double, int, IReadOnlyList<string>)>();
+
+            void Close()
+            {
+                if (sections.Count > 0)
+                    chains.Add(new Chain(chains.Count + 1, stretch.Id, stretch.Number, stretch.Description, stretch.Color,
+                        [.. stations], [.. sections]));
+                stations.Clear();
+                sections.Clear();
+            }
+
+            foreach (var ts in stretch.Stretches)
+            {
+                var section = track[Between(ts.Start.Signature, ts.End.Signature)];
+                // Track already claimed by an earlier stretch is drawn there, and breaks this one in two;
+                // so does a gap, where a stretch does not continue from where its previous section ended.
+                if (claimed[Between(ts.Start.Signature, ts.End.Signature)] != stretch.Id
+                    || (stations.Count > 0 && !stations[^1].Equals(ts.Start)))
+                {
+                    Close();
+                    if (claimed[Between(ts.Start.Signature, ts.End.Signature)] != stretch.Id) continue;
+                }
+                if (stations.Count == 0) stations.Add(ts.Start);
+                stations.Add(ts.End);
+                sections.Add((section.Distance, Math.Max(1, section.Tracks),
+                    [.. section.Used.Where(u => u.Id != stretch.Id).OrderBy(u => u.Id).Select(u => u.Color)]));
+            }
+            Close();
+        }
+        return chains;
+    }
+
+    // How far along a chain a station lies, or null when it is not on it. Zero at the chain's first station.
+    private static double? DistanceAlong(Chain chain, OperationLocation station)
+    {
+        var at = -1;
+        for (var i = 0; i < chain.Stations.Count; i++)
+            if (chain.Stations[i].Equals(station)) { at = i; break; }
+        if (at < 0) return null;
+        var distance = 0.0;
+        for (var i = 0; i < at; i++) distance += chain.Sections[i].Distance;
+        return distance;
     }
 
     private static double RowY(int row) => TopMargin + (row * RowGap);
@@ -393,60 +563,61 @@ public sealed record TopologyDiagram(
 
     private static double Squared(double value) => value * value;
 
-    // Links each stretch to the one it branches from: a stretch diverges when its start is a through
-    // station of another line (drawn as leading out), or otherwise merges when its end is (leading into).
-    // The lowest-id candidate wins, matching how the model attributes a shared station to its owning stretch.
-    private static Dictionary<int, (TimetableStretch Parent, JunctionSide Side)> BuildParentMap(IReadOnlyList<TimetableStretch> all)
+    // Links each chain to the one it branches from: a chain diverges when its first station is a through
+    // station of another (drawn as leading out), or otherwise merges when its last station is (leading
+    // into). The earliest chain wins, so a branch hangs off the line that was drawn first.
+    private static Dictionary<int, (Chain Parent, JunctionSide Side)> BuildParentMap(IReadOnlyList<Chain> all)
     {
-        var parent = new Dictionary<int, (TimetableStretch, JunctionSide)>();
-        foreach (var stretch in all)
+        var parent = new Dictionary<int, (Chain, JunctionSide)>();
+        foreach (var chain in all)
         {
-            if (DivergesFrom(stretch, stretch.Starts, all) is { } startParent)
-                parent[stretch.Id] = (startParent, JunctionSide.Start);
-            else if (DivergesFrom(stretch, stretch.Ends, all) is { } endParent)
-                parent[stretch.Id] = (endParent, JunctionSide.End);
+            if (DivergesFrom(chain, chain.Stations[0], all) is { } startParent)
+                parent[chain.Id] = (startParent, JunctionSide.Start);
+            else if (DivergesFrom(chain, chain.Stations[^1], all) is { } endParent)
+                parent[chain.Id] = (endParent, JunctionSide.End);
         }
         BreakCycles(all, parent);
         return parent;
     }
 
-    private static TimetableStretch? DivergesFrom(TimetableStretch stretch, OperationLocation at, IReadOnlyList<TimetableStretch> all) =>
-        all.Where(p => !ReferenceEquals(p, stretch) && p.DistanceToStation(at) is > 0.0)
-           .OrderBy(p => p.Id)
+    private static Chain? DivergesFrom(Chain chain, OperationLocation at, IReadOnlyList<Chain> all) =>
+        all.Where(p => p.Id != chain.Id && DistanceAlong(p, at) is > 0.0)
+           .OrderBy(p => p.Owner)
+           .ThenBy(p => p.Id)
            .FirstOrDefault();
 
-    // Mutually diverging stretches could form a cycle; drop the parent edge of any stretch whose ancestor
+    // Mutually diverging chains could form a cycle; drop the parent edge of any chain whose ancestor
     // chain loops back to itself so the depth-first walk terminates.
-    private static void BreakCycles(IReadOnlyList<TimetableStretch> all, Dictionary<int, (TimetableStretch Parent, JunctionSide Side)> parent)
+    private static void BreakCycles(IReadOnlyList<Chain> all, Dictionary<int, (Chain Parent, JunctionSide Side)> parent)
     {
-        foreach (var stretch in all)
+        foreach (var chain in all)
         {
-            var seen = new HashSet<int> { stretch.Id };
-            var current = stretch.Id;
+            var seen = new HashSet<int> { chain.Id };
+            var current = chain.Id;
             while (parent.TryGetValue(current, out var link))
             {
-                if (!seen.Add(link.Parent.Id)) { parent.Remove(stretch.Id); break; }
+                if (!seen.Add(link.Parent.Id)) { parent.Remove(chain.Id); break; }
                 current = link.Parent.Id;
             }
         }
     }
 
-    // Roots first (lowest id), each immediately followed by the subtree of stretches that branch off it,
-    // so a branch is always laid out after the line it leaves.
-    private static List<TimetableStretch> OrderDepthFirst(IReadOnlyList<TimetableStretch> all, Dictionary<int, (TimetableStretch Parent, JunctionSide Side)> parent)
+    // Roots first, each immediately followed by the subtree of chains that branch off it, so a branch is
+    // always laid out after the line it leaves.
+    private static List<Chain> OrderDepthFirst(IReadOnlyList<Chain> all, Dictionary<int, (Chain Parent, JunctionSide Side)> parent)
     {
-        var children = all.Where(s => parent.ContainsKey(s.Id))
-            .GroupBy(s => parent[s.Id].Parent.Id)
-            .ToDictionary(g => g.Key, g => g.OrderBy(s => Outermost(s, parent[s.Id])).ThenBy(s => s.Id).ToList());
+        var children = all.Where(c => parent.ContainsKey(c.Id))
+            .GroupBy(c => parent[c.Id].Parent.Id)
+            .ToDictionary(g => g.Key, g => g.OrderBy(c => Outermost(c, parent[c.Id])).ThenBy(c => c.Id).ToList());
 
-        var order = new List<TimetableStretch>(all.Count);
-        void Visit(TimetableStretch stretch)
+        var order = new List<Chain>(all.Count);
+        void Visit(Chain chain)
         {
-            order.Add(stretch);
-            if (children.TryGetValue(stretch.Id, out var kids))
+            order.Add(chain);
+            if (children.TryGetValue(chain.Id, out var kids))
                 foreach (var kid in kids) Visit(kid);
         }
-        foreach (var root in all.Where(s => !parent.ContainsKey(s.Id))) Visit(root);
+        foreach (var root in all.Where(c => !parent.ContainsKey(c.Id))) Visit(root);
         return order;
     }
 
@@ -455,10 +626,10 @@ public sealed record TopologyDiagram(
     // one row cannot clear it at any row either: pushing both further out moves them equally far sideways.
     // Taking the outermost branch first keeps that from happening — its neighbours nearer the parent's
     // other end then fall past the outside of it, where there is nothing in the way.
-    private static double Outermost(TimetableStretch stretch, (TimetableStretch Parent, JunctionSide Side) link)
+    private static double Outermost(Chain chain, (Chain Parent, JunctionSide Side) link)
     {
         var atStart = link.Side == JunctionSide.Start;
-        var distance = link.Parent.DistanceToStation(atStart ? stretch.Starts : stretch.Ends) ?? 0.0;
+        var distance = DistanceAlong(link.Parent, atStart ? chain.Stations[0] : chain.Stations[^1]) ?? 0.0;
         return atStart ? -distance : distance;
     }
 
@@ -489,7 +660,12 @@ public sealed record TopologyDiagram(
         if (shiftX == 0.0 && shiftY == 0.0) return new TopologyDiagram(width, height, lines, connectors);
 
         var shiftedLines = lines
-            .Select(l => l with { Y = l.Y + shiftY, Nodes = l.Nodes.Select(n => n with { X = n.X + shiftX, Y = n.Y + shiftY }).ToList() })
+            .Select(l => l with
+            {
+                Y = l.Y + shiftY,
+                Nodes = l.Nodes.Select(n => n with { X = n.X + shiftX, Y = n.Y + shiftY }).ToList(),
+                Sections = l.Sections.Select(s => s with { FromX = s.FromX + shiftX, ToX = s.ToX + shiftX }).ToList(),
+            })
             .ToList();
         var shiftedConnectors = connectors
             .Select(c => c with

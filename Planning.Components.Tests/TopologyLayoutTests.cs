@@ -16,11 +16,12 @@ public class TopologyLayoutTests
 
     // A real layout that cannot be drawn with every branch below the line it leaves. Rub sends a branch out
     // to the right and Ful, only 17 units further on, takes one in from the left: their connectors both fall
-    // at 45° and so meet less than a row below the line, whichever rows the two branches end up on. On top
-    // of that, two stretches lead into Ful from the same side.
+    // at 45° and so meet less than a row below the line, whichever rows the two branches end up on. Its main
+    // line is double track except for the first section, and lines 5 and 6 run together over Ins–Ful, each
+    // holding its own copy of that one piece of track.
     private static readonly string[] Kolding =
     [
-        "Klb Forgr1@10 Rub@12 Ful@17 Mkd@18 Forgr2@15 Sbg@10",
+        "Klb Forgr1@10:1 Rub@12:2 Ful@17:2 Mkd@18:2 Forgr2@15:2 Sbg@10:2",
         "Mir Hvn@2 Forgr1@4",
         "Rub Kst@10 Cb@6 Alk@4",
         "Forgr2 Htaas@9",
@@ -30,7 +31,8 @@ public class TopologyLayoutTests
 
     // Builds a layout from one line per spec, each spec a space-separated run of station signatures.
     // Stations of the same signature are shared between lines, which is what makes one line a branch of another.
-    // A signature may carry the distance from the station before it as "Sig@2"; it is 10 when left out.
+    // A signature may carry the distance from the station before it as "Sig@2"; it is 10 when left out. It may
+    // also carry the number of tracks on the section reaching it as "Sig@2:2"; it is single track when left out.
     private static Layout CreateLayout(params string[] specs)
     {
         var layout = new Layout { Name = "Test" };
@@ -53,7 +55,11 @@ public class TopologyLayoutTests
         {
             var tokens = spec.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Select(t => t.Split('@'))
-                .Select(t => (Signature: t[0], Distance: t.Length > 1 ? double.Parse(t[1], CultureInfo.InvariantCulture) : 10.0))
+                .Select(t => (Signature: t[0], Measure: t.Length > 1 ? t[1].Split(':') : []))
+                .Select(t => (
+                    t.Signature,
+                    Distance: t.Measure.Length > 0 ? double.Parse(t.Measure[0], CultureInfo.InvariantCulture) : 10.0,
+                    Tracks: t.Measure.Length > 1 ? int.Parse(t.Measure[1], CultureInfo.InvariantCulture) : 1))
                 .ToList();
             lineId++;
             var line = new TimetableStretch(lineId, lineId.ToString(CultureInfo.InvariantCulture))
@@ -61,7 +67,7 @@ public class TopologyLayoutTests
                 Color = Colors[lineId % Colors.Length],
             };
             for (var i = 1; i < tokens.Count; i++)
-                line.AddLast(layout.Add(new TrackStretch(++trackId, Station(tokens[i - 1].Signature), Station(tokens[i].Signature), tokens[i].Distance, 1)));
+                line.AddLast(layout.Add(new TrackStretch(++trackId, Station(tokens[i - 1].Signature), Station(tokens[i].Signature), tokens[i].Distance, tokens[i].Tracks)));
             layout.Add(line);
         }
         return layout;
@@ -129,6 +135,90 @@ public class TopologyLayoutTests
         Assert.IsTrue(diagram.Lines.Any(l => l.Y < main), "A branch with no clear path below must be drawn above instead.");
         Assert.IsTrue(diagram.Lines.Any(l => l.Y > main), "Branches that do have a clear path below must stay below.");
         AssertNothingCrosses(diagram);
+    }
+
+    [TestMethod]
+    public void TrackTwoStretchesRunTogetherOverIsDrawnOnlyOnce()
+    {
+        // Lines 5 and 6 both run from Ful through Ins, and part there: Ins is where they diverge, and the
+        // section between Ins and Ful is track they share. Drawn as two lines in full they would repeat
+        // that section, and print both Ins and Ful twice.
+        var diagram = TopologyDiagram.Build(CreateLayout(Kolding));
+
+        var repeated = diagram.Lines.SelectMany(l => l.Nodes).Where(n => !n.Hidden)
+            .GroupBy(n => n.Signature).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        Assert.AreEqual(0, repeated.Count, $"Drawn more than once: {string.Join(", ", repeated)}.");
+
+        var parted = Line(diagram, "6").Nodes;
+        Assert.AreEqual(2, parted.Count, "Line 6 is drawn from FulT only as far as Ins, where it parts from line 5.");
+        Assert.AreEqual("Ins", parted[^1].Signature);
+        Assert.IsTrue(parted[^1].Hidden, "Ins belongs to line 5, which was drawn first; line 6 only hangs off it.");
+    }
+
+    [TestMethod]
+    public void EachSectionOfTrackIsDrawnOnceAndKnowsEveryStretchRunningOverIt()
+    {
+        // Lines 5 and 6 both run over Ins–Ful. The section belongs to the layout, not to either of them, so
+        // it is drawn once — on line 5, the first to claim it — and carries line 6's colour as a sharing
+        // stretch. Line 6 keeps only the part that is its own.
+        var diagram = TopologyDiagram.Build(CreateLayout(Kolding));
+
+        var shared = diagram.Lines.SelectMany(l => l.Sections).Where(s => s.SharedColors.Count > 0).ToList();
+        Assert.AreEqual(1, shared.Count, "Ins–Ful is the one section two stretches run over.");
+        Assert.AreEqual(Line(diagram, "5").Color, shared[0].Color, "It is drawn on line 5, which claimed it first.");
+        CollectionAssert.AreEqual(new[] { Line(diagram, "6").Color }, shared[0].SharedColors.ToArray(),
+            "Line 6 also runs over it, so its colour is carried for the renderer to lay over as dashes.");
+
+        Assert.AreEqual(1, Line(diagram, "6").Sections.Count, "Line 6 draws only FulT–Ins; Ins–Ful is line 5's.");
+    }
+
+    [TestMethod]
+    public void DoubleTrackIsCarriedThroughToEverySectionThatHasIt()
+    {
+        // The main line is double track from Forgr1 onwards, single from Klb to Forgr1.
+        var diagram = TopologyDiagram.Build(CreateLayout(Kolding));
+        var main = Line(diagram, "1").Sections;
+
+        Assert.AreEqual(1, main[0].Tracks, "Klb–Forgr1 is single track.");
+        Assert.IsTrue(main.Skip(1).All(s => s.Tracks == 2), "The rest of the main line is double track.");
+        Assert.IsTrue(diagram.Lines.Where(l => l.Number != "1").SelectMany(l => l.Sections).All(s => s.Tracks == 1),
+            "Every branch is single track.");
+    }
+
+    [TestMethod]
+    public void SectionsRunFromStationToStationWithNothingLeftOver()
+    {
+        foreach (var diagram in new[] { TopologyDiagram.Build(CreateLayout(Kolding)), TopologyDiagram.Build(CreateLayout("A B C D")) })
+            foreach (var line in diagram.Lines)
+            {
+                Assert.AreEqual(line.Nodes.Count - 1, line.Sections.Count,
+                    $"Line {line.Number} must have one section between each neighbouring pair of stations.");
+                for (var i = 0; i < line.Sections.Count; i++)
+                {
+                    Assert.AreEqual(line.Nodes[i].X, line.Sections[i].FromX, 0.001);
+                    Assert.AreEqual(line.Nodes[i + 1].X, line.Sections[i].ToX, 0.001);
+                }
+            }
+    }
+
+    [TestMethod]
+    public void ASignatureMovesBelowItsLineWhereABranchClimbsAwayFromIt()
+    {
+        // A signature is printed above its station, which is where a branch drawn above the line it leaves
+        // sets off from: the connector would strike the name of the junction it leaves.
+        var diagram = TopologyDiagram.Build(CreateLayout(Kolding));
+
+        var climbs = diagram.Connectors.Where(c => c.LineY < c.JunctionY).ToList();
+        Assert.IsTrue(climbs.Count > 0, "This layout cannot be drawn without branches above the line.");
+        foreach (var connector in climbs)
+        {
+            var junction = diagram.Lines.SelectMany(l => l.Nodes)
+                .Where(n => Math.Abs(n.X - connector.JunctionX) < 0.5 && Math.Abs(n.Y - connector.JunctionY) < 0.5)
+                .ToList();
+            Assert.IsTrue(junction.Count > 0, "A climbing connector sets off from a station.");
+            Assert.IsTrue(junction.All(n => n.LabelBelow),
+                $"The signature of the station at {connector.JunctionX:0} must move below its line to clear the branch climbing away from it.");
+        }
     }
 
     [TestMethod]

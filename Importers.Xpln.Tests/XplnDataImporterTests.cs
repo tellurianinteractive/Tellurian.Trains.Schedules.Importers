@@ -185,6 +185,33 @@ public class XplnDataImporterTests
     }
 
     [TestMethod]
+    public async Task SectionSharedByTwoLinesBecomesOneTrackStretch()
+    {
+        // FREMODERN-2023-Final-1-1 has two lines leaving Ing over the same section to Wei, where they
+        // diverge (one to Sar, the other to Pa). Two operation locations are joined by one track stretch,
+        // so both lines must run over that one — not over a copy of it that the layout does not hold.
+        Assert.IsTrue(IsScheduleFileExisting("FREMODERN-2023-Final-1-1", out var file));
+
+        using var importer = new XplnDataImporter(file, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var result = await importer.ImportScheduleAsync("FREMODERN-2023-Final-1-1");
+        Assert.IsTrue(result.IsSuccess, "Import should succeed.");
+
+        var layout = result.Item.Timetable.Layout;
+        var ingToWei = layout.TrackStretches
+            .Where(s => s.Start.Signature.Equals("Ing", StringComparison.OrdinalIgnoreCase) && s.End.Signature.Equals("Wei", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        Assert.HasCount(1, ingToWei, "The shared Ing–Wei section should be one track stretch.");
+
+        var linesOverIt = layout.TimetableStretches.Where(t => t.Stretches.Any(s => ReferenceEquals(s, ingToWei[0]))).ToArray();
+        Assert.HasCount(2, linesOverIt, "Both lines should run over that same track stretch.");
+
+        foreach (var timetableStretch in layout.TimetableStretches)
+            foreach (var stretch in timetableStretch.Stretches)
+                Assert.IsTrue(layout.TrackStretches.Any(s => ReferenceEquals(s, stretch)),
+                    $"Line {timetableStretch.Number} runs over {stretch}, which the layout does not hold.");
+    }
+
+    [TestMethod]
     public async Task GroupsRoutesByRouteIdWhenRouteIdIsShared()
     {
         // Värnamo2017 reuses the Routeid column to group segments into three lines, and its start
@@ -309,6 +336,12 @@ public class XplnDataImporterTests
     // covering a train's last leg, which it used to skip. The added findings are all slow final legs in
     // the imported data. No file reports a route-continuity warning: every imported route runs over
     // stretches of its layout.
+    //
+    // Magdeburg_v_DB33_DSB32_WTB11's stopping errors fell from 40 to 1 when the Routes worksheet started
+    // rejecting a section defined twice with different data: its rows 26 and 29 both join Fgr and Pa, one
+    // over 1.4 km on three tracks and the other over 7.4 km on two. That error stops the import at the
+    // Routes worksheet, so the 40 malformed times on the Trains worksheet are no longer reached — they
+    // are still there, and are reported once the section is fixed.
     [TestMethod()]
     [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 72)]
     [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 16)]
@@ -323,7 +356,7 @@ public class XplnDataImporterTests
     [DataRow("KoldingNorge2019", 13, 56, 17, 0, 0, 56, 13, 12)]
     [DataRow("Langhurst 2019", 6, 15, 4, 7, 11, 4, 6, 48)]
     [DataRow("LTK2020", 0, 0, 0, 0, 0, 0, 0, 0, 18)]
-    [DataRow("Magdeburg_v_DB33_DSB32_WTB11", 0, 0, 0, 0, 0, 0, 0, 0, 40)]
+    [DataRow("Magdeburg_v_DB33_DSB32_WTB11", 0, 0, 0, 0, 0, 0, 0, 0, 1)]
     [DataRow("Montan2023H0e", 5, 32, 3, 4, 24, 3, 5, 19)]
     [DataRow("Rotebro2015", 12, 39, 15, 0, 0, 31, 12, 63)]
     [DataRow("Rotebro2016", 16, 32, 12, 0, 0, 24, 16, 14)]
