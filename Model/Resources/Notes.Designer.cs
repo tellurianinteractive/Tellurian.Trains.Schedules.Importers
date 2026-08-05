@@ -160,6 +160,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Leave key {0} from {1}..
+        /// </summary>
+        internal static string LeaveKeyFrom {
+            get {
+                return ResourceManager.GetString("LeaveKeyFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Leave key from {0}..
+        /// </summary>
+        internal static string LeaveUnnamedKeyFrom {
+            get {
+                return ResourceManager.GetString("LeaveUnnamedKeyFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Before departure, drive {0} from parking space to departure track..
         /// </summary>
         internal static string MoveTractionUnitFromParkingToDepartureTrack {
@@ -201,6 +219,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string Overtakes {
             get {
                 return ResourceManager.GetString("Overtakes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pick up key {0} for unlocking {1}..
+        /// </summary>
+        internal static string PickUpKeyForUnlocking {
+            get {
+                return ResourceManager.GetString("PickUpKeyForUnlocking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pick up key for unlocking {0}..
+        /// </summary>
+        internal static string PickUpUnnamedKeyForUnlocking {
+            get {
+                return ResourceManager.GetString("PickUpUnnamedKeyForUnlocking", resourceCulture);
             }
         }
         

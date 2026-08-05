@@ -1,5 +1,117 @@
 # Versionshinweise
 
+## Version 0.4.0
+
+### Grundlegende Änderungen
+
+- **Ein selbst angelegtes Fahrzeug wird jetzt durch seinen Betreiber und seine Nummer identifiziert.**
+  Beide zusammen bezeichnen ein einziges wirkliches Fahrzeug, daher darf die Kombination in ein und
+  derselben Fahrrunde nur einem Fahrzeug gehören — gleich welcher Art. Ein Wagensatz und eine Lokomotive
+  können nicht mehr beide *DB 5* sein. Ein Fahrzeug ohne Betreiber wird allein durch seine Nummer
+  identifiziert. Zwei Fahrzeuge dürfen weiterhin denselben Betreiber und dieselbe Nummer tragen, solange
+  sich die Fahrrunden, in denen sie verkehren, nicht überschneiden — dann sind sie nie gleichzeitig beim
+  Treffen.
+
+  Ein **importiertes** Fahrzeug wird weiterhin durch die externe Id identifiziert, mit der es importiert
+  wurde und die im Fahrplan seiner Herkunft bereits eindeutig ist; ein importierter Fahrplan meldet
+  deswegen keine neuen Konflikte.
+
+  Beim Anlegen oder Bearbeiten eines Fahrzeugs im Reiter Umläufe wird eine Identität, die ein anderes
+  Fahrzeug bereits hat, jetzt abgelehnt, und eine Nummer muss angegeben werden. Vor dieser Regel
+  erstellte Fahrpläne bleiben genau so, wie sie sind — es wird nichts für Sie umnummeriert — und jedes
+  Fahrzeug, das sich eine Identität teilt, steht unter den Konflikten, jeweils einmal, damit Sie sehen,
+  was eine neue Nummer braucht.
+
+### Änderungen
+
+- **Es gibt einen neuen Bericht: die Zugmeldeliste.** Ein eigener Satz Blätter für jeden Bahnhof, der
+  besetzt ist — alle besetzten Bahnhöfe und alle Schattenbahnhöfe, ob besetzt oder nicht — mit den
+  Zügen, die dieser Bahnhof abwickelt, in zeitlicher Reihenfolge. Ein Zug, der dort steht, erscheint
+  zweimal, einmal für die Ankunft und einmal für die Abfahrt, denn einen Zug einzulassen und ihn zum
+  nächsten Bahnhof abzulassen sind zwei verschiedene Handlungen im Abstand einiger Minuten. Ankünfte
+  stehen auf Weiß, Abfahrten auf hellem Gelb, damit die beiden nie verwechselt werden. Züge, die nur
+  durchfahren, stehen ebenfalls darauf, denn auch sie müssen durchgelassen werden. Jede Seite trägt den
+  Namen des Bahnhofs, den Tagesabschnitt, den sie abdeckt, und die Telefonnummern der Bahnhöfe am
+  anderen Ende der Zugmeldeabschnitte; jede Zeile hat je Fahrrunde ein Kästchen zum Abhaken, grau
+  hinterlegt für die Fahrrunden, in denen der Zug nicht verkehrt. Jeder Bahnhof beginnt auf einer neuen
+  Seite, sodass der Stapel einfach geteilt und ausgegeben werden kann. Druck über das Menü Berichte.
+
+- **Die Felder zum Anlegen und Bearbeiten eines Fahrzeugs haben eine neue Reihenfolge,** an beiden
+  Stellen dieselbe: Fahrzeugart, Traktionsart, Anzahl Einheiten, Betreiber, Nummer, Klasse, Fahrrunden
+  und zuletzt die externe Id — was das Fahrzeug ist, dann was es identifiziert, dann wie es beschrieben
+  wird und wann es verkehrt. Das bisher mit *Gesellschaft* bezeichnete Feld heißt jetzt *Betreiber*.
+
+- **Eine externe Id lässt sich berichtigen, aber nicht mehr erfinden.** Die externe Id ist der Name, den
+  ein Zug oder ein Fahrzeug in dem System trägt, aus dem er importiert wurde — sie bedeutet also nur
+  dort etwas, wo sie herkommt. Was mit einer Id importiert wurde, hat sein Feld weiterhin — im Reiter
+  Züge und im Fahrzeugdialog im Reiter Umläufe — und kann dort berichtigt werden; was nie eine Id hatte,
+  bekommt jetzt kein Eingabefeld mehr. Ein im Planer angelegtes Fahrzeug erhält daher gar keine externe
+  Id, wo ihm früher eine aus Klasse und Nummer erfundene gegeben wurde.
+
+- **Die kleinste Zeit zwischen zwei Nutzungen desselben Gleises wird jetzt geprüft.** Die Einstellung
+  gab es, aber nichts wertete sie aus. Bei 0 — wo sie beginnt und bleibt, bis Sie sie ändern — ändert
+  sich an der Prüfung nichts: Zwei Züge stehen in Konflikt, wo sie gleichzeitig auf demselben Gleis
+  stehen, und einer, der genau bei der Abfahrt eines anderen ankommt, ist eine Ablösung und kein
+  Konflikt. Setzen Sie sie etwa auf 5, muss das Gleis dazwischen außerdem fünf Minuten frei sein, damit
+  ein Fahrplan gemeldet wird, der das Gleis schneller wendet, als die Station es schafft. Genau fünf
+  freie Minuten genügen, vier nicht.
+
+  Ein solcher Konflikt nennt, wie kurz der Abstand tatsächlich ist und wie lang er sein müsste, statt
+  eine Überschneidung zu behaupten, die die Zeiten gar nicht zeigen.
+
+- **Eine Betriebsstelle kann jetzt eigene Anweisungen tragen.** Das Formular zum Anlegen und Bearbeiten
+  einer Betriebsstelle hat das Feld **Anweisungen**, in Markdown geschrieben und neben einer Vorschau
+  gezeigt wie die allgemeinen Anweisungen in den Einstellungen. Es ist dafür da, wie genau diese
+  Betriebsstelle bei diesem Treffen betrieben wird — welche Gleise wofür genutzt werden, wie das
+  Rangieren organisiert ist und was die Lokführer und das Personal vor Ort dort sonst wissen müssen. Wie
+  die Betriebsstelle allgemein bedient wird, und jede sonstige Beschreibung von ihr, muss ihr Eigentümer
+  bereitstellen; das gehört nicht in das Feld. Was Sie schreiben, wird mit der Betriebsstelle gespeichert
+  und in ihrer Info-Ansicht gezeigt.
+
+  Das Feld wird bei einer Station oder einem Industriegebiet angeboten, wo Reisende und/oder Güter
+  ausgetauscht werden. Es wird nicht angeboten, wo es nichts anzuweisen gibt: an einer signalgesteuerten
+  Stelle fahren die Züge nur vorbei, und eine sonstige Stelle bedient niemand, sodass ein Zug dort genau
+  das tut, was sein Halt vorsieht, und nicht mehr.
+
+- **Eine Stelle, an der ohne Personal Güter bedient werden, kann jetzt einen Schlüssel verlangen.** Wo
+  die Weichen einer unbesetzten Station oder eines Industriegebiets verschlossen sind, wählen Sie im
+  Bearbeitungsformular unter **Schlüssel hinterlegt in** den besetzten Bahnhof, der den Schlüssel
+  verwahrt, und geben ihm eine Bezeichnung, wenn der Bahnhof mehrere verwahrt.
+
+  Mehr ist nicht zu planen. Einem Güterzug, der in dem Bahnhof mit dem Schlüssel hält und später an der
+  Stelle hält, die der Schlüssel aufschließt, wird bei der Abfahrt dort gesagt: *Schlüssel A1 zum
+  Aufschließen von Bruket abholen*; beim nächsten Halt dort heißt es bei der Ankunft *Schlüssel A1 von
+  Bruket abgeben*. Ein Zug, der an einer der beiden Stellen nur vorbeifährt, bekommt keinen Hinweis,
+  denn er schließt nichts auf. Der Schlüssel wird beim letzten Halt im verwahrenden Bahnhof vor der
+  Arbeit geholt und beim ersten danach abgegeben, sodass ein Zug, der dort zweimal hält, ihn nicht eine
+  Fahrt länger mitführen muss.
+
+  Ein Schlüssel gilt nur, solange beide Seiten stimmen. Markieren Sie die Stelle selbst als besetzt oder
+  nehmen Sie die Besetzung vom Bahnhof, der den Schlüssel verwahrt, dann gilt der Schlüssel nicht mehr:
+  es entstehen keine Hinweise daraus, und unter **Konflikte** steht, welche der beiden Änderungen es war.
+  Der Schlüssel bleibt erhalten, statt verworfen zu werden — machen Sie die Änderung rückgängig, gilt er
+  sofort wieder — und er bleibt im Formular stehen, wo Sie ihn auf einen anderen Bahnhof richten oder
+  entfernen können.
+
+### Fehlerbehebungen
+
+- **Zwei Strecken, die von derselben Betriebsstelle ausgehen, wurden gezeichnet, als träfen sie sich
+  nie.** Begann ein Fahrplanabschnitt genau an der ersten Betriebsstelle eines anderen, verband die
+  beiden im Topologie-Diagramm nichts: jeder wurde als eigene Linie gezeichnet, ohne Abzweigung
+  dazwischen. Der zweite verlässt diese Betriebsstelle jetzt wie jede andere Abzweigung und fällt im
+  selben festen Winkel von ihr ab.
+
+- **Jeder Grenzwert der Prüfungen nennt jetzt die Uhr, nach der er gemessen wird.** Die kleinste Zeit
+  zwischen zwei Nutzungen desselben Gleises hatte gar keine Einheit, und die beiden
+  Zuggeschwindigkeiten nannten nur *Uhr-Minuten*, was sich in beide Richtungen lesen ließ. Alle drei
+  stehen jetzt in Schnelluhr-Minuten — der schnellen Uhr, nach der die Züge fahren, nicht der
+  wirklichen Zeit. Die schnelle Uhr heißt in der ganzen App jetzt so, statt *Zeitraffer* oder
+  *Modelluhr*.
+
+- **Längen und Entfernungen sind jetzt in Metern ausgeschrieben,** ebenso der Zähler der
+  Zuggeschwindigkeiten, damit das *m* nicht als Minute gelesen werden kann. Der Mindesthalt an einer
+  Station steht jetzt ebenfalls in Schnelluhr-Minuten.
+
 ## Version 0.3.5
 
 ### Fehlerbehebungen

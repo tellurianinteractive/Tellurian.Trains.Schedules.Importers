@@ -65,6 +65,12 @@
         font-style: normal;
     }
 
+    /* A lock key the manning has left meaningless: still set, still editable, but not in force. Marked
+       where it stands rather than only in the Conflicts list, since this is where it is put right. */
+    .hint.ignored {
+        color: #8a5a00;
+    }
+
     /* QuickGrid list */
     ::deep table {
         border-collapse: collapse;
@@ -176,6 +182,36 @@
 
     .field input.num {
         width: 7rem;
+    }
+
+    /* The instructions field carries an editor that needs the whole width for its two panes, so it
+       stands outside the fields grid: the label goes on its own line above the editor, styled like
+       the form's other block headings since it opens a block of its own. */
+    .field.instructions {
+        display: block;
+        max-width: 960px;
+        padding: 0;
+    }
+
+    .field.instructions:hover {
+        background: transparent;
+    }
+
+    .field.instructions ::deep .help-label {
+        color: var(--primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 1.2rem 0 0.4rem;
+    }
+
+    .field.instructions .hint {
+        margin: 0 0 0.5rem;
+        font-size: 0.9rem;
+        max-width: 60rem;
+    }
+
+    .instructions-body {
+        max-width: 60rem;
     }
 
     .regions {

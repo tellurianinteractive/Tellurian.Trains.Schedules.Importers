@@ -56,6 +56,8 @@ public sealed record ValidationError
 | `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned |
 | `TrainMissingTraction` | A stretch of a train's run has no traction unit on some sessions it runs |
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
+| `VehicleIdentityDuplicated` | Two vehicles share an identity — external id, or operator and number — on a common session |
+| `LockKeyIgnored` | An operation location carries a lock key the manning on one side or the other has left meaningless |
 
 ## ValidationSettings
 
@@ -78,7 +80,7 @@ public sealed class ValidationSettings
     // Threshold values
     public double MinTrainSpeedMetersPerClockMinute { get; set; } = 0.3;
     public double MaxTrainSpeedMetersPerClockMinute { get; set; } = 10;
-    public int MinMinutesBetweenTrackUsage { get; set; }         // Not implemented
+    public int MinMinutesBetweenTrackUsage { get; set; }         // Fast-clock minutes; 0 = overlap only
 }
 ```
 
@@ -121,13 +123,23 @@ status (✅ done · 🟡 partial · ❌ missing).
 ### Layout scope (L) — infrastructure occupancy
 
 #### L2 — Station track conflicts ✅
-**Method**: `GetValidationErrors(this StationTrack me, IEnumerable<Schedule> vehicleSchedules)`
+**Method**: `GetValidationErrors(this StationTrack me, IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay, int minMinutesBetweenTrackUsage)`
 
-**Validates**: At most one train may occupy a station track at a time (no overlapping calls by different trains)
+**Validates**: A station track must be free between two occupants for at least
+`MinMinutesBetweenTrackUsage` fast-clock minutes. At the default of 0 this is plain double booking —
+at most one train on the track at a time — and one train arriving exactly as another leaves is a
+handover, not a conflict. Above 0 the same test also requires that much free time in between; exactly
+the required number of minutes is enough, one minute less is a conflict.
 
-**Exception**: Calls sharing the same vehicle are allowed (e.g. loco changes)
+**Occupancy**: Each call's whole window, optionally extended by a traction unit's stay between two
+trains (`ExtendTrackOccupancyByVehicleStay`), not the call's own arrival and departure alone.
 
-**Error**: `"Train {train1} {time1} has conflicts with train {train2} {time2}."`
+**Exception**: Calls sharing the same vehicle are allowed (e.g. loco changes), as are trains that
+never run on a common session.
+
+**Error**: `"Train {train1} {span1} overlaps in time with train {train2} {span2}."` where the two are
+on the track together, and `"Train {train1} {span1} is followed by train {train2} {span2} after only
+{free} minutes; at least {required} minutes are required."` where the required gap is what is missing.
 
 #### L3 — Track stretch conflicts ✅
 **Method**: `GetValidationErrors(this TrackStretch me)`
@@ -142,6 +154,26 @@ on a train whose calls were added in another order than it runs them.
 
 #### L1 — Meet needs ≥2 tracks 🟡
 No dedicated diagnostic; emergent from L2 (single-track meet → same-track conflict) and L3.
+
+#### L4 — Lock key consistency ✅
+**Method**: `ValidateLockKeys(this Plan plan)`
+
+**Validates**: A lock key is in force only where the location still needs one — it exchanges cargo and
+is not a manned station — and the station holding it is still manned. Manning is edited on both sides
+long after a key is set, and either change can leave the key meaningless.
+
+**Kept, not deleted**: an ignored key stays on its location, because the manning change may well be
+undone and throwing the key away would make that a retyping job. Everything derived from a key reads
+`OperationLocation.EffectiveLockKey`, so an ignored key produces no notes; `OperationLocation.LockKeyFault`
+says which change did it.
+
+**Always run**, like the other checks for a model that contradicts itself: a key nobody can fetch is a
+fault in the layout whatever else is being validated, not a planning preference to switch off.
+
+**Errors** (one per location, `ValidationScope.Layout`, placeless and timeless):
+- `"Operation location {0} is manned, so the lock key held at {1} is ignored."`
+- `"Operation location {0} exchanges no cargo, so the lock key held at {1} is ignored."`
+- `"Station {1} is not manned, so the lock key it holds for {0} cannot be fetched and is ignored."`
 
 ### Timetable scope (T) — train rules
 
@@ -285,6 +317,28 @@ Coverage is judged **leg by leg, not by whether the train appears in some turnus
 
 **Coverage gaps are not checked here.** S4 judges the same thing per leg and per session, correctly allows a traction change at a station, and reads the calls in run order; the time-based gap check this rule used to carry reported each gap a second time and missed the gap entirely on a train whose calls were added in another order than it runs them. `ValidationErrorType.LocomotiveCoverageGap` is no longer produced.
 
+#### P5 — Duplicate vehicle identity ✅
+**Method**: `ValidateVehicleIdentities(this Plan plan)`
+
+**Validates**: A `VehicleIdentity` names one physical vehicle, so on any one session it may belong to only one of the plan's vehicles
+
+**Identity** (`ScheduledObject.Identity`): the `ExternalId` where the vehicle carries one — the identifier it was imported under, unique in the system it came from — otherwise the operating company and the number, the number alone with no company. The two kinds never match each other, and `CreateVehicle` gives a vehicle made in the planner no external id, so operator and number always identify those.
+
+**Logic**:
+1. Groups the vehicles by identity alone, so the rule spans every `ScheduledObjectType` (a wagonset and a locomotive may not share one either). Cargo flows are left out — their identifier stands for a group of wagons, not a vehicle (`HasVehicleIdentity`)
+2. Compares each vehicle's `ClaimedSessions` — its assignments' sessions, or *every* session when it is assigned nowhere, since an unused vehicle still holds its identity in the pool
+3. Reports each duplicate **once**, against the first earlier vehicle of its identity whose sessions it shares. Pairwise reporting would bury the rest of the conflict list: a group of *n* vehicles under one identity gives *n(n−1)/2* pairs but only *n−1* vehicles to fix
+
+**Two vehicles may reuse an identity** when the sessions they work are strictly disjoint — they are then never both at the meeting.
+
+**Errors**:
+- `"Vehicles {0} and {1} share operator and number {2} on sessions {3}."`
+- `"Two vehicles share the external id {0} on sessions {1}."` (both would otherwise be named by the same designation)
+
+**Imported plans are unaffected.** Every XPLN vehicle carries its own identifier, so the importer test files report exactly the conflicts they did before. Judging identity on operator and number instead would report hundreds of false duplicates, since the number is the trailing digits of the identifier — `DB-Post1`, `NPB E1` and `DSB G 01` all become number 1.
+
+**Editor guard**: `Plan.VehicleClaiming(identity, sessions, excluding)` answers the same question before the edit is made, so the Schedules tab's add- and edit-vehicle dialogs refuse a taken identity rather than letting one be created. Older plans keep theirs and are reported here.
+
 #### P2 — Every part scheduled / no cross-schedule session overlap 🟡
 Every train part must belong to a schedule, and no part may be in two schedules with overlapping sessions. Partly served by P3 and P4; the full check is not implemented.
 
@@ -296,7 +350,6 @@ The following options exist but validation logic is not implemented:
 |--------|--------|
 | `ValidateTrainNumbers` | Property exists, not used |
 | `ValidateDriverDuties` | Property exists, validation not implemented |
-| `MinMinutesBetweenTrackUsage` | Property exists, not used |
 
 ## Severity Levels
 
@@ -384,6 +437,5 @@ rotation schemes that close only across sessions or across several schedules are
 allowed (see the S3+S5 section above). Cargo flows are exempt.
 
 1. **P2 (partial)** - every part scheduled; the same part not in two overlapping-session schedules is not fully checked
-2. **MinMinutesBetweenTrackUsage** - Parameter exists but not used
-3. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
-4. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring
+2. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model
+3. **Test expected counts** - Some Xpln.Tests validation count expectations need updating after ValidationError refactoring

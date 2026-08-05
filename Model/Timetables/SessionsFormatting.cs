@@ -64,7 +64,7 @@ public static class SessionsFormatting
             var form = FormOf(sessions, settings);
             var body = settings.UseDaysInsteadOfSessionNumbers
                 ? WebUtility.HtmlEncode(TextBody(form, settings))
-                : HtmlBody(form);
+                : HtmlBody(form, settings);
             return new(form.IsOnDemand
                 ? Join(body, WebUtility.HtmlEncode(DaysExtensions.DayResource("OnDemandOnly")))
                 : body);
@@ -119,11 +119,16 @@ public static class SessionsFormatting
     private static string TextBody(Form form, SessionsSettings settings)
     {
         var useDays = settings.UseDaysInsteadOfSessionNumbers;
-        var useShort = useDays && settings.UseShortWeekdayNames;
+        // Short forms are asked for by the setting alone; it is only ever consulted below inside a branch
+        // that already knows whether days or sessions are being named. (The name says weekday because
+        // days were the only mode with a short form when it was added.)
+        var useShort = settings.UseShortWeekdayNames;
 
         // "No operating days" and "No sessions" are different statements; a layout is one or the other.
-        if (form.IsNone) return DaysExtensions.DayResource(useDays ? (useShort ? "NoneShort" : "None") : "NoSessions");
-        if (form.IsAll) return DaysExtensions.DayResource(useDays ? (useShort ? "DailyShort" : "Daily") : "AllSessions");
+        if (form.IsNone) return DaysExtensions.DayResource(
+            useDays ? (useShort ? "NoneShort" : "None") : (useShort ? "NoSessionsShort" : "NoSessions"));
+        if (form.IsAll) return DaysExtensions.DayResource(
+            useDays ? (useShort ? "DailyShort" : "Daily") : (useShort ? "AllSessionsShort" : "AllSessions"));
 
         var parts = form.Runs.Select(run => useDays ? DayRunText(run, settings, useShort) : SessionRunText(run));
         return string.Join(", ", parts);
@@ -149,10 +154,16 @@ public static class SessionsFormatting
             ? string.Join(", ", Enumerable.Range(run.First, run.Length).Select(n => n.ToString(CultureInfo.CurrentCulture)))
             : $"{run.First}–{run.Last}";
 
-    private static string HtmlBody(Form form)
+    // Only ever reached in sessions mode; the day mode renders its text form encoded.
+    private static string HtmlBody(Form form, SessionsSettings settings)
     {
-        if (form.IsNone) return WebUtility.HtmlEncode(DaysExtensions.DayResource("NoSessions"));
-        if (form.IsAll) return WebUtility.HtmlEncode(DaysExtensions.DayResource("AllSessions"));
+        // Takes the settings so it picks the same short or long wording TextBody does. The two forms
+        // disagreeing is exactly the failure this class exists to prevent — a tooltip saying something
+        // other than the text beside it.
+        if (form.IsNone) return WebUtility.HtmlEncode(
+            DaysExtensions.DayResource(settings.UseShortWeekdayNames ? "NoSessionsShort" : "NoSessions"));
+        if (form.IsAll) return WebUtility.HtmlEncode(
+            DaysExtensions.DayResource(settings.UseShortWeekdayNames ? "AllSessionsShort" : "AllSessions"));
 
         var builder = new StringBuilder();
         foreach (var run in form.Runs)
@@ -197,6 +208,68 @@ public static class SessionsFormatting
         return $"""
             <svg class="sessionnumber" viewBox="0 0 100 100" role="img" aria-label="{number}"><circle cx="50" cy="50" r="50" fill="black" /><text x="50" y="50" fill="white" text-anchor="middle" dominant-baseline="central" font-size="{fontSize}" font-weight="bold">{number}</text></svg>
             """;
+    }
+
+    /// <summary>
+    /// The 1-based positions the operating period has, in order — sessions 1…<c>MaxNumberOfSessions</c>,
+    /// or the days of one operating week when the layout counts in days.
+    /// </summary>
+    /// <remarks>
+    /// For callers that lay a value out <em>position by position</em> rather than as a phrase: a printed
+    /// grid of one small box per session, ticked off as each is worked. The positions and <c>Covers</c>
+    /// come from here so such a grid agrees with the text beside it, which is the whole reason the sheet
+    /// is trusted.
+    /// <para>
+    /// A week has seven days however many sessions the period holds, so the day form is capped at seven —
+    /// the same cap <c>CappedForDisplay</c> applies to the values themselves.
+    /// </para>
+    /// </remarks>
+    /// <param name="settings">Chooses sessions or days and the length of the operating period.</param>
+    public static IReadOnlyList<int> PositionsOf(SessionsSettings settings)
+    {
+        settings = settings.ValueOrException(nameof(settings));
+        var count = settings.UseDaysInsteadOfSessionNumbers
+            ? Math.Min(settings.MaxNumberOfSessions, 7)
+            : settings.MaxNumberOfSessions;
+        return [.. Enumerable.Range(1, Math.Max(count, 0))];
+    }
+
+    /// <summary>
+    /// How one position is headed: the session number as its filled circle, or the day's short name.
+    /// </summary>
+    /// <param name="position">A 1-based position from <see cref="PositionsOf"/>.</param>
+    /// <param name="settings">Chooses sessions or days, and the weekday the period starts on.</param>
+    public static MarkupString PositionHeadingOf(int position, SessionsSettings settings)
+    {
+        settings = settings.ValueOrException(nameof(settings));
+        return settings.UseDaysInsteadOfSessionNumbers
+            ? new(WebUtility.HtmlEncode(DaysExtensions.DayNameAt(settings.SessionFirstWeekday, position - 1, useShort: true)))
+            : SessionNumberHtml(position);
+    }
+
+    extension(Sessions sessions)
+    {
+        /// <summary>
+        /// Whether this value covers the given position of the operating period. See
+        /// <see cref="PositionsOf"/>.
+        /// </summary>
+        /// <remarks>
+        /// Judged on the same capped value the text and markup forms render, so a box is never ticked for
+        /// a session the phrase beside it does not name.
+        /// </remarks>
+        /// <param name="position">A 1-based position from <see cref="PositionsOf"/>.</param>
+        /// <param name="settings">Chooses sessions or days and the length of the operating period.</param>
+        public bool Covers(int position, SessionsSettings settings)
+        {
+            settings = settings.ValueOrException(nameof(settings));
+            var useDays = settings.UseDaysInsteadOfSessionNumbers;
+            var capped = sessions.CappedForDisplay(useDays, settings.MaxNumberOfSessions);
+            // Day patterns mirror their in-week bits into the upper session bits, so day positions must
+            // come from the offsets; taking Numbers would count every day twice.
+            return useDays
+                ? capped.DayOffsets.Contains(position - 1)
+                : capped.Numbers.Contains((byte)position);
+        }
     }
 
     // Joins the sessions and the on-demand marker, tolerating an empty first half.

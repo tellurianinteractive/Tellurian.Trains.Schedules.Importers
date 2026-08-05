@@ -136,4 +136,20 @@
   <data name="NoExchange" xml:space="preserve">
     <value>No exchange</value>
   </data>
+  <data name="PickUpKeyForUnlocking" xml:space="preserve">
+    <value>Pick up key {0} for unlocking {1}.</value>
+    <comment>{0}=name of the key, {1}=the location it unlocks</comment>
+  </data>
+  <data name="PickUpUnnamedKeyForUnlocking" xml:space="preserve">
+    <value>Pick up key for unlocking {0}.</value>
+    <comment>{0}=the location the key unlocks</comment>
+  </data>
+  <data name="LeaveKeyFrom" xml:space="preserve">
+    <value>Leave key {0} from {1}.</value>
+    <comment>{0}=name of the key, {1}=the location it unlocks</comment>
+  </data>
+  <data name="LeaveUnnamedKeyFrom" xml:space="preserve">
+    <value>Leave key from {0}.</value>
+    <comment>{0}=the location the key unlocks</comment>
+  </data>
 </root>

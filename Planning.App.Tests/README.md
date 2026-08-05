@@ -37,5 +37,7 @@ $env:PLANNING_APP_BASEURL = "http://localhost:5097"
 - Empty Workspace shows the "Drag a view here" placeholder.
 - A persisted layout in `localStorage` is restored into two panes.
 - Dragging a view tab onto a pane's edge creates a split.
+- An operation location's lock key: offered only where a key can be needed, held by a manned station,
+  named once a station holds it, and kept through the save.
 
 Screenshots are written to `bin/Debug/net10.0/screenshots/`.

@@ -783,6 +783,161 @@ public class ValidationTests
         Assert.HasCount(1, errors);
     }
 
+    // --- P5: a vehicle's identity must name one vehicle on every session. The identity is the external
+    //         id where the vehicle was imported with one, else its operator and number ---
+
+    private static readonly Company DB = new(1, "Deutsche Bahn", "DB");
+    private static readonly Company SJ = new(2, "Statens Järnvägar", "SJ");
+
+    // A plan with one forward train and one schedule per vehicle, so each vehicle created by the test can
+    // be given sessions of its own. Returns the plan and a factory for such a schedule.
+    private static (Plan plan, Func<Schedule> newSchedule) PlanWithSchedulesForVehicles()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        return (plan, () =>
+        {
+            var schedule = plan.CreateSchedule();
+            schedule.Add(forward.AsTrainPart);
+            return schedule;
+        });
+    }
+
+    private static IEnumerable<ValidationError> IdentityErrors(Plan plan) =>
+        plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleIdentityDuplicated);
+
+    [TestMethod]
+    public void VehiclesWithSameOperatorAndNumberOnOverlappingSessionsAreReported()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        var first = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        var second = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        plan.AssignVehicle(newSchedule(), first, Sessions.FromSessionNumbers(1, 2, 3));
+        plan.AssignVehicle(newSchedule(), second, Sessions.FromSessionNumbers(3, 4)); // shares session 3
+
+        var errors = IdentityErrors(plan).ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.IsTrue(errors[0].Involves(second), "The duplicate is marked, not the vehicle that had the identity first.");
+    }
+
+    [TestMethod]
+    public void VehiclesWithSameOperatorAndNumberOnDisjointSessionsAreAllowed()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        var first = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        var second = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        plan.AssignVehicle(newSchedule(), first, Sessions.FromSessionNumbers(1, 2));
+        plan.AssignVehicle(newSchedule(), second, Sessions.FromSessionNumbers(3, 4));
+
+        Assert.IsEmpty(IdentityErrors(plan), "An identity may be reused on sessions where the other vehicle is not present.");
+    }
+
+    [TestMethod]
+    public void VehiclesWithSameNumberButDifferentOperatorsAreAllowed()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 5, SJ));
+
+        Assert.IsEmpty(IdentityErrors(plan), "The operator is part of the identity, so two operators may use one number.");
+    }
+
+    [TestMethod]
+    public void VehiclesWithoutOperatorAreIdentifiedByNumberAlone()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, null));
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 5, null));
+
+        Assert.HasCount(1, IdentityErrors(plan).ToList());
+    }
+
+    [TestMethod]
+    public void WagonsetAndLocomotiveWithSameOperatorAndNumberAreReported()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 5, DB));
+
+        Assert.HasCount(1, IdentityErrors(plan).ToList(), "The identity spans every vehicle type.");
+    }
+
+    [TestMethod]
+    public void UnassignedDuplicateVehicleIsReported()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+        plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB); // in the pool, not yet assigned
+
+        Assert.HasCount(1, IdentityErrors(plan).ToList(), "A vehicle in the pool claims its identity on every session.");
+    }
+
+    [TestMethod]
+    public void EachDuplicateVehicleIsReportedOnceNotOncePerPair()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        for (var i = 0; i < 4; i++)
+            plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+
+        Assert.HasCount(3, IdentityErrors(plan).ToList(),
+            "Four vehicles under one identity give three duplicates, not six pairs.");
+    }
+
+    [TestMethod]
+    public void VehiclesWithSameOperatorAndNumberButDistinctExternalIdsAreAllowed()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        var first = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        var second = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 5, DB);
+        first.ExternalId = "DB-Post1";   // as the import sets it
+        second.ExternalId = "NPB E1";
+        plan.AssignVehicle(newSchedule(), first);
+        plan.AssignVehicle(newSchedule(), second);
+
+        Assert.IsEmpty(IdentityErrors(plan),
+            "An imported vehicle is identified by its external id, which is unique where it came from.");
+    }
+
+    [TestMethod]
+    public void VehiclesWithTheSameExternalIdOnOverlappingSessionsAreReported()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        var first = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB);
+        var second = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 9, SJ);
+        first.ExternalId = "DBSCH EG 01";
+        second.ExternalId = "dbsch eg 01"; // the same identity, differently cased
+        plan.AssignVehicle(newSchedule(), first);
+        plan.AssignVehicle(newSchedule(), second);
+
+        Assert.HasCount(1, IdentityErrors(plan).ToList(),
+            "One external id may name only one vehicle, whatever operator and number each carries.");
+    }
+
+    [TestMethod]
+    public void CargoFlowIsExemptFromIdentityUniqueness()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.CargoFlow, "CF", 5, DB));
+
+        Assert.IsEmpty(IdentityErrors(plan), "A cargo flow carries a synthesised identifier, not an operator and number.");
+    }
+
+    [TestMethod]
+    public void IdentityValidationCanBeSwitchedOff()
+    {
+        var (plan, newSchedule) = PlanWithSchedulesForVehicles();
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+        plan.AssignVehicle(newSchedule(), plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, DB));
+
+        var errors = plan.GetValidationErrors(new ValidationSettings { ValidateSchedules = false })
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleIdentityDuplicated);
+
+        Assert.IsEmpty(errors);
+    }
+
     // --- Stretch conflicts: two trains meet on a single-track stretch only on a common session ---
 
     // Two trains occupy the same single-track stretch (G<->Yb) at the same clock time: the forward run
@@ -1067,5 +1222,79 @@ public class ValidationTests
 
         Assert.AreEqual(ValidationScope.Schedule, error.Scope);
         Assert.IsTrue(error.Involves(schedule), "A schedule working the under-covered train is marked.");
+    }
+
+    // --- L4: a lock key left meaningless by a manning change is kept, ignored, and reported ---
+
+    [TestMethod]
+    public void ALockKeyInForceIsNotReported()
+    {
+        var (plan, holder, siding) = PlanWithLockKey();
+
+        Assert.IsEmpty(LockKeyErrors(plan));
+        Assert.IsNotNull(siding.EffectiveLockKey);
+        Assert.IsTrue(holder.IsManned);
+    }
+
+    [TestMethod]
+    public void AKeyAtALocationThatIsNowMannedIsReported()
+    {
+        var (plan, _, siding) = PlanWithLockKey();
+        siding.IsManned = true;
+
+        var error = LockKeyErrors(plan).Single();
+
+        Assert.AreEqual(ValidationScope.Layout, error.Scope, "Put right on the Operation Locations tab.");
+        Assert.AreEqual(Severity.Warning, error.Severity);
+        StringAssert.Contains(error.Message.Text, siding.Name, "The message names the location.");
+        Assert.IsNull(error.FromTrack, "A key belongs to the layout, not to anything running on it.");
+        Assert.IsNull(error.FromTime);
+        Assert.IsEmpty(error.Trains);
+    }
+
+    [TestMethod]
+    public void AKeyHeldAtAStationThatIsNowUnmannedIsReported()
+    {
+        var (plan, holder, _) = PlanWithLockKey();
+        holder.IsManned = false;
+
+        var error = LockKeyErrors(plan).Single();
+
+        StringAssert.Contains(error.Message.Text, holder.Name, "The message names the station that cannot hand it over.");
+    }
+
+    [TestMethod]
+    public void AKeyWhereNothingIsWorkedAnyMoreIsReported()
+    {
+        var (plan, _, siding) = PlanWithLockKey();
+        siding.HasCargoExchange = false;
+
+        Assert.HasCount(1, LockKeyErrors(plan));
+    }
+
+    [TestMethod]
+    public void ALocationWithoutALockKeyIsNeverReported()
+    {
+        var (plan, _, siding) = PlanWithLockKey();
+        siding.LockKey = null;
+        siding.IsManned = true;
+
+        Assert.IsEmpty(LockKeyErrors(plan));
+    }
+
+    private static IReadOnlyList<ValidationError> LockKeyErrors(Plan plan) =>
+        [.. plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.LockKeyIgnored)];
+
+    // Ytterby's key is held at Göteborg, both stations of the standard test layout.
+    private static (Plan Plan, Station Holder, Station Siding) PlanWithLockKey()
+    {
+        var timetable = NewTimetable();
+        var stations = timetable.Layout.OperationLocations.OfType<Station>().ToArray();
+        var holder = stations.Single(s => s.Signature == "G");
+        var siding = stations.Single(s => s.Signature == "Yb");
+        holder.IsManned = true;
+        siding.IsManned = false;
+        siding.LockKey = new LockKey { HeldAt = holder, Name = "A1" };
+        return (Plan.Create("Test", timetable), holder, siding);
     }
 }

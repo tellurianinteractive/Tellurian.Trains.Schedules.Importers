@@ -73,6 +73,19 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public int? PhoneNumber { get; set; }
 
     /// <summary>
+    /// Gets or sets markdown instructions for how this location is worked at the meeting this plan is
+    /// for. Optional, and offered only where <c>HasInstructions</c> says there is something to
+    /// instruct about.
+    /// </summary>
+    /// <remarks>
+    /// This is what the planner decides about <em>this</em> location on <em>this</em> layout: which
+    /// tracks are used for what, how the shunting is arranged, what a train is expected to do here.
+    /// What the location is in itself — its track plan, how its interlocking works, how it is operated
+    /// in general — is for its owner to supply and does not belong here.
+    /// </remarks>
+    public string Instructions { get; set; } = string.Empty;
+
+    /// <summary>
     /// TODO: Reevaluate this property. This could instead indicae a <see cref="SignalControlledLocation"/>.
     /// </summary>
     public bool IsSignal { get; set; }
@@ -133,6 +146,13 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     /// </para>
     /// </remarks>
     public Station? CargoServedFrom { get; set; }
+
+    /// <summary>
+    /// Gets or sets the <see cref="LockKey"/> a train needs to unlock the switches here, or <c>null</c>
+    /// when none is needed. Offered only where <c>CanRequireLockKey</c> says there could be one:
+    /// somewhere that exchanges cargo and has nobody on duty to work its switches.
+    /// </summary>
+    public LockKey? LockKey { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of tracks at this operation location.
@@ -263,5 +283,20 @@ public static class OperationLocationExtensions
         public bool CanHaveTrainsMeets =>
             operationLocation is Station station &&
             station.Tracks.Count(t => t.IsScheduled) > 1;
+    }
+
+    extension(OperationLocation location)
+    {
+        /// <summary>
+        /// Whether <see cref="OperationLocation.Instructions"/> apply here: something has to be
+        /// exchanged at the location — passengers, cargo or both — for there to be anything to say
+        /// about how it is worked. Somewhere trains only ever run past, such as a block post, is
+        /// worked from the timetable alone and is given no instructions. Neither is an
+        /// <see cref="OtherLocation"/>: nobody works one, so a train there does what its call says
+        /// and nothing more, whatever it exchanges.
+        /// </summary>
+        public bool HasInstructions =>
+            location is not OtherLocation &&
+            (location.HasPassengerExchange || location.HasCargoExchange);
     }
 }

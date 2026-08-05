@@ -1,5 +1,102 @@
 # Versionsnyheter
 
+## Version 0.4.0
+
+### Brytande ändringar
+
+- **Ett fordon du skapar identifieras nu av sin operatör och sitt nummer.** De två tillsammans pekar ut
+  ett enda verkligt fordon, så under en och samma köromgång får kombinationen tillhöra bara ett fordon
+  — vilken sorts fordon det än är. En vagnsats och ett lok kan inte längre båda vara *DB 5*. Ett fordon
+  utan operatör identifieras av numret ensamt. Två fordon får fortfarande ha samma operatör och nummer
+  så länge de köromgångar de går inte överlappar, eftersom de då aldrig är på träffen samtidigt.
+
+  Ett **importerat** fordon identifieras även fortsättningsvis av det externa id det importerades med,
+  vilket redan är unikt i planen det kom från, så en importerad plan ger inga nya konflikter av detta.
+
+  Att lägga till eller ändra ett fordon under fliken Omlopp avvisar nu en identitet som ett annat fordon
+  redan har, och ett nummer måste anges. Planer gjorda före den här regeln behålls precis som de är —
+  ingenting numreras om åt dig — och varje fordon som delar identitet listas bland konflikterna, en
+  gång vardera, så att du ser vad som behöver ett nytt nummer.
+
+### Ändringar
+
+- **Det finns en ny rapport: tågklareringslistan.** Ett eget häfte per station som är bemannad — alla
+  bemannade stationer, och alla skuggstationer oavsett om de är bemannade — med de tåg stationen
+  hanterar i tidsordning. Ett tåg som står på stationen förekommer två gånger, en gång för ankomsten
+  och en gång för avgången, eftersom att klarera in ett tåg och att klarera ut det mot nästa station är
+  två skilda handlingar som görs med några minuters mellanrum. Ankomster har vit bakgrund och avgångar
+  ljusgul, så att de aldrig kan förväxlas. Tåg som bara passerar tas också med, eftersom även de måste
+  klareras förbi. Varje sida har stationens namn, den del av dygnet sidan täcker och telefonnumren till
+  stationerna i andra änden av tågklareringssträckorna, och varje rad har en ruta per köromgång att
+  pricka av allteftersom, gråmarkerad för de köromgångar tåget inte går. Varje station börjar på ny
+  sida, så bunten kan helt enkelt delas och lämnas ut. Skrivs ut från menyn Rapporter.
+
+- **Fälten för att lägga till och ändra ett fordon har fått ny ordning,** densamma på båda ställena:
+  typ av fordon, typ av dragkraft, antal enheter, operatör, nummer, klass, köromgångar och sist det
+  externa id:t — vad fordonet är, sedan vad som identifierar det, sedan hur det beskrivs och när det
+  går. Fältet som tidigare hette *Företag* heter nu *Operatör*.
+
+- **Ett externt id kan rättas men inte längre hittas på.** Det externa id:t är det namn ett tåg eller ett
+  fordon bär i systemet det importerades från, så det betyder något bara där det kommer från något. Det
+  som importerats med ett id har kvar sitt fält — under fliken Tåg, och i fordonsdialogen under fliken
+  Omlopp — och kan rättas där; det som aldrig haft något id har nu ingen ruta att skriva i. Ett fordon
+  du skapar i planeraren får därför inget externt id alls, där det tidigare fick ett påhittat av klass
+  och nummer.
+
+- **Minsta tiden mellan två användningar av samma spår kontrolleras nu.** Inställningen fanns, men
+  ingenting använde den. Lämnad på 0 — där den börjar, och där den stannar tills du ändrar den — ändras
+  ingenting i kontrollen: två tåg är i konflikt där de står på samma spår samtidigt, och ett som kommer
+  just när ett annat går är en avlösning, inte en konflikt. Sätt den till exempelvis 5 och spåret måste
+  dessutom vara ledigt i fem minuter mellan dem, så att en plan som vänder spåret snabbare än
+  driftplatsen hinner med blir rapporterad. Exakt fem lediga minuter räcker; fyra gör det inte.
+
+  En sådan konflikt anger hur kort mellanrummet faktiskt är och hur långt det måste vara, i stället för
+  att påstå att de två tågen överlappar när tiderna visar att de inte gör det.
+
+- **En driftplats kan nu ha egna instruktioner.** Formuläret för att lägga till och ändra en driftplats
+  har ett fält **Instruktioner**, skrivet i Markdown och visat bredvid en förhandsvisning, precis som de
+  allmänna instruktionerna i Inställningar. Det är till för hur just den driftplatsen körs på den här
+  träffen — vilka spår som används till vad, hur växlingen är upplagd och vad lokförarna och de som
+  bemannar platsen annars behöver veta där. Hur driftplatsen körs i allmänhet, och annan beskrivning av
+  den, är ägarens sak att tillhandahålla och hör inte hemma i fältet. Det du skriver sparas med
+  driftplatsen och visas i dess Info-vy.
+
+  Fältet erbjuds på en station eller ett industriområde, där resande och/eller gods utväxlas. Det
+  erbjuds inte där det inte finns något att instruera om: tågen passerar bara en signalreglerad plats,
+  och ingen bemannar en annan plats, så tåget gör där vad uppehållet säger och inget mer.
+
+- **En plats där gods hanteras utan bemanning kan nu kräva en nyckel.** Där växlarna på en obemannad
+  station eller ett industriområde är låsta kan du i ändringsformuläret välja den bemannade station som
+  förvarar nyckeln, under **Låsnyckel förvaras vid**, och namnge nyckeln om stationen förvarar flera.
+
+  Mer än så behöver inte planeras. Ett godståg som stannar på stationen med nyckeln och senare stannar
+  på platsen som nyckeln låser upp får vid avgången därifrån beskedet *hämta nyckel A1 för att låsa upp
+  Bruket*; nästa gång tåget stannar där säger ankomsten *lämna nyckel A1 från Bruket*. Ett tåg som bara
+  passerar någon av platserna får inget besked, eftersom det inte låser upp något. Nyckeln hämtas vid
+  det sista uppehållet på stationen före arbetet och lämnas tillbaka vid det första efter det, så ett
+  tåg som stannar där två gånger slipper bära med sig den ett extra varv.
+
+  En nyckel betyder något bara så länge båda ändarna håller. Markera platsen själv som bemannad, eller
+  ta bort bemanningen från stationen som förvarar nyckeln, så slutar nyckeln gälla: inga besked skapas
+  av den, och **Konflikter** talar om vilken av de två ändringarna som gjorde det. Nyckeln behålls i
+  stället för att kastas, så om du ångrar ändringen gäller den direkt igen, och den ligger kvar i
+  formuläret där du kan peka den mot en annan station eller ta bort den.
+
+### Rättningar
+
+- **Två sträckor som utgår från samma driftplats ritades som om de aldrig möttes.** Började en
+  tidtabellssträcka på just den första driftplatsen på en annan, förband ingenting de två i
+  Topologi-diagrammet: var och en ritades som en egen linje, utan gren mellan dem. Den andra lämnar nu
+  den driftplatsen som vilken gren som helst och faller bort från den i samma fasta vinkel.
+
+- **Varje gränsvärde för kontrollerna anger nu vilken klocka det mäts mot.** Minsta tiden mellan två
+  användningar av samma spår saknade helt enhet, och de två tåghastigheterna angav bara *klockminuter*,
+  vilket kunde läsas på båda sätten. Alla tre anger nu snabbklocksminuter — den klocka tågen går efter,
+  inte verklig tid.
+
+- **Längder och distanser skrivs nu ut i meter,** liksom täljaren i tåghastigheterna, så att *m* inte
+  kan tas för en minut. Minsta uppehåll vid en station anges nu också i snabbklocksminuter.
+
 ## Version 0.3.5
 
 ### Rättningar

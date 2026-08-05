@@ -108,7 +108,7 @@ public class ScheduleEditingTests
     }
 
     [TestMethod]
-    public void CreateVehicleAddsToPoolWithComposedExternalId()
+    public void CreateVehicleAddsToPoolWithNoExternalId()
     {
         var plan = CreatePlan();
 
@@ -116,7 +116,9 @@ public class ScheduleEditingTests
 
         Assert.HasCount(1, plan.ScheduledObjects);
         Assert.AreEqual(12, vehicle.Number);
-        Assert.AreEqual("BR 218 12", vehicle.ExternalId);
+        Assert.IsFalse(vehicle.HasExternalId, "An external id is the identifier a vehicle was imported under.");
+        Assert.AreEqual("12 BR 218", vehicle.Designation, "Its designation is composed instead.");
+        Assert.AreEqual(VehicleIdentity.Of(null, 12), vehicle.Identity, "So operator and number identify it.");
     }
 
     [TestMethod]
@@ -127,7 +129,77 @@ public class ScheduleEditingTests
         var vehicle = plan.CreateVehicle(ScheduledObjectType.Wagonset, null, 0, null);
 
         Assert.AreEqual(vehicle.Id, vehicle.Number, "A vehicle with no number falls back to its unique id.");
-        Assert.IsFalse(string.IsNullOrWhiteSpace(vehicle.ExternalId));
+    }
+
+    // --- The editor guard behind rule P5: an identity may name only one vehicle per session ---
+
+    [TestMethod]
+    public void VehicleClaimingFindsAVehicleWithTheSameOperatorAndNumber()
+    {
+        var plan = CreatePlan();
+        var db = new Company(1, "Deutsche Bahn", "DB");
+        var existing = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, db);
+
+        Assert.AreEqual(existing, plan.VehicleClaiming(VehicleIdentity.Of(db.Id, 5), Sessions.All));
+    }
+
+    [TestMethod]
+    public void VehicleClaimingFindsAVehicleOfAnotherType()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 5, null);
+
+        Assert.AreEqual(wagonset, plan.VehicleClaiming(VehicleIdentity.Of(null, 5), Sessions.All),
+            "A locomotive may not take the operator and number a wagonset already has.");
+    }
+
+    [TestMethod]
+    public void VehicleClaimingIgnoresTheVehicleBeingEdited()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, null);
+
+        Assert.IsNull(plan.VehicleClaiming(VehicleIdentity.Of(null, 5), Sessions.All, excluding: vehicle),
+            "A vehicle may of course keep its own identity.");
+    }
+
+    [TestMethod]
+    public void VehicleClaimingIgnoresAVehicleWorkingOtherSessions()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        var existing = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, null);
+        plan.AssignVehicle(schedule, existing, Sessions.FromSessionNumbers(1, 2));
+
+        Assert.IsNull(plan.VehicleClaiming(VehicleIdentity.Of(null, 5), Sessions.FromSessionNumbers(3, 4)),
+            "The identity is free on the sessions the other vehicle does not work.");
+        Assert.AreEqual(existing, plan.VehicleClaiming(VehicleIdentity.Of(null, 5), Sessions.FromSessionNumbers(2, 3)),
+            "It is taken as soon as one session is shared.");
+    }
+
+    [TestMethod]
+    public void VehicleClaimingIgnoresADifferentOperator()
+    {
+        var plan = CreatePlan();
+        plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, new Company(1, "Deutsche Bahn", "DB"));
+
+        Assert.IsNull(plan.VehicleClaiming(VehicleIdentity.Of(operatorId: 2, 5), Sessions.All));
+        Assert.IsNull(plan.VehicleClaiming(VehicleIdentity.Of(operatorId: null, 5), Sessions.All),
+            "A vehicle with no operator is a different identity from one with an operator.");
+    }
+
+    [TestMethod]
+    public void VehicleClaimingIgnoresTheOperatorAndNumberOfAnImportedVehicle()
+    {
+        var plan = CreatePlan();
+        var imported = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 5, null);
+        imported.ExternalId = "DBSCH EG 01"; // as the import sets it
+
+        Assert.IsNull(plan.VehicleClaiming(VehicleIdentity.Of(null, 5), Sessions.All),
+            "A vehicle carrying an external id is identified by that, not by its operator and number.");
+        Assert.AreEqual(imported, plan.VehicleClaiming(VehicleIdentity.Of("dbsch eg 01", null, 0), Sessions.All),
+            "An external id identifies case-insensitively.");
     }
 
     [TestMethod]

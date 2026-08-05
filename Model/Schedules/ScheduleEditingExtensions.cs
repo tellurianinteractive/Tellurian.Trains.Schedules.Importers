@@ -198,9 +198,16 @@ public static class ScheduleEditingExtensions
 
         /// <summary>
         /// Creates a new <see cref="ScheduledObject">vehicle</see> and adds it to the plan's vehicle pool.
-        /// A vehicle carrying no number falls back to its unique id (as the XPLN import does), and its
-        /// external id — its identity everywhere in the app — is composed from the class and number.
+        /// A vehicle carrying no number falls back to its unique id (as the XPLN import does).
         /// </summary>
+        /// <remarks>
+        /// The vehicle is given no <see cref="ScheduledObject.ExternalId"/>: that is the identifier a
+        /// vehicle was imported under, and the planner does not invent one. Its
+        /// <see cref="ScheduledObject.Designation"/> is therefore composed from the operator signature,
+        /// class and number, and it is the operator and number that identify it (see
+        /// <see cref="VehicleIdentity"/>). Use <see cref="VehicleClaiming"/> first where the caller must
+        /// not create a vehicle whose identity is already taken.
+        /// </remarks>
         /// <param name="objectType">The kind of vehicle (locomotive, trainset, wagonset).</param>
         /// <param name="class">The vehicle class, e.g. "BR 218"; may be empty.</param>
         /// <param name="number">The vehicle number, or 0 to fall back to the vehicle's id.</param>
@@ -209,15 +216,11 @@ public static class ScheduleEditingExtensions
         {
             plan = plan.ValueOrException(nameof(plan));
             var id = plan.NextScheduledObjectId();
-            var vehicleNumber = number == 0 ? id : number;
-            var cls = @class ?? string.Empty;
-            var externalId = (string.IsNullOrWhiteSpace(cls) ? $"{objectType} {vehicleNumber}" : $"{cls} {vehicleNumber}").Trim();
-            var vehicle = new ScheduledObject(id, objectType, vehicleNumber)
+            var vehicle = new ScheduledObject(id, objectType, number == 0 ? id : number)
             {
-                Class = cls,
+                Class = @class ?? string.Empty,
                 Company = company,
                 CompanyId = company?.Id,
-                ExternalId = externalId,
             };
             plan.AddVehicle(vehicle);
             return vehicle;
@@ -260,6 +263,33 @@ public static class ScheduleEditingExtensions
             // The individual-wagon rake belongs only to a wagonset; clear it when the type is anything else.
             if (!objectType.IsWagonSet) vehicle.Units.Clear();
             return vehicle;
+        }
+
+        /// <summary>
+        /// Finds the vehicle already in the pool that claims the given <see cref="VehicleIdentity"/> on at
+        /// least one of the given sessions — the vehicle a new or edited vehicle with that identity would
+        /// clash with. Returns <c>null</c> when the identity is free, which is what lets an editor refuse
+        /// the edit before it is made rather than leaving the plan to be reported by the identity
+        /// validation (rule P5).
+        /// </summary>
+        /// <remarks>
+        /// The identity spans every vehicle type, so a wagonset is found when a locomotive is being given
+        /// the same identity. Cargo flows are left out (see
+        /// <see cref="ScheduledObjectExtensions.get_HasVehicleIdentity(ScheduledObject)"/>), and a vehicle
+        /// assigned nowhere claims every session, so its identity is taken even before it is given work.
+        /// </remarks>
+        /// <param name="identity">The identity wanted.</param>
+        /// <param name="sessions">The sessions the identity is wanted for.</param>
+        /// <param name="excluding">A vehicle to disregard — the one being edited, which may of course keep
+        /// its own identity.</param>
+        public ScheduledObject? VehicleClaiming(VehicleIdentity identity, Sessions sessions, ScheduledObject? excluding = null)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            return plan.ScheduledObjects.FirstOrDefault(vehicle =>
+                vehicle.HasVehicleIdentity &&
+                !ReferenceEquals(vehicle, excluding) &&
+                vehicle.Identity == identity &&
+                vehicle.ClaimedSessions.Overlaps(sessions));
         }
 
         /// <summary>

@@ -43,6 +43,17 @@ many tracks it has. For each row you can:
 **Add new** asks for the type first (station, signal-controlled, or other location), then opens the
 edit form for that type. A new location is saved once its name and a unique signature are filled in.
 
+#### Instructions
+
+A station or industrial area has an **Instructions** field, written in Markdown and shown beside a live
+preview. It is for how *this* location is worked at *this* meeting: which tracks are used for what, how
+the shunting is arranged, and what else the loco drivers and the people staffing it need to know. How
+the location is operated in general, and any other description of it, is for its owner to provide and
+does not belong here.
+
+The field is not shown where there is nothing to instruct: trains only run past a signal-controlled
+location, and nobody works an other location, so a train there does what its call says and no more.
+
 #### Editing tracks
 
 The edit form lists the location's tracks, where you can add, edit and delete them. A track can only
@@ -54,3 +65,23 @@ trains use it. Reassign or remove those station calls first.
 A station can be linked to one or more **regions** from the layout's region catalogue (managed on the
 **Regions** tab). This is mainly used for shadow shunting yards, which represent external stations or regions
 beyond the modelled railway. If the layout has no regions yet, you can add the standard set from the form.
+
+### Lock keys
+
+Where cargo is exchanged but nobody is on duty — an unmanned station or an industrial area — the
+switches are usually padlocked, and the key is kept at a manned station along the line. Set **Lock key
+held at** to that station, and give the key a name if the station keeps more than one.
+
+Nothing else has to be planned. A freight train that stops at the key-holding station and later stops at
+the location the key unlocks is told, at its departure from the key-holding station, to *pick up key A1
+for unlocking Bruket*; when it next calls at that station on the way back, its arrival tells it to *leave
+key A1 from Bruket*. A train that only runs past either place is told nothing, since it unlocks nothing.
+
+The key is fetched at the last call at the holding station before the work and handed back at the first
+one after it, so a train calling there twice is not asked to carry the key around for an extra visit.
+
+A key only means something while both ends of it hold. Mark the location itself as manned, or take the
+manning off the station that keeps the key, and the key stops applying: no notes are made from it, and
+**Conflicts** says which of the two changes did it. The key itself is kept, not thrown away, so undoing
+that change brings it straight back — and it stays on the form, where you can point it at another
+station or clear it altogether.

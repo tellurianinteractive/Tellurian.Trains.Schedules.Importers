@@ -125,4 +125,20 @@
   <data name="NoExchange" xml:space="preserve">
     <value>Kein Austausch</value>
   </data>
+  <data name="PickUpKeyForUnlocking" xml:space="preserve">
+    <value>Schlüssel {0} zum Aufschließen von {1} abholen.</value>
+    <comment>{0}=Name des Schlüssels, {1}=der Ort, den er aufschließt</comment>
+  </data>
+  <data name="PickUpUnnamedKeyForUnlocking" xml:space="preserve">
+    <value>Schlüssel zum Aufschließen von {0} abholen.</value>
+    <comment>{0}=der Ort, den der Schlüssel aufschließt</comment>
+  </data>
+  <data name="LeaveKeyFrom" xml:space="preserve">
+    <value>Schlüssel {0} von {1} abgeben.</value>
+    <comment>{0}=Name des Schlüssels, {1}=der Ort, den er aufschließt</comment>
+  </data>
+  <data name="LeaveUnnamedKeyFrom" xml:space="preserve">
+    <value>Schlüssel von {0} abgeben.</value>
+    <comment>{0}=der Ort, den der Schlüssel aufschließt</comment>
+  </data>
 </root>

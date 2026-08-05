@@ -144,6 +144,9 @@
   <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
     <value>Tåg {0} {1} överlappar i tid med tåg {2} {3}.</value>
   </data>
+  <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
+    <value>Tåg {0} {1} följs av tåg {2} {3} efter bara {4} minuter; minst {5} minuter krävs.</value>
+  </data>
   <data name="ConflictOnStretchBetweenPassingTrains" xml:space="preserve">
     <value>Konflikt på sträckan {0} mellan {1} och {2}.</value>
   </data>
@@ -270,6 +273,12 @@
   <data name="TrainsShareNumberOnOverlappingSessions" xml:space="preserve">
     <value>Tåg {0} och {1} har samma nummer men körs på överlappande köromgångar {2}.</value>
   </data>
+  <data name="VehiclesShareExternalId" xml:space="preserve">
+    <value>Två fordon har samma externa id {0} på köromgångar {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumber" xml:space="preserve">
+    <value>Fordon {0} och {1} har samma operatör och nummer {2} på köromgångar {3}.</value>
+  </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Fordonsomlopp {0}: {1} fortsätter inte där föregående del slutade vid {2}.</value>
   </data>
@@ -293,5 +302,14 @@
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tåg {0} saknar körande tjänst på köromgångar {1} för delen från {2} {3} till {4} {5}.</value>
+  </data>
+  <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
+    <value>Driftplatsen {0} är bemannad, så låsnyckeln som förvaras vid {1} ignoreras.</value>
+  </data>
+  <data name="LockKeyIgnoredWithoutCargoExchange" xml:space="preserve">
+    <value>Driftplatsen {0} utväxlar inget gods, så låsnyckeln som förvaras vid {1} ignoreras.</value>
+  </data>
+  <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
+    <value>Stationen {1} är inte bemannad, så låsnyckeln den förvarar för {0} kan inte hämtas och ignoreras.</value>
   </data>
 </root>

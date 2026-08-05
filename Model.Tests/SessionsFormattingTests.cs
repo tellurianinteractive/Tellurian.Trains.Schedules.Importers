@@ -200,6 +200,26 @@ public class SessionsFormattingTests
     });
 
     [TestMethod]
+    public void AskingForShortFormsAbbreviatesTheWholeAndEmptyValues() => WithCulture("en-GB", () =>
+    {
+        var brief = new SessionsSettings { MaxNumberOfSessions = 4, UseShortWeekdayNames = true };
+        var none = Sessions.FromBitPattern(0);
+
+        // The printed reports ask for short forms, where the column is a few millimetres wide and the
+        // word "sessions" is already the heading above it.
+        Assert.AreEqual("All", Sessions.All.ToText(brief));
+        Assert.AreEqual("None", none.ToText(brief));
+
+        // The text and markup forms must not disagree about the wording.
+        Assert.AreEqual("All", Sessions.All.ToHtml(brief).Value);
+        Assert.AreEqual("None", none.ToHtml(brief).Value);
+
+        // Anything asking for the long form is unchanged.
+        Assert.AreEqual("All sessions", Sessions.All.ToText(Numbers(4)));
+        Assert.AreEqual("No sessions", none.ToText(Numbers(4)));
+    });
+
+    [TestMethod]
     public void CirclesAreDrawnWithAnSvgFillSoTheyPrint() => WithCulture("en-GB", () =>
     {
         var html = Sessions.FromSessionNumbers(1).ToHtml(Numbers()).Value;

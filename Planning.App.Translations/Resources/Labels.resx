@@ -451,13 +451,13 @@
     <value>Thresholds</value>
   </data>
   <data name="MinTrainSpeed" xml:space="preserve">
-    <value>Min train speed (m/clock-min)</value>
+    <value>Min train speed (metres/fast-clock min)</value>
   </data>
   <data name="MaxTrainSpeed" xml:space="preserve">
-    <value>Max train speed (m/clock-min)</value>
+    <value>Max train speed (metres/fast-clock min)</value>
   </data>
   <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
-    <value>Min minutes between track usage</value>
+    <value>Min time between track usage (fast-clock min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
     <value>ModuleRegistry API key</value>
@@ -632,7 +632,7 @@
     <value>Leave blank to inherit the layout default.</value>
   </data>
   <data name="MinimumStopMinutes" xml:space="preserve">
-    <value>Minimum stop (min)</value>
+    <value>Minimum stop (fast-clock min)</value>
   </data>
   <data name="MinimumStopMinutesHelp" xml:space="preserve">
     <value>Minimum time a train stops at this manned station, in fast-clock minutes.</value>
@@ -665,7 +665,7 @@
     <value>Scheduled?</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Length (m)</value>
+    <value>Length (metres)</value>
   </data>
   <data name="Usage" xml:space="preserve">
     <value>Usage</value>
@@ -942,7 +942,7 @@
     <value>Route</value>
   </data>
   <data name="DistanceMeters" xml:space="preserve">
-    <value>Distance (m)</value>
+    <value>Distance (metres)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Speed (km/h)</value>
@@ -1286,6 +1286,9 @@
   <data name="Sessions" xml:space="preserve">
     <value>Sessions</value>
   </data>
+  <data name="SessionsShort" xml:space="preserve">
+    <value>Runs</value>
+  </data>
   <data name="Days" xml:space="preserve">
     <value>Days</value>
   </data>
@@ -1405,7 +1408,7 @@
     <value>From category: {0}</value>
   </data>
   <data name="LengthMeters" xml:space="preserve">
-    <value>Length (m)</value>
+    <value>Length (metres)</value>
   </data>
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Show a note at arrival stating which train this continues as, from the schedule.</value>
@@ -1646,6 +1649,9 @@
   </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Create new vehicle</value>
+  </data>
+  <data name="VehicleIdentityAlreadyUsed" xml:space="preserve">
+    <value>Operator and number {0} is already used by {1}. Choose another number or operator.</value>
   </data>
   <data name="VehicleType" xml:space="preserve">
     <value>Vehicle type</value>
@@ -2042,5 +2048,47 @@
   </data>
   <data name="DriverDuties" xml:space="preserve">
     <value>Driver duties</value>
+  </data>
+  <data name="StationDispatchList" xml:space="preserve">
+    <value>Station dispatch list</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="NoTrainsAtStation" xml:space="preserve">
+    <value>No trains call at this station.</value>
+  </data>
+  <data name="NoDispatchStations" xml:space="preserve">
+    <value>There are no manned or shadow stations to print a dispatch list for.</value>
+  </data>
+  <data name="LocationInstructions" xml:space="preserve">
+    <value>Instructions</value>
+  </data>
+  <data name="LocationInstructionsHint" xml:space="preserve">
+    <value>How this location is worked at this meeting: which tracks are used for what, how the shunting is arranged, and what else the loco drivers and the people staffing it need to know here.</value>
+  </data>
+  <data name="LocationInstructionsHelp" xml:space="preserve">
+    <value>Markdown. For instructions that apply to this location on this meeting's layout. General instructions on how the location is operated, and any other information about it, are for its owner to provide and do not belong here.</value>
+  </data>
+  <data name="LockKey" xml:space="preserve">
+    <value>Lock key</value>
+  </data>
+  <data name="LockKeyHeldAt" xml:space="preserve">
+    <value>Lock key held at</value>
+  </data>
+  <data name="LockKeyHeldAtHelp" xml:space="preserve">
+    <value>The manned station that holds the key for unlocking the switches here. A freight train stopping here is told to collect it on leaving that station and to hand it back the next time it calls there. Leave empty when no key is needed.</value>
+  </data>
+  <data name="LockKeyName" xml:space="preserve">
+    <value>Lock key name</value>
+  </data>
+  <data name="LockKeyNameHelp" xml:space="preserve">
+    <value>What the key is called, so the loco driver can ask for the right one where a station holds several. Optional.</value>
+  </data>
+  <data name="NoMannedStationsForLockKey" xml:space="preserve">
+    <value>No manned station can hold a key yet. Mark the station that keeps it as manned first.</value>
+  </data>
+  <data name="LockKeyIgnoredHint" xml:space="preserve">
+    <value>This key is ignored as things stand: see Conflicts for why. It is kept, so it works again as soon as that is put right.</value>
   </data>
 </root>

@@ -187,7 +187,13 @@
   <data name="AllSessions" xml:space="preserve">
     <value>All sessions</value>
   </data>
+  <data name="AllSessionsShort" xml:space="preserve">
+    <value>All</value>
+  </data>
   <data name="NoSessions" xml:space="preserve">
     <value>No sessions</value>
+  </data>
+  <data name="NoSessionsShort" xml:space="preserve">
+    <value>None</value>
   </data>
 </root>

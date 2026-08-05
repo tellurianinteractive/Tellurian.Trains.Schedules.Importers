@@ -123,6 +123,9 @@
   <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
     <value>Tog {0} {1} overlapper i tid med tog {2} {3}.</value>
   </data>
+  <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
+    <value>Tog {0} {1} etterfølges av tog {2} {3} etter bare {4} minutter; minst {5} minutter kreves.</value>
+  </data>
   <data name="CallMustBeAfterPreviousCall" xml:space="preserve">
     <value>Anløp {0} skal være senere en foregående anløp {1} for tog {2}.</value>
   </data>
@@ -270,6 +273,12 @@
   <data name="TrainsShareNumberOnOverlappingSessions" xml:space="preserve">
     <value>Tog {0} og {1} har samme nummer men kjører på overlappende sesjoner {2}.</value>
   </data>
+  <data name="VehiclesShareExternalId" xml:space="preserve">
+    <value>To kjøretøy har samme eksterne id {0} på sesjoner {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumber" xml:space="preserve">
+    <value>Kjøretøy {0} og {1} har samme operatør og nummer {2} på sesjoner {3}.</value>
+  </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Vognløp {0}: {1} fortsetter ikke der forrige del sluttet ved {2}.</value>
   </data>
@@ -293,5 +302,14 @@
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tog {0} har ingen tjeneste på sesjoner {1} for delen fra {2} {3} til {4} {5}.</value>
+  </data>
+  <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
+    <value>Driftsstedet {0} er betjent, så nøkkelen som oppbevares ved {1}, ignoreres.</value>
+  </data>
+  <data name="LockKeyIgnoredWithoutCargoExchange" xml:space="preserve">
+    <value>Driftsstedet {0} utveksler ikke gods, så nøkkelen som oppbevares ved {1}, ignoreres.</value>
+  </data>
+  <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
+    <value>Stasjonen {1} er ikke betjent, så nøkkelen den oppbevarer for {0}, kan ikke hentes og ignoreres.</value>
   </data>
 </root>

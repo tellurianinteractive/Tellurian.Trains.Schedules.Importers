@@ -114,6 +114,7 @@
     {
         ValidationScope.Schedule or ValidationScope.Vehicle => "schedules",
         ValidationScope.Duty => "duties",
+        ValidationScope.Layout => "operation-locations",
         _ => error.ErrorType switch
         {
             ValidationErrorType.StationTrackConflict or

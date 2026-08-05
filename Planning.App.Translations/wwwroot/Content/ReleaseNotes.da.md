@@ -1,5 +1,104 @@
 # Versionsnyheder
 
+## Version 0.4.0
+
+### Brydende ændringer
+
+- **Et køretøj, du opretter, identificeres nu af sin operatør og sit nummer.** De to tilsammen udpeger
+  ét virkeligt køretøj, så på én og samme køresession må kombinationen kun tilhøre ét køretøj — uanset
+  hvilken slags køretøj det er. Et vognsæt og et lokomotiv kan ikke længere begge være *DB 5*. Et
+  køretøj uden operatør identificeres af nummeret alene. To køretøjer må stadig have samme operatør og
+  nummer, så længe de køresessioner, de kører, ikke overlapper, for så er de aldrig til træffet samtidig.
+
+  Et **importeret** køretøj identificeres fortsat af det eksterne id, det blev importeret med, og som
+  allerede er entydigt i den plan, det kom fra, så en importeret plan giver ingen nye konflikter af dette.
+
+  At tilføje eller rette et køretøj under fanen Omløb afviser nu en identitet, som et andet køretøj
+  allerede har, og et nummer skal angives. Planer lavet før denne regel bevares præcis som de er — der
+  bliver ikke omnummereret for dig — og hvert køretøj, der deler identitet, står blandt konflikterne,
+  én gang hver, så du kan se, hvad der skal have et nyt nummer.
+
+### Ændringer
+
+- **Der er en ny rapport: togekspeditionslisten.** Et sæt ark for hver station, der er bemandet — alle
+  bemandede stationer og alle skyggestationer, uanset om de er bemandede — med de tog, stationen
+  ekspederer, i tidsrækkefølge. Et tog, der holder på stationen, optræder to gange, én gang for
+  ankomsten og én gang for afgangen, fordi det at ekspedere et tog ind og at ekspedere det videre til
+  næste station er to forskellige handlinger med nogle minutters mellemrum. Ankomster står på hvid
+  baggrund og afgange på lysegul, så de to aldrig kan forveksles. Tog, der blot kører igennem, er også
+  med, for de skal også ekspederes forbi. Hver side har stationens navn, den del af døgnet siden
+  dækker, og telefonnumrene til stationerne i den anden ende af togekspeditionsstrækningerne, og hver
+  række har et felt pr. køresession til at krydse af undervejs, gråtonet for de køresessioner, toget
+  ikke kører. Hver station begynder på en ny side, så bunken uden videre kan deles og uddeles. Udskrives
+  fra menuen Rapporter.
+
+- **Felterne til at tilføje og rette et køretøj har fået ny rækkefølge,** den samme begge steder:
+  køretøjstype, trækkrafttype, antal enheder, operatør, nummer, klasse, køresessioner og til sidst det
+  eksterne id — hvad køretøjet er, så hvad der identificerer det, så hvordan det beskrives, og hvornår
+  det kører. Feltet, der før hed *Selskab*, hedder nu *Operatør*.
+
+- **Et eksternt id kan rettes, men ikke længere opfindes.** Det eksterne id er det navn, et tog eller et
+  køretøj bærer i det system, det blev importeret fra, så det betyder kun noget, hvor det kommer fra
+  noget. Det, der er importeret med et id, har stadig sit felt — under fanen Tog og i køretøjsdialogen
+  under fanen Omløb — og kan rettes der; det, der aldrig har haft et id, har nu intet felt at skrive i.
+  Et køretøj, du opretter i planlæggeren, får derfor slet intet eksternt id, hvor det før fik et
+  opdigtet af klasse og nummer.
+
+- **Den mindste tid mellem to anvendelser af samme spor kontrolleres nu.** Indstillingen fandtes, men
+  intet brugte den. Står den på 0 — hvor den begynder, og hvor den bliver, indtil du ændrer den —
+  ændres intet i kontrollen: to tog er i konflikt, hvor de står på samme spor samtidig, og et, der
+  ankommer netop som et andet kører, er en afløsning, ikke en konflikt. Sæt den til f.eks. 5, og sporet
+  skal desuden være frit i fem minutter imellem dem, så en plan, der vender sporet hurtigere, end
+  stationen kan nå, bliver rapporteret. Præcis fem frie minutter er nok; fire er ikke.
+
+  En sådan konflikt angiver, hvor kort mellemrummet faktisk er, og hvor langt det skulle være, i stedet
+  for at påstå, at de to tog overlapper, når tiderne viser, at de ikke gør.
+
+- **Et driftssted kan nu have sine egne instruktioner.** Formularen til at tilføje og rette et
+  driftssted har feltet **Instruktioner**, skrevet i Markdown og vist ved siden af en forhåndsvisning
+  ligesom de generelle instruktioner i Indstillinger. Det er til, hvordan netop det driftssted køres på
+  dette træf — hvilke spor der bruges til hvad, hvordan rangeringen er tilrettelagt, og hvad lokoførerne
+  og dem, der bemander stedet, ellers har brug for at vide der. Hvordan driftsstedet betjenes i
+  almindelighed, og anden beskrivelse af det, er ejerens opgave at levere og hører ikke til i feltet.
+  Det, du skriver, gemmes sammen med driftsstedet og vises i dets Info-visning.
+
+  Feltet tilbydes på en station eller et industriområde, hvor der udveksles rejsende og/eller gods. Det
+  tilbydes ikke, hvor der intet er at instruere om: togene kører bare forbi et signalstyret sted, og
+  ingen bemander et andet sted, så toget gør der, hvad standsningen siger, og intet mere.
+
+- **Et sted, hvor der køres gods uden bemanding, kan nu kræve en nøgle.** Hvor sporskifterne på en
+  ubemandet station eller et industriområde er aflåst, kan du i redigeringsformularen vælge den
+  bemandede station, der opbevarer nøglen, under **Nøgle opbevares på**, og navngive nøglen, hvis
+  stationen opbevarer flere.
+
+  Mere skal der ikke planlægges. Et godstog, der standser på stationen med nøglen og senere standser på
+  det sted, nøglen låser op, får ved afgangen derfra beskeden *hent nøgle A1 til oplåsning af Bruket*;
+  næste gang toget standser der, siger ankomsten *aflever nøgle A1 fra Bruket*. Et tog, der blot kører
+  forbi et af stederne, får ingen besked, for det låser intet op. Nøglen hentes ved den sidste
+  standsning på stationen før arbejdet og afleveres ved den første derefter, så et tog, der standser
+  der to gange, slipper for at have den med en ekstra tur.
+
+  En nøgle betyder kun noget, så længe begge ender holder. Markér stedet selv som bemandet, eller tag
+  bemandingen af den station, der opbevarer nøglen, så holder nøglen op med at gælde: der laves ingen
+  beskeder ud fra den, og **Konflikter** fortæller, hvilken af de to ændringer der gjorde det. Nøglen
+  bevares i stedet for at blive kastet væk, så fortryder du ændringen, gælder den straks igen, og den
+  bliver stående i formularen, hvor du kan pege den mod en anden station eller fjerne den.
+
+### Fejlrettelser
+
+- **To strækninger, der udgår fra samme driftssted, blev tegnet, som om de aldrig mødtes.** Begyndte en
+  køreplanstrækning netop på det første driftssted på en anden, var der ingenting, der bandt de to
+  sammen i Topologi-diagrammet: hver blev tegnet som sin egen linje, uden gren imellem. Den anden
+  forlader nu det driftssted som enhver anden gren og falder væk fra det i samme faste vinkel.
+
+- **Hver grænseværdi for kontrollerne angiver nu, hvilket ur den måles efter.** Den mindste tid mellem
+  to anvendelser af samme spor manglede helt en enhed, og de to toghastigheder angav kun *ur-minutter*,
+  som kunne læses på begge måder. Alle tre angiver nu hurtigursminutter — det ur, togene kører efter,
+  ikke virkelig tid.
+
+- **Længder og distancer skrives nu ud i meter,** ligesom tælleren i toghastighederne, så *m* ikke kan
+  tages for et minut. Mindste ophold på en station angives nu også i hurtigursminutter.
+
 ## Version 0.3.5
 
 ### Fejlrettelser

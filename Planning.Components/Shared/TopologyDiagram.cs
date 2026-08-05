@@ -563,9 +563,9 @@ public sealed record TopologyDiagram(
 
     private static double Squared(double value) => value * value;
 
-    // Links each chain to the one it branches from: a chain diverges when its first station is a through
-    // station of another (drawn as leading out), or otherwise merges when its last station is (leading
-    // into). The earliest chain wins, so a branch hangs off the line that was drawn first.
+    // Links each chain to the one it branches from: a chain diverges when its first station lies on
+    // another (drawn as leading out), or otherwise merges when its last station does (leading into).
+    // The earliest chain wins, so a branch hangs off the line that was drawn first.
     private static Dictionary<int, (Chain Parent, JunctionSide Side)> BuildParentMap(IReadOnlyList<Chain> all)
     {
         var parent = new Dictionary<int, (Chain, JunctionSide)>();
@@ -580,11 +580,20 @@ public sealed record TopologyDiagram(
         return parent;
     }
 
+    // The line a chain leaves at a given station: any other chain that station lies on. It is usually a
+    // through station or the far end of that other chain, but two lines that both begin at the same
+    // station part there just as much, and the second must hang off the first rather than be drawn on
+    // its own with nothing joining them. That case is symmetric — the station is where both begin — so
+    // only the chain laid out first may be the parent; otherwise each would claim to leave the other.
     private static Chain? DivergesFrom(Chain chain, OperationLocation at, IReadOnlyList<Chain> all) =>
-        all.Where(p => p.Id != chain.Id && DistanceAlong(p, at) is > 0.0)
+        all.Where(p => p.Id != chain.Id && DistanceAlong(p, at) is { } distance && (distance > 0.0 || Precedes(p, chain)))
            .OrderBy(p => p.Owner)
            .ThenBy(p => p.Id)
            .FirstOrDefault();
+
+    // Whether one chain is laid out before another: the earlier timetable stretch first, and within one
+    // stretch the earlier part of its route.
+    private static bool Precedes(Chain a, Chain b) => a.Owner != b.Owner ? a.Owner < b.Owner : a.Id < b.Id;
 
     // Mutually diverging chains could form a cycle; drop the parent edge of any chain whose ancestor
     // chain loops back to itself so the depth-first walk terminates.

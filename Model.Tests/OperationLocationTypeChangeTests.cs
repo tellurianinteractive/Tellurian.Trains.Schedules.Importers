@@ -91,6 +91,34 @@ public class OperationLocationTypeChangeTests
     }
 
     [TestMethod]
+    public void ChangingTypeCarriesOverTheLockKey()
+    {
+        var (layout, a, b, _) = LineABC();
+        b.IsManned = false;
+        b.LockKey = new LockKey { HeldAt = a, Name = "A1" };
+
+        // Turning a location into an industrial area is exactly when a key matters: nobody works it.
+        var replacement = layout.ChangeOperationLocationType(b, OperationLocationKind.IndustrialArea);
+
+        Assert.AreEqual("A1", replacement.LockKey?.Name);
+        Assert.AreSame(a, replacement.LockKey?.HeldAt);
+    }
+
+    [TestMethod]
+    public void ChangingAKeyHoldingStationDropsTheKeyItHeld()
+    {
+        var (layout, a, b, _) = LineABC();
+        b.IsManned = false;
+        b.LockKey = new LockKey { HeldAt = a, Name = "A1" };
+
+        layout.ChangeOperationLocationType(a, OperationLocationKind.IndustrialArea);
+
+        // Only a station can hold a key, so converting one always leaves the location it held the key
+        // for without one, rather than pointing at a station the layout no longer has.
+        Assert.IsNull(b.LockKey);
+    }
+
+    [TestMethod]
     public void ChangingToTheSameKindIsANoOp()
     {
         var (layout, _, b, _) = LineABC();

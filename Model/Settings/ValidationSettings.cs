@@ -30,7 +30,16 @@ public sealed class ValidationSettings
     public double MinTrainSpeedMetersPerClockMinute { get; set; } = 0.3;
     /// <summary>Gets or sets the maximum allowed train speed, in metres per clock minute.</summary>
     public double MaxTrainSpeedMetersPerClockMinute { get; set; } = 10;
-    /// <summary>Gets or sets the minimum number of minutes required between successive uses of the same track.</summary>
+    /// <summary>
+    /// Gets or sets the free time a station track needs between two occupancies, in fast-clock minutes.
+    /// </summary>
+    /// <remarks>
+    /// Zero, the default, is the plain double-booking rule: two trains conflict only where they are on
+    /// the track at the same time, and one arriving exactly as another leaves is a handover. Above zero
+    /// the track must also stand free for that many minutes in between, so a plan that turns a track
+    /// round faster than the station can work it is reported. Exactly the stated number of minutes is
+    /// enough; one minute less is a conflict.
+    /// </remarks>
     public int MinMinutesBetweenTrackUsage { get; set; }
 
     /// <summary>

@@ -193,6 +193,18 @@ public static class SessionsExtensions
         /// </summary>
         public string OnDemand => sessions.IsOnDemand ? "OnDemand" : string.Empty;
 
+        /// <summary>
+        /// The same value with the on-demand marker cleared, leaving only the sessions or days.
+        /// </summary>
+        /// <remarks>
+        /// For callers that state the marker somewhere else and would otherwise say it twice — a report
+        /// carrying it as a note, say, rather than inside a narrow column where "on demand only" wraps
+        /// over several lines. It is dropped from the rendering, never from the value: what a train's
+        /// <c>Sessions</c> holds is unchanged, and <c>IsOnDemand</c> still answers for it.
+        /// </remarks>
+        public Sessions WithoutOnDemand =>
+            new() { Flags = (ushort)(sessions.Flags & ~CommonSessionPatterns.OnDemand) };
+
 
 
         /// <summary>

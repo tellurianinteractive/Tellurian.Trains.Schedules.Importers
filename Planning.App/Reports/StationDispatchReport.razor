@@ -1,0 +1,91 @@
+@page "/station-dispatch-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The sheets the person on duty at a station works from during an operating session.
+
+   Like the duty booklets this serves operating rather than planning: it is read standing at a layout,
+   under time pressure, on paper that cannot be scrolled — so a page that overflows is a bug, not a
+   cosmetic issue. Every dispatch endpoint gets its own sheets, starting on a fresh page, because the
+   pile is torn apart and handed to different people.
+
+   Printed A4 landscape, one-sided. Unlike the booklets there is no imposition: these are working sheets
+   to be laid out on a desk beside the phone, not folded. *@
+
+@if (_pages is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (_pages.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoDispatchStations" />
+}
+else
+{
+    @* No page footer: the heading carries the station and the interval the page covers, which is what
+       identifies a sheet and what orders a station's pile. *@
+    @foreach (var page in _pages)
+    {
+        <A4LPage Margin="10">
+            <StationDispatchTable Page="page" Settings="Settings" />
+        </A4LPage>
+    }
+}
+
+@code {
+    /// <summary>
+    /// Optional comma-separated station signatures to print, for a targeted reprint — a link that can be
+    /// kept. Absent or empty prints every station, so the plain route keeps working unchanged.
+    /// </summary>
+    /// <remarks>
+    /// Matched on the signature rather than the name: a signature is what identifies a location
+    /// throughout the model (it is what <c>OperationLocation.Equals</c> compares), it is short enough to
+    /// type into a URL, and it survives a station being renamed.
+    /// </remarks>
+    [SupplyParameterFromQuery(Name = "stations")]
+    public string? StationSignatures { get; set; }
+
+    private IReadOnlyList<DispatchPage>? _pages;
+
+    private SessionsSettings Settings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        if (ScheduleState.Layout is not { } layout || ScheduleState.Timetable is not { } timetable)
+        {
+            _pages = [];
+            return;
+        }
+
+        var settings = Settings;
+        var lists = Selected(layout)
+            .Select(station => DispatchList.Create(station, timetable.Trains, settings))
+            .ToList();
+
+        _pages = DispatchPaginator.BuildPages(
+            lists, SessionsFormatting.PositionsOf(settings).Count, DispatchPageGeometry.A4Landscape);
+    }
+
+    // The stations that get a list: every dispatch endpoint — manned stations, and shadow stations
+    // whether manned or not — in layout order, narrowed by the query parameter when one is given.
+    // Selection changes WHICH stations print, never their order.
+    private IReadOnlyList<Station> Selected(Model.Layouts.Layout layout)
+    {
+        var all = layout.DispatchEndpoints.ToList();
+        if (string.IsNullOrWhiteSpace(StationSignatures)) return all;
+
+        var wanted = StationSignatures
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        return [.. all.Where(station => wanted.Contains(station.Signature, StringComparer.OrdinalIgnoreCase))];
+    }
+}

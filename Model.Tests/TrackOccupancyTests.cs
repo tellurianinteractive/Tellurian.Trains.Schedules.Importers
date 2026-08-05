@@ -120,6 +120,73 @@ public class TrackOccupancyTests
         Assert.AreEqual(Time.FromHourAndMinute(12, 00), to);
     }
 
+    // A train taking the track shortly after the arriving one has left it: no overlap at all, so it is a
+    // conflict only where the track is required to stand free in between.
+    private Train FollowingAfter(int minutes)
+    {
+        var following = new Train(4, Category, 4) { Category = Category };
+        var from = Time.FromHourAndMinute(12, 00).AddMinutes(minutes);
+        _ = following.Add(new StationCall(1, Track, from, from.AddMinutes(10)));
+        _ = following.Add(new StationCall(2, OtherTrack, Time.FromHourAndMinute(14, 50), Time.FromHourAndMinute(15, 00)));
+        return following;
+    }
+
+    [TestMethod]
+    public void WithoutARequiredGapTrainsFollowingCloselyDoNotConflict()
+    {
+        _ = FollowingAfter(1);
+
+        Assert.IsEmpty(Track.GetValidationErrors([]),
+            "At zero the rule is plain double booking, and a train taking the track a minute after the last one left is not that.");
+    }
+
+    [TestMethod]
+    public void ATrainTakingTheTrackSoonerThanTheRequiredGapConflicts()
+    {
+        _ = FollowingAfter(3);
+
+        // 17 minutes required: a number that appears in none of the times in play, so finding it in the
+        // message says the required gap was named — whichever language the message came out in.
+        var errors = Track.GetValidationErrors([], minMinutesBetweenTrackUsage: 17).ToList();
+
+        Assert.HasCount(1, errors);
+        StringAssert.Contains(errors[0].Message.Text, "17",
+            "A conflict over a missing gap has to say how much free time the track was required to have.");
+    }
+
+    [TestMethod]
+    public void ExactlyTheRequiredGapIsEnough()
+    {
+        _ = FollowingAfter(5);
+
+        Assert.IsEmpty(Track.GetValidationErrors([], minMinutesBetweenTrackUsage: 5),
+            "Five minutes free is what five minutes required asks for; only less than that is a conflict.");
+    }
+
+    [TestMethod]
+    public void ARequiredGapDoesNotSeparateTheSameVehicleFromItself()
+    {
+        // The same unit arriving on one train and leaving on the next turns the track round in an hour,
+        // but it never leaves it: one occupant, so no gap is owed.
+        Assert.IsEmpty(Track.GetValidationErrors([Continuing()], minMinutesBetweenTrackUsage: 90),
+            "A gap is time the track stands free between two occupants, not between one vehicle's own trains.");
+    }
+
+    [TestMethod]
+    public void AnOverlapIsStillReportedAsAnOverlapWhenAGapIsRequired()
+    {
+        // Straight into the arriving train's own window, so the two are on the track together.
+        _ = FollowingAfter(-5);
+
+        var errors = Track.GetValidationErrors([], minMinutesBetweenTrackUsage: 17).ToList();
+
+        Assert.HasCount(1, errors);
+        // Only the missing-gap message names the required minutes, so its absence says this was reported
+        // as the overlap it is rather than as two trains merely following each other too closely.
+        Assert.IsFalse(errors[0].Message.Text.Contains("17", StringComparison.Ordinal),
+            $"Overlapping trains overlap; they are not merely too close together: {errors[0].Message.Text}");
+    }
+
     [TestMethod]
     public void AConflictFromTheExtendedStayReportsTheOccupiedSpanNotEitherCallsOwnTimes()
     {

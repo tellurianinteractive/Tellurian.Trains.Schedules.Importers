@@ -95,8 +95,11 @@ public sealed record ValidationError
     /// </summary>
     public static ValidationScope ScopeOf(ValidationErrorType errorType) => errorType switch
     {
+        ValidationErrorType.LockKeyIgnored => ValidationScope.Layout,
+
         ValidationErrorType.VehicleDoubleBooked or
-        ValidationErrorType.VehicleNotClosed => ValidationScope.Vehicle,
+        ValidationErrorType.VehicleNotClosed or
+        ValidationErrorType.VehicleIdentityDuplicated => ValidationScope.Vehicle,
 
         ValidationErrorType.DutyPartDoubleAssigned or
         ValidationErrorType.DutyPartsOverlap or
@@ -409,6 +412,27 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a duplicate vehicle-identity error: two vehicles share a <see cref="VehicleIdentity"/> on
+    /// at least one common session, so it would name two vehicles at once (rule P5). The clash is a
+    /// property of the plan's vehicle pool, with no place on the layout and no time, so it carries no
+    /// track and no times (see <see cref="FromTrack"/>).
+    /// </summary>
+    public static ValidationError VehicleIdentityDuplicated(
+        ScheduledObject vehicle,
+        ScheduledObject otherVehicle,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.VehicleIdentityDuplicated,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Vehicle = vehicle,
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a duplicate train-number error: two trains share the same operating company, category
     /// and number but run on overlapping sessions (rule T4).
     /// </summary>
@@ -621,6 +645,23 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates an ignored-lock-key error: an operation location carries a key that the manning on one
+    /// side or the other has left meaningless (rule L4). The key is a property of the layout, not of
+    /// anything running on it, so it carries no track, no time and no train (see <see cref="FromTrack"/>).
+    /// </summary>
+    public static ValidationError LockKeyIgnored(
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.LockKeyIgnored,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
 
@@ -687,6 +728,9 @@ public enum ValidationErrorType
     /// <summary>Vehicle has overlapping schedule assignments (double-booked).</summary>
     VehicleDoubleBooked,
 
+    /// <summary>Two vehicles share an identity — external id, or operator and number — on a common session.</summary>
+    VehicleIdentityDuplicated,
+
     /// <summary>Two trains share company, category and number but run on overlapping sessions.</summary>
     DuplicateTrainNumber,
 
@@ -720,6 +764,10 @@ public enum ValidationErrorType
     /// <summary>A train part with a traction unit assigned has no driver duty on some of the sessions
     /// the traction assignment runs.</summary>
     TrainPartMissingDriverDuty,
+
+    /// <summary>An operation location carries a lock key that the manning on one side or the other has
+    /// left meaningless, so it is ignored.</summary>
+    LockKeyIgnored,
 }
 
 /// <summary>
@@ -743,4 +791,8 @@ public enum ValidationScope
     /// <summary>A problem with a driver duty: a part double-assigned across duties, or parts overlapping
     /// within a duty. Marks the offending duty in the Duties tab.</summary>
     Duty,
+
+    /// <summary>A problem with the layout itself, not with anything running on it: a lock key the
+    /// manning has left meaningless. Resolved on the Operation Locations tab.</summary>
+    Layout,
 }

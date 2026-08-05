@@ -379,7 +379,7 @@
     <value>Zugbeschriftungsgröße (pt)</value>
   </data>
   <data name="FastClockSpeed" xml:space="preserve">
-    <value>Zeitraffer-Faktor (×)</value>
+    <value>Schnelluhr-Faktor (×)</value>
   </data>
   <data name="DistanceFactor" xml:space="preserve">
     <value>Entfernungsfaktor (×)</value>
@@ -412,7 +412,7 @@
     <value>Anlagenweite Standardwerte; einzelne Stationen können diese überschreiben.</value>
   </data>
   <data name="MinimumStop" xml:space="preserve">
-    <value>Mindeststopp (Zeitraffer-Min)</value>
+    <value>Mindeststopp (Schnelluhr-Min)</value>
   </data>
   <data name="LocoRunaround" xml:space="preserve">
     <value>Lokumlauf (reale Min)</value>
@@ -451,13 +451,13 @@
     <value>Schwellenwerte</value>
   </data>
   <data name="MinTrainSpeed" xml:space="preserve">
-    <value>Min. Zuggeschwindigkeit (m/Uhr-Min)</value>
+    <value>Min. Zuggeschwindigkeit (Meter/Schnelluhr-Min)</value>
   </data>
   <data name="MaxTrainSpeed" xml:space="preserve">
-    <value>Max. Zuggeschwindigkeit (m/Uhr-Min)</value>
+    <value>Max. Zuggeschwindigkeit (Meter/Schnelluhr-Min)</value>
   </data>
   <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
-    <value>Min. Minuten zwischen Gleisnutzung</value>
+    <value>Min. Zeit zwischen Gleisnutzung (Schnelluhr-Min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
     <value>ModuleRegistry-API-Schlüssel</value>
@@ -631,7 +631,7 @@
     <value>Laufweg</value>
   </data>
   <data name="DistanceMeters" xml:space="preserve">
-    <value>Entfernung (m)</value>
+    <value>Entfernung (Meter)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Geschwindigkeit (km/h)</value>
@@ -1021,7 +1021,7 @@
     <value>Der Name dieser Anlage, der in Berichten und exportierten Dateien angezeigt wird.</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Länge (m)</value>
+    <value>Länge (Meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kann nicht gelöscht werden: Züge halten an dieser Stelle.</value>
@@ -1036,13 +1036,13 @@
     <value>Echte Zeit für das Umsetzen einer Lok um ihren Zug, in echten Minuten.</value>
   </data>
   <data name="MinimumStopHelp" xml:space="preserve">
-    <value>Die kürzeste Zeit in Modelluhr-Minuten, die ein Zug an einer Station bleiben muss, bevor er abfahren darf.</value>
+    <value>Die kürzeste Zeit in Schnelluhr-Minuten, die ein Zug an einer Station bleiben muss, bevor er abfahren darf.</value>
   </data>
   <data name="MinimumStopMinutes" xml:space="preserve">
-    <value>Mindesthalt (Min.)</value>
+    <value>Mindesthalt (Schnelluhr-Min)</value>
   </data>
   <data name="MinimumStopMinutesHelp" xml:space="preserve">
-    <value>Mindestzeit, die ein Zug an dieser besetzten Station hält, in Modelluhr-Minuten.</value>
+    <value>Mindestzeit, die ein Zug an dieser besetzten Station hält, in Schnelluhr-Minuten.</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -1281,6 +1281,9 @@
   <data name="Sessions" xml:space="preserve">
     <value>Fahrrunden</value>
   </data>
+  <data name="SessionsShort" xml:space="preserve">
+    <value>Fährt</value>
+  </data>
   <data name="Days" xml:space="preserve">
     <value>Tage</value>
   </data>
@@ -1400,7 +1403,7 @@
     <value>Aus Kategorie: {0}</value>
   </data>
   <data name="LengthMeters" xml:space="preserve">
-    <value>Länge (m)</value>
+    <value>Länge (Meter)</value>
   </data>
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Bei Ankunft einen Hinweis anzeigen, als welcher Zug dieser laut Fahrplan weiterfährt.</value>
@@ -1641,6 +1644,9 @@
   </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Neues Fahrzeug anlegen</value>
+  </data>
+  <data name="VehicleIdentityAlreadyUsed" xml:space="preserve">
+    <value>Betreiber und Nummer {0} werden bereits von {1} verwendet. Wählen Sie eine andere Nummer oder einen anderen Betreiber.</value>
   </data>
   <data name="VehicleType" xml:space="preserve">
     <value>Fahrzeugtyp</value>
@@ -2040,5 +2046,47 @@
   </data>
   <data name="DriverDuties" xml:space="preserve">
     <value>Lokführerdienste</value>
+  </data>
+  <data name="StationDispatchList" xml:space="preserve">
+    <value>Zugmeldeliste</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Bemerkungen</value>
+  </data>
+  <data name="NoTrainsAtStation" xml:space="preserve">
+    <value>An diesem Bahnhof verkehren keine Züge.</value>
+  </data>
+  <data name="NoDispatchStations" xml:space="preserve">
+    <value>Es gibt keine besetzten Bahnhöfe oder Schattenbahnhöfe, für die eine Zugmeldeliste gedruckt werden kann.</value>
+  </data>
+  <data name="LocationInstructions" xml:space="preserve">
+    <value>Anweisungen</value>
+  </data>
+  <data name="LocationInstructionsHint" xml:space="preserve">
+    <value>Wie diese Stelle bei diesem Treffen betrieben wird: welche Gleise wofür genutzt werden, wie das Rangieren organisiert ist und was die Lokführer und das Personal vor Ort hier sonst wissen müssen.</value>
+  </data>
+  <data name="LocationInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Für Anweisungen, die für diese Stelle auf der Anlage dieses Treffens gelten. Allgemeine Anweisungen zur Bedienung der Stelle und sonstige Informationen darüber muss ihr Eigentümer bereitstellen; sie gehören nicht hierher.</value>
+  </data>
+  <data name="LockKey" xml:space="preserve">
+    <value>Schlüssel</value>
+  </data>
+  <data name="LockKeyHeldAt" xml:space="preserve">
+    <value>Schlüssel hinterlegt in</value>
+  </data>
+  <data name="LockKeyHeldAtHelp" xml:space="preserve">
+    <value>Der besetzte Bahnhof, in dem der Schlüssel für die Weichenschlösser hier hinterlegt ist. Einem Güterzug, der hier hält, wird gesagt, den Schlüssel beim Verlassen dieses Bahnhofs mitzunehmen und ihn beim nächsten Halt dort wieder abzugeben. Leer lassen, wenn kein Schlüssel nötig ist.</value>
+  </data>
+  <data name="LockKeyName" xml:space="preserve">
+    <value>Schlüsselbezeichnung</value>
+  </data>
+  <data name="LockKeyNameHelp" xml:space="preserve">
+    <value>Wie der Schlüssel heißt, damit der Lokführer den richtigen verlangen kann, wo ein Bahnhof mehrere verwahrt. Optional.</value>
+  </data>
+  <data name="NoMannedStationsForLockKey" xml:space="preserve">
+    <value>Noch kann kein besetzter Bahnhof einen Schlüssel verwahren. Markieren Sie zuerst den verwahrenden Bahnhof als besetzt.</value>
+  </data>
+  <data name="LockKeyIgnoredHint" xml:space="preserve">
+    <value>Dieser Schlüssel wird derzeit nicht beachtet: warum, steht unter Konflikte. Er bleibt erhalten und gilt wieder, sobald das behoben ist.</value>
   </data>
 </root>

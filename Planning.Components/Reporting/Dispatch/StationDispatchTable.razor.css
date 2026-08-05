@@ -1,0 +1,255 @@
+/* A station's dispatch list.
+
+   The printed sheet is the artefact, so the geometry below is stated in millimetres and points and
+   applies on screen as well as on paper — NOT inside @media print. The A4LPage wrapper is a real
+   297 x 210 mm box on screen, so with one geometry the on-screen render is a true print preview: what
+   overflows the box would overflow the page. Split the two and the preview stops being evidence, which
+   is how a page that fitted on screen came to lose its last rows on paper.
+
+   DispatchPaginator estimates page fit from fixed millimetre constants in DispatchPageGeometry, and
+   these are the values it estimates against. The two must be calibrated together: a constant that no
+   longer matches does not print short, it prints past the foot of the page.
+
+   Heights are MEASURED off a rendered page, not derived from the type size — deriving them got the row
+   height wrong, because a row sets a taller line box than 9 pt / 1.3 alone implies. As rendered: a row
+   is 5.87 mm (RowHeightMm 5.9), each further line of notes 5.07 mm (NoteLineHeightMm 5.1), the heading
+   line 15.01 mm (HeadingHeightMm 15.5) and the column headers 4.15 mm (ColumnHeaderHeightMm 4.75).
+   Remeasure in the browser after changing any type size, padding or line height here — the heading is
+   the one that moves most, since it is set large and a second line there costs four rows off the page.
+
+   Widths: the fixed columns total 136 mm (FixedColumnsWidthMm) and each tick-off column is 4 mm
+   (SessionColumnWidthMm), leaving the rest of the 277 mm printable width to the notes — which is why the
+   estimate derives its characters-per-line from the number of sessions rather than assuming a fixed
+   notes column. */
+
+.dispatchlist {
+    /* One line: station, the interval this page covers, then the neighbours and their numbers — the
+       whole identification of the sheet, since there is no footer. Only the station name carries weight;
+       the rest is what the reader consults once they have the right sheet in front of them. */
+    .heading {
+        border-bottom: 1.5px solid #000;
+
+        /* Set large and wholly bold: this is read at a glance, across a desk, by somebody checking they
+           have the right sheet in front of them — not read into like the table below it.
+
+           The station and the interval carry that size; the neighbours stay at the old 13 pt. At 26 pt
+           throughout, a heading with three neighbours and their numbers measures 330 mm against a 277 mm
+           page, so every one of them wrapped to a second line and cost ~20 mm — four rows — off every
+           page. The two halves are read differently anyway: the identification is read from a distance,
+           the numbers are read close up when there is a call to make. */
+        h2 {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0 2mm;
+            margin: 0 0 1mm;
+            font-size: 26pt;
+
+            /* A wider gap than the one between name and interval, which is what separates the two halves
+               of the line: what this sheet is, and who to ring about it. */
+            .neighbours {
+                margin-left: 3mm;
+                font-size: 0.5em;
+
+                /* The phone glyph is a Font Awesome webfont character, bundled with the app rather than
+                   fetched, so it prints like any other text. Set a shade smaller than the number beside
+                   it: it labels the number rather than competing with it. */
+                .fa-phone {
+                    font-size: 0.85em;
+                }
+            }
+        }
+    }
+
+    .empty {
+        margin: 4mm 0;
+        font-style: italic;
+    }
+}
+
+table.dispatch {
+    width: 100%;
+    border-collapse: collapse;
+    /* Fixed layout so the column widths below are the ones that print, rather than whatever the content
+       happens to negotiate — the notes estimate depends on knowing how wide the notes column is. */
+    table-layout: fixed;
+    font-size: 9pt;
+
+    th,
+    td {
+        border-top: 1px solid #999;
+        border-bottom: 1px solid #999;
+        padding: 0.5mm 1mm;
+        line-height: 1.4;
+        text-align: left;
+        vertical-align: top;
+        overflow: hidden;
+    }
+
+    th {
+        font-size: 0.75em;
+        font-style: italic;
+        font-weight: 400;
+        white-space: nowrap;
+    }
+
+    td {
+        white-space: nowrap;
+    }
+
+    .track,
+    .time,
+    .tick {
+        text-align: center;
+    }
+    /* The train number identifies the row and is read first, so it carries weight on every row. */
+    td.train {
+        font-weight: 700;
+    }
+    /* One tick-off box per session, filled in by hand as each session is worked.
+
+       The side padding is trimmed from the table's 1 mm: the column is 4 mm and its heading is a session
+       circle about 9 px across, so 1 mm each side left less room than the circle needed and clipped a
+       slice off every one of them. */
+    .tick {
+        border-left: 1px solid #999;
+        border-right: 1px solid #999;
+        padding-left: 0.25mm;
+        padding-right: 0.25mm;
+    }
+    /* A session the train does not run: greyed so it can never be ticked by mistake. Forced to print,
+       which browsers otherwise suppress for background colours. */
+    td.tick.off {
+        background: #c8c8c8;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    td.notes {
+        white-space: normal;
+        /* One note per line: each is a discrete instruction, and running them together lets the eye slide
+           past the one that mattered. The page-height estimate counts a line per note, so this is not
+           decoration. Styled through the wrapper this component emits rather than the model's own
+           .callnote span, which arrives as a MarkupString and so carries no CSS-isolation attribute. */
+        .note {
+            display: block;
+        }
+    }
+    /* Wraps rather than truncates: clipping "on demand only" off the end of a value would drop operating
+       information the reader never learns was there. The estimate charges the wrapped lines. */
+    td.sessions {
+        white-space: normal;
+    }
+    /* Every row states the whole call — arrived when and from where, leaves when and for where — so the
+       emphasis is what says which clearance the row is for. An arrival row bolds the arrival pair, a
+       departure row the departure pair; the other pair stays light, there for reference. */
+    /* An arrival row stays white: the dispatcher is clearing the train IN. */
+    tr.arrival {
+        background: #fff;
+
+        td.arr,
+        td.from {
+            font-weight: 700;
+        }
+    }
+    /* A departure row is tinted: the dispatcher is clearing it ONWARD. The tint is the whole point of the
+       sheet — the two clearances must never be mistaken for one another — so it too is forced to print. */
+    tr.departure {
+        background: #FFFCED;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+
+        td.dep,
+        td.to {
+            font-weight: 700;
+        }
+    }
+    /* The train's only row here — it passes through, or it starts or ends its run at this station. It
+       stands for everything done with that train, so both pairs are what the reader acts on and both
+       are bold. Last, so it wins over the rules above whichever tint the row carries. */
+    tr.sole {
+        td.arr,
+        td.from,
+        td.dep,
+        td.to {
+            font-weight: 700;
+        }
+    }
+    /* The pair a row does NOT act on belongs to the train's other clearance, and is carried only so the
+       row can be read on its own. Weight alone is a weak signal in a column of times, so it is also set
+       in italic with the time bracketed: a reader running down the Arr column then sees at a glance
+       which times are that column's business and which are the other row's, without reading across.
+
+       A sole row has no other clearance, so nothing on it is set this way — which is why these are
+       scoped :not(.sole) rather than off the row kind alone. Nothing is bracketed away entirely: the
+       reference pair is still there to read, only marked as belonging elsewhere. */
+    tr.arrival:not(.sole) {
+        td.dep,
+        td.to {
+            font-style: italic;
+        }
+
+            td.dep::before {
+                content: "(";
+            }
+
+            td.dep::after {
+                content: ")";
+            }
+    }
+
+    tr.departure:not(.sole) {
+        td.arr,
+        td.from {
+            font-style: italic;
+        }
+
+            td.arr::before {
+                content: "(";
+            }
+
+            td.arr::after {
+                content: ")";
+            }
+    }
+    /* The column widths the estimate assumes; .notes takes whatever the others leave. */
+    .train {
+        width: 20mm;
+    }
+
+    /* 14 mm: the values are now a short word ("All", "None") or a few session circles, and the heading is
+       a verb rather than the noun that used to need 22 mm. The long case — a value carrying "on demand
+       only" — wraps rather than truncates, and the estimate charges the wrapped lines. */
+    .sessions {
+        width: 14mm;
+    }
+
+    .track {
+        width: 8mm;
+    }
+    /* 13 mm, not 12: a bracketed reference time ("(07:15)") measures 46 px against a 45 px cell at 12 mm,
+       so the closing bracket was clipped by a pixel — invisible, but overflow: hidden does not warn. */
+    .time {
+        width: 13mm;
+    }
+
+    .place {
+        width: 34mm;
+    }
+
+    .tick {
+        width: 4mm;
+    }
+}
+
+/* SessionsView pins white-space: nowrap so a session value never breaks in the middle of itself. That is
+   right nearly everywhere, but here the column is 22 mm and the longest value ("No sessions, on demand
+   only" and its translations) would be clipped by the cell's overflow — losing operating information the
+   reader never learns was there. Wrapping it over two lines is the lesser evil, and the page-height
+   estimate charges those lines.
+
+   Flat and using ::deep because the span belongs to the child component and so carries its scope
+   attribute, not this one's. */
+table.dispatch td.sessions ::deep .sessions-view {
+    white-space: normal;
+}

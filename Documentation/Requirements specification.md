@@ -29,7 +29,7 @@ Snapshot of coverage by area (see each section for detail).
 
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
-| Operation locations + subtypes (§4.1.1) | ✅ | owner on every location; a shadow station's regions are chosen from the layout's region catalogue (each region has a name, a country and a palette colour) |
+| Operation locations + subtypes (§4.1.1) | ✅ | owner on every location; a shadow station's regions are chosen from the layout's region catalogue (each region has a name, a country and a palette colour); a location where cargo is exchanged with nobody on duty can name the manned station holding the key to its switches |
 | Station tracks (§4.1.2) | ✅ | |
 | Track / Timetable / Dispatch stretches (§4.1.3–5) | ✅ | |
 | Companies (§4.1.6) | ✅ | each company names the country it operates in, chosen from the layout's country catalogue |
@@ -42,7 +42,7 @@ Snapshot of coverage by area (see each section for detail).
 | Schedule top level (§4.4.1) | ✅ | terminology: what this document calls a *Schedule* (the whole operating plan) is called a *plan* in the data model; what it calls a *Vehicle Schedule* is called simply a *schedule* |
 | Vehicles inventory (§4.4.2) | ✅ | includes a DCC address |
 | Vehicle schedules / driver duties (§4.4.3–4) | 🟡 | a vehicle schedule is a reusable, type-agnostic sequence of train parts; interactive and automatic turnus building and session-aware vehicle assignment (§3.8); wagon-group assignment editor not wired |
-| Note generation system (§4.5.1–4) | ❌ | only manual free-text notes exist |
+| Note generation system (§4.5.1–4) | 🟡 | notes are assembled from schedule data and localised texts, in plain text and styled markup; about half the note types are built (see §4.5.2), the rest are not |
 | Manual note translations (§4.5.5) | 🟡 | a single language code, not a translation collection |
 
 ### Functional / UI (§3)
@@ -50,7 +50,7 @@ Snapshot of coverage by area (see each section for detail).
 | Requirement | Status | Note |
 | ----------- | ------ | ---- |
 | Settings tab (§3.2) | ✅ | all 5 groups + language selector |
-| Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor built; ModuleRegistry import (FR-3.3.1) missing |
+| Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor and the lock key built; ModuleRegistry import (FR-3.3.1) missing |
 | Track/Dispatch/Timetable Stretches (§3.4) | ✅ | three sub-sections; direction warnings; auto dispatch + route builder |
 | Train Categories (§3.5) | ✅ | list + add/edit/delete; delete blocked when referenced by a train; start number and exclude-from-automatic-scheduling editable |
 | Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; calls listed in travel order, editing a departure shifts the times after it and an arrival the times before it; pass-through set via arrival/departure checkboxes; conflict highlighting |
@@ -58,7 +58,7 @@ Snapshot of coverage by area (see each section for detail).
 | Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
 | Vehicle Owners (§3.9) | ❌ | stub page |
 | Automatic time calculation UI (§3.10) | 🟡 | editing a call time shifts the times on one side of it — after a departure, before an arrival — keeping run and dwell times; locking individual times and recomputing from the travel-time calculation while editing not built |
-| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L3, T1–T5, S1–S5, P1/P3/P4 done; closure (S3+S5) judged per traction unit by flow conservation; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
+| Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L4, T1–T5, S1–S5, P1/P3–P5 done; closure (S3+S5) judged per traction unit by flow conservation; vehicle identity (P5) is the imported external id or else operator + number, refused at entry and reported for older plans; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
 | Reports (§3.12) | 🟡 | shell + page formats present; 2 reports built — Turnus Cards and a paginated tabular Timetable report |
 
 ### Integration (§5)
@@ -147,7 +147,7 @@ module meetings, but also for fixed club layouts and home layouts.
 | Cargo Flow                 | Güterverkehr       | A flow of cargo to specific destinations, scheduled like a vehicle but assigned to a cargo flow object           |
 | Sessions                   | Verkehrstage        | Operating day patterns controlling which sessions a train, duty, or vehicle runs                                 |
 | On-Demand Train            | Bedarfszug          | A train that only runs when needed                                                                               |
-| Fast Clock                 | Modelluhr           | An accelerated clock used during operation; the ratio of model time to real time                                 |
+| Fast Clock                 | Schnelle Uhr        | An accelerated clock used during operation; the ratio of model time to real time                                 |
 | Graphical Timetable        | Bildfahrplan        | Time-distance diagram showing train movements along a timetable stretch                                          |
 
 ### 2.2 Model Railway–Specific Concepts
@@ -292,7 +292,8 @@ Countries tab selects a subset of it into the layout.
 
 The user adds, edits and deletes operation locations and their station tracks, and marks each
 station as manned and/or a shadow station — these flags drive automatic dispatch-stretch
-generation (§3.4.2).
+generation (§3.4.2). Where cargo is exchanged but nobody is on duty, the user also names the manned
+station holding the key that unlocks the switches there, and what that key is called (§4.1.1).
 
 #### FR-3.3.1 Data Import
 
@@ -519,7 +520,7 @@ with an option to lock individual times.
 
 > **Status:** 🟡 Partial. Fully implemented: the Layout occupancy rules **L2–L3**, the
 > Timetable train rules **T1–T5**, the Schedule rules **S1–S5**, and the Plan
-> consistency rules **P1, P3, P4**, all with FR-3.11.6 output (severity, localised
+> consistency rules **P1, P3–P5**, all with FR-3.11.6 output (severity, localised
 > message, location + time range, involved trains). Closure (**S3 + S5**) is judged **per
 > traction unit** by flow conservation over the operating period, so rotation schemes that
 > return across sessions or across several schedules are correctly allowed. Missing or
@@ -561,6 +562,7 @@ operation location, or on the same track stretch, at overlapping times.
 | **L1** | Trains may only **meet** where there are **at least two tracks** — at an operation location or on a track stretch. A single-track location or stretch cannot host a meet. | 🟡 Emergent | Not asserted directly; follows from L2 (a meet at a single-track station forces both trains onto one track → conflict) and L3 (stretch capacity). No dedicated "a meet needs ≥2 tracks" diagnostic. |
 | **L2** | **At most one train may occupy a station track** at any time; two trains meeting must therefore stand on different tracks. | ✅ | Overlapping calls on the same track by different trains are flagged. Exception: calls sharing the same vehicle (e.g. a loco change) are allowed. |
 | **L3** | The number of trains **simultaneously on a track stretch** may not exceed the **number of tracks**, counting **both directions together**. Double track permits two concurrent trains (one each way, or two the same way). | ✅ | Simultaneous passings on a stretch are compared against its track count, counting both directions together. |
+| **L4** | A **lock key** is in force only where the location still needs one — it exchanges cargo and has nobody on duty — and the station holding it is still manned. A key either change has left meaningless is **kept but ignored**, and reported. | ✅ | Manning is edited on both sides long after a key is set. An ignored key produces no notes and is kept, so undoing the manning change brings it back; the conflict says which change did it. Always enforced. |
 
 > Layout **structural** validity — consistent track-stretch directions and contiguous
 > timetable-stretch routes — is validated on the Stretches tab (see §3.4), not here.
@@ -600,13 +602,14 @@ The plan is the aggregate root; these rules span the timetable, schedules and ve
 | **P2** | **Every train part belongs to a schedule.** A part may appear in several schedules only for **non-overlapping sessions**; no part may be in two schedules whose sessions overlap. | 🟡 Partial | Partly served by P4 (no traction → gap) and P3 (session overlap). Not checked: that *every* part is scheduled, and the *same part* across overlapping-session schedules. |
 | **P3** | **No vehicle is double-booked** — the same vehicle is not assigned to schedules that overlap in **both** sessions **and** clock time (a vehicle cannot be in two places at once). | ✅ | Requires both session overlap **and** clock-time overlap, so a vehicle working a morning then an afternoon turn on the same day is not flagged. |
 | **P4** | **Traction coverage** — each train's run is covered by traction schedules **without gaps or overlaps** (a loco change at the same station is allowed). | ✅ | Checked. Complements the per-session view in S4. |
+| **P5** | **A vehicle has an identity that names one vehicle.** It is the external id the vehicle was imported under where it has one, and otherwise its operator and number — the number alone with no operator. On any one session an identity may belong to only **one** vehicle, whatever kind of vehicle it is, so a wagonset and a locomotive may not share it either. Two vehicles may reuse an identity only for **non-overlapping sessions**. | ✅ | Adding or editing a vehicle refuses an identity another vehicle already holds, so it cannot be created; older plans keep theirs and every duplicate is listed once among the conflicts. An imported plan raises no new conflicts, since its external ids are already unique. Wagon groups are exempt — their identifier stands for a group of wagons, not a vehicle. |
 
 #### FR-3.11.5 Validation Configuration
 
 All publish-blocking validations shall be **individually toggleable**. Speed thresholds
 and timing parameters shall be configurable. These settings are stored on the layout with
-the other Validation settings (see §3.2). The consistency rule P1 is always enforced and
-is not toggleable.
+the other Validation settings (see §3.2). The rules that catch a plan contradicting itself —
+consistency (P1) and lock keys (L4) — are always enforced and are not toggleable.
 
 #### FR-3.11.6 Validation Output
 
@@ -746,13 +749,14 @@ The layout carries all configurable settings, grouped by purpose
 #### DM-4.1.1 Operation Locations
 
 > **Status:** ✅ Implemented. Name, signature, subtypes (Station, Signal-Controlled and
-> Other Location), the shadow flag and per-station timings are present, and an owner is on
-> every operation location. The region catalogue is owned by the layout; a station's
+> Other Location), the shadow flag and per-station timings are present, and an owner and
+> meeting-specific instructions are on every operation location. The region catalogue is owned by the layout; a station's
 > regions reference a subset of it. A region carries a single name (in the layout's default
 > language), the country it belongs to (defaulting to the layout's default country) and a
 > background colour chosen from a fixed palette (see DM-4.5.4). The standard regions are
-> named in the layout's default language. Operation locations, their tracks and region
-> assignments are edited on the **Operation Locations** tab.
+> named in the layout's default language. A location that exchanges cargo with nobody on duty can
+> name the manned station holding the key to its switches, and what that key is called. Operation
+> locations, their tracks and region assignments are edited on the **Operation Locations** tab.
 
 
 
@@ -765,8 +769,10 @@ The system shall support defining operation locations with:
 | Signature | Short code (e.g. "Hb")                               | Yes      |
 | Type      | Station, Signal-Controlled, Other                    | Yes      |
 | Owner     | Module owner (for FREMO)                             | No       |
+| Instructions | Markdown text for how this location is worked at this meeting — which tracks are used for what, how the shunting is arranged. General instructions on operating the location come from its owner. Available at a station or an industrial area, where passengers and/or cargo are exchanged; never at a signal-controlled or other location | No |
 | Is Shadow | Hidden yard at line end                              | No       |
 | Regions   | Regions/countries represented (shadow stations only) | No       |
+| Lock key  | The manned station holding the key that unlocks the switches here, and optionally what the key is called. Available only where cargo is exchanged and nobody is on duty — an unmanned station or an industrial area. Drives the lock key notes (see DM-4.5.2). A key the manning on either side has left meaningless is kept but ignored, and reported as a conflict (see L4 in §3.11.1) | No       |
 | Timings   | Per-station operational time overrides; each value optional, inheriting the layout default when unset (see §4.3.3) | No       |
 
 Subtypes:
@@ -1201,10 +1207,13 @@ The system shall support creating driver duties:
 
 ### 4.5 Note Structure and Localized Text
 
-> **Status:** ❌ Largely missing. Only a manual free-text note (with a single language
-> code) and an abstract note base with intent flags exist. The data-driven note
-> **generation engine, the 14 note types, structured markup, and destination rendering are
-> not implemented.** See per-item markers below.
+> **Status:** 🟡 Partial. Notes are assembled from schedule data and localised texts as described
+> below, in plain text and in styled markup, and a manual free-text note can be written by hand.
+> Built so far are the loco and wagon connect/disconnect notes, loco exchange, moves to and from a
+> parking track, reinforcement, cargo destinations, whether the train stops or exchanges anything,
+> the lock key notes, and the meeting and overtaking notes. Still missing are turning and running a
+> loco round, the loco driver sorting wagons, block origins and arrivals, scheduled wagons, the two
+> passenger notes and the train continuation note.
 
 #### DM-4.5.1 Data-Driven Note Texts
 
@@ -1232,6 +1241,8 @@ The following note types shall be generated from station call data:
 | Passenger pickup               | Passenger service at departure          | "Pick up passengers"                          |
 | Passenger interchange          | Passenger transfer at station           | "Passenger interchange"                       |
 | Train continuation             | Train number change                     | "Continues as IC 2045"                        |
+| Lock key collected             | A later stop at a location whose key is held here | "Pick up key A1 for unlocking Bruket."        |
+| Lock key handed back           | An earlier stop at a location whose key is held here | "Leave key A1 from Bruket."                   |
 | Train meets                    | Trains meeting from opposite directions | "Crosses G 4012 14:23-14:28"                  |
 | Train overtaking               | Train passing another that stands still | "Overtakes G 4012 14:23-14:28", "Is overtaken by G 4012 14:25" |
 | Manual note                    | User-entered per language               | Free text, stored per language code           |

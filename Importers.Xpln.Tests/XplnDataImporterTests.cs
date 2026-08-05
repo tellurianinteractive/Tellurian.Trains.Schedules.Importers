@@ -337,6 +337,11 @@ public class XplnDataImporterTests
     // the imported data. No file reports a route-continuity warning: every imported route runs over
     // stretches of its layout.
     //
+    // The vehicle-identity rule (P5) left every count here unchanged, as it should: an imported vehicle is
+    // identified by its XPLN identifier, which is unique in the file it came from. Were identity judged on
+    // operator and number instead, these files would report hundreds of false duplicates — the number is
+    // the trailing digits of the identifier, so "DB-Post1", "NPB E1" and "DSB G 01" all become number 1.
+    //
     // Magdeburg_v_DB33_DSB32_WTB11's stopping errors fell from 40 to 1 when the Routes worksheet started
     // rejecting a section defined twice with different data: its rows 26 and 29 both join Fgr and Pa, one
     // over 1.4 km on three tracks and the other over 7.4 km on two. That error stops the import at the

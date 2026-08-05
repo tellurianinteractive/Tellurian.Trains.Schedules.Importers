@@ -4,6 +4,54 @@
 
 ### New Features
 
+- **`ValidationSettings.MinMinutesBetweenTrackUsage` is now enforced (validation rule L2).** The setting
+  existed but nothing read it. It is the free time a station track needs between two occupants, in
+  fast-clock minutes, and it generalises the double-booking check rather than adding a second one: at
+  its default of **0** the rule is exactly what it was — two occupancies conflict only where they cover
+  the same time, and a train arriving as another leaves is a handover — while above 0 the track must
+  also stand free for that many minutes in between. Exactly the required number of minutes is enough;
+  one minute less is a conflict.
+
+  The predicate behind it is public as
+  **`(Time From, Time To).ConflictsInTime(other, minMinutesBetween)`**, with the existing
+  `OverlapsInTime` now defined as its zero case, and **`FreeMinutesBetween(other)`** gives the free
+  time between two spans. `StationTrack.GetValidationErrors` takes the required gap as a new optional
+  third argument, so existing calls keep the overlap-only behaviour.
+
+  A conflict that is only a missing gap is reported as one: the new resource string
+  `CallAtStationTooCloseInTimeToOtherCall` names how much free time there is and how much was required,
+  in all five languages, instead of claiming an overlap the times plainly do not show. The error type is
+  unchanged (`ValidationErrorType.StationTrackConflict`).
+
+- **A vehicle has an identity that may name only one vehicle per session (validation rule P5).** The new
+  **`VehicleIdentity`** is a vehicle's `ExternalId` where it carries one — the identifier it was imported
+  under, unique in the system it came from — and otherwise its operating `Company` and `Number`, the
+  number alone with no company. The two kinds never match each other. An identity names one physical
+  vehicle, so on any one session it may belong to only one of a plan's vehicles, across every
+  `ScheduledObjectType`: a `Wagonset` and a `Locomotive` may not share one either. Two vehicles may reuse
+  an identity only for strictly non-overlapping sessions.
+
+  `Plan.GetValidationErrors` reports a clash as the new `ValidationErrorType.VehicleIdentityDuplicated`
+  (`ValidationScope.Vehicle`, placeless and timeless, keyed to the duplicate vehicle), under the existing
+  `ValidateSchedules` setting. Each duplicate is reported **once**, against the first earlier vehicle of
+  its identity whose sessions it shares, rather than once per pair — a plan can hold many vehicles under
+  one identity, and the pairs of such a group would bury the rest of the list. Imported plans are
+  unaffected: every XPLN vehicle carries its own identifier, and all the importer test files report
+  exactly the conflicts they did before.
+
+  New members supporting the rule: **`Plan.VehicleClaiming(identity, sessions, excluding)`** answers the
+  same question before an edit is made, so an editor can refuse a taken identity;
+  `ScheduledObject.Identity`, `IdentityText`, `ClaimedSessions` (a vehicle assigned nowhere claims every
+  session, since it holds its identity in the pool) and `HasVehicleIdentity` (false for a cargo flow,
+  which carries a synthesised identifier standing for a group of wagons).
+
+- **`Plan.CreateVehicle` no longer composes an `ExternalId`.** It used to set one from the class and
+  number (`"BR 218 12"`), which is not an external id at all — that is the identifier a vehicle was
+  *imported* under. A vehicle created through the API now carries none, so its `Designation` falls back
+  to the composed operator signature, class and number as it always did for an id-less vehicle, and it is
+  its operator and number that identify it under rule P5. Callers that relied on a created vehicle having
+  a non-null `ExternalId` should use `Designation` instead.
+
 - **Two operation locations are joined by one track stretch.** A track stretch is bidirectional
   infrastructure, so one defined the opposite way round joins the same pair and is the same connection:
   a second stretch between them would duplicate what the layout already holds.
@@ -16,6 +64,37 @@
 
   `Layout.Add(TrackStretch)` is unchanged: it still ignores an exact duplicate and still accepts a
   reversed one, so a route that reverses at a station and comes back can be expressed.
+
+- **An operation location can require a lock key, and the notes for it are generated.** Where cargo is
+  exchanged but nobody is on duty — an unmanned station or an `IndustrialArea` — the switches are
+  padlocked and the key is kept at a manned station along the line. The new
+  **`OperationLocation.LockKey`** holds that station (`LockKey.HeldAt`) and optionally what the key is
+  called (`LockKey.Name`); `null` means no key is needed. Two extension properties say where it applies:
+  **`OperationLocation.CanRequireLockKey`** (exchanges cargo and is not a manned station) and
+  **`Layout.LockKeyHoldingStations`** (every manned station).
+
+  From that, **`StationCall.LockKeyNotes`** derives the two notes a loco driver reads, both written at
+  the key-holding station and neither at the location the key unlocks: a departure `PickUpLockKeyNote`
+  ("Pick up key A1 for unlocking Bruket.") and, on the way back, an arrival `LeaveLockKeyNote` ("Leave
+  key A1 from Bruket."). Only a cargo train gets them, and only where it *stops* at both ends — a key
+  cannot be collected in passing, and a train running through unlocks nothing. Which visit to the
+  holding station a key belongs to is decided by the stops in between: it is collected at the last stop
+  there before the work and handed back at the first one after it, so a train calling there twice is
+  not told to fetch the same key twice. Both notes are included in `StationCall.DriverNotes` at
+  `DisplayOrder` 200, after the stop notes and before the crossings. The texts are resources
+  (`PickUpKeyForUnlocking`, `LeaveKeyFrom`, and the two forms used when the key has no name) in all five
+  languages.
+
+  A key is in force only while both ends of it hold: the location must still need one and the station
+  holding it must still be manned. Manning is edited on both sides long after a key is set, so either
+  change can leave the key meaningless — it is then **kept but ignored**, since the change may well be
+  undone. **`OperationLocation.EffectiveLockKey`** is the key that actually applies (what the notes read)
+  and **`OperationLocation.LockKeyFault`** says why one is ignored: `LocationIsManned`,
+  `LocationExchangesNoCargo` or `HolderIsNotManned`. `Plan.GetValidationErrors` reports each ignored key
+  as the new `ValidationErrorType.LockKeyIgnored` under the new `ValidationScope.Layout` — a conflict of
+  the layout itself rather than of anything running on it, so it carries no track, time or train. The
+  rule (**L4**) is always enforced, like the other checks for a model that contradicts itself, and needs
+  no setting.
 
 ### XPLN Importer Improvements
 

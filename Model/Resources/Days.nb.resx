@@ -186,7 +186,13 @@
   <data name="AllSessions" xml:space="preserve">
     <value>Alle økter</value>
   </data>
+  <data name="AllSessionsShort" xml:space="preserve">
+    <value>Alle</value>
+  </data>
   <data name="NoSessions" xml:space="preserve">
     <value>Ingen økter</value>
+  </data>
+  <data name="NoSessionsShort" xml:space="preserve">
+    <value>Ingen</value>
   </data>
 </root>

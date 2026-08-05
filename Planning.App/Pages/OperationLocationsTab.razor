@@ -1,6 +1,7 @@
 @page "/operation-locations"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Utilities
 @using Tellurian.Utilities.Web
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
@@ -56,6 +57,7 @@ else
                     <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@if (context.HasPassengerExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("CargoServedFrom")'>@(context.CargoServedFrom?.Name ?? "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("LockKey")'>@LockKeySummary(context)</TemplateColumn>
                     <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
@@ -215,6 +217,43 @@ else
                             </select>
                         </div>
                     }
+
+                    @* The key that unlocks the switches here. Offered where nobody is on duty to work
+                       them and there is cargo to work, and only manned stations can hold it. The key is
+                       named only once a station holds it — a name on its own says nothing.
+
+                       A key already set stays on offer even where one is no longer needed, so it can be
+                       cleared or corrected here rather than only by undoing the manning change that
+                       made it meaningless. Such a key is kept and ignored, which the hint says and the
+                       Conflicts list explains. *@
+                    @if (Editing.CanRequireLockKey || Editing.LockKey is not null)
+                    {
+                        <div class="field">
+                            <HelpLabel For="LockKeyHeldAt" />
+                            <select @bind="LockKeyHeldAtId" @bind:after="OnEdited">
+                                <option value="">@Translator("NoneOption")</option>
+                                @foreach (var s in LockKeyStationChoices)
+                                {
+                                    <option value="@s.Id">@s.Name (@s.Signature)</option>
+                                }
+                            </select>
+                        </div>
+                        @if (Editing.LockKey is { } lockKey)
+                        {
+                            <div class="field">
+                                <HelpLabel For="LockKeyName" />
+                                <input type="text" @bind="lockKey.Name" @bind:after="OnEdited" />
+                            </div>
+                        }
+                        else if (!LockKeyHoldingStations.Any())
+                        {
+                            <p class="hint">@Translator("NoMannedStationsForLockKey")</p>
+                        }
+                        @if (Editing.LockKeyFault is not LockKeyFault.None)
+                        {
+                            <p class="hint ignored">@Translator("LockKeyIgnoredHint")</p>
+                        }
+                    }
                 </div>
 
                 @if (Editing is Station regionStation)
@@ -240,6 +279,23 @@ else
                             }
                         </div>
                     }
+                }
+
+                @* How this location is worked at this meeting. What the location is in itself — its
+                   track plan, how it is operated in general — comes from whoever owns it, so it is
+                   not what this field is for; the help text says so.
+
+                   Offered at a station or an industrial area; a location trains merely run past, and
+                   one nobody works, have nothing to instruct about. Where the field is hidden, what
+                   was written stays with the location rather than being thrown away. *@
+                @if (Editing.HasInstructions)
+                {
+                    <div class="field instructions">
+                        <HelpLabel For="LocationInstructions" />
+                        <p class="hint">@Translator("LocationInstructionsHint")</p>
+                        <MarkdownEditor Rows="10" PreviewClass="instructions-body"
+                                        @bind-Value="Editing.Instructions" @bind-Value:after="OnEdited" />
+                    </div>
                 }
 
                 <h3>@Translator("OperationalTimes")</h3>
@@ -361,6 +417,22 @@ else
                         <dt>@Translator("ControlledBy")</dt>
                         <dd>@(infoSignal.ControlledBy is { } c ? $"{c.Name} ({c.Signature})" : "—")</dd>
                     }
+                    @if (_selected.CanRequireLockKey || _selected.LockKey is not null)
+                    {
+                        <dt>@Translator("LockKeyHeldAt")</dt>
+                        <dd>
+                            @(_selected.LockKey is { } key ? $"{key.HeldAt.Name} ({key.HeldAt.Signature})" : "—")
+                            @if (_selected.LockKeyFault is not LockKeyFault.None)
+                            {
+                                <span class="hint ignored">@Translator("LockKeyIgnoredHint")</span>
+                            }
+                        </dd>
+                        @if (_selected.LockKey is { Name.Length: > 0 } namedKey)
+                        {
+                            <dt>@Translator("LockKeyName")</dt>
+                            <dd>@namedKey.Name</dd>
+                        }
+                    }
                     <dt>@Translator("MinimumStopMinutes")</dt>
                     <dd>@Inherited(_selected.Timings.MinimumStopMinutes)</dd>
                     <dt>@Translator("LocoRunaroundRealMinutes")</dt>
@@ -368,6 +440,15 @@ else
                     <dt>@Translator("TrainClearanceRealMinutes")</dt>
                     <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes)</dd>
                 </dl>
+
+                @* Shown only where instructions apply and something is written; the rendered markdown
+                   carries its own headings, so an empty block with nothing under it would only be
+                   noise. *@
+                @if (_selected.HasInstructions && !string.IsNullOrWhiteSpace(_selected.Instructions))
+                {
+                    <h3>@Translator("LocationInstructions")</h3>
+                    <div class="instructions-body">@Rendered(_selected.Instructions)</div>
+                }
 
                 <h3>@Translator("Tracks")</h3>
                 @if (_selected.Tracks.Any())
@@ -462,6 +543,9 @@ else
 
     private string YesNo(bool value) => Translator(value ? "Yes" : "No");
     private string Inherited(int? value) => value?.ToString(Culture) ?? "—";
+
+    // Same Markdig call the editor's preview and the printed reports use, so the three agree.
+    private static MarkupString Rendered(string markdown) => new(Markdig.Markdown.ToHtml(markdown));
 
     // A location/track is referenced when any train calls there; such items cannot be deleted.
     private static bool IsReferenced(OperationLocation o) => o.Tracks.Any(t => t.Calls.Count > 0);
@@ -639,6 +723,41 @@ else
                 : null;
         }
     }
+
+    // Only a manned station can hold a lock key: an unmanned one has nobody to hand it over.
+    private IEnumerable<Station> LockKeyHoldingStations => Layout?.LockKeyHoldingStations ?? [];
+
+    // The stations the picker offers: the manned ones, plus the station already holding this key where
+    // it has since been unmanned. Leaving that one out would show "(none)" for a key that is still set,
+    // and the planner would have no way to tell an ignored key from no key at all.
+    private IEnumerable<Station> LockKeyStationChoices =>
+        Editing?.LockKey?.HeldAt is { IsManned: false } held
+            ? [held, .. LockKeyHoldingStations]
+            : LockKeyHoldingStations;
+
+    // The whole key is the station that holds it: choosing none removes the key, and the name goes with
+    // it, since a name with nowhere to fetch it from tells the driver nothing.
+    private string LockKeyHeldAtId
+    {
+        get => Editing?.LockKey?.HeldAt.Id.ToString(Culture) ?? "";
+        set
+        {
+            if (Editing is null) return;
+            // Looked up among the offered choices, not the manned stations alone: re-picking the station
+            // that already holds an ignored key must keep it, not silently clear it.
+            var station = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
+                ? LockKeyStationChoices.FirstOrDefault(s => s.Id == id)
+                : null;
+            if (station is null) Editing.LockKey = null;
+            else if (Editing.LockKey is { } key) key.HeldAt = station;
+            else Editing.LockKey = new LockKey { HeldAt = station };
+        }
+    }
+
+    // What the grid shows for a key: its name where it has one, and where it is fetched.
+    private static string LockKeySummary(OperationLocation location) =>
+        location.LockKey is not { } key ? "" :
+        key.Name.HasValue ? $"{key.Name} ({key.HeldAt.Signature})" : key.HeldAt.Signature;
 
     private int NextLocationId() =>
         (Layout!.OperationLocations.Count == 0 ? 0 : Layout.OperationLocations.Max(o => o.Id)) + 1;

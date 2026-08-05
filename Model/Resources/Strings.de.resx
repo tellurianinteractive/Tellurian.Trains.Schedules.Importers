@@ -123,6 +123,9 @@
   <data name="CallAtStationOverlapsInTimeWithOtherCall" xml:space="preserve">
     <value>Zug {0} {1} überschneidet sich zeitlich mit Zug {2} {3}.</value>
   </data>
+  <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
+    <value>Auf Zug {0} {1} folgt Zug {2} {3} schon nach {4} Minuten; erforderlich sind mindestens {5} Minuten.</value>
+  </data>
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>bei {0} Gleis {1} an {2} ab {3}</value>
   </data>
@@ -270,6 +273,12 @@
   <data name="TrainsShareNumberOnOverlappingSessions" xml:space="preserve">
     <value>Züge {0} und {1} haben dieselbe Nummer, verkehren aber in überlappenden Fahrrunden {2}.</value>
   </data>
+  <data name="VehiclesShareExternalId" xml:space="preserve">
+    <value>Zwei Fahrzeuge haben dieselbe externe Id {0} in den Fahrrunden {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumber" xml:space="preserve">
+    <value>Fahrzeuge {0} und {1} haben denselben Betreiber und dieselbe Nummer {2} in den Fahrrunden {3}.</value>
+  </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Fahrzeugplan {0}: {1} setzt nicht dort fort, wo der vorherige Teil bei {2} endete.</value>
   </data>
@@ -293,5 +302,14 @@
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Teil von {2} {3} bis {4} {5}.</value>
+  </data>
+  <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
+    <value>Die Betriebsstelle {0} ist besetzt, daher wird der in {1} hinterlegte Schlüssel nicht beachtet.</value>
+  </data>
+  <data name="LockKeyIgnoredWithoutCargoExchange" xml:space="preserve">
+    <value>Die Betriebsstelle {0} tauscht keine Güter aus, daher wird der in {1} hinterlegte Schlüssel nicht beachtet.</value>
+  </data>
+  <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
+    <value>Der Bahnhof {1} ist nicht besetzt, daher kann der dort für {0} hinterlegte Schlüssel nicht abgeholt werden und wird nicht beachtet.</value>
   </data>
 </root>

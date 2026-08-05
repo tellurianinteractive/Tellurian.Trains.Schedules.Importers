@@ -125,4 +125,20 @@
   <data name="NoExchange" xml:space="preserve">
     <value>Inget utbyte</value>
   </data>
+  <data name="PickUpKeyForUnlocking" xml:space="preserve">
+    <value>Hämta nyckel {0} för att låsa upp {1}.</value>
+    <comment>{0}=nyckelns namn, {1}=platsen den låser upp</comment>
+  </data>
+  <data name="PickUpUnnamedKeyForUnlocking" xml:space="preserve">
+    <value>Hämta nyckel för att låsa upp {0}.</value>
+    <comment>{0}=platsen nyckeln låser upp</comment>
+  </data>
+  <data name="LeaveKeyFrom" xml:space="preserve">
+    <value>Lämna nyckel {0} från {1}.</value>
+    <comment>{0}=nyckelns namn, {1}=platsen den låser upp</comment>
+  </data>
+  <data name="LeaveUnnamedKeyFrom" xml:space="preserve">
+    <value>Lämna nyckel från {0}.</value>
+    <comment>{0}=platsen nyckeln låser upp</comment>
+  </data>
 </root>

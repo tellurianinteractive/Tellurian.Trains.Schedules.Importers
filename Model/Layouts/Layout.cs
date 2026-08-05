@@ -457,6 +457,62 @@ public static class LayoutTracksExtensions
 /// </summary>
 public static class LayoutDispatchStretchExtensions
 {
+    extension(OperationLocation location)
+    {
+        /// <summary>
+        /// Whether this location is a <em>dispatch endpoint</em>: somewhere with a person on duty who
+        /// clears trains in and out. That is a manned station, and a shadow station whether manned or
+        /// not — off-layout staging is always worked by someone, and trains have to be cleared onto and
+        /// off the modelled railway there like anywhere else.
+        /// </summary>
+        /// <remarks>
+        /// The single definition of the term. A dispatch stretch runs between two of these
+        /// (see <c>CreateDispatchStretches</c>), and the station dispatch list is printed for each of
+        /// them — the two must agree, or a station would be handed a list naming neighbours it has no
+        /// dispatch stretch to.
+        /// </remarks>
+        public bool IsDispatchEndpoint =>
+            location is Station { IsManned: true } or Station { IsShadow: true };
+    }
+
+    extension(Layout layout)
+    {
+        /// <summary>
+        /// The layout's dispatch endpoints in layout order — the stations a
+        /// <see cref="DispatchStretch"/> can begin or end at. See <c>IsDispatchEndpoint</c>.
+        /// </summary>
+        public IEnumerable<Station> DispatchEndpoints =>
+            layout.OperationLocations.OfType<Station>().Where(station => station.IsDispatchEndpoint);
+
+        /// <summary>
+        /// The dispatch endpoints reachable from <paramref name="station"/> over a single dispatch
+        /// stretch — the neighbours its dispatcher talks to, and so the ones whose phone numbers belong
+        /// on its dispatch list.
+        /// </summary>
+        /// <remarks>
+        /// Read from <see cref="Layout.DispatchStretches"/> and from nowhere else — never derived on the
+        /// fly. Those stretches are the planner's own answer to who talks to whom, and a station handed a
+        /// list naming neighbours it has no dispatch stretch to would be told to ring the wrong people.
+        /// A layout with none recorded yields none here; the planner generates them on the Stretches tab.
+        /// </remarks>
+        /// <param name="station">The station whose dispatch neighbours are wanted.</param>
+        public IReadOnlyList<Station> DispatchNeighboursOf(Station station)
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            if (station is null) return [];
+
+            return
+            [
+                .. layout.DispatchStretches
+                    .Where(stretch => stretch.From.Equals(station) || stretch.To.Equals(station))
+                    .Select(stretch => stretch.From.Equals(station) ? stretch.To : stretch.From)
+                    .Where(neighbour => !neighbour.Equals(station))
+                    .DistinctBy(neighbour => neighbour.Signature, StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(neighbour => neighbour.Name, StringComparer.CurrentCulture)
+            ];
+        }
+    }
+
     extension(Layout layout)
     {
         /// <summary>
@@ -469,7 +525,7 @@ public static class LayoutDispatchStretchExtensions
         public ICollection<DispatchStretch> CreateDispatchStretches()
         {
             var result = new List<DispatchStretch>(layout.OperationLocations.Count);
-            var endpoints = layout.OperationLocations.OfType<Station>().Where(IsDispatchEndpoint).ToList();
+            var endpoints = layout.DispatchEndpoints.ToList();
 
             foreach (var fromStation in endpoints)
             {
@@ -596,6 +652,7 @@ public static class LayoutOperationLocationConversionExtensions
             replacement.HideMeets = existing.HideMeets;
             replacement.HidePassings = existing.HidePassings;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;
+            replacement.LockKey = existing.LockKey;
             replacement.Timings = existing.Timings;
             replacement.Layout = existing.Layout;
             replacement.LayoutId = existing.LayoutId;
@@ -617,6 +674,11 @@ public static class LayoutOperationLocationConversionExtensions
                 if (signal.ControlledBy is { } controller && controller.Equals(existing))
                     signal.ControlledBy = replacement as Station; // null when the replacement is no longer a station
             }
+            // Only a station can hold a lock key, so converting one is always converting it into
+            // something that cannot: the locations whose keys it held are left without one rather than
+            // pointing at a station the layout no longer has.
+            foreach (var keyed in layout.OperationLocations.Where(o => o.LockKey is { } key && key.HeldAt.Equals(existing)))
+                keyed.LockKey = null;
 
             layout.OperationLocations = [.. layout.OperationLocations.Select(o => o.Equals(existing) ? replacement : o)];
             return replacement;

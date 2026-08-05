@@ -1,5 +1,104 @@
 # Release Notes
 
+## Version 0.4.0
+
+### Breaking changes
+
+- **A vehicle you create is now identified by its operator and number.** The two together name one
+  physical vehicle, so on any one session the combination may belong to only one vehicle — whichever
+  kind of vehicle it is. A wagonset and a locomotive can no longer both be *DB 5*. A vehicle with no
+  operator is identified by its number alone. Two vehicles may still carry the same operator and number
+  as long as the sessions they work do not overlap, since they are then never at the meeting at the
+  same time.
+
+  An **imported** vehicle keeps being identified by the external id it was imported under, which is
+  already unique in the plan it came from, so an imported plan raises no new conflicts over this.
+
+  Adding or editing a vehicle on the Schedules tab now refuses an identity another vehicle already
+  holds, and a number has to be given. Plans made before this rule are kept exactly as they are —
+  nothing is renumbered for you — and every vehicle that shares an identity is listed among the
+  conflicts, once each, so you can see what needs a new number.
+
+### Changes
+
+- **There is a new report: the station dispatch list.** One set of sheets per station with somebody on
+  duty — every manned station, and every shadow station whether manned or not — listing the trains that
+  station handles in time order. A train that stands there appears twice, once for the arrival and once
+  for the departure, because clearing a train in and clearing it on to the next station are separate
+  actions taken minutes apart; arrivals are on white and departures on a light yellow so the two can
+  never be mistaken for one another. Trains that only run past are listed too, since they have to be
+  cleared through as well. Each page carries the station's name, the part of the day it covers and the
+  phone numbers of the stations at the other end of its dispatch stretches, and every row has a box per
+  session to tick off as it is worked, greyed where the train does not run. Each station starts on a
+  fresh page, so the pile can simply be torn apart and handed out. Print it from the Reports menu.
+
+- **The fields for adding and editing a vehicle are in a new order,** the same in both places: type of
+  vehicle, type of traction, number of units, operator, number, class, sessions and last the external
+  id — what the vehicle is, then what identifies it, then how it is described and when it runs. The
+  field previously labelled *Company* is now *Operator*.
+
+- **An external id can be corrected but no longer invented.** The external id is the name a train or a
+  vehicle carries in the system it was imported from, so it means something only where it came from
+  something. One imported with an id still has its field — on the Trains tab, and in the vehicle dialog
+  on the Schedules tab — and can be corrected there; one that never had an id now has no field to type
+  into. A vehicle you create in the planner is therefore given no external id at all, where it used to
+  be given one made up from its class and number.
+
+- **The shortest time between two uses of the same track is now checked.** The setting was there but
+  nothing acted on it. Left at 0 — where it starts, and where it stays until you change it — nothing
+  about the checking changes: two trains are in conflict where they stand on the same track at the same
+  time, and one arriving just as another leaves is a handover, not a conflict. Set it to, say, 5 and the
+  track must also be free for five minutes between them, so a plan that turns a track round faster than
+  the station can work it is reported. Exactly five minutes free is enough; four is not.
+
+  A conflict of that kind says how short the gap actually is and how long it had to be, rather than
+  claiming the two trains overlap when the times show they do not.
+
+- **An operation location can now carry its own instructions.** The form for adding and editing a
+  location has an **Instructions** field, written in Markdown and shown beside a live preview like the
+  general instructions in Settings. It is for how that location is worked at this meeting — which
+  tracks are used for what, how the shunting is arranged, and what else the loco drivers and the
+  people staffing it need to know there. How the location is operated in general, and any other
+  description of it, is for its owner to provide and does not belong in the field. What is written is
+  saved with the location and shown on its Info view.
+
+  The field is offered at a station or an industrial area, where passengers and/or cargo are exchanged.
+  It is not offered where there is nothing to instruct: trains only run past a signal-controlled
+  location, and nobody works an other location, so a train there does what its call says and no more.
+
+- **A location where cargo is worked with nobody on duty can now require a key.** Where the switches at
+  an unmanned station or an industrial area are padlocked, the edit form lets you pick the manned
+  station that keeps the key, under **Lock key held at**, and name the key if that station keeps more
+  than one.
+
+  Nothing else has to be planned. A freight train that stops at the key-holding station and later stops
+  at the location the key unlocks is told, as it leaves the key-holding station, to *pick up key A1 for
+  unlocking Bruket*; when it next calls there, its arrival tells it to *leave key A1 from Bruket*. A
+  train that only runs past either place is told nothing, since it unlocks nothing. The key is fetched
+  at the last call at the holding station before the work and handed back at the first one after it, so
+  a train calling there twice is not asked to carry it around for an extra visit.
+
+  A key only means something while both ends of it hold. Mark the location itself as manned, or take the
+  manning off the station that keeps the key, and the key stops applying: no notes are made from it, and
+  **Conflicts** says which of the two changes did it. The key is kept rather than thrown away, so
+  undoing that change brings it straight back, and it stays on the form where you can point it at
+  another station or clear it.
+
+### Fixes
+
+- **Two stretches setting off from the same operation location were drawn as if they never met.** Where
+  a timetable stretch began at the very first operation location of another, nothing joined the two in
+  the Topology diagram: each was drawn as a line of its own, with no branch between them. The second now
+  leaves that operation location like any other branch, falling away from it at the same fixed angle.
+
+- **Every validation threshold now says which clock it is measured against.** The shortest time between
+  two uses of the same track gave no unit at all, and the two train speeds said only *clock minutes*,
+  which could be read either way. All three now say fast-clock minutes — the clock the trains run to,
+  not real time.
+
+- **Lengths and distances now spell metres out,** as does the top half of the train speeds, so the *m*
+  cannot be taken for a minute. The minimum stop at a station is now labelled in fast-clock minutes too.
+
 ## Version 0.3.5
 
 ### Fixes

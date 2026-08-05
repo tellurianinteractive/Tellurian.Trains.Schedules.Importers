@@ -1,0 +1,144 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* One printed page of a station's dispatch list.
+
+   The reader is the person on duty at the station, working down the page in time order while trains are
+   moving. Every row is one clearance they give, and the two things they must never confuse — a train
+   pulling in and a train being sent onward — are separated by colour as well as by column: arrivals on
+   white, departures on light yellow. A train standing at the station therefore appears twice, and the
+   trains that pass in between appear where they fall in time rather than beside the train they belong to.
+
+   The heading repeats on every page and is the page's only identification — there is no footer — because
+   these sheets are torn apart and handed out: a page has to say which station it is, which part of the
+   day it covers, and who to ring, all on one line. *@
+
+<div class="dispatchlist">
+    <header class="heading">
+        <h2>
+            <span class="name">@Page.Station.Name</span>
+            @if (Interval is { } interval)
+            {
+                <span class="interval">@interval</span>
+            }
+            @if (Page.List.Neighbours.Count > 0)
+            {
+                <span class="neighbours">
+                    @* Written on one line so the spacing is exactly what is typed: a space between the
+                       name, the phone glyph and the number, and the comma hard against the number. *@
+                    @for (var i = 0; i < Page.List.Neighbours.Count; i++)
+                    {
+                        var neighbour = Page.List.Neighbours[i];
+                        // The trailing space is part of the separator: Razor strips the whitespace
+                        // between two control-flow blocks, so nothing else puts one there.
+                        var separator = i < Page.List.Neighbours.Count - 1 ? ", " : "";
+                        <span class="neighbour">@neighbour.Name <i class="fa-solid fa-phone" aria-hidden="true"></i>@neighbour.PhoneNumber.ToString(Culture)@separator</span>
+                    }
+                </span>
+            }
+        </h2>
+    </header>
+
+    @if (Page.Rows.Count == 0)
+    {
+        <p class="empty">@Translator("NoTrainsAtStation")</p>
+    }
+    else
+    {
+        <table class="dispatch">
+            <thead>
+                <tr>
+                    <th class="train">@Translator("Train")</th>
+                    @* "Runs", not "Sessions": a verb saying what the column tells you about the train,
+                       which is both shorter than the noun in every language and true of the day form
+                       too. The nouns run to thirteen characters ("Køresessioner") and would be clipped
+                       at this width — the column is sized by its contents, which are now a word or a
+                       few circles. *@
+                    <th class="sessions">@Translator(Settings.UseDaysInsteadOfSessionNumbers ? "Days" : "SessionsShort")</th>
+                    <th class="track">@Translator("Track")</th>
+                    <th class="time">@Translator("Arr")</th>
+                    <th class="place">@Translator("From")</th>
+                    <th class="time">@Translator("Dep")</th>
+                    <th class="place">@Translator("To")</th>
+                    @foreach (var position in Positions)
+                    {
+                        <th class="tick">@SessionsFormatting.PositionHeadingOf(position, Settings)</th>
+                    }
+                    <th class="notes">@Translator("Notes")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Page.Rows)
+                {
+                    <tr class="@RowClass(row)">
+                        <td class="train">@row.TrainIdentity</td>
+                        @* Without the on-demand marker — it appears among the notes instead, where it has
+                           room to be read rather than wrapping over four lines of a 14 mm column. *@
+                        <td class="sessions"><SessionsView Sessions="row.DisplayedSessions" Settings="Settings" /></td>
+                        <td class="track">@row.TrackNumber</td>
+                        <td class="time arr">@row.ArrivalTime</td>
+                        <td class="place from">@row.OriginName</td>
+                        <td class="time dep">@row.DepartureTime</td>
+                        <td class="place to">@row.DestinationName</td>
+                        @foreach (var position in Positions)
+                        {
+                            @* Empty by design: the box is ticked by hand as the session is worked.
+                               A session the train does not run is greyed so it cannot be ticked by mistake. *@
+                            <td class="tick @(row.Sessions.Covers(position, Settings) ? "" : "off")"></td>
+                        }
+                        <td class="notes">
+                            @foreach (var note in row.PrintingNotes)
+                            {
+                                @* One note per line: each is a discrete instruction, and running them
+                                   together would let the eye slide past the one that mattered. *@
+                                <span class="note">@note.ToHtml</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    /// <summary>The page to render.</summary>
+    [Parameter, EditorRequired] public DispatchPage Page { get; set; } = default!;
+
+    /// <summary>
+    /// Chooses sessions or days, the operating period and the day names. Build it from the layout with
+    /// <c>Layout.Settings.General.SessionSettings()</c>.
+    /// </summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    // One tick-off column per session or day of the operating period.
+    private IReadOnlyList<int> Positions => SessionsFormatting.PositionsOf(Settings);
+
+    // The part of the day this page covers, which is how a reader picks the right sheet out of a
+    // station's pile without reading every row — and, with no footer, the only thing that orders them.
+    private string? Interval =>
+        Page.FirstTime is { } first && Page.LastTime is { } last ? $"{first.HHMM()}-{last.HHMM()}" : null;
+
+    // The tint says which clearance the row is: white for a train being cleared in, yellow for one being
+    // cleared onward. A pass-through takes the departure tint, being a single onward clearance.
+    //
+    // "sole" is added where the row is the train's only one here, which makes both pairs bold: there is
+    // no second row for the reader's eye to go to, so everything on it is what they act on.
+    private static string RowClass(DispatchRow row)
+    {
+        var kind = row.Kind switch
+        {
+            DispatchRowKind.Arrival => "arrival",
+            DispatchRowKind.Departure => "departure",
+            _ => "departure passing",
+        };
+        return row.IsSoleRow ? $"{kind} sole" : kind;
+    }
+}

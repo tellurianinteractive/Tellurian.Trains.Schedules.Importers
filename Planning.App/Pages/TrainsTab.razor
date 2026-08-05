@@ -90,8 +90,14 @@ else
                                     @if (ShowExternalId)
                                     {
                                         <td>
-                                            <input type="text" class="ext" value="@train.ExternalId"
-                                                   @onchange="e => SetExternalId(train, e)" />
+                                            @* An external id belongs to the system the train came from, so it can be
+                                               corrected but never invented here: a train imported without one has no
+                                               field to type into. *@
+                                            @if (HasExternalId(train))
+                                            {
+                                                <input type="text" class="ext" value="@train.ExternalId"
+                                                       @onchange="e => SetExternalId(train, e)" />
+                                            }
                                         </td>
                                     }
                                     <td>
@@ -191,7 +197,11 @@ else
         [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number)];
 
     // The ExternalId column is only meaningful for imported trains; hide it when nothing uses it.
-    private bool ShowExternalId => Trains.Any(t => !string.IsNullOrWhiteSpace(t.ExternalId));
+    private bool ShowExternalId => Trains.Any(HasExternalId);
+
+    // True when the train carries an external id from the system it was imported from. Only such a train
+    // gets an editable field, so an id can be corrected but not added to a train that never had one.
+    private static bool HasExternalId(Train train) => !string.IsNullOrWhiteSpace(train.ExternalId);
 
     // External ids are as long as the system they were imported from made them, so the field is sized to
     // the longest one instead of clipping every id to a fixed width. Bounded so that neither a very short

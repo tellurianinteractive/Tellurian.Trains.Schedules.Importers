@@ -19,13 +19,20 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public int Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the scheduled object instance number.
-    /// Must be unique withing a <see cref="Company"/> or unique withing the <see cref="Plan"/> if no company is specified. 
+    /// Gets or sets the scheduled object instance number. Together with the operating
+    /// <see cref="Company"/> it identifies a vehicle that carries no <see cref="ExternalId"/> — the number
+    /// alone when there is no company — and must then be unique among the plan's vehicles on any one
+    /// session, whatever their <see cref="ObjectType"/>, so a wagonset and a locomotive may not share it
+    /// either. A vehicle that does carry an external id is identified by that instead. See
+    /// <see cref="VehicleIdentity"/>; a clash is reported by the identity validation (rule P5).
     /// </summary>
     public int Number { get; set; }
 
     /// <summary>
-    /// Gets or sets an optional external identifier for this vehicle.
+    /// Gets or sets the identifier the vehicle was imported under, or <c>null</c> for a vehicle that was
+    /// not imported. It is unique in the system it came from, so where it is set it — rather than the
+    /// operator and <see cref="Number"/> — is what identifies the vehicle (see <see cref="VehicleIdentity"/>).
+    /// A vehicle created in the planner is given none, so the planner never invents one.
     /// </summary>
     public string? ExternalId { get; set; }
 
@@ -333,6 +340,41 @@ public static class ScheduledObjectExtensions
         /// </summary>
         public Sessions AssignedSessions =>
             scheduledObject.ScheduleAssignments.Select(a => a.Sessions).Aggregate(new Sessions(), (acc, s) => acc.Or(s));
+
+        /// <summary>
+        /// True when the operating company and the number identify this scheduled object, so that it takes
+        /// part in the identity-uniqueness rule (see <c>ValidateVehicleIdentities</c>). A cargo flow is left
+        /// out: it is a group of freight wagons directed by waybills, carrying a synthesised identifier
+        /// rather than an operator and a number of its own.
+        /// </summary>
+        public bool HasVehicleIdentity => !scheduledObject.IsCargoFlow;
+
+        /// <summary>
+        /// What identifies this vehicle, and so may name only one of the plan's vehicles on any one
+        /// session: its <see cref="ScheduledObject.ExternalId"/> when it carries one, otherwise its
+        /// operator and number. See <see cref="VehicleIdentity"/>.
+        /// </summary>
+        public VehicleIdentity Identity =>
+            VehicleIdentity.Of(scheduledObject.ExternalId, scheduledObject.CompanyId, scheduledObject.Number);
+
+        /// <summary>
+        /// The vehicle's identity as text, for a message naming what is shared: its external id when it
+        /// has one, otherwise its operator signature and number (e.g. "DB 218"), or the number alone when
+        /// it has no operator.
+        /// </summary>
+        public string IdentityText =>
+            scheduledObject.HasExternalId
+                ? scheduledObject.ExternalId!
+                : $"{scheduledObject.Company?.Signature} {scheduledObject.Number}".Trim();
+
+        /// <summary>
+        /// The sessions on which this vehicle claims its operator and number: the union of the sessions of
+        /// all its <see cref="ScheduledObject.ScheduleAssignments"/>. A vehicle assigned nowhere claims
+        /// <em>every</em> session, because it stands in the pool ready to be assigned to any of them — so
+        /// its identity is taken whether or not it has been given work yet.
+        /// </summary>
+        public Sessions ClaimedSessions =>
+            scheduledObject.ScheduleAssignments.Count == 0 ? Sessions.All : scheduledObject.AssignedSessions;
 
         /// <summary>
         /// Gets the distinct session/day combinations this vehicle works, each paired with the train parts it

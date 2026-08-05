@@ -153,6 +153,27 @@ public class PlanSettingsPersistenceTests
         Assert.AreEqual(2, restored.Layout.StationTracks().Sum(t => t.Calls.Count), "per-track call index");
     }
 
+    [TestMethod]
+    public void ALockKeyIsRestoredPointingAtTheStationInTheRestoredLayout()
+    {
+        // The key holds a station, so it is written as a reference to one the layout already holds.
+        // Read back as a second copy it would be a station nothing else in the plan knows about.
+        var plan = PlanWithTrain(out _);
+        var holder = (Station)plan.Layout.OperationLocations.First();
+        var keyed = plan.Layout.OperationLocations.Last();
+        ((Station)keyed).IsManned = false;
+        keyed.LockKey = new LockKey { HeldAt = holder, Name = "A1" };
+
+        var json = JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        var restored = JsonSerializer.Deserialize<Plan>(json, PlanJson.CreateOptions());
+
+        Assert.IsNotNull(restored);
+        var key = restored.Layout.OperationLocations.Last().LockKey;
+        Assert.IsNotNull(key);
+        Assert.AreEqual("A1", key.Name);
+        Assert.AreSame(restored.Layout.OperationLocations.First(), key.HeldAt);
+    }
+
     // A minimal plan of the shape the app creates: two stations joined by a track stretch, one
     // timetable stretch over it and one train calling at both ends.
     private static Plan PlanWithTrain(out Train train)

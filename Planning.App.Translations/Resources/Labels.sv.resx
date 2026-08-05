@@ -451,13 +451,13 @@
     <value>Tröskelvärden</value>
   </data>
   <data name="MinTrainSpeed" xml:space="preserve">
-    <value>Lägsta tåghastighet (m/klockmin)</value>
+    <value>Lägsta tåghastighet (meter/snabbklocksmin)</value>
   </data>
   <data name="MaxTrainSpeed" xml:space="preserve">
-    <value>Högsta tåghastighet (m/klockmin)</value>
+    <value>Högsta tåghastighet (meter/snabbklocksmin)</value>
   </data>
   <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
-    <value>Minsta minuter mellan spåranvändning</value>
+    <value>Minsta tid mellan spåranvändning (snabbklocksmin)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
     <value>API-nyckel för ModuleRegistry</value>
@@ -631,7 +631,7 @@
     <value>Sträckning</value>
   </data>
   <data name="DistanceMeters" xml:space="preserve">
-    <value>Distans (m)</value>
+    <value>Distans (meter)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Hastighet (km/h)</value>
@@ -1021,7 +1021,7 @@
     <value>Namnet på banan, som visas i rapporter och exporterade filer.</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Längd (m)</value>
+    <value>Längd (meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kan inte tas bort: tåg stannar på denna plats.</value>
@@ -1039,7 +1039,7 @@
     <value>Den kortaste tid, i snabbklocksminuter, ett tåg måste stanna på en station innan det får avgå.</value>
   </data>
   <data name="MinimumStopMinutes" xml:space="preserve">
-    <value>Minsta uppehåll (min)</value>
+    <value>Minsta uppehåll (snabbklocksmin)</value>
   </data>
   <data name="MinimumStopMinutesHelp" xml:space="preserve">
     <value>Minsta tid ett tåg stannar på denna bemannade driftplats, i snabbklocksminuter.</value>
@@ -1281,6 +1281,9 @@
   <data name="Sessions" xml:space="preserve">
     <value>Köromgångar</value>
   </data>
+  <data name="SessionsShort" xml:space="preserve">
+    <value>Kör</value>
+  </data>
   <data name="Days" xml:space="preserve">
     <value>Dagar</value>
   </data>
@@ -1400,7 +1403,7 @@
     <value>Från kategori: {0}</value>
   </data>
   <data name="LengthMeters" xml:space="preserve">
-    <value>Längd (m)</value>
+    <value>Längd (meter)</value>
   </data>
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Visa en notis vid ankomst om vilket tåg detta fortsätter som, enligt schemat.</value>
@@ -1641,6 +1644,9 @@
   </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Skapa nytt fordon</value>
+  </data>
+  <data name="VehicleIdentityAlreadyUsed" xml:space="preserve">
+    <value>Operatör och nummer {0} används redan av {1}. Välj ett annat nummer eller en annan operatör.</value>
   </data>
   <data name="VehicleType" xml:space="preserve">
     <value>Fordonstyp</value>
@@ -1892,7 +1898,7 @@
     <value>Fast nummer?</value>
   </data>
   <data name="Experienced" xml:space="preserve">
-    <value>Van</value>
+    <value>Erfaren</value>
   </data>
   <data name="ValidFrom" xml:space="preserve">
     <value>Gäller från</value>
@@ -2040,5 +2046,47 @@
   </data>
   <data name="DriverDuties" xml:space="preserve">
     <value>Förartjänster</value>
+  </data>
+  <data name="StationDispatchList" xml:space="preserve">
+    <value>Tågklareringslista</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Anmärkningar</value>
+  </data>
+  <data name="NoTrainsAtStation" xml:space="preserve">
+    <value>Inga tåg angör denna station.</value>
+  </data>
+  <data name="NoDispatchStations" xml:space="preserve">
+    <value>Det finns inga bemannade stationer eller skuggstationer att skriva ut tågklareringslista för.</value>
+  </data>
+  <data name="LocationInstructions" xml:space="preserve">
+    <value>Instruktioner</value>
+  </data>
+  <data name="LocationInstructionsHint" xml:space="preserve">
+    <value>Hur den här platsen körs på den här träffen: vilka spår som används till vad, hur växlingen är upplagd och vad lokförarna och de som bemannar platsen annars behöver veta här.</value>
+  </data>
+  <data name="LocationInstructionsHelp" xml:space="preserve">
+    <value>Markdown. För instruktioner som gäller den här platsen på den här träffens bana. Allmänna instruktioner om hur platsen körs, och annan information om den, är ägarens sak att tillhandahålla och hör inte hemma här.</value>
+  </data>
+  <data name="LockKey" xml:space="preserve">
+    <value>Låsnyckel</value>
+  </data>
+  <data name="LockKeyHeldAt" xml:space="preserve">
+    <value>Låsnyckel förvaras vid</value>
+  </data>
+  <data name="LockKeyHeldAtHelp" xml:space="preserve">
+    <value>Den bemannade station som förvarar nyckeln till växellåsen här. Ett godståg som stannar här får besked att hämta nyckeln när det lämnar den stationen och att lämna tillbaka den nästa gång det stannar där. Lämna tomt om ingen nyckel behövs.</value>
+  </data>
+  <data name="LockKeyName" xml:space="preserve">
+    <value>Nyckelns namn</value>
+  </data>
+  <data name="LockKeyNameHelp" xml:space="preserve">
+    <value>Vad nyckeln heter, så att lokföraren kan be om rätt nyckel där en station förvarar flera. Valfritt.</value>
+  </data>
+  <data name="NoMannedStationsForLockKey" xml:space="preserve">
+    <value>Ingen bemannad station kan förvara en nyckel ännu. Markera först den station som förvarar den som bemannad.</value>
+  </data>
+  <data name="LockKeyIgnoredHint" xml:space="preserve">
+    <value>Den här nyckeln ignoreras som det är nu: se Konflikter för varför. Den behålls, så den gäller igen så snart det är åtgärdat.</value>
   </data>
 </root>

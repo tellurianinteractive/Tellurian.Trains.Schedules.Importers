@@ -186,7 +186,13 @@
   <data name="AllSessions" xml:space="preserve">
     <value>Alla pass</value>
   </data>
+  <data name="AllSessionsShort" xml:space="preserve">
+    <value>Alla</value>
+  </data>
   <data name="NoSessions" xml:space="preserve">
     <value>Inga pass</value>
+  </data>
+  <data name="NoSessionsShort" xml:space="preserve">
+    <value>Inga</value>
   </data>
 </root>

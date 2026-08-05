@@ -235,6 +235,42 @@ public class TopologyLayoutTests
         AssertNothingCrosses(diagram);
     }
 
+    [TestMethod]
+    public void TwoStretchesLeavingTheSameFirstStationAreJoinedThere()
+    {
+        // A real layout: line 1 and line 3 both set off from SAT, and line 2 leaves line 1 at HHN. SAT is
+        // where lines 1 and 3 part, so line 3 must hang off it like any other branch — drawn on its own
+        // with nothing joining it, the diagram would claim the two lines never meet.
+        var diagram = TopologyDiagram.Build(CreateLayout(
+            "SAT FPN@10 Dul@20 HHN@15 HDAR@15", "HHN AKHG@3", "SAT ERFT@15"));
+
+        var junction = Line(diagram, "1").Nodes[0];
+        Assert.AreEqual("SAT", junction.Signature);
+
+        var branch = diagram.Connectors.Single(c => c.Color == Line(diagram, "3").Color);
+        Assert.AreEqual(junction.X, branch.JunctionX, 0.001, "Line 3 must leave line 1 at the station they share.");
+        Assert.AreEqual(junction.Y, branch.JunctionY, 0.001);
+        Assert.AreEqual(Line(diagram, "3").StartX, branch.LineX, 0.001, "The connector must meet line 3 where it begins.");
+        Assert.AreEqual(Math.Abs(branch.LineY - branch.JunctionY), Math.Abs(branch.LineX - branch.JunctionX), 0.001,
+            "It must diverge at 45°.");
+
+        Assert.IsTrue(Line(diagram, "3").Nodes[0].Hidden, "SAT belongs to line 1, which was drawn first.");
+        AssertNothingCrosses(diagram);
+    }
+
+    [TestMethod]
+    public void ThreeStretchesLeavingTheSameFirstStationAreAllJoinedThere()
+    {
+        // All three set off from A. Each must be joined to what it leaves, and the two branches hang off
+        // each other's corner rather than being drawn one on top of the other.
+        var diagram = TopologyDiagram.Build(CreateLayout("A B C D", "A P Q", "A X Y"));
+
+        Assert.AreEqual(2, diagram.Connectors.Count, "Both lines leaving A besides the first must be joined to it.");
+        Assert.AreEqual(2, diagram.Connectors.Select(c => (c.JunctionX, c.JunctionY)).Distinct().Count(),
+            "The second branch hangs off the corner of the first, so no two connectors start at the same point.");
+        AssertNothingCrosses(diagram);
+    }
+
     // A connector runs at 45° from its junction to the line it leads to, falling to a branch drawn below and
     // climbing to one drawn above. Nothing may lie in its way: not a line on a row it passes — that would
     // show a branch running straight through another line — and not another connector, which would show two

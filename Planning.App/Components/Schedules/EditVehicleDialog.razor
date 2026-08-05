@@ -4,9 +4,14 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 
-@* Edits a vehicle already on a schedule: its identity (type, external id, class, number, company),
+@* Edits a vehicle already on a schedule: its identity (type, external id, class, number, operator),
    an optional remark, and the sessions/days its assignment covers on this schedule. The external id is a
-   display override — when left blank the vehicle is shown as its company signature, class and number instead. *@
+   display override — when left blank the vehicle is shown as its company signature, class and number instead.
+
+   The fields are ordered as the planner works: what kind of vehicle it is, then what identifies it
+   (operator and number), then how it is described, then when it runs. Operator and number are the
+   vehicle's identity, so an identity another vehicle already claims on a common session is refused
+   here rather than left to the conflict list (rule P5). *@
 
 @if (Plan is not null)
 {
@@ -35,24 +40,6 @@
                     </select>
                 </div>
             }
-            <div class="field">
-                <label>@Translator("Class")</label>
-                <input type="text" value="@_class" @onchange="e => _class = e.Value?.ToString() ?? string.Empty" />
-            </div>
-            <div class="field">
-                <label>@Translator("Number")</label>
-                <input type="number" class="num" min="0" value="@_number" @onchange="e => _number = ParseInt(e, _number)" />
-            </div>
-            <div class="field">
-                <label>@Translator("Company")</label>
-                <select value="@(_companyId?.ToString() ?? string.Empty)" @onchange="OnCompanyChanged">
-                    <option value="">@Translator("None")</option>
-                    @foreach (var company in Companies)
-                    {
-                        <option value="@company.Id">@company.Name</option>
-                    }
-                </select>
-            </div>
             @if (IsTractionType || IsWagonsetType)
             {
                 <div class="field">
@@ -63,6 +50,24 @@
                            @onchange="e => _numberOfUnits = ParseInt(e, _numberOfUnits)" />
                 </div>
             }
+            <div class="field">
+                <label>@Translator("Operator")</label>
+                <select value="@(_companyId?.ToString() ?? string.Empty)" @onchange="OnCompanyChanged">
+                    <option value="">@Translator("None")</option>
+                    @foreach (var company in Companies)
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="field">
+                <label>@Translator("Number")</label>
+                <input type="number" class="num" min="1" value="@_number" @onchange="e => _number = ParseInt(e, _number)" />
+            </div>
+            <div class="field">
+                <label>@Translator("Class")</label>
+                <input type="text" value="@_class" @onchange="e => _class = e.Value?.ToString() ?? string.Empty" />
+            </div>
             @if (IsWagonsetType)
             {
                 <div class="field wagons">
@@ -111,13 +116,23 @@
                 <label>@Translator("Remark")</label>
                 <input type="text" value="@_remark" @onchange="e => _remark = e.Value?.ToString() ?? string.Empty" />
             </div>
-            <div class="field">
-                <label>@Translator("ExternalId")</label>
-                <input type="text" value="@_externalId" @onchange="e => _externalId = e.Value?.ToString() ?? string.Empty" />
-            </div>
+            @* An external id belongs to the system the vehicle came from, so it can be corrected but never
+               invented here: a vehicle created in the planner has none and gets no field to type into. *@
+            @if (Vehicle.HasExternalId)
+            {
+                <div class="field">
+                    <label>@Translator("ExternalId")</label>
+                    <input type="text" value="@_externalId" @onchange="e => _externalId = e.Value?.ToString() ?? string.Empty" />
+                </div>
+            }
+
+            @if (ClaimedBy is { } other)
+            {
+                <p class="error">@IdentityInUseMessage(other)</p>
+            }
 
             <div class="actions">
-                <button class="primary" @onclick="Save">@Translator("Save")</button>
+                <button class="primary" disabled="@(!CanSave)" @onclick="Save">@Translator("Save")</button>
                 <button @onclick="Cancel">@Translator("Cancel")</button>
             </div>
         </div>
@@ -220,6 +235,29 @@
     private void OnCompanyChanged(ChangeEventArgs e) =>
         _companyId = int.TryParse(e.Value?.ToString(), out var id) ? id : null;
 
+    // The sessions the vehicle would claim after this edit: the sessions of its other assignments
+    // together with the ones chosen here. Only this assignment's sessions are edited, but the identity
+    // is claimed across everything the vehicle works.
+    private Sessions EditedSessions =>
+        Vehicle.ScheduleAssignments
+            .Where(a => !ReferenceEquals(a, Assignment))
+            .Select(a => a.Sessions)
+            .Aggregate(_sessions, (union, s) => union.Or(s));
+
+    // The identity the vehicle would have after this edit: its external id where it has one (only an
+    // imported vehicle does), otherwise the entered operator and number.
+    private VehicleIdentity EditedIdentity => VehicleIdentity.Of(_externalId, _companyId, _number);
+
+    // The other vehicle already claiming that identity on a session this one would work, or null when it
+    // is free (see Plan.VehicleClaiming, rule P5).
+    private ScheduledObject? ClaimedBy =>
+        _number < 1 ? null : Plan?.VehicleClaiming(EditedIdentity, EditedSessions, excluding: Vehicle);
+
+    private bool CanSave => _number >= 1 && ClaimedBy is null;
+
+    private string IdentityInUseMessage(ScheduledObject other) =>
+        string.Format(CultureInfo.CurrentCulture, Translator("VehicleIdentityAlreadyUsed"), other.IdentityText, other.Designation);
+
     private void OnSessionsChanged(ChangeEventArgs e)
     {
         var key = e.Value?.ToString();
@@ -232,7 +270,7 @@
 
     private async Task Save()
     {
-        if (Plan is not { } plan) return;
+        if (Plan is not { } plan || !CanSave) return;
         var type = Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
         plan.UpdateVehicle(Vehicle, type, _externalId, _class, _number, company, _tractionType, EffectiveNumberOfUnits);

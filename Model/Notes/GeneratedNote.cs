@@ -67,8 +67,19 @@ public static class GeneratedNoteExtensions
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 new(NoteResources.BringsWagonsTo, NoteArg.Markup(part.ToText, part.ToHtml)),
+            // The key's name is emphasised beside the location, because at a station holding several it
+            // is what the driver has to ask for by name.
+            PickUpLockKeyNote(var location, var name) => name.HasValue
+                ? new(NoteResources.PickUpKeyForUnlocking, name, location)
+                : new(NoteResources.PickUpUnnamedKeyForUnlocking, location),
+            LeaveLockKeyNote(var location, var name) => name.HasValue
+                ? new(NoteResources.LeaveKeyFrom, name, location)
+                : new(NoteResources.LeaveUnnamedKeyFrom, location),
             NoStopNote => new(NoteResources.NoStop),
             NoExchangeNote => new(NoteResources.NoExchange),
+            // Reuses the wording the sessions value itself uses for the marker, so a reader meets the
+            // same phrase whether it is stated in a column or as a note.
+            OnDemandNote => new(DaysExtensions.DayResource("OnDemandOnly")),
             CrossingNote(var meets, var settings) => new(NoteResources.Crosses, MeetList(meets, settings)),
             OvertakesNote(var meets, var settings) => new(NoteResources.Overtakes, MeetList(meets, settings)),
             IsOvertakenNote(var meets, var settings) => new(NoteResources.IsOvertakenBy, MeetList(meets, settings)),

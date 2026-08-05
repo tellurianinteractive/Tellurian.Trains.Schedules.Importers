@@ -79,6 +79,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} {1} is followed by train {2} {3} after only {4} minutes; at least {5} minutes are required..
+        /// </summary>
+        internal static string CallAtStationTooCloseInTimeToOtherCall {
+            get {
+                return ResourceManager.GetString("CallAtStationTooCloseInTimeToOtherCall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to at {0} track {1} arr {2} dep {3}.
         /// </summary>
         internal static string CallAtStationTrackDuringTimes {
@@ -192,6 +201,33 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string Information {
             get {
                 return ResourceManager.GetString("Information", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation location {0} is manned, so the lock key held at {1} is ignored..
+        /// </summary>
+        internal static string LockKeyIgnoredAtMannedLocation {
+            get {
+                return ResourceManager.GetString("LockKeyIgnoredAtMannedLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Station {1} is not manned, so the lock key it holds for {0} cannot be fetched and is ignored..
+        /// </summary>
+        internal static string LockKeyIgnoredWhenHolderIsNotManned {
+            get {
+                return ResourceManager.GetString("LockKeyIgnoredWhenHolderIsNotManned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation location {0} exchanges no cargo, so the lock key held at {1} is ignored..
+        /// </summary>
+        internal static string LockKeyIgnoredWithoutCargoExchange {
+            get {
+                return ResourceManager.GetString("LockKeyIgnoredWithoutCargoExchange", resourceCulture);
             }
         }
         
@@ -579,6 +615,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string VehicleScheduleHasNoVehicle {
             get {
                 return ResourceManager.GetString("VehicleScheduleHasNoVehicle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Two vehicles share the external id {0} on sessions {1}..
+        /// </summary>
+        internal static string VehiclesShareExternalId {
+            get {
+                return ResourceManager.GetString("VehiclesShareExternalId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicles {0} and {1} share operator and number {2} on sessions {3}..
+        /// </summary>
+        internal static string VehiclesShareOperatorAndNumber {
+            get {
+                return ResourceManager.GetString("VehiclesShareOperatorAndNumber", resourceCulture);
             }
         }
         

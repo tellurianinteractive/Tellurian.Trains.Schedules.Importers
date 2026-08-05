@@ -451,13 +451,13 @@
     <value>Tærskelværdier</value>
   </data>
   <data name="MinTrainSpeed" xml:space="preserve">
-    <value>Mindste toghastighed (m/ur-min)</value>
+    <value>Mindste toghastighed (meter/hurtigur-min)</value>
   </data>
   <data name="MaxTrainSpeed" xml:space="preserve">
-    <value>Største toghastighed (m/ur-min)</value>
+    <value>Største toghastighed (meter/hurtigur-min)</value>
   </data>
   <data name="MinMinutesBetweenTrackUsage" xml:space="preserve">
-    <value>Mindste minutter mellem sporbrug</value>
+    <value>Mindste tid mellem sporbrug (hurtigur-min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
     <value>ModuleRegistry API-nøgle</value>
@@ -631,7 +631,7 @@
     <value>Strækning</value>
   </data>
   <data name="DistanceMeters" xml:space="preserve">
-    <value>Distance (m)</value>
+    <value>Distance (meter)</value>
   </data>
   <data name="SpeedKmh" xml:space="preserve">
     <value>Hastighed (km/t)</value>
@@ -1021,7 +1021,7 @@
     <value>Navnet på dette anlæg, som vises i rapporter og eksporterede filer.</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Længde (m)</value>
+    <value>Længde (meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kan ikke slettes: tog standser på dette sted.</value>
@@ -1039,7 +1039,7 @@
     <value>Den korteste tid, i hurtigursminutter, et tog skal blive på en station, før det må afgå.</value>
   </data>
   <data name="MinimumStopMinutes" xml:space="preserve">
-    <value>Mindste ophold (min)</value>
+    <value>Mindste ophold (hurtigur-min)</value>
   </data>
   <data name="MinimumStopMinutesHelp" xml:space="preserve">
     <value>Mindste tid et tog standser på denne bemandede station, i hurtigursminutter.</value>
@@ -1281,6 +1281,9 @@
   <data name="Sessions" xml:space="preserve">
     <value>Køresessioner</value>
   </data>
+  <data name="SessionsShort" xml:space="preserve">
+    <value>Kører</value>
+  </data>
   <data name="Days" xml:space="preserve">
     <value>Dage</value>
   </data>
@@ -1400,7 +1403,7 @@
     <value>Fra kategori: {0}</value>
   </data>
   <data name="LengthMeters" xml:space="preserve">
-    <value>Længde (m)</value>
+    <value>Længde (meter)</value>
   </data>
   <data name="ShowContinuesAsHint" xml:space="preserve">
     <value>Vis en note ved ankomst om hvilket tog dette fortsætter som ifølge skemaet.</value>
@@ -1641,6 +1644,9 @@
   </data>
   <data name="CreateNewVehicle" xml:space="preserve">
     <value>Opret nyt køretøj</value>
+  </data>
+  <data name="VehicleIdentityAlreadyUsed" xml:space="preserve">
+    <value>Operatør og nummer {0} bruges allerede af {1}. Vælg et andet nummer eller en anden operatør.</value>
   </data>
   <data name="VehicleType" xml:space="preserve">
     <value>Køretøjstype</value>
@@ -2040,5 +2046,47 @@
   </data>
   <data name="DriverDuties" xml:space="preserve">
     <value>Førertjenester</value>
+  </data>
+  <data name="StationDispatchList" xml:space="preserve">
+    <value>Togekspeditionsliste</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Bemærkninger</value>
+  </data>
+  <data name="NoTrainsAtStation" xml:space="preserve">
+    <value>Ingen tog betjener denne station.</value>
+  </data>
+  <data name="NoDispatchStations" xml:space="preserve">
+    <value>Der er ingen bemandede stationer eller skyggestationer at udskrive togekspeditionsliste for.</value>
+  </data>
+  <data name="LocationInstructions" xml:space="preserve">
+    <value>Instruktioner</value>
+  </data>
+  <data name="LocationInstructionsHint" xml:space="preserve">
+    <value>Hvordan dette sted køres på dette træf: hvilke spor der bruges til hvad, hvordan rangeringen er tilrettelagt, og hvad lokoførerne og dem, der bemander stedet, ellers har brug for at vide her.</value>
+  </data>
+  <data name="LocationInstructionsHelp" xml:space="preserve">
+    <value>Markdown. Til instruktioner, der gælder dette sted på dette træfs anlæg. Generelle instruktioner om, hvordan stedet betjenes, og andre oplysninger om det er ejerens opgave at levere og hører ikke til her.</value>
+  </data>
+  <data name="LockKey" xml:space="preserve">
+    <value>Nøgle</value>
+  </data>
+  <data name="LockKeyHeldAt" xml:space="preserve">
+    <value>Nøgle opbevares på</value>
+  </data>
+  <data name="LockKeyHeldAtHelp" xml:space="preserve">
+    <value>Den bemandede station, der opbevarer nøglen til sporskiftelåsene her. Et godstog, der standser her, får besked på at hente nøglen, når det forlader den station, og aflevere den næste gang det standser der. Lad stå tomt, hvis ingen nøgle er nødvendig.</value>
+  </data>
+  <data name="LockKeyName" xml:space="preserve">
+    <value>Nøglens navn</value>
+  </data>
+  <data name="LockKeyNameHelp" xml:space="preserve">
+    <value>Hvad nøglen hedder, så lokoføreren kan bede om den rigtige, hvor en station opbevarer flere. Valgfrit.</value>
+  </data>
+  <data name="NoMannedStationsForLockKey" xml:space="preserve">
+    <value>Ingen bemandet station kan opbevare en nøgle endnu. Markér først den station, der opbevarer den, som bemandet.</value>
+  </data>
+  <data name="LockKeyIgnoredHint" xml:space="preserve">
+    <value>Denne nøgle ignoreres, som tingene står: se Konflikter for hvorfor. Den bevares, så den gælder igen, så snart det er bragt i orden.</value>
   </data>
 </root>

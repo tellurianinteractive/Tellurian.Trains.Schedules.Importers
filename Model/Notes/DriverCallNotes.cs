@@ -2,7 +2,8 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 
 /// <summary>
 /// Assembles the notes a loco driver reads at one call: the persisted and generated notes already on the
-/// call, the two derived from whether the train stops, and the crossings and overtakings.
+/// call, the two derived from whether the train stops, the lock keys collected and handed back here, and
+/// the crossings and overtakings.
 /// </summary>
 public static class DriverCallNoteExtensions
 {
@@ -27,6 +28,7 @@ public static class DriverCallNoteExtensions
                 .. call.Notes
                     .Cast<ICallNote>()
                     .Concat(call.StopNotes)
+                    .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
                     .Where(note => note.IsDriverNote)
                     .OrderBy(note => note.DisplayOrder)

@@ -4,8 +4,13 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 
-@* Assigns a vehicle to a schedule: pick one from the pool, or create a new one (type, class, number,
-   company) on the spot. A schedule may carry several vehicles (e.g. a loco and its coach set). *@
+@* Assigns a vehicle to a schedule: pick one from the pool, or create a new one (type, operator, number,
+   class) on the spot. A schedule may carry several vehicles (e.g. a loco and its coach set).
+
+   The new-vehicle fields are ordered as in the edit dialog: what kind of vehicle it is, then what
+   identifies it, then how it is described. Operator and number are the vehicle's identity, so a number
+   is required and one another vehicle already claims is refused here (rule P5) — a newly created vehicle
+   takes every session it is free for, so it would clash with any vehicle already carrying that identity. *@
 
 @if (Plan is not null)
 {
@@ -27,15 +32,7 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>@Translator("Class")</label>
-                        <input type="text" value="@_newClass" @onchange="e => _newClass = e.Value?.ToString() ?? string.Empty" />
-                    </div>
-                    <div class="field">
-                        <label>@Translator("Number")</label>
-                        <input type="number" class="num" min="0" value="@_newNumber" @onchange="e => _newNumber = ParseInt(e, _newNumber)" />
-                    </div>
-                    <div class="field">
-                        <label>@Translator("Company")</label>
+                        <label>@Translator("Operator")</label>
                         <select value="@(_newCompanyId?.ToString() ?? string.Empty)" @onchange="OnCompanyChanged">
                             <option value="">@Translator("None")</option>
                             @foreach (var company in Companies)
@@ -43,6 +40,14 @@
                                 <option value="@company.Id">@company.Name</option>
                             }
                         </select>
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Number")</label>
+                        <input type="number" class="num" min="1" value="@_newNumber" @onchange="e => _newNumber = ParseInt(e, _newNumber)" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("Class")</label>
+                        <input type="text" value="@_newClass" @onchange="e => _newClass = e.Value?.ToString() ?? string.Empty" />
                     </div>
                 </fieldset>
                 @if (AvailableVehicles.Count > 0)
@@ -68,6 +73,10 @@
             @if (_error is not null)
             {
                 <p class="error">@_error</p>
+            }
+            else if (ClaimedBy is { } other)
+            {
+                <p class="error">@IdentityInUseMessage(other)</p>
             }
 
             <div class="actions">
@@ -117,12 +126,23 @@
             .Where(v => v.HasTurnusCard
                         && !Schedule.Vehicles.Contains(v)
                         && !v.AssignedSessions.CoversAllWithin(UseDays, MaxSessions))
-            .OrderBy(v => v.ExternalId, StringComparer.CurrentCulture)];
+            .OrderBy(v => v.Designation, StringComparer.CurrentCulture)];
 
     private IEnumerable<Company> Companies =>
         (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
 
-    private bool CanAssign => _creatingNew || _existingId is not null;
+    private bool CanAssign =>
+        _creatingNew ? _newNumber >= 1 && ClaimedBy is null : _existingId is not null;
+
+    // The vehicle already carrying the entered operator and number, or null when the identity is free. A
+    // vehicle created here is given no external id, so operator and number identify it; and it takes every
+    // session it is free for, so it is measured against all of them (see Plan.VehicleClaiming, rule P5).
+    private ScheduledObject? ClaimedBy =>
+        !_creatingNew || _newNumber < 1 ? null
+            : Plan?.VehicleClaiming(VehicleIdentity.Of(_newCompanyId, _newNumber), Sessions.All);
+
+    private string IdentityInUseMessage(ScheduledObject other) =>
+        string.Format(CultureInfo.CurrentCulture, Translator("VehicleIdentityAlreadyUsed"), other.IdentityText, other.Designation);
 
     private void OnExistingChanged(ChangeEventArgs e)
     {
@@ -136,7 +156,7 @@
     private async Task Assign()
     {
         _error = null;
-        if (Plan is not { } plan) return;
+        if (Plan is not { } plan || !CanAssign) return;
 
         ScheduledObject? vehicle;
         if (_creatingNew)
@@ -163,7 +183,7 @@
     // Vehicle identity, annotated with the sessions it is still free for when it is already partly booked.
     private string VehicleLabel(ScheduledObject vehicle)
     {
-        var name = $"{vehicle.ExternalId} ({Translator(vehicle.ObjectType.ToString())})";
+        var name = $"{vehicle.Designation} ({Translator(vehicle.ObjectType.ToString())})";
         if (!vehicle.ScheduleAssignments.Any()) return name;
         var free = vehicle.AssignedSessions.ComplementWithin(UseDays, MaxSessions);
         // Part of an <option> label, so the text form rather than circles.

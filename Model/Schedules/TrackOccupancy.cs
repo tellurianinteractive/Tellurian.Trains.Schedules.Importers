@@ -79,5 +79,30 @@ public static class TrackOccupancyExtensions
     /// arriving exactly as another leaves is a handover rather than a conflict.
     /// </summary>
     public static bool OverlapsInTime(this (Time From, Time To) span, (Time From, Time To) other) =>
-        span.From < other.To && span.To > other.From;
+        span.ConflictsInTime(other, 0);
+
+    /// <summary>
+    /// Whether two occupancy spans leave less than <paramref name="minMinutesBetween"/> fast-clock
+    /// minutes of free track between them — either because they overlap, or because they follow each
+    /// other too closely for the track to be considered free in between.
+    /// </summary>
+    /// <remarks>
+    /// The overlap case is this rule with no required gap: at zero the spans conflict only where they
+    /// actually cover the same time, and a train arriving exactly as another leaves is still a handover.
+    /// Above zero the same test asks for that much free time as well, so exactly the required number of
+    /// minutes is enough and one minute less is a conflict.
+    /// </remarks>
+    /// <param name="span">The occupancy span to test.</param>
+    /// <param name="other">The occupancy span to test it against.</param>
+    /// <param name="minMinutesBetween">The free time the track needs between two occupancies, in
+    /// fast-clock minutes; see <see cref="Settings.ValidationSettings.MinMinutesBetweenTrackUsage"/>.</param>
+    public static bool ConflictsInTime(this (Time From, Time To) span, (Time From, Time To) other, int minMinutesBetween) =>
+        span.From < other.To.AddMinutes(minMinutesBetween) && span.To.AddMinutes(minMinutesBetween) > other.From;
+
+    /// <summary>
+    /// The free time between two occupancy spans that do not overlap, in whole fast-clock minutes.
+    /// Negative where they do overlap.
+    /// </summary>
+    public static int FreeMinutesBetween(this (Time From, Time To) span, (Time From, Time To) other) =>
+        (int)(span.From >= other.To ? span.From.Subtract(other.To).TotalMinutes : other.From.Subtract(span.To).TotalMinutes);
 }

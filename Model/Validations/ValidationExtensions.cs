@@ -21,11 +21,13 @@ public static class ValidationExtensions
             options = options.ValueOrException(nameof(options));
             var result = new List<ValidationError>();
             result.AddRange(plan.GetTimetableValidationErrors(options));
+            result.AddRange(plan.ValidateLockKeys());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleIdentities());
             if (options.ValidateDriverDuties) result.AddRange(plan.ValidateDriverDuties());
             if (options.ValidateDriverDuties) result.AddRange(plan.ValidateDriverDutyCoverage());
             if (options.ValidateLocomotiveCoverage) result.AddRange(plan.ValidateLocomotiveCoverage());
@@ -45,11 +47,39 @@ public static class ValidationExtensions
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
-            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay)));
+            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
             if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetConflictingTrains()).Distinct());
             if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             return result;
+        }
+
+        /// <summary>
+        /// Validates the lock keys the layout's operation locations carry (rule L4): a key is in force
+        /// only where the location still needs one and the station holding it is still manned. A key the
+        /// manning has left meaningless is kept but ignored, and reported here — silently dropping the
+        /// notes it produced would leave the planner wondering where they went.
+        /// </summary>
+        /// <remarks>
+        /// Always run, like the other checks for a model that contradicts itself: this is not a planning
+        /// preference to be switched off, and a key nobody can fetch is a fault in the layout however the
+        /// plan is being validated.
+        /// </remarks>
+        internal IEnumerable<ValidationError> ValidateLockKeys()
+        {
+            foreach (var location in plan.Layout.OperationLocations)
+            {
+                if (location.LockKey is not { HeldAt: { } holder }) continue;
+                var message = location.LockKeyFault switch
+                {
+                    LockKeyFault.LocationIsManned => Strings.LockKeyIgnoredAtMannedLocation,
+                    LockKeyFault.LocationExchangesNoCargo => Strings.LockKeyIgnoredWithoutCargoExchange,
+                    LockKeyFault.HolderIsNotManned => Strings.LockKeyIgnoredWhenHolderIsNotManned,
+                    _ => null,
+                };
+                if (message is null) continue;
+                yield return ValidationError.LockKeyIgnored(Message.Warning(message, location, holder));
+            }
         }
 
         /// <summary>
@@ -137,6 +167,58 @@ public static class ValidationExtensions
                         if (span1.OverlapsInTime(span2)) return true;
                 }
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Validates that no two vehicles share a <see cref="VehicleIdentity"/> on a common session
+        /// (rule P5). An identity names one physical vehicle — the external id a vehicle was imported
+        /// under, or, for a vehicle carrying none, its operator and number (the number alone with no
+        /// operator) — so on any one session it may belong to only one of the plan's vehicles.
+        /// </summary>
+        /// <remarks>
+        /// The identity spans every vehicle type: a wagonset and a locomotive may not share one either, so
+        /// the vehicles are grouped by identity alone. Two vehicles may reuse an identity as long as the
+        /// sessions they work are strictly disjoint — the meeting where one is present and the other is
+        /// not. A vehicle assigned nowhere claims every session (see <c>ClaimedSessions</c>), so an unused
+        /// duplicate in the pool is reported too. Cargo flows are left out; they carry a synthesised
+        /// identifier standing for a group of wagons, not a vehicle's identity.
+        /// <para>
+        /// Older plans were built before the rule existed, so this is where their duplicates surface. Each
+        /// duplicate is reported <em>once</em>, against the first earlier vehicle of its identity it
+        /// clashes with, rather than once per pair: a plan can hold many vehicles under one identity, and
+        /// the pairs of such a group would bury every other conflict in the list. One error per vehicle
+        /// still names every vehicle that has to be given an identity of its own.
+        /// </para>
+        /// </remarks>
+        internal IEnumerable<ValidationError> ValidateVehicleIdentities()
+        {
+            var duplicates = plan.ScheduledObjects
+                .Where(v => v.HasVehicleIdentity)
+                .GroupBy(v => v.Identity)
+                .Where(g => g.Count() > 1);
+            foreach (var group in duplicates)
+            {
+                var vehicles = group.ToArray();
+                for (var i = 1; i < vehicles.Length; i++)
+                {
+                    var vehicle = vehicles[i];
+                    var claimed = vehicle.ClaimedSessions;
+                    for (var j = 0; j < i; j++)
+                    {
+                        var overlap = claimed.And(vehicles[j].ClaimedSessions);
+                        if (overlap.Flags == 0) continue;
+                        // Two vehicles sharing an external id have the same Designation, so naming them
+                        // both would say the same thing twice; the shared id and the sessions are the news.
+                        var message = group.Key.IsExternalId
+                            ? Message.Information(Strings.VehiclesShareExternalId,
+                                vehicle.IdentityText, overlap.SessionsNumbers)
+                            : Message.Information(Strings.VehiclesShareOperatorAndNumber,
+                                vehicle.Designation, vehicles[j].Designation, vehicle.IdentityText, overlap.SessionsNumbers);
+                        yield return ValidationError.VehicleIdentityDuplicated(vehicle, vehicles[j], message);
+                        break;
+                    }
+                }
             }
         }
 
@@ -756,7 +838,7 @@ public static class ValidationExtensions
             return result;
         }
 
-        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, bool extendByVehicleStay = false)
+        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, bool extendByVehicleStay = false, int minMinutesBetweenTrackUsage = 0)
         {
             var result = new List<(StationCall, StationCall)>();
             // The schedules are still needed when the extension is off: they are what tells two calls of
@@ -769,10 +851,10 @@ public static class ValidationExtensions
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
                 r.Train!.Sessions.Overlaps(stationCall.Train!.Sessions) &&
-                r.TrackOccupancy(occupancySchedules).OverlapsInTime(mine) &&
+                r.TrackOccupancy(occupancySchedules).ConflictsInTime(mine, minMinutesBetweenTrackUsage) &&
                 !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
-            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, extendByVehicleStay));
+            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, extendByVehicleStay, minMinutesBetweenTrackUsage));
             return result;
         }
 
@@ -797,10 +879,13 @@ public static class ValidationExtensions
         /// <param name="vehicleSchedules">The vehicle schedules used to determine whether conflicting calls share a vehicle.</param>
         /// <param name="extendOccupancyByVehicleStay">Whether a traction unit waiting between two trains
         /// counts as occupying the track; see <see cref="ValidationSettings.ExtendTrackOccupancyByVehicleStay"/>.</param>
+        /// <param name="minMinutesBetweenTrackUsage">The free time the track needs between two occupancies,
+        /// in fast-clock minutes; see <see cref="ValidationSettings.MinMinutesBetweenTrackUsage"/>. At zero
+        /// only overlapping occupancies conflict.</param>
         /// <returns>The validation errors found.</returns>
-        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false) =>
+        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false, int minMinutesBetweenTrackUsage = 0) =>
             stationTrack is null ? [] :
-            stationTrack.GetConflicts(vehicleSchedules, extendOccupancyByVehicleStay).Select(c =>
+            stationTrack.GetConflicts(vehicleSchedules, extendOccupancyByVehicleStay, minMinutesBetweenTrackUsage).Select(c =>
             {
                 // Same occupancy the conflict was detected with, not each call's own arrival/departure,
                 // so a conflict caused by a traction unit's stay (rather than the calls' own times) still
@@ -811,14 +896,20 @@ public static class ValidationExtensions
                 var (first, second) = c.one.TrackOccupancy(occupancySchedules).From <= c.another.TrackOccupancy(occupancySchedules).From ? (c.one, c.another) : (c.another, c.one);
                 var firstSpan = first.TrackOccupancySpanText(occupancySchedules);
                 var secondSpan = second.TrackOccupancySpanText(occupancySchedules);
-                var message = Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan);
+                // Two occupancies that do not overlap are only in conflict because the required free time
+                // between them is missing, and saying they overlap would then be plainly wrong: the times
+                // in the message do not, and the planner needs to be told how short the gap actually is.
+                var free = second.TrackOccupancy(occupancySchedules).FreeMinutesBetween(first.TrackOccupancy(occupancySchedules));
+                var message = free < 0
+                    ? Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan)
+                    : Message.Information(Strings.CallAtStationTooCloseInTimeToOtherCall, first.Train!, firstSpan, second.Train!, secondSpan, free, minMinutesBetweenTrackUsage);
                 return ValidationError.StationTrackConflict(stationTrack, first, second, message);
             });
 
-        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay)
+        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay, int minMinutesBetweenTrackUsage)
         {
             if (stationTrack.Calls.Count < 2) return [];
-            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, extendOccupancyByVehicleStay);
+            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, extendOccupancyByVehicleStay, minMinutesBetweenTrackUsage);
             return result.Distinct();
         }
 
