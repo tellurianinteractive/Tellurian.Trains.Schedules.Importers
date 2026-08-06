@@ -53,12 +53,13 @@ public sealed record ValidationError
     public required IReadOnlyList<Train> Trains { get; init; }
 
     /// <summary>
-    /// The schedule (turnus) this error belongs to, when the error is attributed to a specific schedule
-    /// (rules S1, S2, orphan S4). Lets the Schedules tab mark the exact schedule's parts column instead
-    /// of matching by train intersection. Null for train-keyed schedule-scope errors (e.g. missing
-    /// traction), which are located via <see cref="Trains"/>.
+    /// The schedules (turnus) this error belongs to, when the error is attributed to specific schedules
+    /// (rules S1, S2, orphan S4, and the locomotive overlap P4, which is between two of them). Lets the
+    /// Schedules tab mark exactly those schedules' parts column instead of matching by train
+    /// intersection. Empty for train-keyed schedule-scope errors (e.g. missing traction), which are
+    /// located via <see cref="Trains"/>.
     /// </summary>
-    public Schedule? Schedule { get; init; }
+    public IReadOnlyList<Schedule> Schedules { get; init; } = [];
 
     /// <summary>
     /// The vehicle (scheduled object) this error is attributed to, for <see cref="ValidationScope.Vehicle"/>
@@ -167,13 +168,20 @@ public sealed record ValidationError
 
     /// <summary>
     /// Determines whether this schedule-scope conflict should mark the given schedule's parts column.
-    /// A schedule-keyed error (<see cref="Schedule"/> set) marks exactly that schedule; a train-keyed
+    /// A schedule-keyed error (<see cref="Schedules"/> set) marks exactly those schedules; a train-keyed
     /// schedule-scope error (e.g. missing traction) marks every schedule that works one of its trains.
     /// Returns false for train- and vehicle-scope errors, so those never bleed into the parts column.
     /// </summary>
+    /// <remarks>
+    /// The train fallback is for a conflict that no schedule owns — a train left without traction is a
+    /// gap in the roster, and every schedule working the train is somewhere to close it. Where the
+    /// conflict does lie in particular schedules, falling back would mark schedules whose own parts have
+    /// nothing to do with it: a train worked in several legs has a schedule per leg, and only the two
+    /// holding the offending parts are at fault.
+    /// </remarks>
     public bool Involves(Schedule schedule) =>
         Scope == ValidationScope.Schedule &&
-        (Schedule is not null ? Schedule.Equals(schedule) : schedule.Parts.Any(p => Involves(p.Train)));
+        (Schedules.Count > 0 ? Schedules.Contains(schedule) : schedule.Parts.Any(p => Involves(p.Train)));
 
     /// <summary>
     /// Determines whether this vehicle-scope conflict should mark the given vehicle's chip in the Vehicle
@@ -300,7 +308,7 @@ public sealed record ValidationError
             FromTime = Time.Min(part1.From.Departure, part2.From.Departure),
             ToTime = Time.Max(part1.To.Arrival, part2.To.Arrival),
             Trains = [part1.Train, part2.Train],
-            Schedule = schedule,
+            Schedules = [schedule],
             Message = message
         };
 
@@ -375,8 +383,14 @@ public sealed record ValidationError
         };
 
     /// <summary>
-    /// Creates a locomotive coverage overlap error.
+    /// Creates a locomotive coverage overlap error: two locomotives are booked to haul the same stretch
+    /// of the same train at the same time (rule P4).
     /// </summary>
+    /// <remarks>
+    /// Keyed to the two schedules the offending parts belong to, and to those only. The train is worked
+    /// by every schedule that holds a part of it, and marking all of them would put the conflict against
+    /// locomotives whose own parts run elsewhere in the day and are not doubled at all.
+    /// </remarks>
     public static ValidationError LocomotiveCoverageOverlap(
         Train train,
         ScheduledTrainPart part1,
@@ -389,6 +403,7 @@ public sealed record ValidationError
             FromTime = Time.Max(part1.From.Departure, part2.From.Departure),
             ToTime = Time.Min(part1.To.Arrival, part2.To.Arrival),
             Trains = [train],
+            Schedules = [.. new[] { part1.Schedule, part2.Schedule }.OfType<Schedule>().Distinct()],
             Message = message
         };
 
@@ -466,7 +481,7 @@ public sealed record ValidationError
             FromTime = previous.To.Arrival,
             ToTime = next.From.Departure,
             Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
-            Schedule = schedule,
+            Schedules = [schedule],
             Message = message
         };
 
@@ -484,7 +499,7 @@ public sealed record ValidationError
             FromTime = GetFirstDeparture(schedule) ?? Time.Zero,
             ToTime = GetLastArrival(schedule) ?? Time.Zero,
             Trains = [.. schedule.Parts.Select(p => p.Train).Distinct()],
-            Schedule = schedule,
+            Schedules = [schedule],
             Message = message
         };
 

@@ -243,8 +243,29 @@ public static class SessionsFormatting
     {
         settings = settings.ValueOrException(nameof(settings));
         return settings.UseDaysInsteadOfSessionNumbers
-            ? new(WebUtility.HtmlEncode(DaysExtensions.DayNameAt(settings.SessionFirstWeekday, position - 1, useShort: true)))
+            ? new(WebUtility.HtmlEncode(PositionTextOf(position, settings)))
             : SessionNumberHtml(position);
+    }
+
+    /// <summary>
+    /// How one position is headed where no markup can be drawn: the session number as a plain numeral, or
+    /// the day's short name.
+    /// </summary>
+    /// <remarks>
+    /// The day form is the same text <see cref="PositionHeadingOf"/> renders, so a plain-text grid heads
+    /// its columns exactly as the on-screen one does. The session form cannot be: on screen a number is a
+    /// filled circle drawn as SVG, which a text document has no way to reproduce, so it becomes the bare
+    /// numeral. That is a deliberate difference in appearance and none in meaning — position 3 is headed 3
+    /// either way.
+    /// </remarks>
+    /// <param name="position">A 1-based position from <see cref="PositionsOf"/>.</param>
+    /// <param name="settings">Chooses sessions or days, and the weekday the period starts on.</param>
+    public static string PositionTextOf(int position, SessionsSettings settings)
+    {
+        settings = settings.ValueOrException(nameof(settings));
+        return settings.UseDaysInsteadOfSessionNumbers
+            ? DaysExtensions.DayNameAt(settings.SessionFirstWeekday, position - 1, useShort: true)
+            : position.ToString(CultureInfo.CurrentCulture);
     }
 
     extension(Sessions sessions)

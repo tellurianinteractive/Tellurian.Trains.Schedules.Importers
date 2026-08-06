@@ -152,10 +152,23 @@
         box-shadow: inset 3px 0 0 #d9a406;
     }
 
-    /* Wide enough for the expander toggle and, beside it, the conflict badge of a row that has one. */
+    /* A leading conflict column, opened only while something in the table has a conflict: one narrow cell
+       per row holding that row's badge. Kept a column of its own so the expander arrows line up down the
+       table whether or not the row beside them carries a badge, which is what makes the two levels of
+       expansion readable. */
+    th.conflict,
+    td.conflict {
+        width: 1.9rem;
+        white-space: nowrap;
+        text-align: center;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+
+    /* Wide enough for the expander toggle alone; the badge now has its own column. */
     th.expander,
     td.expander {
-        width: 4.6rem;
+        width: 2.6rem;
         white-space: nowrap;
         text-align: center;
         padding-left: 0.2rem;

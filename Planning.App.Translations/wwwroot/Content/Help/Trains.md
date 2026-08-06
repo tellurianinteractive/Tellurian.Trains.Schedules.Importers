@@ -5,11 +5,21 @@ set its number and category, and its **station calls** — the places it passes 
 arrival and departure times. The default station times from **Settings › Time and speed** are
 used as a starting point and can be overridden per call.
 
-Trains drawn here appear as lines on the **Graphic timetable**, coloured by their category, and
+Trains drawn here appear as lines on the **Graphical timetable**, coloured by their category, and
 are checked against the validation rules in **Settings › Validation** (speeds, track usage, train
 numbers and so on).
 
-## Start- and End Time of Working on a Train
+## What makes a train unique in the plan?
+
+Trains are identified by it's **train number**.
+These numbers must be unique within a plan.
+I you specify an operation company, either
+on the **train category** or on specific trains,
+a train number is required to be unique within
+that company. So you can have **DB 123** and **DSB 123**,
+and they are two different trains.
+
+## Start and end time of working on a train
 Two times have a special meaning to let the planner specify preparation and finishing-up time:
 - **First arrival** time is the start time of the preparation time.
   A driver starts work on a train this time. This is the time for picking up a loco from parking,
@@ -17,7 +27,7 @@ Two times have a special meaning to let the planner specify preparation and fini
 - **Last departure** time is the end time of finishing up. 
   A driver ends work on a train this time. This is the time driving the loco to parking, etc.
 
-## Editing a Call Time
+## Editing a call time
 
 A time is never changed on its own — the rest of the train comes with it, keeping the run and dwell
 times it already has. A **departure** works forwards, the way the train runs: let a train stand five
@@ -27,7 +37,7 @@ times on the other side of the call you edit stay where they are, so what change
 long the train stands there. A change that would take the train outside the plan's operating times is
 refused as a whole, and the field falls back to the time already stored.
 
-## Stops and Pass-throughs
+## Stops and pass-throughs
 
 The **Arr** and **Dep** boxes on a call say whether the train stops there. Tick neither and it passes
 through. Two things take the choice out of your hands:
@@ -42,10 +52,10 @@ through. Two things take the choice out of your hands:
   and last call, and the ends of every part a vehicle schedule, a driver duty or a cargo flow is
   planned over. To free the box, move the call or the part that ends there.
 
-## Add Train Dialogue
+## Add train dialogue
 
 To add trains should be easy.
-You add trains in the **Add Train** dialogue. There are a number of options:
+You add trains in the **Add train** dialogue. There are a number of options:
 - Create a single train.
 - Create a single train with a return train in opposite direction.
 - Create a repeated number of trains with a given interval between them.
@@ -61,7 +71,7 @@ Creating trains fails when some part of any train falls outside the
 start- and end time of the plan. However, in **Settings** you can enable  
 to let the plan's start- and end times expand with added trains.
 
-## Operating Sessions or Days
+## Operating sessions or days
 The planning of trains can utilise the option to define what sessions (or weekdays) a train runs.
-The default is always **All/Daily**. You defined the different session patterns in **Settings > Session & Days**. 
+The default is always **All/Daily**. You defined the different session patterns in **Settings › Sessions & days**. 
 There are common predefined patters, but you can add your own.

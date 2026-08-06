@@ -32,7 +32,7 @@ unmanned locations a dispatch stretch passes through.
 
 A **timetable stretch** is an ordered series of contiguous track stretches that you want to plan and
 draw together — typically a line from one end station to another. Timetable stretches are what you
-pick from on the **Graphic timetable** tab, and each becomes one graph.
+pick from on the **Graphical timetable** tab, and each becomes one graph.
 
 To build one, give it a number (and an optional description), then add track stretches to its route
 one at a time. Only track stretches that continue from where the route currently ends are offered, so

@@ -502,6 +502,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} has overlapping locomotive assignments on sessions {3}: {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageOverlapOnSessions {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageOverlapOnSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Train {0} has no locomotive assigned..
         /// </summary>
         internal static string TrainHasNoLocomotiveAssigned {

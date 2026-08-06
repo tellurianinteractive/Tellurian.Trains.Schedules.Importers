@@ -1,5 +1,52 @@
 # Versionshinweise
 
+## Version 0.4.1
+
+### Änderungen
+
+- **Die Zugmeldelisten lassen sich jetzt als Dokumente speichern, die die Bahnhofsbetreiber bearbeiten
+  können.** Über *Zugmeldelisten* im Menü Export erhält jeder besetzte Bahnhof ein eigenes Dokument im
+  OpenDocument-Format, das LibreOffice Writer und die meisten anderen Textverarbeitungen öffnen. Es ist
+  dafür gedacht, jedem Bahnhofsbetreiber vor dem Treffen seine eigene Liste zu schicken, damit er die
+  örtlichen Anweisungen ergänzen kann, die nur er kennt — deshalb ein Dokument je Bahnhof und nicht ein
+  Dokument mit den Blättern aller. Ist mehr als ein Bahnhof besetzt, kommen die Dokumente gemeinsam in
+  einer ZIP-Datei, darin eine Datei je Bahnhof.
+
+  Nichts im Dokument legt fest, wo seine Seiten enden. Der Name des Bahnhofs und die Telefonnummern der
+  Bahnhöfe, zu und von denen er Züge meldet, wiederholen sich am Kopf jeder Seite, ebenso die
+  Spaltenköpfe, aber wo die Seiten umbrechen, bleibt der Textverarbeitung überlassen. Ein Betreiber,
+  der drei Züge und eine lange Anmerkung einfügt, erhält daher Seiten, die weiterhin sinnvoll umbrechen
+  und weiterhin ihre Köpfe tragen, statt Text, der über Umbrüche läuft, die nur bis zum Beginn seiner
+  Eingabe richtig waren. Schriftgrößen und Hervorhebungen sind benannte Formatvorlagen, sodass sich das
+  Aussehen des ganzen Dokuments auf einmal ändern lässt und nicht Zeile für Zeile.
+
+  Das Einzige, was ein solches Dokument nicht tragen kann, ist der Tagesabschnitt, den jede Seite
+  abdeckt und den das gedruckte Blatt in seinem Kopf nennt: er hängt davon ab, welche Zeilen auf welche
+  Seite fallen, was erst nach dem Umbruch feststeht — und nach der ersten Änderung wieder falsch wäre.
+  Stattdessen ist jede Seite numeriert, und ihre erste und letzte Zeile sagen weiterhin, was sie
+  abdeckt.
+
+  Die gedruckten Blätter sind unverändert und bleiben die, mit denen während einer Fahrrunde gearbeitet
+  wird: Druck weiterhin über das Menü Berichte.
+
+- **Ein Zug, der zugleich von zwei Loks gezogen wird, sagt jetzt, von welchen beiden.** Der Konflikt
+  nannte den Zug und die Minuten und ließ die Loks aus, und waren beide über genau denselben Abschnitt
+  gebucht, lauteten seine zwei Hälften Wort für Wort gleich — er meldete also einen doppelt bespannten
+  Zug, ohne zu sagen, was zu lösen ist. Jetzt wird die Lok auf jeder Seite genannt.
+
+  Er wird auch nur noch an den zwei Umläufen angezeigt, die die doppelte Arbeit halten. Vorher stand er
+  an jedem Umlauf, der diesen Zug irgendwo am Tag führt, sodass eine Lok, die den Zug auf einem ganz
+  anderen Abschnitt übernimmt und deren eigener Umlauf in Ordnung ist, für einen Konflikt gemeldet
+  wurde, an dem sie keinen Anteil hat.
+
+- **Zwei Loks, die sich einen Zug über die Fahrrunden teilen, gelten nicht mehr als Konflikt.** Es
+  wurden nur die Uhrzeiten verglichen, sodass eine Lok, die den Zug in den ungeraden Fahrrunden
+  übernimmt, und eine andere in den geraden — nie am selben Tag beim Treffen, und genau der Sinn dieser
+  Aufteilung — als ein von zwei Loks zugleich gezogener Zug gemeldet wurde. Gemeldet wird jetzt nur
+  noch, wo beide für eine gemeinsame Fahrrunde gebucht sind, und der Konflikt nennt die Fahrrunden,
+  wenn es nur einige von ihnen sind. Zwei Loks in einem Umlauf sind Doppeltraktion und waren ohnehin
+  nie der Konflikt.
+
 ## Version 0.4.0
 
 ### Grundlegende Änderungen

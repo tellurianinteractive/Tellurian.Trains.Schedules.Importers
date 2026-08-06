@@ -1206,6 +1206,114 @@ public class ValidationTests
         Assert.IsFalse(error.Involves(other), "Another schedule is not marked.");
     }
 
+    // --- P4: a train hauled twice over one stretch ------------------------------------------------
+
+    // Train 1 runs G 12:00 -> Yb 12:25/12:30 -> Snu 12:55. Two locomotives are booked over its first
+    // leg, which is the conflict, and a third over its second, which nothing doubles.
+    private static (Plan Plan, Schedule First, Schedule Doubled, Schedule Later) PlanWithADoubleHauledLeg()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var calls = FirstTrainCalls(plan);
+
+        var first = HauledBy(plan, calls[0], calls[1], 1);
+        var doubled = HauledBy(plan, calls[0], calls[1], 2);
+        var later = HauledBy(plan, calls[1], calls[2], 3);
+        return (plan, first, doubled, later);
+    }
+
+    private static IReadOnlyList<StationCall> FirstTrainCalls(Plan plan) =>
+        plan.Timetable.Trains.First(t => t.Number == 1).CallsInRunOrder;
+
+    // A schedule over one leg of the train, worked by a locomotive of its own on the given sessions.
+    private static Schedule HauledBy(Plan plan, StationCall from, StationCall to, int locoNumber, Sessions? sessions = null)
+    {
+        var schedule = plan.CreateSchedule();
+        schedule.Add(new ScheduledTrainPart(from, to));
+        plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", locoNumber, null), sessions);
+        return schedule;
+    }
+
+    private static IEnumerable<ValidationError> LocomotiveOverlaps(Plan plan) =>
+        plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.LocomotiveCoverageOverlap);
+
+    [TestMethod]
+    public void LocomotivesTakingTheSameLegOnDisjointSessionsAreARotationNotAConflict()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var calls = FirstTrainCalls(plan);
+        HauledBy(plan, calls[0], calls[1], 1, Sessions.FromSessionNumbers(1, 3, 5));
+        HauledBy(plan, calls[0], calls[1], 2, Sessions.FromSessionNumbers(2, 4, 6));
+
+        Assert.IsEmpty(LocomotiveOverlaps(plan),
+            "The two are never at the meeting on the same session, so the train is never hauled twice over.");
+    }
+
+    [TestMethod]
+    public void LocomotiveOverlapNamesTheSessionsTheTrainIsDoubleHauledOn()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var calls = FirstTrainCalls(plan);
+        HauledBy(plan, calls[0], calls[1], 1, Sessions.FromSessionNumbers(1, 2, 3, 4));
+        HauledBy(plan, calls[0], calls[1], 2, Sessions.FromSessionNumbers(3, 4, 5));
+
+        var error = LocomotiveOverlaps(plan).Single();
+
+        StringAssert.Contains(error.Message.Text, Sessions.FromSessionNumbers(3, 4).SessionsNumbers,
+            "The sessions the two bookings share are the ones to put right.");
+    }
+
+    [TestMethod]
+    public void LocomotiveOverlapOnEverySessionTheTrainRunsNamesNoSessions()
+    {
+        var (plan, _, _, _) = PlanWithADoubleHauledLeg();   // both bookings for every session
+
+        var error = LocomotiveOverlaps(plan).Single();
+
+        Assert.DoesNotContain(Sessions.All.SessionsNumbers, error.Message.Text,
+            "There is no subset to point at, so naming the sessions would only be noise.");
+    }
+
+    [TestMethod]
+    public void TwoLocomotivesOnOneWorkingAreDoubleHeadedNotDoubleBooked()
+    {
+        var plan = PlanWithForwardAndReturn();
+        var calls = FirstTrainCalls(plan);
+        var schedule = HauledBy(plan, calls[0], calls[1], 1);
+        plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null));
+
+        Assert.IsEmpty(LocomotiveOverlaps(plan), "Two locomotives on one working are one claim on the train.");
+    }
+
+    [TestMethod]
+    public void LocomotiveOverlapNamesTheLocomotivesInvolved()
+    {
+        var (plan, first, doubled, later) = PlanWithADoubleHauledLeg();
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.LocomotiveCoverageOverlap);
+
+        // Which locomotives are doubled is the news; the two parts otherwise read alike to the minute.
+        StringAssert.Contains(error.Message.Text, first.Vehicles.Single().Designation);
+        StringAssert.Contains(error.Message.Text, doubled.Vehicles.Single().Designation);
+        Assert.DoesNotContain(later.Vehicles.Single().Designation, error.Message.Text,
+            "The locomotive on the other leg is not part of the conflict.");
+    }
+
+    [TestMethod]
+    public void LocomotiveOverlapMarksOnlyTheSchedulesHoldingTheOffendingParts()
+    {
+        var (plan, first, doubled, later) = PlanWithADoubleHauledLeg();
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.LocomotiveCoverageOverlap);
+
+        Assert.AreEqual(ValidationScope.Schedule, error.Scope);
+        Assert.IsTrue(error.Involves(first), "The schedule holding one of the doubled parts is marked.");
+        Assert.IsTrue(error.Involves(doubled), "So is the schedule holding the other.");
+        Assert.IsFalse(error.Involves(later),
+            "A schedule working the same train elsewhere in the day is not part of the conflict.");
+    }
+
     // A train-keyed schedule-scope error (missing traction) marks every schedule that works the train.
     [TestMethod]
     public void TrainKeyedScheduleScopeErrorMarksSchedulesWorkingTheTrain()

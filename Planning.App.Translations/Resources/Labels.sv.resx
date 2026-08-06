@@ -460,7 +460,7 @@
     <value>Minsta tid mellan spåranvändning (snabbklocksmin)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
-    <value>API-nyckel för ModuleRegistry</value>
+    <value>API-nyckel för Module Registry</value>
   </data>
   <data name="OpenSchedule" xml:space="preserve">
     <value>Öppna tidtabell:</value>
@@ -1486,6 +1486,9 @@
   <data name="OriginLocations" xml:space="preserve">
     <value>Ursprungsdriftplatser</value>
   </data>
+  <data name="OriginLocationsHint" xml:space="preserve">
+    <value>Lägg bara till ursprungsdriftplatser när tåget förväntas ta med vagnar som kommer från en driftplats som tåget inte själv trafikerar — vanligen vagnar som matas in från en anslutande bana och ska fortsätta med det här tåget. En ursprungsdriftplats är inte den plats där tåget hämtar vagnarna; det anges på annat ställe.</value>
+  </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Kan inte ta bort: den här godsbeskrivningen används av ett eller flera godsflöden.</value>
   </data>
@@ -2088,5 +2091,11 @@
   </data>
   <data name="LockKeyIgnoredHint" xml:space="preserve">
     <value>Den här nyckeln ignoreras som det är nu: se Konflikter för varför. Den behålls, så den gäller igen så snart det är åtgärdat.</value>
+  </data>
+  <data name="DispatchLists" xml:space="preserve">
+    <value>Tågklareringslistor</value>
+  </data>
+  <data name="DispatchListsHint" xml:space="preserve">
+    <value>Ett redigerbart dokument per station, så att varje stationsägare kan lägga till sina egna instruktioner före träffen.</value>
   </data>
 </root>

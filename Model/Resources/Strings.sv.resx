@@ -258,6 +258,9 @@
   <data name="TrainHasLocomotiveCoverageOverlap" xml:space="preserve">
     <value>Tåg {0} har överlappande loktilldelningar: {1} och {2}.</value>
   </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnSessions" xml:space="preserve">
+    <value>Tåg {0} har överlappande loktilldelningar på köromgångar {3}: {1} och {2}.</value>
+  </data>
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Fordon {0} är dubbelbokat: köromgångar {1} överlappar med köromgångar {2}.</value>
   </data>

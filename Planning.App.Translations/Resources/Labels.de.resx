@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppName" xml:space="preserve">
-    <value>Fahrplan Planner</value>
+    <value>Fahrplaner</value>
   </data>
   <data name="NoActiveDocument" xml:space="preserve">
     <value>Kein aktives Dokument</value>
@@ -460,7 +460,7 @@
     <value>Min. Zeit zwischen Gleisnutzung (Schnelluhr-Min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
-    <value>ModuleRegistry-API-Schlüssel</value>
+    <value>Module-Registry-API-Schlüssel</value>
   </data>
   <data name="OpenSchedule" xml:space="preserve">
     <value>Fahrplan öffnen:</value>
@@ -1486,6 +1486,9 @@
   <data name="OriginLocations" xml:space="preserve">
     <value>Herkunftsbetriebsstellen</value>
   </data>
+  <data name="OriginLocationsHint" xml:space="preserve">
+    <value>Herkunftsbetriebsstellen nur angeben, wenn der Zug Wagen mitnehmen soll, die von einer Betriebsstelle kommen, die der Zug selbst nicht bedient — typischerweise Wagen von einer Zweigstrecke, die mit diesem Zug weiterlaufen sollen. Eine Herkunftsbetriebsstelle ist nicht der Ort, an dem der Zug die Wagen aufnimmt; das wird an anderer Stelle festgelegt.</value>
+  </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Löschen nicht möglich: Diese Güterbeschreibung wird von einem oder mehreren Wagenströmen verwendet.</value>
   </data>
@@ -2088,5 +2091,11 @@
   </data>
   <data name="LockKeyIgnoredHint" xml:space="preserve">
     <value>Dieser Schlüssel wird derzeit nicht beachtet: warum, steht unter Konflikte. Er bleibt erhalten und gilt wieder, sobald das behoben ist.</value>
+  </data>
+  <data name="DispatchLists" xml:space="preserve">
+    <value>Zugmeldelisten</value>
+  </data>
+  <data name="DispatchListsHint" xml:space="preserve">
+    <value>Ein bearbeitbares Dokument pro Station, damit jeder Stationsbetreiber vor dem Treffen eigene Anweisungen ergänzen kann.</value>
   </data>
 </root>

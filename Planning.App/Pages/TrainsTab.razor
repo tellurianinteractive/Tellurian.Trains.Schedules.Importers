@@ -36,9 +36,21 @@ else
         }
         else
         {
+            @* Each category's conflicts are read once here: the badges need them, and so does the decision
+               whether the table carries a conflict column at all. A category gathers the conflicts of its
+               trains, so a category without any has no train with one either. *@
+            var rows = groups.Select(g => (Group: g, Conflicts: ConflictsOf(g))).ToList();
+            var showConflicts = rows.Any(r => r.Conflicts.Count > 0);
+            @* What a category name and an expanded train's calls span: everything after the leading cells. *@
+            var bodySpan = ColumnCount(showConflicts) - (showConflicts ? 2 : 1);
+
             <table class="trains">
                 <thead>
                     <tr>
+                        @if (showConflicts)
+                        {
+                            <th class="conflict"></th>
+                        }
                         <th class="expander"></th>
                         @if (ShowExternalId)
                         {
@@ -57,17 +69,23 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var group in groups)
+                    @foreach (var (group, groupConflicts) in rows)
                     {
                         var groupExpanded = IsExpanded(group);
-                        var groupConflicts = ConflictsOf(group);
                         <tr class="category @(groupConflicts.Count > 0 ? "has-conflict" : "")">
+                            @if (showConflicts)
+                            {
+                                @* A collapsed category is the only place the conflicts inside it can be
+                                   seen, so the badge here stands for every train of the category. *@
+                                <td class="conflict">
+                                    <ConflictBadge Errors="groupConflicts" For="@GroupName(group)" />
+                                </td>
+                            }
                             <td class="expander">
                                 <button class="toggle" title="@Translator(groupExpanded ? "Collapse" : "Expand")"
                                         @onclick="() => ToggleExpanded(group)"><i class="fa-solid @(groupExpanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
-                                <ConflictBadge Errors="groupConflicts" For="@GroupName(group)" />
                             </td>
-                            <td colspan="@(ColumnCount - 1)">
+                            <td colspan="@bodySpan">
                                 @if (group.Category is { } groupCategory)
                                 {
                                     <span class="swatch" style="background-color:@groupCategory.Color"></span>
@@ -82,10 +100,15 @@ else
                             {
                                 var conflicts = ConflictsOf(train);
                                 <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflicts.Count > 0 ? "has-conflict" : "")">
+                                    @if (showConflicts)
+                                    {
+                                        <td class="conflict">
+                                            <ConflictBadge Errors="conflicts" For="@TrainLabel(train)" />
+                                        </td>
+                                    }
                                     <td class="expander">
                                         <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
                                                 @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
-                                        <ConflictBadge Errors="conflicts" For="@TrainLabel(train)" />
                                     </td>
                                     @if (ShowExternalId)
                                     {
@@ -151,8 +174,12 @@ else
                                 @if (IsExpanded(train))
                                 {
                                     <tr class="detail">
+                                        @if (showConflicts)
+                                        {
+                                            <td></td>
+                                        }
                                         <td></td>
-                                        <td colspan="@(ColumnCount - 1)">
+                                        <td colspan="@bodySpan">
                                             @CallsTable(train)
                                         </td>
                                     </tr>
@@ -209,8 +236,10 @@ else
     private string ExternalIdWidth =>
         $"{Math.Clamp(Trains.Select(t => t.ExternalId.Length).DefaultIfEmpty(0).Max() + 2, 8, 32)}ch";
 
-    // Expander, the optional ExternalId, the nine train fields and the actions cell.
-    private int ColumnCount => ShowExternalId ? 12 : 11;
+    // The leading conflict column when the table shows one, the expander, the optional ExternalId, the nine
+    // train fields and the actions cell.
+    private int ColumnCount(bool withConflicts) =>
+        (withConflicts ? 12 : 11) + (ShowExternalId ? 1 : 0);
 
     private IEnumerable<Company> CompanyChoices =>
         (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);

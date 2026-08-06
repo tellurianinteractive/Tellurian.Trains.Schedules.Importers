@@ -258,6 +258,9 @@
   <data name="TrainHasLocomotiveCoverageOverlap" xml:space="preserve">
     <value>Train {0} has overlapping locomotive assignments: {1} and {2}.</value>
   </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnSessions" xml:space="preserve">
+    <value>Train {0} has overlapping locomotive assignments on sessions {3}: {1} and {2}.</value>
+  </data>
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Vehicle {0} is double-booked: sessions {1} overlap with sessions {2}.</value>
   </data>

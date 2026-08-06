@@ -460,7 +460,7 @@
     <value>Minste tid mellom sporbruk (hurtigklokke-min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
-    <value>ModuleRegistry API-nøkkel</value>
+    <value>Module Registry API-nøkkel</value>
   </data>
   <data name="OpenSchedule" xml:space="preserve">
     <value>Åpne ruteplan:</value>
@@ -1486,6 +1486,9 @@
   <data name="OriginLocations" xml:space="preserve">
     <value>Opprinnelsesdriftssteder</value>
   </data>
+  <data name="OriginLocationsHint" xml:space="preserve">
+    <value>Legg bare til opprinnelsesdriftssteder når toget forventes å ta med vogner som kommer fra et driftssted toget ikke selv betjener — vanligvis vogner som mates inn fra en sidebane, og som skal fortsette med dette toget. Et opprinnelsesdriftssted er ikke stedet der toget henter vognene; det angis et annet sted.</value>
+  </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Kan ikke slette: denne godsbeskrivelsen brukes av en eller flere godsstrømmer.</value>
   </data>
@@ -2088,5 +2091,11 @@
   </data>
   <data name="LockKeyIgnoredHint" xml:space="preserve">
     <value>Denne nøkkelen ignoreres slik det er nå: se Konflikter for hvorfor. Den beholdes, så den gjelder igjen så snart det er rettet opp.</value>
+  </data>
+  <data name="DispatchLists" xml:space="preserve">
+    <value>Togekspederingslister</value>
+  </data>
+  <data name="DispatchListsHint" xml:space="preserve">
+    <value>Ett redigerbart dokument per stasjon, slik at hver stasjonseier kan legge til sine egne instruksjoner før treffet.</value>
   </data>
 </root>

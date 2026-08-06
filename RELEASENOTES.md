@@ -96,6 +96,46 @@
   rule (**L4**) is always enforced, like the other checks for a model that contradicts itself, and needs
   no setting.
 
+### Fixes
+
+- **A locomotive overlap is now reported against the two locomotives that are actually doubled.** Rule
+  **P4** finds a train hauled twice over one stretch, but the error it raised named neither locomotive
+  and was keyed to the train alone. `ValidationError.Involves(Schedule)` therefore fell back to marking
+  every schedule holding any part of that train — so a locomotive working the same train hours away, on
+  a leg nothing doubles, was marked for a conflict none of its own parts are in. The error now carries
+  the two schedules the offending parts belong to, and marks only those.
+
+  The message states which locomotives they are. It read `Train GD 42754 has overlapping locomotive
+  assignments: 'GD 42754' Fullerup Terminal 14:51->Fullerup 15:05 and 'GD 42754' …` — the train named
+  three times over and the locomotives not at all, the two halves often identical to the minute. It now
+  reads `… : MZ 5 Fullerup Terminal 14:51->Fullerup 15:05 and MZ 5 …`. The five resource strings are
+  unchanged; what is substituted into them is. The new
+  `ScheduledTrainPart.TractionWorkingSpanText` composes that form, resolving the traction through the
+  part's own `Schedule` rather than through `TractionUnits`, because a part is equal to any part over the
+  same two calls and two schedules covering one leg each would otherwise both name both locomotives.
+
+- **A locomotive rotation is no longer reported as a locomotive overlap.** **P4** compared the two
+  workings' times and nothing else, so one locomotive taking a train on the odd sessions and another on
+  the even — never at the meeting on the same day, and the whole point of a rotation — was reported as
+  the train being hauled twice over. Two parts must now overlap in **sessions** as well as in time. The
+  sessions a part is hauled on are the schedule's traction bookings unioned, narrowed to the sessions the
+  train itself runs; an on-demand train runs on no numbered session and so has nothing to narrow by,
+  leaving the bookings to stand on their own.
+
+  The schedules are also grouped rather than taken one assignment at a time, so a working two
+  locomotives share stays one claim on the train: **double heading is not double booking.**
+
+  Where the doubling is confined to some sessions, the message now names them — the new
+  `TrainHasLocomotiveCoverageOverlapOnSessions` in all five languages. Doubled on every session the
+  train runs, the plain string is used, since `on sessions All` says nothing the rest of the message
+  does not.
+
+- **`ValidationError.Schedule` is now `ValidationError.Schedules`, a list.** A conflict between two
+  schedules could not be attributed to both, which is what let the locomotive overlap above fall back to
+  matching by train. The rules that key to a single schedule (**S1**, **S2**, orphan **S4**) fill it with
+  that one schedule and behave exactly as before; an empty list still means a train-keyed schedule-scope
+  error, located through `Trains`.
+
 ### XPLN Importer Improvements
 
 - **A section two lines share is imported as one track stretch.** A line is listed in the Routes

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Schedules;
@@ -187,5 +188,38 @@ public static class ScheduledTrainPartExtensions
         /// <summary>The wagonsets this part carries.</summary>
         public IEnumerable<ScheduledObject> WagonSets =>
             trainPart.ScheduledObjects.Where(so => so.IsWagonSet);
+
+        /// <summary>
+        /// The part written as the traction units working it followed by the times of its
+        /// <c>WorkingSpan</c> — "MZ 5 Fullerup 14:51-&gt;Skovborg 15:05". Double-headed traction is joined
+        /// with a plus sign, as it is written elsewhere.
+        /// </summary>
+        /// <remarks>
+        /// For a message about a train hauled twice over. There the train is named already, so what
+        /// <c>WorkingSpanText</c> leads with says nothing, while the one thing
+        /// that tells the two parts apart — which locomotive works each — is missing. Two parts of the
+        /// same train can run over the same stretch at the same times, and then the locomotive is all
+        /// there is to tell them apart. A part whose traction cannot be resolved (it is detached from its
+        /// plan) shows the span alone rather than an empty name.
+        /// <para>
+        /// Where the train is <em>not</em> already named, <c>WorkingSpanText</c> is the one to use.
+        /// </para>
+        /// </remarks>
+        public string TractionWorkingSpanText
+        {
+            get
+            {
+                var (from, to) = trainPart.WorkingSpan;
+                var span = string.Format(CultureInfo.CurrentCulture, "{0} {1}->{2} {3}",
+                    trainPart.From.OperationLocation, from.HHMM(), trainPart.To.OperationLocation, to.HHMM());
+                // Through the schedule this part belongs to, not through TractionUnits: a part is equal to
+                // any part over the same two calls, so two schedules covering one leg each resolve to both
+                // locomotives — and telling those two apart is the whole point here.
+                var traction = string.Join(" + ", (trainPart.Schedule?.Vehicles ?? [])
+                    .Where(v => v.IsTraction)
+                    .Select(v => v.Designation));
+                return traction.Length == 0 ? span : $"{traction} {span}";
+            }
+        }
     }
 }

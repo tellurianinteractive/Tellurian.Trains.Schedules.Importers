@@ -145,7 +145,7 @@
     <value>Domestic regions and foreign countries used for cargo flow routing.</value>
   </data>
   <data name="OperationLocations" xml:space="preserve">
-    <value>Operation Locations</value>
+    <value>Operation locations</value>
   </data>
   <data name="Companies" xml:space="preserve">
     <value>Companies</value>
@@ -160,19 +160,19 @@
     <value>Stretches</value>
   </data>
   <data name="TrainCategories" xml:space="preserve">
-    <value>Train Categories</value>
+    <value>Train categories</value>
   </data>
   <data name="Trains" xml:space="preserve">
     <value>Trains</value>
   </data>
   <data name="GraphicalTimetable" xml:space="preserve">
-    <value>Graphical Timetable</value>
+    <value>Graphical timetable</value>
   </data>
   <data name="Schedules" xml:space="preserve">
     <value>Schedules</value>
   </data>
   <data name="VehicleOwners" xml:space="preserve">
-    <value>Vehicle Owners</value>
+    <value>Vehicle owners</value>
   </data>
   <data name="Import" xml:space="preserve">
     <value>Import</value>
@@ -295,10 +295,10 @@
     <value>General</value>
   </data>
   <data name="SessionDays" xml:space="preserve">
-    <value>Sessions &amp; Days</value>
+    <value>Sessions &amp; days</value>
   </data>
   <data name="TimeAndSpeed" xml:space="preserve">
-    <value>Time &amp; Speed</value>
+    <value>Time &amp; speed</value>
   </data>
   <data name="Validation" xml:space="preserve">
     <value>Validation</value>
@@ -460,7 +460,7 @@
     <value>Min time between track usage (fast-clock min)</value>
   </data>
   <data name="ModuleRegistryApiKey" xml:space="preserve">
-    <value>ModuleRegistry API key</value>
+    <value>Module Registry API key</value>
   </data>
   <data name="OpenSchedule" xml:space="preserve">
     <value>Open schedule:</value>
@@ -783,7 +783,7 @@
     <value>A company with this signature already exists.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
-    <value>Not Found</value>
+    <value>Not found</value>
   </data>
   <data name="NotFoundMessage" xml:space="preserve">
     <value>Sorry, the content you are looking for does not exist.</value>
@@ -1140,7 +1140,7 @@
     <value>Add selected</value>
   </data>
   <data name="ImportExport" xml:space="preserve">
-    <value>Import &amp; Export</value>
+    <value>Import &amp; export</value>
   </data>
   <data name="ModuleRegistryApiUrl" xml:space="preserve">
     <value>Module Registry API URL</value>
@@ -1167,7 +1167,7 @@
     <value>Upload failed: {0}</value>
   </data>
   <data name="ModuleRegistryUrlMissing" xml:space="preserve">
-    <value>Set the Module Registry API URL in Settings → Import &amp; Export first.</value>
+    <value>Set the Module Registry API URL in Settings → Import &amp; export first.</value>
   </data>
   <data name="ExportFailed" xml:space="preserve">
     <value>Export failed: {0}</value>
@@ -1278,7 +1278,7 @@
     <value>The shift would take a selected train's start time outside the day (00:00–23:59).</value>
   </data>
   <data name="ExternalId" xml:space="preserve">
-    <value>External Id</value>
+    <value>External ID</value>
   </data>
   <data name="Category" xml:space="preserve">
     <value>Category</value>
@@ -1490,6 +1490,9 @@
   </data>
   <data name="OriginLocations" xml:space="preserve">
     <value>Origin locations</value>
+  </data>
+  <data name="OriginLocationsHint" xml:space="preserve">
+    <value>Only add origin locations when the train is expected to take wagons that come from a location the train does not serve itself — typically wagons fed in from a branch line that are to continue with this train. An origin location is not where the train picks up the wagons; that is specified elsewhere.</value>
   </data>
   <data name="CargoDescriptionReferenced" xml:space="preserve">
     <value>Cannot delete: this cargo description is used by one or more cargo flows.</value>
@@ -1951,7 +1954,7 @@
     <value>Layout</value>
   </data>
   <data name="ShuntingYards" xml:space="preserve">
-    <value>Shunting Yards</value>
+    <value>Shunting yards</value>
   </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Cargo served from</value>
@@ -2090,5 +2093,11 @@
   </data>
   <data name="LockKeyIgnoredHint" xml:space="preserve">
     <value>This key is ignored as things stand: see Conflicts for why. It is kept, so it works again as soon as that is put right.</value>
+  </data>
+  <data name="DispatchLists" xml:space="preserve">
+    <value>Station dispatch lists</value>
+  </data>
+  <data name="DispatchListsHint" xml:space="preserve">
+    <value>One editable document per station, so each station owner can add their own instructions before the meeting.</value>
   </data>
 </root>

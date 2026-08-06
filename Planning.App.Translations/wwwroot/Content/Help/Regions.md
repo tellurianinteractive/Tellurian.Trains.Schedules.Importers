@@ -24,7 +24,7 @@ its regions as coloured chips — telling the operator that wagons brought there
 regions or countries.
 
 Define the regions you need here, then assign them to your shadow stations on the
-**Operation Locations** tab.
+**Operation locations** tab.
 
 ### Managing regions
 
@@ -34,7 +34,7 @@ The list shows each region as a coloured chip alongside its name and country.
   palette.
 - **Edit** changes a region's name, country or colour.
 - **Delete** removes a region. It is blocked while any station is assigned the region — remove the
-  assignment on the **Operation Locations** tab first.
+  assignment on the **Operation locations** tab first.
 - **Default regions** adds the standard set of regions, named in the layout's default language and
   handy when starting a new layout.
 

@@ -14,13 +14,13 @@ works for fixed club layouts and home layouts.
 - Display graphical timetables (time–distance diagrams).
 - Generate printed output: train cards, station books, and driver duty sheets.
 
-## Getting Started
+## Getting started
 
 Use the **Settings** tab to configure your layout name, timing parameters,
-and default values. Then define your operational places in the **Operation Locations** tab, and start
+and default values. Then define your operational places in the **Operation locations** tab, and start
 adding trains in the **Trains** tab.
 
-## About This Project
+## About this project
 
 This application is part of the Tellurian Trains suite of tools for model
 railway operations. It is open source and available on GitHub.

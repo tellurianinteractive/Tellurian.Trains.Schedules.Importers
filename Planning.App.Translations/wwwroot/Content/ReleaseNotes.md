@@ -1,4 +1,48 @@
-# Release Notes
+# Release notes
+
+## Version 0.4.1
+
+### Changes
+
+- **The station dispatch lists can now be saved as documents the station owners can edit.** Choose
+  *Station dispatch lists* on the Export menu and each station on duty gets its own document in
+  OpenDocument format, which LibreOffice Writer and most other word processors open. It is meant for
+  sending every station's owner their own list before the meeting, so they can add the local
+  instructions only they know — which is why it is one document per station rather than one document
+  holding everybody's sheets. Where more than one station is on duty the documents arrive together in a
+  zip, one file per station inside it.
+
+  Nothing in the document decides where its pages break. The station's name and the phone numbers of
+  the stations it clears trains to and from repeat at the top of every page, and so do the column
+  headings, but where the pages end is left to the word processor. So an owner who adds three trains
+  and a long note gets pages that still break sensibly and still head themselves, rather than text
+  running over page breaks that were right only until they started typing. The type sizes and the
+  emphasis are named styles, so the appearance of the whole document can be changed at once instead of
+  row by row.
+
+  The one thing such a document cannot carry is the part of the day each page covers, which the printed
+  sheet states in its heading: that depends on which rows land on which page, which is not known until
+  the text has been laid out — and would be wrong again after the first edit. Each page is numbered
+  instead, and its first and last row still say what it covers.
+
+  The printed sheets are unchanged, and are still the ones to work from during a session: print them
+  from the Reports menu as before.
+
+- **A train hauled by two locomotives at once now says which two.** The conflict named the train and
+  the minutes and left the locomotives out, and where both were booked over the very same stretch its
+  two halves read word for word the same — so it told you a train was doubled without telling you what
+  to unbook. It now names the locomotive on each side.
+
+  It is also marked only on the two schedules holding the doubled work. It used to be marked on every
+  schedule working that train anywhere in the day, so a locomotive taking the train on quite another
+  leg, with nothing wrong with its own turn, was flagged for a conflict it has no part in.
+
+- **Two locomotives sharing a train between sessions are no longer reported as a conflict.** Only the
+  clock times were compared, so one locomotive taking the train on the odd sessions and another on the
+  even — never at the meeting on the same day, and the whole point of arranging it that way — was
+  reported as the train being hauled by two locomotives at once. It is now reported only where the two
+  are booked for a session in common, and the conflict then names the sessions where it is only some of
+  them. Two locomotives on one schedule are double-heading and were never the conflict either.
 
 ## Version 0.4.0
 
@@ -169,7 +213,7 @@
   a clear way down. A long branch may therefore now be drawn below a short one that leaves the stretch
   further along.
 
-- **A plan could show its trains under train categories the Train Categories tab did not list.** A
+- **A plan could show its trains under train categories the Train categories tab did not list.** A
   train carries its category with it, so a plan saved by an earlier version opened with its trains
   grouped by category while the list of categories was empty: the category drop-down had nothing to
   offer, and no train could be moved to another category. Several categories could also be taken for
@@ -187,7 +231,7 @@
 - **A plan stored its train categories, companies and countries in more than one place.** Each was
   written wherever it was first met on the way out — usually inside the first train that used it —
   while the list it belongs to held no more than a pointer to it. That is how a plan could come to have
-  trains in categories the Train Categories tab knew nothing about. Each is now written once, in its
+  trains in categories the Train categories tab knew nothing about. Each is now written once, in its
   own list, and everything that uses one keeps only a reference. Countries are no longer copied into
   the plan at all, so a correction to a country's languages now reaches plans that were saved before
   it. A plan saved by an earlier version is read as before and put right the next time it is saved.
@@ -268,11 +312,11 @@
 
 - The **kilometre figures** in the printed timetable and along the graphical timetable are now rounded
   to whole kilometres. They were printed with a decimal, and the distance factor under **Settings ›
-  Time & Speed** could turn a stretch length into an odd fraction of a kilometre. A branch line now
+  Time & speed** could turn a stretch length into an odd fraction of a kilometre. A branch line now
   also shows the same kilometre as the line it leaves at their junction station.
 - Everything that reads a train's route now follows the **order the train runs its stops**, not the
   order they were entered. On a train whose stops went in out of order — one added after a stop it
-  only reaches later — the **Graphical Timetable** drew zig-zag lines between stops the train never
+  only reaches later — the **Graphical timetable** drew zig-zag lines between stops the train never
   runs between and could place the train in the wrong direction's column; the printed **timetable
   table** could show a departure where the train arrives; **Build automatically** did not chain the
   train at all, since it appeared to start where it does not; **repeating a train** measured the
@@ -284,7 +328,7 @@
 
 ## Version 0.3.1
 
-- The **Traction units** section on a train part page in the Driver Duties booklet now has its
+- The **Traction units** section on a train part page in the Driver duties booklet now has its
   heading in the chosen language. It was previously the only heading in the booklet left
   untranslated, so the section did not read as the traction units at all.
 - The traction unit is now printed for every train part that has one. In plans imported with an
@@ -301,7 +345,7 @@
 
 ## Version 0.3.0
 
-- A new **Driver Duties report** that prints one A5 booklet per duty. The front page shows
+- A new **Driver duties report** that prints one A5 booklet per duty. The front page shows
   the duty number, which sessions or days it runs,
   its start and end time and station, a difficulty grade, staffing needs and any duty
   notes. Each train part gets its own page, with which traction units to use,
@@ -309,7 +353,7 @@
   wagons, and the timetable — each shown in its own clearly separated
   block. The last page of every booklet shows the layout's track plan and a table of
   shunting yards, for easy reference while running.
-- A new **General Instructions** report is a separate printed booklet with the meeting
+- A new **General instructions** report is a separate printed booklet with the meeting
   programme and instructions that apply to a layout for the whole meeting. Here, the
   meeting organiser is free to write anything — for example driving instructions,
   signalling practice, radio/phone use, running late, who to ask — handed out once to

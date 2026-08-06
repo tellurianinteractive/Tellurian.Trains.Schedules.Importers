@@ -12,7 +12,7 @@ Each schedule is a row: the first column lists the **vehicle(s)** working it, fo
 
 Use **Build automatically** to chain trains of the same category
 that continue from where the previous one arrived (mark a category *Exclude from automatic
-scheduling* on the **Train Categories** tab to keep it out of this), or **New schedule** to build
+scheduling* on the **Train categories** tab to keep it out of this), or **New schedule** to build
 one by hand. 
 
 On a row, 
@@ -29,7 +29,7 @@ for you to resolve.
 several vehicles (such as a locomotive and its coach set). Cargo flows are shown as turnus cards in
 the reports rather than here.
 
-#### Operating Sessions or Days
+#### Operating sessions or days
 
 A schedule's operating sessions becomes the subset of sessions all trains operate. With a schedule with most trains 
 operating daily and a pair only sessions 1-5, the whole schedule becomes 1-5. 

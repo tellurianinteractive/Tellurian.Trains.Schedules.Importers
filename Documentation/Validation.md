@@ -309,11 +309,17 @@ Coverage is judged **leg by leg, not by whether the train appears in some turnus
 **Validates**: No train is assigned two traction units over the same stretch of its run
 
 **Logic**:
-1. Gathers traction schedules (Locomotive/Trainset assignments)
-2. For each train, collects the parts assigned to traction (matched by train `Id`, so runs sharing a category and number are not merged)
-3. Checks for pairs of parts that overlap in time
+1. Gathers the schedules traction is booked on, each with the sessions it is booked for: the union over the schedule's traction assignments. Grouped by schedule, so a schedule two locomotives share counts once — a double-headed working is one claim on the train, not two
+2. For each train, collects the parts on those schedules (matched by train `Id`, so runs sharing a category and number are not merged), each with the sessions it is hauled on: the booking narrowed to the sessions the train runs
+3. Checks for pairs of parts that overlap **both in time and in sessions**
 
-**Error**: `"Train {0} has overlapping locomotive assignments: {1} and {2}."`
+**Error**: `"Train {0} has overlapping locomotive assignments: {1} and {2}."`, where each of `{1}` and `{2}` is a part's `TractionWorkingSpanText` — the locomotives working it and the times of its working span, e.g. `MZ 5 Fullerup 14:51->Skovborg 15:05`. The train is `{0}` already, and two parts of one train can read alike to the minute, so the locomotive is what tells them apart. The traction is resolved through the part's own `Schedule`, not through `TractionUnits`: a part is equal to any part over the same two calls, so two schedules covering one leg each would otherwise both name both locomotives.
+
+**Attributed to two schedules.** The error carries `Schedules = [part1.Schedule, part2.Schedule]`, so `Involves(Schedule)` marks exactly the two schedules holding the offending parts. Without them it fell back to matching by train and marked every schedule holding any part of that train — flagging a locomotive that works the train on a leg nothing doubles.
+
+**A rotation is not a conflict.** Two workings that share no session — one locomotive takes the train on the odd sessions, another on the even — are never at the meeting on the same day, so the train is never hauled twice over and nothing is reported. An on-demand train runs on no numbered session and so has nothing to narrow the bookings by; theirs then stand on their own.
+
+**Where the doubling is confined to some sessions, the message names them** (`TrainHasLocomotiveCoverageOverlapOnSessions`, five languages). Doubled on every session the train runs — the ordinary case, where both bookings are for every session — there is no subset to point at and the plain string is used instead.
 
 **Coverage gaps are not checked here.** S4 judges the same thing per leg and per session, correctly allows a traction change at a station, and reads the calls in run order; the time-based gap check this rule used to carry reported each gap a second time and missed the gap entirely on a train whose calls were added in another order than it runs them. `ValidationErrorType.LocomotiveCoverageGap` is no longer produced.
 

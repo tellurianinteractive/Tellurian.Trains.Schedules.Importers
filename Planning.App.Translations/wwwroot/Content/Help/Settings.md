@@ -1,4 +1,4 @@
-You use the **Settings Tab** to control how the current layout's 
+You use the **Settings** tab to control how the current layout's 
 timetable is calculated, drawn and validated. 
 Settings are saved withing the planning document.
 
@@ -9,7 +9,7 @@ You can optionally select to use **numbered sessions** or **weekdays** when you 
 have different operations for different session. If all trains, schedules and duties
 runs the same all sessions you dont have to anyting, all defaults to **all sessions**.
 
-### Sessions & Days
+### Sessions & days
 
 In some planning scenarios the possibility to select sessions/days to operate is useful.
 You can set operation sessions/days for;
@@ -28,7 +28,7 @@ stations that do not override them.
 Choose which checks run and the thresholds they use. Switching a check off suppresses its
 messages without removing the underlying data.
 
-### Graphic timetable
+### Graphical timetable
 
 Control the appearance of the graphical timetable: the orientation of the time axis, the spacing
 of stations and tracks, and which labels (arrival/departure minutes, train category, company) are

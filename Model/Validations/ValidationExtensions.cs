@@ -95,32 +95,42 @@ public static class ValidationExtensions
         {
             var errors = new List<ValidationError>();
 
-            // Get all traction vehicle schedules (locomotives and self-propelled railcars)
-            var locomotiveSchedules = plan.ScheduledObjects
-                .Where(v => v.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset)
+            // The workings traction is booked on, each with the sessions it is booked for: the union over
+            // the schedule's traction assignments. Grouped by schedule, so a schedule two locomotives
+            // share counts once — a double-headed working is one claim on the train, not two — and so
+            // that a schedule worked by one locomotive on the odd sessions and another on the even is
+            // booked, as it reads, for both.
+            var tractionSchedules = plan.ScheduledObjects
+                .Where(v => v.IsTraction)
                 .SelectMany(v => v.ScheduleAssignments)
-                .Select(a => a.Schedule)
-                .Distinct()
+                .Where(a => a.Schedule is not null)
+                .GroupBy(a => a.Schedule)
+                .Select(g => (Schedule: g.Key, Sessions: g.Aggregate(new Sessions(), (union, a) => union.Or(a.Sessions))))
                 .ToList();
 
-            // Group by train
             foreach (var train in plan.Timetable.Trains)
             {
-                // Get all train parts for this specific train run from locomotive schedules.
+                // An on-demand train runs on no numbered session, so there is nothing to narrow the
+                // bookings by; theirs stand on their own.
+                var runsOnNumberedSessions = train.Sessions.Numbers.Length > 0;
+
+                // Every part of this train that traction is booked on, with the sessions it is hauled on:
+                // the booking narrowed to the sessions the train itself runs.
                 // Match by Id, not value equality: several runs can share the same category and number
                 // (e.g. a clock-face service), and value equality would merge their parts and emit the
-                // same gap/overlap warnings once per run.
+                // same overlap warning once per run.
                 // In the order the locomotive starts work on each part — the times an overlap message
                 // shows — so a reported pair reads earliest first.
-                var locomotiveParts = locomotiveSchedules
-                    .SelectMany(ls => ls.Parts)
-                    .Where(p => p.Train.Id == train.Id)
-                    .OrderBy(p => p.WorkingSpan.From)
+                var hauledParts = tractionSchedules
+                    .SelectMany(s => s.Schedule.Parts
+                        .Where(p => p.Train.Id == train.Id)
+                        .Select(p => (Part: p, Sessions: runsOnNumberedSessions ? s.Sessions.And(train.Sessions) : s.Sessions)))
+                    .OrderBy(x => x.Part.WorkingSpan.From)
                     .ToList();
 
-                if (locomotiveParts.Count == 0) continue; // no traction at all: S4's concern, not an overlap
+                if (hauledParts.Count < 2) continue; // no traction at all, or one working: S4's concern
 
-                errors.AddRange(CheckLocomotiveCoverageOverlaps(train, locomotiveParts));
+                errors.AddRange(CheckLocomotiveCoverageOverlaps(train, hauledParts));
             }
 
             return errors;
@@ -713,24 +723,41 @@ public static class ValidationExtensions
             return result;
         }
 
-        private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<ScheduledTrainPart> locomotiveParts)
+        private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<(ScheduledTrainPart Part, Sessions Sessions)> hauledParts)
         {
             // Each part is taken over its WorkingSpan: the running time plus the preparation time at the
             // train's origin and the finishing-up time at its destination, which are as much a claim on
             // the locomotive as the run between them.
-            var spans = locomotiveParts.Select(p => p.WorkingSpan).ToArray();
-            for (var i = 0; i < locomotiveParts.Count - 1; i++)
+            var spans = hauledParts.Select(x => x.Part.WorkingSpan).ToArray();
+            for (var i = 0; i < hauledParts.Count - 1; i++)
             {
-                for (var j = i + 1; j < locomotiveParts.Count; j++)
+                for (var j = i + 1; j < hauledParts.Count; j++)
                 {
-                    var part1 = locomotiveParts[i];
-                    var part2 = locomotiveParts[j];
+                    var (part1, sessions1) = hauledParts[i];
+                    var (part2, sessions2) = hauledParts[j];
 
-                    if (spans[i].OverlapsInTime(spans[j]))
-                    {
-                        var message = Message.Information(Strings.TrainHasLocomotiveCoverageOverlap, train, part1.WorkingSpanText, part2.WorkingSpanText);
-                        yield return ValidationError.LocomotiveCoverageOverlap(train, part1, part2, message);
-                    }
+                    if (!spans[i].OverlapsInTime(spans[j])) continue;
+
+                    // Two workings that share no session are a rotation, not a conflict: one locomotive
+                    // takes the train on the odd sessions and another on the even, and the two are never
+                    // at the meeting on the same day. Only where the sessions meet is the train hauled
+                    // twice over, and then it is hauled twice over on exactly those sessions.
+                    if (!sessions1.Overlaps(sessions2)) continue;
+                    var shared = sessions1.And(sessions2);
+
+                    // Named by their traction, not by their train: the train is {0} already, and the
+                    // two parts can otherwise read alike down to the last minute, leaving the planner
+                    // no way to see which locomotives are the doubled ones.
+                    // The sessions are stated only where they are a subset of the ones the train runs.
+                    // Doubled whenever it runs — the ordinary case, where both bookings are for every
+                    // session — there is no subset to point at, and naming them all would only be noise.
+                    var everySessionTheTrainRuns = shared.Numbers.SequenceEqual(train.Sessions.Numbers);
+                    var message = everySessionTheTrainRuns
+                        ? Message.Information(Strings.TrainHasLocomotiveCoverageOverlap,
+                            train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText)
+                        : Message.Information(Strings.TrainHasLocomotiveCoverageOverlapOnSessions,
+                            train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText, shared.SessionsNumbers);
+                    yield return ValidationError.LocomotiveCoverageOverlap(train, part1, part2, message);
                 }
             }
         }

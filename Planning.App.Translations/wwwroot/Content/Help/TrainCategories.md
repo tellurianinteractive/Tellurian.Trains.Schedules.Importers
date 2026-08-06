@@ -4,7 +4,7 @@ A category groups trains that share a classification — for example express, lo
 shunting. Each category has:
 
 - a **prefix** used in train numbers and labels;
-- a **colour** used to draw the train's line on the graphic timetable;
+- a **colour** used to draw the train's line on the graphical timetable;
 - a **classification** that influences validation and ordering.
 - a **company** that runs all trains in the category, can be overriden for individual trains.
 - a **preparation time** and a **finishing-up time** in minutes, used for every new train of the

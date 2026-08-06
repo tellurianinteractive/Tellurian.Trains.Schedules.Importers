@@ -120,7 +120,7 @@
         <table class="grid">
             <thead>
                 <tr>
-                    <th>@Translator("OriginLocations")</th>
+                    <th title="@Translator("OriginLocationsHint")">@Translator("OriginLocations")</th>
                     <th class="center">@Translator("ToAllDestinations")</th>
                     <th>@Translator("DestinationLocations")</th>
                     <th title="@Translator("OnlyWagonClassesHint")">@Translator("OnlyWagonClasses")</th>
@@ -343,6 +343,7 @@
 
     private RenderFragment OriginsTable(CargoFlowOptions d) => @<div class="sub">
         <h4>@Translator(d.Origins.Count == 1 ? "OriginLocation" : "OriginLocations")</h4>
+        <p class="hint">@Translator("OriginLocationsHint")</p>
         <table class="sub-grid">
             <thead>
                 <tr>

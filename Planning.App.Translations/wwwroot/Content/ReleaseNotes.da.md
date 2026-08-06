@@ -1,5 +1,48 @@
 # Versionsnyheder
 
+## Version 0.4.1
+
+### Ændringer
+
+- **Togekspeditionslisterne kan nu gemmes som dokumenter, stationsejerne kan redigere.** Vælg
+  *Togekspeditionslister* i menuen Eksportér, og hver bemandet station får sit eget dokument i
+  OpenDocument-format, som LibreOffice Writer og de fleste andre tekstbehandlere åbner. Det er tænkt
+  til at sende hver stations ejer deres egen liste før træffet, så de kan tilføje de lokale
+  instruktioner, kun de kender — derfor ét dokument pr. station og ikke ét dokument med alles ark i. Er
+  mere end én station bemandet, kommer dokumenterne samlet i en zip-fil med én fil pr. station i.
+
+  Intet i dokumentet bestemmer, hvor siderne brydes. Stationens navn og telefonnumrene til de
+  stationer, den ekspederer tog til og fra, gentages øverst på hver side, og det gør
+  kolonneoverskrifterne også, men hvor siderne slutter, er overladt til tekstbehandleren. En ejer, der
+  tilføjer tre tog og en lang bemærkning, får derfor sider, der stadig brydes fornuftigt og stadig har
+  deres overskrifter, i stedet for tekst, der løber over sideskift, som kun passede indtil de begyndte
+  at skrive. Skriftstørrelser og fremhævning er navngivne typografier, så hele dokumentets udseende kan
+  ændres på én gang i stedet for række for række.
+
+  Det eneste, et sådant dokument ikke kan bære, er den del af dagen, hver side dækker, og som det
+  udskrevne ark angiver i sin overskrift: det afhænger af, hvilke rækker der havner på hvilken side,
+  hvilket ikke vides, før teksten er ombrudt — og ville være galt igen efter den første ændring. Hver
+  side nummereres i stedet, og dens første og sidste række siger stadig, hvad den dækker.
+
+  De udskrevne ark er uændrede og er fortsat dem, man arbejder fra under en køresession: de udskrives
+  fra menuen Rapporter som før.
+
+- **Et tog, der trækkes af to lokomotiver på én gang, siger nu hvilke to.** Konflikten nævnte toget og
+  minutterne, men udelod lokomotiverne, og var begge booket over nøjagtig samme strækning, lød dens to
+  halvdele ord for ord ens — den fortalte altså, at et tog var dobbeltbooket, uden at fortælle, hvad
+  der skulle bookes fra. Nu nævnes lokomotivet på hver side.
+
+  Den markeres også kun på de to omløb, der holder det dobbeltbookede arbejde. Før blev den markeret på
+  hvert omløb, der kørte det tog et sted på dagen, så et lokomotiv, der tog toget på en helt anden
+  delstrækning, uden noget galt i sit eget omløb, blev flaget for en konflikt, det ikke har del i.
+
+- **To lokomotiver, der deles om et tog mellem køresessioner, rapporteres ikke længere som en
+  konflikt.** Kun klokkeslættene blev sammenlignet, så et lokomotiv, der tog toget på ulige
+  køresessioner, og et andet på lige — aldrig til træffet samme dag, og hele pointen med at lægge det
+  sådan an — blev rapporteret som et tog trukket af to lokomotiver på én gang. Nu rapporteres det kun,
+  hvor begge er booket på en fælles køresession, og konflikten nævner køresessionerne, når det kun er
+  nogle af dem. To lokomotiver i samme omløb er dobbelttrækning og var heller aldrig konflikten.
+
 ## Version 0.4.0
 
 ### Brydende ændringer

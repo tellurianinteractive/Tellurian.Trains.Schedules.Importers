@@ -1,5 +1,49 @@
 # Versionsnyheter
 
+## Version 0.4.1
+
+### Ändringar
+
+- **Tågklareringslistorna kan nu sparas som dokument stationsägarna kan redigera.** Välj
+  *Tågklareringslistor* på menyn Exportera, och varje bemannad station får ett eget dokument i
+  OpenDocument-format, som LibreOffice Writer och de flesta andra ordbehandlare öppnar. Det är avsett
+  för att skicka varje stations ägare deras egen lista före träffen, så att de kan lägga till de lokala
+  instruktioner bara de känner till — därför är det ett dokument per station och inte ett dokument med
+  allas blad i. Är fler än en station bemannad kommer dokumenten tillsammans i en zip-fil, med en fil
+  per station inuti.
+
+  Ingenting i dokumentet bestämmer var sidorna bryts. Stationens namn och telefonnumren till
+  stationerna den klarerar tåg till och från upprepas högst upp på varje sida, och så även
+  kolumnrubrikerna, men var sidorna slutar lämnas till ordbehandlaren. En ägare som lägger till tre tåg
+  och en lång anmärkning får därför sidor som fortfarande bryts vettigt och fortfarande har sina
+  rubriker, i stället för text som löper över sidbrytningar som stämde bara fram till att de började
+  skriva. Teckenstorlekar och utmärkning är namngivna stilar, så hela dokumentets utseende kan ändras
+  på en gång i stället för rad för rad.
+
+  Det enda ett sådant dokument inte kan bära är den del av dagen varje sida täcker, som det utskrivna
+  bladet anger i sin rubrik: det beror på vilka rader som hamnar på vilken sida, vilket inte är känt
+  förrän texten är ombruten — och skulle vara fel igen efter första ändringen. Varje sida numreras i
+  stället, och dess första och sista rad säger fortfarande vad den täcker.
+
+  De utskrivna bladen är oförändrade och är fortfarande de man arbetar från under en köromgång: de
+  skrivs ut från menyn Rapporter som förut.
+
+- **Ett tåg som dras av två lok samtidigt talar nu om vilka två.** Konflikten namngav tåget och
+  minuterna men utelämnade loken, och var båda bokade över exakt samma sträcka löd dess två halvor
+  ordagrant lika — den berättade alltså att ett tåg var dubbelbokat utan att berätta vad som skulle
+  bokas bort. Nu namnges loket på var sida.
+
+  Den markeras också bara på de två omlopp som håller det dubbelbokade arbetet. Förut markerades den på
+  varje omlopp som körde det tåget någonstans under dagen, så ett lok som tog tåget på en helt annan
+  delsträcka, utan något fel i sitt eget omlopp, flaggades för en konflikt det inte har någon del i.
+
+- **Två lok som delar på ett tåg mellan köromgångar rapporteras inte längre som en konflikt.** Bara
+  klockslagen jämfördes, så ett lok som tog tåget på udda köromgångar och ett annat på jämna — aldrig
+  på träffen samma dag, och hela poängen med att lägga upp det så — rapporterades som att tåget drogs
+  av två lok samtidigt. Nu rapporteras det bara där båda är bokade på någon gemensam köromgång, och
+  konflikten namnger köromgångarna när det bara rör några av dem. Två lok i samma omlopp är
+  dubbeldragning och var aldrig heller konflikten.
+
 ## Version 0.4.0
 
 ### Brytande ändringar

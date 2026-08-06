@@ -258,6 +258,9 @@
   <data name="TrainHasLocomotiveCoverageOverlap" xml:space="preserve">
     <value>Zug {0} hat überlappende Lokzuweisungen: {1} und {2}.</value>
   </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnSessions" xml:space="preserve">
+    <value>Zug {0} hat überlappende Lokzuweisungen in Fahrrunden {3}: {1} und {2}.</value>
+  </data>
   <data name="VehicleIsDoubleBooked" xml:space="preserve">
     <value>Fahrzeug {0} ist doppelt gebucht: Fahrrunden {1} überlappen mit Fahrrunden {2}.</value>
   </data>

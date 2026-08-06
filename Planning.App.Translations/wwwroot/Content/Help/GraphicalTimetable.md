@@ -1,4 +1,4 @@
-The **Graphic timetable** tab draws a train-graph (time–distance diagram) for the timetable
+The **Graphical timetable** tab draws a train-graph (time–distance diagram) for the timetable
 stretches you select.
 
 ### Choosing what to show
@@ -18,9 +18,9 @@ The selector is hidden when no break time is set.
 
 Stations are spaced along one axis and time along the other; each train is a sloped line coloured
 by its category. The orientation, spacing and labels are controlled from
-**Settings › Graphic timetable**.
+**Settings › Graphical timetable**.
 
-### Start and End Time
+### Start and end time
 The graph displays the timeframe defined in **Settings > General**. 
 A special option makes the graph shows a full day from 00:00 to 24:00 for continous operation. 
 A train whose timing continues past

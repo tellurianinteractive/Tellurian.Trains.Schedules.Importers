@@ -1,6 +1,6 @@
 The **Cargo flow** tab plans freight that is directed by waybills, in two steps.
 
-### Cargo Description tab
+### Cargo descriptions tab
 
 **Cargo descriptions** are reusable descriptions of where wagons are routed. Each has a name and a
 set of **destinations** — the operational places wagons are brought to, optionally with a position in
@@ -13,11 +13,20 @@ A destination can also include the station's
 - its **local** destinations, when the station is a hub for one or several local  freight servces.
 - **regions**, when a shadow shunting yard represents some part of the rest of the world.
 
-A description may forward
-wagons from one or more **origin** stations, and can be marked as going to **all destinations**. The
+A description can also be marked as going to **all destinations**. The
 same description can be referenced by many cargo flows, so editing it updates them all.
 
-### Cargo Train tab
+#### Origin locations
+
+Origin locations are the exception, not the rule: leave them empty unless the train is expected to
+take wagons that come from a location the train does not serve itself. The typical case is wagons
+fed in from a branch line, which are to continue with this train — the origin location tells the
+loco driver and the shunter which incoming wagons belong to this train.
+
+An origin location is **not** where the train picks up the wagons. That follows from the cargo
+flow's connect call on the Cargo trains tab.
+
+### Cargo trains tab
 **Cargo trains** is where you attach cargo flows to trains. Choose a train, then for each cargo flow
 set where wagons are **connected** (the from-call, a departure where the train stops) and
 **disconnected** (the to-call, a later arrival), its position in the train, and which cargo

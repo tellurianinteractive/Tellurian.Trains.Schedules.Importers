@@ -1,3 +1,6 @@
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Odt
+
 @inject ScheduleStateService ScheduleState
 @inject ScheduleExportService Exporter
 @inject ModuleRegistryUploadService Uploader
@@ -6,6 +9,7 @@
 
 <TabMenu @ref="_menu" Label="@Translator("Export")">
     <button class="menu-item" @onclick="OpenSaveAs" disabled="@(!ScheduleState.HasSchedule)">@Translator("SaveAs")</button>
+    <button class="menu-item" @onclick="OpenDispatchLists" disabled="@(!ScheduleState.HasSchedule)">@Translator("DispatchLists")</button>
 </TabMenu>
 
 @if (_showSaveAs)
@@ -41,6 +45,45 @@
     </div>
 }
 
+@* The station dispatch lists as editable documents — a report leaving the app rather than the plan in
+   another format, which is why it is its own entry and not a row in Save as. *@
+@if (_showDispatchLists)
+{
+    <div class="dialog-backdrop" @onclick="CloseDispatchLists">
+        <div class="dialog" @onclick:stopPropagation>
+            <h3>@Translator("DispatchLists")</h3>
+            <p>@Translator("DispatchListsHint")</p>
+
+            @if (DispatchStationCount == 0)
+            {
+                <div class="export-row dim">
+                    <span class="note">@Translator("NoDispatchStations")</span>
+                </div>
+            }
+            else
+            {
+                <div class="export-row">
+                    <span class="fmt">ODT<span class="ext">@(DispatchStationCount == 1 ? ".odt" : ".zip")</span></span>
+                    <button class="dest" disabled="@_busy" @onclick="SaveDispatchListsToDisk">@Translator("ToDisk")</button>
+                </div>
+            }
+
+            @if (_busy)
+            {
+                <p class="status busy"><span class="spinner"></span>@Translator(_busyKey!)</p>
+            }
+            else if (_result is not null)
+            {
+                <p class="status @(_resultOk ? "ok" : "err")">@_result</p>
+            }
+
+            <div class="dialog-actions">
+                <button @onclick="CloseDispatchLists" disabled="@_busy">@Translator("Close")</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private TabMenu? _menu;
     private bool _showSaveAs;
@@ -48,7 +91,15 @@
     private string? _busyKey;
     private string? _result;
     private bool _resultOk;
+    private bool _showDispatchLists;
     private IJSObjectReference? _downloadModule;
+
+    // Every station a dispatcher works: manned stations and shadow stations, in layout order. Read rather
+    // than cached, because the dialog can be opened again after a station has been marked manned.
+    private IReadOnlyList<Station> DispatchStations =>
+        ScheduleState.Layout is { } layout ? [.. layout.DispatchEndpoints] : [];
+
+    private int DispatchStationCount => DispatchStations.Count;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -67,6 +118,19 @@
     {
         if (_busy) return;
         _showSaveAs = false;
+    }
+
+    private void OpenDispatchLists()
+    {
+        _menu?.Close();
+        _result = null;
+        _showDispatchLists = true;
+    }
+
+    private void CloseDispatchLists()
+    {
+        if (_busy) return;
+        _showDispatchLists = false;
     }
 
     // Show the spinner before the (synchronous, UI-thread-blocking) serialize: flip to busy, render,
@@ -127,6 +191,51 @@
                 : result.Message == "MissingUrl"
                     ? Translator("ModuleRegistryUrlMissing")
                     : string.Format(Translator("UploadFailed"), result.Message);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    /* One editable document per station, which is what gets sent: a station's owner is emailed their own
+       station and edits it without touching anybody else's. Several are zipped only because a browser
+       hands over one file per gesture — the recipient never sees the bundle.
+
+       Unlike the JSON export this needs no save picker: it is generated in milliseconds, so there is
+       nothing to serialize behind a dialog that is already open, and the anchor download keeps the code to
+       the one path that works in every browser. */
+    private async Task SaveDispatchListsToDisk()
+    {
+        if (ScheduleState.Timetable is not { } timetable) return;
+        if (_downloadModule is null) return;
+
+        await BeginBusy("Saving");
+        try
+        {
+            var settings = ScheduleState.Layout?.Settings.General.SessionSettings()
+                ?? SessionsSettings.UseSessions(14);
+            var lists = DispatchStations
+                .Select(station => DispatchList.Create(station, timetable.Trains, settings))
+                .ToList();
+
+            var single = lists.Count == 1;
+            var bytes = single
+                ? StationDispatchOdt.Create(lists[0], settings, Translator, DateTimeOffset.Now)
+                : StationDispatchOdt.CreateBundle(lists, settings, Translator, DateTimeOffset.Now);
+            var fileName = single
+                ? StationDispatchOdt.FileNameOf(lists[0])
+                : $"{SafeFileName($"{timetable.Name} {Translator("DispatchLists")}")}.zip";
+
+            await _downloadModule.InvokeVoidAsync(
+                "downloadBytes", fileName, Convert.ToBase64String(bytes),
+                single ? OdtPackage.MediaType : OdtPackage.ZipMediaType);
+            _showDispatchLists = false;
+        }
+        catch (Exception ex)
+        {
+            _resultOk = false;
+            _result = string.Format(Translator("ExportFailed"), ex.Message);
         }
         finally
         {
