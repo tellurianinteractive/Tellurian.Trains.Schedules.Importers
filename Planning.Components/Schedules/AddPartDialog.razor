@@ -1,0 +1,128 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Schedules
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Planning.Components
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* Adds a train part to a schedule. The planner picks a candidate train, then the from/to stops. For a
+   non-empty schedule the from-stop is fixed to where the schedule ends (the train may join mid-run); for
+   an empty schedule both stops are free, so a partial train can seed a new working. *@
+
+@if (Plan is not null)
+{
+    <div class="add-part-backdrop">
+        <div class="add-part-dialog">
+            <h3>@Translator("AddTrainPart")</h3>
+
+            <div class="field">
+                <label>@Translator("SelectTrain")</label>
+                <ListBoxView Items="@(Candidates.ToListItems())"
+                             Value="_trainId" ValueChanged="OnTrainChanged" Placeholder="—" />
+            </div>
+
+            @if (SelectedTrain is { } train)
+            {
+                var calls = train.CallsInRunOrder;
+                <div class="field">
+                    <label>@Translator("From")</label>
+                    <select value="@_from" disabled="@FromFixed" @onchange="e => SetFrom(e)">
+                        @for (var i = 0; i < calls.Count - 1; i++)
+                        {
+                            <option value="@i">@CallText(calls[i], departure: true)</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label>@Translator("To")</label>
+                    <select value="@_to" @onchange="e => SetTo(e)">
+                        @for (var i = _from + 1; i < calls.Count; i++)
+                        {
+                            <option value="@i">@CallText(calls[i], departure: false)</option>
+                        }
+                    </select>
+                </div>
+
+                <p class="preview">@PreviewText(train)</p>
+            }
+
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+
+            <div class="actions">
+                <button class="primary" disabled="@(SelectedTrain is null)" @onclick="Add">@Translator("Add")</button>
+                <button @onclick="Abort">@Translator("Abort")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>The schedule the part is appended to.</summary>
+    [Parameter, EditorRequired] public Schedule Schedule { get; set; } = default!;
+
+    /// <summary>Raised after a part has been appended and saved.</summary>
+    [Parameter] public EventCallback OnAdded { get; set; }
+
+    /// <summary>Raised when the dialog is dismissed without adding a part.</summary>
+    [Parameter] public EventCallback OnClosed { get; set; }
+
+    private Plan? Plan => ScheduleState.Schedule;
+
+    private int? _trainId;
+    private int _from;
+    private int _to;
+    private string? _error;
+
+    private IReadOnlyList<Train> Candidates => Plan?.CandidateTrainsFor(Schedule) ?? [];
+
+    private Train? SelectedTrain => Candidates.FirstOrDefault(t => t.Id == _trainId);
+
+    // For a non-empty schedule the join point is fixed (the train continues from where the schedule ends).
+    private bool FromFixed => Schedule.EndLocation is not null;
+
+    private void OnTrainChanged(int? id)
+    {
+        _trainId = id;
+        _error = null;
+        if (SelectedTrain is not { } train) return;
+        _from = Schedule.JoinCallIndexFor(train) ?? 0;
+        _to = train.Calls.Count - 1; // default to the whole remaining run
+    }
+
+    private void SetFrom(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var i)) _from = i;
+        if (_to <= _from) _to = _from + 1;
+        _error = null;
+    }
+
+    private void SetTo(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var i)) _to = i;
+        _error = null;
+    }
+
+    private async Task Add()
+    {
+        _error = null;
+        if (SelectedTrain is not { } train) return;
+        var result = Schedule.Append(train.AsTrainPart(_from, _to));
+        if (result.IsNone) { _error = result.Message; return; }
+        ScheduleState.SaveAndNotify();
+        await OnAdded.InvokeAsync();
+    }
+
+    private Task Abort() => OnClosed.InvokeAsync();
+
+    private static string CallText(StationCall call, bool departure) =>
+        $"{call.OperationLocation.Signature} {(departure ? call.Departure : call.Arrival).HHMM()}";
+
+    private string PreviewText(Train train)
+    {
+        var calls = train.CallsInRunOrder;
+        return $"{CallText(calls[_from], departure: true)} → {CallText(calls[_to], departure: false)}";
+    }
+}

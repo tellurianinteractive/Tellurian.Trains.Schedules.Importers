@@ -1,0 +1,118 @@
+@page "/general-instructions-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
+@* Planning.Components.Layout is a namespace here, so the model type needs disambiguating. *@
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The standing instructions for the whole meeting, as their own A5 booklet.
+
+   Not bound into each duty booklet, for three reasons: the audience is everyone at the meeting rather
+   than only the drivers — station staff need the same conventions and never hold a duty booklet; the
+   content is identical in every duty, so binding it in would repeat the same pages across the whole
+   pile and still miss those people; and it is read once, before the first session, whereas a duty
+   booklet is carried and consulted throughout.
+
+   Same physical format as the duty booklets, and it reuses their padding and imposition unchanged —
+   both depend only on a page count. The booklet always opens with a front page (meeting name, validity,
+   print date, programme), then the standing instructions under their own heading, then the layout
+   topology and shunting yards under theirs — appended because the people who receive this get no
+   layout overview from anywhere else. *@
+
+@if (_sheets is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else
+{
+    <div class="no-print sheet-index">
+        <h2>@Translator("GeneralInstructions")</h2>
+        <p class="hint">@Translator("BookletPrintingHint")</p>
+    </div>
+
+    @foreach (var side in _sheets)
+    {
+        <A4LPage>
+            <div class="dutysheet">
+                @RenderPage(side.Left)
+                @RenderPage(side.Right)
+            </div>
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<SheetSide<InstructionsPage>>? _sheets;
+    private DateOnly _printDate;
+
+    private LayoutModel? Layout => ScheduleState.Layout;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded.
+        await ScheduleState.InitializeAsync();
+
+        // Fixed once for the whole render, so a PDF printed later still identifies the render it came from.
+        _printDate = DateOnly.FromDateTime(DateTime.Now);
+
+        var pages = InstructionsPagination.BuildPages(ScheduleState.Schedule?.GeneralInstructions);
+        _sheets = BookletImposition.Impose(pages);
+    }
+
+    private RenderFragment RenderPage(InstructionsPage page) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "dutypage");
+        switch (page.Kind)
+        {
+            case InstructionsPageKind.Front:
+                builder.OpenComponent<InstructionsFrontPage>(2);
+                builder.AddComponentParameter(3, nameof(InstructionsFrontPage.MeetingName), ScheduleState.Schedule?.Name ?? "");
+                builder.AddComponentParameter(4, nameof(InstructionsFrontPage.ValidFrom), Layout?.Settings.General.ValidFrom);
+                builder.AddComponentParameter(5, nameof(InstructionsFrontPage.ValidTo), Layout?.Settings.General.ValidTo);
+                builder.AddComponentParameter(6, nameof(InstructionsFrontPage.PrintDate), _printDate);
+                builder.AddComponentParameter(7, nameof(InstructionsFrontPage.Program), ScheduleState.Schedule?.Program);
+                builder.CloseComponent();
+                break;
+
+            case InstructionsPageKind.Content:
+                builder.OpenElement(8, "div");
+                builder.AddAttribute(9, "class", "instructions-body");
+                if (page.IsFirstOfSection)
+                {
+                    builder.OpenElement(10, "h1");
+                    builder.AddAttribute(11, "class", "section-title");
+                    builder.AddContent(12, Translator("Instructions"));
+                    builder.CloseElement();
+                }
+                builder.AddContent(13, (MarkupString)Markdig.Markdown.ToHtml(page.Markdown));
+                builder.CloseElement();
+                break;
+
+            case InstructionsPageKind.Overview:
+                builder.OpenElement(14, "div");
+                builder.AddAttribute(15, "class", "instructions-overview");
+                builder.OpenElement(16, "h1");
+                builder.AddAttribute(17, "class", "section-title");
+                builder.AddContent(18, Translator("Layout"));
+                builder.CloseElement();
+                builder.OpenComponent<DutyOverviewPage>(19);
+                builder.AddComponentParameter(20, nameof(DutyOverviewPage.Layout), Layout);
+                builder.CloseComponent();
+                builder.CloseElement();
+                break;
+
+            case InstructionsPageKind.Blank:
+                builder.OpenElement(21, "p");
+                builder.AddAttribute(22, "class", "blank");
+                builder.AddContent(23, Translator("ThisPageIsIntentionalBlank"));
+                builder.CloseElement();
+                break;
+        }
+        builder.CloseElement();
+    };
+}

@@ -1,0 +1,75 @@
+@page "/cargo-flow"
+@using Tellurian.Trains.Schedules.Planning.Components.CargoFlow
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@inject UiPreferenceService UiPrefs
+@implements IDisposable
+
+@if (ScheduleState.Timetable is null)
+{
+    <p>@Translator("CargoFlowNoSchedule")</p>
+}
+else
+{
+    <div class="cargo-flow">
+        <p class="intro">@Translator("CargoFlowDescription")</p>
+
+        <nav class="sub-tabs">
+            @foreach (var section in Sections)
+            {
+                <button class="sub-tab @(section == _section ? "active" : "")"
+                        @onclick="() => SelectSection(section)">
+                    @SectionLabel(section)
+                </button>
+            }
+        </nav>
+
+        <div class="section">
+            @switch (_section)
+            {
+                case CargoFlowSection.Descriptions:
+                    <CargoDescriptionsEditor />
+                    break;
+                case CargoFlowSection.Trains:
+                    <CargoTrainsEditor />
+                    break;
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private enum CargoFlowSection { Descriptions, Trains }
+
+    private CargoFlowSection _section = CargoFlowSection.Descriptions;
+    private static readonly CargoFlowSection[] Sections = Enum.GetValues<CargoFlowSection>();
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await UiPrefs.GetCargoFlowSectionAsync() is { } saved && Enum.TryParse<CargoFlowSection>(saved, out var section))
+            _section = section;
+    }
+
+    private void SelectSection(CargoFlowSection section)
+    {
+        _section = section;
+        _ = UiPrefs.SetCargoFlowSectionAsync(section.ToString());
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    private string SectionLabel(CargoFlowSection section) => Translator(section switch
+    {
+        CargoFlowSection.Descriptions => "CargoDescriptions",
+        CargoFlowSection.Trains => "CargoTrains",
+        _ => section.ToString()
+    });
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

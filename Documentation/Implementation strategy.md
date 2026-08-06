@@ -295,25 +295,56 @@ simpler scenarios but reduces concurrency.
 
 ### 4.4 Solution Structure for Reuse
 
-To support both standalone and collaborative modes (and a potential future
-MAUI desktop app), the solution should be structured as:
+Two hosting scenarios define what has to be shared:
+
+- **a) Blazor WebAssembly** — the standalone offline-first PWA. One user, one
+  browser, data in browser storage. This is what runs today.
+- **b) Blazor interactive Server** — the route to online collaboration. One
+  central instance of the data, with SignalR propagating one user's edits to
+  every other browser working on the same plan.
+
+Anything both hosts need therefore lives in `Planning.Components`, and the host
+project keeps only what is genuinely host-specific:
 
 ```
-Shared RCL (Razor Class Library)
-  └── All Razor components, services, and view models
+Planning.Components (Razor Class Library)
+  └── Every Razor component — routable pages, reports, layouts, dialogs —
+      plus the services they inject and the CSS, JavaScript and data files
+      they load. Registered with a single AddPlanningComponents() call.
 
-Blazor WASM PWA project
-  └── References shared RCL, hosts in browser
+Planning.App (Blazor WASM PWA)
+  └── References Planning.Components. Owns App.razor, Program.cs, the
+      index.html shell and its CSS, and the PWA assets (manifest, icons,
+      service worker).
 
-(Future) Web API + SignalR project
-  └── Shared data store, collaboration hub
+(Future) Blazor interactive Server project
+  └── References Planning.Components, adds the shared data store and the
+      SignalR collaboration hub.
 
 (Future) MAUI Blazor Hybrid project
-  └── References shared RCL, hosts in native window
+  └── References Planning.Components, hosts in a native window.
 ```
 
+Two rules keep the library usable by both hosts:
+
+- **No WebAssembly-only dependencies or APIs.** `Planning.Components` must not
+  reference `Microsoft.AspNetCore.Components.WebAssembly`, and must not use
+  synchronous JS interop (`IJSInProcessRuntime`), which does not exist over a
+  Server circuit. Asynchronous `IJSRuntime` works in both.
+- **Component services are Scoped, never Singleton.** Under WebAssembly there
+  is one scope, so the two are indistinguishable. Under Server a scope is one
+  SignalR circuit — one user's session — while a singleton is shared by every
+  connected user. Registering the open plan, dock layout, UI preferences or
+  validation state as singletons would leak one user's session into everyone
+  else's. Sharing data between users is then something scenario (b) introduces
+  deliberately, through a store behind an interface, rather than by accident
+  through a service lifetime.
+
 Platform-specific services (file access, storage, HTTP) are abstracted behind
-interfaces with per-host implementations.
+interfaces with per-host implementations. `BrowserStorageService` and
+`CrossWindowSyncService` are the ones still tied to browser APIs; scenario (b)
+will need them behind an interface so the Server host can persist centrally
+instead.
 
 ---
 

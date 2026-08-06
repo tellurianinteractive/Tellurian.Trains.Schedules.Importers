@@ -110,7 +110,7 @@
 
     // The operating sessions/days label for one train column. When the layout uses weekdays the short
     // day names (already translated) are shown; otherwise the session numbers, with the "All"/"None"
-    // literals translated. Mirrors SessionsDisplay.Text, which lives in Planning.App and is out of reach here.
+    // literals translated. Mirrors SessionsDisplay.Text, which now lives alongside in Services.
     private string SessionsText(Sessions sessions)
     {
         sessions = sessions.CappedForDisplay(Table.UseDays, Table.MaxSessions);

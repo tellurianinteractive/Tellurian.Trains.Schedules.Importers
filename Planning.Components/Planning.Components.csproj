@@ -7,11 +7,14 @@
     <Description>Blazor UI components for model railway timetable planning.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.10" />
     <PackageReference Include="Tellurian.Utilities" Version="1.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Planning\Planning.csproj" />
     <ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
+    <ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+    <ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
   </ItemGroup>
 </Project>

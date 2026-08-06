@@ -1,0 +1,126 @@
+@page "/driver-duties-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
+@* Planning.Components.Layout is a namespace here, so the model type needs disambiguating. *@
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The printed booklets a loco driver is handed at the start of an operating session.
+
+   Everything else in the application serves planning; this serves operating. It is read while standing
+   at a layout, under time pressure, on paper that cannot be scrolled or re-flowed — so legibility and a
+   predictable position for each piece of information matter more than density, and a page that
+   overflows is a bug rather than a cosmetic issue.
+
+   The output is A4 landscape SHEETS, each carrying two A5 portrait pages side by side, both sides
+   printed in saddle-stitch booklet order. Duplex flip must be on the SHORT edge, because the fold runs
+   vertically down the middle of the sheet. That is a setting on the PDF print dialogue, not the
+   browser's — the imposition order is baked into the page sequence, so the PDF is correct either way. *@
+
+@if (_sheets is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else
+{
+    @foreach (var side in _sheets)
+    {
+        <A4LPage>
+            <div class="dutysheet">
+                <DutyBookletPage Page="side.Left" HasMoreParts="HasMorePartsAfter(side.Left)"
+                                 Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                                 Settings="Settings" PrintedAt="_printedAt" />
+                <DutyBookletPage Page="side.Right" HasMoreParts="HasMorePartsAfter(side.Right)"
+                                 Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                                 Settings="Settings" PrintedAt="_printedAt" />
+            </div>
+        </A4LPage>
+    }
+}
+
+@code {
+    /// <summary>
+    /// Optional comma-separated duty identities to render, for a targeted reprint — a link that can be
+    /// kept. Absent or empty renders every duty, so the plain route keeps working unchanged.
+    /// </summary>
+    /// <remarks>
+    /// The values are identities matched as strings, not indices and not integers: an identity may be
+    /// non-numeric once a duty is pinned to a fixed number, so integer parsing would break exactly the
+    /// duties most likely to be reprinted.
+    /// </remarks>
+    [SupplyParameterFromQuery(Name = "duties")]
+    public string? DutyIdentities { get; set; }
+
+    private IReadOnlyList<SheetSide<DutyPage>>? _sheets;
+    private DateTime _printedAt;
+
+    // The pages of each duty, kept so the continuation marker can tell whether any part follows.
+    private readonly Dictionary<DutyPage, bool> _hasMoreParts = [];
+
+    private LayoutModel? Layout => ScheduleState.Layout;
+    private string LayoutName => Layout?.Name ?? "";
+    private DateOnly? ValidFrom => Layout?.Settings.General.ValidFrom;
+    private DateOnly? ValidTo => Layout?.Settings.General.ValidTo;
+
+    private SessionsSettings Settings =>
+        Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        // Fixed once for the whole render, so every booklet in one print carries the same timestamp and
+        // a PDF printed later still identifies the render it came from.
+        _printedAt = DateTime.Now;
+
+        if (ScheduleState.Schedule is not { } plan)
+        {
+            _sheets = [];
+            return;
+        }
+
+        var selected = Selected(plan);
+        var sides = new List<SheetSide<DutyPage>>();
+
+        foreach (var duty in selected)
+        {
+            var pages = DutyPagination.BuildPages(duty, Settings, key => Translator(key));
+            RecordContinuations(pages);
+            sides.AddRange(DutyPagination.Impose(pages));
+        }
+
+        _sheets = sides;
+    }
+
+    // Duties print in duty-number order, which is the order the pile is actually kept in — not running
+    // order. Renumbering used to make the two identical, so running order produced a number-ordered
+    // stack by coincidence; a pinned number breaks that, and the pile order is the one that must win.
+    private IReadOnlyList<DriverDuty> Selected(Plan plan)
+    {
+        var all = plan.DriverDutiesInPrintOrder;
+        if (string.IsNullOrWhiteSpace(DutyIdentities)) return all;
+
+        var wanted = DutyIdentities
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        // Selection changes WHICH duties render, never their order.
+        return [.. all.Where(d => wanted.Contains(d.Identity, StringComparer.OrdinalIgnoreCase))];
+    }
+
+    // Whether any train part of the duty follows a given page, which decides between the continuation
+    // warning and the terminal message.
+    private void RecordContinuations(IReadOnlyList<DutyPage> pages)
+    {
+        var lastPartPage = pages.LastOrDefault(p => p.Kind == DutyPageKind.Part);
+        foreach (var page in pages.Where(p => p.Kind == DutyPageKind.Part))
+            _hasMoreParts[page] = !ReferenceEquals(page, lastPartPage);
+    }
+
+    private bool HasMorePartsAfter(DutyPage page) =>
+        _hasMoreParts.TryGetValue(page, out var more) && more;
+}

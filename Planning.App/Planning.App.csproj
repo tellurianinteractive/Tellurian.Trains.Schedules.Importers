@@ -36,14 +36,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.10" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
-		<ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
 		<ProjectReference Include="..\Planning.App.Translations\Planning.App.Translations.csproj" />
 		<ProjectReference Include="..\Planning.Components\Planning.Components.csproj" />
 	</ItemGroup>

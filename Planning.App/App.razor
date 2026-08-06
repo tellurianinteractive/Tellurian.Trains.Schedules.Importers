@@ -1,6 +1,14 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+@* Every routable component (pages, reports) lives in the Planning.Components class library,
+   so the router must be told to scan that assembly in addition to this one. *@
+<Router AppAssembly="@typeof(App).Assembly"
+        AdditionalAssemblies="@ComponentAssemblies"
+        NotFoundPage="typeof(NotFound)">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>
+
+@code {
+    private static readonly System.Reflection.Assembly[] ComponentAssemblies = [typeof(MainLayout).Assembly];
+}
