@@ -970,4 +970,200 @@ public class ScheduleEditingTests
 
         Assert.IsTrue(edit.IsNone);
     }
+
+    // Working a train into the middle of a schedule. The working here is the forward run G 12:00–Snu 12:55
+    // followed by a late return Snu 15:00–G 15:55, so the vehicle stands at Snu from 12:55 to 15:00 — long
+    // enough for the 13:00 return to G and the 14:00 forward run back to Snu.
+    private static (Plan Plan, Schedule Schedule) CreatePlanWithALayover()
+    {
+        var plan = CreatePlan();
+        var category = Forward(plan).Category!;
+        var lateReturn = TestDataFactory.CreateTrainInOppositeDirection(category, 4, Time.FromHourAndMinute(15, 00));
+        plan.Timetable.Add(lateReturn);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        schedule.Append(lateReturn.AsTrainPart);
+        return (plan, schedule);
+    }
+
+    private static Train BackAgain(Plan plan)
+    {
+        var category = Forward(plan).Category!;
+        var train = plan.Timetable.Trains.FirstOrDefault(t => t.Number == 3);
+        if (train is null)
+        {
+            train = TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(14, 00));
+            plan.Timetable.Add(train);
+        }
+        return train;
+    }
+
+    [TestMethod]
+    public void AWorkingHasOneJointMoreThanItHasParts()
+    {
+        var plan = CreatePlan();
+        var (schedule, _, _) = CreateOutAndBack(plan);
+
+        var joints = schedule.Joints;
+
+        Assert.HasCount(3, joints, "One before the first part, one between the two, one after the last.");
+        Assert.IsTrue(joints[0].IsStart);
+        Assert.IsTrue(joints[^1].IsEnd);
+        Assert.AreEqual("Snu", joints[1].From!.Signature, ignoreCase: true, message: "The vehicle stands at Snu between the two runs.");
+    }
+
+    [TestMethod]
+    public void AnEmptyScheduleHasNoJoints()
+    {
+        var plan = CreatePlan();
+
+        Assert.IsEmpty(plan.CreateSchedule().Joints, "There is no working yet to join anything to.");
+    }
+
+    [TestMethod]
+    public void AJointReportsHowLongTheVehicleStandsThere()
+    {
+        var (_, schedule) = CreatePlanWithALayover();
+
+        var joint = schedule.Joints[1];
+
+        Assert.AreEqual("02:05", joint.Layover!.Value.HHMM(), "Snu 12:55 until Snu 15:00.");
+        Assert.IsFalse(joint.IsBroken);
+        Assert.IsTrue(joint.HasRoom);
+    }
+
+    [TestMethod]
+    public void AJointWhereThePartsMeetExactlyHasNoRoom()
+    {
+        var plan = CreatePlan();
+        var category = Forward(plan).Category!;
+        var straightOn = TestDataFactory.CreateTrainInOppositeDirection(category, 6, Time.FromHourAndMinute(12, 55));
+        plan.Timetable.Add(straightOn);
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart); // arrives Snu 12:55
+        schedule.Append(straightOn.AsTrainPart);    // leaves Snu 12:55
+
+        Assert.IsNull(schedule.Joints[1].Layover, "The vehicle changes train without standing at all.");
+        Assert.IsFalse(schedule.Joints[1].HasRoom, "Nothing can be worked into a joint the parts meet at.");
+    }
+
+    [TestMethod]
+    public void AHandoverAtAnIntermediateStopLeavesTheTimeTheTrainStandsThere()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart(0, 1)); // G–Yb, arrives 12:25
+        schedule.Append(Forward(plan).AsTrainPart(1, 2)); // Yb–Snu, departs 12:30
+
+        // The two parts are of the same train, which itself stands five minutes at Yb: that is the vehicle's
+        // own time there, so the joint offers it rather than pretending the parts meet exactly.
+        Assert.AreEqual("00:05", schedule.Joints[1].Layover!.Value.HHMM());
+    }
+
+    [TestMethod]
+    public void OnlyTrainsThatFitTheLayoverAreOfferedForAJoint()
+    {
+        var (plan, schedule) = CreatePlanWithALayover();
+        BackAgain(plan); // the 14:00 forward run, which leaves from G, not from where the vehicle stands
+
+        var candidates = plan.CandidateTrainsInJoint(schedule, schedule.Joints[1]);
+
+        Assert.HasCount(1, candidates);
+        Assert.AreEqual(2, candidates[0].Number, "Only the 13:00 return leaves Snu within the time the vehicle stands there.");
+    }
+
+    [TestMethod]
+    public void ATrainIsOfferedForTheStartOfAWorkingWhenItBringsTheVehicleThere()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Return(plan).AsTrainPart); // Snu 13:00 – G 13:55
+
+        var candidates = plan.CandidateTrainsInJoint(schedule, schedule.Joints[0]);
+
+        Assert.HasCount(1, candidates);
+        Assert.AreEqual(1, candidates[0].Number, "The forward run arrives at Snu at 12:55, before the working starts.");
+    }
+
+    [TestMethod]
+    public void AnOutAndBackTripIsWorkedIntoALayoverALegAtATime()
+    {
+        var (plan, schedule) = CreatePlanWithALayover();
+        var backTrain = BackAgain(plan); // the 14:00 forward run, in the timetable from the start
+        var settings = new ValidationSettings();
+
+        // The leg out: the 13:00 return to G. It leaves the vehicle at G while the working goes on from Snu.
+        var joint = schedule.Joints[1];
+        var run = joint.FittingCallsFor(Return(plan))!.Value;
+        var outward = schedule.Insert(Return(plan).AsTrainPart(run.From, run.To));
+
+        Assert.IsTrue(outward.HasValue, outward.Message);
+        Assert.AreEqual("Snu–G", Span(outward.Value), "The whole return run fits the layover.");
+        Assert.Contains(ValidationErrorType.ScheduleNotContiguous,
+            plan.GetValidationErrors(settings).Select(e => e.ErrorType).ToList(),
+            "The working is broken until the leg back is worked in — the temporary inconsistency the planner expects.");
+
+        // The leg back: the 14:00 forward run, now offered at the broken joint because it bridges it.
+        var broken = schedule.Joints[2];
+        Assert.IsTrue(broken.IsBroken);
+        var candidates = plan.CandidateTrainsInJoint(schedule, broken);
+        Assert.Contains(backTrain, candidates);
+        var bridge = broken.FittingCallsFor(backTrain)!.Value;
+        var back = schedule.Insert(backTrain.AsTrainPart(bridge.From, bridge.To));
+
+        Assert.IsTrue(back.HasValue, back.Message);
+        Assert.AreEqual("G–Snu", Span(back.Value));
+        Assert.IsEmpty(plan.GetValidationErrors(settings).Where(e => e.ErrorType == ValidationErrorType.ScheduleNotContiguous),
+            "With the leg back worked in, the working hangs together again.");
+    }
+
+    [TestMethod]
+    public void InsertRejectsAPartTheVehicleCannotBeThereFor()
+    {
+        var (plan, schedule) = CreatePlanWithALayover();
+        var overlapping = BackAgain(plan).AsTrainPart(0, 2); // G 14:00 – Snu 14:55
+
+        // Nothing else runs at that hour, so this one is only rejected once it clashes with a part added first.
+        schedule.Insert(Return(plan).AsTrainPart);        // Snu 13:00 – G 13:55
+        var first = schedule.Insert(overlapping);
+        var again = schedule.Insert(BackAgain(plan).AsTrainPart(0, 1)); // G 14:00 – Yb 14:25, inside the part above
+
+        Assert.IsTrue(first.HasValue, first.Message);
+        Assert.IsTrue(again.IsNone, "A vehicle cannot be in two places at once.");
+        Assert.HasCount(4, schedule.Parts);
+    }
+
+    [TestMethod]
+    public void APartIsWorkedInBeforeTheFirstPartOfAWorking()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Return(plan).AsTrainPart); // Snu 13:00 – G 13:55
+
+        var inserted = schedule.Insert(Forward(plan).AsTrainPart); // G 12:00 – Snu 12:55
+
+        Assert.IsTrue(inserted.HasValue, inserted.Message);
+        Assert.AreEqual("G", schedule.StartLocation!.Signature, ignoreCase: true, message: "The working now starts where the added run does.");
+        Assert.AreEqual(inserted.Value, schedule.FirstPart);
+    }
+
+    [TestMethod]
+    public void AFittingRunThatBridgesTheJointOutrightIsPreferred()
+    {
+        var (plan, schedule) = CreatePlanWithALayover();
+        var category = Forward(plan).Category!;
+        // A shuttle Snu 13:00 – Yb 13:25/13:30 – Snu 13:55 would both leave from and return to where the
+        // vehicle stands, so it is the run the editor offers first for that train.
+        var shuttle = new Train(5, category, 5) { Category = category };
+        var stations = TestDataFactory.Stations.ToArray();
+        shuttle.Add(new StationCall(1, stations[2]["1"], Time.FromHourAndMinute(13, 00), Time.FromHourAndMinute(13, 00)));
+        shuttle.Add(new StationCall(2, stations[1]["2"], Time.FromHourAndMinute(13, 25), Time.FromHourAndMinute(13, 30)));
+        shuttle.Add(new StationCall(3, stations[2]["1"], Time.FromHourAndMinute(13, 55), Time.FromHourAndMinute(13, 55)));
+        plan.Timetable.Add(shuttle);
+
+        var run = schedule.Joints[1].FittingCallsFor(shuttle);
+
+        Assert.IsNotNull(run);
+        Assert.AreEqual((0, 2), run!.Value, "The whole shuttle run, which leaves the working contiguous.");
+    }
 }

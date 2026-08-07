@@ -1,5 +1,64 @@
 # Versionshinweise
 
+## Version 0.4.2
+
+### Änderungen
+
+- **Ein Zug lässt sich jetzt mitten in einen Umlauf einfügen.** Bisher konnte ein Umlauf nur vorwärts
+  gebaut werden: Ein Zug ließ sich allein am Ende des Umlaufs anhängen. Zwischen den Zugteilen einer
+  Zeile stehen nun kleine Übergänge, die zeigen, wo das Fahrzeug steht und wie lange, und vor dem
+  ersten Teil einer, der zeigt, woher es gebracht werden muss. Ein Klick darauf fügt einen Zug in die
+  Lücke ein — angeboten werden nur die Züge, die das Fahrzeug in der freien Zeit tatsächlich schafft.
+  Eine Fahrt, die das Fahrzeug nicht dorthin zurückbringt, wo der Umlauf weitergeht, wird trotzdem
+  eingefügt und als Konflikt gemeldet, bis die Rückfahrt eingefügt ist; so wird eine Hin- und
+  Rückfahrt Fahrt für Fahrt in eine Standzeit eingepasst. Ein Übergang, an dem der Umlauf
+  unterbrochen ist, wie ihn ein Import hinterlassen kann, ist gelb markiert; ein Klick bietet die
+  Züge an, die die Lücke schließen.
+
+- **Die App hat ein eigenes Symbol.** Bisher trug sie das Zeichen, das mit den Werkzeugen mitkommt, mit
+  denen sie gebaut ist, und das nichts darüber sagte, wofür die App da ist. Jetzt zeigt sie die Front
+  eines modernen Zuges auf einer dunkelblauen Fläche. Das Symbol erscheint im Tab des Browsers sowie
+  auf dem Startbildschirm oder im Startmenü, wenn die App installiert wird, sodass sie von allem
+  anderen zu unterscheiden ist, was gerade offen ist.
+
+- **Auf ein Blatt passen jetzt zwölf Umlaufkarten statt zehn.** Die Karten waren 50 mm breit, sodass
+  quer über ein A4-Blatt im Querformat nur fünf nebeneinander standen und am rechten Rand eine
+  Handbreit Papier ungenutzt blieb. Sie sind jetzt 48 mm breit, also passen sechs nebeneinander und
+  zwölf auf das Blatt, und das Blatt hat ringsum einen Rand, den gewöhnliche Drucker erreichen. Die
+  Karten sind so hoch wie zuvor, und ihr Inhalt ist unverändert — sie sind nur etwas schmaler, sodass
+  bei jedem gedruckten Umlauf ein Sechstel des Schneidens und Sortierens entfällt.
+
+- **Die Zeilen im Fahrplan stehen jetzt weiter auseinander.** Die Zeilen lagen so dicht beieinander,
+  dass das Auge beim Verfolgen einer Zeile mit Zeiten die Spur verlor — und genau dafür wird das Blatt
+  gelesen. Um jede Zeile ist jetzt ein Siebtel mehr Luft, sodass sich eine Zeile leichter über die
+  Seite verfolgen und ein Bahnhof leichter in der Spalte finden lässt. Die Schrift ist so groß wie
+  zuvor und die Spalten sind so breit wie zuvor, das Blatt fasst also dieselben Züge — gewachsen ist
+  allein der Abstand zwischen den Zeilen. Auf eine Seite gehen jetzt neununddreißig Zeilen statt
+  fünfundvierzig, und das ist so viel Luft, wie sich geben ließ, ohne dass die häufigste Strecke ein
+  zweites Blatt bräuchte.
+
+### Fehlerbehebungen
+
+- **Der gedruckte Fahrplan verliert die letzten Zeilen einer Seite nicht mehr.** Beide Richtungen eines
+  Fahrplanabschnitts wurden auf dieselbe Seite gesetzt, auch wenn dort nicht beide Platz hatten, und
+  die zweite brach mitten in ihrer Liste der Stationen ab — die Zeilen, für die kein Platz mehr war,
+  wurden abgeschnitten, statt auf die nächste Seite zu wandern.
+
+  Wie viel auf eine Seite passt, war für das Blatt aus dem Drucker berechnet, doch der Bericht am
+  Bildschirm war in einer größeren Schrift gesetzt als der gedruckte, sodass seine Zeilen fast zwei
+  Drittel höher standen als die gezählten. Der Bericht am Bildschirm und das gedruckte Blatt sind jetzt
+  gleich gesetzt, sodass die Seite am Bildschirm ein wahres Bild des Papiers ist: Was sie am Bildschirm
+  füllt, füllt sie auch auf dem Papier, und was keinen Platz findet, wandert auf die nächste Seite,
+  statt abgeschnitten zu werden. Wie viel hineinpasst, wird jetzt an einer wirklichen Seite gemessen
+  statt aus der Schriftgröße errechnet, und am Fuß jeder Seite bleiben drei Zeilen frei, sodass ein
+  Abschnitt, der eine Zeile oder zwei zu lang ist, eine eigene Seite bekommt, statt über den Rand zu
+  laufen.
+
+- **Die Wagenstromliste nennt jetzt die Ziele, zu denen die Wagen gehen.** Unter **Güterverkehr ›
+  Güterzüge** stand in der Auswahlliste nur „Wagen nach“ ohne die Ziele, sodass sich die Einträge nicht
+  unterscheiden ließen. Die Ziele sind wieder da, und die Unterregisterkarte und ihre Spalte heißen
+  jetzt **Güterziele** statt *Güterbeschreibungen*, denn Ziele sind es, was sie enthalten.
+
 ## Version 0.4.1
 
 ### Änderungen

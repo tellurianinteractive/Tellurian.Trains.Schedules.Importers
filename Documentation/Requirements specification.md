@@ -467,6 +467,11 @@ which layout is open.
 > neighbouring part that joins it is adapted to the new joint where its own train calls
 > there, so shortening one part turns the return working round at the new place by itself.
 > An edit the neighbour cannot follow is applied all the same and reported as a conflict.
+> A train can also be worked into the **middle** of a working: each joint between two parts
+> shows where the vehicle stands and for how long, and offers the trains it could make in
+> that time. A leg that does not bring the vehicle back to where the working goes on is
+> added all the same and reported as a conflict until the leg back is added, so an
+> out-and-back trip is worked into a layover a leg at a time.
 > Conflicting schedules are highlighted (§3.11). **Not yet wired:** assigning a schedule
 > to a wagon group via an editor.
 >
@@ -667,7 +672,7 @@ excluded from the printed output. Each report sets its own page size and orienta
 | ------------------------------ | ----------------------------------------------------------------------- | -------- |
 | Locomotive Schedule Cards    | Individual loco assignment cards, optionally including shunting locos | Card   |
 | Trainset Schedule Cards      | Trainset (passenger/freight) duty assignment cards                    | Card   |
-| Wagon/Turnus Cards           | Four cards per page showing specific wagon assignments                | Card   |
+| Wagon/Turnus Cards           | Twelve cards per sheet showing specific wagon assignments             | Card   |
 | Graphic Locomotive Schedules | Graphical time-based view of locomotive assignments across turnus     | A3L    |
 
 > **Status:** 🟡 Only **Wagon/Turnus Cards** built. Locomotive Schedule Cards,
@@ -953,7 +958,7 @@ whichever report needs direction-aware wagon order once one is specified.
 > wagons/axles; origins; to-all-destinations) held in a catalogue on the timetable, routing
 > to the shadow-shunting-yard regions on a station (DM-4.1.1). Each occurrence references a
 > description and records its from-call/to-call, position and per-occurrence shunting/couple
-> flags. Edited on the **Cargo flow** tab (Cargo descriptions + Cargo trains sub-tabs);
+> flags. Edited on the **Cargo flow** tab (Cargo destinations + Cargo trains sub-tabs);
 > deletion is guarded. The destination note is generated from the occurrence; rendering it
 > in the printed reports (§4.5.4) is pending. The XPLN importer creates a cargo-flow
 > scheduled object directly; aligning it with this catalogue model is pending.

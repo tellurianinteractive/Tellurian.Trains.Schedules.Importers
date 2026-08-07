@@ -1,5 +1,59 @@
 # Versjonsnyheter
 
+## Version 0.4.2
+
+### Endringer
+
+- **Nå kan et tog settes inn midt i et omløp.** Hittil kunne et omløp bare bygges framover: det eneste
+  stedet å legge til et tog var på slutten av omløpet. Mellom togdelene på en rad er det nå små
+  skjøter som viser hvor kjøretøyet står og hvor lenge, og før den første delen en som viser hvor det
+  må hentes fra. Klikk på en av dem for å sette inn et tog i hullet — bare togene kjøretøyet faktisk
+  rekker på tiden, tilbys. En tur som ikke bringer kjøretøyet tilbake dit omløpet fortsetter, settes
+  inn likevel og rapporteres som en konflikt til du setter inn returen; slik passes en tur-retur inn
+  i et opphold, en tur om gangen. En skjøt der omløpet er brutt, slik en import kan etterlate det, er
+  merket med gult, og et klikk tilbyr togene som fyller hullet.
+
+- **Appen har fått sitt eget ikon.** Hittil bar den merket som følger med verktøyene den er bygd med,
+  og som ikke sa noe om hva appen er til for. Nå viser den fronten på et moderne tog mot en mørkeblå
+  flate. Ikonet vises i fanen i nettleseren, og på hjemskjermen eller i Start-menyen for den som
+  installerer appen, så den kan skilles fra alt annet som er åpent samtidig.
+
+- **Det er nå plass til tolv omløpskort på et ark i stedet for ti.** Kortene var 50 mm brede, som bare
+  ga plass til fem ved siden av hverandre tvers over et liggende A4-ark, med en håndsbredde papir til
+  overs i høyre kant. De er nå 48 mm brede, så seks får plass i bredden og tolv på arket, og arket har
+  en marg hele veien rundt som vanlige skrivere når. Kortene er like høye som før, og innholdet er
+  uendret — de er bare litt smalere, så en sjettedel av klippingen og sorteringen faller bort for hvert
+  omløp som skrives ut.
+
+- **Radene i ruteplanen står nå lenger fra hverandre.** Linjene lå så tett at øyet mistet plassen sin
+  når man fulgte en rad med tider, og det er nettopp det bladet leses for. Det er nå en sjuendedel mer
+  luft rundt hver linje, så en rad er lettere å følge tvers over siden og en stasjon lettere å finne i
+  kolonnen. Skriften er like stor som før og kolonnene like brede som før, så bladet rommer de samme
+  togene — det er bare avstanden mellom linjene som har vokst. En side tar nå trettini linjer i stedet
+  for førtifem, og det er så mye luft som lot seg gi uten at den vanligste strekningen ville trenge et
+  annet blad.
+
+### Feilrettinger
+
+- **Den utskrevne ruteplanen mister ikke lenger de siste radene på en side.** Begge retninger av en
+  ruteplanstrekning ble satt på samme side, også når det ikke var plass til begge, og den andre sluttet
+  midt i listen sin over stasjoner — radene det ikke ble plass til, ble klippet bort i stedet for å bli
+  flyttet til neste side.
+
+  Hvor mye det er plass til på en side, ble regnet ut for arket som kommer ut av skriveren, men
+  rapporten på skjermen var satt i en større skrift enn den utskrevne, så radene der var nesten to
+  tredjedeler høyere enn dem som ble talt. Rapporten på skjermen og det utskrevne arket settes nå likt,
+  så siden på skjermen er et sant bilde av papiret: det som fyller den på skjermen, fyller den også på
+  papiret, og det det ikke blir plass til, flyttes til neste side i stedet for å bli klippet bort. Hvor
+  mye det er plass til, måles nå på en virkelig side i stedet for å regnes ut fra skriftstørrelsen, og
+  tre linjer holdes frie nederst på hver side, slik at en strekning som er en rad eller to for lang, får
+  sin egen side i stedet for å gå ut over kanten.
+
+- **Godsstrømlisten nevner nå destinasjonene vognene skal til.** Under **Godsstrøm › Godstog** sto det
+  bare "Vogner til" i listen man velger fra, uten destinasjonene, så postene kunne ikke skilles fra
+  hverandre. Destinasjonene er tilbake, og underfanen og kolonnen dens heter nå **Godsdestinasjoner** i
+  stedet for *Godsbeskrivelser*, for det er destinasjoner de inneholder.
+
 ## Version 0.4.1
 
 ### Endringer

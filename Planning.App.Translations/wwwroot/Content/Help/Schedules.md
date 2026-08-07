@@ -19,6 +19,13 @@ On a row,
 - **+ train** appends the next train — choose only part of it (a from/to stop)
 when a train must be split between vehicles, for example at a change from electric to diesel
 traction. 
+- The small **joints** between the train parts say where the vehicle stands and for how long, and
+before the first part where it has to be brought from. Click one to work a train into that gap: only
+the trains the vehicle could actually make in the time available are offered. A leg that does not
+bring the vehicle back to where the working goes on is added all the same and reported as a conflict
+until you add the leg back — that is how an out-and-back trip is worked into a layover, a leg at a
+time. A joint the working is broken across is marked in amber, and clicking it offers the trains
+that bridge it.
 - The **pen** on a train part changes how much of its train the schedule works: pick a new from- or
 to-stop. The train itself stays; to work a different train, remove the part and add the other one.
 The neighbouring part that joins the one you change follows along, so the working stays whole —

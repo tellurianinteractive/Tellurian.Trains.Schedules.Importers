@@ -690,6 +690,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.OnlyWagonClasses).HasMaxLength(50);
+            entity.Property(e => e.SpecificCargo).HasMaxLength(50);
 
             entity.OwnsMany(c => c.Origins, origin =>
             {

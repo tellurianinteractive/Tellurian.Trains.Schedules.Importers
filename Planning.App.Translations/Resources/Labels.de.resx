@@ -1164,6 +1164,33 @@
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>Wenn aktiviert, werden Berichtselemente in der vom Element selbst abgeleiteten Sprache dargestellt – zum Beispiel ein Lokführerdienst in der Sprache des betreibenden Unternehmens. Die Oberfläche und alle Elemente ohne ableitbare Sprache verwenden weiterhin Ihre bevorzugte Sprache.</value>
   </data>
+  <data name="ReportFontFamily" xml:space="preserve">
+    <value>Schriftart für Berichte</value>
+  </data>
+  <data name="ReportFontFamilyHelp" xml:space="preserve">
+    <value>Die Schriftart, in der gedruckte Berichte gesetzt werden. Die übrige Oberfläche behält ihre eigene Schriftart. Angeboten werden nur Schriftarten, die auf diesem Gerät installiert sind – installieren Sie eine Eisenbahnschrift wie Bahnschrift, Farringdon, Railway oder DIN 1451, und sie erscheint hier unter Eisenbahn und Verkehr. Der Name wird mit dem Plan gespeichert: auf einem anderen Rechner gedruckt, verwendet der Bericht diese Schriftart, wenn sie dort installiert ist, sonst eine ähnliche.</value>
+  </data>
+  <data name="Railway" xml:space="preserve">
+    <value>Eisenbahn und Verkehr</value>
+  </data>
+  <data name="ReportFontSample" xml:space="preserve">
+    <value>Zug 2145 fährt 07:45 von Gleis 3 ab und kommt 08:12 an.</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Standardschriftart</value>
+  </data>
+  <data name="FontNotInstalled" xml:space="preserve">
+    <value>Auf diesem Gerät nicht installiert</value>
+  </data>
+  <data name="SansSerif" xml:space="preserve">
+    <value>Ohne Serifen</value>
+  </data>
+  <data name="Serif" xml:space="preserve">
+    <value>Mit Serifen</value>
+  </data>
+  <data name="Monospace" xml:space="preserve">
+    <value>Feste Zeichenbreite</value>
+  </data>
   <data name="Yes" xml:space="preserve">
     <value>Ja</value>
   </data>
@@ -1412,25 +1439,22 @@
     <value>Erstellen oder importieren Sie eine Anlage, um Wagenströme zu planen.</value>
   </data>
   <data name="CargoFlowDescription" xml:space="preserve">
-    <value>Planen Sie Wagenströme in zwei Schritten: Definieren Sie wiederverwendbare Güterbeschreibungen und fügen Sie dann Wagenströme zu Zügen hinzu.</value>
+    <value>Planen Sie Wagenströme in zwei Schritten: Definieren Sie wiederverwendbare Güterziele und fügen Sie dann Wagenströme zu Zügen hinzu.</value>
   </data>
-  <data name="CargoDescriptions" xml:space="preserve">
-    <value>Güterbeschreibungen</value>
+  <data name="CargoDestinations" xml:space="preserve">
+    <value>Güterziele</value>
   </data>
   <data name="CargoTrains" xml:space="preserve">
     <value>Güterzüge</value>
   </data>
-  <data name="CargoDescriptionsDescription" xml:space="preserve">
-    <value>Wiederverwendbare Beschreibungen, wohin Wagen geleitet werden. Ein Wagenstrom an einem Zug verweist auf eine davon; das Bearbeiten einer Beschreibung aktualisiert alle Ströme, die sie verwenden.</value>
+  <data name="CargoDestinationsDescription" xml:space="preserve">
+    <value>Wiederverwendbare Güterziele, wohin Wagen geleitet werden. Ein Wagenstrom an einem Zug verweist auf eines davon; das Bearbeiten aktualisiert alle Ströme, die es verwenden.</value>
   </data>
-  <data name="AddCargoDescription" xml:space="preserve">
-    <value>Güterbeschreibung hinzufügen</value>
+  <data name="AddCargoDestination" xml:space="preserve">
+    <value>Güterziel hinzufügen</value>
   </data>
-  <data name="NoCargoDescriptions" xml:space="preserve">
-    <value>Noch keine Güterbeschreibungen.</value>
-  </data>
-  <data name="NewCargoDescriptionName" xml:space="preserve">
-    <value>Neue Güterbeschreibung</value>
+  <data name="NoCargoDestinations" xml:space="preserve">
+    <value>Noch keine Güterziele.</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
     <value>Zu allen Zielen?</value>
@@ -1443,6 +1467,9 @@
   </data>
   <data name="WagonsTo" xml:space="preserve">
     <value>Wagen nach</value>
+  </data>
+  <data name="WagonsToDestinations" xml:space="preserve">
+    <value>Wagen nach {0}</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Wagen von {0} nach {1}</value>
@@ -1459,11 +1486,20 @@
   <data name="UsedInTrains" xml:space="preserve">
     <value>Verwendet in Zügen</value>
   </data>
-  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+  <data name="CargoDestinationNotUsed" xml:space="preserve">
     <value>Von keinem Zug verwendet.</value>
   </data>
   <data name="OnlyWagonClassesHint" xml:space="preserve">
     <value>Optionale UIC-Wagenklassen-Buchstaben, die einschränken, welche Wagen mitgenommen werden, z. B. "U,Z". Leer lassen für alle Wagen.</value>
+  </data>
+  <data name="SpecificCargo" xml:space="preserve">
+    <value>Spezifische Ladung</value>
+  </data>
+  <data name="SpecificCargoHint" xml:space="preserve">
+    <value>Optionaler Name der Ladung, die die Wagen befördern, z. B. "Holz". Leer lassen für jede Ladung, die die Wagenklassen aufnehmen.</value>
+  </data>
+  <data name="SpecificCargoDisabledHint" xml:space="preserve">
+    <value>Zuerst Wagenklassen eingeben, um eine spezifische Ladung zu benennen.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Ziele</value>
@@ -1489,11 +1525,11 @@
   <data name="OriginLocationsHint" xml:space="preserve">
     <value>Herkunftsbetriebsstellen nur angeben, wenn der Zug Wagen mitnehmen soll, die von einer Betriebsstelle kommen, die der Zug selbst nicht bedient — typischerweise Wagen von einer Zweigstrecke, die mit diesem Zug weiterlaufen sollen. Eine Herkunftsbetriebsstelle ist nicht der Ort, an dem der Zug die Wagen aufnimmt; das wird an anderer Stelle festgelegt.</value>
   </data>
-  <data name="CargoDescriptionReferenced" xml:space="preserve">
-    <value>Löschen nicht möglich: Diese Güterbeschreibung wird von einem oder mehreren Wagenströmen verwendet.</value>
+  <data name="CargoDestinationReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Dieses Güterziel wird von einem oder mehreren Wagenströmen verwendet.</value>
   </data>
-  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
-    <value>Güterbeschreibung '{0}' löschen?</value>
+  <data name="DeleteCargoDestinationConfirm" xml:space="preserve">
+    <value>Güterziel '{0}' löschen?</value>
   </data>
   <data name="PositionInTrainHint" xml:space="preserve">
     <value>Position im Zug (1 = vorne); 0 bedeutet beliebig.</value>
@@ -1547,10 +1583,10 @@
     <value>Herkunftsbetriebsstelle hinzufügen</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
-    <value>Wagenströme zu Zügen hinzufügen: Wählen Sie einen Zug und legen Sie dann fest, wo Wagen an- und abgekuppelt werden und welche Güterbeschreibung gilt.</value>
+    <value>Wagenströme zu Zügen hinzufügen: Wählen Sie einen Zug und legen Sie dann fest, wo Wagen an- und abgekuppelt werden und welche Güterziele gelten.</value>
   </data>
-  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
-    <value>Fügen Sie zuerst mindestens eine Güterbeschreibung auf der Registerkarte Güterbeschreibungen hinzu.</value>
+  <data name="CargoTrainsNeedDestinations" xml:space="preserve">
+    <value>Fügen Sie zuerst mindestens ein Güterziel auf der Registerkarte Güterziele hinzu.</value>
   </data>
   <data name="SelectTrain" xml:space="preserve">
     <value>Zug auswählen…</value>
@@ -1563,9 +1599,6 @@
   </data>
   <data name="CargoFlows" xml:space="preserve">
     <value>Wagenströme</value>
-  </data>
-  <data name="CargoDescription" xml:space="preserve">
-    <value>Güterbeschreibung</value>
   </data>
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Diesen Wagenstrom löschen?</value>
@@ -1611,6 +1644,18 @@
   </data>
   <data name="AddTrainPart" xml:space="preserve">
     <value>Zug hinzufügen</value>
+  </data>
+  <data name="InsertTrainPart" xml:space="preserve">
+    <value>Zug einfügen</value>
+  </data>
+  <data name="ScheduleLayover" xml:space="preserve">
+    <value>Das Fahrzeug steht hier — Zug hinzufügen</value>
+  </data>
+  <data name="ScheduleBrokenJoint" xml:space="preserve">
+    <value>Das Fahrzeug fährt hier nicht weiter — Zug hinzufügen, der die Lücke schließt</value>
+  </data>
+  <data name="InsertBeforeFirstPart" xml:space="preserve">
+    <value>Zug hinzufügen, der das Fahrzeug hierher bringt</value>
   </data>
   <data name="EditTrainPart" xml:space="preserve">
     <value>Zugteil bearbeiten</value>

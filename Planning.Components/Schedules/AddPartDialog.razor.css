@@ -53,6 +53,24 @@
             color: var(--primary);
         }
 
+        /* The joint being filled: the time the vehicle stands free, shown under the title so the planner
+           can see what the run has to fit between. */
+        .joint {
+            margin: -0.5rem 0 1rem 0;
+            color: #556;
+            font-size: 0.85rem;
+        }
+
+        /* What the selected run would leave unfinished at the joint — it is added all the same. */
+        .warning {
+            margin: 0.3rem 0 0 0;
+            padding: 0.35rem 0.6rem;
+            color: #8a6100;
+            background: #fdf6e3;
+            border: 1px solid #e8d9a8;
+            border-radius: 5px;
+        }
+
         .error {
             margin: 0.4rem 0 0 0;
             padding: 0.4rem 0.6rem;

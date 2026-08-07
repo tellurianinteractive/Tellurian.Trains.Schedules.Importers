@@ -4,8 +4,15 @@
     font-size: 11pt;
 }
 
+    /* Card size is chosen so an A4 landscape sheet holds 6 cards across and 2 down = 12 per page:
+       6 x 48 mm = 288 mm of the 297 mm width, leaving 9 mm for the page margin, and 2 x 91 mm =
+       182 mm of the 210 mm height. The width is published as a custom property because the card
+       content (the diagonal cross line in TurnusCard) has to match it, and that lives in another
+       component's isolated stylesheet — custom properties inherit through the DOM, so they cross
+       the isolation boundary where a shared class name would not. */
     .pocket.frame {
-        width: 50mm;
+        --pocket-width: 48mm;
+        width: var(--pocket-width);
         height: 91mm;
         padding: 0pt;
         margin: 0pt;
@@ -16,6 +23,9 @@
         display: inline-block;
         position: relative;
         z-index: 0;
+        /* The card is a flex item in .pagebreak. Its size is physical — cards are cut out and used
+           in a pocket — so it must never be squeezed to make a row fit; overflow the row instead. */
+        flex-shrink: 0;
     }
 
     .pocket.header {

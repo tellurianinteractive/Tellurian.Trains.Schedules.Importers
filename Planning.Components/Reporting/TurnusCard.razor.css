@@ -32,7 +32,8 @@ svg {
     top: 0;
     left: 0;
     height: 92mm;
-    width: 50mm;
+    /* Inherited from .pocket.frame (PocketCard), so the cross line always spans the full card width. */
+    width: var(--pocket-width);
 }
 
 .cal-icon {

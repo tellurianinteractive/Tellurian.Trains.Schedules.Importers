@@ -211,6 +211,49 @@ public class StationDispatchOdtTests
     }
 
     [TestMethod]
+    public void TheDocumentIsSetInTheLayoutsReportFont()
+    {
+        var styles = XDocument.Parse(StationDispatchOdt.StylesXml(ListAt(Middle), "Georgia"));
+
+        // Declared as a font face and named in Standard, which every other style inherits from — so the
+        // whole document follows the setting rather than only the paragraphs that happen to name a font.
+        var face = styles.Descendants(Style + "font-face").Single();
+        Assert.AreEqual("Georgia", face.Attribute(Style + "name")?.Value);
+        var standard = styles.Descendants(Style + "style")
+            .Single(style => style.Attribute(Style + "name")?.Value == "Standard");
+        Assert.AreEqual("Georgia", standard.Descendants(Style + "text-properties").Single()
+            .Attribute(Style + "font-name")?.Value);
+
+        // And it falls back within its own kind: a reader without Georgia gets a serif, not a grotesque.
+        Assert.AreEqual("roman", face.Attribute(Style + "font-family-generic")?.Value);
+    }
+
+    [TestMethod]
+    public void TheDocumentKeepsItsOwnFontWhenTheLayoutNamesNone()
+    {
+        foreach (var unset in new[] { (string?)null, "", "   " })
+        {
+            var face = XDocument.Parse(StationDispatchOdt.StylesXml(ListAt(Middle), unset))
+                .Descendants(Style + "font-face").Single();
+
+            // Liberation Sans ships with LibreOffice, so an unconfigured document is set in a font the
+            // recipient is certain to have.
+            Assert.AreEqual("Liberation Sans", face.Attribute(Style + "name")?.Value);
+        }
+    }
+
+    [TestMethod]
+    public void AFontNameCannotBreakOutOfTheStylesheet()
+    {
+        // A name is stored as text and reaches the markup as it stands, so a plan carrying a name with
+        // quotes in it must not be able to close the attribute and write its own XML.
+        var styles = StationDispatchOdt.StylesXml(ListAt(Middle), "Georgia\" foo=\"<bar/>");
+
+        XDocument.Parse(styles);
+        Assert.DoesNotContain("<bar", styles);
+    }
+
+    [TestMethod]
     public void ThePageIsA4LandscapeWithTheReportsMargins()
     {
         var layout = StylesOf(ListAt(Middle)).Descendants(Style + "page-layout-properties").Single();

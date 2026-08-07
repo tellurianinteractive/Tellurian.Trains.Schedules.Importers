@@ -2,18 +2,47 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 @inject Translator Translator
+@inject ScheduleStateService ScheduleState
+@implements IDisposable
 
+@* Reports open in the same window, so they carry the same title as the rest of the app. Without it
+   the window would fall back to the static title in the host page while a report is open. *@
+<PageTitle>@WindowTitle</PageTitle>
+
+@* The toolbar sits outside .print-canvas on purpose: it is interface, so it keeps the application
+   font whatever the reports are set in. It is not printed either way. *@
 <div class="report-toolbar no-print">
     <button @onclick="Print">@Translator("Print")</button>
     <button @onclick="Close">@Translator("Close")</button>
 </div>
 
-<div class="print-canvas">
+@* Every report is rendered through this layout, so setting the chosen family here is what makes the
+   setting apply to all of them — on screen and on paper alike, since an inline style is not tied to
+   a media query. Nothing inside declares its own font-family, so it inherits all the way down. *@
+<div class="print-canvas" style="font-family: @FontFamily">
     @Body
 </div>
 
 @code {
+    // The app name alone until a plan is loaded (or while it is still unnamed).
+    private string WindowTitle =>
+        ScheduleState.Schedule?.Name is { Length: > 0 } name
+            ? $"{Translator("AppName")} – {name}"
+            : Translator("AppName");
+
+    private string FontFamily =>
+        ReportFonts.CssFontFamily(ScheduleState.Layout?.Settings.General.ReportFontFamily);
+
+    // The report restores the plan from storage in its own initialisation, which finishes after this
+    // layout has first rendered. Without this the font would only be applied from the second render on
+    // — that is, not on a report opened directly by its address.
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
     private async Task Print() => await JS.InvokeVoidAsync("window.print");
 
     private void Close() => Nav.NavigateTo("");
+
+    public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
 }

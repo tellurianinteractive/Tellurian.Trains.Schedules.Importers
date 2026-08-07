@@ -289,7 +289,7 @@
     <value>Vognløp {0} har ingen kjøretøy tildelt.</value>
   </data>
   <data name="TrainMissingTraction" xml:space="preserve">
-    <value>Tog {0} har ingen trekkraftenhet mellom {1} og {2} på sesjoner {3}.</value>
+    <value>Tog {0} har ingen trekkraftenhet mellom {1} {2} og {3} {4} på sesjoner {5}.</value>
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Kjøretøy {0} vender ikke tilbake til sitt utgangspunkt {1}; det slutter ved {2}.</value>

@@ -7,14 +7,16 @@
 @inject Translator Translator
 @implements IDisposable
 
-<div class="cargo-descriptions">
+<div class="cargo-destinations">
     @if (_infoTarget is { } info)
     {
         <div class="info">
-            <h2>@Translator("CargoDescription")</h2>
+            <h2>@Translator("CargoDestinations")</h2>
             <dl>
                 <dt>@Translator("OnlyWagonClasses")</dt>
                 <dd>@(string.IsNullOrWhiteSpace(info.OnlyWagonClasses) ? "—" : info.OnlyWagonClasses)</dd>
+                <dt>@Translator("SpecificCargo")</dt>
+                <dd>@(string.IsNullOrWhiteSpace(info.SpecificCargo) ? "—" : info.SpecificCargo)</dd>
                 <dt>@Translator("ToAllDestinations")</dt>
                 <dd>@YesNo(info.ToAllDestinations)</dd>
             </dl>
@@ -95,7 +97,7 @@
             }
             else
             {
-                <p class="empty">@Translator("CargoDescriptionNotUsed")</p>
+                <p class="empty">@Translator("CargoDestinationNotUsed")</p>
             }
 
             <div class="form-actions">
@@ -105,15 +107,15 @@
     }
     else
     {
-    <p class="hint">@Translator("CargoDescriptionsDescription")</p>
+    <p class="hint">@Translator("CargoDestinationsDescription")</p>
 
     <div class="toolbar">
-        <button class="primary" @onclick="AddDescription">@Translator("AddCargoDescription")</button>
+        <button class="primary" @onclick="AddCargoDestination">@Translator("AddCargoDestination")</button>
     </div>
 
-    @if (Descriptions.Count == 0)
+    @if (CargoDestinations.Count == 0)
     {
-        <p class="empty">@Translator("NoCargoDescriptions")</p>
+        <p class="empty">@Translator("NoCargoDestinations")</p>
     }
     else
     {
@@ -124,22 +126,26 @@
                     <th class="center">@Translator("ToAllDestinations")</th>
                     <th>@Translator("DestinationLocations")</th>
                     <th title="@Translator("OnlyWagonClassesHint")">@Translator("OnlyWagonClasses")</th>
+                    <th title="@Translator("SpecificCargoHint")">@Translator("SpecificCargo")</th>
                     <th class="actions"></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var d in Descriptions)
+                @foreach (var d in CargoDestinations)
                 {
-                    <tr class="description @(IsExpanded(d) ? "expanded" : "")">
+                    <tr class="destination @(IsExpanded(d) ? "expanded" : "")" @key="d">
                         <td>@d.OriginLocationNames</td>
                         <td class="center"><input type="checkbox" checked="@d.ToAllDestinations" @onchange="e => SetToAll(d, e)" /></td>
                         <td>@(d.ToAllDestinations ? "" : d.DestinationLocationNames)</td>
                         <td><input type="text" value="@d.OnlyWagonClasses" @onchange="e => SetOnlyWagonClasses(d, e)" /></td>
+                        <td><input type="text" value="@d.SpecificCargo" disabled="@(!HasWagonClasses(d))"
+                                   title="@Translator(HasWagonClasses(d) ? "SpecificCargoHint" : "SpecificCargoDisabledHint")"
+                                   @onchange="e => SetSpecificCargo(d, e)" /></td>
                         <td class="actions">
                             <button @onclick="() => _infoTarget = d">@Translator("Info")</button>
                             <button @onclick="() => ToggleExpanded(d)">@Translator(IsExpanded(d) ? "Close" : "Edit")</button>
                             @{ var deletion = Plan?.MayDelete(d); }
-                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDescriptionReferenced", Translator)">
+                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "CargoDestinationReferenced", Translator)">
                                 <button class="danger" disabled="@(deletion?.IsDenied == true)"
                                         @onclick="() => _deleteTarget = d"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </span>
@@ -147,8 +153,9 @@
                     </tr>
                     @if (IsExpanded(d))
                     {
-                        <tr class="detail">
-                            <td colspan="5">
+                        @* Keyed on the id, not on d itself: sibling keys must differ, and the row above owns d. *@
+                        <tr class="detail" @key="d.Id">
+                            <td colspan="6">
                                 @OriginsTable(d)
                                 @if (!d.ToAllDestinations)
                                 {
@@ -165,7 +172,7 @@
     @if (_deleteTarget is not null)
     {
         <div class="confirm">
-            <span>@string.Format(Culture, Translator("DeleteCargoDescriptionConfirm"), _deleteTarget.DestinationsSummary)</span>
+            <span>@string.Format(Culture, Translator("DeleteCargoDestinationConfirm"), _deleteTarget.DestinationsSummary)</span>
             <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
         </div>
@@ -180,8 +187,12 @@
     private Timetable? Timetable => ScheduleState.Timetable;
     private Layout? Layout => ScheduleState.Layout;
 
-    private List<CargoFlowOptions> Descriptions =>
-        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.OnlyWagonClasses, StringComparer.CurrentCulture)];
+    // The catalogue entries. Each is a CargoFlowOptions: one set of cargo destinations, plus the origins
+    // and wagon classes that qualify them.
+    // In catalogue order, so a row stays where it is while being edited. Sorting by wagon classes would
+    // move a row the moment its classes are typed, and the classes are optional anyway.
+    private List<CargoFlowOptions> CargoDestinations =>
+        [.. (Timetable?.CargoFlowOptions ?? []).OrderBy(o => o.Id)];
 
     // Wagons can be routed from and to any location that exchanges cargo — an industrial area just as
     // much as a station — so the choices are all such operation locations, not only the stations.
@@ -223,11 +234,22 @@
         if (!_expanded.Remove(d.Id)) _expanded.Add(d.Id);
     }
 
-    // ---- Description fields ----------------------------------------------------------------------
+    // ---- Cargo destination fields ------------------------------------------------------------------
+
+    // A specific cargo only makes sense within a wagon-class limit, so the field is enabled by the classes
+    // and clearing the classes drops the cargo with them rather than leaving it stranded and unreachable.
+    private static bool HasWagonClasses(CargoFlowOptions d) => !string.IsNullOrWhiteSpace(d.OnlyWagonClasses);
 
     private void SetOnlyWagonClasses(CargoFlowOptions d, ChangeEventArgs e)
     {
         d.OnlyWagonClasses = e.Value?.ToString() ?? "";
+        if (!HasWagonClasses(d)) d.SpecificCargo = "";
+        Save();
+    }
+
+    private void SetSpecificCargo(CargoFlowOptions d, ChangeEventArgs e)
+    {
+        d.SpecificCargo = e.Value?.ToString() ?? "";
         Save();
     }
 
@@ -237,7 +259,7 @@
         Save();
     }
 
-    private void AddDescription()
+    private void AddCargoDestination()
     {
         if (Timetable is not { } timetable) return;
         var added = timetable.Add(new CargoFlowOptions());
@@ -275,7 +297,7 @@
             <tbody>
                 @foreach (var dest in d.Destinations.ToList())
                 {
-                    <tr>
+                    <tr @key="dest">
                         <td>
                             <ListBoxView Items="@(LocationChoices.ToListItems())"
                                          Value="dest.Location.Id" ValueChanged="id => SetDestinationLocation(dest, id)" />
@@ -354,7 +376,7 @@
             <tbody>
                 @foreach (var origin in d.Origins.ToList())
                 {
-                    <tr>
+                    <tr @key="origin">
                         <td>
                             <ListBoxView Items="@(LocationChoices.ToListItems())"
                                          Value="origin.Location.Id" ValueChanged="id => SetOriginLocation(origin, id)" />

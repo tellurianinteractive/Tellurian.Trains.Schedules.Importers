@@ -26,6 +26,13 @@ public sealed class CargoFlowOptions
     public string OnlyWagonClasses { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional free text naming the cargo the wagons carry, e.g. "Timber" or "Coal", when the flow is
+    /// limited to one commodity rather than to everything the wagon classes can take. Only meaningful
+    /// together with <see cref="OnlyWagonClasses"/>; empty means any cargo those classes carry.
+    /// </summary>
+    public string SpecificCargo { get; set; } = string.Empty;
+
+    /// <summary>
     /// The ultimate origin of the wagons. Wagons gathered at these origin locations are forwarded by the
     /// cargo flow (in addition to, or instead of, wagons from the train part's from-station).
     /// </summary>

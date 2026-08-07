@@ -11,6 +11,11 @@
 @inject Translator Translator
 @implements IDisposable
 
+@* The window title names the app in the user's own language and the plan being worked on, so the
+   browser tab identifies both. Changing language force-reloads the app, so only the plan name needs
+   watching — the layout already re-renders on ScheduleState.OnChanged. *@
+<PageTitle>@WindowTitle</PageTitle>
+
 <div class="page" style="--primary: @Primary; --primary-text: @Primary.TextColor">@* signature colour + its auto-contrasted text, exposed app-wide for data-grid headers etc. *@
     <header class="top-bar no-print">
         <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span><button class="version-notes" type="button" title="@Translator("ReleaseNotes")" aria-label="@Translator("ReleaseNotes")" @onclick="ToggleReleaseNotes"><i class="fa-solid fa-bullhorn"></i></button></h1>
@@ -104,7 +109,7 @@
 </div>
 
 @code {
-    private const string AppVersion = "0.4.1";
+    private const string AppVersion = "0.4.2";
 
     // The app's signature colour. Exposed (with its auto-contrasted text colour) as the --primary /
     // --primary-text CSS variables on the page root, so data-grid headers and similar can use them.
@@ -124,6 +129,10 @@
     // in which case the bar falls back to the "no active document" caption.
     private string? PlanName =>
         ScheduleState.Schedule?.Name is { Length: > 0 } name ? name : null;
+
+    // The app name alone until a plan is loaded (or while it is still unnamed).
+    private string WindowTitle =>
+        PlanName is { } name ? $"{Translator("AppName")} – {name}" : Translator("AppName");
 
     [Inject(Key = "Markdown")]
     public IResourceProvider MarkdownProvider { get; set; } = default!;

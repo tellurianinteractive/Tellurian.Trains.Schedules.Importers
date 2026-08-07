@@ -9,6 +9,7 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 @inject UiPreferenceService UiPrefs
+@inject IJSRuntime JS
 @implements IDisposable
 
 
@@ -119,6 +120,32 @@ else
                     <HelpLabel For="UseObjectLanguageInReports" />
                     <input type="checkbox" @bind="g.UseObjectLanguageInReports" @bind:after="OnEdited" />
                 </div>
+                @* Each family is listed in itself, so the choice is made by looking at the faces rather
+                   than by recognising their names. The list is what this device can actually render. *@
+                <div class="field">
+                    <HelpLabel For="ReportFontFamily" />
+                    <select class="font-choice" @bind="ReportFontFamily" @bind:after="OnEdited">
+                        <option value="">@Translator("DefaultFont")</option>
+                        @foreach (var group in FontChoices)
+                        {
+                            <optgroup label="@Translator(group.Key.ToString())">
+                                @foreach (var font in group)
+                                {
+                                    <option value="@font.Name" style="font-family: @ReportFonts.CssFontFamily(font.Name)">@font.Name</option>
+                                }
+                            </optgroup>
+                        }
+                        @* A plan may name a font this device has not got. Keeping it in the list is what
+                           stops merely opening the settings here from silently discarding the choice. *@
+                        @if (MissingFont is { } missing)
+                        {
+                            <optgroup label="@Translator("FontNotInstalled")">
+                                <option value="@missing">@missing</option>
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+                <p class="hint font-sample" style="font-family: @ReportFonts.CssFontFamily(ReportFontFamily)">@Translator("ReportFontSample")</p>
             }
             else if (_section == SettingsSection.SessionDays)
             {
@@ -523,6 +550,37 @@ else
     {
         get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.EndTime);
         set { if (LayoutSettings is not null) LayoutSettings.General.EndTime = value.ToTimeSpan(); }
+    }
+
+    // The report font. Until the browser has been asked which families it has, every candidate is
+    // offered: a list that starts empty and fills in is worse than one that starts long and shortens.
+    private IReadOnlyList<ReportFont> _fonts = ReportFonts.Candidates;
+
+    private string ReportFontFamily
+    {
+        get => LayoutSettings?.General.ReportFontFamily ?? "";
+        set { if (LayoutSettings is not null) LayoutSettings.General.ReportFontFamily = value; }
+    }
+
+    // Grouped in catalogue order, so the railway faces lead and the serifs stay apart from the rest.
+    private IEnumerable<IGrouping<ReportFontGroup, ReportFont>> FontChoices =>
+        _fonts.GroupBy(f => f.Group);
+
+    // The chosen family when this device has not got it, so it can still be listed and kept.
+    private string? MissingFont =>
+        ReportFontFamily is { Length: > 0 } chosen && !_fonts.Any(f => f.Name == chosen) ? chosen : null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var module = await JS.InvokeAsync<IJSObjectReference>(
+            "import", "./_content/Tellurian.Trains.Schedules.Planning.Components/js/fonts.js");
+        var names = await module.InvokeAsync<string[]>("installed", ReportFonts.Candidates.Select(f => f.Name));
+        // An empty answer means the check could not tell (a browser that resists fingerprinting, say),
+        // not that the device has no fonts — so keep the full list rather than emptying the drop-down.
+        if (names.Length == 0) return;
+        _fonts = [.. ReportFonts.Candidates.Where(f => names.Contains(f.Name))];
+        StateHasChanged();
     }
 
     private bool UseBreak

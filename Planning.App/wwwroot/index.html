@@ -4,16 +4,39 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Planning.App</title>
+    <!-- Placeholder until the app boots and sets the localised title; see MainLayout. -->
+    <title>Timetable Planner</title>
     <base href="/" />
     <link rel="preload" id="webassembly" />
     <link rel="stylesheet" href="_content/Tellurian.Trains.Schedules.Planning.Components/css/app.css" />
     <link rel="stylesheet" href="_content/Tellurian.Trains.Schedules.Planning.Components/css/print.css" />
     <link rel="stylesheet" href="css/host.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- Browsers that support SVG favicons take the first one and stay crisp at any size;
+         the rest fall back to the 32x32 raster. Both are generated from Planning.App/Icons. -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
     <link href="Tellurian.Trains.Schedules.Planning.App.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
+    <script>
+        // The name an installed app gets comes from its manifest, and a manifest holds one language
+        // only — so there is one per supported language, named like the .resx files. Point the link at
+        // the one for the chosen language before the browser reads it, so installing the app names it
+        // in the language in use, and use the same name as the title until Blazor boots (see MainLayout).
+        // The storage key mirrors UiCulture.StorageKey; unknown or unset falls back to English, as
+        // UiCulture.Resolve does. Keep the language list in step with LanguageService.SupportedLanguages.
+        (function () {
+            var stored = localStorage.getItem('planning.ui.culture') || '';
+            var language = stored.slice(0, 2).toLowerCase();
+            if (['de', 'da', 'nb', 'sv'].indexOf(language) < 0) return;
+            var href = 'manifest.' + language + '.webmanifest';
+            document.querySelector('link[rel=manifest]').href = href;
+            document.documentElement.lang = language;
+            fetch(href).then(function (r) { return r.json(); })
+                .then(function (m) { document.title = m.name; })
+                .catch(function () { /* keep the fallback title */ });
+        })();
+    </script>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
     <script type="importmap"></script>

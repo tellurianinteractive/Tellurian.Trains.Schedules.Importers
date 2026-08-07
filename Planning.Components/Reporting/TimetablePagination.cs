@@ -3,9 +3,14 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting;
 /// <summary>
 /// Page geometry used to estimate how a <see cref="TimetableTable"/> is split across printed
 /// pages. Measurements are millimetres (fractional allowed); the values are deliberately deterministic so
-/// pagination is pure arithmetic (no DOM measuring) and unit-testable. The print CSS in
-/// <c>TimetableStretchTable.razor.css</c> pins the font size and line height so these estimates
-/// match the printed result — calibrate the constants there and here together.
+/// pagination is pure arithmetic (no DOM measuring) and unit-testable.
+/// <para>
+/// Every value below is <em>measured off a rendered page</em> and then rounded up a hair, not derived
+/// from the type size — deriving them is what got the row height wrong before. The geometry they measure
+/// is pinned in <c>TimetableStretchTable.razor.css</c>, which states it for screen and paper alike so the
+/// on-screen A4 sheet is a true preview. Calibrate the constants there and here together: a constant that
+/// no longer matches does not print short, it prints past the foot of the page.
+/// </para>
 /// </summary>
 public sealed record PageGeometry
 {
@@ -13,19 +18,43 @@ public sealed record PageGeometry
     public double PrintableHeightMm { get; init; } = 190;
 
     /// <summary>
-    /// Height of the stretch title (the <c>h3</c>). It prints once per page: a stacked column-group block
-    /// that repeats a heading already shown on the page drops its title, so this part is not charged again.
+    /// Blank space kept at the foot of every page, so an estimate that drifts by a line or two still lands
+    /// on the paper. Three table lines (3 × <see cref="RowHeightMm"/>, spelled out because a property
+    /// initializer cannot read another one): enough to absorb a rounding error, small enough not to cost a page.
     /// </summary>
-    public double TitleHeightMm { get; init; } = 6;
+    public double BottomMarginMm { get; init; } = 3 * 4.2;
 
-    /// <summary>Height of the column-header row, printed by every block (it repeats in each column group).</summary>
-    public double ColumnHeaderHeightMm { get; init; } = 6;
+    /// <summary>Height a page has for content once the bottom margin is kept clear.</summary>
+    public double UsableHeightMm => PrintableHeightMm - BottomMarginMm;
+
+    /// <summary>
+    /// Height of the stretch title (the <c>h3</c> at 10&#160;pt, plus its 2&#160;mm/1&#160;mm margins;
+    /// measured 8.29). It prints once per page: a stacked column-group block that repeats a heading
+    /// already shown on the page drops its title and pays <see cref="NoTitleGapMm"/> instead.
+    /// </summary>
+    public double TitleHeightMm { get; init; } = 8.4;
+
+    /// <summary>
+    /// The gap a block gets in place of a heading it does not repeat
+    /// (<c>.timetable-section.no-title</c>'s top margin), so stacked column groups stay apart.
+    /// </summary>
+    public double NoTitleGapMm { get; init; } = 2.5;
+
+    /// <summary>Height of the column-header row, printed by every block (it repeats in each column group; measured 2.86).</summary>
+    public double ColumnHeaderHeightMm { get; init; } = 2.9;
+
+    /// <summary>Height of the operating sessions/days row, printed under the header when shown (measured 2.86).</summary>
+    public double SessionsRowHeightMm { get; init; } = 2.9;
 
     /// <summary>Title plus column-header row: the full header height a block prints when it shows its title.</summary>
     public double HeaderHeightMm => TitleHeightMm + ColumnHeaderHeightMm;
 
-    /// <summary>Height of one printed table line in millimetres. A split row (arrival + departure) costs two of these.</summary>
-    public double RowHeightMm { get; init; } = 3.5;
+    /// <summary>
+    /// Height of one printed table line in millimetres (measured 4.16). A split row (arrival + departure)
+    /// costs two of these. The line spacing that produces it is set in the CSS and is pushed as far as the
+    /// page budget allows: one notch more leading and a two-direction 18-row stretch stops fitting a sheet.
+    /// </summary>
+    public double RowHeightMm { get; init; } = 4.2;
 
     /// <summary>Maximum number of train columns per page; the three fixed columns are repeated in addition.</summary>
     public int ColumnsPerPage { get; init; } = 15;
@@ -53,7 +82,7 @@ public sealed record TimetablePage(IReadOnlyList<TimetableTile> Tiles);
 /// Splits timetable tables into page-sized tiles and packs those tiles onto physical pages.
 /// Horizontal breaking: train columns are grouped in chunks of <see cref="PageGeometry.ColumnsPerPage"/>,
 /// each group rendered with the three fixed columns repeated. Vertical breaking: rows are filled until
-/// the next row would overflow the printable height, then a new tile starts with the header repeated.
+/// the next row would overflow the usable height, then a new tile starts with the header repeated.
 /// Packing: tiles flow onto a page until the next tile would overflow, with a hard page break whenever
 /// the stretch (<see cref="TimetableTable.TableNumber"/>) changes — so both directions of one stretch
 /// share a page when they fit.
@@ -73,7 +102,7 @@ public static class TimetablePaginator
             // title only once, so estimate with that saving rather than charging every block a full header.
             var stretchHeight = PackedHeight(directions.SelectMany(direction => direction), geometry);
 
-            if (stretchHeight <= geometry.PrintableHeightMm)
+            if (stretchHeight <= geometry.UsableHeightMm)
             {
                 // The whole stretch fits on one page: keep both directions together on it.
                 pages.AddRange(PackTiles(directions.SelectMany(direction => direction), geometry));
@@ -133,7 +162,7 @@ public static class TimetablePaginator
                 .Select(row => row with { Cells = row.Cells.Skip(start).Take(count).ToList() })
                 .ToList();
 
-            var available = geometry.PrintableHeightMm - geometry.HeaderHeightMm - SessionsRowHeightMm(table, geometry);
+            var available = geometry.UsableHeightMm - geometry.HeaderHeightMm - SessionsRowHeightMm(table, geometry);
             var current = new List<TimetableTableRow>();
             var used = 0.0;
 
@@ -159,26 +188,32 @@ public static class TimetablePaginator
         }
     }
 
-    // Height of a run of tiles stacked on one page: each tile costs its full height, less the title when
-    // it repeats the heading of the tile immediately above it (a stacked column group of the same table),
-    // because that title is printed only once.
+    // Height of a run of tiles stacked on one page: each tile costs its full height, except that one
+    // repeating the heading of the tile immediately above it (a stacked column group of the same table)
+    // drops that heading and pays the smaller no-title gap in its place.
     private static double PackedHeight(IEnumerable<TimetableTile> tiles, PageGeometry geometry)
     {
         var total = 0.0;
         string? above = null;
         foreach (var tile in tiles)
         {
-            total += tile.HeightMm - (tile.Table.Title == above ? geometry.TitleHeightMm : 0);
+            total += tile.Table.Title == above ? StackedHeight(tile, geometry) : tile.HeightMm;
             above = tile.Table.Title;
         }
         return total;
     }
 
+    // What a tile costs when it is stacked under a block with the same heading: its own heading is not
+    // printed, so the title comes off and the gap that replaces it goes on.
+    private static double StackedHeight(TimetableTile tile, PageGeometry geometry) =>
+        tile.HeightMm - geometry.TitleHeightMm + geometry.NoTitleGapMm;
+
     /// <summary>
     /// Packs a single packing unit (a whole stretch when both directions fit on one page, otherwise one
-    /// direction) onto pages, starting a new page whenever the next tile would overflow the printable height.
-    /// A tile stacked under a same-title block reuses the page's single title, so it is charged its height
-    /// less <see cref="PageGeometry.TitleHeightMm"/>; the first tile on a page always shows (and pays for) its title.
+    /// direction) onto pages, starting a new page whenever the next tile would overflow the usable height.
+    /// A tile stacked under a same-title block reuses the page's single title, so it is charged the smaller
+    /// <see cref="PageGeometry.NoTitleGapMm"/> in place of <see cref="PageGeometry.TitleHeightMm"/>; the
+    /// first tile on a page always shows (and pays for) its title.
     /// </summary>
     internal static IReadOnlyList<TimetablePage> PackTiles(IEnumerable<TimetableTile> tiles, PageGeometry geometry)
     {
@@ -189,8 +224,8 @@ public static class TimetablePaginator
         foreach (var tile in tiles)
         {
             var savesTitle = current.Count > 0 && tile.Table.Title == current[^1].Table.Title;
-            var height = savesTitle ? tile.HeightMm - geometry.TitleHeightMm : tile.HeightMm;
-            if (current.Count > 0 && used + height > geometry.PrintableHeightMm)
+            var height = savesTitle ? StackedHeight(tile, geometry) : tile.HeightMm;
+            if (current.Count > 0 && used + height > geometry.UsableHeightMm)
             {
                 pages.Add(BuildPage(current));
                 current = [];
@@ -237,7 +272,8 @@ public static class TimetablePaginator
     private static double RowHeightMm(TimetableTableRow row, PageGeometry geometry) =>
         (row.IsSplit ? 2 : 1) * geometry.RowHeightMm;
 
-    // The operating sessions/days row, when shown, adds one printed line to the repeated header.
+    // The operating sessions/days row, when shown, adds one line to the repeated header. It is set
+    // smaller than a data row, so it has its own constant.
     private static double SessionsRowHeightMm(TimetableTable table, PageGeometry geometry) =>
-        table.ShowSessionsRow ? geometry.RowHeightMm : 0;
+        table.ShowSessionsRow ? geometry.SessionsRowHeightMm : 0;
 }

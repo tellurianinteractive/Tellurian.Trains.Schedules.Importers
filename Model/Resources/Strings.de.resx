@@ -289,7 +289,7 @@
     <value>Fahrzeugplan {0} hat kein Fahrzeug zugewiesen.</value>
   </data>
   <data name="TrainMissingTraction" xml:space="preserve">
-    <value>Zug {0} hat kein Triebfahrzeug zwischen {1} und {2} in den Fahrrunden {3}.</value>
+    <value>Zug {0} hat kein Triebfahrzeug zwischen {1} {2} und {3} {4} in den Fahrrunden {5}.</value>
   </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Fahrzeug {0} kehrt nicht zu seinem Ausgangspunkt {1} zurück; es endet bei {2}.</value>

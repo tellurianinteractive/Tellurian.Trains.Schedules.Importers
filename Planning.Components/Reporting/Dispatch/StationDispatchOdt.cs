@@ -44,15 +44,17 @@ public static class StationDispatchOdt
     /// <param name="settings">Chooses sessions or days, the operating period and the day names.</param>
     /// <param name="translator">Supplies the column headings in the reader's language.</param>
     /// <param name="created">When the document was generated; omitted from it when <c>null</c>.</param>
+    /// <param name="fontFamily">The layout's report font, or <c>null</c> for the default one.</param>
     public static byte[] Create(
-        DispatchList list, SessionsSettings settings, Translator translator, DateTimeOffset? created = null)
+        DispatchList list, SessionsSettings settings, Translator translator, DateTimeOffset? created = null,
+        string? fontFamily = null)
     {
         list = list.ValueOrException(nameof(list));
         settings = settings.ValueOrException(nameof(settings));
         translator = translator.ValueOrException(nameof(translator));
 
         return OdtPackage.Create(
-            ContentXml(list, settings, translator), StylesXml(list), TitleOf(list), created);
+            ContentXml(list, settings, translator), StylesXml(list, fontFamily), TitleOf(list), created);
     }
 
     /// <summary>
@@ -67,9 +69,10 @@ public static class StationDispatchOdt
     /// <param name="settings">Chooses sessions or days, the operating period and the day names.</param>
     /// <param name="translator">Supplies the column headings in the reader's language.</param>
     /// <param name="created">When the documents were generated; omitted from them when <c>null</c>.</param>
+    /// <param name="fontFamily">The layout's report font, or <c>null</c> for the default one.</param>
     public static byte[] CreateBundle(
         IEnumerable<DispatchList> lists, SessionsSettings settings, Translator translator,
-        DateTimeOffset? created = null)
+        DateTimeOffset? created = null, string? fontFamily = null)
     {
         lists = lists.ValueOrException(nameof(lists));
 
@@ -83,7 +86,7 @@ public static class StationDispatchOdt
             used[name] = used.TryGetValue(name, out var count) ? count + 1 : 1;
             if (used[name] > 1)
                 name = $"{Path.GetFileNameWithoutExtension(name)} ({used[name]}){OdtPackage.FileExtension}";
-            files.Add((name, Create(list, settings, translator, created)));
+            files.Add((name, Create(list, settings, translator, created, fontFamily)));
         }
         return OdtPackage.CreateZip(files);
     }
@@ -151,18 +154,24 @@ public static class StationDispatchOdt
     /// whose header repeats this station's identification on every page.
     /// </summary>
     /// <param name="list">The station's list, which supplies the running header.</param>
-    public static string StylesXml(DispatchList list)
+    /// <param name="fontFamily">The layout's report font, or <c>null</c> for the default one. The
+    /// document declares it as a font face and names it in the Standard style, so Writer sets the
+    /// whole document in it — and falls back to a font of the same kind where it is not installed.</param>
+    public static string StylesXml(DispatchList list, string? fontFamily = null)
     {
         list = list.ValueOrException(nameof(list));
+
+        var font = ReportFonts.FamilyName(fontFamily) is { Length: > 0 } chosen ? chosen : BodyFont;
+        var fallback = FallbackOf(font);
 
         return $"""
             <?xml version="1.0" encoding="UTF-8"?>
             <office:document-styles {OdtPackage.Namespaces} office:version="1.2">
               <office:font-face-decls>
-                <style:font-face style:name="{BodyFont}" svg:font-family="'{BodyFont}', Arial, sans-serif" style:font-family-generic="swiss" style:font-pitch="variable"/>
+                <style:font-face style:name="{font}" svg:font-family="'{font}', {fallback.Families}" style:font-family-generic="{fallback.Generic}" style:font-pitch="variable"/>
               </office:font-face-decls>
               <office:styles>
-            {NamedStyles}
+            {NamedStyles(font)}
               </office:styles>
               <office:automatic-styles>
                 <style:page-layout style:name="{PageLayoutName}">
@@ -406,7 +415,19 @@ public static class StationDispatchOdt
     private static string ColumnStyleName(double width) =>
         $"{Style.Column}{Millimetres(width).Replace('.', '_')}";
 
+    // What the document is set in when the layout names no report font. Liberation Sans is metric-
+    // compatible with Arial and ships with LibreOffice, so it is there for whoever opens the file.
     private const string BodyFont = "Liberation Sans";
+
+    // What Writer reaches for when the named font is not installed on the reader's machine. The ODF
+    // generic name is the one that actually decides it; the family list is what a converter reads.
+    private static (string Families, string Generic) FallbackOf(string font) =>
+        ReportFonts.GroupOf(font) switch
+        {
+            ReportFontGroup.Serif => ("'Liberation Serif', 'Times New Roman', serif", "roman"),
+            ReportFontGroup.Monospace => ("'Liberation Mono', 'Courier New', monospace", "modern"),
+            _ => ("'Liberation Sans', Arial, sans-serif", "swiss")
+        };
     private const string PageLayoutName = "DispatchPage";
     private const double MarginMm = 10;
 
@@ -452,10 +473,10 @@ public static class StationDispatchOdt
 
        The sizes are the printed report's: 26 pt for the station, half that for the numbers beside it, 9 pt
        for the table and three quarters of that for its headings. */
-    private const string NamedStyles = """
+    private static string NamedStyles(string bodyFont) => $"""
             <style:style style:name="Standard" style:family="paragraph" style:class="text">
               <style:paragraph-properties fo:margin-top="0mm" fo:margin-bottom="0mm"/>
-              <style:text-properties style:font-name="Liberation Sans" fo:font-size="9pt" fo:language="en" fo:country="GB"/>
+              <style:text-properties style:font-name="{bodyFont}" fo:font-size="9pt" fo:language="en" fo:country="GB"/>
             </style:style>
             <style:style style:name="DispatchHeading" style:display-name="Dispatch heading" style:family="paragraph" style:parent-style-name="Standard">
               <style:paragraph-properties fo:margin-bottom="1mm" fo:padding-bottom="1mm" fo:border-bottom="1pt solid #000000">

@@ -27,8 +27,8 @@ else
         <div class="section">
             @switch (_section)
             {
-                case CargoFlowSection.Descriptions:
-                    <CargoDescriptionsEditor />
+                case CargoFlowSection.Destinations:
+                    <CargoDestinationsEditor />
                     break;
                 case CargoFlowSection.Trains:
                     <CargoTrainsEditor />
@@ -39,9 +39,9 @@ else
 }
 
 @code {
-    private enum CargoFlowSection { Descriptions, Trains }
+    private enum CargoFlowSection { Destinations, Trains }
 
-    private CargoFlowSection _section = CargoFlowSection.Descriptions;
+    private CargoFlowSection _section = CargoFlowSection.Destinations;
     private static readonly CargoFlowSection[] Sections = Enum.GetValues<CargoFlowSection>();
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
@@ -62,7 +62,7 @@ else
 
     private string SectionLabel(CargoFlowSection section) => Translator(section switch
     {
-        CargoFlowSection.Descriptions => "CargoDescriptions",
+        CargoFlowSection.Destinations => "CargoDestinations",
         CargoFlowSection.Trains => "CargoTrains",
         _ => section.ToString()
     });

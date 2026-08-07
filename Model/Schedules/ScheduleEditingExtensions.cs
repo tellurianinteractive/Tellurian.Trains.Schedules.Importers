@@ -87,6 +87,41 @@ public static class ScheduleEditingExtensions
             ];
         }
 
+        /// <summary>
+        /// Gets the trains that can be worked into the given <see cref="ScheduleJoint">joint</see> of a
+        /// schedule: those with a run that fits the time the vehicle stands free there and that touches the
+        /// joint (see <c>ScheduleJoint.FittingCallsFor</c>). A train that cannot share a session with the
+        /// rest of the working is left out, as the vehicle could never work it.
+        /// </summary>
+        /// <remarks>
+        /// This is the gap-filling counterpart of <see cref="CandidateTrainsFor"/>, which offers the trains
+        /// that continue a working at its end. Here the window is closed at both ends, so a train is offered
+        /// only for the run it could actually make in the time available; a run that leaves the working
+        /// broken is still offered, since an out-and-back trip is worked in a leg at a time (see
+        /// <see cref="ScheduleExtensions.Insert"/>).
+        /// </remarks>
+        /// <param name="schedule">The schedule being built.</param>
+        /// <param name="joint">The joint of that schedule to fill.</param>
+        /// <returns>The candidate trains, ordered by the departure they would leave the joint on, then by
+        /// number.</returns>
+        public IReadOnlyList<Train> CandidateTrainsInJoint(Schedule schedule, ScheduleJoint joint)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            schedule = schedule.ValueOrException(nameof(schedule));
+            joint = joint.ValueOrException(nameof(joint));
+
+            return
+            [
+                .. plan.SchedulableTrains()
+                    .Where(train => schedule.EffectiveSessions.Overlaps(train.Sessions))
+                    .Select(train => (train, run: joint.FittingCallsFor(train)))
+                    .Where(x => x.run is not null)
+                    .OrderBy(x => x.train.CallsInRunOrder[x.run!.Value.From].Departure.Value)
+                    .ThenBy(x => x.train.Number)
+                    .Select(x => x.train)
+            ];
+        }
+
         // True when the continuation this schedule would take from the candidate train — from its join call
         // through to its last call — is already worked, on every session in want, by one or more OTHER
         // schedules whose vehicles share one of the given roles. Such a train is fully allocated for that

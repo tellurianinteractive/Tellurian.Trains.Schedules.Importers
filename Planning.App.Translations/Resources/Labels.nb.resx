@@ -1164,6 +1164,33 @@
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>Når dette er på, gjengis hvert element i rapporter på språket som utledes fra elementet selv – for eksempel en førertjeneste på operatørselskapets språk. Grensesnittet, og alle elementer uten utledbart språk, fortsetter å bruke ditt foretrukne språk.</value>
   </data>
+  <data name="ReportFontFamily" xml:space="preserve">
+    <value>Skrifttype i rapporter</value>
+  </data>
+  <data name="ReportFontFamilyHelp" xml:space="preserve">
+    <value>Skrifttypen som utskrevne rapporter settes med. Resten av grensesnittet beholder sin egen skrifttype. Bare skrifttyper som er installert på denne enheten, tilbys – installer en jernbaneskrifttype som Bahnschrift, Farringdon, Railway eller DIN 1451, så dukker den opp her under Jernbane og trafikk. Navnet lagres sammen med planen: skrives rapporten ut på en annen maskin, brukes den skrifttypen hvis den er installert der, ellers en lignende.</value>
+  </data>
+  <data name="Railway" xml:space="preserve">
+    <value>Jernbane og trafikk</value>
+  </data>
+  <data name="ReportFontSample" xml:space="preserve">
+    <value>Tog 2145 går 07:45 fra spor 3 og ankommer 08:12.</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Standardskrifttype</value>
+  </data>
+  <data name="FontNotInstalled" xml:space="preserve">
+    <value>Ikke installert på denne enheten</value>
+  </data>
+  <data name="SansSerif" xml:space="preserve">
+    <value>Grotesk</value>
+  </data>
+  <data name="Serif" xml:space="preserve">
+    <value>Antikva</value>
+  </data>
+  <data name="Monospace" xml:space="preserve">
+    <value>Fast tegnbredde</value>
+  </data>
   <data name="Yes" xml:space="preserve">
     <value>Ja</value>
   </data>
@@ -1412,25 +1439,22 @@
     <value>Opprett eller importer et anlegg for å planlegge godsstrømmer.</value>
   </data>
   <data name="CargoFlowDescription" xml:space="preserve">
-    <value>Planlegg godsstrømmer i to trinn: definer gjenbrukbare godsbeskrivelser, og legg deretter godsstrømmer til tog.</value>
+    <value>Planlegg godsstrømmer i to trinn: definer gjenbrukbare godsdestinasjoner, og legg deretter godsstrømmer til tog.</value>
   </data>
-  <data name="CargoDescriptions" xml:space="preserve">
-    <value>Godsbeskrivelser</value>
+  <data name="CargoDestinations" xml:space="preserve">
+    <value>Godsdestinasjoner</value>
   </data>
   <data name="CargoTrains" xml:space="preserve">
     <value>Godstog</value>
   </data>
-  <data name="CargoDescriptionsDescription" xml:space="preserve">
-    <value>Gjenbrukbare beskrivelser av hvor vogner dirigeres. En godsstrøm på et tog refererer til en av disse; å redigere en beskrivelse oppdaterer alle strømmer som bruker den.</value>
+  <data name="CargoDestinationsDescription" xml:space="preserve">
+    <value>Gjenbrukbare godsdestinasjoner som vogner dirigeres til. En godsstrøm på et tog refererer til en av disse; å redigere den oppdaterer alle strømmer som bruker den.</value>
   </data>
-  <data name="AddCargoDescription" xml:space="preserve">
-    <value>Legg til godsbeskrivelse</value>
+  <data name="AddCargoDestination" xml:space="preserve">
+    <value>Legg til godsdestinasjon</value>
   </data>
-  <data name="NoCargoDescriptions" xml:space="preserve">
-    <value>Ingen godsbeskrivelser ennå.</value>
-  </data>
-  <data name="NewCargoDescriptionName" xml:space="preserve">
-    <value>Ny godsbeskrivelse</value>
+  <data name="NoCargoDestinations" xml:space="preserve">
+    <value>Ingen godsdestinasjoner ennå.</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
     <value>Til alle destinasjoner?</value>
@@ -1443,6 +1467,9 @@
   </data>
   <data name="WagonsTo" xml:space="preserve">
     <value>Vogner til</value>
+  </data>
+  <data name="WagonsToDestinations" xml:space="preserve">
+    <value>Vogner til {0}</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Vogner fra {0} til {1}</value>
@@ -1459,11 +1486,20 @@
   <data name="UsedInTrains" xml:space="preserve">
     <value>Brukes i tog</value>
   </data>
-  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+  <data name="CargoDestinationNotUsed" xml:space="preserve">
     <value>Brukes ikke av noe tog.</value>
   </data>
   <data name="OnlyWagonClassesHint" xml:space="preserve">
     <value>Valgfrie UIC-vognklassebokstaver som begrenser hvilke vogner som tas med, f.eks. "U,Z". La stå tomt for alle vogner.</value>
+  </data>
+  <data name="SpecificCargo" xml:space="preserve">
+    <value>Spesifikk last</value>
+  </data>
+  <data name="SpecificCargoHint" xml:space="preserve">
+    <value>Valgfritt navn på lasten vognene fører, f.eks. "Tømmer". La stå tomt for all last vognklassene kan ta.</value>
+  </data>
+  <data name="SpecificCargoDisabledHint" xml:space="preserve">
+    <value>Angi vognklasser først for å kunne angi en spesifikk last.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Destinasjoner</value>
@@ -1489,11 +1525,11 @@
   <data name="OriginLocationsHint" xml:space="preserve">
     <value>Legg bare til opprinnelsesdriftssteder når toget forventes å ta med vogner som kommer fra et driftssted toget ikke selv betjener — vanligvis vogner som mates inn fra en sidebane, og som skal fortsette med dette toget. Et opprinnelsesdriftssted er ikke stedet der toget henter vognene; det angis et annet sted.</value>
   </data>
-  <data name="CargoDescriptionReferenced" xml:space="preserve">
-    <value>Kan ikke slette: denne godsbeskrivelsen brukes av en eller flere godsstrømmer.</value>
+  <data name="CargoDestinationReferenced" xml:space="preserve">
+    <value>Kan ikke slette: denne godsdestinasjonen brukes av en eller flere godsstrømmer.</value>
   </data>
-  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
-    <value>Slett godsbeskrivelse '{0}'?</value>
+  <data name="DeleteCargoDestinationConfirm" xml:space="preserve">
+    <value>Slett godsdestinasjon '{0}'?</value>
   </data>
   <data name="PositionInTrainHint" xml:space="preserve">
     <value>Posisjon i toget (1 = fremst); 0 betyr hvor som helst.</value>
@@ -1547,10 +1583,10 @@
     <value>Legg til opprinnelsesdriftssted</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
-    <value>Legg til godsstrømmer på tog: velg et tog, og angi deretter hvor vogner kobles til og fra, og hvilken godsbeskrivelse som gjelder.</value>
+    <value>Legg til godsstrømmer på tog: velg et tog, og angi deretter hvor vogner kobles til og fra, og hvilke godsdestinasjoner som gjelder.</value>
   </data>
-  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
-    <value>Legg først til minst én godsbeskrivelse på fanen Godsbeskrivelser.</value>
+  <data name="CargoTrainsNeedDestinations" xml:space="preserve">
+    <value>Legg først til minst én godsdestinasjon på fanen Godsdestinasjoner.</value>
   </data>
   <data name="SelectTrain" xml:space="preserve">
     <value>Velg et tog…</value>
@@ -1563,9 +1599,6 @@
   </data>
   <data name="CargoFlows" xml:space="preserve">
     <value>Godsstrømmer</value>
-  </data>
-  <data name="CargoDescription" xml:space="preserve">
-    <value>Godsbeskrivelse</value>
   </data>
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Slett denne godsstrømmen?</value>
@@ -1611,6 +1644,18 @@
   </data>
   <data name="AddTrainPart" xml:space="preserve">
     <value>Legg til tog</value>
+  </data>
+  <data name="InsertTrainPart" xml:space="preserve">
+    <value>Sett inn tog</value>
+  </data>
+  <data name="ScheduleLayover" xml:space="preserve">
+    <value>Kjøretøyet står her — legg til et tog</value>
+  </data>
+  <data name="ScheduleBrokenJoint" xml:space="preserve">
+    <value>Kjøretøyet fortsetter ikke herfra — legg til toget som fyller hullet</value>
+  </data>
+  <data name="InsertBeforeFirstPart" xml:space="preserve">
+    <value>Legg til et tog som bringer kjøretøyet hit</value>
   </data>
   <data name="EditTrainPart" xml:space="preserve">
     <value>Rediger togdel</value>

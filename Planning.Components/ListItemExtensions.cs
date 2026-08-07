@@ -51,7 +51,8 @@ public static class ListItemExtensions
     //   classes, no origins -> "U,Z wagons to <destinations>"
     //   no classes, origins -> "Wagons from <origins> to <destinations>"
     //   no classes, no origins -> "Wagons to <destinations>"
-    // Needs a Translator for the localised, word-order-preserving format strings.
+    // Needs a Translator for the localised, word-order-preserving format strings. Note that the last one
+    // is WagonsToDestinations, not the placeholderless WagonsTo used as a report column header.
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions, Translator translator) =>
         SortedByDescription(descriptions.Select(d => ToItem(d, translator)));
 
@@ -66,7 +67,7 @@ public static class ListItemExtensions
             hasOrigins && hasClasses ? string.Format(CultureInfo.CurrentCulture, translator("WagonClassesFromTo"), classes, origins, destinations) :
             hasOrigins               ? string.Format(CultureInfo.CurrentCulture, translator("WagonsFromTo"), origins, destinations) :
             hasClasses               ? string.Format(CultureInfo.CurrentCulture, translator("WagonClassesTo"), classes, destinations) :
-                                       string.Format(CultureInfo.CurrentCulture, translator("WagonsTo"), destinations);
+                                       string.Format(CultureInfo.CurrentCulture, translator("WagonsToDestinations"), destinations);
         return new(description.Id.ToString(), label);
     }
 

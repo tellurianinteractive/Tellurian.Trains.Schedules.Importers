@@ -456,7 +456,8 @@ public static class ValidationExtensions
 
                     var (from, to) = (calls[leg], calls[last + 1]);
                     var missingSessions = SessionsExtensions.FromPeriodNumbers(missingPerLeg[leg], general.UseDays);
-                    var message = Message.Information(Strings.TrainMissingTraction, train, from.OperationLocation, to.OperationLocation, missingSessions.SessionsNumbers);
+                    var message = Message.Information(Strings.TrainMissingTraction,
+                        train, from.OperationLocation, from.Departure.HHMM(), to.OperationLocation, to.Arrival.HHMM(), missingSessions.SessionsNumbers);
                     errors.Add(ValidationError.TrainMissingTraction(train, from, to, message));
                     leg = last + 1;
                 }

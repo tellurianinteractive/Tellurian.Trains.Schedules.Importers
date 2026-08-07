@@ -219,10 +219,13 @@
                 .Select(station => DispatchList.Create(station, timetable.Trains, settings))
                 .ToList();
 
+            // Set in the layout's report font, like every other report — the recipient can still
+            // restyle it, since these are named styles rather than direct formatting.
+            var font = ScheduleState.Layout?.Settings.General.ReportFontFamily;
             var single = lists.Count == 1;
             var bytes = single
-                ? StationDispatchOdt.Create(lists[0], settings, Translator, DateTimeOffset.Now)
-                : StationDispatchOdt.CreateBundle(lists, settings, Translator, DateTimeOffset.Now);
+                ? StationDispatchOdt.Create(lists[0], settings, Translator, DateTimeOffset.Now, font)
+                : StationDispatchOdt.CreateBundle(lists, settings, Translator, DateTimeOffset.Now, font);
             var fileName = single
                 ? StationDispatchOdt.FileNameOf(lists[0])
                 : $"{SafeFileName($"{timetable.Name} {Translator("DispatchLists")}")}.zip";

@@ -1,4 +1,4 @@
-.cargo-descriptions {
+.cargo-destinations {
     /* --primary / --primary-text come from MainLayout (the layout's signature colour and its
        auto-contrasted text); do not override --primary here or the global themed header
        (table.grid thead th) would get a mismatched text colour. */
@@ -118,11 +118,11 @@
         white-space: nowrap;
     }
 
-    table.grid > tbody > tr.description:hover {
+    table.grid > tbody > tr.destination:hover {
         background: var(--hover);
     }
 
-    table.grid > tbody > tr.description.expanded {
+    table.grid > tbody > tr.destination.expanded {
         background: var(--detail-bg);
     }
 

@@ -1,5 +1,59 @@
 # Release notes
 
+## Version 0.4.2
+
+### Changes
+
+- **A train can now be worked into the middle of a schedule.** Until now a schedule could only be
+  built forwards: the one place to add a train was the end of the working. Between the train parts of
+  a row there are now small joints saying where the vehicle stands and for how long, and one before
+  the first part saying where it has to be brought from. Click one to add a train into that gap —
+  only the trains the vehicle could actually make in the time available are offered. A leg that does
+  not bring the vehicle back to where the working goes on is added all the same and reported as a
+  conflict until you add the leg back; that is how an out-and-back trip is fitted into a layover, a
+  leg at a time. A joint the working is broken across, as an import can leave it, is marked in amber,
+  and clicking it offers the trains that bridge it.
+
+- **The app has an icon of its own.** Until now it carried the mark that comes with the tools it is
+  built with, which said nothing about what the app is for. It now shows the front of a modern train
+  on a dark blue tile. The icon appears in the browser tab, and on the home screen or in the Start
+  menu for anyone who installs the app, so it can be told apart from everything else open at the time.
+
+- **Twelve turnus cards now go on a sheet instead of ten.** The cards were 50 mm wide, which let only
+  five stand side by side across an A4 sheet held landscape, with a hand's breadth of paper wasted at
+  the right-hand edge. They are now 48 mm wide, so six fit across and twelve to the sheet, and the
+  sheet has a margin on every side that ordinary printers can reach. The cards are the same height as
+  before, and what they hold is unchanged — they are simply a little narrower, so a sixth of the
+  cutting and sorting falls away for every schedule printed.
+
+- **The timetable rows now stand further apart.** The lines sat so close together that the eye lost its
+  place running along a row of times, which is the one thing the sheet is read for. There is now a
+  seventh more space around every line, so a row is easier to follow across the page and a station is
+  easier to pick out of the column. The type is the same size as before and the columns are as wide as
+  before, so the sheet holds the same trains — it is only the space between the lines that has grown.
+  A page now takes thirty-nine lines instead of forty-five, which is as much air as could be given
+  without the commonest stretch needing a second sheet.
+
+### Fixes
+
+- **The timetable report no longer loses the last rows of a page.** Both directions of a timetable
+  stretch were put on one page where they did not both fit, and the second one stopped part-way down its
+  list of stations — the rows with nowhere left to go were cut off rather than carried to the next page.
+
+  How much fits on a page was reckoned for the sheet that comes out of the printer, but the report on
+  screen was set in a larger type than the printed one, so its rows stood nearly two-thirds taller than
+  the ones being counted. The report on screen and the printed sheet are now set identically, so the
+  page on screen is a true picture of the paper: what fills it on screen fills it on paper, and what
+  will not fit is carried to the next page instead of being cut off. How much fits is now measured on a
+  real page rather than reckoned from the type size, and three lines are kept clear at the foot of
+  every page, so a stretch that runs a row or two long gets a page of its own rather than going over
+  the edge.
+
+- **The cargo flow list now names the destinations wagons are going to.** On **Cargo flow › Cargo
+  trains**, the list to choose from read only "Wagons to" with the destinations left off, so one entry
+  could not be told from another. The destinations are back, and the sub-tab and its column are now
+  called **Cargo destinations** rather than *Cargo descriptions*, since destinations are what they hold.
+
 ## Version 0.4.1
 
 ### Changes

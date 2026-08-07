@@ -10,9 +10,11 @@
 }
 else
 {
-    @foreach (var itemsOnPage in Items.ItemsPerPage(10))
+    @* 48 x 91 mm cards on A4 landscape: 6 across, 2 down. The 4 mm page margin keeps the outermost
+       cards away from the sheet edge, which most printers cannot reach. *@
+    @foreach (var itemsOnPage in Items.ItemsPerPage(12))
     {
-        <A4LPage>
+        <A4LPage Margin="4">
             <div class="pagebreak">
                 @foreach (var item in itemsOnPage)
                 {

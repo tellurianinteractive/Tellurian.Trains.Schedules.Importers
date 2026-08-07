@@ -217,6 +217,56 @@ public static class ScheduleExtensions
             return new Maybe<ScheduledTrainPart>(part);
         }
 
+        /// <summary>
+        /// Works a train part into the schedule at a joint, rejecting only what a vehicle physically
+        /// cannot do: being in two places at once.
+        /// </summary>
+        /// <remarks>
+        /// Unlike <see cref="Append"/>, which builds the working forwards from a known end and therefore
+        /// insists on continuity, this fills a gap: the part must not overlap another part in time, and its
+        /// train must share a session with the rest of the working, but it need not arrive where the next
+        /// part leaves from. That is what lets an out-and-back trip be worked into a layover a leg at a
+        /// time — the first leg leaves the working broken, which the contiguity validation (rule S2)
+        /// reports until the leg back is worked in as well. A part already present is returned unchanged.
+        /// </remarks>
+        /// <param name="part">The train part to work in.</param>
+        /// <returns>A <see cref="Maybe{T}"/> with the part when it was worked in (or already present), or
+        /// an error message explaining why it was rejected.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the part is null.</exception>
+        public Maybe<ScheduledTrainPart> Insert(ScheduledTrainPart part)
+        {
+            part = part.ValueOrException(nameof(part));
+            if (schedule.Parts.Contains(part)) return new Maybe<ScheduledTrainPart>(part);
+            if (part.IsOverlapping(schedule.Parts))
+                return new Maybe<ScheduledTrainPart>($"Part {part} overlaps existing parts in schedule {schedule.Number}.");
+            if (schedule.Parts.Count > 0 && !schedule.EffectiveSessions.Overlaps(part.Train.Sessions))
+                return new Maybe<ScheduledTrainPart>($"Part {part} operates on no session/day common to schedule {schedule.Number}.");
+            schedule.Attach(part);
+            return new Maybe<ScheduledTrainPart>(part);
+        }
+
+        /// <summary>
+        /// Gets the joints of the working, in working order: one before the first part, one between each
+        /// pair of consecutive parts, and one after the last. Empty for an empty schedule, which has no
+        /// working to join anything to.
+        /// </summary>
+        /// <remarks>
+        /// A joint is where the vehicle stands between two trains, and so where <see cref="Insert"/> works
+        /// one in. See <see cref="ScheduleJoint"/>.
+        /// </remarks>
+        public IReadOnlyList<ScheduleJoint> Joints
+        {
+            get
+            {
+                var parts = schedule.OrderedParts;
+                if (parts.Count == 0) return [];
+                List<ScheduleJoint> joints = [new(null, parts[0])];
+                for (var i = 1; i < parts.Count; i++) joints.Add(new(parts[i - 1], parts[i]));
+                joints.Add(new(parts[^1], null));
+                return joints;
+            }
+        }
+
         private void Attach(ScheduledTrainPart part)
         {
             part.Schedule = schedule;

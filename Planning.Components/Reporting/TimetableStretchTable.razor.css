@@ -1,18 +1,44 @@
+/* One direction of a timetable stretch, as printed.
+
+   The printed sheet is the artefact, so the geometry below is stated in millimetres and points and
+   applies on screen as well as on paper — NOT inside @media print. The A4LPage wrapper is a real
+   297 x 210 mm box on screen, so with one geometry the on-screen render is a true print preview: what
+   overflows the box would overflow the page. Split the two and the preview stops being evidence: with
+   the type pinned for print only, the screen rendered 5.87 mm rows against print's 3.65 mm, so a pair
+   of 18-row sections that fits the paper comfortably lost its last rows off the foot of the preview.
+
+   TimetablePaginator estimates page fit from fixed millimetre constants in PageGeometry, and these are
+   the values it estimates against. The two must be calibrated together: a constant that no longer
+   matches does not print short, it prints past the foot of the page.
+
+   Heights are MEASURED off a rendered page, not derived from the type size. As rendered: a table line
+   is 4.16 mm (RowHeightMm 4.2 — a split row costs two of them), the column-header row and the sessions
+   row 2.86 mm each (ColumnHeaderHeightMm / SessionsRowHeightMm 2.9), and the title with its margins
+   8.29 mm (TitleHeightMm 8.4). Remeasure in the browser after changing any type size, padding or line
+   height here.
+
+   Widths: the column widths were once set in rem — tied to the 16 px root, not to the print font —
+   which made a 16-column tile ~287 mm against the 277 mm A4-landscape printable area, so the browser
+   spilled the overflow onto an extra near-blank sheet. table-layout: fixed plus the explicit mm widths
+   below pin a 15-column tile (PageGeometry.ColumnsPerPage) to ~260 mm, so it fits with margin to spare. */
+
 .timetable-title {
-    font-size: 1rem;
+    font-size: 10pt;
     font-weight: bold;
-    margin: 0.5rem 0 0.3rem;
+    margin: 2mm 0 1mm;
 }
 
 /* A section whose heading is dropped (it repeats the one above) gets a little top gap so the two
-   column groups don't run together where the heading would have separated them. */
+   column groups don't run together where the heading would have separated them. The paginator charges
+   this gap in place of the heading it replaces (PageGeometry.NoTitleGapMm), so the two must agree. */
 .timetable-section.no-title {
-    margin-top: 0.6rem;
+    margin-top: 2.5mm;
 }
 
 table.timetable {
     border-collapse: collapse;
-    font-size: 0.8rem;
+    font-size: 8pt;
+    table-layout: fixed;
 }
 
 table.timetable th,
@@ -21,8 +47,42 @@ table.timetable td {
     border-bottom: 1px solid #bbb;
     border-left: none;
     border-right: none;
-    padding: 1px 4px;
+    padding: 0 3px;
+    /* Leading, not padding: a table line is a single line box, so line-height sets the space around it
+       and — being unitless — scales the smaller header and sessions type by the same proportion, which a
+       fixed padding would not. It is also the only lever here that adds air without touching the 8pt type
+       or the column widths. 1.38 is the most the page budget allows: at 4.16 mm a line, both directions of
+       an 18-row stretch still come to 173.8 mm of the 177.4 mm a page has, so the commonest sheet in the
+       timetable keeps its single page. Raising it to 1.45 costs that sheet a second page. */
+    line-height: 1.38;
     white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Fixed columns, repeated in every tile: 9 + 9 + 32 = 50 mm. */
+table.timetable th.km,
+table.timetable td.km,
+table.timetable th.arr-dep,
+table.timetable td.arr-dep {
+    width: 9mm;
+    min-width: 9mm;
+    max-width: 9mm;
+}
+
+table.timetable th.stations,
+table.timetable td.stations {
+    width: 32mm;
+    min-width: 32mm;
+    max-width: 32mm;
+}
+
+/* Up to 15 train columns per tile: 15 × 14 mm = 210 mm, + 50 mm fixed ≈ 260 mm < 277 mm. */
+table.timetable th.train-header,
+table.timetable th.train-sessions,
+table.timetable td.time {
+    width: 14mm;
+    min-width: 14mm;
+    max-width: 14mm;
 }
 
 table.timetable th {
@@ -44,9 +104,6 @@ table.timetable th {
 
     &.train-header {
         font-size: 0.7em;
-        width: 3.5rem;
-        min-width: 3.5rem;
-        max-width: 3.5rem;
     }
 }
 
@@ -57,12 +114,6 @@ tr.sessions-row th {
     font-weight: 400;
     border-top-style: hidden;
 
-    &.train-sessions {
-        width: 3.5rem;
-        min-width: 3.5rem;
-        max-width: 3.5rem;
-    }
-
     &.stations {
         font-style: italic;
     }
@@ -71,21 +122,16 @@ tr.sessions-row th {
 table.timetable td {
     &.km {
         text-align: right;
-        width: 2.5rem;
         color: #666;
     }
 
     &.arr-dep,
     &.stations {
         font-weight: 600;
-        padding-right: 0.5rem;
     }
 
     &.time {
         text-align: center;
-        width: 3.5rem;
-        min-width: 3.5rem;
-        max-width: 3.5rem;
     }
 }
 
@@ -106,65 +152,10 @@ tr.dep-row td.time {
     border-top-style: hidden;
 }
 
-/* Print geometry pinning. Pagination (TimetablePaginator / PageGeometry) estimates page fit from
-   fixed millimetre constants, so both the printed row height AND the table width must be stable and
-   known. Heights: at 8pt / 1.2 a normal row is ~4 mm (RowHeightMm) and a split row ~8 mm. Widths:
-   the on-screen column widths are 3.5rem (tied to the 16px root, not the print font), which makes a
-   16-column tile ~287 mm — wider than the 277 mm A4-landscape printable area, so the browser would
-   spill the overflow onto an extra near-blank sheet. table-layout: fixed plus the explicit mm column
-   widths below pin a 15-column tile (PageGeometry.ColumnsPerPage) to ~260 mm so it fits with margin
-   to spare. A whole tile is sized by the paginator to fit one page, so break-inside: avoid stops the
-   browser splitting it. */
+/* A whole tile is sized by the paginator to fit one page, so this only ever stops the browser
+   second-guessing an estimate that is already correct — never moves a section that fits. */
 @media print {
     .timetable-section {
         break-inside: avoid;
-    }
-
-    table.timetable {
-        font-size: 8pt;
-        table-layout: fixed;
-    }
-
-    table.timetable th,
-    table.timetable td {
-        padding: 0 3px;
-        line-height: 1.2;
-        overflow: hidden;
-    }
-
-    /* Fixed columns, repeated in every tile. */
-    table.timetable th.km,
-    table.timetable td.km {
-        width: 9mm;
-        min-width: 9mm;
-        max-width: 9mm;
-    }
-
-    table.timetable th.arr-dep,
-    table.timetable td.arr-dep {
-        width: 9mm;
-        min-width: 9mm;
-        max-width: 9mm;
-    }
-
-    table.timetable th.stations,
-    table.timetable td.stations {
-        width: 32mm;
-        min-width: 32mm;
-        max-width: 32mm;
-    }
-
-    /* Up to 15 train columns per tile: 15 × 14 mm = 210 mm, + 50 mm fixed ≈ 260 mm < 277 mm. */
-    table.timetable th.train-header,
-    table.timetable th.train-sessions,
-    table.timetable td.time {
-        width: 14mm;
-        min-width: 14mm;
-        max-width: 14mm;
-    }
-
-    .timetable-title {
-        font-size: 10pt;
-        margin: 2mm 0 1mm;
     }
 }

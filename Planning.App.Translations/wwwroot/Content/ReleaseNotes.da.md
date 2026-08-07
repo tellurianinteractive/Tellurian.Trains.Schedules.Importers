@@ -1,5 +1,59 @@
 # Versionsnyheder
 
+## Version 0.4.2
+
+### Ændringer
+
+- **Nu kan et tog sættes ind midt i et omløb.** Hidtil kunne et omløb kun bygges fremad: det eneste
+  sted at tilføje et tog var i slutningen af omløbet. Mellem togdelene på en række er der nu små
+  samlinger, der viser, hvor køretøjet holder og hvor længe, og før den første del en, der viser,
+  hvorfra det skal hentes. Klik på en af dem for at sætte et tog ind i hullet — kun de tog, køretøjet
+  faktisk kan nå på tiden, tilbydes. En tur, der ikke bringer køretøjet tilbage dertil, hvor omløbet
+  fortsætter, sættes ind alligevel og rapporteres som en konflikt, indtil du sætter returen ind;
+  sådan passes en tur-retur ind i et ophold, en tur ad gangen. En samling, hvor omløbet er brudt, som
+  en import kan efterlade det, er markeret med gult, og et klik tilbyder de tog, der udfylder hullet.
+
+- **Appen har fået sit eget ikon.** Hidtil bar den mærket, der følger med de værktøjer, den er bygget
+  med, og som ikke sagde noget om, hvad appen er til for. Nu viser den fronten af et moderne tog på en
+  mørkeblå flade. Ikonet ses i browserens faneblad og på hjemmeskærmen eller i Start-menuen for den,
+  der installerer appen, så den kan skelnes fra alt andet, der er åbent samtidig.
+
+- **Der er nu plads til tolv omløbskort på et ark i stedet for ti.** Kortene var 50 mm brede, hvilket
+  kun gav plads til fem ved siden af hinanden tværs over et liggende A4-ark, med en håndsbredde papir
+  spildt i højre kant. De er nu 48 mm brede, så seks kan være ved siden af hinanden og tolv på arket,
+  og arket har en margen hele vejen rundt, som almindelige printere kan nå. Kortene er lige så høje som
+  før, og indholdet er uændret — de er blot lidt smallere, så en sjettedel af klipningen og
+  sorteringen falder bort for hvert omløb, der skrives ud.
+
+- **Rækkerne i køreplanen står nu længere fra hinanden.** Linjerne lå så tæt, at øjet mistede sit sted,
+  når man fulgte en række med tider, hvilket er netop det, bladet læses for. Der er nu en syvendedel
+  mere luft omkring hver linje, så en række er lettere at følge tværs over siden, og en station lettere
+  at finde i kolonnen. Skriften er lige så stor som før, og kolonnerne lige så brede som før, så bladet
+  rummer de samme tog — det er kun afstanden mellem linjerne, der er vokset. En side tager nu
+  niogtredive linjer i stedet for femogfyrre, hvilket er så meget luft, som kunne gives, uden at den
+  almindeligste strækning ville få brug for et andet blad.
+
+### Fejlrettelser
+
+- **Den udskrevne køreplan mister ikke længere de sidste rækker på en side.** Begge retninger af en
+  køreplansstrækning blev sat på samme side, også når de ikke begge kunne være der, og den anden holdt
+  op midt i sin liste over stationer — rækkerne, der blev til overs, blev klippet af i stedet for at
+  blive flyttet til næste side.
+
+  Hvor meget der kan være på en side blev regnet ud for det ark, der kommer ud af printeren, men
+  rapporten på skærmen var sat i en større skrift end den udskrevne, så dens rækker var næsten to
+  tredjedele højere end dem, der blev talt. Rapporten på skærmen og det udskrevne ark sættes nu ens, så
+  siden på skærmen er et sandt billede af papiret: det, der fylder den på skærmen, fylder den også på
+  papiret, og det, der ikke kan være der, flyttes til næste side i stedet for at blive klippet af. Hvor
+  meget der kan være, måles nu på en virkelig side i stedet for at blive regnet ud fra skriftstørrelsen,
+  og tre linjer holdes frie nederst på hver side, så en strækning, der er en række eller to for lang,
+  får sin egen side i stedet for at gå ud over kanten.
+
+- **Godsstrømslisten nævner nu de destinationer, vognene skal til.** Under **Godsstrøm › Godstog** stod
+  der kun "Vogne til" i listen, man vælger fra, uden destinationerne, så posterne ikke kunne skelnes fra
+  hinanden. Destinationerne er tilbage, og underfanen og dens kolonne hedder nu **Godsdestinationer** i
+  stedet for *Godsbeskrivelser*, for det er destinationer, de indeholder.
+
 ## Version 0.4.1
 
 ### Ændringer

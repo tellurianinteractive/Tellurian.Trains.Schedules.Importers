@@ -155,6 +155,43 @@
         font-weight: 700;
     }
 
+    /* A joint between two train blocks: where the vehicle stands, and how long, or the two stations when
+       the working is broken there. Clicking it works a train into that gap. Kept quiet — dashed and
+       muted — so the trains still carry the row. */
+    .joint {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        border: 1px dashed #b7c4d2;
+        border-radius: 10px;
+        background: transparent;
+        color: #667;
+        cursor: pointer;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.7rem;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .joint:hover {
+        background: #eef3f8;
+        color: var(--primary);
+        border-style: solid;
+    }
+
+    /* A broken joint is the contiguity conflict (rule S2) made into an affordance: the same amber the
+       conflicts are marked in, on the very gap that has to be filled to clear it. */
+    .joint.broken {
+        border-color: #d9a406;
+        border-style: solid;
+        background: #fff8e1;
+        color: #7a5c00;
+    }
+
+    .joint.broken:hover {
+        background: #ffefc0;
+    }
+
     /* The train's own sessions/days, shown on the part only when it does not operate every session. */
     .part .sessions {
         font-weight: 600;

@@ -5,15 +5,23 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 
-@* Adds a train part to a schedule. The planner picks a candidate train, then the from/to stops. For a
-   non-empty schedule the from-stop is fixed to where the schedule ends (the train may join mid-run); for
-   an empty schedule both stops are free, so a partial train can seed a new working. *@
+@* Adds a train part to a schedule. The planner picks a candidate train, then the from/to stops.
+   Appending to the end of a working: the from-stop is fixed to where the schedule ends (the train may join
+   mid-run); for an empty schedule both stops are free, so a partial train can seed a new working.
+   Filling a joint: the candidates are the trains with a run that fits the time the vehicle stands free
+   there, and every stop is offered — a run that leaves the working broken is added all the same, since an
+   out-and-back trip is worked in a leg at a time. *@
 
 @if (Plan is not null)
 {
     <div class="add-part-backdrop">
         <div class="add-part-dialog">
-            <h3>@Translator("AddTrainPart")</h3>
+            <h3>@Translator(Joint is null ? "AddTrainPart" : "InsertTrainPart")</h3>
+
+            @if (Joint is { } joint)
+            {
+                <p class="joint">@WindowText(joint)</p>
+            }
 
             <div class="field">
                 <label>@Translator("SelectTrain")</label>
@@ -44,6 +52,11 @@
                 </div>
 
                 <p class="preview">@PreviewText(train)</p>
+
+                @foreach (var warning in Warnings(train))
+                {
+                    <p class="warning">@warning</p>
+                }
             }
 
             @if (_error is not null)
@@ -60,10 +73,13 @@
 }
 
 @code {
-    /// <summary>The schedule the part is appended to.</summary>
+    /// <summary>The schedule the part is added to.</summary>
     [Parameter, EditorRequired] public Schedule Schedule { get; set; } = default!;
 
-    /// <summary>Raised after a part has been appended and saved.</summary>
+    /// <summary>The joint of the working to fill, or <c>null</c> to append to its end.</summary>
+    [Parameter] public ScheduleJoint? Joint { get; set; }
+
+    /// <summary>Raised after a part has been added and saved.</summary>
     [Parameter] public EventCallback OnAdded { get; set; }
 
     /// <summary>Raised when the dialog is dismissed without adding a part.</summary>
@@ -76,18 +92,27 @@
     private int _to;
     private string? _error;
 
-    private IReadOnlyList<Train> Candidates => Plan?.CandidateTrainsFor(Schedule) ?? [];
+    private IReadOnlyList<Train> Candidates =>
+        Plan is null ? []
+        : Joint is { } joint ? Plan.CandidateTrainsInJoint(Schedule, joint)
+        : Plan.CandidateTrainsFor(Schedule);
 
     private Train? SelectedTrain => Candidates.FirstOrDefault(t => t.Id == _trainId);
 
-    // For a non-empty schedule the join point is fixed (the train continues from where the schedule ends).
-    private bool FromFixed => Schedule.EndLocation is not null;
+    // Appending to a non-empty schedule, the join point is fixed (the train continues from where the
+    // schedule ends). Filling a joint, every stop is offered: the run that fits is only a starting point.
+    private bool FromFixed => Joint is null && Schedule.EndLocation is not null;
 
     private void OnTrainChanged(int? id)
     {
         _trainId = id;
         _error = null;
         if (SelectedTrain is not { } train) return;
+        if (Joint is { } joint && joint.FittingCallsFor(train) is { } run)
+        {
+            (_from, _to) = run;
+            return;
+        }
         _from = Schedule.JoinCallIndexFor(train) ?? 0;
         _to = train.Calls.Count - 1; // default to the whole remaining run
     }
@@ -105,11 +130,24 @@
         _error = null;
     }
 
+    // What the selected run would leave behind at the joint: a leg that does not start where the vehicle
+    // stands, or does not end where the working goes on, is added all the same — this says so beforehand,
+    // so the planner knows another leg is still to be worked in.
+    private IEnumerable<string> Warnings(Train train)
+    {
+        if (Joint is not { } joint) yield break;
+        var calls = train.CallsInRunOrder;
+        if (_to <= _from || _to >= calls.Count) yield break;
+        if (joint.From is { } from && !calls[_from].OperationLocation.Equals(from)) yield return Translator("PartEditGapBefore");
+        if (joint.To is { } to && !calls[_to].OperationLocation.Equals(to)) yield return Translator("PartEditGapAfter");
+    }
+
     private async Task Add()
     {
         _error = null;
         if (SelectedTrain is not { } train) return;
-        var result = Schedule.Append(train.AsTrainPart(_from, _to));
+        var part = train.AsTrainPart(_from, _to);
+        var result = Joint is null ? Schedule.Append(part) : Schedule.Insert(part);
         if (result.IsNone) { _error = result.Message; return; }
         ScheduleState.SaveAndNotify();
         await OnAdded.InvokeAsync();
@@ -124,5 +162,15 @@
     {
         var calls = train.CallsInRunOrder;
         return $"{CallText(calls[_from], departure: true)} → {CallText(calls[_to], departure: false)}";
+    }
+
+    // The time the vehicle stands free at this joint, written as the working it has to fit between, with
+    // how long that is (as H:mm, the form a duration is written in elsewhere).
+    private static string WindowText(ScheduleJoint joint)
+    {
+        if (joint.IsStart) return $"→ {joint.To!.Signature} {joint.WindowEnd!.Value.HHMM()}";
+        var window = $"{joint.From!.Signature} {joint.WindowStart!.Value.HHMM()} → {joint.To!.Signature} {joint.WindowEnd!.Value.HHMM()}";
+        if (joint.Layover is not { } layover) return window;
+        return $"{window} ({(int)layover.Value.TotalHours}:{layover.Value.Minutes:00})";
     }
 }

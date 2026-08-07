@@ -1,5 +1,59 @@
 # Versionsnyheter
 
+## Version 0.4.2
+
+### Ändringar
+
+- **Nu går det att lägga in ett tåg mitt i ett omlopp.** Hittills kunde ett omlopp bara byggas framåt:
+  det enda stället att lägga till ett tåg var i slutet av omloppet. Mellan tågdelarna på en rad finns
+  nu små skarvar som visar var fordonet står och hur länge, och före den första delen en som visar
+  varifrån det måste hämtas. Klicka på en av dem för att lägga in ett tåg i luckan — bara de tåg
+  fordonet faktiskt hinner med under tiden erbjuds. En tur som inte för fordonet tillbaka dit
+  omloppet fortsätter läggs in ändå och rapporteras som en konflikt tills du lägger in returen; så
+  passas en tur och retur in i ett uppehåll, en tur i taget. En skarv där omloppet är brutet, som en
+  import kan lämna det, är gulmarkerad, och ett klick erbjuder de tåg som överbryggar avbrottet.
+
+- **Appen har fått en egen ikon.** Hittills bar den märket som följer med verktygen den är byggd med,
+  vilket inte sade något om vad appen är till för. Nu visar den fronten på ett modernt tåg mot en
+  mörkblå platta. Ikonen syns i webbläsarens flik, och på hemskärmen eller i Start-menyn för den som
+  installerar appen, så att den går att skilja från allt annat som är öppet samtidigt.
+
+- **Nu ryms tolv omloppskort på ett ark i stället för tio.** Korten var 50 mm breda, vilket bara gav
+  plats för fem bredvid varandra tvärs över ett liggande A4-ark, med en handsbredd papper bortkastat i
+  högerkanten. De är nu 48 mm breda, så sex får plats i bredd och tolv på arket, och arket har en
+  marginal runt om som vanliga skrivare når. Korten är lika höga som förut, och innehållet är
+  oförändrat — de är bara något smalare, så en sjättedel av klippandet och sorterandet försvinner för
+  varje omlopp som skrivs ut.
+
+- **Raderna i tidtabellen står nu längre isär.** Raderna låg så tätt att ögat tappade bort sig när man
+  följde en rad med tider, vilket är just det bladet läses för. Det finns nu en sjundedel mer luft runt
+  varje rad, så en rad är lättare att följa tvärs över sidan och en station lättare att hitta i
+  kolumnen. Texten är lika stor som förut och kolumnerna lika breda som förut, så bladet rymmer samma
+  tåg — det är bara avståndet mellan raderna som har vuxit. En sida tar nu trettionio rader i stället
+  för fyrtiofem, vilket är så mycket luft som gick att ge utan att den vanligaste sträckan skulle
+  behöva ett andra blad.
+
+### Rättningar
+
+- **Den utskrivna tidtabellen tappar inte längre de sista raderna på en sida.** Båda riktningarna av en
+  tidtabellssträcka placerades på samma sida även när de inte båda fick plats, och den andra slutade
+  mitt i sin lista över stationer — raderna som blev över klipptes bort i stället för att flyttas till
+  nästa sida.
+
+  Hur mycket som ryms på en sida räknades ut för det ark som kommer ur skrivaren, men rapporten på
+  skärmen sattes i en större stil än den utskrivna, så dess rader var nästan två tredjedelar högre än
+  de som räknades. Rapporten på skärmen och det utskrivna arket sätts nu likadant, så sidan på skärmen
+  är en sann bild av papperet: det som fyller den på skärmen fyller den också på papperet, och det som
+  inte får plats flyttas till nästa sida i stället för att klippas bort. Hur mycket som ryms mäts nu på
+  en verklig sida i stället för att räknas fram ur stilstorleken, och tre rader hålls fria nederst på
+  varje sida, så att en sträcka som är en rad eller två för lång får en egen sida i stället för att gå
+  över kanten.
+
+- **Godsflödeslistan namnger nu destinationerna vagnarna går till.** Under **Godsflöde › Godståg** stod
+  det bara "Vagnar till" i listan att välja ur, utan destinationerna, så posterna gick inte att skilja
+  åt. Destinationerna är tillbaka, och underfliken och dess kolumn heter nu **Godsdestinationer** i
+  stället för *Godsbeskrivningar*, eftersom det är destinationer de innehåller.
+
 ## Version 0.4.1
 
 ### Ändringar

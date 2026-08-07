@@ -78,6 +78,17 @@ public sealed class GeneralSettings
     /// using the user's language. Default is <c>false</c>.
     /// </summary>
     public bool UseObjectLanguageInReports { get; set; }
+
+    /// <summary>
+    /// The font family printed reports are set in, stored as the family name on its own (for example
+    /// <c>Georgia</c>). An empty value means the application's default font. Only reports use it — the
+    /// rest of the user interface keeps its own font, so the choice never affects working on the plan.
+    /// </summary>
+    /// <remarks>
+    /// A name rather than a font file, so the plan stays small and portable: opened on a machine where
+    /// the font is installed it is used, and elsewhere the report falls back to a font of the same kind.
+    /// </remarks>
+    public string ReportFontFamily { get; set; } = "";
 }
 
 /// <summary>

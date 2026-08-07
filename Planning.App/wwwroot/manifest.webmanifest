@@ -1,6 +1,7 @@
 {
-  "name": "Planning.App",
-  "short_name": "Planning.App",
+  "lang": "en",
+  "name": "Timetable Planner",
+  "short_name": "Timetable Planner",
   "id": "./",
   "start_url": "./",
   "display": "standalone",
@@ -11,12 +12,26 @@
     {
       "src": "icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     },
     {
       "src": "icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
     }
   ]
 }

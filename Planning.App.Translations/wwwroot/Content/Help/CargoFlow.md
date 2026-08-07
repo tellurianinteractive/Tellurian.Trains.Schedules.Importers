@@ -1,9 +1,9 @@
 The **Cargo flow** tab plans freight that is directed by waybills, in two steps.
 
-### Cargo descriptions tab
+### Cargo destinations tab
 
-**Cargo descriptions** are reusable descriptions of where wagons are routed. Each has a name and a
-set of **destinations** — the operational places wagons are brought to, optionally with a position in
+**Cargo destinations** are reusable statements of where wagons are routed. Each holds a set of
+**destinations** — the operational places wagons are brought to, optionally with a position in
 the train and a maximum number of wagons or axles. 
 
 #### Destinations
@@ -13,8 +13,12 @@ A destination can also include the station's
 - its **local** destinations, when the station is a hub for one or several local  freight servces.
 - **regions**, when a shadow shunting yard represents some part of the rest of the world.
 
-A description can also be marked as going to **all destinations**. The
-same description can be referenced by many cargo flows, so editing it updates them all.
+A cargo destination can also be marked as going to **all destinations**. The
+same one can be referenced by many cargo flows, so editing it updates them all.
+
+**Only wagon classes** limits the flow to certain UIC wagon classes, and **specific cargo** names
+the commodity those wagons carry, for example timber or coal. Specific cargo can only be entered
+once wagon classes are set, since it narrows them further.
 
 #### Origin locations
 
@@ -30,6 +34,6 @@ flow's connect call on the Cargo trains tab.
 **Cargo trains** is where you attach cargo flows to trains. Choose a train, then for each cargo flow
 set where wagons are **connected** (the from-call, a departure where the train stops) and
 **disconnected** (the to-call, a later arrival), its position in the train, and which cargo
-description applies. A cargo flow shows as a "brings wagons to …" note at its from-call.
+destinations apply. A cargo flow shows as a "brings wagons to …" note at its from-call.
 
-Cargo descriptions belong to the timetable; deleting one is blocked while any cargo flow still uses it.
+Cargo destinations belong to the timetable; deleting one is blocked while any cargo flow still uses it.

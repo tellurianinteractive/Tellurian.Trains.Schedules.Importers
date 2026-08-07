@@ -134,6 +134,25 @@
         display: none;
     }
 
+    /* The font list is long and its entries are set in their own faces, so give it the same
+       comfortable width as the free-text fields rather than the width of the longest name. */
+    .field select.font-choice {
+        width: 22rem;
+        max-width: 100%;
+    }
+
+    /* The chosen face, set in itself at reading size, so the choice can be judged here instead of by
+       printing a report. Deliberately not a hint's small grey text — this one is meant to be looked at. */
+    .hint.font-sample {
+        margin: 0.1rem 0.6rem 0.6rem;
+        padding: 0.45rem 0.7rem;
+        border: 1px dashed #cdd6e0;
+        border-radius: 5px;
+        background: #fcfcfd;
+        color: #222;
+        font-size: 1rem;
+    }
+
     .group-heading {
         margin: 1.25rem 0 0.5rem;
         font-weight: 600;

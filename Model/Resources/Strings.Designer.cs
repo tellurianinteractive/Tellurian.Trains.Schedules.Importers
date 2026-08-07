@@ -529,7 +529,7 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Train {0} has no traction unit between {1} and {2} on sessions {3}..
+        ///   Looks up a localized string similar to Train {0} has no traction unit between {1} {2} and {3} {4} on sessions {5}..
         /// </summary>
         internal static string TrainMissingTraction {
             get {

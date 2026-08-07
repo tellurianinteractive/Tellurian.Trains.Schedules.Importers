@@ -827,6 +827,33 @@
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
     <value>When on, reports render each item in the language derived from the item itself — for example, a driver duty in its operating company's language. The interface, and any item with no derivable language, keep using your preferred language.</value>
   </data>
+  <data name="ReportFontFamily" xml:space="preserve">
+    <value>Report font</value>
+  </data>
+  <data name="ReportFontFamilyHelp" xml:space="preserve">
+    <value>The font that printed reports are set in. The rest of the interface keeps its own font. Only fonts installed on this device are offered — install a railway face such as Bahnschrift, Farringdon, Railway or DIN 1451 and it appears here under Railway and transport. The name is stored with the plan: printed on another machine, the report uses that font when it is installed there and a similar one when it is not.</value>
+  </data>
+  <data name="Railway" xml:space="preserve">
+    <value>Railway and transport</value>
+  </data>
+  <data name="ReportFontSample" xml:space="preserve">
+    <value>Train 2145 departs 07:45 from track 3 and arrives 08:12.</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Default font</value>
+  </data>
+  <data name="FontNotInstalled" xml:space="preserve">
+    <value>Not installed on this device</value>
+  </data>
+  <data name="SansSerif" xml:space="preserve">
+    <value>Sans serif</value>
+  </data>
+  <data name="Serif" xml:space="preserve">
+    <value>Serif</value>
+  </data>
+  <data name="Monospace" xml:space="preserve">
+    <value>Fixed width</value>
+  </data>
   <data name="LayoutNameHelp" xml:space="preserve">
     <value>The name of this layout, shown in reports and exported files.</value>
   </data>
@@ -1417,25 +1444,22 @@
     <value>Create or import a layout to plan cargo flows.</value>
   </data>
   <data name="CargoFlowDescription" xml:space="preserve">
-    <value>Plan cargo flows in two steps: define reusable cargo descriptions, then add cargo flows to trains.</value>
+    <value>Plan cargo flows in two steps: define reusable cargo destinations, then add cargo flows to trains.</value>
   </data>
-  <data name="CargoDescriptions" xml:space="preserve">
-    <value>Cargo descriptions</value>
+  <data name="CargoDestinations" xml:space="preserve">
+    <value>Cargo destinations</value>
   </data>
   <data name="CargoTrains" xml:space="preserve">
     <value>Cargo trains</value>
   </data>
-  <data name="CargoDescriptionsDescription" xml:space="preserve">
-    <value>Reusable descriptions of where wagons are routed. A cargo flow on a train references one of these; editing a description updates every flow that uses it.</value>
+  <data name="CargoDestinationsDescription" xml:space="preserve">
+    <value>Reusable cargo destinations that wagons are routed to. A cargo flow on a train references one of these; editing it updates every flow that uses it.</value>
   </data>
-  <data name="AddCargoDescription" xml:space="preserve">
-    <value>Add cargo description</value>
+  <data name="AddCargoDestination" xml:space="preserve">
+    <value>Add cargo destination</value>
   </data>
-  <data name="NoCargoDescriptions" xml:space="preserve">
-    <value>No cargo descriptions yet.</value>
-  </data>
-  <data name="NewCargoDescriptionName" xml:space="preserve">
-    <value>New cargo description</value>
+  <data name="NoCargoDestinations" xml:space="preserve">
+    <value>No cargo destinations yet.</value>
   </data>
   <data name="ToAllDestinations" xml:space="preserve">
     <value>To all destinations?</value>
@@ -1448,6 +1472,9 @@
   </data>
   <data name="WagonsTo" xml:space="preserve">
     <value>Wagons to</value>
+  </data>
+  <data name="WagonsToDestinations" xml:space="preserve">
+    <value>Wagons to {0}</value>
   </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Wagons from {0} to {1}</value>
@@ -1464,11 +1491,20 @@
   <data name="UsedInTrains" xml:space="preserve">
     <value>Used in trains</value>
   </data>
-  <data name="CargoDescriptionNotUsed" xml:space="preserve">
+  <data name="CargoDestinationNotUsed" xml:space="preserve">
     <value>Not used by any train.</value>
   </data>
   <data name="OnlyWagonClassesHint" xml:space="preserve">
     <value>Optional UIC wagon-class letters limiting which wagons to bring, e.g. "U,Z". Leave empty for any wagon.</value>
+  </data>
+  <data name="SpecificCargo" xml:space="preserve">
+    <value>Specific cargo</value>
+  </data>
+  <data name="SpecificCargoHint" xml:space="preserve">
+    <value>Optional name of the cargo the wagons carry, e.g. "Timber". Leave empty for any cargo the wagon classes take.</value>
+  </data>
+  <data name="SpecificCargoDisabledHint" xml:space="preserve">
+    <value>Enter wagon classes first to name a specific cargo.</value>
   </data>
   <data name="Destinations" xml:space="preserve">
     <value>Destinations</value>
@@ -1494,11 +1530,11 @@
   <data name="OriginLocationsHint" xml:space="preserve">
     <value>Only add origin locations when the train is expected to take wagons that come from a location the train does not serve itself — typically wagons fed in from a branch line that are to continue with this train. An origin location is not where the train picks up the wagons; that is specified elsewhere.</value>
   </data>
-  <data name="CargoDescriptionReferenced" xml:space="preserve">
-    <value>Cannot delete: this cargo description is used by one or more cargo flows.</value>
+  <data name="CargoDestinationReferenced" xml:space="preserve">
+    <value>Cannot delete: this cargo destination is used by one or more cargo flows.</value>
   </data>
-  <data name="DeleteCargoDescriptionConfirm" xml:space="preserve">
-    <value>Delete cargo description '{0}'?</value>
+  <data name="DeleteCargoDestinationConfirm" xml:space="preserve">
+    <value>Delete cargo destination '{0}'?</value>
   </data>
   <data name="PositionInTrainHint" xml:space="preserve">
     <value>Position in the train (1 = front); 0 means anywhere.</value>
@@ -1552,10 +1588,10 @@
     <value>Add origin location</value>
   </data>
   <data name="CargoTrainsDescription" xml:space="preserve">
-    <value>Add cargo flows to trains: choose a train, then set where wagons are connected and disconnected and which cargo description applies.</value>
+    <value>Add cargo flows to trains: choose a train, then set where wagons are connected and disconnected and which cargo destinations apply.</value>
   </data>
-  <data name="CargoTrainsNeedDescriptions" xml:space="preserve">
-    <value>Add at least one cargo description first, on the Cargo descriptions tab.</value>
+  <data name="CargoTrainsNeedDestinations" xml:space="preserve">
+    <value>Add at least one cargo destination first, on the Cargo destinations tab.</value>
   </data>
   <data name="SelectTrain" xml:space="preserve">
     <value>Select a train…</value>
@@ -1568,9 +1604,6 @@
   </data>
   <data name="CargoFlows" xml:space="preserve">
     <value>Cargo flows</value>
-  </data>
-  <data name="CargoDescription" xml:space="preserve">
-    <value>Cargo description</value>
   </data>
   <data name="DeleteCargoFlowConfirm" xml:space="preserve">
     <value>Delete this cargo flow?</value>
@@ -1616,6 +1649,18 @@
   </data>
   <data name="AddTrainPart" xml:space="preserve">
     <value>Add train</value>
+  </data>
+  <data name="InsertTrainPart" xml:space="preserve">
+    <value>Insert train</value>
+  </data>
+  <data name="ScheduleLayover" xml:space="preserve">
+    <value>The vehicle stands here — add a train</value>
+  </data>
+  <data name="ScheduleBrokenJoint" xml:space="preserve">
+    <value>The vehicle does not continue from here — add the train that bridges the gap</value>
+  </data>
+  <data name="InsertBeforeFirstPart" xml:space="preserve">
+    <value>Add a train that brings the vehicle here</value>
   </data>
   <data name="EditTrainPart" xml:space="preserve">
     <value>Edit train part</value>

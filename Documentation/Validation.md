@@ -283,7 +283,7 @@ Coverage is judged **leg by leg, not by whether the train appears in some turnus
 
 **Errors**:
 - `"Vehicle schedule {number} has no vehicle assigned."` (`ScheduleHasNoVehicle`)
-- `"Train {0} has no traction unit between {1} and {2} on sessions {3}."` (`TrainMissingTraction`)
+- `"Train {0} has no traction unit between {1} {2} and {3} {4} on sessions {5}."` (`TrainMissingTraction`)
 
 ### Plan scope (P) — cross-object consistency
 

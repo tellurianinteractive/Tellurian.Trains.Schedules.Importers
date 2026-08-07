@@ -88,8 +88,18 @@ else
                             <SessionsView Sessions="schedule.EffectiveSessions" Settings="SessionSettings" />
                         </span>
                     }
-                    @foreach (var part in schedule.OrderedParts)
+                    @foreach (var joint in schedule.Joints)
                     {
+                        @* Every joint but the last is drawn before the part that follows it; the working's
+                           end keeps the "+ train" button below. *@
+                        if (joint.Next is not { } part) continue;
+                        if (joint.HasRoom)
+                        {
+                            <button class="joint @(joint.IsBroken ? "broken" : null) @(joint.IsStart ? "start" : null)"
+                                    title="@JointTitle(joint)" @onclick="() => _addPartTarget = (schedule, joint)">
+                                <i class="fa-solid fa-plus"></i> @JointText(joint)
+                            </button>
+                        }
                         var segment = BuildSegment(part);
                         <div class="part" style="background:@segment.Color; color:@segment.TextColor" title="@segment.Title">
                             <span class="from">@segment.From</span>
@@ -106,7 +116,7 @@ else
                             <button class="x" title="@Translator("RemovePart")" @onclick="() => RemovePart(schedule, part)"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                     }
-                    <button class="add-train" @onclick="() => _addPartTarget = schedule"><i class="fa-solid fa-plus"></i> @Translator("AddTrainPart")</button>
+                    <button class="add-train" @onclick="() => _addPartTarget = (schedule, null)"><i class="fa-solid fa-plus"></i> @Translator("AddTrainPart")</button>
                 </div>
             </div>
         }
@@ -115,7 +125,7 @@ else
 
 @if (_addPartTarget is { } addTarget)
 {
-    <AddPartDialog Schedule="addTarget"
+    <AddPartDialog Schedule="addTarget.Schedule" Joint="addTarget.Joint"
                    OnAdded="() => _addPartTarget = null"
                    OnClosed="() => _addPartTarget = null" />
 }
@@ -142,8 +152,8 @@ else
     /// <summary>The vehicle schedules to chart, in the order they should appear (top to bottom).</summary>
     [Parameter, EditorRequired] public IReadOnlyList<Schedule> Schedules { get; set; } = [];
 
-    /// <summary>The graph settings that decide how a train identity is formatted (category prefix, company
-    /// signature, sessions/days), so the blocks match the graphical timetable's labels.</summary>
+    /// <summary>The graph settings that decide how a train identity is formatted (company signature,
+    /// sessions/days), so the blocks match the graphical timetable's labels.</summary>
     [Parameter] public GraphSettings Settings { get; set; } = GraphSettings.Default;
 
     /// <summary>Raised with a status message to show (or <c>null</c> to clear it), e.g. when a complement
@@ -159,7 +169,9 @@ else
     private SessionsSettings SessionSettings =>
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
-    private Schedule? _addPartTarget;
+    // The working a train is being added to, and where in it: a joint to fill, or null for the trailing
+    // "+ train" that appends to the end.
+    private (Schedule Schedule, ScheduleJoint? Joint)? _addPartTarget;
     private (Schedule Schedule, ScheduledTrainPart Part)? _editPartTarget;
     private Schedule? _assignTarget;
     private Schedule? _deleteTarget;
@@ -191,6 +203,21 @@ else
             .Select(v => (Vehicle: v, Assignment: v.ScheduleAssignments.FirstOrDefault(a => schedule.Equals(a.Schedule))))
             .Where(x => x.Assignment is not null)
             .Select(x => (x.Vehicle, x.Assignment!));
+
+    // What a joint reads as in the row: where the vehicle stands and for how long, the two stations when
+    // the working is broken across it, or where the vehicle must be brought to before the working starts.
+    private string JointText(ScheduleJoint joint) =>
+        joint.IsStart ? $"→ {joint.To!.Signature} {joint.WindowEnd!.Value.HHMM()}"
+        : joint.IsBroken ? $"{joint.From!.Signature} → {joint.To!.Signature}"
+        : $"{joint.From!.Signature} {LayoverText(joint.Layover!.Value)}";
+
+    // The time the vehicle stands, as H:mm — the form the duty chart writes a duration in, and not a
+    // padded clock time, which is what the times on the blocks either side of it are.
+    private static string LayoverText(Time layover) =>
+        $"{(int)layover.Value.TotalHours}:{layover.Value.Minutes:00}";
+
+    private string JointTitle(ScheduleJoint joint) =>
+        Translator(joint.IsStart ? "InsertBeforeFirstPart" : joint.IsBroken ? "ScheduleBrokenJoint" : "ScheduleLayover");
 
     private void RemoveVehicle(ScheduleAssignment assignment)
     {
@@ -237,10 +264,14 @@ else
         }
     }
 
+    // The category prefix/suffix is always part of the identity here, whatever the graph is set to draw:
+    // the blocks have to be recognisable against the Trains tab, which always lists trains that way.
+    private GraphSettings IdentitySettings => Settings with { ShowTrainCategory = true };
+
     private Segment BuildSegment(ScheduledTrainPart part)
     {
         var color = part.Train.Category?.Color ?? "#000000";
-        var identity = part.Train.GraphLabel(Settings);
+        var identity = part.Train.GraphLabel(IdentitySettings);
         var from = $"{part.From.OperationLocation.Signature} {part.From.Departure.HHMM()}";
         var to = $"{part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
         return new Segment(from, identity, to, color, color.TextColor, $"{from} – {identity} – {to}");
