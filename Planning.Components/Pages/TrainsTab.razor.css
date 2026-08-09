@@ -70,9 +70,12 @@
         font-style: italic;
     }
 
+    /* Only as wide as its columns need (the app-wide max-content sizing in app.css). Stretched across
+       the whole window the values of one train drift so far apart that the row can no longer be read
+       across; squeezed into a narrow window they wrap, which is no better. A window too narrow for the
+       table scrolls instead. */
     table.trains {
         border-collapse: collapse;
-        width: 100%;
         font-size: 0.9rem;
     }
 
@@ -268,13 +271,8 @@
         top: 1px;
     }
 
-    .sub {
-        max-width: 1040px;
-    }
-
     table.sub-grid {
         border-collapse: collapse;
-        width: 100%;
         margin-bottom: 0.4rem;
     }
 
@@ -298,15 +296,14 @@
         padding: 0.3rem 0.5rem;
     }
 
-    /* The note takes whatever the fixed-width columns leave; the others are sized by their content,
-       so this one absorbs the rest of the sub-table's width. */
-    table.sub-grid th.note,
-    table.sub-grid td.note {
-        width: 100%;
+    /* A note column sized by its content would be a sliver on the calls that carry no note, and a note
+       is written into an empty field as often as into a full one. So the field itself asks for a width
+       to work in, and the column follows it; a longer note than that widens the column, as everywhere
+       else. */
+    table.sub-grid td.note ::deep .notefield {
+        min-width: 20rem;
     }
 
-    /* Absorbing the slack squeezes the action cell to its minimum content width, which stacks the
-       delete button's icon above its label. Keep that cell on one line. */
     table.sub-grid td:last-child {
         white-space: nowrap;
     }

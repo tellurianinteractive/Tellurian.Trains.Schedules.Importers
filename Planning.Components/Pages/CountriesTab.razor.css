@@ -72,8 +72,6 @@
     /* QuickGrid list */
     ::deep table {
         border-collapse: collapse;
-        width: 100%;
-        max-width: 700px;
         font-size: 0.9rem;
     }
 

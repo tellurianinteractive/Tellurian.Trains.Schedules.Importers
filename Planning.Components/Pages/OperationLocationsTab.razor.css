@@ -74,9 +74,15 @@
     /* QuickGrid list */
     ::deep table {
         border-collapse: collapse;
-        width: 100%;
-        max-width: 960px;
         font-size: 0.9rem;
+    }
+
+    /* Regions are the one column that can hold several items, and with content sizing a station in
+       four of them would stretch the whole table. The cap sits on a wrapper inside the cell, not on
+       the cell: a max-width on a td is ignored by the automatic table layout, whereas the wrapper's
+       cap does limit what the column asks for. */
+    .region-list {
+        max-width: 14rem;
     }
 
     ::deep th,

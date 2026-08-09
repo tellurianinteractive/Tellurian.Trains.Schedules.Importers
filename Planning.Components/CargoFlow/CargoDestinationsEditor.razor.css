@@ -77,8 +77,6 @@
     table.grid {
         border-collapse: separate;
         border-spacing: 2px 0;
-        width: 100%;
-        max-width: 960px;
         font-size: 0.9rem;
     }
 

@@ -56,6 +56,29 @@ textarea:focus {
    rules so these plain rules apply without !important. The sort-direction arrow is a hard-coded black
    SVG background-image (dotnet/aspnetcore#47805) that `color` cannot change, so it is recoloured to the
    header text colour with a filter. */
+/* --- Data-table sizing (app-wide) ----------------------------------------------
+   A table on screen is sized by what is in it: max-content gives every column exactly the width its
+   widest entry needs, so no column is squeezed until its text wraps, and none is stretched to fill a
+   window the data does not need. A table wider than the window is not a problem to design around —
+   the tab pane (.pane-content in MainLayout) already scrolls, so it scrolls with the pane instead of
+   being compressed.
+
+   So: do not put width or max-width on a screen table, and do not give a column a percentage width to
+   make it absorb the slack — there is no slack to absorb. Hold back a column that would otherwise run
+   away (one holding free text) by capping a wrapper inside its cells, not the cell itself: automatic
+   table layout ignores max-width on a td. Conversely, a column whose content is too small to work in
+   (an input that must stay usable when empty) gets a min-width on the control.
+
+   The printed tables are the exception and keep their fixed widths: they are laid out to the paper,
+   and the pagination counts on those widths (see Reporting/ and the print rules below). */
+table.grid,
+table.sub-grid,
+table.tracks,
+table.speed-map,
+table.trains {
+    width: max-content;
+}
+
 /* The header look is shared by QuickGrid (table.grid) and the ordinary data tables (tracks,
    speed-map): signature background with auto-contrasted text. A new data table should use one of
    these classes to match. */
@@ -754,8 +777,6 @@ code {
     table.grid {
         border-collapse: separate;
         border-spacing: 2px 0;
-        width: 100%;
-        max-width: 960px;
         font-size: 0.9rem;
     }
 

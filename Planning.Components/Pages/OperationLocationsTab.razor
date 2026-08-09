@@ -46,10 +46,12 @@ else
                     <TemplateColumn Title='@Translator("Regions")'>
                         @if (context is Station { Regions.Count: > 0 } regionStation)
                         {
-                            @foreach (var region in regionStation.Regions)
-                            {
-                                @region.ToHtml
-                            }
+                            <div class="region-list">
+                                @foreach (var region in regionStation.Regions)
+                                {
+                                    @region.ToHtml
+                                }
+                            </div>
                         }
                     </TemplateColumn>
                     <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@if (context is Station { IsManned: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
