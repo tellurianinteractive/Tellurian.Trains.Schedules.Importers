@@ -365,6 +365,23 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a passenger-exchange error: a passenger train stops at a location that exchanges
+    /// passengers, but at a track with no platform for them to get on and off at (rule T6).
+    /// </summary>
+    public static ValidationError PassengerExchangeWithoutPlatform(
+        StationCall call,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.PassengerExchangeWithoutPlatform,
+            FromTrack = call.Track,
+            ToTrack = call.Track,
+            FromTime = call.Arrival,
+            ToTime = call.Departure,
+            Trains = [call.Train!],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a locomotive coverage gap error.
     /// </summary>
     public static ValidationError LocomotiveCoverageGap(
@@ -726,6 +743,9 @@ public enum ValidationErrorType
 
     /// <summary>Two calls the train runs one after the other have no track stretch between them.</summary>
     TrainRouteNotConnected,
+
+    /// <summary>A passenger train stops to exchange passengers at a track with no platform.</summary>
+    PassengerExchangeWithoutPlatform,
 
     /// <summary>Vehicle schedule has overlapping train parts.</summary>
     VehicleScheduleOverlap,

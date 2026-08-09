@@ -315,4 +315,7 @@
   <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
     <value>Der Bahnhof {1} ist nicht besetzt, daher kann der dort für {0} hinterlegte Schlüssel nicht abgeholt werden und wird nicht beachtet.</value>
   </data>
+  <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
+    <value>Zug {0} hält zum Reisendenwechsel in {1} {2}, aber Gleis {3} hat keinen Bahnsteig.</value>
+  </data>
 </root>

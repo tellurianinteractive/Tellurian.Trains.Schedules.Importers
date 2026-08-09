@@ -432,6 +432,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validera tåghastighet?</value>
   </data>
+  <data name="ValidatePassengerExchange" xml:space="preserve">
+    <value>Validera resandeutbyte vid plattform?</value>
+  </data>
   <data name="ValidateRouteContinuity" xml:space="preserve">
     <value>Validera sammanhängande tågvägar?</value>
   </data>
@@ -912,6 +915,21 @@
   <data name="AddTrack" xml:space="preserve">
     <value>Lägg till spår</value>
   </data>
+  <data name="TrackPreviousLocation" xml:space="preserve">
+    <value>Föregående</value>
+  </data>
+  <data name="TrackNextLocation" xml:space="preserve">
+    <value>Nästa</value>
+  </data>
+  <data name="TrackBothDirections" xml:space="preserve">
+    <value>Båda riktningarna?</value>
+  </data>
+  <data name="TrackRoute" xml:space="preserve">
+    <value>Tågväg</value>
+  </data>
+  <data name="TrackRouteHint" xml:space="preserve">
+    <value>Ange driftplatsen ett tåg kommer från, den det fortsätter till, eller båda, så läggs ett nytt tåg som går den vägen på det här spåret — även åt andra hållet om båda riktningarna är ikryssat. Ett nytt tåg som inget spår är avsett för läggs på ett spår med plattform där det stannar för resandeutbyte, och på huvudspåret där det inte gör det.</value>
+  </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Färg</value>
   </data>
@@ -1022,6 +1040,9 @@
   </data>
   <data name="Length" xml:space="preserve">
     <value>Längd (meter)</value>
+  </data>
+  <data name="PlatformLength" xml:space="preserve">
+    <value>Plattformslängd (meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kan inte tas bort: tåg stannar på denna plats.</value>
@@ -1269,6 +1290,12 @@
   <data name="Clone" xml:space="preserve">
     <value>Kopiera</value>
   </data>
+  <data name="OppositeDirection" xml:space="preserve">
+    <value>Motsatt riktning?</value>
+  </data>
+  <data name="OppositeDirectionHint" xml:space="preserve">
+    <value>Kopian kör det kopierade tågets sträcka i motsatt riktning och avgår angivet antal minuter efter det tågets sista avgång.</value>
+  </data>
   <data name="UpdateTimings" xml:space="preserve">
     <value>Uppdatera tider</value>
   </data>
@@ -1324,7 +1351,7 @@
     <value>Vagnar</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fortsätter som?</value>
+    <value>Fortsätter?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Uppehåll</value>
@@ -1349,6 +1376,12 @@
   </data>
   <data name="Track" xml:space="preserve">
     <value>Spår</value>
+  </data>
+  <data name="StationTrackOption" xml:space="preserve">
+    <value>Spår {0}</value>
+  </data>
+  <data name="StationTrackOptionWithUsage" xml:space="preserve">
+    <value>Spår {0}, {1}</value>
   </data>
   <data name="Position" xml:space="preserve">
     <value>Position</value>
@@ -1797,6 +1830,12 @@
   </data>
   <data name="Battery" xml:space="preserve">
     <value>Batteri</value>
+  </data>
+  <data name="IsReversibleTrain" xml:space="preserve">
+    <value>Vändtåg?</value>
+  </data>
+  <data name="IsReversibleTrainHelp" xml:space="preserve">
+    <value>Tåget kan köras från båda ändarna — med manövervagn eller ett lok i andra änden — så ingen tid avsätts för lokrundgång där tåget vänder.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antal enheter</value>

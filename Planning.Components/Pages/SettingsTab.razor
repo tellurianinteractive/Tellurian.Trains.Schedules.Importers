@@ -338,6 +338,10 @@ else
                     <input type="checkbox" @bind="v.ValidateRouteContinuity" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
+                    <label>@Translator("ValidatePassengerExchange")</label>
+                    <input type="checkbox" @bind="v.ValidatePassengerExchange" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
                     <label>@Translator("ValidateTrainNumbers")</label>
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>
@@ -471,10 +475,13 @@ else
         OnEdited();
     }
 
+    // The plan and its timetable carry the same name as the layout, so renaming goes through the plan
+    // (see Plan.Rename): setting only the layout's would leave the old name in the top bar, the window
+    // title and the export file name, which read the plan's.
     private string LayoutName
     {
         get => Layout?.Name ?? "";
-        set { if (Layout is not null) Layout.Name = value; }
+        set => Plan?.Rename(value);
     }
 
     // Changing the theme switches which countries are offered, so keep the stored default country

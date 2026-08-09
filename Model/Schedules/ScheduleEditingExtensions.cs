@@ -280,8 +280,12 @@ public static class ScheduleEditingExtensions
         /// <param name="numberOfUnits">The number of units making up the vehicle — locomotives in a consist,
         /// cars in a multiple unit, or wagons in a wagonset. Values below 1 are clamped to 1. <c>null</c>
         /// leaves it unchanged.</param>
+        /// <param name="isReversibleTrain">Whether the locomotive works a reversible train
+        /// (<see cref="ScheduledObject.IsReversibleTrain"/>). Applied only to a locomotive — anything
+        /// else is left without the flag, since only a locomotive can be spared the runaround by one.
+        /// <c>null</c> leaves it unchanged.</param>
         /// <returns>The updated vehicle.</returns>
-        public ScheduledObject UpdateVehicle(ScheduledObject vehicle, ScheduledObjectType objectType, string? externalId, string? @class, int number, Company? company, TractionType? tractionType = null, int? numberOfUnits = null)
+        public ScheduledObject UpdateVehicle(ScheduledObject vehicle, ScheduledObjectType objectType, string? externalId, string? @class, int number, Company? company, TractionType? tractionType = null, int? numberOfUnits = null, bool? isReversibleTrain = null)
         {
             plan = plan.ValueOrException(nameof(plan));
             vehicle = vehicle.ValueOrException(nameof(vehicle));
@@ -295,6 +299,10 @@ public static class ScheduleEditingExtensions
             vehicle.CompanyId = company?.Id;
             if (tractionType is { } traction && vehicle.IsTraction) vehicle.TractionType = traction;
             if (numberOfUnits is { } units) vehicle.NumberOfUnits = Math.Max(1, units);
+            // Only a locomotive is spared the runaround by working a reversible train; a trainset reverses
+            // freely anyway and nothing else is traction, so neither keeps the flag.
+            if (isReversibleTrain is { } reversible)
+                vehicle.IsReversibleTrain = reversible && objectType == ScheduledObjectType.Locomotive;
             // The individual-wagon rake belongs only to a wagonset; clear it when the type is anything else.
             if (!objectType.IsWagonSet) vehicle.Units.Clear();
             return vehicle;

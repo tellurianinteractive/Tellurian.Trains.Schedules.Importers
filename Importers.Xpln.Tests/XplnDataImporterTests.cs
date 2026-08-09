@@ -305,6 +305,36 @@ public class XplnDataImporterTests
     }
 
     [TestMethod]
+    public async Task ReadsSmallWheelValuesAsAxlesAndLargeOnesAsCentimeters()
+    {
+        // XPLN's wheel value is normally a maximum number of axles, but some plans state the maximum
+        // train length in centimetres there instead. Värnamo2017 does throughout (100, 150, 200 cm),
+        // while FREMODERN-2023-Norge mixes both conventions in the same file.
+        Assert.IsTrue(IsScheduleFileExisting("Värnamo2017", out var värnamo));
+        using var värnamoImporter = new XplnDataImporter(värnamo, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var värnamoResult = await värnamoImporter.ImportScheduleAsync("Värnamo2017");
+        Assert.IsTrue(värnamoResult.IsSuccess, "Import should succeed.");
+
+        var s32 = värnamoResult.Item.Timetable.Trains.Single(t => t.Number == 32);
+        Assert.AreEqual(1.5, s32.Length.Meters, "150 should be read as 150 cm = 1.5 m.");
+        Assert.IsNull(s32.Length.Axles, "A centimetre value should not also set axles.");
+
+        Assert.IsTrue(IsScheduleFileExisting("FREMODERN-2023-Norge", out var fremodern));
+        using var fremodernImporter = new XplnDataImporter(fremodern, DataSetProvider, OperatingCompaniesService, TrainCategoriesService, Logger);
+        var fremodernResult = await fremodernImporter.ImportScheduleAsync("FREMODERN-2023-Norge");
+        Assert.IsTrue(fremodernResult.IsSuccess, "Import should succeed.");
+        var trains = fremodernResult.Item.Timetable.Trains;
+
+        var gt6303 = trains.Single(t => t.Number == 6303);
+        Assert.AreEqual(12, gt6303.Length.Axles, "12 should be read as axles.");
+        Assert.IsNull(gt6303.Length.Meters, "An axle value should not also set metres.");
+
+        var gt5935 = trains.Single(t => t.Number == 5935);
+        Assert.AreEqual(1.0, gt5935.Length.Meters, "100 is at the threshold and should be read as 100 cm = 1 m.");
+        Assert.IsNull(gt5935.Length.Axles, "A centimetre value should not also set axles.");
+    }
+
+    [TestMethod]
     public async Task VehicleSchedulesResolveTheirVehicleAndCargoFlowsAreDistinguished()
     {
         // The Schedules turn chart labels each row with the vehicle that works the schedule and leaves
@@ -394,6 +424,11 @@ public class XplnDataImporterTests
                 Assert.HasCount(expectedCargoFlows, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.CargoFlow), "Cargo flows");
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
+                // Validated as the app validates it: an imported plan is brought into a consistent state
+                // before anything looks at it (the app does this when the plan is handed to
+                // ScheduleState). Without it the plan is judged half-built — XPLN records no platforms,
+                // for one, so every passenger stop would be reported as having nowhere to exchange (T6).
+                result.Item.Reconcile();
                 var validationErrors = result.Item.GetValidationErrors(ValidationSettings);
                 WriteLines(result.Messages.ToStrings().Concat(validationErrors.ToStrings()), file);
                 Assert.AreEqual(expectedValidationWarnings, validationErrors.Count(), "Validation warnings");

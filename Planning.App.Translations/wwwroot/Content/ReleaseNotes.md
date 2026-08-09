@@ -1,5 +1,80 @@
 # Release notes
 
+## Version 0.5.0
+
+### Changes
+
+- **A reversible train no longer stands waiting for a runaround.** Where a train's route reverses, it
+  has until now been given time enough for the locomotive to be run round to the other end — whatever
+  worked it. Edit a locomotive on the Schedules tab and tick the new **Reversible train?** box where it
+  works a train that can be driven from either end: one with a driving trailer at the far end, or with
+  a second locomotive there. The driver simply changes cab, so **Update timings** now leaves out the
+  runaround and the train stands for the minimum stop instead, bringing every later call forward.
+
+  A **trainset** is treated this way too, without anything to tick — it turns round as it stands, which
+  the timings had not allowed for before. Untick the box, or give the train an ordinary locomotive, and
+  the time for the runaround comes back. A stand you have deliberately made longer than the runaround
+  itself is left as you set it.
+
+- **A track can now say which way through the location it is for.** Where an operation location has more
+  than one track and somewhere to run on to, each of its tracks can name the **previous** location a
+  train comes from, the **next** one it goes on to, or both, with a **both ways** box for when the same
+  track serves the opposite direction as well. Only the locations reached by a stretch from here are
+  offered, so a track can only be named for a route a train can actually take.
+
+  A new train is then put on the track that fits its route best: a track named for exactly where the
+  train has come from and where it is going on to beats one naming only one of them, which beats a track
+  naming nothing, and a track named for a route the train does not run is left to the trains it is for.
+  This is what a **double line** needs — give one track the previous and next locations of the one
+  direction and the other track the same pair reversed, and each direction keeps to its own track. Leave
+  the columns empty and nothing changes from before.
+
+  Where two tracks fit the route equally well, a passenger train that **stops** takes a track with a
+  platform, and a train running **through** — like any train with no passengers to exchange — takes the
+  main track. Until now a passenger train took a platform track wherever it called, whether it stopped
+  there or not.
+
+- **A train can now be copied the other way round, and copied over and over.** Copying a train made a
+  single copy running the same way as the train it came from. Tick **Opposite direction?** and the copy
+  runs the route backwards instead, from where the train ended to where it began: every run time and
+  every stop is kept, the preparation and finishing-up times swap ends, and the copy takes a number from
+  the opposite direction's series. The minutes are then counted from the copied train's last departure,
+  so 20 minutes puts the working back 20 minutes after the train it returns from is put away.
+
+  The copy dialogue also has the **Repeat trains** option that adding a train has: give an end time and
+  an interval, and one copy is added per interval until the end time is passed. A train can now be
+  created on its own, adjusted until it runs as it should, and only then repeated across the day — until
+  now the whole series had to be asked for when the first train was created.
+
+- **A track can now say how long its platform is.** Where an operation location exchanges passengers,
+  each of its tracks has a **platform length** in metres. Above zero means there is a platform along that
+  track and passengers can get on and off there; zero means there is none. A new passenger train is put
+  on a track with a platform — the main one of them for choice — at every location it calls at, and takes
+  the main track where the location has none. A passenger train may still stand at a track without a
+  platform: it simply exchanges nothing there, which is exactly what it does when it meets another train
+  somewhere no passengers are exchanged at all.
+
+  Tick **Passengers?** for a location whose tracks have no platform yet and every track is given a
+  one-metre platform for you to adjust. A plan made or imported before this is treated the same way the
+  first time it is opened, so it goes on working exactly as it did — you then shorten or clear the tracks
+  that in truth have no platform. A location where a platform is already recorded is left alone.
+
+  A passenger train that stops to exchange passengers at a track with no platform is now listed under
+  **Conflicts**. You decide which of two things it is: give the track a platform length, or clear the
+  call's **Arr** and **Dep** boxes, which says the train is merely standing there and exchanging nothing.
+  Nothing is put right for you, since only you know which it is. Where a location has a platform at one
+  track only — the usual arrangement at a small station — two passenger trains meeting there cannot both
+  have it, and the one without it is the one reported. The check can be switched off under
+  **Settings › Validation**.
+
+### Fixes
+
+- **Renaming the layout now changes the name everywhere it is shown.** The layout name under
+  **Settings › General** was changed in the settings alone: the front page of the general instructions
+  booklet, the name in the top bar and the file name a plan is saved under all went on showing what
+  the layout was called before. They now all follow the name as it is edited, and a plan renamed
+  before this is put right the next time it is opened.
+
 ## Version 0.4.2
 
 ### Changes

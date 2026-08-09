@@ -48,6 +48,7 @@ public sealed record ValidationError
 | `TrainSpeedTooFast` | Train speed is too fast between calls |
 | `TrainTooFewCalls` | Train must have at least two station calls |
 | `TrainRouteNotConnected` | Two calls the train runs one after the other have no track stretch between them |
+| `PassengerExchangeWithoutPlatform` | A passenger train stops to exchange passengers at a track with no platform |
 | `VehicleScheduleOverlap` | Vehicle schedule has overlapping train parts |
 | `LocomotiveCoverageGap` | Train has a gap in locomotive coverage — **no longer produced**, superseded by `TrainMissingTraction` |
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
@@ -72,6 +73,7 @@ public sealed class ValidationSettings
     public bool ValidateStretches { get; set; } = true;
     public bool ValidateTrainSpeed { get; set; } = true;
     public bool ValidateRouteContinuity { get; set; } = true;
+    public bool ValidatePassengerExchange { get; set; } = true;
     public bool ValidateTrainNumbers { get; set; } = true;
     public bool ValidateSchedules { get; set; } = true;
     public bool ValidateLocomotiveCoverage { get; set; } = true;
@@ -235,8 +237,41 @@ stretch between these locations."` (`TrainRouteNotConnected`)
 This rule is why a call in the middle of a route may not be deleted, only one at either end: removing an
 intermediate call would leave the route jumping the location it stood for. The deletion rule
 (`DeletionRules.MayDelete(StationCall)`) enforces that up front, so the planner cannot create the fault by
-deleting; T5 reports it in a plan that already has it — from a hand-edited file, a re-pointed call, or a
-stretch removed from the layout under a train that used it.
+deleting.
+
+The same rule read forwards decides where a call may be put in the first place: `RouteRules` offers only the
+operating locations joined to the call before it and the call after it, so a call cannot be re-pointed into a
+gap either, and a call added at the end of a run is offered only the locations the train can run on to.
+
+T5 therefore reports a plan that already has the fault rather than one made in the editor — from a
+hand-edited file, an import, or a stretch removed from the layout under a train that used it.
+
+#### T6 — Passenger exchange needs a platform ✅
+**Method**: `CheckPassengerExchange(this Train me)`
+
+**Validates**: A passenger train that stops to exchange passengers stands at a track with a platform.
+Three things must hold before anything is reported: the train carries passengers
+(`Train.IsPassenger`), the location exchanges them (`OperationLocation.HasPassengerExchange`), and the
+call is one the train stops at — `IsArrival`, `IsDeparture` or both. The fault is then a track with no
+platform (`StationTrack.HasPlatform` false, i.e. `PlatformLength` zero). Gated by
+`ValidatePassengerExchange`.
+
+**Not a fault**: a call that is neither an arrival nor a departure. A passenger train may stand for as
+long as the plan says at a track with no platform — waiting for a meet — as long as the call is not
+marked as a stop. Neither is a location that exchanges no passengers, whatever its calls say.
+
+**Error**: `"Train {train} stops to exchange passengers at {location} {time}, but track {track} has no
+platform."` (`PassengerExchangeWithoutPlatform`)
+
+Nothing is put right automatically, because the answer is the planner's: give the track a platform
+length on the **Operation locations** tab, or clear the call's Arr and Dep boxes so the train is merely
+standing there. Where a location has a platform at one track only — the ordinary small-station
+arrangement — two passenger trains meeting there cannot both have it, and the one without is reported
+until the planner says which of the two answers applies.
+
+The rule judges a **reconciled** plan (`Plan.Reconcile()`), as every consumer validates one. A plan that
+records no platforms at all — an XPLN import, which has no such concept — is given them there
+(`Layout.EnsurePlatforms`), so importing raises no findings from this rule.
 
 ### Schedule scope (S) — vehicle schedule / turnus
 

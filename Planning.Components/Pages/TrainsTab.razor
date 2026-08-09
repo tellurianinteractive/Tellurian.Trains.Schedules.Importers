@@ -428,7 +428,8 @@ else
         <table class="sub-grid">
             <thead>
                 <tr>
-                    <th>@Translator("Station") / @Translator("Track")</th>
+                    <th>@Translator("Station")</th>
+                    <th>@Translator("Track")</th>
                     <th>@Translator("Arrival")</th>
                     <th>@Translator("Departure")</th>
                     <th title="@Translator("IsArrival")">@Translator("Arr")</th>
@@ -449,9 +450,20 @@ else
                     var canBeStop = call.CanBeStop;
                     var arrivalRequired = Plan?.IsArrivalRequired(call) == true;
                     var departureRequired = Plan?.IsDepartureRequired(call) == true;
-                    <tr>
+                    @* Keyed on the call itself: editing a time re-sorts the rows, and without a key the two
+                       drop-downs would be diffed against whichever row moved into this position. *@
+                    <tr @key="call">
+                        @* Where the train calls and which track it takes are asked separately: one list of
+                           every location-and-track pair in the layout is long enough to pick the wrong line
+                           out of, and changing track — much the commoner edit — should not mean finding the
+                           station again. The locations offered are the ones that keep the route whole (see
+                           the model's RouteRules), and the tracks are that location's own. *@
                         <td>
-                            <ListBoxView Items="@(TrackChoices.ToListItems())"
+                            <ListBoxView Items="@(train.LocationChoicesFor(call).ToListItems())"
+                                         Value="call.OperationLocation.Id" ValueChanged="id => SetCallLocation(call, id)" />
+                        </td>
+                        <td>
+                            <ListBoxView Items="@(call.OperationLocation.TracksInDisplayOrder.ToListItems(Translator))"
                                          Value="call.TrackId" ValueChanged="id => SetCallTrack(call, id)" />
                         </td>
                         @* Keyed on _timeEdits so a refused or unreadable time is discarded: without a changed
@@ -485,19 +497,39 @@ else
                 }
                 @if (train.Calls.Count == 0)
                 {
-                    <tr><td colspan="7" class="empty">@Translator("NoCalls")</td></tr>
+                    <tr><td colspan="8" class="empty">@Translator("NoCalls")</td></tr>
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!TrackChoices.Any())" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
+        <button class="small" disabled="@(!NextCallLocations(train).Any())" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
     </div>;
 
-    private IEnumerable<StationTrack> TrackChoices =>
-        (Layout?.StationTracks() ?? []).OrderBy(t => t.Station.Name, StringComparer.CurrentCulture).ThenBy(t => t.Number, StringComparer.CurrentCulture);
+    // The locations a call added at the end of this train's run may be at. Empty means there is nowhere
+    // to add one — a layout with no track anywhere, or a train that has run out of onward locations.
+    private IReadOnlyList<OperationLocation> NextCallLocations(Train train) =>
+        Layout is { } layout ? train.LocationChoicesForNextCall(layout) : [];
+
+    // Moving a call to another location puts it on that location's first track; the planner picks another
+    // from the track list beside it if the first is not the one wanted. A location with no track is never
+    // offered, so finding no track here means the location was emptied under the call.
+    private void SetCallLocation(StationCall call, int? id)
+    {
+        if (call.Train.LocationChoicesFor(call).FirstOrDefault(l => l.Id == id) is not { } location) return;
+        if (location.TracksInDisplayOrder.FirstOrDefault() is not { } track) return;
+        MoveCall(call, track);
+    }
 
     private void SetCallTrack(StationCall call, int? id)
     {
-        if (TrackChoices.FirstOrDefault(t => t.Id == id) is not { } track) return;
+        if (call.OperationLocation.Tracks.FirstOrDefault(t => t.Id == id) is not { } track) return;
+        MoveCall(call, track);
+    }
+
+    // The per-track index of calls is the track's own (see Timetable.RebuildStationCalls), so a call
+    // leaving one track has to be taken off it and put on the other.
+    private void MoveCall(StationCall call, StationTrack track)
+    {
+        if (ReferenceEquals(call.Track, track)) return;
         call.Track.Calls.Remove(call);
         call.Track = track;
         call.TrackId = track.Id;
@@ -560,10 +592,17 @@ else
         Save();
     }
 
+    // The call is added where the train can run on to, so a route built with this button stays whole: the
+    // first of the onward locations, or the first location of the layout when the train has no calls yet.
+    // It goes at the end of the run, so the train reaches the location from its last one and goes on
+    // nowhere from it, and that is what decides the track it is put on — a track the planner has reserved
+    // for trains running this way first of all (see OperationLocation.PreferredTrack).
     private void AddCall(Train train)
     {
-        var track = TrackChoices.FirstOrDefault();
-        if (track is null) return;
+        if (NextCallLocations(train).FirstOrDefault() is not { } location) return;
+        var previous = train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
+        var preference = train.Category?.IsPassenger == true ? TrackPreference.Platform : TrackPreference.MainTrack;
+        if (location.PreferredTrack(previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
         train.Add(call);

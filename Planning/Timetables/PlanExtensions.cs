@@ -214,6 +214,24 @@ public static class PlanExtensions
                 plan.OperatingWindowContains(train.DriverStartTime.AddMinutes(minutes), train.DriverEndTime.AddMinutes(minutes));
         }
 
+        /// <summary>
+        /// Gets whether a clone of <paramref name="train"/> made with <c>Clone</c> would fit the plan's operating
+        /// window (see <c>FitsWithinOperatingWindow</c>). Used to validate a clone before it happens, without
+        /// mutating anything — though when <see cref="Model.Settings.GeneralSettings.AllowPlanTimeExtend"/> is set,
+        /// the operating window itself is widened as a side effect and the clone always fits.
+        /// </summary>
+        /// <param name="train">The train to be cloned. Cannot be null.</param>
+        /// <param name="minutes">The clone's offset in minutes, read as <c>Clone</c> reads it: a shift of every
+        /// time for a same-direction clone, minutes after the train's last departure for an opposite one.</param>
+        /// <param name="direction">Which way round the clone runs.</param>
+        /// <returns><c>true</c> when the clone would fit the operating window; otherwise <c>false</c>.</returns>
+        public bool FitsWhenCloned(Train train, int minutes, CloneDirection direction)
+        {
+            ArgumentNullException.ThrowIfNull(train);
+            if (train.Calls.Count == 0) return false;
+            return plan.FitsWhenMovedBy(train, direction == CloneDirection.Opposite ? OppositeShiftMinutes(train, minutes) : minutes);
+        }
+
         // The shared operating-window rule. The start must always lie within the operating day (00:00–24:00);
         // when the window wraps midnight the end may spill past it, otherwise the whole span must fall within
         // [StartTime, EndTime] — unless AllowPlanTimeExtend is set, in which case StartTime and/or EndTime are
@@ -258,17 +276,22 @@ public static class PlanExtensions
         /// free id and number, and adds it to the plan's timetable.
         /// </summary>
         /// <remarks>
-        /// Run times come from <see cref="TrainExtensions.ScheduledTravelMinutes"/> using the layout's
+        /// Run times come from <see cref="TrainExtensions.ScheduledLegMinutes"/> using the layout's
         /// <see cref="Model.Settings.TimeAndSpeedSettings"/> and the train's effective speed: the train's
         /// <paramref name="maxSpeed"/> is capped per stretch by the stretch's own maximum speed (see
         /// <see cref="TrainExtensions.EffectiveScaleSpeed"/>). When <paramref name="maxSpeed"/> is <c>null</c>
         /// the train's <see cref="Train.MaxSpeed"/> stays unset and the speed falls back to the category's
-        /// <see cref="TrainCategory.DefaultSpeed"/>. The train stops at
+        /// <see cref="TrainCategory.DefaultSpeed"/>. Each end of a leg where the train stands still — a stop,
+        /// the origin, the terminus — adds a minute to that leg's run time for getting away and braking.
+        /// The train stops at
         /// the origin and terminus (always) and at any shadow station; at an intermediate location it stops only
         /// when the category can exchange there (a passenger category where <see cref="OperationLocation.HasPassengerExchange"/>,
         /// a freight category where <see cref="OperationLocation.HasCargoExchange"/>) — otherwise it passes through.
         /// A <see cref="SignalControlledLocation"/> is never a stop. Where the path reverses direction the stop is
         /// long enough for the loco runaround.
+        /// A passenger train is put on a track where its passengers can get on and off — a scheduled track with a
+        /// platform (see <c>StationTrack.HasPassengerExchange</c>), the main one of them for choice; every other
+        /// train, and a passenger train where the location has no platform, takes a scheduled main track.
         /// </remarks>
         /// <param name="category">The category of the train.</param>
         /// <param name="from">The origin location from which the train will depart.</param>
@@ -305,16 +328,19 @@ public static class PlanExtensions
             var directionChanges = path.DirectionChanges.ToHashSet();
 
             var trainNumber = number ?? plan.Timetable.NextTrainNumber(category, IsDownward(path));
-            var train = new Train(NextTrainId(), category, trainNumber) { Sessions = Sessions.All, MaxSpeed = maxSpeed };
+            var train = new Train(plan.NextTrainId, category, trainNumber) { Sessions = Sessions.All, MaxSpeed = maxSpeed };
             plan.Timetable.Add(train);
 
-            var nextCallId = NextCallId();
+            var nextCallId = plan.NextCallId;
             var previousDeparture = startTime;
 
             for (var i = 0; i < locations.Count; i++)
             {
                 var location = locations[i];
-                if (PickTrack(location) is not { } track) return null;
+                var previous = i > 0 ? locations[i - 1] : null;
+                var next = i < locations.Count - 1 ? locations[i + 1] : null;
+                var stops = StandsAt(i);
+                if (location.PreferredTrack(previous, next, Preference(stops)) is not { } track) return null;
 
                 Time arrival, departure;
                 bool isArrival, isDeparture;
@@ -329,7 +355,7 @@ public static class PlanExtensions
                 else
                 {
                     var stretch = path.Segments[i - 1].TrackStretch;
-                    var runMinutes = Math.Max(1, (int)Math.Round(train.ScheduledTravelMinutes(stretch, settings)));
+                    var runMinutes = train.ScheduledLegMinutes(stretch, settings, StandsAt(i - 1), StandsAt(i));
                     arrival = previousDeparture.AddMinutes(runMinutes);
 
                     if (i == locations.Count - 1)
@@ -366,11 +392,15 @@ public static class PlanExtensions
 
             return train;
 
-            int NextTrainId() => plan.Timetable.Trains.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
-            int NextCallId() => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
+            // Whether the train stands still at the location at the given index of the path: it is made ready
+            // at its origin and finished up at its terminus, as surely as it stands at any stop in between.
+            // This decides both the track it is put on and the time it loses getting away and braking (see
+            // TrainExtensions.ScheduledLegMinutes).
+            bool StandsAt(int index) =>
+                index == 0 || index == locations.Count - 1 || StopsAt(locations[index]);
 
             // A train stops at a location when the category can exchange there; shadow stations always stop and
-            // signal-controlled locations never do. The origin and terminus are handled by the caller above.
+            // signal-controlled locations never do. The origin and terminus are handled by StandsAt above.
             bool StopsAt(OperationLocation location)
             {
                 if (location is SignalControlledLocation) return false;
@@ -380,11 +410,15 @@ public static class PlanExtensions
                 return passenger || freight;
             }
 
-            // Prefer a scheduled main track, then any scheduled track, then any track at all.
-            static StationTrack? PickTrack(OperationLocation location) =>
-                location.Tracks.FirstOrDefault(t => t.IsMain && t.IsScheduled)
-                ?? location.Tracks.FirstOrDefault(t => t.IsScheduled)
-                ?? location.Tracks.FirstOrDefault();
+            // What the train wants of the track it is put on, which decides between the tracks whose own
+            // route (see StationTrack.PreviousLocationId) suits it equally well. A passenger train that
+            // stops wants a platform for its passengers to get on and off at; a train running through, and
+            // one with no passengers to exchange, wants the main track. Where the location has no platform
+            // — it exchanges no passengers, or none of its tracks has one — a passenger train falls back to
+            // the main track like any other. Standing at a track without a platform is perfectly ordinary;
+            // a meet is exactly that.
+            TrackPreference Preference(bool stops) =>
+                stops && category.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
         }
 
         /// <summary>
@@ -563,17 +597,40 @@ public static class PlanExtensions
         /// <param name="endTime">The latest departure time; no clone departs after it.</param>
         /// <param name="intervalMinutes">The number of minutes between consecutive departures. Must be greater than zero.</param>
         /// <returns>The added clones in departure order; empty when none fit before <paramref name="endTime"/>.</returns>
-        public IReadOnlyList<Train> CloneMany(Train train, Time endTime, int intervalMinutes)
+        public IReadOnlyList<Train> CloneMany(Train train, Time endTime, int intervalMinutes) =>
+            plan.CloneRepeating(train, intervalMinutes, endTime, intervalMinutes);
+
+        /// <summary>
+        /// Adds a repeating sequence of clones of <paramref name="train"/> to the plan's timetable: the first at
+        /// an offset of <paramref name="minutes"/> and one more every <paramref name="intervalMinutes"/> after
+        /// it, until the next clone would depart after <paramref name="endTime"/>. Each clone is made by
+        /// <c>Clone</c>, so they share the train's route, run and stop times, category and speed — run the same
+        /// way round or backwards, as <paramref name="direction"/> asks.
+        /// </summary>
+        /// <remarks>
+        /// Use this to repeat a train that already exists, once it has been adjusted to run as it should:
+        /// <c>CreateRepeating</c> builds a new train and its repeats in one go, this repeats one that is
+        /// already there. The sequence stops as soon as a clone's departure would fall after
+        /// <paramref name="endTime"/> or outside the plan's operating window (see <c>FitsWhenCloned</c>). The
+        /// train itself is not included in the result.
+        /// </remarks>
+        /// <param name="train">The train to clone repeatedly. Cannot be null.</param>
+        /// <param name="minutes">The first clone's offset, read as <c>Clone</c> reads it: a shift of every time
+        /// for a same-direction clone, minutes after the train's last departure for an opposite one.</param>
+        /// <param name="endTime">The latest departure time; no clone departs after it.</param>
+        /// <param name="intervalMinutes">The number of minutes between consecutive departures. Must be greater than zero.</param>
+        /// <param name="direction">Which way round the clones run; the same way as the train by default.</param>
+        /// <returns>The added clones in departure order; empty when none fit before <paramref name="endTime"/>.</returns>
+        public IReadOnlyList<Train> CloneRepeating(Train train, int minutes, Time endTime, int intervalMinutes, CloneDirection direction = CloneDirection.Same)
         {
             ArgumentNullException.ThrowIfNull(train);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
+            if (train.Calls.Count == 0) return [];
 
-            // The train's own departure: the first departing call it runs, not the first one added.
-            var startTime = train.CallsInRunOrder.First(c => c.IsDeparture).Departure;
             var clones = new List<Train>();
-            for (var offset = intervalMinutes; startTime.AddMinutes(offset).Value <= endTime.Value; offset += intervalMinutes)
+            for (var offset = minutes; CloneDeparture(train, offset, direction).Value <= endTime.Value; offset += intervalMinutes)
             {
-                if (plan.Clone(train, offset) is not { } clone) break;
+                if (plan.Clone(train, offset, direction) is not { } clone) break;
                 clones.Add(clone);
             }
             return clones;
@@ -700,23 +757,38 @@ public static class PlanExtensions
         }
 
         /// <summary>
-        /// Creates a copy of the train with all timings shifted by the given number of minutes, assigns it the
-        /// next free id, number and call ids, and adds it to the plan's timetable.
+        /// Creates a copy of the train, assigns it the next free id, number and call ids, and adds it to the
+        /// plan's timetable. The copy runs the same route as the train it was made from, either the same way
+        /// round or backwards.
         /// </summary>
         /// <remarks>
-        /// The whole shifted clone must fit the plan's operating window (see <c>FitsWhenMovedBy</c>);
-        /// when it would not, nothing is added and <c>null</c> is returned.
+        /// A same-direction clone is the train over again with every time shifted by <paramref name="minutes"/>.
+        /// An opposite-direction clone runs the route backwards, from the train's terminus to its origin: it
+        /// departs <paramref name="minutes"/> after the train's last departure, keeps each leg's run time and
+        /// each intermediate stop's dwell, and swaps ends with the train's preparation and finishing-up times,
+        /// so it takes exactly as long as the train it mirrors. Because it runs the other way, it takes the next
+        /// free number of the opposite parity (odd downwards, even upwards); a same-direction clone keeps the
+        /// train's own parity.
+        /// <para>
+        /// The whole clone must fit the plan's operating window (see <c>FitsWhenCloned</c>); when it would not,
+        /// nothing is added and <c>null</c> is returned.
+        /// </para>
         /// </remarks>
         /// <param name="train">The train to clone. Cannot be null.</param>
-        /// <param name="minutes">The number of minutes to shift the clone; negative moves it earlier, positive later.</param>
-        /// <returns>The cloned train, already added to the timetable, or <c>null</c> when the shift would take
-        /// it outside the operating window.</returns>
-        public Train? Clone(Train train, int minutes)
+        /// <param name="minutes">For a same-direction clone, the number of minutes to shift it by; negative moves
+        /// it earlier, positive later. For an opposite-direction clone, the number of minutes after the train's
+        /// last departure that the clone departs.</param>
+        /// <param name="direction">Which way round the clone runs; the same way as the train by default.</param>
+        /// <returns>The cloned train, already added to the timetable, or <c>null</c> when the clone would fall
+        /// outside the operating window, or when an opposite-direction clone is asked of a train with fewer than
+        /// two calls, which has no route to run backwards.</returns>
+        public Train? Clone(Train train, int minutes, CloneDirection direction = CloneDirection.Same)
         {
             ArgumentNullException.ThrowIfNull(train);
-            if (!plan.FitsWhenMovedBy(train, minutes)) return null;
+            if (direction == CloneDirection.Opposite && train.Calls.Count < 2) return null;
+            if (!plan.FitsWhenCloned(train, minutes, direction)) return null;
 
-            var clone = new Train(NextTrainId(), NextCloneNumber())
+            var clone = new Train(plan.NextTrainId, plan.NextCloneNumber(train, direction))
             {
                 Category = train.Category,
                 CategoryId = train.CategoryId,
@@ -730,25 +802,57 @@ public static class PlanExtensions
             };
             plan.Timetable.Add(clone);
 
-            var nextCallId = NextCallId();
-            foreach (var call in train.Calls)
-            {
-                var copy = new StationCall(nextCallId++, call.Track,
-                    call.Arrival.AddMinutes(minutes), call.Departure.AddMinutes(minutes));
-                clone.Add(copy);
-                copy.IsArrival = call.IsArrival;
-                copy.IsDeparture = call.IsDeparture;
-            }
+            var nextCallId = plan.NextCallId;
+            if (direction == CloneDirection.Opposite) AddReversedCalls();
+            else AddShiftedCalls();
             return clone;
 
-            int NextTrainId() => plan.Timetable.Trains.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
-            // A clone runs the same route as its source, so it keeps that direction's parity: the next free
-            // number of the source's parity in its category. Falls back to the plain next number when the
-            // source has no category.
-            int NextCloneNumber() => train.Category is { } category
-                ? plan.Timetable.NextTrainNumber(category, train.Number % 2 != 0)
-                : plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
-            int NextCallId() => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
+            void AddShiftedCalls()
+            {
+                foreach (var call in train.Calls)
+                {
+                    var copy = new StationCall(nextCallId++, call.Track,
+                        call.Arrival.AddMinutes(minutes), call.Departure.AddMinutes(minutes));
+                    clone.Add(copy);
+                    copy.IsArrival = call.IsArrival;
+                    copy.IsDeparture = call.IsDeparture;
+                }
+            }
+
+            void AddReversedCalls()
+            {
+                // In run order, so the route can be walked backwards from the terminus the clone starts at.
+                var calls = train.CallsInRunOrder;
+                var last = calls.Count - 1;
+
+                // The clone starts where the train ended, the given number of minutes after its last departure,
+                // and its driver prepares it for as long as the train's driver did.
+                var departure = train.DriverEndTime.AddMinutes(minutes);
+                var arrival = departure.AddMinutes(-train.PreparationMinutes);
+
+                for (var i = 0; i <= last; i++)
+                {
+                    var source = calls[last - i];
+                    if (i > 0)
+                    {
+                        // The leg the train ran out of this call, run the other way round: the same stretch at
+                        // the same speed, so the same number of minutes.
+                        arrival = departure.AddMinutes(MinutesBetween(source.Departure, calls[last - i + 1].Arrival));
+                        // The clone ends where the train began, so the dwell there is its finishing-up time;
+                        // anywhere else it stands for as long as the train did.
+                        departure = arrival.AddMinutes(i == last
+                            ? train.FinishingMinutes
+                            : MinutesBetween(source.Arrival, source.Departure));
+                    }
+
+                    var copy = new StationCall(nextCallId++, source.Track, arrival, departure);
+                    clone.Add(copy);
+                    (copy.IsArrival, copy.IsDeparture) =
+                        i == 0 ? (false, true) :
+                        i == last ? (true, false) :
+                        (source.IsArrival, source.IsDeparture);
+                }
+            }
         }
 
         /// <summary>
@@ -760,11 +864,17 @@ public static class PlanExtensions
         /// <remarks>
         /// The origin call is left untouched: its departure is the fixed anchor and its arrival keeps the
         /// existing preparation dwell. From there each leg's run time is recomputed with
-        /// <see cref="TrainExtensions.ScheduledTravelMinutes"/> over the <see cref="TrackStretch"/> between the
-        /// two calls, using the train's effective speed. At a call that is now a stop the dwell is preserved
+        /// <see cref="TrainExtensions.ScheduledLegMinutes"/> over the <see cref="TrackStretch"/> between the
+        /// two calls, using the train's effective speed, and each end of the leg where the train stands still
+        /// — a stop, the origin, the terminus — adds a minute for getting away and braking, so making a call
+        /// a stop lengthens the legs on both sides of it. At a call that is now a stop the dwell is preserved
         /// when the call already had one (so an intentional or terminus finishing dwell is kept); a call that
         /// has just become a stop (its times were equal) is given the standard dwell from
-        /// <see cref="DwellMinutes"/>, including the loco runaround where the travel direction reverses. A call
+        /// <see cref="DwellMinutes"/>. Where the travel direction reverses that dwell allows for the loco
+        /// runaround, unless the train is worked by a trainset or a reversible train (see
+        /// <see cref="Model.Schedules.PlanExtensions.NeedsLocoRunaround"/>) — and there the dwell is
+        /// recomputed rather than preserved, so long as it is no longer than the runaround allowance itself,
+        /// so a train given such traction stops there no longer than anywhere else. A call
         /// that is now a pass-through gets equal arrival and departure times (no dwell). The change is
         /// all-or-nothing: it is not applied and <c>null</c> is returned when two consecutive calls are not
         /// joined by a track stretch, or when the recomputed train would fall outside the plan's operating
@@ -792,11 +902,15 @@ public static class PlanExtensions
                 legs[i] = (stretch, stretch.Start.Equals(from));
             }
 
-            // A call where the travel direction reverses needs a loco runaround (see DwellMinutes). Direction
-            // is taken relative to each stretch's own Start/End, the same convention the path finder uses.
+            // A call where the travel direction reverses. Direction is taken relative to each stretch's own
+            // Start/End, the same convention the path finder uses.
             var reverses = new bool[calls.Length];
             for (var i = 1; i < legs.Length; i++)
                 reverses[i] = legs[i].Forward != legs[i - 1].Forward;
+
+            // Whether reversing costs the time to run the loco round to the other end of the train, which
+            // a trainset or a reversible train is spared (see Plan.NeedsLocoRunaround).
+            var needsRunaround = plan.NeedsLocoRunaround(train);
 
             // Compute the new times into buffers first so the update is all-or-nothing.
             var arrivals = new Time[calls.Length];
@@ -806,17 +920,14 @@ public static class PlanExtensions
 
             for (var i = 1; i < calls.Length; i++)
             {
-                var runMinutes = Math.Max(1, (int)Math.Round(train.ScheduledTravelMinutes(legs[i - 1].Stretch, settings)));
+                var runMinutes = train.ScheduledLegMinutes(legs[i - 1].Stretch, settings, StandsAt(i - 1), StandsAt(i));
                 arrivals[i] = departures[i - 1].AddMinutes(runMinutes);
 
                 var call = calls[i];
                 if (call.IsStop)
                 {
-                    // Keep a dwell the call already has (an intentional stop or the terminus finishing time);
-                    // give a newly-added stop (its times were equal) the standard dwell.
                     var existingDwell = (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
-                    var dwell = existingDwell > 0 ? existingDwell : plan.DwellMinutes(call.OperationLocation, reverses[i]);
-                    departures[i] = arrivals[i].AddMinutes(dwell);
+                    departures[i] = arrivals[i].AddMinutes(Dwell(call, reverses[i], existingDwell));
                 }
                 else
                 {
@@ -833,15 +944,33 @@ public static class PlanExtensions
                 calls[i].Departure = departures[i];
             }
             return train;
+
+            // Whether the train stands still at the call at the given index: it is made ready at its origin
+            // and finished up at its terminus, as surely as it stands at any stop in between. This decides the
+            // time it loses getting away and braking (see TrainExtensions.ScheduledLegMinutes).
+            bool StandsAt(int index) => index == 0 || index == calls.Length - 1 || calls[index].IsStop;
+
+            // The dwell to give a stop. A dwell the call already has is kept — an intentional stop, or the
+            // terminus finishing time — and a call that has just become a stop (its times were equal) is
+            // given the standard one. At a reversal there is one exception: a dwell no longer than the
+            // runaround allowance was computed here rather than asked for, so it follows what the train now
+            // needs, and a train given a trainset or a reversible train stops there no longer than anywhere
+            // else. A longer stand at a reversal was the planner's doing and is kept like any other.
+            int Dwell(StationCall call, bool reverses, int existingDwell)
+            {
+                var standard = plan.DwellMinutes(call.OperationLocation, reverses && needsRunaround);
+                if (!reverses) return existingDwell > 0 ? existingDwell : standard;
+                return existingDwell > plan.DwellMinutes(call.OperationLocation, true) ? existingDwell : standard;
+            }
         }
 
-        // Fast-clock dwell: at least the minimum stop; where the path reverses, at least the loco runaround
-        // (a real duration converted to fast-clock minutes).
-        private int DwellMinutes(OperationLocation location, bool reverses)
+        // Fast-clock dwell: at least the minimum stop; where the loco has to be run round to the other end
+        // of the train, at least the loco runaround (a real duration converted to fast-clock minutes).
+        private int DwellMinutes(OperationLocation location, bool needsRunaround)
         {
             var settings = plan.Layout.Settings.TimeAndSpeed;
             var minimumStop = location.Timings.MinimumStopMinutes ?? settings.StationTimings.MinimumStopMinutes ?? 3;
-            if (!reverses) return minimumStop;
+            if (!needsRunaround) return minimumStop;
             var runaroundReal = location.Timings.LocoRunaroundRealMinutes ?? settings.StationTimings.LocoRunaroundRealMinutes ?? 5;
             return Math.Max(minimumStop, runaroundReal * settings.FastClockSpeed);
         }
@@ -851,6 +980,21 @@ public static class PlanExtensions
             plan.Layout.TrackStretches.FirstOrDefault(s =>
                 (s.Start.Equals(a) && s.End.Equals(b)) || (s.Start.Equals(b) && s.End.Equals(a)));
 
+        // The next free ids in the timetable. Read them before adding what they are for, never after.
+        private int NextTrainId => plan.Timetable.Trains.Select(t => t.Id).DefaultIfEmpty(0).Max() + 1;
+
+        private int NextCallId => plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max() + 1;
+
+        // A clone running the same route as its source keeps that direction's parity, one running it backwards
+        // takes the opposite: the next free number of that parity in the source's category. Falls back to the
+        // plain next number when the source has no category.
+        private int NextCloneNumber(Train train, CloneDirection direction)
+        {
+            if (train.Category is not { } category)
+                return plan.Timetable.Trains.Select(t => t.Number).DefaultIfEmpty(0).Max() + 1;
+            var isOdd = train.Number % 2 != 0;
+            return plan.Timetable.NextTrainNumber(category, direction == CloneDirection.Opposite ? !isOdd : isOdd);
+        }
     }
 
     // A path starts downwards when its first leg runs from a stretch's End towards its Start (a Backward
@@ -865,6 +1009,24 @@ public static class PlanExtensions
 
     private static int MinutesBetween(Time from, Time to) =>
         (int)Math.Round((to.Value - from.Value).TotalMinutes);
+
+    // Where a clone made with this offset departs: a same-direction clone leaves the train's own departure
+    // later, an opposite-direction one leaves after the train it mirrors has finished its run.
+    private static Time CloneDeparture(Train train, int minutes, CloneDirection direction)
+    {
+        if (direction == CloneDirection.Opposite) return train.DriverEndTime.AddMinutes(minutes);
+        // The train's own departure: the first departing call it runs, not the first one added. An imported
+        // train may have no call flagged as a departure at all, so fall back to where its run starts.
+        var calls = train.CallsInRunOrder;
+        return (calls.FirstOrDefault(c => c.IsDeparture) ?? calls[0]).Departure.AddMinutes(minutes);
+    }
+
+    // An opposite-direction clone runs the train's route backwards, so it spans exactly as long as the train
+    // does: the preparation and finishing-up times swap ends, and every run and dwell between them is mirrored.
+    // It therefore occupies the train's own span shifted by this many minutes, which is what the operating
+    // window has to be asked about.
+    private static int OppositeShiftMinutes(Train train, int minutes) =>
+        MinutesBetween(train.DriverStartTime, train.DriverEndTime.AddMinutes(minutes - train.PreparationMinutes));
 
     // The call's position in the train's run, by identity: two calls of the same train can compare equal,
     // so IndexOf would find the wrong one.

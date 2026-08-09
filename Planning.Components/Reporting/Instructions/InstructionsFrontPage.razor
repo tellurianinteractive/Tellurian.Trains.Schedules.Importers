@@ -12,7 +12,7 @@
    first session, printed here because it has nowhere else to go. *@
 
 <div class="instructionsfront">
-    <h1 class="meetingname">@MeetingName</h1>
+    <h1 class="layoutname">@LayoutName</h1>
     @if (Validity is { Length: > 0 } validity)
     {
         <p class="validity">@validity</p>
@@ -30,8 +30,11 @@
 </div>
 
 @code {
-    /// <summary>The schedule's own name, shown as the page's heading.</summary>
-    [Parameter] public string MeetingName { get; set; } = "";
+    /// <summary>
+    /// The layout's name, shown as the page's heading — the same heading a duty booklet opens with
+    /// (see <c>FrontDutyPage</c>), so the two booklets handed out at the same meeting agree.
+    /// </summary>
+    [Parameter] public string LayoutName { get; set; } = "";
 
     /// <summary>First day of the meeting, or null when none is booked.</summary>
     [Parameter] public DateOnly? ValidFrom { get; set; }

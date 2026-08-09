@@ -24,6 +24,39 @@
                        @onchange="e => { _minutes = e.Value?.ToString() ?? _minutes; _error = null; }" />
             </div>
 
+            @if (IsClone)
+            {
+                <div class="field">
+                    <label>@Translator("OppositeDirection")</label>
+                    <input type="checkbox" checked="@_opposite" @onchange="SetOpposite" />
+                </div>
+                @if (_opposite)
+                {
+                    <p class="hint">@Translator("OppositeDirectionHint")</p>
+                }
+
+                <fieldset>
+                    <legend>@Translator("RepeatTrains")</legend>
+                    <div class="field">
+                        <label>@Translator("Repeat")</label>
+                        <input type="checkbox" checked="@_repeat" @onchange="e => { _repeat = e.Value as bool? ?? false; _error = null; }" />
+                    </div>
+                    @if (_repeat)
+                    {
+                        <div class="field">
+                            <label>@Translator("EndTime")</label>
+                            <input type="text" class="time" value="@_endTime"
+                                   @onchange="e => { _endTime = e.Value?.ToString() ?? _endTime; _error = null; }" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("MinutesInterval")</label>
+                            <input type="number" class="num" min="1" value="@_interval"
+                                   @onchange="e => { _interval = ParseInt(e, _interval); _error = null; }" />
+                        </div>
+                    }
+                </fieldset>
+            }
+
             @if (_error is not null)
             {
                 <p class="error">@Translator(_error)</p>
@@ -47,18 +80,37 @@
     /// <summary>Raised when the dialog is dismissed without changing anything.</summary>
     [Parameter] public EventCallback OnClosed { get; set; }
 
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
     private Plan? Plan => ScheduleState.Schedule;
     private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
 
     private readonly HashSet<int> _selectedIds = [];
     private string _minutes = "";
+    private bool _opposite;
+    private bool _repeat;
+    private string _endTime = "";
+    private int _interval = 60;
     private string? _error;
 
     // Trains ordered by number, the same order used elsewhere in the app.
     private IEnumerable<Train> TrainChoices =>
         (Timetable?.Trains ?? []).OrderBy(t => t.Number);
 
+    // A copy runs the route backwards only when asked to; a move always keeps the train as it runs.
+    private CloneDirection Direction => IsClone && _opposite ? CloneDirection.Opposite : CloneDirection.Same;
+
     private bool CanApply => _selectedIds.Count > 0 && TryParseSignedMinutes(_minutes, out _);
+
+    protected override void OnInitialized() =>
+        _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
+
+    private void SetOpposite(ChangeEventArgs e)
+    {
+        _opposite = e.Value as bool? ?? false;
+        _error = null;
+    }
 
     private void OnSelectionChanged(ChangeEventArgs e)
     {
@@ -86,12 +138,24 @@
 
         // Validate every train first so a move/clone is all-or-nothing: a moved train mutates in place,
         // so we must not shift some and reject others.
-        if (trains.Any(t => !plan.FitsWhenMovedBy(t, minutes))) { _error = "TrainsOutOfDayBounds"; return; }
+        var fits = IsClone
+            ? trains.All(t => plan.FitsWhenCloned(t, minutes, Direction))
+            : trains.All(t => plan.FitsWhenMovedBy(t, minutes));
+        if (!fits) { _error = "TrainsOutOfDayBounds"; return; }
 
-        foreach (var train in trains)
+        if (!IsClone)
         {
-            if (IsClone) plan.Clone(train, minutes);
-            else plan.Move(train, minutes);
+            foreach (var train in trains) plan.Move(train, minutes);
+        }
+        else if (_repeat)
+        {
+            if (!TryParseTime(_endTime, out var endTime)) { _error = "InvalidTime"; return; }
+            if (_interval < 1) { _error = "InvalidMinutes"; return; }
+            foreach (var train in trains) plan.CloneRepeating(train, minutes, endTime, _interval, Direction);
+        }
+        else
+        {
+            foreach (var train in trains) plan.Clone(train, minutes, Direction);
         }
 
         ScheduleState.SaveAndNotify();
@@ -100,7 +164,21 @@
 
     private Task Abort() => OnClosed.InvokeAsync();
 
+    private static int ParseInt(ChangeEventArgs e, int fallback) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var value) ? value : fallback;
+
     // Accepts a whole number of minutes with an optional leading sign: "5", "+5" or "-5".
     private static bool TryParseSignedMinutes(string text, out int minutes) =>
         int.TryParse(text?.Trim(), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out minutes);
+
+    private static bool TryParseTime(string text, out Time time)
+    {
+        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span))
+        {
+            time = Time.FromTimeSpan(span);
+            return true;
+        }
+        time = Time.Zero;
+        return false;
+    }
 }

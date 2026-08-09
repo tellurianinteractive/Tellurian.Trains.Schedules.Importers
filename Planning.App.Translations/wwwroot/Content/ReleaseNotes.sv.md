@@ -1,5 +1,80 @@
 # Versionsnyheter
 
+## Version 0.5.0
+
+### Ändringar
+
+- **Ett vändtåg står inte längre och väntar på lokrundgång.** Där ett tågs väg vänder har det hittills
+  fått tid nog för att loket ska hinna gå runt till andra änden — oavsett vad som framfört det. Redigera
+  ett lok på fliken Omlopp och kryssa i den nya rutan **Vändtåg?** där loket framför ett tåg som kan köras
+  från båda ändarna: ett tåg med manövervagn i andra änden, eller med ytterligare ett lok där. Föraren
+  byter helt enkelt hytt, så **Uppdatera tider** räknar nu bort rundgången och tåget står den kortaste
+  uppehållstiden i stället, vilket tidigarelägger alla följande uppehåll.
+
+  Ett **motorvagnståg** behandlas likadant, utan något att kryssa i — det vänder som det står, vilket
+  tidsberäkningen inte tagit hänsyn till förut. Kryssa ur rutan, eller ge tåget ett vanligt lok, så
+  kommer tiden för rundgången tillbaka. Ett uppehåll som du medvetet gjort längre än själva rundgången
+  lämnas som du har satt det.
+
+- **Ett spår kan nu ange vilken väg genom driftplatsen det är avsett för.** Där en driftplats har fler än
+  ett spår och något att fortsätta till kan vart och ett av dess spår ange den **föregående** driftplats
+  ett tåg kommer från, den **nästa** det fortsätter till, eller båda, med rutan **båda riktningarna** för
+  när samma spår även gäller åt motsatt håll. Bara de driftplatser som nås av en sträcka härifrån
+  erbjuds, så ett spår kan bara anges för en väg som ett tåg faktiskt kan ta.
+
+  Ett nytt tåg läggs sedan på det spår som passar dess väg bäst: ett spår som anger precis varifrån tåget
+  kommer och vart det ska går före ett som bara anger det ena, vilket i sin tur går före ett spår som
+  inte anger något, och ett spår som är avsett för en väg tåget inte kör lämnas åt de tåg det är till
+  för. Det är detta ett **dubbelspår** behöver — ge det ena spåret den ena riktningens föregående och
+  nästa driftplats och det andra spåret samma par omvänt, så håller sig varje riktning till sitt spår.
+  Lämna kolumnerna tomma, så ändras ingenting mot förut.
+
+  Där två spår passar vägen lika bra tar ett persontåg som **stannar** ett spår med plattform, medan ett
+  tåg som kör **igenom** — liksom varje tåg utan resandeutbyte — tar huvudspåret. Hittills tog ett
+  persontåg ett spår med plattform på varje driftplats det anropade, oavsett om det stannade där eller
+  inte.
+
+- **Ett tåg kan nu kopieras i motsatt riktning och upprepas.** Att kopiera ett tåg gav en enda kopia som
+  körde åt samma håll som tåget den kom från. Kryssa i **Motsatt riktning?**, så kör kopian i stället
+  sträckan baklänges, från där tåget slutade till där det började: alla gångtider och alla uppehåll
+  behålls, förberedelse- och avslutningstiden byter ände, och kopian får ett nummer ur motsatt riktnings
+  serie. Minuterna räknas då från det kopierade tågets sista avgång, så 20 minuter lägger returtåget 20
+  minuter efter att tåget det vänder från är avslutat.
+
+  Kopieringsdialogen har nu också valet **Upprepa tåg** som finns när ett tåg läggs till: ange en sluttid
+  och ett intervall, så läggs en kopia till per intervall tills sluttiden passeras. Ett tåg kan nu skapas
+  för sig, justeras tills det går som det ska, och först därefter upprepas över dagen — hittills måste
+  hela serien beställas redan när det första tåget skapades.
+
+- **Ett spår kan nu ange hur lång dess plattform är.** Där en driftplats har resandeutbyte har vart och
+  ett av dess spår en **plattformslängd** i meter. Över noll betyder att det finns en plattform längs
+  spåret och att resande kan stiga på och av där; noll betyder att det inte finns någon. Ett nytt
+  persontåg läggs på ett spår med plattform — helst huvudspåret bland dem — på varje driftplats det
+  anropar, och tar huvudspåret där driftplatsen saknar plattform. Ett persontåg kan fortfarande stå på
+  ett spår utan plattform: det byter helt enkelt ingenting där, vilket är just vad det gör när det möter
+  ett annat tåg någonstans där inget resandeutbyte alls sker.
+
+  Kryssa i **Resande?** för en driftplats vars spår ännu saknar plattform, så får varje spår en meter
+  plattform som du kan justera. En plan som skapats eller importerats före detta behandlas likadant
+  första gången den öppnas, så den fungerar precis som förut — du kortar sedan av eller nollställer de
+  spår som i själva verket saknar plattform. En driftplats där en plattform redan är angiven lämnas
+  orörd.
+
+  Ett persontåg som gör uppehåll för resandeutbyte på ett spår utan plattform listas nu under
+  **Konflikter**. Du avgör vilket av två fall det är: ge spåret en plattformslängd, eller kryssa ur
+  uppehållets **Ank** och **Avg**, vilket säger att tåget bara står där utan att byta något. Ingenting
+  rättas åt dig, eftersom bara du vet vilket det är. Där en driftplats bara har plattform vid ett spår —
+  det vanliga på en mindre station — kan två mötande persontåg inte båda få den, och det tåg som blir
+  utan är det som rapporteras. Kontrollen kan stängas av under **Inställningar › Validering**.
+
+### Rättningar
+
+- **Att byta namn på banan ändrar nu namnet överallt där det visas.** Banans namn under
+  **Inställningar › Allmänt** ändrades bara i inställningarna: framsidan på häftet med de allmänna
+  instruktionerna, namnet i övre listen och filnamnet en plan sparas under fortsatte alla visa det
+  banan hette förut. Alla följer nu namnet så som det skrivs, och en plan som bytt namn tidigare
+  rättas nästa gång den öppnas.
+
 ## Version 0.4.2
 
 ### Ändringar

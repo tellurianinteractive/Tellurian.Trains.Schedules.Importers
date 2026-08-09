@@ -123,7 +123,9 @@
             ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",
 
             // TrainTimeSequence, StationCallTiming, TrainTooFewCalls, TrainRouteNotConnected,
-            // MissingTrackReference, DuplicateTrainNumber
+            // MissingTrackReference, DuplicateTrainNumber, PassengerExchangeWithoutPlatform — the last
+            // is answered on either tab (clear the call's Arr/Dep, or give the track a platform), and
+            // the call the conflict names is on this one.
             _ => "trains",
         },
     };

@@ -105,6 +105,7 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
         this.RebuildStationCalls();
         this.ResolveCatalogueReferences();
         this.RebuildTrainCategories();
+        Layout.EnsurePlatforms();
     }
 
     /// <inheritdoc/>

@@ -1,6 +1,82 @@
 # Versjonsnyheter
 
-## Version 0.4.2
+## Versjon 0.5.0
+
+### Endringer
+
+- **Et vendetog står ikke lenger og venter på lokrundgang.** Der et togs rute vender, har det hittil
+  fått tid nok til at lokomotivet rekker å kjøre rundt til den andre enden — uansett hva som har
+  framført det. Rediger et lokomotiv på fanen Omløp, og kryss av i den nye boksen **Vendetog?** der
+  lokomotivet framfører et tog som kan kjøres fra begge ender: et tog med styrevogn i den andre enden,
+  eller med enda et lokomotiv der. Føreren bytter ganske enkelt førerrom, så **Oppdater tider** regner
+  nå bort rundgangen, og toget står det korteste oppholdet i stedet, noe som framskynder alle følgende
+  opphold.
+
+  Et **motorvogntog** behandles på samme måte, uten noe å krysse av — det vender som det står, noe
+  tidsberegningen ikke tok hensyn til før. Fjern krysset, eller gi toget et vanlig lokomotiv, så kommer
+  tiden til rundgangen tilbake. Et opphold du bevisst har gjort lengre enn selve rundgangen, blir stående
+  slik du har satt det.
+
+- **Et spor kan nå angi hvilken vei gjennom driftsstedet det er ment for.** Der et driftssted har mer enn
+  ett spor og noe å kjøre videre til, kan hvert av sporene angi det **forrige** driftsstedet et tog
+  kommer fra, det **neste** det fortsetter til, eller begge — med feltet **begge retninger** når samme
+  spor også gjelder motsatt vei. Bare de driftsstedene som nås av en strekning herfra, tilbys, slik at et
+  spor bare kan angis for en vei et tog faktisk kan kjøre.
+
+  Et nytt tog legges så på det sporet som passer best til veien det kjører: et spor som angir nøyaktig
+  hvor toget kommer fra og hvor det skal, går foran ett som bare angir det ene, som igjen går foran et
+  spor som ikke angir noe, og et spor som er ment for en vei toget ikke kjører, overlates til togene det
+  er til for. Det er nettopp dette en **dobbeltsporet strekning** trenger — gi det ene sporet den ene
+  retningens forrige og neste driftssted og det andre sporet samme par omvendt, så holder hver retning
+  seg til sitt spor. La kolonnene stå tomme, så endres ingenting fra før.
+
+  Der to spor passer like godt til veien, tar et persontog som **stopper**, et spor med plattform, mens
+  et tog som kjører **gjennom** — som ethvert tog uten passasjerutveksling — tar hovedsporet. Hittil tok
+  et persontog et spor med plattform på hvert driftssted det anløp, uansett om det stoppet der eller
+  ikke.
+
+- **Et tog kan nå kopieres i motsatt retning og gjentas.** Å kopiere et tog gav én eneste kopi som kjørte
+  samme vei som toget den kom fra. Kryss av for **Motsatt retning?**, så kjører kopien i stedet
+  strekningen baklengs, fra der toget sluttet til der det begynte: alle kjøretider og alle opphold
+  beholdes, forberedelses- og avslutningstiden bytter ende, og kopien får et nummer fra rekka til motsatt
+  retning. Minuttene telles da fra siste avgang for det kopierte toget, så 20 minutter legger returtoget
+  20 minutter etter at toget det vender fra, er avsluttet.
+
+  Kopidialogen har nå også valget **Gjenta tog** som finnes når et tog legges til: oppgi et sluttidspunkt
+  og et intervall, så legges det til én kopi per intervall til sluttidspunktet er passert. Et tog kan nå
+  opprettes for seg, justeres til det går som det skal, og først deretter gjentas utover dagen — hittil
+  måtte hele rekka bestilles allerede da det første toget ble opprettet.
+
+- **Et spor kan nå si hvor lang plattformen er.** Der et driftssted utveksler passasjerer, har hvert av
+  sporene en **plattformlengde** i meter. Over null betyr at det ligger en plattform langs sporet og at
+  passasjerer kan gå på og av der; null betyr at det ikke finnes noen. Et nytt passasjertog legges på et
+  spor med plattform — helst hovedsporet blant dem — på hvert driftssted det anløper, og tar hovedsporet
+  der driftsstedet ikke har noen plattform. Et passasjertog kan fortsatt stå ved et spor uten plattform:
+  det utveksler rett og slett ingenting der, og det er nettopp det det gjør når det krysser et annet tog
+  et sted der det ikke utveksles passasjerer i det hele tatt.
+
+  Kryss av for **Passasjerer?** ved et driftssted der sporene ennå ikke har noen plattform, så får hvert
+  spor en plattform på én meter som du kan justere. En plan som er laget eller importert før dette,
+  behandles likedan første gang den åpnes, så den virker akkurat som før — deretter korter du ned eller
+  nullstiller de sporene som i virkeligheten ikke har noen plattform. Et driftssted der en plattform
+  allerede er ført opp, blir stående urørt.
+
+  Et passasjertog som stopper for passasjerutveksling ved et spor uten plattform, står nå under
+  **Konflikter**. Du avgjør hvilket av to tilfeller det er: gi sporet en plattformlengde, eller fjern
+  krysset i stoppets **Ank** og **Avg**, som sier at toget bare står der uten å utveksle noe. Ingenting
+  rettes for deg, for bare du vet hva som gjelder. Der et driftssted bare har plattform ved ett spor —
+  det vanlige på en mindre stasjon — kan to kryssende passasjertog ikke begge få den, og det toget som
+  blir uten, er det som rapporteres. Kontrollen kan slås av under **Innstillinger › Validering**.
+
+### Feilrettinger
+
+- **Å gi anlegget et nytt navn endrer nå navnet alle stedene det vises.** Anleggets navn under
+  **Innstillinger › Generelt** ble bare endret i innstillingene: forsiden på heftet med de generelle
+  instruksjonene, navnet i den øverste linja og filnavnet en plan lagres under fortsatte alle å vise
+  hva anlegget het før. De følger nå alle navnet slik det skrives, og en plan som har fått nytt navn
+  tidligere, rettes neste gang den åpnes.
+
+## Versjon 0.4.2
 
 ### Endringer
 
@@ -54,7 +130,7 @@
   hverandre. Destinasjonene er tilbake, og underfanen og kolonnen dens heter nå **Godsdestinasjoner** i
   stedet for *Godsbeskrivelser*, for det er destinasjoner de inneholder.
 
-## Version 0.4.1
+## Versjon 0.4.1
 
 ### Endringer
 
@@ -98,7 +174,7 @@
   og konflikten nevner sesjonene når det bare gjelder noen av dem. To lokomotiver i samme omløp er
   dobbeltkjøring og var heller aldri konflikten.
 
-## Version 0.4.0
+## Versjon 0.4.0
 
 ### Brytende endringer
 
@@ -197,7 +273,7 @@
 - **Lengder og distanser skrives nå ut i meter,** slik også telleren i toghastighetene gjør, så *m*
   ikke kan leses som et minutt. Minste opphold på en stasjon oppgis nå også i hurtigklokkeminutter.
 
-## Version 0.3.5
+## Versjon 0.3.5
 
 ### Feilrettinger
 
@@ -213,7 +289,7 @@
   1 MB, og lagres og åpnes tilsvarende raskere. En plan lagret av en tidligere versjon kan fortsatt
   åpnes.
 
-## Version 0.3.4
+## Versjon 0.3.4
 
 - **Feltene Ank og Avg på et stopp følger nå hvor toget faktisk kan stoppe.** Et tog stopper for å
   utveksle noe og trenger derfor et sted å utveksle det: et persontog der driftsstedet tar imot
@@ -295,7 +371,7 @@
   etter. Overskriften viser nå hele togidentiteten, med prefiks og suffiks, etter operatørens
   signatur.
 
-## Version 0.3.3
+## Versjon 0.3.3
 
 - **Konflikter kan nå leses der de vises.** En rad med konflikter — et tog eller en togkategori under
   **Tog**, et omløp eller ett av kjøretøyene i det under **Omløp**, en tjeneste under **Tjenester** —
@@ -333,7 +409,7 @@
   og i hvilke kjøresesjoner toget mangler trekkraft. Planer som så rene ut, kan nå rapportere dette —
   hullet har alltid vært der.
 
-## Version 0.3.2
+## Versjon 0.3.2
 
 - Under **Godsstrøm › Godsbeskrivelser** kan et opprinnelsessted eller en destinasjon nå være
   hvilket som helst driftssted som utveksler gods, ikke bare en stasjon. Et industriområde
@@ -382,7 +458,7 @@
   hastighet** kunne gjøre lengden på en strekning til en skjev del av en kilometer. En sidebane viser
   nå også samme kilometertall som banen den går ut fra ved forgreningsstasjonen.
 
-## Version 0.3.1
+## Versjon 0.3.1
 
 - Avsnittet **Trekkraftenheter** på en togdelsside i heftet Førertjenester har nå overskriften
   sin på det valgte språket. Det var den eneste overskriften i heftet uten oversettelse, så
@@ -400,7 +476,7 @@
   krysset eller forbikjørt der. Disse tidene er når lokføreren møter til tjeneste eller går av,
   ikke når toget kjører.
 
-## Version 0.3.0
+## Versjon 0.3.0
 
 - En ny rapport, **Førertjenester**, skriver ut ett A5-hefte per tjeneste. Forsiden
   viser tjenestens nummer, hvilke økter eller dager den kjøres, dens start- og
@@ -484,7 +560,7 @@
 - Når man legger til et nytt tog, settes nå standard starttid under hensyn til
   den angitte forberedelsestiden, slik at det ikke starter før planens starttid.
 
-## Version 0.2.4
+## Versjon 0.2.4
 
 - En ny fane **Tjenester** lar deg planlegge førertjenester – arbeidet en lokfører utfører
   i løpet av en økt, som en rekke av togdelene føreren kjører. Hver tjeneste er en rad:
@@ -508,7 +584,7 @@
   fanen **Tjenester**. Du kan slå kontrollen på eller av under **Innstillinger ›
   Validering**.
 
-## Version 0.2.2
+## Versjon 0.2.2
 
 ### Feilrettinger
 
@@ -519,7 +595,7 @@
   strekning merkes bare når det er flere tog på den samtidig enn den har spor, og bare
   tog som kjører i en felles økt telles med.
 
-## Version 0.2.1
+## Versjon 0.2.1
 
 - Konfliktvarsler vises nå der du kan rette dem. Togkonflikter vises bare i den
   grafiske ruteplanen og på fanen **Tog**; kjøretøy- og omløpskonflikter vises bare
@@ -531,7 +607,7 @@
   vognsett og gods, ikke bare lok og togsett, slik at et vognsett eller gods som blir
   stående på feil sted ved slutten av driftsøkten, nå rapporteres.
 
-## Version 0.2.0
+## Versjon 0.2.0
 
 - Navnet på planen du arbeider med, vises nå øverst i vinduet, slik at du alltid
   ser hvilket dokument som er åpent.
@@ -549,7 +625,7 @@
   stoppene sammen med det, slik at ingen foreldreløse stopp eller falske konflikter
   blir igjen.
 
-## Version 0.1.0
+## Versjon 0.1.0
 
 Første forhåndsvisning av Ruteplanleggeren. Du kan:
 

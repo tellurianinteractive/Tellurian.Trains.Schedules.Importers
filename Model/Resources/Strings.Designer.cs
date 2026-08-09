@@ -583,6 +583,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} stops to exchange passengers at {1} {2}, but track {3} has no platform..
+        /// </summary>
+        internal static string TrainStopsForPassengerExchangeWithoutPlatform {
+            get {
+                return ResourceManager.GetString("TrainStopsForPassengerExchangeWithoutPlatform", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Undefined.
         /// </summary>
         internal static string Undefined {

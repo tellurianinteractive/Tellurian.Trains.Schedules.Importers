@@ -315,4 +315,7 @@
   <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
     <value>Stationen {1} er ikke bemandet, så nøglen, den opbevarer til {0}, kan ikke hentes og ignoreres.</value>
   </data>
+  <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
+    <value>Tog {0} standser for passagerudveksling ved {1} {2}, men spor {3} har ingen perron.</value>
+  </data>
 </root>

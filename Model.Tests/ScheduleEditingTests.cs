@@ -249,6 +249,43 @@ public class ScheduleEditingTests
     }
 
     [TestMethod]
+    public void UpdateVehicleSetsReversibleTrainForALocomotive()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 6, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "Rc 6", "Rc", 6, null, isReversibleTrain: true);
+
+        Assert.IsTrue(vehicle.IsReversibleTrain);
+        Assert.IsTrue(vehicle.ReversesWithoutRunaround);
+    }
+
+    [TestMethod]
+    public void UpdateVehicleLeavesReversibleTrainClearForATrainset()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Trainset, "X2", 1, null);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Trainset, "X2", "X2", 1, null, isReversibleTrain: true);
+
+        Assert.IsFalse(vehicle.IsReversibleTrain, "Only a locomotive can be spared the runaround by one.");
+        Assert.IsTrue(vehicle.ReversesWithoutRunaround, "A trainset turns round as it stands regardless.");
+    }
+
+    [TestMethod]
+    public void UpdateVehicleDropsReversibleTrainWhenTheTypeIsNoLongerALocomotive()
+    {
+        var plan = CreatePlan();
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 6, null);
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "Rc 6", "Rc", 6, null, isReversibleTrain: true);
+
+        plan.UpdateVehicle(vehicle, ScheduledObjectType.Wagonset, "Gbs", "Gbs", 6, null, isReversibleTrain: true);
+
+        Assert.IsFalse(vehicle.IsReversibleTrain);
+        Assert.IsFalse(vehicle.ReversesWithoutRunaround, "A wagonset is not traction at all.");
+    }
+
+    [TestMethod]
     public void UpdateVehicleClearsWagonsWhenTypeIsNotWagonset()
     {
         var plan = CreatePlan();

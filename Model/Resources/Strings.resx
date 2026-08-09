@@ -315,4 +315,7 @@
   <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
     <value>Station {1} is not manned, so the lock key it holds for {0} cannot be fetched and is ignored.</value>
   </data>
+  <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
+    <value>Train {0} stops to exchange passengers at {1} {2}, but track {3} has no platform.</value>
+  </data>
 </root>

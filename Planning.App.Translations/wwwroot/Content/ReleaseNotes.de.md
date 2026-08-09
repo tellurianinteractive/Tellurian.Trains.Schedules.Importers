@@ -1,5 +1,86 @@
 # Versionshinweise
 
+## Version 0.5.0
+
+### Änderungen
+
+- **Ein Wendezug wartet nicht mehr auf das Umsetzen der Lok.** Wo der Fahrweg eines Zuges wendet, war
+  bisher immer so viel Zeit vorgesehen, dass die Lok ans andere Ende umsetzen kann — gleich, was den Zug
+  befördert. Bearbeiten Sie eine Lok im Reiter Umläufe und setzen Sie das neue Häkchen **Wendezug?**, wo
+  die Lok einen Zug befördert, der von beiden Enden gefahren werden kann: einen Zug mit Steuerwagen am
+  anderen Ende oder mit einer zweiten Lok dort. Der Triebfahrzeugführer wechselt einfach den Führerstand,
+  daher rechnet **Zeiten aktualisieren** das Umsetzen jetzt heraus, und der Zug hält stattdessen nur den
+  Mindestaufenthalt, wodurch alle folgenden Halte früher liegen.
+
+  Ein **Triebzug** wird ebenso behandelt, ohne dass etwas anzuhaken wäre — er wendet, wie er steht, was
+  die Zeitberechnung bisher nicht berücksichtigt hat. Nehmen Sie das Häkchen zurück oder geben Sie dem
+  Zug eine gewöhnliche Lok, so kommt die Zeit für das Umsetzen wieder. Ein Aufenthalt, den Sie bewusst
+  länger als das Umsetzen selbst gemacht haben, bleibt so, wie Sie ihn gesetzt haben.
+
+- **Ein Gleis kann jetzt angeben, für welchen Fahrweg durch die Betriebsstelle es vorgesehen ist.** Wo
+  eine Betriebsstelle mehr als ein Gleis und eine Weiterfahrt hat, kann jedes ihrer Gleise die
+  **vorherige** Betriebsstelle nennen, von der ein Zug kommt, die **nächste**, zu der er weiterfährt,
+  oder beide — dazu das Kästchen **beide Richtungen**, wenn dasselbe Gleis auch der Gegenrichtung dient.
+  Angeboten werden nur Betriebsstellen, die von hier über eine Strecke erreichbar sind, damit ein Gleis
+  nur für einen Laufweg vorgesehen werden kann, den ein Zug auch nehmen kann.
+
+  Ein neuer Zug kommt dann auf das Gleis, das zu seinem Laufweg am besten passt: ein Gleis, das genau
+  angibt, woher der Zug kommt und wohin er weiterfährt, geht einem vor, das nur eines von beidem nennt,
+  und dieses wiederum einem Gleis ohne Angabe; ein Gleis, das für einen anderen Laufweg vorgesehen ist,
+  bleibt den Zügen vorbehalten, für die es gedacht ist. Genau das braucht eine **zweigleisige Strecke** —
+  geben Sie dem einen Gleis die vorherige und die nächste Betriebsstelle der einen Richtung und dem
+  anderen dasselbe Paar umgekehrt, dann bleibt jede Richtung auf ihrem Gleis. Lassen Sie die Spalten
+  leer, ändert sich nichts gegenüber vorher.
+
+  Passen zwei Gleise gleich gut zum Laufweg, nimmt ein Reisezug, der **hält**, ein Gleis mit Bahnsteig,
+  und ein Zug, der **durchfährt** — wie jeder Zug ohne Reisendenwechsel — das Hauptgleis. Bisher nahm ein
+  Reisezug an jeder Betriebsstelle ein Bahnsteiggleis, ob er dort hielt oder nicht.
+
+- **Ein Zug lässt sich jetzt in der Gegenrichtung kopieren und mehrfach wiederholen.** Das Kopieren eines
+  Zuges ergab eine einzige Kopie, die in dieselbe Richtung fuhr wie der Zug, aus dem sie kam. Mit
+  **Gegenrichtung?** befährt die Kopie stattdessen den Laufweg rückwärts, von dort, wo der Zug endete,
+  bis dorthin, wo er begann: alle Fahrzeiten und alle Halte bleiben erhalten, Vorbereitungs- und
+  Abschlusszeit wechseln die Seite, und die Kopie erhält eine Nummer aus der Reihe der Gegenrichtung. Die
+  Minuten zählen dann ab der letzten Abfahrt des kopierten Zuges: 20 Minuten legen die Rückleistung 20
+  Minuten nach dem Abschluss des Zuges, aus dem sie zurückkehrt.
+
+  Der Kopierdialog hat jetzt auch die Möglichkeit **Züge wiederholen**, die es beim Hinzufügen eines
+  Zuges gibt: Endzeit und Abstand angeben, und je Abstand wird eine Kopie hinzugefügt, bis die Endzeit
+  überschritten ist. Ein Zug lässt sich jetzt zuerst allein anlegen, so lange anpassen, bis er richtig
+  fährt, und erst dann über den Tag wiederholen — bisher musste die ganze Reihe schon beim Anlegen des
+  ersten Zuges bestellt werden.
+
+- **Ein Gleis kann jetzt angeben, wie lang sein Bahnsteig ist.** Wo eine Betriebsstelle Reisende
+  austauscht, hat jedes ihrer Gleise eine **Bahnsteiglänge** in Metern. Über null bedeutet, dass am Gleis
+  ein Bahnsteig liegt und Reisende dort ein- und aussteigen können; null bedeutet, dass keiner vorhanden
+  ist. Ein neuer Reisezug wird an jeder Betriebsstelle, die er anfährt, auf ein Gleis mit Bahnsteig
+  gelegt — bevorzugt auf das Hauptgleis darunter — und nimmt das Hauptgleis, wo die Betriebsstelle keinen
+  Bahnsteig hat. Ein Reisezug darf weiterhin an einem Gleis ohne Bahnsteig stehen: er tauscht dort
+  einfach nichts aus, und genau das tut er, wenn er dort kreuzt, wo überhaupt keine Reisenden
+  ausgetauscht werden.
+
+  Wird **Reisende?** bei einer Betriebsstelle gesetzt, deren Gleise noch keinen Bahnsteig haben, erhält
+  jedes Gleis einen Bahnsteig von einem Meter, den Sie anpassen. Ein Plan, der davor angelegt oder
+  importiert wurde, wird beim ersten Öffnen genauso behandelt und arbeitet damit unverändert weiter — die
+  Gleise, die in Wahrheit keinen Bahnsteig haben, kürzen oder leeren Sie danach. Eine Betriebsstelle, bei
+  der bereits ein Bahnsteig eingetragen ist, bleibt unangetastet.
+
+  Ein Reisezug, der zum Reisendenwechsel an einem Gleis ohne Bahnsteig hält, steht jetzt unter
+  **Konflikte**. Sie entscheiden, welcher der beiden Fälle vorliegt: dem Gleis eine Bahnsteiglänge geben
+  oder beim Halt **An** und **Ab** abwählen, womit der Zug dort nur steht und nichts austauscht. Nichts
+  wird für Sie berichtigt, denn nur Sie wissen, was zutrifft. Wo eine Betriebsstelle nur an einem Gleis
+  einen Bahnsteig hat — das Übliche auf einem kleinen Bahnhof — können zwei kreuzende Reisezüge ihn nicht
+  beide haben, und gemeldet wird der Zug ohne. Die Prüfung lässt sich unter
+  **Einstellungen › Validierung** abschalten.
+
+### Fehlerbehebungen
+
+- **Ein neuer Anlagenname wird jetzt überall gezeigt, wo der Name steht.** Der Anlagenname unter
+  **Einstellungen › Allgemein** wurde allein in den Einstellungen geändert: die Titelseite des Hefts
+  mit den allgemeinen Anweisungen, der Name in der oberen Leiste und der Dateiname, unter dem ein Plan
+  gespeichert wird, zeigten weiterhin, wie die Anlage vorher hieß. Alle folgen jetzt dem Namen, so wie
+  er eingegeben wird, und ein zuvor umbenannter Plan wird beim nächsten Öffnen richtiggestellt.
+
 ## Version 0.4.2
 
 ### Änderungen

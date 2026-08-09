@@ -46,6 +46,7 @@ public static class ValidationExtensions
             result.AddRange(timetable.EnsureStationHasTrack());
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
+            if (options.ValidatePassengerExchange) result.AddRange(timetable.Trains.SelectMany(t => t.CheckPassengerExchange()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
@@ -684,6 +685,51 @@ public static class ValidationExtensions
             result.AddRange(train.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             result.AddRange(train.CheckTrainTimeSequence());
             if (options.ValidateRouteContinuity) result.AddRange(train.CheckRouteContinuity());
+            if (options.ValidatePassengerExchange) result.AddRange(train.CheckPassengerExchange());
+            return result;
+        }
+
+        /// <summary>
+        /// Checks that a passenger train stops to exchange passengers only where they can get on and off:
+        /// at a track with a platform (rule T6).
+        /// </summary>
+        /// <remarks>
+        /// Three things have to hold before there is anything to report. The train must carry passengers,
+        /// the location must exchange them, and the call must be one the train stops at — an arrival, a
+        /// departure, or both. A call that is neither is a pass-through, and a train running past a
+        /// platform needs none.
+        /// <para>
+        /// That last condition is what keeps an ordinary meet out of the report. A passenger train may
+        /// stand for as long as the plan says at a track with no platform, waiting for another train, as
+        /// long as the call is not marked as an arrival or a departure — and a location that exchanges no
+        /// passengers is out of scope whatever its calls say. Where the call <em>is</em> a stop, the
+        /// planner has two answers, and only they can choose: give the track a platform length, or clear
+        /// the call's Arr and Dep boxes so the train is merely standing there. This is why nothing is put
+        /// right automatically.
+        /// </para>
+        /// <para>
+        /// Where a location has a platform at one track only — the ordinary arrangement at a small station
+        /// — two passenger trains meeting there cannot both have it. The one at the platform exchanges
+        /// passengers, and the other is reported until the planner decides which of the two answers it is.
+        /// </para>
+        /// </remarks>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckPassengerExchange()
+        {
+            if (!train.IsPassenger) return [];
+            var result = new List<ValidationError>();
+            foreach (var call in train.CallsInRunOrder)
+            {
+                if (!call.IsArrival && !call.IsDeparture) continue;
+                if (!call.OperationLocation.HasPassengerExchange) continue;
+                if (call.Track.HasPlatform) continue;
+                // The time the exchange would happen: when it gets there, or when it leaves if it only
+                // leaves (its origin, where the arrival time is the start of the driver's preparation).
+                var time = call.IsArrival ? call.Arrival : call.Departure;
+                var message = Message.Information(Strings.TrainStopsForPassengerExchangeWithoutPlatform,
+                    train, call.OperationLocation, time.HHMM(), call.Track);
+                result.Add(ValidationError.PassengerExchangeWithoutPlatform(call, message));
+            }
             return result;
         }
 

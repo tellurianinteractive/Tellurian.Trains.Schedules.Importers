@@ -96,6 +96,41 @@
   rule (**L4**) is always enforced, like the other checks for a model that contradicts itself, and needs
   no setting.
 
+- **A station track says where the platform is.** The new **`StationTrack.PlatformLength`** is the length
+  in metres, to one decimal, of the platform along a track, and zero where there is none.
+  **`StationTrack.HasPlatform`** is that length above zero, and **`StationTrack.HasPassengerExchange`**
+  is what decides whether passengers get on and off there: the location must exchange passengers
+  (`OperationLocation.HasPassengerExchange`) *and* the track must have a platform.
+
+  Nothing stops a passenger train standing at a track without one — `Train.CanStopAt` is unchanged and
+  still asks the location alone, which is what makes a meet at a location that exchanges no passengers
+  an ordinary stop. What the platform decides is *where* a train is put: `Plan.Create` now gives a
+  passenger train a scheduled track with a platform, the main one of them for choice, and falls back to
+  the scheduled main track as before where the location has none.
+
+  A plan written before platforms existed has none recorded, and every track of a passenger location
+  served passengers then. **`Layout.EnsurePlatforms()`** — and **`OperationLocation.EnsurePlatforms()`**
+  for one location — therefore gives every track of a location that exchanges passengers the minimum
+  **`StationTrack.DefaultPlatformLength`** of one metre, but only where not one of its tracks has a
+  platform already; a location where the planner has recorded one is left as it stands, and so is a
+  location that exchanges no passengers. It runs when a timetable is read and from `Plan.Reconcile()`, so
+  every reading and importing path gets it, and it is idempotent.
+
+  **A passenger train that stops to exchange passengers must stand at a platform (validation rule T6).**
+  The new **`Train.CheckPassengerExchange()`** reports a call where the train carries passengers, the
+  location exchanges them, the call is an arrival and/or a departure, and the track has no platform. A
+  call that is neither an arrival nor a departure is not reported at all — a passenger train standing at a
+  platformless track for a meet is exactly that — and neither is a location that exchanges no passengers.
+  The error type is the new `ValidationErrorType.PassengerExchangeWithoutPlatform` (train scope,
+  warning severity), with the message `TrainStopsForPassengerExchangeWithoutPlatform` in all five
+  languages, and the rule is gated by the new `ValidationSettings.ValidatePassengerExchange` (default
+  **true**). Nothing is repaired automatically: giving the track a platform and clearing the call's stop
+  flags are both valid answers, and only the planner knows which.
+
+  The rule judges a **reconciled** plan, as every consumer validates one. An importer builds a plan
+  rather than reading one — and XPLN records no platforms at all — so call `Plan.Reconcile()` on an
+  imported plan before validating it, or every passenger stop in it is reported.
+
 ### Fixes
 
 - **A locomotive overlap is now reported against the two locomotives that are actually doubled.** Rule

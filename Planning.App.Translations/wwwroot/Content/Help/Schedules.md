@@ -36,6 +36,12 @@ for you to resolve.
 several vehicles (such as a locomotive and its coach set). Cargo flows are shown as turnus cards in
 the reports rather than here.
 
+Editing a locomotive offers **Reversible train?**. Tick it where the locomotive works a train that can
+be driven from either end — one with a driving trailer at the far end, or with a second locomotive
+there. Where such a train's route reverses it changes direction by changing cab, so **Update timings**
+no longer allows it the time to run the locomotive round, and the stop shrinks to the minimum stop.
+A trainset is treated this way already and is offered no tick.
+
 #### Operating sessions or days
 
 A schedule's operating sessions becomes the subset of sessions all trains operate. With a schedule with most trains 

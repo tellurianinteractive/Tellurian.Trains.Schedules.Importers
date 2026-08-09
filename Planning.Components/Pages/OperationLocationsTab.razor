@@ -149,7 +149,7 @@ else
                     {
                         <div class="field" title="@(shadow ? Translator("ShadowExchangesEverything") : null)">
                             <HelpLabel For="HasPassengerExchange" />
-                            <input type="checkbox" @bind="Editing.HasPassengerExchange" @bind:after="OnEdited" disabled="@shadow" />
+                            <input type="checkbox" @bind="Editing.HasPassengerExchange" @bind:after="OnPassengerExchangeEdited" disabled="@shadow" />
                         </div>
                     }
 
@@ -318,6 +318,13 @@ else
                 </div>
 
                 <h3>@Translator("Tracks")</h3>
+                @* Which way through the location a track is for. Only worth asking where there is a
+                   choice to make: a location with one track, or one with nowhere to run on to, has
+                   nothing to say here. What was set stays with the track where the columns are hidden. *@
+                @if (ShowTrackRoutes)
+                {
+                    <p class="hint">@Translator("TrackRouteHint")</p>
+                }
                 <table class="tracks">
                     <thead>
                         <tr>
@@ -326,19 +333,64 @@ else
                             <th>@Translator("IsMain")</th>
                             <th>@Translator("IsScheduled")</th>
                             <th>@Translator("Length")</th>
+                            @if (Editing.HasPassengerExchange)
+                            {
+                                <th>@Translator("PlatformLength")</th>
+                            }
+                            @if (ShowTrackRoutes)
+                            {
+                                <th>@Translator("TrackPreviousLocation")</th>
+                                <th>@Translator("TrackNextLocation")</th>
+                                <th>@Translator("TrackBothDirections")</th>
+                            }
                             <th>@Translator("Usage")</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var t in Editing.Tracks.OrderBy(t => t.DisplayOrder).ThenBy(t => t.Number, StringComparer.OrdinalIgnoreCase).ToList())
+                        @* Keyed on the track id: the rows are ordered by the display order edited in
+                           them, so without a key a reordering would leave each row's values with
+                           whichever track took its place. The id, not the track itself, because two
+                           tracks compare equal while a number is half typed. *@
+                        @foreach (var t in Editing.TracksInDisplayOrder)
                         {
-                            <tr>
+                            <tr @key="t.Id">
                                 <td><input type="text" class="track-number" @bind="t.Number" @bind:after="OnEdited" /></td>
                                 <td><input type="number" class="num" @bind="t.DisplayOrder" @bind:after="OnEdited" /></td>
                                 <td><input type="checkbox" @bind="t.IsMain" @bind:after="OnEdited" /></td>
                                 <td><input type="checkbox" @bind="t.IsScheduled" @bind:after="OnEdited" /></td>
                                 <td><input type="number" step="0.1" class="num" @bind="t.Length" @bind:after="OnEdited" /></td>
+                                @if (Editing.HasPassengerExchange)
+                                {
+                                    <td><input type="number" step="0.1" min="0" class="num" @bind="t.PlatformLength" @bind:after="() => OnPlatformLengthEdited(t)" /></td>
+                                }
+                                @if (ShowTrackRoutes)
+                                {
+                                    <td>
+                                        <select value="@t.PreviousLocationId" @onchange="e => SetTrackPreviousLocation(t, e)">
+                                            <option value="">@Translator("NoneOption")</option>
+                                            @foreach (var n in RouteLocationChoices(t))
+                                            {
+                                                <option value="@n.Id">@n.Signature</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select value="@t.NextLocationId" @onchange="e => SetTrackNextLocation(t, e)">
+                                            <option value="">@Translator("NoneOption")</option>
+                                            @foreach (var n in RouteLocationChoices(t))
+                                            {
+                                                <option value="@n.Id">@n.Signature</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    @* Nothing to reverse until the track names a location, so the box is
+                                       shown disabled rather than left to be ticked to no effect. *@
+                                    <td>
+                                        <input type="checkbox" disabled="@(!t.HasRoute)"
+                                               @bind="t.AppliesInBothDirections" @bind:after="OnEdited" />
+                                    </td>
+                                }
                                 <td><input type="text" @bind="t.Usage" @bind:after="OnEdited" /></td>
                                 <td>
                                     <button class="danger" disabled="@TrackReferenced(t)"
@@ -463,11 +515,19 @@ else
                                 <th>@Translator("IsMain")</th>
                                 <th>@Translator("IsScheduled")</th>
                                 <th>@Translator("Length")</th>
+                                @if (_selected.HasPassengerExchange)
+                                {
+                                    <th>@Translator("PlatformLength")</th>
+                                }
+                                @if (_selected.Tracks.Any(t => t.HasRoute))
+                                {
+                                    <th>@Translator("TrackRoute")</th>
+                                }
                                 <th>@Translator("Usage")</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var t in _selected.Tracks.OrderBy(t => t.DisplayOrder).ThenBy(t => t.Number, StringComparer.OrdinalIgnoreCase))
+                            @foreach (var t in _selected.TracksInDisplayOrder)
                             {
                                 <tr>
                                     <td>@t.Number</td>
@@ -475,6 +535,14 @@ else
                                     <td>@YesNo(t.IsMain)</td>
                                     <td>@YesNo(t.IsScheduled)</td>
                                     <td>@(t.Length > 0 ? t.Length.ToString(Culture) : "—")</td>
+                                    @if (_selected.HasPassengerExchange)
+                                    {
+                                        <td>@(t.HasPlatform ? t.PlatformLength.ToString("0.0", Culture) : "—")</td>
+                                    }
+                                    @if (_selected.Tracks.Any(track => track.HasRoute))
+                                    {
+                                        <td>@RouteSummary(t)</td>
+                                    }
                                     <td>@(string.IsNullOrWhiteSpace(t.Usage) ? "—" : t.Usage)</td>
                                 </tr>
                             }
@@ -650,6 +718,9 @@ else
     {
         if (_deleteTarget is null) return;
         Layout!.OperationLocations.Remove(_deleteTarget);
+        // A track's route names a location by id, so the tracks reserved for trains to or from this one
+        // are released with it rather than left pointing at a location the layout no longer has.
+        Layout.ForgetTrackRoutesTo(_deleteTarget);
         _deleteTarget = null;
         ScheduleState.SaveAndNotify();
     }
@@ -663,6 +734,28 @@ else
             DisplayOrder = order
         };
         Editing.Add(track);
+        // The first track of a location that exchanges passengers is where they get on and off, so it is
+        // given a platform; a track added where one already has a platform gets none, since the planner
+        // is the one who says which tracks have them (see Layout.EnsurePlatforms).
+        Editing.EnsurePlatforms();
+        OnEdited();
+    }
+
+    // Turning passenger exchange on opens the platform column, and a location that exchanges passengers
+    // needs somewhere to exchange them: where no track has a platform yet, they all get the minimum
+    // length, which the planner then adjusts. Doing it here rather than only when the plan is next read
+    // (see Layout.EnsurePlatforms) means the lengths are on the screen that asked for them.
+    private void OnPassengerExchangeEdited()
+    {
+        Editing?.EnsurePlatforms();
+        OnEdited();
+    }
+
+    // A platform length is a length in metres to one decimal, and never negative; the browser's number
+    // input allows both a finer value and a typed-in minus, so it is put right where it is entered.
+    private void OnPlatformLengthEdited(StationTrack track)
+    {
+        track.PlatformLength = Math.Round(Math.Max(0, track.PlatformLength), 1, MidpointRounding.AwayFromZero);
         OnEdited();
     }
 
@@ -672,6 +765,64 @@ else
         Editing.Tracks.Remove(track);
         OnEdited();
     }
+
+    // ---- Which way through the location a track is for -------------------------------------------
+
+    // The route columns are worth showing only where there is a choice to make: more than one track to
+    // choose between, and somewhere to come from or go on to.
+    private bool ShowTrackRoutes =>
+        Editing is { Tracks.Count: > 1 } && Neighbours.Count > 0;
+
+    // The locations a train calling here can have come from or go on to.
+    private IReadOnlyList<OperationLocation> Neighbours =>
+        Layout?.NeighboursOf(Editing) ?? [];
+
+    // What the two route drop-downs offer: the neighbours, plus any location this track already names
+    // that is no longer one — a stretch removed since. Leaving that one out would show "(none)" for a
+    // route that is still set, and the planner would have no way to see or clear it.
+    private IReadOnlyList<OperationLocation> RouteLocationChoices(StationTrack track)
+    {
+        var neighbours = Neighbours;
+        var named = new[] { track.PreviousLocationId, track.NextLocationId }
+            .Where(id => id.HasValue && neighbours.All(n => n.Id != id))
+            .Select(id => Layout!.OperationLocations.FirstOrDefault(l => l.Id == id))
+            .OfType<OperationLocation>();
+        return [.. neighbours, .. named];
+    }
+
+    private void SetTrackPreviousLocation(StationTrack track, ChangeEventArgs e)
+    {
+        track.PreviousLocationId = LocationId(e);
+        ClearBothDirectionsWithoutRoute(track);
+        OnEdited();
+    }
+
+    private void SetTrackNextLocation(StationTrack track, ChangeEventArgs e)
+    {
+        track.NextLocationId = LocationId(e);
+        ClearBothDirectionsWithoutRoute(track);
+        OnEdited();
+    }
+
+    private static int? LocationId(ChangeEventArgs e) =>
+        int.TryParse((string?)e.Value, NumberStyles.Integer, Culture, out var id) ? id : null;
+
+    // A track naming no location has no route to reverse, so the flag goes with the last location
+    // cleared rather than lingering to take effect again when another is chosen.
+    private static void ClearBothDirectionsWithoutRoute(StationTrack track)
+    {
+        if (!track.HasRoute) track.AppliesInBothDirections = false;
+    }
+
+    // The route a track is for, as the planner reads it: "Yb → Sti", one end alone as "Yb →" or
+    // "→ Sti", and "↔" where it counts both ways round.
+    private string RouteSummary(StationTrack track) =>
+        track.HasRoute
+            ? $"{Signature(track.PreviousLocationId)} {(track.AppliesInBothDirections ? "↔" : "→")} {Signature(track.NextLocationId)}".Trim()
+            : "—";
+
+    private string Signature(int? locationId) =>
+        Layout?.OperationLocations.FirstOrDefault(l => l.Id == locationId)?.Signature ?? "";
 
     private void AddStandardRegions()
     {

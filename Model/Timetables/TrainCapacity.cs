@@ -74,7 +74,7 @@ public static class TrainLengthExtensions
         /// </summary>
         /// <param name="meters">The maximum length in meters.</param>
         /// <returns>A train length with meter restriction.</returns>
-        public static TrainCapacity MetersOnly(int meters) =>
+        public static TrainCapacity MetersOnly(double meters) =>
             new() { Meters = meters };
 
         /// <summary>

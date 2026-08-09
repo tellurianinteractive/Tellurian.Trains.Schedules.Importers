@@ -65,6 +65,22 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public TractionType TractionType { get; set; } = TractionType.Undefined;
 
     /// <summary>
+    /// Gets or sets whether this locomotive works a reversible train (a <em>Wendezug</em>): one that can
+    /// be driven from either end, either because it carries a driving trailer at the far end or because
+    /// a second locomotive stands there. Such a train changes direction the way a trainset does — the
+    /// driver walks to the other cab — so no time is allowed for running the locomotive round its train
+    /// where the route reverses (see <c>ReversesWithoutRunaround</c>). Only meaningful for
+    /// <see cref="ScheduledObjectType.Locomotive"/>: a trainset reverses freely whatever this says, and
+    /// anything else is not traction at all.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="IsDoubleDirected"/>, which says the locomotive has a cab at each end so
+    /// it need not be turned on a turntable. A double-ended locomotive still has to run round its train;
+    /// a reversible train does not, because the train itself can be driven from either end.
+    /// </remarks>
+    public bool IsReversibleTrain { get; set; }
+
+    /// <summary>
     /// Gets or sets the class designation of this vehicle.
     /// </summary>
     public string Class { get; set; } = string.Empty;
@@ -230,6 +246,18 @@ public static class ScheduledObjectExtensions
         /// True if <see cref="ScheduledObject"/> is a traction unit.
         /// </summary>
         public bool IsTraction => scheduledObject.ObjectType.IsTraction;
+        /// <summary>
+        /// True when this traction unit can change the direction its train runs in without the
+        /// locomotive being run round to the other end: a self-propelled trainset, which is driven from
+        /// either end as it stands, or a locomotive working a reversible train
+        /// (<see cref="ScheduledObject.IsReversibleTrain"/>), which has a cab at the far end in a driving
+        /// trailer or a second locomotive. A train worked by such a unit therefore stands no longer at a
+        /// reversal than at any other stop.
+        /// </summary>
+        public bool ReversesWithoutRunaround =>
+            scheduledObject.ObjectType == ScheduledObjectType.Trainset ||
+            (scheduledObject.ObjectType == ScheduledObjectType.Locomotive && scheduledObject.IsReversibleTrain);
+
         /// <summary>
         /// True if <see cref="ScheduledObject"/> is a non-traction unit.
         /// </summary>

@@ -315,4 +315,7 @@
   <data name="LockKeyIgnoredWhenHolderIsNotManned" xml:space="preserve">
     <value>Stasjonen {1} er ikke betjent, så nøkkelen den oppbevarer for {0}, kan ikke hentes og ignoreres.</value>
   </data>
+  <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
+    <value>Tog {0} stopper for passasjerutveksling ved {1} {2}, men spor {3} har ingen plattform.</value>
+  </data>
 </root>

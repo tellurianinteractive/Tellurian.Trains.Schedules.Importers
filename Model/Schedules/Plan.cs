@@ -165,6 +165,27 @@ public static class PlanExtensions
         public Layout Layout => plan.Timetable.Layout;
 
         /// <summary>
+        /// Renames the plan, its timetable and its layout together — the one name the planner edits
+        /// (Settings › General).
+        /// </summary>
+        /// <remarks>
+        /// A plan names one layout and one timetable, and every path that creates one — <c>PlanFactory</c>
+        /// and the importers alike — gives all three the same name. They are three stores of a single
+        /// name, so setting only one of them leaves the others still calling the layout what it used to
+        /// be called: the booklet front pages read the layout's name, while the window title, the top bar
+        /// and the export file name read the plan's.
+        /// </remarks>
+        /// <param name="name">The new name.</param>
+        public void Rename(string name)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            plan.Name = name;
+            if (plan.Timetable is not { } timetable) return;
+            timetable.Name = name;
+            if (timetable.Layout is { } layout) layout.Name = name;
+        }
+
+        /// <summary>
         /// Reconciles the company catalogue (<see cref="Layouts.Layout.Companies"/>) with the companies
         /// the plan's trains, train categories, vehicles and driver duties actually refer to: a company
         /// referred to but not in the catalogue is added to it, and every company is then given an id
@@ -211,10 +232,11 @@ public static class PlanExtensions
 
         /// <summary>
         /// Brings a whole plan into a consistent state, before anything validates, displays or saves it:
-        /// the per-track call index is rebuilt from the trains, the catalogue references are put back,
-        /// the category and company catalogues are reconciled with what the plan actually uses, and the
-        /// stop flags the train parts depend on are set (see <see cref="Validations.StopRules"/>).
-        /// Idempotent.
+        /// the name is taken from the layout, the per-track call index is rebuilt from the trains, the
+        /// catalogue references are put back, the category and company catalogues are reconciled with
+        /// what the plan actually uses, every location that exchanges passengers is given somewhere to
+        /// exchange them (see <c>Layout.EnsurePlatforms</c>), and the stop flags the train parts depend
+        /// on are set (see <see cref="Validations.StopRules"/>). Idempotent.
         /// </summary>
         /// <remarks>
         /// Reading a plan does all of this on its way (see the <c>OnDeserialized</c> of
@@ -225,11 +247,17 @@ public static class PlanExtensions
         public void Reconcile()
         {
             plan = plan.ValueOrException(nameof(plan));
+            // The layout carries the name the planner edits, so it is the one the other two follow. A
+            // plan saved before renaming became a single edit (see Rename) kept the name it was created
+            // with, and would otherwise go on showing it in the window title and the export file name.
+            if (plan.Timetable?.Layout?.Name is { Length: > 0 } layoutName && plan.Name != layoutName)
+                plan.Rename(layoutName);
             if (plan.Timetable is { } timetable)
             {
                 timetable.RebuildStationCalls();
                 timetable.ResolveCatalogueReferences();
                 timetable.RebuildTrainCategories();
+                timetable.Layout.EnsurePlatforms();
             }
             plan.RebuildCompanies();
             plan.ResolveCatalogueReferences();
@@ -311,6 +339,42 @@ public static class PlanExtensions
                 .Where(so => so.ScheduleAssignments
                 .Any(sa => sa.Schedule.Parts.Contains(trainPart)));
         }
+
+        /// <summary>
+        /// Gets whether a reversal on <paramref name="train"/>'s route costs the time to run the
+        /// locomotive round to the other end of the train, so that the timings must allow for it (see
+        /// the loco runaround duration in <see cref="Settings.StationTimings"/>).
+        /// </summary>
+        /// <remarks>
+        /// It does not where every traction unit working the train can turn round as it stands — a
+        /// self-propelled trainset, or a locomotive working a reversible train (see
+        /// <see cref="ScheduledObjectExtensions.get_ReversesWithoutRunaround(ScheduledObject)"/>). A
+        /// train no traction unit works yet — one just created, above all — is taken to need the
+        /// runaround, so nothing changes until the planner says what works it.
+        /// </remarks>
+        /// <param name="train">The train to ask about.</param>
+        /// <returns><c>true</c> when the runaround must be allowed for; otherwise <c>false</c>.</returns>
+        public bool NeedsLocoRunaround(Train train)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            train = train.ValueOrException(nameof(train));
+            var traction = plan.ScheduledObjects
+                .Where(vehicle => vehicle.IsTraction && vehicle.Works(train))
+                .ToList();
+            return traction.Count == 0 || traction.Any(vehicle => !vehicle.ReversesWithoutRunaround);
+        }
+    }
+
+    extension(ScheduledObject vehicle)
+    {
+        /// <summary>
+        /// Gets whether this vehicle works any part of <paramref name="train"/>, through the schedules
+        /// it is assigned to. A schedule that could not be resolved when the plan was read is skipped.
+        /// </summary>
+        /// <param name="train">The train to ask about.</param>
+        public bool Works(Train train) =>
+            vehicle.ScheduleAssignments.Any(assignment =>
+                (assignment.Schedule?.Parts ?? []).Any(part => part.Train.Equals(train)));
     }
 
 

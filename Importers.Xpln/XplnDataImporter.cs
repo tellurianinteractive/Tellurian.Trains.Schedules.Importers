@@ -630,6 +630,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         const int Type = 8;
         const int Remark = 10;
         const int MinLength = 10;
+        const int MinCentimeterValue = 100;
+        const int CentimetersPerMeter = 100;
 
         List<Message> messages = [];
 
@@ -749,9 +751,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         case "wheel":
                             {
                                 if (current is null) break;
-                                if (int.TryParse(fields[Wheel], out var axles) && axles > 0)
+                                // XPLN's wheel value is ambiguous: it is normally a maximum number of axles,
+                                // but some plans state the maximum train length in centimetres instead.
+                                // Values below the threshold are read as axles, larger ones as centimetres.
+                                if (int.TryParse(fields[Wheel], out var value) && value > 0)
                                 {
-                                    current.Length = TrainCapacity.AxlesOnly(axles);
+                                    current.Length = value < MinCentimeterValue ?
+                                        TrainCapacity.AxlesOnly(value) :
+                                        TrainCapacity.MetersOnly(value / (double)CentimetersPerMeter);
                                 }
                             }
                             break;

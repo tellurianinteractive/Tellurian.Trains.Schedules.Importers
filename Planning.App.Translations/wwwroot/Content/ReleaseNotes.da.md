@@ -1,5 +1,81 @@
 # Versionsnyheder
 
+## Version 0.5.0
+
+### Ændringer
+
+- **Et vendetog står ikke længere og venter på lokomotivrundgang.** Hvor et togs rute vender, har det
+  hidtil fået tid nok til, at lokomotivet kan køre rundt til den anden ende — uanset hvad der har
+  fremført det. Redigér et lokomotiv på fanen Omløb, og sæt kryds i den nye boks **Vendetog?**, hvor
+  lokomotivet fremfører et tog, der kan køres fra begge ender: et tog med styrevogn i den anden ende
+  eller med endnu et lokomotiv der. Føreren skifter blot førerrum, så **Opdatér tider** regner nu
+  rundgangen fra, og toget står det korteste ophold i stedet, hvilket fremrykker alle følgende ophold.
+
+  Et **motorvognstog** behandles på samme måde, uden noget at sætte kryds i — det vender, som det står,
+  hvilket tidsberegningen ikke tidligere tog højde for. Fjern krydset, eller giv toget et almindeligt
+  lokomotiv, så kommer tiden til rundgangen tilbage. Et ophold, du bevidst har gjort længere end selve
+  rundgangen, bliver stående, som du har sat det.
+
+- **Et spor kan nu angive, hvilken vej gennem driftsstedet det er beregnet til.** Hvor et driftssted har
+  mere end ét spor og noget at køre videre til, kan hvert af dets spor angive det **forrige** driftssted,
+  et tog kommer fra, det **næste**, det fortsætter til, eller begge — med feltet **begge retninger**, når
+  samme spor også gælder den modsatte vej. Kun de driftssteder, der nås af en strækning herfra, tilbydes,
+  så et spor kun kan angives for en vej, et tog rent faktisk kan tage.
+
+  Et nyt tog lægges derefter på det spor, der passer bedst til dets vej: et spor, der angiver præcis,
+  hvor toget kommer fra og skal hen, går forud for et, der kun angiver det ene, som igen går forud for et
+  spor, der intet angiver, og et spor, der er beregnet til en vej, toget ikke kører, overlades til de
+  tog, det er til for. Det er netop, hvad en **dobbeltsporet strækning** har brug for — giv det ene spor
+  den ene retnings forrige og næste driftssted og det andet spor samme par omvendt, så holder hver
+  retning sig til sit spor. Lad kolonnerne stå tomme, så ændres intet i forhold til før.
+
+  Hvor to spor passer lige godt til vejen, tager et persontog, der **standser**, et spor med perron,
+  mens et tog, der kører **igennem** — som ethvert tog uden passagerudveksling — tager hovedsporet.
+  Hidtil tog et persontog et spor med perron på hvert driftssted, det anløb, uanset om det standsede der
+  eller ej.
+
+- **Et tog kan nu kopieres i modsat retning og gentages.** At kopiere et tog gav én enkelt kopi, der
+  kørte samme vej som toget, den kom fra. Sæt flueben i **Modsat retning?**, så kører kopien i stedet
+  strækningen baglæns, fra hvor toget sluttede, til hvor det begyndte: alle køretider og alle ophold
+  bevares, forberedelses- og afslutningstiden bytter ende, og kopien får et nummer fra den modsatte
+  retnings række. Minutterne tælles så fra det kopierede togs sidste afgang, så 20 minutter lægger
+  returtoget 20 minutter efter, at toget, det vender fra, er afsluttet.
+
+  Kopidialogen har nu også valget **Gentag tog**, som findes, når et tog tilføjes: angiv et sluttidspunkt
+  og et interval, så tilføjes én kopi pr. interval, indtil sluttidspunktet er passeret. Et tog kan nu
+  oprettes for sig, justeres, til det kører, som det skal, og først derefter gentages hen over dagen —
+  hidtil skulle hele rækken bestilles allerede, da det første tog blev oprettet.
+
+- **Et spor kan nu angive, hvor lang dets perron er.** Hvor et driftssted udveksler passagerer, har hvert
+  af dets spor en **perronlængde** i meter. Over nul betyder, at der ligger en perron langs sporet, og at
+  passagerer kan stige på og af der; nul betyder, at der ikke er nogen. Et nyt passagertog lægges på et
+  spor med perron — helst hovedsporet blandt dem — på hvert driftssted, det anløber, og tager
+  hovedsporet, hvor driftsstedet ingen perron har. Et passagertog må stadig holde ved et spor uden
+  perron: det udveksler ganske enkelt intet der, og det er præcis, hvad det gør, når det krydser et andet
+  tog et sted, hvor der slet ikke udveksles passagerer.
+
+  Sæt flueben i **Passagerer?** ved et driftssted, hvis spor endnu ingen perron har, så får hvert spor en
+  perron på én meter, som du kan justere. En plan, der er oprettet eller importeret før dette, behandles
+  på samme måde, første gang den åbnes, så den fungerer nøjagtig som før — derefter afkorter eller
+  nulstiller du de spor, der i virkeligheden ingen perron har. Et driftssted, hvor en perron allerede er
+  angivet, røres der ikke ved.
+
+  Et passagertog, der standser for passagerudveksling ved et spor uden perron, står nu under
+  **Konflikter**. Du afgør, hvilket af to tilfælde det er: giv sporet en perronlængde, eller fjern
+  fluebenene i standsningens **Ank** og **Afg**, hvilket siger, at toget blot holder der uden at udveksle
+  noget. Intet rettes for dig, for kun du ved, hvad der gælder. Hvor et driftssted kun har perron ved ét
+  spor — det sædvanlige på en mindre station — kan to krydsende passagertog ikke begge få den, og det
+  tog, der ikke får den, er det, der rapporteres. Kontrollen kan slås fra under
+  **Indstillinger › Validering**.
+
+### Fejlrettelser
+
+- **At give anlægget et nyt navn ændrer nu navnet alle de steder, det vises.** Anlæggets navn under
+  **Indstillinger › Generelt** blev kun ændret i indstillingerne: forsiden på hæftet med de generelle
+  instruktioner, navnet i den øverste linje og filnavnet, en plan gemmes under, blev alle ved med at
+  vise, hvad anlægget hed før. De følger nu alle navnet, som det skrives, og en plan, der har fået nyt
+  navn tidligere, rettes næste gang den åbnes.
+
 ## Version 0.4.2
 
 ### Ændringer

@@ -98,14 +98,24 @@ public static class ListItemExtensions
 
     private static ListboxItem ToItem(TrainCategory category) => new(category.Id.ToString(), category.Name);
 
-    // ---- StationTrack ----
-    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationTrack> tracks) =>
-        SortedByDescription(tracks.Select(ToItem));
+    // ---- StationTrack (the label names the track and what it is used for, so a Translator is required
+    //      for the localised word for "track" and the word order) ----
+    // The one projection that keeps the order it is given rather than sorting by the text shown. A track
+    // list belongs to a station chosen beside it, and the order is the planner's own — pass
+    // OperationLocation.TracksInDisplayOrder, which is where that order is defined. The station is not
+    // named again here either, the drop-down beside it having just said which one.
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationTrack> tracks, Translator translator) =>
+        tracks.Select(track => ToItem(track, translator));
 
-    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<StationTrack> tracks, Func<StationTrack, TKey> sorting) =>
-        tracks.OrderBy(sorting).Select(ToItem);
-
-    private static ListboxItem ToItem(StationTrack track) => new(track.Id.ToString(), $"{track.Station.Name} {track.Number}");
+    // "Track 5, Cargo" - the usage is left out when the track has none.
+    private static ListboxItem ToItem(StationTrack track, Translator translator)
+    {
+        var usage = track.Usage.Trim();
+        var label = usage.Length > 0
+            ? string.Format(CultureInfo.CurrentCulture, translator("StationTrackOptionWithUsage"), track.Number, usage)
+            : string.Format(CultureInfo.CurrentCulture, translator("StationTrackOption"), track.Number);
+        return new(track.Id.ToString(), label);
+    }
 
     // ---- Country (label is the localised name, so a Translator is required) ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<Country> countries, Translator translator) =>

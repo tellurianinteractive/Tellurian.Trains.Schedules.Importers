@@ -432,6 +432,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Zuggeschwindigkeit prüfen?</value>
   </data>
+  <data name="ValidatePassengerExchange" xml:space="preserve">
+    <value>Reisendenwechsel am Bahnsteig prüfen?</value>
+  </data>
   <data name="ValidateRouteContinuity" xml:space="preserve">
     <value>Zusammenhängende Laufwege prüfen?</value>
   </data>
@@ -912,6 +915,21 @@
   <data name="AddTrack" xml:space="preserve">
     <value>Gleis hinzufügen</value>
   </data>
+  <data name="TrackPreviousLocation" xml:space="preserve">
+    <value>Vorherige</value>
+  </data>
+  <data name="TrackNextLocation" xml:space="preserve">
+    <value>Nächste</value>
+  </data>
+  <data name="TrackBothDirections" xml:space="preserve">
+    <value>Beide Richtungen?</value>
+  </data>
+  <data name="TrackRoute" xml:space="preserve">
+    <value>Fahrweg</value>
+  </data>
+  <data name="TrackRouteHint" xml:space="preserve">
+    <value>Geben Sie die Betriebsstelle an, von der ein Zug kommt, die, zu der er weiterfährt, oder beide, dann wird ein neuer Zug auf diesem Laufweg auf dieses Gleis gelegt — auch in der Gegenrichtung, wenn beide Richtungen angekreuzt ist. Ein neuer Zug, für den kein Gleis vorgesehen ist, kommt auf ein Gleis mit Bahnsteig, wo er zum Reisendenwechsel hält, und sonst auf das Hauptgleis.</value>
+  </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Farbe</value>
   </data>
@@ -1022,6 +1040,9 @@
   </data>
   <data name="Length" xml:space="preserve">
     <value>Länge (Meter)</value>
+  </data>
+  <data name="PlatformLength" xml:space="preserve">
+    <value>Bahnsteiglänge (Meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kann nicht gelöscht werden: Züge halten an dieser Stelle.</value>
@@ -1269,6 +1290,12 @@
   <data name="Clone" xml:space="preserve">
     <value>Kopieren</value>
   </data>
+  <data name="OppositeDirection" xml:space="preserve">
+    <value>Gegenrichtung?</value>
+  </data>
+  <data name="OppositeDirectionHint" xml:space="preserve">
+    <value>Die Kopie befährt den Laufweg des kopierten Zuges rückwärts und fährt die angegebene Anzahl Minuten nach dessen letzter Abfahrt ab.</value>
+  </data>
   <data name="UpdateTimings" xml:space="preserve">
     <value>Zeiten aktualisieren</value>
   </data>
@@ -1324,7 +1351,7 @@
     <value>Wagen</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fährt weiter als?</value>
+    <value>Fährt weiter?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Halte</value>
@@ -1349,6 +1376,12 @@
   </data>
   <data name="Track" xml:space="preserve">
     <value>Gleis</value>
+  </data>
+  <data name="StationTrackOption" xml:space="preserve">
+    <value>Gleis {0}</value>
+  </data>
+  <data name="StationTrackOptionWithUsage" xml:space="preserve">
+    <value>Gleis {0}, {1}</value>
   </data>
   <data name="Position" xml:space="preserve">
     <value>Position</value>
@@ -1797,6 +1830,12 @@
   </data>
   <data name="Battery" xml:space="preserve">
     <value>Batterie</value>
+  </data>
+  <data name="IsReversibleTrain" xml:space="preserve">
+    <value>Wendezug?</value>
+  </data>
+  <data name="IsReversibleTrainHelp" xml:space="preserve">
+    <value>Der Zug kann von beiden Enden gefahren werden — durch einen Steuerwagen oder eine Lok am anderen Ende — daher wird beim Fahrtrichtungswechsel keine Zeit für das Umsetzen der Lok eingeplant.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Anzahl Einheiten</value>

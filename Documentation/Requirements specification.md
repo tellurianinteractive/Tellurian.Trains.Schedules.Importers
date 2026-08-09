@@ -294,6 +294,14 @@ The user adds, edits and deletes operation locations and their station tracks, a
 station as manned and/or a shadow station — these flags drive automatic dispatch-stretch
 generation (§3.4.2). Where cargo is exchanged but nobody is on duty, the user also names the manned
 station holding the key that unlocks the switches there, and what that key is called (§4.1.1).
+Where passengers are exchanged, the user gives each track the length of the platform along it, which
+is what decides where passengers can get on and off (§4.1.2).
+
+Where a location has more than one track and somewhere to run on to, the user may reserve a track for
+trains running a particular way through the location, naming the previous location such a train comes
+from, the next one it goes on to, or both, and saying whether the same track serves the opposite
+direction as well. Only the locations reached by a stretch from here can be named. This is what decides
+which track a new train is put on (§3.6); leaving it unsaid changes nothing.
 
 #### FR-3.3.1 Data Import
 
@@ -351,10 +359,19 @@ A new timetable is seeded with two standard categories, named in the layout's de
 > company, number, sessions, category, maximum speed, train length (axles/wagons/metres)
 > and continuation (filtered to same-category trains starting after this one ends). Each
 > row expands to a fully editable **Calls** or **Wagon groups** sub-table. Trains can be
-> added, cloned and time-shifted. Station calls carry arrival/departure checkboxes that
+> added, cloned and time-shifted. A clone can run the copied train's route backwards, timed
+> from that train's last departure, and both a new train and a clone can be repeated at a
+> fixed interval up to an end time. Station calls carry arrival/departure checkboxes that
 > set stop vs pass-through (see DM-4.2.3). Edits are saved immediately, and deletion is
 > blocked when other data depends on the train. Rows with scheduling conflicts are
 > highlighted (§3.11).
+>
+> A new train is put on the track that best fits the way it runs through each location it calls at.
+> A track reserved for exactly the route the train takes comes before one reserved for part of it,
+> which comes before a track reserved for nothing at all, and a track reserved for another route is
+> left to the trains it is for (§3.3). Where two tracks fit equally well, a passenger train that
+> stops takes a track with a platform and a train running through takes the main track; tracks left
+> out of the timetable are used only when there is no other.
 >
 > The **Calls** sub-table always lists the calls in the order the train travels them, from the
 > first to the last. Editing a departure shifts the times after it and editing an arrival the
@@ -515,6 +532,8 @@ The system shall calculate travel times between station calls using:
 - The track stretch distance
 - The fast clock speed to convert real time to scheduled time
 - Station-specific operational times (see §4.3)
+- A minute at each end of a stretch where the train stands still, for getting away and
+  braking (see DM-4.3.5)
 
 When a user changes one time, subsequent times should shift accordingly,
 with an option to lock individual times.
@@ -584,6 +603,7 @@ individually and as a set.
 | **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | Checked against the configured min/max speed thresholds. |
 | **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | Trains equal on company, category and number are flagged when any pair has overlapping sessions. Can be toggled off. |
 | **T5** | A train's route must be **continuous**: every leg it runs, from one call to the next, must be a **track stretch of the layout**. A train travels a stretch by departing its start and arriving at its end, so it calls at both ends of every stretch on its way. | ✅ | Two successive calls with no stretch between them are flagged as a route that jumps a location. Two successive calls at the same location (a change of track) travel no stretch and are not flagged. This is also why only the first or last call of a train may be deleted: removing one in between would leave the route jumping the location it stood for. Can be toggled off. |
+| **T6** | A passenger train that **stops to exchange passengers** must stand at a track with a **platform**. The rule applies where the train carries passengers, the location exchanges them, and the call is an **arrival and/or a departure**. | ✅ | A stop at a track whose platform length is zero is flagged. A call that is neither an arrival nor a departure is not: a passenger train may stand at a track without a platform, which is what a meet is. The planner answers either by giving the track a platform length or by clearing the call's arrival and departure, so nothing is put right automatically. Where only one track has a platform, two trains meeting there cannot both have it. Can be toggled off. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
@@ -802,7 +822,20 @@ Each operation location shall have one or more tracks:
 | Is Main       | Whether this is a main through-track       |
 | Is Scheduled  | Whether trains are scheduled on this track |
 | Length        | Usable track length (meters, model scale)  |
+| Platform Length | Length of the platform along the track (metres, one decimal); zero where there is none. Offered only where the location exchanges passengers |
 | Usage         | Free-text usage description                |
+
+Passengers can be exchanged only at a track with a platform, and only where the location exchanges
+passengers at all. A new passenger train is therefore put on a track with a platform — the main one of
+them for choice — and falls back to the main track where the location has none. A passenger train may
+still stand at a track without a platform; it simply exchanges nothing there, which is what a meet at a
+location that exchanges no passengers amounts to. A passenger train that *does* stop to exchange
+passengers at a track without a platform is reported as a conflict (rule T6 in §3.11.2).
+
+A location that exchanges passengers but has no platform on any of its tracks — a plan made before
+platform lengths were recorded — is given a one-metre platform on every track when the plan is opened or
+imported, so it goes on working as it did. A location where one platform has already been recorded is
+left as it stands.
 
 #### DM-4.1.3 Track Stretches
 
@@ -1080,6 +1113,12 @@ fastClockMinutes = realMinutes × fastClockSpeed
 Stations override these defaults to reflect their specific infrastructure
 (e.g., a large station with a long runaround track takes longer).
 
+The loco runaround duration is allowed for only where the train actually needs it. Where a train's
+route reverses, it stands long enough for the locomotive to be run round to the other end — unless the
+train is worked by a trainset, or by a locomotive working a reversible train (see DM-4.4.2), which
+changes direction by changing cab. Such a train stands for the minimum stop instead, as it would
+anywhere else. A train with no vehicle assigned to it yet is allowed the runaround.
+
 The per-field, unset-inherits-default design means defaults are resolved at the point of
 use, not copied onto each station. Imports must therefore **not** copy the layout defaults
 onto each station: a station with no explicit value stays unset, so it continues to track
@@ -1111,6 +1150,27 @@ The factor defaults to 1, so reports show the same number as before this setting
 existed. Raising the factor lets a layout present a larger, more prototype-like
 kilometre count for the same physical stretch length; it has no effect on travel-time
 calculations, which use the stored metre value directly.
+
+#### DM-4.3.5 Time lost at a stop
+
+> **Status:** ✅ Implemented. Applied both when a new train is created and when a train's
+> timings are updated.
+
+A train that stands still at one end of a stretch takes longer over it than one running
+past at speed: it has to get away from a standstill, or brake to one. The calculated
+travel time assumes a train passing at speed, so the system shall allow for that loss
+separately: **one minute is added to the stretch leading up to an arrival where the train
+stops, and one minute to the stretch following its departure.**
+
+A stop that lies between two stretches therefore costs a minute on each of them — two
+minutes in all — over and above the time the train stands at the location. A train stands
+still at its origin and at its terminus as surely as at any stop in between, so those count
+too: the first stretch of a run and the last each carry one minute at that end. A location
+the train passes without stopping adds nothing to either of its stretches.
+
+The allowance is quite separate from the minimum stop duration (see DM-4.3.3), which is
+the time the train stands at the location; this is time spent moving, on the stretches
+either side of it.
 
 ---
 
@@ -1144,9 +1204,13 @@ The system shall maintain a vehicle inventory:
 | Type               | Locomotive or Wagonset                                  |
 | Class              | Vehicle class/series                                    |
 | Number of Units    | For multiple units                                      |
-| Is Double-Directed | Can run in both directions without runaround or turning |
+| Is Double-Directed | Has a cab at each end, so it never needs turning        |
+| Reversible train   | This locomotive works a train that can be driven from either end — one with a driving trailer at the far end, or with a second locomotive there — so it is never run round its train |
 | Company            | Owning company                                          |
 | DCC-address        | For motorised vehicles only                             |
+
+A trainset is reversible by its nature and needs no such marking; the property is offered for
+locomotives only.
 
 #### DM-4.4.3 Vehicle Schedules
 

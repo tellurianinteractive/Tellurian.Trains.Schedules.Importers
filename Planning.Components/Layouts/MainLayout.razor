@@ -9,6 +9,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 @inject Translator Translator
+@inject AppInfoSettings AppInfo
 @implements IDisposable
 
 @* The window title names the app in the user's own language and the plan being worked on, so the
@@ -18,7 +19,7 @@
 
 <div class="page" style="--primary: @Primary; --primary-text: @Primary.TextColor">@* signature colour + its auto-contrasted text, exposed app-wide for data-grid headers etc. *@
     <header class="top-bar no-print">
-        <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppVersion</span><button class="version-notes" type="button" title="@Translator("ReleaseNotes")" aria-label="@Translator("ReleaseNotes")" @onclick="ToggleReleaseNotes"><i class="fa-solid fa-bullhorn"></i></button></h1>
+        <h1 class="app-title">@Translator("AppName") <span class="app-version">@AppInfo.Version</span><button class="version-notes" type="button" title="@Translator("ReleaseNotes")" aria-label="@Translator("ReleaseNotes")" @onclick="ToggleReleaseNotes"><i class="fa-solid fa-bullhorn"></i></button></h1>
         @* The plan currently being worked on, centred so it reads as the document title of the window. *@
         <div class="active-plan @(PlanName is null ? "none" : "")">
             <i class="fa-solid fa-file-lines"></i>
@@ -109,8 +110,6 @@
 </div>
 
 @code {
-    private const string AppVersion = "0.4.2";
-
     // The app's signature colour. Exposed (with its auto-contrasted text colour) as the --primary /
     // --primary-text CSS variables on the page root, so data-grid headers and similar can use them.
     private const string Primary = "#1a3a5c";

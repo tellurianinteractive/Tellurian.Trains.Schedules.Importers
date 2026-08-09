@@ -432,6 +432,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validate train speed?</value>
   </data>
+  <data name="ValidatePassengerExchange" xml:space="preserve">
+    <value>Validate passenger exchange at platforms?</value>
+  </data>
   <data name="ValidateRouteContinuity" xml:space="preserve">
     <value>Validate continuous train routes?</value>
   </data>
@@ -667,11 +670,33 @@
   <data name="Length" xml:space="preserve">
     <value>Length (metres)</value>
   </data>
+  <data name="PlatformLength" xml:space="preserve">
+    <value>Platform length (metres)</value>
+  </data>
   <data name="Usage" xml:space="preserve">
     <value>Usage</value>
   </data>
   <data name="AddTrack" xml:space="preserve">
     <value>Add track</value>
+  </data>
+  <data name="TrackPreviousLocation" xml:space="preserve">
+    <value>Previous</value>
+    <comment>Tracks table column: the location a train comes from for this to be its track.</comment>
+  </data>
+  <data name="TrackNextLocation" xml:space="preserve">
+    <value>Next</value>
+    <comment>Tracks table column: the location a train goes on to for this to be its track.</comment>
+  </data>
+  <data name="TrackBothDirections" xml:space="preserve">
+    <value>Both ways?</value>
+    <comment>Tracks table column: whether the track's route counts the other way round as well.</comment>
+  </data>
+  <data name="TrackRoute" xml:space="preserve">
+    <value>Route</value>
+    <comment>Tracks table column in the read-only view, showing the route as "Yb → Sti".</comment>
+  </data>
+  <data name="TrackRouteHint" xml:space="preserve">
+    <value>Name the location a train comes from, the one it goes on to, or both, and a new train running that way is put on this track — the other way round as well when both ways is ticked. A new train no track is reserved for takes a platform track where it stops to exchange passengers, and the main track where it does not.</value>
   </data>
   <data name="TrackReferencedByTrains" xml:space="preserve">
     <value>Cannot delete: {0} train(s) use this track.</value>
@@ -1274,6 +1299,12 @@
   <data name="Clone" xml:space="preserve">
     <value>Clone</value>
   </data>
+  <data name="OppositeDirection" xml:space="preserve">
+    <value>Opposite direction?</value>
+  </data>
+  <data name="OppositeDirectionHint" xml:space="preserve">
+    <value>The copy runs the copied train's route backwards and departs the given number of minutes after that train's last departure.</value>
+  </data>
   <data name="UpdateTimings" xml:space="preserve">
     <value>Update timings</value>
   </data>
@@ -1329,7 +1360,7 @@
     <value>Wagons</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Continues as?</value>
+    <value>Continues?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Calls</value>
@@ -1354,6 +1385,14 @@
   </data>
   <data name="Track" xml:space="preserve">
     <value>Track</value>
+  </data>
+  <data name="StationTrackOption" xml:space="preserve">
+    <value>Track {0}</value>
+    <comment>A track choice in a drop-down: {0} track number. The station is chosen in its own drop-down beside it.</comment>
+  </data>
+  <data name="StationTrackOptionWithUsage" xml:space="preserve">
+    <value>Track {0}, {1}</value>
+    <comment>A track choice in a drop-down: {0} track number, {1} what the track is used for.</comment>
   </data>
   <data name="Position" xml:space="preserve">
     <value>Position</value>
@@ -1802,6 +1841,12 @@
   </data>
   <data name="Battery" xml:space="preserve">
     <value>Battery</value>
+  </data>
+  <data name="IsReversibleTrain" xml:space="preserve">
+    <value>Reversible train?</value>
+  </data>
+  <data name="IsReversibleTrainHelp" xml:space="preserve">
+    <value>The train can be driven from either end — by a driving trailer, or by a locomotive at the far end — so no time is allowed for the loco runaround where the route reverses.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Number of units</value>

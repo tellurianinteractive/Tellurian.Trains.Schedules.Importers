@@ -222,6 +222,14 @@ public class Train : IEquatable<Train>
 /// </summary>
 public static class TrainExtensions
 {
+    /// <summary>
+    /// The time a train loses at one end of a stretch by standing still there: it has to brake into the
+    /// location, or get away from it again. Added to the running time of the stretch leading up to a stop
+    /// and of the stretch following it (see <c>ScheduledLegMinutes</c>), so a stop costs two minutes in all
+    /// on top of its dwell.
+    /// </summary>
+    public const int StopAllowanceMinutes = 1;
+
     extension(string value)
     {
         /// <summary>
@@ -451,6 +459,32 @@ public static class TrainExtensions
             if (realSpeed <= 0) return 0;
             var realSeconds = stretch.Distance / realSpeed;
             return realSeconds / 60.0 * settings.FastClockSpeed;
+        }
+
+        /// <summary>
+        /// Gets the scheduled (fast-clock) run time in whole minutes for this train over one leg of its
+        /// journey: the travel time across <paramref name="stretch"/>, plus a minute for each end of the
+        /// leg where the train stands still.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ScheduledTravelMinutes"/> is the time for a train running the stretch at speed. A train
+        /// that stands still at one end loses time on top of that — braking into the location, or getting away
+        /// from it again — so a stop costs a minute on the stretch leading up to its arrival and a minute on
+        /// the stretch following its departure, and a leg between two stops costs both. The allowance is added
+        /// to the running time and is quite separate from the dwell at the location itself. A train stands
+        /// still at its origin and at its terminus as surely as at any stop in between, so those count too;
+        /// a pass-through does not.
+        /// </remarks>
+        /// <param name="stretch">The track stretch the train runs on.</param>
+        /// <param name="settings">The time and speed settings holding the speed curve and fast-clock speed.</param>
+        /// <param name="standsAtStart">Whether the train stands still at the call the leg starts from.</param>
+        /// <param name="standsAtEnd">Whether the train stands still at the call the leg ends at.</param>
+        /// <returns>The run time in fast-clock minutes; the running time is at least one minute before the
+        /// allowances are added.</returns>
+        public int ScheduledLegMinutes(TrackStretch stretch, TimeAndSpeedSettings settings, bool standsAtStart, bool standsAtEnd)
+        {
+            var running = Math.Max(1, (int)Math.Round(train.ScheduledTravelMinutes(stretch, settings)));
+            return running + (standsAtStart ? StopAllowanceMinutes : 0) + (standsAtEnd ? StopAllowanceMinutes : 0);
         }
 
         /// <summary>

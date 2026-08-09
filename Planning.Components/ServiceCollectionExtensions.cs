@@ -17,12 +17,19 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds the component services and the localisation providers.
     /// </summary>
+    /// <param name="services">The service collection to add to.</param>
+    /// <param name="appInfo">Facts about the hosting application, such as its release version.</param>
     /// <remarks>
     /// The host still owns what only the host can know: the <see cref="HttpClient"/> and its base
-    /// address, the root components, and applying the stored UI culture at startup.
+    /// address, the root components, its own version, and applying the stored UI culture at startup.
     /// </remarks>
-    public static IServiceCollection AddPlanningComponents(this IServiceCollection services)
+    public static IServiceCollection AddPlanningComponents(this IServiceCollection services, AppInfoSettings appInfo)
     {
+        // Immutable and identical for every user, so a singleton is correct here even under a
+        // multi-user host.
+        services.AddSingleton(appInfo);
+
+
         // Every service below holds one user's state — the open plan, the dock layout, UI
         // preferences, validation results. They are therefore Scoped, never Singleton.
         //

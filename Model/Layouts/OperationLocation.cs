@@ -245,6 +245,21 @@ public static class OperationLocationExtensions
             operationLocation.Tracks.SelectMany(t => t.Calls);
 
         /// <summary>
+        /// The location's tracks in the order they are shown: the order the planner put them in, and
+        /// within that by track number, so tracks that were never given an order of their own still come
+        /// out the same way everywhere. The first of them is the one a call moved here is put on.
+        /// </summary>
+        /// <remarks>
+        /// The single definition of that order. The tracks table and the track drop-down both read it,
+        /// so a planner reordering the tracks sees the drop-down follow.
+        /// </remarks>
+        public IReadOnlyList<StationTrack> TracksInDisplayOrder =>
+            operationLocation is null ? [] :
+            [.. operationLocation.Tracks
+                .OrderBy(track => track.DisplayOrder)
+                .ThenBy(track => track.Number, StringComparer.OrdinalIgnoreCase)];
+
+        /// <summary>
         /// Finds a track by its number.
         /// </summary>
         /// <param name="number">The track number to find.</param>
@@ -278,6 +293,46 @@ public static class OperationLocationExtensions
         }
 
         /// <summary>
+        /// The track a train is put on here, given where it comes from and where it goes on to — either
+        /// of them <c>null</c> where the train starts or ends its run at this location — and what it
+        /// wants of the track it stands on. Returns <c>null</c> only where the location has no track.
+        /// </summary>
+        /// <remarks>
+        /// The tracks are ranked best first: the scheduled ones; then those whose own route fits the
+        /// train's most closely (see <c>StationTrack.RouteMatch</c>); then those that give the train what
+        /// it asked for — a platform where it stops to exchange passengers, the main track where it does
+        /// not — with the main track deciding between equals; and last by display order, so the choice is
+        /// the one the planner sees first. Where every track is reserved for some other way through, the
+        /// routes are set aside and the rest of the ranking decides: the train has to stand somewhere.
+        /// </remarks>
+        /// <param name="previous">The location the train comes from, or <c>null</c> where it starts here.</param>
+        /// <param name="next">The location the train goes on to, or <c>null</c> where it ends here.</param>
+        /// <param name="preference">What the train wants of the track it is put on.</param>
+        public StationTrack? PreferredTrack(OperationLocation? previous, OperationLocation? next, TrackPreference preference)
+        {
+            if (operationLocation is null || operationLocation.Tracks.Count == 0) return null;
+
+            var candidates = operationLocation.Tracks
+                .Select(track => (track, fit: track.RouteMatch(previous?.Id, next?.Id)))
+                .Where(candidate => candidate.fit.HasValue)
+                .ToList();
+            if (candidates.Count == 0)
+                candidates = [.. operationLocation.Tracks.Select(track => (track, fit: (int?)0))];
+
+            return candidates
+                .OrderByDescending(candidate => candidate.track.IsScheduled)
+                .ThenByDescending(candidate => candidate.fit!.Value)
+                .ThenByDescending(candidate => Wanted(candidate.track))
+                .ThenByDescending(candidate => candidate.track.IsMain)
+                .ThenBy(candidate => candidate.track.DisplayOrder)
+                .ThenBy(candidate => candidate.track.Number, StringComparer.OrdinalIgnoreCase)
+                .First().track;
+
+            bool Wanted(StationTrack track) =>
+                preference is TrackPreference.Platform ? track.HasPassengerExchange : track.IsMain;
+        }
+
+        /// <summary>
         /// Decides whether trains can meet on an <see cref="Station"/>
         /// </summary>
         public bool CanHaveTrainsMeets =>
@@ -298,5 +353,19 @@ public static class OperationLocationExtensions
         public bool HasInstructions =>
             location is not OtherLocation &&
             (location.HasPassengerExchange || location.HasCargoExchange);
+
+        /// <summary>
+        /// Makes sure this location has somewhere to exchange the passengers it says it exchanges: where
+        /// it exchanges passengers and not one of its tracks has a platform, all of them are given
+        /// <see cref="StationTrack.DefaultPlatformLength"/>. Returns <c>true</c> when something changed.
+        /// Idempotent. See <c>Layout.EnsurePlatforms</c> for why, and for the whole-layout form of it.
+        /// </summary>
+        public bool EnsurePlatforms()
+        {
+            if (!location.HasPassengerExchange) return false;
+            if (location.Tracks.Count == 0 || location.Tracks.Any(track => track.HasPlatform)) return false;
+            foreach (var track in location.Tracks) track.PlatformLength = StationTrack.DefaultPlatformLength;
+            return true;
+        }
     }
 }

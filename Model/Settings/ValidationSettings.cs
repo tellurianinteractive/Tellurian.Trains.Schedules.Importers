@@ -20,6 +20,11 @@ public sealed class ValidationSettings
     public bool ValidateRouteContinuity { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether train numbers are validated.</summary>
     public bool ValidateTrainNumbers { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether a passenger train that stops to exchange passengers is
+    /// validated for standing at a track with a platform (rule T6).
+    /// </summary>
+    public bool ValidatePassengerExchange { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
     public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>

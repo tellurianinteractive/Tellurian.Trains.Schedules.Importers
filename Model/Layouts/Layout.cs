@@ -254,6 +254,69 @@ public static class LayoutOperationLocationExtensions
         public IEnumerable<StationTrack> StationTracks() => layout is null ? [] : layout.OperationLocations.SelectMany(s => s.Tracks);
 
         /// <summary>
+        /// Makes sure every location that exchanges passengers has somewhere to exchange them: where not
+        /// one of its tracks has a platform, all of them are given
+        /// <see cref="StationTrack.DefaultPlatformLength"/>. Returns <c>true</c> when something changed.
+        /// Idempotent. Call this whenever a plan is read or imported, before it is displayed.
+        /// </summary>
+        /// <remarks>
+        /// Platform lengths came after the plans that have none, and every track of a passenger location
+        /// served passengers before there were any. Giving them all the minimum length keeps such a plan
+        /// working exactly as it did, and leaves the planner to shorten or clear the tracks that in truth
+        /// have no platform. A location where a platform has already been recorded is left alone — the
+        /// planner has said which of its tracks have one, and the rest having none is the answer, not a
+        /// gap to fill. So is a location that exchanges no passengers, where a platform means nothing.
+        /// </remarks>
+        public bool EnsurePlatforms()
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            var changed = false;
+            foreach (var location in layout.OperationLocations) changed |= location.EnsurePlatforms();
+            return changed;
+        }
+
+        /// <summary>
+        /// The locations directly connected to <paramref name="location"/> by a track stretch, either way
+        /// round, in name order. These are the only places a train calling here can have come from or go
+        /// on to, so they are what a track's route may name (see
+        /// <see cref="StationTrack.PreviousLocationId"/>).
+        /// </summary>
+        /// <param name="location">The location whose neighbours are wanted.</param>
+        public IReadOnlyList<OperationLocation> NeighboursOf(OperationLocation? location)
+        {
+            if (layout is null || location is null) return [];
+            return
+            [
+                .. layout.TrackStretches
+                    .Where(stretch => stretch.Start.Equals(location) || stretch.End.Equals(location))
+                    .Select(stretch => stretch.Start.Equals(location) ? stretch.End : stretch.Start)
+                    .Where(neighbour => !neighbour.Equals(location))
+                    .Distinct()
+                    .OrderBy(neighbour => neighbour.Name, StringComparer.CurrentCulture)
+            ];
+        }
+
+        /// <summary>
+        /// Clears every track route naming <paramref name="location"/> (see
+        /// <see cref="StationTrack.PreviousLocationId"/>), so no track is left reserved for trains to or
+        /// from somewhere the layout no longer has. Call it when a location is removed. Returns
+        /// <c>true</c> when a track was changed.
+        /// </summary>
+        /// <param name="location">The location being removed.</param>
+        public bool ForgetTrackRoutesTo(OperationLocation? location)
+        {
+            if (layout is null || location is null) return false;
+            var changed = false;
+            foreach (var track in layout.StationTracks())
+            {
+                if (track.PreviousLocationId == location.Id) { track.PreviousLocationId = null; changed = true; }
+                if (track.NextLocationId == location.Id) { track.NextLocationId = null; changed = true; }
+                if (!track.HasRoute) track.AppliesInBothDirections = false;
+            }
+            return changed;
+        }
+
+        /// <summary>
         /// Adds a station to the layout.
         /// </summary>
         /// <param name="station">The station to add.</param>

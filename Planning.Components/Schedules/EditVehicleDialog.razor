@@ -40,6 +40,16 @@
                     </select>
                 </div>
             }
+            @* Only a locomotive can be spared the runaround by working a reversible train; a trainset
+               turns round as it stands whatever is ticked here. *@
+            @if (IsLocomotiveType)
+            {
+                <div class="field">
+                    <label title="@Translator("IsReversibleTrainHelp")">@Translator("IsReversibleTrain")</label>
+                    <input type="checkbox" checked="@_isReversibleTrain"
+                           @onchange="e => _isReversibleTrain = e.Value as bool? ?? false" />
+                </div>
+            }
             @if (IsTractionType || IsWagonsetType)
             {
                 <div class="field">
@@ -175,6 +185,7 @@
     private int _number;
     private int? _companyId;
     private TractionType _tractionType = TractionType.Undefined;
+    private bool _isReversibleTrain;
     private int _numberOfUnits = 1;
     private readonly List<Wagon> _wagons = [];
     private Sessions _sessions;
@@ -184,6 +195,7 @@
         Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
     private bool IsTractionType => Type.IsTraction;
     private bool IsWagonsetType => Type.IsWagonSet;
+    private bool IsLocomotiveType => Type == ScheduledObjectType.Locomotive;
 
     // The number of units to display and save: the listed wagon count wins for a wagonset that lists its
     // individual wagons, otherwise the entered number.
@@ -199,6 +211,7 @@
         _number = Vehicle.Number;
         _companyId = Vehicle.CompanyId;
         _tractionType = Vehicle.TractionType == TractionType.None ? TractionType.Undefined : Vehicle.TractionType;
+        _isReversibleTrain = Vehicle.IsReversibleTrain;
         _numberOfUnits = Math.Max(1, Vehicle.NumberOfUnits);
         // Stage clones so the dialog can be cancelled without touching the vehicle's rake.
         _wagons.AddRange(Vehicle.Units.OfType<Wagon>().OrderBy(w => w.Position).Select(w => new Wagon
@@ -273,7 +286,7 @@
         if (Plan is not { } plan || !CanSave) return;
         var type = Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
-        plan.UpdateVehicle(Vehicle, type, _externalId, _class, _number, company, _tractionType, EffectiveNumberOfUnits);
+        plan.UpdateVehicle(Vehicle, type, _externalId, _class, _number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)

@@ -18,7 +18,7 @@
    booklet is carried and consulted throughout.
 
    Same physical format as the duty booklets, and it reuses their padding and imposition unchanged —
-   both depend only on a page count. The booklet always opens with a front page (meeting name, validity,
+   both depend only on a page count. The booklet always opens with a front page (layout name, validity,
    print date, programme), then the standing instructions under their own heading, then the layout
    topology and shunting yards under theirs — appended because the people who receive this get no
    layout overview from anywhere else. *@
@@ -71,7 +71,7 @@ else
         {
             case InstructionsPageKind.Front:
                 builder.OpenComponent<InstructionsFrontPage>(2);
-                builder.AddComponentParameter(3, nameof(InstructionsFrontPage.MeetingName), ScheduleState.Schedule?.Name ?? "");
+                builder.AddComponentParameter(3, nameof(InstructionsFrontPage.LayoutName), Layout?.Name ?? "");
                 builder.AddComponentParameter(4, nameof(InstructionsFrontPage.ValidFrom), Layout?.Settings.General.ValidFrom);
                 builder.AddComponentParameter(5, nameof(InstructionsFrontPage.ValidTo), Layout?.Settings.General.ValidTo);
                 builder.AddComponentParameter(6, nameof(InstructionsFrontPage.PrintDate), _printDate);

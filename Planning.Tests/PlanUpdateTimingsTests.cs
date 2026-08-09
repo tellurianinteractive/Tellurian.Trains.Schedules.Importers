@@ -22,6 +22,10 @@ public class PlanUpdateTimingsTests
     private static StationCall Call(Train train, string signature) =>
         train.Calls.Single(c => c.OperationLocation.Signature == signature);
 
+    /// <summary>The run time in minutes from the departure at one location to the arrival at the next.</summary>
+    private static int LegMinutes(Train train, string fromSignature, string toSignature) =>
+        (int)(Call(train, toSignature).Arrival.Value - Call(train, fromSignature).Departure.Value).TotalMinutes;
+
     [TestMethod]
     public void KeepsTheOriginDepartureFixed()
     {
@@ -52,8 +56,36 @@ public class PlanUpdateTimingsTests
 
         Assert.IsNotNull(result);
         Assert.AreEqual(eslöv.Arrival, eslöv.Departure, "A pass-through has equal arrival and departure times.");
-        // The run times are unchanged, so the terminus arrives earlier by exactly the removed dwell.
-        Assert.AreEqual(terminusArrivalBefore.AddMinutes(-(int)removedDwell.TotalMinutes), train.Calls[^1].Arrival);
+        // Eslöv no longer costs its dwell, nor the minute the stop added to the leg in and the leg out, so
+        // the terminus arrives earlier by all three together.
+        Assert.AreEqual(
+            terminusArrivalBefore.AddMinutes(-(int)removedDwell.TotalMinutes - 2 * TrainExtensions.StopAllowanceMinutes),
+            train.Calls[^1].Arrival);
+    }
+
+    [TestMethod]
+    public void MakingACallAStopAddsAMinuteToTheLegOnEachSideOfIt()
+    {
+        var plan = SimplePlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start)!;
+        var eslöv = Call(train, "E");
+
+        // Start from a pass-through, so neither leg around Eslöv carries an allowance for it.
+        eslöv.IsArrival = false;
+        eslöv.IsDeparture = false;
+        plan.UpdateTimings(train);
+        var legInBefore = LegMinutes(train, "Lu", "E");
+        var legOutBefore = LegMinutes(train, "E", "Hm");
+
+        eslöv.IsArrival = true;
+        eslöv.IsDeparture = true;
+        var result = plan.UpdateTimings(train);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(legInBefore + TrainExtensions.StopAllowanceMinutes, LegMinutes(train, "Lu", "E"),
+            "Braking into the new stop lengthens the leg leading up to it.");
+        Assert.AreEqual(legOutBefore + TrainExtensions.StopAllowanceMinutes, LegMinutes(train, "E", "Hm"),
+            "Getting away from the new stop lengthens the leg following it.");
     }
 
     [TestMethod]

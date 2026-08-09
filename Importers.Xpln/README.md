@@ -59,7 +59,7 @@ The XPLN SubType field determines which `OperationLocation` subclass is created:
 | `timetable` | `StationCall` | Station, track, arrival/departure times, remarks (see *Station call conventions* below) |
 | `locomotive` | `TextCallNote` | Adds loco info as driver/station note on first call; sets train's operating company |
 | `trainset` | `TextCallNote` | Adds trainset info as driver note on first call |
-| `wheel` | `Train.Length` | Max train length in axles (meters not set) |
+| `wheel` | `Train.Length` | Max train length: values below 100 are read as axles, 100 and above as centimetres and converted to metres |
 | `group` | `Train.Groups` | Train classification (e.g., *P_Zug* = Passenger, *G_Zug* = Freight or else actual value) |
 
 #### Station call conventions

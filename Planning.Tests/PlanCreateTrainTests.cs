@@ -19,6 +19,13 @@ public class PlanCreateTrainTests
     private static OperationLocation Location(Plan plan, string signature) =>
         plan.Layout.OperationLocations.First(l => l.Signature == signature);
 
+    private static StationCall Call(Train train, string signature) =>
+        train.Calls.Single(c => c.OperationLocation.Signature == signature);
+
+    /// <summary>The run time in minutes from the departure at one location to the arrival at the next.</summary>
+    private static int LegMinutes(Train train, string fromSignature, string toSignature) =>
+        (int)(Call(train, toSignature).Arrival.Value - Call(train, fromSignature).Departure.Value).TotalMinutes;
+
     [TestMethod]
     public void CreatesTrainWithOneCallPerLocationOnPath()
     {
@@ -82,6 +89,38 @@ public class PlanCreateTrainTests
             Assert.IsTrue(call.IsStop, $"Expected a stop at {call.OperationLocation.Signature}.");
             Assert.IsTrue(call.Departure > call.Arrival, $"Expected a dwell at {call.OperationLocation.Signature}.");
         }
+    }
+
+    [TestMethod]
+    public void EachEndOfALegWhereTheTrainStandsStillAddsAMinuteToItsRunTime()
+    {
+        var plan = SimplePlan();
+
+        // The passenger train stands at its origin and terminus and stops at both stations in between, so
+        // every leg gets a minute at each end: running times of 3, 3 and 4 minutes become 5, 5 and 6.
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.AreEqual(5, LegMinutes(train, "M2", "Lu"));
+        Assert.AreEqual(5, LegMinutes(train, "Lu", "E"));
+        Assert.AreEqual(6, LegMinutes(train, "E", "Hm"));
+    }
+
+    [TestMethod]
+    public void ALegIntoOrOutOfAPassThroughGetsNoAllowanceThere()
+    {
+        var plan = SimplePlan();
+        // Without passenger exchange at Eslöv the passenger train cannot stop there, so it runs through at
+        // speed: the leg in and the leg out each lose the minute the stop would have cost them.
+        Location(plan, "E").HasPassengerExchange = false;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.IsTrue(Call(train, "E").IsPassthrough, "Precondition: the train passes Eslöv.");
+        Assert.AreEqual(5, LegMinutes(train, "M2", "Lu"), "Lund is still a stop, and the origin still stands.");
+        Assert.AreEqual(4, LegMinutes(train, "Lu", "E"), "Only the departure from Lund adds a minute.");
+        Assert.AreEqual(5, LegMinutes(train, "E", "Hm"), "Only the arrival at the terminus adds a minute.");
     }
 
     [TestMethod]
@@ -275,5 +314,180 @@ public class PlanCreateTrainTests
 
         Assert.IsNotNull(train);
         Assert.AreEqual(4321, train.Number);
+    }
+
+    [TestMethod]
+    public void APassengerTrainIsPutOnTheTrackWithAPlatform()
+    {
+        var plan = SimplePlan();
+        // Track 2 is the only one anywhere with a platform, so it is where the passengers are.
+        foreach (var location in plan.Layout.OperationLocations) location["2"].PlatformLength = 4.5;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.IsTrue(train.Calls.All(call => call.Track.Number == "2"));
+    }
+
+    [TestMethod]
+    public void ATrainThatCarriesNoPassengersIgnoresThePlatforms()
+    {
+        var plan = SimplePlan();
+        foreach (var location in plan.Layout.OperationLocations) location["2"].PlatformLength = 4.5;
+
+        var train = plan.Create(Freight, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.IsTrue(train.Calls.All(call => call.Track.Number == "1"));
+    }
+
+    [TestMethod]
+    public void APassengerTrainTakesTheMainTrackWhereTheLocationHasNoPlatform()
+    {
+        var plan = SimplePlan();
+        // Only Eslöv has a platform; everywhere else the train stands where any other train would.
+        Location(plan, "E")["2"].PlatformLength = 4.5;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        CollectionAssert.AreEqual(
+            new[] { "1", "1", "2", "1" },
+            train.Calls.Select(call => call.Track.Number).ToArray());
+    }
+
+    [TestMethod]
+    public void ANewTrainIsPutOnTheTrackNamedForTheWayItRunsThroughTheLocation()
+    {
+        var plan = SimplePlan();
+        var lund = Location(plan, "Lu");
+        lund["3"].PreviousLocationId = Location(plan, "M2").Id;
+        lund["3"].NextLocationId = Location(plan, "E").Id;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.AreEqual("3", TrackAt(train, "Lu"));
+        // Nothing is said about the other locations, so the train stands where it always would.
+        Assert.IsTrue(train.Calls.Where(call => call.OperationLocation.Signature != "Lu")
+            .All(call => call.Track.Number == "1"));
+    }
+
+    [TestMethod]
+    public void EachDirectionOfADoubleLineGetsItsOwnTrack()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+        var lund = Location(plan, "Lu");
+        lund["1"].PreviousLocationId = m2.Id;
+        lund["1"].NextLocationId = Location(plan, "E").Id;
+        lund["2"].PreviousLocationId = Location(plan, "E").Id;
+        lund["2"].NextLocationId = m2.Id;
+
+        var upward = plan.Create(Passenger, m2, hm, Start);
+        var downward = plan.Create(Passenger, hm, m2, Start);
+
+        Assert.IsNotNull(upward);
+        Assert.IsNotNull(downward);
+        Assert.AreEqual("1", TrackAt(upward, "Lu"));
+        Assert.AreEqual("2", TrackAt(downward, "Lu"));
+    }
+
+    [TestMethod]
+    public void ATrackForBothDirectionsTakesTheTrainWhicheverWayItRuns()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+        var lund = Location(plan, "Lu");
+        lund["3"].PreviousLocationId = m2.Id;
+        lund["3"].NextLocationId = Location(plan, "E").Id;
+        lund["3"].AppliesInBothDirections = true;
+
+        var upward = plan.Create(Passenger, m2, hm, Start);
+        var downward = plan.Create(Passenger, hm, m2, Start);
+
+        Assert.IsNotNull(upward);
+        Assert.IsNotNull(downward);
+        Assert.AreEqual("3", TrackAt(upward, "Lu"));
+        Assert.AreEqual("3", TrackAt(downward, "Lu"));
+    }
+
+    [TestMethod]
+    public void ATrainRunningTheOtherWayIsNotPutOnATrackNamedForOneDirectionOnly()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var lund = Location(plan, "Lu");
+        lund["1"].PreviousLocationId = m2.Id;
+        lund["1"].NextLocationId = Location(plan, "E").Id;
+
+        var downward = plan.Create(Passenger, Location(plan, "Hm"), m2, Start);
+
+        Assert.IsNotNull(downward);
+        Assert.AreNotEqual("1", TrackAt(downward, "Lu"));
+    }
+
+    [TestMethod]
+    public void ThePlatformDecidesBetweenTracksNamedForTheSameRoute()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        var hm = Location(plan, "Hm");
+        var lund = Location(plan, "Lu");
+        foreach (var track in new[] { lund["2"], lund["3"] })
+        {
+            track.PreviousLocationId = m2.Id;
+            track.NextLocationId = Location(plan, "E").Id;
+        }
+        lund["3"].PlatformLength = 4.5;
+
+        var passenger = plan.Create(Passenger, m2, hm, Start);
+        var freight = plan.Create(Freight, m2, hm, Start);
+
+        Assert.IsNotNull(passenger);
+        Assert.IsNotNull(freight);
+        // Both trains are named for track 2 and 3 alike; the passenger train stops to exchange
+        // passengers and takes the platform, the freight train has none and takes the main track.
+        Assert.AreEqual("3", TrackAt(passenger, "Lu"));
+        Assert.AreEqual("2", TrackAt(freight, "Lu"));
+    }
+
+    [TestMethod]
+    public void ATrainStartingAtALocationTakesTheTrackNamedForWhereItGoesOnTo()
+    {
+        var plan = SimplePlan();
+        var m2 = Location(plan, "M2");
+        // Track 4 is for trains between Kävlinge and Lund, track 3 for trains starting here for Lund.
+        m2["4"].PreviousLocationId = Location(plan, "Kä").Id;
+        m2["4"].NextLocationId = Location(plan, "Lu").Id;
+        m2["3"].NextLocationId = Location(plan, "Lu").Id;
+
+        var train = plan.Create(Passenger, m2, Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        Assert.AreEqual("3", TrackAt(train, "M2"));
+    }
+
+    private static string TrackAt(Train train, string signature) =>
+        train.Calls.Single(call => call.OperationLocation.Signature == signature).Track.Number;
+
+    [TestMethod]
+    public void APassengerTrainMeetingWhereNoPassengersAreExchangedNeedsNoPlatform()
+    {
+        var plan = SimplePlan();
+        foreach (var location in plan.Layout.OperationLocations) location["2"].PlatformLength = 4.5;
+        // Eslöv exchanges no passengers, so its platform serves none and the train is simply put on the
+        // main track — which is exactly where a meet there would put it.
+        var eslöv = Location(plan, "E");
+        eslöv.HasPassengerExchange = false;
+
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
+
+        Assert.IsNotNull(train);
+        CollectionAssert.AreEqual(
+            new[] { "2", "2", "1", "2" },
+            train.Calls.Select(call => call.Track.Number).ToArray());
     }
 }

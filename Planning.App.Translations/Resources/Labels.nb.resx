@@ -432,6 +432,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Valider toghastighet?</value>
   </data>
+  <data name="ValidatePassengerExchange" xml:space="preserve">
+    <value>Valider passasjerutveksling ved plattform?</value>
+  </data>
   <data name="ValidateRouteContinuity" xml:space="preserve">
     <value>Valider sammenhengende togveier?</value>
   </data>
@@ -912,6 +915,21 @@
   <data name="AddTrack" xml:space="preserve">
     <value>Legg til spor</value>
   </data>
+  <data name="TrackPreviousLocation" xml:space="preserve">
+    <value>Forrige</value>
+  </data>
+  <data name="TrackNextLocation" xml:space="preserve">
+    <value>Neste</value>
+  </data>
+  <data name="TrackBothDirections" xml:space="preserve">
+    <value>Begge retninger?</value>
+  </data>
+  <data name="TrackRoute" xml:space="preserve">
+    <value>Togvei</value>
+  </data>
+  <data name="TrackRouteHint" xml:space="preserve">
+    <value>Angi driftsstedet et tog kommer fra, det det fortsetter til, eller begge, så legges et nytt tog som kjører den veien på dette sporet — også motsatt vei når begge retninger er krysset av. Et nytt tog som ingen spor er ment for, legges på et spor med plattform der det stopper for passasjerutveksling, og ellers på hovedsporet.</value>
+  </data>
   <data name="BackgroundColor" xml:space="preserve">
     <value>Farge</value>
   </data>
@@ -1022,6 +1040,9 @@
   </data>
   <data name="Length" xml:space="preserve">
     <value>Lengde (meter)</value>
+  </data>
+  <data name="PlatformLength" xml:space="preserve">
+    <value>Plattformlengde (meter)</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Kan ikke slettes: tog stopper på dette stedet.</value>
@@ -1269,6 +1290,12 @@
   <data name="Clone" xml:space="preserve">
     <value>Kopier</value>
   </data>
+  <data name="OppositeDirection" xml:space="preserve">
+    <value>Motsatt retning?</value>
+  </data>
+  <data name="OppositeDirectionHint" xml:space="preserve">
+    <value>Kopien kjører strekningen til det kopierte toget motsatt vei og avgår det angitte antallet minutter etter dette togets siste avgang.</value>
+  </data>
   <data name="UpdateTimings" xml:space="preserve">
     <value>Oppdater tider</value>
   </data>
@@ -1324,7 +1351,7 @@
     <value>Vogner</value>
   </data>
   <data name="ContinuesAs" xml:space="preserve">
-    <value>Fortsetter som?</value>
+    <value>Fortsetter?</value>
   </data>
   <data name="Calls" xml:space="preserve">
     <value>Stopp</value>
@@ -1349,6 +1376,12 @@
   </data>
   <data name="Track" xml:space="preserve">
     <value>Spor</value>
+  </data>
+  <data name="StationTrackOption" xml:space="preserve">
+    <value>Spor {0}</value>
+  </data>
+  <data name="StationTrackOptionWithUsage" xml:space="preserve">
+    <value>Spor {0}, {1}</value>
   </data>
   <data name="Position" xml:space="preserve">
     <value>Posisjon</value>
@@ -1797,6 +1830,12 @@
   </data>
   <data name="Battery" xml:space="preserve">
     <value>Batteri</value>
+  </data>
+  <data name="IsReversibleTrain" xml:space="preserve">
+    <value>Vendetog?</value>
+  </data>
+  <data name="IsReversibleTrainHelp" xml:space="preserve">
+    <value>Toget kan kjøres fra begge ender — med en styrevogn eller et lokomotiv i den andre enden — så det settes ikke av tid til lokrundgang der ruten vender.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antall enheter</value>

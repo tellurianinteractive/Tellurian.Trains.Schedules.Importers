@@ -122,10 +122,13 @@
         box-shadow: inset 3px 0 0 #d9a406;
     }
 
+    /* A train's fields stay on one line each: every one of them is a single short value or control, so a
+       column wide enough to wrap it is a column that was sized wrong. */
     table.trains > tbody > tr.train > td {
         padding: 0.3rem 0.6rem;
         border-bottom: 1px solid var(--border);
         vertical-align: middle;
+        white-space: nowrap;
     }
 
     /* Trains sit one level in from their category header. */
