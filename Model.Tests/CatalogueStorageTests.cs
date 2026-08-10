@@ -282,6 +282,27 @@ public class CatalogueStorageTests
     }
 
     [TestMethod]
+    public void ARegionAStationHoldsIsPutIntoTheCatalogueBeforeThePlanIsWritten()
+    {
+        var plan = CreatePlan(out _, out _);
+        var station = plan.Layout.OperationLocations.OfType<Station>().First();
+        // The state an importer, or any code adding a region directly, can leave a layout in: the
+        // station has the region, the catalogue that is the only place it gets written has not.
+        station.Add(new Region { Id = 0, Name = "Fyn", CountryId = 3 });
+        Assert.IsEmpty(plan.Layout.Regions, "Precondition: the catalogue does not hold it.");
+
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, Options), Options);
+
+        Assert.IsNotNull(restored);
+        Assert.AreEqual("Fyn", restored.Layout.Regions.Single().Name,
+            "Writing the plan put it into the catalogue rather than losing it.");
+        var restoredStation = restored.Layout.OperationLocations.OfType<Station>().Single(s => s.Signature == station.Signature);
+        Assert.AreEqual("Fyn", restoredStation.Regions.Single().Name, "And the station still has it.");
+        Assert.IsGreaterThan(0, restoredStation.Regions.Single().Id,
+            "A region left on id zero could not be told from any other, so it is given one of its own.");
+    }
+
+    [TestMethod]
     public void APlanWrittenWithWholeRegionsOnItsStationsStillReads()
     {
         var plan = CreatePlanWithARegionOnAStation(out var region, out var station);

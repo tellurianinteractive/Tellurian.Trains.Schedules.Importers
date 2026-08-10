@@ -218,6 +218,30 @@ public static class LayoutRegionExtensions
         }
 
         /// <summary>
+        /// Reconciles the region catalogue (<see cref="Layout.Regions"/>) with the regions the layout's
+        /// stations actually hold: a region a station carries that the catalogue does not know is added
+        /// to it, and every region is then given an id that is unique and greater than zero. Call this
+        /// whenever a plan is written or imported.
+        /// </summary>
+        /// <remarks>
+        /// A region is stored once, in the catalogue, and a station keeps only its id (see
+        /// <see cref="Station.RegionIds"/>). A region the catalogue did not hold would therefore be
+        /// written nowhere at all and lost on the next read, and two regions left sharing an id would
+        /// read back as one. The Regions tab is the only way to make a region and puts it straight into
+        /// the catalogue, so this normally finds nothing to do; it is what makes that a guarantee rather
+        /// than a habit.
+        /// </remarks>
+        public void RebuildRegions()
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            Catalogue.Reconcile(
+                layout.Regions,
+                layout.OperationLocations.OfType<Station>().SelectMany(station => station.Regions),
+                region => region.Id,
+                (region, id) => region.Id = id);
+        }
+
+        /// <summary>
         /// Re-establishes the regions each station is read without, looking up every id in
         /// <see cref="Station.RegionIds"/> in the layout's own catalogue. Call this whenever a plan is
         /// read, once the whole layout is there.

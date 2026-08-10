@@ -114,19 +114,20 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
     /// its companies on whatever referred to them rather than in the catalogue.
     /// </remarks>
     /// <summary>
-    /// Completes both catalogues before a plan is written, so that writing one can never lose what it
+    /// Completes every catalogue before a plan is written, so that writing one can never lose what it
     /// holds.
     /// </summary>
     /// <remarks>
-    /// A category and a company are written only in their catalogue (see <c>PlanJson</c>), so a plan
-    /// whose catalogue does not yet hold everything its trains, vehicles and duties use would write
-    /// those entries nowhere at all and read back without them. That is the state an importer leaves a
-    /// plan in, and the state every plan saved before the catalogues were kept was read in — reconciling
-    /// on the way out means no path can save a plan that has not been put right first.
+    /// A category, a company and a region are written only in their catalogue (see <c>PlanJson</c>), so
+    /// a plan whose catalogue does not yet hold everything its trains, vehicles, duties and stations use
+    /// would write those entries nowhere at all and read back without them. That is the state an importer
+    /// leaves a plan in, and the state every plan saved before the catalogues were kept was read in —
+    /// reconciling on the way out means no path can save a plan that has not been put right first.
     /// </remarks>
     void IJsonOnSerializing.OnSerializing()
     {
         Timetable?.RebuildTrainCategories();
+        Timetable?.Layout?.RebuildRegions();
         this.RebuildCompanies();
     }
 
@@ -257,6 +258,7 @@ public static class PlanExtensions
                 timetable.RebuildStationCalls();
                 timetable.ResolveCatalogueReferences();
                 timetable.RebuildTrainCategories();
+                timetable.Layout.RebuildRegions();
                 timetable.Layout.EnsurePlatforms();
             }
             plan.RebuildCompanies();

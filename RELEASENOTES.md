@@ -217,6 +217,28 @@
   that one schedule and behave exactly as before; an empty list still means a train-keyed schedule-scope
   error, located through `Trains`.
 
+- **A region is written only in the layout's region catalogue.** `Station.Regions` was where a region
+  ended up being stored: `Layout.Regions` was declared *after* `Layout.OperationLocations`, so the writer
+  met each region under the first station using it, wrote it whole there, and left the catalogue — the
+  one place a region belongs — as a list of `$ref`. Every other station wrote an empty list of its own on
+  top of that, on a property nearly no station uses.
+
+  The catalogue is now declared, and so written, before the locations, and a station keeps just the ids:
+  the new **`Station.RegionIds`**, left out entirely where a station has no regions. `Layout.Regions` is
+  unchanged as the catalogue, and `Station.Regions` still holds the catalogue's own objects — it is only
+  how the association is stored that changed. This follows exactly what `Train.Category`, `Train.Company`
+  and the rest already do (version 3.1.0).
+
+  Supporting members: **`Layout.ResolveCatalogueReferences()`** puts each station's regions back from the
+  ids after a read, called from `Timetable.ResolveCatalogueReferences` so no reading path has to remember
+  both; **`Layout.RebuildRegions()`** reconciles the catalogue with the regions the stations hold before
+  a plan is written, so a region reaching a station some other way is added to the catalogue rather than
+  written nowhere at all, and no two regions are left sharing an id. The ids are written as a plain JSON
+  array rather than the `$id`/`$values` object `ReferenceHandler.Preserve` wraps every collection in.
+
+  As with the other catalogues, only writing changed: a plan written by an earlier version stores its
+  regions under the stations and still reads exactly as it did.
+
 ### XPLN Importer Improvements
 
 - **A section two lines share is imported as one track stretch.** A line is listed in the Routes
