@@ -131,6 +131,52 @@
   rather than reading one — and XPLN records no platforms at all — so call `Plan.Reconcile()` on an
   imported plan before validating it, or every passenger stop in it is reported.
 
+- **The Timetable report lists only the locations trains stop at.** A row used to be printed for every
+  operation location along a timetable stretch, whether anything stopped there or not, so a signal
+  controlled location ran down the table as a column of pass-through marks and a station every train
+  runs past took a row to say nothing. A location now earns its row when at least one train running the
+  stretch stops there (`StationCall.IsStop`), and one train is enough — the list grows by itself as
+  stops are planned. A signal controlled location is never a stop for any train, so it is never listed.
+
+  Both directions are judged together, so a stretch's up and down tables still list the same locations
+  and can be read side by side. The trains that run a stretch are now public as the new
+  **`TimetableStretch.RunningTrains(trains)`**, read the same way the graph reads a train's direction.
+  Nothing else changes: a train passing a location where another stops still shows its pass-through
+  mark, and the connection rows that show where trains start and end on a neighbouring stretch are
+  unaffected.
+
+- **A circulated or turned locomotive now says so, to the driver and to the dispatcher.**
+  `TractionOptions.ReverseLoco` and `TurnLoco` were recorded and imported but produced no note at all.
+  They now generate **`CirculateNote`** ("Circulate locomotive."), **`TurnNote`** ("Turn locomotive.")
+  and, where a part asks for both, the single **`TurnAndCirculateNote`** ("Turn and circulate
+  locomotive.") rather than two notes for what is one errand — the loco leaves the train, goes to the
+  turntable and comes back on the other end. All three are arrival notes and are read by driver and
+  station alike, in all five languages.
+
+  They name no vehicle and explain no procedure. A note on an arrival needs no *after arrival*, the
+  locomotive is the one standing in front of the driver, and circulating is a manoeuvre every loco
+  driver can already do. That also makes it one note per train part rather than one per traction unit,
+  which is what double-headed traction wants: the whole consist circulates once.
+
+- **Everything a vehicle schedule says is done with its vehicles now reaches the two people who have to
+  do it.** The notes generated from a train part's options — `UseNote`, `CoupleNote`, `UncoupleNote`,
+  the two parking notes and the new turning ones — were built on `ScheduledTrainPart` and read by
+  nothing: the driver duties report and the station dispatch list both assemble a call's notes through
+  `StationCall.DriverNotes` / `StationNotes`, which knew only the persisted notes, the stop, lock key
+  and meeting notes. Both now include the new **`StationCall.VehicleNotes(plan)`**, which collects the
+  arrival notes of every scheduled part ending at that call and the departure notes of every part
+  beginning there.
+
+  Nothing on a station call leads back to the schedules that work it, so the plan holding them is
+  passed in — a new optional last argument on `DriverNotes`, `StationNotes`, `DispatchRow.Build` and
+  `DispatchList.Create`. Omitting it keeps the previous behaviour exactly: a timetable is readable
+  before a single vehicle has been scheduled, and there is then nothing to say about the vehicles.
+  Identical notes are collapsed, so two schedules working the same part do not repeat an instruction
+  that names no vehicle. **`ScheduledTrainPart.GeneratedArrivalNotes`** and
+  **`GeneratedDepartureNotes`** expose what the part generates without the call's own persisted notes,
+  which is what keeps every hand-written note from printing twice; `ArrivalNotes` and `DepartureNotes`
+  still return both families together as before.
+
 ### Fixes
 
 - **A locomotive overlap is now reported against the two locomotives that are actually doubled.** Rule

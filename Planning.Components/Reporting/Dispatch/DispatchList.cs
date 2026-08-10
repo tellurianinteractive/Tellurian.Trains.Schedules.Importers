@@ -33,14 +33,16 @@ public sealed record DispatchList(
     /// <param name="station">The station to build the list for.</param>
     /// <param name="trains">The timetable's trains.</param>
     /// <param name="settings">How sessions are rendered inside notes.</param>
+    /// <param name="plan">The plan whose vehicle schedules say what is done with the vehicles at this
+    /// station. Omit it and the rows carry no vehicle instructions.</param>
     public static DispatchList Create(
-        OperationLocation station, IEnumerable<Train> trains, SessionsSettings settings)
+        OperationLocation station, IEnumerable<Train> trains, SessionsSettings settings, Plan? plan = null)
     {
         station = station.ValueOrException(nameof(station));
         trains = trains.ValueOrException(nameof(trains));
 
         var rows = trains
-            .SelectMany(train => DispatchRow.Build(train, station, settings))
+            .SelectMany(train => DispatchRow.Build(train, station, settings, plan))
             // Time first, because the list is worked through in time order. The tie-breaks only make the
             // order of simultaneous clearances stable from one print to the next: arrivals before
             // departures, since a train pulling in has to be cleared in before the platform is given away.

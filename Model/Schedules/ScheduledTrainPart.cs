@@ -81,14 +81,25 @@ public static class ScheduledTrainPartExtensions
         /// <summary>
         /// Creates <see cref="ICallNote">notes</see> for the departure station call at the train part's start station.
         /// </summary>
-        public IEnumerable<ICallNote> DepartureNotes
+        public IEnumerable<ICallNote> DepartureNotes =>
+            [.. trainPart.GeneratedDepartureNotes, .. trainPart.From.Notes];
+
+        /// <summary>
+        /// Only the notes this part <em>generates</em> for its departure — without the call's own
+        /// persisted ones.
+        /// </summary>
+        /// <remarks>
+        /// The split exists because a call assembles its notes from both families itself (see
+        /// <c>DriverNotes</c> and <c>StationNotes</c>), and reading the persisted ones from here as well
+        /// would print every one of them twice.
+        /// </remarks>
+        public IEnumerable<ICallNote> GeneratedDepartureNotes
         {
             get
             {
                 List<ICallNote> result = [];
                 trainPart.AddTractionUnitDepartureNotes(result);
                 trainPart.AddWagonSetDepartureNotes(result);
-                result.AddRange(trainPart.From.Notes);
                 return result;
             }
         }
@@ -111,13 +122,19 @@ public static class ScheduledTrainPartExtensions
         /// <summary>
         /// Creates <see cref="ICallNote">notes</see> for the arrival station call at the train part's end station.
         /// </summary>
-        public IEnumerable<ICallNote> ArrivalNotes
+        public IEnumerable<ICallNote> ArrivalNotes =>
+            [.. trainPart.GeneratedArrivalNotes, .. trainPart.To.Notes];
+
+        /// <summary>
+        /// Only the notes this part <em>generates</em> for its arrival — without the call's own persisted
+        /// ones. See <c>GeneratedDepartureNotes</c> for why the two are separable.
+        /// </summary>
+        public IEnumerable<ICallNote> GeneratedArrivalNotes
         {
             get
             {
                 List<ICallNote> result = [];
                 trainPart.AddTractionUnitArrivalNotes(result);
-                result.AddRange(trainPart.To.Notes);
                 return result;
             }
         }
@@ -163,7 +180,10 @@ public static class ScheduledTrainPartExtensions
                 callNotes.AddRange(trainPart.TractionUnits
                     .Select(so => new UncoupleNote(so) { IsForArrival = true }));
             }
-
+            // Not part of the chain above: uncoupling is what a circulating loco does first, so a part
+            // asking for both wants both notes, in that order. One note whatever the consist — the whole
+            // of it turns or circulates together.
+            if (TurningNote(options) is { } turning) callNotes.Add(turning);
         }
 
         private void AddWagonSetDepartureNotes(List<ICallNote> callNotes)
@@ -222,4 +242,23 @@ public static class ScheduledTrainPartExtensions
             }
         }
     }
+
+    /// <summary>
+    /// The one note for what has to be done with the traction after arrival so the train can leave the
+    /// other way: circulate it to the other end of the train, turn it, or both. Null when neither is
+    /// asked for.
+    /// </summary>
+    /// <remarks>
+    /// Both flags together give a single note, not two. The two moves are one errand — the loco leaves
+    /// the train, goes to the turntable and comes back on the other end — and stating them separately
+    /// reads as two independent movements.
+    /// </remarks>
+    private static GeneratedNote? TurningNote(TractionOptions options) =>
+        options switch
+        {
+            { TurnLoco: true, ReverseLoco: true } => new TurnAndCirculateNote { IsForArrival = true },
+            { TurnLoco: true } => new TurnNote { IsForArrival = true },
+            { ReverseLoco: true } => new CirculateNote { IsForArrival = true },
+            _ => null,
+        };
 }

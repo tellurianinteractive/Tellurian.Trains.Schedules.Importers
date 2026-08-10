@@ -129,7 +129,10 @@ public sealed class DispatchRow
     /// <param name="train">The train to take calls from.</param>
     /// <param name="station">The station the list is for.</param>
     /// <param name="settings">How sessions are rendered inside notes.</param>
-    public static IEnumerable<DispatchRow> Build(Train train, OperationLocation station, SessionsSettings settings)
+    /// <param name="plan">The plan whose vehicle schedules say what is done with the vehicles here.
+    /// Omit it and the rows carry no vehicle instructions.</param>
+    public static IEnumerable<DispatchRow> Build(
+        Train train, OperationLocation station, SessionsSettings settings, Plan? plan = null)
     {
         train = train.ValueOrException(nameof(train));
         station = station.ValueOrException(nameof(station));
@@ -143,7 +146,7 @@ public sealed class DispatchRow
             // The reader is the station, present at every session; what needs qualifying is when a meet
             // does not happen on all the sessions this train runs, so the train's own sessions are the
             // context — the row states one train's working.
-            var notes = call.StationNotes(train.Sessions, settings);
+            var notes = call.StationNotes(train.Sessions, settings, plan);
 
             // Without the on-demand marker: that is stated as a note, and saying it in both places
             // would spend four lines of a narrow column repeating what the notes already say.

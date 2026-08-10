@@ -78,6 +78,16 @@ public class GeneratedNoteTests
     }
 
     [TestMethod]
+    public void CirculatingAndTurningEachSayWhichMoveToMake()
+    {
+        // No vehicle named and no explanation of the manoeuvre: the note is on an arrival, the loco is
+        // the one in front of the driver, and circulating is something every loco driver can already do.
+        Assert.AreEqual("Circulate locomotive.", new CirculateNote().ToText);
+        Assert.AreEqual("Turn locomotive.", new TurnNote().ToText);
+        Assert.AreEqual("Turn and circulate locomotive.", new TurnAndCirculateNote().ToText);
+    }
+
+    [TestMethod]
     public void OvertakingNotesSayWhichTrainPassesTheOther()
     {
         // The two readings of one event, and the whole reason they are separate note types: a driver

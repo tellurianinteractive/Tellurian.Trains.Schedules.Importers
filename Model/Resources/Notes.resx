@@ -82,6 +82,15 @@
     <value>After arrival, drive {0} from arrival track to parking space.</value>
     <comment>{0}=traction unit</comment>
   </data>
+  <data name="CirculateTractionUnit" xml:space="preserve">
+    <value>Circulate locomotive.</value>
+  </data>
+  <data name="TurnTractionUnit" xml:space="preserve">
+    <value>Turn locomotive.</value>
+  </data>
+  <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
+    <value>Turn and circulate locomotive.</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Reinforces {0} between {1} and {2}.</value>
     <comment>{0}=train, {1}=from station, {2}=to station</comment>

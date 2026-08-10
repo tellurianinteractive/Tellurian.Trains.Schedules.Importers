@@ -87,23 +87,25 @@ public sealed class TimetableTable
     public static TimetableTable Create(TimetableStretch stretch, IEnumerable<Train> trains, TrainGraphDirection direction, bool useDays = false, int maxSessions = 14, DayOfWeek startDay = DayOfWeek.Monday)
     {
         // SortedTrainSegments splits overtaken trains into multiple segments for the graph.
-        // In the table each train occupies exactly one column, so deduplicate by train
-        // (keeping the first occurrence to preserve column order) and restore the full
-        // call range, which TrainSpansKm uses to detect SCL pass-throughs.
+        // In the table each train occupies exactly one column, so deduplicate by train,
+        // keeping the first occurrence to preserve column order.
         var seenTrains = new HashSet<Train>(ReferenceEqualityComparer.Instance);
-        var segments = stretch.SortedTrainSegments(trains, direction)
-            .Where(s => seenTrains.Add(s.Train))
-            .Select(s => new GraphicalTrainSegment(s.Train, 0, s.Train.Calls.Count - 1))
+        var tableTrains = stretch.SortedTrainSegments(trains, direction)
+            .Select(s => s.Train)
+            .Where(seenTrains.Add)
             .ToList();
-
-        var stations = direction == TrainGraphDirection.Upward
-            ? stretch.Stations.ToList()
-            : stretch.Stations.Reverse().ToList();
 
         var stretchStations = stretch.Stations.ToHashSet();
 
-        var columns = segments
-            .Select(s => new TimetableTableColumn(s.Train.Identity, s.Train.IsPassenger, s.Train.Sessions, s.Train.Category?.Color ?? "#000000"))
+        // Only the locations somebody stops at earn a row. Judged from every train running the stretch,
+        // not just this direction's, so the stretch's up and down tables list the same locations.
+        var stoppingStations = StoppingStations(stretch, trains);
+        var stations = (direction == TrainGraphDirection.Upward ? stretch.Stations : stretch.Stations.Reverse())
+            .Where(stoppingStations.Contains)
+            .ToList();
+
+        var columns = tableTrains
+            .Select(t => new TimetableTableColumn(t.Identity, t.IsPassenger, t.Sessions, t.Category?.Color ?? "#000000"))
             .ToList();
 
         // A sessions row is shown only when at least one train does not operate every session/day within the
@@ -118,26 +120,14 @@ public sealed class TimetableTable
         var lastIndex = stations.Count - 1;
         var rows = stations.Select((station, index) =>
         {
-            // stationKm stays a raw along-stretch distance for the SCL pass-through span test below (a
-            // constant offset would cancel there anyway); the displayed km carries the divergence offset so a
-            // branch continues counting from its junction on the line it leaves.
-            var stationKm = stretch.DistanceToStation(station) ?? 0.0;
+            // The displayed km carries the divergence offset, so a branch continues counting from its
+            // junction on the line it leaves.
             var km = stretch.DisplayedDistanceToStation(station).ToString("F0", CultureInfo.InvariantCulture);
-            var cells = (IReadOnlyList<TimetableTimeCell>)segments
-                .Select(s =>
-                {
-                    // A train only shows departure-only where it truly originates and arrival-only where it
-                    // truly terminates (its absolute first/last call). At a boundary station where it
-                    // continues to or from another stretch — now visible as a connection row — it reads as a
-                    // normal through-stop with both times.
-                    var cell = BuildCell(s.Train, station);
-                    if (station is SignalControlledLocation && cell == TimetableTimeCell.Empty)
-                        cell = TrainSpansKm(s, stationKm, stretch, stretchStations)
-                            ? TimetableTimeCell.NotStopping
-                            : TimetableTimeCell.Empty;
-                    return cell;
-                })
-                .ToList();
+            // A train only shows departure-only where it truly originates and arrival-only where it truly
+            // terminates (its absolute first/last call). At a boundary station where it continues to or
+            // from another stretch — now visible as a connection row — it reads as a normal through-stop
+            // with both times.
+            var cells = (IReadOnlyList<TimetableTimeCell>)[.. tableTrains.Select(t => BuildCell(t, station))];
             return new TimetableTableRow(km, station.Name, cells)
             {
                 IsFirst = index == 0,
@@ -145,7 +135,7 @@ public sealed class TimetableTable
             };
         }).ToList();
 
-        var (originRows, terminalRows) = BuildConnectionRows(segments, stretch, stretchStations);
+        var (originRows, terminalRows) = BuildConnectionRows(tableTrains, stretch, stretchStations);
 
         return new TimetableTable
         {
@@ -178,10 +168,8 @@ public sealed class TimetableTable
     /// </para>
     /// </summary>
     private static (List<TimetableTableRow> Origins, List<TimetableTableRow> Terminals) BuildConnectionRows(
-        IReadOnlyList<GraphicalTrainSegment> segments, TimetableStretch stretch, HashSet<OperationLocation> stretchStations)
+        IReadOnlyList<Train> trains, TimetableStretch stretch, HashSet<OperationLocation> stretchStations)
     {
-        var trains = segments.Select(s => s.Train).ToList();
-
         // Which off-stretch stations get a connection row, and an ordering step (call distance from the
         // stretch boundary) taken from the trains that actually start/end there.
         var originSteps = new Dictionary<OperationLocation, int>();
@@ -238,6 +226,22 @@ public sealed class TimetableTable
         return (originRows, terminalRows);
     }
 
+    /// <summary>
+    /// The locations along <paramref name="stretch"/> that earn a row: those where at least one train
+    /// running the stretch actually stops (<see cref="StationCall.IsStop"/>). A location every train runs
+    /// past has no times to print, only a column of pass-through marks, so it is left out — and the list
+    /// grows by itself as trains that do stop there are added.
+    /// </summary>
+    /// <remarks>
+    /// A signal controlled location is never a stop for any train, so it never appears. Both directions
+    /// are judged together, which keeps the stretch's up and down tables listing the same locations.
+    /// </remarks>
+    private static HashSet<OperationLocation> StoppingStations(TimetableStretch stretch, IEnumerable<Train> trains) =>
+        [.. stretch.RunningTrains(trains)
+            .SelectMany(t => t.Calls)
+            .Where(c => c.IsStop)
+            .Select(c => c.OperationLocation)];
+
     private static void AddMinStep(Dictionary<OperationLocation, int> steps, OperationLocation station, int step)
     {
         if (!steps.TryGetValue(station, out var existing) || step < existing) steps[station] = step;
@@ -256,8 +260,7 @@ public sealed class TimetableTable
     // The time a train shows at a station, judged by the train's absolute first/last call: departure only
     // where it truly originates, arrival only where it truly terminates, both where it stops in passing, a
     // pass-through pipe where it does not stop, and Empty where it never calls there. Stop versus pass-through
-    // is decided solely by StationCall.IsStop, never by comparing arrival and departure times — except that a
-    // SignalControlledLocation always reads as a pass-through, because a train never stops there. Used for both the
+    // is decided solely by StationCall.IsStop, never by comparing arrival and departure times. Used for both the
     // stretch's own rows and (via ProjectConnectionCell) the borrowed connection rows, so a boundary
     // station reads consistently whichever table it appears in.
     private static TimetableTimeCell BuildCell(Train train, OperationLocation station)
@@ -277,25 +280,5 @@ public sealed class TimetableTable
             return new TimetableTimeCell { Arrival = call.Arrival.HHMM(), Departure = call.Departure.HHMM() };
         }
         return TimetableTimeCell.Empty;
-    }
-
-    // Returns true when the segment has stretch calls on both sides of the given km value,
-    // meaning the train passes through that point even without an explicit station call there.
-    private static bool TrainSpansKm(GraphicalTrainSegment segment, double km, TimetableStretch stretch, HashSet<OperationLocation> stretchStations)
-    {
-        // A segment's indices are positions in the train's calls in run order.
-        var calls = segment.Train.CallsInRunOrder;
-        var before = false;
-        var after = false;
-        for (var i = segment.FromCallIndex; i <= segment.ToCallIndex; i++)
-        {
-            if (!stretchStations.Contains(calls[i].OperationLocation)) continue;
-            var d = stretch.DistanceToStation(calls[i].OperationLocation);
-            if (d is null) continue;
-            if (d < km) before = true;
-            else if (d > km) after = true;
-            if (before && after) return true;
-        }
-        return false;
     }
 }

@@ -1279,10 +1279,11 @@ The system shall support creating driver duties:
 > **Status:** 🟡 Partial. Notes are assembled from schedule data and localised texts as described
 > below, in plain text and in styled markup, and a manual free-text note can be written by hand.
 > Built so far are the loco and wagon connect/disconnect notes, loco exchange, moves to and from a
-> parking track, reinforcement, cargo destinations, whether the train stops or exchanges anything,
-> the lock key notes, and the meeting and overtaking notes. Still missing are turning and running a
-> loco round, the loco driver sorting wagons, block origins and arrivals, scheduled wagons, the two
-> passenger notes and the train continuation note.
+> parking track, turning and circulating a loco, reinforcement, cargo destinations, whether the train
+> stops or exchanges anything, the lock key notes, and the meeting and overtaking notes. Everything a
+> vehicle schedule says is done with its vehicles now reaches both the driver's booklet and the
+> station's dispatch list. Still missing are the loco driver sorting wagons, block origins and
+> arrivals, scheduled wagons, the two passenger notes and the train continuation note.
 
 #### DM-4.5.1 Data-Driven Note Texts
 
@@ -1300,7 +1301,7 @@ The following note types shall be generated from station call data:
 | -------------------------------- | ----------------------------------------- | ----------------------------------------------- |
 | Loco connect/disconnect        | Vehicle schedule + station call         | "Connect loco DB 218 042"                     |
 | Loco exchange                  | Two vehicle schedules at same call      | "Replace loco; Use loco DB 101 003"           |
-| Loco turn/reverse/circulate    | Vehicle properties + station call       | "Turn loco", "Reverse loco", "Circulate loco" |
+| Loco turn/circulate            | Vehicle properties + station call       | "Turn locomotive.", "Circulate locomotive.", "Turn and circulate locomotive." |
 | Loco driver sorts wagons       | Wagon group data at arrival             | "Loco driver sorts wagons at arrival"         |
 | Wagon group connect/disconnect | Wagon group assignment                  | "Connect wagons to [destinations]"            |
 | Block origin                   | Wagon block routing at arrival          | "Connect wagons from [stations]"              |

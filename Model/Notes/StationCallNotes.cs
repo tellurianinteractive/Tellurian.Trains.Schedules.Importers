@@ -23,7 +23,10 @@ public static class StationCallNoteExtensions
         /// whether a meet needs a session qualifier. On a station dispatch list that is the sessions of the
         /// train the row belongs to, because a row states one train's working.</param>
         /// <param name="settings">How session qualifiers are rendered.</param>
-        public IReadOnlyList<ICallNote> StationNotes(Sessions readerSessions, SessionsSettings settings)
+        /// <param name="plan">The plan whose vehicle schedules say what to do with the vehicles here.
+        /// Omit it where there is none; the vehicle notes are then simply absent (see
+        /// <c>VehicleCallNoteExtensions</c>).</param>
+        public IReadOnlyList<ICallNote> StationNotes(Sessions readerSessions, SessionsSettings settings, Plan? plan = null)
         {
             call = call.ValueOrException(nameof(call));
             return
@@ -34,6 +37,7 @@ public static class StationCallNoteExtensions
                     .Concat(call.OnDemandNotes)
                     .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
+                    .Concat(call.VehicleNotes(plan))
                     .Where(note => note.IsStationNote)
                     .OrderBy(note => note.DisplayOrder)
             ];

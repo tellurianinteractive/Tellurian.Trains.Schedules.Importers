@@ -31,9 +31,33 @@ public class Station : OperationLocation
     /// <summary>
     /// Gets or sets the regions and countries represented by this station. Mostly meaningful for
     /// shadow stations (<see cref="IsShadow"/>), which represent external stations or regions and
-    /// are used for cargo flow routing. Seldom used for ordinary stations.
+    /// are used for cargo flow routing. Seldom used for ordinary stations. Each entry is an entry of
+    /// the layout's own catalogue, <see cref="Layout.Regions"/>, which is where it is stored; a plan
+    /// keeps only <see cref="RegionIds"/> here.
     /// </summary>
     public IList<Region> Regions { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the ids of the regions in <see cref="Regions"/> — the form they are written to a
+    /// plan in, each region itself being written once, in the layout's catalogue.
+    /// </summary>
+    /// <remarks>
+    /// Setting this only records the ids: the regions are looked up, and <see cref="Regions"/> filled
+    /// in, by <c>Layout.ResolveCatalogueReferences</c> once the whole layout has been read, because the
+    /// catalogue need not have been read by the time a station is.
+    /// </remarks>
+    [JsonConverter(typeof(Schedules.IdListConverter))]
+    public IList<int> RegionIds
+    {
+        get => [.. Regions.Select(region => region.Id)];
+        set => UnresolvedRegionIds = value;
+    }
+
+    /// <summary>
+    /// The region ids read from a plan that have yet to be looked up in the layout's catalogue.
+    /// Not public, so neither JSON nor EF Core sees it; emptied once the regions are resolved.
+    /// </summary>
+    internal IList<int> UnresolvedRegionIds { get; set; } = [];
 
     /// <summary>
     /// Always true at a shadow station, otherwise as configured. A shadow station stands for everything

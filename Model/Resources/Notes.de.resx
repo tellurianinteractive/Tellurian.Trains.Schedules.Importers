@@ -76,6 +76,15 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis fahren.</value>
   </data>
+  <data name="CirculateTractionUnit" xml:space="preserve">
+    <value>Lok umsetzen.</value>
+  </data>
+  <data name="TurnTractionUnit" xml:space="preserve">
+    <value>Lok drehen.</value>
+  </data>
+  <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
+    <value>Lok drehen und umsetzen.</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Verstärkt {0} zwischen {1} und {2}.</value>
   </data>

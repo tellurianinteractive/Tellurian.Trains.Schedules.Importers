@@ -41,16 +41,17 @@ public sealed class Layout : IEquatable<Layout>
     public ICollection<Company> Companies { get; set; }
 
     /// <summary>
+    /// Gets or sets the catalogue of regions (domestic regions and foreign countries) available on
+    /// this layout for cargo flow routing. A <see cref="Station"/>'s <see cref="Station.Regions"/>
+    /// references a subset of these. Declared before <see cref="OperationLocations"/>, so a region is
+    /// written here — the catalogue it belongs to — rather than under the first station using it.
+    /// </summary>
+    public ICollection<Region> Regions { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of stations (operation locations) on this layout.
     /// </summary>
     public ICollection<OperationLocation> OperationLocations { get; set; }
-
-    /// <summary>
-    /// Gets or sets the catalogue of regions (domestic regions and foreign countries) available on
-    /// this layout for cargo flow routing. A <see cref="Station"/>'s <see cref="Station.Regions"/>
-    /// references a subset of these.
-    /// </summary>
-    public ICollection<Region> Regions { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of track stretches connecting stations.
@@ -74,8 +75,8 @@ public sealed class Layout : IEquatable<Layout>
     {
         Countries = [];
         Companies = [];
-        OperationLocations = [];
         Regions = [];
+        OperationLocations = [];
         TrackStretches = [];
         TimetableStretches = [];
         DispatchStretches = [];
@@ -214,6 +215,33 @@ public static class LayoutRegionExtensions
             region = region.ValueOrException(nameof(region));
             if (!layout.HasRegion(region.Id)) layout.Regions.Add(region);
             return region;
+        }
+
+        /// <summary>
+        /// Re-establishes the regions each station is read without, looking up every id in
+        /// <see cref="Station.RegionIds"/> in the layout's own catalogue. Call this whenever a plan is
+        /// read, once the whole layout is there.
+        /// </summary>
+        /// <remarks>
+        /// The catalogue is the only place a region belongs, so it is the only place one is written
+        /// (see <c>PlanJson</c>) and a station keeps just the ids. Regions that survived the reading —
+        /// a plan written by an earlier version stored them whole on the station — are left alone, so
+        /// nothing is lost by resolving against a catalogue that version filled with references only.
+        /// An id the catalogue does not know is dropped; the Regions tab refuses to delete a region a
+        /// station still uses, so a layout does not get into that state.
+        /// </remarks>
+        public void ResolveCatalogueReferences()
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            foreach (var station in layout.OperationLocations.OfType<Station>())
+            {
+                foreach (var id in station.UnresolvedRegionIds)
+                {
+                    if (layout.Regions.FirstOrDefault(region => region.Id == id) is { } region)
+                        station.Add(region);
+                }
+                station.UnresolvedRegionIds = [];
+            }
         }
     }
 }

@@ -26,56 +26,66 @@ public sealed class TimetableTableTests
         _plan = JsonSerializer.Deserialize<Plan>(File.ReadAllText(JsonFilePath), JsonOptions)!;
     }
 
-    // A train with a registered call at a SignalControlledLocation must show |
-    // in that station's row — never an empty cell. This covers:
-    //   - Junction SCLs that are first/last on a stretch (km=0 or km=max)
-    //   - Terminal trains whose last stretch call is at the SCL
+    // Every ordinary row must be a location where at least one train on the stretch stops. A location
+    // the trains only run past — a signal controlled location always, a station nobody calls at — has
+    // nothing to print but a column of pass-through marks, so it gets no row at all.
     [TestMethod]
-    public void SignalControlledLocation_ShowsPipe_WhenTrainCallsThereAsTerminal()
+    public void OnlyLocationsWhereSomebodyStopsGetARow()
     {
-        var trains = _plan.Timetable.Trains
-            .ToDictionary(t => t.Identity, t => t);
-
         var failures = new List<string>();
 
         foreach (var stretch in _plan.Timetable.Layout.TimetableStretches)
         {
-            var stretchStationList = stretch.Stations.ToList();
+            var stopping = stretch.RunningTrains(_plan.Timetable.Trains)
+                .SelectMany(t => t.Calls)
+                .Where(c => c.IsStop)
+                .Select(c => c.OperationLocation)
+                .ToHashSet();
 
             foreach (var direction in new[] { TrainGraphDirection.Upward, TrainGraphDirection.Downward })
             {
                 var table = TimetableTable.Create(stretch, _plan.Timetable.Trains, direction);
-                var tableStations = direction == TrainGraphDirection.Upward
-                    ? stretchStationList
-                    : [.. stretchStationList.AsEnumerable().Reverse()];
+                var expected = (direction == TrainGraphDirection.Upward ? stretch.Stations : stretch.Stations.Reverse())
+                    .Where(stopping.Contains)
+                    .Select(s => s.Name)
+                    .ToArray();
+                var actual = table.Rows
+                    .Where(r => r.Kind == TimetableRowKind.Normal)
+                    .Select(r => r.StationName)
+                    .ToArray();
 
-                // The ordinary stretch rows align one-to-one with the stretch stations; connection
-                // rows borrowed from neighbouring stretches are excluded so the indices stay in step.
-                var stationRows = table.Rows.Where(r => r.Kind == TimetableRowKind.Normal).ToList();
-
-                for (var rowIdx = 0; rowIdx < stationRows.Count; rowIdx++)
-                {
-                    if (tableStations[rowIdx] is not SignalControlledLocation sclStation) continue;
-
-                    for (var colIdx = 0; colIdx < table.Columns.Count; colIdx++)
-                    {
-                        if (!trains.TryGetValue(table.Columns[colIdx].Header, out var train)) continue;
-
-                        var hasCallAtScl = train.Calls.Any(c => c.OperationLocation.Equals(sclStation));
-                        if (!hasCallAtScl) continue;
-
-                        var cell = stationRows[rowIdx].Cells[colIdx];
-                        if (!cell.IsNotStopping)
-                            failures.Add(
-                                $"Stretch {stretch.Number} {direction}: train {train.Identity} calls at SCL " +
-                                $"'{sclStation.Name}' (row {rowIdx}) but cell is empty");
-                    }
-                }
+                if (!expected.SequenceEqual(actual))
+                    failures.Add($"Stretch {stretch.Number} {direction}: expected rows " +
+                        $"[{string.Join(", ", expected)}] but got [{string.Join(", ", actual)}]");
             }
         }
 
-        if (failures.Count > 0)
-            Assert.Fail(string.Join("\n", failures));
+        if (failures.Count > 0) Assert.Fail(string.Join("\n", failures));
+    }
+
+    // A signal controlled location can never be a stop for any train, so it can never earn a row —
+    // the junction and block-post names that used to run down the table with a pipe in every column.
+    [TestMethod]
+    public void SignalControlledLocationsAreLeftOut()
+    {
+        var sclNames = _plan.Timetable.Layout.OperationLocations
+            .OfType<SignalControlledLocation>()
+            .Select(l => l.Name)
+            .ToHashSet();
+        Assert.IsNotEmpty(sclNames, "The test plan should have signal controlled locations to leave out.");
+
+        foreach (var stretch in _plan.Timetable.Layout.TimetableStretches)
+        {
+            foreach (var direction in new[] { TrainGraphDirection.Upward, TrainGraphDirection.Downward })
+            {
+                var table = TimetableTable.Create(stretch, _plan.Timetable.Trains, direction);
+                var found = table.Rows
+                    .Where(r => r.Kind == TimetableRowKind.Normal && sclNames.Contains(r.StationName))
+                    .Select(r => r.StationName)
+                    .ToArray();
+                Assert.IsEmpty(found, $"Stretch {stretch.Number} {direction} still lists {string.Join(", ", found)}.");
+            }
+        }
     }
 
     // Stretch 1 (Ingerslev–…–Munkeröd) trains branch at Friedensweg onto stretch 2 and terminate at

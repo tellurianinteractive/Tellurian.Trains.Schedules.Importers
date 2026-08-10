@@ -40,7 +40,8 @@ else
             .SelectMany(stretch =>
                 new[] { TrainGraphDirection.Upward, TrainGraphDirection.Downward }
                     .Select(dir => TimetableTable.Create(stretch, trains, dir, useDays, maxSessions, startDay))
-                    .Where(t => t.Columns.Count > 0));
+                    // A stretch nobody stops anywhere along has no rows left to print, only headers.
+                    .Where(t => t.Columns.Count > 0 && t.Rows.Count > 0));
 
         Pages = TimetablePaginator.BuildPages(tables, PageGeometry.A4Landscape);
     }

@@ -76,6 +76,15 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Etter ankomst, kjør {0} fra ankomstsporet til hensettingsplassen.</value>
   </data>
+  <data name="CirculateTractionUnit" xml:space="preserve">
+    <value>Omløp lok.</value>
+  </data>
+  <data name="TurnTractionUnit" xml:space="preserve">
+    <value>Snu lok.</value>
+  </data>
+  <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
+    <value>Snu og omløp lok.</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Forsterker {0} mellom {1} og {2}.</value>
   </data>

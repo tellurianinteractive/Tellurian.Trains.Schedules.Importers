@@ -29,26 +29,35 @@ public static class PlanJson
         Converters = { new CountryByIdConverter() },
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
-            Modifiers = { AcceptLegacyNames, WriteCallsOnlyWithTheirTrain, WriteCatalogueEntriesOnlyInTheirCatalogue },
+            Modifiers =
+            {
+                AcceptLegacyNames,
+                WriteCallsOnlyWithTheirTrain,
+                WriteCatalogueEntriesOnlyInTheirCatalogue,
+                WriteRegionIdsOnlyWhereAStationHasSome,
+            },
         },
     };
 
     /// <summary>
-    /// Writes a train category and a company only where each belongs — in the catalogue that owns it —
-    /// and not again on everything that refers to it. Each keeps just the id it is picked out by, which
-    /// is what a plan is read with: <see cref="Timetables.TimetableExtensions.ResolveCatalogueReferences"/>
-    /// and <see cref="Plan"/> put the objects back afterwards.
+    /// Writes a train category, a company and a region only where each belongs — in the catalogue that
+    /// owns it — and not again on everything that refers to it. Each keeps just the id it is picked out
+    /// by, which is what a plan is read with:
+    /// <see cref="Timetables.TimetableExtensions.ResolveCatalogueReferences"/>,
+    /// <see cref="Layouts.LayoutRegionExtensions"/> and <see cref="Plan"/> put the objects back
+    /// afterwards.
     /// </summary>
     /// <remarks>
     /// As with <see cref="WriteCallsOnlyWithTheirTrain"/>, only writing is turned off, never reading. A
-    /// plan written by an earlier version stored the category or company on the first train, vehicle or
-    /// duty that used it and pointed everything else — including the catalogue — at that copy with a
-    /// <c>$ref</c>, so refusing to read it would leave every one of those references dangling.
+    /// plan written by an earlier version stored the category, company or region on the first train,
+    /// vehicle, duty or station that used it and pointed everything else — including the catalogue — at
+    /// that copy with a <c>$ref</c>, so refusing to read it would leave every one of those references
+    /// dangling.
     /// <para>
     /// The catalogues are written before anything that refers to them: <see cref="Layouts.Layout"/>
-    /// declares its companies ahead of its locations, and <see cref="Timetables.Timetable"/> declares
-    /// its categories ahead of its trains. That is what makes the catalogue the place the entry is
-    /// stored, rather than wherever the writer first happened to meet it.
+    /// declares its companies and regions ahead of its locations, and <see cref="Timetables.Timetable"/>
+    /// declares its categories ahead of its trains. That is what makes the catalogue the place the entry
+    /// is stored, rather than wherever the writer first happened to meet it.
     /// </para>
     /// </remarks>
     private static void WriteCatalogueEntriesOnlyInTheirCatalogue(JsonTypeInfo typeInfo)
@@ -62,14 +71,27 @@ public static class PlanJson
     }
 
     // The references that are written as an id alone, by the type holding them. Each names a property
-    // whose value lives in Layout.Companies or Timetable.TrainCategories.
+    // whose value lives in Layout.Companies, Layout.Regions or Timetable.TrainCategories.
     private static readonly Dictionary<Type, string[]> CatalogueReferences = new()
     {
         [typeof(Timetables.Train)] = [nameof(Timetables.Train.Category), nameof(Timetables.Train.Company)],
         [typeof(Timetables.TrainCategory)] = [nameof(Timetables.TrainCategory.Company)],
         [typeof(ScheduledObject)] = [nameof(ScheduledObject.Company)],
         [typeof(Duties.DriverDuty)] = [nameof(Duties.DriverDuty.Company)],
+        [typeof(Layouts.Station)] = [nameof(Layouts.Station.Regions)],
     };
+
+    /// <summary>
+    /// Leaves a station's <see cref="Layouts.Station.RegionIds"/> out where it has no regions, which is
+    /// every station but the few shadow yards that stand for somewhere off the layout. An empty list
+    /// says exactly what its absence does, on every location of the plan.
+    /// </summary>
+    private static void WriteRegionIdsOnlyWhereAStationHasSome(JsonTypeInfo typeInfo)
+    {
+        if (typeInfo.Type != typeof(Layouts.Station)) return;
+        if (typeInfo.Properties.FirstOrDefault(p => p.Name == nameof(Layouts.Station.RegionIds)) is not { } regionIds) return;
+        regionIds.ShouldSerialize = static (_, value) => value is IList<int> { Count: > 0 };
+    }
 
     /// <summary>
     /// Writes a station call only where it belongs — in its train — and not a second time under the

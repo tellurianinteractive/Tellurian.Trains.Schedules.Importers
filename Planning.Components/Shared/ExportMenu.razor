@@ -216,7 +216,7 @@
             var settings = ScheduleState.Layout?.Settings.General.SessionSettings()
                 ?? SessionsSettings.UseSessions(14);
             var lists = DispatchStations
-                .Select(station => DispatchList.Create(station, timetable.Trains, settings))
+                .Select(station => DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
                 .ToList();
 
             // Set in the layout's report font, like every other report — the recipient can still

@@ -40,6 +40,19 @@ public static class PlanExtensions
                 timetableStretch.ExtrapolatedTimeAtFirstStation(s, direction).TotalMinutes)];
         }
 
+        /// <summary>
+        /// The trains from <paramref name="trains"/> that run along this stretch, in either direction.
+        /// Together they are the trains the stretch's two timetable tables are built from.
+        /// </summary>
+        /// <remarks>
+        /// A train runs along the stretch when its calls follow one of the stretch's track stretches from
+        /// end to end — the same test the direction is read by — so a train that merely terminates at a
+        /// station the stretch happens to share with its neighbour is not one of them.
+        /// </remarks>
+        /// <param name="trains">All trains in the timetable to consider.</param>
+        public IEnumerable<Train> RunningTrains(IEnumerable<Train> trains) =>
+            trains.Where(t => timetableStretch.InferDirection(t) is not null);
+
         // The direction is read from the order the train runs its calls, not the order they were added.
         private TrainGraphDirection? InferDirection(Train train)
         {

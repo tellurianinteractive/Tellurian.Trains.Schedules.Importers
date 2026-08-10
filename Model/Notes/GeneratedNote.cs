@@ -63,6 +63,9 @@ public static class GeneratedNoteExtensions
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
             FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
+            CirculateNote => new(NoteResources.CirculateTractionUnit),
+            TurnNote => new(NoteResources.TurnTractionUnit),
+            TurnAndCirculateNote => new(NoteResources.TurnAndCirculateTractionUnit),
             ReinforcementNote(_, var part) => new(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>

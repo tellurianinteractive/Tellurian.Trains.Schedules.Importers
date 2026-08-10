@@ -20,7 +20,10 @@ public static class DriverCallNoteExtensions
         /// <param name="readerSessions">The sessions the reader's duty runs, used to decide whether a
         /// meet needs a session qualifier.</param>
         /// <param name="settings">How session qualifiers are rendered.</param>
-        public IReadOnlyList<ICallNote> DriverNotes(Sessions readerSessions, SessionsSettings settings)
+        /// <param name="plan">The plan whose vehicle schedules say what to do with the vehicles here.
+        /// Omit it where there is none; the vehicle notes are then simply absent (see
+        /// <c>VehicleCallNoteExtensions</c>).</param>
+        public IReadOnlyList<ICallNote> DriverNotes(Sessions readerSessions, SessionsSettings settings, Plan? plan = null)
         {
             call = call.ValueOrException(nameof(call));
             return
@@ -30,6 +33,7 @@ public static class DriverCallNoteExtensions
                     .Concat(call.StopNotes)
                     .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
+                    .Concat(call.VehicleNotes(plan))
                     .Where(note => note.IsDriverNote)
                     .OrderBy(note => note.DisplayOrder)
             ];

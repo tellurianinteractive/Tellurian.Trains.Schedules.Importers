@@ -1,13 +1,14 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
 
 /// <summary>
-/// Verifies that a train category, a company and a country are each stored in one place only — the
-/// catalogue that owns them — and that everything referring to one keeps just its id, without any of
-/// it being lost on the way out or on the way back in.
+/// Verifies that a train category, a company, a country and a region are each stored in one place
+/// only — the catalogue that owns them — and that everything referring to one keeps just its id,
+/// without any of it being lost on the way out or on the way back in.
 /// </summary>
 [TestClass]
 public class CatalogueStorageTests
@@ -21,6 +22,26 @@ public class CatalogueStorageTests
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256,
     };
+
+    // The same, but writing a layout's regions the way an earlier version did: no station ids at all,
+    // and the catalogue after the locations, so a region is defined under the first station using it
+    // and the catalogue is left holding a $ref into that station.
+    private static readonly JsonSerializerOptions LegacyRegionOptions = new()
+    {
+        ReferenceHandler = ReferenceHandler.Preserve,
+        MaxDepth = 256,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { WriteRegionsTheOldWay } },
+    };
+
+    private static void WriteRegionsTheOldWay(JsonTypeInfo typeInfo)
+    {
+        foreach (var property in typeInfo.Properties)
+        {
+            if (typeInfo.Type == typeof(Layout) && property.Name == nameof(Layout.Regions)) property.Order = 1;
+            if (typeInfo.Type == typeof(Station) && property.Name == nameof(Station.RegionIds))
+                property.ShouldSerialize = static (_, _) => false;
+        }
+    }
 
     private static Plan CreatePlan(out Company danish, out Company german)
     {
@@ -186,6 +207,101 @@ public class CatalogueStorageTests
 
         Assert.IsNotNull(restored);
         CollectionAssert.AreEqual(expectedCountries, restored.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray());
+    }
+
+    private static Plan CreatePlanWithARegionOnAStation(out Region region, out Station station)
+    {
+        var plan = CreatePlan(out _, out _);
+        var layout = plan.Layout;
+        region = new Region { Id = 3, Name = "Söder", CountryId = 1, BackgroundColor = "#009933" };
+        layout.Add(region);
+        station = layout.OperationLocations.OfType<Station>().First();
+        station.Add(region);
+        return plan;
+    }
+
+    [TestMethod]
+    public void ARegionIsWrittenOnlyInTheLayoutCatalogue()
+    {
+        var plan = CreatePlanWithARegionOnAStation(out _, out _);
+
+        var json = JsonSerializer.Serialize(plan, Options);
+
+        Assert.AreEqual(1, CountOf(json, "\"Name\":\"S\\u00F6der\""),
+            "A region is written once — in the layout's catalogue.");
+        Assert.AreEqual(1, CountOf(json, "\"Regions\":"),
+            "That catalogue is the only list of regions written; no station writes its own.");
+        Assert.Contains("\"RegionIds\":", json, StringComparison.Ordinal);
+    }
+
+    [TestMethod]
+    public void AStationWithNoRegionsWritesNothingAboutThem()
+    {
+        var plan = CreatePlanWithARegionOnAStation(out _, out var station);
+        Assert.IsGreaterThan(1, plan.Layout.OperationLocations.OfType<Station>().Count(),
+            "Precondition: the layout has stations besides the one carrying the region.");
+
+        var json = JsonSerializer.Serialize(plan, Options);
+
+        Assert.AreEqual(1, CountOf(json, "\"RegionIds\":"),
+            "Only the one station that has regions says anything about them.");
+        Assert.Contains($"\"RegionIds\":[{station.Regions.Single().Id}]", json.Replace(" ", "", StringComparison.Ordinal), StringComparison.Ordinal,
+            "The ids are a plain array, not the object ReferenceHandler.Preserve wraps a collection in.");
+    }
+
+    [TestMethod]
+    public void AStationsRegionsAreTheCatalogueEntriesAfterARoundTrip()
+    {
+        var plan = CreatePlanWithARegionOnAStation(out var region, out var station);
+
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, Options), Options);
+
+        Assert.IsNotNull(restored);
+        var restoredStation = restored.Layout.OperationLocations.OfType<Station>().Single(s => s.Signature == station.Signature);
+        var restoredRegion = restoredStation.Regions.Single();
+        Assert.AreEqual(region.Id, restoredRegion.Id);
+        Assert.AreEqual(region.Name, restoredRegion.Name);
+        Assert.AreEqual(region.BackgroundColor, restoredRegion.BackgroundColor);
+        Assert.IsTrue(restored.Layout.Regions.Any(r => ReferenceEquals(r, restoredRegion)),
+            "A restored station's region is the catalogue entry itself, so editing it there shows here.");
+    }
+
+    [TestMethod]
+    public void AStationLeftWithNoRegionsStaysThatWayAcrossASave()
+    {
+        var plan = CreatePlanWithARegionOnAStation(out var region, out var station);
+        station.Regions.Remove(region);
+
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, Options), Options);
+
+        Assert.IsNotNull(restored);
+        var restoredStation = restored.Layout.OperationLocations.OfType<Station>().Single(s => s.Signature == station.Signature);
+        Assert.IsEmpty(restoredStation.Regions, "A station given no region does not get its old one back.");
+        Assert.AreEqual(1, restored.Layout.Regions.Count(r => r.Id == region.Id),
+            "The region itself stays in the catalogue, which is what it was detached from the station into.");
+    }
+
+    [TestMethod]
+    public void APlanWrittenWithWholeRegionsOnItsStationsStillReads()
+    {
+        var plan = CreatePlanWithARegionOnAStation(out var region, out var station);
+
+        var legacyJson = JsonSerializer.Serialize(plan, LegacyRegionOptions);
+        Assert.DoesNotContain("\"RegionIds\":", legacyJson, StringComparison.Ordinal,
+            "Precondition: a plan written by an earlier version has no such property.");
+        Assert.IsGreaterThan(
+            legacyJson.IndexOf("\"OperationLocations\":", StringComparison.Ordinal),
+            legacyJson.IndexOf("\"Name\":\"S\\u00F6der\"", StringComparison.Ordinal),
+            "Precondition: the region is defined under the station, the catalogue after it holding a $ref into it.");
+
+        var restored = JsonSerializer.Deserialize<Plan>(legacyJson, Options);
+
+        Assert.IsNotNull(restored);
+        var restoredStation = restored.Layout.OperationLocations.OfType<Station>().Single(s => s.Signature == station.Signature);
+        Assert.AreEqual(region.Name, restoredStation.Regions.Single().Name,
+            "The region written on the station is still read.");
+        Assert.IsTrue(restored.Layout.Regions.Any(r => ReferenceEquals(r, restoredStation.Regions.Single())),
+            "And it is still the same object the catalogue holds.");
     }
 
     private static int CountOf(string text, string value)

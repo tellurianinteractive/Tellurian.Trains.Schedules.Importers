@@ -115,6 +115,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Circulate locomotive..
+        /// </summary>
+        internal static string CirculateTractionUnit {
+            get {
+                return ResourceManager.GetString("CirculateTractionUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Couple {0} to train..
         /// </summary>
         internal static string CoupleToTrain {
@@ -264,6 +273,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string TrainMeetAtTime {
             get {
                 return ResourceManager.GetString("TrainMeetAtTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Turn and circulate locomotive..
+        /// </summary>
+        internal static string TurnAndCirculateTractionUnit {
+            get {
+                return ResourceManager.GetString("TurnAndCirculateTractionUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Turn locomotive..
+        /// </summary>
+        internal static string TurnTractionUnit {
+            get {
+                return ResourceManager.GetString("TurnTractionUnit", resourceCulture);
             }
         }
         

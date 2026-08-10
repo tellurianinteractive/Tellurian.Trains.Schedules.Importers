@@ -143,6 +143,10 @@ public sealed class TimetableRow
     {
         trainPart = trainPart.ValueOrException(nameof(trainPart));
 
+        // What the driver is told to do with the vehicles comes from the vehicle schedules, which hang
+        // off the plan the part's own schedule belongs to. A part detached from one still prints; it
+        // simply has no vehicle instructions to give.
+        var plan = trainPart.Schedule?.Plan;
         var calls = trainPart.Train.Calls.ToList();
         // By reference: StationCall equality is by value, and a train can hold two equal-valued calls.
         var fromIndex = calls.FindIndex(c => ReferenceEquals(c, trainPart.From));
@@ -160,7 +164,7 @@ public sealed class TimetableRow
             // A stretch the driver does not work carries no notes: the notes are work instructions, and
             // showing them against a cancelled row would say to do something that is not theirs to do.
             var notes = arrivalIsInPart || departureIsInPart
-                ? call.DriverNotes(readerSessions, settings)
+                ? call.DriverNotes(readerSessions, settings, plan)
                 : [];
 
             if (i == 0)

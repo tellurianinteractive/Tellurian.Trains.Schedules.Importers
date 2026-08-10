@@ -300,6 +300,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // EF Core creates the StationRegion join table for this many-to-many.
             entity.HasMany(e => e.Regions)
                   .WithMany();
+
+            // RegionIds is how that association is written to a plan (see PlanJson); the join table
+            // holds it here, so mapping it as well would store it twice.
+            entity.Ignore(e => e.RegionIds);
         });
         modelBuilder.Entity<SignalControlledLocation>(entity =>
         {

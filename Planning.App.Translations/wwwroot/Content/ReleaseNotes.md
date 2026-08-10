@@ -4,6 +4,17 @@
 
 ### Changes
 
+- **What is to be done with the locomotives now appears in the driver booklets and the station dispatch
+  lists.** These instructions were worked out from the vehicle schedules all along, but nothing printed
+  them: which locomotive to use, what to couple and uncouple, and fetching it from — or driving it back
+  to — the parking track. They now stand among the other notes at the call they belong to, the departure
+  ones at the departure and the arrival ones at the arrival, and both the driver and the dispatcher see
+  them.
+
+  New among them is the note for a locomotive that has to be **circulated** to the other end of the
+  train, or **turned**, before the train leaves the other way. Where both are needed it reads as one
+  instruction — *Turn and circulate locomotive.* — because it is one errand.
+
 - **The general instructions booklet now prints all of your text, on pages that read properly.** The
   booklet worked out how much fitted on a page far too generously, so a page could be filled past its
   foot and whatever ran over was quietly dropped — most often leaving a heading as the last thing on the

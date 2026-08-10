@@ -68,7 +68,7 @@ else
 
         var settings = Settings;
         var lists = Selected(layout)
-            .Select(station => DispatchList.Create(station, timetable.Trains, settings))
+            .Select(station => DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
             .ToList();
 
         _pages = DispatchPaginator.BuildPages(

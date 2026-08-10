@@ -219,8 +219,9 @@ public static class TimetableExtensions
     /// Re-establishes the catalogue entries a timetable is read without: a <see cref="Train"/>'s
     /// <see cref="Train.Category"/> and <see cref="Train.Company"/>, and a
     /// <see cref="TrainCategory"/>'s <see cref="TrainCategory.Company"/>, are each looked up by their
-    /// foreign key in the catalogue that owns them. Call this whenever a plan is read, before
-    /// <see cref="RebuildTrainCategories"/>.
+    /// foreign key in the catalogue that owns them. The layout's own are resolved too (see
+    /// <see cref="Layouts.LayoutRegionExtensions"/>), so no reading path has to remember both. Call
+    /// this whenever a plan is read, before <see cref="RebuildTrainCategories"/>.
     /// </summary>
     /// <remarks>
     /// These are the only place a category or a company belongs, so they are the only place either is
@@ -233,6 +234,8 @@ public static class TimetableExtensions
     public static void ResolveCatalogueReferences(this Timetable timetable)
     {
         timetable = timetable.ValueOrException(nameof(timetable));
+        // The layout has its own — a station's regions — and is read before anything here needs it.
+        timetable.Layout.ResolveCatalogueReferences();
         var categories = timetable.TrainCategories;
         var companies = timetable.Layout.Companies;
 
