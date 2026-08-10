@@ -517,7 +517,7 @@
     <value>Ingen køretøjsomløb endnu.</value>
   </data>
   <data name="SchedulesNoParts" xml:space="preserve">
-    <value>Omløbene indeholder ingen togdele at vise.</value>
+    <value>Omløbene indeholder ingen togafsnit at vise.</value>
   </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationer og deres spor.</value>
@@ -1409,10 +1409,10 @@
     <value>Toget kan ikke standse her: driftsstedet er signalstyret, eller det har hverken passager- eller godsudveksling for denne slags tog.</value>
   </data>
   <data name="CallStopRequired" xml:space="preserve">
-    <value>Dette stop kan ikke fjernes: togets løb, eller en togdel planlagt over det, begynder eller slutter her.</value>
+    <value>Dette stop kan ikke fjernes: togets løb, eller et togafsnit planlagt over det, begynder eller slutter her.</value>
   </data>
   <data name="CallStopRequiredButImpossible" xml:space="preserve">
-    <value>En togdel begynder eller slutter her, men toget kan ikke standse på dette driftssted. Flyt stoppet eller togdelen.</value>
+    <value>Et togafsnit begynder eller slutter her, men toget kan ikke standse på dette driftssted. Flyt stoppet eller togafsnittet.</value>
   </data>
   <data name="CallReferenced" xml:space="preserve">
     <value>Kan ikke slette: stoppet bruges af materielomløb eller førertjenester.</value>
@@ -1691,28 +1691,28 @@
     <value>Tilføj et tog, der bringer køretøjet hertil</value>
   </data>
   <data name="EditTrainPart" xml:space="preserve">
-    <value>Rediger togdel</value>
+    <value>Rediger togafsnit</value>
   </data>
   <data name="PreviousPart" xml:space="preserve">
-    <value>Forrige del</value>
+    <value>Forrige afsnit</value>
   </data>
   <data name="NextPart" xml:space="preserve">
-    <value>Næste del</value>
+    <value>Næste afsnit</value>
   </data>
   <data name="PartEditAdapted" xml:space="preserve">
     <value>tilpasset</value>
   </data>
   <data name="PartEditGapBefore" xml:space="preserve">
-    <value>Forrige del slutter ikke, hvor denne del begynder.</value>
+    <value>Forrige afsnit slutter ikke, hvor dette afsnit begynder.</value>
   </data>
   <data name="PartEditGapAfter" xml:space="preserve">
-    <value>Næste del begynder ikke, hvor denne del slutter.</value>
+    <value>Næste afsnit begynder ikke, hvor dette afsnit slutter.</value>
   </data>
   <data name="PartEditOverlapBefore" xml:space="preserve">
-    <value>Forrige del er ikke ankommet, når denne del afgår.</value>
+    <value>Forrige afsnit er ikke ankommet, når dette afsnit afgår.</value>
   </data>
   <data name="PartEditOverlapAfter" xml:space="preserve">
-    <value>Næste del afgår, før denne del ankommer.</value>
+    <value>Næste afsnit afgår, før dette afsnit ankommer.</value>
   </data>
   <data name="AddVehicle" xml:space="preserve">
     <value>Tilføj køretøj</value>
@@ -1739,7 +1739,7 @@
     <value>Køretøjer</value>
   </data>
   <data name="RemovePart" xml:space="preserve">
-    <value>Fjern del</value>
+    <value>Fjern afsnit</value>
   </data>
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Fjern køretøj</value>
@@ -1880,7 +1880,7 @@
     <value>Tjenester</value>
   </data>
   <data name="DutiesDescription" xml:space="preserve">
-    <value>Planlæg førertjenester – rækkefølgen af togdele, en fører kører. Tilføj de togdele, en fører kører efter tur; føreren går mellem togdelene, så de behøver ikke starte på samme station. Togdelene er de trækkraftstrækninger, der allerede er defineret i køretøjernes omløb.</value>
+    <value>Planlæg førertjenester – rækkefølgen af togafsnit, en fører kører. Tilføj de togafsnit, en fører kører efter tur; føreren går mellem togafsnittene, så de behøver ikke starte på samme station. Togafsnittene er de trækkraftstrækninger, der allerede er defineret i køretøjernes omløb.</value>
   </data>
   <data name="DutiesNoSchedule" xml:space="preserve">
     <value>Åbn eller importer en plan for at redigere førertjenester.</value>
@@ -1925,16 +1925,16 @@
     <value>Rediger tjeneste</value>
   </data>
   <data name="AddDutyPart" xml:space="preserve">
-    <value>Tilføj togdel</value>
+    <value>Tilføj togafsnit</value>
   </data>
   <data name="RemoveDutyPart" xml:space="preserve">
-    <value>Fjern togdel</value>
+    <value>Fjern togafsnit</value>
   </data>
   <data name="DutyNoCandidateParts" xml:space="preserve">
-    <value>Der kan ikke tilføjes flere togdele til denne tjeneste.</value>
+    <value>Der kan ikke tilføjes flere togafsnit til denne tjeneste.</value>
   </data>
   <data name="SelectTrainPart" xml:space="preserve">
-    <value>Vælg togdel</value>
+    <value>Vælg togafsnit</value>
   </data>
   <data name="TractionUnit" xml:space="preserve">
     <value>Trækkraftenhed</value>

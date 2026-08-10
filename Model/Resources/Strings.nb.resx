@@ -265,10 +265,10 @@
     <value>Kjøretøy {0} er dobbeltbooket: sesjoner {1} overlapper med sesjoner {2}.</value>
   </data>
   <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
-    <value>Togdel {0} kjøres av tjeneste {1} og tjeneste {2} på overlappende sesjoner.</value>
+    <value>Togavsnitt {0} kjøres av tjeneste {1} og tjeneste {2} på overlappende sesjoner.</value>
   </data>
   <data name="DutyHasOverlappingParts" xml:space="preserve">
-    <value>Tjeneste {0} har overlappende togdeler: {1} og {2}.</value>
+    <value>Tjeneste {0} har overlappende togavsnitt: {1} og {2}.</value>
   </data>
   <data name="Undefined" xml:space="preserve">
     <value>Udefinert</value>
@@ -283,7 +283,7 @@
     <value>Kjøretøy {0} og {1} har samme operatør og nummer {2} på sesjoner {3}.</value>
   </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
-    <value>Vognløp {0}: {1} fortsetter ikke der forrige del sluttet ved {2}.</value>
+    <value>Vognløp {0}: {1} fortsetter ikke der forrige avsnitt sluttet ved {2}.</value>
   </data>
   <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
     <value>Vognløp {0} har ingen kjøretøy tildelt.</value>
@@ -304,7 +304,7 @@
     <value>Tjeneste {0} krever {1} personer, som er utenfor det tillatte intervallet 1 til 3.</value>
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
-    <value>Tog {0} har ingen tjeneste på sesjoner {1} for delen fra {2} {3} til {4} {5}.</value>
+    <value>Tog {0} har ingen tjeneste på sesjoner {1} for avsnittet fra {2} {3} til {4} {5}.</value>
   </data>
   <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
     <value>Driftsstedet {0} er betjent, så nøkkelen som oppbevares ved {1}, ignoreres.</value>

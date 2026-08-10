@@ -517,7 +517,7 @@
     <value>Noch keine Fahrzeugumläufe.</value>
   </data>
   <data name="SchedulesNoParts" xml:space="preserve">
-    <value>Die Umläufe enthalten keine anzuzeigenden Zugteile.</value>
+    <value>Die Umläufe enthalten keine anzuzeigenden Zugabschnitte.</value>
   </data>
   <data name="OperationLocationsDescription" xml:space="preserve">
     <value>Stationen und ihre Gleise.</value>
@@ -1409,10 +1409,10 @@
     <value>Der Zug kann hier nicht halten: Die Betriebsstelle ist signalgesteuert oder bietet für diese Zugart weder Reisenden- noch Frachtaustausch.</value>
   </data>
   <data name="CallStopRequired" xml:space="preserve">
-    <value>Dieser Halt kann nicht entfernt werden: Der Zuglauf oder ein darüber geplanter Zugteil beginnt oder endet hier.</value>
+    <value>Dieser Halt kann nicht entfernt werden: Der Zuglauf oder ein darüber geplanter Zugabschnitt beginnt oder endet hier.</value>
   </data>
   <data name="CallStopRequiredButImpossible" xml:space="preserve">
-    <value>Ein Zugteil beginnt oder endet hier, aber der Zug kann an dieser Betriebsstelle nicht halten. Verschieben Sie den Halt oder den Zugteil.</value>
+    <value>Ein Zugabschnitt beginnt oder endet hier, aber der Zug kann an dieser Betriebsstelle nicht halten. Verschieben Sie den Halt oder den Zugabschnitt.</value>
   </data>
   <data name="CallReferenced" xml:space="preserve">
     <value>Löschen nicht möglich: Dieser Halt wird von Fahrzeugumläufen oder Diensten verwendet.</value>
@@ -1691,28 +1691,28 @@
     <value>Zug hinzufügen, der das Fahrzeug hierher bringt</value>
   </data>
   <data name="EditTrainPart" xml:space="preserve">
-    <value>Zugteil bearbeiten</value>
+    <value>Zugabschnitt bearbeiten</value>
   </data>
   <data name="PreviousPart" xml:space="preserve">
-    <value>Vorheriger Teil</value>
+    <value>Vorheriger Abschnitt</value>
   </data>
   <data name="NextPart" xml:space="preserve">
-    <value>Nächster Teil</value>
+    <value>Nächster Abschnitt</value>
   </data>
   <data name="PartEditAdapted" xml:space="preserve">
     <value>angepasst</value>
   </data>
   <data name="PartEditGapBefore" xml:space="preserve">
-    <value>Der vorherige Teil endet nicht dort, wo dieser Teil beginnt.</value>
+    <value>Der vorherige Abschnitt endet nicht dort, wo dieser Abschnitt beginnt.</value>
   </data>
   <data name="PartEditGapAfter" xml:space="preserve">
-    <value>Der nächste Teil beginnt nicht dort, wo dieser Teil endet.</value>
+    <value>Der nächste Abschnitt beginnt nicht dort, wo dieser Abschnitt endet.</value>
   </data>
   <data name="PartEditOverlapBefore" xml:space="preserve">
-    <value>Der vorherige Teil ist noch nicht angekommen, wenn dieser Teil abfährt.</value>
+    <value>Der vorherige Abschnitt ist noch nicht angekommen, wenn dieser Abschnitt abfährt.</value>
   </data>
   <data name="PartEditOverlapAfter" xml:space="preserve">
-    <value>Der nächste Teil fährt ab, bevor dieser Teil ankommt.</value>
+    <value>Der nächste Abschnitt fährt ab, bevor dieser Abschnitt ankommt.</value>
   </data>
   <data name="AddVehicle" xml:space="preserve">
     <value>Fahrzeug hinzufügen</value>
@@ -1739,7 +1739,7 @@
     <value>Fahrzeuge</value>
   </data>
   <data name="RemovePart" xml:space="preserve">
-    <value>Teil entfernen</value>
+    <value>Abschnitt entfernen</value>
   </data>
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Fahrzeug entfernen</value>
@@ -1880,7 +1880,7 @@
     <value>Dienste</value>
   </data>
   <data name="DutiesDescription" xml:space="preserve">
-    <value>Fahrerdienste planen – die Folge von Zugteilen, die ein Fahrer fährt. Fügen Sie die Zugteile nacheinander hinzu; der Fahrer geht zwischen den Zugteilen zu Fuß, sie müssen also nicht an derselben Station beginnen. Die Zugteile sind die bereits in den Fahrzeugumläufen definierten Triebfahrzeugabschnitte.</value>
+    <value>Fahrerdienste planen – die Folge von Zugabschnitten, die ein Fahrer fährt. Fügen Sie die Zugabschnitte nacheinander hinzu; der Fahrer geht zwischen den Zugabschnitten zu Fuß, sie müssen also nicht an derselben Station beginnen. Die Zugabschnitte sind die bereits in den Fahrzeugumläufen definierten Triebfahrzeugabschnitte.</value>
   </data>
   <data name="DutiesNoSchedule" xml:space="preserve">
     <value>Öffnen oder importieren Sie einen Plan, um Fahrerdienste zu bearbeiten.</value>
@@ -1925,16 +1925,16 @@
     <value>Dienst bearbeiten</value>
   </data>
   <data name="AddDutyPart" xml:space="preserve">
-    <value>Zugteil hinzufügen</value>
+    <value>Zugabschnitt hinzufügen</value>
   </data>
   <data name="RemoveDutyPart" xml:space="preserve">
-    <value>Zugteil entfernen</value>
+    <value>Zugabschnitt entfernen</value>
   </data>
   <data name="DutyNoCandidateParts" xml:space="preserve">
-    <value>Diesem Dienst können keine weiteren Zugteile hinzugefügt werden.</value>
+    <value>Diesem Dienst können keine weiteren Zugabschnitte hinzugefügt werden.</value>
   </data>
   <data name="SelectTrainPart" xml:space="preserve">
-    <value>Zugteil auswählen</value>
+    <value>Zugabschnitt auswählen</value>
   </data>
   <data name="TractionUnit" xml:space="preserve">
     <value>Triebfahrzeug</value>

@@ -423,12 +423,19 @@ table.grid thead th .sort-indicator {
     padding-bottom: 0.15em;
 }
 
-/* --- General instructions booklet ---
-   Rendered markdown of unbounded length, split across pages at block boundaries. */
+/* --- General instructions booklet: the author's own markdown ---
+   Wraps every stretch of authored markdown in this booklet: the instructions, split across pages at
+   block boundaries, and the programme on the front page. One rule for both, so a heading is set the
+   same wherever the author writes one — and the heights InstructionsPagination estimates from these
+   figures hold for everything it has to fit. */
 .instructions-body {
     font-size: 0.9rem;
 
-    h1 { font-size: 1.2rem; margin: 0 0 0.3em; }
+    /* The section title above the author's markdown is an h1 inside this block too, and a nested rule
+       outranks the bare .section-title class — so without the exclusion the "Instructions" title was
+       set at the author's h1 size, half a step down from the identical titles on the programme and
+       layout pages, which sit outside this block and keep theirs. */
+    h1:not(.section-title) { font-size: 1.2rem; margin: 0 0 0.3em; }
     h2 { font-size: 1.05rem; margin: 0.5em 0 0.2em; }
     h3 { font-size: 0.95rem; margin: 0.4em 0 0.15em; }
 

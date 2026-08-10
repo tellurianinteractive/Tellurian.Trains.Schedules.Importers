@@ -142,7 +142,7 @@ module meetings, but also for fixed club layouts and home layouts.
 | Schedule                   | Umlaufplan          | The complete operational plan: timetable + vehicle assignments + driver duties                                   |
 | Vehicle Schedule           | Fahrzeugumlauf      | A sequence of train parts forming a circulation; assignable to locomotives, wagons, wagon groups, or cargo flows |
 | Driver Duty                | Dienst              | A continuous assignment of a driver to a sequence of train parts                                                 |
-| Train Part                 | Zugteil             | A segment of a train's journey used for assigning vehicles or drivers                                            |
+| Train Part                 | Zugabschnitt        | A segment of a train's journey used for assigning vehicles or drivers                                            |
 | Wagon Group                | Wagengruppe         | A group of wagons within a train, tracked between origin and destination                                         |
 | Cargo Flow                 | Güterverkehr       | A flow of cargo to specific destinations, scheduled like a vehicle but assigned to a cargo flow object           |
 | Sessions                   | Verkehrstage        | Operating day patterns controlling which sessions a train, duty, or vehicle runs                                 |

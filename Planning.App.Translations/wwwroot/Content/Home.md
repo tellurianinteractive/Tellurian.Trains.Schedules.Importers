@@ -1,6 +1,13 @@
-# Welcome to the Timetable Planner
+# Welcome to the Timetable Planner App
 This is where you plan a model railway operating session: the
 track layout, the trains and their timings, and the schedules and duties that go with them.
+
+## Purpose with the App
+The purposes are:
+- An easy way to plan model train operation, expecially for module meetings.
+- To preview and print reports for the operations paperwork.
+- Reuse of already existing data for planning purposes.
+- Provide data to train dispatch applications,
 
 ## Getting started
 

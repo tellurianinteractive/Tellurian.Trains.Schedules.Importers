@@ -1,5 +1,26 @@
 # Versionsnyheter
 
+## Version 0.5.1
+
+### Ändringar
+
+- **Häftet med allmänna instruktioner skriver nu ut hela din text, på sidor som går att läsa.** Häftet
+  räknade alldeles för generöst med hur mycket som rymdes på en sida, så en sida kunde fyllas förbi
+  nederkanten och det som gick över föll tyst bort — oftast så att en rubrik blev det sista på sidan och
+  texten under den inte stod någonstans. En sida rymmer nu det en sida verkligen rymmer, och texten
+  fortsätter på nästa i stället. En sida slutar inte heller med en ensam rubrik, inte ens där du skrivit
+  en rubrik direkt följd av en till: rubriker följer med den text de inleder.
+
+  **Topologi** och **Rangerbangårdar** kommer nu på häftets allra sista sida, där man hittar dem genom
+  att slå upp häftet bakifrån — precis som de redan gjorde i förarnas omloppshäften. En tom sida som
+  behövs för att fylla arket kommer före dem i stället för efter. Rubriken **Instruktioner** är dessutom
+  satt i samma storlek som **Program** och **Banan** nu, i stället för ett halvt steg mindre.
+
+  **Programmet** på första sidan är satt som instruktionssidorna nu. Det hade lämnats åt webbläsarens
+  egna rubrikstorlekar, som ger mycket mer utrymme över och under en rubrik än något annat i häftet —
+  ett program på tre dagar och en notis tog nästan hela sidan, och ett längre hade runnit ut nedanför
+  den.
+
 ## Version 0.5.0
 
 ### Ändringar
@@ -80,8 +101,8 @@
 ### Ändringar
 
 - **Nu går det att lägga in ett tåg mitt i ett omlopp.** Hittills kunde ett omlopp bara byggas framåt:
-  det enda stället att lägga till ett tåg var i slutet av omloppet. Mellan tågdelarna på en rad finns
-  nu små skarvar som visar var fordonet står och hur länge, och före den första delen en som visar
+  det enda stället att lägga till ett tåg var i slutet av omloppet. Mellan tågavsnitten på en rad finns
+  nu små skarvar som visar var fordonet står och hur länge, och före det första avsnittet en som visar
   varifrån det måste hämtas. Klicka på en av dem för att lägga in ett tåg i luckan — bara de tåg
   fordonet faktiskt hinner med under tiden erbjuds. En tur som inte för fordonet tillbaka dit
   omloppet fortsätter läggs in ändå och rapporteras som en konflikt tills du lägger in returen; så
@@ -296,12 +317,12 @@
   på utbytet igen så finns uppehållen där. Ett magasin har alltid utbyte av både resande och gods,
   eftersom det representerar allt utanför banan, så dess två rutor visas ikryssade och låsta.
 
-- **Ett uppehåll som något hänger på går inte längre att ta bort.** En tågdel går från ett uppehåll
+- **Ett uppehåll som något hänger på går inte längre att ta bort.** Ett tågavsnitt går från ett uppehåll
   där tåget avgår till ett där det ankommer, så båda ändarna måste vara uppehåll. Tågets eget första
-  och sista uppehåll, och ändarna på varje tågdel som ett fordonsomlopp, en förartur eller ett
+  och sista uppehåll, och ändarna på varje tågavsnitt som ett fordonsomlopp, en förartur eller ett
   godsflöde planerats över, behåller nu sin ruta ikryssad och låst; håll pekaren över den så sägs det
-  vad som håller den. Där en tågdel slutar någonstans tåget inte kan stanna — en plan gjord före den
-  här regeln — sägs det rent ut, så att du kan flytta uppehållet eller tågdelen.
+  vad som håller den. Där ett tågavsnitt slutar någonstans tåget inte kan stanna — en plan gjord före den
+  här regeln — sägs det rent ut, så att du kan flytta uppehållet eller tågavsnittet.
 
 - **En tågkategori bär nu de förberedelse- och avslutstider som dess tåg planeras med.** Varje nytt
   tåg i kategorin görs klart så många minuter innan det avgår och avvecklas så många minuter efter att
@@ -319,12 +340,12 @@
 
 ### Rättningar
 
-- **Ett tjänstehäfte kunde skriva ut en tågdel utanför sidans nederkant.** Rapporten räknar före
-  utskriften ut hur många tågdelar som får plats på en sida, och räknade med ungefär hälften mer
+- **Ett tjänstehäfte kunde skriva ut ett tågavsnitt utanför sidans nederkant.** Rapporten räknar före
+  utskriften ut hur många tågavsnitt som får plats på en sida, och räknade med ungefär hälften mer
   utrymme än en A5-sida faktiskt har. Det som hamnar utanför sidkanten klipps bort utan förvarning:
-  den andra tågdelen på en sådan sida saknade slutet av sin tidtabell — eller saknades helt, så att en
-  lokförare stod med en tjänst där det sista tåget fattades. Tågdelar mäts nu mot vad sidan verkligen
-  rymmer, och en tågdel som inte får plats flyttas till nästa sida. Vissa häften behöver därför ett ark
+  det andra tågavsnittet på en sådan sida saknade slutet av sin tidtabell — eller saknades helt, så att en
+  lokförare stod med en tjänst där det sista tåget fattades. Tågavsnitt mäts nu mot vad sidan verkligen
+  rymmer, och ett tågavsnitt som inte får plats flyttas till nästa sida. Vissa häften behöver därför ett ark
   mer än förut.
 
 - **Topologi-diagrammet kunde skriva signaturerna för två driftplatser ovanpå varandra.** Driftplatserna
@@ -361,7 +382,7 @@
   så en rättelse av ett lands språk når nu även planer som sparats dessförinnan. En plan sparad av en
   tidigare version läses som förut och rättas nästa gång den sparas.
 
-- **Ett tjänstehäfte angav bara tågnumret i rubriken för en tågdel.** Ett tåg identifieras lika mycket
+- **Ett tjänstehäfte angav bara tågnumret i rubriken för ett tågavsnitt.** Ett tåg identifieras lika mycket
   av kategorins prefix och suffix som av numret — Gt 1234, inte 1234 — och en lokförare som jämför
   häftet med tidtabellen, eller med det som ropas ut, har bara den rubriken att gå efter. Rubriken
   visar nu hela tågidentiteten, prefix och suffix inräknade, efter operatörens signatur.
@@ -380,7 +401,7 @@
   öppnar den, så att en plan med många tåg blir lättare att överblicka. *Expandera alla* öppnar alla
   på en gång, och en kategori öppnas av sig själv när du lägger till ett tåg i den eller flyttar ett
   tåg dit.
-- **Att redigera en tågdel i ett omlopp visar nu vilka slags fordon omloppet gäller** — lok, tågsätt
+- **Att redigera ett tågavsnitt i ett omlopp visar nu vilka slags fordon omloppet gäller** — lok, tågsätt
   eller vagnsätt. Delar flera fordon på samma omlopp nämns varje slag en gång, och pekar du på det
   visas fordonen själva.
 
@@ -426,11 +447,11 @@
 - **Tåghastigheten kontrolleras nu även på den sista sträckan**, in till den driftplats där tåget slutar
   sitt lopp. Den sträckan hoppades tidigare över.
 
-- En tågdel i ett **omlopp** går nu att **redigera**: pennan på en tågdel öppnar dess från- och
-  tilluppehåll, så ett omlopp kan formas om utan att allt efter det tas bort. En angränsande tågdel
-  som ansluter till den du ändrar följer med — korta av en del från A–C till A–B, så blir returen
-  B–A av sig själv. En angränsande del vars eget tåg inte gör uppehåll på den nya driftplatsen
-  lämnas orörd, och glappet rapporteras som en konflikt att lösa.
+- Ett tågavsnitt i ett **omlopp** går nu att **redigera**: pennan på ett tågavsnitt öppnar dess från- och
+  tilluppehåll, så ett omlopp kan formas om utan att allt efter det tas bort. Ett angränsande tågavsnitt
+  som ansluter till det du ändrar följer med — korta av ett avsnitt från A–C till A–B, så blir returen
+  B–A av sig själv. Ett angränsande avsnitt vars eget tåg inte gör uppehåll på den nya driftplatsen
+  lämnas orört, och glappet rapporteras som en konflikt att lösa.
 
 - Allt som läser ett tågs tågväg följer nu **den ordning tåget kör sina uppehåll**, inte den ordning de
   matades in. För ett tåg vars uppehåll lagts in i fel ordning — ett uppehåll tillagt efter ett som
@@ -438,7 +459,7 @@
   kör mellan och kunde placera tåget i fel riktnings kolumn; den utskrivna **tidtabellen** kunde visa
   en avgång där tåget ankommer; **bygg automatiskt** kedjade inte tåget alls, eftersom det såg ut att
   starta där det inte startar; **upprepa tåg** mätte intervallet från fel uppehåll; och att räkna om
-  tiderna efter en ändrad uppehållsbild misslyckades helt. Att välja en del av ett tåg vid tillägg
+  tiderna efter en ändrad uppehållsbild misslyckades helt. Att välja ett avsnitt av ett tåg vid tillägg
   till ett omlopp visar också uppehållen i körordning. Importerade planer har aldrig berörts — där är
   de båda ordningarna desamma.
 
@@ -458,11 +479,11 @@
 
 ## Version 0.3.1
 
-- Avsnittet **Dragfordon** på ett tågdelsuppslag i häftet Förartjänster har nu sin rubrik på
+- Avsnittet **Dragfordon** på uppslaget för ett tågavsnitt i häftet Förartjänster har nu sin rubrik på
   det valda språket. Det var den enda rubriken i häftet som inte var översatt, så avsnittet
   gick inte att känna igen som dragfordonen.
-- Dragfordonet skrivs nu ut för varje tågdel som har ett. I planer som importerats med en
-  tidigare version visade en del tågdelar ett dragfordon under **Tjänster** men inget i häftet.
+- Dragfordonet skrivs nu ut för varje tågavsnitt som har ett. I planer som importerats med en
+  tidigare version visade en del tågavsnitt ett dragfordon under **Tjänster** men inget i häftet.
 - Anteckningar om tåg i samma riktning talar nu om vilket tåg som passerar det andra —
   **Förbigår GD 42757 12:02-12:05** eller **Förbigås av GD 42757 12:02** — i stället för det
   tidigare *"Möter GD 42757 i samma riktning"*, som aldrig sa vilket tåg som kom före. Två tåg som
@@ -479,7 +500,7 @@
 - En ny rapport, **Förartjänster**, skriver ut ett A5-häfte per tjänst. Framsidan visar
   tjänstens nummer, vilka köromgångar eller dagar den körs, dess start- och sluttid och
   stationer, en svårighetsgrad, bemanningsbehov och eventuella tjänsteanteckningar.
-  Varje tågdel får sin egen sida, med vilka dragfordon som ska användas, vilka vagnsätt
+  Varje tågavsnitt får sin egen sida, med vilka dragfordon som ska användas, vilka vagnsätt
   som ska tas med och till vilka destinationer godsvagnar ska tas med, samt tidtabellen
   – var och en visad i sitt eget tydligt avgränsade block. Häftets sista sida visar
   banans spårplan och en tabell över rangerbangårdar, för enkel referens under
@@ -508,8 +529,8 @@
   lokförare och en konduktör – och detta visas på häftet.
 - En tjänst kan fästas med ett **fast nummer** så att automatisk omnumrering lämnar
   den orörd, till exempel särskilda tjänster som delas ut innan en köromgång börjar.
-- Planen kontrolleras nu även så att varje tågdel med ett lok eller tågsätt tilldelat
-  har en förartjänst som täcker den under varje köromgång den körs – en del som ingen
+- Planen kontrolleras nu även så att varje tågavsnitt med ett lok eller tågsätt tilldelat
+  har en förartjänst som täcker det under varje köromgång det körs – ett avsnitt som ingen
   är schemalagd att köra rapporteras, köromgång för köromgång. En tjänst med fast
   nummer kontrolleras också: den måste ha ett nummer, och inga två tjänster med fast
   nummer kan ges samma nummer.
@@ -558,23 +579,23 @@
 ## Version 0.2.4
 
 - En ny flik **Tjänster** låter dig planera förartjänster – det arbete en lokförare utför
-  under en köromgång, som en följd av de tågdelar hen kör. Varje tjänst är en rad: dess
-  beteckning, företag och köromgångar till vänster, tågdelarna i körordning till höger.
-- Lägg till de tågdelar en förare kör med **Lägg till tågdel**. Listan visar de
+  under en köromgång, som en följd av de tågavsnitt hen kör. Varje tjänst är en rad: dess
+  beteckning, företag och köromgångar till vänster, tågavsnitten i körordning till höger.
+- Lägg till de tågavsnitt en förare kör med **Lägg till tågavsnitt**. Listan visar de
   dragfordonssträckor en förare kan ta härnäst – de som inte krockar i tid med tjänsten
-  och, när den har en tågdel, de som avgår vid eller efter att den ankommer. Tågdelarna
-  behöver inte börja på samma station: mellan två tågdelar går föraren helt enkelt dit
+  och, när den har ett tågavsnitt, de som avgår vid eller efter att det ankommer. Tågavsnitten
+  behöver inte börja på samma station: mellan två tågavsnitt går föraren helt enkelt dit
   nästa börjar.
-- Samma tågdel kan köras av flera tjänster så länge de går på olika köromgångar, så en
+- Samma tågavsnitt kan köras av flera tjänster så länge de går på olika köromgångar, så en
   tjänst kan täcka de udda köromgångarna och en annan de jämna.
-- Där två tågdelar för samma tåg i en tjänst körs av olika dragfordon visar fliken nu en
+- Där två tågavsnitt för samma tåg i en tjänst körs av olika dragfordon visar fliken nu en
   anteckning vid stationen där dragfordonet byts – du behöver inte skriva den för hand.
 - Du kan ge varje tjänst en beteckning och ett företag, välja de köromgångar den körs och
   lägga till fria anteckningar som gäller hela tjänsten.
-- Tjänster som importeras från XPLN delar nu de tågdelar som är definierade i fordonens
-  köromgångar, så varje tågdel visar det dragfordon som kör den.
-- Planen kontrolleras så att ingen tågdel körs av två tjänster under samma köromgång och
-  ingen tjänst har tågdelar som överlappar i tid; eventuella konflikter listas och öppnas
+- Tjänster som importeras från XPLN delar nu de tågavsnitt som är definierade i fordonens
+  köromgångar, så varje tågavsnitt visar det dragfordon som kör det.
+- Planen kontrolleras så att inget tågavsnitt körs av två tjänster under samma köromgång och
+  ingen tjänst har tågavsnitt som överlappar i tid; eventuella konflikter listas och öppnas
   på fliken **Tjänster**. Du kan slå på eller av kontrollen under
   **Inställningar › Validering**.
 

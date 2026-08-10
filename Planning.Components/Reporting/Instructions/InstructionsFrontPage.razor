@@ -24,7 +24,12 @@
         <hr />
         <div class="programme">
             <h1 class="section-title">@Translator("Program")</h1>
-            @((MarkupString)Markdig.Markdown.ToHtml(Program))
+            @* Same wrapper the instructions pages use, so the author's headings and lists are set the
+               same throughout the booklet. Without it the programme fell back to the browser's own
+               heading sizes and margins, which are far looser than anything else on this page. *@
+            <div class="instructions-body">
+                @((MarkupString)Markdig.Markdown.ToHtml(Program))
+            </div>
         </div>
     }
 </div>

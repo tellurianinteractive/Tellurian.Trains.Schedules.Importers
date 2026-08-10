@@ -14,6 +14,14 @@ public class InstructionsPaginationTests
         string.Join("\n\n", Enumerable.Range(1, count)
             .Select(i => string.Join("\n", Enumerable.Repeat($"Paragraph {i}.", linesEach))));
 
+    /// <summary>One paragraph long enough to be charged exactly <paramref name="lines"/> wrapped lines.</summary>
+    /// <remarks>The first line is free; every further <c>CharactersPerLine</c> adds one.</remarks>
+    private static string Paragraph(string marker, int lines)
+    {
+        var length = (lines - 1) * InstructionsPagination.CharactersPerLine;
+        return marker + new string('x', Math.Max(0, length - marker.Length));
+    }
+
     [TestMethod]
     public void AShortDocumentFitsOneContentPage()
     {
@@ -49,6 +57,20 @@ public class InstructionsPaginationTests
         var pages = InstructionsPagination.BuildPages(Paragraphs(3));
 
         Assert.HasCount(1, pages.Where(p => p.Kind == InstructionsPageKind.Overview));
+    }
+
+    [TestMethod]
+    public void TheOverviewIsTheLastPageOfTheBooklet()
+    {
+        // Reached by opening the booklet at the back, as in the duty booklets — so the blank padding
+        // goes before it, never after.
+        foreach (var paragraphs in new[] { 0, 1, 5, 30 })
+        {
+            var pages = InstructionsPagination.BuildPages(Paragraphs(paragraphs));
+
+            Assert.AreEqual(InstructionsPageKind.Overview, pages[^1].Kind, $"{paragraphs} paragraphs.");
+            Assert.AreEqual(0, pages.Count % 4, $"{paragraphs} paragraphs produced {pages.Count} pages.");
+        }
     }
 
     [TestMethod]
@@ -98,12 +120,14 @@ public class InstructionsPaginationTests
         // join it on the same page. Without the stranded-block rule the short paragraph would be the
         // last thing on the first page, with a big gap behind it while the large paragraph moves
         // entirely to the next page anyway.
-        string Line(string marker, int totalLength) => marker + new string('x', totalLength - marker.Length);
-
-        var bigA = Line("AAA", 700);
-        var bigB = Line("BBB", 700);
-        var shortP = Line("SHORT", 10);
-        var bigC = Line("CCC", 1000);
+        //
+        // The sizes are stated in charged lines rather than characters, so they follow the estimator's
+        // constants: the two big paragraphs and the short one leave a gap wide enough for the rule
+        // (33 − 2.5 title − 21.9 = 8.6 against the 8.25 it wants), and the last is too tall to join them.
+        var bigA = Paragraph("AAA", lines: 10);
+        var bigB = Paragraph("BBB", lines: 10);
+        var shortP = Paragraph("SHORT", lines: 1);
+        var bigC = Paragraph("CCC", lines: 15);
         var markdown = string.Join("\n\n", [bigA, bigB, shortP, bigC]);
 
         var pages = InstructionsPagination.BuildPages(markdown, includeOverview: false);
@@ -124,6 +148,52 @@ public class InstructionsPaginationTests
         // Otherwise the two could fall either side of a fold.
         Assert.Contains("# Signalling", blocks[0]);
         Assert.Contains("Always stop at a red signal.", blocks[0]);
+    }
+
+    [TestMethod]
+    public void ARunOfHeadingsStaysWithTheTextItIntroduces()
+    {
+        // A chapter heading followed straight by its first section heading. Attaching only the next
+        // block would pair the two headings and leave the text they announce on its own.
+        var blocks = InstructionsPagination
+            .Blocks("# Operating\n\n## Signalling\n\nAlways stop at a red signal.\n\nNext.").ToList();
+
+        Assert.Contains("# Operating", blocks[0]);
+        Assert.Contains("## Signalling", blocks[0]);
+        Assert.Contains("Always stop at a red signal.", blocks[0]);
+        Assert.HasCount(2, blocks);
+    }
+
+    [TestMethod]
+    public void NoPageEndsOnAHeadingWithItsTextOverleaf()
+    {
+        var markdown = string.Join("\n\n", Enumerable.Range(1, 40)
+            .Select(i => $"# Chapter {i}\n\n## Section {i}\n\nWhat section {i} says."));
+
+        var pages = InstructionsPagination.BuildPages(markdown, includeOverview: false);
+
+        var contentPages = pages.Where(p => p.Kind == InstructionsPageKind.Content).ToList();
+        Assert.IsTrue(contentPages.Count > 1, "Need several content pages to test this meaningfully.");
+        foreach (var page in contentPages)
+        {
+            var lastLine = page.Markdown.Split('\n').Last(l => l.Trim().Length > 0);
+            Assert.IsFalse(lastLine.TrimStart().StartsWith('#'),
+                $"Page {page.PageNumber} ends on the heading '{lastLine}'.");
+        }
+    }
+
+    [TestMethod]
+    public void TheFirstContentPageLeavesRoomForTheSectionTitle()
+    {
+        // As many one-line paragraphs as fill a page that carries no title. The first content page also
+        // prints the "Instructions" title, so they cannot all fit on it — before the title was charged,
+        // the last of them printed past the foot of the page and was silently clipped.
+        var perPage = (int)(InstructionsPagination.PageBudget / (1 + InstructionsPagination.BlockGap));
+
+        var pages = InstructionsPagination.BuildPages(Paragraphs(perPage), includeOverview: false);
+
+        Assert.IsTrue(pages.Count(p => p.Kind == InstructionsPageKind.Content) > 1,
+            "A full page of text must not be crammed onto the page that also carries the section title.");
     }
 
     [TestMethod]

@@ -1,5 +1,26 @@
 # Release notes
 
+## Version 0.5.1
+
+### Changes
+
+- **The general instructions booklet now prints all of your text, on pages that read properly.** The
+  booklet worked out how much fitted on a page far too generously, so a page could be filled past its
+  foot and whatever ran over was quietly dropped — most often leaving a heading as the last thing on the
+  page with the text under it nowhere to be found. A page now holds what a page really holds, and the
+  text carries on to the next one instead. A page also never ends on a heading alone, not even where you
+  have written a heading followed straight by another one: headings stay with the text they introduce.
+
+  **Topology** and **Shunting yards** now come on the very last page of the booklet, where they are
+  reached by opening it at the back — as they already were in the driver duty booklets. Any blank page
+  needed to make up the sheet comes before them rather than after. The **Instructions** title is also
+  set at the same size as **Programme** and **Layout** now, instead of half a step smaller.
+
+  The **programme** on the front page is set like the instructions pages too. It had been left to the
+  browser's own heading sizes, which put far more space over and under a heading than anything else in
+  the booklet — a programme of three days and a note took nearly the whole page, and a longer one would
+  have run off the foot of it.
+
 ## Version 0.5.0
 
 ### Changes

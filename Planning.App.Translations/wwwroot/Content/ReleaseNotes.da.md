@@ -1,5 +1,27 @@
 # Versionsnyheder
 
+## Version 0.5.1
+
+### Ændringer
+
+- **Hæftet med generelle instruktioner udskriver nu hele din tekst, på sider der kan læses.** Hæftet
+  regnede alt for rundhåndet med, hvor meget der kunne være på en side, så en side kunne fyldes forbi
+  bundkanten, og det der løb over faldt stiltiende bort — oftest sådan at en overskrift blev det sidste
+  på siden, og teksten under den ikke stod nogen steder. En side rummer nu det, en side faktisk rummer,
+  og teksten fortsætter i stedet på den næste. En side slutter heller aldrig med en overskrift alene,
+  heller ikke hvor du har skrevet en overskrift efterfulgt direkte af endnu en: overskrifter følger med
+  den tekst, de indleder.
+
+  **Topologi** og **Rangerbanegårde** kommer nu på hæftets allersidste side, hvor man finder dem ved at
+  slå hæftet op bagfra — ligesom de allerede gjorde i førernes omløbshæfter. En tom side, der skal til
+  for at fylde arket, kommer nu før dem i stedet for efter. Overskriften **Instruktioner** er desuden sat
+  i samme størrelse som **Program** og **Anlæg** nu i stedet for et halvt trin mindre.
+
+  **Programmet** på forsiden er sat som instruktionssiderne nu. Det var overladt til browserens egne
+  overskriftsstørrelser, som giver langt mere plads over og under en overskrift end noget andet i
+  hæftet — et program over tre dage og en bemærkning fyldte næsten hele siden, og et længere ville være
+  løbet ud under den.
+
 ## Version 0.5.0
 
 ### Ændringer
@@ -81,8 +103,8 @@
 ### Ændringer
 
 - **Nu kan et tog sættes ind midt i et omløb.** Hidtil kunne et omløb kun bygges fremad: det eneste
-  sted at tilføje et tog var i slutningen af omløbet. Mellem togdelene på en række er der nu små
-  samlinger, der viser, hvor køretøjet holder og hvor længe, og før den første del en, der viser,
+  sted at tilføje et tog var i slutningen af omløbet. Mellem togafsnittene på en række er der nu små
+  samlinger, der viser, hvor køretøjet holder og hvor længe, og før det første afsnit en, der viser,
   hvorfra det skal hentes. Klik på en af dem for at sætte et tog ind i hullet — kun de tog, køretøjet
   faktisk kan nå på tiden, tilbydes. En tur, der ikke bringer køretøjet tilbage dertil, hvor omløbet
   fortsætter, sættes ind alligevel og rapporteres som en konflikt, indtil du sætter returen ind;
@@ -297,12 +319,12 @@
   udvekslingen til igen, så er stoppene der. En skyggebanegård har altid udveksling af både passagerer
   og gods, da den repræsenterer alt uden for anlægget, så dens to felter vises satte og låste.
 
-- **Et stop, som noget afhænger af, kan ikke længere fjernes.** En togdel går fra et stop, hvor toget
+- **Et stop, som noget afhænger af, kan ikke længere fjernes.** Et togafsnit går fra et stop, hvor toget
   afgår, til et, hvor det ankommer, så begge ender skal være stop. Togets eget første og sidste stop,
-  og enderne på hver togdel, som et materielomløb, en tjeneste eller et godsflow er planlagt over,
+  og enderne på hvert togafsnit, som et materielomløb, en tjeneste eller et godsflow er planlagt over,
   beholder nu deres felt sat og låst; hold markøren over det, så fortælles det, hvad der holder det.
-  Hvor en togdel slutter et sted, toget ikke kan standse — en plan lavet før denne regel — siges det
-  ligeud, så du kan flytte stoppet eller togdelen.
+  Hvor et togafsnit slutter et sted, toget ikke kan standse — en plan lavet før denne regel — siges det
+  ligeud, så du kan flytte stoppet eller togafsnittet.
 
 - **En togkategori bærer nu de forberedelses- og afslutningstider, dens tog planlægges med.** Hvert
   nyt tog i kategorien gøres klar så mange minutter før det afgår og sættes væk så mange minutter
@@ -320,12 +342,12 @@
 
 ### Fejlrettelser
 
-- **Et tjenestehæfte kunne udskrive en togdel ud over sidens nederste kant.** Rapporten beregner før
-  udskriften, hvor mange togdele der er plads til på en side, og regnede med omkring halvdelen mere
-  plads, end en A5-side faktisk har. Det, der går ud over sidekanten, skæres væk uden varsel: den anden
-  togdel på en sådan side manglede slutningen af sin køreplan — eller manglede helt, så en lokofører
-  stod med en tjeneste, hvor det sidste tog manglede. Togdele måles nu mod det, siden faktisk rummer,
-  og en togdel, der ikke er plads til, flyttes til næste side. Nogle hæfter får derfor et ark mere end
+- **Et tjenestehæfte kunne udskrive et togafsnit ud over sidens nederste kant.** Rapporten beregner før
+  udskriften, hvor mange togafsnit der er plads til på en side, og regnede med omkring halvdelen mere
+  plads, end en A5-side faktisk har. Det, der går ud over sidekanten, skæres væk uden varsel: det andet
+  togafsnit på en sådan side manglede slutningen af sin køreplan — eller manglede helt, så en lokofører
+  stod med en tjeneste, hvor det sidste tog manglede. Togafsnit måles nu mod det, siden faktisk rummer,
+  og et togafsnit, der ikke er plads til, flyttes til næste side. Nogle hæfter får derfor et ark mere end
   før.
 
 - **Topologi-diagrammet kunne skrive signaturerne for to driftssteder oven på hinanden.** Driftsstederne
@@ -363,7 +385,7 @@
   en rettelse af et lands sprog nu også når planer, der er gemt forinden. En plan gemt af en tidligere
   version læses som før og bliver rettet, næste gang den gemmes.
 
-- **Et tjenestehæfte angav kun tognummeret i overskriften for en togdel.** Et tog identificeres lige
+- **Et tjenestehæfte angav kun tognummeret i overskriften for et togafsnit.** Et tog identificeres lige
   så meget af kategoriens præfiks og suffiks som af nummeret — Gt 1234, ikke 1234 — og en lokofører,
   der sammenligner hæftet med køreplanen eller med det, der råbes op, har kun den overskrift at gå
   efter. Overskriften viser nu hele togidentiteten, præfiks og suffiks med, efter operatørens
@@ -382,7 +404,7 @@
 - **Fanen Tog åbner nu på listen over togkategorier**, hvor togene i hver kategori er skjult, indtil du
   åbner den, så en plan med mange tog er lettere at overskue. *Udvid alle* åbner dem alle på én gang,
   og en kategori åbner af sig selv, når du føjer et tog til den eller flytter et tog derind.
-- **Når en togdel i et omløb redigeres, står der nu, hvilke slags køretøjer omløbet gælder** —
+- **Når et togafsnit i et omløb redigeres, står der nu, hvilke slags køretøjer omløbet gælder** —
   lokomotiv, togsæt eller vognsæt. Deler flere køretøjer det samme omløb, nævnes hver slags én gang, og
   peger du på den, nævnes køretøjerne selv.
 
@@ -427,10 +449,10 @@
 - **Toghastigheden kontrolleres nu også på den sidste strækning**, ind til det driftssted, hvor toget
   slutter sit løb. Den strækning blev sprunget over før.
 
-- En togdel i et **omløb** kan nu **redigeres**: pennen på en togdel åbner dens fra- og til-stop, så
-  et omløb kan formes om, uden at alt efter det fjernes. En tilstødende togdel, der slutter til den,
-  du ændrer, følger med — afkort en del fra A–C til A–B, og returløbet bliver B–A af sig selv. En
-  nabodel, hvis eget tog ikke standser på det nye stop, står uændret, og hullet rapporteres som en
+- Et togafsnit i et **omløb** kan nu **redigeres**: pennen på et togafsnit åbner dets fra- og til-stop, så
+  et omløb kan formes om, uden at alt efter det fjernes. Et tilstødende togafsnit, der slutter til det,
+  du ændrer, følger med — afkort et afsnit fra A–C til A–B, og returløbet bliver B–A af sig selv. Et
+  naboafsnit, hvis eget tog ikke standser på det nye stop, står uændret, og hullet rapporteres som en
   konflikt, du selv løser.
 
 - Alt, der læser et togs togvej, følger nu **den rækkefølge, toget kører sine stop i**, ikke den
@@ -440,7 +462,7 @@
   udskrevne **køreplan** kunne vise en afgang, hvor toget ankommer; **byg automatisk** kædede slet
   ikke toget, da det så ud til at starte et andet sted; **gentag tog** målte intervallet fra det
   forkerte stop; og genberegning af tiderne efter en ændret standsningsplan mislykkedes helt. Valg af
-  en del af et tog viser også stoppene i køreorden. Importerede planer har aldrig været berørt — der
+  et afsnit af et tog viser også stoppene i køreorden. Importerede planer har aldrig været berørt — der
   er de to rækkefølger ens.
 
 - **Tilføj tog** kan nu oprette **returtoget** samtidig. Sæt kryds i *Retur?*, så oprettes toget tilbage
@@ -459,11 +481,11 @@
 
 ## Version 0.3.1
 
-- Afsnittet **Trækkraftenheder** på en togdelsside i hæftet Førertjenester har nu sin
+- Afsnittet **Trækkraftenheder** på siden for et togafsnit i hæftet Førertjenester har nu sin
   overskrift på det valgte sprog. Det var den eneste overskrift i hæftet uden oversættelse, så
   afsnittet kunne ikke genkendes som trækkraftenhederne.
-- Trækkraftenheden udskrives nu for hver togdel, der har en. I planer importeret med en
-  tidligere version viste nogle togdele en trækkraftenhed under **Tjenester** men ingen i hæftet.
+- Trækkraftenheden udskrives nu for hvert togafsnit, der har en. I planer importeret med en
+  tidligere version viste nogle togafsnit en trækkraftenhed under **Tjenester** men ingen i hæftet.
 - Noter om tog i samme retning fortæller nu, hvilket tog der kommer forbi det andet —
   **Overhaler GD 42757 12:02-12:05** eller **Overhales af GD 42757 12:02** — i stedet for det
   hidtidige *"Møder GD 42757 i samme retning"*, der aldrig sagde, hvilket tog der kom foran. To
@@ -480,7 +502,7 @@
 - En ny rapport, **Førertjenester**, udskriver ét A5-hæfte pr. tjeneste. Forsiden
   viser tjenestens nummer, hvilke sessioner eller dage den kører, dens start- og
   sluttidspunkt og -stationer, en sværhedsgrad, bemandingsbehov og eventuelle
-  tjenestenoter. Hver togdel får sin egen side med hvilke trækkraftenheder der skal
+  tjenestenoter. Hvert togafsnit får sin egen side med hvilke trækkraftenheder der skal
   bruges, hvilke vognsæt der skal medbringes, og til hvilke destinationer der skal
   medbringes godsvogne, samt køreplanen – hver vist i sin egen tydeligt afgrænsede
   blok. Hæftets sidste side viser anlæggets sporplan og en tabel over
@@ -511,8 +533,8 @@
 - En tjeneste kan fastgøres til et **fast nummer**, så automatisk omnummerering
   lader den urørt, for eksempel særlige tjenester, der uddeles, inden en session
   begynder.
-- Planen kontrolleres nu også, så hver togdel med et lokomotiv eller togsæt
-  tildelt har en førertjeneste, der dækker den i hver session, den kører – en del,
+- Planen kontrolleres nu også, så hvert togafsnit med et lokomotiv eller togsæt
+  tildelt har en førertjeneste, der dækker det i hver session, det kører – et afsnit,
   som ingen er planlagt til at køre, rapporteres session for session. En tjeneste
   med fast nummer kontrolleres også: den skal have et nummer, og ingen to
   tjenester med fast nummer må få samme nummer.
@@ -562,25 +584,25 @@
 ## Version 0.2.4
 
 - En ny fane **Tjenester** lader dig planlægge førertjenester – det arbejde, en lokofører
-  udfører i løbet af en session, som en række af de togdele, føreren kører. Hver tjeneste
-  er en række: dens betegnelse, firma og sessioner til venstre, togdelene i køreorden til
+  udfører i løbet af en session, som en række af de togafsnit, føreren kører. Hver tjeneste
+  er en række: dens betegnelse, firma og sessioner til venstre, togafsnittene i køreorden til
   højre.
-- Tilføj de togdele, en fører kører, med **Tilføj togdel**. Listen viser de
+- Tilføj de togafsnit, en fører kører, med **Tilføj togafsnit**. Listen viser de
   trækkraftstrækninger, en fører kan tage som det næste – dem, der ikke støder sammen i
-  tid med tjenesten, og, når den har en togdel, dem, der afgår ved eller efter, at den
-  ankommer. Togdelene behøver ikke starte på samme station: mellem to togdele går føreren
-  ganske enkelt hen, hvor den næste starter.
-- Den samme togdel kan køres af flere tjenester, så længe de kører i forskellige
+  tid med tjenesten, og, når den har et togafsnit, dem, der afgår ved eller efter, at det
+  ankommer. Togafsnittene behøver ikke starte på samme station: mellem to togafsnit går føreren
+  ganske enkelt hen, hvor det næste starter.
+- Det samme togafsnit kan køres af flere tjenester, så længe de kører i forskellige
   sessioner, så én tjeneste kan dække de ulige sessioner og en anden de lige.
-- Hvor to togdele for samme tog i en tjeneste køres af forskellige trækkraftenheder,
+- Hvor to togafsnit for samme tog i en tjeneste køres af forskellige trækkraftenheder,
   viser fanen nu en note ved stationen, hvor trækkraftenheden skiftes – du indtaster den
   ikke i hånden.
 - Du kan give hver tjeneste en betegnelse og et firma, vælge de sessioner, den kører, og
   tilføje frie noter, der gælder hele tjenesten.
-- Tjenester importeret fra XPLN deler nu de togdele, der er defineret i køretøjernes
-  omløb, så hver togdel viser den trækkraftenhed, der kører den.
-- Planen kontrolleres, så ingen togdel køres af to tjenester i samme session, og ingen
-  tjeneste har togdele, der overlapper i tid; eventuelle konflikter vises og åbnes på
+- Tjenester importeret fra XPLN deler nu de togafsnit, der er defineret i køretøjernes
+  omløb, så hvert togafsnit viser den trækkraftenhed, der kører det.
+- Planen kontrolleres, så intet togafsnit køres af to tjenester i samme session, og ingen
+  tjeneste har togafsnit, der overlapper i tid; eventuelle konflikter vises og åbnes på
   fanen **Tjenester**. Du kan slå kontrollen til eller fra under **Indstillinger ›
   Validering**.
 

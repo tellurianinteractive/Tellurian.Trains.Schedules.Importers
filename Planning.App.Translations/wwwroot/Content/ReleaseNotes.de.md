@@ -1,5 +1,28 @@
 # Versionshinweise
 
+## Version 0.5.1
+
+### Änderungen
+
+- **Das Heft mit den allgemeinen Anweisungen druckt jetzt Ihren ganzen Text, auf lesbaren Seiten.** Das
+  Heft rechnete viel zu großzügig damit, wie viel auf eine Seite passt, sodass eine Seite über den
+  Seitenfuß hinaus gefüllt wurde und alles Weitere stillschweigend entfiel — meist so, dass eine
+  Überschrift das Letzte auf der Seite war und der Text darunter nirgends stand. Eine Seite fasst jetzt
+  das, was eine Seite wirklich fasst, und der Text läuft stattdessen auf der nächsten weiter. Eine Seite
+  endet auch nie mit einer Überschrift allein, selbst dort nicht, wo Sie eine Überschrift unmittelbar von
+  einer weiteren gefolgt geschrieben haben: Überschriften bleiben bei dem Text, den sie einleiten.
+
+  **Topologie** und **Rangierbahnhöfe** stehen jetzt auf der allerletzten Seite des Heftes, wo man sie
+  findet, indem man das Heft von hinten aufschlägt — so wie schon in den Umlaufheften der
+  Triebfahrzeugführer. Eine Leerseite, die den Bogen auffüllt, steht nun davor statt dahinter. Die
+  Überschrift **Anweisungen** ist außerdem jetzt genauso groß gesetzt wie **Programm** und **Anlage**
+  statt eine halbe Stufe kleiner.
+
+  Das **Programm** auf der Titelseite ist jetzt ebenso gesetzt wie die Anweisungsseiten. Es war den
+  eigenen Überschriftengrößen des Browsers überlassen, die über und unter einer Überschrift weit mehr
+  Platz lassen als alles andere im Heft — ein Programm über drei Tage samt einem Hinweis nahm fast die
+  ganze Seite ein, und ein längeres wäre unten aus ihr herausgelaufen.
+
 ## Version 0.5.0
 
 ### Änderungen
@@ -86,9 +109,9 @@
 ### Änderungen
 
 - **Ein Zug lässt sich jetzt mitten in einen Umlauf einfügen.** Bisher konnte ein Umlauf nur vorwärts
-  gebaut werden: Ein Zug ließ sich allein am Ende des Umlaufs anhängen. Zwischen den Zugteilen einer
+  gebaut werden: Ein Zug ließ sich allein am Ende des Umlaufs anhängen. Zwischen den Zugabschnitten einer
   Zeile stehen nun kleine Übergänge, die zeigen, wo das Fahrzeug steht und wie lange, und vor dem
-  ersten Teil einer, der zeigt, woher es gebracht werden muss. Ein Klick darauf fügt einen Zug in die
+  ersten Abschnitt einer, der zeigt, woher es gebracht werden muss. Ein Klick darauf fügt einen Zug in die
   Lücke ein — angeboten werden nur die Züge, die das Fahrzeug in der freien Zeit tatsächlich schafft.
   Eine Fahrt, die das Fahrzeug nicht dorthin zurückbringt, wo der Umlauf weitergeht, wird trotzdem
   eingefügt und als Konflikt gemeldet, bis die Rückfahrt eingefügt ist; so wird eine Hin- und
@@ -324,12 +347,12 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
   Halte sind wieder da. Ein Schattenbahnhof hat immer beides, da er für alles außerhalb der Anlage
   steht; seine beiden Felder werden daher gesetzt und gesperrt gezeigt.
 
-- **Ein Halt, an dem etwas hängt, lässt sich nicht mehr entfernen.** Ein Zugteil läuft von einem Halt,
+- **Ein Halt, an dem etwas hängt, lässt sich nicht mehr entfernen.** Ein Zugabschnitt läuft von einem Halt,
   an dem der Zug abfährt, zu einem, an dem er ankommt, also müssen beide Enden Halte sein. Der erste
-  und der letzte Halt des Zuges selbst sowie die Enden jedes Zugteils, über den ein Fahrzeugumlauf,
+  und der letzte Halt des Zuges selbst sowie die Enden jedes Zugabschnitts, über den ein Fahrzeugumlauf,
   ein Dienst oder ein Frachtfluss geplant ist, behalten ihr Feld nun gesetzt und gesperrt; der
-  Mauszeiger darauf sagt, was es hält. Wo ein Zugteil dort endet, wo sein Zug nicht halten kann — ein
-  Plan aus der Zeit vor dieser Regel —, wird das offen gesagt, damit Sie den Halt oder den Zugteil
+  Mauszeiger darauf sagt, was es hält. Wo ein Zugabschnitt dort endet, wo sein Zug nicht halten kann — ein
+  Plan aus der Zeit vor dieser Regel —, wird das offen gesagt, damit Sie den Halt oder den Zugabschnitt
   verschieben können.
 
 - **Eine Zugkategorie trägt jetzt die Vorbereitungs- und Abschlusszeiten, mit denen ihre Züge geplant
@@ -349,12 +372,12 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 
 ### Fehlerbehebungen
 
-- **Ein Dienstheft konnte einen Zugteil über den unteren Seitenrand hinaus drucken.** Der Bericht
-  berechnet vor dem Druck, wie viele Zugteile auf eine Seite passen, und rechnete dabei mit rund der
+- **Ein Dienstheft konnte einen Zugabschnitt über den unteren Seitenrand hinaus drucken.** Der Bericht
+  berechnet vor dem Druck, wie viele Zugabschnitte auf eine Seite passen, und rechnete dabei mit rund der
   Hälfte mehr Platz, als eine A5-Seite tatsächlich hat. Was über den Seitenrand hinausragt, wird
-  kommentarlos abgeschnitten: Dem zweiten Zugteil einer solchen Seite fehlte das Ende seines Fahrplans
+  kommentarlos abgeschnitten: Dem zweiten Zugabschnitt einer solchen Seite fehlte das Ende seines Fahrplans
   — oder er fehlte ganz, sodass ein Lokführer einen Dienst in der Hand hielt, dessen letzter Zug fehlte.
-  Zugteile werden jetzt an dem gemessen, was die Seite wirklich fasst, und ein Zugteil, der nicht mehr
+  Zugabschnitte werden jetzt an dem gemessen, was die Seite wirklich fasst, und ein Zugabschnitt, der nicht mehr
   passt, kommt auf die nächste Seite. Manche Hefte brauchen dadurch ein Blatt mehr als bisher.
 
 - **Das Topologie-Diagramm konnte die Signaturen zweier Betriebsstellen übereinander drucken.** Die
@@ -398,7 +421,7 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
   Landes jetzt auch Pläne erreicht, die davor gespeichert wurden. Ein von einer früheren Version
   gespeicherter Plan wird wie bisher gelesen und beim nächsten Speichern in Ordnung gebracht.
 
-- **Ein Dienstheft nannte in der Überschrift eines Zugteils nur die Zugnummer.** Ein Zug wird durch
+- **Ein Dienstheft nannte in der Überschrift eines Zugabschnitts nur die Zugnummer.** Ein Zug wird durch
   Präfix und Suffix seiner Zugkategorie ebenso bezeichnet wie durch seine Nummer — Gt 1234, nicht
   1234 — und ein Lokführer, der das Heft mit dem Fahrplan oder mit dem Ausgerufenen vergleicht, hat
   nur diese Überschrift. Die Überschrift trägt jetzt die vollständige Zugbezeichnung mit Präfix und
@@ -418,7 +441,7 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
   verborgen, bis Sie sie aufklappen, wodurch ein Plan mit vielen Zügen übersichtlicher wird. *Alle
   aufklappen* öffnet alle auf einmal, und eine Kategorie klappt von selbst auf, wenn Sie ihr einen Zug
   hinzufügen oder einen Zug in sie verschieben.
-- **Beim Bearbeiten eines Zugteils in einem Umlauf steht jetzt, für welche Fahrzeugarten der Umlauf
+- **Beim Bearbeiten eines Zugabschnitts in einem Umlauf steht jetzt, für welche Fahrzeugarten der Umlauf
   gilt** — Lokomotive, Triebzug oder Wagengruppe. Teilen sich mehrere Fahrzeuge einen Umlauf, wird jede
   Art einmal genannt; zeigen Sie darauf, werden die Fahrzeuge selbst genannt.
 
@@ -466,10 +489,10 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 - **Die Zuggeschwindigkeit wird jetzt auch auf der letzten Strecke geprüft**, bis zu der Betriebsstelle, an
   der der Zug endet. Diese Strecke wurde bisher übersprungen.
 
-- Ein Zugteil in einem **Umlauf** lässt sich jetzt **bearbeiten**: Der Stift an einem Zugteil öffnet
+- Ein Zugabschnitt in einem **Umlauf** lässt sich jetzt **bearbeiten**: Der Stift an einem Zugabschnitt öffnet
   seinen Anfangs- und Endhalt, sodass ein Umlauf umgeformt werden kann, ohne alles danach zu
-  entfernen. Ein benachbarter Zugteil, der an den geänderten anschließt, passt sich mit an — wird
-  ein Teil von A–C auf A–B verkürzt, wird der Gegenlauf von selbst zu B–A. Ein Nachbar, dessen
+  entfernen. Ein benachbarter Zugabschnitt, der an den geänderten anschließt, passt sich mit an — wird
+  ein Abschnitt von A–C auf A–B verkürzt, wird der Gegenlauf von selbst zu B–A. Ein Nachbarabschnitt, dessen
   eigener Zug am neuen Halt nicht hält, bleibt unverändert, und die entstandene Lücke wird als
   Konflikt gemeldet.
 
@@ -481,7 +504,7 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
   dort zeigen, wo der Zug ankommt; **Automatisch erstellen** verkettete den Zug gar nicht, da er
   scheinbar anderswo beginnt; **Zug wiederholen** maß den Abstand ab dem falschen Halt; und das
   Neuberechnen der Zeiten nach einer geänderten Halteabfolge schlug ganz fehl. Auch die Auswahl eines
-  Zugteils beim Hinzufügen listet die Halte in Fahrtreihenfolge. Importierte Pläne waren nie
+  Zugabschnitts beim Hinzufügen listet die Halte in Fahrtreihenfolge. Importierte Pläne waren nie
   betroffen — dort sind beide Reihenfolgen gleich.
 
 - **Zug hinzufügen** kann jetzt den **Gegenzug** gleich mit anlegen. Mit *Gegenzug?* entsteht neben dem
@@ -502,11 +525,11 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 
 ## Version 0.3.1
 
-- Der Abschnitt **Triebfahrzeuge** auf einer Zugteilseite im Heft Lokführerdienste hat seine
+- Der Abschnitt **Triebfahrzeuge** auf der Seite eines Zugabschnitts im Heft Lokführerdienste hat seine
   Überschrift jetzt in der gewählten Sprache. Es war die einzige Überschrift im Heft ohne
   Übersetzung, sodass der Abschnitt nicht als die Triebfahrzeuge zu erkennen war.
-- Das Triebfahrzeug wird jetzt für jeden Zugteil gedruckt, der eines hat. In Plänen, die mit
-  einer früheren Version importiert wurden, zeigten manche Zugteile unter **Dienste** ein
+- Das Triebfahrzeug wird jetzt für jeden Zugabschnitt gedruckt, der eines hat. In Plänen, die mit
+  einer früheren Version importiert wurden, zeigten manche Zugabschnitte unter **Dienste** ein
   Triebfahrzeug, im Heft aber keines.
 - Hinweise zu Zügen in gleicher Richtung sagen jetzt, welcher Zug am anderen vorbeikommt —
   **Überholt GD 42757 12:02-12:05** oder **Wird überholt von GD 42757 12:02** — statt des
@@ -524,7 +547,7 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 - Ein neuer Bericht, **Lokführerdienste**, druckt für jeden Dienst ein A5-Heft. Die
   Titelseite zeigt die Dienstnummer, in welchen Sitzungen oder an welchen Tagen er
   läuft, seine Start- und Endzeit und -bahnhöfe, einen Schwierigkeitsgrad, den
-  Besetzungsbedarf und etwaige Diensthinweise. Jeder Zugteil erhält seine eigene
+  Besetzungsbedarf und etwaige Diensthinweise. Jeder Zugabschnitt erhält seine eigene
   Seite, mit den zu verwendenden Triebfahrzeugen, den mitzuführenden Wagengruppen und
   den Zielen, zu denen Güterwagen mitgeführt werden, sowie den Fahrplan – jeweils in
   einem eigenen, klar abgegrenzten Block dargestellt. Die letzte Seite jedes Heftes
@@ -559,9 +582,9 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 - Ein Dienst kann mit einer **festen Nummer** versehen werden, sodass die
   automatische Neunummerierung ihn unverändert lässt, zum Beispiel für
   Sonderdienste, die ausgegeben werden, bevor eine Sitzung beginnt.
-- Der Plan wird jetzt auch geprüft, damit jeder Zugteil mit zugewiesener Lokomotive
+- Der Plan wird jetzt auch geprüft, damit jeder Zugabschnitt mit zugewiesener Lokomotive
   oder zugewiesenem Triebzug in jeder Sitzung, in der er fährt, von einem Dienst
-  abgedeckt ist – ein Teil, für den niemand eingeteilt ist, wird sitzungsweise
+  abgedeckt ist – ein Abschnitt, für den niemand eingeteilt ist, wird sitzungsweise
   gemeldet. Ein Dienst mit fester Nummer wird ebenfalls geprüft: Er muss eine Nummer
   haben, und keine zwei Dienste mit fester Nummer dürfen dieselbe Nummer erhalten.
 - Unternehmen können jetzt ein hochgeladenes **Logo** haben, das in Berichten
@@ -613,27 +636,27 @@ Ein mit einer früheren Version gespeicherter Fahrplan lässt sich weiterhin öf
 
 - Eine neue Registerkarte **Dienste** ermöglicht die Planung von Fahrerdiensten – die
   Arbeit, die ein Triebfahrzeugführer während einer Sitzung verrichtet, als Folge der
-  Zugteile, die er fährt. Jeder Dienst ist eine Zeile: links Bezeichnung, Unternehmen und
-  Sitzungen, rechts die Zugteile in Fahrreihenfolge.
-- Fügen Sie die Zugteile mit **Zugteil hinzufügen** hinzu. Die Auswahl zeigt die
+  Zugabschnitte, die er fährt. Jeder Dienst ist eine Zeile: links Bezeichnung, Unternehmen und
+  Sitzungen, rechts die Zugabschnitte in Fahrreihenfolge.
+- Fügen Sie die Zugabschnitte mit **Zugabschnitt hinzufügen** hinzu. Die Auswahl zeigt die
   Triebfahrzeugabschnitte, die ein Fahrer als Nächstes übernehmen könnte – solche, die
-  zeitlich nicht mit dem Dienst kollidieren, und, sobald er einen Zugteil hat, solche,
-  die bei oder nach seiner Ankunft abfahren. Zugteile müssen nicht an derselben Station
-  beginnen: zwischen zwei Zugteilen geht der Fahrer einfach dorthin, wo der nächste
+  zeitlich nicht mit dem Dienst kollidieren, und, sobald er einen Zugabschnitt hat, solche,
+  die bei oder nach seiner Ankunft abfahren. Zugabschnitte müssen nicht an derselben Station
+  beginnen: zwischen zwei Zugabschnitten geht der Fahrer einfach dorthin, wo der nächste
   beginnt.
-- Derselbe Zugteil kann von mehreren Diensten gefahren werden, solange sie an
+- Derselbe Zugabschnitt kann von mehreren Diensten gefahren werden, solange sie an
   verschiedenen Sitzungen laufen, sodass ein Dienst die ungeraden und ein anderer die
   geraden Sitzungen abdecken kann.
-- Wo zwei Zugteile desselben Zuges in einem Dienst von verschiedenen Triebfahrzeugen
+- Wo zwei Zugabschnitte desselben Zuges in einem Dienst von verschiedenen Triebfahrzeugen
   gefahren werden, zeigt die Registerkarte nun einen Hinweis an der Station, an der das
   Triebfahrzeug gewechselt wird – Sie geben ihn nicht von Hand ein.
 - Sie können jedem Dienst eine Bezeichnung und ein Unternehmen geben, die Sitzungen
   wählen, an denen er läuft, und freie Anmerkungen hinzufügen, die für den ganzen Dienst
   gelten.
 - Aus XPLN importierte Dienste teilen sich nun die in den Fahrzeugumläufen definierten
-  Zugteile, sodass jeder Zugteil das Triebfahrzeug zeigt, das ihn fährt.
-- Der Plan wird geprüft, damit kein Zugteil von zwei Diensten in derselben Sitzung
-  gefahren wird und kein Dienst zeitlich überlappende Zugteile hat; etwaige Konflikte
+  Zugabschnitte, sodass jeder Zugabschnitt das Triebfahrzeug zeigt, das ihn fährt.
+- Der Plan wird geprüft, damit kein Zugabschnitt von zwei Diensten in derselben Sitzung
+  gefahren wird und kein Dienst zeitlich überlappende Zugabschnitte hat; etwaige Konflikte
   werden aufgelistet und auf der Registerkarte **Dienste** geöffnet. Sie können die
   Prüfung unter **Einstellungen › Validierung** ein- oder ausschalten.
 

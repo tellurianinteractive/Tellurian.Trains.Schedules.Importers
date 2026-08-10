@@ -265,10 +265,10 @@
     <value>Fordon {0} är dubbelbokat: köromgångar {1} överlappar med köromgångar {2}.</value>
   </data>
   <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
-    <value>Tågdel {0} körs av tjänst {1} och tjänst {2} på överlappande köromgångar.</value>
+    <value>Tågavsnitt {0} körs av tjänst {1} och tjänst {2} på överlappande köromgångar.</value>
   </data>
   <data name="DutyHasOverlappingParts" xml:space="preserve">
-    <value>Tjänst {0} har överlappande tågdelar: {1} och {2}.</value>
+    <value>Tjänst {0} har överlappande tågavsnitt: {1} och {2}.</value>
   </data>
   <data name="Undefined" xml:space="preserve">
     <value>Odefinierad</value>
@@ -283,7 +283,7 @@
     <value>Fordon {0} och {1} har samma operatör och nummer {2} på köromgångar {3}.</value>
   </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
-    <value>Fordonsomlopp {0}: {1} fortsätter inte där föregående del slutade vid {2}.</value>
+    <value>Fordonsomlopp {0}: {1} fortsätter inte där föregående avsnitt slutade vid {2}.</value>
   </data>
   <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
     <value>Fordonsomlopp {0} har inget fordon tilldelat.</value>
@@ -304,7 +304,7 @@
     <value>Tjänst {0} kräver {1} personer, vilket ligger utanför det tillåtna intervallet 1 till 3.</value>
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
-    <value>Tåg {0} saknar körande tjänst på köromgångar {1} för delen från {2} {3} till {4} {5}.</value>
+    <value>Tåg {0} saknar körande tjänst på köromgångar {1} för avsnittet från {2} {3} till {4} {5}.</value>
   </data>
   <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
     <value>Driftplatsen {0} är bemannad, så låsnyckeln som förvaras vid {1} ignoreras.</value>

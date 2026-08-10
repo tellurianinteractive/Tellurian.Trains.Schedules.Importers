@@ -265,10 +265,10 @@
     <value>Fahrzeug {0} ist doppelt gebucht: Fahrrunden {1} überlappen mit Fahrrunden {2}.</value>
   </data>
   <data name="DutyPartIsDoubleAssigned" xml:space="preserve">
-    <value>Zugteil {0} wird von Dienst {1} und Dienst {2} an überlappenden Fahrrunden gefahren.</value>
+    <value>Zugabschnitt {0} wird von Dienst {1} und Dienst {2} an überlappenden Fahrrunden gefahren.</value>
   </data>
   <data name="DutyHasOverlappingParts" xml:space="preserve">
-    <value>Dienst {0} hat überlappende Zugteile: {1} und {2}.</value>
+    <value>Dienst {0} hat überlappende Zugabschnitte: {1} und {2}.</value>
   </data>
   <data name="Undefined" xml:space="preserve">
     <value>Undefiniert</value>
@@ -283,7 +283,7 @@
     <value>Fahrzeuge {0} und {1} haben denselben Betreiber und dieselbe Nummer {2} in den Fahrrunden {3}.</value>
   </data>
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
-    <value>Fahrzeugplan {0}: {1} setzt nicht dort fort, wo der vorherige Teil bei {2} endete.</value>
+    <value>Fahrzeugplan {0}: {1} setzt nicht dort fort, wo der vorherige Abschnitt bei {2} endete.</value>
   </data>
   <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
     <value>Fahrzeugplan {0} hat kein Fahrzeug zugewiesen.</value>
@@ -304,7 +304,7 @@
     <value>Dienst {0} benötigt {1} Personen und liegt damit außerhalb des zulässigen Bereichs von 1 bis 3.</value>
   </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
-    <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Teil von {2} {3} bis {4} {5}.</value>
+    <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
   </data>
   <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
     <value>Die Betriebsstelle {0} ist besetzt, daher wird der in {1} hinterlegte Schlüssel nicht beachtet.</value>

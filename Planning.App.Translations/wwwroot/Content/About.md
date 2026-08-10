@@ -24,3 +24,13 @@ adding trains in the **Trains** tab.
 
 This application is part of the Tellurian Trains suite of tools for model
 railway operations. It is open source and available on GitHub.
+
+## Technical stuff
+The app is a *progressive web application* and can run offline. 
+The app runs as native web assembly in the browser of choice.
+When online, the app updates automatically to latest version.
+
+Developed using:
+- **.NET** and **Blazor**, an open souce web framework from Microsoft and the .NET Foundation.
+- **Claude Code** from Antrophic.
+
