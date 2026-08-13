@@ -63,6 +63,41 @@ public record GraphSettings
     /// <summary>Font size in points of the train identity labels along the train lines. Drives both the
     /// rendered text and the label-thinning overlap estimate, so changing it re-thins on the next render.</summary>
     public int TrainLabelFontPoints { get; set; }
+
+    /// <summary>
+    /// How many drawing units one typographic point occupies. On screen a drawing unit is a CSS pixel, so this
+    /// is 96/72. A printed graph draws in hundredths of a millimetre instead (see <c>GraphPrintScale</c>), and
+    /// sets this to the matching value so the label-thinning overlap estimate stays in the same units as the
+    /// geometry — otherwise thinning would judge printed labels by screen sizes and drop far too few.
+    /// </summary>
+    public double UnitsPerPoint { get; set; } = 96.0 / 72.0;
+
+    /// <summary>Perpendicular lift of a train identity label off its own line, in drawing units. The renderer
+    /// applies it as the <c>textPath</c> <c>dy</c>, and the thinning estimate offsets the label box by the
+    /// same amount.</summary>
+    public int LabelLift { get; set; } = 2;
+
+    /// <summary>Stroke width of a train line, in drawing units.</summary>
+    public int TrainStrokeWidth { get; set; } = 2;
+
+    /// <summary>Gap in drawing units between an axis label and the axis it labels, and the inset of the station
+    /// signature from the edge of the sheet.</summary>
+    public int LabelGap { get; set; } = 5;
+
+    /// <summary>Gap in drawing units between the kilometre label and the distance axis. It must clear the track
+    /// numbers, which are set closer to the axis (<see cref="TrackNumberGap"/>).</summary>
+    public int KmLabelGap { get; set; } = 15;
+
+    /// <summary>Gap in drawing units between a track number and the distance axis.</summary>
+    public int TrackNumberGap { get; set; } = 2;
+
+    /// <summary>How far in drawing units a track number is dropped below its track line, so the text sits
+    /// centred on the line rather than resting on it. Roughly half the track-number cap height.</summary>
+    public int TrackNumberBaseline { get; set; } = 3;
+
+    /// <summary>Distance in drawing units from the top of the drawing to the row of station signatures, used
+    /// only with a vertical time axis where the signatures sit above their station columns.</summary>
+    public int StationNameBaseline { get; set; } = 25;
 }
 
 public enum TimeAxisDirection

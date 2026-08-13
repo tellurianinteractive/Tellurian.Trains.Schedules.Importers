@@ -55,6 +55,7 @@ else
                         }
                     </TemplateColumn>
                     <TemplateColumn Title='@Translator("IsManned")' Align="Align.Center">@if (context is Station { IsManned: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    <TemplateColumn Title='@Translator("HasTurntable")' Align="Align.Center">@if (context is Station { HasTurntable: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@if (context is Station { IsShadow: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@if (context.HasPassengerExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
@@ -184,6 +185,12 @@ else
                         <div class="field">
                             <HelpLabel For="IsManned" />
                             <input type="checkbox" @bind="station.IsManned" @bind:after="OnEdited" />
+                        </div>
+                        @* What decides whether a train part arriving here may ask for its locomotive to
+                           be turned (see the schedule's part editor). *@
+                        <div class="field">
+                            <HelpLabel For="HasTurntable" />
+                            <input type="checkbox" @bind="station.HasTurntable" @bind:after="OnEdited" />
                         </div>
                     }
 
@@ -451,6 +458,8 @@ else
                         <dd>@YesNo(infoStation.IsShadow)</dd>
                         <dt>@Translator("IsManned")</dt>
                         <dd>@YesNo(infoStation.IsManned)</dd>
+                        <dt>@Translator("HasTurntable")</dt>
+                        <dd>@YesNo(infoStation.HasTurntable)</dd>
                         <dt>@Translator("Regions")</dt>
                         <dd>
                             @if (infoStation.Regions.Any())
@@ -721,6 +730,8 @@ else
         // A track's route names a location by id, so the tracks reserved for trains to or from this one
         // are released with it rather than left pointing at a location the layout no longer has.
         Layout.ForgetTrackRoutesTo(_deleteTarget);
+        // The topology diagram places a location by id too, so its saved position goes with it.
+        Layout.ForgetTopologyPositionOf(_deleteTarget);
         _deleteTarget = null;
         ScheduleState.SaveAndNotify();
     }

@@ -1,5 +1,35 @@
 # Release Notes
 
+## Unreleased
+
+### New Features
+
+- **A station says whether it has a turntable, and a train part says what is to be done with its
+  traction on arrival.** New **`Station.HasTurntable`** records the facility, and
+  **`OperationLocation.CanTurnLoco`** answers the question a caller actually asks — a location can be
+  turned at only where it is a station with a turntable, since nowhere else has one.
+
+  `TractionOptions.TurnLoco` and its neighbour are now settable from the planning app rather than only by
+  an import, and the notes they generate (`TurnNote`, `CirculateNote`, `TurnAndCirculateNote`) are
+  unchanged in text and in the rule that both flags together give one note, not two.
+
+- **A runaround is asked for only where the traction actually needs one.** New
+  **`ScheduledTrainPart.NeedsRunaround`** is false where every traction unit working the part reverses as
+  it stands — a trainset, or a locomotive working a reversible train — and true where the part's traction
+  cannot be resolved at all, so what was asked for stands until the vehicles say otherwise. It is the
+  part-scope counterpart of the existing `Plan.NeedsLocoRunaround`, which answers the same question for a
+  whole train and is what the timings allow the standing time from. `CirculateNote` and
+  `TurnAndCirculateNote` are now generated through it, so a trainset is never told to run round; the flag
+  itself is kept as set, and takes effect again as soon as traction that needs the move works the part.
+
+### Breaking Changes
+
+- **`TractionOptions.ReverseLoco` is renamed `TractionOptions.RunaroundLoco`**, after the manoeuvre the
+  rest of the model and the app already name that way (`Plan.NeedsLocoRunaround`,
+  `StationTimings.LocoRunaroundRealMinutes`). Nothing but the name changed. A plan written by an earlier
+  version stores the flag under its old name and reads back without it; the XPLN importer does not set
+  it, so only a plan that had it set by hand is affected.
+
 ## Version 3.2.0
 
 ### New Features

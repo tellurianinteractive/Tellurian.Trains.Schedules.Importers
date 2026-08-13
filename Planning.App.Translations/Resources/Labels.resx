@@ -336,6 +336,15 @@
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Break time (splits the graph in two halves)</value>
   </data>
+  <data name="CommonSettings" xml:space="preserve">
+    <value>Common settings</value>
+  </data>
+  <data name="OnScreen" xml:space="preserve">
+    <value>On screen</value>
+  </data>
+  <data name="PrintedReport" xml:space="preserve">
+    <value>Printed report</value>
+  </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Time axis orientation</value>
   </data>
@@ -365,6 +374,24 @@
   </data>
   <data name="TrackSpacing" xml:space="preserve">
     <value>Track spacing (px)</value>
+  </data>
+  <data name="GraphicalTimetableReport" xml:space="preserve">
+    <value>Graphical timetable</value>
+  </data>
+  <data name="PrintHourSpacing" xml:space="preserve">
+    <value>Hour spacing, fast clock (mm/h)</value>
+  </data>
+  <data name="PrintKilometerSpacing" xml:space="preserve">
+    <value>Distance scale (mm/km)</value>
+  </data>
+  <data name="PrintStationSpacing" xml:space="preserve">
+    <value>Station spacing (mm)</value>
+  </data>
+  <data name="PrintTrackSpacing" xml:space="preserve">
+    <value>Track spacing (mm)</value>
+  </data>
+  <data name="PrintMonochrome" xml:space="preserve">
+    <value>Black and white?</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
     <value>Show train category?</value>
@@ -588,6 +615,12 @@
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Whether the station is operated by a dispatcher rather than self-operated.</value>
+  </data>
+  <data name="HasTurntable" xml:space="preserve">
+    <value>Turntable?</value>
+  </data>
+  <data name="HasTurntableHelp" xml:space="preserve">
+    <value>Whether the station has a turntable, so a locomotive can be turned here. A steam locomotive can only be turned where there is one.</value>
   </data>
   <data name="IsChangingTrainDirectionPossible" xml:space="preserve">
     <value>Train can change direction?</value>
@@ -1021,7 +1054,13 @@
     <value>Topology</value>
   </data>
   <data name="TopologyHint" xml:space="preserve">
-    <value>A schematic overview of the timetable stretches. Stations are spaced by track distance; branches connect to the line they diverge from.</value>
+    <value>A schematic overview of the layout's track, each operation location shown once. Drag a location to where it belongs and the track follows it.</value>
+  </data>
+  <data name="TopologyArrangeAutomatically" xml:space="preserve">
+    <value>Arrange automatically</value>
+  </data>
+  <data name="TopologyArrangeAutomaticallyHint" xml:space="preserve">
+    <value>Forget every location you have moved and draw the whole diagram automatically again.</value>
   </data>
   <data name="TopologyNoStretches" xml:space="preserve">
     <value>Define timetable stretches to see the topology.</value>
@@ -1847,6 +1886,25 @@
   </data>
   <data name="IsReversibleTrainHelp" xml:space="preserve">
     <value>The train can be driven from either end — by a driving trailer, or by a locomotive at the far end — so no time is allowed for the loco runaround where the route reverses.</value>
+  </data>
+  <data name="TurnLoco" xml:space="preserve">
+    <value>Turn loco?</value>
+  </data>
+  <data name="TurnLocoHelp" xml:space="preserve">
+    <value>The locomotive is turned on the turntable after the train arrives, so it faces the other way. Printed as an arrival note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="TurnLocoNoTurntable" xml:space="preserve">
+    <value>{0} has no turntable, so nothing can be turned there.</value>
+    <comment>{0}=station name</comment>
+  </data>
+  <data name="RunaroundLoco" xml:space="preserve">
+    <value>Runaround loco?</value>
+  </data>
+  <data name="RunaroundLocoHelp" xml:space="preserve">
+    <value>The locomotive is run round to the other end of the train after it arrives, so the train can leave the way it came. Printed as an arrival note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="RunaroundLocoNotNeeded" xml:space="preserve">
+    <value>The traction working this train part reverses as it stands, so no runaround note is printed.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Number of units</value>

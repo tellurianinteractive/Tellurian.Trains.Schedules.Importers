@@ -1,0 +1,88 @@
+@page "/graphical-timetable-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The graphical timetables, printed at a true millimetre scale.
+
+   Unlike the tabular timetable, a graph cannot be re-flowed to fit: it is a drawing whose whole point is that
+   distance and time are to scale, so lines can be compared and meets read off the paper. The report therefore
+   keeps the scale fixed (millimetres per hour and per kilometre, from the settings) and lets the page count
+   follow, rather than shrinking a graph until it fits.
+
+   The time axis is cut into page-sized spans — at the break time first, then with a 15-minute overlap at any
+   further seam — and each span is filled with as many stretches as the cross axis of the sheet holds. Every
+   graph on a sheet therefore shows the SAME time span, which is what lets a meet be followed across stacked
+   stretches. Orientation follows the settings: a horizontal time axis prints on A4 landscape with the graphs
+   stacked downward, a vertical one on A4 portrait with them stacked sideways. *@
+
+@if (_report is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (_report.Pages.Count == 0)
+{
+    <DisplayedMessage ResourceKey="GraphNoSchedule" />
+}
+else
+{
+    @* No page footer: every graph carries its own heading with the stretch and the time span it covers, so a
+       footer would say nothing the sheet does not already say — and it would cost a graph's worth of paper on
+       every sheet. Omitting PageNumber is what suppresses it. *@
+    @foreach (var page in _report.Pages)
+    {
+        @if (_report.IsVertical)
+        {
+            <A4PPage Margin="@MarginMm">@Graphs(page)</A4PPage>
+        }
+        else
+        {
+            <A4LPage Margin="@MarginMm">@Graphs(page)</A4LPage>
+        }
+    }
+}
+
+@code {
+    private GraphReport? _report;
+
+    private LayoutModel? Layout => ScheduleState.Layout;
+    private static int MarginMm => (int)GraphPageGeometry.A4.MarginMm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        _report = ScheduleState.Timetable is { } timetable && Layout is { } layout
+            ? GraphReport.Create(timetable, ScheduleState.TimetableStretches, layout.Settings, GraphPageGeometry.A4)
+            : GraphReport.Empty;
+    }
+
+    private RenderFragment Graphs(GraphPage page) =>
+        @<div class="graph-page @(_report!.IsVertical ? "vertical" : "horizontal")">
+            @foreach (var item in page.Items)
+            {
+                <div class="graph">
+                    <h3>@item.Stretch.ForwardDescription <span class="time-span">@TimeSpanText(page)</span></h3>
+                    <GraphicalScheduleEditor Schedule="_report.Graph(item, page)"
+                                             UnitsPerMillimetre="GraphPrintScale.UnitsPerMillimetre"
+                                             Monochrome="_report.Monochrome" />
+                </div>
+            }
+        </div>;
+
+    private string TimeSpanText(GraphPage page)
+    {
+        var span = $"{Hhmm(page.From)}–{Hhmm(page.To)}";
+        return page.IsContinued ? $"{span}, {Translator("Continued")}" : span;
+    }
+
+    // Whole hours rather than TimeSpan's own "hh", which renders a time at or past midnight (24:05, stored as
+    // one day and five minutes) as 00:05 and so loses which side of midnight the sheet ends on.
+    private static string Hhmm(TimeSpan time) => $"{(int)time.TotalHours:00}:{time.Minutes:00}";
+}

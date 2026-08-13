@@ -208,16 +208,16 @@
     <value>Tog</value>
   </data>
   <data name="From" xml:space="preserve">
-    <value>af</value>
+    <value>Fra</value>
   </data>
   <data name="To" xml:space="preserve">
-    <value>an</value>
+    <value>Til</value>
   </data>
   <data name="FromShort" xml:space="preserve">
-    <value>af</value>
+    <value>fra</value>
   </data>
   <data name="ToShort" xml:space="preserve">
-    <value>an</value>
+    <value>til</value>
   </data>
   <data name="Turnus" xml:space="preserve">
     <value>Omløb</value>
@@ -336,6 +336,15 @@
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Delepunkt (deler grafen i to halvdele)</value>
   </data>
+  <data name="CommonSettings" xml:space="preserve">
+    <value>Fælles indstillinger</value>
+  </data>
+  <data name="OnScreen" xml:space="preserve">
+    <value>På skærmen</value>
+  </data>
+  <data name="PrintedReport" xml:space="preserve">
+    <value>Udskrevet rapport</value>
+  </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Tidsaksens orientering</value>
   </data>
@@ -365,6 +374,24 @@
   </data>
   <data name="TrackSpacing" xml:space="preserve">
     <value>Sporafstand (px)</value>
+  </data>
+  <data name="GraphicalTimetableReport" xml:space="preserve">
+    <value>Grafisk køreplan</value>
+  </data>
+  <data name="PrintHourSpacing" xml:space="preserve">
+    <value>Timeafstand, hurtigur (mm/t)</value>
+  </data>
+  <data name="PrintKilometerSpacing" xml:space="preserve">
+    <value>Afstandsskala (mm/km)</value>
+  </data>
+  <data name="PrintStationSpacing" xml:space="preserve">
+    <value>Stationsafstand (mm)</value>
+  </data>
+  <data name="PrintTrackSpacing" xml:space="preserve">
+    <value>Sporafstand (mm)</value>
+  </data>
+  <data name="PrintMonochrome" xml:space="preserve">
+    <value>Sort-hvid?</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
     <value>Vis togkategori?</value>
@@ -661,7 +688,13 @@
     <value>Topologi</value>
   </data>
   <data name="TopologyHint" xml:space="preserve">
-    <value>Et skematisk overblik over køreplansstrækningerne. Stationer placeres efter sporafstand; grene forbindes til den strækning, de udgår fra.</value>
+    <value>Et skematisk overblik over anlæggets spor, hvor hvert driftssted vises én gang. Træk et driftssted hen, hvor det hører til, så følger sporene med.</value>
+  </data>
+  <data name="TopologyArrangeAutomatically" xml:space="preserve">
+    <value>Placer automatisk</value>
+  </data>
+  <data name="TopologyArrangeAutomaticallyHint" xml:space="preserve">
+    <value>Glem alle de driftssteder, du har flyttet, og tegn hele skitsen automatisk igen.</value>
   </data>
   <data name="TopologyNoStretches" xml:space="preserve">
     <value>Definer køreplansstrækninger for at se topologien.</value>
@@ -1022,6 +1055,12 @@
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om stationen betjenes af en fjernstyringsleder i stedet for at være selvbetjent.</value>
+  </data>
+  <data name="HasTurntable" xml:space="preserve">
+    <value>Har drejeskive?</value>
+  </data>
+  <data name="HasTurntableHelp" xml:space="preserve">
+    <value>Om stationen har en drejeskive, så et lokomotiv kan drejes her. Et damplokomotiv kan kun drejes, hvor der er en drejeskive.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
     <value>Planlagt?</value>
@@ -1836,6 +1875,25 @@
   </data>
   <data name="IsReversibleTrainHelp" xml:space="preserve">
     <value>Toget kan køres fra begge ender — med en styrevogn eller et lokomotiv i den anden ende — så der afsættes ikke tid til lokomotivrundgang, hvor ruten vender.</value>
+  </data>
+  <data name="TurnLoco" xml:space="preserve">
+    <value>Drej lokomotiv?</value>
+  </data>
+  <data name="TurnLocoHelp" xml:space="preserve">
+    <value>Lokomotivet drejes på drejeskiven efter ankomsten, så det vender den anden vej. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="TurnLocoNoTurntable" xml:space="preserve">
+    <value>{0} har ingen drejeskive, så der kan intet drejes.</value>
+    <comment>{0}=station name</comment>
+  </data>
+  <data name="RunaroundLoco" xml:space="preserve">
+    <value>Omløb lokomotiv?</value>
+  </data>
+  <data name="RunaroundLocoHelp" xml:space="preserve">
+    <value>Lokomotivet køres om til den anden ende af toget efter ankomsten, så toget kan afgå den vej, det kom fra. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="RunaroundLocoNotNeeded" xml:space="preserve">
+    <value>Trækkraften på dette togafsnit kan vende, som den står, så der udskrives ingen omløbsbemærkning.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antal enheder</value>

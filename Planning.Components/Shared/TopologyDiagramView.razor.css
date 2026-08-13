@@ -1,0 +1,15 @@
+.topology-svg {
+    display: block;
+
+    /* Only where the planner may arrange the diagram: the booklet's copy is read-only and must not
+       invite anyone to grab anything. touch-action stops a drag on a touch screen from scrolling the
+       page instead of moving the location. */
+    &.editable .topology-node {
+        cursor: grab;
+        touch-action: none;
+    }
+
+    &.editable .topology-node:active {
+        cursor: grabbing;
+    }
+}

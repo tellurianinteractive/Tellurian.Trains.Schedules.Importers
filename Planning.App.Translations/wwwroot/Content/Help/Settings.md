@@ -30,9 +30,14 @@ messages without removing the underlying data.
 
 ### Graphical timetable
 
-Control the appearance of the graphical timetable: the orientation of the time axis, the spacing
-of stations and tracks, and which labels (arrival/departure minutes, train category, company) are
-shown. Note that if trains continues after 24:00 they wraps and continue 00:00.
+**Common settings** control what the graph shows — the orientation of the time axis, and which
+labels (arrival/departure minutes, train category, company) are drawn. They apply both on screen
+and in the printed report. Note that if trains continues after 24:00 they wraps and continue 00:00.
+
+Below them, the **on screen** and **printed report** blocks hold the same kinds of spacing for
+each of the two: screen spacing is in pixels, print spacing in millimetres of paper. The print
+figures are a true scale, so printed graphs can be compared and measured; the number of pages
+follows from them.
 
 ### Integration
 

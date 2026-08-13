@@ -229,7 +229,7 @@
     <value>Klasse</value>
   </data>
   <data name="Continued" xml:space="preserve">
-    <value>fortsat</value>
+    <value>fortsatt</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Side</value>
@@ -336,6 +336,15 @@
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Delepunkt (deler grafen i to halvdeler)</value>
   </data>
+  <data name="CommonSettings" xml:space="preserve">
+    <value>Felles innstillinger</value>
+  </data>
+  <data name="OnScreen" xml:space="preserve">
+    <value>På skjermen</value>
+  </data>
+  <data name="PrintedReport" xml:space="preserve">
+    <value>Utskrevet rapport</value>
+  </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Tidsaksens orientering</value>
   </data>
@@ -365,6 +374,24 @@
   </data>
   <data name="TrackSpacing" xml:space="preserve">
     <value>Sporavstand (px)</value>
+  </data>
+  <data name="GraphicalTimetableReport" xml:space="preserve">
+    <value>Grafisk ruteplan</value>
+  </data>
+  <data name="PrintHourSpacing" xml:space="preserve">
+    <value>Timeavstand, hurtigklokke (mm/t)</value>
+  </data>
+  <data name="PrintKilometerSpacing" xml:space="preserve">
+    <value>Avstandsskala (mm/km)</value>
+  </data>
+  <data name="PrintStationSpacing" xml:space="preserve">
+    <value>Stasjonsavstand (mm)</value>
+  </data>
+  <data name="PrintTrackSpacing" xml:space="preserve">
+    <value>Sporavstand (mm)</value>
+  </data>
+  <data name="PrintMonochrome" xml:space="preserve">
+    <value>Svart-hvitt?</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
     <value>Vis togkategori?</value>
@@ -661,7 +688,13 @@
     <value>Topologi</value>
   </data>
   <data name="TopologyHint" xml:space="preserve">
-    <value>En skjematisk oversikt over ruteplanstrekningene. Stasjoner plasseres etter sporavstand; grener kobles til strekningen de går ut fra.</value>
+    <value>En skjematisk oversikt over anleggets spor, der hvert driftssted vises én gang. Dra et driftssted dit det hører hjemme, så følger sporene med.</value>
+  </data>
+  <data name="TopologyArrangeAutomatically" xml:space="preserve">
+    <value>Plasser automatisk</value>
+  </data>
+  <data name="TopologyArrangeAutomaticallyHint" xml:space="preserve">
+    <value>Glem alle driftsstedene du har flyttet, og tegn hele skissen automatisk igjen.</value>
   </data>
   <data name="TopologyNoStretches" xml:space="preserve">
     <value>Definer ruteplanstrekninger for å se topologien.</value>
@@ -1022,6 +1055,12 @@
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om stasjonen betjenes av en togekspeditør i stedet for å være selvbetjent.</value>
+  </data>
+  <data name="HasTurntable" xml:space="preserve">
+    <value>Har svingskive?</value>
+  </data>
+  <data name="HasTurntableHelp" xml:space="preserve">
+    <value>Om stasjonen har en svingskive, slik at et lok kan snus her. Et damplok kan bare snus der det finnes en svingskive.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
     <value>Planlagt?</value>
@@ -1836,6 +1875,25 @@
   </data>
   <data name="IsReversibleTrainHelp" xml:space="preserve">
     <value>Toget kan kjøres fra begge ender — med en styrevogn eller et lokomotiv i den andre enden — så det settes ikke av tid til lokrundgang der ruten vender.</value>
+  </data>
+  <data name="TurnLoco" xml:space="preserve">
+    <value>Snu lok?</value>
+  </data>
+  <data name="TurnLocoHelp" xml:space="preserve">
+    <value>Loket snus på svingskiven etter ankomsten, slik at det vender andre veien. Skrives ut som ankomstmerknad for lokfører og togekspeditør.</value>
+  </data>
+  <data name="TurnLocoNoTurntable" xml:space="preserve">
+    <value>{0} har ingen svingskive, så ingenting kan snus der.</value>
+    <comment>{0}=station name</comment>
+  </data>
+  <data name="RunaroundLoco" xml:space="preserve">
+    <value>Omløp lok?</value>
+  </data>
+  <data name="RunaroundLocoHelp" xml:space="preserve">
+    <value>Loket kjøres om til den andre enden av toget etter ankomsten, slik at toget kan avgå den veien det kom fra. Skrives ut som ankomstmerknad for lokfører og togekspeditør.</value>
+  </data>
+  <data name="RunaroundLocoNotNeeded" xml:space="preserve">
+    <value>Trekkraften på dette togavsnittet kan snu som den står, så det skrives ingen omløpsmerknad.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antall enheter</value>

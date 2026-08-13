@@ -33,9 +33,7 @@ else
         @* Settings bind directly to the shared Layout model. Each field uses @bind:after="OnEdited"
            so every edit is saved to storage and broadcast: docked views (e.g. the graphical timetable)
            re-render via ScheduleState.OnChanged, and the change survives a reload. *@
-        @* The information section holds markdown editors, each showing its text and a preview side
-           by side; they need the full width rather than the reading width the labelled fields use. *@
-        <div class="section @(_section == SettingsSection.Information ? "wide" : "")">
+        <div class="section @SectionClass">
             @if (_section == SettingsSection.General)
             {
                 var g = LayoutSettings.General;
@@ -212,6 +210,11 @@ else
             else if (_section == SettingsSection.GraphicTimetable)
             {
                 var gt = LayoutSettings.GraphicTimetable;
+                @* What the graph shows comes first, because it applies to the docked view and the printed
+                   report alike. Only the geometry differs between the two, and that is what the two blocks
+                   below hold: the same kinds of spacing, in screen pixels on the left and paper millimetres
+                   on the right, so the two scales cannot be mistaken for each other. *@
+                <div class="group-heading">@Translator("CommonSettings")</div>
                 <div class="field">
                     <label>@Translator("TimeAxisOrientation")</label>
                     <select @bind="gt.Orientation" @bind:after="OnEdited">
@@ -230,26 +233,6 @@ else
                     <input type="checkbox" @bind="gt.ShowDepartureMinutes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("MinuteSpacing")</label>
-                    <input type="number" min="1" @bind="gt.MinuteSpacing" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <label>@Translator("KilometerSpacing")</label>
-                    <input type="number" min="1" @bind="gt.KilometerSpacing" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <label>@Translator("StationSpacing")</label>
-                    <input type="number" min="1" @bind="gt.StationSpacing" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <label>@Translator("TrackSpacing")</label>
-                    <input type="number" min="1" @bind="gt.TrackSpacing" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
-                    <label>@Translator("TrainLabelFontSize")</label>
-                    <input type="number" min="4" max="16" @bind="gt.TrainLabelFontSize" @bind:after="OnEdited" />
-                </div>
-                <div class="field">
                     <label>@Translator("ShowTrainCategory")</label>
                     <input type="checkbox" @bind="gt.ShowTrainCategory" @bind:after="OnEdited" />
                 </div>
@@ -260,6 +243,58 @@ else
                 <div class="field">
                     <label>@Translator("HideSessionsOrDays")</label>
                     <input type="checkbox" @bind="gt.HideSessionsOrDays" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <label>@Translator("TrainLabelFontSize")</label>
+                    <input type="number" min="4" max="16" @bind="gt.TrainLabelFontSize" @bind:after="OnEdited" />
+                </div>
+
+                <div class="columns">
+                    <div class="block">
+                        <div class="group-heading">@Translator("OnScreen")</div>
+                        <div class="field">
+                            <label>@Translator("MinuteSpacing")</label>
+                            <input type="number" min="1" @bind="gt.MinuteSpacing" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("KilometerSpacing")</label>
+                            <input type="number" min="1" @bind="gt.KilometerSpacing" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("StationSpacing")</label>
+                            <input type="number" min="1" @bind="gt.StationSpacing" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("TrackSpacing")</label>
+                            <input type="number" min="1" @bind="gt.TrackSpacing" @bind:after="OnEdited" />
+                        </div>
+                    </div>
+                    @* The print scale is a true paper measurement, not a screen one: it fixes how many millimetres
+                       an hour and a kilometre occupy on the sheet, so printed graphs stay comparable and can be
+                       measured. The number of printed pages follows from it. *@
+                    <div class="block">
+                        <div class="group-heading">@Translator("PrintedReport")</div>
+                        <div class="field">
+                            <label>@Translator("PrintHourSpacing")</label>
+                            <input type="number" min="4" step="0.5" @bind="gt.PrintHourSpacingMm" @bind:culture="Invariant" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("PrintKilometerSpacing")</label>
+                            <input type="number" min="0" step="0.1" @bind="gt.PrintKilometerSpacingMm" @bind:culture="Invariant" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("PrintStationSpacing")</label>
+                            <input type="number" min="5" step="1" @bind="gt.PrintStationSpacingMm" @bind:culture="Invariant" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("PrintTrackSpacing")</label>
+                            <input type="number" min="0.5" step="0.5" @bind="gt.PrintTrackSpacingMm" @bind:culture="Invariant" @bind:after="OnEdited" />
+                        </div>
+                        <div class="field">
+                            <label>@Translator("PrintMonochrome")</label>
+                            <input type="checkbox" @bind="gt.PrintMonochrome" @bind:after="OnEdited" />
+                        </div>
+                    </div>
                 </div>
             }
             else if (_section == SettingsSection.TimeAndSpeed)
@@ -422,6 +457,16 @@ else
     private static readonly SettingsSection[] Sections = Enum.GetValues<SettingsSection>();
 
     private static CultureInfo Invariant => CultureInfo.InvariantCulture;
+
+    // Most sections are a single column of labelled fields at a comfortable reading width. Two need
+    // more: the information section holds markdown editors that show text and preview side by side,
+    // and the graphical timetable puts its view and report blocks beside each other.
+    private string SectionClass => _section switch
+    {
+        SettingsSection.Information => "wide",
+        SettingsSection.GraphicTimetable => "columned",
+        _ => ""
+    };
 
     private LayoutModel? Layout => ScheduleState.Layout;
     private LayoutSettings? LayoutSettings => Layout?.Settings;

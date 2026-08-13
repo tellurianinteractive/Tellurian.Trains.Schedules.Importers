@@ -1,295 +1,253 @@
 # Versionsnyheder
 
+## Version 0.5.2
+
+### Ændringer
+
+- **De grafiske køreplaner kan nu udskrives.** En ny rapport under **Rapporter** tegner hver
+  køreplansstrækning i en fast papirskala — så mange millimeter pr. hurtigurstime og pr. kilometer — og
+  lægger så mange strækninger på et ark, som papiret rummer. Hvordan papiret vender følger den orientering,
+  du har valgt til den grafiske køreplan: en vandret tidsakse udskrives på A4 liggende med strækningerne
+  stablet under hinanden, en lodret på A4 stående med dem ved siden af hinanden.
+
+  Fordi skalaen er fast i stedet for trykket sammen for at passe til papiret, kan tider og hældninger
+  sammenlignes og måles fra det ene ark til det næste. Et tidsvindue, der er for langt til ét ark, deles
+  langs tidsaksen — først ved pausen, derefter i lige store ark, der overlapper hinanden — så et tog, der
+  krydser snittet, kan følges på begge ark, og det sidste ark bliver lige så fyldt som de øvrige i stedet
+  for at bære nogle få minutter. Skalaen indstilles under **Indstillinger → Grafisk køreplan**; det er ved
+  at mindske stationsafstanden der, at to eller tre strækninger får plads på samme ark. Togene udskrives i
+  deres togartsfarver som på skærmen, medmindre du beder om sort-hvid — hvilket er værd at gøre på en
+  sort-hvid printer, som gør farver, der er tydelige på skærmen, til omtrent samme grå.
+
+- **Indstillinger → Grafisk køreplan er nu ordnet efter, hvad hver indstilling påvirker.** Det, køreplanen
+  viser — hvilken vej tidsaksen løber, hvilke minutter der tegnes, og hvad togetiketten bærer — kommer
+  først, for det gælder både på skærmen og på papiret. Under det står to blokke ved siden af hinanden:
+  afstandene på skærmen, i billedpunkter, og afstandene i den udskrevne rapport, i millimeter papir. Hver
+  blok bærer de samme slags afstande, så skærmens indstilling og dens modstykke på papiret kan læses mod
+  hinanden, og den ene ikke kan forveksles med den anden. Talfelter er højrejusterede, så cifrene står
+  under hinanden.
+
+- **Du kan nu angive, hvad der skal ske med lokomotivet, hvor et togafsnit slutter.** Når du redigerer et
+  togafsnit under **Omløb**, stilles der to spørgsmål mere: skal lokomotivet drejes, og skal det køres om
+  til den anden ende af toget, så toget kan afgå den vej, det kom fra? Hver af dem udskrives som en
+  ankomstbemærkning for både lokomotivfører og fjernstyringsleder, og beder du om begge, bliver det én
+  enkelt bemærkning — lokomotivet forlader toget, kører til drejeskiven og kommer tilbage i den anden
+  ende — i stedet for to, der læses som adskilte bevægelser.
+
+  Drejning tilbydes kun, hvor det driftssted, togafsnittet slutter ved, har en drejeskive, hvilket er en
+  ny indstilling under **Driftssteder**; ingen andre steder har en. Omløb udelades af bemærkningen, når
+  trækkraften på togafsnittet kan vende, som den står — et motortog eller et lokomotiv i et vendetog —
+  for så er der intet at køre om. Det, du har bedt om, bevares i begge tilfælde, så det siger sit igen,
+  så snart et andet lokomotiv kører togafsnittet.
+
+- **Topologi-diagrammet tegner nu hele anlæggets spor, med hvert driftssted vist én eneste gang.** Det
+  var før en række vandrette linjer, en for hver køreplansstrækning, og et driftssted, som flere
+  strækninger nåede, blev tegnet på hver af dem. Nu optræder hvert driftssted præcis én gang, og sporet
+  mellem to af dem er en lige linje i den vinkel, de nu ligger i, enkelt- eller dobbeltsporet som
+  strækningen virkelig er og i farverne på de køreplansstrækninger, der går over det. Spor, som ingen
+  køreplansstrækning dækker, tegnes i gråt, så et hul i dine strækninger kan ses i stedet for bare at
+  mangle. En signatur, der ellers ville få spor gennem sig, flyttes til den side af cirklen, der er
+  renest — over, under eller ved siden af den — hvilket er svaret, hvor der går spor både opad og nedad
+  fra samme driftssted.
+
+- **Du kan nu selv arrangere Topologi-diagrammet.** Træk et driftssted hen, hvor det hører til, så følger
+  sporene med. Det lægger sig i de samme rækker og afstande, som den automatiske tegning bruger, så det,
+  du flytter, kommer på linje med det, du lader stå. Hvor du har placeret driftsstederne, gemmes med
+  planen og er det, der udskrives på oversigtssiden i tjenestehæfterne. **Placer automatisk** glemmer
+  alle de driftssteder, du har flyttet, og tegner hele diagrammet igen. Det er dette, et anlæg med et
+  trekantspor, en vendesløjfe eller to strækninger, der hænger sammen i begge ender, har brug for: ingen
+  regel, der kun læser sporene, kan forventes at tegne et sådant anlæg, som det virkelig ser ud, og du
+  ved, hvordan det ser ud.
+
+- **Knapperne, der gælder et helt omløb, står nu i deres egen kolonne.** Under **Omløb** stod klon,
+  komplementer og slet forrest blandt togene, så togfelterne i hver række begyndte forskellige steder, og
+  spørgsmålet, der stilles, før et omløb slettes, skubbede dem endnu længere til siden. Nu står de i en
+  kolonne **Handlinger** mellem køretøjerne og togene: hver rækkes tog begynder samme sted, også hvor de
+  fortsætter på næste linje, og knappen til at slette bliver stående og markeres, mens spørgsmålet
+  stilles ved siden af den.
+
 ## Version 0.5.1
 
 ### Ændringer
 
-- **Hæftet med generelle instruktioner udskriver nu hele din tekst, på sider der kan læses.** Hæftet
-  regnede alt for rundhåndet med, hvor meget der kunne være på en side, så en side kunne fyldes forbi
-  bundkanten, og det der løb over faldt stiltiende bort — oftest sådan at en overskrift blev det sidste
-  på siden, og teksten under den ikke stod nogen steder. En side rummer nu det, en side faktisk rummer,
-  og teksten fortsætter i stedet på den næste. En side slutter heller aldrig med en overskrift alene,
-  heller ikke hvor du har skrevet en overskrift efterfulgt direkte af endnu en: overskrifter følger med
-  den tekst, de indleder.
+- **Hvad der skal gøres med lokomotiverne, står nu i førernes tjenestehæfter og i
+  togekspeditionslisterne.** Hvilket lokomotiv der skal bruges, hvad der skal kobles til og fra, og at det
+  skal hentes fra — eller køres tilbage til — opstillingssporet, blev hele tiden regnet ud af
+  materielomløbene, men aldrig skrevet ud; nu står de blandt de øvrige noter ved den standsning, de hører
+  til, og både føreren og togekspedienten ser dem. Nyt blandt dem er beskeden til et lokomotiv, der skal
+  køres rundt til den anden ende af toget, eller vendes, før toget kører tilbage.
 
-  **Topologi** og **Rangerbanegårde** kommer nu på hæftets allersidste side, hvor man finder dem ved at
-  slå hæftet op bagfra — ligesom de allerede gjorde i førernes omløbshæfter. En tom side, der skal til
-  for at fylde arket, kommer nu før dem i stedet for efter. Overskriften **Instruktioner** er desuden sat
-  i samme størrelse som **Program** og **Anlæg** nu i stedet for et halvt trin mindre.
-
-  **Programmet** på forsiden er sat som instruktionssiderne nu. Det var overladt til browserens egne
-  overskriftsstørrelser, som giver langt mere plads over og under en overskrift end noget andet i
-  hæftet — et program over tre dage og en bemærkning fyldte næsten hele siden, og et længere ville være
-  løbet ud under den.
+- **Hæftet med generelle instruktioner udskriver nu hele din tekst, på sider der kan læses.** En side blev
+  regnet for rummeligere, end den faktisk er, så det der løb forbi bundkanten faldt stiltiende bort;
+  teksten fortsætter nu på den næste side i stedet, og en side slutter aldrig med en overskrift alene.
+  **Topologi** og **Rangerbanegårde** kommer nu på hæftets allersidste side ligesom i tjenestehæfterne, og
+  programmet på forsiden er sat i hæftets egne størrelser i stedet for browserens.
 
 ## Version 0.5.0
 
 ### Ændringer
 
-- **Et vendetog står ikke længere og venter på lokomotivrundgang.** Hvor et togs rute vender, har det
-  hidtil fået tid nok til, at lokomotivet kan køre rundt til den anden ende — uanset hvad der har
-  fremført det. Redigér et lokomotiv på fanen Omløb, og sæt kryds i den nye boks **Vendetog?**, hvor
-  lokomotivet fremfører et tog, der kan køres fra begge ender: et tog med styrevogn i den anden ende
-  eller med endnu et lokomotiv der. Føreren skifter blot førerrum, så **Opdatér tider** regner nu
-  rundgangen fra, og toget står det korteste ophold i stedet, hvilket fremrykker alle følgende ophold.
+- **Et vendetog står ikke længere og venter på lokomotivrundgang.** Sæt kryds i den nye boks **Vendetog?**
+  på et lokomotiv under **Omløb**, hvor det fremfører et tog, der kan køres fra begge ender — et tog med
+  styrevogn eller endnu et lokomotiv i den anden ende — så regner **Opdatér tider** rundgangen fra og lader
+  toget stå det korteste ophold i stedet, hvilket fremrykker alle følgende ophold. Et motorvognstog
+  behandles på samme måde uden noget at sætte kryds i, og et ophold, du bevidst har gjort længere, bliver
+  stående, som du har sat det.
 
-  Et **motorvognstog** behandles på samme måde, uden noget at sætte kryds i — det vender, som det står,
-  hvilket tidsberegningen ikke tidligere tog højde for. Fjern krydset, eller giv toget et almindeligt
-  lokomotiv, så kommer tiden til rundgangen tilbage. Et ophold, du bevidst har gjort længere end selve
-  rundgangen, bliver stående, som du har sat det.
+- **Et spor kan nu angive, hvilken vej gennem driftsstedet det er beregnet til.** Hvert spor kan angive det
+  **forrige** driftssted, et tog kommer fra, det **næste**, det fortsætter til, eller begge — med feltet
+  **begge retninger** — og et nyt tog lægges på det spor, der passer bedst til dets vej. Det er netop, hvad
+  en **dobbeltsporet strækning** har brug for: giv de to spor samme par driftssteder omvendt, så holder
+  hver retning sig til sit spor. Hvor to spor passer lige godt, tager et persontog, der standser, et spor
+  med perron, mens et tog, der kører igennem, tager hovedsporet; lad kolonnerne stå tomme, så ændres intet
+  i forhold til før.
 
-- **Et spor kan nu angive, hvilken vej gennem driftsstedet det er beregnet til.** Hvor et driftssted har
-  mere end ét spor og noget at køre videre til, kan hvert af dets spor angive det **forrige** driftssted,
-  et tog kommer fra, det **næste**, det fortsætter til, eller begge — med feltet **begge retninger**, når
-  samme spor også gælder den modsatte vej. Kun de driftssteder, der nås af en strækning herfra, tilbydes,
-  så et spor kun kan angives for en vej, et tog rent faktisk kan tage.
+- **Et tog kan nu kopieres i modsat retning og gentages.** Sæt flueben i **Modsat retning?**, så kører
+  kopien strækningen baglæns, med alle køretider og ophold bevaret, forberedelses- og afslutningstiden
+  byttet ende og et nummer fra den modsatte retnings række. Kopidialogen har nu også valget **Gentag tog**,
+  så et tog kan oprettes for sig, justeres, til det kører, som det skal, og først derefter gentages hen
+  over dagen.
 
-  Et nyt tog lægges derefter på det spor, der passer bedst til dets vej: et spor, der angiver præcis,
-  hvor toget kommer fra og skal hen, går forud for et, der kun angiver det ene, som igen går forud for et
-  spor, der intet angiver, og et spor, der er beregnet til en vej, toget ikke kører, overlades til de
-  tog, det er til for. Det er netop, hvad en **dobbeltsporet strækning** har brug for — giv det ene spor
-  den ene retnings forrige og næste driftssted og det andet spor samme par omvendt, så holder hver
-  retning sig til sit spor. Lad kolonnerne stå tomme, så ændres intet i forhold til før.
-
-  Hvor to spor passer lige godt til vejen, tager et persontog, der **standser**, et spor med perron,
-  mens et tog, der kører **igennem** — som ethvert tog uden passagerudveksling — tager hovedsporet.
-  Hidtil tog et persontog et spor med perron på hvert driftssted, det anløb, uanset om det standsede der
-  eller ej.
-
-- **Et tog kan nu kopieres i modsat retning og gentages.** At kopiere et tog gav én enkelt kopi, der
-  kørte samme vej som toget, den kom fra. Sæt flueben i **Modsat retning?**, så kører kopien i stedet
-  strækningen baglæns, fra hvor toget sluttede, til hvor det begyndte: alle køretider og alle ophold
-  bevares, forberedelses- og afslutningstiden bytter ende, og kopien får et nummer fra den modsatte
-  retnings række. Minutterne tælles så fra det kopierede togs sidste afgang, så 20 minutter lægger
-  returtoget 20 minutter efter, at toget, det vender fra, er afsluttet.
-
-  Kopidialogen har nu også valget **Gentag tog**, som findes, når et tog tilføjes: angiv et sluttidspunkt
-  og et interval, så tilføjes én kopi pr. interval, indtil sluttidspunktet er passeret. Et tog kan nu
-  oprettes for sig, justeres, til det kører, som det skal, og først derefter gentages hen over dagen —
-  hidtil skulle hele rækken bestilles allerede, da det første tog blev oprettet.
-
-- **Et spor kan nu angive, hvor lang dets perron er.** Hvor et driftssted udveksler passagerer, har hvert
-  af dets spor en **perronlængde** i meter. Over nul betyder, at der ligger en perron langs sporet, og at
-  passagerer kan stige på og af der; nul betyder, at der ikke er nogen. Et nyt passagertog lægges på et
-  spor med perron — helst hovedsporet blandt dem — på hvert driftssted, det anløber, og tager
-  hovedsporet, hvor driftsstedet ingen perron har. Et passagertog må stadig holde ved et spor uden
-  perron: det udveksler ganske enkelt intet der, og det er præcis, hvad det gør, når det krydser et andet
-  tog et sted, hvor der slet ikke udveksles passagerer.
-
-  Sæt flueben i **Passagerer?** ved et driftssted, hvis spor endnu ingen perron har, så får hvert spor en
-  perron på én meter, som du kan justere. En plan, der er oprettet eller importeret før dette, behandles
-  på samme måde, første gang den åbnes, så den fungerer nøjagtig som før — derefter afkorter eller
-  nulstiller du de spor, der i virkeligheden ingen perron har. Et driftssted, hvor en perron allerede er
-  angivet, røres der ikke ved.
-
-  Et passagertog, der standser for passagerudveksling ved et spor uden perron, står nu under
-  **Konflikter**. Du afgør, hvilket af to tilfælde det er: giv sporet en perronlængde, eller fjern
-  fluebenene i standsningens **Ank** og **Afg**, hvilket siger, at toget blot holder der uden at udveksle
-  noget. Intet rettes for dig, for kun du ved, hvad der gælder. Hvor et driftssted kun har perron ved ét
-  spor — det sædvanlige på en mindre station — kan to krydsende passagertog ikke begge få den, og det
-  tog, der ikke får den, er det, der rapporteres. Kontrollen kan slås fra under
-  **Indstillinger › Validering**.
+- **Et spor kan nu angive, hvor lang dets perron er.** Hvert spor på et driftssted, der udveksler
+  passagerer, har en **perronlængde** i meter — over nul betyder, at passagerer kan stige på og af der — og
+  et nyt passagertog lægges på et spor med perron, hvor driftsstedet har en. Sæt flueben i
+  **Passagerer?**, så får hvert spor en perron på én meter, som du kan justere, og en plan oprettet før
+  dette behandles på samme måde, første gang den åbnes, så den fungerer nøjagtig som før, indtil du
+  afkorter eller nulstiller de spor, der i virkeligheden ingen perron har. Et passagertog, der standser for
+  passagerudveksling ved et spor uden perron, står nu under **Konflikter**: giv enten sporet en
+  perronlængde eller fjern fluebenene i standsningens **Ank** og **Afg**, hvilket siger, at toget intet
+  udveksler der. Kontrollen kan slås fra under **Indstillinger › Validering**.
 
 ### Fejlrettelser
 
-- **At give anlægget et nyt navn ændrer nu navnet alle de steder, det vises.** Anlæggets navn under
-  **Indstillinger › Generelt** blev kun ændret i indstillingerne: forsiden på hæftet med de generelle
-  instruktioner, navnet i den øverste linje og filnavnet, en plan gemmes under, blev alle ved med at
-  vise, hvad anlægget hed før. De følger nu alle navnet, som det skrives, og en plan, der har fået nyt
-  navn tidligere, rettes næste gang den åbnes.
+- **At give anlægget et nyt navn ændrer nu navnet alle de steder, det vises.** Forsiden på hæftet med de
+  generelle instruktioner, navnet i den øverste linje og filnavnet, en plan gemmes under, blev alle ved med
+  at vise, hvad anlægget hed før. En plan, der har fået nyt navn tidligere, rettes næste gang den åbnes.
 
 ## Version 0.4.2
 
 ### Ændringer
 
-- **Nu kan et tog sættes ind midt i et omløb.** Hidtil kunne et omløb kun bygges fremad: det eneste
-  sted at tilføje et tog var i slutningen af omløbet. Mellem togafsnittene på en række er der nu små
-  samlinger, der viser, hvor køretøjet holder og hvor længe, og før det første afsnit en, der viser,
-  hvorfra det skal hentes. Klik på en af dem for at sætte et tog ind i hullet — kun de tog, køretøjet
-  faktisk kan nå på tiden, tilbydes. En tur, der ikke bringer køretøjet tilbage dertil, hvor omløbet
-  fortsætter, sættes ind alligevel og rapporteres som en konflikt, indtil du sætter returen ind;
-  sådan passes en tur-retur ind i et ophold, en tur ad gangen. En samling, hvor omløbet er brudt, som
-  en import kan efterlade det, er markeret med gult, og et klik tilbyder de tog, der udfylder hullet.
+- **Nu kan et tog sættes ind midt i et omløb.** Mellem togafsnittene på en række er der nu små samlinger,
+  der viser, hvor køretøjet holder og hvor længe, og før det første afsnit en, der viser, hvorfra det skal
+  hentes; klik på en af dem for at sætte et tog ind i hullet, så tilbydes kun de tog, køretøjet faktisk kan
+  nå. En tur, der ikke bringer køretøjet tilbage, sættes ind alligevel og rapporteres som en konflikt,
+  indtil du sætter returen ind — sådan passes en tur-retur ind i et ophold. En samling, hvor omløbet er
+  brudt, som en import kan efterlade det, er markeret med gult.
 
-- **Appen har fået sit eget ikon.** Hidtil bar den mærket, der følger med de værktøjer, den er bygget
-  med, og som ikke sagde noget om, hvad appen er til for. Nu viser den fronten af et moderne tog på en
-  mørkeblå flade. Ikonet ses i browserens faneblad og på hjemmeskærmen eller i Start-menuen for den,
-  der installerer appen, så den kan skelnes fra alt andet, der er åbent samtidig.
+- **Appen har fået sit eget ikon** — fronten af et moderne tog på en mørkeblå flade — i stedet for mærket,
+  der følger med de værktøjer, den er bygget med. Ikonet ses i browserens faneblad og på hjemmeskærmen
+  eller i Start-menuen for den, der installerer appen.
 
-- **Der er nu plads til tolv omløbskort på et ark i stedet for ti.** Kortene var 50 mm brede, hvilket
-  kun gav plads til fem ved siden af hinanden tværs over et liggende A4-ark, med en håndsbredde papir
-  spildt i højre kant. De er nu 48 mm brede, så seks kan være ved siden af hinanden og tolv på arket,
-  og arket har en margen hele vejen rundt, som almindelige printere kan nå. Kortene er lige så høje som
-  før, og indholdet er uændret — de er blot lidt smallere, så en sjettedel af klipningen og
-  sorteringen falder bort for hvert omløb, der skrives ud.
+- **Der er nu plads til tolv omløbskort på et ark i stedet for ti.** Kortene er 48 mm brede i stedet for
+  50, så seks kan være ved siden af hinanden på et liggende A4-ark, og arket har stadig en margen, som
+  almindelige printere kan nå. Kortene er lige så høje som før, og indholdet er uændret.
 
-- **Rækkerne i køreplanen står nu længere fra hinanden.** Linjerne lå så tæt, at øjet mistede sit sted,
-  når man fulgte en række med tider, hvilket er netop det, bladet læses for. Der er nu en syvendedel
-  mere luft omkring hver linje, så en række er lettere at følge tværs over siden, og en station lettere
-  at finde i kolonnen. Skriften er lige så stor som før, og kolonnerne lige så brede som før, så bladet
-  rummer de samme tog — det er kun afstanden mellem linjerne, der er vokset. En side tager nu
-  niogtredive linjer i stedet for femogfyrre, hvilket er så meget luft, som kunne gives, uden at den
-  almindeligste strækning ville få brug for et andet blad.
+- **Rækkerne i køreplanen står nu længere fra hinanden.** Der er nu en syvendedel mere luft omkring hver
+  linje, så en række er lettere at følge tværs over siden, og en station lettere at finde i kolonnen.
+  Skriften og kolonnerne er uændrede, så bladet rummer de samme tog; en side tager nu niogtredive linjer i
+  stedet for femogfyrre.
 
 ### Fejlrettelser
 
 - **Den udskrevne køreplan mister ikke længere de sidste rækker på en side.** Begge retninger af en
-  køreplansstrækning blev sat på samme side, også når de ikke begge kunne være der, og den anden holdt
-  op midt i sin liste over stationer — rækkerne, der blev til overs, blev klippet af i stedet for at
-  blive flyttet til næste side.
+  strækning blev sat på samme side, også når de ikke begge kunne være der, og rækkerne, der blev til
+  overs, blev klippet af — rapporten på skærmen var sat i en større skrift end den udskrevne, så dens
+  rækker var næsten to tredjedele højere end dem, der blev talt. De to sættes nu ens, hvor meget der kan
+  være måles på en virkelig side i stedet for at blive regnet ud fra skriftstørrelsen, og tre linjer holdes
+  frie nederst på hver side.
 
-  Hvor meget der kan være på en side blev regnet ud for det ark, der kommer ud af printeren, men
-  rapporten på skærmen var sat i en større skrift end den udskrevne, så dens rækker var næsten to
-  tredjedele højere end dem, der blev talt. Rapporten på skærmen og det udskrevne ark sættes nu ens, så
-  siden på skærmen er et sandt billede af papiret: det, der fylder den på skærmen, fylder den også på
-  papiret, og det, der ikke kan være der, flyttes til næste side i stedet for at blive klippet af. Hvor
-  meget der kan være, måles nu på en virkelig side i stedet for at blive regnet ud fra skriftstørrelsen,
-  og tre linjer holdes frie nederst på hver side, så en strækning, der er en række eller to for lang,
-  får sin egen side i stedet for at gå ud over kanten.
-
-- **Godsstrømslisten nævner nu de destinationer, vognene skal til.** Under **Godsstrøm › Godstog** stod
-  der kun "Vogne til" i listen, man vælger fra, uden destinationerne, så posterne ikke kunne skelnes fra
-  hinanden. Destinationerne er tilbage, og underfanen og dens kolonne hedder nu **Godsdestinationer** i
-  stedet for *Godsbeskrivelser*, for det er destinationer, de indeholder.
+- **Godsstrømslisten nævner nu de destinationer, vognene skal til.** Under **Godsstrøm › Godstog** stod der
+  kun "Vogne til" i listen, man vælger fra, uden destinationerne, så posterne ikke kunne skelnes fra
+  hinanden. Underfanen og dens kolonne hedder nu **Godsdestinationer** i stedet for *Godsbeskrivelser*.
 
 ## Version 0.4.1
 
 ### Ændringer
 
 - **Togekspeditionslisterne kan nu gemmes som dokumenter, stationsejerne kan redigere.** Vælg
-  *Togekspeditionslister* i menuen Eksportér, og hver bemandet station får sit eget dokument i
-  OpenDocument-format, som LibreOffice Writer og de fleste andre tekstbehandlere åbner. Det er tænkt
-  til at sende hver stations ejer deres egen liste før træffet, så de kan tilføje de lokale
-  instruktioner, kun de kender — derfor ét dokument pr. station og ikke ét dokument med alles ark i. Er
-  mere end én station bemandet, kommer dokumenterne samlet i en zip-fil med én fil pr. station i.
+  *Togekspeditionslister* i menuen Eksportér, så får hver bemandet station sit eget dokument i
+  OpenDocument-format, tænkt til at sende hver ejer deres egen liste før træffet, så de kan tilføje de
+  lokale instruktioner, kun de kender; er mere end én station bemandet, kommer dokumenterne samlet i en
+  zip-fil. Hvor siderne brydes, er overladt til tekstbehandleren, så siderne brydes fornuftigt også efter,
+  at ejeren har skrevet — stationens navn, telefonnumrene til de stationer, den ekspederer tog til og fra,
+  og kolonneoverskrifterne gentages øverst på hver side, men den del af døgnet, en side dækker, kan ikke
+  angives, så siderne nummereres i stedet. De udskrevne ark i menuen Rapporter er uændrede og er fortsat
+  dem, man arbejder fra under en køresession.
 
-  Intet i dokumentet bestemmer, hvor siderne brydes. Stationens navn og telefonnumrene til de
-  stationer, den ekspederer tog til og fra, gentages øverst på hver side, og det gør
-  kolonneoverskrifterne også, men hvor siderne slutter, er overladt til tekstbehandleren. En ejer, der
-  tilføjer tre tog og en lang bemærkning, får derfor sider, der stadig brydes fornuftigt og stadig har
-  deres overskrifter, i stedet for tekst, der løber over sideskift, som kun passede indtil de begyndte
-  at skrive. Skriftstørrelser og fremhævning er navngivne typografier, så hele dokumentets udseende kan
-  ændres på én gang i stedet for række for række.
+- **Et tog, der trækkes af to lokomotiver på én gang, siger nu hvilke to.** Konflikten nævnte kun toget og
+  minutterne, så var begge booket over nøjagtig samme strækning, lød dens to halvdele ord for ord ens. Den
+  markeres nu også kun på de to omløb, der holder det dobbeltbookede arbejde, i stedet for på hvert omløb,
+  der kørte det tog et sted på dagen.
 
-  Det eneste, et sådant dokument ikke kan bære, er den del af dagen, hver side dækker, og som det
-  udskrevne ark angiver i sin overskrift: det afhænger af, hvilke rækker der havner på hvilken side,
-  hvilket ikke vides, før teksten er ombrudt — og ville være galt igen efter den første ændring. Hver
-  side nummereres i stedet, og dens første og sidste række siger stadig, hvad den dækker.
-
-  De udskrevne ark er uændrede og er fortsat dem, man arbejder fra under en køresession: de udskrives
-  fra menuen Rapporter som før.
-
-- **Et tog, der trækkes af to lokomotiver på én gang, siger nu hvilke to.** Konflikten nævnte toget og
-  minutterne, men udelod lokomotiverne, og var begge booket over nøjagtig samme strækning, lød dens to
-  halvdele ord for ord ens — den fortalte altså, at et tog var dobbeltbooket, uden at fortælle, hvad
-  der skulle bookes fra. Nu nævnes lokomotivet på hver side.
-
-  Den markeres også kun på de to omløb, der holder det dobbeltbookede arbejde. Før blev den markeret på
-  hvert omløb, der kørte det tog et sted på dagen, så et lokomotiv, der tog toget på en helt anden
-  delstrækning, uden noget galt i sit eget omløb, blev flaget for en konflikt, det ikke har del i.
-
-- **To lokomotiver, der deles om et tog mellem køresessioner, rapporteres ikke længere som en
-  konflikt.** Kun klokkeslættene blev sammenlignet, så et lokomotiv, der tog toget på ulige
-  køresessioner, og et andet på lige — aldrig til træffet samme dag, og hele pointen med at lægge det
-  sådan an — blev rapporteret som et tog trukket af to lokomotiver på én gang. Nu rapporteres det kun,
-  hvor begge er booket på en fælles køresession, og konflikten nævner køresessionerne, når det kun er
-  nogle af dem. To lokomotiver i samme omløb er dobbelttrækning og var heller aldrig konflikten.
+- **To lokomotiver, der deles om et tog mellem køresessioner, rapporteres ikke længere som en konflikt.**
+  Kun klokkeslættene blev sammenlignet, så et lokomotiv på ulige køresessioner og et andet på lige — hele
+  pointen med at lægge det sådan an — blev rapporteret som dobbelttrækning. Nu rapporteres det kun, hvor
+  begge er booket på en fælles køresession, og konflikten nævner de køresessioner.
 
 ## Version 0.4.0
 
 ### Brydende ændringer
 
-- **Et køretøj, du opretter, identificeres nu af sin operatør og sit nummer.** De to tilsammen udpeger
-  ét virkeligt køretøj, så på én og samme køresession må kombinationen kun tilhøre ét køretøj — uanset
-  hvilken slags køretøj det er. Et vognsæt og et lokomotiv kan ikke længere begge være *DB 5*. Et
-  køretøj uden operatør identificeres af nummeret alene. To køretøjer må stadig have samme operatør og
-  nummer, så længe de køresessioner, de kører, ikke overlapper, for så er de aldrig til træffet samtidig.
-
-  Et **importeret** køretøj identificeres fortsat af det eksterne id, det blev importeret med, og som
-  allerede er entydigt i den plan, det kom fra, så en importeret plan giver ingen nye konflikter af dette.
-
-  At tilføje eller rette et køretøj under fanen Omløb afviser nu en identitet, som et andet køretøj
-  allerede har, og et nummer skal angives. Planer lavet før denne regel bevares præcis som de er — der
-  bliver ikke omnummereret for dig — og hvert køretøj, der deler identitet, står blandt konflikterne,
-  én gang hver, så du kan se, hvad der skal have et nyt nummer.
+- **Et køretøj, du opretter, identificeres nu af sin operatør og sit nummer.** På én og samme køresession
+  må kombinationen kun tilhøre ét køretøj, uanset hvilken slags køretøj det er, så et vognsæt og et
+  lokomotiv kan ikke længere begge være *DB 5*; et køretøj uden operatør identificeres af nummeret alene,
+  og to køretøjer må dele identitet, så længe de køresessioner, de kører, ikke overlapper. Et
+  **importeret** køretøj identificeres fortsat af det eksterne id, det blev importeret med, så en
+  importeret plan giver ingen nye konflikter af dette. At tilføje eller rette et køretøj afviser nu en
+  identitet, som et andet køretøj allerede har, og kræver et nummer, mens eksisterende planer bevares
+  præcis som de er, med hvert køretøj, der deler identitet, blandt konflikterne.
 
 ### Ændringer
 
-- **Der er en ny rapport: togekspeditionslisten.** Et sæt ark for hver station, der er bemandet — alle
-  bemandede stationer og alle skyggestationer, uanset om de er bemandede — med de tog, stationen
-  ekspederer, i tidsrækkefølge. Et tog, der holder på stationen, optræder to gange, én gang for
-  ankomsten og én gang for afgangen, fordi det at ekspedere et tog ind og at ekspedere det videre til
-  næste station er to forskellige handlinger med nogle minutters mellemrum. Ankomster står på hvid
-  baggrund og afgange på lysegul, så de to aldrig kan forveksles. Tog, der blot kører igennem, er også
-  med, for de skal også ekspederes forbi. Hver side har stationens navn, den del af døgnet siden
-  dækker, og telefonnumrene til stationerne i den anden ende af togekspeditionsstrækningerne, og hver
-  række har et felt pr. køresession til at krydse af undervejs, gråtonet for de køresessioner, toget
-  ikke kører. Hver station begynder på en ny side, så bunken uden videre kan deles og uddeles. Udskrives
-  fra menuen Rapporter.
+- **Der er en ny rapport: togekspeditionslisten.** Et sæt ark for hver bemandet station med de tog,
+  stationen ekspederer, i tidsrækkefølge — et tog, der holder der, optræder to gange, ankomster på hvid
+  baggrund og afgange på lysegul, fordi det at ekspedere et tog ind og at ekspedere det videre er to
+  forskellige handlinger, og tog, der blot kører igennem, er også med. Hver side har stationens navn, den
+  del af døgnet siden dækker, og telefonnumrene til stationerne i den anden ende af
+  togekspeditionsstrækningerne, og hver række har et felt pr. køresession til at krydse af. Hver station
+  begynder på en ny side, så bunken kan deles og uddeles; udskrives fra menuen Rapporter.
 
 - **Felterne til at tilføje og rette et køretøj har fået ny rækkefølge,** den samme begge steder:
   køretøjstype, trækkrafttype, antal enheder, operatør, nummer, klasse, køresessioner og til sidst det
-  eksterne id — hvad køretøjet er, så hvad der identificerer det, så hvordan det beskrives, og hvornår
-  det kører. Feltet, der før hed *Selskab*, hedder nu *Operatør*.
+  eksterne id. Feltet, der før hed *Selskab*, hedder nu *Operatør*.
 
 - **Et eksternt id kan rettes, men ikke længere opfindes.** Det eksterne id er det navn, et tog eller et
-  køretøj bærer i det system, det blev importeret fra, så det betyder kun noget, hvor det kommer fra
-  noget. Det, der er importeret med et id, har stadig sit felt — under fanen Tog og i køretøjsdialogen
-  under fanen Omløb — og kan rettes der; det, der aldrig har haft et id, har nu intet felt at skrive i.
-  Et køretøj, du opretter i planlæggeren, får derfor slet intet eksternt id, hvor det før fik et
-  opdigtet af klasse og nummer.
+  køretøj bærer i det system, det blev importeret fra, så det, der er importeret med et id, har stadig sit
+  felt og kan rettes der, mens det, der aldrig har haft et id, nu intet felt har at skrive i. Et køretøj,
+  du opretter i planlæggeren, får derfor slet intet eksternt id, hvor det før fik et opdigtet af klasse og
+  nummer.
 
-- **Den mindste tid mellem to anvendelser af samme spor kontrolleres nu.** Indstillingen fandtes, men
-  intet brugte den. Står den på 0 — hvor den begynder, og hvor den bliver, indtil du ændrer den —
-  ændres intet i kontrollen: to tog er i konflikt, hvor de står på samme spor samtidig, og et, der
-  ankommer netop som et andet kører, er en afløsning, ikke en konflikt. Sæt den til f.eks. 5, og sporet
-  skal desuden være frit i fem minutter imellem dem, så en plan, der vender sporet hurtigere, end
-  stationen kan nå, bliver rapporteret. Præcis fem frie minutter er nok; fire er ikke.
+- **Den mindste tid mellem to anvendelser af samme spor kontrolleres nu.** Indstillingen fandtes, men intet
+  brugte den: står den på 0, hvor den begynder, ændres intet i kontrollen. Sæt den til 5, og sporet skal
+  desuden være frit i fem minutter mellem to tog — præcis fem er nok, fire er ikke — og konflikten angiver,
+  hvor kort mellemrummet faktisk er, og hvor langt det skulle være.
 
-  En sådan konflikt angiver, hvor kort mellemrummet faktisk er, og hvor langt det skulle være, i stedet
-  for at påstå, at de to tog overlapper, når tiderne viser, at de ikke gør.
+- **Et driftssted kan nu have sine egne instruktioner.** Redigeringsformularen har feltet
+  **Instruktioner**, skrevet i Markdown ved siden af en forhåndsvisning, til hvordan netop det driftssted
+  køres på dette træf: hvilke spor der bruges til hvad, hvordan rangeringen er tilrettelagt, og hvad
+  lokoførerne og dem, der bemander stedet, ellers har brug for at vide. Feltet tilbydes på en station eller
+  et industriområde og vises i driftsstedets Info-visning; det tilbydes ikke, hvor der intet er at
+  instruere om.
 
-- **Et driftssted kan nu have sine egne instruktioner.** Formularen til at tilføje og rette et
-  driftssted har feltet **Instruktioner**, skrevet i Markdown og vist ved siden af en forhåndsvisning
-  ligesom de generelle instruktioner i Indstillinger. Det er til, hvordan netop det driftssted køres på
-  dette træf — hvilke spor der bruges til hvad, hvordan rangeringen er tilrettelagt, og hvad lokoførerne
-  og dem, der bemander stedet, ellers har brug for at vide der. Hvordan driftsstedet betjenes i
-  almindelighed, og anden beskrivelse af det, er ejerens opgave at levere og hører ikke til i feltet.
-  Det, du skriver, gemmes sammen med driftsstedet og vises i dets Info-visning.
-
-  Feltet tilbydes på en station eller et industriområde, hvor der udveksles rejsende og/eller gods. Det
-  tilbydes ikke, hvor der intet er at instruere om: togene kører bare forbi et signalstyret sted, og
-  ingen bemander et andet sted, så toget gør der, hvad standsningen siger, og intet mere.
-
-- **Et sted, hvor der køres gods uden bemanding, kan nu kræve en nøgle.** Hvor sporskifterne på en
-  ubemandet station eller et industriområde er aflåst, kan du i redigeringsformularen vælge den
-  bemandede station, der opbevarer nøglen, under **Nøgle opbevares på**, og navngive nøglen, hvis
-  stationen opbevarer flere.
-
-  Mere skal der ikke planlægges. Et godstog, der standser på stationen med nøglen og senere standser på
-  det sted, nøglen låser op, får ved afgangen derfra beskeden *hent nøgle A1 til oplåsning af Bruket*;
-  næste gang toget standser der, siger ankomsten *aflever nøgle A1 fra Bruket*. Et tog, der blot kører
-  forbi et af stederne, får ingen besked, for det låser intet op. Nøglen hentes ved den sidste
-  standsning på stationen før arbejdet og afleveres ved den første derefter, så et tog, der standser
-  der to gange, slipper for at have den med en ekstra tur.
-
-  En nøgle betyder kun noget, så længe begge ender holder. Markér stedet selv som bemandet, eller tag
-  bemandingen af den station, der opbevarer nøglen, så holder nøglen op med at gælde: der laves ingen
-  beskeder ud fra den, og **Konflikter** fortæller, hvilken af de to ændringer der gjorde det. Nøglen
-  bevares i stedet for at blive kastet væk, så fortryder du ændringen, gælder den straks igen, og den
-  bliver stående i formularen, hvor du kan pege den mod en anden station eller fjerne den.
+- **Et sted, hvor der køres gods uden bemanding, kan nu kræve en nøgle.** Vælg den bemandede station, der
+  opbevarer nøglen, under **Nøgle opbevares på**, og navngiv nøglen, hvis stationen opbevarer flere — et
+  godstog, der standser begge steder, får da ved afgangen beskeden *hent nøgle A1 til oplåsning af Bruket*
+  og ved næste standsning der *aflever nøgle A1 fra Bruket*. Nøglen hentes ved den sidste standsning før
+  arbejdet og afleveres ved den første derefter, og et tog, der blot kører forbi, får ingen besked. Markér
+  stedet som bemandet, eller tag bemandingen af den station, der opbevarer nøglen, så holder nøglen op med
+  at gælde — **Konflikter** fortæller, hvilken ændring der gjorde det, og nøglen bevares, så den gælder
+  straks igen, hvis du fortryder ændringen.
 
 ### Fejlrettelser
 
 - **To strækninger, der udgår fra samme driftssted, blev tegnet, som om de aldrig mødtes.** Begyndte en
-  køreplanstrækning netop på det første driftssted på en anden, var der ingenting, der bandt de to
-  sammen i Topologi-diagrammet: hver blev tegnet som sin egen linje, uden gren imellem. Den anden
-  forlader nu det driftssted som enhver anden gren og falder væk fra det i samme faste vinkel.
+  køreplanstrækning netop på det første driftssted på en anden, var der ingenting, der bandt de to sammen i
+  Topologi-diagrammet. Den anden forlader nu det driftssted som enhver anden gren, i samme faste vinkel.
 
-- **Hver grænseværdi for kontrollerne angiver nu, hvilket ur den måles efter.** Den mindste tid mellem
-  to anvendelser af samme spor manglede helt en enhed, og de to toghastigheder angav kun *ur-minutter*,
-  som kunne læses på begge måder. Alle tre angiver nu hurtigursminutter — det ur, togene kører efter,
-  ikke virkelig tid.
+- **Hver grænseværdi for kontrollerne angiver nu, hvilket ur den måles efter.** Den mindste tid mellem to
+  anvendelser af samme spor manglede helt en enhed, og de to toghastigheder angav kun *ur-minutter*. Alle
+  tre angiver nu hurtigursminutter — det ur, togene kører efter, ikke virkelig tid.
 
 - **Længder og distancer skrives nu ud i meter,** ligesom tælleren i toghastighederne, så *m* ikke kan
   tages for et minut. Mindste ophold på en station angives nu også i hurtigursminutter.
@@ -299,354 +257,276 @@
 ### Fejlrettelser
 
 - **En gemt plan kunne nægte at åbne.** At åbne en plan, som appen lige havde gemt, blev afbrudt med en
-  fejl om et land, og der blev ikke indlæst noget — der var ingen vej udenom. En fil læses et stykke ad
-  gangen, mens den kommer ind, og læsningen af landene i den snublede over det. En allerede gemt plan
-  åbnes, som den er; du behøver ikke gøre noget ved den.
+  fejl om et land, og der blev ikke indlæst noget. En allerede gemt plan åbnes, som den er; du behøver ikke
+  gøre noget ved den.
 
-- **En gemt planfil er omkring syv gange mindre.** At gemme en plan til en fil skrev den i en anden
-  form end den, der holdes i browseren, så gevinsterne fra de to seneste versioner nåede aldrig frem
-  til filen: hvert ophold blev skrevet to gange, og hver togkategori, hver operatør og hvert land igen
-  ved hvert tog, hvert køretøj og hver tjeneste, der brugte det. En fil, der fyldte 8 MB, fylder nu godt
-  1 MB og gemmes og åbnes tilsvarende hurtigere. En plan gemt af en tidligere version kan stadig åbnes.
+- **En gemt planfil er omkring syv gange mindre.** Gemningen skrev planen i en anden form end den, der
+  holdes i browseren, så hvert ophold blev skrevet to gange, og hver togkategori, hver operatør og hvert
+  land igen ved hvert tog, hvert køretøj og hver tjeneste, der brugte det. En fil, der fyldte 8 MB, fylder
+  nu godt 1 MB; en plan gemt af en tidligere version kan stadig åbnes.
 
 ## Version 0.3.4
 
-- **Felterne Ank og Afg på et stop følger nu, hvor toget faktisk kan standse.** Et tog standser for
-  at udveksle noget og har derfor brug for et sted at udveksle det: et persontog hvor driftsstedet
-  tager imod passagerer, et godstog hvor det tager imod gods, og ingen af delene på et signalstyret
-  driftssted. Hvor toget ikke kan standse, vises begge felter tomme og kan ikke sættes, og stoppet er
-  en gennemkørsel i køreplanen og i grafen. Intet af det, du har planlagt, smides væk — slå
-  udvekslingen til igen, så er stoppene der. En skyggebanegård har altid udveksling af både passagerer
-  og gods, da den repræsenterer alt uden for anlægget, så dens to felter vises satte og låste.
+### Ændringer
 
-- **Et stop, som noget afhænger af, kan ikke længere fjernes.** Et togafsnit går fra et stop, hvor toget
-  afgår, til et, hvor det ankommer, så begge ender skal være stop. Togets eget første og sidste stop,
-  og enderne på hvert togafsnit, som et materielomløb, en tjeneste eller et godsflow er planlagt over,
-  beholder nu deres felt sat og låst; hold markøren over det, så fortælles det, hvad der holder det.
-  Hvor et togafsnit slutter et sted, toget ikke kan standse — en plan lavet før denne regel — siges det
-  ligeud, så du kan flytte stoppet eller togafsnittet.
+- **Felterne Ank og Afg på et stop følger nu, hvor toget faktisk kan standse.** Et persontog har brug for
+  et driftssted, der tager imod passagerer, og et godstog et, der tager imod gods, og ingen af delene kan
+  lade sig gøre på et signalstyret driftssted; hvor toget ikke kan standse, vises begge felter tomme og kan
+  ikke sættes, og stoppet er en gennemkørsel. Intet af det, du har planlagt, smides væk — slå udvekslingen
+  til igen, så er stoppene der — og en skyggebanegård har altid udveksling af både passagerer og gods, da
+  den repræsenterer alt uden for anlægget.
 
-- **En togkategori bærer nu de forberedelses- og afslutningstider, dens tog planlægges med.** Hvert
-  nyt tog i kategorien gøres klar så mange minutter før det afgår og sættes væk så mange minutter
-  efter det er ankommet, så du ikke længere skal skrive de samme to tal for hvert tog. Ved siden af
-  hvert af de to felter er der en knap *Anvend igen*, som giver den ene tid til alle de tog,
-  kategorien allerede har, og fortæller hvor mange der blev ændret. De to er hver sin handling, så du
-  kan ændre forberedelsestiden uden at røre afslutningstiden. At anvende igen flytter kun minutterne
-  yderst på et tog: det afgår, holder og ankommer stadig præcis på de tider, det gjorde.
+- **Et stop, som noget afhænger af, kan ikke længere fjernes.** Togets eget første og sidste stop, og
+  enderne på hvert togafsnit, som et materielomløb, en tjeneste eller et godsflow er planlagt over,
+  beholder nu deres felt sat og låst, og holder du markøren over det, fortælles det, hvad der holder det.
+  Hvor et togafsnit slutter et sted, toget ikke kan standse, siges det ligeud, så du kan flytte stoppet
+  eller togafsnittet.
+
+- **En togkategori bærer nu de forberedelses- og afslutningstider, dens tog planlægges med,** så du ikke
+  længere skal skrive de samme to tal for hvert tog. Ved siden af hvert felt er der en knap *Anvend igen*,
+  som giver den ene tid til alle de tog, kategorien allerede har, og fortæller hvor mange der blev ændret;
+  de to er hver sin handling, og at anvende igen flytter kun minutterne yderst på et tog.
 
 - **Operatørerne er lettere at læse på forsiden af et tjenestehæfte.** Linjen sættes nu i dobbelt
-  størrelse i forhold til før, så et logo er stort nok til at genkendes med et blik og en signatur stor
-  nok til at læses tværs over et bord. Har alle operatører i tjenesten et logo, udelades ordet
-  *Operatør* — logoerne siger det selv. Mangler en af dem et logo, står alle stadig med signatur, med
-  fed skrift og med etiketten bevaret.
+  størrelse, så et logo er stort nok til at genkendes med et blik og en signatur stor nok til at læses
+  tværs over et bord. Har alle operatører et logo, udelades ordet *Operatør*; mangler en af dem et logo,
+  står alle med signatur, med fed skrift og med etiketten bevaret.
 
 ### Fejlrettelser
 
-- **Et tjenestehæfte kunne udskrive et togafsnit ud over sidens nederste kant.** Rapporten beregner før
-  udskriften, hvor mange togafsnit der er plads til på en side, og regnede med omkring halvdelen mere
-  plads, end en A5-side faktisk har. Det, der går ud over sidekanten, skæres væk uden varsel: det andet
-  togafsnit på en sådan side manglede slutningen af sin køreplan — eller manglede helt, så en lokofører
-  stod med en tjeneste, hvor det sidste tog manglede. Togafsnit måles nu mod det, siden faktisk rummer,
-  og et togafsnit, der ikke er plads til, flyttes til næste side. Nogle hæfter får derfor et ark mere end
-  før.
+- **Et tjenestehæfte kunne udskrive et togafsnit ud over sidens nederste kant.** Hver side blev regnet med
+  omkring halvdelen mere plads, end en A5-side faktisk har, og det, der går ud over sidekanten, skæres væk
+  uden varsel, så det andet togafsnit på en sådan side manglede slutningen af sin køreplan eller manglede
+  helt. Togafsnit måles nu mod det, siden faktisk rummer, så nogle hæfter får et ark mere end før.
 
 - **Topologi-diagrammet kunne skrive signaturerne for to driftssteder oven på hinanden.** Driftsstederne
-  blev placeret alene efter afstanden mellem dem, så to, der ligger tæt på hinanden på en lang
-  strækning, blev tegnet næsten samme sted, og deres signaturer løb ind i hinanden. De tegnes nu aldrig
-  tættere på hinanden, end deres to signaturer har brug for, mens resten af strækningen beholder sine
-  virkelige proportioner. En lang signatur ved diagrammets kant bliver heller ikke længere skåret væk.
+  blev placeret alene efter afstanden mellem dem, så to, der ligger tæt på hinanden på en lang strækning,
+  blev tegnet næsten samme sted. De tegnes nu aldrig tættere på hinanden, end deres signaturer har brug
+  for, og en lang signatur ved diagrammets kant bliver ikke længere skåret væk.
 
-- **En gren i Topologi-diagrammet kunne tegnes tværs gennem en anden strækning.** En gren falder væk fra
-  den strækning, den forlader, i en fast vinkel, så en gren, der mødte en strækning i vejen, aldrig kunne
-  komme forbi den, uanset hvor langt ned i diagrammet den blev skubbet — den blev simpelthen tegnet tværs
-  over den. De grene, der forlader en strækning længst ude, tegnes nu først, hvilket giver dem bagved en
-  fri vej nedad. En lang gren kan derfor nu blive tegnet under en kort gren, der forlader strækningen
-  længere ude.
+- **En gren i Topologi-diagrammet kunne tegnes tværs gennem en anden strækning.** En gren falder væk i en
+  fast vinkel, så en gren, der mødte en strækning i vejen, blev simpelthen tegnet tværs over den. De grene,
+  der forlader en strækning længst ude, tegnes nu først, så en lang gren kan nu blive tegnet under en kort
+  gren, der forlader strækningen længere ude.
 
-- **En plan kunne vise sine tog under togkategorier, som fanen Togkategorier ikke havde.** Et tog bærer
-  sin kategori med sig, så en plan gemt af en tidligere version blev åbnet med togene grupperet efter
-  kategori, mens listen over kategorier var tom: kategorimenuen havde ingenting at tilbyde, og intet tog
-  kunne flyttes til en anden kategori. Flere kategorier kunne også tages for en og samme, så deres tog
-  blev samlet under en enkelt overskrift, og to tog af forskellige kategorier med samme nummer blev
-  meldt som ét nummer brugt to gange. Når en plan åbnes, fyldes listen over kategorier nu op med de
-  kategorier, togene bruger, og hver kategori holdes adskilt fra de andre.
+- **En plan kunne vise sine tog under togkategorier, som fanen Togkategorier ikke havde.** Flere kategorier
+  kunne også tages for en og samme, så deres tog blev samlet under en enkelt overskrift, og to tog af
+  forskellige kategorier med samme nummer blev meldt som ét nummer brugt to gange. Når en plan åbnes,
+  fyldes listen over kategorier nu op med de kategorier, togene bruger, og hver kategori holdes adskilt fra
+  de andre.
 
-- **To selskaber, der aldrig havde fået deres eget nummer, blev taget for den samme operatør.** Et
-  selskab kendes fra de andre på et nummer, appen fører for det, og en plan kunne indeholde flere, der
-  aldrig havde fået et. Tog fra forskellige selskaber, der delte tognummer, blev så meldt som ét nummer
-  brugt to gange. Hvert selskab får nu sit eget nummer, når en plan åbnes eller gemmes; et selskab fra
-  Module Registry beholder det nummer, det kom med.
+- **To selskaber, der aldrig havde fået deres eget nummer, blev taget for den samme operatør,** så tog fra
+  forskellige selskaber, der delte tognummer, blev meldt som ét nummer brugt to gange. Hvert selskab får nu
+  sit eget nummer, når en plan åbnes eller gemmes; et selskab fra Module Registry beholder det nummer, det
+  kom med.
 
-- **En plan gemte sine togkategorier, selskaber og lande flere steder.** Hver enkelt blev skrevet der,
-  hvor den først blev mødt ved gemningen — som regel inde i det første tog, der brugte den — mens
-  listen, den hører hjemme i, ikke indeholdt mere end en henvisning til den. Sådan kunne en plan få tog
-  i kategorier, som fanen Togkategorier ikke kendte. Hver enkelt skrives nu én gang, i sin egen liste,
-  og alt, der bruger den, beholder kun en henvisning. Lande kopieres slet ikke længere ind i planen, så
-  en rettelse af et lands sprog nu også når planer, der er gemt forinden. En plan gemt af en tidligere
-  version læses som før og bliver rettet, næste gang den gemmes.
+- **En plan gemte sine togkategorier, selskaber og lande flere steder** — hver enkelt blev skrevet der,
+  hvor den først blev mødt, som regel inde i det første tog, der brugte den. Hver enkelt skrives nu én
+  gang, i sin egen liste, og alt, der bruger den, beholder kun en henvisning; lande kopieres slet ikke
+  længere ind i planen, så en rettelse af et lands sprog nu også når planer, der er gemt forinden.
 
-- **Et tjenestehæfte angav kun tognummeret i overskriften for et togafsnit.** Et tog identificeres lige
-  så meget af kategoriens præfiks og suffiks som af nummeret — Gt 1234, ikke 1234 — og en lokofører,
-  der sammenligner hæftet med køreplanen eller med det, der råbes op, har kun den overskrift at gå
-  efter. Overskriften viser nu hele togidentiteten, præfiks og suffiks med, efter operatørens
+- **Et tjenestehæfte angav kun tognummeret i overskriften for et togafsnit.** Et tog identificeres lige så
+  meget af kategoriens præfiks og suffiks som af nummeret — Gt 1234, ikke 1234 — og overskriften er alt, en
+  lokofører har at sammenligne med køreplanen. Den viser nu hele togidentiteten, efter operatørens
   signatur.
 
 ## Version 0.3.3
 
+### Ændringer
+
 - **Konflikter kan nu læses dér, hvor de vises.** En række med konflikter — et tog eller en togkategori
-  under **Tog**, et omløb eller et af dets køretøjer under **Omløb**, en tjeneste under **Tjenester** —
-  har nu et advarselssymbol, og et klik på det åbner meddelelserne som en læsbar liste. Symbolet får
-  farve efter den alvorligste konflikt og tæller dem, når der er mere end én. Hidtil stod
-  meddelelserne kun i et lille felt, der kom frem, mens markøren hvilede på rækken — nemt at overse og
-  svært at læse.
+  under **Tog**, et omløb eller et af dets køretøjer under **Omløb**, en tjeneste under **Tjenester** — har
+  nu et advarselssymbol, og et klik på det åbner meddelelserne som en læsbar liste. Symbolet får farve
+  efter den alvorligste konflikt og tæller dem; hidtil stod de kun i et lille felt, der kom frem, mens
+  markøren hvilede på rækken.
 - **En togkategori viser konflikterne for togene i den**, så de ikke længere skjules, når kategorien
   lukkes.
-- **Fanen Tog åbner nu på listen over togkategorier**, hvor togene i hver kategori er skjult, indtil du
-  åbner den, så en plan med mange tog er lettere at overskue. *Udvid alle* åbner dem alle på én gang,
-  og en kategori åbner af sig selv, når du føjer et tog til den eller flytter et tog derind.
+- **Fanen Tog åbner nu på listen over togkategorier**, hvor togene er skjult, indtil du åbner en kategori.
+  *Udvid alle* åbner dem alle på én gang, og en kategori åbner af sig selv, når du føjer et tog til den
+  eller flytter et tog derind.
 - **Når et togafsnit i et omløb redigeres, står der nu, hvilke slags køretøjer omløbet gælder** —
-  lokomotiv, togsæt eller vognsæt. Deler flere køretøjer det samme omløb, nævnes hver slags én gang, og
-  peger du på den, nævnes køretøjerne selv.
+  lokomotiv, togsæt eller vognsæt. Hver slags nævnes én gang, og peger du på den, nævnes køretøjerne selv.
 
 ### Fejlrettelser
 
-- **Appen kunne holde op med at gemme dit arbejde uden at sige det.** Planen gemmes i browseren, mens
-  du arbejder, og en plan, appen ikke kunne skrive ud — et tog med færre end to standsninger eller en
-  strækning under **Strækninger › Køreplansstrækninger**, hvor alle banestykker var fjernet — fik den
-  lagring til at mislykkes lydløst. Alt derefter blev stående på skærmen, men blev aldrig gemt, så når
-  browseren blev åbnet igen, lå planen som før: med driftsstederne, men uden de strækninger og tog, der
-  var kommet til siden. Begge planer kan nu gemmes, og mislykkes en lagring alligevel, siger den øverste
-  linje det med det samme, så du kan fortryde ændringen i stedet for at miste arbejdet.
+- **Appen kunne holde op med at gemme dit arbejde uden at sige det.** En plan, appen ikke kunne skrive ud —
+  et tog med færre end to standsninger eller en køreplansstrækning, hvor alle banestykker var fjernet — fik
+  lagringen til at mislykkes lydløst, så alt derefter blev stående på skærmen, men blev aldrig gemt. Begge
+  planer kan nu gemmes, og mislykkes en lagring alligevel, siger den øverste linje det med det samme.
 
 - **En gemt planfil er omkring 40 % mindre.** Hver standsning blev skrevet to gange — én gang i sit tog og
-  én gang under det spor, den ligger på — og den anden kopi trak store dele af resten af planen med sig.
-  En plan gemt med en tidligere version kan stadig åbnes.
+  én gang under det spor, den ligger på — og den anden kopi trak store dele af resten af planen med sig. En
+  plan gemt med en tidligere version kan stadig åbnes.
 
-- **Et tog, der er efterladt uden trækkraft på en del af sit løb, rapporteres nu.** Kontrollen spurgte
-  kun, om et lokomotiv eller togsæt kørte toget *et eller andet sted*, så når et omløb blev afkortet i
-  den ene ende, stod resten af toget uden trækkraft, uden at der blev sagt noget. Nu kontrolleres hver
-  strækning, toget kører, for hver køresession det køres, og konflikten siger, mellem hvilke
-  driftssteder og i hvilke køresessioner toget mangler trækkraft. Planer, der så rene ud, kan nu
-  rapportere dette — hullet har altid været der.
+- **Et tog, der er efterladt uden trækkraft på en del af sit løb, rapporteres nu.** Kontrollen spurgte kun,
+  om et lokomotiv eller togsæt kørte toget *et eller andet sted*, så når et omløb blev afkortet i den ene
+  ende, stod resten af toget uden trækkraft, uden at der blev sagt noget. Nu kontrolleres hver strækning
+  for hver køresession, toget køres, og konflikten siger, mellem hvilke driftssteder og i hvilke
+  køresessioner; planer, der så rene ud, kan nu rapportere dette.
 
 ## Version 0.3.2
 
-- Under **Godsstrøm › Godsbeskrivelser** kan en oprindelse eller en destination nu være et hvilket
-  som helst driftssted, der udveksler gods, ikke kun en station. Et industriområde håndterer
-  altid godsvogne, men kunne ikke vælges før, så gods til og fra en industri måtte beskrives, som
-  om det gik til den nærmeste station.
-- De samme lister siger nu **driftssted**, hvor de sagde *station*, da de ikke længere kun
-  indeholder stationer.
-- At ændre en tid for et ophold i fanen **Tog** **tager nu resten af toget med sig**. En **afgang** virker
-  fremad, den vej toget kører: lad et tog stå fem minutter længere ved et driftssted, og det ankommer fem
-  minutter senere til alle senere driftssteder. En **ankomst** virker baglæns: bed toget om at ankomme fem
-  minutter senere, og det afgår fem minutter senere fra alle tidligere driftssteder, så løbet frem til
-  ændringen følger med. Tiderne på den anden side bliver stående, køre- og opholdstiderne bevares, og
-  ændringen afvises — og feltet falder tilbage — hvis den ville føre toget uden for planens driftstider.
+### Ændringer
+
+- Under **Godsstrøm › Godsbeskrivelser** kan en oprindelse eller en destination nu være et hvilket som
+  helst driftssted, der udveksler gods, ikke kun en station — et industriområde håndterer altid godsvogne,
+  men kunne ikke vælges før. De samme lister siger nu **driftssted**, hvor de sagde *station*.
 - Et togs ophold vises altid i den **rækkefølge, toget kører** dem.
+- At ændre en tid for et ophold i fanen **Tog** **tager nu resten af toget med sig**: en **afgang** virker
+  fremad, den vej toget kører, og en **ankomst** baglæns, så løbet frem til ændringen følger med. Tiderne
+  på den anden side bliver stående, køre- og opholdstiderne bevares, og ændringen afvises, hvis den ville
+  føre toget uden for planens driftstider.
 - Et tog, hvis togvej **springer et driftssted over** — to ophold i rækkefølge uden en strækning imellem —
   rapporteres nu som en konflikt. Den kan slås fra under **Indstillinger › Validering**.
-- **Toghastigheden kontrolleres nu også på den sidste strækning**, ind til det driftssted, hvor toget
-  slutter sit løb. Den strækning blev sprunget over før.
-
-- Et togafsnit i et **omløb** kan nu **redigeres**: pennen på et togafsnit åbner dets fra- og til-stop, så
-  et omløb kan formes om, uden at alt efter det fjernes. Et tilstødende togafsnit, der slutter til det,
-  du ændrer, følger med — afkort et afsnit fra A–C til A–B, og returløbet bliver B–A af sig selv. Et
-  naboafsnit, hvis eget tog ikke standser på det nye stop, står uændret, og hullet rapporteres som en
-  konflikt, du selv løser.
-
-- Alt, der læser et togs togvej, følger nu **den rækkefølge, toget kører sine stop i**, ikke den
-  rækkefølge, de blev indtastet. For et tog, hvis stop er indtastet i forkert rækkefølge — et stop
-  tilføjet efter et, toget først når senere — gik linjen i den **grafiske køreplan** i siksak mellem
-  stop, som toget aldrig kører imellem, og toget kunne havne i den forkerte retnings kolonne; den
-  udskrevne **køreplan** kunne vise en afgang, hvor toget ankommer; **byg automatisk** kædede slet
-  ikke toget, da det så ud til at starte et andet sted; **gentag tog** målte intervallet fra det
-  forkerte stop; og genberegning af tiderne efter en ændret standsningsplan mislykkedes helt. Valg af
-  et afsnit af et tog viser også stoppene i køreorden. Importerede planer har aldrig været berørt — der
-  er de to rækkefølger ens.
-
+- Et togafsnit i et **omløb** kan nu **redigeres**: pennen åbner dets fra- og til-stop, så et omløb kan
+  formes om, uden at alt efter det fjernes. Et tilstødende togafsnit, der slutter til det, du ændrer,
+  følger med; et naboafsnit, hvis eget tog ikke standser på det nye stop, står uændret, og hullet
+  rapporteres som en konflikt, du selv løser.
 - **Tilføj tog** kan nu oprette **returtoget** samtidig. Sæt kryds i *Retur?*, så oprettes toget tilbage
-  fra destinationen sammen med det første, med samme strækning i modsat retning, samme togart og
-  hastighed og det næste nummer i den modsatte retning. Afgangen er enten *så tidligt som muligt* — det
-  første togs ankomst plus efterarbejds- og forberedelsestiden — eller et tidspunkt, du indtaster, som
-  gerne må ligge både før og efter det første togs afgang. Sammen med *Gentag?* gentages begge
-  retninger, så en hel trafik i begge retninger planlægges på én gang.
+  sammen med det første, med samme strækning i modsat retning, samme togart og hastighed og det næste
+  nummer i den modsatte retning; afgangen er enten *så tidligt som muligt* eller et tidspunkt, du
+  indtaster. Sammen med *Gentag?* gentages begge retninger.
 
 ### Fejlrettelser
 
 - **Kilometertallene** i den udskrevne køreplan og langs den grafiske køreplan afrundes nu til hele
-  kilometer. De blev skrevet med en decimal, og afstandsfaktoren under **Indstillinger › Tid &
-  hastighed** kunne gøre en stræknings længde til en skæv del af en kilometer. En sidebane viser nu
-  også samme kilometertal som den bane, den udgår fra, ved forgreningsstationen.
+  kilometer, og en sidebane viser samme kilometertal som den bane, den udgår fra, ved forgreningsstationen.
+- Alt, der læser et togs togvej, følger nu **den rækkefølge, toget kører sine stop i**, ikke den
+  rækkefølge, de blev indtastet. For et tog, hvis stop er indtastet i forkert rækkefølge, gik linjen i den
+  **grafiske køreplan** i siksak, kunne den udskrevne **køreplan** vise en afgang, hvor toget ankommer,
+  kædede **byg automatisk** slet ikke toget, målte **gentag tog** intervallet fra det forkerte stop, og
+  genberegning af tiderne mislykkedes helt. Importerede planer har aldrig været berørt.
+- **Toghastigheden kontrolleres nu også på den sidste strækning**, ind til det driftssted, hvor toget
+  slutter sit løb.
 
 ## Version 0.3.1
 
-- Afsnittet **Trækkraftenheder** på siden for et togafsnit i hæftet Førertjenester har nu sin
-  overskrift på det valgte sprog. Det var den eneste overskrift i hæftet uden oversættelse, så
-  afsnittet kunne ikke genkendes som trækkraftenhederne.
-- Trækkraftenheden udskrives nu for hvert togafsnit, der har en. I planer importeret med en
-  tidligere version viste nogle togafsnit en trækkraftenhed under **Tjenester** men ingen i hæftet.
-- Noter om tog i samme retning fortæller nu, hvilket tog der kommer forbi det andet —
-  **Overhaler GD 42757 12:02-12:05** eller **Overhales af GD 42757 12:02** — i stedet for det
-  hidtidige *"Møder GD 42757 i samme retning"*, der aldrig sagde, hvilket tog der kom foran. To
-  tog, der blot står på samme station samtidig, giver ingen note overhovedet, for ingen af dem er
-  kommet forbi det andet.
-- Et møde uden varighed — det andet tog kører igennem uden ophold — skrives som ét klokkeslæt i
-  stedet for et interval fra et tidspunkt til sig selv.
-- Et tog, der begynder eller afslutter sin kørsel på en station, medtages ikke længere som mødt,
-  krydset eller overhalet der. De tidspunkter er, når dets lokofører møder ind eller går af, ikke
-  når toget kører.
+### Ændringer
+
+- Afsnittet **Trækkraftenheder** på siden for et togafsnit i hæftet Førertjenester har nu sin overskrift på
+  det valgte sprog. Det var den eneste overskrift i hæftet uden oversættelse.
+- Trækkraftenheden udskrives nu for hvert togafsnit, der har en. I planer importeret med en tidligere
+  version viste nogle togafsnit en trækkraftenhed under **Tjenester**, men ingen i hæftet.
+- Noter om tog i samme retning fortæller nu, hvilket tog der kommer forbi det andet — **Overhaler GD 42757
+  12:02-12:05** eller **Overhales af GD 42757 12:02** — i stedet for det hidtidige *"Møder GD 42757 i samme
+  retning"*, der aldrig sagde, hvilket tog der kom foran. To tog, der blot står på samme station samtidig,
+  giver ingen note overhovedet.
+- Et møde uden varighed — det andet tog kører igennem uden ophold — skrives som ét klokkeslæt i stedet for
+  et interval fra et tidspunkt til sig selv.
+- Et tog, der begynder eller afslutter sin kørsel på en station, medtages ikke længere som mødt, krydset
+  eller overhalet der. De tidspunkter er, når dets lokofører møder ind eller går af.
 
 ## Version 0.3.0
 
-- En ny rapport, **Førertjenester**, udskriver ét A5-hæfte pr. tjeneste. Forsiden
-  viser tjenestens nummer, hvilke sessioner eller dage den kører, dens start- og
-  sluttidspunkt og -stationer, en sværhedsgrad, bemandingsbehov og eventuelle
-  tjenestenoter. Hvert togafsnit får sin egen side med hvilke trækkraftenheder der skal
-  bruges, hvilke vognsæt der skal medbringes, og til hvilke destinationer der skal
-  medbringes godsvogne, samt køreplanen – hver vist i sin egen tydeligt afgrænsede
-  blok. Hæftets sidste side viser anlæggets sporplan og en tabel over
-  rangerbanegårde, til nem opslag under kørslen.
-- En ny rapport, **Generelle instruktioner**, er et separat trykt hæfte med træffets
-  program og instruktioner, der gælder for et anlæg i hele træffets varighed. Her er
-  træfarrangøren fri til at skrive hvad som helst – for eksempel køreinstruktioner,
-  signalgivning, radio-/telefonbrug, hvad man gør ved forsinkelser og hvem man
-  spørger – og det uddeles én gang til alle.
-- Både programmet og instruktionerne skrives under **Indstillinger › Information** og
-  kan formateres med Markdown – overskrifter, lister, fed og kursiv – så selv en lang
-  instruktionstekst er læsbar på tryk.
-- Hæftet indledes med træffets navn, hvilke datoer det gælder, og udskriftsdatoen,
-  efterfulgt af programmet: sessionernes tider, pauser og måltider – det, enhver
-  deltager har brug for at vide før den første session.
-- Instruktionerne følger derefter over så mange sider, som de har brug for. Der brydes
-  side mellem afsnit, og en overskrift holdes altid sammen med den tekst, den indleder.
-- Sidste side viser anlæggets sporplan og tabellen over rangerbanegårde, så også de,
-  der aldrig har et tjenestehæfte i hånden – først og fremmest stationspersonalet – får
-  et overblik over anlægget.
-- Hæftet udskrives i samme A5-format som tjenestehæfterne: A4 liggende, dobbeltsidet,
-  foldet på midten, med tomme sider tilføjet hvor det er nødvendigt, så arkene foldes
-  korrekt.
-- Tjenester kan nu graderes **Let**, **Middel** eller **Erfaren**, vist farvekodet
-  på hæftet, så en deltager kan vælge en tjeneste, der matcher deres erfaring.
-- En tjeneste kan nu angive, at den kræver to eller tre personer – for eksempel en
-  lokofører og en konduktør – og dette vises på hæftet.
-- En tjeneste kan fastgøres til et **fast nummer**, så automatisk omnummerering
-  lader den urørt, for eksempel særlige tjenester, der uddeles, inden en session
-  begynder.
-- Planen kontrolleres nu også, så hvert togafsnit med et lokomotiv eller togsæt
-  tildelt har en førertjeneste, der dækker det i hver session, det kører – et afsnit,
-  som ingen er planlagt til at køre, rapporteres session for session. En tjeneste
-  med fast nummer kontrolleres også: den skal have et nummer, og ingen to
-  tjenester med fast nummer må få samme nummer.
-- Selskaber kan nu have et uploadet **logo**, vist på rapporter i stedet for
-  tekstsignaturen.
-- Stationer kan nu markeres som den **rangerbanegård**, der betjener en anden
-  lokalitets lokalgods; anlægget lister automatisk hver rangerbanegård og hvad den
-  dækker, vist på tjenestehæftets sidste side. Dette hjælper stationspersonale og
-  godstogsførere med at vide, hvor vogne med en given godsdestination skal sendes
-  hen.
-- Hver køreplansstrækning kan nu tildeles en **farve**, som bruges til at tegne
-  den i Topologi-diagrammet.
-- En ny **afstandsfaktor** (under Indstillinger › Tid & hastighed) lader et anlæg
-  vise et andet – typisk større, mere forbilledetro – kilometertal i rapporter og
-  den grafiske køreplan end den afstand, der faktisk er modelleret, uden at det
-  påvirker nogen køretidsberegning.
-- Appen holder nu flere åbne browserfaner eller -vinduer synkroniseret med
-  hinanden. **Bemærk**, at dette kun virker mellem vinduer på samme maskine i samme
-  browser.
-- Indstillinger kan nu gemme træffets **gælder fra**- og **gælder til**-datoer,
-  trykt som en gyldighedslinje på rapporter; lad dem stå tomme, hvis intet træf er
-  booket endnu.
-- En ny indstilling, **udvid plantider automatisk?** (under Indstillinger ›
-  Generelt), udvider planens start- eller sluttidspunkt for at dække et tog i
-  stedet for at blokere ændringen, når togets egen tid falder uden for det. Slået
-  fra som standard.
-- En ny knap, **opdatér alle tider**, i den grafiske køreplan genberegner alle tog
-  i køreplanen på én gang i stedet for først at skulle vælge en delmængde.
-- Sporbelægningskontrollen kan nu valgfrit tage højde for, at et lokomotiv eller
-  togsæt holder på et spor mellem to tog, medmindre det er booket til eller fra
-  opstilling (under Indstillinger › Validering). Slået fra som standard, da det kun
-  giver mening på anlæg, hvor opstilling er modelleret bevidst – slå den til der
-  for at opdage et tredje tog, der i det skjulte bruger et spor, som et holdende
-  køretøj allerede optager.
-- Hvert ophold i fanen **Tog** har nu et felt til **Bemærkning** – en note, der udskrives
-  ved det ophold, for eksempel “vent på modkørende tog”. Bemærkningen vises færdigformateret
-  og skifter til den rå opmærkning, så snart du går ind i feltet, så du kan fremhæve det,
-  der betyder noget: skriv `*langsomt*` for kursiv og `**første**` for fed. Tømmer du
-  feltet, fjernes bemærkningen igen.
+### Ændringer
+
+- En ny rapport, **Førertjenester**, udskriver ét A5-hæfte pr. tjeneste. Forsiden viser tjenestens nummer,
+  hvilke sessioner eller dage den kører, dens start- og sluttidspunkt og -stationer, en sværhedsgrad,
+  bemandingsbehov og eventuelle tjenestenoter; hvert togafsnit får derefter sin egen side med hvilke
+  trækkraftenheder der skal bruges, hvilke vognsæt der skal medbringes, til hvilke destinationer der skal
+  medbringes godsvogne, samt køreplanen, hver i sin egen blok.
+- En ny rapport, **Generelle instruktioner**, er et separat hæfte med træffets program og de instruktioner,
+  der gælder for anlægget i hele træffets varighed — køreinstruktioner, signalgivning, radio- og
+  telefonbrug, hvad man gør ved forsinkelser og hvem man spørger — og det uddeles én gang til alle. Det
+  indledes med træffets navn og datoer, så programmet, enhver deltager har brug for at vide før den første
+  session, og derefter instruktionerne over så mange sider, som de har brug for, brudt mellem afsnit og
+  aldrig med en overskrift efterladt alene.
+- Sidste side i begge hæfter viser anlæggets sporplan og tabellen over rangerbanegårde, så også de, der
+  aldrig har et tjenestehæfte i hånden — først og fremmest stationspersonalet — får et overblik over
+  anlægget.
+- Både programmet og instruktionerne skrives under **Indstillinger › Information** og kan formateres med
+  Markdown. Begge hæfter udskrives i A5: A4 liggende, dobbeltsidet, foldet på midten, med tomme sider
+  tilføjet hvor det er nødvendigt, så arkene foldes korrekt.
+- Tjenester kan nu graderes **Let**, **Middel** eller **Erfaren**, vist farvekodet på hæftet, kan angive,
+  at de kræver to eller tre personer — for eksempel en lokofører og en konduktør — og kan fastgøres til et
+  **fast nummer**, som automatisk omnummerering lader urørt.
+- Planen kontrolleres nu også, så hvert togafsnit med et lokomotiv eller togsæt tildelt har en
+  førertjeneste, der dækker det i hver session, det kører. En tjeneste med fast nummer skal have et nummer,
+  og ingen to sådanne må få samme nummer.
+- Selskaber kan nu have et uploadet **logo**, vist på rapporter i stedet for tekstsignaturen.
+- Stationer kan nu markeres som den **rangerbanegård**, der betjener en anden lokalitets lokalgods, og
+  anlægget lister hver rangerbanegård og hvad den dækker på tjenestehæftets sidste side.
+- Hver køreplansstrækning kan nu tildeles en **farve**, som bruges til at tegne den i Topologi-diagrammet.
+- En ny **afstandsfaktor** (Indstillinger › Tid & hastighed) lader et anlæg vise et større, mere
+  forbilledetro kilometertal i rapporter og den grafiske køreplan end den afstand, der faktisk er
+  modelleret, uden at det påvirker nogen køretidsberegning.
+- Appen holder nu flere åbne browserfaner eller -vinduer synkroniseret med hinanden. **Bemærk**, at dette
+  kun virker mellem vinduer på samme maskine i samme browser.
+- Indstillinger kan nu gemme træffets **gælder fra**- og **gælder til**-datoer, trykt som en gyldighedslinje
+  på rapporter; lad dem stå tomme, hvis intet træf er booket endnu.
+- En ny indstilling, **udvid plantider automatisk?** (Indstillinger › Generelt), udvider planens start-
+  eller sluttidspunkt for at dække et tog i stedet for at blokere ændringen. Slået fra som standard.
+- En ny knap, **opdatér alle tider**, i den grafiske køreplan genberegner alle tog i køreplanen på én gang
+  i stedet for først at skulle vælge en delmængde.
+- Sporbelægningskontrollen kan nu valgfrit tage højde for, at et lokomotiv eller togsæt holder på et spor
+  mellem to tog, medmindre det er booket til eller fra opstilling (Indstillinger › Validering). Slået fra
+  som standard, da det kun giver mening på anlæg, hvor opstilling er modelleret bevidst.
+- Hvert ophold i fanen **Tog** har nu et felt til **Bemærkning** — en note, der udskrives ved det ophold,
+  for eksempel "vent på modkørende tog". Bemærkningen vises færdigformateret og skifter til den rå
+  opmærkning, så snart du går ind i feltet, så skriv `*langsomt*` for kursiv og `**første**` for fed.
 
 ### Fejlrettelser
 
-- Når man tilføjer et nyt tog, sættes dets standardstarttidspunkt nu under hensyn
-  til den angivne forberedelsestid, så det ikke starter før planens
-  starttidspunkt.
+- Når man tilføjer et nyt tog, sættes dets standardstarttidspunkt nu under hensyn til den angivne
+  forberedelsestid, så det ikke starter før planens starttidspunkt.
 
 ## Version 0.2.4
 
-- En ny fane **Tjenester** lader dig planlægge førertjenester – det arbejde, en lokofører
-  udfører i løbet af en session, som en række af de togafsnit, føreren kører. Hver tjeneste
-  er en række: dens betegnelse, firma og sessioner til venstre, togafsnittene i køreorden til
-  højre.
-- Tilføj de togafsnit, en fører kører, med **Tilføj togafsnit**. Listen viser de
-  trækkraftstrækninger, en fører kan tage som det næste – dem, der ikke støder sammen i
-  tid med tjenesten, og, når den har et togafsnit, dem, der afgår ved eller efter, at det
-  ankommer. Togafsnittene behøver ikke starte på samme station: mellem to togafsnit går føreren
-  ganske enkelt hen, hvor det næste starter.
-- Det samme togafsnit kan køres af flere tjenester, så længe de kører i forskellige
-  sessioner, så én tjeneste kan dække de ulige sessioner og en anden de lige.
-- Hvor to togafsnit for samme tog i en tjeneste køres af forskellige trækkraftenheder,
-  viser fanen nu en note ved stationen, hvor trækkraftenheden skiftes – du indtaster den
-  ikke i hånden.
-- Du kan give hver tjeneste en betegnelse og et firma, vælge de sessioner, den kører, og
-  tilføje frie noter, der gælder hele tjenesten.
-- Tjenester importeret fra XPLN deler nu de togafsnit, der er defineret i køretøjernes
-  omløb, så hvert togafsnit viser den trækkraftenhed, der kører det.
-- Planen kontrolleres, så intet togafsnit køres af to tjenester i samme session, og ingen
-  tjeneste har togafsnit, der overlapper i tid; eventuelle konflikter vises og åbnes på
-  fanen **Tjenester**. Du kan slå kontrollen til eller fra under **Indstillinger ›
-  Validering**.
+### Ændringer
+
+- En ny fane **Tjenester** lader dig planlægge førertjenester — det arbejde, en lokofører udfører i løbet
+  af en session, som en række af de togafsnit, føreren kører. Hver tjeneste er en række: dens betegnelse,
+  firma og sessioner til venstre, togafsnittene i køreorden til højre.
+- Tilføj de togafsnit, en fører kører, med **Tilføj togafsnit**. Listen viser de trækkraftstrækninger, en
+  fører kan tage som det næste — dem, der ikke støder sammen i tid med tjenesten, og, når den har et
+  togafsnit, dem, der afgår ved eller efter, at det ankommer. Togafsnittene behøver ikke starte på samme
+  station: føreren går ganske enkelt hen, hvor det næste starter.
+- Det samme togafsnit kan køres af flere tjenester, så længe de kører i forskellige sessioner, så én
+  tjeneste kan dække de ulige sessioner og en anden de lige.
+- Hvor to togafsnit for samme tog i en tjeneste køres af forskellige trækkraftenheder, viser fanen en note
+  ved stationen, hvor trækkraftenheden skiftes — du indtaster den ikke i hånden.
+- Tjenester importeret fra XPLN deler nu de togafsnit, der er defineret i køretøjernes omløb, så hvert
+  togafsnit viser den trækkraftenhed, der kører det.
+- Planen kontrolleres, så intet togafsnit køres af to tjenester i samme session, og ingen tjeneste har
+  togafsnit, der overlapper i tid. Kontrollen kan slås fra under **Indstillinger › Validering**.
 
 ## Version 0.2.2
 
 ### Fejlrettelser
 
-- To tog, der aldrig kører i samme køresession, rapporteres ikke længere som et møde
-  på en enkeltsporet strækning. Et tog, der kører session 1, 3, 5, og et, der kører
-  2, 4, 6, kan nu dele samme spor uden en falsk advarsel, fordi de aldrig er ude
-  samtidig.
-- Konfliktkontrollen på dobbeltsporede (og flersporede) strækninger er nu præcis: en
-  strækning markeres kun, når der er flere tog på den samtidig, end den har spor, og
-  kun tog, der kører i en fælles session, tælles med.
+- To tog, der aldrig kører i samme køresession, rapporteres ikke længere som et møde på en enkeltsporet
+  strækning. Et tog, der kører session 1, 3, 5, og et, der kører 2, 4, 6, er aldrig ude samtidig.
+- Konfliktkontrollen på dobbeltsporede og flersporede strækninger er nu præcis: en strækning markeres kun,
+  når der er flere tog på den samtidig, end den har spor, og kun tog, der kører i en fælles session, tælles
+  med.
 
 ## Version 0.2.1
 
-- Konfliktadvarsler vises nu, hvor du kan rette dem. Togkonflikter vises kun i den
-  grafiske køreplan og på fanen **Tog**; køretøjs- og omløbskonflikter vises kun på
-  fanen **Omløb**.
-- På fanen **Omløb** fremhæver en køretøjskonflikt nu kun det pågældende køretøj, og
-  en omløbskonflikt fremhæver kun det pågældende omløb, så det er tydeligt, hvad der
-  kræver opmærksomhed.
-- Kontrollen af, at et køretøj vender tilbage til sit udgangspunkt, omfatter nu også
-  vognsæt og gods, ikke kun lokomotiver og togsæt, så et vognsæt eller gods, der
-  bliver efterladt det forkerte sted ved køresessionens slutning, nu rapporteres.
+### Ændringer
+
+- Konfliktadvarsler vises nu, hvor du kan rette dem: togkonflikter i den grafiske køreplan og på fanen
+  **Tog**, køretøjs- og omløbskonflikter på fanen **Omløb**.
+- På fanen **Omløb** fremhæver en køretøjskonflikt nu kun det pågældende køretøj, og en omløbskonflikt kun
+  det pågældende omløb.
+- Kontrollen af, at et køretøj vender tilbage til sit udgangspunkt, omfatter nu også vognsæt og gods, ikke
+  kun lokomotiver og togsæt.
 
 ## Version 0.2.0
 
-- Navnet på den plan, du arbejder med, vises nu øverst i vinduet, så du altid kan
-  se, hvilket dokument der er åbent.
-- Den grafiske køreplan viser nu søjler for lokomotivførerbehovet, hvilket gør det
-  lettere at se, hvor mange førere der er brug for gennem køresessionen.
-- En ny **Topologi**-visning (under fanen **Strækninger**) viser et skematisk
-  diagram over køreplanens strækninger og deres grene.
+### Ændringer
+
+- Navnet på den plan, du arbejder med, vises nu øverst i vinduet.
+- Den grafiske køreplan viser nu søjler for lokomotivførerbehovet, hvilket gør det lettere at se, hvor
+  mange førere der er brug for gennem køresessionen.
+- En ny **Topologi**-visning (under fanen **Strækninger**) viser et skematisk diagram over køreplanens
+  strækninger og deres grene.
 
 ### Fejlrettelser
 
-- Strækninger bevarer nu som standard den rækkefølge, du indtastede dem i, så listen
-  er lettere at følge, når du kontrollerer dine input. Du kan stadig sortere efter
+- Strækninger bevarer nu som standard den rækkefølge, du indtastede dem i. Du kan stadig sortere efter
   enhver kolonne.
-- Konflikter henviser ikke længere til tog, du ikke kan finde: når et tog slettes,
-  fjernes dets stop sammen med det, så der ikke er forældreløse stop eller falske
-  konflikter tilbage.
+- Konflikter henviser ikke længere til tog, du ikke kan finde: når et tog slettes, fjernes dets stop sammen
+  med det, så der ikke er forældreløse stop eller falske konflikter tilbage.
 
 ## Version 0.1.0
 

@@ -355,6 +355,13 @@ public static class OperationLocationExtensions
             (location.HasPassengerExchange || location.HasCargoExchange);
 
         /// <summary>
+        /// Whether a locomotive can be turned here, which takes a station with a
+        /// <see cref="Station.HasTurntable">turntable</see>. Nowhere else has one: turning is a
+        /// station facility, not something a train does on the line.
+        /// </summary>
+        public bool CanTurnLoco => location is Station { HasTurntable: true };
+
+        /// <summary>
         /// Makes sure this location has somewhere to exchange the passengers it says it exchanges: where
         /// it exchanges passengers and not one of its tracks has a platform, all of them are given
         /// <see cref="StationTrack.DefaultPlatformLength"/>. Returns <c>true</c> when something changed.

@@ -9,8 +9,9 @@
 @inject Translator Translator
 
 @* Editable "turn chart": each vehicle schedule (turnus) is a row. The first column lists the vehicle(s)
-   assigned to the working (add/remove), followed by the train-part blocks in working order (each
-   removable, which truncates the tail). A trailing "+ train" appends the next (possibly partial) train. *@
+   assigned to the working (add/remove), the next the controls that act on the whole working, and the last
+   the train-part blocks in working order (each removable, which truncates the tail). A trailing "+ train"
+   appends the next (possibly partial) train. *@
 
 @if (Schedules.Count == 0)
 {
@@ -29,6 +30,7 @@ else
             <div class="head conflict-head"></div>
         }
         <div class="head vehicle-head">@Translator("Vehicles")</div>
+        <div class="head actions-head">@Translator("Actions")</div>
         <div class="head parts-head">@Translator("Trains")</div>
         @foreach (var (schedule, scheduleConflicts) in rows)
         {
@@ -61,27 +63,28 @@ else
                         <button class="add" title="@Translator("AddVehicle")" @onclick="() => _assignTarget = schedule"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <div class="parts @(scheduleConflicts.Count > 0 ? "has-schedule-conflict" : null)">
+                <div class="sched-actions">
+                    <button class="clone-sched" title="@Translator("CloneSchedule")"
+                            @onclick="() => CloneSchedule(schedule)"><i class="fa-solid fa-copy"></i></button>
+                    @if (schedule.Parts.Count > 0)
+                    {
+                        <button class="complement-sched" title="@Translator("ComplementSchedule")"
+                                @onclick="() => ComplementSchedule(schedule)"><i class="fa-solid fa-calendar-plus"></i></button>
+                    }
+                    <button class="del-sched danger @(_deleteTarget == schedule ? "armed" : null)" title="@Translator("DeleteSchedule")"
+                            @onclick="() => _deleteTarget = schedule"><i class="fa-solid fa-trash"></i></button>
                     @if (_deleteTarget == schedule)
                     {
+                        @* Floated over the trains column rather than placed in the cell, so asking for
+                           confirmation does not widen the Actions column of every row. *@
                         <div class="confirm">
                             <span>@Translator("DeleteScheduleConfirm")</span>
                             <button class="danger" @onclick="() => DeleteSchedule(schedule)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
                         </div>
                     }
-                    else
-                    {
-                        <button class="clone-sched" title="@Translator("CloneSchedule")"
-                                @onclick="() => CloneSchedule(schedule)"><i class="fa-solid fa-copy"></i></button>
-                        @if (schedule.Parts.Count > 0)
-                        {
-                            <button class="complement-sched" title="@Translator("ComplementSchedule")"
-                                    @onclick="() => ComplementSchedule(schedule)"><i class="fa-solid fa-calendar-plus"></i></button>
-                        }
-                        <button class="del-sched danger" title="@Translator("DeleteSchedule")"
-                                @onclick="() => _deleteTarget = schedule"><i class="fa-solid fa-trash"></i></button>
-                    }
+                </div>
+                <div class="parts @(scheduleConflicts.Count > 0 ? "has-schedule-conflict" : null)">
                     @if (!schedule.EffectiveSessions.CoversAllWithin(UseDays, MaxSessions))
                     {
                         <span class="sched-sessions" title="@Translator("ScheduleOperatingSessions")">

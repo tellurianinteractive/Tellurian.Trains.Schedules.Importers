@@ -8,12 +8,16 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 /// </summary>
 public class GraphSchedule
 {
-    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null, GraphHalf half = GraphHalf.Whole)
+    /// <param name="window">An explicit time window that replaces the one derived from the settings and
+    /// <paramref name="half"/>. Used when printing, where the paginator slices the operating window into
+    /// page-sized spans; lines and labels outside the slice are clipped away as usual.</param>
+    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null, GraphHalf half = GraphHalf.Whole, (TimeSpan Start, TimeSpan End)? window = null)
     {
         TimetableStretch = timetableStretch;
         Timetable = timetable;
         GraphSettings = graphSettings ?? GraphSettings.Default;
         Half = half;
+        _window = window;
 
         var stretchStations = new HashSet<OperationLocation>(timetableStretch.Stations);
         Stations = [.. timetableStretch.Stations];
@@ -31,6 +35,7 @@ public class GraphSchedule
 
     private static readonly TimeSpan OneDay = TimeSpan.FromHours(24);
     private readonly bool _crossesMidnight;
+    private readonly (TimeSpan Start, TimeSpan End)? _window;
 
     /// <summary>Whether any of these calls runs to or past midnight, which forces the time axis to the full
     /// day so the after-midnight part can wrap back to its start.</summary>
@@ -79,8 +84,12 @@ public class GraphSchedule
     /// <summary>Whether a break is configured for this schedule, so first/last half can be selected.</summary>
     public bool HasBreak => EffectiveBreak is not null;
 
-    public TimeSpan StartTime => TimeWindow(GraphSettings, _crossesMidnight, Half).Start;
-    public TimeSpan EndTime => TimeWindow(GraphSettings, _crossesMidnight, Half).End;
+    public TimeSpan StartTime => _window?.Start ?? TimeWindow(GraphSettings, _crossesMidnight, Half).Start;
+    public TimeSpan EndTime => _window?.End ?? TimeWindow(GraphSettings, _crossesMidnight, Half).End;
+
+    /// <summary>The whole time window this stretch would be drawn over without page slicing: the operating
+    /// window, widened to the full day when a train runs past midnight. The paginator slices this into pages.</summary>
+    public (TimeSpan Start, TimeSpan End) FullTimeWindow => TimeWindow(GraphSettings, _crossesMidnight, Half);
 }
 
 /// <summary>

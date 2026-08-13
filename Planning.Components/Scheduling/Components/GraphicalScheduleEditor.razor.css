@@ -7,6 +7,43 @@
     flex-shrink: 0;
 }
 
+    .graph-container svg {
+        border: 1pt solid black;
+    }
+
+/* A printed graph draws in hundredths of a millimetre instead of CSS pixels (see GraphPrintScale), so every
+   type size here must be given in those units — inside an SVG viewBox one CSS pixel is one drawing unit, so
+   `300px` means 3 mm. These sizes are what the gutters in GraphPrintScale are calculated from: enlarge one
+   here and the labels grow into the graph. The train label size is not among them; it comes from the user's
+   font-size setting as an inline style, converted through GraphSettings.UnitsPerPoint. */
+.graph-container.print {
+    overflow: visible;
+
+    & svg {
+        border: 0.2mm solid black;
+    }
+
+    & .hour {
+        font-size: 300px;
+    }
+
+    & .minute {
+        font-size: 180px;
+    }
+
+    & .number {
+        font-size: 160px;
+    }
+
+    & .stationname {
+        font-size: 260px;
+    }
+
+    & .stationkm {
+        font-size: 180px;
+    }
+}
+
 .hour {
     font-weight: bold;
     font-size: 16pt;

@@ -9,8 +9,8 @@
 }
 else
 {
-    <div class="graph-container">
-        <svg style="border: 1pt solid black " height="@Current.Height()" width="@Current.Width()" @onclick="OnClick" @onmousedown="OnMouseDown">
+    <div class="graph-container @(IsPrinted ? "print" : null)">
+        <svg height="@HeightAttribute" width="@WidthAttribute" viewBox="@ViewBoxAttribute" @onclick="OnClick" @onmousedown="OnMouseDown">
             <defs>
                 @* Semi-transparent white box behind a minute label: the train lines still show through, but the
                    digits stay readable where a label sits on a line. Region is padded slightly around the text. *@
@@ -154,7 +154,7 @@ else
                 var startOffset = (label.Offset * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
                 <path id="@pathId" fill="none" stroke="none" d="M @label.Start.X,@label.Start.Y L @label.End.X,@label.End.Y"></path>
                 <text>
-                    <text class="trainlabel" style="font-size:@(Current.GraphSettings.TrainLabelFontPoints)pt" dy="@LabelOffsetDy"><textPath href="#@pathId" startOffset="@startOffset%">@label.Train.GraphLabel(Current.GraphSettings)</textPath></text>
+                    <text class="trainlabel" style="font-size:@TrainLabelFontSize" dy="@LabelOffsetDy"><textPath href="#@pathId" startOffset="@startOffset%">@label.Train.GraphLabel(Current.GraphSettings)</textPath></text>
                 </text>
             }
         </svg>
@@ -168,6 +168,18 @@ else
     /// <summary>Validation errors for the plan; the graph highlights the trains involved in those that
     /// touch a track it shows. Passed from the tab, sourced from the shared ValidationStateService.</summary>
     [Parameter] public IReadOnlyList<ValidationError> Errors { get; set; } = [];
+
+    /// <summary>
+    /// Drawing units per millimetre when this graph is printed. Set it (to <c>GraphPrintScale.UnitsPerMillimetre</c>)
+    /// and the schedule's geometry is read as paper measurements: the SVG is sized in millimetres with a viewBox in
+    /// those units, so the graph prints at a true, measurable scale. Left null, the graph draws 1:1 in CSS pixels
+    /// as it does on screen.
+    /// </summary>
+    [Parameter] public double? UnitsPerMillimetre { get; set; }
+
+    /// <summary>Whether train lines are drawn black rather than in their category colour, for printing on a
+    /// monochrome printer.</summary>
+    [Parameter] public bool Monochrome { get; set; }
 
     GraphSchedule? Current;
 
@@ -189,15 +201,35 @@ else
         return TimeSpan.FromMinutes((minutes + 59) / 60 * 60);
     }
 
-    string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
-    string TrainStroke(Train t) => t.Category?.Color ?? "#000000";
-    const double TrainStrokeWidthValue = 2;
-    string TrainStrokeWidth => TrainStrokeWidthValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    // Whether this graph is drawn for paper rather than the screen; see UnitsPerMillimetre.
+    bool IsPrinted => UnitsPerMillimetre is > 0;
 
-    // Fixed perpendicular lift (px) of a train identity label off its line, via <textPath> dy, so the
-    // digits sit just beside the line rather than on it. Negative lifts to the side the glyphs already
-    // occupy, consistently for both slope directions. 2px ≈ one graph-thickness.
-    const string LabelOffsetDy = "-2";
+    // On screen the SVG is sized in CSS pixels and needs no viewBox, since one drawing unit is one pixel.
+    // For paper it is given its real size in millimetres, with a viewBox that maps the drawing units onto it —
+    // that mapping is what makes the print scale exact. Lengths are formatted invariantly: a decimal comma
+    // from a Swedish or German locale would make the attribute unparseable.
+    string WidthAttribute => IsPrinted ? Millimetres(Current!.Width()) : Current!.Width().ToString();
+    string HeightAttribute => IsPrinted ? Millimetres(Current!.Height()) : Current!.Height().ToString();
+    string? ViewBoxAttribute => IsPrinted ? $"0 0 {Current!.Width()} {Current!.Height()}" : null;
+
+    string Millimetres(int units) =>
+        $"{(units / UnitsPerMillimetre!.Value).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}mm";
+
+    // The train label font size as a plain number of drawing units, which is what the thinning estimate uses too
+    // (GraphSettings.UnitsPerPoint). On screen a unit is a CSS pixel, so 8 pt renders as 10.67 units — exactly the
+    // 8 pt it was before; on paper the same expression yields hundredths of a millimetre.
+    string TrainLabelFontSize =>
+        (Current!.GraphSettings.TrainLabelFontPoints * Current.GraphSettings.UnitsPerPoint)
+            .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
+    string TrainStroke(Train t) => Monochrome ? "#000000" : t.Category?.Color ?? "#000000";
+    string TrainStrokeWidth => Current!.GraphSettings.TrainStrokeWidth.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    // Perpendicular lift of a train identity label off its line, via <textPath> dy, so the digits sit just
+    // beside the line rather than on it. Negative lifts to the side the glyphs already occupy, consistently
+    // for both slope directions. It is a drawing-unit length, so it scales with the print unit.
+    string LabelOffsetDy => (-Current!.GraphSettings.LabelLift).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     protected override void OnParametersSet()
     {

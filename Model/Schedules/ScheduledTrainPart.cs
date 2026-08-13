@@ -183,8 +183,27 @@ public static class ScheduledTrainPartExtensions
             // Not part of the chain above: uncoupling is what a circulating loco does first, so a part
             // asking for both wants both notes, in that order. One note whatever the consist — the whole
             // of it turns or circulates together.
-            if (TurningNote(options) is { } turning) callNotes.Add(turning);
+            if (trainPart.TurningNote(options) is { } turning) callNotes.Add(turning);
         }
+
+        /// <summary>
+        /// The one note for what has to be done with the traction after arrival so the train can leave the
+        /// other way: run it round to the other end of the train, turn it, or both. Null when neither is
+        /// asked for, or when what is asked for is not needed.
+        /// </summary>
+        /// <remarks>
+        /// Both flags together give a single note, not two. The two moves are one errand — the loco leaves
+        /// the train, goes to the turntable and comes back on the other end — and stating them separately
+        /// reads as two independent movements.
+        /// </remarks>
+        private GeneratedNote? TurningNote(TractionOptions options) =>
+            (options.TurnLoco, options.RunaroundLoco && trainPart.NeedsRunaround) switch
+            {
+                (true, true) => new TurnAndCirculateNote { IsForArrival = true },
+                (true, false) => new TurnNote { IsForArrival = true },
+                (false, true) => new CirculateNote { IsForArrival = true },
+                _ => null,
+            };
 
         private void AddWagonSetDepartureNotes(List<ICallNote> callNotes)
         {
@@ -208,6 +227,27 @@ public static class ScheduledTrainPartExtensions
         /// <summary>The wagonsets this part carries.</summary>
         public IEnumerable<ScheduledObject> WagonSets =>
             trainPart.ScheduledObjects.Where(so => so.IsWagonSet);
+
+        /// <summary>
+        /// Whether leaving in the direction the train arrived from costs this part's traction a runaround
+        /// — the locomotive being run round to the other end of the train. It does not where every
+        /// traction unit working the part reverses as it stands: a trainset, or a locomotive working a
+        /// reversible train (see <c>ScheduledObject.ReversesWithoutRunaround</c>). A part whose traction
+        /// cannot be resolved — one not yet worked by any vehicle, above all — is taken to need it, so
+        /// what the planner asked for stands until the vehicles say otherwise.
+        /// </summary>
+        /// <remarks>
+        /// The part-scope counterpart of <c>Plan.NeedsLocoRunaround</c>, which answers the same question
+        /// for a whole train and is what the timings allow the standing time from.
+        /// </remarks>
+        public bool NeedsRunaround
+        {
+            get
+            {
+                var units = trainPart.TractionUnits.ToList();
+                return units.Count == 0 || units.Any(unit => !unit.ReversesWithoutRunaround);
+            }
+        }
 
         /// <summary>
         /// The part written as the traction units working it followed by the times of its
@@ -242,23 +282,4 @@ public static class ScheduledTrainPartExtensions
             }
         }
     }
-
-    /// <summary>
-    /// The one note for what has to be done with the traction after arrival so the train can leave the
-    /// other way: circulate it to the other end of the train, turn it, or both. Null when neither is
-    /// asked for.
-    /// </summary>
-    /// <remarks>
-    /// Both flags together give a single note, not two. The two moves are one errand — the loco leaves
-    /// the train, goes to the turntable and comes back on the other end — and stating them separately
-    /// reads as two independent movements.
-    /// </remarks>
-    private static GeneratedNote? TurningNote(TractionOptions options) =>
-        options switch
-        {
-            { TurnLoco: true, ReverseLoco: true } => new TurnAndCirculateNote { IsForArrival = true },
-            { TurnLoco: true } => new TurnNote { IsForArrival = true },
-            { ReverseLoco: true } => new CirculateNote { IsForArrival = true },
-            _ => null,
-        };
 }

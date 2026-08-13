@@ -336,6 +336,15 @@
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Umbruchzeit (teilt den Bildfahrplan in zwei Hälften)</value>
   </data>
+  <data name="CommonSettings" xml:space="preserve">
+    <value>Gemeinsame Einstellungen</value>
+  </data>
+  <data name="OnScreen" xml:space="preserve">
+    <value>Am Bildschirm</value>
+  </data>
+  <data name="PrintedReport" xml:space="preserve">
+    <value>Gedruckter Bericht</value>
+  </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Ausrichtung der Zeitachse</value>
   </data>
@@ -365,6 +374,24 @@
   </data>
   <data name="TrackSpacing" xml:space="preserve">
     <value>Gleisabstand (px)</value>
+  </data>
+  <data name="GraphicalTimetableReport" xml:space="preserve">
+    <value>Bildfahrplan</value>
+  </data>
+  <data name="PrintHourSpacing" xml:space="preserve">
+    <value>Stundenabstand, Schnelluhr (mm/h)</value>
+  </data>
+  <data name="PrintKilometerSpacing" xml:space="preserve">
+    <value>Distanzmaßstab (mm/km)</value>
+  </data>
+  <data name="PrintStationSpacing" xml:space="preserve">
+    <value>Stationsabstand (mm)</value>
+  </data>
+  <data name="PrintTrackSpacing" xml:space="preserve">
+    <value>Gleisabstand (mm)</value>
+  </data>
+  <data name="PrintMonochrome" xml:space="preserve">
+    <value>Schwarzweiß?</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
     <value>Zugkategorie anzeigen?</value>
@@ -661,7 +688,13 @@
     <value>Topologie</value>
   </data>
   <data name="TopologyHint" xml:space="preserve">
-    <value>Eine schematische Übersicht der Fahrplanabschnitte. Bahnhöfe werden nach Gleisabstand angeordnet; Abzweige verbinden sich mit dem Abschnitt, von dem sie ausgehen.</value>
+    <value>Eine schematische Übersicht der Gleise der Anlage, in der jede Betriebsstelle einmal erscheint. Ziehen Sie eine Betriebsstelle dorthin, wo sie hingehört, dann folgen die Gleise.</value>
+  </data>
+  <data name="TopologyArrangeAutomatically" xml:space="preserve">
+    <value>Automatisch anordnen</value>
+  </data>
+  <data name="TopologyArrangeAutomaticallyHint" xml:space="preserve">
+    <value>Alle von Ihnen verschobenen Betriebsstellen vergessen und die ganze Skizze wieder automatisch zeichnen.</value>
   </data>
   <data name="TopologyNoStretches" xml:space="preserve">
     <value>Definieren Sie Fahrplanabschnitte, um die Topologie zu sehen.</value>
@@ -1022,6 +1055,12 @@
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Ob die Station von einem Fahrdienstleiter bedient wird statt selbstbedient zu sein.</value>
+  </data>
+  <data name="HasTurntable" xml:space="preserve">
+    <value>Drehscheibe vorhanden?</value>
+  </data>
+  <data name="HasTurntableHelp" xml:space="preserve">
+    <value>Ob die Station eine Drehscheibe hat, sodass eine Lok hier gedreht werden kann. Eine Dampflok kann nur dort gedreht werden, wo es eine gibt.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
     <value>Geplant?</value>
@@ -1836,6 +1875,25 @@
   </data>
   <data name="IsReversibleTrainHelp" xml:space="preserve">
     <value>Der Zug kann von beiden Enden gefahren werden — durch einen Steuerwagen oder eine Lok am anderen Ende — daher wird beim Fahrtrichtungswechsel keine Zeit für das Umsetzen der Lok eingeplant.</value>
+  </data>
+  <data name="TurnLoco" xml:space="preserve">
+    <value>Lok drehen?</value>
+  </data>
+  <data name="TurnLocoHelp" xml:space="preserve">
+    <value>Die Lok wird nach der Ankunft auf der Drehscheibe gedreht, sodass sie in die andere Richtung zeigt. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="TurnLocoNoTurntable" xml:space="preserve">
+    <value>{0} hat keine Drehscheibe, dort kann nichts gedreht werden.</value>
+    <comment>{0}=station name</comment>
+  </data>
+  <data name="RunaroundLoco" xml:space="preserve">
+    <value>Lok umsetzen?</value>
+  </data>
+  <data name="RunaroundLocoHelp" xml:space="preserve">
+    <value>Die Lok wird nach der Ankunft ans andere Zugende umgesetzt, damit der Zug in die Richtung abfahren kann, aus der er gekommen ist. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="RunaroundLocoNotNeeded" xml:space="preserve">
+    <value>Das Triebfahrzeug dieses Zugabschnitts kann wenden, wie es steht; daher wird kein Umsetzvermerk gedruckt.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Anzahl Einheiten</value>

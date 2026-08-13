@@ -1,4 +1,5 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Schedules
+@using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Timetables
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
@@ -52,6 +53,35 @@
             </select>
         </div>
 
+        @* What has to be done with the traction where the part ends, so the train can leave the other
+           way round. Both are arrival notes for the driver and the dispatcher. *@
+        @if (ShowTractionOptions)
+        {
+            @* Offered closed where there is no turntable — except where one was asked for and the
+               turntable has since gone, which is left open so it can be cleared here rather than only
+               by giving the station its turntable back. *@
+            <div class="field">
+                <label title="@Translator("TurnLocoHelp")">@Translator("TurnLoco")</label>
+                <input type="checkbox" checked="@_turnLoco" disabled="@(!CanTurnLoco && !_turnLoco)"
+                       @onchange="e => _turnLoco = e.Value as bool? ?? false" />
+            </div>
+            @if (!CanTurnLoco)
+            {
+                <p class="hint">@NoTurntableText</p>
+            }
+            <div class="field">
+                <label title="@Translator("RunaroundLocoHelp")">@Translator("RunaroundLoco")</label>
+                <input type="checkbox" checked="@_runaroundLoco"
+                       @onchange="e => _runaroundLoco = e.Value as bool? ?? false" />
+            </div>
+            @* Said rather than silently unticked: what the planner asked for is kept, in case the
+               traction working the part changes to one that does have to be run round. *@
+            @if (_runaroundLoco && !Part.NeedsRunaround)
+            {
+                <p class="hint">@Translator("RunaroundLocoNotNeeded")</p>
+            }
+        }
+
         @if (Preview is { } edit)
         {
             <p class="preview">@SpanText(edit.From, edit.To)</p>
@@ -96,6 +126,8 @@
 
     private int _from;
     private int _to;
+    private bool _turnLoco;
+    private bool _runaroundLoco;
     private string? _error;
 
     // The train's calls in run order, so the index order in the lists is the order the train works them.
@@ -127,6 +159,21 @@
         }
     }
 
+    // Whether the part's traction options are worth asking about: only a locomotive or a trainset is
+    // turned or run round. A working with no vehicle yet is offered them all the same — the planner
+    // often lays out the trains before saying what works them.
+    private bool ShowTractionOptions =>
+        !Schedule.Vehicles.Any() || Schedule.Vehicles.Any(v => v.IsTraction);
+
+    // Where the part ends as currently selected, which is where the turn would be made.
+    private OperationLocation ArrivalLocation => Calls[_to].OperationLocation;
+
+    // A locomotive is turned on a turntable, so only a station with one can be asked for it.
+    private bool CanTurnLoco => ArrivalLocation.CanTurnLoco;
+
+    private string NoTurntableText =>
+        string.Format(CultureInfo.CurrentCulture, Translator("TurnLocoNoTurntable"), ArrivalLocation.Name);
+
     protected override void OnInitialized()
     {
         var calls = Calls;
@@ -134,19 +181,30 @@
         _to = calls.TakeWhile(c => !ReferenceEquals(c, Part.To)).Count();
         if (_from >= calls.Count - 1) _from = calls.Count - 2;
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
+        _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
+        _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
     }
 
     private void SetFrom(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), out var i)) _from = i;
         if (_to <= _from) _to = _from + 1;
+        ClearTurnWithoutTurntable();
         _error = null;
     }
 
     private void SetTo(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value?.ToString(), out var i)) _to = i;
+        ClearTurnWithoutTurntable();
         _error = null;
+    }
+
+    // Moving the part's end to a station with no turntable takes the turn with it, rather than leaving a
+    // disabled box ticked for a move that cannot be made there.
+    private void ClearTurnWithoutTurntable()
+    {
+        if (!CanTurnLoco) _turnLoco = false;
     }
 
     private IEnumerable<string> Warnings(PartEdit edit)
@@ -164,8 +222,24 @@
         if (_to <= _from || _to >= calls.Count) return;
         var result = Schedule.EditPart(Part, calls[_from], calls[_to]);
         if (result.IsNone) { _error = result.Message; return; }
+        ApplyTractionOptions();
         ScheduleState.SaveAndNotify();
         await OnSaved.InvokeAsync();
+    }
+
+    // Records what is to be done with the traction on arrival. A part that carries no traction options
+    // gets them only once there is something to say: they are created without the departure "use this
+    // locomotive" note, so asking for a turn cannot quietly add notes at the other end of the part.
+    private void ApplyTractionOptions()
+    {
+        if (!ShowTractionOptions) return;
+        if (Part.TractionOptions is null)
+        {
+            if (!_turnLoco && !_runaroundLoco) return;
+            Part.TractionOptions = new TractionOptions { DisplayUseNote = false };
+        }
+        Part.TractionOptions.TurnLoco = _turnLoco;
+        Part.TractionOptions.RunaroundLoco = _runaroundLoco;
     }
 
     private Task Abort() => OnClosed.InvokeAsync();

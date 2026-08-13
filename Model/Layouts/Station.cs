@@ -29,6 +29,14 @@ public class Station : OperationLocation
     public bool IsManned { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the station has a turntable. A locomotive that cannot be driven equally well
+    /// in both directions — a steam locomotive above all — can only be turned where there is one, so this
+    /// is what decides whether a train part may ask for a turn on arrival
+    /// (<see cref="Schedules.TractionOptions.TurnLoco"/>).
+    /// </summary>
+    public bool HasTurntable { get; set; }
+
+    /// <summary>
     /// Gets or sets the regions and countries represented by this station. Mostly meaningful for
     /// shadow stations (<see cref="IsShadow"/>), which represent external stations or regions and
     /// are used for cargo flow routing. Seldom used for ordinary stations. Each entry is an entry of

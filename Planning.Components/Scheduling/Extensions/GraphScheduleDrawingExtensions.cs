@@ -341,7 +341,7 @@ public static class GraphScheduleDrawingExtensions
                 textLength[l.Train] = length = l.Train.GraphLabel(me.GraphSettings).Length;
             var index = indexInTrain.TryGetValue(l.Train, out var i) ? i : 0;
             indexInTrain[l.Train] = index + 1;
-            nodes.Add(new LabelNode(l.Train, l.Start, l.End, l.Offset, index, perTrainCount[l.Train], LabelBox(l.Start, l.End, l.Offset, length, me.GraphSettings.TrainLabelFontPoints)));
+            nodes.Add(new LabelNode(l.Train, l.Start, l.End, l.Offset, index, perTrainCount[l.Train], LabelBox(l.Start, l.End, l.Offset, length, me.GraphSettings)));
         }
 
         // The conflict graph is static: a label's box never moves when another is removed, so overlaps are
@@ -412,9 +412,7 @@ public static class GraphScheduleDrawingExtensions
 
     // Padding on the estimated label width/height, since server-side text size is estimated, not measured.
     private const double TrainLabelBoxPaddingFactor = 1.1;
-    private const double PointsToPixels = 96.0 / 72.0;
     private const double TrainLabelGlyphWidthEm = 0.62;       // average advance of a bold digit/letter
-    private const double TrainLabelLiftPixels = 2.0;          // matches LabelOffsetDy in the editor
 
     // An oriented bounding box: centre, the unit direction of its long (text) axis, and the half-extents along
     // that axis (Hu) and the perpendicular (Hv).
@@ -436,11 +434,13 @@ public static class GraphScheduleDrawingExtensions
     // Builds the oriented box a label occupies: centred on its anchor point along the segment (lifted off the
     // line like the rendered text), as wide as the estimated text and as tall as the font. The font size (in
     // points) comes from the user setting, so a larger label produces a larger box and thins more aggressively.
-    private static LabelObb LabelBox(Offset start, Offset end, double offset, int textLength, double fontPoints)
+    // The point size is converted with the settings' UnitsPerPoint, so the box lands in whatever unit the
+    // geometry uses — CSS pixels on screen, hundredths of a millimetre on paper.
+    private static LabelObb LabelBox(Offset start, Offset end, double offset, int textLength, GraphSettings settings)
     {
-        var fontPixels = fontPoints * PointsToPixels;
-        var halfWidth = Math.Max(1, textLength) * TrainLabelGlyphWidthEm * fontPixels * TrainLabelBoxPaddingFactor / 2.0;
-        var halfHeight = fontPixels * TrainLabelBoxPaddingFactor / 2.0;
+        var fontUnits = settings.TrainLabelFontPoints * settings.UnitsPerPoint;
+        var halfWidth = Math.Max(1, textLength) * TrainLabelGlyphWidthEm * fontUnits * TrainLabelBoxPaddingFactor / 2.0;
+        var halfHeight = fontUnits * TrainLabelBoxPaddingFactor / 2.0;
 
         double sx = end.X - start.X, sy = end.Y - start.Y;
         var length = Math.Sqrt(sx * sx + sy * sy);
@@ -449,7 +449,8 @@ public static class GraphScheduleDrawingExtensions
 
         var anchorX = start.X + offset * sx;
         var anchorY = start.Y + offset * sy;
-        return new LabelObb(anchorX + nx * -TrainLabelLiftPixels, anchorY + ny * -TrainLabelLiftPixels, ux, uy, halfWidth, halfHeight);
+        var lift = (double)settings.LabelLift;
+        return new LabelObb(anchorX + nx * -lift, anchorY + ny * -lift, ux, uy, halfWidth, halfHeight);
     }
 
     // Separating-axis test for two oriented boxes: they overlap unless some axis (the four box edge normals)
@@ -541,8 +542,8 @@ public static class GraphScheduleDrawingExtensions
     public static Offset TimeAxisLabelOffset(this GraphSchedule me, TimeSpan time) =>
        me.AxisDirection switch
        {
-           TimeAxisDirection.Horisontal => me.TimeLine(time).Start - new Offset(0, 5),
-           TimeAxisDirection.Vertical => me.TimeLine(time).Start - new Offset(5, 0),
+           TimeAxisDirection.Horisontal => me.TimeLine(time).Start - new Offset(0, me.GraphSettings.LabelGap),
+           TimeAxisDirection.Vertical => me.TimeLine(time).Start - new Offset(me.GraphSettings.LabelGap, 0),
            _ => throw new NotSupportedException()
        };
 
@@ -551,8 +552,8 @@ public static class GraphScheduleDrawingExtensions
         var offset = me.Stations[stationIndex].Tracks.Count / 2 * me.GraphSettings.TrackSpacing;
         return me.AxisDirection switch
         {
-            TimeAxisDirection.Horisontal => new(5, me.Y(stationIndex, 0) + offset),
-            TimeAxisDirection.Vertical => new(me.X(stationIndex, 0) + offset, 25),
+            TimeAxisDirection.Horisontal => new(me.GraphSettings.LabelGap, me.Y(stationIndex, 0) + offset),
+            TimeAxisDirection.Vertical => new(me.X(stationIndex, 0) + offset, me.GraphSettings.StationNameBaseline),
             _ => Offset.Invalid
         };
     }
@@ -562,8 +563,8 @@ public static class GraphScheduleDrawingExtensions
         var offset = me.Stations[stationIndex].Tracks.Count / 2 * me.GraphSettings.TrackSpacing;
         return me.AxisDirection switch
         {
-            TimeAxisDirection.Horisontal => new(me.GraphSettings.KilometerAxisSpacing.X - 15, me.Y(stationIndex, 0) + offset),
-            TimeAxisDirection.Vertical => new(me.X(stationIndex, 0) + offset, me.GraphSettings.KilometerAxisSpacing.Y - 15),
+            TimeAxisDirection.Horisontal => new(me.GraphSettings.KilometerAxisSpacing.X - me.GraphSettings.KmLabelGap, me.Y(stationIndex, 0) + offset),
+            TimeAxisDirection.Vertical => new(me.X(stationIndex, 0) + offset, me.GraphSettings.KilometerAxisSpacing.Y - me.GraphSettings.KmLabelGap),
             _ => Offset.Invalid
         };
     }
@@ -572,8 +573,8 @@ public static class GraphScheduleDrawingExtensions
     {
         return me.AxisDirection switch
         {
-            TimeAxisDirection.Horisontal => new(me.GraphSettings.KilometerAxisSpacing.X - 2, me.Y(stationIndex, trackIndex) + 3),
-            TimeAxisDirection.Vertical => new(me.X(stationIndex, trackIndex) + 0, me.GraphSettings.KilometerAxisSpacing.Y - 2),
+            TimeAxisDirection.Horisontal => new(me.GraphSettings.KilometerAxisSpacing.X - me.GraphSettings.TrackNumberGap, me.Y(stationIndex, trackIndex) + me.GraphSettings.TrackNumberBaseline),
+            TimeAxisDirection.Vertical => new(me.X(stationIndex, trackIndex) + 0, me.GraphSettings.KilometerAxisSpacing.Y - me.GraphSettings.TrackNumberGap),
             _ => Offset.Invalid
         };
     }

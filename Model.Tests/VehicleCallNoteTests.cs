@@ -19,9 +19,13 @@ public class VehicleCallNoteTests
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
     }
 
-    // A plan holding one train, worked end to end by one locomotive's schedule whose traction options
-    // the test sets.
-    private static (Plan Plan, StationCall Arrival, StationCall Departure) Arrange(Action<TractionOptions> options)
+    // A plan holding one train, worked end to end by one traction unit's schedule whose traction options
+    // the test sets. The unit is an ordinary locomotive unless the test says otherwise — one that has to
+    // be run round to leave the way it came.
+    private static (Plan Plan, StationCall Arrival, StationCall Departure) Arrange(
+        Action<TractionOptions> options,
+        ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive,
+        bool isReversibleTrain = false)
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
@@ -36,7 +40,9 @@ public class VehicleCallNoteTests
         options(part.TractionOptions);
 
         // The notes that name a vehicle are written one per traction unit, so the schedule needs one.
-        plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Locomotive, "T44", 42, null), Sessions.All);
+        var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
+        vehicle.IsReversibleTrain = isReversibleTrain;
+        plan.AssignVehicle(schedule, vehicle, Sessions.All);
 
         return (plan, part.To, part.From);
     }
@@ -46,7 +52,7 @@ public class VehicleCallNoteTests
     {
         // The whole point of the note: the driver makes the move and the dispatcher has to give it the
         // road, so it is no use to either of them alone.
-        var (plan, arrival, _) = Arrange(o => o.ReverseLoco = true);
+        var (plan, arrival, _) = Arrange(o => o.RunaroundLoco = true);
 
         Assert.ContainsSingle(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<CirculateNote>());
         Assert.ContainsSingle(arrival.StationNotes(Sessions.All, Settings, plan).OfType<CirculateNote>());
@@ -55,7 +61,7 @@ public class VehicleCallNoteTests
     [TestMethod]
     public void CirculatingIsAnArrivalNote()
     {
-        var (plan, arrival, departure) = Arrange(o => o.ReverseLoco = true);
+        var (plan, arrival, departure) = Arrange(o => o.RunaroundLoco = true);
 
         var note = arrival.DriverNotes(Sessions.All, Settings, plan).OfType<CirculateNote>().Single();
         Assert.IsTrue(note.IsForArrival);
@@ -69,7 +75,7 @@ public class VehicleCallNoteTests
     {
         // One errand, not two: the loco leaves the train, goes to the turntable and comes back on the
         // other end. Two notes would read as two independent movements.
-        var (plan, arrival, _) = Arrange(o => { o.TurnLoco = true; o.ReverseLoco = true; });
+        var (plan, arrival, _) = Arrange(o => { o.TurnLoco = true; o.RunaroundLoco = true; });
 
         var notes = arrival.DriverNotes(Sessions.All, Settings, plan);
         Assert.ContainsSingle(notes.OfType<TurnAndCirculateNote>());
@@ -97,6 +103,39 @@ public class VehicleCallNoteTests
     }
 
     [TestMethod]
+    public void ATrainsetIsNotAskedToRunRound()
+    {
+        // A trainset is driven from either end as it stands, so there is nothing to run round: the flag
+        // is kept as the planner set it, but it says nothing to anybody here.
+        var (plan, arrival, _) = Arrange(o => o.RunaroundLoco = true, ScheduledObjectType.Trainset);
+
+        Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<CirculateNote>());
+    }
+
+    [TestMethod]
+    public void ALocomotiveOnAReversibleTrainIsNotAskedToRunRound()
+    {
+        // The far end has a cab, in a driving trailer or a second locomotive, so the driver walks to it
+        // instead of the locomotive being moved.
+        var (plan, arrival, _) = Arrange(o => o.RunaroundLoco = true, isReversibleTrain: true);
+
+        Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<CirculateNote>());
+    }
+
+    [TestMethod]
+    public void ATrainsetAskedToTurnAndRunRoundOnlyTurns()
+    {
+        // Turning is the errand a trainset can still have; what is left of the pair is the turn alone,
+        // not the combined note.
+        var (plan, arrival, _) = Arrange(
+            o => { o.TurnLoco = true; o.RunaroundLoco = true; }, ScheduledObjectType.Trainset);
+
+        var notes = arrival.DriverNotes(Sessions.All, Settings, plan);
+        Assert.ContainsSingle(notes.OfType<TurnNote>());
+        Assert.IsEmpty(notes.OfType<TurnAndCirculateNote>());
+    }
+
+    [TestMethod]
     public void TheRestOfTheVehicleFamilyReachesTheReadersToo()
     {
         // The notes were generated on the train part all along; nothing read them. These two are the
@@ -112,7 +151,7 @@ public class VehicleCallNoteTests
     {
         // A timetable is readable before a single vehicle has been scheduled; there is then simply
         // nothing to say about the vehicles.
-        var (_, arrival, _) = Arrange(o => o.ReverseLoco = true);
+        var (_, arrival, _) = Arrange(o => o.RunaroundLoco = true);
 
         Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings).OfType<CirculateNote>());
         Assert.IsEmpty(arrival.VehicleNotes(null));
@@ -123,7 +162,7 @@ public class VehicleCallNoteTests
     {
         // A call assembles its persisted notes itself, so the part must contribute only what it
         // generates — otherwise every hand-written note at a scheduled call prints twice.
-        var (plan, arrival, _) = Arrange(o => o.ReverseLoco = true);
+        var (plan, arrival, _) = Arrange(o => o.RunaroundLoco = true);
         arrival.Notes.Add(new TextCallNote("Ring the dispatcher.", "en") { IsForArrival = true });
 
         Assert.ContainsSingle(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<TextCallNote>());

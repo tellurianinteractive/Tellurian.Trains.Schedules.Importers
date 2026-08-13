@@ -46,4 +46,36 @@ public sealed class GraphicTimetableSettings
     /// <summary>Font size in points of the train identity labels drawn along the train lines. Also feeds the
     /// label-thinning overlap estimate, so a larger size drops more crossing labels. Default is 8.</summary>
     public int TrainLabelFontSize { get; set; } = 8;
+
+    /// <summary>
+    /// Millimetres of paper per hour along the printed time axis. This is a true, fixed scale: every printed
+    /// graph uses it, so gradients and times can be compared and measured between stretches and between
+    /// sheets, and the number of pages follows from the scale rather than the other way round. Default is 18,
+    /// which puts a 14-hour operating window on a single A4 sheet.
+    /// </summary>
+    public double PrintHourSpacingMm { get; set; } = 18;
+
+    /// <summary>
+    /// Millimetres of paper per kilometre along the printed distance axis, floored by
+    /// <see cref="PrintStationSpacingMm"/>. Default is 1.
+    /// </summary>
+    public double PrintKilometerSpacingMm { get; set; } = 1;
+
+    /// <summary>
+    /// Minimum millimetres between two stations on the printed distance axis, applied when the distance-based
+    /// spacing would be smaller. This is a legibility floor rather than a scale: a stretch too tall for one
+    /// sheet has only this reduced, never <see cref="PrintKilometerSpacingMm"/>, so real distances stay
+    /// comparable between sheets. Default is 20.
+    /// </summary>
+    public double PrintStationSpacingMm { get; set; } = 20;
+
+    /// <summary>Millimetres between individual tracks at a station when printed. Default is 2.</summary>
+    public double PrintTrackSpacingMm { get; set; } = 2;
+
+    /// <summary>
+    /// Whether printed train lines are drawn black rather than in their train category's colour. Default is
+    /// <c>false</c>, so a printed graph matches the screen. Worth setting for a monochrome printer, which
+    /// renders colours chosen to be distinct on screen as similar mid-greys.
+    /// </summary>
+    public bool PrintMonochrome { get; set; }
 }

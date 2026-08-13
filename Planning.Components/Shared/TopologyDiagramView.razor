@@ -1,83 +1,145 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Shared
 @using System.Globalization
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
-@* The schematic of the layout's timetable stretches, drawn from the pure TopologyDiagram.Build result.
+@* The schematic of the layout's track, drawn from the pure TopologyDiagram.Build result.
 
    Shared between the Stretches tab and the duty booklet's overview page, so a driver meets the same
    diagram on paper that the planner drew on screen. Being SVG it prints reliably: browsers drop
-   background colours when printing, but strokes and fills always print. *@
+   background colours when printing, but strokes and fills always print.
+
+   Every operation location appears exactly once, wherever it is placed, and every piece of track is one
+   straight line between the two locations it joins. Where the automatic placement does not match the
+   railway — which no rule reading a layout with cycles in it can be relied on to do — the planner drags
+   the locations into place and the track follows them. *@
 
 @if (Diagram is { } diagram)
 {
-    <svg class="topology-svg" viewBox="0 0 @F(diagram.Width) @F(diagram.Height)"
+    <svg class="topology-svg @(Editable ? "editable" : null)"
+         viewBox="@ViewBox(diagram)"
          width="100%" preserveAspectRatio="xMidYMid meet"
-         xmlns="http://www.w3.org/2000/svg">
-        @foreach (var connector in diagram.Connectors)
+         xmlns="http://www.w3.org/2000/svg" @ref="_svg">
+        @foreach (var section in diagram.Sections)
         {
-            @* Diagonal and the first bit of the branch's own line in one path: a rounded join fills the
-               corner between them, which two separate strokes butting together leave notched. *@
-            <path d="M @F(connector.JunctionX) @F(connector.JunctionY) L @F(connector.LineX) @F(connector.LineY) L @F(connector.StubX) @F(connector.LineY)"
-                  fill="none" stroke="@connector.Color" stroke-width="10" stroke-linejoin="round" />
+            @* A double-track stretch is drawn as the two tracks it has, offset either side of the line
+               between the locations; a single-track one as one line. Timetable stretches sharing a
+               stretch are laid over it as dashes instead of as further lines, which would be read as
+               more tracks than the stretch really has. *@
+            @foreach (var offset in TrackOffsets(section.Tracks))
+            {
+                var (dx, dy) = Normal(section, offset);
+                <line x1="@F(section.FromX + dx)" y1="@F(section.FromY + dy)"
+                      x2="@F(section.ToX + dx)" y2="@F(section.ToY + dy)"
+                      stroke="@BaseColor(section)" stroke-width="@F(TrackWidth(section.Tracks))"
+                      stroke-linecap="round" />
+            }
+            @foreach (var (shared, index) in section.Colors.Skip(1).Select((c, i) => (c, i)))
+            {
+                <line x1="@F(section.FromX)" y1="@F(section.FromY)" x2="@F(section.ToX)" y2="@F(section.ToY)"
+                      stroke="@shared" stroke-width="@F(SharedWidth)" stroke-linecap="butt"
+                      stroke-dasharray="@DashPattern" stroke-dashoffset="@F(index * DashStep)" />
+            }
         }
-        @foreach (var line in diagram.Lines)
+        @foreach (var node in diagram.Nodes)
         {
-            @foreach (var section in line.Sections)
-            {
-                @* A double-track section is drawn as the two tracks it has, a single-track one as one line.
-                   Timetable stretches sharing a section are laid over it as dashes instead of as further
-                   lines, which would be read as more tracks than the section really has. *@
-                @foreach (var offset in TrackOffsets(section.Tracks))
+            <g class="topology-node" @key="node.LocationId"
+               @onpointerdown="@(e => StartDrag(e, node))" @onpointerdown:preventDefault>
+                @* An invisible disc wider than the circle, so a location can be grabbed without having to
+                   hit five units of drawing exactly — on a touch screen most of all. *@
+                @if (Editable)
                 {
-                    <line x1="@F(section.FromX)" y1="@F(line.Y + offset)" x2="@F(section.ToX)" y2="@F(line.Y + offset)"
-                          stroke="@section.Color" stroke-width="@F(TrackWidth(section.Tracks))" />
+                    <circle cx="@F(node.X)" cy="@F(node.Y)" r="@F(GrabRadius)" fill="transparent" />
                 }
-                @foreach (var (shared, index) in section.SharedColors.Select((c, i) => (c, i)))
-                {
-                    <line x1="@F(section.FromX)" y1="@F(line.Y)" x2="@F(section.ToX)" y2="@F(line.Y)"
-                          stroke="@shared" stroke-width="@F(SharedWidth)" stroke-linecap="butt"
-                          stroke-dasharray="@DashPattern" stroke-dashoffset="@F(index * DashStep)" />
-                }
-            }
-            <SvgText X="line.StartX - TopologyDiagram.NumberOffset" Y="line.Y + 4" Anchor="end"
-                     Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@line.Number" />
-            @foreach (var node in line.Nodes.Where(n => !n.Hidden))
-            {
-                <circle cx="@F(node.X)" cy="@F(node.Y)" r="5"
-                        fill="#fff" stroke="@line.Color" stroke-width="2" />
-                <SvgText X="node.X" Y="node.Y + (node.LabelBelow ? LabelDrop : -LabelRise)" Anchor="middle"
+                <circle cx="@F(node.X)" cy="@F(node.Y)" r="@F(TopologyDiagram.NodeRadius)"
+                        fill="#fff" stroke="@NodeColor(node)" stroke-width="2" />
+                @* Where the signature goes is worked out with the rest of the geometry, so that the side
+                   chosen to keep it off the track is the side it is actually drawn on. *@
+                <SvgText X="node.LabelX" Y="node.LabelY" Anchor="@node.LabelAnchor"
                          Fill="@TextColor" FontSize="TopologyDiagram.FontSize" FontWeight="600" Text="@node.Signature" />
-            }
+            </g>
         }
     </svg>
 }
 
 @code {
-    /// <summary>The layout to draw. Nothing is rendered when it has no stretches to show.</summary>
+    /// <summary>The layout to draw. Nothing is rendered when it has no track to show.</summary>
     [Parameter, EditorRequired] public Layout? Layout { get; set; }
 
-    // Text stays a neutral black regardless of each line's colour, so labels never clash with a
+    /// <summary>
+    /// Whether the planner may drag a location to where it belongs. Off by default, so the printed
+    /// booklet shows the diagram without inviting anyone to move anything.
+    /// </summary>
+    [Parameter] public bool Editable { get; set; }
+
+    /// <summary>
+    /// Raised once a location has been dropped and its new position written to the layout. The parent
+    /// saves; this component only draws and moves.
+    /// </summary>
+    [Parameter] public EventCallback Moved { get; set; }
+
+    // Text stays a neutral black regardless of each stretch's colour, so labels never clash with a
     // similarly-coloured line and remain equally legible across the whole diagram.
     private const string TextColor = "#223";
 
-    // A section is drawn to the same overall weight whether it is single or double track, so that the number
-    // of tracks reads from the gap between them rather than from the line getting heavier. Two tracks of
-    // TrackWidth centred TrackGap apart leave a clear gap between them and still span the single line's 10.
+    // Track no timetable stretch runs over: drawn, but in a neutral grey, so a gap in the timetable
+    // stretches can be seen rather than being invisible for want of a colour.
+    private const string UncoveredColor = "#b9b9c2";
+
+    // A stretch is drawn to the same overall weight whether it is single or double track, so that the
+    // number of tracks reads from the gap between them rather than from the line getting heavier.
     private const double SectionWidth = 10.0;
     private const double TrackGap = 6.5;
 
-    // Where a station's signature sits relative to its circle. Above it by default; below it — far enough
-    // down to clear the circle and sit on its own baseline — where a branch climbs away from that station.
-    private const double LabelRise = 10.0;
-    private const double LabelDrop = 22.0;
+    // How near a location the pointer must come to grab it.
+    private const double GrabRadius = 15.0;
 
-    // Dashes of a sharing stretch's colour laid over a section: short enough to read as an overlay rather
-    // than as the section's own colour, and stepped so two sharing stretches do not fall on each other.
+    // Dashes of a sharing stretch's colour laid over a stretch: short enough to read as an overlay rather
+    // than as the stretch's own colour, and stepped so two sharing stretches do not fall on each other.
     private const double SharedWidth = 5.0;
     private const double DashStep = 8.0;
     private const string DashPattern = "5 11";
 
-    // Where each track of a section sits relative to the line: one track on the line itself, two straddling
-    // it evenly. More than two are spread the same way, out from the middle.
+    private ElementReference _svg;
+    private IJSObjectReference? _module;
+    private DotNetObjectReference<TopologyDiagramView>? _self;
+
+    // What is being dragged: which location, where it was when the drag began, and how far the pointer
+    // has moved since. The frame is held still for the whole drag — recomputing it as the location moves
+    // would rescale the drawing under the pointer, and the pointer would then chase its own tail.
+    private OperationLocation? _dragging;
+    private (double X, double Y) _from;
+    private (double X, double Y) _by;
+    private string? _frozen;
+
+    private TopologyDiagram? Diagram =>
+        Layout is null || (Layout.TrackStretches.Count == 0 && Layout.TimetableStretches.All(s => s.Stretches.Count == 0))
+            ? null
+            : TopologyDiagram.Build(Layout, withRoomToArrange: Editable);
+
+    // The window the drawing is seen through. It is held still for the whole of a drag: recomputing it as
+    // the location moves would rescale the drawing under the pointer, and the pointer would chase its own
+    // tail — every step it took would move what it was dragging somewhere else.
+    private string ViewBox(TopologyDiagram diagram) =>
+        _frozen ?? $"{F(diagram.MinX)} {F(diagram.MinY)} {F(diagram.Width)} {F(diagram.Height)}";
+
+    private static string BaseColor(TopologySection section) => section.IsUncovered ? UncoveredColor : section.Colors[0];
+
+    private string NodeColor(TopologyNode node) => _dragging?.Id == node.LocationId ? "#c33" : TextColor;
+
+    // Where each track of a stretch sits relative to the line between its two locations: one track on the
+    // line itself, two straddling it evenly, more spread the same way out from the middle. The offset is
+    // taken along the perpendicular, so a stretch drawn at an angle keeps its tracks the same width apart
+    // as one drawn level.
+    private static (double X, double Y) Normal(TopologySection section, double offset)
+    {
+        if (offset == 0.0) return (0.0, 0.0);
+        var dx = section.ToX - section.FromX;
+        var dy = section.ToY - section.FromY;
+        var length = Math.Sqrt((dx * dx) + (dy * dy));
+        return length <= 0.0 ? (0.0, 0.0) : (-dy / length * offset, dx / length * offset);
+    }
+
     private static IEnumerable<double> TrackOffsets(int tracks) =>
         tracks <= 1
             ? [0.0]
@@ -85,11 +147,65 @@
 
     private static double TrackWidth(int tracks) => tracks <= 1 ? SectionWidth : 4.0;
 
-    private TopologyDiagram? Diagram =>
-        Layout is null || Layout.TimetableStretches.All(s => s.Stretches.Count == 0)
-            ? null
-            : TopologyDiagram.Build(Layout);
-
     // SVG requires '.' as the decimal separator regardless of UI culture.
     private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Editable)
+            _module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Tellurian.Trains.Schedules.Planning.Components/js/topology.js");
+    }
+
+    private async Task StartDrag(PointerEventArgs e, TopologyNode node)
+    {
+        if (!Editable || _module is null || Layout is null) return;
+        if (Layout.OperationLocations.FirstOrDefault(l => l.Id == node.LocationId) is not { } location) return;
+
+        _dragging = location;
+        _from = (node.X, node.Y);
+        _by = (0.0, 0.0);
+        _frozen = Diagram is { } diagram ? ViewBox(diagram) : null;
+        _self ??= DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("startDrag", _svg, _self, e.ClientX, e.ClientY);
+    }
+
+    /// <summary>Called from the drag script as the pointer moves, with how far it has moved in diagram units.</summary>
+    [JSInvokable]
+    public void OnDragMove(double byX, double byY)
+    {
+        if (_dragging is null || Layout is null) return;
+        _by = (byX, byY);
+        // Written straight into the layout so the whole diagram is redrawn from it and the track follows
+        // the location as it moves. Only the drop is saved; a drag that is abandoned costs nothing.
+        Layout.SetTopologyPosition(_dragging, _from.X + byX, _from.Y + byY);
+        StateHasChanged();
+    }
+
+    /// <summary>Called from the drag script when the pointer is released, with the final movement.</summary>
+    [JSInvokable]
+    public async Task OnDragEnd(double byX, double byY)
+    {
+        if (_dragging is null || Layout is null) return;
+        var location = _dragging;
+        if (byX != 0.0 || byY != 0.0) _by = (byX, byY);
+
+        var (x, y) = TopologyDiagram.Snap(_from.X + _by.X, _from.Y + _by.Y);
+        Layout.SetTopologyPosition(location, x, y);
+
+        _dragging = null;
+        _frozen = null;
+        StateHasChanged();
+        await Moved.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _self?.Dispose();
+        if (_module is not null)
+        {
+            try { await _module.DisposeAsync(); }
+            catch (JSDisconnectedException) { /* The page is going away; the module goes with it. */ }
+        }
+    }
 }

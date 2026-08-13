@@ -3,19 +3,21 @@
     --surface: #fff;
     --primary: #1a3a5c;
 
-    /* Two aligned columns across all rows: the vehicle column sizes to its widest content (so a row's
-       vehicles and "+ vehicle" never wrap), the parts column takes the rest and wraps internally. */
+    /* Three aligned columns across all rows: the vehicle column sizes to its widest content (so a row's
+       vehicles and "+ vehicle" never wrap), the actions column holds the controls that act on the whole
+       working, and the parts column takes the rest and wraps internally. Keeping the actions out of the
+       parts column is what lets every wrapped line of train blocks start at the same place. */
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto auto 1fr;
     border: 1px solid var(--border);
     border-radius: 5px;
     overflow: hidden;
     font-size: 0.85rem;
 
     /* A leading conflict column is opened only while some working in the chart has a conflict, so a clean
-       plan keeps the two-column chart it always had. */
+       plan keeps the three-column chart it always had. */
     &.with-conflicts {
-        grid-template-columns: auto auto 1fr;
+        grid-template-columns: auto auto auto 1fr;
     }
 
     /* Column headers: cells placed directly into the grid (like a row's cells), so they align with
@@ -28,7 +30,8 @@
     }
 
     .head.conflict-head,
-    .head.vehicle-head {
+    .head.vehicle-head,
+    .head.actions-head {
         border-right: 1px solid var(--border);
     }
 
@@ -59,6 +62,7 @@
     /* Row separators live on the cells, since the row itself generates no box (display: contents). */
     .sched-row:first-child .conflict-cell,
     .sched-row:first-child .sched-vehicle,
+    .sched-row:first-child .sched-actions,
     .sched-row:first-child .parts {
         border-top: none;
     }
@@ -86,6 +90,21 @@
         flex-wrap: nowrap;
         align-items: center;
         gap: 0.25rem;
+    }
+
+    /* The controls that act on the whole working (clone, complement, delete). A column of their own so they
+       line up down the chart and the train blocks — including their wrapped lines — all start at the same
+       place. Positioned, so the delete confirmation can float out of the cell. */
+    .sched-actions {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+        padding: 0.4rem 0.5rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        border-top: 1px solid var(--border);
     }
 
     .chip {
@@ -203,7 +222,7 @@
     }
 
     /* The schedule's effective (common) sessions/days, shown before the first part when the working does
-       not run on every session. Placed between the delete control and the first train block. */
+       not run on every session. */
     .sched-sessions {
         align-self: center;
         font-weight: 600;
@@ -263,8 +282,8 @@
         background: #eef3f8;
     }
 
-    /* Delete-schedule control: the first item in the train sequence, so it plainly targets the whole
-       schedule (not a vehicle). */
+    /* Delete-schedule control: in the Actions column, so it plainly targets the whole schedule
+       (not a vehicle). */
     .del-sched {
         border: 1px solid var(--border);
         background: #fff;
@@ -277,8 +296,15 @@
     }
 
     .del-sched:hover,
+    .del-sched.armed,
     .confirm .danger:hover {
         background: #fbeaea;
+    }
+
+    /* While its confirmation is open, the delete control stays put and shows as armed, so the question
+       beside it plainly belongs to this row. */
+    .del-sched.armed {
+        border-color: #a11;
     }
 
     /* Clone / complement controls: sit beside the delete control and target the whole schedule. */
@@ -299,11 +325,25 @@
         background: #eef3f8;
     }
 
+    /* The delete confirmation floats out of the Actions cell, over the start of the trains column: asking
+       the question must not widen the Actions column of every row in the chart. */
     .confirm {
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
         display: flex;
         gap: 0.3rem;
         align-items: center;
+        white-space: nowrap;
         font-size: 0.78rem;
+        margin-left: 0.4rem;
+        padding: 0.25rem 0.4rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     }
 
     .confirm .danger {

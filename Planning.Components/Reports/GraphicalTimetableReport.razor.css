@@ -1,0 +1,31 @@
+/* The stack of graphs on one sheet. A horizontal time axis makes wide, short graphs, so they stack downward;
+   a vertical one makes tall, narrow graphs, so they stack sideways — the same transpose the screen tab uses.
+   The gap must match GraphPageGeometry.GraphGapMm, and the heading below must fit its HeadingHeightMm, or the
+   paginator will fit one graph more per sheet than the paper actually holds. */
+.graph-page {
+    display: flex;
+    gap: 5mm;
+
+    &.horizontal {
+        flex-direction: column;
+    }
+
+    &.vertical {
+        flex-direction: row;
+    }
+}
+
+/* Heading budget: 4.2 mm of text plus a 1 mm gap, inside the 6 mm reserved per graph. */
+.graph {
+    h3 {
+        margin: 0 0 1mm 0;
+        font-size: 10pt;
+        font-weight: bold;
+        line-height: 1.2;
+    }
+
+    .time-span {
+        font-size: 9pt;
+        font-weight: normal;
+    }
+}

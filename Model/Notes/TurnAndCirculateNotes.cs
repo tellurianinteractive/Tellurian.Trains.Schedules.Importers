@@ -6,8 +6,9 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Derived from <see cref="TractionOptions.ReverseLoco"/>. Both the loco driver and the station's
-/// dispatcher get it: the driver does the move, and the dispatcher has to give it the road.
+/// Derived from <see cref="TractionOptions.RunaroundLoco"/>, and only where the traction actually needs
+/// the move. Both the loco driver and the station's dispatcher get it: the driver does the move, and the
+/// dispatcher has to give it the road.
 /// </para>
 /// <para>
 /// It names no vehicle. Circulating is a manoeuvre every loco driver knows, and the loco is the one

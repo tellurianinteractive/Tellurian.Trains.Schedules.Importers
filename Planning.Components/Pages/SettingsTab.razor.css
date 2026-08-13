@@ -53,6 +53,32 @@
         max-width: none;
     }
 
+    /* A section that carries two blocks of fields beside each other needs room for two label columns. */
+    .section.columned {
+        max-width: 1120px;
+    }
+
+    /* Two blocks of settings side by side, each one a grid of its own so its labels align with each
+       other rather than with the other block's. auto-fit drops them onto one column when the pane is
+       too narrow for two, without a media query — the settings live in a dockable pane, so what
+       matters is the pane's width, not the window's. */
+    .columns {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+        column-gap: 2.5rem;
+        align-items: start;
+    }
+
+    .columns .block {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        align-items: center;
+    }
+
+    .columns .block > * {
+        grid-column: 1 / -1;
+    }
+
     .field {
         display: grid;
         grid-template-columns: subgrid;
@@ -100,6 +126,12 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
+    }
+
+    /* Numbers read down a column and are compared with each other, so they align on their last digit
+       instead of drifting with the number of digits typed. */
+    input[type="number"] {
+        text-align: right;
     }
 
     .field input[type="number"] {
@@ -157,6 +189,11 @@
         margin: 1.25rem 0 0.5rem;
         font-weight: 600;
         color: #1a3a5c;
+    }
+
+    /* A section that opens with a heading has nothing above it to be separated from. */
+    .section > .group-heading:first-child {
+        margin-top: 0;
     }
 
     .hint {

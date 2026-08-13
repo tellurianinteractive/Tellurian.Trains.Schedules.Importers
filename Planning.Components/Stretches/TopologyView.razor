@@ -3,21 +3,27 @@
 @inject Translator Translator
 @implements IDisposable
 
-@* The Stretches tab's topology view: the shared diagram plus the tab's own hint and scrolling. The
-   drawing itself lives in Planning.Components.Shared so the duty booklet's overview page renders the
-   same schematic. *@
+@* The Stretches tab's topology view: the shared diagram plus the tab's own hint, scrolling and the one
+   command it needs. The drawing itself lives in Planning.Components.Shared so the duty booklet's overview
+   page renders the same schematic — read-only there, since a booklet is printed, not arranged. *@
 
 <div class="topology">
     <p class="hint">@Translator("TopologyHint")</p>
 
-    @if (Layout is null || Layout.TimetableStretches.All(s => s.Stretches.Count == 0))
+    @if (Layout is null || (Layout.TrackStretches.Count == 0 && Layout.TimetableStretches.All(s => s.Stretches.Count == 0)))
     {
         <p class="empty">@Translator("TopologyNoStretches")</p>
     }
     else
     {
+        <div class="commands">
+            <button type="button" class="secondary" disabled="@(!Layout.HasTopologyPositions)"
+                    title="@Translator("TopologyArrangeAutomaticallyHint")" @onclick="ArrangeAutomatically">
+                @Translator("TopologyArrangeAutomatically")
+            </button>
+        </div>
         <div class="topology-scroll">
-            <TopologyDiagramView Layout="Layout" />
+            <TopologyDiagramView Layout="Layout" Editable="true" Moved="OnMoved" />
         </div>
     }
 </div>
@@ -28,6 +34,14 @@
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // The diagram writes the new position into the layout itself, so all that is left is to save it.
+    private void OnMoved() => ScheduleState.SaveAndNotify();
+
+    private void ArrangeAutomatically()
+    {
+        if (Layout?.ClearTopologyPositions() == true) ScheduleState.SaveAndNotify();
+    }
 
     public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;
 }

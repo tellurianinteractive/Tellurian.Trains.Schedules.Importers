@@ -87,6 +87,13 @@
             color: #3d5c3d;
         }
 
+        .hint {
+            margin: 0.1rem 0 0.6rem 0;
+            color: #667;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
         .warning {
             margin: 0.3rem 0 0 0;
             padding: 0.35rem 0.6rem;

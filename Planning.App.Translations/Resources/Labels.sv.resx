@@ -229,7 +229,7 @@
     <value>Klass</value>
   </data>
   <data name="Continued" xml:space="preserve">
-    <value>fortssatt</value>
+    <value>fortsatt</value>
   </data>
   <data name="Page" xml:space="preserve">
     <value>Sida</value>
@@ -336,6 +336,15 @@
   <data name="BreakForPrinting" xml:space="preserve">
     <value>Brytpunkt (delar grafen i två halvor)</value>
   </data>
+  <data name="CommonSettings" xml:space="preserve">
+    <value>Gemensamma inställningar</value>
+  </data>
+  <data name="OnScreen" xml:space="preserve">
+    <value>På skärmen</value>
+  </data>
+  <data name="PrintedReport" xml:space="preserve">
+    <value>Utskriven rapport</value>
+  </data>
   <data name="TimeAxisOrientation" xml:space="preserve">
     <value>Tidsaxelns orientering</value>
   </data>
@@ -365,6 +374,24 @@
   </data>
   <data name="TrackSpacing" xml:space="preserve">
     <value>Spåravstånd (px)</value>
+  </data>
+  <data name="GraphicalTimetableReport" xml:space="preserve">
+    <value>Grafisk tidtabell</value>
+  </data>
+  <data name="PrintHourSpacing" xml:space="preserve">
+    <value>Timavstånd, snabbklocka (mm/h)</value>
+  </data>
+  <data name="PrintKilometerSpacing" xml:space="preserve">
+    <value>Avståndsskala (mm/km)</value>
+  </data>
+  <data name="PrintStationSpacing" xml:space="preserve">
+    <value>Stationsavstånd (mm)</value>
+  </data>
+  <data name="PrintTrackSpacing" xml:space="preserve">
+    <value>Spåravstånd (mm)</value>
+  </data>
+  <data name="PrintMonochrome" xml:space="preserve">
+    <value>Svartvitt?</value>
   </data>
   <data name="ShowTrainCategory" xml:space="preserve">
     <value>Visa tågkategori?</value>
@@ -661,7 +688,13 @@
     <value>Topologi</value>
   </data>
   <data name="TopologyHint" xml:space="preserve">
-    <value>En schematisk översikt över tidtabellssträckorna. Stationer placeras efter spåravstånd; grenar ansluter till sträckan de utgår från.</value>
+    <value>En schematisk översikt över banans spår, där varje driftplats visas en gång. Dra en driftplats dit den hör hemma, så följer spåren med.</value>
+  </data>
+  <data name="TopologyArrangeAutomatically" xml:space="preserve">
+    <value>Placera automatiskt</value>
+  </data>
+  <data name="TopologyArrangeAutomaticallyHint" xml:space="preserve">
+    <value>Glöm alla driftplatser du har flyttat och rita hela skissen automatiskt igen.</value>
   </data>
   <data name="TopologyNoStretches" xml:space="preserve">
     <value>Definiera tidtabellssträckor för att se topologin.</value>
@@ -1022,6 +1055,12 @@
   </data>
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om driftplatsen sköts av en tågklarerare i stället för att vara självbetjänad.</value>
+  </data>
+  <data name="HasTurntable" xml:space="preserve">
+    <value>Har vändskiva?</value>
+  </data>
+  <data name="HasTurntableHelp" xml:space="preserve">
+    <value>Om driftplatsen har en vändskiva, så att lok kan vändas här. Ånglok kan bara vändas där det finns en vändskiva.</value>
   </data>
   <data name="IsScheduled" xml:space="preserve">
     <value>Tidtabellslagd?</value>
@@ -1836,6 +1875,25 @@
   </data>
   <data name="IsReversibleTrainHelp" xml:space="preserve">
     <value>Tåget kan köras från båda ändarna — med manövervagn eller ett lok i andra änden — så ingen tid avsätts för lokrundgång där tåget vänder.</value>
+  </data>
+  <data name="TurnLoco" xml:space="preserve">
+    <value>Vänd loket?</value>
+  </data>
+  <data name="TurnLocoHelp" xml:space="preserve">
+    <value>Loket vänds på vändskivan efter ankomsten, så att det står åt andra hållet. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+  </data>
+  <data name="TurnLocoNoTurntable" xml:space="preserve">
+    <value>{0} har ingen vändskiva, så inget kan vändas där.</value>
+    <comment>{0}=station name</comment>
+  </data>
+  <data name="RunaroundLoco" xml:space="preserve">
+    <value>Gör rundgång?</value>
+  </data>
+  <data name="RunaroundLocoHelp" xml:space="preserve">
+    <value>Loket körs runt till andra änden av tåget efter ankomsten, så att tåget kan avgå åt det håll det kom ifrån. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+  </data>
+  <data name="RunaroundLocoNotNeeded" xml:space="preserve">
+    <value>Dragfordonet som går på tågavsnittet kan vända som det står, så ingen anmärkning om rundgång skrivs ut.</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antal enheter</value>

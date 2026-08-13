@@ -69,6 +69,13 @@ public sealed class Layout : IEquatable<Layout>
     public ICollection<DispatchStretch> DispatchStretches { get; set; }
 
     /// <summary>
+    /// Gets or sets where the planner has put operation locations in the topology diagram. Only the
+    /// locations that have been moved are here; the rest are placed automatically. See
+    /// <see cref="TopologyPosition"/>.
+    /// </summary>
+    public ICollection<TopologyPosition> TopologyPositions { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="Layout"/> with empty collections.
     /// </summary>
     public Layout()
@@ -80,6 +87,7 @@ public sealed class Layout : IEquatable<Layout>
         TrackStretches = [];
         TimetableStretches = [];
         DispatchStretches = [];
+        TopologyPositions = [];
     }
 
     /// <inheritdoc/>

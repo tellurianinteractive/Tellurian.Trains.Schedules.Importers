@@ -174,6 +174,37 @@ public class PlanSettingsPersistenceTests
         Assert.AreSame(restored.Layout.OperationLocations.First(), key.HeldAt);
     }
 
+    [TestMethod]
+    public void TopologyPositionsSurvivePlanRoundTrip()
+    {
+        // Where the planner has put a location in the topology diagram is part of the plan: arranging a
+        // layout with cycles in it is real work, and losing it on the next load would mean doing it again
+        // every session.
+        var plan = PlanWithTrain(out _);
+        var moved = plan.Layout.OperationLocations.Last();
+        plan.Layout.SetTopologyPosition(moved, 320.0, 184.0);
+
+        var json = JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        var restored = JsonSerializer.Deserialize<Plan>(json, PlanJson.CreateOptions());
+
+        Assert.IsNotNull(restored);
+        var position = restored.Layout.TopologyPositionOf(restored.Layout.OperationLocations.Last());
+        Assert.IsNotNull(position);
+        Assert.AreEqual(320.0, position.X);
+        Assert.AreEqual(184.0, position.Y);
+    }
+
+    [TestMethod]
+    public void APlanWithNothingMovedCarriesNoTopologyPositions()
+    {
+        var plan = PlanWithTrain(out _);
+
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, PlanJson.CreateOptions()), PlanJson.CreateOptions());
+
+        Assert.IsNotNull(restored);
+        Assert.IsFalse(restored.Layout.HasTopologyPositions);
+    }
+
     // A minimal plan of the shape the app creates: two stations joined by a track stretch, one
     // timetable stretch over it and one train calling at both ends.
     private static Plan PlanWithTrain(out Train train)
