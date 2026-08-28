@@ -1,0 +1,19 @@
+/* Each limit is one indivisible value, so it never breaks between its icon and its figure — and two
+   limits standing side by side are held apart by a gap wider than the one inside either of them, which
+   is what makes "24 axles, 12 wagons" read as two values and not four. */
+.maxload {
+    white-space: nowrap;
+
+    & + .maxload {
+        margin-left: 0.7em;
+    }
+
+    /* The mark follows its figure with nothing between them, so it is set well below the type size and
+       lifted off the baseline to sit against the middle of the digits: at the text size a filled circle
+       or square outweighs the number it qualifies, which is the wrong way round — the figure is what is
+       read, and the mark only says which limit it is. */
+    i {
+        font-size: 0.62em;
+        vertical-align: 0.15em;
+    }
+}

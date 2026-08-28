@@ -23,8 +23,15 @@ public class GraphSchedule
         Stations = [.. timetableStretch.Stations];
         TrackStretches = [.. timetableStretch.Stretches];
 
-        // Select trains that have at least one call at a station on this stretch.
-        Trains = [.. timetable.Trains.Where(t => t.Calls.Any(c => stretchStations.Contains(c.OperationLocation)))];
+        // Select trains that have at least one call at a station on this stretch. A shunting task is left
+        // out: the graph is a space-time diagram of trains travelling, and a task travels nowhere — it
+        // would contribute no line to draw while still counting towards the axis and the label thinning.
+        Trains =
+        [
+            .. timetable.Trains
+                .Where(t => !t.IsShuntingTask)
+                .Where(t => t.Calls.Any(c => stretchStations.Contains(c.OperationLocation)))
+        ];
 
         // A train may start before midnight and continue past it (calls at 24:00 or later). When any
         // call shown on this stretch runs to or past 24:00, the axis spans the full day 00:00–24:00 so

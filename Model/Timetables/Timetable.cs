@@ -395,4 +395,29 @@ public static class TimetableExtensions
         while (used.Contains(number)) number += 2;
         return number;
     }
+
+    /// <summary>
+    /// Gets the next free number for a shunting task of <paramref name="category"/>: the lowest number at
+    /// or above the category's <see cref="TrainCategory.StartNumber"/> not already used by another train
+    /// of the same category.
+    /// </summary>
+    /// <remarks>
+    /// Parity says nothing here. It encodes the direction a train travels, and a shunting task travels
+    /// nowhere — so the whole of the category's band is available to it rather than every second number.
+    /// </remarks>
+    /// <param name="timetable">The timetable whose trains define which numbers are taken.</param>
+    /// <param name="category">The shunting category whose start number and existing trains bound the search.</param>
+    /// <returns>The next free number in the category's band.</returns>
+    public static int NextShuntingTaskNumber(this Timetable timetable, TrainCategory category)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        ArgumentNullException.ThrowIfNull(category);
+        var used = timetable.Trains
+            .Where(t => t.CategoryId == category.Id)
+            .Select(t => t.Number)
+            .ToHashSet();
+        var number = Math.Max(category.StartNumber, 1);
+        while (used.Contains(number)) number++;
+        return number;
+    }
 }

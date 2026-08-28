@@ -45,6 +45,7 @@ public static class ValidationExtensions
             var timetable = plan.Timetable;
             result.AddRange(timetable.EnsureStationHasTrack());
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckTrainTimeSequence()));
+            result.AddRange(timetable.Trains.SelectMany(t => t.CheckShuntingTaskCalls()));
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidatePassengerExchange) result.AddRange(timetable.Trains.SelectMany(t => t.CheckPassengerExchange()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
@@ -684,9 +685,29 @@ public static class ValidationExtensions
             List<ValidationError> result = [];
             result.AddRange(train.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             result.AddRange(train.CheckTrainTimeSequence());
+            result.AddRange(train.CheckShuntingTaskCalls());
             if (options.ValidateRouteContinuity) result.AddRange(train.CheckRouteContinuity());
             if (options.ValidatePassengerExchange) result.AddRange(train.CheckPassengerExchange());
             return result;
+        }
+
+        /// <summary>
+        /// Checks that a shunting task has the one station call it is defined by (rule T7).
+        /// </summary>
+        /// <remarks>
+        /// A shunting task is work done at one location over a span of time: its call's arrival is when
+        /// the work starts and its departure when it ends. A task with no call has no time and nowhere to
+        /// be; a task with several is a route, which is a travelling train and not a task at all. The
+        /// editors do not let a second call be added to a task, so what this catches is a train given the
+        /// shunting category after it was built as a travelling train — and the remedy, deleting calls or
+        /// changing the category back, is the planner's to choose.
+        /// </remarks>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckShuntingTaskCalls()
+        {
+            if (!train.IsShuntingTask || train.Calls.Count == 1) return [];
+            var message = Message.Warning(Strings.ShuntingTaskMustHaveExactlyOneCall, train, train.Calls.Count);
+            return [ValidationError.ShuntingTaskCallCount(train, message)];
         }
 
         /// <summary>

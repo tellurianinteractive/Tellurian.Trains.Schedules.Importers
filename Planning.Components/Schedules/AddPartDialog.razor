@@ -32,24 +32,29 @@
             @if (SelectedTrain is { } train)
             {
                 var calls = train.CallsInRunOrder;
-                <div class="field">
-                    <label>@Translator("From")</label>
-                    <select value="@_from" disabled="@FromFixed" @onchange="e => SetFrom(e)">
-                        @for (var i = 0; i < calls.Count - 1; i++)
-                        {
-                            <option value="@i">@CallText(calls[i], departure: true)</option>
-                        }
-                    </select>
-                </div>
-                <div class="field">
-                    <label>@Translator("To")</label>
-                    <select value="@_to" @onchange="e => SetTo(e)">
-                        @for (var i = _from + 1; i < calls.Count; i++)
-                        {
-                            <option value="@i">@CallText(calls[i], departure: false)</option>
-                        }
-                    </select>
-                </div>
+                @* A shunting task is worked at one call from beginning to end, so there is nothing to pick
+                   between: the whole of it is the part, and the preview alone says what that is. *@
+                @if (!train.IsShuntingTask)
+                {
+                    <div class="field">
+                        <label>@Translator("From")</label>
+                        <select value="@_from" disabled="@FromFixed" @onchange="e => SetFrom(e)">
+                            @for (var i = 0; i < calls.Count - 1; i++)
+                            {
+                                <option value="@i">@CallText(calls[i], departure: true)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>@Translator("To")</label>
+                        <select value="@_to" @onchange="e => SetTo(e)">
+                            @for (var i = _from + 1; i < calls.Count; i++)
+                            {
+                                <option value="@i">@CallText(calls[i], departure: false)</option>
+                            }
+                        </select>
+                    </div>
+                }
 
                 <p class="preview">@PreviewText(train)</p>
 
@@ -161,6 +166,10 @@
     private string PreviewText(Train train)
     {
         var calls = train.CallsInRunOrder;
+        // A shunting task reads the other way round: it starts when the vehicle gets there and ends when
+        // it leaves, so the arrival leads and the departure closes.
+        if (train.IsShuntingTask && calls.Count == 1)
+            return $"{CallText(calls[0], departure: false)} → {calls[0].Departure.HHMM()}";
         return $"{CallText(calls[_from], departure: true)} → {CallText(calls[_to], departure: false)}";
     }
 

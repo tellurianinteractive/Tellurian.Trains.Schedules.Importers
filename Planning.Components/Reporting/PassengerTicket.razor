@@ -1,0 +1,43 @@
+@inject Translator Translator
+
+@* One return ticket: two single tickets side by side, folded down the middle so the outward journey is
+   on one face of the folded ticket and the journey home on the other. Each half is a whole pocket card,
+   the same size as a turnus card, so one set of cut lines serves every card printed for a meeting.
+
+   The two halves are the same journey read in opposite directions, so the markup is written once and
+   rendered twice with the stations swapped. Only the stations swap: the seller and the validity belong
+   to the ticket rather than to a direction (see TicketData), so both halves print them identically. *@
+
+<div class="ticket">
+    @if (Item is not null)
+    {
+        @foreach (var side in Sides)
+        {
+            <PocketCard>
+                <div class="ticketside">
+                    <div class="caption">@Translator("Destination")</div>
+                    <div class="destination">@side.Destination</div>
+                    <div class="caption">@Translator("Origin")</div>
+                    <div class="origin">@side.Origin</div>
+                    @if (Item.Validity(Translator) is { Length: > 0 } validity)
+                    {
+                        <div class="validity">@validity</div>
+                    }
+                    <div class="seller">
+                        <CompanyLogo Company="Item.SoldBy" />
+                        <div class="soldby">@Item.SoldByText(Translator)</div>
+                    </div>
+                </div>
+            </PocketCard>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>The ticket to print. Nothing is rendered without one.</summary>
+    [Parameter] public TicketData? Item { get; set; }
+
+    // The outward journey first, then the way home — the same ticket read the other way round.
+    private IEnumerable<(string Destination, string Origin)> Sides =>
+        Item is null ? [] : [(Item.Destination, Item.Origin), (Item.Origin, Item.Destination)];
+}

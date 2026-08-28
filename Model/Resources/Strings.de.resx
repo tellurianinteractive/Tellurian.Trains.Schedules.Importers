@@ -231,6 +231,9 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Zug {0} muss an mindestens zwei Bahnhöfen halten.</value>
   </data>
+  <data name="ShuntingTaskMustHaveExactlyOneCall" xml:space="preserve">
+    <value>Rangieraufgabe {0} muss genau einen Halt haben, hat aber {1}.</value>
+  </data>
   <data name="TrainHasNoStretchBetweenCalls" xml:space="preserve">
     <value>Zug {0} fährt von {1} {2} nach {3} {4}, aber die Anlage hat keine Strecke zwischen diesen Betriebsstellen.</value>
   </data>

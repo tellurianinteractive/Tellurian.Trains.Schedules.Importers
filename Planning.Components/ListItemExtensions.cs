@@ -12,9 +12,10 @@ namespace Tellurian.Trains.Schedules.Planning.Components;
 /// <para>
 /// Each type has two overloads: the no-argument one sorts by the displayed description; the keyed one
 /// sorts the source by the returned value before projecting — use it when the description does not sort
-/// correctly as text, e.g. a call shown as "Sti 14:30" must be sorted by its <c>SortTime</c>:
-/// <c>train.DepartureCalls.ToListItems(c =&gt; c.SortTime)</c>. A list that depends on another selection
-/// re-sorts naturally because it is re-projected each render from a freshly filtered sequence.
+/// correctly as text, e.g. a company shown by name but listed in catalogue order. A station call takes
+/// this further: what it is listed for decides which of its two times it shows, so the caller passes that
+/// time and it is sorted by it. A list that depends on another selection re-sorts naturally because it is
+/// re-projected each render from a freshly filtered sequence.
 /// </para>
 /// </summary>
 public static class ListItemExtensions
@@ -29,13 +30,19 @@ public static class ListItemExtensions
     private static ListboxItem ToItem(Train train) => new(train.Id.ToString(), train.ListLabel);
 
     // ---- StationCall ----
+    // A call is shown as "Sti 14:30", and which of the call's two times that is depends on what the list
+    // is for. A cargo flow, for one, connects its wagons at a departure and disconnects them at an
+    // arrival — and on a shunting task, whose flow spans its single call from when the work starts to
+    // when it ends, those two are the other way round (Train.CargoFlowConnectTime). So the caller names
+    // the time to show, and the list is sorted by it, so that the times read in order.
+    public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationCall> calls, Func<StationCall, Time> shownTime) =>
+        calls.OrderBy(shownTime).Select(call => ToItem(call, shownTime(call)));
+
+    // Without a time named, a call shows the one it sorts by.
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<StationCall> calls) =>
-        SortedByDescription(calls.Select(ToItem));
+        SortedByDescription(calls.Select(call => ToItem(call, call.SortTime)));
 
-    public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<StationCall> calls, Func<StationCall, TKey> sorting) =>
-        calls.OrderBy(sorting).Select(ToItem);
-
-    private static ListboxItem ToItem(StationCall call) => new(call.Id.ToString(), $"{call.OperationLocation.Name} {call.SortTime.HHMM()}");
+    private static ListboxItem ToItem(StationCall call, Time time) => new(call.Id.ToString(), $"{call.OperationLocation.Name} {time.HHMM()}");
 
     // ---- CargoFlowOptions (cargo descriptions) ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions) =>
@@ -51,8 +58,8 @@ public static class ListItemExtensions
     //   classes, no origins -> "U,Z wagons to <destinations>"
     //   no classes, origins -> "Wagons from <origins> to <destinations>"
     //   no classes, no origins -> "Wagons to <destinations>"
-    // Needs a Translator for the localised, word-order-preserving format strings. Note that the last one
-    // is WagonsToDestinations, not the placeholderless WagonsTo used as a report column header.
+    // Needs a Translator for the localised, word-order-preserving format strings — each takes the
+    // destinations as a placeholder, so none of them is the bare To used as a report column header.
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<CargoFlowOptions> descriptions, Translator translator) =>
         SortedByDescription(descriptions.Select(d => ToItem(d, translator)));
 

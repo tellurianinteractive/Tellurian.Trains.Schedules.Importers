@@ -93,6 +93,20 @@ public static class ScheduleJointExtensions
             // no part before this joint, or is broken across it, is a run that merely arrives of any use.
             var acceptsArrivalOnly = joint.IsStart || joint.IsBroken;
 
+            // A shunting task has one call, which is both where the vehicle takes the task up and where it
+            // is free again, so its only run is that call to itself. It fits when the task stands where the
+            // vehicle does and falls wholly inside the time the vehicle is free.
+            if (train.IsShuntingTask && calls.Count == 1)
+            {
+                var only = calls[0];
+                if (joint.WindowStart is { } free && only.WorkStart < free) return null;
+                if (joint.WindowEnd is { } needed && only.WorkEnd > needed) return null;
+                var atJoint =
+                    (from is { } leaves && only.OperationLocation.Equals(leaves)) ||
+                    (acceptsArrivalOnly && to is { } arrives && only.OperationLocation.Equals(arrives));
+                return atJoint ? (0, 0) : null;
+            }
+
             (int From, int To)? best = null;
             var bestBridges = false;
             for (var i = 0; i < calls.Count - 1; i++)

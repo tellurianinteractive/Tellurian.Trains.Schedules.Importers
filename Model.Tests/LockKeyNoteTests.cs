@@ -9,8 +9,8 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 [TestClass]
 public class LockKeyNoteTests
 {
-    private static readonly TrainCategory Freight = new() { Id = 1, Name = "Freight", Prefix = "G", IsFreight = true };
-    private static readonly TrainCategory Passenger = new() { Id = 2, Name = "Passenger", Prefix = "P", IsPassenger = true };
+    private static readonly TrainCategory Freight = new() { Id = 1, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo };
+    private static readonly TrainCategory Passenger = new() { Id = 2, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger };
 
     // Pin both cultures to invariant so the note texts resolve the neutral (English) Notes resource,
     // independent of the host machine's culture and of the localised Notes.<culture>.resx files.

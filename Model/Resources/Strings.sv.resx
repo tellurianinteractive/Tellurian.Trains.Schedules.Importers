@@ -138,6 +138,9 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Tåg {0} måste stanna vid minst två stationer.</value>
   </data>
+  <data name="ShuntingTaskMustHaveExactlyOneCall" xml:space="preserve">
+    <value>Växlingsuppdrag {0} måste ha exakt ett uppehåll, men har {1}.</value>
+  </data>
   <data name="TrainHasNoStretchBetweenCalls" xml:space="preserve">
     <value>Tåg {0} går från {1} {2} till {3} {4}, men banan har ingen sträcka mellan dessa driftplatser.</value>
   </data>

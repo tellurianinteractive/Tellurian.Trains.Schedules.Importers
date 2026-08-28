@@ -592,11 +592,11 @@ Duty in SB train 1234                                    ← heading
 Passenger train.  Starts at: Munkeröd 11:20, ends at Stilkøbing 14:20
 Max speed: 100 km/h. Max axles: 24. Max length: 2.5 m    ← only the limits that are set
 ──────────────────────────────────────────────────────────────────────
-Traction units          │ Sessions │ Traction unit │ From │ Dep │ To │ Arr │
+Traction units          │ Runs │ Traction unit │ From │ Dep │ To │ Arr │
 ──────────────────────────────────────────────────────────────────────
-Scheduled wagonsets     │ Sessions │ Wagonset      │ From │ Dep │ To │ Arr │
+Scheduled wagonsets     │ Runs │ Wagonset      │ From │ Dep │ To │ Arr │
 ──────────────────────────────────────────────────────────────────────
-Cargo wagons with waybills │ Position │ Sessions │ Wagons from │ Classes │ Wagons to │
+Cargo wagons with waybills │ Position │ Runs │ From │ Classes │ To │ Max │
 ──────────────────────────────────────────────────────────────────────
 Train timetable       │ Arr/Dep │ Station │ Track │ Time │ Note │
 ──────────────────────────────────────────────────────────────────────
@@ -651,7 +651,9 @@ These apply to every block, and stating them once keeps the four components cons
   no "Scheduled wagonsets" heading. The `@if (HasData)` guard in the traction view already does
   this. This matters for page fitting: a suppressed block costs zero height (§6.2).
 - **The Sessions column comes first in the traction and wagonset blocks**, and uses the session
-  indicator of §5.1.1 — circles, not text (D10). The cargo block puts **Position** first instead,
+  indicator of §5.1.1 — circles, not text (D10). It is headed by the short form — *Runs* / *Kører* /
+  *Fährt* / *Kjører* / *Kör* — or by the day heading when days are shown (D115). The cargo block puts
+  **Position** first instead,
   because that is what its rows are sorted by (§5.3.5); the general rule is that the leading column
   is the sort key. The train timetable has no Sessions column at all; session-dependent facts there
   live in the note text instead.
@@ -667,7 +669,7 @@ These apply to every block, and stating them once keeps the four components cons
 | Heading | *Duty in SB train 1234* | `Company.Signature` + `Train.Number` |
 | Category, full name | *Passenger train* | `Train.Category?.Name` |
 | Start and end | *Starts at: Munkeröd 11:20, ends at Stilkøbing 14:20* | part `From` / `To` calls |
-| Limits | *Max speed: 100 km/h. Max axles: 24. Max length: 2.5 m* | `Train.MaxSpeed`, `Train.Length` |
+| Limits | *Max: 100 km/h 24● 12■ 2.5m* | `Train.MaxSpeed`, `Train.Length` |
 
 - The heading uses the **train's own** company signature, which need not be the duty's — a duty may
   work several operators' trains (D27).
@@ -683,38 +685,36 @@ possible — maximum speed, axles, wagons and length — and each is independent
 | Max wagons | `Train.Length.Wagons` | `int?` |
 | Max length | `Train.Length.Meters` | `double?` |
 
-**An unset limit contributes nothing at all — no value, and no label either.** A train with only an
-axle limit prints *"Max axles: 24"*, not *"Max speed: –. Max axles: 24. Max wagons: –."* The rule is
-built into the construction rather than applied afterwards:
-
-```csharp
-// Each limit yields a label-value pair only when it has a value; the line is the join of what survives.
-string?[] limits =
-[
-    train.MaxSpeed is { } speed ? $"{Translator("MaxSpeed")}: {speed} km/h" : null,
-    train.Length.Axles is { } axles ? $"{Translator("MaxAxles")}: {axles}" : null,
-    train.Length.Wagons is { } wagons ? $"{Translator("MaxWagons")}: {wagons}" : null,
-    train.Length.Meters is { } metres ? $"{Translator("MaxLength")}: {metres:F1} m" : null,
-];
-var line = string.Join(". ", limits.OfType<string>());
-```
+**An unset limit contributes nothing at all — no figure, and no mark either.** A train with only an
+axle limit prints *"Max: 24●"*, not *"Max: – km/h 24● –■ –m"*. The rule is built into the
+construction rather than applied afterwards: each limit is drawn only when it has a value, and
+`DriverDutyPart.HasLimits` decides whether the line is printed at all.
 
 Three reasons this matters more than it looks:
 
 - **A printed label with no value is worse than silence.** On paper a driver cannot tell "not
   restricted" from "the planner forgot"; an absent line says the first unambiguously.
-- **Most trains have one or two limits, not four.** Printing all four labels every time would
-  usually be mostly empty and would cost a line the page fitting has to pay for.
+- **Most trains have one or two limits, not four.** Printing all four every time would usually be
+  mostly empty and would cost a line the page fitting has to pay for.
 - **The whole line disappears when nothing is set**, and costs zero height — the same rule as an
   empty block (§5.3.1).
 
-**Do not use `TrainLenght.ToString()`.** It renders the symbolic compact form — `24ʘ 12■ 2.5m` —
-built from `internal` extensions for dense tabular contexts, and it returns the literal
-*"Undefined"* when nothing is set. Neither suits a header that must read plainly and vanish when
-empty. The report reads `Axles`, `Wagons` and `Meters` directly and labels them in words.
+**The limits are set compactly (D117).** The word *Max* is said once at the head of the line; the
+speed keeps its unit, which names it; axles and wagons take `●` and `■` after the figure, and the
+length is written `2.5m` — in each case the mark follows the number with nothing between them. Spelled out four times over, the labels ran wider than
+the page in the longer languages and wrapped onto a second line the page budget then had to pay for.
 
-**The labels are translated**, so `MaxAxles`, `MaxWagons` and `MaxLength` need keys in all five
-languages alongside the existing speed key.
+`MaxLoadView` draws the three length limits, and is the one place the marks are chosen — the cargo
+block's load column (§5.3.5) uses the same component, so a figure means the same thing wherever it
+appears in the booklet.
+
+**Do not use `TrainCapacity.ToString()`.** It joins all three limits and returns the literal
+*"Undefined"* when nothing is set, which a header that must vanish when empty cannot use. The report
+reads `Axles`, `Wagons` and `Meters` and composes the line itself.
+
+**The labels are translated**, so `Maximum` heads the line and `MaxSpeed`, `MaxAxles`, `MaxWagons`
+and `MaxLength` name the figures where a pointer can reach them — on screen as `title` attributes,
+which is what a reader has instead of a legend.
 
 **Header start is the arrival, not the departure.** *"Starts at: Munkeröd 11:20"* against the
 timetable's *"Dep Munkeröd … 12:20"* is deliberate: 11:20 is the train's **first arrival time** and
@@ -778,15 +778,16 @@ by the Sessions column.
 Ordered by **position, then by session** — and **Position leads the columns**, unlike the two blocks
 above:
 
-| Position | Sessions | Wagons from | Classes | Wagons to |
-|---|---|---|---|---|
-| 1 | 1,3,5 | Munkeröd, also shunt | | Stilkøbing og lokalt, ØST, FYN |
-| 1 | 2,4,6 | Munkeröd, also shunt | U,Z | Stilkøbing, NORGE |
-| 2 | 1,3,5 | Rubjerg | | Stilkøbing og lokalt, ØST, FYN |
-| 2 | 2,4,6 | Rubjerg | | Stilkøbing, NORGE |
-| Any | All | Munkeröd | | Rubjerg |
+| Position | Runs | From | Classes | To | Max |
+|---|---|---|---|---|---|
+| 1 | 1,3,5 | Munkeröd, also shunt | | Stilkøbing og lokalt, ØST, FYN | 5■ |
+| 1 | 1,3,5 | Munkeröd | | Rubjerg | 16● 12■ |
+| 1 | 2,4,6 | Munkeröd, also shunt | U,Z | Stilkøbing, NORGE | 12● |
+| 2 | 1,3,5 | Rubjerg | | Stilkøbing og lokalt, ØST, FYN | |
+| 2 | 2,4,6 | Rubjerg | | Stilkøbing, NORGE | |
+| Any | All | Munkeröd | | Rubjerg | |
 
-Five columns, and no times — a cargo wagon's timing is the train's. **Position** is the wagon's place
+Six columns, and no times — a cargo wagon's timing is the train's. **Position** is the wagon's place
 in the rake, so the driver and conductor can find it.
 
 **A row is one `CargoFlowTrainPart`.** Not one destination: a flow's destinations belong together in
@@ -797,10 +798,27 @@ the `CargoFlowOptions` it references.
 | Column | Source |
 |---|---|
 | Position | `CargoFlowTrainPart.PositionInTrain`, **rendered *"Any"* when 0** |
-| Sessions | the cargo flow's sessions, as circles (§5.1.1) |
-| Wagons from | `CargoFlowOptions.Origins`, plus the from-station when wagons are taken there — see below |
+| Runs | the cargo flow's sessions, as circles (§5.1.1) |
+| From | `CargoFlowOptions.Origins`, plus the from-station when wagons are taken there, or a **globe** on a shunting task's arrived wagons — see below |
 | Classes | `CargoFlowOptions.OnlyWagonClasses` — the UIC letters limiting which wagons the flow brings |
-| Wagons to | the destinations — `CargoFlowTrainPart.ToHtml` already composes exactly this |
+| To | the destinations without their limits — `CargoFlowTrainPart.ToHtml` composes exactly this |
+| Max | the destinations' limits — `TrainPartCargoFlow.MaxLoads`, drawn by `MaxLoadView` — see below |
+
+**How much may be brought has a column of its own (D118).** It used to sit inside the *To* cell, at
+the end of a comma-joined list of place names, where it attached to whichever destination it happened
+to follow. A column of figures is scanned down; prose is not.
+
+**The column is dropped entirely when no row limits anything** — heading included — by the same rule
+that drops an empty block. On an A5 page its width comes out of the destinations, which are the
+longest thing on the row and the first to wrap.
+
+**A figure stands unqualified only when it is the whole row's (D119)**: one destination, or every
+destination carrying the same limit. Where the destinations differ, or only some of them are limited,
+each figure is named with its destination — an unnamed one would be read as applying to all the
+wagons on the row, which is the misreading the column exists to prevent.
+
+`Destination.MaxLoad` states the limit as a `TrainCapacity`, so a destination limited by both wagons
+and axles prints both (D121); the report renders it and never re-derives it.
 
 **Position 0 prints *"Any"*.** Zero means *anywhere in the train*, and a column showing `0` would be
 read as a position — position zero, at the front. The word states the fact the number encodes.
@@ -810,7 +828,7 @@ column) and `Destination.PositionInTrain` are separate values on separate types,
 named the same. The row's position is the **flow's**, not the destination's. Worth checking at the
 point of implementation, because the wrong one compiles perfectly.
 
-**"Wagons from" is a union of two sources, each name appearing once:**
+**"From" is a union of two sources, each name appearing once:**
 
 ```csharp
 // The flow's forwarded origins, plus this station itself unless nothing is taken here.
@@ -825,12 +843,34 @@ flow still forwards wagons from its origins"* — so it removes exactly one of t
 the whole column. The `Distinct()` matters: a flow whose origin list already includes the
 from-station would otherwise print it twice.
 
+**On a shunting task working arrived wagons out, the station is not one of the two sources
+(D123).** A shunting task stands at one station, so its from-station is also its to-station; a flow
+whose destinations are that station is carrying wagons that *arrived* here and go out to the cargo
+customers (`CargoFlowTrainPart.ShuntingWork` derives exactly this). Naming the station in *From*
+would repeat the *To* cell and state something false — some earlier train brought those wagons in,
+and the task itself knows nothing of where they started. So the station is left out, the flow's
+origins answer the column when it names any, and where it names none the cell carries a **globe**.
+
+This mirrors what the generated instruction already does: `ShuntArrivingWagonsNote` states the
+origins when the flow has them and leaves the clause out when it has not. The column cannot leave it
+out — a blank cell in a table reads as *unknown*, not as *unrestricted* — so it states the fact, and
+states it as a mark rather than a word (D124): *From* is the narrowest column of the block, and
+*"Hvor som helst"* wrapped it onto a second line the page budget then had to pay for. The word
+survives as the icon's `title` and `aria-label`, so it is a hover away on screen and read aloud
+unchanged; the icon is a Font Awesome glyph set at the size of the place names it stands among, and
+grey, because a place name is a fact the driver acts on and the globe says there is nothing to act
+on. This makes *From* markup rather than text, as *To* already is — so the place names in it are
+HTML-encoded.
+
+The other direction needs no rule: a flow bound elsewhere is gathering wagons *from* this station's
+customers, and the station is then genuinely where they come from.
+
 **"Also shunt" is appended to a column, not given one of its own:**
 
 | Qualifier | Condition | Column |
 |---|---|---|
-| *also shunt* | `AlsoShuntBeforeDeparture` | Wagons **from** |
-| *also shunt* | `AlsoShuntAfterArrival` **and not** `BringsNoWagonsFromHere` | Wagons **to** |
+| *also shunt* | `AlsoShuntBeforeDeparture` | **From** |
+| *also shunt* | `AlsoShuntAfterArrival` **and not** `BringsNoWagonsFromHere` | **To** |
 
 Both mean the driver performs the shunting themselves — before departure in the first case, after
 arrival in the second — so each belongs beside the movement it qualifies rather than in a separate
@@ -1573,7 +1613,7 @@ the `ScheduledTrainPart`'s `From` / `To` calls; sessions from the scheduled obje
 `IsDriverNote` (D28). Two of the note types are derived from `IsStop` and the times (D36) and are
 trivial. **The crossing and overtaking notes are not** — see Q36.
 
-**Cargo (§5.3.5)** — one row per `CargoFlowTrainPart`, five columns, all sources fixed in that
+**Cargo (§5.3.5)** — one row per `CargoFlowTrainPart`, six columns, all sources fixed in that
 section. The block matters more than its size suggests: it is the conductor's working document
 (D90).
 
@@ -2436,6 +2476,16 @@ a dash (D15).*
 | D112 | The same-direction case is **two note types** — *"Overtakes G 4012 12:02-12:05"* and *"Is overtaken by G 4012 12:02"* — replacing the single *"Meets G 4012 in the same direction"*. | The old wording was the one thing in the booklet a driver could not act on: it named an event without saying who was getting past whom, which is the whole content of an overtaking. Which of the two applies is already decided by D111's containment test with its arguments swapped, so one predicate still keeps the pair consistent. Two record types rather than one with a flag, because the report and the tests select notes by type. | 2026-07-30 |
 | D113 | A meet whose shared interval is **zero-length prints as a single time**, not `12:02-12:02`. | The interval collapses exactly when the other train runs through — the commonest overtaking of all — and an interval between a time and itself states a span that does not exist. The reader stops to work out what the repetition means, and there is nothing to find. | 2026-07-30 |
 | D114 | **Neither train may be at its own origin or terminus** — the rule that silences the driver's own first and last call applies equally to the train being met. | Those two times are the driver reporting and standing down, not movements (§5.3.6.1), so a train sitting there has finished or not yet begun its run and can be neither crossed nor passed. Applied to one side only, the same event read from the two cabs would disagree — one booklet claiming an overtaking the other's does not record — and the train said to be overtaken never moved. | 2026-07-30 |
+| D115 | The Sessions column of the vehicle and cargo blocks is headed by the **short form** — *Runs* / *Kører* / *Fährt* / *Kjører* / *Kör* — or by the day-name heading when days are shown. | The noun reaches thirteen characters in the Nordic languages (*Køresessioner*), heading a column that holds a few circles; it set the column's width from its heading rather than from its contents and took that width from the destinations, which are the longest thing on a cargo row. The verb is what the column tells you about the vehicle and is true of the day form too. The station dispatch list already heads its equivalent column this way, so the two documents now agree. | 2026-08-18 |
+| D116 | The cargo block's *Wagons from* and *Wagons to* are headed **From** and **To**, as the vehicle blocks above them are. | Under a heading naming the block as the cargo wagons, the qualifier repeated what the reader had just been told, at three times the width of the columns it headed. It also made two identical column pairs read as different ones. | 2026-08-18 |
+| D117 | *(revises D71)* Limits print in a **compact form**: the figure then its mark, with nothing between them — `24●` for axles, `12■` for wagons, and the length as `2.1m`. The word *Max* is said once at the head of the line rather than before each figure, and the speed keeps its unit, which names it. | Four labelled pairs ran wider than the A5 page in the longer languages and wrapped onto a second line the page budget then had to pay for — D70's rule about unset limits is what keeps that line short on most trains, but not on the trains that carry all four. The two marks are the ones the model has always used in its own compact form (`24ʘ 12■ 2.5m`), now drawn as icons so they scale with the type and do not depend on a glyph the body font may not carry. D71's ban on `TrainCapacity.ToString()` stands: the composition is still built limit by limit, so an unset one still contributes nothing and the whole line still vanishes when nothing is set. | 2026-08-18 |
+| D118 | A destination's load limit moves **out of the *To* cell into a column of its own**, and that column is dropped entirely when no row limits anything. | The limit is a figure among place names, and read at the end of a comma-joined list it attached to whichever destination it happened to follow. A column of figures is scanned down; prose is not. Dropping the empty column follows the rule the empty blocks and the absent limits line already follow: on an A5 page the width is taken from the destinations, which wrap first. | 2026-08-18 |
+| D119 | A limit in that column **stands unqualified only when it is the whole row's** — one destination, or every destination carrying the same limit. Otherwise each figure is named with its destination. | A bare figure states what the row may carry, so it may only stand alone when that is true. Where the destinations differ, or only some of them are limited, an unnamed figure would be read as applying to all the wagons on the row — which is the misreading the column was moved to prevent. | 2026-08-18 |
+| D120 | `Destination` renders in two pairs: `ToText` / `ToHtml` (place and limit, what a note carries) and `PlaceText` / `PlaceHtml` (place alone, what a report with a limit column carries), with `MaxLoad` / `MaxLoadText` for the limit. `CargoFlowTrainPart` gains the matching `PlacesHtml`. | A note has no column to put the limit in and must keep saying it, so the composed form cannot simply lose it. Splitting the rendering rather than parsing it apart keeps the reading of the stored zeros stated once, in the model, where both renderings take it from. The derived members are extension properties (see the repository convention), which is also what let the EF mapping drop its `Ignore(x => x.ToHtml)`. | 2026-08-18 |
+| D121 | A destination's **wagon and axle limits stand beside each other**; axles no longer override wagons, and a destination carrying both prints both. | A siding may take at most twelve wagons *and* at most sixteen axles at once, and which of the two binds depends on the wagons that turn up — sixteen axles is four bogie wagons but eight two-axle ones. The override was a rendering rule with nothing behind it: the editor offers both fields side by side and never said that filling one silenced the other, so a planner who filled both saw one of their two figures disappear from the booklet. | 2026-08-18 |
+| D123 | On a **shunting task whose flow is bound for the worked station itself**, the cargo block's *From* column leaves the station out, and states *anywhere* when the flow names no origin. | A shunting task's from-station and to-station are the same one call, so the union rule printed the station on both sides of the row: *From Munkeröd … To Munkeröd*. That is not merely redundant — it is wrong. Wagons whose destination is this station arrived here on some earlier train, and the task knows nothing of where they started, so they may have come from anywhere. Naming the origins when the flow states them matches what `ShuntArrivingWagonsNote` already says in words; saying something rather than leaving the cell blank follows position 0's *"Any"*, because a blank reads as unknown. | 2026-08-18 |
+| D124 | *(refines D123)* The *anywhere* cell is a **globe icon**, not the word, with the wording kept as its `title` and `aria-label`. *From* therefore returns markup, and its place names are HTML-encoded. | *From* is the narrowest column of the block and sizes to the place names in it, so a phrase three words long wrapped the row onto a second line — which the page budget then has to pay for, in the one block whose height it counts in rows. The same reason put the load limits behind marks (D118's column, `MaxLoadView`'s ●/■), and the same table already carries those, so the reader meets no new convention. Nothing is lost in the swap: the word is still there on hover and to a screen reader, and a globe needs no translating. | 2026-08-18 |
+| D122 | *(revises D120)* A **cargo flow's generated notes name the places only** — *Fetch wagons to Central station and local destinations and beyond from the cargo customers*, not *… and beyond Axles × 16 from …*. `CargoFlowTrainPart.ToText` / `ToHtml` therefore compose from `Destination.PlaceText` / `PlaceHtml`, and the separate `PlacesHtml` D120 added is gone. | D120 assumed a note must keep saying the limit because it has no column to put it in. It does not: the limit is a planning figure, and the note is read on the spot by someone already at the wagons. Dropped into the middle of a sentence it read as part of the destination — *and beyond Axles × 16 from the cargo customers* — which is the misreading D118 moved it out of the *To* cell to prevent, and prose is where that misreading is hardest to see coming. The limit still prints, in the cargo block's own column. `Destination` keeps both pairs: the composed one is what its `ToString()` gives. | 2026-08-18 |
 
 ---
 

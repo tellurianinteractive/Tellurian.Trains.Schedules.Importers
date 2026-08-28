@@ -1,6 +1,7 @@
 @using System.Globalization
 @using System.Net
 @using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
 
 @inject Translator Translator
 
@@ -28,10 +29,21 @@
             }
             <span>@Extent</span>
         </p>
-        @* Only the limits that are set, and no line at all when none are. *@
-        @if (Part.LimitsLine(key => Translator(key)) is { Length: > 0 } limits)
+        @* Only the limits that are set, and no line at all when none are. Every one of them is a
+           maximum, so the word is said once at the head of the line instead of before each figure:
+           spelled out four times over ("Max speed: 100 km/h. Max axles: 24. …") the labels ran wider
+           than the page in the longer languages and wrapped onto a second line the page budget then
+           had to pay for. The speed keeps its unit, which names it; the rest carry their icons. *@
+        @if (Part.HasLimits)
         {
-            <p class="limits">@limits</p>
+            <p class="limits">
+                <span class="label">@Translator("Maximum"):</span>
+                @if (Part.Train.MaxSpeed is { } speed)
+                {
+                    <span class="speed" title="@Translator("MaxSpeed")">@speed km/h</span>
+                }
+                <MaxLoadView Capacity="Part.Train.Length" />
+            </p>
         }
         <hr />
 

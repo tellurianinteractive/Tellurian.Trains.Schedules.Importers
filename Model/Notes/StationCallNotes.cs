@@ -38,6 +38,7 @@ public static class StationCallNoteExtensions
                     .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
                     .Concat(call.VehicleNotes(plan))
+                    .Concat(call.CargoFlowNotes)
                     .Where(note => note.IsStationNote)
                     .OrderBy(note => note.DisplayOrder)
             ];

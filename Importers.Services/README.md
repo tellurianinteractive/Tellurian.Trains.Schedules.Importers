@@ -75,13 +75,14 @@ var service = new TrainCategoriesFromCsvService("/path/to/categories.csv");
 Each category includes:
 - `Name` - the category name (unique within a layout)
 - `Prefix` / `Suffix` - for train number formatting (e.g., "IC 123")
-- `IsPassenger` / `IsFreight` - classification flags
+- `IsPassenger` / `IsFreight` - what the category exchanges where its trains stop; neither one set makes it a service category, which exchanges nothing
+- `IsShunting` - the category's trains are shunting tasks worked at one location rather than runs between locations
 - `Color` - for timetable graph display
 
 Bundled categories include:
-- Passenger: LocalTrain, RegionalTrain, InterCity, EuroCity, ExpressTrain, etc.
-- Freight: FreightTrain, ContainerTrain, OreTrain, TimberTrain, etc.
-- Other: EmptyTrain, Shunting, LocoTransport, ConstructionTrain, etc.
+- Passenger: LocalTrain, RegionalTrain, InterCity, InterRegio, EuroCity, EuroNight, etc.
+- Freight: FreightTrain, LocalFreightTrain, FreightExpressTrain, OreTrain, MailTrain, etc.
+- Other: ShuntingTask, ServiceTrain
 
 ## Bundled Data Files
 

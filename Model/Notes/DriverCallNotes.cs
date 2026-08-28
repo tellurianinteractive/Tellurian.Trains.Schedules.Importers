@@ -34,6 +34,7 @@ public static class DriverCallNoteExtensions
                     .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
                     .Concat(call.VehicleNotes(plan))
+                    .Concat(call.CargoFlowNotes)
                     .Where(note => note.IsDriverNote)
                     .OrderBy(note => note.DisplayOrder)
             ];

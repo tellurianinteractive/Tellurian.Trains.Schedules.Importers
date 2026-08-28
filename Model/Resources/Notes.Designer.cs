@@ -113,7 +113,34 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
                 return ResourceManager.GetString("BringsWagonsTo", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shunt arriving wagons from {0} to cargo customers..
+        /// </summary>
+        internal static string ShuntArrivingWagonsFromToCargoCustomers {
+            get {
+                return ResourceManager.GetString("ShuntArrivingWagonsFromToCargoCustomers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shunt arriving wagons to cargo customers..
+        /// </summary>
+        internal static string ShuntArrivingWagonsToCargoCustomers {
+            get {
+                return ResourceManager.GetString("ShuntArrivingWagonsToCargoCustomers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch wagons to {0} from cargo customers..
+        /// </summary>
+        internal static string FetchWagonsToFromCargoCustomers {
+            get {
+                return ResourceManager.GetString("FetchWagonsToFromCargoCustomers", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Circulate locomotive..
         /// </summary>

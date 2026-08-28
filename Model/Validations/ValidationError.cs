@@ -346,6 +346,23 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a shunting-task shape error: a train of a shunting category does not have the single
+    /// station call a task is defined by (rule T7).
+    /// </summary>
+    public static ValidationError ShuntingTaskCallCount(
+        Train train,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ShuntingTaskCallCount,
+            FromTrack = train.Calls.FirstOrDefault()?.Track ?? StationTrack.Example,
+            ToTrack = train.Calls.LastOrDefault()?.Track ?? StationTrack.Example,
+            FromTime = train.Calls.FirstOrDefault()?.Arrival ?? Time.Zero,
+            ToTime = train.Calls.LastOrDefault()?.Departure ?? Time.Zero,
+            Trains = [train],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a route-continuity error: the train runs straight from one call to the next, but the layout
     /// has no track stretch between those two operating locations, so there is no way to run the leg
     /// (rule T5).
@@ -740,6 +757,9 @@ public enum ValidationErrorType
 
     /// <summary>Train must have at least two station calls.</summary>
     TrainTooFewCalls,
+
+    /// <summary>A shunting task does not have the single station call it is defined by.</summary>
+    ShuntingTaskCallCount,
 
     /// <summary>Two calls the train runs one after the other have no track stretch between them.</summary>
     TrainRouteNotConnected,

@@ -1,0 +1,48 @@
+@page "/passenger-tickets-report"
+@layout PrintLayout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The return tickets a station sells during the meeting: one from every location that exchanges
+   passengers to every other such location, in both directions.
+
+   96 x 91 mm tickets on A4 landscape: 3 across, 2 down. The 4 mm page margin keeps the outermost
+   tickets away from the sheet edge, which most printers cannot reach. Tickets flow on without regard to
+   which location sells them, so no sheet is left half empty; they are ordered by selling location, so a
+   printed run still comes off the guillotine in blocks that can be handed to one station. *@
+
+@if (Items is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (Items.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoPassengerTickets" />
+}
+else
+{
+    @foreach (var itemsOnPage in Items.ItemsPerPage(6))
+    {
+        <A4LPage Margin="4">
+            <div class="pagebreak">
+                @foreach (var item in itemsOnPage)
+                {
+                    <PassengerTicket Item="@item" />
+                }
+            </div>
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<TicketData>? Items { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        Items = ScheduleState.Timetable?.ToPassengerTickets() ?? [];
+    }
+}

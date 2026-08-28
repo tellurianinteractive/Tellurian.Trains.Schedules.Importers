@@ -8,6 +8,14 @@ namespace Tellurian.Trains.Schedules.Planning.App.Translations;
 public class LanguageService
 {
     /// <summary>
+    /// The language the markdown content files carrying no language suffix are written in.
+    /// About.md is the English text; every other language carries its two-letter code, as About.sv.md.
+    /// The markdown provider is given this so it does not ask the server for About.en.md, a file that
+    /// by this convention never exists.
+    /// </summary>
+    public const string NeutralLanguage = "en";
+
+    /// <summary>
     /// All languages fully supported in the application (gui, reports, dynamic content)
     /// </summary>
     public static IEnumerable<Language> SupportedLanguages => [

@@ -1,0 +1,43 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@* A capacity limit in its compact form — 24●, 12■, 2.1m.
+
+   It exists because the limits are printed where words do not fit: a column of a booklet table, or a
+   header line that has to stay one line. Spelling each one out ("Max axles: 24. Max wagons: 12.") ran to
+   more than half the page width in the longer languages and wrapped.
+
+   The mark follows its figure with nothing between them, the way a unit follows a measurement — and the
+   way the model has always written these limits in its own compact form (24ʘ 12■ 2.5m). It is set as an
+   icon rather than a character so it scales with the type and prints solid, instead of depending on a
+   glyph the body font may not carry. A circle is a wheel end-on and a square a wagon end-on.
+
+   Only the limits that are set are drawn, and nothing at all when none are: on paper a driver cannot
+   tell "not restricted" from "the planner forgot", and an absent figure says the first unambiguously.
+   Every figure keeps its mark, so two limits on one line can never be read as one. *@
+
+@if (Capacity.Axles is { } axles)
+{
+    <span class="maxload axles" title="@Translator("MaxAxles")">@axles<i class="fa-solid fa-circle" aria-hidden="true"></i></span>
+}
+@if (Capacity.Wagons is { } wagons)
+{
+    <span class="maxload wagons" title="@Translator("MaxWagons")">@wagons<i class="fa-solid fa-square" aria-hidden="true"></i></span>
+}
+@if (Capacity.Meters is { } metres)
+{
+    <span class="maxload metres" title="@Translator("MaxLength")">@metres.ToString("0.0", Culture)m</span>
+}
+
+@code {
+    /// <summary>
+    /// The limit to show. An unspecified capacity renders nothing at all.
+    /// </summary>
+    [Parameter, EditorRequired] public TrainCapacity Capacity { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+}

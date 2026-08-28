@@ -1,9 +1,17 @@
 @page "/timetable-report"
 @layout PrintLayout
+@using System.Globalization
 @using Tellurian.Trains.Schedules.Planning.Timetables
 
 @inject Translator Translator
 @inject ScheduleStateService ScheduleState
+
+@* The tabular timetables, packed onto A4 landscape sheets.
+
+   A page is a row of columns and a column a stack of blocks, because a short branch line needs nowhere near
+   a whole sheet: the paginator fills the sheet with as many further stretches as its width and height hold,
+   and the flex row below is what puts them side by side. Each column is given the exact width the paginator
+   reserved for it, so what the estimate called a fit is what the browser lays out. *@
 
 @if (Pages.Count == 0)
 {
@@ -14,15 +22,25 @@ else
     @foreach (var page in Pages)
     {
         <A4LPage Margin="10">
-            @foreach (var tile in page.Tiles)
-            {
-                <TimetableStretchTable Table="tile.Table" Continued="tile.IsContinued" ShowTitle="tile.ShowTitle" />
-            }
+            <div class="timetable-page">
+                @foreach (var column in page.Columns)
+                {
+                    <div class="timetable-page-column" style="width: @Mm(column.WidthMm)">
+                        @foreach (var tile in column.Tiles)
+                        {
+                            <TimetableStretchTable Table="tile.Table" Continued="tile.IsContinued" ShowTitle="tile.ShowTitle" />
+                        }
+                    </div>
+                }
+            </div>
         </A4LPage>
     }
 }
 
 @code {
+    // Invariant, or a Swedish or German culture writes the decimal comma the CSS parser then throws away.
+    private static string Mm(double value) => $"{value.ToString("0.##", CultureInfo.InvariantCulture)}mm";
+
     private IReadOnlyList<TimetablePage> Pages { get; set; } = [];
 
     protected override async Task OnInitializedAsync()

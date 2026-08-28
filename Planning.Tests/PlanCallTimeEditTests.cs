@@ -12,7 +12,7 @@ public class PlanCallTimeEditTests
 {
     private static readonly Time Start = Time.FromHourAndMinute(8, 0);
 
-    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true, DefaultSpeed = 100 };
+    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
 
     private static Plan SimplePlan()
     {

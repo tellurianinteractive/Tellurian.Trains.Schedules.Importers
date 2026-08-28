@@ -124,12 +124,13 @@
     }
 
     // Cargo flows attach freight wagons, so only calls at stations with cargo exchange are valid
-    // connect/disconnect points — further filtering the train's default departure/arrival stops.
+    // connect/disconnect points — and on a shunting task both ends are its single call. Both rules live
+    // on the model (Train.CargoFlowDepartureCalls / CargoFlowArrivalCalls); these only name them here.
     private static IEnumerable<StationCall> CargoDepartureCalls(Train train) =>
-        train.DepartureCalls.Where(c => c.OperationLocation.HasCargoExchange);
+        train.CargoFlowDepartureCalls;
 
     private static IEnumerable<StationCall> CargoArrivalCallsAfter(Train train, StationCall from) =>
-        train.ArrivalCallsAfter(from).Where(c => c.OperationLocation.HasCargoExchange);
+        train.CargoFlowArrivalCalls(from);
 
     private void DeleteConfirmed()
     {
@@ -166,7 +167,7 @@
                     <tr @key="flow">
                         <td><input type="number" class="num" min="0" value="@flow.PositionInTrain" @onchange="e => SetPosition(flow, e)" /></td>
                         <td>
-                            <ListBoxView Items="@(CargoDepartureCalls(train).ToListItems(c => c.SortTime))"
+                            <ListBoxView Items="@(CargoDepartureCalls(train).ToListItems(c => train.CargoFlowConnectTime(c)))"
                                          Value="flow.From.Id" ValueChanged="id => SetFrom(flow, id)" />
                         </td>
                         <td>
@@ -177,7 +178,7 @@
                         <td class="center"><input type="checkbox" checked="@flow.AlsoShuntBeforeDeparture" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.AlsoShuntBeforeDeparture = e.Value is true; Save(); }" /></td>
                         <td class="center"><input type="checkbox" checked="@flow.HasCoupleNote" disabled="@flow.BringsNoWagonsFromHere" @onchange="e => { flow.HasCoupleNote = e.Value is true; Save(); }" /></td>
                         <td>
-                            <ListBoxView Items="@(CargoArrivalCallsAfter(train, flow.From).ToListItems(c => c.SortTime))"
+                            <ListBoxView Items="@(CargoArrivalCallsAfter(train, flow.From).ToListItems(c => train.CargoFlowDisconnectTime(c)))"
                                          Value="flow.To.Id" ValueChanged="id => SetTo(flow, id)" />
                         </td>
                         <td class="center"><input type="checkbox" checked="@flow.HasUncoupleNote" @onchange="e => { flow.HasUncoupleNote = e.Value is true; Save(); }" /></td>

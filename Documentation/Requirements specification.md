@@ -345,8 +345,20 @@ one graph.
 > **Status:** ✅ Built (Train Categories tab).
 
 The train categories are a catalogue saved on the timetable. The user adds, edits
-and deletes categories (name, prefix, suffix, passenger/freight, colour and an optional operating
+and deletes categories (name, prefix, suffix, type, colour and an optional operating
 company). A category **cannot be deleted** while any train references it.
+
+A category's type is **passenger**, **freight**, **shunting task** or **service train**. The type says
+what the trains of the category exchange where they stop, which is what decides where they are able to
+stop at all. A shunting task does not travel: it is worked at one station over a span of time (§3.6),
+and because it handles cargo wagons it counts as a freight category as well. A service train exchanges
+nothing — a construction train, or a locomotive or trainset moved out of service — so no exchange is
+demanded of the places it calls at, and it can stop where a location exchanges neither passengers nor
+cargo. What such a train is *for* is said by the category name. A train that leaves material wagons
+behind exchanges cargo like any other freight train, and belongs in a freight category.
+
+Building a route for a service train gives it no stops between its ends: the one stop that matters,
+such as the work site, is added by the planner (§3.6).
 
 A new timetable is seeded with two standard categories, named in the layout's default language:
 **Passenger** (prefix `P`) and **Freight** (prefix `G`), with no operating company.
@@ -380,6 +392,17 @@ A new timetable is seeded with two standard categories, named in the layout's de
 > (rules T2 and T5 in §3.11). Only the **first or last** call may be deleted, which shortens the
 > route at that end; a call in between is an operating location on the way, which the train
 > cannot skip.
+>
+> A train of a **shunting task** category is work done at one station rather than a run between
+> stations, typically making up the wagons of a departing train or taking the wagons of an arrived one
+> out to the cargo customers. Such a train has a **single call**: its arrival is the time the work
+> starts and its departure the time it ends, the same two times that bound any train's working. It is
+> added by choosing the station, the start time and how long the work lasts, and a second call cannot be
+> added to it. Which wagons are to be shunted is said by the cargo flows added to it (DM-4.2.5).
+>
+> A shunting task travels nowhere, so it draws no line on the graphical timetable and takes no column in
+> the tabular timetable; it appears in the driver duty booklets and the station reports, where what
+> happens at a station is what is being described.
 >
 > *Still to come: call-level note editing (the note-generation system, §4.5, is not built).*
 
@@ -598,12 +621,13 @@ individually and as a set.
 
 | Rule | Requirement | Status | Notes / gap |
 | ---- | ----------- | ------ | ----------- |
-| **T1** | A train has **at least two station calls**. | ✅ | Checked. |
+| **T1** | A train has **at least two station calls**. | ✅ | Checked. A shunting task is the exception: it is worked at one place and has exactly one call (T7). |
 | **T2** | A train's call times must be **ascending**, and at each operation location **arrival must not be after departure**. | ✅ | Checked. The calls are read in the order the train runs them, which is the order of their times, so what is reported is a train whose times contradict themselves — above all one that reaches the next location before it has left the previous one. |
 | **T3** | A train's **speed** between consecutive calls stays within the configured min/max thresholds. | ✅ | Checked against the configured min/max speed thresholds. |
 | **T4** | When trains are equal on **Company + Category + Number**, each instance must run on **different, non-overlapping sessions**. | ✅ | Trains equal on company, category and number are flagged when any pair has overlapping sessions. Can be toggled off. |
 | **T5** | A train's route must be **continuous**: every leg it runs, from one call to the next, must be a **track stretch of the layout**. A train travels a stretch by departing its start and arriving at its end, so it calls at both ends of every stretch on its way. | ✅ | Two successive calls with no stretch between them are flagged as a route that jumps a location. Two successive calls at the same location (a change of track) travel no stretch and are not flagged. This is also why only the first or last call of a train may be deleted: removing one in between would leave the route jumping the location it stood for. Can be toggled off. |
 | **T6** | A passenger train that **stops to exchange passengers** must stand at a track with a **platform**. The rule applies where the train carries passengers, the location exchanges them, and the call is an **arrival and/or a departure**. | ✅ | A stop at a track whose platform length is zero is flagged. A call that is neither an arrival nor a departure is not: a passenger train may stand at a track without a platform, which is what a meet is. The planner answers either by giving the track a platform length or by clearing the call's arrival and departure, so nothing is put right automatically. Where only one track has a platform, two trains meeting there cannot both have it. Can be toggled off. |
+| **T7** | A **shunting task** has **exactly one station call**, whose arrival is the time the work starts and whose departure the time it ends. | ✅ | A task with no call, or with more than one, is flagged. The editors do not let a second call be added, so what this catches is a train given the shunting category after it was built as a travelling train. The remedy — deleting calls or changing the category back — is the planner's to choose, so nothing is put right automatically. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
@@ -928,7 +952,7 @@ The system shall support creating trains with:
 
 #### DM-4.2.2 Train Categories
 
-> **Status:** ✅ Implemented. Prefix, suffix, passenger/freight flags, display name, colour
+> **Status:** ✅ Implemented. Prefix, suffix, what the category exchanges, display name, colour
 > and default speed are present, plus start number (the first train number offered for the
 > category — seeded 1 for Passenger, 5000 for Freight) and exclude-from-automatic-scheduling
 > (skipped by the automatic turnus builder, §3.8). The catalogue is held on the timetable,
@@ -940,7 +964,8 @@ The system shall support configurable train categories:
 | Property                  | Description                                                                       |
 | :-------------------------- | :---------------------------------------------------------------------------------- |
 | Prefix / Suffix           | For train identity formatting (e.g. "IC", "G")                                    |
-| Is Passenger / Is Freight | Classification, can be none, one of or both                                       |
+| Exchanges                 | What the trains exchange where they stop: passengers, cargo, both, or nothing at all. Exchanging nothing makes it a service category — a construction train, or a vehicle moved out of service — which no location has to exchange anything for |
+| Is Shunting               | The category's trains are shunting tasks worked at one station, not runs between stations (§3.6). A shunting category is a freight category too |
 | Color                     | Display color in graphical timetable and otherwise where color makes sense        |
 | Display Name              | Name of category                                                                  |
 | Default Speed             | Default scale speed for this category (km/h); used when no per-train speed is set |
@@ -1019,6 +1044,19 @@ Region-to-shadow-shunting-yard mapping is configured per layout (see DM-4.1.1).
 A cargo flow is scheduled using the common vehicle schedule mechanism (see DM-4.4.3) —
 the same sequence-of-train-parts pattern used for locomotives and wagon groups,
 but assigned to a cargo flow object instead.
+
+**Cargo flows on a shunting task.** A shunting task (§3.6) has one call, so a cargo flow on it connects
+and disconnects at the same call, and what the flow says is which wagons the task handles. Its
+destinations decide which of the two movements the task is:
+
+| The flow's destination | The movement | What the loco driver is told |
+| ---------------------- | ------------ | ---------------------------- |
+| The task's own station | The wagons have arrived here and go out to the station's cargo customers | Shunt the arriving wagons to the cargo customers, naming the flow's **origins** — where the wagons came from |
+| Anywhere else          | The wagons are gathered from the cargo customers for a departing train | Fetch the wagons from the cargo customers, naming the flow's **destinations** — where they are going |
+
+A flow going to all destinations reaches beyond this station, so it is the second of the two. The
+instruction is shown at the call as a note, and so reaches the driver duty booklets and the station
+reports alike.
 
 #### DM-4.2.6 Sessions
 

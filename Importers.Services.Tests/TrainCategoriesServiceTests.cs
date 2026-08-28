@@ -9,6 +9,6 @@ public class TrainCategoriesServiceTests
         var target = new TrainCategoriesFromCsvService();
         var actual = await target.GetAllTrainCategoriesAsync();
         Assert.IsNotNull(actual);
-        Assert.HasCount(14, actual);
+        Assert.HasCount(16, actual);
     }
 }

@@ -35,15 +35,16 @@ public class TrainCategoriesFromCsvService(string? path = null) : ITrainCategori
         var suffix = fields[2];
         bool isPassenger = bool.Parse(fields[3]);
         bool isFreight = bool.Parse(fields[4]);
-        string color = fields[5];
+        bool isShunting = bool.Parse(fields[5]);
+        string color = fields[6];
         return new TrainCategory()
         {
             Id = NextId,
             Name = name,
             Prefix = prefix,
             Suffix = suffix,
-            IsPassenger = isPassenger,
-            IsFreight = isFreight,
+            Content = TrainContent.From(isPassenger, isFreight),
+            IsShunting = isShunting,
             Color = color
         };
     }

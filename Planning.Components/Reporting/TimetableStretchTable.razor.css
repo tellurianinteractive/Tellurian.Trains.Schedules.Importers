@@ -20,7 +20,13 @@
    Widths: the column widths were once set in rem — tied to the 16 px root, not to the print font —
    which made a 16-column tile ~287 mm against the 277 mm A4-landscape printable area, so the browser
    spilled the overflow onto an extra near-blank sheet. table-layout: fixed plus the explicit mm widths
-   below pin a 15-column tile (PageGeometry.ColumnsPerPage) to ~260 mm, so it fits with margin to spare. */
+   below pin a 15-column tile (PageGeometry.ColumnsPerPage) to 260 mm, so it fits with margin to spare.
+
+   The widths are load-bearing now that the paginator stands blocks side by side: it works out how wide a
+   block is as PageGeometry.FixedColumnsWidthMm + trains x TrainColumnWidthMm, which mirrors the 9 + 9 + 32
+   and 14 mm set here, and gives the column that exact width. Measured in the browser: 5 trains = 120.0 mm,
+   15 trains = 260.0 mm — but only because app.css sets box-sizing: border-box on everything, so the
+   padding below falls inside these widths rather than adding 1.6 mm to every column. */
 
 .timetable-title {
     font-size: 10pt;

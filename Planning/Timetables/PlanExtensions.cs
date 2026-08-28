@@ -414,6 +414,12 @@ public static class PlanExtensions
 
             // A train stops at a location when the category can exchange there; shadow stations always stop and
             // signal-controlled locations never do. The origin and terminus are handled by StandsAt above.
+            //
+            // A service category exchanges nothing, so this stops it nowhere in between: a vehicle transfer
+            // runs through, and a construction train runs to its site and no further. That is narrower on
+            // purpose than Train.CanStopAt, which lets a service train stop anywhere the location type
+            // allows — the one is what a route is built with, the other what the planner may then add by
+            // hand, and the work-site stop is exactly the sort of thing only the planner knows to place.
             bool StopsAt(OperationLocation location)
             {
                 if (location is SignalControlledLocation) return false;
@@ -432,6 +438,61 @@ public static class PlanExtensions
             // a meet is exactly that.
             TrackPreference Preference(bool stops) =>
                 stops && category.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
+        }
+
+        /// <summary>
+        /// Creates a shunting task of <paramref name="category"/> at <paramref name="location"/>: work done
+        /// at one place over a span of time, starting at <paramref name="startTime"/> and lasting
+        /// <paramref name="durationMinutes"/>. Assigns the next free id and number and adds it to the plan's
+        /// timetable.
+        /// </summary>
+        /// <remarks>
+        /// A task is a train with exactly one call, and that call carries the span: its arrival is when the
+        /// work starts and its departure when it ends, exactly as a travelling train's first arrival and
+        /// last departure bound the driver's service. The call is both an arrival and a departure, because
+        /// it is at once the task's origin and its destination. Which wagons are to be shunted is said
+        /// afterwards, by the cargo flows added to the task (see <c>Train.CreateCargoFlow</c>).
+        /// <para>
+        /// There is no route to find and no run time to compute, so nothing here can fail on the layout's
+        /// geometry: only a location with no track at all, a category that is not a shunting one, or a task
+        /// falling outside the plan's operating window is refused.
+        /// </para>
+        /// </remarks>
+        /// <param name="category">The shunting category of the task (see <see cref="TrainCategory.IsShunting"/>).</param>
+        /// <param name="location">The operating location the task is worked at.</param>
+        /// <param name="startTime">The time the work starts, which is the call's arrival.</param>
+        /// <param name="durationMinutes">How long the work lasts, in minutes. Must be greater than zero.</param>
+        /// <param name="number">The number to assign. When <c>null</c>, the next free number in the
+        /// category's band is used (see <see cref="TimetableExtensions.NextShuntingTaskNumber"/>).</param>
+        /// <returns>The created task, already added to the timetable, or <c>null</c> when the category is not
+        /// a shunting one, the location has no track, or the task falls outside the plan's operating window
+        /// (see <c>FitsWithinOperatingWindow</c>).</returns>
+        public Train? CreateShuntingTask(TrainCategory category, OperationLocation location, Time startTime, int durationMinutes, int? number = null)
+        {
+            ArgumentNullException.ThrowIfNull(category);
+            ArgumentNullException.ThrowIfNull(location);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(durationMinutes);
+            if (!category.IsShunting) return null;
+
+            // Neither a location before nor one after: the task comes from nowhere and goes nowhere, so the
+            // track is chosen on the planner's own ranking alone.
+            if (location.PreferredTrack(null, null, TrackPreference.MainTrack) is not { } track) return null;
+
+            var taskNumber = number ?? plan.Timetable.NextShuntingTaskNumber(category);
+            var train = new Train(plan.NextTrainId, category, taskNumber) { Sessions = Sessions.All };
+            plan.Timetable.Add(train);
+
+            var call = new StationCall(plan.NextCallId, track, startTime, startTime.AddMinutes(durationMinutes));
+            train.Add(call);
+            call.IsArrival = true;
+            call.IsDeparture = true;
+
+            if (!plan.FitsWithinOperatingWindow(train))
+            {
+                plan.Timetable.Trains.Remove(train);
+                return null;
+            }
+            return train;
         }
 
         /// <summary>

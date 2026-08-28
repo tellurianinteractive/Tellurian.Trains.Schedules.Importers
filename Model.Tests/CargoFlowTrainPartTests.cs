@@ -76,4 +76,23 @@ public class CargoFlowTrainPartTests
 
         StringAssert.Contains(note.ToText, "Göteborg");
     }
+
+    [TestMethod]
+    public void DepartureNoteNamesThePlacesWithoutTheirLimits()
+    {
+        var (_, train, description) = Arrange();
+        var destination = description.Destinations.Single();
+        destination.MaxNumberOfAxles = 16;
+        destination.MaxNumberOfWagons = 12;
+        var calls = train.Calls.OrderBy(c => c.SortTime).ToList();
+        var cargoFlow = train.CreateCargoFlow(1, calls.First(), calls.Last(), description);
+
+        var note = cargoFlow.DepartureNotes.OfType<CargoFlowDestinationNote>().Single();
+
+        StringAssert.Contains(note.ToText, "Göteborg", "The place is still what the note names.");
+        // The limits belong to the cargo block's own column; in a sentence they read as part of the
+        // destination that happens to precede them.
+        Assert.IsFalse(note.ToText.Contains("16", StringComparison.Ordinal), $"Note text: '{note.ToText}'.");
+        Assert.IsFalse(note.ToText.Contains("12", StringComparison.Ordinal), $"Note text: '{note.ToText}'.");
+    }
 }

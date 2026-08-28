@@ -1,67 +1,82 @@
 # Versionsnyheter
 
-## Version 0.5.2
+## Version 0.6.0
 
 ### Ändringar
 
-- **De grafiska tidtabellerna går nu att skriva ut.** En ny rapport under **Rapporter** ritar varje
-  tidtabellssträcka i en fast pappersskala — så många millimeter per snabbklockstimme och per kilometer —
-  och lägger så många sträckor på ett ark som papperet rymmer. Hur papperet vänds följer den orientering du
-  valt för den grafiska tidtabellen: en vågrät tidsaxel skrivs ut på A4 liggande med sträckorna staplade
-  under varandra, en lodrät på A4 stående med dem bredvid varandra.
+- **Tjänstetåg är en ny sorts tågkategori.** Ge en tågkategori typen **Tjänstetåg** under
+  **Tågkategorier** för tåg som varken lämnar av eller tar upp något där de stannar: ett arbetståg, eller
+  ett lok eller tågsätt som förs ut ur trafik. Ett sådant tåg får göra uppehåll där en driftplats varken
+  utväxlar resande eller gods — till exempel en arbetsplats — och när dess tåglägen byggs får det inga
+  uppehåll mellan sina ändpunkter, så det uppehåll som betyder något lägger du in själv. Namnge kategorin
+  efter vad tågen gör: ett tåg som lämnar materialvagnar efter sig hanterar gods och hör hemma i en
+  godskategori.
 
-  Eftersom skalan är fast i stället för hoptryckt för att passa papperet går tider och lutningar att jämföra
-  och mäta från ett ark till nästa. Ett tidsfönster som är för långt för ett ark delas längs tidsaxeln —
-  först vid rasten, sedan i lika stora ark som överlappar varandra — så att ett tåg som korsar snittet går
-  att följa på båda arken, och det sista arket blir lika fyllt som de övriga i stället för att bära några
-  enstaka minuter. Skalan ställs in under **Inställningar → Grafisk tidtabell**; det är genom att minska
-  stationsavståndet där som två eller tre sträckor får plats på samma ark. Tågen skrivs ut i sina
-  tågslagsfärger, som på skärmen, om du inte begär svartvitt — vilket är värt att göra på en svartvit
-  skrivare, som gör färger valda för att skiljas åt på skärmen till ungefär samma grå.
+  En kategori i en plan gjord med en tidigare version som varken var person eller gods — vilket en
+  XPLN-import kan lämna efter sig — visas nu som ett tjänstetåg, där den förut visades som ett persontåg.
+
+- **Växlingsuppdrag är en ny sorts tåg.** Ge en tågkategori typen **Växlingsuppdrag** under
+  **Tågkategorier**, så utförs tågen i den kategorin på en station under en viss tid i stället för att
+  gå någonstans: vart och ett har ett enda uppehåll, där ankomsttiden är när arbetet börjar och
+  avgångstiden när det slutar.
+
+- **Godsflödena i ett växlingsuppdrag anger vilka vagnar som ska växlas.** Lägg till godsflöden i
+  uppdraget under **Godsflöde** på samma sätt som för vilket godståg som helst. Ett flöde med
+  uppdragets egen station som destination innehåller vagnar som har ankommit, och lokföraren får i
+  uppdrag att växla ut dem till godskunderna, med uppgift om varifrån de kommer. Ett flöde till någon
+  annanstans hämtas i stället in från godskunderna, med uppgift om vart vagnarna ska. Instruktionen
+  skrivs ut i förarturhäftena och i stationsrapporterna.
+
+- **Passagerarbiljetter går nu att skriva ut.** En ny rapport under **Rapporter** ger en tur- och
+  returbiljett mellan varje par av driftplatser som har resandeutbyte, vikt på mitten, med den
+  persontågsoperatör som har flest avgångar från försäljningsplatsen längst ned på båda halvorna.
+
+- **Tidtabellsrapporten lägger nu flera sträckor på samma ark.** Tabeller som är för smala för att fylla
+  bredden står bredvid varandra, så en kort bibana tar inte längre ett helt ark för sig själv.
+
+- **De grafiska tidtabellerna går nu att skriva ut.** En ny rapport under **Rapporter** ritar varje
+  sträcka i den fasta pappersskala som ställs in under **Inställningar → Grafisk tidtabell**, så att tider
+  och lutningar går att mäta från ett ark till nästa.
 
 - **Inställningar → Grafisk tidtabell är nu ordnad efter vad varje inställning påverkar.** Det som
-  tidtabellen visar — åt vilket håll tidsaxeln går, vilka minuter som ritas och vad tågetiketten bär —
-  kommer först, eftersom det gäller både på skärmen och på papperet. Under det står två block bredvid
-  varandra: avstånden som används på skärmen, i bildpunkter, och avstånden som används av den utskrivna
-  rapporten, i millimeter papper. Varje block bär samma slags avstånd, så skärmens inställning och dess
-  motsvarighet på papperet går att läsa mot varandra, och den ena kan inte förväxlas med den andra.
-  Sifferfälten är högerjusterade så att siffrorna ligger i linje.
+  tidtabellen visar kommer först, och under det avstånden som används på skärmen, i bildpunkter, bredvid
+  dem som används på papperet, i millimeter.
 
 - **Du kan nu ange vad som ska göras med loket där ett tågavsnitt slutar.** När du redigerar ett
-  tågavsnitt under **Omlopp** ställs två frågor till: ska loket vändas, och ska det köras runt till andra
-  änden av tåget så att tåget kan avgå åt det håll det kom ifrån? Var och en av dem skrivs ut som en
-  ankomstanmärkning för både lokförare och tågklarerare, och begär du båda blir det en enda anmärkning —
-  loket lämnar tåget, går till vändskivan och kommer tillbaka i andra änden — i stället för två som läses
-  som skilda rörelser.
+  tågavsnitt under **Omlopp** frågas om loket ska vändas och om det ska köras runt till andra änden, och
+  vardera skrivs ut som en ankomstanmärkning för lokförare och tågklarerare.
 
-  Vändning erbjuds bara där driftplatsen som tågavsnittet slutar vid har en vändskiva, vilket är en ny
-  inställning under **Driftplatser**; ingen annanstans finns någon. Rundgång utelämnas ur anmärkningen
-  när dragfordonet som går på tågavsnittet kan vända som det står — ett motorvagnståg eller ett lok i ett
-  vändtåg — eftersom det då inte finns något att köra runt. Det du begärt behålls i båda fallen, så det
-  säger sitt igen så snart ett annat lok går på tågavsnittet.
+- **Topologi-diagrammet ritar nu hela banans spår, med varje driftplats visad en enda gång.** Spåret är
+  enkel- eller dubbelspårigt som sträckan verkligen är och i färgerna för de tidtabellssträckor som går
+  över det, och grått där ingen sträcka alls täcker det.
 
-- **Topologi-diagrammet ritar nu hela banans spår, med varje driftplats visad en enda gång.** Det var
-  förut en rad vågräta linjer, en för varje tidtabellssträcka, och en driftplats som flera sträckor nådde
-  ritades på var och en av dem. Nu förekommer varje driftplats exakt en gång, och spåret mellan två av
-  dem är en rak linje i den vinkel de råkar ligga, enkel- eller dubbelspårigt som sträckan verkligen är
-  och i färgerna för de tidtabellssträckor som går över det. Spår som ingen tidtabellssträcka alls täcker
-  ritas i grått, så att en lucka i dina sträckor syns i stället för att bara saknas. En signatur som
-  annars skulle få spår genom sig flyttas till den sida av cirkeln som är renast — över, under eller
-  bredvid den — vilket är svaret där spår går både uppåt och nedåt från samma driftplats.
+- **Du kan nu ordna Topologi-diagrammet själv.** Dra en driftplats dit den hör hemma så följer spåren med;
+  det du ordnar sparas med planen och skrivs ut i tjänstehäftena.
 
-- **Du kan nu ordna Topologi-diagrammet själv.** Dra en driftplats dit den hör hemma, så följer spåren
-  med. Den lägger sig i samma rader och avstånd som den automatiska ritningen använder, så att det du
-  flyttar hamnar i linje med det du låter vara. Var du har placerat driftplatserna sparas med planen och
-  är det som skrivs ut på översiktssidan i tjänstehäftena. **Placera automatiskt** glömmer alla
-  driftplatser du har flyttat och ritar hela diagrammet igen. Det är detta en bana med ett triangelspår,
-  en vändslinga eller två sträckor som hänger ihop i båda ändar behöver: ingen regel som bara läser
-  spåren kan förväntas rita en sådan bana som den verkligen ser ut, och du vet hur den ser ut.
+- **En godsdestination med gräns för både vagnar och axlar visar nu båda.** Vagnantalet försvann förut
+  där det också stod ett axelantal — både i tjänstehäftena och i godsanmärkningarna — trots att de två
+  fälten står sida vid sida under **Godsflöde** och vardera gränsen kan vara den som binder: sexton axlar
+  är fyra boggivagnar men åtta tvåaxliga.
 
-- **Knapparna som gäller ett helt omlopp står nu i en egen kolumn.** Under **Omlopp** stod klona,
-  komplettera och ta bort först bland tågen, så tågrutorna i varje rad började på olika ställen, och
-  frågan som ställs innan ett omlopp tas bort sköt dem ännu längre åt sidan. Nu står de i en kolumn
-  **Åtgärder** mellan fordonen och tågen: varje rads tåg börjar på samma ställe, även där de fortsätter
-  på nästa rad, och knappen för att ta bort står kvar och markeras medan frågan ställs bredvid den.
+- **Tågsidorna i ett tjänstehäfte säger nu detsamma på mindre plats.** Kolumnen med köromgångar har nu
+  rubriken **Kör** — det den berättar om fordonet — i stället för ett långt ord över en kolumn med
+  cirklar, och godsvagnarna har rubrikerna **Från** och **Till**, som fordonen ovanför dem redan hade.
+  Begränsningarna under rubriken skrivs som siffror under ett enda **Max**: hastigheten med sin enhet, talet
+  med en cirkel efter för axlar, en fyrkant för vagnar och längden som *2,5m*. Hur många vagnar eller axlar en
+  destination tar har flyttats ut ur **Till** till en egen kolumn **Max**, där det läses rakt nedför sidan
+  i stället för sist i en rad ortnamn — och den kolumnen visas bara när något på sidan alls är begränsat.
+
+- **Knapparna som gäller ett helt omlopp står nu i en egen kolumn.** Under **Omlopp** har de flyttats till
+  en kolumn **Åtgärder** mellan fordonen och tågen, så att varje rads tåg börjar på samma ställe.
+
+- **Rapportmenyn har en ny ordning**, från de allmänna instruktionerna till passagerarbiljetterna.
+
+### Rättningar
+
+- **Den installerade appen fungerar nu utan internetanslutning.** Hjälptexterna, texterna under Om
+  och Versionsnyheter samt katalogen med färdiga tågkategorier hämtades från webben varje gång de
+  visades och blev därför tomma när du var utan uppkoppling. De sparas nu tillsammans med resten av
+  appen när den installeras.
 
 ## Version 0.5.1
 

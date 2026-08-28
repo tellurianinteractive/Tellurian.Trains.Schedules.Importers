@@ -76,6 +76,102 @@ public class TimetablePaginationTests
     }
 
     [TestMethod]
+    public void SmallStretches_ShareOnePage_SideBySide()
+    {
+        // Three branch lines, five trains and ten stations each: a block is 120 mm wide and 106.6 mm tall,
+        // so two stand beside each other within the 277 mm of the sheet but a second one will not go under
+        // the first. The third has nowhere left to go and opens a new page.
+        var pages = TimetablePaginator.BuildPages(Stretches(count: 3, columns: 5, rows: 10), Geometry);
+
+        Assert.AreEqual(2, pages.Count);
+        Assert.AreEqual(2, pages[0].Columns.Count, "The second stretch should stand beside the first.");
+        Assert.AreEqual("1: A-B", pages[0].Columns[0].Tiles[0].Table.Title);
+        Assert.AreEqual("2: A-B", pages[0].Columns[1].Tiles[0].Table.Title);
+        Assert.AreEqual("3: A-B", pages[1].Columns.Single().Tiles[0].Table.Title);
+    }
+
+    [TestMethod]
+    public void SmallStretches_StackWithinAColumn_BeforeANewColumnIsOpened()
+    {
+        // Six-station branch lines: a block is 73 mm, so two fit in a column and the column is filled before
+        // one is opened beside it — which is what keeps the blocks in stretch order when read column by column.
+        var pages = TimetablePaginator.BuildPages(Stretches(count: 4, columns: 5, rows: 6), Geometry);
+
+        Assert.AreEqual(1, pages.Count);
+        Assert.AreEqual(2, pages[0].Columns.Count);
+        CollectionAssert.AreEqual(
+            new[] { "1: A-B", "1: B-A", "2: A-B", "2: B-A" },
+            pages[0].Columns[0].Tiles.Select(tile => tile.Table.Title).ToArray());
+        CollectionAssert.AreEqual(
+            new[] { "3: A-B", "3: B-A", "4: A-B", "4: B-A" },
+            pages[0].Columns[1].Tiles.Select(tile => tile.Table.Title).ToArray());
+    }
+
+    [TestMethod]
+    public void AStretchTooBigForOnePage_KeepsItsPagesToItself()
+    {
+        // A 30-row stretch needs a page per direction. It must break the page it meets and take nothing
+        // along, so the small stretches on either side of it keep their own sheets.
+        var pages = TimetablePaginator.BuildPages(
+        [
+            Table(columns: 5, rows: 6, tableNumber: 1, title: "1: A-B"),
+            Table(columns: 5, rows: 6, tableNumber: 1, title: "1: B-A"),
+            Table(columns: 10, rows: 30, tableNumber: 2, title: "2: C-D"),
+            Table(columns: 10, rows: 30, tableNumber: 2, title: "2: D-C"),
+            Table(columns: 5, rows: 6, tableNumber: 3, title: "3: E-F"),
+            Table(columns: 5, rows: 6, tableNumber: 3, title: "3: F-E"),
+        ], Geometry);
+
+        Assert.AreEqual(4, pages.Count);
+        CollectionAssert.AreEqual(new[] { "1: A-B", "1: B-A" }, Titles(pages[0]));
+        CollectionAssert.AreEqual(new[] { "2: C-D" }, Titles(pages[1]));
+        CollectionAssert.AreEqual(new[] { "2: D-C" }, Titles(pages[2]));
+        CollectionAssert.AreEqual(new[] { "3: E-F", "3: F-E" }, Titles(pages[3]));
+    }
+
+    [TestMethod]
+    public void NoPageIsPackedBeyondTheUsableWidthOrHeight()
+    {
+        // The two-dimensional calibration guard, swept over runs of stretches of every shape the report
+        // produces. A page that overflows sideways is the worse failure of the two: the browser does not
+        // shrink it, it moves the surplus onto a sheet of its own.
+        foreach (var columns in new[] { 2, 5, 8, 15, 20 })
+        {
+            foreach (var rows in new[] { 1, 4, 9, 18, 26, 45 })
+            {
+                var pages = TimetablePaginator.BuildPages(Stretches(count: 7, columns, rows), Geometry);
+                foreach (var page in pages)
+                {
+                    var width = page.Columns.Sum(column => column.WidthMm)
+                        + Geometry.ColumnGapMm * (page.Columns.Count - 1);
+                    Assert.IsTrue(width <= Geometry.PrintableWidthMm + 1e-9,
+                        $"{columns} columns × {rows} rows packed a page {width:F1} mm wide, over the {Geometry.PrintableWidthMm:F1} mm a page has.");
+                    Assert.IsTrue(PackedHeight(page) <= Geometry.UsableHeightMm + 1e-9,
+                        $"{columns} columns × {rows} rows packed a page to {PackedHeight(page):F1} mm, over the {Geometry.UsableHeightMm:F1} mm a page has.");
+                    foreach (var column in page.Columns)
+                        Assert.IsTrue(column.Tiles.Max(TileWidthMm) <= column.WidthMm + 1e-9,
+                            "A column must reserve the width of its widest tile.");
+                }
+            }
+        }
+    }
+
+    // A run of identically shaped stretches, both directions each, numbered from 1.
+    private static IReadOnlyList<TimetableTable> Stretches(int count, int columns, int rows) =>
+    [
+        .. Enumerable.Range(1, count).SelectMany(number => new[]
+        {
+            Table(columns, rows, number, $"{number}: A-B"),
+            Table(columns, rows, number, $"{number}: B-A"),
+        })
+    ];
+
+    private static string[] Titles(TimetablePage page) => [.. page.Tiles.Select(tile => tile.Table.Title)];
+
+    private static double TileWidthMm(TimetableTile tile) =>
+        Geometry.FixedColumnsWidthMm + tile.Table.Columns.Count * Geometry.TrainColumnWidthMm;
+
+    [TestMethod]
     public void ColumnGroupsOnSeparatePages_GetContinuedHeading()
     {
         // 20 columns -> two column groups (15 + 5); 26 rows makes each group's tile 120.5 mm, so even with
@@ -128,13 +224,17 @@ public class TimetablePaginationTests
         Assert.AreEqual(2, pages[0].Tiles.Count);
     }
 
-    // What a packed page measures: every tile at its own height, except that one repeating the heading of
-    // the tile above it drops the heading and pays the no-title gap instead. Mirrors the packer's own rule.
-    private static double PackedHeight(TimetablePage page)
+    // What a packed page measures: the tallest of its columns. Within a column every tile costs its own
+    // height, except that one repeating the heading of the tile above it drops the heading and pays the
+    // no-title gap instead. Mirrors the packer's own rule.
+    private static double PackedHeight(TimetablePage page) =>
+        page.Columns.Max(ColumnHeight);
+
+    private static double ColumnHeight(TimetablePageColumn column)
     {
         var total = 0.0;
         string? above = null;
-        foreach (var tile in page.Tiles)
+        foreach (var tile in column.Tiles)
         {
             total += tile.Table.Title == above
                 ? tile.HeightMm - Geometry.TitleHeightMm + Geometry.NoTitleGapMm

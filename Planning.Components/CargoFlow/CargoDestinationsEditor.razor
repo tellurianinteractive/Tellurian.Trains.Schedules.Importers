@@ -88,8 +88,10 @@
                         {
                             <tr>
                                 <td>@train.Identity</td>
-                                <td>@flow.From.OperationLocation.Signature @flow.From.Departure.HHMM()</td>
-                                <td>@flow.To.OperationLocation.Signature @flow.To.Arrival.HHMM()</td>
+                                @* The flow's own connect and disconnect times, which on a shunting task
+                                   are the call's arrival and departure rather than the other way round. *@
+                                <td>@flow.From.OperationLocation.Signature @flow.ConnectTime.HHMM()</td>
+                                <td>@flow.To.OperationLocation.Signature @flow.DisconnectTime.HHMM()</td>
                             </tr>
                         }
                     </tbody>

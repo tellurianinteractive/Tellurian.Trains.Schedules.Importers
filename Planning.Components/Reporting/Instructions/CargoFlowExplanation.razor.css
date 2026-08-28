@@ -1,0 +1,51 @@
+/* The key to the cargo marks and wordings, at the foot of the general instructions booklet's last
+   page. Set a step below the body text of the booklet: it shares the page with the topology diagram
+   and the shunting yards table, which are consulted, whereas this is read once and then recognised.
+   The floor under the type size still holds — 0.8 rem is the size the shunting yards table above it
+   is set at. */
+.cargokey {
+    font-size: 0.8rem;
+    margin-top: 0.8em;
+
+    /* Says what a maximum is before the three marks are shown; the marks then only name themselves. */
+    .intro {
+        margin: 0 0 0.4em;
+    }
+
+    /* Marks on the left, wordings on the right — see the component for why they are two lists and not
+       one. They start at the same line rather than being stretched to a common height: the two are
+       read as two lists, not as a table with rows across it. */
+    .entries {
+        display: flex;
+        gap: 1.4em;
+        align-items: flex-start;
+    }
+
+    /* Term and meaning in two columns, the term column exactly as wide as its widest term, so the
+       meanings line up down the list and a meaning that wraps stays clear of the term beside it. */
+    dl {
+        flex: 1;
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        column-gap: 0.5em;
+        row-gap: 0.2em;
+        margin: 0;
+    }
+
+    dt {
+        font-weight: 600;
+        /* A mark and its figure are one value and never break apart, as in the tables they come from. */
+        white-space: nowrap;
+    }
+
+    /* A phrase is a quotation from a note, where it runs on inside a sentence. Italic says that much;
+       the weight the marks carry would make it look like a heading of its own instead. */
+    dt.phrase {
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    dd {
+        margin: 0;
+    }
+}

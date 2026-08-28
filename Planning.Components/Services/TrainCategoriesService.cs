@@ -16,16 +16,16 @@ public sealed class TrainCategoriesService(HttpClient http) : ITrainCategoriesSe
             {
                 if (isHeader) { isHeader = false; continue; }
                 var fields = line.Trim().Split(',');
-                if (fields.Length < 6) continue;
+                if (fields.Length < 7) continue;
                 categories.Add(new TrainCategory
                 {
                     Id = NextId,
                     Name = fields[0],
                     Prefix = fields[1],
                     Suffix = fields[2],
-                    IsPassenger = bool.Parse(fields[3]),
-                    IsFreight = bool.Parse(fields[4]),
-                    Color = fields[5]
+                    Content = TrainContent.From(bool.Parse(fields[3]), bool.Parse(fields[4])),
+                    IsShunting = bool.Parse(fields[5]),
+                    Color = fields[6]
                 });
             }
             return categories;

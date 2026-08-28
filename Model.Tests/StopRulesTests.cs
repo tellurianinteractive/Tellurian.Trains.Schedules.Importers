@@ -9,10 +9,10 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 [TestClass]
 public class StopRulesTests
 {
-    private static readonly TrainCategory Passenger = new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true };
-    private static readonly TrainCategory Freight = new() { Id = 2, Name = "Freight", Prefix = "G", IsFreight = true };
-    private static readonly TrainCategory Mixed = new() { Id = 3, Name = "Mixed", Prefix = "PG", IsPassenger = true, IsFreight = true };
-    private static readonly TrainCategory Uncategorised = new() { Id = 4, Name = "Empty stock", Prefix = "T" };
+    private static readonly TrainCategory Passenger = new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger };
+    private static readonly TrainCategory Freight = new() { Id = 2, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo };
+    private static readonly TrainCategory Mixed = new() { Id = 3, Name = "Mixed", Prefix = "PG", Content = TrainContent.Passenger | TrainContent.Cargo };
+    private static readonly TrainCategory Service = new() { Id = 4, Name = "Construction train", Prefix = "A" };
 
     private static Layout Layout => new() { Id = 1, Name = "Test" };
 
@@ -89,19 +89,32 @@ public class StopRulesTests
     [TestMethod]
     public void ATrainCarryingNeitherIsRestrictedByTheLocationTypeAlone()
     {
-        // Empty stock and light engines exchange nothing, so no exchange is demanded of the location.
+        // A service train — a construction train, or a vehicle moved out of service — exchanges nothing,
+        // so no exchange is demanded of the location.
         var station = new Station(1, "Ytterby", "Yb") { HasPassengerExchange = false, HasCargoExchange = false };
-        var train = CreateTrain(Uncategorised, station);
+        var train = CreateTrain(Service, station);
 
         Assert.IsTrue(train.CanStopAt(station));
         Assert.IsTrue(train.Calls[0].IsStop);
     }
 
     [TestMethod]
+    public void OnlyAServiceTrainCanStopAtALocationExchangingNothing()
+    {
+        // A work site is naturally an other location: it exchanges no cargo, and passengers can be turned
+        // off. That leaves a service train the only kind able to stop there.
+        var site = new OtherLocation(1, "Björkås", "Bkå") { HasPassengerExchange = false };
+
+        Assert.IsTrue(CreateTrain(Service, site).CanStopAt(site));
+        Assert.IsFalse(CreateTrain(Passenger, new Station(2, "Kode", "Kd")).CanStopAt(site));
+        Assert.IsFalse(CreateTrain(Freight, new Station(3, "Ytterby", "Yb")).CanStopAt(site));
+    }
+
+    [TestMethod]
     public void NoTrainCanStopAtASignalControlledLocation()
     {
         var block = new SignalControlledLocation(1, "Björkås", "Bkå");
-        var train = CreateTrain(Uncategorised, block);
+        var train = CreateTrain(Service, block);
 
         Assert.IsFalse(train.CanStopAt(block));
         Assert.IsFalse(train.Calls[0].IsStop);

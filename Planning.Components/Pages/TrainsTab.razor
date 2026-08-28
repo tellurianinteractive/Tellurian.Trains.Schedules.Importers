@@ -501,8 +501,15 @@ else
                 }
             </tbody>
         </table>
-        <button class="small" disabled="@(!NextCallLocations(train).Any())" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
+        <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
+            <button class="small" disabled="@(!CanAddCall(train))" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
+        </span>
     </div>;
+
+    // A shunting task is work at one place, so its one call is all it may ever have: a second would make
+    // it a route, which is a travelling train and not a task (see the model's CheckShuntingTaskCalls).
+    private bool CanAddCall(Train train) =>
+        !(train.IsShuntingTask && train.Calls.Count > 0) && NextCallLocations(train).Any();
 
     // The locations a call added at the end of this train's run may be at. Empty means there is nowhere
     // to add one — a layout with no track anywhere, or a train that has run out of onward locations.
@@ -599,9 +606,10 @@ else
     // for trains running this way first of all (see OperationLocation.PreferredTrack).
     private void AddCall(Train train)
     {
+        if (!CanAddCall(train)) return;
         if (NextCallLocations(train).FirstOrDefault() is not { } location) return;
         var previous = train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
-        var preference = train.Category?.IsPassenger == true ? TrackPreference.Platform : TrackPreference.MainTrack;
+        var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
         if (location.PreferredTrack(previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);

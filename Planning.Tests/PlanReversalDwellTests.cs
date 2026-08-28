@@ -12,7 +12,7 @@ public class PlanReversalDwellTests
 {
     private static readonly Time Start = Time.FromHourAndMinute(8, 0);
 
-    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", IsFreight = true, DefaultSpeed = 100 };
+    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo, DefaultSpeed = 100 };
 
     // Malmö → Växjö reverses at Munkeröd (Mkd), the only station on the route that permits it. A start
     // time can be given where the test lengthens the run and needs room inside the operating window.

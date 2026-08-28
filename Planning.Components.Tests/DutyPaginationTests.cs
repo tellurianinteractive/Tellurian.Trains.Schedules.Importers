@@ -10,7 +10,6 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 public class DutyPaginationTests
 {
     private static readonly SessionsSettings Settings = SessionsSettings.UseSessions(14);
-    private static string Translate(string key) => key;
 
     // A duty of `partCount` short train parts, each on its own two-call train.
     private static DriverDuty CreateDuty(int partCount, int callsPerTrain = 2)
@@ -48,7 +47,7 @@ public class DutyPaginationTests
     }
 
     private static IReadOnlyList<DutyPage> Pages(DriverDuty duty) =>
-        DutyPagination.BuildPages(duty, Settings, Translate);
+        DutyPagination.BuildPages(duty, Settings);
 
     [TestMethod]
     public void AMinimalBookletIsFourPagesEndingWithTheOverview()
@@ -192,7 +191,7 @@ public class DutyPaginationTests
             var pages = Pages(CreateDuty(partCount: 5, callsPerTrain));
             foreach (var page in pages.Where(p => p.Parts.Count > 0 && !p.IsSplitFirstHalf && !p.IsTimetableContinuation))
             {
-                var used = page.Parts.Sum(p => DutyPagination.HeightOf(p, Translate));
+                var used = page.Parts.Sum(p => DutyPagination.HeightOf(p));
                 Assert.IsTrue(used <= DutyPagination.PageBudget,
                     $"Page {page.PageNumber} holds {used:F2} row units of a {DutyPagination.PageBudget} budget.");
             }
@@ -224,7 +223,7 @@ public class DutyPaginationTests
 
         // The part has no wagonsets and no cargo, so only the header and the timetable are charged.
         var expected = DutyPagination.HeaderHeight - 1 + DutyPagination.TimetableHeight(part);
-        Assert.AreEqual(expected, DutyPagination.HeightOf(part, Translate), 0.01,
+        Assert.AreEqual(expected, DutyPagination.HeightOf(part), 0.01,
             "An empty block is omitted entirely and costs nothing in page fitting.");
     }
 }

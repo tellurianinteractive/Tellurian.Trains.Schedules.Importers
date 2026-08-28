@@ -13,8 +13,8 @@ public sealed class TimetableTableStopFilterTests
 {
     private static readonly Time Start = Time.FromHourAndMinute(8, 0);
 
-    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true, DefaultSpeed = 100 };
-    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", IsFreight = true, DefaultSpeed = 80 };
+    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
+    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo, DefaultSpeed = 80 };
 
     private readonly Plan _plan = TestLayoutFactory.CreatePlan();
 

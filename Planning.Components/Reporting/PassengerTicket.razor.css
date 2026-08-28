@@ -1,0 +1,70 @@
+/* A return ticket is two 48 x 91 mm pocket cards side by side, so 96 x 91 mm in all: an A4 landscape
+   sheet holds 3 across and 2 down = 6 tickets (3 x 96 = 288 mm of the 297 mm width, 2 x 91 = 182 mm of
+   the 210 mm height), leaving room for the page margin. The ticket is a flex item in .pagebreak and its
+   size is physical — tickets are cut out and folded — so it must never be squeezed to make a row fit;
+   overflow the row instead. */
+.ticket {
+    display: flex;
+    flex-shrink: 0;
+}
+
+/* The fold runs down the middle, between the two halves. Dashing the two facing edges tells the fold
+   apart from the cut lines around the outside, which are the borders PocketCard already draws.
+   ::deep reaches into another component's markup, and is written unnested because that is where the
+   CSS-isolation rewriter handles it dependably. */
+.ticket ::deep .pocket.frame:first-child {
+    border-right-style: dashed;
+}
+
+.ticket ::deep .pocket.frame:last-child {
+    border-left-style: dashed;
+}
+
+/* Half a ticket: one single journey, read top-down. Where the passenger is going is what a conductor
+   and a booking clerk look for, so the destination is the one thing set large and bold; everything else
+   is subordinate to it. The seller is pinned to the foot of the card so it stays in the same place
+   whether or not a long station name wraps onto a second line. */
+.ticketside {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-align: center;
+
+    .caption {
+        font-size: 8pt;
+        line-height: 10pt;
+        font-style: italic;
+    }
+
+    .destination {
+        font-size: 15pt;
+        line-height: 17pt;
+        font-weight: 700;
+        /* A long station name is wider than 48 mm of card at this size; let it wrap rather than spill
+           across the cut line. */
+        overflow-wrap: anywhere;
+        margin-bottom: 4mm;
+    }
+
+    .origin {
+        font-size: 11pt;
+        line-height: 13pt;
+        overflow-wrap: anywhere;
+    }
+
+    .validity {
+        font-size: 8pt;
+        line-height: 10pt;
+        margin-top: 2mm;
+    }
+
+    /* margin-top: auto pushes the block to the foot of the card, under whatever the journey took. */
+    .seller {
+        margin-top: auto;
+    }
+
+    .soldby {
+        font-size: 8pt;
+        line-height: 10pt;
+    }
+}

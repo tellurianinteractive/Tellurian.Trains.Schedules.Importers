@@ -188,12 +188,17 @@ public class Train : IEquatable<Train>
 
     /// <summary>
     /// Gets this train as a train part covering all station calls, from where it starts its run to
-    /// where it ends it.
+    /// where it ends it. A shunting task, which works at one location and travels nowhere, is the part
+    /// from its single call to itself.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the train has fewer than two calls,
-    /// which is too few to span a part.</exception>
+    /// which is too few to span a part — unless it is a shunting task, whose one call is its whole
+    /// working.</exception>
     [JsonIgnore]
-    public ScheduledTrainPart AsTrainPart => this.AsTrainPart(0, Calls.Count - 1);
+    public ScheduledTrainPart AsTrainPart =>
+        this.IsShuntingTask && Calls.Count == 1
+            ? new ScheduledTrainPart(Calls[0], Calls[0])
+            : this.AsTrainPart(0, Calls.Count - 1);
 
     // A train under construction may have no calls at all. Everything derived from where it runs is
     // then undefined rather than zero, so it says so instead of failing with a null reference.
@@ -272,6 +277,10 @@ public static class TrainExtensions
             var t = train.ValueOrException(nameof(train));
             var calls = t.CallsInRunOrder;
             var c = calls.Count;
+            // A shunting task spans no route: its one call is both ends of the only part it has, so the
+            // rule that a part must reach a later call than it starts from does not apply to it.
+            if (t.IsShuntingTask && c == 1 && fromCallIndex == 0 && toCallIndex == 0)
+                return new ScheduledTrainPart(calls[0], calls[0]);
             (fromCallIndex < 0 || fromCallIndex > c - 2).IfTrueThrows(nameof(fromCallIndex));
             (toCallIndex <= fromCallIndex || toCallIndex > c - 1).IfTrueThrows(nameof(toCallIndex));
             return new ScheduledTrainPart(calls[fromCallIndex], calls[toCallIndex]);
@@ -294,15 +303,26 @@ public static class TrainExtensions
         /// <summary>
         /// Gets a one-line label for the train suitable for a drop-down: its identity (with the
         /// effective company signature) followed by the first and last call as station signatures and
-        /// times, e.g. "G 4321  Gbg 12:00→Snu 12:55". The from/to part is omitted when the train has
-        /// no calls.
+        /// times, e.g. "G 4321  Gbg 12:00→Snu 12:55". A shunting task is written as the one place it is
+        /// worked at and the span of the work, e.g. "V 801  RSE 06:00-08:00". The from/to part is
+        /// omitted when the train has no calls.
         /// </summary>
+        /// <remarks>
+        /// The two forms differ because the two things do. A travelling train goes from somewhere to
+        /// somewhere, so the arrow reads as the journey and each end names its own place. A shunting task
+        /// goes nowhere: naming its one station twice with an arrow between would read as a journey that
+        /// ends where it began, and the times would come out backwards — the departure leads on a
+        /// travelling train because that is when it sets off, whereas a task's departure is when it
+        /// <em>finishes</em>. So the place is said once and the times are given as the span they are.
+        /// </remarks>
         public string ListLabel
         {
             get
             {
                 var identity = train.EffectiveCompany is { } c ? $"{c.Signature} {train.Identity}".Trim() : train.Identity;
                 if (train.Calls.Count == 0) return identity;
+                if (train.ShuntingCall is { } task)
+                    return $"{identity}  {task.OperationLocation.Signature} {task.Arrival.HHMM()}-{task.Departure.HHMM()}";
                 var ordered = train.Calls.OrderBy(call => call.SortTime).ToList();
                 var first = ordered[0];
                 var last = ordered[^1];
@@ -380,13 +400,71 @@ public static class TrainExtensions
         /// Gets whether this is a passenger train, from its <see cref="Train.Category"/>. A train may be
         /// both a passenger and a cargo train at the same time.
         /// </summary>
-        public bool IsPassenger => train.Category?.IsPassenger ?? false;
+        public bool IsPassenger => train.Category is { } category && category.IsPassenger;
 
         /// <summary>
         /// Gets whether this is a cargo (freight) train, from its <see cref="Train.Category"/>. A train may
         /// be both a passenger and a cargo train at the same time.
         /// </summary>
-        public bool IsCargo => train.Category?.IsFreight ?? false;
+        public bool IsCargo => train.Category is { } category && category.IsFreight;
+
+        /// <summary>
+        /// Gets whether this is a shunting task rather than a train that travels, from its
+        /// <see cref="Train.Category"/> (see <see cref="TrainCategory.IsShunting"/>). A shunting task works
+        /// at one operating location: it has exactly one call, whose arrival is the time the work starts
+        /// and whose departure the time it ends.
+        /// </summary>
+        public bool IsShuntingTask => train.Category?.IsShunting ?? false;
+
+        /// <summary>
+        /// The one call a shunting task works at, or <c>null</c> when this is not a shunting task or it
+        /// does not have exactly the one call it should (a task under construction, or one whose category
+        /// was changed to shunting while it still had a route).
+        /// </summary>
+        public StationCall? ShuntingCall =>
+            train.IsShuntingTask && train.Calls.Count == 1 ? train.Calls[0] : null;
+
+        /// <summary>
+        /// The calls at which a cargo flow on this train may connect its wagons: a departure stop at a
+        /// location that exchanges cargo.
+        /// </summary>
+        public IEnumerable<StationCall> CargoFlowDepartureCalls =>
+            train.DepartureCalls.Where(c => c.OperationLocation.HasCargoExchange);
+
+        /// <summary>
+        /// The calls at which a cargo flow connected at <paramref name="from"/> may disconnect its wagons:
+        /// an arrival stop exchanging cargo later in the run — or, on a shunting task, the very call the
+        /// flow connects at, because the task neither travels nor has another call to reach.
+        /// </summary>
+        /// <param name="from">The call the flow connects its wagons at.</param>
+        public IEnumerable<StationCall> CargoFlowArrivalCalls(StationCall from) =>
+            train.IsShuntingTask
+                ? [from]
+                : train.ArrivalCallsAfter(from).Where(c => c.OperationLocation.HasCargoExchange);
+
+        /// <summary>
+        /// The time a cargo flow connects its wagons at <paramref name="call"/>: the train's departure
+        /// from it — but on a shunting task the arrival, because the task's flow spans its single call
+        /// from when the work starts to when it ends, and the work starts at the arrival.
+        /// </summary>
+        /// <param name="call">The call the flow connects its wagons at.</param>
+        public Time CargoFlowConnectTime(StationCall call) =>
+            train.IsShuntingTask ? call.Arrival : call.Departure;
+
+        /// <summary>
+        /// The time a cargo flow disconnects its wagons at <paramref name="call"/>: the train's arrival
+        /// at it — but on a shunting task the departure, which is when the work ends.
+        /// </summary>
+        /// <param name="call">The call the flow disconnects its wagons at.</param>
+        public Time CargoFlowDisconnectTime(StationCall call) =>
+            train.IsShuntingTask ? call.Departure : call.Arrival;
+
+        /// <summary>
+        /// Whether a cargo flow can be added to this train at all: it carries cargo and has a pair of
+        /// calls to span (on a shunting task, its single call twice over).
+        /// </summary>
+        public bool CanHostCargoFlow =>
+            train.IsCargo && train.CargoFlowDepartureCalls.Any(from => train.CargoFlowArrivalCalls(from).Any());
 
         /// <summary>
         /// Gets whether this train is able to stop at <paramref name="location"/> at all, whatever a call

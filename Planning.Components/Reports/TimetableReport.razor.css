@@ -1,0 +1,17 @@
+/* The blocks on one sheet. TimetablePaginator packs whole stretches two-dimensionally — down a column,
+   then into a new column to its right — so the sheet is a row of columns, each a stack of blocks.
+
+   The gap must match PageGeometry.ColumnGapMm, or a pair the estimate calls a fit spills off the right-hand
+   edge of the sheet. Each column carries the exact width the paginator reserved as an inline style, so the
+   columns must neither grow nor shrink from it: flex would otherwise shrink them to fit and quietly make an
+   overfull page look correct on screen while printing wrong. */
+.timetable-page {
+    display: flex;
+    align-items: flex-start;
+    gap: 5mm;
+
+    .timetable-page-column {
+        flex: 0 0 auto;
+        overflow: hidden;
+    }
+}

@@ -1,70 +1,83 @@
 # Versionsnyheder
 
-## Version 0.5.2
+## Version 0.6.0
 
 ### Ændringer
 
-- **De grafiske køreplaner kan nu udskrives.** En ny rapport under **Rapporter** tegner hver
-  køreplansstrækning i en fast papirskala — så mange millimeter pr. hurtigurstime og pr. kilometer — og
-  lægger så mange strækninger på et ark, som papiret rummer. Hvordan papiret vender følger den orientering,
-  du har valgt til den grafiske køreplan: en vandret tidsakse udskrives på A4 liggende med strækningerne
-  stablet under hinanden, en lodret på A4 stående med dem ved siden af hinanden.
+- **Tjenestetog er en ny slags togkategori.** Giv en togkategori typen **Tjenestetog** under
+  **Togkategorier** for tog, der hverken afleverer eller optager noget, hvor de standser: et arbejdstog,
+  eller et lokomotiv eller togsæt, der køres ud af drift. Et sådant tog må standse, hvor en driftsplads
+  hverken udveksler rejsende eller gods — for eksempel en arbejdsplads — og når dets køreplan bygges, får
+  det ingen ophold mellem sine endepunkter, så det ophold, der betyder noget, lægger du selv ind. Navngiv
+  kategorien efter, hvad togene gør: et tog, der efterlader materialevogne, udveksler gods og hører
+  hjemme i en godskategori.
 
-  Fordi skalaen er fast i stedet for trykket sammen for at passe til papiret, kan tider og hældninger
-  sammenlignes og måles fra det ene ark til det næste. Et tidsvindue, der er for langt til ét ark, deles
-  langs tidsaksen — først ved pausen, derefter i lige store ark, der overlapper hinanden — så et tog, der
-  krydser snittet, kan følges på begge ark, og det sidste ark bliver lige så fyldt som de øvrige i stedet
-  for at bære nogle få minutter. Skalaen indstilles under **Indstillinger → Grafisk køreplan**; det er ved
-  at mindske stationsafstanden der, at to eller tre strækninger får plads på samme ark. Togene udskrives i
-  deres togartsfarver som på skærmen, medmindre du beder om sort-hvid — hvilket er værd at gøre på en
-  sort-hvid printer, som gør farver, der er tydelige på skærmen, til omtrent samme grå.
+  En kategori i en plan lavet med en tidligere version, som hverken var person eller gods — hvilket en
+  XPLN-import kan efterlade — vises nu som et tjenestetog, hvor den før blev vist som et persontog.
+
+- **Rangeropgaver er en ny slags tog.** Giv en togkategori typen **Rangeropgave** under
+  **Togkategorier**, så udføres togene i den kategori på én station i et bestemt tidsrum i stedet for at
+  køre nogen steder: hvert af dem har kun ét ophold, hvor ankomsttiden er, når arbejdet begynder, og
+  afgangstiden, når det slutter.
+
+- **Godsstrømmene i en rangeropgave angiver, hvilke vogne der skal rangeres.** Tilføj godsstrømme til
+  opgaven under **Godsstrøm** på samme måde som til ethvert andet godstog. En strøm med opgavens egen
+  station som destination indeholder vogne, der er ankommet, og lokomotivføreren får besked på at
+  rangere dem ud til godskunderne med angivelse af, hvor de kommer fra. En strøm til et andet sted
+  hentes i stedet ind fra godskunderne med angivelse af, hvor vognene skal hen. Instruktionen udskrives
+  i lokomotivførernes turhæfter og i stationsrapporterne.
+
+- **Passagerbilletter kan nu udskrives.** En ny rapport under **Rapporter** giver en returbillet mellem
+  hvert par af driftssteder med passagerudveksling, foldet på midten og med den operatør, der har flest
+  persontogsafgange fra salgsstedet, nederst på begge halvdele.
+
+- **Køreplansrapporten lægger nu flere strækninger på ét ark.** Tabeller, der er for smalle til at fylde
+  bredden, står ved siden af hinanden, så en kort sidebane ikke længere tager et helt ark for sig selv.
+
+- **De grafiske køreplaner kan nu udskrives.** En ny rapport under **Rapporter** tegner hver strækning i
+  den faste papirskala, der indstilles under **Indstillinger → Grafisk køreplan**, så tider og hældninger
+  kan måles fra det ene ark til det næste.
 
 - **Indstillinger → Grafisk køreplan er nu ordnet efter, hvad hver indstilling påvirker.** Det, køreplanen
-  viser — hvilken vej tidsaksen løber, hvilke minutter der tegnes, og hvad togetiketten bærer — kommer
-  først, for det gælder både på skærmen og på papiret. Under det står to blokke ved siden af hinanden:
-  afstandene på skærmen, i billedpunkter, og afstandene i den udskrevne rapport, i millimeter papir. Hver
-  blok bærer de samme slags afstande, så skærmens indstilling og dens modstykke på papiret kan læses mod
-  hinanden, og den ene ikke kan forveksles med den anden. Talfelter er højrejusterede, så cifrene står
-  under hinanden.
+  viser, kommer først, og under det afstandene på skærmen, i billedpunkter, ved siden af dem på papiret, i
+  millimeter.
 
 - **Du kan nu angive, hvad der skal ske med lokomotivet, hvor et togafsnit slutter.** Når du redigerer et
-  togafsnit under **Omløb**, stilles der to spørgsmål mere: skal lokomotivet drejes, og skal det køres om
-  til den anden ende af toget, så toget kan afgå den vej, det kom fra? Hver af dem udskrives som en
-  ankomstbemærkning for både lokomotivfører og fjernstyringsleder, og beder du om begge, bliver det én
-  enkelt bemærkning — lokomotivet forlader toget, kører til drejeskiven og kommer tilbage i den anden
-  ende — i stedet for to, der læses som adskilte bevægelser.
+  togafsnit under **Omløb**, spørges der, om lokomotivet skal drejes, og om det skal køres om til den
+  anden ende, og hver af dem udskrives som en ankomstbemærkning for lokomotivfører og fjernstyringsleder.
 
-  Drejning tilbydes kun, hvor det driftssted, togafsnittet slutter ved, har en drejeskive, hvilket er en
-  ny indstilling under **Driftssteder**; ingen andre steder har en. Omløb udelades af bemærkningen, når
-  trækkraften på togafsnittet kan vende, som den står — et motortog eller et lokomotiv i et vendetog —
-  for så er der intet at køre om. Det, du har bedt om, bevares i begge tilfælde, så det siger sit igen,
-  så snart et andet lokomotiv kører togafsnittet.
-
-- **Topologi-diagrammet tegner nu hele anlæggets spor, med hvert driftssted vist én eneste gang.** Det
-  var før en række vandrette linjer, en for hver køreplansstrækning, og et driftssted, som flere
-  strækninger nåede, blev tegnet på hver af dem. Nu optræder hvert driftssted præcis én gang, og sporet
-  mellem to af dem er en lige linje i den vinkel, de nu ligger i, enkelt- eller dobbeltsporet som
-  strækningen virkelig er og i farverne på de køreplansstrækninger, der går over det. Spor, som ingen
-  køreplansstrækning dækker, tegnes i gråt, så et hul i dine strækninger kan ses i stedet for bare at
-  mangle. En signatur, der ellers ville få spor gennem sig, flyttes til den side af cirklen, der er
-  renest — over, under eller ved siden af den — hvilket er svaret, hvor der går spor både opad og nedad
-  fra samme driftssted.
+- **Topologi-diagrammet tegner nu hele anlæggets spor, med hvert driftssted vist én eneste gang.** Sporet
+  er enkelt- eller dobbeltsporet, som strækningen virkelig er, og i farverne på de køreplansstrækninger,
+  der går over det — gråt, hvor ingen strækning dækker det.
 
 - **Du kan nu selv arrangere Topologi-diagrammet.** Træk et driftssted hen, hvor det hører til, så følger
-  sporene med. Det lægger sig i de samme rækker og afstande, som den automatiske tegning bruger, så det,
-  du flytter, kommer på linje med det, du lader stå. Hvor du har placeret driftsstederne, gemmes med
-  planen og er det, der udskrives på oversigtssiden i tjenestehæfterne. **Placer automatisk** glemmer
-  alle de driftssteder, du har flyttet, og tegner hele diagrammet igen. Det er dette, et anlæg med et
-  trekantspor, en vendesløjfe eller to strækninger, der hænger sammen i begge ender, har brug for: ingen
-  regel, der kun læser sporene, kan forventes at tegne et sådant anlæg, som det virkelig ser ud, og du
-  ved, hvordan det ser ud.
+  sporene med; det, du arrangerer, gemmes med planen og udskrives i tjenestehæfterne.
 
-- **Knapperne, der gælder et helt omløb, står nu i deres egen kolonne.** Under **Omløb** stod klon,
-  komplementer og slet forrest blandt togene, så togfelterne i hver række begyndte forskellige steder, og
-  spørgsmålet, der stilles, før et omløb slettes, skubbede dem endnu længere til siden. Nu står de i en
-  kolonne **Handlinger** mellem køretøjerne og togene: hver rækkes tog begynder samme sted, også hvor de
-  fortsætter på næste linje, og knappen til at slette bliver stående og markeres, mens spørgsmålet
-  stilles ved siden af den.
+- **En godsdestination med grænse for både vogne og aksler viser nu begge.** Vogntallet forsvandt før,
+  hvor der også stod et aksletal — både i tjenestehæfterne og i godsbemærkningerne — selv om de to felter
+  står side om side under **Godsstrøm**, og hver af grænserne kan være den, der binder: seksten aksler er
+  fire bogievogne, men otte toakslede.
+
+- **Togsiderne i et tjenestehæfte siger nu det samme på mindre plads.** Kolonnen med køresessioner har
+  nu overskriften **Kører** — det, den fortæller om køretøjet — i stedet for et langt ord over en kolonne
+  med cirkler, og godsvognene har overskrifterne **Fra** og **Til**, som køretøjerne ovenfor allerede
+  havde. Begrænsningerne under overskriften skrives som tal under et enkelt **Maks**: hastigheden med sin
+  enhed, tallet med en cirkel efter for aksler, en firkant for vogne og længden som *2,5m*. Hvor mange vogne eller aksler
+  en destination kan tage, er flyttet ud af **Til** til sin egen kolonne **Maks**, hvor det læses lige ned
+  ad siden i stedet for til sidst i en række stednavne — og den kolonne vises kun, når noget på siden
+  overhovedet er begrænset.
+
+- **Knapperne, der gælder et helt omløb, står nu i deres egen kolonne.** Under **Omløb** er de flyttet til
+  en kolonne **Handlinger** mellem køretøjerne og togene, så hver rækkes tog begynder samme sted.
+
+- **Rapportmenuen har en ny rækkefølge**, fra de generelle instruktioner til passagerbilletterne.
+
+### Fejlrettelser
+
+- **Den installerede app virker nu uden internetforbindelse.** Hjælpeteksterne, teksterne under Om
+  og Versionsnyheder samt kataloget med færdige togkategorier blev hentet fra nettet, hver gang de
+  blev vist, og stod derfor tomme, når du var uden forbindelse. De gemmes nu sammen med resten af
+  appen, når den installeres.
 
 ## Version 0.5.1
 

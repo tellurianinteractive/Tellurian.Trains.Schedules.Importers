@@ -1,68 +1,83 @@
 # Release notes
 
-## Version 0.5.2
+## Version 0.6.0
 
 ### Changes
 
-- **The graphical timetables can now be printed.** A new report under **Reports** draws every timetable
-  stretch to a fixed paper scale — so many millimetres to the fast-clock hour, so many to the kilometre —
-  and puts as many stretches on a sheet as the paper holds. Which way round the paper goes follows the
-  orientation you have chosen for the graphical timetable: a horizontal time axis prints on A4 landscape
-  with the stretches stacked one under another, a vertical one on A4 portrait with them side by side.
+- **Service trains are a new kind of train category.** Give a train category the type **Service train**
+  under **Train categories** for trains that hand nothing over where they stop: a construction train, or
+  a locomotive or trainset moved out of service. Such a train may call where a location exchanges neither
+  passengers nor cargo — a work site, for one — and building its route gives it no stops between its
+  ends, leaving the one that matters for you to place. Name the category for what its trains do: a train
+  that leaves material wagons behind exchanges cargo, and belongs in a freight category.
 
-  Because the scale is fixed rather than squeezed to fit the paper, times and gradients can be compared
-  and measured from one sheet to the next. A time window too long for one sheet is divided along the time
-  axis — at the break time first, then into equal sheets that overlap — so a train crossing the cut can be
-  followed on both sheets, and the last sheet is as full as the others rather than carrying a few stray
-  minutes. The scale is set under **Settings → Graphical timetable**; lowering the station spacing there
-  is what makes two or three stretches share a sheet. Trains print in their category colours, as on
-  screen, unless you ask for black and white — worth doing on a monochrome printer, which turns colours
-  chosen to be distinct on screen into much the same grey.
+  A category in a plan made by an earlier version that was neither passenger nor freight — which an XPLN
+  import can leave behind — is now shown as a service train, where before it was shown as a passenger
+  train.
 
-- **Settings → Graphical timetable is now arranged by what each setting affects.** What the graph shows —
-  which way the time axis runs, which minutes are printed, what a train label carries — comes first, since
-  it applies on screen and on paper alike. Under it stand two blocks side by side: the spacing used on
-  screen, in pixels, and the spacing used by the printed report, in millimetres of paper. Each block
-  carries the same kinds of spacing, so the screen setting and its paper counterpart can be read against
-  each other, and neither can be mistaken for the other. Number fields are right-justified, so their
-  digits line up.
+- **Shunting tasks are a new kind of train.** Give a train category the type **Shunting task** under
+  **Train categories**, and the trains of that category are worked at one station over a span of time
+  instead of travelling: each has a single call whose arrival is when the work starts and whose
+  departure is when it ends.
+
+- **A shunting task's cargo flows say which wagons to shunt.** Add cargo flows to the task under **Cargo
+  flow** as to any freight train. A flow whose destination is the task's own station carries wagons that
+  have arrived, and the loco driver is told to shunt them out to the cargo customers, naming where they
+  came from; a flow bound anywhere else is fetched in from those customers, naming where the wagons are
+  going. The instruction is printed in the driver duty booklets and in the station reports.
+
+- **Passenger tickets can now be printed.** A new report under **Reports** gives a return ticket between
+  every pair of operation locations that exchanges passengers, folded down the middle, with the busiest
+  passenger operator at the selling location printed at the foot of both halves.
+
+- **The timetable report now puts several stretches on one sheet.** Tables too narrow to fill the width
+  stand side by side, so a short branch line no longer takes a whole sheet to itself.
+
+- **The graphical timetables can now be printed.** A new report under **Reports** draws every stretch to
+  the fixed paper scale set under **Settings → Graphical timetable**, so times and gradients can be
+  measured from one sheet to the next.
+
+- **Settings → Graphical timetable is now arranged by what each setting affects.** What the graph shows
+  comes first, and under it the spacing used on screen, in pixels, beside the spacing used on paper, in
+  millimetres.
 
 - **You can now say what is to be done with the locomotive where a train part ends.** Editing a train
-  part under **Schedules** asks two more questions: is the locomotive to be turned, and is it to be run
-  round to the other end of the train so the train can leave the way it came? Either one is printed as an
-  arrival note for both the loco driver and the dispatcher, and asking for both gives a single note — the
-  locomotive leaves the train, goes to the turntable and comes back on the other end — rather than two
-  that read as separate movements.
-
-  Turning is only offered where the station the part ends at has a turntable, which is a new setting
-  under **Operation locations**; nowhere else has one. Running round is left out of the note where the
-  traction working the part reverses as it stands — a trainset, or a locomotive on a reversible train —
-  since there is then nothing to run round. What you asked for is kept either way, so it says what it
-  should again as soon as another locomotive works the part.
+  part under **Schedules** asks whether the locomotive is to be turned and whether it is to be run round
+  to the other end, and prints either as an arrival note for the loco driver and the dispatcher.
 
 - **The Topology diagram now draws the whole layout's track, with every operation location shown once.**
-  It was a row of horizontal lines, one for each timetable stretch, and a location several stretches
-  reached was drawn on each of them. Every location now appears exactly once, and the track between two
-  of them is a straight line at whatever angle they lie, single or double as the stretch really is and in
-  the colours of the timetable stretches running over it. Track no timetable stretch covers at all is
-  drawn in grey, so a gap in your stretches can be seen instead of simply being absent. A signature that
-  would have track running through it moves to whichever side of its circle is clearest — over, under or
-  beside it — which is the answer where track runs both up and down from the same location.
+  Track is single or double as it really is and in the colours of the timetable stretches running over
+  it, and grey where no stretch covers it at all.
 
 - **You can now arrange the Topology diagram yourself.** Drag an operation location to where it belongs
-  and the track follows it, settling on the same rows and spacing the automatic drawing uses so that what
-  you move stays in line with what you leave. Where you have put things is saved with the plan and is
-  what the overview page of the driver duty booklets prints. **Arrange automatically** forgets every
-  location you have moved and draws the whole diagram again. This is what a layout with a triangle, a
-  balloon loop or two lines joined at both ends needs: no rule that reads the track alone can be relied
-  on to draw such a layout as it really is, and you know what it looks like.
+  and the track follows; what you arrange is saved with the plan and printed in the driver duty booklets.
 
-- **The controls that act on a whole working now stand in a column of their own.** Under **Schedules**,
-  copying, complementing and deleting a working stood at the head of its trains, so each row's train
-  blocks began in a different place, and the question asked before deleting pushed them further along
-  still. They are now in an **Actions** column between the vehicles and the trains: every row's trains
-  begin at the same place, including where they wrap onto the next line, and the delete control stays
-  where it is and is marked while the question stands beside it.
+- **A cargo destination limited by both wagons and axles now shows both.** The wagon figure used to
+  disappear wherever an axle figure was also set — in the driver duty booklets and in the cargo notes
+  alike — although the two boxes stand side by side under **Cargo flow** and either limit can be the one
+  that binds: sixteen axles is four bogie wagons but eight two-axle ones.
+
+- **The train pages of a driver duty booklet now say the same in less room.** The sessions column is
+  headed by what it tells you about the vehicle — **Runs** — instead of a long noun over a column of
+  circles, and the cargo wagons are headed **From** and **To**, as the vehicles above them already were.
+  The limits under the heading are written as figures under a single **Max**: the speed with its unit, a
+  figure with a circle after it for axles, a square for wagons, and the length as *2.5m*. How many wagons or axles a destination
+  takes has moved out of **To** into a **Max** column of its own, where it is read straight down the page
+  instead of at the end of a row of place names — and that column appears only when something on the page
+  is limited at all.
+
+- **The controls that act on a whole working now stand in a column of their own.** Under **Schedules**
+  they have moved to an **Actions** column between the vehicles and the trains, so every row's trains
+  begin at the same place.
+
+- **The Reports menu has a new order**, from the general instructions through to the passenger tickets.
+
+### Fixes
+
+- **The installed app now works without an internet connection.** The built-in help, the About and
+  release notes texts and the catalogue of ready-made train categories were fetched from the web
+  every time they were shown, so they stayed empty when you were offline. They are now stored
+  together with the rest of the app when it is installed.
 
 ## Version 0.5.1
 

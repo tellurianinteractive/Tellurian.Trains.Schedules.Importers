@@ -97,24 +97,18 @@ public static class DriverDutyPartExtensions
             TimetableRow.Build(dutyPart.TrainPart, dutyPart.Duty.Sessions, dutyPart.SessionsSettings);
 
         /// <summary>
-        /// The limits the train carries, each labelled in words and only when it is set. An unset limit
-        /// contributes neither value nor label, because on paper a driver cannot tell "not restricted"
-        /// from "the planner forgot" — and an absent line says the first unambiguously. The whole line
-        /// disappears when nothing is set.
+        /// Whether the train carries any limit at all, and so whether the header prints a limits line.
         /// </summary>
-        /// <param name="translator">Resolves the label resource keys.</param>
-        public string LimitsLine(Func<string, string> translator)
-        {
-            var train = dutyPart.Train;
-            string?[] limits =
-            [
-                train.MaxSpeed is { } speed ? $"{translator("MaxSpeed")}: {speed} km/h" : null,
-                train.Length.Axles is { } axles ? $"{translator("MaxAxles")}: {axles}" : null,
-                train.Length.Wagons is { } wagons ? $"{translator("MaxWagons")}: {wagons}" : null,
-                train.Length.Meters is { } metres ? $"{translator("MaxLength")}: {metres:F1} m" : null,
-            ];
-            return string.Join(". ", limits.OfType<string>());
-        }
+        /// <remarks>
+        /// An unset limit contributes neither figure nor label, because on paper a driver cannot tell
+        /// "not restricted" from "the planner forgot" — and an absent line says the first unambiguously.
+        /// The whole line disappears when nothing is set, and then costs no height.
+        /// </remarks>
+        public bool HasLimits =>
+            dutyPart.Train.MaxSpeed is not null ||
+            dutyPart.Train.Length.Axles is not null ||
+            dutyPart.Train.Length.Wagons is not null ||
+            dutyPart.Train.Length.Meters is not null;
 
         /// <summary>
         /// The vehicles working this part, resolved through the duty's plan.
@@ -132,10 +126,13 @@ public static class DriverDutyPartExtensions
                 ? plan.ScheduledObjectsFor(dutyPart.TrainPart)
                 : dutyPart.TrainPart.ScheduledObjects;
 
-        // A cargo flow belongs on this part's page when it is carried over any of the part's span.
+        // A cargo flow belongs on this part's page when it is carried over any of the part's span. On a
+        // shunting task there is no span to overlap — the part and every flow on it stand at the one call
+        // — so the flows of the task are simply all of them, which is what the page is for.
         private bool Covers(CargoFlowTrainPart flow) =>
-            flow.From.SortTime < dutyPart.TrainPart.To.Arrival &&
-            flow.To.SortTime > dutyPart.TrainPart.From.Departure;
+            dutyPart.Train.IsShuntingTask ||
+            (flow.From.SortTime < dutyPart.TrainPart.To.Arrival &&
+             flow.To.SortTime > dutyPart.TrainPart.From.Departure);
     }
 
     extension(ScheduledObject vehicle)

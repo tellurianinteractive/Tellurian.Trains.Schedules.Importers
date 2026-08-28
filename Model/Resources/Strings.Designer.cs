@@ -545,7 +545,16 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
                 return ResourceManager.GetString("TrainMustHaveMinimumTwoCalls", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shunting task {0} must have exactly one station call, but has {1}..
+        /// </summary>
+        internal static string ShuntingTaskMustHaveExactlyOneCall {
+            get {
+                return ResourceManager.GetString("ShuntingTaskMustHaveExactlyOneCall", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}..
         /// </summary>

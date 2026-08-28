@@ -32,7 +32,7 @@ else
                     <PropertyColumn Property="c => c.Prefix" Title='@Translator("Prefix")' />
                     <PropertyColumn Property="c => c.Suffix" Title='@Translator("Suffix")' />
                     <PropertyColumn Property="c => c.StartNumber" Title='@Translator("StartNumber")' />
-                    <TemplateColumn Title='@Translator("Type")'>@Translator(context.IsFreight ? "Freight" : "Passenger")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Type")'>@Translator(TypeLabel(context))</TemplateColumn>
                     <TemplateColumn Title='@Translator("Color")'>
                         <span class="swatch" style="background-color:@context.Color"></span>
                     </TemplateColumn>
@@ -86,11 +86,25 @@ else
                     </div>
                     <div class="field">
                         <label>@Translator("Type")</label>
-                        <select value="@(Editing.IsFreight ? "F" : "P")" @onchange="OnTypeChanged">
-                            <option value="P">@Translator("Passenger")</option>
-                            <option value="F">@Translator("Freight")</option>
+                        @* The type says what trains of this category exchange where they stop, which is what
+                           decides where they can stop at all. A shunting category is a freight one too — what
+                           it handles is cargo wagons — so the four are offered as one choice rather than as
+                           checkboxes. *@
+                        <select value="@TypeKey(Editing)" @onchange="OnTypeChanged" title="@Translator("TrainCategoryTypeHint")">
+                            <option value="Passenger">@Translator("Passenger")</option>
+                            <option value="Freight">@Translator("Freight")</option>
+                            <option value="Shunting">@Translator("ShuntingTask")</option>
+                            <option value="Service">@Translator("ServiceTrain")</option>
                         </select>
                     </div>
+                    @if (Editing.IsShunting)
+                    {
+                        <p class="hint">@Translator("ShuntingCategoryHint")</p>
+                    }
+                    else if (Editing.IsService)
+                    {
+                        <p class="hint">@Translator("ServiceCategoryHint")</p>
+                    }
                     <div class="field">
                         <label>@Translator("Color")</label>
                         <input type="color" @bind="Editing.Color" @bind:after="OnEdited" />
@@ -185,18 +199,31 @@ else
     private bool IsReferenced(TrainCategory category) =>
         (Timetable?.Trains ?? []).Any(t => t.Category?.Id == category.Id);
 
+    // The four types the planner picks between. A shunting category carries cargo wagons, so it is a
+    // freight category as well — that is what lets its tasks stop where cargo is exchanged and hold the
+    // cargo flows saying which wagons to shunt. A service category exchanges nothing at all.
+    private static string TypeKey(TrainCategory category) =>
+        category.IsShunting ? "Shunting" : category.IsFreight ? "Freight" : category.IsService ? "Service" : "Passenger";
+
+    private static string TypeLabel(TrainCategory category) =>
+        category.IsShunting ? "ShuntingTask" : category.IsFreight ? "Freight" : category.IsService ? "ServiceTrain" : "Passenger";
+
     private void OnTypeChanged(ChangeEventArgs e)
     {
         if (Editing is null) return;
-        var isFreight = (string?)e.Value == "F";
-        Editing.IsFreight = isFreight;
-        Editing.IsPassenger = !isFreight;
+        Editing.Content = (string?)e.Value switch
+        {
+            "Passenger" => TrainContent.Passenger,
+            "Freight" or "Shunting" => TrainContent.Cargo,
+            _ => TrainContent.None,
+        };
+        Editing.IsShunting = (string?)e.Value == "Shunting";
         OnEdited();
     }
 
     private void StartAdd()
     {
-        Editing = new TrainCategory { Id = NextId(), Name = "", IsPassenger = true };
+        Editing = new TrainCategory { Id = NextId(), Name = "", Content = TrainContent.Passenger };
         _isNew = true;
         _reapplied = null;
         _mode = Mode.Edit;
@@ -252,7 +279,7 @@ else
         BackToList();
     }
 
-    private string DefaultName(TrainCategory category) => Translator(category.IsFreight ? "Freight" : "Passenger");
+    private string DefaultName(TrainCategory category) => Translator(TypeLabel(category));
 
     private void DeleteConfirmed()
     {

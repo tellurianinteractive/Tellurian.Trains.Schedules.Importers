@@ -201,6 +201,9 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Tog {0} skal standse ved mindst to stationer.</value>
   </data>
+  <data name="ShuntingTaskMustHaveExactlyOneCall" xml:space="preserve">
+    <value>Rangeropgave {0} skal have præcis ét ophold, men har {1}.</value>
+  </data>
   <data name="TrainHasNoStretchBetweenCalls" xml:space="preserve">
     <value>Tog {0} kører fra {1} {2} til {3} {4}, men anlægget har ingen strækning mellem disse driftssteder.</value>
   </data>

@@ -103,13 +103,20 @@ else
                 builder.OpenComponent<DutyOverviewPage>(19);
                 builder.AddComponentParameter(20, nameof(DutyOverviewPage.Layout), Layout);
                 builder.CloseComponent();
+                @* The key to the cargo marks and wordings, under a section title of its own: the
+                   shunting yards above it are layout facts, and this is how the freight entries of
+                   every other report are written. Both belong on the page the reader keeps coming
+                   back to, which is this one. *@
+                builder.OpenComponent<CargoFlowExplanation>(21);
+                builder.AddComponentParameter(22, nameof(CargoFlowExplanation.Timetable), ScheduleState.Schedule?.Timetable);
+                builder.CloseComponent();
                 builder.CloseElement();
                 break;
 
             case InstructionsPageKind.Blank:
-                builder.OpenElement(21, "p");
-                builder.AddAttribute(22, "class", "blank");
-                builder.AddContent(23, Translator("ThisPageIsIntentionalBlank"));
+                builder.OpenElement(23, "p");
+                builder.AddAttribute(24, "class", "blank");
+                builder.AddContent(25, Translator("ThisPageIsIntentionalBlank"));
                 builder.CloseElement();
                 break;
         }

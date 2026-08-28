@@ -1,0 +1,88 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* The key to the marks and wordings the cargo entries are written in — the foot of the general
+   instructions booklet's last page.
+
+   Everything the cargo blocks of a duty booklet and the cargo notes of the station reports say about
+   freight is compressed: a load limit is a mark rather than a word, the origin of wagons already
+   standing at a station is a globe, a destination carries its qualifier as a fragment of a sentence,
+   and a region is a coloured chip. Each is compressed because the column it sits in has no room for
+   the words — which means the words have to be somewhere, and this is where.
+
+   It belongs in this booklet rather than in the duty booklets for the same reason the standing
+   instructions do: it is read once, before the first session, by everyone at the meeting — and the
+   station staff who work the wagons hold no duty booklet at all.
+
+   The marks and the wordings are set as two lists side by side rather than one. A list's term column
+   is as wide as its widest term, so "and local destinations" standing over a globe would have left
+   every mark alone at the near edge of an empty column; and side by side they take half the height, on
+   the one page of the booklet that already carries a diagram and a table.
+
+   The marks and phrases are drawn through the very code that prints them — MaxLoadView, the duty
+   report's globe, and the model's own note wordings — so that what is explained here cannot drift
+   from what is printed there. *@
+
+<div class="cargokey">
+    <h1 class="section-title">@Translator("CargoFlows")</h1>
+    <p class="intro">@Translator("MaximumExplanation")</p>
+    <div class="entries">
+        <dl>
+            <dt><MaxLoadView Capacity="ExampleAxles" /></dt>
+            <dd>@Translator("MaxAxlesExplanation")</dd>
+
+            <dt><MaxLoadView Capacity="ExampleWagons" /></dt>
+            <dd>@Translator("MaxWagonsExplanation")</dd>
+
+            <dt><MaxLoadView Capacity="ExampleLength" /></dt>
+            <dd>@Translator("MaxLengthExplanation")</dd>
+
+            <dt>@Globe</dt>
+            <dd>@Translator("AnywhereExplanation")</dd>
+        </dl>
+        <dl>
+            @* The phrases as the notes write them: lower case, mid-sentence, following a place name. *@
+            <dt class="phrase">@Destination.AndLocalDestinationsPhrase</dt>
+            <dd>@Translator("AndLocalDestinationsExplanation")</dd>
+
+            <dt class="phrase">@Destination.AndBeyondPhrase</dt>
+            <dd>@Translator("AndBeyondExplanation")</dd>
+
+            @* A real region of this layout, not an invented one: the reader then meets the same chip
+               here and in the shunting yards table above. A layout with no regions prints no chips
+               anywhere, so there is nothing to explain. *@
+            @if (ExampleRegion is { } region)
+            {
+                <dt>@region.ToHtml</dt>
+                <dd>@Translator("RegionExplanation")</dd>
+            }
+        </dl>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// The timetable the booklet is printed for. Only its layout is read, for a region to show as an
+    /// example; the rest of the key is the same in every plan.
+    /// </summary>
+    [Parameter, EditorRequired] public Timetable? Timetable { get; set; }
+
+    // Example figures, not limits: a mark is printed following a figure and never on its own, so the
+    // key has to show it the same way for it to be recognised. The values are the ones the report
+    // specification uses in its own examples.
+    private static TrainCapacity ExampleAxles => new() { Axles = 24 };
+    private static TrainCapacity ExampleWagons => new() { Wagons = 12 };
+    private static TrainCapacity ExampleLength => new() { Meters = 2.5 };
+
+    private MarkupString Globe => new(TrainPartCargoFlow.AnywhereGlobe(Translator("Anywhere")));
+
+    // A region a shunting yard actually stands for, which is what the chips in the booklet mean. The
+    // catalogue is the fallback: a region may be defined before the station carrying it is.
+    private Region? ExampleRegion =>
+        Timetable?.Layout is not { } layout ? null :
+        layout.ShuntingYards.SelectMany(yard => yard.ServedRegions).FirstOrDefault()
+            ?? layout.Regions.FirstOrDefault();
+}

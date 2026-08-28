@@ -873,6 +873,9 @@
   <data name="Freight" xml:space="preserve">
     <value>Godståg</value>
   </data>
+  <data name="ServiceTrain" xml:space="preserve">
+    <value>Tjänstetåg</value>
+  </data>
   <data name="Color" xml:space="preserve">
     <value>Färg</value>
   </data>
@@ -1537,9 +1540,6 @@
   <data name="CargoFromTo" xml:space="preserve">
     <value>Gods från {0} till {1}</value>
   </data>
-  <data name="WagonsTo" xml:space="preserve">
-    <value>Vagnar till</value>
-  </data>
   <data name="WagonsToDestinations" xml:space="preserve">
     <value>Vagnar till {0}</value>
   </data>
@@ -2168,6 +2168,9 @@
   <data name="MaxLength" xml:space="preserve">
     <value>Max längd</value>
   </data>
+  <data name="Maximum" xml:space="preserve">
+    <value>Max</value>
+  </data>
   <data name="ArrDep" xml:space="preserve">
     <value>Ank/Avg</value>
   </data>
@@ -2177,11 +2180,11 @@
   <data name="AnyPositionInTrain" xml:space="preserve">
     <value>Valfri</value>
   </data>
+  <data name="Anywhere" xml:space="preserve">
+    <value>Var som helst</value>
+  </data>
   <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
     <value>Inga fler tåg i denna tjänst.</value>
-  </data>
-  <data name="WagonsFrom" xml:space="preserve">
-    <value>Vagnar från</value>
   </data>
   <data name="ScheduledWagonsets" xml:space="preserve">
     <value>Planerade vagnsätt</value>
@@ -2239,5 +2242,47 @@
   </data>
   <data name="DispatchListsHint" xml:space="preserve">
     <value>Ett redigerbart dokument per station, så att varje stationsägare kan lägga till sina egna instruktioner före träffen.</value>
+  </data>
+  <data name="PassengerTickets" xml:space="preserve">
+    <value>Passagerarbiljetter</value>
+  </data>
+  <data name="NoPassengerTickets" xml:space="preserve">
+    <value>Inga biljetter att skriva ut: minst två driftplatser måste ta emot resande.</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="Origin" xml:space="preserve">
+    <value>Avreseort</value>
+  </data>
+  <data name="SoldByAt" xml:space="preserve">
+    <value>Såld av {0} vid {1}</value>
+  </data>
+  <data name="SoldAt" xml:space="preserve">
+    <value>Såld vid {0}</value>
+  </data>
+  <data name="ShuntingTask" xml:space="preserve">
+    <value>Växlingsuppdrag</value>
+  </data>
+  <data name="ShuntingCategoryHint" xml:space="preserve">
+    <value>Tåg i en växlingskategori utförs på en station under en viss tid. Ett sådant tåg har ett enda uppehåll: ankomsttiden är när arbetet börjar och avgångstiden när det slutar.</value>
+  </data>
+  <data name="ServiceCategoryHint" xml:space="preserve">
+    <value>Tåg i en tjänstekategori lämnar av eller tar upp ingenting där de stannar: ett arbetståg, eller ett lok eller tågsätt som förs ut ur trafik. Namnge kategorin efter vad tågen gör. Ett tåg som lämnar materialvagnar efter sig hanterar gods och hör hemma i en godskategori.</value>
+  </data>
+  <data name="TrainCategoryTypeHint" xml:space="preserve">
+    <value>Typen anger vad tåg i den här kategorin lämnar av eller tar upp där de stannar, vilket avgör var de över huvud taget kan stanna.</value>
+  </data>
+  <data name="ShuntingTaskHint" xml:space="preserve">
+    <value>Ett växlingsuppdrag utförs på en station. Ange station, när arbetet börjar och hur länge det pågår. Lägg sedan till godsflöden som anger vilka vagnar som ska växlas.</value>
+  </data>
+  <data name="ShuntingTaskHasOneCall" xml:space="preserve">
+    <value>Ett växlingsuppdrag har bara ett uppehåll.</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>Varaktighet (minuter)</value>
+  </data>
+  <data name="CouldNotCreateShuntingTask" xml:space="preserve">
+    <value>Växlingsuppdraget kunde inte skapas. Kontrollera att stationen har ett spår och att tiderna ligger inom driftstiden.</value>
   </data>
 </root>

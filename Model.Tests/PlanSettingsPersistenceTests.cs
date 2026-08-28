@@ -129,6 +129,9 @@ public class PlanSettingsPersistenceTests
         Assert.AreEqual(2, plan.Layout.DispatchStretches.Count, "dispatch stretches");
         var train = plan.Timetable.Trains.Single();
         Assert.AreEqual(3, train.Calls.Count, "calls");
+        // That version said what a category carried with two booleans; they are read into Content.
+        Assert.AreEqual(TrainContent.Passenger, train.Category?.Content, "the category the train runs in");
+        Assert.AreEqual(TrainContent.Cargo, plan.Timetable.TrainCategories.Single(c => c.Id == 2).Content, "the freight category");
         Assert.AreEqual("Vorsicht", train.CallsInRunOrder[0].ManualNoteText, "call note");
         Assert.IsTrue(plan.Layout.IsConnected(train.CallsInRunOrder[0].OperationLocation, train.CallsInRunOrder[1].OperationLocation));
         // That document wrote each call under its track as well as under its train; the per-track index

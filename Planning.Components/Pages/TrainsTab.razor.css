@@ -192,13 +192,17 @@
     }
 
     /* The span owns the hover so the blocked-reason tooltip shows even when the button is disabled. */
-    .delete-wrap {
+    .delete-wrap,
+    .add-call {
         display: inline-block;
     }
 
     /* The disabled Delete button would otherwise swallow the hover; letting it pass through means the
-       wrapping span receives the hover and shows its title tooltip (the blocked-delete reason). */
-    .delete-wrap > button:disabled {
+       wrapping span receives the hover and shows its title tooltip (the blocked-delete reason). The Add
+       call button is wrapped for the same reason: on a shunting task it is disabled, and the tooltip is
+       the only place that says why. */
+    .delete-wrap > button:disabled,
+    .add-call > button:disabled {
         pointer-events: none;
     }
 

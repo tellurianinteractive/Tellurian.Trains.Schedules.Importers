@@ -9,7 +9,11 @@
 
    Position leads the columns here, unlike the two blocks above, because it is the sort key: the
    repeated 1, 1, 2, 2, 3 then reads as grouping. With sessions first, the sorted column would sit
-   second under a leading column in no order at all, which reads as an unsorted table. *@
+   second under a leading column in no order at all, which reads as an unsorted table.
+
+   From and To are headed as they are in the vehicle blocks above, not as "Wagons from" and "Wagons to":
+   under a heading naming the block as the cargo wagons, the words only repeated what the reader had
+   just been told, at three times the width of the columns they head. *@
 
 @if (Data is { HasData: true })
 {
@@ -18,10 +22,16 @@
         <thead>
             <tr>
                 <th>@Translator("PositionInTrain")</th>
-                <th>@Translator("Sessions")</th>
-                <th>@Translator("WagonsFrom")</th>
+                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
+                   and would head a column holding a few circles. *@
+                <th>@Translator(SessionsHeading)</th>
+                <th>@Translator("From")</th>
                 <th>@Translator("WagonClasses")</th>
-                <th>@Translator("WagonsTo")</th>
+                <th>@Translator("To")</th>
+                @if (Data.HasMaxLoads)
+                {
+                    <th class="maxload">@Translator("Maximum")</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -30,10 +40,27 @@
                 <tr>
                     <td>@row.PositionText(Translator("AnyPositionInTrain"))</td>
                     <td><SessionsView Sessions="row.Sessions" Settings="Data.SessionsSettings" /></td>
-                    <td>@row.From(AlsoShunt)</td>
+                    <td>@row.From(AlsoShunt, Anywhere)</td>
                     @* Empty means no restriction, printed as nothing rather than "all" or a dash. *@
                     <td>@row.WagonClasses</td>
                     <td>@row.To(AlsoShunt)</td>
+                    @if (Data.HasMaxLoads)
+                    {
+                        <td class="maxload">
+                            @foreach (var limit in row.MaxLoads)
+                            {
+                                <span class="limit">
+                                    @* Named only where the row's destinations do not share one limit —
+                                       see TrainPartCargoFlow.MaxLoads. *@
+                                    @if (limit.Location is { Length: > 0 } location)
+                                    {
+                                        <span class="at">@location</span>
+                                    }
+                                    <MaxLoadView Capacity="limit.Capacity" />
+                                </span>
+                            }
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
@@ -48,4 +75,13 @@
     // Appended to the column it qualifies rather than given one of its own, which would be empty on
     // most rows. Either way it means the driver performs the shunting themselves.
     private string AlsoShunt => Translator("AlsoShunt");
+
+    // The From column of a shunting task's arrived wagons, which were brought in by some earlier train
+    // and so have no origin the task itself can name. Drawn as a globe; this is the word it carries as
+    // its label, not the word printed.
+    private string Anywhere => Translator("Anywhere");
+
+    // The day names already say what the column is, so they head it as themselves.
+    private string SessionsHeading =>
+        Data?.SessionsSettings.UseDaysInsteadOfSessionNumbers == true ? "Days" : "SessionsShort";
 }

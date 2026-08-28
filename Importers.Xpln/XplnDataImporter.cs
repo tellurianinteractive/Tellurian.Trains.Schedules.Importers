@@ -769,8 +769,8 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                             // freight/passenger meaning and are ignored.
                             switch (fields[Object])
                             {
-                                case "G_Zug": current.Category.IsFreight = true; current.Category.IsPassenger = false; break;
-                                case "P_Zug": current.Category.IsPassenger = true; current.Category.IsFreight = false; break;
+                                case "G_Zug": current.Category.Content = TrainContent.Cargo; break;
+                                case "P_Zug": current.Category.Content = TrainContent.Passenger; break;
                             }
                             break;
                     }

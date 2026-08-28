@@ -89,7 +89,7 @@ else
 
         foreach (var duty in selected)
         {
-            var pages = DutyPagination.BuildPages(duty, Settings, key => Translator(key));
+            var pages = DutyPagination.BuildPages(duty, Settings);
             RecordContinuations(pages);
             sides.AddRange(DutyPagination.Impose(pages));
         }

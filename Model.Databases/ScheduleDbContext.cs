@@ -710,8 +710,8 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 destination.Property<int>("Id").ValueGeneratedOnAdd();
                 destination.HasKey("Id");
                 destination.HasOne(x => x.Location).WithMany().OnDelete(DeleteBehavior.Restrict);
-                // Computed markup rendering, not persisted.
-                destination.Ignore(x => x.ToHtml);
+                // The renderings are extension properties, so EF never discovers them and there is
+                // nothing here to ignore.
             });
         });
 

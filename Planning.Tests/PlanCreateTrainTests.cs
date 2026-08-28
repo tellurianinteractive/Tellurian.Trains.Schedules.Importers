@@ -7,8 +7,9 @@ public class PlanCreateTrainTests
 {
     private static readonly Time Start = Time.FromHourAndMinute(8, 0);
 
-    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true, DefaultSpeed = 100 };
-    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", IsFreight = true, DefaultSpeed = 100 };
+    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
+    private static TrainCategory Freight => new() { Id = 2, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo, DefaultSpeed = 100 };
+    private static TrainCategory Service => new() { Id = 3, Name = "Construction train", Prefix = "A", Content = TrainContent.None, DefaultSpeed = 60 };
 
     private static Plan SimplePlan()
     {
@@ -38,6 +39,27 @@ public class PlanCreateTrainTests
         CollectionAssert.AreEqual(
             new[] { "M2", "Lu", "E", "Hm" },
             train.Calls.Select(c => c.OperationLocation.Signature).ToArray());
+    }
+
+    [TestMethod]
+    public void AServiceTrainIsGivenNoStopsBetweenItsEnds()
+    {
+        // A service category exchanges nothing, so building its route stops it nowhere in between. The one
+        // stop that matters — the work site — is the planner's to add, and only the planner knows where.
+        var service = Routed(Service);
+        var passenger = Routed(Passenger);
+
+        Assert.IsFalse(Call(service, "Lu").IsStop);
+        Assert.IsFalse(Call(service, "E").IsStop);
+        Assert.IsTrue(Call(passenger, "Lu").IsStop, "a passenger train does stop where passengers are exchanged");
+
+        static Train Routed(TrainCategory category)
+        {
+            var plan = SimplePlan();
+            var train = plan.Create(category, Location(plan, "M2"), Location(plan, "Hm"), Start);
+            Assert.IsNotNull(train);
+            return train;
+        }
     }
 
     [TestMethod]
@@ -275,7 +297,7 @@ public class PlanCreateTrainTests
     public void NumberingStartsFromTheCategoryStartNumber()
     {
         var plan = SimplePlan();
-        var category = new TrainCategory { Id = 3, Name = "Express", Prefix = "X", IsPassenger = true, DefaultSpeed = 100, StartNumber = 100 };
+        var category = new TrainCategory { Id = 3, Name = "Express", Prefix = "X", Content = TrainContent.Passenger, DefaultSpeed = 100, StartNumber = 100 };
         var m2 = Location(plan, "M2");
         var hm = Location(plan, "Hm");
 

@@ -95,6 +95,17 @@
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Medför vagnar till {0}</value>
   </data>
+  <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
+    <value>Växla ankommande vagnar från {0} till godskunderna.</value>
+    <comment>{0}=ursprung som vagnarna kommer från</comment>
+  </data>
+  <data name="ShuntArrivingWagonsToCargoCustomers" xml:space="preserve">
+    <value>Växla ankommande vagnar till godskunderna.</value>
+  </data>
+  <data name="FetchWagonsToFromCargoCustomers" xml:space="preserve">
+    <value>Hämta vagnar till {0} från godskunderna.</value>
+    <comment>{0}=destinationer som vagnarna ska till</comment>
+  </data>
   <data name="AllDestinations" xml:space="preserve">
     <value>alla destinationer</value>
   </data>

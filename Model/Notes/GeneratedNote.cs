@@ -70,6 +70,14 @@ public static class GeneratedNoteExtensions
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 new(NoteResources.BringsWagonsTo, NoteArg.Markup(part.ToText, part.ToHtml)),
+            // The origins are what the driver sorts the arrived wagons by, so they carry the emphasis.
+            // A flow naming none still gives a usable instruction — take what arrived out to the
+            // customers — so it gets the wording without the clause rather than an empty one.
+            ShuntArrivingWagonsNote(var part) => part.FromText.HasValue
+                ? new(NoteResources.ShuntArrivingWagonsFromToCargoCustomers, NoteArg.Markup(part.FromText, part.FromHtml))
+                : new(NoteResources.ShuntArrivingWagonsToCargoCustomers),
+            FetchDepartingWagonsNote(var part) =>
+                new(NoteResources.FetchWagonsToFromCargoCustomers, NoteArg.Markup(part.ToText, part.ToHtml)),
             // The key's name is emphasised beside the location, because at a station holding several it
             // is what the driver has to ask for by name.
             PickUpLockKeyNote(var location, var name) => name.HasValue

@@ -15,7 +15,9 @@
     <table class="dutytrain">
         <thead>
             <tr>
-                <th>@Translator("Sessions")</th>
+                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
+                   and would head a column holding a few circles. *@
+                <th>@Translator(SessionsHeading)</th>
                 <th>@Translator(VehicleColumn)</th>
                 <th>@Translator("From")</th>
                 <th>@Translator("Dep")</th>
@@ -50,4 +52,8 @@
 
     /// <summary>Resource key for the vehicle column header.</summary>
     [Parameter, EditorRequired] public string VehicleColumn { get; set; } = "";
+
+    // The day names already say what the column is, so they head it as themselves.
+    private string SessionsHeading =>
+        Data?.SessionsSettings.UseDaysInsteadOfSessionNumbers == true ? "Days" : "SessionsShort";
 }

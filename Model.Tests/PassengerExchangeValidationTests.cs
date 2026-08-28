@@ -10,8 +10,8 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 [TestClass]
 public class PassengerExchangeValidationTests
 {
-    private static readonly TrainCategory Passenger = new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true };
-    private static readonly TrainCategory Freight = new() { Id = 2, Name = "Freight", Prefix = "G", IsFreight = true };
+    private static readonly TrainCategory Passenger = new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger };
+    private static readonly TrainCategory Freight = new() { Id = 2, Name = "Freight", Prefix = "G", Content = TrainContent.Cargo };
 
     [TestMethod]
     public void AStopAtATrackWithNoPlatformIsReported()

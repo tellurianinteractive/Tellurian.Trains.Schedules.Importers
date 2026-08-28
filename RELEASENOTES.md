@@ -4,6 +4,19 @@
 
 ### New Features
 
+- **A train category says what it exchanges, and can now exchange nothing.** New
+  **`TrainCategory.Content`**, a `[Flags]` **`TrainContent`** of `None`, `Passenger` and `Cargo`, replaces
+  the two booleans that said the same thing less exactly. `TrainContent.None` is a *service* category —
+  a construction train, or a locomotive or trainset moved out of service — whose trains hand nothing over
+  and so need no exchange of the locations they call at: `Train.CanStopAt` lets them stop wherever the
+  location type allows, which is what makes a work site modelled as an `OtherLocation` a legal stop.
+
+  `TrainCategory.IsPassenger` and `TrainCategory.IsFreight` remain, as extension properties over the
+  content, joined by **`TrainCategory.IsService`**. `IsFreight` is true for a shunting category whatever
+  its content says, so the pair can no longer disagree. Building a route (`Plan.Create`) gives a service
+  train no stops between its ends — deliberately narrower than `CanStopAt`, since only the planner knows
+  where the work site is.
+
 - **A station says whether it has a turntable, and a train part says what is to be done with its
   traction on arrival.** New **`Station.HasTurntable`** records the facility, and
   **`OperationLocation.CanTurnLoco`** answers the question a caller actually asks — a location can be
@@ -24,11 +37,29 @@
 
 ### Breaking Changes
 
+- **`TrainCategory.IsPassenger` and `TrainCategory.IsFreight` are no longer settable.** Both are now
+  read-only extension properties over `TrainCategory.Content`; set the content instead
+  (`TrainContent.From(isPassenger, isCargo)` states it as the old pair). Reading either is unchanged,
+  except through the null-conditional operator, which extension members do not allow: write
+  `train.IsPassenger` rather than `train.Category?.IsPassenger`.
+
+  A plan written by an earlier version stores the two booleans and reads back into the content, so
+  nothing is lost. A category with neither set becomes a service category — which is what it already
+  meant, there being no other way to say it. The train category catalogue CSV read by
+  `TrainCategoriesFromCsvService` keeps both columns and gains an `IsShunting` column, so a file written
+  for the previous format needs that column adding.
+
 - **`TractionOptions.ReverseLoco` is renamed `TractionOptions.RunaroundLoco`**, after the manoeuvre the
   rest of the model and the app already name that way (`Plan.NeedsLocoRunaround`,
   `StationTimings.LocoRunaroundRealMinutes`). Nothing but the name changed. A plan written by an earlier
   version stores the flag under its old name and reads back without it; the XPLN importer does not set
   it, so only a plan that had it set by hand is affected.
+
+### Dependencies
+
+- **Tellurian.Localization is raised to 1.5.0.** Its markdown providers now take the language the
+  suffixless content files are written in, and stop looking for a culture-specific file for that
+  language — a lookup that could only ever miss. Nothing in this model's own API changes.
 
 ## Version 3.2.0
 

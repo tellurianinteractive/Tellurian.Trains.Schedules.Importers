@@ -24,14 +24,34 @@ public record TrainCategory
     public string Suffix { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets a value indicating whether this is a passenger train category.
+    /// Gets or sets what trains of this category exchange where they stop — passengers, cargo, both, or
+    /// nothing at all. This is what every stop rule tests (see <c>Train.CanStopAt</c>), so it is what
+    /// decides where trains of this category are able to stop.
     /// </summary>
-    public bool IsPassenger { get; set; }
+    /// <remarks>
+    /// <see cref="TrainContent.None"/> makes it a service category, whose trains hand nothing over: a
+    /// construction train, or a locomotive or trainset moved out of service. The category
+    /// <see cref="Name"/> says which of those it is. A shunting category always includes
+    /// <see cref="TrainContent.Cargo"/>, because what it handles is cargo wagons; see
+    /// <see cref="IsShunting"/>.
+    /// </remarks>
+    public TrainContent Content { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this is a freight train category.
+    /// Gets or sets a value indicating whether trains of this category are <em>shunting tasks</em> rather
+    /// than trains that travel: work done at one operating location over a span of time, typically making
+    /// up the wagons of a departing train or taking the wagons of an arrived one out to the cargo
+    /// customers. A shunting task has exactly one station call, whose arrival is the time the work starts
+    /// and whose departure is the time it ends — the same two times that bound any train's working.
     /// </summary>
-    public bool IsFreight { get; set; }
+    /// <remarks>
+    /// A shunting category is a freight category too — its <see cref="Content"/> includes
+    /// <see cref="TrainContent.Cargo"/> — because what it handles is cargo wagons: that is what lets it
+    /// stop where cargo is exchanged and carry the cargo flows that say
+    /// which wagons to shunt. What it does <em>not</em> do is travel, so its trains are left out of the
+    /// reports that draw or tabulate a run over a stretch. See <c>TrainExtensions.IsShuntingTask</c>.
+    /// </remarks>
+    public bool IsShunting { get; set; }
 
     /// <summary>
     /// Gets or sets the name of this train category.
@@ -111,6 +131,26 @@ public static class TrainCategoryExtensions
     extension(TrainCategory category)
     {
         /// <summary>
+        /// Gets whether trains of this category exchange passengers where they stop, from
+        /// <see cref="TrainCategory.Content"/>.
+        /// </summary>
+        public bool IsPassenger => category.Content.HasFlag(TrainContent.Passenger);
+
+        /// <summary>
+        /// Gets whether trains of this category exchange cargo where they stop, from
+        /// <see cref="TrainCategory.Content"/>. A shunting category always does, whatever its content
+        /// says: what it handles is cargo wagons.
+        /// </summary>
+        public bool IsFreight => category.Content.HasFlag(TrainContent.Cargo) || category.IsShunting;
+
+        /// <summary>
+        /// Gets whether this is a service category: its trains exchange nothing at all and are not
+        /// shunting tasks either. A construction train or a vehicle moved out of service; the category
+        /// <see cref="TrainCategory.Name"/> says which.
+        /// </summary>
+        public bool IsService => category.Content is TrainContent.None && !category.IsShunting;
+
+        /// <summary>
         /// Gets the full train identity string for a given train number.
         /// </summary>
         /// <param name="trainNumber">The train number.</param>
@@ -131,8 +171,7 @@ public static class TrainCategoryExtensions
                 Name = d.NameFor(language),
                 Prefix = d.Prefix,
                 Color = d.Color,
-                IsPassenger = d.IsPassenger,
-                IsFreight = !d.IsPassenger,
+                Content = d.Content,
                 DefaultSpeed = d.DefaultSpeed,
                 StartNumber = d.StartNumber,
             });
@@ -143,11 +182,11 @@ public static class TrainCategoryExtensions
     // start in separate number bands so their trains never collide.
     private static readonly TrainCategoryDefault[] Defaults =
     [
-        new(1, "P", "#CC0000", IsPassenger: true,  DefaultSpeed: 100, StartNumber: 1,    EN: "Passenger", DA: "Persontog", DE: "Reisezug",  NB: "Persontog", SV: "Persontåg"),
-        new(2, "G", "#000000", IsPassenger: false, DefaultSpeed: 80,  StartNumber: 5000, EN: "Freight",   DA: "Godstog",   DE: "Güterzug",  NB: "Godstog",   SV: "Godståg"),
+        new(1, "P", "#CC0000", TrainContent.Passenger, DefaultSpeed: 100, StartNumber: 1,    EN: "Passenger", DA: "Persontog", DE: "Reisezug",  NB: "Persontog", SV: "Persontåg"),
+        new(2, "G", "#000000", TrainContent.Cargo,     DefaultSpeed: 80,  StartNumber: 5000, EN: "Freight",   DA: "Godstog",   DE: "Güterzug",  NB: "Godstog",   SV: "Godståg"),
     ];
 
-    private sealed record TrainCategoryDefault(int Id, string Prefix, string Color, bool IsPassenger, int DefaultSpeed, int StartNumber, string EN, string DA, string DE, string NB, string SV)
+    private sealed record TrainCategoryDefault(int Id, string Prefix, string Color, TrainContent Content, int DefaultSpeed, int StartNumber, string EN, string DA, string DE, string NB, string SV)
     {
         public string NameFor(string language) => language switch
         {

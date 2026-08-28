@@ -1,76 +1,85 @@
 # Versionshinweise
 
-## Version 0.5.2
+## Version 0.6.0
 
 ### Änderungen
 
-- **Die Bildfahrpläne lassen sich jetzt drucken.** Ein neuer Bericht unter **Berichte** zeichnet jede
-  Fahrplanstrecke in einem festen Papiermaßstab — so viele Millimeter je Schnelluhr-Stunde und je
-  Kilometer — und bringt so viele Strecken auf ein Blatt, wie das Papier fasst. Wie das Papier liegt,
-  richtet sich nach der für den Bildfahrplan gewählten Ausrichtung: eine waagerechte Zeitachse wird auf A4
-  quer gedruckt, mit den Strecken untereinander, eine senkrechte auf A4 hoch, mit den Strecken
-  nebeneinander.
+- **Dienstzüge sind eine neue Art von Zugkategorie.** Geben Sie einer Zugkategorie unter
+  **Zugkategorien** den Typ **Dienstzug** für Züge, die an ihren Halten nichts abgeben und nichts
+  aufnehmen: ein Bauzug, oder eine Lokomotive oder ein Triebzug, die aus dem Betrieb gefahren werden. Ein
+  solcher Zug darf dort halten, wo eine Betriebsstelle weder Reisende noch Güter austauscht — etwa an
+  einer Baustelle — und beim Erstellen seines Laufwegs erhält er zwischen seinen Endpunkten keine Halte,
+  sodass Sie den entscheidenden Halt selbst setzen. Benennen Sie die Kategorie danach, was ihre Züge tun:
+  ein Zug, der Materialwagen zurücklässt, tauscht Güter aus und gehört in eine Güterkategorie.
 
-  Da der Maßstab fest ist und nicht auf das Papier zusammengedrückt wird, lassen sich Zeiten und Neigungen
-  von Blatt zu Blatt vergleichen und messen. Ein Zeitfenster, das für ein Blatt zu lang ist, wird entlang
-  der Zeitachse geteilt — zuerst an der Pause, dann in gleich große, einander überlappende Blätter — sodass
-  ein Zug, der die Schnittstelle überquert, auf beiden Blättern zu verfolgen ist und das letzte Blatt
-  ebenso voll wird wie die übrigen, statt nur wenige Minuten zu tragen. Der Maßstab wird unter
-  **Einstellungen → Bildfahrplan** eingestellt; erst ein kleinerer Stationsabstand bringt zwei oder drei
-  Strecken auf dasselbe Blatt. Züge werden wie am Bildschirm in den Farben ihrer Zuggattung gedruckt, außer
-  Sie verlangen Schwarzweiß — auf einem Schwarzweißdrucker lohnt sich das, denn er macht am Bildschirm gut
-  unterscheidbare Farben zu fast demselben Grau.
+  Eine Kategorie in einem Plan einer früheren Version, die weder Reise- noch Güterkategorie war — was ein
+  XPLN-Import hinterlassen kann — wird jetzt als Dienstzug angezeigt, wo sie zuvor als Reisezug erschien.
+
+- **Rangieraufgaben sind eine neue Art von Zug.** Geben Sie einer Zugkategorie unter **Zugkategorien**
+  den Typ **Rangieraufgabe**, dann werden die Züge dieser Kategorie an einem Bahnhof über eine bestimmte
+  Zeitspanne ausgeführt, statt zu fahren: jeder hat nur einen Halt, dessen Ankunftszeit der Beginn der
+  Arbeit und dessen Abfahrtszeit ihr Ende ist.
+
+- **Die Wagenströme einer Rangieraufgabe legen fest, welche Wagen zu rangieren sind.** Fügen Sie der
+  Aufgabe unter **Wagenstrom** Wagenströme hinzu wie jedem anderen Güterzug. Ein Strom mit dem eigenen
+  Bahnhof der Aufgabe als Ziel enthält angekommene Wagen, und der Lokführer wird angewiesen, sie zu den
+  Güterkunden zu rangieren, mit Angabe ihrer Herkunft. Ein Strom mit einem anderen Ziel wird stattdessen
+  von den Güterkunden geholt, mit Angabe des Ziels der Wagen. Die Anweisung wird in den Dienstheften der
+  Lokführer und in den Bahnhofsberichten gedruckt.
+
+- **Fahrkarten lassen sich jetzt drucken.** Ein neuer Bericht unter **Berichte** liefert eine
+  Rückfahrkarte zwischen je zwei Betriebsstellen mit Reisendenwechsel, in der Mitte zu falten, mit dem
+  Betreiber der meisten Reisezugabfahrten von der Verkaufsstelle am Fuß beider Hälften.
+
+- **Der Fahrplanbericht bringt jetzt mehrere Strecken auf ein Blatt.** Tabellen, die die Breite nicht
+  füllen, stehen nebeneinander, sodass eine kurze Nebenbahn kein ganzes Blatt mehr für sich braucht.
+
+- **Die Bildfahrpläne lassen sich jetzt drucken.** Ein neuer Bericht unter **Berichte** zeichnet jede
+  Strecke in dem festen Papiermaßstab, der unter **Einstellungen → Bildfahrplan** eingestellt wird, sodass
+  Zeiten und Neigungen von Blatt zu Blatt zu messen sind.
 
 - **Einstellungen → Bildfahrplan ist jetzt danach geordnet, was jede Einstellung betrifft.** Was der
-  Bildfahrplan zeigt — in welche Richtung die Zeitachse läuft, welche Minuten gezeichnet werden, was die
-  Zugbeschriftung trägt — steht zuoberst, denn es gilt am Bildschirm wie auf dem Papier. Darunter stehen
-  zwei Blöcke nebeneinander: die Abstände am Bildschirm, in Bildpunkten, und die Abstände des gedruckten
-  Berichts, in Millimetern Papier. Jeder Block trägt dieselben Arten von Abständen, sodass die Einstellung
-  am Bildschirm und ihr Gegenstück auf dem Papier gegeneinander gelesen werden können und die eine nicht
-  mit der anderen zu verwechseln ist. Zahlenfelder sind rechtsbündig, damit die Ziffern untereinander
-  stehen.
+  Bildfahrplan zeigt, steht zuoberst, darunter die Abstände am Bildschirm, in Bildpunkten, neben denen auf
+  dem Papier, in Millimetern.
 
-- **Sie können jetzt angeben, was mit der Lok geschehen soll, wo ein Zugabschnitt endet.** Beim
-  Bearbeiten eines Zugabschnitts unter **Umläufe** werden zwei weitere Fragen gestellt: soll die Lok
-  gedreht werden, und soll sie ans andere Zugende umgesetzt werden, damit der Zug in die Richtung
-  abfahren kann, aus der er gekommen ist? Jede davon wird als Ankunftsvermerk für Lokführer und
-  Fahrdienstleiter gedruckt, und werden beide verlangt, ergibt das einen einzigen Vermerk — die Lok
-  verlässt den Zug, fährt zur Drehscheibe und kommt am anderen Ende zurück — statt zweier, die sich wie
-  getrennte Bewegungen lesen.
-
-  Das Drehen wird nur dort angeboten, wo die Betriebsstelle, an der der Zugabschnitt endet, eine
-  Drehscheibe hat — eine neue Einstellung unter **Betriebsstellen**; anderswo gibt es keine. Das
-  Umsetzen entfällt im Vermerk, wenn das Triebfahrzeug des Zugabschnitts wenden kann, wie es steht — ein
-  Triebzug oder eine Lok in einem Wendezug —, denn dann ist nichts umzusetzen. Ihre Angabe bleibt in
-  beiden Fällen erhalten und gilt wieder, sobald eine andere Lok den Zugabschnitt fährt.
+- **Sie können jetzt angeben, was mit der Lok geschehen soll, wo ein Zugabschnitt endet.** Beim Bearbeiten
+  eines Zugabschnitts unter **Umläufe** wird gefragt, ob die Lok gedreht und ob sie ans andere Zugende
+  umgesetzt werden soll, und beides wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.
 
 - **Das Topologie-Diagramm zeichnet jetzt die Gleise der ganzen Anlage, wobei jede Betriebsstelle nur ein
-  einziges Mal erscheint.** Es war bisher eine Reihe waagerechter Linien, eine je Fahrplanabschnitt, und
-  eine Betriebsstelle, die mehrere Abschnitte erreichten, wurde auf jeder von ihnen gezeichnet. Jetzt
-  erscheint jede Betriebsstelle genau einmal, und das Gleis zwischen zwei von ihnen ist eine gerade Linie
-  in dem Winkel, in dem sie gerade liegen — ein- oder zweigleisig, wie der Abschnitt wirklich ist, und in
-  den Farben der Fahrplanabschnitte, die darüber verkehren. Gleise, die kein Fahrplanabschnitt abdeckt,
-  werden grau gezeichnet, sodass eine Lücke in Ihren Abschnitten zu sehen ist, statt einfach zu fehlen.
-  Eine Signatur, durch die sonst ein Gleis liefe, rückt auf die freieste Seite ihres Kreises — darüber,
-  darunter oder daneben —, was die Antwort dort ist, wo Gleise von derselben Betriebsstelle sowohl nach
-  oben als auch nach unten führen.
+  einziges Mal erscheint.** Die Gleise sind ein- oder zweigleisig, wie der Abschnitt wirklich ist, und in
+  den Farben der Fahrplanabschnitte, die darüber verkehren — grau, wo kein Abschnitt sie abdeckt.
 
 - **Sie können das Topologie-Diagramm jetzt selbst anordnen.** Ziehen Sie eine Betriebsstelle dorthin, wo
-  sie hingehört, dann folgen die Gleise. Sie legt sich in dieselben Reihen und Abstände, die die
-  automatische Zeichnung verwendet, sodass das Verschobene mit dem Stehengelassenen auf einer Linie
-  bleibt. Wo Sie die Betriebsstellen hingesetzt haben, wird mit dem Plan gespeichert und auch auf der
-  Übersichtsseite der Diensthefte gedruckt. **Automatisch anordnen** vergisst alle von Ihnen verschobenen
-  Betriebsstellen und zeichnet das ganze Diagramm neu. Genau das braucht eine Anlage mit einem
-  Gleisdreieck, einer Wendeschleife oder zwei an beiden Enden zusammenhängenden Strecken: keine Regel,
-  die nur die Gleise liest, zeichnet eine solche Anlage verlässlich so, wie sie wirklich ist — Sie aber
-  wissen, wie sie aussieht.
+  sie hingehört, dann folgen die Gleise; Ihre Anordnung wird mit dem Plan gespeichert und in den
+  Dienstheften gedruckt.
+
+- **Ein Güterziel mit einer Grenze für Wagen und für Achsen zeigt jetzt beide.** Die Wagenzahl
+  verschwand bisher überall dort, wo auch eine Achszahl stand — in den Dienstheften wie in den
+  Gütervermerken —, obwohl beide Felder unter **Güterverkehr** nebeneinander stehen und jede der beiden
+  Grenzen die bindende sein kann: sechzehn Achsen sind vier Drehgestellwagen, aber acht zweiachsige.
+
+- **Die Zugseiten eines Dienstheftes sagen dasselbe jetzt auf weniger Raum.** Die Spalte der Fahrrunden
+  trägt die Überschrift **Fährt** — das, was sie über das Fahrzeug sagt — statt eines langen Wortes über
+  einer Spalte von Kreisen, und die Güterwagen sind mit **Von** und **Nach** überschrieben, wie die
+  Fahrzeuge darüber schon zuvor. Die Beschränkungen unter der Überschrift stehen als Zahlen unter einem
+  einzigen **Max.**: die Geschwindigkeit mit ihrer Einheit, die Zahl mit einem Kreis dahinter für Achsen, einem
+  Quadrat für Wagen und die Länge als *2,5m*. Wie viele Wagen oder Achsen ein Ziel aufnimmt, ist aus **Nach** in eine eigene
+  Spalte **Max.** gerückt, wo es die Seite hinunter gelesen wird statt am Ende einer Reihe von Ortsnamen —
+  und diese Spalte erscheint nur, wenn auf der Seite überhaupt etwas beschränkt ist.
 
 - **Die Schaltflächen für einen ganzen Umlauf stehen jetzt in einer eigenen Spalte.** Unter **Umläufe**
-  standen Klonen, Komplementieren und Löschen an der Spitze der Züge, sodass die Zugfelder jeder Zeile an
-  einer anderen Stelle begannen und die Rückfrage vor dem Löschen sie noch weiter zur Seite schob. Jetzt
-  stehen sie in einer Spalte **Aktionen** zwischen den Fahrzeugen und den Zügen: Die Züge jeder Zeile
-  beginnen an derselben Stelle, auch wo sie in die nächste Zeile umbrechen, und die Schaltfläche zum
-  Löschen bleibt stehen und wird hervorgehoben, während die Rückfrage daneben steht.
+  sind sie in eine Spalte **Aktionen** zwischen die Fahrzeuge und die Züge gerückt, sodass die Züge jeder
+  Zeile an derselben Stelle beginnen.
+
+- **Das Menü Berichte hat eine neue Reihenfolge**, von den allgemeinen Anweisungen bis zu den Fahrkarten.
+
+### Fehlerbehebungen
+
+- **Die installierte App funktioniert jetzt ohne Internetverbindung.** Die eingebauten Hilfetexte,
+  die Texte unter Über und Versionshinweise sowie der Katalog der fertigen Zugkategorien wurden bei
+  jeder Anzeige aus dem Web geladen und blieben deshalb ohne Verbindung leer. Sie werden nun bei der
+  Installation zusammen mit dem Rest der App gespeichert.
 
 ## Version 0.5.1
 

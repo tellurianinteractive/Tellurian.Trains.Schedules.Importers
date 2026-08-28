@@ -155,6 +155,32 @@ public sealed class TimetableRow
 
         var rows = new List<TimetableRow>(calls.Count * 2);
 
+        // A shunting task is worked at one place, so its single call is both ends of the part and the
+        // ordinary first/last handling — origin departs only, terminus arrives only — would print one of
+        // the two times and drop the other. Both are wanted: the arrival is when the work starts and the
+        // departure when it ends, and the driver needs to be told how long they have. The instruction
+        // saying what to shunt is an arrival note, so it lands on the row showing the start time.
+        if (trainPart.Train.IsShuntingTask && calls.Count == 1)
+        {
+            var only = calls[0];
+            var taskNotes = only.DriverNotes(readerSessions, settings, plan);
+            rows.Add(new TimetableRow
+            {
+                Call = only,
+                Half = CallHalf.Arrival,
+                Time = only.Arrival,
+                Notes = [.. taskNotes.Where(n => n.IsForArrival)],
+            });
+            rows.Add(new TimetableRow
+            {
+                Call = only,
+                Half = CallHalf.Departure,
+                Time = only.Departure,
+                Notes = [.. taskNotes.Where(n => n.IsForDeparture)],
+            });
+            return rows;
+        }
+
         for (var i = 0; i < calls.Count; i++)
         {
             var call = calls[i];

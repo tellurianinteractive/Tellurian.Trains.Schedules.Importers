@@ -17,6 +17,33 @@
                              Value="_categoryId" ValueChanged="id => { _categoryId = id; UpdateCategoryDefaults(); UpdateSuggestedNumber(); }"
                              Placeholder="—" />
             </div>
+            @* A shunting task is worked at one place, so it is asked for one location and a duration
+               instead of a route, a speed and the times of making a train ready and putting it away.
+               Everything else on this dialog describes travelling, and none of it applies. *@
+            @if (IsShuntingCategory)
+            {
+                <p class="hint">@Translator("ShuntingTaskHint")</p>
+                <div class="field">
+                    <label>@Translator("Station")</label>
+                    <ListBoxView Items="@(LocationChoices.ToListItems())"
+                                 Value="_fromId" ValueChanged="id => { _fromId = id; _error = null; }"
+                                 Placeholder="—" />
+                </div>
+                <div class="field">
+                    <label>@Translator("StartTime")</label>
+                    <input type="text" class="time" value="@_time" @onchange="e => _time = e.Value?.ToString() ?? _time" />
+                </div>
+                <div class="field">
+                    <label>@Translator("DurationMinutes")</label>
+                    <input type="number" class="num" min="1" value="@_durationMinutes" @onchange="e => _durationMinutes = ParseInt(e, _durationMinutes)" />
+                </div>
+                <div class="field">
+                    <label>@Translator("Number")</label>
+                    <input type="number" class="num" min="1" value="@_number" @onchange="SetNumber" />
+                </div>
+            }
+            else
+            {
             <div class="field">
                 <label>@Translator("From")</label>
                 <ListBoxView Items="@(LocationChoices.ToListItems())"
@@ -88,6 +115,7 @@
                     </div>
                 }
             </fieldset>
+            }
 
             @if (_error is not null)
             {
@@ -138,10 +166,17 @@
     // planner starts on "as soon as possible" and only types a time when they want a different one.
     private bool _returnAsSoonAsPossible = true;
     private string _returnTime = "";
+    private int _durationMinutes = 30;
     private string? _error;
 
+    private TrainCategory? SelectedCategory => CategoryChoices.FirstOrDefault(c => c.Id == _categoryId);
+
+    private bool IsShuntingCategory => SelectedCategory?.IsShunting == true;
+
     private bool CanCreate =>
-        _categoryId is not null && _fromId is not null && _toId is not null && _fromId != _toId;
+        IsShuntingCategory
+            ? _categoryId is not null && _fromId is not null && _durationMinutes > 0
+            : _categoryId is not null && _fromId is not null && _toId is not null && _fromId != _toId;
 
     protected override void OnInitialized()
     {
@@ -171,9 +206,14 @@
     // planner types over them afterwards when this train is to differ.
     private void UpdateCategoryDefaults()
     {
-        if (CategoryChoices.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
+        if (SelectedCategory is not { } category) return;
         _preparationMinutes = category.DefaultPreparationMinutes;
         _finishingMinutes = category.DefaultFinishingMinutes;
+        // A shunting task travels in no direction, so the parity that numbers travelling trains says
+        // nothing about it: the whole of the category's band is free and the suggestion cannot wait for
+        // a route to be chosen the way UpdateSuggestedNumber does.
+        if (category.IsShunting && !_numberEdited && Timetable is { } timetable)
+            _number = timetable.NextShuntingTaskNumber(category);
     }
 
     // The planner has typed a number, so stop overwriting it with the category/direction suggestion.
@@ -190,7 +230,7 @@
     {
         if (_numberEdited) return;
         if (Plan is not { } plan) return;
-        if (CategoryChoices.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
+        if (SelectedCategory is not { } category || category.IsShunting) return;
         if (Layout?.OperationLocations.FirstOrDefault(l => l.Id == _fromId) is not { } from) return;
         if (Layout?.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
         if (from.Equals(to)) return;
@@ -203,8 +243,24 @@
         if (Plan is not { } plan || Timetable is not { } timetable || Layout is not { } layout) return;
         if (timetable.TrainCategories.FirstOrDefault(c => c.Id == _categoryId) is not { } category) return;
         if (layout.OperationLocations.FirstOrDefault(l => l.Id == _fromId) is not { } from) return;
-        if (layout.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
         if (!TryParseTime(_time, out var startTime)) { _error = "InvalidTime"; return; }
+
+        // A shunting task is finished here: it has no destination to reach, nothing to return from and
+        // nothing to repeat, so none of what follows applies to it.
+        if (category.IsShunting)
+        {
+            if (_durationMinutes < 1) { _error = "InvalidMinutes"; return; }
+            if (plan.CreateShuntingTask(category, from, startTime, _durationMinutes, _number) is not { } task)
+            {
+                _error = "CouldNotCreateShuntingTask";
+                return;
+            }
+            ScheduleState.SaveAndNotify();
+            await OnCreated.InvokeAsync(task);
+            return;
+        }
+
+        if (layout.OperationLocations.FirstOrDefault(l => l.Id == _toId) is not { } to) return;
 
         // Null asks the return train to depart as soon as possible; any entered time is used as it stands.
         Time? returnTime = null;

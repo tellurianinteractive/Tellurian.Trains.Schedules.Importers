@@ -32,6 +32,7 @@ public static class PlanJson
             Modifiers =
             {
                 AcceptLegacyNames,
+                AcceptLegacyTrainCategoryFlags,
                 WriteCallsOnlyWithTheirTrain,
                 WriteCatalogueEntriesOnlyInTheirCatalogue,
                 WriteRegionIdsOnlyWhereAStationHasSome,
@@ -140,5 +141,34 @@ public static class PlanJson
         var legacy = typeInfo.CreateJsonPropertyInfo(typeof(OperationLocation), "Station");
         legacy.Set = setLocation;
         typeInfo.Properties.Add(legacy);
+    }
+
+    /// <summary>
+    /// Reads the two booleans an earlier version wrote on a train category — <c>IsPassenger</c> and
+    /// <c>IsFreight</c> — into <see cref="Timetables.TrainCategory.Content"/>. Like every legacy name
+    /// (see <see cref="AcceptLegacyNames"/>) both are read-only, so a plan saved after being read once
+    /// carries the content alone.
+    /// </summary>
+    /// <remarks>
+    /// A category that had neither flag set becomes a service category, exchanging nothing. That is what
+    /// those categories already meant: only the two booleans existed, so a category that was neither a
+    /// passenger nor a freight one — an XPLN category whose group row said something other than
+    /// <c>P_Zug</c> or <c>G_Zug</c>, for one — could be said no other way.
+    /// </remarks>
+    private static void AcceptLegacyTrainCategoryFlags(JsonTypeInfo typeInfo)
+    {
+        if (typeInfo.Type != typeof(Timetables.TrainCategory)) return;
+        AddFlag("IsPassenger", Timetables.TrainContent.Passenger);
+        AddFlag("IsFreight", Timetables.TrainContent.Cargo);
+
+        void AddFlag(string name, Timetables.TrainContent content)
+        {
+            var legacy = typeInfo.CreateJsonPropertyInfo(typeof(bool), name);
+            legacy.Set = (target, value) =>
+            {
+                if (value is true) ((Timetables.TrainCategory)target).Content |= content;
+            };
+            typeInfo.Properties.Add(legacy);
+        }
     }
 }

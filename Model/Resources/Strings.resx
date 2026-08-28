@@ -195,6 +195,9 @@
   <data name="TrainMustHaveMinimumTwoCalls" xml:space="preserve">
     <value>Train {0} must stop at at least two stations.</value>
   </data>
+  <data name="ShuntingTaskMustHaveExactlyOneCall" xml:space="preserve">
+    <value>Shunting task {0} must have exactly one station call, but has {1}.</value>
+  </data>
   <data name="TrainHasNoStretchBetweenCalls" xml:space="preserve">
     <value>Train {0} runs from {1} {2} to {3} {4}, but the layout has no track stretch between these locations.</value>
   </data>

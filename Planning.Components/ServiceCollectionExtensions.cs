@@ -52,12 +52,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ModuleRegistryUploadService>();
         services.AddScoped<HelpContentService>();
 
-        // Localisation — language service, RESX and Markdown providers.
-        // NOTE: Language.IsFallback has 'internal set' in Tellurian.Localization 1.0.1,
-        // so we use the individual registration methods until that is changed to 'init'.
+        // Localisation — language service, RESX and Markdown providers. Registered one by one rather
+        // than through AddTellurianLocalization, which registers the file-based markdown provider; a
+        // WebAssembly host has no file system, so the content is fetched over HTTP instead.
         services.AddLanguageService(LanguageService.SupportedLanguages);
         services.AddResxResourceProviders([typeof(Labels)]);
-        services.AddHttpMarkdownResourceProvider("_content/Tellurian.Trains.Schedules.Planning.App.Translations/Content");
+        services.AddHttpMarkdownResourceProvider(
+            "_content/Tellurian.Trains.Schedules.Planning.App.Translations/Content",
+            LanguageService.NeutralLanguage);
         services.AddObjectResourceProvider();
         services.AddScoped<TranslationService>();
         services.AddResxStringLocalizers();

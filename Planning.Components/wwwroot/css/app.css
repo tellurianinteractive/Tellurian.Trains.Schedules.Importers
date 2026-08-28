@@ -524,6 +524,25 @@ table.grid thead th .sort-indicator {
         }
     }
 
+    /* One word says "maximum" for the whole line, so it stays light and the figures take the weight —
+       the same division as the extent line above it. The gaps between the figures are what separates
+       one limit from the next, there being no punctuation left to do it. */
+    .limits {
+        .label {
+            margin-right: 0.4em;
+        }
+
+        .speed {
+            font-weight: 600;
+            white-space: nowrap;
+            margin-right: 0.7em;
+        }
+
+        .maxload {
+            font-weight: 600;
+        }
+    }
+
     h3 {
         margin: 0.4em 0 0.15em;
         font-size: 0.95rem;
@@ -559,6 +578,33 @@ table.grid thead th .sort-indicator {
     .designation {
         white-space: nowrap;
         font-weight: 600;
+    }
+
+    /* Wagons that arrived from anywhere. It stands where a place name would, so it is set at the size
+       of the names around it rather than shrunk like the load marks, which qualify a figure — this one
+       IS the cell. Grey, because a place name states a fact the driver acts on and the globe states
+       that there is nothing to act on. */
+    .cargo .anywhere {
+        font-size: 0.95em;
+        color: #555;
+    }
+
+    /* How much may be brought. The figures are the instruction and take the weight; a destination name
+       beside one only says which of them it belongs to, so it stays light — and it only appears where
+       the row's destinations do not share a single limit. The limits run on rather than stacking: the
+       page budget charges a cargo row as one row, and a cell that stacked would print past what it was
+       charged. */
+    .cargo td.maxload {
+        font-weight: 600;
+
+        .limit + .limit {
+            margin-left: 0.6em;
+        }
+
+        .at {
+            font-weight: 400;
+            margin-right: 0.2em;
+        }
     }
 
     /* Fixed layout is required, not cosmetic: with automatic layout the full-width colspan note rows

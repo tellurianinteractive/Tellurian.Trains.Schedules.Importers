@@ -360,9 +360,13 @@ public static class ScheduleEditingExtensions
             return new Maybe<ScheduleAssignment>(assignment);
         }
 
-        /// <summary>Trains that can take part in a schedule: those with a category and at least two calls.</summary>
+        /// <summary>
+        /// Trains that can take part in a schedule: those with a category and at least two calls — and a
+        /// shunting task, whose single call is the whole of its working and so is span enough.
+        /// </summary>
         private IEnumerable<Train> SchedulableTrains() =>
-            plan.Timetable.Trains.Where(t => t.Category is not null && t.Calls.Count >= 2);
+            plan.Timetable.Trains.Where(t => t.Category is not null &&
+                (t.Calls.Count >= 2 || (t.IsShuntingTask && t.Calls.Count == 1)));
 
         private int NextScheduleId() =>
             (plan.Schedules.Count == 0 ? 0 : plan.Schedules.Max(s => s.Id)) + 1;
@@ -389,7 +393,11 @@ public static class ScheduleEditingExtensions
             train = train.ValueOrException(nameof(train));
             if (schedule.EndLocation is not { } end || schedule.LastArrival is not { } lastArrival) return null;
             var calls = train.CallsInRunOrder;
-            for (var i = 0; i < calls.Count - 1; i++)
+            // A travelling train is joined at a call it later departs from, so its last call is no join.
+            // A shunting task has only the one call, and that call is the join: the vehicle takes the task
+            // up there and is free again when it ends.
+            var joinable = train.IsShuntingTask ? calls.Count : calls.Count - 1;
+            for (var i = 0; i < joinable; i++)
             {
                 var call = calls[i];
                 if (call.OperationLocation.Equals(end) && !(call.Departure < lastArrival)) return i;

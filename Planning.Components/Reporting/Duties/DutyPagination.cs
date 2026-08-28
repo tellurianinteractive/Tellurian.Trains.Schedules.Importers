@@ -82,14 +82,13 @@ public static class DutyPagination
     /// block costs nothing.
     /// </summary>
     /// <param name="part">The part to measure.</param>
-    /// <param name="translator">Resolves the limit labels, which decide whether that line is printed.</param>
-    public static double HeightOf(DriverDutyPart part, Func<string, string> translator)
+    public static double HeightOf(DriverDutyPart part)
     {
         part = part.ValueOrException(nameof(part));
 
         var height = HeaderHeight;
         // The limits line and the margin under it come to 23.8 px — one row, near enough to state as one.
-        if (part.LimitsLine(translator).Length == 0) height -= 1;
+        if (!part.HasLimits) height -= 1;
 
         height += TableHeight(part.TractionData.Vehicles.Count);
         height += TableHeight(part.WagonsetData.Vehicles.Count);
@@ -124,10 +123,8 @@ public static class DutyPagination
     /// </summary>
     /// <param name="duty">The duty to print.</param>
     /// <param name="settings">How sessions are displayed.</param>
-    /// <param name="translator">Resolves labels whose presence affects height.</param>
     /// <returns>The pages in reading order, numbered from 1. Always a multiple of four.</returns>
-    public static IReadOnlyList<DutyPage> BuildPages(
-        DriverDuty duty, SessionsSettings settings, Func<string, string> translator)
+    public static IReadOnlyList<DutyPage> BuildPages(DriverDuty duty, SessionsSettings settings)
     {
         duty = duty.ValueOrException(nameof(duty));
 
@@ -142,7 +139,7 @@ public static class DutyPagination
         while (index < parts.Count)
         {
             var part = parts[index];
-            var height = HeightOf(part, translator);
+            var height = HeightOf(part);
 
             if (height > PageBudget)
             {
@@ -161,7 +158,7 @@ public static class DutyPagination
                 continue;
             }
 
-            var used = pending.Sum(p => HeightOf(p, translator));
+            var used = pending.Sum(p => HeightOf(p));
             if (pending.Count > 0 && used + height > PageBudget) FlushPending();
             pending.Add(part);
             index++;

@@ -13,7 +13,7 @@ public class PlanRunOrderTests
 {
     private static Plan SimplePlan() => new("Test", new Timetable("Test", TestLayoutFactory.CreateSimpleLayout()));
 
-    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", IsPassenger = true, DefaultSpeed = 100 };
+    private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
 
     // Malmö 07:50/08:00 → Lund 08:10/08:12 → Eslöv 08:25/08:35, with the calls added in another order than
     // the train runs them: the intermediate Lund stop first, then the origin, then the terminus.

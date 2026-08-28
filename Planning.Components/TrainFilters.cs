@@ -13,9 +13,10 @@ public static class TrainFilters
         public static Func<Train, bool> All => _ => true;
 
         /// <summary>
-        /// Includes trains that can carry a cargo flow: a cargo (freight) train with a departure call
-        /// that has a later arrival.
+        /// Includes trains that can carry a cargo flow: a cargo (freight) train with a pair of calls to
+        /// span — on a shunting task, its single call twice over. The rule itself lives on the model
+        /// (<c>Train.CanHostCargoFlow</c>); this only names it for the drop-downs.
         /// </summary>
-        public static Func<Train, bool> CanHostCargoFlow => t => t.IsCargo && t.DepartureCalls.Any(f => t.ArrivalCallsAfter(f).Any());
+        public static Func<Train, bool> CanHostCargoFlow => t => t.CanHostCargoFlow;
     }
 }
