@@ -1,0 +1,53 @@
+@* One A5 page body of the general instructions booklet. Not an A5PPage wrapper: two of these sit side
+   by side inside one A4 landscape sheet, which is what actually gets printed — the same arrangement,
+   and the same page class, as the duty booklets.
+
+   All this does is pick the component for the page's kind. Each kind sets its own page, so nothing
+   about how a front page, a page of instructions or the layout overview looks is decided here. *@
+
+<div class="dutypage">
+    @switch (Page.Kind)
+    {
+        case InstructionsPageKind.Front:
+            <InstructionsFrontPage LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                                   PrintDate="PrintDate" Program="@Program" />
+            break;
+
+        case InstructionsPageKind.Content:
+            <InstructionsContentPage Markdown="@Page.Markdown" IsFirstOfSection="Page.IsFirstOfSection"
+                                     Layout="Layout" />
+            break;
+
+        case InstructionsPageKind.Overview:
+            <InstructionsOverviewPage Layout="Layout" ShowShuntingYards="ShowShuntingYards" />
+            break;
+
+        case InstructionsPageKind.Blank:
+            <BlankBookletPage />
+            break;
+    }
+</div>
+
+@code {
+    /// <summary>The page to render.</summary>
+    [Parameter, EditorRequired] public InstructionsPage Page { get; set; } = default!;
+
+    /// <summary>The layout, for the front page's heading and validity and for the overview page.</summary>
+    [Parameter] public Layout? Layout { get; set; }
+
+    /// <summary>The authored programme, printed on the front page.</summary>
+    [Parameter] public string? Program { get; set; }
+
+    /// <summary>
+    /// Whether the layout page still carries the shunting yards table. False when the author placed it
+    /// in their own text with a &lt;ShuntingYards/&gt; tag, so the booklet never prints it twice.
+    /// </summary>
+    [Parameter] public bool ShowShuntingYards { get; set; } = true;
+
+    /// <summary>The render date shown on the front page.</summary>
+    [Parameter] public DateOnly PrintDate { get; set; }
+
+    private string LayoutName => Layout?.Name ?? "";
+    private DateOnly? ValidFrom => Layout?.Settings.General.ValidFrom;
+    private DateOnly? ValidTo => Layout?.Settings.General.ValidTo;
+}

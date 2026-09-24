@@ -115,8 +115,10 @@ public static class DaysExtensions
         if (offsets.Length == 0) return Translate(useShort ? "NoneShort" : nameof(Days.None));
         if (offsets.Length == 7) return Translate(useShort ? "DailyShort" : "Daily");
         var days = offsets.Select(offset => WeekdayAt(startDay, offset)).ToArray();
+        // Short names are listed without spaces (Mo,We,Fr): they are asked for where the space is tight,
+        // and the group reads as one value there. Full names keep the comma and space of a sentence.
         if (!AreConsecutive(offsets))
-            return string.Join(", ", days.Select(d => DayName(d, useShort)));
+            return string.Join(useShort ? "," : ", ", days.Select(d => DayName(d, useShort)));
         var (first, last) = (DayName(days[0], useShort), DayName(days[^1], useShort));
         // Short ranges use a hyphen (Mo-Fr); long ranges spell out the localised connector (Monday to Friday).
         return useShort ? $"{first}-{last}" : $"{first} {Translate("DayRangeConnector")} {last}";

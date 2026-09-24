@@ -115,6 +115,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Uncouple wagons for {0}..
+        /// </summary>
+        internal static string UncoupleWagonsFor {
+            get {
+                return ResourceManager.GetString("UncoupleWagonsFor", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Shunt arriving wagons from {0} to cargo customers..
         /// </summary>
         internal static string ShuntArrivingWagonsFromToCargoCustomers {
@@ -231,6 +240,51 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Fetch {0} from track {1}..
+        /// </summary>
+        internal static string FetchFromTrack {
+            get {
+                return ResourceManager.GetString("FetchFromTrack", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: {1}.
+        /// </summary>
+        internal static string OnSessions {
+            get {
+                return ResourceManager.GetString("OnSessions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Put {0} on track {1}..
+        /// </summary>
+        internal static string PutOnTrack {
+            get {
+                return ResourceManager.GetString("PutOnTrack", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shunt wagons to departure track before departure..
+        /// </summary>
+        internal static string ShuntWagonsToDepartureTrack {
+            get {
+                return ResourceManager.GetString("ShuntWagonsToDepartureTrack", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shunt wagons to their arrival track after arrival..
+        /// </summary>
+        internal static string ShuntWagonsToArrivalTrack {
+            get {
+                return ResourceManager.GetString("ShuntWagonsToArrivalTrack", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to No exchange.
         /// </summary>

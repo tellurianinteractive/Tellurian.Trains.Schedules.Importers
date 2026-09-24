@@ -1,0 +1,119 @@
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* The plan's participant catalogue: everyone named as an owner, and what each of them brings. A name is kept
+   once and referred to by id, so correcting a misspelt one here corrects it everywhere it appears. *@
+
+<p class="hint">@Translator("ParticipantsDescription")</p>
+<div class="toolbar">
+    <input type="text" class="name" value="@_newName" placeholder="@Translator("TypeParticipantName")"
+           @oninput="e => _newName = e.Value?.ToString() ?? string.Empty" @onkeydown="AddOnEnter" />
+    <button class="primary" @onclick="Add"><i class="fa-solid fa-plus"></i> @Translator("AddParticipant")</button>
+</div>
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
+@if (Plan.Participants.Count == 0)
+{
+    <p class="empty">@Translator("NoParticipants")</p>
+}
+else
+{
+    <table class="owners participants">
+        <thead>
+            <tr>
+                <th>@Translator("Name")</th>
+                <th>@Translator("RollingStock")</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @* Keyed by id: renaming re-sorts the list, and an unkeyed row would leave the typed name standing in
+               the row that moved into its place. *@
+            @foreach (var participant in Plan.Participants.OrderBy(p => p.Name, StringComparer.CurrentCulture))
+            {
+                var deletion = Plan.MayDelete(participant);
+                <tr @key="participant.Id">
+                    <td>
+                        <input type="text" class="name" @key="_refusedEdits" value="@participant.Name"
+                               @onchange="e => Rename(participant, e)" />
+                    </td>
+                    <td>
+                        <span class="brought">
+                            @foreach (var (vehicle, isPrimary) in Plan.RollingStockBroughtBy(participant))
+                            {
+                                <span class="@(isPrimary ? "primary" : "spare")"
+                                      title="@Translator(isPrimary ? "PrimaryContributorHint" : "SpareContributorHint")">@vehicle.Designation</span>
+                            }
+                        </span>
+                    </td>
+                    <td class="actions">
+                        @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
+                        <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "ParticipantReferenced", Translator)">
+                            <button class="danger small" disabled="@deletion.IsDenied"
+                                    @onclick="() => Delete(participant)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string _newName = string.Empty;
+    private string? _error;
+
+    // Counts the refused renames, only to key the name fields: a changed key rebuilds a field from the model,
+    // which is what makes a refused name fall back to the stored one.
+    private int _refusedEdits;
+
+    /// <summary>The plan whose participants are listed.</summary>
+    [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
+
+    private void AddOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Add();
+    }
+
+    private void Add()
+    {
+        _error = null;
+        var name = _newName.NormalizedParticipantName;
+        if (name.IsEmpty)
+        {
+            _error = Translator("ParticipantNameRequired");
+            return;
+        }
+        if (Plan.ParticipantNamed(name) is not null)
+        {
+            _error = Translator("ParticipantNameInUse");
+            return;
+        }
+        Plan.FindOrAddParticipant(name);
+        _newName = string.Empty;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void Rename(Participant participant, ChangeEventArgs e)
+    {
+        _error = null;
+        var name = e.Value?.ToString();
+        if (Plan.RenameParticipant(participant, name))
+        {
+            ScheduleState.SaveAndNotify();
+            return;
+        }
+        _error = Translator(name.NormalizedParticipantName.IsEmpty ? "ParticipantNameRequired" : "ParticipantNameInUse");
+        _refusedEdits++;
+    }
+
+    private void Delete(Participant participant)
+    {
+        _error = null;
+        if (Plan.TryDelete(participant).IsSuccess) ScheduleState.SaveAndNotify();
+    }
+}

@@ -8,12 +8,17 @@ working through the day. Driver duties tie this together into work that one pers
 ### Schedule
 
 Each schedule is a row: the first column lists the **vehicle(s)** working it, followed by the
-**train parts** in working order. 
+**train parts** in working order. A wagonset that lists its wagons shows how many there are and each
+wagon class once after its number, as in *SJ 05 5 x A/B/Fv*.
 
 Use **Build automatically** to chain trains of the same category
 that continue from where the previous one arrived (mark a category *Exclude from automatic
 scheduling* on the **Train categories** tab to keep it out of this), or **New schedule** to build
-one by hand. 
+one by hand. Building automatically offers the unscheduled trains to the schedules already there
+first: a working carries on with whatever continues it in the same category, and an empty schedule
+you have made is filled before any new one is created, so a vehicle that is already turning takes on
+more work before another is put in service. Only the trains that fit no existing schedule start new
+ones, and cargo flows are left as they are.
 
 On a row, 
 - **+ train** appends the next train — choose only part of it (a from/to stop)
@@ -32,6 +37,14 @@ The neighbouring part that joins the one you change follows along, so the workin
 shorten a part from A–C to A–B and the return working becomes B–A by itself. When the neighbour's
 own train does not call at the new stop it is left as it is, and the gap is reported as a conflict
 for you to resolve.
+The same dialog says where the vehicles stand when it is not the track the train uses: **Fetch from**
+names the track they are fetched from before the train departs, and **Put on** the track they are put
+on after it arrives. Each is printed as a note for the loco driver and the dispatcher, in place of the
+usual note to couple or uncouple the vehicle. A wagonset's tracks are already in the loco driver's
+wagonset table, so the loco driver's note only says to shunt the wagons to the departure track, or to
+their arrival track. Where a vehicle works the train on only some of the sessions or days the train
+runs, its note starts with those. A track chosen at a station the part no
+longer starts or ends at is forgotten.
 -  **+ vehicle** assigns a vehicle, creating a new one when needed; a schedule may carry
 several vehicles (such as a locomotive and its coach set). Cargo flows are shown as turnus cards in
 the reports rather than here.

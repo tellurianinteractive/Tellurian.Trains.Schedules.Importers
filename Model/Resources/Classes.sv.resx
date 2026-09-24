@@ -89,7 +89,7 @@
     <value>Motorvagnståg</value>
   </data>
   <data name="Wagonset" xml:space="preserve">
-    <value>Vagnset</value>
+    <value>Vagnsätt</value>
   </data>
   <data name="CargoFlow" xml:space="preserve">
     <value>Godsflöde</value>
@@ -99,5 +99,8 @@
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Okänd</value>
+  </data>
+  <data name="Participant" xml:space="preserve">
+    <value>Deltagare</value>
   </data>
 </root>

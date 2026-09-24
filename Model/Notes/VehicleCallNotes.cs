@@ -30,6 +30,11 @@ public static class VehicleCallNoteExtensions
         /// Identical notes are collapsed. Two schedules can work the same part — a locomotive's and a
         /// wagonset's — and the notes that name no vehicle would otherwise be said once per schedule.
         /// The notes that do name one stay distinct, which is what double-headed traction wants.
+        /// <para>
+        /// The loco driver's notes to shunt wagons name no wagonset either, but they can differ in the
+        /// sessions they are for, when the schedules shunt their wagonsets on different ones. Each kind is
+        /// said once, for every session any of the schedules shunts on.
+        /// </para>
         /// </remarks>
         /// <param name="plan">The plan whose vehicle schedules are read, or null when there is none.</param>
         public IEnumerable<ICallNote> VehicleNotes(Plan? plan)
@@ -45,7 +50,12 @@ public static class VehicleCallNoteExtensions
                 if (ReferenceEquals(part.To, call)) notes.AddRange(part.GeneratedArrivalNotes);
                 if (ReferenceEquals(part.From, call)) notes.AddRange(part.GeneratedDepartureNotes);
             }
-            return notes.Distinct();
+            if (call.Train is not { } train) return notes.Distinct();
+            return
+            [
+                .. notes.Where(note => note is not ShuntWagonsNote).Distinct(),
+                .. ShuntWagonsNote.SaidOnce(notes.OfType<ShuntWagonsNote>(), train.Sessions),
+            ];
         }
     }
 }

@@ -1,0 +1,11 @@
+@inject Translator Translator
+
+@* A padding page: printed so the booklet's page count reaches a whole number of sheets.
+
+   It says in words that it is blank on purpose. An empty page reads as a printing fault, and the doubt
+   is what makes someone flip back and forth looking for the pages they think they have lost.
+
+   Shared by the duty booklets and the general instructions booklet, which pad by the same rule and
+   whose padding pages are handed to the same people at the same meeting. *@
+
+<p class="blank">@Translator("ThisPageIsIntentionalBlank")</p>

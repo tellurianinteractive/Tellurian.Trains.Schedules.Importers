@@ -319,6 +319,58 @@ public class ScheduleEditingTests
     }
 
     [TestMethod]
+    public void AWagonsetListingItsWagonsGivesEachClassOnceInRakeOrder()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", 5, new Company(1, "Statens Järnvägar", "SJ"));
+        foreach (var @class in new[] { "A", "B", "A", "Fv", "B" }) wagonset.AddWagon(@class);
+
+        Assert.AreEqual("A/B/Fv", wagonset.Classes);
+        Assert.AreEqual("5 x A/B/Fv", wagonset.WagonsText);
+        Assert.AreEqual("SJ 05 5 x A/B/Fv", wagonset.DesignationWithWagons, "The wagons take the place of the class.");
+        Assert.AreEqual("SJ 05 B", wagonset.Designation, "The designation itself is unchanged.");
+    }
+
+    [TestMethod]
+    public void AnImportedWagonsetListingItsWagonsIsNamedByItsExternalIdAndWagons()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", 5, null);
+        wagonset.ExternalId = "SJWS12";
+        wagonset.AddWagon("A");
+        wagonset.AddWagon("B");
+
+        Assert.AreEqual("SJWS12 2 x A/B", wagonset.DesignationWithWagons);
+    }
+
+    [TestMethod]
+    public void AVehicleListingNoWagonsKeepsItsOwnClassAndDesignation()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", 5, null);
+        wagonset.NumberOfUnits = 3;
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "Rc", 6, null);
+
+        Assert.AreEqual("B", wagonset.Classes);
+        Assert.IsNull(wagonset.WagonsText, "Only listed wagons are summarised.");
+        Assert.AreEqual(wagonset.Designation, wagonset.DesignationWithWagons);
+        Assert.AreEqual("Rc", loco.Classes);
+        Assert.AreEqual(loco.Designation, loco.DesignationWithWagons);
+    }
+
+    [TestMethod]
+    public void WagonsWithoutAClassFallBackToTheWagonsetsOwnClass()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", 5, null);
+        wagonset.AddWagon("");
+        wagonset.AddWagon(" ");
+
+        Assert.AreEqual("B", wagonset.Classes);
+        Assert.AreEqual("05 2 x B", wagonset.DesignationWithWagons);
+    }
+
+    [TestMethod]
     public void WagonsOnAWagonsetSurviveJsonRoundTrip()
     {
         var plan = CreatePlan();

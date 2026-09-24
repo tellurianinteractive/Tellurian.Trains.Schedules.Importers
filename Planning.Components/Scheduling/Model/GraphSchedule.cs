@@ -1,4 +1,4 @@
-using Tellurian.Trains.Schedules.Model;
+﻿using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -21,6 +21,7 @@ public class GraphSchedule
 
         var stretchStations = new HashSet<OperationLocation>(timetableStretch.Stations);
         Stations = [.. timetableStretch.Stations];
+        StationTracks = [.. Stations.Select(station => station.TracksInDisplayOrder.ToArray())];
         TrackStretches = [.. timetableStretch.Stretches];
 
         // Select trains that have at least one call at a station on this stretch. A shunting task is left
@@ -72,6 +73,14 @@ public class GraphSchedule
     public TimeAxisDirection AxisDirection => GraphSettings.AxisDirection;
     public string Description => TimetableStretch.ForwardDescription;
     public OperationLocation[] Stations { get; }
+
+    /// <summary>
+    /// The tracks of each station, in the same order as <see cref="Stations"/>, laid out in the order the
+    /// planner put them in (<c>OperationLocation.TracksInDisplayOrder</c>). Every track index in the graph —
+    /// the track lines, their numbers, and the endpoints of every train line and label — indexes into these
+    /// arrays, so they all agree on which track is which and follow a reordering in the tracks table.
+    /// </summary>
+    public StationTrack[][] StationTracks { get; }
     public TrackStretch[] TrackStretches { get; }
     public Train[] Trains { get; }
 

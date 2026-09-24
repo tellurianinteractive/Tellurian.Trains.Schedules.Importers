@@ -1,5 +1,152 @@
 # Versionsnyheder
 
+## Version 0.7.0
+
+### Nye funktioner
+
+- **Tabellen over rangerbanegårde kan nu placeres i de almene instruktioner.** Tabellen over
+  rangerbanegårde udskrives på anlægssiden bagest i hæftet med de almene instruktioner. På et anlæg med
+  mange rangerbanegårde fyldte den siden og skubbede forklaringen af godsstrømmenes mærker ud. Skriv
+
+  ```
+  <ShuntingYards/>
+  ```
+
+  på en linje for sig under **Indstillinger**, dér i teksten hvor den hører hjemme, for i stedet at
+  udskrive den der. Anlægssiden udelader den så, så den aldrig udskrives to gange. Forhåndsvisningen ved
+  siden af teksten viser en kasse, hvor tabellen kommer. Skrives den ingen steder, bliver tabellen på
+  anlægssiden som før.
+
+- **Køretøjsejere: hvem der medbringer hvilket rullende materiel til træffet, og hvor det skal stilles op.**
+  Fanen **Køretøjsejere** viser hvert lokomotiv, togsæt og vognsæt — med antallet af enheder, hvor der er
+  mere end én, og for et vognsæt, der angiver sine vogne, hver vognklasse én gang — med den første køresession (eller dag), det er i drift, og den station, det spor og den
+  afgang, hvor det skal stå inden da. Åbn en række for at tilføje ejere: den første medbringer køretøjet og
+  stiller det op på anlægget, øvrige ejere medbringer reserver. Vælg en ejer ved at skrive de første
+  bogstaver i navnet — eller i efternavnet — så et navn staves ens overalt; et navn, der ikke passer til
+  nogen, tilbydes som en ny deltager. Hver ejer af et lokomotiv eller togsæt, også reserverne, skal angive
+  en DCC-adresse; skriv **0**, når ejeren endnu ikke har oplyst den. Hvert køretøj og hver ejer har en
+  bemærkning, og visningen **Deltagere** viser alle med det, de medbringer, og der rettes et forkert stavet
+  navn én gang for alle.
+
+  Rapporten **Medbragte køretøjer** under **Rapporter** udskriver den samme liste på A4 liggende, ordnet på
+  en af tre måder, som vælges over siderne: **Pr. driftssted**, en side pr. station til dens ejer med de
+  køretøjer, der skal stilles op der, i rækkefølge efter første køresession og afgang; **Pr. ejer**, en side
+  pr. deltager med det, vedkommende medbringer, DCC-adresserne og hvor hvert køretøj starter; eller **Efter
+  DCC-adresse**, alle medbragte lokomotiver og togsæt i én liste. Hver station eller ejer begynder på en ny
+  side og fortsætter på den næste, når én side ikke er nok. Køretøjer, der ikke er i drift, vises sidst;
+  dem, ingen medbringer endnu, kommer først pr. ejer under **Endnu ikke booket**. Rækkens baggrund viser,
+  hvornår enheden bruges: hvid, når den er i drift i alle køresessioner, lysegrå for en reserve og ellers
+  lyseblå, lysegrøn eller lyserød, når køretøjet først er i drift fra første, anden eller tredje
+  køresession.
+
+- **Et omløb kan angive, at køretøjerne står på et andet spor end toget.** Når et togafsnit redigeres
+  under **Omløb**, angiver **Hent fra** det spor, køretøjerne står på, før toget afgår, og **Sæt på**
+  det spor, de sættes på efter ankomsten — for eksempel et vognsæt, der efterlades på et sidespor på
+  en mellemstation. Tjenestehæfterne og togekspeditionslisterne udskriver det som en bemærkning: *Før
+  afgang, hent vognsæt 21 fra spor 3.* ved afgangen og *Efter ankomst, rangér vognsæt 21 til spor 3.*
+  ved ankomsten, i stedet for bemærkningen om at koble køretøjet til eller fra. Hvor køretøjet kun
+  kører med toget i nogle af de køresessioner eller dage, toget kører, indledes bemærkningen med dem —
+  *1,3,5: Før afgang, hent …* — og et køretøj, der ikke kører med toget i nogen af dem, får ingen
+  bemærkning. Et spor, som et omløb bruger på den måde, kan ikke slettes under **Driftssteder**.
+
+- **Togsammensætninger kan nu udskrives.** En ny rapport under **Rapporter** giver hver bemandet station sin
+  egen side på A4 liggende med alle tog, der afgår derfra med godsstrømsvogne eller med et vognsæt, der
+  angiver sine vogne. Togene vises spor for spor og i afgangsrækkefølge på hvert spor. Ved siden af hvert tog
+  tegnes dets sammensætning forfra som rektangler: et vognsæt som ét rektangel pr. vogn, i vognrækkefølge,
+  med vognens litra og nummer; og godsstrømsvogne som ét rektangel pr. plads i toget med, hvor de skal hen —
+  med *og lokale destinationer* og *og videre*, hvor godsdestinationen angiver det, og dens regioner i deres
+  farver. Sammensætningen er den, toget afgår med, så vogne, det ankom med, vises lige så vel som dem, der
+  kobles til på stationen. Et vognsæt, der kun kører med toget i nogle køresessioner eller dage, mærkes med
+  dem, og godsstrømsvogne uden plads vises sidst som *Hvor som helst i toget*.
+
+- **Et motorvognstog ankommer nu til det spor, det skal afgå fra.** Et motorvognstog — og et lokomotiv i
+  vendetog — kører aldrig rundgang: det afgår fra netop det spor, det ankom til. Når et sådant køretøj
+  kører tog efter tog, lægges hvert togs ankomstspor derfor på det spor, næste tog afgår fra, og — slutter
+  omløbet, hvor det begyndte — lægges sidste togs ankomstspor på det spor, første tog afgår fra, så
+  køretøjet står klar, hvor næste køresession henter det. Kun ankomstspor flyttes; det spor, et tog afgår
+  fra, står, som du har angivet det. Et omløb, der trækkes af et almindeligt lokomotiv, røres ikke, for
+  lokomotivet kører alene over stationen til det spor, næste tog står på. Sporene rettes, hver gang et tog
+  føjes til et omløb — af **Byg automatisk** eller af dig, sidst i omløbet eller dér, hvor køretøjet holder
+  — og hver gang du tildeler et køretøj til et omløb, så et omløb, der er bygget, før motorvognstoget var
+  kendt, rettes, så snart motorvognstoget sættes på det. Et importeret omløb beholder de spor, det blev
+  indlæst med. Ville flytningen stille to tog på samme spor samtidig, står det blandt konflikterne, du kan
+  løse.
+
+### Ændringer
+
+- **Dage og køresessioner angives uden mellemrum.** Hvor en bemærkning eller en kolonne angiver, hvilke
+  dage eller køresessioner noget gælder, skrives de nu *M,O,F* og *1,3,5* i stedet for *M, O, F* og
+  *1, 3, 5*, så angivelsen fylder så lidt som muligt. Dage, der skrives helt ud — *Mandag, Onsdag,
+  Fredag* — er uændrede.
+
+- **Et vognsæt, der angiver sine vogne, viser dem nu i sin etiket under Omløb.** Etiketten angiver antallet
+  af vogne og hver vognklasse én gang — *SJ 05 5 x A/B/Fv* — i stedet for vognsættets egen klasse.
+
+- **En bemærkning ved et ophold angiver nu, om den hører til ankomsten eller afgangen.** Tjenestehæfterne og
+  togekspeditionslisterne udskriver et opholds ankomst og afgang på hver sin linje, så under **Tog** spørger
+  feltet ved siden af hver **Bemærkning**, hvilken af dem den gælder: **Ank** for noget, der mødes eller skal
+  gøres ved indkørslen, **Afg** for noget, der skal gøres før eller ved afgangen. Hvor toget kun ankommer
+  eller kun afgår, er kun den ene at vælge. Hvor det kører igennem, kan der ikke skrives nogen bemærkning —
+  sæt først kryds i **Ank** eller **Afg** — men en, der allerede står der, kan stadig fjernes.
+
+  En bemærkning, der blev skrevet med en tidligere version eller fulgte med en XPLN-import, angav ingen af
+  delene og blev derfor hverken udskrevet i hæfterne eller i listerne. Første gang en plan åbnes, får hver
+  sådan bemærkning afgangen, hvor toget afgår, og ankomsten, hvor det kun ankommer.
+
+- **Hver blok på en togside i et tjenestehæfte har nu en farvet streg langs venstre kant.** Trækkraftenheder
+  er markeret med rødt, planlagte vognsæt med grønt, godsvogne med fragtbreve med blåt og ruteplanen med gråt,
+  så blokkene kan skelnes med et blik, og hvor en grå streg slutter, slutter det togafsnit. Stregerne
+  udskrives, uden at baggrundsgrafik skal slås til, og hver blok beholder sin overskrift, så en udskrift i
+  sort-hvid mister intet.
+
+- **Trækkraftenheder og planlagte vognsæt på en togside i et tjenestehæfte viser nu deres spor.** Hver række
+  angiver det spor, køretøjet står på ved starten, og det spor, det efterlades på ved slutningen — togets
+  eget spor eller det, omløbet angiver under **Hent fra** eller **Sæt på**. Kolonnen, der angiver køretøjet,
+  har nu overskriften **Omløb** i begge blokke, efter det kort, køretøjets identitet står på. Med sporene i
+  tabellen angiver ruteplanen nedenfor ikke længere hvert vognsæt og dets spor: den siger *Rangér vogne til
+  afgangssporet før afgang.* eller *Rangér vogne til deres ankomstspor efter ankomst.*, indledt med de
+  køresessioner eller dage, det gælder, når vognene kun rangeres i nogle af dem, toget kører.
+  Togekspeditionslisterne angiver stadig hvert vognsæt og dets spor.
+
+- **Hæftet med generelle instruktioner forklarer nu, hvordan gods skrives i de andre rapporter.** Under
+  **Godsstrømme** på hæftets sidste side siger en forklaring, at hver lastgrænse er et maksimum, og hvad
+  mærket efter et tal tæller, hvad globussen står for, hvad *og lokale destinationer* og *og videre* føjer til
+  en destination, og hvad et farvet regionsnavn betyder.
+
+- **Forsiden af hæftet med generelle instruktioner har plads til et længere program.** Programmet sættes med
+  mindre afstand mellem linjerne, punkterne og dagsoverskrifterne — skriftstørrelsen er den samme — hvilket
+  giver plads til fire eller fem punkter mere. Et program, der er for langt til siden, mister sine sidste
+  punkter, og de er slutningen på træffet, netop det, folk slår op.
+
+### Fejlrettelser
+
+- **Forklaringen af godsstrømmenes mærker løber ikke længere ud af hæftet med de almene
+  instruktioner.** Formuleringerne *og lokale destinationer* og *og videre* samt forklaringen af en
+  region stod i en så smal kolonne, at hver af dem fyldte fire linjer, og på et anlæg med flere
+  rangerbanegårde faldt den sidste af dem ud under sidens bund. Mærkerne og formuleringerne sættes nu
+  som to lister under hinanden, hver i hele sidens bredde.
+
+- **En ruteplan, der fortsætter på modstående side i et tjenestehæfte, ser nu ud som alle andre.** Når et
+  togafsnit er for langt til én side, flyttes dets ruteplan til modstående side, og der blev den udskrevet
+  uden hæftets eget layout: med større skrift, uden de fede stationer og tider og uden stregerne mellem
+  opholdene, så en lang ruteplan kunne løbe ud over sidens bund.
+
+- **At ændre et togs nummer eller kategori under Tog efterlader ikke længere ændringen på en anden linje.**
+  Begge ændringer sorterer listen om, og det nummer, du skrev, eller den kategori, du valgte, kunne blive
+  stående på linjen for det tog, der rykkede ind på dets plads.
+
+- **Dialogerne læser nu et tal, mens du skriver det.** **Varighed (minutter)** for en ny rangeropgave,
+  **Minutter** at flytte eller kopiere tog med og et køretøjs **Nummer** under **Omløb** blev først læst, når
+  du forlod feltet, så knappen, der bekræfter dialogen — og advarslen om, at et køretøjsnummer allerede er
+  optaget — haltede bagefter, indtil du klikkede et andet sted.
+
+- **Den grafiske køreplan tegner nu et driftssteds spor i den rækkefølge, du har givet dem.** Den så bort fra
+  sporenes **Rækkefølge** under **Driftssteder** og kunne derfor tegne dem i en anden rækkefølge end alle
+  andre sporlister i appen.
+
+- **Et omløbskort for et køretøj, der kører på dage, som ikke følger efter hinanden, nævner nu dagene.** Et
+  kort for mandag, onsdag og fredag udskrev *MondayShort,WednesdayShort,FridayShort* i stedet for *M,O,F*.
+
 ## Version 0.6.0
 
 ### Ændringer

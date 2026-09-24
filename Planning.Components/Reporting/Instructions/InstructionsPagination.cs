@@ -104,6 +104,38 @@ public static class InstructionsPagination
     /// </summary>
     public const double StrandedBlockGap = PageBudget * 0.25;
 
+    /// <summary>Lines the "Shunting yards" heading above the table costs.</summary>
+    /// <remarks>
+    /// 1.05 rem at line-height 1.5 is 25.2 px, its 0.2 em bottom margin 3.4 px, and the top margin it
+    /// gets inside <c>.instructions-body</c> (0.5 em, 8.4 px) less the 5.8 px gap already charged to
+    /// the block above it — 31.2 px, or 1.45 lines. Taken as 1.5.
+    /// </remarks>
+    public const double ShuntingYardsHeadingHeight = 1.5;
+
+    /// <summary>Lines the table's header row costs.</summary>
+    /// <remarks>
+    /// Measured at 44.0 px, which is 2.04 lines: the three column headings are longer than the columns
+    /// are wide once a layout has more than one yard, so the row wraps to two lines. Charged at the
+    /// wrapped height always — a header charged short on a page that already ends near the foot is what
+    /// pushes the last yard off it.
+    /// </remarks>
+    public const double ShuntingYardsHeaderHeight = 2.1;
+
+    /// <summary>Lines one line of one table row costs.</summary>
+    /// <remarks>
+    /// A row of one line measures 23.6 px and of two lines 43.5 px — 20.4 px a line plus 2.7 px of
+    /// padding the row pays once. Charged as 1.1 lines each, so both are covered by the same constant.
+    /// </remarks>
+    public const double ShuntingYardsRowHeight = 1.1;
+
+    /// <summary>Characters of served locations that fit on one line of the table's middle column.</summary>
+    /// <remarks>
+    /// The column measures 266 px of the 499 px table and the table is set at 0.85 rem, which is 6.0 px
+    /// a character — 44 characters. Taken as 36: the column is narrower on a layout whose yard names are
+    /// long, and this is the figure that decides whether the last row of the table lands on the page.
+    /// </remarks>
+    public const int ShuntingYardsCharactersPerLine = 36;
+
     /// <summary>
     /// Builds the booklet's pages: the front page, the instructions split across content pages, blank
     /// padding to a whole number of sheets, and the layout overview last.
@@ -113,7 +145,13 @@ public static class InstructionsPagination
     /// Whether to append the layout overview. The people who receive this booklet and never hold a
     /// duty booklet — station staff above all — get no layout overview from anywhere else.
     /// </param>
-    public static IReadOnlyList<InstructionsPage> BuildPages(string? markdown, bool includeOverview = true)
+    /// <param name="shuntingYards">
+    /// The layout's shunting yards, needed only to charge a <c>&lt;ShuntingYards/&gt;</c> placeholder
+    /// in the authored text its true height. Left out, a placeholder is charged as one line, which is
+    /// what an unrecognised line costs — so the table would print past the foot of the page.
+    /// </param>
+    public static IReadOnlyList<InstructionsPage> BuildPages(
+        string? markdown, bool includeOverview = true, IReadOnlyList<ShuntingYard>? shuntingYards = null)
     {
         var pages = new List<InstructionsPage> { new(1, InstructionsPageKind.Front) };
         var blocks = Blocks(markdown).ToList();
@@ -126,7 +164,7 @@ public static class InstructionsPagination
         for (var i = 0; i < blocks.Count; i++)
         {
             var block = blocks[i];
-            var height = HeightOf(block);
+            var height = HeightOf(block, shuntingYards);
 
             // A block taller than a page still prints, overflowing, rather than being truncated: the
             // author is the only one who knows what can go, so the report's job is to make it visible.
@@ -140,7 +178,7 @@ public static class InstructionsPagination
             // regardless. The page reads better ending on the fuller block before this one, with this
             // one carried over to join what follows instead of trailing behind on its own.
             var hasNext = i + 1 < blocks.Count;
-            var nextFitsHere = hasNext && overhead + used + HeightOf(blocks[i + 1]) <= PageBudget;
+            var nextFitsHere = hasNext && overhead + used + HeightOf(blocks[i + 1], shuntingYards) <= PageBudget;
             if (hasNext && !nextFitsHere && current.Count > 1 &&
                 height <= ShortTrailingBlockHeight && PageBudget - overhead - used >= StrandedBlockGap)
             {
@@ -213,20 +251,46 @@ public static class InstructionsPagination
 
     // Estimated, never measured: each source line charged its rendered height, wrapping charged per
     // character, and the block's own bottom margin added once.
-    private static double HeightOf(string block) =>
-        block.Split('\n').Sum(HeightOfLine) + BlockGap;
+    private static double HeightOf(string block, IReadOnlyList<ShuntingYard>? shuntingYards) =>
+        block.Split('\n').Sum(line => HeightOfLine(line, shuntingYards)) + BlockGap;
 
-    private static double HeightOfLine(string line)
+    private static double HeightOfLine(string line, IReadOnlyList<ShuntingYard>? shuntingYards)
     {
         var text = line.TrimStart();
         // The blank line that joins a heading to its body; the margins either side of it are already
         // counted in HeadingHeight.
         if (text.Length == 0) return 0;
+        // A placeholder is one line of source standing for a whole rendered part, so it is charged what
+        // that part costs and not what the line does.
+        if (InstructionsPlaceholders.PlaceholderOf(line) is InstructionsPlaceholder.ShuntingYards)
+            return ShuntingYardsHeight(shuntingYards);
         if (text.StartsWith('#')) return HeadingHeight;
 
         var wrapped = 1 + line.Length / CharactersPerLine;
         // A list item carries a bottom margin of its own; its wrapped continuation lines do not.
         return IsListItem(text) ? wrapped + BlockGap : wrapped;
+    }
+
+    /// <summary>
+    /// Lines the shunting yards table costs, heading included — what a <c>&lt;ShuntingYards/&gt;</c>
+    /// placeholder is charged where the author wrote it.
+    /// </summary>
+    /// <remarks>
+    /// Estimated from the yards themselves rather than from their number alone: the served locations
+    /// are a list of names in one column, and a yard that works half the layout wraps to two lines
+    /// where a yard that works one station does not. A layout with no shunting yards renders no table,
+    /// so the placeholder costs nothing.
+    /// </remarks>
+    public static double ShuntingYardsHeight(IReadOnlyList<ShuntingYard>? shuntingYards)
+    {
+        if (shuntingYards is not { Count: > 0 }) return 0;
+
+        var rows = shuntingYards.Sum(yard =>
+        {
+            var locations = string.Join(", ", yard.ServedLocations.Select(location => location.Name)).Length;
+            return ShuntingYardsRowHeight * (1 + locations / ShuntingYardsCharactersPerLine);
+        });
+        return ShuntingYardsHeadingHeight + ShuntingYardsHeaderHeight + rows;
     }
 
     private static bool IsListItem(string text)

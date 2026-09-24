@@ -1,4 +1,4 @@
-@namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
+﻿@namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @using Tellurian.Trains.Schedules.Model
 @using Tellurian.Trains.Schedules.Model.Validations
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
@@ -39,7 +39,7 @@ else
             @for (var s = 0; s < Current.Stations.Length; s++)
             {
                 var station = Current.Stations[s];
-                var stationTracks = station.Tracks.ToArray();
+                var stationTracks = Current.StationTracks[s];
                 var stationOffset = Current.StationLabelOffset(s);
                 var kmOffset = Current.KmLabelOffset(s);
                 <text>
@@ -65,7 +65,7 @@ else
             @for (var s = 0; s < Current.Stations.Length; s++)
             {
                 var station = Current.Stations[s];
-                var stationTracks = station.Tracks.ToArray();
+                var stationTracks = Current.StationTracks[s];
                 @for (var t = 0; t < stationTracks.Length; t++)
                 {
                     var track = stationTracks[t];
@@ -85,8 +85,8 @@ else
                 var fromStationIndex = toStationIndex - 1;
                 var fromStation = Current.Stations[fromStationIndex];
                 var toStation = Current.Stations[toStationIndex];
-                var fromTracks = fromStation.Tracks.ToArray();
-                var toTracks = toStation.Tracks.ToArray();
+                var fromTracks = Current.StationTracks[fromStationIndex];
+                var toTracks = Current.StationTracks[toStationIndex];
 
                 @for (var fromTrackIndex = 0; fromTrackIndex < fromTracks.Length; fromTrackIndex++)
                 {
@@ -112,8 +112,8 @@ else
                 var toStationIndex = fromStationIndex - 1;
                 var fromStation = Current.Stations[fromStationIndex];
                 var toStation = Current.Stations[toStationIndex];
-                var fromTracks = fromStation.Tracks.ToArray();
-                var toTracks = toStation.Tracks.ToArray();
+                var fromTracks = Current.StationTracks[fromStationIndex];
+                var toTracks = Current.StationTracks[toStationIndex];
 
                 @for (var fromTrackIndex = 0; fromTrackIndex < fromTracks.Length; fromTrackIndex++)
                 {

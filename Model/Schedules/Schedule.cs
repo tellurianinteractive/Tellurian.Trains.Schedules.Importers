@@ -190,6 +190,12 @@ public static class ScheduleExtensions
         /// the schedule's <see cref="Schedule.Number"/> from its train number when the number has not
         /// yet been set. A part already present is returned unchanged. This is the method used when
         /// building schedules automatically or interactively.
+        /// <para>
+        /// A part accepted onto a working whose vehicle cannot change tracks on its own puts the arrival
+        /// tracks right again (see <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracks"/>): the
+        /// new part is a new joint, and a trainset leaves from the track it arrived at. The unguarded
+        /// <see cref="Add"/> does not, because a reconstruction is authoritative about its own tracks.
+        /// </para>
         /// </remarks>
         /// <param name="part">The train part to append.</param>
         /// <returns>A <see cref="Maybe{T}"/> with the part when appended (or already present), or an
@@ -214,6 +220,7 @@ public static class ScheduleExtensions
                     return new Maybe<ScheduledTrainPart>($"Part {part} operates on no session/day common to schedule {schedule.Number}.");
             }
             schedule.Attach(part);
+            schedule.AlignArrivalTracks();
             return new Maybe<ScheduledTrainPart>(part);
         }
 
@@ -228,6 +235,12 @@ public static class ScheduleExtensions
         /// part leaves from. That is what lets an out-and-back trip be worked into a layover a leg at a
         /// time — the first leg leaves the working broken, which the contiguity validation (rule S2)
         /// reports until the leg back is worked in as well. A part already present is returned unchanged.
+        /// <para>
+        /// Like <see cref="Append"/>, this puts the arrival tracks right again where the working's vehicle
+        /// cannot change tracks on its own (see
+        /// <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracks"/>). A joint the leg leaves broken
+        /// is passed over there, so half an out-and-back trip moves no track until the leg back closes it.
+        /// </para>
         /// </remarks>
         /// <param name="part">The train part to work in.</param>
         /// <returns>A <see cref="Maybe{T}"/> with the part when it was worked in (or already present), or
@@ -242,6 +255,7 @@ public static class ScheduleExtensions
             if (schedule.Parts.Count > 0 && !schedule.EffectiveSessions.Overlaps(part.Train.Sessions))
                 return new Maybe<ScheduledTrainPart>($"Part {part} operates on no session/day common to schedule {schedule.Number}.");
             schedule.Attach(part);
+            schedule.AlignArrivalTracks();
             return new Maybe<ScheduledTrainPart>(part);
         }
 

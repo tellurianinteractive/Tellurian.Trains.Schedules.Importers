@@ -100,4 +100,7 @@
   <data name="Unknown" xml:space="preserve">
     <value>Ukendt</value>
   </data>
+  <data name="Participant" xml:space="preserve">
+    <value>Deltager</value>
+  </data>
 </root>

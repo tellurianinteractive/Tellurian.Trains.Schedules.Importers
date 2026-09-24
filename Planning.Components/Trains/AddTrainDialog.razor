@@ -35,7 +35,10 @@
                 </div>
                 <div class="field">
                     <label>@Translator("DurationMinutes")</label>
-                    <input type="number" class="num" min="1" value="@_durationMinutes" @onchange="e => _durationMinutes = ParseInt(e, _durationMinutes)" />
+                    @* Entered on input, not on change, so the Create button follows what is typed
+                       instead of waiting for the field to lose focus. *@
+                    <input type="number" class="num" min="1" value="@_durationMinutes"
+                           @oninput="e => { _durationMinutes = ParseOptionalInt(e); _error = null; }" />
                 </div>
                 <div class="field">
                     <label>@Translator("Number")</label>
@@ -166,7 +169,9 @@
     // planner starts on "as soon as possible" and only types a time when they want a different one.
     private bool _returnAsSoonAsPossible = true;
     private string _returnTime = "";
-    private int _durationMinutes = 30;
+    // Null while the field is empty or holds something that is not a number, which keeps the Create
+    // button disabled and lets the field show what was typed rather than an old value.
+    private int? _durationMinutes = 30;
     private string? _error;
 
     private TrainCategory? SelectedCategory => CategoryChoices.FirstOrDefault(c => c.Id == _categoryId);
@@ -249,8 +254,8 @@
         // nothing to repeat, so none of what follows applies to it.
         if (category.IsShunting)
         {
-            if (_durationMinutes < 1) { _error = "InvalidMinutes"; return; }
-            if (plan.CreateShuntingTask(category, from, startTime, _durationMinutes, _number) is not { } task)
+            if (_durationMinutes is not > 0) { _error = "InvalidMinutes"; return; }
+            if (plan.CreateShuntingTask(category, from, startTime, _durationMinutes.Value, _number) is not { } task)
             {
                 _error = "CouldNotCreateShuntingTask";
                 return;
@@ -302,6 +307,10 @@
 
     private static int ParseInt(ChangeEventArgs e, int fallback) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var value) ? value : fallback;
+
+    // Null for an empty or unparseable field, so a half-typed value never counts as a whole one.
+    private static int? ParseOptionalInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var value) ? value : null;
 
     private static bool TryParseTime(string text, out Time time)
     {

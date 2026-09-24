@@ -529,7 +529,7 @@
     <value>Zugkategorien mit Präfix, Farbe und Klassifizierung.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Wer bringt welches rollende Material zur Fahrrunde mit.</value>
+    <value>Wer welches rollende Material zum Treffen mitbringt. Der erste Eigentümer bringt das Fahrzeug mit und stellt es auf der Anlage auf; weitere Eigentümer bringen Reservefahrzeuge mit.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Fahrzeugumläufe erstellen und Lokomotiven, Wagen und Frachtströmen zuweisen.</value>
@@ -1197,8 +1197,8 @@
   <data name="TrackNumber" xml:space="preserve">
     <value>Gleis</value>
   </data>
-  <data name="TrackReferencedByTrains" xml:space="preserve">
-    <value>Kann nicht gelöscht werden: {0} Zug/Züge nutzen dieses Gleis.</value>
+  <data name="TrackReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Dieses Gleis wird von Zügen oder Fahrzeugumläufen verwendet.</value>
   </data>
   <data name="Tracks" xml:space="preserve">
     <value>Gleise</value>
@@ -1437,6 +1437,12 @@
   </data>
   <data name="CallNoteHint" xml:space="preserve">
     <value>Bemerkung, die bei diesem Halt angezeigt wird. Mit *kursiv* und **fett** hervorheben; die Auszeichnung erscheint beim Bearbeiten.</value>
+  </data>
+  <data name="CallNoteTargetHint" xml:space="preserve">
+    <value>Ob die Bemerkung bei der Ankunft oder bei der Abfahrt angezeigt wird.</value>
+  </data>
+  <data name="CallNoteNeedsStop" xml:space="preserve">
+    <value>Eine Bemerkung setzt einen Halt voraus: An oder Ab ankreuzen, um hier eine zu schreiben.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>Keine Halte.</value>
@@ -1709,7 +1715,7 @@
     <value>Automatisch erstellen</value>
   </data>
   <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
-    <value>{0} Umläufe erstellt</value>
+    <value>{0} Zugabschnitte zu {1} vorhandenen Umläufen hinzugefügt, {2} neue Umläufe erstellt</value>
   </data>
   <data name="SchedulesNewSchedule" xml:space="preserve">
     <value>Neuer Umlauf</value>
@@ -1870,6 +1876,21 @@
   <data name="Battery" xml:space="preserve">
     <value>Batterie</value>
   </data>
+  <data name="SteamInText" xml:space="preserve">
+    <value>Dampf</value>
+  </data>
+  <data name="DieselInText" xml:space="preserve">
+    <value>Diesel</value>
+  </data>
+  <data name="ElectricInText" xml:space="preserve">
+    <value>elektrisch</value>
+  </data>
+  <data name="DualInText" xml:space="preserve">
+    <value>Zweikraft</value>
+  </data>
+  <data name="BatteryInText" xml:space="preserve">
+    <value>Batterie</value>
+  </data>
   <data name="IsReversibleTrain" xml:space="preserve">
     <value>Wendezug?</value>
   </data>
@@ -1894,6 +1915,21 @@
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>Das Triebfahrzeug dieses Zugabschnitts kann wenden, wie es steht; daher wird kein Umsetzvermerk gedruckt.</value>
+  </data>
+  <data name="PartFetchFromTrack" xml:space="preserve">
+    <value>Holen von</value>
+  </data>
+  <data name="PartFetchFromTrackHelp" xml:space="preserve">
+    <value>Das Gleis, auf dem die Fahrzeuge vor der Abfahrt des Zuges stehen, wenn es ein anderes ist als das, von dem der Zug abfährt. Wird als Abfahrtsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="PartPutOnTrack" xml:space="preserve">
+    <value>Abstellen auf</value>
+  </data>
+  <data name="PartPutOnTrackHelp" xml:space="preserve">
+    <value>Das Gleis, auf das die Fahrzeuge nach der Ankunft des Zuges gestellt werden, wenn es ein anderes ist als das, auf dem der Zug ankommt. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="SameTrackAsTrain" xml:space="preserve">
+    <value>Wie der Zug (Gleis {0})</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Anzahl Einheiten</value>
@@ -2096,6 +2132,9 @@
   <data name="ShuntingYards" xml:space="preserve">
     <value>Rangierbahnhöfe</value>
   </data>
+  <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
+    <value>Die Tabelle der Rangierbahnhöfe wird auf der Anlagenseite hinten im Heft gedruckt. Um sie stattdessen im Text zu platzieren, schreibe sie in eine eigene Zeile:</value>
+  </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Güterbedienung von</value>
   </data>
@@ -2284,5 +2323,155 @@
   </data>
   <data name="CouldNotCreateShuntingTask" xml:space="preserve">
     <value>Die Rangieraufgabe konnte nicht erstellt werden. Prüfen Sie, ob der Bahnhof ein Gleis hat und die Zeiten in der Betriebszeit liegen.</value>
+  </data>
+  <data name="MaximumExplanation" xml:space="preserve">
+    <value>Eine Lastgrenze wird als Zahl mit einem Zeichen gedruckt, das angibt, was gezählt wird. Jede Zahl ist ein Höchstwert.</value>
+  </data>
+  <data name="MaxAxlesExplanation" xml:space="preserve">
+    <value>Anzahl Achsen</value>
+  </data>
+  <data name="MaxWagonsExplanation" xml:space="preserve">
+    <value>Anzahl Wagen</value>
+  </data>
+  <data name="MaxLengthExplanation" xml:space="preserve">
+    <value>Zuglänge in Metern</value>
+  </data>
+  <data name="AnywhereExplanation" xml:space="preserve">
+    <value>Die Wagen stehen bereits im Bahnhof und können von überall gekommen sein</value>
+  </data>
+  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
+    <value>Auch Wagen für die Ziele, die von dort mit Güterzügen bedient werden</value>
+  </data>
+  <data name="AndBeyondExplanation" xml:space="preserve">
+    <value>Auch Wagen für die Ziele der Anlage jenseits dieses Ortes</value>
+  </data>
+  <data name="RegionExplanation" xml:space="preserve">
+    <value>Ein Ziel außerhalb der Anlage, das über diesen Ort erreicht wird</value>
+  </data>
+  <data name="RollingStock" xml:space="preserve">
+    <value>Rollendes Material</value>
+  </data>
+  <data name="Participants" xml:space="preserve">
+    <value>Teilnehmer</value>
+  </data>
+  <data name="Participant" xml:space="preserve">
+    <value>Teilnehmer</value>
+  </data>
+  <data name="FirstSession" xml:space="preserve">
+    <value>Erste Fahrrunde</value>
+  </data>
+  <data name="FirstDay" xml:space="preserve">
+    <value>Erster Tag</value>
+  </data>
+  <data name="DccAddress" xml:space="preserve">
+    <value>DCC-Adresse</value>
+  </data>
+  <data name="DccAddressHelp" xml:space="preserve">
+    <value>Jedes mitgebrachte Triebfahrzeug braucht eine eigene DCC-Adresse, auch die Reservefahrzeuge. Geben Sie 0 ein, wenn der Eigentümer sie noch nennen muss.</value>
+  </data>
+  <data name="DccAddressToBeProvided" xml:space="preserve">
+    <value>Folgt vom Eigentümer</value>
+  </data>
+  <data name="DccAddressMissing" xml:space="preserve">
+    <value>DCC-Adresse fehlt. Jedes Triebfahrzeug braucht eine; geben Sie 0 ein, wenn der Eigentümer sie nennen soll.</value>
+  </data>
+  <data name="DccAddressInvalid" xml:space="preserve">
+    <value>Geben Sie eine DCC-Adresse von 0 bis 9999 ein; 0 bedeutet, dass der Eigentümer sie nennen soll.</value>
+  </data>
+  <data name="PrimaryContributor" xml:space="preserve">
+    <value>Primär</value>
+  </data>
+  <data name="PrimaryContributorHint" xml:space="preserve">
+    <value>Bringt das Fahrzeug mit und stellt es auf der Anlage auf</value>
+  </data>
+  <data name="SpareContributor" xml:space="preserve">
+    <value>Reserve</value>
+  </data>
+  <data name="SpareContributorHint" xml:space="preserve">
+    <value>Bringt ein Reservefahrzeug mit</value>
+  </data>
+  <data name="Spares" xml:space="preserve">
+    <value>Reserven</value>
+  </data>
+  <data name="AddOwner" xml:space="preserve">
+    <value>Eigentümer hinzufügen</value>
+  </data>
+  <data name="MakePrimary" xml:space="preserve">
+    <value>Als primär festlegen</value>
+  </data>
+  <data name="NoOwnersYet" xml:space="preserve">
+    <value>Noch bringt niemand dieses Fahrzeug mit.</value>
+  </data>
+  <data name="NoRollingStock" xml:space="preserve">
+    <value>Noch kein rollendes Material. Fahrzeuge werden unter Umläufe hinzugefügt.</value>
+  </data>
+  <data name="NotInOperation" xml:space="preserve">
+    <value>Nicht im Einsatz</value>
+  </data>
+  <data name="WithoutOwnerOnly" xml:space="preserve">
+    <value>Nur die ohne Eigentümer?</value>
+  </data>
+  <data name="ParticipantNameRequired" xml:space="preserve">
+    <value>Geben Sie den Namen des Teilnehmers ein.</value>
+  </data>
+  <data name="ParticipantNameInUse" xml:space="preserve">
+    <value>Es gibt bereits einen Teilnehmer mit diesem Namen.</value>
+  </data>
+  <data name="ParticipantReferenced" xml:space="preserve">
+    <value>Löschen nicht möglich: Dieser Teilnehmer bringt rollendes Material mit.</value>
+  </data>
+  <data name="NewParticipant" xml:space="preserve">
+    <value>Neuer Teilnehmer: {0}</value>
+  </data>
+  <data name="AddParticipant" xml:space="preserve">
+    <value>Teilnehmer hinzufügen</value>
+  </data>
+  <data name="NoParticipants" xml:space="preserve">
+    <value>Noch keine Teilnehmer. Ein als Eigentümer eingegebener Name wird hier hinzugefügt.</value>
+  </data>
+  <data name="ParticipantsDescription" xml:space="preserve">
+    <value>Alle, die als Eigentümer eingetragen sind. Korrigieren Sie hier einen falsch geschriebenen Namen, dann ist er überall korrigiert.</value>
+  </data>
+  <data name="TypeParticipantName" xml:space="preserve">
+    <value>Namen eingeben…</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Anzahl</value>
+  </data>
+  <data name="VehicleContributors" xml:space="preserve">
+    <value>Mitgebrachte Fahrzeuge</value>
+  </data>
+  <data name="ByOperationLocation" xml:space="preserve">
+    <value>Nach Betriebsstelle</value>
+  </data>
+  <data name="ByOwner" xml:space="preserve">
+    <value>Nach Eigentümer</value>
+  </data>
+  <data name="ByDccAddress" xml:space="preserve">
+    <value>Nach DCC-Adresse</value>
+  </data>
+  <data name="DccAddresses" xml:space="preserve">
+    <value>DCC-Adressen</value>
+  </data>
+  <data name="NotYetBooked" xml:space="preserve">
+    <value>Noch nicht gebucht</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Rolle</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Fehlt</value>
+  </data>
+  <data name="NoTractionUnits" xml:space="preserve">
+    <value>Noch keine Lokomotiven oder Triebzüge, daher gibt es keine DCC-Adressen aufzulisten.</value>
+  </data>
+  <data name="TrainCompositions" xml:space="preserve">
+    <value>Zugbildungen</value>
+  </data>
+  <data name="NoTrainCompositions" xml:space="preserve">
+    <value>Kein besetzter Bahnhof hat abfahrende Züge mit Wagenströmen oder Wagengruppen mit erfassten Wagen.</value>
+  </data>
+  <data name="CompositionFromLoco" xml:space="preserve">
+    <value>Zugbildung ab Lok gezählt</value>
   </data>
 </root>

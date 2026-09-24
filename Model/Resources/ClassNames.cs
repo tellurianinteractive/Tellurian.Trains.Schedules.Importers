@@ -42,4 +42,31 @@ public static class ClassNames
     /// </summary>
     /// <param name="value">The object to label.</param>
     public static string LocalizedFor(object value) => Localized(KeyOf(value));
+
+    /// <summary>
+    /// Returns the localised name for <paramref name="value"/> as it is written <em>inside</em> a
+    /// sentence, for example in a call note: "Before departure, fetch <c>locomotive</c> 21 from track 31".
+    /// </summary>
+    /// <remarks>
+    /// A display name is written the way a label is — with a capital first letter — but a note embeds it
+    /// mid-sentence, where every language here but German writes a common noun in lower case. German
+    /// capitalises its nouns wherever they stand, so its names are returned unchanged; see
+    /// <see cref="InSentence"/>.
+    /// </remarks>
+    /// <param name="value">The object to name.</param>
+    public static string InSentenceFor(object value) => InSentence(LocalizedFor(value));
+
+    /// <summary>
+    /// Returns <paramref name="name"/> as it is written inside a sentence in the current UI language:
+    /// with a lower-case first letter, except in German, which capitalises nouns wherever they stand.
+    /// </summary>
+    /// <param name="name">A display name, as the resources give it.</param>
+    public static string InSentence(string name) =>
+        CapitalisesNouns || name.Length == 0
+            ? name
+            : char.ToLower(name[0], CultureInfo.CurrentUICulture) + name[1..];
+
+    // German is the one language here that writes a common noun with a capital wherever it stands.
+    private static bool CapitalisesNouns =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("de", StringComparison.OrdinalIgnoreCase);
 }

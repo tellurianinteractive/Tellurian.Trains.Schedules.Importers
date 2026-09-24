@@ -15,7 +15,8 @@ public class DriverDutyPartTests
 
     private sealed record Fixture(Plan Plan, DriverDuty Duty, Schedule Schedule, ScheduledObject Loco);
 
-    // A duty of one train part, worked by a schedule with one locomotive assigned to it.
+    // A duty of one train part, worked by a schedule with one locomotive assigned to it. The train runs
+    // on track 1 at both stations; each has a track 2 for vehicles fetched or put elsewhere.
     private static Fixture CreateFixture()
     {
         var layout = new Layout { Name = "Test" };
@@ -24,6 +25,7 @@ public class DriverDutyPartTests
         {
             var station = new Station(i + 1, $"Station{i + 1}", $"S{i + 1}");
             station.Add(new StationTrack((i + 1) * 10, "1"));
+            station.Add(new StationTrack((i + 1) * 10 + 1, "2"));
             stations.Add(layout.Add(station));
         }
         layout.Add(new TrackStretch(1, stations[0], stations[1], 10));
@@ -109,5 +111,50 @@ public class DriverDutyPartTests
 
         Assert.IsNotNull(part.TrainPart.Schedule, "A restored duty part must still know the schedule that owns it.");
         Assert.IsTrue(part.TractionData.HasData, "The traction block must survive the storage round trip.");
+    }
+
+    [TestMethod]
+    public void AVehicleRowNamesTheTrainsTracksWhereNoOtherTrackIsGiven()
+    {
+        var fixture = CreateFixture();
+
+        var row = PartOf(fixture).TractionData.Vehicles[0];
+
+        Assert.AreEqual("1", row.DepartureTrack.Number);
+        Assert.AreEqual("1", row.ArrivalTrack.Number);
+    }
+
+    [TestMethod]
+    public void AVehicleRowNamesTheTracksItsScheduleFetchesItFromAndPutsItOn()
+    {
+        var fixture = CreateFixture();
+        var owned = fixture.Schedule.OrderedParts[0];
+        owned.FromTrack = owned.From.OperationLocation["2"];
+        owned.ToTrack = owned.To.OperationLocation["2"];
+
+        var row = PartOf(fixture).TractionData.Vehicles[0];
+
+        Assert.AreEqual("2", row.DepartureTrack.Number);
+        Assert.AreEqual("2", row.ArrivalTrack.Number);
+    }
+
+    [TestMethod]
+    public void AVehicleRowIgnoresTheOtherTrackOfAnotherVehiclesSchedule()
+    {
+        // Parts are equal over the same two calls, so a wagonset's schedule covering the loco's part is
+        // found for the loco's part too. Its fetch-from track concerns the wagonset only.
+        var fixture = CreateFixture();
+        var train = fixture.Schedule.OrderedParts[0].Train;
+        var wagonSchedule = fixture.Plan.CreateSchedule();
+        wagonSchedule.Add(train.AsTrainPart);
+        var wagonset = fixture.Plan.CreateVehicle(ScheduledObjectType.Wagonset, "Bm", 1, null);
+        fixture.Plan.AssignVehicle(wagonSchedule, wagonset);
+        var wagonPart = wagonSchedule.OrderedParts[0];
+        wagonPart.FromTrack = wagonPart.From.OperationLocation["2"];
+
+        var part = PartOf(fixture);
+
+        Assert.AreEqual("1", part.TractionData.Vehicles[0].DepartureTrack.Number, "The loco stands on the train's track.");
+        Assert.AreEqual("2", part.WagonsetData.Vehicles[0].DepartureTrack.Number, "The wagonset is fetched from its own track.");
     }
 }

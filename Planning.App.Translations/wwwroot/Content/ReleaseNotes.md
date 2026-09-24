@@ -1,5 +1,168 @@
 # Release notes
 
+## Version 0.7.0
+
+### New features
+
+- **The shunting yards table can now be placed in the general instructions.** The table of shunting
+  yards is printed on the layout page at the back of the general instructions booklet. On a layout with
+  many shunting yards it filled that page and pushed the explanation of the cargo flow marks off it. To
+  print it in the standing instructions instead, write
+
+  ```
+  <ShuntingYards/>
+  ```
+
+  on a line of its own under **Settings**, wherever in the text it belongs. The layout page then leaves
+  it out, so it is never printed twice. The preview beside the text shows a box where the table will
+  go. Written nowhere, the table stays on the layout page as before.
+
+- **Vehicle owners: who brings which rolling stock to the meeting, and where it is to be set up.** The
+  **Vehicle owners** tab lists every locomotive, trainset and wagonset — with its count of units where there
+  is more than one, and for a wagonset that lists its wagons each wagon class once — with the first session
+  (or day) it is in operation, and the station, track and departure where it is to stand before it. Open a row to add its owners: the first brings the unit and sets
+  it up on the layout, any further owners bring spares. Pick an owner by typing the first letters of their
+  name — or of their surname — so that a name is spelt the same way throughout; a name that matches nobody
+  is offered as a new participant. Every owner of a locomotive or trainset, spares included, must give a DCC
+  address; enter **0** when the owner is still to provide it. Each item and each owner has a note, and the
+  **Participants** view lists everyone with what they bring, where a misspelt name is corrected once for
+  all.
+
+  The **Vehicle contributors** report under **Reports** prints the same list on A4 landscape, arranged in
+  one of three ways chosen above the pages: **By operation location**, a page per station for its owner,
+  with the vehicles to set up there in order of first session and departure; **By owner**, a page per
+  participant with what they bring, their DCC addresses and where each item starts; or **By DCC address**,
+  every locomotive and trainset brought, in one list. Each station or owner starts on a new page, and
+  continues on the next when one page is not enough. Items not in operation are listed last; those nobody
+  brings yet come first in the arrangement by owner, under **Not yet booked**. A row's background shows when
+  its unit is needed: white when it is in operation on every session, light grey for a spare, and otherwise
+  light blue, green or red for an item first in operation on the first, second or third session.
+
+- **A schedule can say its vehicles stand on another track than the train.** When editing a train part
+  under **Schedules**, **Fetch from** names the track the vehicles stand on before the train departs,
+  and **Put on** the track they are put on after it arrives — a wagonset left in a siding at an
+  intermediate station, say. The driver duty booklets and the station dispatch lists print it as a
+  note: *Before departure, fetch wagonset 21 from track 3.* on the departure, *After arrival, shunt
+  wagonset 21 to track 3.* on the arrival, in place of the note to couple or uncouple the vehicle.
+  Where the vehicle works the train on only some of the sessions or days it runs, the note starts with
+  those — *1,3,5: Before departure, fetch …* — and a vehicle that works it on none of them gets no
+  note. A track a vehicle schedule uses this way cannot be deleted under **Operation locations**.
+
+- **Train compositions can now be printed.** A new report under **Reports** gives each manned station a page
+  of its own on A4 landscape, listing every train that departs from it carrying cargo flow wagons or a
+  wagonset that lists its wagons. The trains are listed track by track, and in order of departure on each
+  track, each with the sessions or days it runs, when it arrives and when it leaves, where it is bound, the
+  most it may be made up of, and the turnus of every wagonset it works with. The arrival is empty where the
+  train starts its run at the station, and the maximum where nothing restricts the train — the same marks
+  as everywhere else say which limit each figure is: a wheel end-on for axles, a wagon end-on for wagons.
+  Beside each train its composition is drawn from the front of the train as rectangles: a wagonset as one
+  rectangle per wagon, in rake order, with the wagon's class and number; and cargo flow wagons as one
+  rectangle per position in the train, listing where they go — with *and local destinations* and *and
+  beyond* where the cargo destination says so, its regions in their colours, and the most that may be
+  brought there after the place itself. The rectangles stand in the order the wagons stand in the train, so
+  nothing has to name the positions; the wagons gathered in one rectangle may be marshalled in any order
+  among themselves. Each rectangle is only as wide as what it holds. The composition is what the train leaves with, so wagons it arrived with are shown as well as those
+  coupled at the station. A wagonset in the train on only some of the sessions or days is marked with them
+  beside its turnus, and cargo flow wagons without a position are shown last.
+
+- **A trainset now arrives at the track it is to leave from.** A trainset, and a locomotive working a
+  reversible train, never runs round its train: it leaves the station on the very track it came in on. Where
+  such a vehicle works one train after another, the arrival track of each train is therefore put on the track
+  its next train departs from, and — where the working ends where it began — the last arrival is put on the
+  track the first train departs from, so the vehicle stands ready where the next session fetches it. Only
+  arrival tracks are moved; the track a train departs from stays as you set it. A working hauled by an
+  ordinary locomotive is left untouched, since the locomotive runs light across the station to whichever
+  track its next train stands on. The tracks are put right whenever a train is added to a working — by
+  **Build automatically**, or by you, at its end or into a layover — and whenever you assign a vehicle to a
+  working, so a working built before its trainset was known is corrected as soon as the trainset is put on
+  it. An imported working keeps the tracks it was read with. Should the move put two trains on the same
+  track at once, it is listed among the conflicts for you to resolve.
+
+### Changes
+
+- **Days and sessions are listed without spaces.** Where a note or a column names the days or the sessions
+  something holds on, they are now written *Mo,We,Fr* and *1,3,5* rather than *Mo, We, Fr* and *1, 3, 5*,
+  so the value takes no more room than it must. Days written out in full — *Monday, Wednesday, Friday* —
+  are unchanged.
+
+- **A wagonset that lists its wagons now shows them in its label under Schedules.** The label gives the
+  number of wagons and each wagon class once — *SJ 05 5 x A/B/Fv* — in place of the wagonset's own class.
+
+- **A remark on a call now says whether it belongs to the arrival or the departure.** The driver duty
+  booklets and the station dispatch lists print a call's arrival and its departure on separate lines, so
+  under **Trains** the box beside each **Remark** asks which of the two it is for: **Arr** for something
+  met or done on pulling in, **Dep** for something done before or on leaving. Where the train only
+  arrives or only departs, that half is the only one on offer. Where it passes through, no remark can be
+  written — tick **Arr** or **Dep** first — although one already there can still be cleared.
+
+  A remark written with an earlier version, or brought in by an XPLN import, said neither, and so was
+  printed in neither the booklets nor the dispatch lists. The first time a plan is opened, each such
+  remark is given the departure where the train departs, and the arrival where it only arrives.
+
+- **Each block of a train page in a driver duty booklet now has a colour bar down its left edge.**
+  Traction units are marked red, scheduled wagonsets green, cargo wagons with waybills blue and the
+  timetable grey, so the blocks can be told apart at a glance, and where a grey bar stops, that train part
+  ends. The bars print without background graphics having to be switched on, and every block keeps its
+  heading, so a black-and-white print loses nothing.
+
+- **The traction units and scheduled wagonsets on a train page in a driver duty booklet now show their
+  tracks.** Each row gives the track the vehicle stands on at the start and the track it is left on at the
+  end — the train's own track, or the one its schedule names under **Fetch from** or **Put on**. The column
+  naming the vehicle is now headed **Turnus** in both blocks, after the card the vehicle's identity is
+  written on. With the tracks in the table, the timetable below no longer names each wagonset and its track:
+  it says *Shunt wagons to departure track before departure.* or *Shunt wagons to their arrival track after
+  arrival.*, led by the sessions or days when the wagons are shunted on only some of those the train runs.
+  The station dispatch lists still name each wagonset and its track.
+
+- **The general instructions booklet now explains how cargo is written in the other reports.** Under
+  **Cargo flows** on its last page, a key says that every load limit is a maximum and what the mark after a
+  figure counts, what the globe stands for, what *and local destinations* and *and beyond* add to a
+  destination, and what a coloured region name means.
+
+- **The front page of the general instructions booklet has room for a longer programme.** The programme is
+  set with less space between its lines, its entries and its day headings — the type size is unchanged —
+  which makes room for four or five more entries. A programme too long for the page loses its last
+  entries, and those are the end of the meeting, which is exactly what people look up.
+
+- **Build automatically now adds to the schedules you already have before it makes new ones.** The
+  trains that are not yet in a schedule are offered to the existing schedules first: a working carries on
+  with whatever continues it from where it arrives, in the category it is already working, and an empty
+  schedule you have made yourself is filled before any new one is created. Only the trains that fit no
+  existing schedule start new schedules, so building again after adding a few trains extends the vehicles
+  already turning instead of putting new ones in service. Cargo flows are left as they are. The result
+  beside the button now says how many train parts the existing schedules took on, how many of them were
+  extended, and how many schedules were built.
+
+### Fixes
+
+- **The explanation of the cargo flow marks no longer runs off the general instructions booklet.** The
+  wordings *and local destinations* and *and beyond*, and the explanation of a region, were set in a
+  column so narrow that each ran to four lines, and on a layout with several shunting yards the last of
+  them fell off the foot of the page. The marks and the wordings are now set one list under the other,
+  each across the whole page.
+
+- **A timetable continued on the facing page of a driver duty booklet now looks like every other.** When
+  a train part is too long for one page, its timetable moves to the facing page, and there it was printed
+  without the booklet's own layout: in larger type, without the bold stations and times and without the
+  lines between the calls, so a long one could run off the foot of the page.
+
+- **Changing a train's number or category under Trains no longer leaves the edit showing in another
+  row.** Either change re-sorts the list, and the number you typed, or the category you picked, could stay
+  behind in the row of the train that moved into its place.
+
+- **Dialogues now take in a number as you type it.** The **Duration (minutes)** of a new shunting task,
+  the **Minutes** to move or clone trains by, and a vehicle's **Number** under **Schedules** were only read
+  once you left the field, so the button that confirms the dialogue — and the warning that a vehicle
+  number is already taken — lagged behind until you clicked somewhere else.
+
+- **The graphical timetable now draws a location's tracks in the order you gave them.** It ignored the
+  **Order** of the tracks under **Operation locations**, and so could draw them in a different order from
+  every list of tracks in the app.
+
+- **A turnus card for a vehicle running on days that do not follow on from each other now names them.** A
+  card for Monday, Wednesday and Friday printed *MondayShort,WednesdayShort,FridayShort* instead of
+  *Mo,We,Fr*.
+
 ## Version 0.6.0
 
 ### Changes

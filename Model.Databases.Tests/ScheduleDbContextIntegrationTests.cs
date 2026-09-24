@@ -166,7 +166,9 @@ public class ScheduleDbContextIntegrationTests
         var layout = new Layout { Id = 1, Name = "L" };
         var station = new Station(1, "Station", "S");
         var track = new StationTrack(1, "1");
+        var siding = new StationTrack(2, "2");
         station.Add(track);
+        station.Add(siding);
         layout.Add(station);
 
         var timetable = new Timetable("T", layout);
@@ -179,6 +181,7 @@ public class ScheduleDbContextIntegrationTests
         part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true, RunaroundLoco = true };
         part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3 };
         part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
+        part.FromTrack = siding;
 
         // Act
         context.Layouts.Add(layout);
@@ -191,6 +194,7 @@ public class ScheduleDbContextIntegrationTests
         var loaded = await context.TrainParts
             .OfType<ScheduledTrainPart>()
             .Include(p => p.WagonSetOptions!)
+            .Include(p => p.FromTrack)
             .FirstAsync(CancellationToken);
 
         // Assert - each option kind persisted and read back from SQLite
@@ -206,6 +210,9 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsNotNull(loaded.CargoOnlyOptions, "CargoOnlyOptions");
         Assert.AreEqual("Coal", loaded.CargoOnlyOptions!.CargoName);
         Assert.IsTrue(loaded.CargoOnlyOptions.Load, "Load is computed from HasCoupleNote");
+
+        Assert.AreEqual("2", loaded.FromTrack?.Number, "FromTrack");
+        Assert.IsNull(loaded.ToTrack, "ToTrack");
     }
 
     [TestMethod]

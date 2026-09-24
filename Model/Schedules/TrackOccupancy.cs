@@ -20,7 +20,8 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// <para>
 /// Unless it is parked. Where the unit is booked to parking on arrival, or comes from parking before
 /// departing, it is not standing on this track between the two trains, and occupancy falls back to what
-/// each train occupies by itself.
+/// each train occupies by itself. The same holds where it is put on another track of the station on
+/// arrival, or fetched from another track before departing.
 /// </para>
 /// </remarks>
 public static class TrackOccupancyExtensions
@@ -41,7 +42,9 @@ public static class TrackOccupancyExtensions
         /// <para>
         /// Only a continuation onto the <em>same track</em> extends anything. A unit that leaves on a
         /// train departing from another track has moved between the two, and nothing in the data says
-        /// when — so the gap is left unclaimed rather than attributed to a track it may not be on.
+        /// when — so the gap is left unclaimed rather than attributed to a track it may not be on. The
+        /// same goes for a unit put on another track after arriving. One fetched from this track for a
+        /// train departing from another stays here until then, so that one does extend it.
         /// </para>
         /// </remarks>
         /// <param name="vehicleSchedules">The schedules that assign vehicles to train parts. Occupancy
@@ -65,7 +68,12 @@ public static class TrackOccupancyExtensions
                     var leaving = parts[i + 1];
                     if (arriving.TractionOptions?.ToParking == true) return own;
                     if (leaving.TractionOptions?.FromParking == true) return own;
-                    if (!leaving.From.Track.Equals(call.Track)) return own;
+                    // Where the vehicles are put after arriving and where they are fetched from before
+                    // leaving: the other track a part names, or else the train's own. Only a stay on this
+                    // call's track at both ends keeps this track occupied.
+                    var leftOn = arriving.OtherToTrack ?? call.Track;
+                    var fetchedFrom = leaving.OtherFromTrack ?? leaving.From.Track;
+                    if (!leftOn.Equals(call.Track) || !fetchedFrom.Equals(call.Track)) return own;
 
                     return leaving.From.Arrival > own.To ? (own.From, leaving.From.Arrival) : own;
                 }

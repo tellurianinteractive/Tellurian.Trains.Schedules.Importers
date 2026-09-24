@@ -12,19 +12,25 @@
         margin: 0 0 0.4em;
     }
 
-    /* Marks on the left, wordings on the right — see the component for why they are two lists and not
-       one. They start at the same line rather than being stretched to a common height: the two are
-       read as two lists, not as a table with rows across it. */
+    /* The two lists one under the other, each the full width — see the component for why they are two
+       lists and not one. Side by side they were half the height and unreadable with it: a list's term
+       column is as wide as its widest term, and "och lokala destinationer" is wide, so the meaning
+       beside it had about sixteen characters to wrap in and every wording on the right ran to three or
+       four ragged lines against one line on the left. Stacked, each list still sets its own term column
+       — the marks stay hard against their meanings — and every meaning gets the whole page width, which
+       across the five languages takes all but two of them down to a single line. It costs 7 px against
+       the side-by-side arrangement, which the page has to spare now that the shunting yards table can
+       be placed in the text instead. */
     .entries {
         display: flex;
-        gap: 1.4em;
-        align-items: flex-start;
+        flex-direction: column;
+        /* Wider than the 0.2em between rows, so the marks and the wordings read as two lists. */
+        gap: 0.5em;
     }
 
     /* Term and meaning in two columns, the term column exactly as wide as its widest term, so the
        meanings line up down the list and a meaning that wraps stays clear of the term beside it. */
     dl {
-        flex: 1;
         display: grid;
         grid-template-columns: max-content 1fr;
         column-gap: 0.5em;

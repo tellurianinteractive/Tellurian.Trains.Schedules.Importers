@@ -35,7 +35,7 @@ public static class SessionsFormatting
     extension(Sessions sessions)
     {
         /// <summary>
-        /// The plain-text form: <c>All sessions</c>, <c>1–3</c>, <c>1, 3, 5</c>, <c>Monday to Wednesday</c>.
+        /// The plain-text form: <c>All sessions</c>, <c>1–3</c>, <c>1,3,5</c>, <c>Monday to Wednesday</c>.
         /// </summary>
         /// <remarks>
         /// Used wherever markup cannot go — note bodies, validation messages, tooltips and <c>title</c>
@@ -131,7 +131,9 @@ public static class SessionsFormatting
             useDays ? (useShort ? "DailyShort" : "Daily") : (useShort ? "AllSessionsShort" : "AllSessions"));
 
         var parts = form.Runs.Select(run => useDays ? DayRunText(run, settings, useShort) : SessionRunText(run));
-        return string.Join(", ", parts);
+        // Only full day names are listed as a sentence lists them. Session numbers and short day names are
+        // written tight — 1,3,5 and Mo,We,Fr — so the value takes no more room than it must.
+        return string.Join(useDays && !useShort ? ", " : ",", parts);
     }
 
     private static string DayRunText(Run run, SessionsSettings settings, bool useShort)
@@ -140,8 +142,10 @@ public static class SessionsFormatting
         // Positions are 1-based here; DayNameAt takes the 0-based operating-week offset.
         string NameOf(int position) => DaysExtensions.DayNameAt(startDay, position - 1, useShort);
 
+        // Short names are listed without spaces (Mo,We,Fr): they are asked for where the space is tight,
+        // and the group reads as one value there. Full names keep the comma and space of a sentence.
         if (run.Length < ShortFormThreshold)
-            return string.Join(", ", Enumerable.Range(run.First, run.Length).Select(NameOf));
+            return string.Join(useShort ? "," : ", ", Enumerable.Range(run.First, run.Length).Select(NameOf));
 
         // Short day names use a hyphen (Mo-We); full names spell out the localised connector.
         return useShort
@@ -151,7 +155,7 @@ public static class SessionsFormatting
 
     private static string SessionRunText(Run run) =>
         run.Length < ShortFormThreshold
-            ? string.Join(", ", Enumerable.Range(run.First, run.Length).Select(n => n.ToString(CultureInfo.CurrentCulture)))
+            ? string.Join(",", Enumerable.Range(run.First, run.Length).Select(n => n.ToString(CultureInfo.CurrentCulture)))
             : $"{run.First}–{run.Last}";
 
     // Only ever reached in sessions mode; the day mode renders its text form encoded.
@@ -235,21 +239,23 @@ public static class SessionsFormatting
     }
 
     /// <summary>
-    /// How one position is headed: the session number as its filled circle, or the day's short name.
+    /// How one position is headed: the session number as its filled circle, or the day's name.
     /// </summary>
     /// <param name="position">A 1-based position from <see cref="PositionsOf"/>.</param>
     /// <param name="settings">Chooses sessions or days, and the weekday the period starts on.</param>
-    public static MarkupString PositionHeadingOf(int position, SessionsSettings settings)
+    /// <param name="useShortDayName">Whether a day is named by its short name, as a narrow grid column needs,
+    /// or in full, where a single day stands on its own.</param>
+    public static MarkupString PositionHeadingOf(int position, SessionsSettings settings, bool useShortDayName = true)
     {
         settings = settings.ValueOrException(nameof(settings));
         return settings.UseDaysInsteadOfSessionNumbers
-            ? new(WebUtility.HtmlEncode(PositionTextOf(position, settings)))
+            ? new(WebUtility.HtmlEncode(PositionTextOf(position, settings, useShortDayName)))
             : SessionNumberHtml(position);
     }
 
     /// <summary>
     /// How one position is headed where no markup can be drawn: the session number as a plain numeral, or
-    /// the day's short name.
+    /// the day's name.
     /// </summary>
     /// <remarks>
     /// The day form is the same text <see cref="PositionHeadingOf"/> renders, so a plain-text grid heads
@@ -260,11 +266,13 @@ public static class SessionsFormatting
     /// </remarks>
     /// <param name="position">A 1-based position from <see cref="PositionsOf"/>.</param>
     /// <param name="settings">Chooses sessions or days, and the weekday the period starts on.</param>
-    public static string PositionTextOf(int position, SessionsSettings settings)
+    /// <param name="useShortDayName">Whether a day is named by its short name, as a narrow grid column needs,
+    /// or in full, where a single day stands on its own.</param>
+    public static string PositionTextOf(int position, SessionsSettings settings, bool useShortDayName = true)
     {
         settings = settings.ValueOrException(nameof(settings));
         return settings.UseDaysInsteadOfSessionNumbers
-            ? DaysExtensions.DayNameAt(settings.SessionFirstWeekday, position - 1, useShort: true)
+            ? DaysExtensions.DayNameAt(settings.SessionFirstWeekday, position - 1, useShortDayName)
             : position.ToString(CultureInfo.CurrentCulture);
     }
 

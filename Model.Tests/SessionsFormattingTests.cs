@@ -52,7 +52,7 @@ public class SessionsFormattingTests
         // Two circles joined by a dash occupy the same width as two circles, and read worse.
         var target = Sessions.FromSessionNumbers(4, 5);
 
-        Assert.AreEqual("4, 5", target.ToText(Numbers()));
+        Assert.AreEqual("4,5", target.ToText(Numbers()));
         Assert.AreEqual(2, CircleCount(target.ToHtml(Numbers()).Value));
     });
 
@@ -61,7 +61,7 @@ public class SessionsFormattingTests
     {
         var target = Sessions.FromSessionNumbers(1, 3, 5);
 
-        Assert.AreEqual("1, 3, 5", target.ToText(Numbers()));
+        Assert.AreEqual("1,3,5", target.ToText(Numbers()));
         Assert.AreEqual(3, CircleCount(target.ToHtml(Numbers()).Value));
     });
 
@@ -69,9 +69,9 @@ public class SessionsFormattingTests
     public void RunsAndLoneSessionsMixFreely() => WithCulture("en-GB", () =>
     {
         // 1,2,3,7,8,9 abbreviates each run independently.
-        Assert.AreEqual("1–3, 7–9", Sessions.FromSessionNumbers(1, 2, 3, 7, 8, 9).ToText(Numbers()));
+        Assert.AreEqual("1–3,7–9", Sessions.FromSessionNumbers(1, 2, 3, 7, 8, 9).ToText(Numbers()));
         // 1,2,3,5 mixes an abbreviated run with a lone session.
-        Assert.AreEqual("1–3, 5", Sessions.FromSessionNumbers(1, 2, 3, 5).ToText(Numbers()));
+        Assert.AreEqual("1–3,5", Sessions.FromSessionNumbers(1, 2, 3, 5).ToText(Numbers()));
     });
 
     [TestMethod]

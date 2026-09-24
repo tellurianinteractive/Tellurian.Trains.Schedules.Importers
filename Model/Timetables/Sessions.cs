@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -125,6 +125,26 @@ public static class SessionsExtensions
         /// </summary>
         /// <param name="other">The sessions that must all be present.</param>
         internal bool Includes(Sessions other) => sessions.And(other).Flags == other.Flags;
+
+        /// <summary>
+        /// Which of <paramref name="whole"/>'s sessions or days these sessions share, as a qualifier for
+        /// something said about what runs on <paramref name="whole"/>: <c>null</c> where they share every
+        /// one of them, since the qualifier would only repeat <paramref name="whole"/>, and a value with
+        /// no sessions at all where they share none.
+        /// </summary>
+        /// <remarks>
+        /// Only the sessions and days are compared; the on-demand marker says nothing about <em>which</em>
+        /// sessions, and is left out. The days marker of <paramref name="whole"/> is kept, so a day
+        /// pattern stays one.
+        /// </remarks>
+        /// <param name="whole">The sessions the thing being qualified runs on — a train's, say.</param>
+        internal Sessions? SharedPartOf(Sessions whole)
+        {
+            const ushort sessionBits = 0b00_1111111_1111111;
+            var running = (ushort)(whole.Flags & sessionBits);
+            var shared = (ushort)(running & sessions.Flags);
+            return shared == running ? null : new Sessions { Flags = (ushort)(shared | (whole.Flags & DaysMarker)) };
+        }
 
         /// <summary>
         /// Returns a copy for display in which the session bits at or above <paramref name="maxSessions"/>
@@ -339,6 +359,27 @@ public static class SessionsExtensions
         return string.Join(",", ranges);
     }
 
+    extension(IEnumerable<Sessions?> qualifiers)
+    {
+        /// <summary>
+        /// Several qualifiers of what runs on <paramref name="whole"/>, each as <c>SharedPartOf</c> gives
+        /// one, taken together as a qualifier for something said once about all of them: <c>null</c> where
+        /// any of them is, or where between them they share every one of <paramref name="whole"/>'s
+        /// sessions or days; otherwise the sessions or days any of them shares.
+        /// </summary>
+        /// <param name="whole">The sessions the thing being qualified runs on — a train's, say.</param>
+        internal Sessions? SharedPartOf(Sessions whole)
+        {
+            var together = Sessions.FromBitPattern(0);
+            foreach (var qualifier in qualifiers)
+            {
+                if (qualifier is not { } some) return null;
+                together = together.Or(some);
+            }
+            return together.SharedPartOf(whole);
+        }
+    }
+
     extension(ushort flags)
     {
         internal ushort And(ushort other) => (ushort)(flags & other);
@@ -364,9 +405,16 @@ public static class SessionsExtensions
 
 }
 /// <summary>
-/// 
+/// How sessions and days are written wherever a value of them is shown: as session numbers or as
+/// weekday names, how many of them the operating period holds, and which weekday it starts on.
 /// </summary>
-public class SessionsSettings()
+/// <remarks>
+/// Compared by value. It is settled once per layout and then handed to everything that renders a
+/// session value, so two instances built from the same layout say exactly the same thing — and the
+/// notes carrying one (see <c>GeneratedNote.Settings</c>) are collapsed by equality, where two
+/// instances that differed only by reference would print the same instruction twice.
+/// </remarks>
+public class SessionsSettings() : IEquatable<SessionsSettings>
 {
     /// <summary>
     /// The expected max number of sessions to run at a meeting.
@@ -410,4 +458,19 @@ public class SessionsSettings()
         UseShortWeekdayNames = useShortDayNames,
         SessionFirstWeekday = sessionFirstWeekday,
     };
+
+    /// <inheritdoc/>
+    public bool Equals(SessionsSettings? other) =>
+        other is not null &&
+        other.MaxNumberOfSessions == MaxNumberOfSessions &&
+        other.UseDaysInsteadOfSessionNumbers == UseDaysInsteadOfSessionNumbers &&
+        other.UseShortWeekdayNames == UseShortWeekdayNames &&
+        other.SessionFirstWeekday == SessionFirstWeekday;
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => Equals(obj as SessionsSettings);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() =>
+        HashCode.Combine(MaxNumberOfSessions, UseDaysInsteadOfSessionNumbers, UseShortWeekdayNames, SessionFirstWeekday);
 }

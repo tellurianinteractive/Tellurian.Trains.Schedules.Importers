@@ -35,7 +35,137 @@
   `TurnAndCirculateNote` are now generated through it, so a trainset is never told to run round; the flag
   itself is kept as set, and takes effect again as soon as traction that needs the move works the part.
 
+- **A working whose traction cannot change tracks now arrives where its next train departs.** New
+  **`Schedule.AlignArrivalTracks()`** puts the arrival call of each part of a working on the track the next
+  part departs from, and the last arrival on the first part's departure track where the working ends where
+  it began. It applies only where new **`Schedule.IsWorkedWithoutRunaround`** holds — every traction unit
+  assigned to the schedule reverses as it stands (a trainset, or a locomotive on a reversible train) and at
+  least one is assigned — because such a unit *is* the train and leaves from the very track it came in on,
+  while a locomotive runs light to whatever track its next train stands on. Only arrival calls are moved,
+  and a joint where the parts do not meet at one location is passed over.
+
+  The guarded `Schedule.Append` and `Schedule.Insert` align the working they accept a part onto, so both
+  automatic building (`Plan.BuildSchedulesAutomatically`, which chains through `Append`) and building by
+  hand keep the tracks in step as the working grows. `Plan.AssignVehicle` aligns the schedule it assigns
+  to, so a working built before its traction was known is put right when the vehicle is assigned. The
+  unguarded `Schedule.Add` does not align, so an XPLN import and the clone and complement paths — which
+  reference the origin's own trains — keep the tracks they were built with. A track thereby occupied twice
+  over is left to the track-occupancy validation to report.
+
+- **A train part can put its vehicles on another track than the train's.** New
+  **`ScheduledTrainPart.FromTrack`** and **`ScheduledTrainPart.ToTrack`** name the track the part's vehicles
+  are fetched from before it departs and put on after it arrives, where that is not the track the train
+  uses. **`OtherFromTrack`** and **`OtherToTrack`** read them, counting a track only where it is another
+  track of the location the part starts or ends at — so one left behind by a call moved elsewhere says
+  nothing. `Schedule.EditPart` forgets a track on every part whose end it moves to another station.
+
+  They generate the new **`FromTrackNote`** (departure) and **`ToTrackNote`** (arrival), both for the
+  driver and the dispatcher and routed through `StationCall.VehicleNotes` like the rest of the vehicle
+  family. Each names when the move is made and what kind of vehicle is moved, the kind written as the
+  current language writes it inside a sentence (new `ClassNames.InSentenceFor`): en *"Before departure,
+  fetch {0} {1} from track {2}."* / *"After arrival, shunt {0} {1} to track {2}."*, sv *"Innan avgång
+  hämta vagnsätt … från spår …"* / *"Efter ankomst växla in vagnsätt … till spår …"*, de *"Vor Abfahrt …
+  von Gleis … holen."* / *"Nach Ankunft … auf Gleis … rangieren."*, da *"Før afgang, hent …"* / *"Efter
+  ankomst, rangér …"*, nb *"Før avgang, hent …"* / *"Etter ankomst, skift …"*. One note per vehicle of
+  the part's **own** schedule, not per vehicle working the part, since a loco and a wagonset over the
+  same calls would otherwise both be sent. A track note takes the place of the use, couple and
+  from-parking notes at the departure and of the uncouple and to-parking notes at the arrival; turning
+  and circulating notes are still given.
+
+  A wagonset's track notes are for the dispatcher only (`IsDriverNote` false): the driver duty booklet's
+  wagonset block already gives each wagonset's tracks. The loco driver instead gets one of the new
+  **`ShuntWagonsToDepartureTrackNote`** / **`ShuntWagonsToArrivalTrackNote`** (abstract base
+  **`ShuntWagonsNote`**, driver only), naming neither wagonset nor track: en *"Shunt wagons to departure
+  track before departure."* / *"Shunt wagons to their arrival track after arrival."*, sv *"Växla vagnar till
+  avgångsspåret före avgång."* / *"… till deras ankomstspår efter ankomst."*, de *"Wagen vor Abfahrt zum
+  Abfahrtsgleis rangieren."* / *"Wagen nach Ankunft zu ihrem Ankunftsgleis rangieren."*, da *"Rangér vogne
+  …"*, nb *"Skift vogner …"*. One per part for all the wagonsets of its schedule, and `VehicleNotes` says
+  each kind once for all the schedules shunting wagons at the call. Its `Sessions` are those any of the
+  wagonsets is shunted on, null where together that is every session the train runs — new internal
+  `IEnumerable<Sessions?>.SharedPartOf(whole)` combines the per-vehicle qualifiers.
+
+  Each note compares the vehicle's assignment to the schedule with the sessions the train runs. Where the
+  vehicle works the train on only some of them, the note's `Sessions` holds those and the text is led by
+  them — *"1,3,5: Before departure, fetch …"*, as session circles in the markup or as day names on a
+  layout counting in
+  days — through the new `NoteResources.OnSessions` (`"{0}: {1}"`). Where it works every session the train
+  runs, `Sessions` is null and nothing is added; where it works none of them, there is no note for that
+  vehicle. The sessions are written with the plan's own `GeneralSettings.SessionSettings()`. New internal
+  `Sessions.SharedPartOf(whole)` does the comparison, ignoring the on-demand marker.
+
+  `StationCall.TrackOccupancy` extends a call's occupancy by the unit's stay only where the unit is left on
+  the call's track and fetched from it again, so a unit put on or fetched from another track no longer
+  holds this one. New **`DeletionRules.MayDelete(StationTrack)`** / **`TryDelete(StationTrack)`** refuse a
+  track any train calls at or any part names; `TryDelete` also clears a part still holding the deleted track
+  where it no longer counted. `ScheduleDbContext` maps both tracks as optional references (shadow keys
+  `FromTrackId`, `ToTrackId`).
+
+- **A note now says which half of its call it belongs to.** New **`CallNoteTarget`** (`Arrival`,
+  `Departure`) and **`ManualNoteRules`** say what a call offers: `StationCall.ManualNoteTargets` is both
+  halves where the train arrives and departs, one where it does only one of them, and none at a
+  pass-through, where the train stands for neither. `StationCall.SetManualNote` takes the half to write
+  for, falls back to `StationCall.DefaultManualNoteTarget` (the departure wherever there is a choice) and
+  writes nothing where the call offers no half at all. Clearing a note still works everywhere, so one
+  left behind by a call that has since become a pass-through can be taken away.
+
+  A note naming neither half was printed nowhere the arrival and the departure are told apart — the
+  station dispatch lists and the driver duty booklets — which is what every note written before this,
+  and every call remark the XPLN import carries over, looked like.
+  **`Plan.ApplyManualNoteTargetRules`** gives such a note the half its call implies. It runs when a plan
+  is read and from `Plan.Reconcile`, so an older plan and a fresh import are both put right on the way
+  in. A note at a pass-through is left as it is: the single row a pass-through prints as shows the notes
+  it carries whole.
+
+- **A plan records who brings its rolling stock.** New **`Plan.Participants`**, a catalogue of
+  **`Participant`** (id and name), and **`Plan.VehicleContributions`**: per rolling stock item a
+  **`VehicleContribution`** tied to its vehicle by `ScheduledObjectId`, with a note and an ordered list of
+  **`VehicleContributor`** — the first the primary one, who brings the unit and sets it up, every later one
+  bringing a spare. A contributor names its participant by `ParticipantId`, and carries a note and a
+  `DccAddress`: required for every contributor of a traction unit, spares included, where
+  **`DccAddresses.ToBeProvided`** (0) says the owner is still to provide it, and absent for a wagonset.
+  Both collections are written with the plan and read back empty from a plan saved before they existed.
+
+  **`VehicleOwnershipExtensions`** holds the operations: `ScheduledObject.IsRollingStock` (locomotive,
+  trainset or wagonset), `NeedsDccAddress` and `AcceptsDccAddress`; `Plan.FindOrAddParticipant`,
+  `RenameParticipant` (refusing a blank name or another participant's) and `ParticipantsMatching`, which
+  matches the start of a name or of any later word in it, whole-name matches first; `Plan.AddContributor`
+  (refusing an address the vehicle does not accept), `MakePrimary`, `SetDccAddress`,
+  `SetContributionNote` and `RollingStockBroughtBy`. A contribution left with no contributor and no note is
+  removed. **`ScheduledObject.Start(useDays, maxSessions)`** gives a **`VehicleStart`**: the first session or
+  day the vehicle is in operation and the first train part it works on it, whose start is where the vehicle
+  is to stand, and whether it works on every session or day of the operating period. `DeletionRules` gains `MayDelete`/`TryDelete` for a `Participant` (refused while they bring
+  rolling stock) and a `VehicleContributor` (the first spare taking a removed primary's place). In
+  `ScheduleDbContext` both collections are JSON columns on the plan.
+
+- **Automatic schedule building offers the work to the schedules already there before it starts new
+  ones.** `Plan.BuildSchedulesAutomatically` now gives the unassigned trains to the plan's own schedules
+  first: each working is chained on with the unassigned trains of the category it currently works, and a
+  schedule with no parts is seeded as a new one would be. A vehicle that is already turning therefore takes
+  on more work before another is put in service, and only the trains that fit no existing schedule create
+  schedules of their own. A cargo-flow schedule is left as it is, being the circulation of a consignment
+  rather than of a turning vehicle, and a category flagged `ExcludeFromAutomaticScheduling` is now skipped
+  when chaining as well as when seeding — which it could not be before, when only a seed was ever excluded.
+
+  The build reports what it did as a **`ScheduleBuildResult`**: the schedules `Created`, the existing ones
+  `Extended`, and the number of `AddedParts` worked into them.
+
+- **Session numbers and short day names are written without spaces.** `Sessions.DaysShort` and
+  `SessionsFormatting.ToText`/`ToHtml` now join a scattered value with a bare comma — *1,3,5*, *Mo,We,Fr*,
+  sv *M,O,F* — where they wrote *1, 3, 5* and *Mo, We, Fr* before, so a value takes no more room than it
+  must. `Sessions.SessionsNumbers` and the turnus cards already wrote them this way, so the renderings now
+  agree. Only day names written out in full keep the comma and space of a sentence.
+
+- **A display name can be written inside a sentence.** New **`ClassNames.InSentence(name)`** and
+  **`ClassNames.InSentenceFor(value)`** give the localised name with a lower-case first letter, except in
+  German, which capitalises its nouns wherever they stand. The track notes name the kind of vehicle
+  through it. The Swedish name for a wagonset is now *Vagnsätt*, the word the application itself uses.
+
 ### Breaking Changes
+
+- **`StationCall.SetManualNote` takes the half of the call the note is written for.** The signature is
+  now `SetManualNote(string? text, CallNoteTarget? target = null, string? languageCode = null)`, so a
+  caller that passed the language positionally must name it: `SetManualNote(text, languageCode: "sv")`.
+  A null target leaves the choice to the call, which is what the previous signature always did.
 
 - **`TrainCategory.IsPassenger` and `TrainCategory.IsFreight` are no longer settable.** Both are now
   read-only extension properties over `TrainCategory.Content`; set the content instead
@@ -54,6 +184,10 @@
   `StationTimings.LocoRunaroundRealMinutes`). Nothing but the name changed. A plan written by an earlier
   version stores the flag under its old name and reads back without it; the XPLN importer does not set
   it, so only a plan that had it set by hand is affected.
+
+- **`Plan.BuildSchedulesAutomatically` returns a `ScheduleBuildResult`** rather than
+  `IReadOnlyList<Schedule>`, now that a build can extend schedules as well as create them. A caller that
+  wants what it got before reads `.Created`.
 
 ### Dependencies
 

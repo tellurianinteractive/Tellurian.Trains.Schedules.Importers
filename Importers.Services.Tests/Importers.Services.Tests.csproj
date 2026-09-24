@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/4.0.2">
+<Project Sdk="MSTest.Sdk">
 
 	<PropertyGroup>
 		<AssemblyName>Tellurian.Trains.Schedules.Importers.Services.Tests</AssemblyName>
@@ -8,10 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.10" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -24,41 +24,4 @@
 	<ItemGroup>
 		<None Include="Test data\**\*.ods" CopyToOutputDirectory="Always" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.CrashDump" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.HangDump" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.HotReload" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.Retry" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="MSTest.TestAdapter" Version="4.3.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="MSTest.TestFramework" Version="4.3.3" />
-	</ItemGroup>
-
 </Project>

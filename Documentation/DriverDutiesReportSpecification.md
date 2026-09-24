@@ -592,9 +592,9 @@ Duty in SB train 1234                                    ← heading
 Passenger train.  Starts at: Munkeröd 11:20, ends at Stilkøbing 14:20
 Max speed: 100 km/h. Max axles: 24. Max length: 2.5 m    ← only the limits that are set
 ──────────────────────────────────────────────────────────────────────
-Traction units          │ Runs │ Traction unit │ From │ Dep │ To │ Arr │
+Traction units          │ Runs │ Turnus │ From │ Track │ Dep │ To │ Track │ Arr │
 ──────────────────────────────────────────────────────────────────────
-Scheduled wagonsets     │ Runs │ Wagonset      │ From │ Dep │ To │ Arr │
+Scheduled wagonsets     │ Runs │ Turnus │ From │ Track │ Dep │ To │ Track │ Arr │
 ──────────────────────────────────────────────────────────────────────
 Cargo wagons with waybills │ Position │ Runs │ From │ Classes │ To │ Max │
 ──────────────────────────────────────────────────────────────────────
@@ -728,9 +728,15 @@ the moment the driver stands down after the train has arrived — matching `Defa
 
 #### 5.3.3 Traction units — implemented
 
-| Sessions | Traction unit | From | Dep | To | Arr |
-|---|---|---|---|---|---|
-| All | SB MX 1 | Munkeröd | 12:20 | Stilkøbing | 14:00 |
+| Sessions | Turnus | From | Track | Dep | To | Track | Arr |
+|---|---|---|---|---|---|---|---|
+| All | SB MX 1 | Munkeröd | 2 | 12:20 | Stilkøbing | 1 | 14:00 |
+
+The vehicle column is headed **Turnus** in both vehicle blocks (it was *Traction unit* and *Wagonset*),
+after the card the identity is written on. The two **Track** columns give the vehicle's own tracks: the
+track its schedule fetches it from or puts it on (`ScheduledTrainPart.OtherFromTrack`/`OtherToTrack`,
+read from the vehicle's own schedule's part), or else the train's track at that call — the same rule
+track occupancy uses.
 
 Already built in `TrainPartTractionView.razor` against `TrainPartTractionData`. Outstanding: the
 `DriverDutyPart.TractionData` mapping still throws `NotImplementedException`, and the Sessions cell
@@ -756,22 +762,28 @@ So the cell must be `unit.TractionUnit.Designation`, which means `TrainPartTract
 
 #### 5.3.4 Scheduled wagonsets
 
-| Sessions | Wagonset | From | Dep | To | Arr |
-|---|---|---|---|---|---|
-| 1,3,5 | Hbis 1 | Munkeröd | 12:20 | Stilkøbing | 14:00 |
-| 2,4,6 | Zacs 1 | Munkeröd | 12:20 | Stilkøbing | 14:00 |
+| Sessions | Turnus | From | Track | Dep | To | Track | Arr |
+|---|---|---|---|---|---|---|---|
+| 1,3,5 | Hbis 1 | Munkeröd | 2 | 12:20 | Stilkøbing | 2 | 14:00 |
+| 2,4,6 | Zacs 1 | Munkeröd | 2 | 12:20 | Stilkøbing | 3 | 14:00 |
 
-Structurally identical to traction units — same six columns, same shape — differing only in which
+Structurally identical to traction units — same eight columns, same shape — differing only in which
 scheduled objects it lists (`IsWagonSet` rather than `IsTraction`). `TrainPartWagonsetData` exists
 as a stub; `TrainPartWagonsetView.razor` is empty.
 
-The Wagonset column follows the same rule as the traction one: **`ScheduledObject.Designation`**,
+The Turnus column follows the same rule as the traction one: **`ScheduledObject.Designation`**,
 because wagonsets carry cards too and the driver has to pick the right rake out of several standing
 in the yard.
 
 The example shows the case this block exists for: **the same train carries different wagonsets on
 different sessions**. One booklet covers all sessions (D1), so both rows must appear, distinguished
 by the Sessions column.
+
+Because the two Track columns name the tracks, the timetable does not name them again for wagonsets
+(D126). Where a wagonset is fetched from or put on another track, the timetable's note is only
+*Shunt wagons to departure track before departure.* or *Shunt wagons to their arrival track after
+arrival.* (`ShuntWagonsToDepartureTrackNote` / `ShuntWagonsToArrivalTrackNote`), led by the sessions
+when the wagons are shunted on only some of those the train runs.
 
 #### 5.3.5 Cargo wagons with waybills
 
@@ -1368,6 +1380,34 @@ page and no fixed last page, so its only padding rule is the multiple-of-4 one.
 
 Distribution is by hand, before the first session, in whatever quantity the organiser wants — the
 one respect in which it differs from D3's "one of each".
+
+#### 5.5.1 Placing the shunting yards table in the text
+
+The layout page at the back (D107) carries four things: a section title, the topology diagram, the
+shunting yards table and the cargo key. Three of them are of fixed height; the table is not — it
+grows a row per shunting yard, and each row grows with the locations worked from that yard. On a
+layout with more than a handful of yards the page runs past its foot, and because a page body is
+`overflow: hidden` what does not fit is dropped without a word. What is dropped is whatever is last,
+which is the cargo key — the one thing on the page that the station staff, who hold no other
+booklet, cannot get anywhere else.
+
+So the table may be **placed in the authored instructions instead**, by writing an empty element on a
+line of its own:
+
+```markdown
+## Where the wagons go
+
+<ShuntingYards/>
+```
+
+Written there, the table prints there and the layout page does not carry it. Written nowhere, the
+layout page carries it as before, so nothing changes for a plan that never uses the tag.
+
+The tag is taken out of the markdown **before** it is rendered, not picked out of the HTML
+afterwards: each stretch either side is then a whole markdown document in its own right, and the
+table can never end up inside a paragraph the author started on the line above. The pagination
+charges the tag the estimated height of the table rather than the one line it occupies, from the
+yards themselves — a yard working half the layout wraps its locations onto a second row.
 
 ---
 
@@ -2486,6 +2526,10 @@ a dash (D15).*
 | D123 | On a **shunting task whose flow is bound for the worked station itself**, the cargo block's *From* column leaves the station out, and states *anywhere* when the flow names no origin. | A shunting task's from-station and to-station are the same one call, so the union rule printed the station on both sides of the row: *From Munkeröd … To Munkeröd*. That is not merely redundant — it is wrong. Wagons whose destination is this station arrived here on some earlier train, and the task knows nothing of where they started, so they may have come from anywhere. Naming the origins when the flow states them matches what `ShuntArrivingWagonsNote` already says in words; saying something rather than leaving the cell blank follows position 0's *"Any"*, because a blank reads as unknown. | 2026-08-18 |
 | D124 | *(refines D123)* The *anywhere* cell is a **globe icon**, not the word, with the wording kept as its `title` and `aria-label`. *From* therefore returns markup, and its place names are HTML-encoded. | *From* is the narrowest column of the block and sizes to the place names in it, so a phrase three words long wrapped the row onto a second line — which the page budget then has to pay for, in the one block whose height it counts in rows. The same reason put the load limits behind marks (D118's column, `MaxLoadView`'s ●/■), and the same table already carries those, so the reader meets no new convention. Nothing is lost in the swap: the word is still there on hover and to a screen reader, and a globe needs no translating. | 2026-08-18 |
 | D122 | *(revises D120)* A **cargo flow's generated notes name the places only** — *Fetch wagons to Central station and local destinations and beyond from the cargo customers*, not *… and beyond Axles × 16 from …*. `CargoFlowTrainPart.ToText` / `ToHtml` therefore compose from `Destination.PlaceText` / `PlaceHtml`, and the separate `PlacesHtml` D120 added is gone. | D120 assumed a note must keep saying the limit because it has no column to put it in. It does not: the limit is a planning figure, and the note is read on the spot by someone already at the wagons. Dropped into the middle of a sentence it read as part of the destination — *and beyond Axles × 16 from the cargo customers* — which is the misreading D118 moved it out of the *To* cell to prevent, and prose is where that misreading is hardest to see coming. The limit still prints, in the cargo block's own column. `Destination` keeps both pairs: the composed one is what its `ToString()` gives. | 2026-08-18 |
+| D125 | Each block of a train part carries a **colour bar down its left edge**: traction red, scheduled wagonsets green, cargo flow wagons blue, the timetable grey. The bar hangs in the page padding and spans the heading and the table, not the rule below. | The blocks are easier to tell apart while leafing, and the timetable's grey bar marks where a part ends before the next one's heading. Decoration only — every block keeps its heading, so greyscale loses nothing (D21). Hanging in the padding leaves the tables their width, so DutyPagination's estimates stand; drawn as a border, so it prints without background graphics. | 2026-09-13 |
+| D126 | A wagonset fetched from or put on another track gets, in the timetable, a note naming **neither the wagonset nor the track** — *Shunt wagons to departure track before departure.* / *Shunt wagons to their arrival track after arrival.* — said **once** for all the wagonsets shunted at the call, led by the sessions when that is not every session the train runs. Traction units keep *Before departure, fetch … from track …* / *After arrival, shunt … to track …*, and the dispatch list keeps naming each wagonset and its track. | The wagonset block's Track columns already say which wagonset stands where; repeating it per wagonset in the note column made the notes long exactly where D29 moved facts out of them. The dispatcher has no wagonset block, so their note keeps the detail. Naming nothing, the note would print once per schedule, so the notes of every schedule at a call are merged, over the sessions any of them shunts on. | 2026-09-15 |
+| D127 | *(refines D107)* The shunting yards table may be **placed in the authored instructions** with a `<ShuntingYards/>` tag on a line of its own, and the layout page then omits it. Without a tag, nothing changes. | The layout page's other three parts are of fixed height and the table is not: it grows with the layout, and past a handful of yards it pushed the cargo key off a page body that hides what overflows. The key is what the station staff have instead of a duty booklet, so it is the last thing that may be dropped. Which of the two moves is a judgement about the particular meeting's text, so it is the author's, not the report's. | 2026-09-17 |
+| D128 | The cargo key's two lists are set **one under the other**, not side by side. | Side by side halved the height and made the wordings unreadable: a list's term column is as wide as its widest term, and *och lokala destinationer* is wide, so each meaning beside it had about sixteen characters to wrap in and ran to three or four ragged lines. Stacked, each list still sets its own term column — the marks keep a narrow one — and every meaning gets the page width, which takes all but two of them across the five languages down to a single line, for 7 px. | 2026-09-17 |
 
 ---
 

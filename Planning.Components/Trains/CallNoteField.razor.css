@@ -28,6 +28,21 @@
         background: #fff;
     }
 
+    /* The half of the call the note is shown at. Narrow enough to leave the note itself the room, and
+       the same width whether it is the selector or the dash that stands in for it where a call can
+       carry no note, so the notes of neighbouring rows line up. */
+    .target {
+        flex: none;
+        box-sizing: border-box;
+        width: 3.4rem;
+        font-size: 0.85rem;
+    }
+
+    .target.none {
+        padding-left: 0.3rem;
+        color: #889;
+    }
+
     .rendered {
         cursor: text;
         /* A long note stays on one line at rest so it cannot make its row taller than its neighbours;

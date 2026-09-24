@@ -43,7 +43,10 @@
                     </div>
                     <div class="field">
                         <label>@Translator("Number")</label>
-                        <input type="number" class="num" min="1" value="@_newNumber" @onchange="e => _newNumber = ParseInt(e, _newNumber)" />
+                        @* Entered on input, not on change, so the Assign button and the identity-in-use check
+                           follow what is typed instead of waiting for the field to lose focus. *@
+                        <input type="number" class="num" min="1" value="@_newNumber"
+                               @oninput="e => { _newNumber = ParseOptionalInt(e); _error = null; }" />
                     </div>
                     <div class="field">
                         <label>@Translator("Class")</label>
@@ -110,7 +113,9 @@
     private int? _existingId;
     private string _newType = ScheduledObjectType.Locomotive.ToString();
     private string _newClass = "";
-    private int _newNumber;
+    // Null while the field is empty or holds something that is not a number, which keeps the Assign
+    // button disabled and lets the field show what was typed rather than an old value.
+    private int? _newNumber;
     private int? _newCompanyId;
     private string? _error;
 
@@ -132,14 +137,14 @@
         (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
 
     private bool CanAssign =>
-        _creatingNew ? _newNumber >= 1 && ClaimedBy is null : _existingId is not null;
+        _creatingNew ? _newNumber is > 0 && ClaimedBy is null : _existingId is not null;
 
     // The vehicle already carrying the entered operator and number, or null when the identity is free. A
     // vehicle created here is given no external id, so operator and number identify it; and it takes every
     // session it is free for, so it is measured against all of them (see Plan.VehicleClaiming, rule P5).
     private ScheduledObject? ClaimedBy =>
-        !_creatingNew || _newNumber < 1 ? null
-            : Plan?.VehicleClaiming(VehicleIdentity.Of(_newCompanyId, _newNumber), Sessions.All);
+        !_creatingNew || _newNumber is not > 0 ? null
+            : Plan?.VehicleClaiming(VehicleIdentity.Of(_newCompanyId, _newNumber.Value), Sessions.All);
 
     private string IdentityInUseMessage(ScheduledObject other) =>
         string.Format(CultureInfo.CurrentCulture, Translator("VehicleIdentityAlreadyUsed"), other.IdentityText, other.Designation);
@@ -161,9 +166,10 @@
         ScheduledObject? vehicle;
         if (_creatingNew)
         {
+            if (_newNumber is not { } number) return;
             var type = Enum.TryParse<ScheduledObjectType>(_newType, out var t) ? t : ScheduledObjectType.Locomotive;
             var company = _newCompanyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
-            vehicle = plan.CreateVehicle(type, _newClass, _newNumber, company);
+            vehicle = plan.CreateVehicle(type, _newClass, number, company);
         }
         else
         {
@@ -193,6 +199,7 @@
     private SessionsSettings SessionSettings =>
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
-    private static int ParseInt(ChangeEventArgs e, int fallback) =>
-        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : fallback;
+    // Null for an empty or unparseable field, so a half-typed value never counts as a whole one.
+    private static int? ParseOptionalInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;
 }

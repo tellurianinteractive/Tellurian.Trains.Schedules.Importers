@@ -38,12 +38,7 @@ public static class DriverDutyPartExtensions
             Vehicles =
             [
                 .. dutyPart.Vehicles.Where(vehicle => vehicle.IsTraction)
-                    .Select(unit => new TrainPartVehicle
-                    {
-                        Vehicle = unit,
-                        TrainPart = dutyPart.TrainPart,
-                        Sessions = unit.SessionsOn(dutyPart.TrainPart),
-                    })
+                    .Select(dutyPart.VehicleRow)
                     .OrderBy(v => v.Sessions.FirstNumber)
             ],
             SessionsSettings = dutyPart.SessionsSettings,
@@ -59,12 +54,7 @@ public static class DriverDutyPartExtensions
             Vehicles =
             [
                 .. dutyPart.Vehicles.Where(vehicle => vehicle.IsWagonSet)
-                    .Select(set => new TrainPartVehicle
-                    {
-                        Vehicle = set,
-                        TrainPart = dutyPart.TrainPart,
-                        Sessions = set.SessionsOn(dutyPart.TrainPart),
-                    })
+                    .Select(dutyPart.VehicleRow)
                     .OrderBy(v => v.Sessions.FirstNumber)
             ],
             SessionsSettings = dutyPart.SessionsSettings,
@@ -126,6 +116,17 @@ public static class DriverDutyPartExtensions
                 ? plan.ScheduledObjectsFor(dutyPart.TrainPart)
                 : dutyPart.TrainPart.ScheduledObjects;
 
+        // One row of a vehicle block: the vehicle, the sessions it works this part on, and the tracks it
+        // is fetched from and left on.
+        private TrainPartVehicle VehicleRow(ScheduledObject vehicle) => new()
+        {
+            Vehicle = vehicle,
+            TrainPart = dutyPart.TrainPart,
+            Sessions = vehicle.SessionsOn(dutyPart.TrainPart),
+            DepartureTrack = vehicle.DepartureTrackOn(dutyPart.TrainPart),
+            ArrivalTrack = vehicle.ArrivalTrackOn(dutyPart.TrainPart),
+        };
+
         // A cargo flow belongs on this part's page when it is carried over any of the part's span. On a
         // shunting task there is no span to overlap — the part and every flow on it stand at the one call
         // — so the flows of the task are simply all of them, which is what the page is for.
@@ -152,5 +153,31 @@ public static class DriverDutyPartExtensions
                 ? trainPart.Train.Sessions
                 : assigned.Aggregate((left, right) => left.Or(right));
         }
+
+        /// <summary>
+        /// The track this vehicle stands on before the given part departs: the other track its own
+        /// schedule fetches it from, or else the track the train departs from.
+        /// </summary>
+        /// <remarks>
+        /// The other track is read from the vehicle's own schedule's part, not from the part the duty
+        /// holds: parts are equal over the same two calls, so the duty's part may belong to another
+        /// schedule — or to none — and would then send this vehicle to a track named for someone else's.
+        /// </remarks>
+        internal StationTrack DepartureTrackOn(ScheduledTrainPart trainPart) =>
+            vehicle.OwnPartsEqualTo(trainPart).Select(part => part.OtherFromTrack).FirstOrDefault(track => track is not null)
+            ?? trainPart.From.Track;
+
+        /// <summary>
+        /// The track this vehicle is left on after the given part arrives: the other track its own
+        /// schedule puts it on, or else the track the train arrives at. See <c>DepartureTrackOn</c>.
+        /// </summary>
+        internal StationTrack ArrivalTrackOn(ScheduledTrainPart trainPart) =>
+            vehicle.OwnPartsEqualTo(trainPart).Select(part => part.OtherToTrack).FirstOrDefault(track => track is not null)
+            ?? trainPart.To.Track;
+
+        private IEnumerable<ScheduledTrainPart> OwnPartsEqualTo(ScheduledTrainPart trainPart) =>
+            vehicle.ScheduleAssignments
+                .SelectMany(assignment => assignment.Schedule.Parts)
+                .Where(part => part.Equals(trainPart));
     }
 }

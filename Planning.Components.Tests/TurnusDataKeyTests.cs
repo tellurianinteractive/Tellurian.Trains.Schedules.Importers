@@ -1,3 +1,6 @@
+using System.Globalization;
+using Tellurian.Trains.Schedules.Planning.App.Translations;
+using Tellurian.Trains.Schedules.Planning.App.Translations.Resources;
 using Tellurian.Trains.Schedules.Planning.Components.Reporting;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
@@ -32,5 +35,23 @@ public class TurnusDataKeyTests
 
         Assert.AreEqual(weekdays.Key, weekend.Key,
             "Both variants are the same turnus (same identity), so they are flagged as turning over.");
+    }
+
+    /// <summary>
+    /// Regression: <c>Split('-', ',', options)</c> bound to <c>Split(char, int count, options)</c>, so a
+    /// non-consecutive day set was never split on the comma and printed as raw resource keys.
+    /// </summary>
+    [TestMethod]
+    [DataRow(Days.Monday | Days.Wednesday | Days.Friday, "Mo,We,Fr")]
+    [DataRow(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday, "Mo-Fr")]
+    [DataRow(Days.Saturday, "Sa")]
+    public void OperatingPeriodTranslatesEveryDayName(Days days, string expected)
+    {
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-GB");
+        var localizer = new ResxStringLocalizer<Labels>();
+        Translator translator = key => localizer[key ?? string.Empty].Value;
+        var card = new TurnusData { Sessions = Sessions.FromDays(days), UseDays = true, MaxSessions = 7 };
+
+        Assert.AreEqual(expected, card.OperatingPeriod(translator));
     }
 }

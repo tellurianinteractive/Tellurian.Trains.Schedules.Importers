@@ -227,7 +227,7 @@ public static class ScheduleEditingExtensions
             foreach (var vehicle in origin.Vehicles.ToList())
             {
                 var assignment = vehicle.ScheduleAssignments.FirstOrDefault(a => origin.Equals(a.Schedule));
-                plan.AssignVehicle(target, vehicle, sessions ?? assignment?.Sessions);
+                plan.CreateAssignment(target, vehicle, sessions ?? assignment?.Sessions);
             }
         }
 
@@ -340,11 +340,28 @@ public static class ScheduleEditingExtensions
         /// sessions (all sessions by default), creating the <see cref="ScheduleAssignment"/>. A vehicle
         /// already assigned to the schedule is returned unchanged rather than duplicated.
         /// </summary>
+        /// <remarks>
+        /// The assignment is what says whether the vehicle can leave a train on another track than it
+        /// brought it in on, so the schedule's arrival tracks are aligned with it (see
+        /// <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracks"/>): a working built before its
+        /// trainset was known is put right as soon as the trainset is put on it.
+        /// </remarks>
         /// <param name="schedule">The schedule to assign the vehicle to.</param>
         /// <param name="vehicle">The vehicle to assign.</param>
         /// <param name="sessions">The sessions the assignment applies to; defaults to all sessions.</param>
         /// <returns>The created (or already-present) assignment.</returns>
         public Maybe<ScheduleAssignment> AssignVehicle(Schedule schedule, ScheduledObject vehicle, Sessions? sessions = null)
+        {
+            var assignment = plan.CreateAssignment(schedule, vehicle, sessions);
+            if (assignment.HasValue) schedule.AlignArrivalTracks();
+            return assignment;
+        }
+
+        // Creates the assignment and nothing more. The copying paths below go through this rather than
+        // through AssignVehicle: a clone and a complement reference the origin's own trains, and a
+        // complement only some of them, so aligning their tracks would move the arrivals of the origin's
+        // trains to suit a shorter chain than the one the planner built.
+        private Maybe<ScheduleAssignment> CreateAssignment(Schedule schedule, ScheduledObject vehicle, Sessions? sessions)
         {
             plan = plan.ValueOrException(nameof(plan));
             schedule = schedule.ValueOrException(nameof(schedule));
@@ -419,7 +436,10 @@ public static class ScheduleEditingExtensions
         /// location and only where the parts already met: a working that is broken at that joint (as an
         /// import may be) keeps its gap rather than being silently rewritten. Anything the edit leaves
         /// inconsistent — a gap the neighbour could not follow, or a joint the vehicle cannot make in time
-        /// — is applied as asked and reported by the schedule validations (S1, S2).
+        /// — is applied as asked and reported by the schedule validations (S1, S2). A track the vehicles
+        /// are fetched from or put on (<see cref="ScheduledTrainPart.FromTrack"/>,
+        /// <see cref="ScheduledTrainPart.ToTrack"/>) is a track of the station it was chosen at, so it is
+        /// forgotten on every part whose end the edit moves to another station.
         /// </remarks>
         /// <param name="part">The part to change; it must be in this schedule.</param>
         /// <param name="from">The call the part is to depart from.</param>
@@ -432,8 +452,17 @@ public static class ScheduleEditingExtensions
             if (planned.IsNone) return planned;
             var edit = planned.Value;
             edit.Part.SetSpan(edit.From, edit.To);
-            if (edit is { Previous: { } previous, PreviousTo: { } previousTo }) previous.SetSpan(previous.From, previousTo);
-            if (edit is { Next: { } next, NextFrom: { } nextFrom }) next.SetSpan(nextFrom, next.To);
+            edit.Part.ForgetOtherTracksElsewhere();
+            if (edit is { Previous: { } previous, PreviousTo: { } previousTo })
+            {
+                previous.SetSpan(previous.From, previousTo);
+                previous.ForgetOtherTracksElsewhere();
+            }
+            if (edit is { Next: { } next, NextFrom: { } nextFrom })
+            {
+                next.SetSpan(nextFrom, next.To);
+                next.ForgetOtherTracksElsewhere();
+            }
             return planned;
         }
 

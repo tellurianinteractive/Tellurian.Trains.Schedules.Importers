@@ -1,0 +1,160 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@* One printed page of the Vehicle contributors report: the name of the station or participant as its heading,
+   and the rolling stock below it.
+
+   The heading repeats on every page of a group and is what identifies the sheet: the pile is torn apart and
+   handed to the station owners and the participants, so a page has to say whose it is on its own. The report
+   and the plan it comes from are named beside it, small, with the day it was printed — owners change their
+   minds, and a sheet has to tell which version it is. *@
+
+<div class="contributors-page @KindClass">
+    <header class="heading">
+        <h1>
+            @Heading
+            @if (Page.IsContinued)
+            {
+                <span class="continued">(@Translator("Continued"))</span>
+            }
+        </h1>
+        <div class="context">
+            <span>@Translator("VehicleContributors") · @Translator(GroupingKey)</span>
+            <span>@ContextLine</span>
+        </div>
+    </header>
+
+    @* No column is given a width: each but the notes is as wide as its widest text, heading included, and the
+       notes take what the others leave (see the stylesheet). *@
+    <table class="contributors">
+        <thead>
+            <tr>
+                @foreach (var column in Columns)
+                {
+                    <th class="@ClassOf(column)">@Cells.HeadingOf(column)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var line in Page.Lines)
+            {
+                <tr class="@RowClass(line)">
+                    @foreach (var column in Columns)
+                    {
+                        if (column.IsStart && line.Start is null)
+                        {
+                            @* A vehicle given no work has nowhere to be set up; saying so once reads better than
+                               four empty cells, which look like something left out. *@
+                            if (column == FirstStartColumn)
+                            {
+                                <td class="not-in-operation" colspan="@StartColumnCount">@Cells.NotInOperation</td>
+                            }
+                        }
+                        else if (column == VehicleContributorsColumn.FirstSession)
+                        {
+                            <td class="@ClassOf(column)">@SessionsFormatting.PositionHeadingOf(line.Start!.FirstPosition, Settings, useShortDayName: false)</td>
+                        }
+                        else if (column == VehicleContributorsColumn.Note)
+                        {
+                            <td class="@ClassOf(column)">
+                                @foreach (var note in line.Notes)
+                                {
+                                    @* One note per line, as the page-fit estimate counts them. *@
+                                    <span class="note">@note</span>
+                                }
+                            </td>
+                        }
+                        else if (column == VehicleContributorsColumn.DccAddress && line.IsDccAddressMissing)
+                        {
+                            <td class="@ClassOf(column) missing">@Cells.TextOf(line, column)</td>
+                        }
+                        else
+                        {
+                            <td class="@ClassOf(column)">@Cells.TextOf(line, column)</td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    /// <summary>The page to print.</summary>
+    [Parameter, EditorRequired] public VehicleContributorsPage Page { get; set; } = default!;
+
+    /// <summary>How the report arranges the rolling stock, named beside the heading.</summary>
+    [Parameter, EditorRequired] public VehicleContributorsGrouping Grouping { get; set; }
+
+    /// <summary>The text of each cell.</summary>
+    [Parameter, EditorRequired] public VehicleContributorCells Cells { get; set; } = default!;
+
+
+    /// <summary>
+    /// Whether the layout counts in sessions or days: the first session is printed as its circle, the first
+    /// day by its full name.
+    /// </summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+
+    /// <summary>The name of the layout the plan is for.</summary>
+    [Parameter] public string? LayoutName { get; set; }
+
+    /// <summary>The day the report was printed.</summary>
+    [Parameter] public DateOnly PrintDate { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private IReadOnlyList<VehicleContributorsColumn> Columns => Page.Group.Kind.Columns;
+
+    private VehicleContributorsColumn? FirstStartColumn => Columns.FirstOrDefault(column => column.IsStart);
+
+    private int StartColumnCount => Columns.Count(column => column.IsStart);
+
+    private string Heading => Page.Group.Kind switch
+    {
+        VehicleContributorsGroupKind.NotInOperation => Translator("NotInOperation"),
+        VehicleContributorsGroupKind.NotYetBooked => Translator("NotYetBooked"),
+        VehicleContributorsGroupKind.AllUnits => Translator("DccAddresses"),
+        _ => Page.Group.Name ?? string.Empty,
+    };
+
+    private string GroupingKey => Grouping switch
+    {
+        VehicleContributorsGrouping.OperationLocation => "ByOperationLocation",
+        VehicleContributorsGrouping.Contributor => "ByOwner",
+        _ => "ByDccAddress",
+    };
+
+    private string ContextLine
+    {
+        get
+        {
+            var printed = string.Format(Culture, Translator("PrintedAt"), PrintDate.ToString("yyyy-MM-dd", Culture));
+            return LayoutName is { Length: > 0 } name ? $"{name} · {printed}" : printed;
+        }
+    }
+
+    // The address list is looked up by its address, so that column is set apart there.
+    private string? KindClass => Page.Group.Kind == VehicleContributorsGroupKind.AllUnits ? "all-units" : null;
+
+    // Named apart from the first-session column's own class, which would otherwise centre the whole row.
+    private static string? RowClass(VehicleContributorLine line) => line.Shade switch
+    {
+        VehicleContributorShade.Spare => "spare",
+        VehicleContributorShade.FirstSession => "from-session-1",
+        VehicleContributorShade.SecondSession => "from-session-2",
+        VehicleContributorShade.ThirdSession => "from-session-3",
+        _ => null,
+    };
+
+    private static string ClassOf(VehicleContributorsColumn column) => column switch
+    {
+        VehicleContributorsColumn.DccAddress => "dcc-address",
+        VehicleContributorsColumn.FirstSession => "first-session",
+        _ => column.ToString().ToLowerInvariant(),
+    };
+}

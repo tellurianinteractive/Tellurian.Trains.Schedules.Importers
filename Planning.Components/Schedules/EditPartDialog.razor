@@ -8,7 +8,8 @@
    stops from its run — so the driver duties working it follow the change. Every stop is offered: where a
    neighbouring part meets this one and its own train calls at the new joint, the neighbour is adapted with
    it; where it cannot follow, the edit is applied all the same and what it leaves behind is shown here and
-   reported as a conflict. *@
+   reported as a conflict. It also says what is done with the vehicles at either end: the track they are
+   fetched from or put on, and what the traction does on arrival. *@
 
 <div class="edit-part-backdrop">
     <div class="edit-part-dialog">
@@ -43,6 +44,16 @@
                 }
             </select>
         </div>
+        @* Where the vehicles stand when that is not the track the train uses: offered only where the
+           station has another track to name. Each gives a note for the driver and the dispatcher. *@
+        @if (OtherTracks(FromCall).Count > 0)
+        {
+            <div class="field">
+                <label title="@Translator("PartFetchFromTrackHelp")">@Translator("PartFetchFromTrack")</label>
+                <ListBoxView Items="@(OtherTracks(FromCall).ToListItems(Translator))" Placeholder="@SameTrackText(FromCall)"
+                             Value="_fromTrack?.Id" ValueChanged="id => _fromTrack = OtherTrack(FromCall, id)" />
+            </div>
+        }
         <div class="field">
             <label>@Translator("To")</label>
             <select value="@_to" @onchange="SetTo">
@@ -52,6 +63,14 @@
                 }
             </select>
         </div>
+        @if (OtherTracks(ToCall).Count > 0)
+        {
+            <div class="field">
+                <label title="@Translator("PartPutOnTrackHelp")">@Translator("PartPutOnTrack")</label>
+                <ListBoxView Items="@(OtherTracks(ToCall).ToListItems(Translator))" Placeholder="@SameTrackText(ToCall)"
+                             Value="_toTrack?.Id" ValueChanged="id => _toTrack = OtherTrack(ToCall, id)" />
+            </div>
+        }
 
         @* What has to be done with the traction where the part ends, so the train can leave the other
            way round. Both are arrival notes for the driver and the dispatcher. *@
@@ -128,10 +147,16 @@
     private int _to;
     private bool _turnLoco;
     private bool _runaroundLoco;
+    private StationTrack? _fromTrack;
+    private StationTrack? _toTrack;
     private string? _error;
 
     // The train's calls in run order, so the index order in the lists is the order the train works them.
     private IReadOnlyList<StationCall> Calls => Part.Train.CallsInRunOrder;
+
+    // The calls currently selected as the part's start and end.
+    private StationCall FromCall => Calls[_from];
+    private StationCall ToCall => Calls[_to];
 
     // The kinds of vehicle working this part, one entry per distinct type in type order. Several vehicles
     // of different kinds may share a working — a locomotive hauling a wagonset, say — and what shortening
@@ -183,6 +208,8 @@
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
         _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
         _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
+        _fromTrack = Part.OtherFromTrack;
+        _toTrack = Part.OtherToTrack;
     }
 
     private void SetFrom(ChangeEventArgs e)
@@ -190,6 +217,7 @@
         if (int.TryParse(e.Value?.ToString(), out var i)) _from = i;
         if (_to <= _from) _to = _from + 1;
         ClearTurnWithoutTurntable();
+        ClearTracksNoLongerOther();
         _error = null;
     }
 
@@ -197,8 +225,28 @@
     {
         if (int.TryParse(e.Value?.ToString(), out var i)) _to = i;
         ClearTurnWithoutTurntable();
+        ClearTracksNoLongerOther();
         _error = null;
     }
+
+    // A track is kept only while it is still another track of the station the part now starts or ends at:
+    // moving the end to a different station takes it away, and so does moving it to a call on that very
+    // track, where the vehicles already stand where the train does.
+    private void ClearTracksNoLongerOther()
+    {
+        if (_fromTrack is not null && !OtherTracks(FromCall).Contains(_fromTrack)) _fromTrack = null;
+        if (_toTrack is not null && !OtherTracks(ToCall).Contains(_toTrack)) _toTrack = null;
+    }
+
+    // The tracks at the call's station other than the one the train uses there, in the station's order.
+    private static IReadOnlyList<StationTrack> OtherTracks(StationCall call) =>
+        [.. call.OperationLocation.TracksInDisplayOrder.Where(track => !track.Equals(call.Track))];
+
+    private static StationTrack? OtherTrack(StationCall call, int? id) =>
+        OtherTracks(call).FirstOrDefault(track => track.Id == id);
+
+    private string SameTrackText(StationCall call) =>
+        string.Format(CultureInfo.CurrentCulture, Translator("SameTrackAsTrain"), call.Track.Number);
 
     // Moving the part's end to a station with no turntable takes the turn with it, rather than leaving a
     // disabled box ticked for a move that cannot be made there.
@@ -223,6 +271,8 @@
         var result = Schedule.EditPart(Part, calls[_from], calls[_to]);
         if (result.IsNone) { _error = result.Message; return; }
         ApplyTractionOptions();
+        Part.FromTrack = _fromTrack;
+        Part.ToTrack = _toTrack;
         ScheduleState.SaveAndNotify();
         await OnSaved.InvokeAsync();
     }

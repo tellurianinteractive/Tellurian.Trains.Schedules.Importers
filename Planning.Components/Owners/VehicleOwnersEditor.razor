@@ -1,0 +1,202 @@
+@using Tellurian.Trains.Schedules.Model.Validations
+@using System.Globalization
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* The owners of one rolling stock item, each on a row of their own, and a last row to add another. The first
+   owner is the primary one, who brings the unit and sets it up; every later one brings a spare. A traction
+   unit asks every owner for the DCC address of the unit they bring, and takes 0 for an address the owner is
+   still to provide. *@
+
+@{
+    var contributors = Plan.ContributorsOf(Vehicle);
+    var needsAddress = Vehicle.NeedsDccAddress;
+}
+
+<div class="sub">
+    <table class="sub-grid">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Translator("Participant")</th>
+                @if (needsAddress)
+                {
+                    <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
+                }
+                <th>@Translator("Note")</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var index = 0; index < contributors.Count; index++)
+            {
+                var contributor = contributors[index];
+                var isPrimary = index == 0;
+                @* Keyed by the contributor: making one primary reorders the rows. *@
+                <tr @key="contributor">
+                    <td class="role">@RoleLabel(isPrimary)</td>
+                    <td>
+                        <ParticipantComboBox Suggest="@(typed => Plan.ParticipantsMatching(typed))"
+                                             Value="@NameOf(contributor)"
+                                             ValueChanged="@(name => SetParticipant(contributor, name))" />
+                    </td>
+                    @if (needsAddress)
+                    {
+                        <td>
+                            @* Keyed on the refused edits, so an address that is not accepted falls back to the
+                               stored one instead of standing in the field. *@
+                            <input type="number" class="dcc @(contributor.DccAddress is null ? "invalid" : null)"
+                                   min="@DccAddresses.ToBeProvided" max="@DccAddresses.Highest" step="1"
+                                   @key="_refusedEdits" value="@contributor.DccAddress"
+                                   title="@(contributor.DccAddress is null ? Translator("DccAddressMissing") : null)"
+                                   @onchange="e => SetDccAddress(contributor, e)" />
+                            @if (contributor.DccAddress == DccAddresses.ToBeProvided)
+                            {
+                                <span class="to-be-provided">@Translator("DccAddressToBeProvided")</span>
+                            }
+                        </td>
+                    }
+                    <td><input type="text" class="note" value="@contributor.Note" @onchange="e => SetNote(contributor, e)" /></td>
+                    <td class="actions">
+                        @if (!isPrimary)
+                        {
+                            <button class="small" title="@Translator("PrimaryContributorHint")"
+                                    @onclick="() => MakePrimary(contributor)"><i class="fa-solid fa-arrow-up"></i> @Translator("MakePrimary")</button>
+                        }
+                        <button class="danger small" @onclick="() => Remove(contributor)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                    </td>
+                </tr>
+            }
+            @if (contributors.Count == 0)
+            {
+                <tr><td colspan="@(needsAddress ? 5 : 4)" class="empty">@Translator("NoOwnersYet")</td></tr>
+            }
+            <tr class="add">
+                <td class="role">@RoleLabel(contributors.Count == 0)</td>
+                <td>
+                    <ParticipantComboBox Suggest="@(typed => Plan.ParticipantsMatching(typed))"
+                                         Value="@_name" ValueChanged="@((string name) => _name = name)"
+                                         Placeholder="@Translator("TypeParticipantName")" />
+                </td>
+                @if (needsAddress)
+                {
+                    <td>
+                        <input type="number" class="dcc" min="@DccAddresses.ToBeProvided" max="@DccAddresses.Highest" step="1"
+                               value="@_dccAddress" @oninput="e => _dccAddress = e.Value?.ToString() ?? string.Empty"
+                               @onkeydown="AddOnEnter" />
+                    </td>
+                }
+                <td>
+                    <input type="text" class="note" value="@_note" @oninput="e => _note = e.Value?.ToString() ?? string.Empty"
+                           @onkeydown="AddOnEnter" />
+                </td>
+                <td class="actions">
+                    <button class="primary small" @onclick="Add"><i class="fa-solid fa-plus"></i> @Translator("AddOwner")</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+</div>
+
+@code {
+    // What is typed into the add row, kept until the owner is added.
+    private string _name = string.Empty;
+    private string _dccAddress = string.Empty;
+    private string _note = string.Empty;
+
+    // The last refused edit, shown under the table until the next edit.
+    private string? _error;
+
+    // Counts the refused edits, only to key the address fields: a changed key rebuilds a field from the model.
+    private int _refusedEdits;
+
+    /// <summary>The plan the vehicle belongs to.</summary>
+    [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
+
+    /// <summary>The rolling stock item whose owners are edited.</summary>
+    [Parameter, EditorRequired] public ScheduledObject Vehicle { get; set; } = default!;
+
+    private RenderFragment RoleLabel(bool isPrimary) =>
+        @<span class="@(isPrimary ? "primary" : "spare")" title="@Translator(isPrimary ? "PrimaryContributorHint" : "SpareContributorHint")">@Translator(isPrimary ? "PrimaryContributor" : "SpareContributor")</span>;
+
+    private string NameOf(VehicleContributor contributor) => Plan.ParticipantById(contributor.ParticipantId)?.Name ?? "?";
+
+    private static bool TryParseDccAddress(string? text, out int address) =>
+        int.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out address) && DccAddresses.IsValid(address);
+
+    private void Save()
+    {
+        _error = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void AddOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Add();
+    }
+
+    // Everything is checked before anything is added, so a refused owner leaves no new participant behind.
+    private void Add()
+    {
+        _error = null;
+        if (_name.NormalizedParticipantName.IsEmpty)
+        {
+            _error = Translator("ParticipantNameRequired");
+            return;
+        }
+        int? address = null;
+        if (Vehicle.NeedsDccAddress)
+        {
+            if (!TryParseDccAddress(_dccAddress, out var value))
+            {
+                _error = Translator("DccAddressInvalid");
+                return;
+            }
+            address = value;
+        }
+        if (Plan.FindOrAddParticipant(_name) is not { } participant) return;
+        if (Plan.AddContributor(Vehicle, participant, address, _note) is null) return;
+        (_name, _dccAddress, _note) = (string.Empty, string.Empty, string.Empty);
+        Save();
+    }
+
+    // Picking another name hands the unit to that participant, and a name nobody has yet adds them. A blank
+    // name is nobody, so nothing changes and the field falls back to the name it had once it is left.
+    private void SetParticipant(VehicleContributor contributor, string name)
+    {
+        if (Plan.FindOrAddParticipant(name) is not { } participant) return;
+        contributor.ParticipantId = participant.Id;
+        Save();
+    }
+
+    private void SetDccAddress(VehicleContributor contributor, ChangeEventArgs e)
+    {
+        if (TryParseDccAddress(e.Value?.ToString(), out var address) && Plan.SetDccAddress(Vehicle, contributor, address))
+        {
+            Save();
+            return;
+        }
+        _error = Translator("DccAddressInvalid");
+        _refusedEdits++;
+    }
+
+    private void SetNote(VehicleContributor contributor, ChangeEventArgs e)
+    {
+        contributor.Note = e.Value?.ToString()?.Trim() ?? string.Empty;
+        Save();
+    }
+
+    private void MakePrimary(VehicleContributor contributor)
+    {
+        if (Plan.MakePrimary(Vehicle, contributor)) Save();
+    }
+
+    private void Remove(VehicleContributor contributor)
+    {
+        if (Plan.TryDelete(contributor).IsSuccess) Save();
+    }
+}

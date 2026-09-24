@@ -5,8 +5,8 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 /// <summary>
 /// Covers how long a station track is occupied, which is longer than the calling trains say on their
 /// own: a traction unit that arrives with one train and leaves with the next stands on the track for the
-/// whole time between — unless it is booked to or from parking, when each train occupies only its own
-/// window again.
+/// whole time between — unless it is booked to or from parking, or put on or fetched from another track,
+/// when each train occupies only its own window again.
 /// </summary>
 [TestClass]
 public class TrackOccupancyTests
@@ -40,13 +40,15 @@ public class TrackOccupancyTests
     private StationCall ArrivalCall => Arriving.Calls[^1];
 
     // A vehicle schedule working the arriving train and then the leaving one.
-    private Schedule Continuing(bool toParking = false, bool fromParking = false)
+    private Schedule Continuing(bool toParking = false, bool fromParking = false, StationTrack? toTrack = null, StationTrack? fromTrack = null)
     {
         var schedule = new Schedule(1);
         var first = Arriving.AsTrainPart(0, 1);
         var second = Leaving.AsTrainPart(0, 1);
         first.TractionOptions = new TractionOptions { ToParking = toParking };
         second.TractionOptions = new TractionOptions { FromParking = fromParking };
+        first.ToTrack = toTrack;
+        second.FromTrack = fromTrack;
         schedule.Add(first);
         schedule.Add(second);
         return schedule;
@@ -118,6 +120,36 @@ public class TrackOccupancyTests
         var (_, to) = ArrivalCall.TrackOccupancy([Continuing()]);
 
         Assert.AreEqual(Time.FromHourAndMinute(12, 00), to);
+    }
+
+    [TestMethod]
+    public void AUnitPutOnAnotherTrackOccupiesOnlyTheTrainsOwnWindow()
+    {
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toTrack: OtherTrack)]);
+
+        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
+            "Put on another track after arriving, the unit is not standing on this one between the two trains.");
+    }
+
+    [TestMethod]
+    public void AUnitFetchedFromAnotherTrackOccupiesOnlyTheTrainsOwnWindow()
+    {
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromTrack: OtherTrack)]);
+
+        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
+            "Fetched from another track, the unit was not on this one waiting for its next train.");
+    }
+
+    [TestMethod]
+    public void AUnitFetchedFromThisTrackForATrainLeavingFromAnotherStaysOnIt()
+    {
+        // The next train leaves from the other track, but the unit is fetched from this one for it: it
+        // has been standing here all along, and is taken away only for that train.
+        Leaving.Calls[0].Track = OtherTrack;
+
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromTrack: Track)]);
+
+        Assert.AreEqual(Time.FromHourAndMinute(12, 50), to);
     }
 
     // A train taking the track shortly after the arriving one has left it: no overlap at all, so it is a

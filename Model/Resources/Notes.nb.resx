@@ -76,6 +76,21 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Etter ankomst, kjør {0} fra ankomstsporet til hensettingsplassen.</value>
   </data>
+  <data name="FetchFromTrack" xml:space="preserve">
+    <value>Før avgang, hent {0} {1} fra spor {2}.</value>
+  </data>
+  <data name="PutOnTrack" xml:space="preserve">
+    <value>Etter ankomst, skift {0} {1} til spor {2}.</value>
+  </data>
+  <data name="ShuntWagonsToDepartureTrack" xml:space="preserve">
+    <value>Skift vogner til avgangssporet før avgang.</value>
+  </data>
+  <data name="ShuntWagonsToArrivalTrack" xml:space="preserve">
+    <value>Skift vogner til deres ankomstspor etter ankomst.</value>
+  </data>
+  <data name="OnSessions" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
   <data name="CirculateTractionUnit" xml:space="preserve">
     <value>Omløp lok.</value>
   </data>
@@ -94,6 +109,9 @@
   </data>
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Bringer vogner til {0}</value>
+  </data>
+  <data name="UncoupleWagonsFor" xml:space="preserve">
+    <value>Koble fra vogner til {0}.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Skift ankomne vogner fra {0} til godskundene.</value>

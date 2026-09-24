@@ -135,7 +135,7 @@ public class DutyPaginationTests
     }
 
     // The formula must reproduce the four page counts the prototype hardcoded, term for term.
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(4, "4,1,2,3")]
     [DataRow(8, "8,1,2,7,6,3,4,5")]
     [DataRow(12, "12,1,2,11,10,3,4,9,8,5,6,7")]

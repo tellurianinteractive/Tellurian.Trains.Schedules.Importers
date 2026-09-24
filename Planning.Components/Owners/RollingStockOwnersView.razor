@@ -1,0 +1,163 @@
+@using System.Globalization
+@inject Translator Translator
+
+@* Every rolling stock item of the plan on one row: what it is, where it is to stand before the meeting begins
+   and on which session or day it is first in operation, and who brings it. A row opens onto its owners. *@
+
+@{
+    var all = RollingStock;
+    IReadOnlyList<ScheduledObject> vehicles = _onlyWithoutOwner ? [.. all.Where(v => Plan.ContributorsOf(v).Count == 0)] : all;
+}
+
+@if (all.Count == 0)
+{
+    <p class="empty">@Translator("NoRollingStock")</p>
+}
+else
+{
+    <div class="toolbar">
+        <button @onclick="() => ExpandAll(vehicles)"><i class="fa-solid fa-angles-down"></i> @Translator("ExpandAll")</button>
+        <button @onclick="() => _expanded.Clear()"><i class="fa-solid fa-angles-up"></i> @Translator("CollapseAll")</button>
+        <label class="filter">
+            <input type="checkbox" checked="@_onlyWithoutOwner" @onchange="e => _onlyWithoutOwner = e.Value is true" />
+            @Translator("WithoutOwnerOnly")
+        </label>
+    </div>
+
+    <table class="owners">
+        <thead>
+            <tr>
+                <th class="expander"></th>
+                <th>@Translator("Type")</th>
+                <th>@Translator("Vehicle")</th>
+                <th>@Translator("Class")</th>
+                <th class="units" title="@Translator("NumberOfUnits")">@Translator("Count")</th>
+                <th>@Translator(SessionSettings.UseDaysInsteadOfSessionNumbers ? "FirstDay" : "FirstSession")</th>
+                <th>@Translator("Station")</th>
+                <th>@Translator("Track")</th>
+                <th>@Translator("Departure")</th>
+                <th>@Translator("Owner")</th>
+                <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
+                <th>@Translator("Spares")</th>
+                <th>@Translator("Note")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* Both kinds of row are keyed by their vehicle: with the filter on, an owner table opened under one
+               vehicle must not be diffed into the row of another that took its place. *@
+            @foreach (var vehicle in vehicles)
+            {
+                var expanded = _expanded.Contains(vehicle.Id);
+                var contributors = Plan.ContributorsOf(vehicle);
+                var primary = contributors.FirstOrDefault();
+                var start = vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions);
+                <tr class="vehicle @(expanded ? "expanded" : null)" @key="VehicleRowKey(vehicle)">
+                    <td class="expander">
+                        <button class="toggle" title="@Translator(expanded ? "Collapse" : "Expand")"
+                                @onclick="() => ToggleExpanded(vehicle)"><i class="fa-solid @(expanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                    </td>
+                    <td>@Translator(vehicle.ObjectType.ToString())</td>
+                    <td class="designation">@vehicle.Designation</td>
+                    <td>@vehicle.Classes</td>
+                    @* Only a count worth noticing is shown: a single unit is what every other row is, so a 1
+                       would be noise, and it would hide the few items an owner has to bring several of. A wagonset
+                       listing its wagons counts them. *@
+                    <td class="units">@(vehicle.NumberOfUnits > 1 ? vehicle.NumberOfUnits.ToString(CultureInfo.CurrentCulture) : null)</td>
+                    @if (start is null)
+                    {
+                        @* A vehicle given no work yet has nowhere to stand; saying so reads better than four
+                           empty cells. *@
+                        <td colspan="4" class="not-in-operation">@Translator("NotInOperation")</td>
+                    }
+                    else
+                    {
+                        <td class="first-session">@SessionsFormatting.PositionHeadingOf(start.FirstPosition, SessionSettings, false)</td>
+                        <td>@start.Location.Name</td>
+                        <td>@start.Track.Number</td>
+                        <td>@start.Departure.HHMM()</td>
+                    }
+                    <td>@(primary is null ? "—" : NameOf(primary))</td>
+                    <td class="dcc">
+                        @if (vehicle.NeedsDccAddress && primary is not null)
+                        {
+                            @DccAddressText(primary)
+                        }
+                        @* A traction unit whose owners were entered while it was a wagonset has owners without an
+                           address, and that must not go unnoticed until the meeting. *@
+                        @if (vehicle.NeedsDccAddress && contributors.Any(c => c.DccAddress is null))
+                        {
+                            <i class="fa-solid fa-triangle-exclamation missing" title="@Translator("DccAddressMissing")"></i>
+                        }
+                    </td>
+                    <td><span class="spares">@string.Join(", ", contributors.Skip(1).Select(NameOf))</span></td>
+                    <td>
+                        <input type="text" class="note" value="@Plan.ContributionFor(vehicle)?.Note"
+                               @onchange="e => SetNote(vehicle, e)" />
+                    </td>
+                </tr>
+                @if (expanded)
+                {
+                    <tr class="detail" @key="OwnersRowKey(vehicle)">
+                        <td></td>
+                        <td colspan="12">
+                            <VehicleOwnersEditor Plan="Plan" Vehicle="vehicle" />
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Inject] private ScheduleStateService ScheduleState { get; set; } = default!;
+
+    private readonly HashSet<int> _expanded = [];
+    private bool _onlyWithoutOwner;
+
+    /// <summary>The plan whose rolling stock is listed.</summary>
+    [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
+
+    /// <summary>
+    /// Whether the layout counts in sessions or days, how many there are, and the names of the days — which
+    /// decides how the first session or day of each vehicle is shown.
+    /// </summary>
+    [Parameter, EditorRequired] public SessionsSettings SessionSettings { get; set; } = default!;
+
+    // Locomotives, then trainsets, then wagonsets, each kind in designation order: how an owner looks for their
+    // own stock in the list.
+    private IReadOnlyList<ScheduledObject> RollingStock =>
+        [.. Plan.RollingStock
+            .OrderBy(v => v.ObjectType)
+            .ThenBy(v => v.Designation, StringComparer.CurrentCulture)
+            .ThenBy(v => v.Id)];
+
+    private static string VehicleRowKey(ScheduledObject vehicle) => $"vehicle-{vehicle.Id}";
+
+    private static string OwnersRowKey(ScheduledObject vehicle) => $"owners-{vehicle.Id}";
+
+    private void ToggleExpanded(ScheduledObject vehicle)
+    {
+        if (!_expanded.Remove(vehicle.Id)) _expanded.Add(vehicle.Id);
+    }
+
+    private void ExpandAll(IEnumerable<ScheduledObject> vehicles)
+    {
+        foreach (var vehicle in vehicles) _expanded.Add(vehicle.Id);
+    }
+
+    private string NameOf(VehicleContributor contributor) => Plan.ParticipantById(contributor.ParticipantId)?.Name ?? "?";
+
+    private string DccAddressText(VehicleContributor contributor) => contributor.DccAddress switch
+    {
+        null => string.Empty,
+        DccAddresses.ToBeProvided => Translator("DccAddressToBeProvided"),
+        var address => address.Value.ToString(CultureInfo.CurrentCulture),
+    };
+
+    private void SetNote(ScheduledObject vehicle, ChangeEventArgs e)
+    {
+        Plan.SetContributionNote(vehicle, e.Value?.ToString());
+        ScheduleState.SaveAndNotify();
+    }
+}

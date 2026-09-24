@@ -1,0 +1,309 @@
+/* The tab's own markup: the colours shared by everything below, and the sub-tabs. */
+.vehicle-owners {
+    --primary: #1a3a5c;
+    --danger: #c00;
+    --border: #ddd;
+    --hover: #f3f6fa;
+    --detail-bg: #f7f9fc;
+    --attention: #d9a406;
+
+    .sub-tabs {
+        display: flex;
+        gap: 2px;
+        margin: 0.6rem 0 0.4rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sub-tab {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
+        background: transparent;
+    }
+
+    .sub-tab:hover {
+        background: #ececec;
+    }
+
+    .sub-tab.active {
+        background: #fff;
+        border-color: var(--border);
+        color: var(--primary);
+        font-weight: 600;
+        position: relative;
+        top: 1px;
+    }
+
+    .sub-tab .count {
+        font-weight: 400;
+        color: #667;
+    }
+}
+
+/* The tab's views are components of their own, so their markup is reached through ::deep: one stylesheet keeps
+   the rolling stock list, its owner tables and the participant list looking alike. Written flat, because a
+   nested rule starting with ::deep is scoped as a descendant of another scoped element, which the markup of a
+   child component never is. */
+.vehicle-owners ::deep button {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.vehicle-owners ::deep button:hover {
+    background: #ececec;
+}
+
+.vehicle-owners ::deep button.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.vehicle-owners ::deep button.danger {
+    color: var(--danger);
+    border-color: #e0b4b4;
+}
+
+.vehicle-owners ::deep button.danger:hover {
+    background: #fbeaea;
+}
+
+.vehicle-owners ::deep button.small {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.vehicle-owners ::deep button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.vehicle-owners ::deep button.toggle {
+    border: none;
+    background: transparent;
+    padding: 0.1rem 0.3rem;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--primary);
+}
+
+.vehicle-owners ::deep .hint {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.vehicle-owners ::deep .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+
+.vehicle-owners ::deep .toolbar .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.vehicle-owners ::deep .empty {
+    color: #667;
+    font-style: italic;
+}
+
+.vehicle-owners ::deep .error {
+    margin: 0.3rem 0;
+    color: var(--danger);
+    font-size: 0.85rem;
+}
+
+.vehicle-owners ::deep input[type="text"],
+.vehicle-owners ::deep input[type="number"] {
+    font-size: 0.85rem;
+    padding: 0.15rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: #fff;
+}
+
+.vehicle-owners ::deep input.note {
+    min-width: 14rem;
+}
+
+.vehicle-owners ::deep input.name {
+    min-width: 16rem;
+}
+
+.vehicle-owners ::deep input.dcc {
+    width: 5.5rem;
+}
+
+.vehicle-owners ::deep input.invalid {
+    border-color: var(--danger);
+    background: #fff5f5;
+}
+
+/* Sized to its columns (the app-wide max-content rule in app.css); a window too narrow for it scrolls. */
+.vehicle-owners ::deep table.owners {
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.vehicle-owners ::deep table.owners > thead th {
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.vehicle-owners ::deep table.owners > tbody > tr > td {
+    padding: 0.3rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.vehicle-owners ::deep table.owners > tbody > tr.vehicle:hover {
+    background: var(--hover);
+}
+
+.vehicle-owners ::deep table.owners > tbody > tr.vehicle.expanded {
+    background: var(--detail-bg);
+}
+
+.vehicle-owners ::deep table.owners th.expander,
+.vehicle-owners ::deep table.owners td.expander {
+    width: 2.6rem;
+    text-align: center;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+}
+
+.vehicle-owners ::deep table.owners td.designation {
+    font-weight: 600;
+}
+
+.vehicle-owners ::deep table.owners th.units,
+.vehicle-owners ::deep table.owners td.units {
+    text-align: right;
+}
+
+.vehicle-owners ::deep table.owners td.not-in-operation {
+    color: #889;
+    font-style: italic;
+}
+
+.vehicle-owners ::deep table.owners td.dcc .missing {
+    margin-left: 0.3rem;
+    color: var(--attention);
+}
+
+/* Spares are a list of names, usually none or one; held back so an item with many does not widen the
+   table for every other row. */
+.vehicle-owners ::deep table.owners .spares {
+    display: inline-block;
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+.vehicle-owners ::deep table.owners tr.detail > td {
+    background: var(--detail-bg);
+    padding: 0.2rem 0.6rem 0.7rem 0.6rem;
+}
+
+.vehicle-owners ::deep table.owners td.actions {
+    text-align: right;
+}
+
+.vehicle-owners ::deep table.owners td.actions button + button {
+    margin-left: 0.3rem;
+}
+
+/* What each participant brings, as chips: bold where they bring the unit itself, plain where a spare. */
+.vehicle-owners ::deep table.participants .brought {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    max-width: 36rem;
+    white-space: normal;
+}
+
+.vehicle-owners ::deep table.participants .brought > span {
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+.vehicle-owners ::deep table.participants .brought > span.primary {
+    font-weight: 600;
+    border-color: var(--primary);
+}
+
+.vehicle-owners ::deep table.sub-grid {
+    border-collapse: collapse;
+    margin: 0.2rem 0 0.2rem 0;
+}
+
+.vehicle-owners ::deep table.sub-grid th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #556;
+    padding: 0.2rem 0.5rem;
+    white-space: nowrap;
+}
+
+.vehicle-owners ::deep table.sub-grid td {
+    padding: 0.15rem 0.5rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.vehicle-owners ::deep table.sub-grid td.empty {
+    color: #889;
+    font-style: italic;
+    padding: 0.3rem 0.5rem;
+}
+
+.vehicle-owners ::deep table.sub-grid tr.add > td {
+    padding-top: 0.4rem;
+    border-top: 1px dashed var(--border);
+}
+
+.vehicle-owners ::deep table.sub-grid td.role .primary {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.vehicle-owners ::deep table.sub-grid td.role .spare {
+    color: #556;
+}
+
+.vehicle-owners ::deep table.sub-grid .to-be-provided {
+    margin-left: 0.4rem;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #667;
+}
+
+/* The span owns the hover so the blocked-reason tooltip shows even when the button is disabled. */
+.vehicle-owners ::deep .delete-wrap {
+    display: inline-block;
+}
+
+.vehicle-owners ::deep .delete-wrap > button:disabled {
+    pointer-events: none;
+}

@@ -16,56 +16,58 @@
 
 @if (Rows is { Count: > 0 })
 {
-    <h3>@Translator("TrainTimetable")</h3>
-    <table class="dutycalls">
-        @* Fixed layout takes its widths from these, not from the first row: with Station spanning the
-           first two columns the header row can no longer state a width for each of the five. *@
-        <colgroup>
-            <col class="arrdep" />
-            <col class="station" />
-            <col class="track" />
-            <col class="time" />
-            <col class="note" />
-        </colgroup>
-        <thead>
-            <tr>
-                @* The Arr/Dep column needs no heading of its own — every cell in it already says which
-                   it is — so Station heads the pair, over the two columns that together name the place. *@
-                <th class="station" colspan="2">@Translator("Station")</th>
-                <th class="track">@Translator("Track")</th>
-                <th class="time">@Translator("Time")</th>
-                <th class="note">@Translator("Note")</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in Rows)
-            {
-                @* The rule always falls below the whole group — the call row plus any notes stacked
-                   under it — never between a call and its own notes. *@
-                var stacked = row.StackedNotes.ToList();
-                <tr class="@RowClass(row) @(stacked.Count == 0 ? RuleClass(row) : null)">
-                    <td class="arrdep">@HalfLabel(row.Half)</td>
-                    @* Repeated on both rows of a two-row call, so a time is never read against a blank
-                       station cell. *@
-                    <td class="station">@row.StationName</td>
-                    <td class="track">@row.TrackNumber</td>
-                    <td class="time">@row.Time.HHMM()</td>
-                    <td class="note">@if (row.InlineNote is { } inline) { @inline.ToHtml }</td>
+    <div class="dutyblock timetable">
+        <h3>@Translator("TrainTimetable")</h3>
+        <table class="dutycalls">
+            @* Fixed layout takes its widths from these, not from the first row: with Station spanning the
+               first two columns the header row can no longer state a width for each of the five. *@
+            <colgroup>
+                <col class="arrdep" />
+                <col class="station" />
+                <col class="track" />
+                <col class="time" />
+                <col class="note" />
+            </colgroup>
+            <thead>
+                <tr>
+                    @* The Arr/Dep column needs no heading of its own — every cell in it already says which
+                       it is — so Station heads the pair, over the two columns that together name the place. *@
+                    <th class="station" colspan="2">@Translator("Station")</th>
+                    <th class="track">@Translator("Track")</th>
+                    <th class="time">@Translator("Time")</th>
+                    <th class="note">@Translator("Note")</th>
                 </tr>
-                @* Every further note gets a full-width row, so it has the whole page to run in and
-                   almost never wraps. It starts at the same offset as the station name — an empty
-                   Arr/Dep cell, then the note spanning the remaining four columns — so it reads as
-                   belonging to the call above rather than as a new one. *@
-                @for (var i = 0; i < stacked.Count; i++)
+            </thead>
+            <tbody>
+                @foreach (var row in Rows)
                 {
-                    <tr class="note-row @(i == stacked.Count - 1 ? RuleClass(row) : null)">
-                        <td class="arrdep"></td>
-                        <td colspan="4">@stacked[i].ToHtml</td>
+                    @* The rule always falls below the whole group — the call row plus any notes stacked
+                       under it — never between a call and its own notes. *@
+                    var stacked = row.StackedNotes.ToList();
+                    <tr class="@RowClass(row) @(stacked.Count == 0 ? RuleClass(row) : null)">
+                        <td class="arrdep">@HalfLabel(row.Half)</td>
+                        @* Repeated on both rows of a two-row call, so a time is never read against a blank
+                           station cell. *@
+                        <td class="station">@row.StationName</td>
+                        <td class="track">@row.TrackNumber</td>
+                        <td class="time">@row.Time.HHMM()</td>
+                        <td class="note">@if (row.InlineNote is { } inline) { @inline.ToHtml }</td>
                     </tr>
+                    @* Every further note gets a full-width row, so it has the whole page to run in and
+                       almost never wraps. It starts at the same offset as the station name — an empty
+                       Arr/Dep cell, then the note spanning the remaining four columns — so it reads as
+                       belonging to the call above rather than as a new one. *@
+                    @for (var i = 0; i < stacked.Count; i++)
+                    {
+                        <tr class="note-row @(i == stacked.Count - 1 ? RuleClass(row) : null)">
+                            <td class="arrdep"></td>
+                            <td colspan="4">@stacked[i].ToHtml</td>
+                        </tr>
+                    }
                 }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

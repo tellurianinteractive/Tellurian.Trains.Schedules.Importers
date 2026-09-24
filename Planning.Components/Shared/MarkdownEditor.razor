@@ -8,7 +8,12 @@
    using @bind-Value:after as before.
 
    Rendered with the same Markdig call the printed reports use, so what the preview shows is what
-   the print gets — give it the print's own class through PreviewClass and the styling matches too. *@
+   the print gets — give it the print's own class through PreviewClass and the styling matches too.
+
+   A report whose text may carry markers the print expands into something Markdig knows nothing about
+   passes a Preprocess function, which turns each marker into something the preview can show. Without
+   it the marker would render as an unknown element and simply disappear, and the author would have no
+   way to tell a marker that was understood from one that was misspelt. *@
 <div class="markdown-editor">
     <textarea rows="@Rows" value="@_draft"
               @oninput="e => _draft = e.Value?.ToString() ?? string.Empty"
@@ -30,10 +35,16 @@
     /// text, so the preview is styled the way it will be printed.</summary>
     [Parameter] public string? PreviewClass { get; set; }
 
+    /// <summary>
+    /// Optional transformation applied to the text before it is rendered for the preview only. The
+    /// stored value is never touched by it.
+    /// </summary>
+    [Parameter] public Func<string, string>? Preprocess { get; set; }
+
     private string _draft = "";
     private string _lastValue = "";
 
-    private MarkupString Rendered => new(Markdig.Markdown.ToHtml(_draft));
+    private MarkupString Rendered => new(Markdig.Markdown.ToHtml(Preprocess is null ? _draft : Preprocess(_draft)));
 
     // Anything else that re-renders the page (a docked view refreshing, another edit being saved)
     // hands the same value back while typing is still in progress; only a value that has genuinely

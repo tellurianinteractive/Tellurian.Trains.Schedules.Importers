@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text.Json.Serialization;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
@@ -104,13 +104,38 @@ public static class CargoFlowTrainPartExtensions
         /// Creates the <see cref="ICallNote">notes</see> shown at the from-call: a destination note
         /// listing where the cargo flow brings wagons.
         /// </summary>
+        /// <remarks>
+        /// For the station's dispatcher, not for the loco driver: the driver's booklet states the flow in
+        /// its cargo block, with the load limits and wagon classes, and a note beside it would say the
+        /// same thing twice on one page. A cargo flow belongs to its train rather than to a vehicle
+        /// schedule, so it is worked whenever the train runs and the note never needs a session
+        /// qualifier.
+        /// </remarks>
         public IEnumerable<ICallNote> DepartureNotes
         {
             get
             {
                 List<ICallNote> result = [];
                 if (trainPart.HasCoupleNote && trainPart.CargoFlowOptions is not null)
-                    result.Add(new CargoFlowDestinationNote(trainPart) { IsForDeparture = true });
+                    result.Add(new CargoFlowDestinationNote(trainPart) { IsForDeparture = true, IsDriverNote = false });
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates the <see cref="ICallNote">notes</see> shown at the to-call: an uncouple note naming the
+        /// destinations the freight wagons coming off here are bound for.
+        /// </summary>
+        /// <remarks>
+        /// The counterpart of <c>DepartureNotes</c>, and for the same reader; see there.
+        /// </remarks>
+        public IEnumerable<ICallNote> ArrivalNotes
+        {
+            get
+            {
+                List<ICallNote> result = [];
+                if (trainPart.HasUncoupleNote && trainPart.CargoFlowOptions is not null)
+                    result.Add(new CargoFlowUncoupleNote(trainPart) { IsForArrival = true, IsDriverNote = false });
                 return result;
             }
         }

@@ -1,4 +1,51 @@
 @page "/vehicle-owners"
+@inject ScheduleStateService ScheduleState
 @inject Translator Translator
+@implements IDisposable
 
-<p>@Translator("VehicleOwnersDescription")</p>
+@if (ScheduleState.Schedule is not { } plan || ScheduleState.Layout is not { } layout)
+{
+    <p>@Translator("SchedulesNoSchedule")</p>
+}
+else
+{
+    <div class="vehicle-owners">
+        <p class="hint">@Translator("VehicleOwnersDescription")</p>
+
+        @* Two views of one set of facts: what each rolling stock item is brought by, and — to put a misspelt
+           name right in one place — who the participants are and what each of them brings. *@
+        <div class="sub-tabs">
+            <button class="sub-tab @(_view == View.RollingStock ? "active" : null)" @onclick="() => _view = View.RollingStock">
+                @Translator("RollingStock") <span class="count">(@plan.RollingStock.Count())</span>
+            </button>
+            <button class="sub-tab @(_view == View.Participants ? "active" : null)" @onclick="() => _view = View.Participants">
+                @Translator("Participants") <span class="count">(@plan.Participants.Count)</span>
+            </button>
+        </div>
+
+        @if (_view == View.RollingStock)
+        {
+            <RollingStockOwnersView Plan="plan" SessionSettings="layout.Settings.General.SessionSettings()" />
+        }
+        else
+        {
+            <ParticipantsView Plan="plan" />
+        }
+    </div>
+}
+
+@code {
+    private enum View { RollingStock, Participants }
+
+    private View _view = View.RollingStock;
+
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+}

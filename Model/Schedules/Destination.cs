@@ -155,7 +155,7 @@ public static class DestinationExtensions
 
         /// <summary>
         /// The wording <see cref="Destination.AndLocalDestinations"/> prints in a note —
-        /// <em>"and local destinations"</em>. See <see cref="AndBeyondPhrase"/> for why it is exposed.
+        /// <em>"and local destinations"</em>. See <see cref="Destination.AndBeyond"/> for why it is exposed.
         /// </summary>
         public static string AndLocalDestinationsPhrase => NoteResources.AndLocalDestinations;
 

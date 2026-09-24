@@ -17,38 +17,9 @@
     <h2>@Translator("Topology")</h2>
     <TopologyDiagramView Layout="Layout" />
 
-    @if (ShuntingYards.Count > 0)
+    @if (ShowShuntingYards)
     {
-        <h2>@Translator("ShuntingYards")</h2>
-        @* Three columns, because a shunting yard covers two different kinds of destination. Together
-           they answer the question a driver actually has holding a wagon card: where does this wagon go
-           from here, and is that on the layout or off it? Either column alone answers only half. *@
-        <table class="shunting-yards">
-            <thead>
-                <tr>
-                    <th>@Translator("ShuntingYards")</th>
-                    <th>@Translator("ServesLocations")</th>
-                    <th>@Translator("ServesRegions")</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var shuntingYard in ShuntingYards)
-                {
-                    <tr>
-                        <td class="shunting-yard">@shuntingYard.Station.Name</td>
-                        <td>@string.Join(", ", shuntingYard.ServedLocations.Select(l => l.Name))</td>
-                        @* The same coloured chips as in the cargo notes, so this page reads as a key to
-                           those notes rather than as separate information. *@
-                        <td>
-                            @foreach (var region in shuntingYard.ServedRegions)
-                            {
-                                @region.ToHtml
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <ShuntingYardsView Layout="Layout" />
     }
 </div>
 
@@ -56,5 +27,10 @@
     /// <summary>The layout whose topology and shunting yards are shown.</summary>
     [Parameter, EditorRequired] public Layout? Layout { get; set; }
 
-    private IReadOnlyList<ShuntingYard> ShuntingYards => Layout?.ShuntingYards ?? [];
+    /// <summary>
+    /// Whether the shunting yards table is printed here. Always true for a duty booklet, where this is
+    /// the only place it appears. The general instructions booklet turns it off when the author has
+    /// placed the table in their own text instead, so the booklet never carries it twice.
+    /// </summary>
+    [Parameter] public bool ShowShuntingYards { get; set; } = true;
 }

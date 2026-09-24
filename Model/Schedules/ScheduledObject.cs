@@ -163,18 +163,17 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public string Designation =>
         !string.IsNullOrWhiteSpace(ExternalId) ? ExternalId : ComposedIdentity;
 
+    private string ComposedIdentity => ComposedIdentityWith(Class);
+
     // The identity composed when a vehicle carries no external id: the operating company's signature
-    // followed by the class and number (e.g. "DB BR 218 05"). The number is padded to at least two digits
-    // so short numbers line up. A vehicle with no class shows just the number; surrounding whitespace is
-    // trimmed away.
-    private string ComposedIdentity
+    // followed by the number and what describes the vehicle — its class, or for a wagonset the wagons it
+    // lists (e.g. "DB 05 BR 218"). The number is padded to at least two digits so short numbers line up. A
+    // vehicle with no description shows just the number; surrounding whitespace is trimmed away.
+    internal string ComposedIdentityWith(string? description)
     {
-        get
-        {
-            var number = Number.ToString("D2");
-            var @class = string.IsNullOrWhiteSpace(Class) ? number : $"{number} {Class} ";
-            return $"{Company?.Signature} {@class}".Trim();
-        }
+        var number = Number.ToString("D2");
+        var described = string.IsNullOrWhiteSpace(description) ? number : $"{number} {description} ";
+        return $"{Company?.Signature} {described}".Trim();
     }
 
     /// <summary>
@@ -297,6 +296,54 @@ public static class ScheduledObjectExtensions
         /// <see cref="Wagon">Wagons</see> that makes up this <see cref="ScheduledObject"/>
         /// </summary>
         public IEnumerable<Wagon> Wagons => scheduledObject.Units.OfType<Wagon>();
+
+        /// <summary>
+        /// The classes this vehicle is made up of: for a wagonset that lists its wagons, each wagon class once, in
+        /// the order the wagons stand in the rake and separated by "/" (e.g. "A/B/Fv"); otherwise — and where no
+        /// listed wagon is given a class — the vehicle's own <see cref="ScheduledObject.Class"/>.
+        /// </summary>
+        public string Classes
+        {
+            get
+            {
+                if (!scheduledObject.IsWagonSet) return scheduledObject.Class;
+                var classes = scheduledObject.Wagons
+                    .OrderBy(w => w.Position)
+                    .Select(w => w.Class.Trim())
+                    .Where(c => c.Length > 0)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList();
+                return classes.Count > 0 ? string.Join("/", classes) : scheduledObject.Class;
+            }
+        }
+
+        /// <summary>
+        /// How many wagons a wagonset lists, and their classes (e.g. "5 x A/B/Fv"); <c>null</c> for
+        /// a vehicle that lists no wagons, or whose wagons have no class to tell them by.
+        /// </summary>
+        public string? WagonsText
+        {
+            get
+            {
+                if (!scheduledObject.IsWagonSet) return null;
+                var count = scheduledObject.Wagons.Count();
+                var classes = scheduledObject.Classes;
+                return count > 0 && !string.IsNullOrWhiteSpace(classes) ? $"{count} x {classes}" : null;
+            }
+        }
+
+        /// <summary>
+        /// The vehicle as a schedule names it: its <see cref="ScheduledObject.Designation"/>, but for a wagonset
+        /// that lists its wagons followed by the <see cref="WagonsText"/> (e.g. "SJ 05 5 x A/B/Fv"). A composed
+        /// designation then gives the wagons in place of the vehicle's own class, so the class is not said twice.
+        /// </summary>
+        public string DesignationWithWagons => scheduledObject.WagonsText switch
+        {
+            null => scheduledObject.Designation,
+            var wagons when scheduledObject.HasExternalId => $"{scheduledObject.ExternalId} {wagons}",
+            var wagons => scheduledObject.ComposedIdentityWith(wagons),
+        };
+
         /// <summary>
         /// Adds a wagon to the end of the rake and re-sequences <see cref="ScheduledUnit.Position"/> to 1..n.
         /// </summary>

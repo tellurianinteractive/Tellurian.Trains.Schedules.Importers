@@ -68,9 +68,12 @@ else
     private void BuildAutomatically()
     {
         if (ScheduleState.Schedule is not { } plan) return;
-        var created = plan.BuildSchedulesAutomatically();
+        var built = plan.BuildSchedulesAutomatically();
         ScheduleState.SaveAndNotify();
-        _buildMessage = string.Format(CultureInfo.CurrentCulture, Translator("SchedulesBuildAutomaticallyResult"), created.Count);
+        // The build gives the unassigned trains to the schedules that are already there before it starts
+        // new ones, so the result says both what existing workings took on and what had to be created.
+        _buildMessage = string.Format(CultureInfo.CurrentCulture, Translator("SchedulesBuildAutomaticallyResult"),
+            built.AddedParts, built.Extended.Count, built.Created.Count);
     }
 
     private void NewSchedule()

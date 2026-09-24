@@ -18,18 +18,24 @@
             break;
 
         case DutyPageKind.Blank:
-            @* So a driver does not think pages are missing. *@
-            <p class="blank">@Translator("ThisPageIsIntentionalBlank")</p>
+            <BlankBookletPage />
             break;
 
         case DutyPageKind.Part:
             @foreach (var part in Page.Parts)
             {
                 @* On the facing page of a split part only the timetable is shown; its header and tables
-                   are on the left-hand page, in view without turning. *@
+                   are on the left-hand page, in view without turning.
+
+                   Still inside a .dutypart, although there is no header here: the booklet's table rules
+                   are scoped to it, so without one the timetable printed with none of them — no fixed
+                   columns, no bold, no rules, and at the browser's larger type, which DutyPagination
+                   does not charge for. *@
                 @if (Page.IsTimetableContinuation)
                 {
-                    <TrainPartView Rows="part.TimetableRows" />
+                    <div class="dutypart">
+                        <TrainPartView Rows="part.TimetableRows" />
+                    </div>
                 }
                 else
                 {

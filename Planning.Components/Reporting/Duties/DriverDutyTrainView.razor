@@ -8,7 +8,8 @@
 @* One train part: a header block followed by four table blocks, separated by rules.
 
    The order matches how the driver works — what am I driving (traction), what am I pulling (wagonsets),
-   what is in it and where does it go (cargo), then where and when (the timetable).
+   what is in it and where does it go (cargo), then where and when (the timetable). Each block carries a
+   colour bar down its left edge, so the four can be told apart at a glance — see .dutyblock in app.css.
 
    The three tables exist to absorb facts that would otherwise have to be squeezed into the timetable's
    note column, which is what made the prototype's notes long and repetitive exactly where a driver can
@@ -47,8 +48,8 @@
         }
         <hr />
 
-        <TrainPartVehicleView Data="Part.TractionData" Heading="TractionUnits" VehicleColumn="TractionUnit" />
-        <TrainPartVehicleView Data="Part.WagonsetData" Heading="ScheduledWagonsets" VehicleColumn="Wagonset" />
+        <TrainPartVehicleView Data="Part.TractionData" Heading="TractionUnits" Block="traction" />
+        <TrainPartVehicleView Data="Part.WagonsetData" Heading="ScheduledWagonsets" Block="wagonsets" />
         <TrainPartCargoWagonsWithWaybillsView Data="Part.CargoData" />
         @if (ShowTimetable)
         {

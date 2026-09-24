@@ -1,36 +1,62 @@
 @using Tellurian.Trains.Schedules.Model.Notes
+@inject Translator Translator
 
 @* A manual call note that reads as formatted text and edits as the markup behind it: the rendered
    emphasis is what a planner sees at rest, and entering the field swaps in a plain input holding the
    *asterisks* they typed. Two elements rather than a contenteditable, because the stored value is
    markup-free text and a rich-text surface would invite pasted markup this note cannot carry. *@
 <div class="notefield">
+    @* Which half of the call the note is for. The reports print the arrival and the departure as
+       separate rows and take only the notes belonging to that half, so a note that says neither is
+       shown nowhere. Where the train only arrives or only departs there is nothing to choose, and the
+       one half it can be is shown disabled. *@
+    @if (Targets.Count > 0)
+    {
+        <select class="target" title="@Translator("CallNoteTargetHint")" disabled="@(Targets.Count == 1)"
+                value="@Chosen" @onchange="SetTarget">
+            @foreach (var target in Targets)
+            {
+                <option value="@target">@Translator(target == CallNoteTarget.Arrival ? "Arr" : "Dep")</option>
+            }
+        </select>
+    }
+    else
+    {
+        @* Nothing here for a note to be shown at. It keeps the selector's width all the same, so the
+           notes of the rows above and below stay in line. *@
+        <span class="target none" title="@Translator("CallNoteNeedsStop")">&mdash;</span>
+    }
     @if (_editing)
     {
-        <input type="text" @ref="_input" value="@_draft" title="@Title"
+        <input type="text" @ref="_input" value="@_draft" title="@Translator("CallNoteHint")"
                @oninput="e => _draft = e.Value?.ToString() ?? string.Empty"
                @onblur="Commit" @onkeydown="OnKeyDown" />
     }
     else
     {
         @* tabindex makes the rendered form a tab stop, so the field is reachable without a mouse; focus
-           and click both open it, which is the same gesture either way. *@
-        <div class="rendered @(HasText ? null : "empty")" tabindex="0" role="textbox" title="@Title"
+           and click both open it, which is the same gesture either way. A call that may carry no note
+           is neither a tab stop nor openable, and says why instead of inviting one to be typed. *@
+        <div class="rendered @(HasText ? null : "empty") @(CanEdit ? null : "readonly")"
+             tabindex="@(CanEdit ? "0" : null)" role="textbox"
+             title="@(CanEdit ? Translator("CallNoteHint") : Translator("CallNoteNeedsStop"))"
              @onfocus="StartEditing" @onclick="StartEditing">
             @if (HasText)
             {
                 <span class="callnote">@Rendered</span>
             }
-            else
+            else if (CanEdit)
             {
-                @Placeholder
+                @Translator("AddCallNote")
             }
         </div>
         @* Clearing is the one edit that needs no typing, so it is one click from the rendered form.
-           It only appears once there is something to clear. *@
+           It only appears once there is something to clear, and stays even where nothing new may be
+           written, so a note left behind by a call that has since become a pass-through can be taken
+           away. *@
         @if (HasText)
         {
-            <button type="button" class="clear" title="@ClearTitle" @onclick="Clear"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="clear" title="@Translator("ClearCallNote")" @onclick="Clear"><i class="fa-solid fa-xmark"></i></button>
         }
     }
 </div>
@@ -39,24 +65,35 @@
     /// <summary>The note text as stored, Markdown emphasis included.</summary>
     [Parameter] public string Value { get; set; } = "";
 
-    /// <summary>Raised with the edited text when the field is left or Enter is pressed.</summary>
-    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    /// <summary>The half of the call the note is for, as stored, or null where it may carry none.</summary>
+    [Parameter] public CallNoteTarget? Target { get; set; }
 
-    /// <summary>Shown in place of the text while the note is empty.</summary>
-    [Parameter] public string? Placeholder { get; set; }
+    /// <summary>
+    /// The halves this call offers — see <c>StationCall.ManualNoteTargets</c>. Empty makes the field
+    /// read-only: there is nowhere to show a note at a call the train runs past.
+    /// </summary>
+    [Parameter] public IReadOnlyList<CallNoteTarget> Targets { get; set; } = [];
 
-    /// <summary>Hover text, normally explaining the emphasis syntax.</summary>
-    [Parameter] public string? Title { get; set; }
-
-    /// <summary>Hover text for the button that clears a written note.</summary>
-    [Parameter] public string? ClearTitle { get; set; }
+    /// <summary>
+    /// Raised with the text and the half when the field is left, Enter is pressed, the note is cleared,
+    /// or the half of a written note is changed.
+    /// </summary>
+    [Parameter] public EventCallback<ManualNoteEdit> NoteChanged { get; set; }
 
     private ElementReference _input;
     private string _draft = "";
     private bool _editing;
     private bool _focusPending;
 
+    // A half picked before anything is typed belongs to a note that does not exist yet, so it waits
+    // here until the text that stores it arrives.
+    private CallNoteTarget? _pending;
+
     private bool HasText => !string.IsNullOrWhiteSpace(Value);
+
+    private bool CanEdit => Targets.Count > 0;
+
+    private CallNoteTarget? Chosen => _pending ?? Target;
 
     private MarkupString Rendered => new(NoteMarkdown.ToHtml(Value));
 
@@ -77,10 +114,19 @@
 
     private void StartEditing()
     {
-        if (_editing) return;
+        if (_editing || !CanEdit) return;
         _draft = Value;
         _editing = true;
         _focusPending = true;
+    }
+
+    // Changing the half of a written note is an edit of that note, so it is stored at once; picked
+    // before there is a note, it only waits for the text.
+    private async Task SetTarget(ChangeEventArgs e)
+    {
+        if (!Enum.TryParse<CallNoteTarget>(e.Value?.ToString(), out var target) || !Targets.Contains(target)) return;
+        _pending = target;
+        if (HasText) await Store(Value);
     }
 
     private async Task Commit()
@@ -89,15 +135,19 @@
         if (!_editing) return;
         _editing = false;
         if (_draft == Value) return;
-        await ValueChanged.InvokeAsync(_draft);
+        await Store(_draft);
     }
 
     // Clearing is a commit of empty text, not an edit: the field stays closed, so the note simply
     // disappears and leaves the placeholder behind.
-    private async Task Clear()
+    private async Task Clear() => await Store("");
+
+    private async Task Store(string text)
     {
-        _draft = "";
-        await ValueChanged.InvokeAsync("");
+        _draft = text;
+        var target = Chosen;
+        _pending = null;
+        await NoteChanged.InvokeAsync(new ManualNoteEdit(text, target));
     }
 
     private async Task OnKeyDown(KeyboardEventArgs e)

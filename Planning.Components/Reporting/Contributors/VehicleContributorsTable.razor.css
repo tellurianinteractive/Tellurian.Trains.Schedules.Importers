@@ -1,0 +1,165 @@
+/* A page of the Vehicle contributors report.
+
+   The printed sheet is the artefact, so the geometry is stated in millimetres and points and applies on screen
+   as well as on paper — not inside @media print. The A4LPage wrapper is a real 297 x 210 mm box on screen, so
+   the on-screen render is a true print preview: what overflows the box would overflow the page.
+
+   VehicleContributorsPaginator fits rows to pages from VehicleContributorsPageGeometry, and the heights pinned
+   here are the ones it counts with: the heading box of 17 mm plus its 3 mm margin (HeadingHeightMm 20), the
+   column-header row of one 4 mm line (ColumnHeaderHeightMm 6), and rows of 5 mm lines with 1 mm of padding and a
+   hairline border (RowHeightMm 6.3, LineHeightMm 5). As rendered in Chromium: heading 17.00 mm and 20.00 mm to
+   the table, a row 6.25 mm and each further line of notes 5.00 mm. Change one and remeasure the other.
+
+   No column width is stated anywhere. Every column but the notes is shrunk to its widest text, heading included,
+   and never wraps; the notes take the rest of the page. Notes are expected to be short, and each is counted as
+   one line. */
+
+.contributors-page {
+    /* The name is what the reader looks for across a table of sheets, so it is set large; what the sheet is and
+       when it was printed is read once it is in hand, so it is set small beside it. The box has a fixed height
+       and the name a single line, cut short rather than wrapped, because a second line would push the table
+       down by a row the estimate never paid for. */
+    .heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 6mm;
+        box-sizing: border-box;
+        height: 17mm;
+        margin-bottom: 3mm;
+        border-bottom: 1.5px solid #000;
+        overflow: hidden;
+
+        h1 {
+            flex: 1 1 auto;
+            min-width: 0;
+            margin: 0;
+            font-size: 26pt;
+            line-height: 15mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            .continued {
+                margin-left: 3mm;
+                font-size: 0.5em;
+                font-weight: 400;
+            }
+        }
+
+        .context {
+            display: flex;
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-bottom: 1mm;
+            font-size: 9pt;
+            line-height: 4.5mm;
+            white-space: nowrap;
+        }
+    }
+
+    table.contributors {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10pt;
+
+        /* A width of 1% shrinks a column to its content, which cannot wrap, so the column is exactly as wide as
+           its widest text — heading or value. The notes alone are left to take up the rest. */
+        th,
+        td {
+            width: 1%;
+            padding: 0.5mm 1mm;
+            border-bottom: 1px solid #999;
+            line-height: 5mm;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        th {
+            height: 6mm;
+            box-sizing: border-box;
+            border-bottom: 1.5px solid #000;
+            font-size: 8pt;
+            font-style: italic;
+            font-weight: 400;
+            line-height: 4mm;
+            vertical-align: bottom;
+        }
+
+        /* The background says what the unit is for the meeting: white when it is set up and in operation on
+           every session, light grey for a spare, and light blue, green or red for an item first in operation
+           on the first, second or third session. Light enough to read black text on, apart enough to tell on
+           paper, and forced to print, which browsers otherwise suppress for background colours. */
+        tbody tr {
+            background: #fff;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+
+            &.spare {
+                background: #e3e3e3;
+            }
+
+            &.from-session-1 {
+                background: #d6e8fa;
+            }
+
+            &.from-session-2 {
+                background: #d8f0d2;
+            }
+
+            &.from-session-3 {
+                background: #f8d7d7;
+            }
+        }
+
+        /* Right-aligned, so the digits line up, and kept clear of the left-aligned column after it. */
+        .count {
+            padding-right: 3mm;
+            text-align: right;
+        }
+
+        .track,
+        .departure,
+        .first-session,
+        .class,
+        .turnus {
+            text-align: center;
+        }
+
+        /* The turnus is what an owner recognises their own stock by. */
+        td.turnus {
+            font-weight: 700;
+        }
+
+        td.not-in-operation {
+            font-style: italic;
+        }
+
+        /* A traction unit that cannot be driven until its owner gives an address: red, so it is chased up
+           before the meeting rather than found out at the layout. */
+        td.dcc-address.missing {
+            color: #c00000;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* The one column that wraps and the one that takes the width left, a note per line. A word too long for
+           the column breaks rather than pushing the table past the page. */
+        th.note,
+        td.note {
+            width: auto;
+            white-space: normal;
+            overflow-wrap: anywhere;
+
+            .note {
+                display: block;
+            }
+        }
+    }
+
+    &.all-units table.contributors td.dcc-address {
+        font-weight: 700;
+    }
+}

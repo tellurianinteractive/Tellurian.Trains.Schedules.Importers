@@ -2,6 +2,7 @@
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
 @using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
 @using Theme = Tellurian.Trains.Schedules.Model.Layouts.Theme
 @using Scale = Tellurian.Trains.Schedules.Model.Layouts.Scale
@@ -440,9 +441,17 @@ else
                        booklet and handed to every participant before the first session — station staff
                        included — rather than bound into each driver's duty booklet. *@
                     <p class="hint">@Translator("GeneralInstructionsHint")</p>
+                    @* Where the shunting yards table goes is the author's to decide, so the tag that
+                       places it is written out here rather than left to the field help: it is the only
+                       thing in this text area that is not plain markdown. *@
+                    <p class="hint">
+                        @Translator("ShuntingYardsPlaceholderHint")
+                        <code>@InstructionsPlaceholders.TagOf(InstructionsPlaceholder.ShuntingYards)</code>
+                    </p>
                     <div class="field instructions">
                         <HelpLabel For="GeneralInstructions" />
                         <MarkdownEditor Rows="24" PreviewClass="instructions-body"
+                                        Preprocess="PreviewInstructions"
                                         @bind-Value="Plan.GeneralInstructions" @bind-Value:after="OnEdited" />
                     </div>
                 }
@@ -453,6 +462,11 @@ else
 
 @code {
     private SettingsSection _section = SettingsSection.General;
+
+    // The preview renders markdown only, so a placeholder tag would vanish from it. Shown as a named
+    // box instead, so the author can see the tag was recognised without printing the booklet.
+    private string PreviewInstructions(string markdown) =>
+        InstructionsPlaceholders.ToPreviewMarkdown(markdown, placeholder => Translator(placeholder.ToString()));
 
     private static readonly SettingsSection[] Sections = Enum.GetValues<SettingsSection>();
 

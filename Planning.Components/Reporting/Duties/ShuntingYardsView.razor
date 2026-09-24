@@ -1,0 +1,52 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@* The layout's shunting yards, as a table under its own heading.
+
+   Printed in two places, which is why it is a component of its own: fixed on the last page of every
+   duty booklet, where a driver turns to it mid-run, and — in the general instructions booklet —
+   wherever the author put a <ShuntingYards/> placeholder in their own text. The two must look the
+   same, because a participant who holds both booklets is meant to recognise one from the other.
+
+   Three columns, because a shunting yard covers two different kinds of destination. Together they
+   answer the question a driver actually has holding a wagon card: where does this wagon go from here,
+   and is that on the layout or off it? Either column alone answers only half. *@
+
+@if (ShuntingYards.Count > 0)
+{
+    <h2>@Translator("ShuntingYards")</h2>
+    <table class="shunting-yards">
+        <thead>
+            <tr>
+                <th>@Translator("ShuntingYards")</th>
+                <th>@Translator("ServesLocations")</th>
+                <th>@Translator("ServesRegions")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var shuntingYard in ShuntingYards)
+            {
+                <tr>
+                    <td class="shunting-yard">@shuntingYard.Station.Name</td>
+                    <td>@string.Join(", ", shuntingYard.ServedLocations.Select(l => l.Name))</td>
+                    @* The same coloured chips as in the cargo notes, so this table reads as a key to
+                       those notes rather than as separate information. *@
+                    <td>
+                        @foreach (var region in shuntingYard.ServedRegions)
+                        {
+                            @region.ToHtml
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    /// <summary>The layout whose shunting yards are listed. A layout with none prints nothing at all.</summary>
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
+
+    private IReadOnlyList<ShuntingYard> ShuntingYards => Layout?.ShuntingYards ?? [];
+}

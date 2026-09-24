@@ -1,0 +1,37 @@
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
+
+@inject Translator Translator
+
+@* The last page of the general instructions booklet: what the layout is, and how the freight entries
+   of every other report are written.
+
+   Appended because the people who receive this booklet and no other — station staff above all — get a
+   layout overview from nowhere else. The topology and shunting yards are the same ones a duty booklet
+   shows, so the component is shared; the section title is not, because the duty booklet's overview
+   page carries none.
+
+   The shunting yards table can be taken off this page and placed in the author's own text instead,
+   with a <ShuntingYards/> tag. This page carries four things — a section title, a diagram, a table and
+   the cargo key — and a layout with more than a handful of shunting yards runs past the foot of it,
+   where the page body's overflow:hidden drops whatever did not fit without a word. The table is the
+   part that grows with the layout, so it is the part the author can move. *@
+
+<div class="instructions-overview">
+    <h1 class="section-title">@Translator("Layout")</h1>
+    <DutyOverviewPage Layout="Layout" ShowShuntingYards="ShowShuntingYards" />
+    @* The key to the cargo marks and wordings, under a section title of its own: the shunting yards
+       above it are layout facts, and this is how the freight entries of every other report are
+       written. Both belong on the page the reader keeps coming back to, which is this one. *@
+    <CargoFlowExplanation Layout="Layout" />
+</div>
+
+@code {
+    /// <summary>The layout the booklet is printed for.</summary>
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
+
+    /// <summary>
+    /// Whether the shunting yards table is printed here, which it is unless the author placed it in
+    /// their own text.
+    /// </summary>
+    [Parameter] public bool ShowShuntingYards { get; set; } = true;
+}

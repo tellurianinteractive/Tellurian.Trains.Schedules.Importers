@@ -338,6 +338,33 @@ public class MeetNoteTests
     }
 
     [TestMethod]
+    public void DirectionAndTheEndsOfTheRunFollowTheRunOrder()
+    {
+        var timetable = CreateTimetable();
+        var stations = TestDataFactory.Stations.ToArray();
+
+        // Calls added out of run order — the terminus before the stop in between — as happens as soon as a
+        // planner adds a call to a train that already has its ends. Only the times say what the train runs next.
+        var train = new Train(1, Category, 1) { Category = Category };
+        var origin = train.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 00)));
+        var terminus = train.Add(new StationCall(3, stations[2]["1"], Time.FromHourAndMinute(12, 55), Time.FromHourAndMinute(12, 55)));
+        var ytterby = train.Add(new StationCall(2, stations[1]["2"], Time.FromHourAndMinute(12, 25), Time.FromHourAndMinute(12, 30)));
+        timetable.Add(train);
+        var opposite = TestDataFactory.CreateTrainInOppositeDirection(Category, 2, Time.FromHourAndMinute(12, 00));
+        timetable.Add(opposite);
+
+        Assert.IsTrue(origin.IsTrainOriginOrTerminus);
+        Assert.IsTrue(terminus.IsTrainOriginOrTerminus);
+        Assert.IsFalse(ytterby.IsTrainOriginOrTerminus);
+        Assert.AreEqual(TravelDirection.Forward, ytterby.DirectionInto);
+
+        // And so the meet is still found: taking the calls as inserted makes Ytterby the terminus and the
+        // inbound stretch the one from Snusaviken, which silences the note and reverses the direction.
+        var crossing = ytterby.MeetNotes(Sessions.All, Settings).OfType<CrossingNote>().Single();
+        Assert.AreEqual(opposite, crossing.Meets.Single().Other);
+    }
+
+    [TestMethod]
     public void PassThroughCallsAreMarkedNoStopAndStandingCallsNoExchange()
     {
         var timetable = CreateTimetable();

@@ -529,7 +529,7 @@
     <value>Train categories with prefix, colour, and classification.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Who brings what rolling stock for the session.</value>
+    <value>Who brings which rolling stock to the meeting. The first owner of an item brings the unit and sets it up on the layout; any further owners bring spares.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Build vehicle schedules and assign to locomotives, wagons, and cargo flows.</value>
@@ -731,8 +731,8 @@
   <data name="TrackRouteHint" xml:space="preserve">
     <value>Name the location a train comes from, the one it goes on to, or both, and a new train running that way is put on this track — the other way round as well when both ways is ticked. A new train no track is reserved for takes a platform track where it stops to exchange passengers, and the main track where it does not.</value>
   </data>
-  <data name="TrackReferencedByTrains" xml:space="preserve">
-    <value>Cannot delete: {0} train(s) use this track.</value>
+  <data name="TrackReferenced" xml:space="preserve">
+    <value>Cannot delete: this track is used by trains or vehicle schedules.</value>
   </data>
   <data name="LocationReferencedByTrains" xml:space="preserve">
     <value>Cannot delete: trains call at this location.</value>
@@ -1449,6 +1449,12 @@
   <data name="CallNoteHint" xml:space="preserve">
     <value>Note shown at this call. Use *italic* and **bold** for emphasis; the markup appears when you edit.</value>
   </data>
+  <data name="CallNoteTargetHint" xml:space="preserve">
+    <value>Whether the note is shown at the arrival or at the departure.</value>
+  </data>
+  <data name="CallNoteNeedsStop" xml:space="preserve">
+    <value>A note needs a stop: tick Arr or Dep to write one at this call.</value>
+  </data>
   <data name="NoCalls" xml:space="preserve">
     <value>No calls.</value>
   </data>
@@ -1720,7 +1726,7 @@
     <value>Build automatically</value>
   </data>
   <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
-    <value>{0} schedules built</value>
+    <value>{0} train parts added to {1} existing schedules, {2} new schedules built</value>
   </data>
   <data name="SchedulesNewSchedule" xml:space="preserve">
     <value>New schedule</value>
@@ -1881,6 +1887,26 @@
   <data name="Battery" xml:space="preserve">
     <value>Battery</value>
   </data>
+  <data name="SteamInText" xml:space="preserve">
+    <value>steam</value>
+    <comment>Traction type as written after the vehicle type, e.g. "Locomotive, steam"</comment>
+  </data>
+  <data name="DieselInText" xml:space="preserve">
+    <value>diesel</value>
+    <comment>Traction type as written after the vehicle type, e.g. "Trainset, diesel"</comment>
+  </data>
+  <data name="ElectricInText" xml:space="preserve">
+    <value>electric</value>
+    <comment>Traction type as written after the vehicle type, e.g. "Locomotive, electric"</comment>
+  </data>
+  <data name="DualInText" xml:space="preserve">
+    <value>dual</value>
+    <comment>Traction type as written after the vehicle type, e.g. "Locomotive, dual"</comment>
+  </data>
+  <data name="BatteryInText" xml:space="preserve">
+    <value>battery</value>
+    <comment>Traction type as written after the vehicle type, e.g. "Trainset, battery"</comment>
+  </data>
   <data name="IsReversibleTrain" xml:space="preserve">
     <value>Reversible train?</value>
   </data>
@@ -1905,6 +1931,22 @@
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>The traction working this train part reverses as it stands, so no runaround note is printed.</value>
+  </data>
+  <data name="PartFetchFromTrack" xml:space="preserve">
+    <value>Fetch from</value>
+  </data>
+  <data name="PartFetchFromTrackHelp" xml:space="preserve">
+    <value>The track the vehicles stand on before the train departs, where it is another than the one the train departs from. Printed as a departure note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="PartPutOnTrack" xml:space="preserve">
+    <value>Put on</value>
+  </data>
+  <data name="PartPutOnTrackHelp" xml:space="preserve">
+    <value>The track the vehicles are put on after the train arrives, where it is another than the one the train arrives at. Printed as an arrival note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="SameTrackAsTrain" xml:space="preserve">
+    <value>Same as the train (track {0})</value>
+    <comment>{0}=track number</comment>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Number of units</value>
@@ -2104,6 +2146,9 @@
   <data name="ShuntingYards" xml:space="preserve">
     <value>Shunting yards</value>
   </data>
+  <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
+    <value>The shunting yards table is printed on the layout page at the back of the booklet. To place it in the text instead, write it on a line of its own:</value>
+  </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Cargo served from</value>
   </data>
@@ -2292,5 +2337,155 @@
   </data>
   <data name="CouldNotCreateShuntingTask" xml:space="preserve">
     <value>The shunting task could not be created. Check that the station has a track and that the times fall within the operating window.</value>
+  </data>
+  <data name="MaximumExplanation" xml:space="preserve">
+    <value>A load limit is printed as a figure with a mark that says what is counted. Every figure is a maximum.</value>
+  </data>
+  <data name="MaxAxlesExplanation" xml:space="preserve">
+    <value>Number of axles</value>
+  </data>
+  <data name="MaxWagonsExplanation" xml:space="preserve">
+    <value>Number of wagons</value>
+  </data>
+  <data name="MaxLengthExplanation" xml:space="preserve">
+    <value>Train length in metres</value>
+  </data>
+  <data name="AnywhereExplanation" xml:space="preserve">
+    <value>The wagons are already at the station and may have come from anywhere</value>
+  </data>
+  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
+    <value>Also wagons for the destinations served by freight trains from there</value>
+  </data>
+  <data name="AndBeyondExplanation" xml:space="preserve">
+    <value>Also wagons for the destinations on the layout beyond that place</value>
+  </data>
+  <data name="RegionExplanation" xml:space="preserve">
+    <value>A destination outside the layout, reached through this place</value>
+  </data>
+  <data name="RollingStock" xml:space="preserve">
+    <value>Rolling stock</value>
+  </data>
+  <data name="Participants" xml:space="preserve">
+    <value>Participants</value>
+  </data>
+  <data name="Participant" xml:space="preserve">
+    <value>Participant</value>
+  </data>
+  <data name="FirstSession" xml:space="preserve">
+    <value>First session</value>
+  </data>
+  <data name="FirstDay" xml:space="preserve">
+    <value>First day</value>
+  </data>
+  <data name="DccAddress" xml:space="preserve">
+    <value>DCC address</value>
+  </data>
+  <data name="DccAddressHelp" xml:space="preserve">
+    <value>Every traction unit brought needs its own DCC address, spares included. Enter 0 if the owner is still to provide it.</value>
+  </data>
+  <data name="DccAddressToBeProvided" xml:space="preserve">
+    <value>Owner to provide</value>
+  </data>
+  <data name="DccAddressMissing" xml:space="preserve">
+    <value>No DCC address. Every traction unit needs one; enter 0 if the owner is to provide it.</value>
+  </data>
+  <data name="DccAddressInvalid" xml:space="preserve">
+    <value>Enter a DCC address from 0 to 9999, where 0 means the owner is to provide it.</value>
+  </data>
+  <data name="PrimaryContributor" xml:space="preserve">
+    <value>Primary</value>
+  </data>
+  <data name="PrimaryContributorHint" xml:space="preserve">
+    <value>Brings the unit and sets it up on the layout</value>
+  </data>
+  <data name="SpareContributor" xml:space="preserve">
+    <value>Spare</value>
+  </data>
+  <data name="SpareContributorHint" xml:space="preserve">
+    <value>Brings a spare unit</value>
+  </data>
+  <data name="Spares" xml:space="preserve">
+    <value>Spares</value>
+  </data>
+  <data name="AddOwner" xml:space="preserve">
+    <value>Add owner</value>
+  </data>
+  <data name="MakePrimary" xml:space="preserve">
+    <value>Make primary</value>
+  </data>
+  <data name="NoOwnersYet" xml:space="preserve">
+    <value>Nobody brings this yet.</value>
+  </data>
+  <data name="NoRollingStock" xml:space="preserve">
+    <value>No rolling stock yet. Vehicles are added under Schedules.</value>
+  </data>
+  <data name="NotInOperation" xml:space="preserve">
+    <value>Not in operation</value>
+  </data>
+  <data name="WithoutOwnerOnly" xml:space="preserve">
+    <value>Only those without an owner?</value>
+  </data>
+  <data name="ParticipantNameRequired" xml:space="preserve">
+    <value>Enter the participant's name.</value>
+  </data>
+  <data name="ParticipantNameInUse" xml:space="preserve">
+    <value>There is already a participant with that name.</value>
+  </data>
+  <data name="ParticipantReferenced" xml:space="preserve">
+    <value>Cannot delete: this participant brings rolling stock.</value>
+  </data>
+  <data name="NewParticipant" xml:space="preserve">
+    <value>New participant: {0}</value>
+  </data>
+  <data name="AddParticipant" xml:space="preserve">
+    <value>Add participant</value>
+  </data>
+  <data name="NoParticipants" xml:space="preserve">
+    <value>No participants yet. A name entered as an owner is added here.</value>
+  </data>
+  <data name="ParticipantsDescription" xml:space="preserve">
+    <value>Everyone named as an owner. Correct a misspelt name here and it is corrected wherever it appears.</value>
+  </data>
+  <data name="TypeParticipantName" xml:space="preserve">
+    <value>Type a name…</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="VehicleContributors" xml:space="preserve">
+    <value>Vehicle contributors</value>
+  </data>
+  <data name="ByOperationLocation" xml:space="preserve">
+    <value>By operation location</value>
+  </data>
+  <data name="ByOwner" xml:space="preserve">
+    <value>By owner</value>
+  </data>
+  <data name="ByDccAddress" xml:space="preserve">
+    <value>By DCC address</value>
+  </data>
+  <data name="DccAddresses" xml:space="preserve">
+    <value>DCC addresses</value>
+  </data>
+  <data name="NotYetBooked" xml:space="preserve">
+    <value>Not yet booked</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Missing</value>
+  </data>
+  <data name="NoTractionUnits" xml:space="preserve">
+    <value>No locomotives or trainsets yet, so there are no DCC addresses to list.</value>
+  </data>
+  <data name="TrainCompositions" xml:space="preserve">
+    <value>Train compositions</value>
+  </data>
+  <data name="NoTrainCompositions" xml:space="preserve">
+    <value>No manned station has departing trains with cargo flows or wagonsets with listed wagons.</value>
+  </data>
+  <data name="CompositionFromLoco" xml:space="preserve">
+    <value>Composition counted from the loco</value>
   </data>
 </root>

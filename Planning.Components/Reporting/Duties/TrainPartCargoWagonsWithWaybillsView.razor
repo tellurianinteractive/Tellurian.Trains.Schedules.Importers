@@ -17,54 +17,56 @@
 
 @if (Data is { HasData: true })
 {
-    <h3>@Translator("CargoWagonsWithWaybills")</h3>
-    <table class="dutytrain cargo">
-        <thead>
-            <tr>
-                <th>@Translator("PositionInTrain")</th>
-                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
-                   and would head a column holding a few circles. *@
-                <th>@Translator(SessionsHeading)</th>
-                <th>@Translator("From")</th>
-                <th>@Translator("WagonClasses")</th>
-                <th>@Translator("To")</th>
-                @if (Data.HasMaxLoads)
-                {
-                    <th class="maxload">@Translator("Maximum")</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in Data.Flows)
-            {
+    <div class="dutyblock cargo-flows">
+        <h3>@Translator("CargoWagonsWithWaybills")</h3>
+        <table class="dutytrain cargo">
+            <thead>
                 <tr>
-                    <td>@row.PositionText(Translator("AnyPositionInTrain"))</td>
-                    <td><SessionsView Sessions="row.Sessions" Settings="Data.SessionsSettings" /></td>
-                    <td>@row.From(AlsoShunt, Anywhere)</td>
-                    @* Empty means no restriction, printed as nothing rather than "all" or a dash. *@
-                    <td>@row.WagonClasses</td>
-                    <td>@row.To(AlsoShunt)</td>
+                    <th>@Translator("PositionInTrain")</th>
+                    @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
+                       and would head a column holding a few circles. *@
+                    <th>@Translator(SessionsHeading)</th>
+                    <th>@Translator("From")</th>
+                    <th>@Translator("WagonClasses")</th>
+                    <th>@Translator("To")</th>
                     @if (Data.HasMaxLoads)
                     {
-                        <td class="maxload">
-                            @foreach (var limit in row.MaxLoads)
-                            {
-                                <span class="limit">
-                                    @* Named only where the row's destinations do not share one limit —
-                                       see TrainPartCargoFlow.MaxLoads. *@
-                                    @if (limit.Location is { Length: > 0 } location)
-                                    {
-                                        <span class="at">@location</span>
-                                    }
-                                    <MaxLoadView Capacity="limit.Capacity" />
-                                </span>
-                            }
-                        </td>
+                        <th class="maxload">@Translator("Maximum")</th>
                     }
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var row in Data.Flows)
+                {
+                    <tr>
+                        <td>@row.PositionText(Translator("AnyPositionInTrain"))</td>
+                        <td><SessionsView Sessions="row.Sessions" Settings="Data.SessionsSettings" /></td>
+                        <td>@row.From(AlsoShunt, Anywhere)</td>
+                        @* Empty means no restriction, printed as nothing rather than "all" or a dash. *@
+                        <td>@row.WagonClasses</td>
+                        <td>@row.To(AlsoShunt)</td>
+                        @if (Data.HasMaxLoads)
+                        {
+                            <td class="maxload">
+                                @foreach (var limit in row.MaxLoads)
+                                {
+                                    <span class="limit">
+                                        @* Named only where the row's destinations do not share one limit —
+                                           see TrainPartCargoFlow.MaxLoads. *@
+                                        @if (limit.Location is { Length: > 0 } location)
+                                        {
+                                            <span class="at">@location</span>
+                                        }
+                                        <MaxLoadView Capacity="limit.Capacity" />
+                                    </span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
     <hr />
 }
 

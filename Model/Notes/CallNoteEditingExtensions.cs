@@ -28,14 +28,36 @@ public static class CallNoteEditingExtensions
         public string ManualNoteText => call.ManualNote?.Text ?? string.Empty;
 
         /// <summary>
+        /// The half of the call the manual note is for — the note's own where it has one, and otherwise
+        /// the half a note written here would get. Null at a call that may carry no manual note.
+        /// </summary>
+        /// <remarks>
+        /// This is the value the note field's arrival/departure selector binds to, so it never answers
+        /// with a half the call no longer offers: a note written before its half was taken away shows,
+        /// and on its next edit moves to, the half that is left. What the note itself still says is
+        /// <c>CallNote.Target</c>.
+        /// </remarks>
+        public CallNoteTarget? ManualNoteTarget =>
+            call.ValueOrException(nameof(call)).ManualNote?.Target is { } target && call.ManualNoteTargets.Contains(target)
+                ? target
+                : call.DefaultManualNoteTarget;
+
+        /// <summary>
         /// Writes the manual note of this call, creating it when there is none and removing it when the
         /// text is cleared — so an emptied field leaves no blank note behind to occupy a row in a
         /// printed booklet.
         /// </summary>
         /// <param name="text">The new text, Markdown emphasis included. Null or blank removes the note.</param>
+        /// <param name="target">The half of the call the note is for. Null takes the call's own default,
+        /// and so does a half this call does not offer. See <see cref="ManualNoteRules"/>.</param>
         /// <param name="languageCode">The language written, or <c>null</c> for the reader's current
         /// language. See <see cref="TextCallNote.SetText(string, string?)"/>.</param>
-        public void SetManualNote(string? text, string? languageCode = null)
+        /// <remarks>
+        /// Nothing is written at a call the train runs past: a note there belongs to neither half, and
+        /// the reports that print the two apart would never show it. Clearing still works, so a note
+        /// left over from when the call was a stop can be taken away.
+        /// </remarks>
+        public void SetManualNote(string? text, CallNoteTarget? target = null, string? languageCode = null)
         {
             call = call.ValueOrException(nameof(call));
             var note = call.ManualNote;
@@ -44,6 +66,8 @@ public static class CallNoteEditingExtensions
                 if (note is not null) call.Notes.Remove(note);
                 return;
             }
+            if (call.DefaultManualNoteTarget is not { } fallback) return;
+            var half = target is { } wanted && call.ManualNoteTargets.Contains(wanted) ? wanted : fallback;
             if (note is null)
             {
                 // A manual note is for everyone at the call until someone says otherwise: the audience
@@ -57,6 +81,7 @@ public static class CallNoteEditingExtensions
                 };
                 call.Notes.Add(note);
             }
+            note.SetTarget(half);
             // Written through SetText even when just created, so the language a note is stored under is
             // resolved in one place and cannot disagree with the language it is read back in.
             note.SetText(text, languageCode);

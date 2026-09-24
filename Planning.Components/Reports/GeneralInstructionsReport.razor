@@ -2,7 +2,6 @@
 @layout PrintLayout
 
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions
-@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
 @* Planning.Components.Layout is a namespace here, so the model type needs disambiguating. *@
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
 
@@ -21,7 +20,11 @@
    both depend only on a page count. The booklet always opens with a front page (layout name, validity,
    print date, programme), then the standing instructions under their own heading, then the layout
    topology and shunting yards under theirs — appended because the people who receive this get no
-   layout overview from anywhere else. *@
+   layout overview from anywhere else.
+
+   The shunting yards table is the one part of that last page the author may move: writing a
+   <ShuntingYards/> tag in the instructions prints it there instead, and takes it off the layout page,
+   which a long yard list would otherwise push past the foot of. *@
 
 @if (_sheets is null)
 {
@@ -38,8 +41,10 @@ else
     {
         <A4LPage>
             <div class="dutysheet">
-                @RenderPage(side.Left)
-                @RenderPage(side.Right)
+                <InstructionsBookletPage Page="side.Left" Layout="Layout" Program="@Program"
+                                         PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
+                <InstructionsBookletPage Page="side.Right" Layout="Layout" Program="@Program"
+                                         PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
             </div>
         </A4LPage>
     }
@@ -48,8 +53,10 @@ else
 @code {
     private IReadOnlyList<SheetSide<InstructionsPage>>? _sheets;
     private DateOnly _printDate;
+    private bool _showShuntingYards = true;
 
     private LayoutModel? Layout => ScheduleState.Layout;
+    private string? Program => ScheduleState.Schedule?.Program;
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,67 +66,13 @@ else
         // Fixed once for the whole render, so a PDF printed later still identifies the render it came from.
         _printDate = DateOnly.FromDateTime(DateTime.Now);
 
-        var pages = InstructionsPagination.BuildPages(ScheduleState.Schedule?.GeneralInstructions);
+        var instructions = ScheduleState.Schedule?.GeneralInstructions;
+
+        // The table goes where the author put it, and nowhere else: a booklet that printed it both in
+        // the text and again at the back would leave the reader wondering which one to trust.
+        _showShuntingYards = !InstructionsPlaceholders.Places(instructions, InstructionsPlaceholder.ShuntingYards);
+
+        var pages = InstructionsPagination.BuildPages(instructions, shuntingYards: Layout?.ShuntingYards);
         _sheets = BookletImposition.Impose(pages);
     }
-
-    private RenderFragment RenderPage(InstructionsPage page) => builder =>
-    {
-        builder.OpenElement(0, "div");
-        builder.AddAttribute(1, "class", "dutypage");
-        switch (page.Kind)
-        {
-            case InstructionsPageKind.Front:
-                builder.OpenComponent<InstructionsFrontPage>(2);
-                builder.AddComponentParameter(3, nameof(InstructionsFrontPage.LayoutName), Layout?.Name ?? "");
-                builder.AddComponentParameter(4, nameof(InstructionsFrontPage.ValidFrom), Layout?.Settings.General.ValidFrom);
-                builder.AddComponentParameter(5, nameof(InstructionsFrontPage.ValidTo), Layout?.Settings.General.ValidTo);
-                builder.AddComponentParameter(6, nameof(InstructionsFrontPage.PrintDate), _printDate);
-                builder.AddComponentParameter(7, nameof(InstructionsFrontPage.Program), ScheduleState.Schedule?.Program);
-                builder.CloseComponent();
-                break;
-
-            case InstructionsPageKind.Content:
-                builder.OpenElement(8, "div");
-                builder.AddAttribute(9, "class", "instructions-body");
-                if (page.IsFirstOfSection)
-                {
-                    builder.OpenElement(10, "h1");
-                    builder.AddAttribute(11, "class", "section-title");
-                    builder.AddContent(12, Translator("Instructions"));
-                    builder.CloseElement();
-                }
-                builder.AddContent(13, (MarkupString)Markdig.Markdown.ToHtml(page.Markdown));
-                builder.CloseElement();
-                break;
-
-            case InstructionsPageKind.Overview:
-                builder.OpenElement(14, "div");
-                builder.AddAttribute(15, "class", "instructions-overview");
-                builder.OpenElement(16, "h1");
-                builder.AddAttribute(17, "class", "section-title");
-                builder.AddContent(18, Translator("Layout"));
-                builder.CloseElement();
-                builder.OpenComponent<DutyOverviewPage>(19);
-                builder.AddComponentParameter(20, nameof(DutyOverviewPage.Layout), Layout);
-                builder.CloseComponent();
-                @* The key to the cargo marks and wordings, under a section title of its own: the
-                   shunting yards above it are layout facts, and this is how the freight entries of
-                   every other report are written. Both belong on the page the reader keeps coming
-                   back to, which is this one. *@
-                builder.OpenComponent<CargoFlowExplanation>(21);
-                builder.AddComponentParameter(22, nameof(CargoFlowExplanation.Timetable), ScheduleState.Schedule?.Timetable);
-                builder.CloseComponent();
-                builder.CloseElement();
-                break;
-
-            case InstructionsPageKind.Blank:
-                builder.OpenElement(23, "p");
-                builder.AddAttribute(24, "class", "blank");
-                builder.AddContent(25, Translator("ThisPageIsIntentionalBlank"));
-                builder.CloseElement();
-                break;
-        }
-        builder.CloseElement();
-    };
 }

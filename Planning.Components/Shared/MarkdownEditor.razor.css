@@ -37,6 +37,22 @@
     .preview ::deep * {
         overflow-wrap: break-word;
     }
+
+    /* Where a marker in the text stands for a part the app prints — the shunting yards table, say.
+       Drawn as an empty dashed box carrying the part's name, because that is what it is: the preview
+       knows where the part goes and how much of the text it separates, but not how tall it will be.
+       Quiet and obviously not type, so it is never mistaken for something the author wrote. */
+    .preview ::deep .report-placeholder {
+        margin: 0.4em 0;
+        padding: 0.35em 0.6em;
+        border: 1px dashed #b7c0c9;
+        border-radius: 3px;
+        background: #f1f4f7;
+        color: #5a6570;
+        font-size: 0.9em;
+        font-style: italic;
+        text-align: center;
+    }
 }
 
 /* Narrower than this the two panes are each too cramped to read, so the preview moves below the

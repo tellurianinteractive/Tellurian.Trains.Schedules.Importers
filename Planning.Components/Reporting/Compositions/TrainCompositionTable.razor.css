@@ -1,0 +1,256 @@
+﻿/* A page of the Train compositions report.
+
+   The printed sheet is the artefact, so the geometry is stated in millimetres and points and applies on screen
+   as well as on paper — not inside @media print. The A4LPage wrapper is a real 297 x 210 mm box on screen, so
+   the on-screen render is a true print preview: what overflows the box would overflow the page.
+
+   CompositionPaginator fits rows to pages from CompositionPageGeometry, and every size below that it counts
+   with is pinned here: the heading box of 17 mm plus its 3 mm margin (HeadingHeightMm 20), the column-header
+   row (ColumnHeaderHeightMm), the row's 1 mm padding and rule (RowChromeHeightMm), the 5 mm text line, the
+   column widths (FixedColumnsWidthMm 142), the gaps between groups, the one-line 6.1 mm wagon rectangle with
+   its padding, border, type sizes and 1 mm gaps, the 8 mm narrowest rectangle, and the cargo rectangle with
+   its 4.5 mm lines. Change one and remeasure the other.
+
+   Every rectangle is as wide as what it holds, which is why no rectangle is given a width here: the estimate
+   works the same width out from the text, and a width set in CSS would be the one the browser used and the
+   estimate did not. */
+
+.compositions-page {
+    /* The name is what the reader looks for across a table of sheets, so it is set large; what the sheet is and
+       when it was printed is read once it is in hand, so it is set small beside it. The box has a fixed height
+       and the name a single line, cut short rather than wrapped, because a second line would push the table
+       down by a row the estimate never paid for. */
+    .heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 6mm;
+        box-sizing: border-box;
+        height: 17mm;
+        margin-bottom: 3mm;
+        border-bottom: 1.5px solid #000;
+        overflow: hidden;
+
+        h1 {
+            flex: 1 1 auto;
+            min-width: 0;
+            margin: 0;
+            font-size: 26pt;
+            line-height: 15mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            .continued {
+                margin-left: 3mm;
+                font-size: 0.5em;
+                font-weight: 400;
+            }
+        }
+
+        .context {
+            display: flex;
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-bottom: 1mm;
+            font-size: 9pt;
+            line-height: 4.5mm;
+            white-space: nowrap;
+        }
+    }
+}
+
+table.compositions {
+    width: 100%;
+    border-collapse: collapse;
+    /* Fixed layout so the column widths below are the ones that print, rather than whatever the content
+       happens to negotiate — the estimate lays the groups out within the width the composition is left. */
+    table-layout: fixed;
+    font-size: 9pt;
+
+    th,
+    td {
+        box-sizing: border-box;
+        padding: 1mm;
+        border-bottom: 1px solid #999;
+        line-height: 5mm;
+        text-align: left;
+        vertical-align: top;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    th {
+        padding-top: 0.5mm;
+        padding-bottom: 0.5mm;
+        font-size: 0.75em;
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    /* The departures of one track are closed by a black rule, so the tracks read as groups down the page. The
+       same width as the grey rules between rows, so a group costs no height the estimate does not count. */
+    tr.last-of-track td {
+        border-bottom-color: #000;
+    }
+
+    .track,
+    .time {
+        text-align: center;
+    }
+
+    td.track,
+    td.train {
+        font-weight: 700;
+    }
+
+    /* Wraps rather than truncates: clipping "on demand only" off the end of a value would drop operating
+       information the reader never learns was there. The estimate charges the wrapped lines. */
+    td.sessions {
+        white-space: normal;
+    }
+
+    /* Two limits side by side wrap between one another rather than run past the column; each is held
+       together by MaxLoadView's own nowrap, so a figure never parts from its mark. */
+    td.limit {
+        white-space: normal;
+    }
+
+    /* One entry per wagonset, each on a line of its own and wrapping within the column, for the same reason:
+       a turnus the reader cannot read in full is a rake they cannot fetch. */
+    td.turnus {
+        white-space: normal;
+
+        .entry .designation {
+            margin-right: 1mm;
+            font-weight: 700;
+        }
+    }
+
+    td.composition {
+        white-space: normal;
+        text-overflow: clip;
+    }
+
+    /* The column widths the estimate assumes; the composition takes what the others leave. */
+    .track {
+        width: 10mm;
+    }
+
+    .sessions {
+        width: 14mm;
+    }
+
+    .time {
+        width: 12mm;
+    }
+
+    .train {
+        width: 24mm;
+    }
+
+    .to {
+        width: 32mm;
+    }
+
+    .limit {
+        width: 18mm;
+    }
+
+    .turnus {
+        width: 20mm;
+    }
+
+    /* The groups stand side by side front first, and wrap onto another line where the next one does not fit.
+       Each is as wide as its rectangles, so the estimate can follow the same wrapping. The gap between two
+       groups is wider than the one between the wagons within a rake, which is what tells the rakes apart now
+       that nothing captions them. */
+    .groups {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 1.5mm 2mm;
+    }
+
+    /* Sized by its contents rather than given a width, and shrinkable so a group wider than the whole
+       composition is brought back within it rather than printed past the edge of the cell. */
+    .group {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .wagonset {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1mm;
+
+        /* One line, class and number side by side, as tall as a one-line cargo rectangle so the two line up.
+           As wide as its text rather than a fixed width, so a long wagon number is never cut short; the
+           estimate charges the text by the character, biased high. */
+        .wagon {
+            display: flex;
+            flex: 0 0 auto;
+            align-items: baseline;
+            gap: 1mm;
+            box-sizing: border-box;
+            height: 6.1mm;
+            min-width: 8mm;
+            border: 0.3mm solid #000;
+            border-radius: 1mm;
+            padding: 0.5mm 1.2mm;
+            line-height: 4.5mm;
+            white-space: nowrap;
+
+            .class {
+                font-size: 8.5pt;
+                font-weight: 700;
+            }
+
+            .number {
+                font-size: 7.5pt;
+            }
+        }
+    }
+
+    /* One rectangle for everything the train carries at one position, as wide as its longest destination and
+       no narrower than two letters. Stretched to the height of the tallest group on its line, so the
+       rectangles of a composition line up along their foot as well as their top. */
+    .cargo {
+        box-sizing: border-box;
+        min-width: 8mm;
+        border: 0.3mm solid #000;
+        border-radius: 1mm;
+        padding: 0.5mm 1mm;
+        font-size: 8pt;
+        line-height: 4.5mm;
+
+        /* The place and the most that may be brought there on one line, the limit following the place the
+           way it does in the duty booklets. */
+        .destination {
+            display: block;
+        }
+    }
+}
+
+/* The most that may be brought to a destination stands off the place it qualifies by the same gap that holds
+   two limits apart, so "Rubjerg and beyond 12■" reads as a place and a limit rather than as one long value.
+   MaxLoadView gives that gap only between two limits, the first one having nothing to stand off.
+
+   Flat and using ::deep because the limit is drawn by another component and carries its scope, not this one's. */
+table.compositions .cargo .destination ::deep .maxload {
+    margin-left: 0.7em;
+}
+
+/* A region chip must not decide the height of the line it sits in. As an inline-block with the app's roomier
+   size it brings its own leading and vertical margin, which would push a line past the 4.5 mm the estimate
+   counts. Flattened to sit inside the line, at the size of the text around it.
+
+   Flat and using ::deep because the chip arrives as a MarkupString and so carries no CSS-isolation attribute. */
+table.compositions .cargo ::deep .region {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 1em;
+    line-height: 1;
+}

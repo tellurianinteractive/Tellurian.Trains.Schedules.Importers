@@ -44,7 +44,7 @@ public class SessionsTests
     public void DaysShortStartingSundayUsesEnglishShortNames() => WithCulture("en-US", () =>
     {
         var target = Sessions.FromBitPattern(CommonSessionPatterns.Odd);
-        Assert.AreEqual("Su, Tu, Th, Sa", target.DaysShort(DayOfWeek.Sunday));
+        Assert.AreEqual("Su,Tu,Th,Sa", target.DaysShort(DayOfWeek.Sunday));
     });
 
     [TestMethod]
@@ -94,9 +94,9 @@ public class SessionsTests
     [TestMethod]
     public void NonAdjacentSessionPositionsAreListedNotRanged() => WithCulture("sv-SE", () =>
     {
-        // Sessions 1, 2 and 7 sit at positions 0, 1 and 6 — a gap, so Mo, Ti, Sö is listed not ranged.
+        // Sessions 1, 2 and 7 sit at positions 0, 1 and 6 — a gap, so M,Ti,S is listed not ranged.
         var target = Sessions.FromSessionNumbers(1, 2, 7);
-        Assert.AreEqual("M, Ti, S", target.DaysShort(DayOfWeek.Monday));
+        Assert.AreEqual("M,Ti,S", target.DaysShort(DayOfWeek.Monday));
     });
 
     [TestMethod]

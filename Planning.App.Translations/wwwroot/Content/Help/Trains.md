@@ -52,6 +52,18 @@ through. Two things take the choice out of your hands:
   and last call, and the ends of every part a vehicle schedule, a driver duty or a cargo flow is
   planned over. To free the box, move the call or the part that ends there.
 
+## Remarks
+
+The **Remark** on a call is a note of your own, printed for the loco driver and the station staff
+alongside the notes the plan works out for itself. Use *italic* and **bold** for emphasis; the markup
+appears when you edit the note.
+
+The reports print a call's arrival and its departure as separate lines, so a remark has to say which
+of the two it belongs to. The box beside the note is where you choose: **Arr** for something met or
+done on pulling in, **Dep** for something done before or on leaving. Where the train only arrives or
+only departs, that half is the only one on offer. Where it passes through, no remark can be written
+at all — tick **Arr** or **Dep** first, and there is somewhere to show one.
+
 ## Add train dialogue
 
 To add trains should be easy.

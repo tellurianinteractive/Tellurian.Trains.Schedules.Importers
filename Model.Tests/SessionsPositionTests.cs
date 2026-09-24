@@ -89,4 +89,15 @@ public class SessionsPositionTests
         // Naming the positions is the only thing the start day changes; see APositionIsAPlaceInTheOperatingWeek.
         Assert.AreEqual("Sa", SessionsFormatting.PositionHeadingOf(1, ShortDays(7, DayOfWeek.Saturday)).Value);
     });
+
+    [TestMethod]
+    public void ADayStandingOnItsOwnCanBeNamedInFull() => WithCulture("en-GB", () =>
+    {
+        Assert.AreEqual("Saturday", SessionsFormatting.PositionHeadingOf(1, ShortDays(7, DayOfWeek.Saturday), useShortDayName: false).Value);
+        Assert.AreEqual("Tuesday", SessionsFormatting.PositionTextOf(2, ShortDays(7), useShortDayName: false));
+
+        // A session has no name to spell out: it stays its circle, or its numeral where no markup can be drawn.
+        Assert.Contains("<svg", SessionsFormatting.PositionHeadingOf(3, Numbers(4), useShortDayName: false).Value);
+        Assert.AreEqual("3", SessionsFormatting.PositionTextOf(3, Numbers(4), useShortDayName: false));
+    });
 }

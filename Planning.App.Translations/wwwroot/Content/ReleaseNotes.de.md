@@ -1,5 +1,170 @@
 # Versionshinweise
 
+## Version 0.7.0
+
+### Neue Funktionen
+
+- **Die Tabelle der Rangierbahnhöfe lässt sich jetzt in den allgemeinen Anweisungen platzieren.** Die
+  Tabelle der Rangierbahnhöfe wird auf der Anlagenseite hinten im Heft der allgemeinen Anweisungen
+  gedruckt. Auf einer Anlage mit vielen Rangierbahnhöfen füllte sie diese Seite und verdrängte die
+  Erklärung der Güterfluss-Zeichen. Schreibe
+
+  ```
+  <ShuntingYards/>
+  ```
+
+  unter **Einstellungen** in eine eigene Zeile, an der Stelle im Text, an die sie gehört, um sie
+  stattdessen dort zu drucken. Die Anlagenseite lässt sie dann weg, sodass sie nie zweimal gedruckt
+  wird. Die Vorschau neben dem Text zeigt ein Feld, wo die Tabelle stehen wird. Ohne Eintrag bleibt die
+  Tabelle wie bisher auf der Anlagenseite.
+
+- **Fahrzeugbesitzer: wer welches rollende Material zum Treffen mitbringt und wo es aufgestellt wird.** Der
+  Reiter **Fahrzeugbesitzer** führt jede Lokomotive, jeden Triebzug und jede Wagengruppe auf — mit der
+  Anzahl der Einheiten, wo es mehr als eine sind, und bei einer Wagengruppe, die ihre Wagen aufführt, mit
+  jeder Wagenklasse einmal — sowie mit der ersten Fahrrunde (oder dem ersten Tag), in
+  der sie im Einsatz ist, und mit dem Bahnhof, dem Gleis und der Abfahrt, wo sie davor stehen soll. Öffnen
+  Sie eine Zeile, um Eigentümer hinzuzufügen: Der erste bringt das Fahrzeug mit und stellt es auf der Anlage
+  auf, weitere Eigentümer bringen Reservefahrzeuge mit. Wählen Sie einen Eigentümer, indem Sie die ersten
+  Buchstaben des Namens — oder des Nachnamens — eingeben, damit ein Name überall gleich geschrieben wird;
+  ein Name, der zu niemandem passt, wird als neuer Teilnehmer angeboten. Jeder Eigentümer einer Lokomotive
+  oder eines Triebzugs, auch eines Reservefahrzeugs, muss eine DCC-Adresse angeben; geben Sie **0** ein,
+  wenn der Eigentümer sie noch nennen muss. Jedes Fahrzeug und jeder Eigentümer hat eine Bemerkung, und die
+  Ansicht **Teilnehmer** zeigt alle mit dem, was sie mitbringen; dort wird ein falsch geschriebener Name ein
+  für alle Mal korrigiert.
+
+  Der Bericht **Mitgebrachte Fahrzeuge** unter **Berichte** druckt dieselbe Liste auf A4 quer, auf eine von
+  drei Arten geordnet, die über den Seiten gewählt wird: **Nach Betriebsstelle**, eine Seite je Bahnhof für
+  seinen Eigentümer, mit den dort aufzustellenden Fahrzeugen nach erster Fahrrunde und Abfahrt geordnet;
+  **Nach Eigentümer**, eine Seite je Teilnehmer mit dem, was er mitbringt, den DCC-Adressen und wo jedes
+  Fahrzeug startet; oder **Nach DCC-Adresse**, alle mitgebrachten Lokomotiven und Triebzüge in einer Liste.
+  Jeder Bahnhof und jeder Eigentümer beginnt auf einer neuen Seite und wird auf der nächsten fortgesetzt,
+  wenn eine Seite nicht reicht. Fahrzeuge, die nicht im Einsatz sind, stehen am Ende; die noch niemand
+  mitbringt, stehen nach Eigentümer geordnet zuerst, unter **Noch nicht gebucht**. Der Hintergrund einer
+  Zeile zeigt, wann die Einheit gebraucht wird: weiß, wenn sie in allen Fahrrunden im Einsatz ist, hellgrau
+  für eine Reserve und sonst hellblau, hellgrün oder hellrot, wenn das Fahrzeug erst ab der ersten, zweiten
+  oder dritten Fahrrunde im Einsatz ist.
+
+- **Ein Umlauf kann angeben, dass die Fahrzeuge auf einem anderen Gleis stehen als der Zug.** Beim
+  Bearbeiten eines Zugabschnitts unter **Umläufe** nennt **Holen von** das Gleis, auf dem die
+  Fahrzeuge vor der Abfahrt stehen, und **Abstellen auf** das Gleis, auf das sie nach der Ankunft
+  gestellt werden — etwa eine Wagengruppe, die an einem Zwischenbahnhof auf einem Nebengleis bleibt. Die
+  Diensthefte und die Zugmeldelisten drucken das als Vermerk: *Vor Abfahrt Wagengruppe 21 von Gleis 3
+  holen.* bei der Abfahrt und *Nach Ankunft Wagengruppe 21 auf Gleis 3 rangieren.* bei der Ankunft,
+  anstelle des Vermerks zum An- oder Abkuppeln des Fahrzeugs. Fährt das Fahrzeug nur in einigen der
+  Fahrrunden oder an einigen der Tage mit, an denen der Zug fährt, beginnt der Vermerk mit diesen —
+  *1,3,5: Vor Abfahrt … holen.* — und ein Fahrzeug, das in keiner davon mitfährt, erhält keinen
+  Vermerk. Ein Gleis, das ein Umlauf so verwendet, kann unter **Betriebsstellen** nicht gelöscht
+  werden.
+
+- **Zugbildungen können jetzt gedruckt werden.** Ein neuer Bericht unter **Berichte** gibt jedem besetzten
+  Bahnhof eine eigene Seite auf A4 quer mit allen Zügen, die dort mit Wagen aus Wagenströmen oder mit einer
+  Wagengruppe abfahren, die ihre Wagen aufführt. Die Züge stehen Gleis für Gleis und auf jedem Gleis in der
+  Reihenfolge der Abfahrt. Neben jedem Zug wird seine Bildung von der Zugspitze aus als Rechtecke gezeichnet:
+  eine Wagengruppe als ein Rechteck je Wagen, in Wagenreihung, mit Gattung und Nummer des Wagens; und Wagen
+  aus Wagenströmen als ein Rechteck je Position im Zug mit ihren Zielen — mit *und lokale Ziele* und *und
+  weiter*, wo das Güterziel es angibt, und seinen Regionen in ihren Farben. Gezeigt wird die Bildung, mit der
+  der Zug abfährt, also auch die Wagen, mit denen er angekommen ist, nicht nur die am Bahnhof angekuppelten.
+  Eine Wagengruppe, die nur in einigen Fahrrunden oder an einigen Tagen im Zug läuft, ist mit diesen
+  gekennzeichnet, und Wagen aus Wagenströmen ohne Position stehen am Ende, als *Beliebig im Zug*.
+
+- **Ein Triebzug kommt jetzt auf dem Gleis an, von dem er abfahren soll.** Ein Triebzug — und eine Lok im
+  Wendezug — wird nie umgesetzt: er fährt von genau dem Gleis ab, auf dem er angekommen ist. Fährt ein
+  solches Fahrzeug einen Zug nach dem anderen, wird deshalb das Ankunftsgleis jedes Zuges auf das Gleis
+  gelegt, von dem sein nächster Zug abfährt, und — endet der Umlauf dort, wo er begonnen hat — das
+  Ankunftsgleis des letzten Zuges auf das Abfahrtsgleis des ersten, sodass das Fahrzeug dort bereitsteht,
+  wo die nächste Fahrrunde es abholt. Nur Ankunftsgleise werden verlegt; das Gleis, von dem ein Zug
+  abfährt, bleibt so, wie Sie es festgelegt haben. Ein Umlauf mit gewöhnlicher Lok bleibt unberührt, denn
+  die Lok fährt allein über den Bahnhof zu dem Gleis, auf dem ihr nächster Zug steht. Die Gleise werden
+  jedes Mal richtiggestellt, wenn ein Zug zu einem Umlauf hinzukommt — durch **Automatisch erstellen** oder
+  durch Sie, am Ende des Umlaufs oder dort, wo das Fahrzeug steht — und jedes Mal, wenn Sie einem Umlauf ein
+  Fahrzeug zuweisen, sodass ein vor der Zuweisung erstellter Umlauf berichtigt wird, sobald der Triebzug
+  darauf gesetzt wird. Ein importierter Umlauf behält die Gleise, mit denen er eingelesen wurde. Stünden
+  durch die Verlegung zwei Züge gleichzeitig auf demselben Gleis, wird das unter den Konflikten aufgeführt,
+  damit Sie es lösen können.
+
+### Änderungen
+
+- **Tage und Fahrrunden werden ohne Leerzeichen aufgeführt.** Wo ein Vermerk oder eine Spalte nennt, an
+  welchen Tagen oder in welchen Fahrrunden etwas gilt, steht jetzt *Mo,Mi,Fr* und *1,3,5* statt
+  *Mo, Mi, Fr* und *1, 3, 5*, damit die Angabe nicht mehr Platz einnimmt als nötig. Ausgeschriebene
+  Tagesnamen — *Montag, Mittwoch, Freitag* — bleiben unverändert.
+
+- **Eine Wagengruppe, die ihre Wagen aufführt, zeigt sie jetzt in ihrer Beschriftung unter Umläufe.** Die
+  Beschriftung nennt die Anzahl der Wagen und jede Wagenklasse einmal — *SJ 05 5 x A/B/Fv* — anstelle der
+  eigenen Klasse der Wagengruppe.
+
+- **Eine Bemerkung an einem Halt sagt jetzt, ob sie zur Ankunft oder zur Abfahrt gehört.** Die Diensthefte
+  und die Zugmeldelisten drucken Ankunft und Abfahrt eines Halts in getrennten Zeilen, deshalb fragt unter
+  **Züge** das Feld neben jeder **Bemerkung**, für welche der beiden sie gilt: **An** für etwas, das bei der
+  Einfahrt anzutreffen oder zu tun ist, **Ab** für etwas, das vor oder bei der Abfahrt zu tun ist. Wo der Zug
+  nur ankommt oder nur abfährt, steht nur diese Hälfte zur Wahl. Wo er durchfährt, lässt sich keine
+  Bemerkung schreiben — kreuzen Sie zuerst **An** oder **Ab** an —, eine bereits vorhandene lässt sich aber
+  weiterhin löschen.
+
+  Eine Bemerkung, die mit einer früheren Version geschrieben oder durch einen XPLN-Import übernommen wurde,
+  gab keines von beiden an und wurde daher weder in den Heften noch in den Listen gedruckt. Beim ersten
+  Öffnen eines Plans erhält jede solche Bemerkung die Abfahrt, wo der Zug abfährt, und die Ankunft, wo er nur
+  ankommt.
+
+- **Jeder Block einer Zugseite im Dienstheft hat jetzt einen farbigen Balken am linken Rand.** Triebfahrzeuge
+  sind rot markiert, geplante Wagengruppen grün, Güterwagen mit Frachtbriefen blau und der Fahrplan grau,
+  sodass sich die Blöcke auf einen Blick unterscheiden lassen, und wo ein grauer Balken aufhört, endet dieser
+  Zugabschnitt. Die Balken werden gedruckt, ohne dass Hintergrundgrafiken eingeschaltet sein müssen, und
+  jeder Block behält seine Überschrift, sodass ein Schwarzweißdruck nichts verliert.
+
+- **Triebfahrzeuge und geplante Wagengruppen auf einer Zugseite im Dienstheft zeigen jetzt ihre Gleise.**
+  Jede Zeile nennt das Gleis, auf dem das Fahrzeug zu Beginn steht, und das Gleis, auf dem es am Ende
+  abgestellt wird — das eigene Gleis des Zuges oder das, das der Umlauf unter **Holen von** oder
+  **Abstellen auf** nennt. Die Spalte mit dem Fahrzeug heißt jetzt in beiden Blöcken **Umlauf**, nach der
+  Karte, auf der die Kennung des Fahrzeugs steht. Da die Gleise in der Tabelle stehen, nennt der Fahrplan
+  darunter nicht mehr jede Wagengruppe und ihr Gleis: Er sagt *Wagen vor Abfahrt zum Abfahrtsgleis
+  rangieren.* oder *Wagen nach Ankunft zu ihrem Ankunftsgleis rangieren.*, angeführt von den Fahrrunden oder
+  Tagen, an denen die Wagen rangiert werden, wenn das nur einige derer sind, an denen der Zug fährt. Die
+  Zugmeldelisten nennen weiterhin jede Wagengruppe und ihr Gleis.
+
+- **Das Heft mit den allgemeinen Anweisungen erklärt jetzt, wie Güter in den anderen Berichten geschrieben
+  werden.** Unter **Wagenströme** auf seiner letzten Seite sagt eine Legende, dass jede Lastgrenze ein
+  Höchstwert ist und was das Zeichen hinter einer Zahl zählt, wofür der Globus steht, was *und lokale Ziele*
+  und *und weiter* einem Ziel hinzufügen und was ein farbiger Regionsname bedeutet.
+
+- **Die Titelseite des Heftes mit den allgemeinen Anweisungen hat Platz für ein längeres Programm.** Das
+  Programm wird mit weniger Abstand zwischen Zeilen, Einträgen und Tagesüberschriften gesetzt — die
+  Schriftgröße bleibt gleich —, was Platz für vier oder fünf weitere Einträge schafft. Ein Programm, das zu
+  lang für die Seite ist, verliert seine letzten Einträge, und die sind das Ende des Treffens, also genau das,
+  was man nachschlägt.
+
+### Fehlerbehebungen
+
+- **Die Erklärung der Güterfluss-Zeichen läuft nicht mehr aus dem Heft der allgemeinen Anweisungen
+  heraus.** Die Formulierungen *und lokale Ziele* und *und weiter* sowie die Erklärung einer Region
+  standen in einer so schmalen Spalte, dass jede vier Zeilen lang wurde, und auf einer Anlage mit
+  mehreren Rangierbahnhöfen fiel die letzte davon unten von der Seite. Zeichen und Formulierungen stehen
+  nun als zwei Listen untereinander, jede über die ganze Seitenbreite.
+
+- **Ein Fahrplan, der auf der gegenüberliegenden Seite eines Dienstheftes weitergeht, sieht jetzt aus wie
+  jeder andere.** Ist ein Zugabschnitt zu lang für eine Seite, rückt sein Fahrplan auf die gegenüberliegende
+  Seite, und dort wurde er ohne die eigene Gestaltung des Heftes gedruckt: in größerer Schrift, ohne die fett
+  gesetzten Bahnhöfe und Zeiten und ohne die Linien zwischen den Halten, sodass ein langer Fahrplan über den
+  Seitenfuß hinauslaufen konnte.
+
+- **Das Ändern der Nummer oder Kategorie eines Zuges unter Züge lässt die Änderung nicht mehr in einer
+  anderen Zeile stehen.** Beide Änderungen sortieren die Liste neu, und die eingegebene Nummer oder die
+  gewählte Kategorie konnte in der Zeile des Zuges stehen bleiben, der an ihre Stelle rückte.
+
+- **Dialoge übernehmen eine Zahl jetzt schon während der Eingabe.** Die **Dauer (Minuten)** einer neuen
+  Rangieraufgabe, die **Minuten**, um die Züge verschoben oder kopiert werden, und die **Nummer** eines
+  Fahrzeugs unter **Umläufe** wurden erst beim Verlassen des Feldes gelesen, sodass die Schaltfläche, die den
+  Dialog bestätigt — und die Warnung, dass eine Fahrzeugnummer schon vergeben ist —, hinterherhinkte, bis Sie
+  woanders hinklickten.
+
+- **Der Bildfahrplan zeichnet die Gleise einer Betriebsstelle jetzt in der Reihenfolge, die Sie ihnen gegeben
+  haben.** Er übersah die **Reihenfolge** der Gleise unter **Betriebsstellen** und konnte sie daher anders
+  anordnen als jede andere Gleisliste der App.
+
+- **Eine Umlaufkarte für ein Fahrzeug, das an nicht aufeinanderfolgenden Tagen fährt, nennt diese Tage
+  jetzt.** Eine Karte für Montag, Mittwoch und Freitag druckte *MondayShort,WednesdayShort,FridayShort* statt
+  *Mo,Mi,Fr*.
+
 ## Version 0.6.0
 
 ### Änderungen

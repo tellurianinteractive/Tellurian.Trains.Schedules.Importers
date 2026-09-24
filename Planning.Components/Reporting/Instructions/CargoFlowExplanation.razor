@@ -17,10 +17,14 @@
    instructions do: it is read once, before the first session, by everyone at the meeting — and the
    station staff who work the wagons hold no duty booklet at all.
 
-   The marks and the wordings are set as two lists side by side rather than one. A list's term column
-   is as wide as its widest term, so "and local destinations" standing over a globe would have left
-   every mark alone at the near edge of an empty column; and side by side they take half the height, on
-   the one page of the booklet that already carries a diagram and a table.
+   The marks and the wordings are set as two lists, one under the other, rather than as one. A list's
+   term column is as wide as its widest term, so "and local destinations" standing over a globe would
+   have left every mark alone at the near edge of an empty column. Two lists, and each sets its own
+   column: the marks keep a narrow one and the wordings a wide one.
+
+   They were side by side until the wordings pushed the block past the foot of the page. Half the width
+   each meant the wide term column took most of the wordings' half and left their meanings about sixteen
+   characters to wrap in, so each ran to three or four ragged lines — see the stylesheet.
 
    The marks and phrases are drawn through the very code that prints them — MaxLoadView, the duty
    report's globe, and the model's own note wordings — so that what is explained here cannot drift
@@ -65,10 +69,10 @@
 
 @code {
     /// <summary>
-    /// The timetable the booklet is printed for. Only its layout is read, for a region to show as an
-    /// example; the rest of the key is the same in every plan.
+    /// The layout the booklet is printed for. Only read for a region to show as an example; the rest
+    /// of the key is the same on every layout.
     /// </summary>
-    [Parameter, EditorRequired] public Timetable? Timetable { get; set; }
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
 
     // Example figures, not limits: a mark is printed following a figure and never on its own, so the
     // key has to show it the same way for it to be recognised. The values are the ones the report
@@ -82,7 +86,7 @@
     // A region a shunting yard actually stands for, which is what the chips in the booklet mean. The
     // catalogue is the fallback: a region may be defined before the station carrying it is.
     private Region? ExampleRegion =>
-        Timetable?.Layout is not { } layout ? null :
+        Layout is not { } layout ? null :
         layout.ShuntingYards.SelectMany(yard => yard.ServedRegions).FirstOrDefault()
             ?? layout.Regions.FirstOrDefault();
 }

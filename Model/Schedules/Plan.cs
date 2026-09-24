@@ -20,6 +20,8 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         ScheduledObjects = [];
         Schedules = [];
         DriverDuties = [];
+        Participants = [];
+        VehicleContributions = [];
     }
 
     /// <summary>
@@ -35,6 +37,8 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         ScheduledObjects = [];
         Schedules = [];
         DriverDuties = [];
+        Participants = [];
+        VehicleContributions = [];
     }
 
     /// <summary>
@@ -105,6 +109,18 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
     public ICollection<DriverDuty> DriverDuties { get; set; }
 
     /// <summary>
+    /// Gets or sets the participant catalogue: everyone this plan names as bringing something to the
+    /// meeting, each stored once and referred to elsewhere by <see cref="Participant.Id"/>.
+    /// </summary>
+    public ICollection<Participant> Participants { get; set; }
+
+    /// <summary>
+    /// Gets or sets who brings which rolling stock to the meeting: one entry per rolling stock item that
+    /// has contributors or a note, tied to its vehicle by <see cref="VehicleContribution.ScheduledObjectId"/>.
+    /// </summary>
+    public ICollection<VehicleContribution> VehicleContributions { get; set; }
+
+    /// <summary>
     /// Completes a plan as soon as it has been read, so it is never looked at half-resolved.
     /// </summary>
     /// <remarks>
@@ -138,6 +154,8 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         // Only here can the stop flags the train parts depend on be put right: the parts the vehicle
         // schedules and driver duties are planned over are read after the timetable.
         this.ApplyStopRules();
+        // After the stop flags, which decide what half a note can be given (see ManualNoteRules).
+        this.ApplyManualNoteTargetRules();
     }
 
     /// <inheritdoc/>
@@ -236,8 +254,9 @@ public static class PlanExtensions
         /// the name is taken from the layout, the per-track call index is rebuilt from the trains, the
         /// catalogue references are put back, the category and company catalogues are reconciled with
         /// what the plan actually uses, every location that exchanges passengers is given somewhere to
-        /// exchange them (see <c>Layout.EnsurePlatforms</c>), and the stop flags the train parts depend
-        /// on are set (see <see cref="Validations.StopRules"/>). Idempotent.
+        /// exchange them (see <c>Layout.EnsurePlatforms</c>), the stop flags the train parts depend on
+        /// are set (see <see cref="Validations.StopRules"/>), and every note is given the half of its
+        /// call it is shown at (see <see cref="Notes.ManualNoteRules"/>). Idempotent.
         /// </summary>
         /// <remarks>
         /// Reading a plan does all of this on its way (see the <c>OnDeserialized</c> of
@@ -264,6 +283,7 @@ public static class PlanExtensions
             plan.RebuildCompanies();
             plan.ResolveCatalogueReferences();
             plan.ApplyStopRules();
+            plan.ApplyManualNoteTargetRules();
         }
         /// <summary>
         /// Adds a vehicle to the schedule.

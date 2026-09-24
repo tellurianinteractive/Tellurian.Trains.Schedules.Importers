@@ -75,7 +75,8 @@ table.grid,
 table.sub-grid,
 table.tracks,
 table.speed-map,
-table.trains {
+table.trains,
+table.owners {
     width: max-content;
 }
 
@@ -400,13 +401,47 @@ table.grid thead th .sort-indicator {
         color: #666;
     }
 
+    /* The rule between the meeting's identity and the programme. Tighter than the browser's own
+       half-line either side, because every millimetre above the programme is one the programme
+       itself may need. */
+    hr {
+        margin: 0.4em 0;
+    }
+
+    /* The programme is the one stretch of authored markdown in this booklet with nowhere to overflow
+       to: it shares page 1 with the meeting's name and validity, and the page body is overflow:hidden,
+       so a programme a few lines too long simply loses its last entries — and the last entries of a
+       programme are the end of the meeting, which is exactly what people look up.
+
+       So it is set tighter than the instructions pages, which are free to run on for as many pages as
+       they need. Only the separation is taken out — between lines, between entries, and above each
+       day's heading — never the type size: this is read by everyone at the meeting, standing up, in a
+       hall that is rarely well lit. Measured on the Varnamo Moduldagar 2026 programme, the longest
+       written so far: 850 px of content against a 733 px page body becomes 697 px, a fifth of the
+       height, which is four or five more entries.
+
+       Deliberately NOT applied to .instructions-body as a whole: InstructionsPagination estimates the
+       height of the instructions pages from the shared rules above, so every one of its constants
+       would have to be re-derived — for pages that gain nothing, since they just flow onto the next
+       sheet. */
     .programme {
         text-align: left;
-        margin-top: 0.8em;
+        margin-top: 0.5em;
 
         /* Centred like the rest of the front page, even though the programme text below it is not. */
         .section-title {
             text-align: center;
+            margin-bottom: 0.25em;
+        }
+
+        .instructions-body {
+            line-height: 1.3;
+
+            h1:not(.section-title), h2, h3 { margin: 0.35em 0 0.1em; }
+
+            p, li { margin: 0 0 0.1em; }
+
+            ul, ol { margin: 0 0 0.2em; }
         }
     }
 }
@@ -465,26 +500,37 @@ table.grid thead th .sort-indicator {
         max-width: 100%;
         height: auto;
     }
+}
 
-    .shunting-yards {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
+/* --- The shunting yards table ---
+   Not nested under .dutyoverview, because the same component prints in two places: fixed at the back
+   of every duty booklet, and — where the author wrote a <ShuntingYards/> tag — inside the general
+   instructions, which is .instructions-body and not an overview page at all. A participant holding
+   both booklets is meant to recognise one table from the other, so there is one rule for both.
 
-        th {
-            text-align: left;
-            border-bottom: 1px solid #000;
-            padding: 0.1em 0.25em;
-        }
+   The heading above it is deliberately left to whichever block it sits in: 1.05 rem either way, so the
+   two agree on size while each keeps its own spacing. InstructionsPagination.ShuntingYardsHeight is
+   derived from these figures and must be re-derived if they change — the instructions page body is
+   overflow:hidden, so a table charged short prints past the foot of the page and loses its last rows
+   without a word. */
+.shunting-yards {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
 
-        td {
-            padding: 0.1em 0.25em;
-            vertical-align: top;
-        }
+    th {
+        text-align: left;
+        border-bottom: 1px solid #000;
+        padding: 0.1em 0.25em;
+    }
 
-        .shunting-yard {
-            font-weight: 600;
-        }
+    td {
+        padding: 0.1em 0.25em;
+        vertical-align: top;
+    }
+
+    .shunting-yard {
+        font-weight: 600;
     }
 }
 
@@ -580,6 +626,14 @@ table.grid thead th .sort-indicator {
         font-weight: 600;
     }
 
+    /* A vehicle's tracks are one- or two-digit numbers under a heading as wide as "Track"/"Gleis", so
+       they are centred under it, as in the timetable. */
+    .dutytrain {
+        .track {
+            text-align: center;
+        }
+    }
+
     /* Wagons that arrived from anywhere. It stands where a place name would, so it is set at the size
        of the names around it rather than shrunk like the load marks, which qualify a figure — this one
        IS the cell. Grey, because a place name states a fact the driver acts on and the globe states
@@ -673,6 +727,43 @@ table.grid thead th .sort-indicator {
         tr.not-part.rule-heavy td,
         tr.not-part.rule-light td {
             border-bottom-color: #a8a8a8;
+        }
+    }
+
+    /* A colour bar down the left of each block of a train part — traction red, scheduled wagonsets green,
+       cargo flow wagons blue, the timetable grey — so the blocks can be told apart while leafing, and a
+       part's end shows where its grey bar stops. Decoration only: every block keeps its heading, so a
+       greyscale print loses nothing but scanning speed (D21).
+       The bar hangs in the page padding rather than taking width from the block: the tables then keep the
+       width the note wrapping in DutyPagination is estimated against. It spans the heading and the table,
+       not the rule below — the heading's top margin collapses through the wrapper, so the wrapper begins
+       at the heading's text. A border, not a background, because printing drops backgrounds by default. */
+    .dutyblock {
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -2.8mm;
+            border-left: 1.2mm solid transparent;
+        }
+
+        &.traction::before {
+            border-left-color: #c62828;
+        }
+
+        &.wagonsets::before {
+            border-left-color: #2e7d32;
+        }
+
+        &.cargo-flows::before {
+            border-left-color: #1565c0;
+        }
+
+        &.timetable::before {
+            border-left-color: #9e9e9e;
         }
     }
 }

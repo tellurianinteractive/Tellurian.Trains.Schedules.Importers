@@ -548,6 +548,16 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .WithOne(e => e.Plan)
                   .HasForeignKey(e => e.PlanId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Who brings which rolling stock. Both are stored as JSON columns rather than tables, like the
+            // layout's country catalogue: a participant and a vehicle are referred to by a plain int id, and
+            // the order of a vehicle's contributors — the first is the primary one — is the order of the array.
+            entity.OwnsMany(e => e.Participants, b => b.ToJson());
+            entity.OwnsMany(e => e.VehicleContributions, b =>
+            {
+                b.ToJson();
+                b.OwnsMany(c => c.Contributors);
+            });
         });
 
         // Vehicle
@@ -685,6 +695,20 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                 o.Ignore(c => c.Load);
                 o.Ignore(c => c.Unload);
             });
+
+            // The other tracks the vehicles are fetched from and put on: optional references to tracks the
+            // layout owns, through shadow foreign keys. A track in use is not deleted (DeletionRules).
+            entity.HasOne(e => e.FromTrack)
+                  .WithMany()
+                  .HasForeignKey("FromTrackId")
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ToTrack)
+                  .WithMany()
+                  .HasForeignKey("ToTrackId")
+                  .IsRequired(false)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // CargoFlowOptions: a reusable cargo flow description in the timetable catalogue, referenced by

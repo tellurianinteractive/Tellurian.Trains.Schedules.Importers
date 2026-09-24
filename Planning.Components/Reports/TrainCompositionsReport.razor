@@ -1,0 +1,70 @@
+@page "/train-compositions-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* How every train leaving a manned station is to be made up: the wagonsets it carries, wagon by wagon, and
+   the positions of its cargo flow wagons with where they go.
+
+   It serves operating rather than planning: it is read at the tracks by whoever makes up and checks the
+   trains, so a page that overflows is a bug, not a cosmetic issue. Every station starts on a fresh page,
+   because the pile is torn apart and handed to different stations.
+
+   Printed A4 landscape, one-sided. *@
+
+@if (_pages is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (_pages.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoTrainCompositions" />
+}
+else
+{
+    @* No page footer: the heading names the station, the report and the day it was printed, which is all a
+       torn-off sheet needs to identify itself. *@
+    @foreach (var page in _pages)
+    {
+        <A4LPage Margin="10">
+            <TrainCompositionTable Page="page" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<CompositionPage>? _pages;
+    private DateOnly _printDate;
+
+    private SessionsSettings Settings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fixed once for the whole render, so a PDF printed later still says which day's plan it shows.
+        _printDate = DateOnly.FromDateTime(DateTime.Now);
+
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        if (ScheduleState.Layout is not { } layout || ScheduleState.Timetable is not { } timetable)
+        {
+            _pages = [];
+            return;
+        }
+
+        var settings = Settings;
+        // Manned stations only, in layout order: they are where somebody is on duty to make up the trains.
+        var stations = layout.OperationLocations
+            .OfType<Station>()
+            .Where(station => station.IsManned)
+            .Select(station => StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
+            .Where(station => station.Departures.Count > 0);
+
+        _pages = CompositionPaginator.BuildPages(stations, CompositionPageGeometry.A4Landscape);
+    }
+}

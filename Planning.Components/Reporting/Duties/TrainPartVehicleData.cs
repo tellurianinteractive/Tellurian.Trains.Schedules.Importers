@@ -4,7 +4,7 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties;
 /// The rows of a vehicle block on a train part page — traction units or wagonsets.
 /// </summary>
 /// <remarks>
-/// Both blocks have the same six columns and the same shape, differing only in which scheduled objects
+/// Both blocks have the same eight columns and the same shape, differing only in which scheduled objects
 /// they list, so one data type and one view serve both.
 /// </remarks>
 public sealed class TrainPartVehicleData
@@ -32,6 +32,18 @@ public sealed class TrainPartVehicle
 
     /// <summary>The sessions it works this movement on.</summary>
     public Sessions Sessions { get; init; }
+
+    /// <summary>
+    /// The track the vehicle stands on before the movement departs: the one its schedule fetches it
+    /// from, or else the train's own departure track.
+    /// </summary>
+    public required StationTrack DepartureTrack { get; init; }
+
+    /// <summary>
+    /// The track the vehicle is left on after the movement arrives: the one its schedule puts it on, or
+    /// else the train's own arrival track.
+    /// </summary>
+    public required StationTrack ArrivalTrack { get; init; }
 
     /// <summary>
     /// The identity printed for the vehicle.

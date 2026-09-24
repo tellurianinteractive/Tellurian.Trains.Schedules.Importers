@@ -11,8 +11,14 @@ public class ManualNoteEditingTests
     private const string English = "en";
     private const string Swedish = "sv";
 
+    // A note is only written where the train arrives or departs, so the call these tests write on is a
+    // stop that does both. What each of the two halves offers is covered by ManualNoteTargetTests.
     private static StationCall Call() =>
-        new(1, new StationTrack(1, "1") { Station = new Station(1, "Falun", "Fln") }, Time.Zero, Time.Zero);
+        new(1, new StationTrack(1, "1") { Station = new Station(1, "Falun", "Fln") }, Time.Zero, Time.Zero)
+        {
+            IsArrival = true,
+            IsDeparture = true,
+        };
 
     [TestInitialize]
     public void UseEnglish() => CultureInfo.CurrentCulture = new CultureInfo(English);
@@ -77,8 +83,8 @@ public class ManualNoteEditingTests
     public void EditingInAnotherLanguageKeepsTheFirstTranslation()
     {
         var call = Call();
-        call.SetManualNote("Track one", English);
-        call.SetManualNote("Spår ett", Swedish);
+        call.SetManualNote("Track one", languageCode: English);
+        call.SetManualNote("Spår ett", languageCode: Swedish);
 
         Assert.AreEqual(1, call.Notes.Count);
         Assert.AreEqual("Track one", call.ManualNoteText);
@@ -93,10 +99,14 @@ public class ManualNoteEditingTests
         // The XPLN import stores a call remark with no language code. That is not a translation, so an
         // edit replaces it instead of leaving it to resurface for a reader in another language.
         var call = new StationCall(1, new StationTrack(1, "1") { Station = new Station(1, "Falun", "Fln") },
-            Time.Zero, Time.Zero, "Imported remark");
+            Time.Zero, Time.Zero, "Imported remark")
+        {
+            IsArrival = true,
+            IsDeparture = true,
+        };
         Assert.AreEqual("Imported remark", call.ManualNoteText);
 
-        call.SetManualNote("Edited", English);
+        call.SetManualNote("Edited", languageCode: English);
 
         Assert.AreEqual(1, call.Notes.Count);
         Assert.AreEqual("Edited", call.ManualNoteText);

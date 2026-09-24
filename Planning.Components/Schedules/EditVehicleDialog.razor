@@ -72,7 +72,10 @@
             </div>
             <div class="field">
                 <label>@Translator("Number")</label>
-                <input type="number" class="num" min="1" value="@_number" @onchange="e => _number = ParseInt(e, _number)" />
+                @* Entered on input, not on change, so the Save button and the identity-in-use check follow
+                   what is typed instead of waiting for the field to lose focus. *@
+                <input type="number" class="num" min="1" value="@_number"
+                       @oninput="e => _number = ParseOptionalInt(e)" />
             </div>
             <div class="field">
                 <label>@Translator("Class")</label>
@@ -182,7 +185,9 @@
     private string _externalId = "";
     private string _remark = "";
     private string _class = "";
-    private int _number;
+    // Null while the field is empty or holds something that is not a number, which keeps the Save button
+    // disabled and lets the field show what was typed rather than an old value.
+    private int? _number;
     private int? _companyId;
     private TractionType _tractionType = TractionType.Undefined;
     private bool _isReversibleTrain;
@@ -258,15 +263,16 @@
             .Aggregate(_sessions, (union, s) => union.Or(s));
 
     // The identity the vehicle would have after this edit: its external id where it has one (only an
-    // imported vehicle does), otherwise the entered operator and number.
-    private VehicleIdentity EditedIdentity => VehicleIdentity.Of(_externalId, _companyId, _number);
+    // imported vehicle does), otherwise the entered operator and number. Null while no number is entered.
+    private VehicleIdentity? EditedIdentity =>
+        _number is > 0 ? VehicleIdentity.Of(_externalId, _companyId, _number.Value) : null;
 
     // The other vehicle already claiming that identity on a session this one would work, or null when it
     // is free (see Plan.VehicleClaiming, rule P5).
     private ScheduledObject? ClaimedBy =>
-        _number < 1 ? null : Plan?.VehicleClaiming(EditedIdentity, EditedSessions, excluding: Vehicle);
+        EditedIdentity is { } identity ? Plan?.VehicleClaiming(identity, EditedSessions, excluding: Vehicle) : null;
 
-    private bool CanSave => _number >= 1 && ClaimedBy is null;
+    private bool CanSave => _number is > 0 && ClaimedBy is null;
 
     private string IdentityInUseMessage(ScheduledObject other) =>
         string.Format(CultureInfo.CurrentCulture, Translator("VehicleIdentityAlreadyUsed"), other.IdentityText, other.Designation);
@@ -283,10 +289,10 @@
 
     private async Task Save()
     {
-        if (Plan is not { } plan || !CanSave) return;
+        if (Plan is not { } plan || !CanSave || _number is not { } number) return;
         var type = Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
-        plan.UpdateVehicle(Vehicle, type, _externalId, _class, _number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
+        plan.UpdateVehicle(Vehicle, type, _externalId, _class, number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)
@@ -311,6 +317,10 @@
 
     // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
     private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
+
+    // Null for an empty or unparseable field, so a half-typed value never counts as a whole one.
+    private static int? ParseOptionalInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;
 
     private static int ParseInt(ChangeEventArgs e, int fallback) =>
         int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : fallback;

@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
+using ClassNames = Tellurian.Trains.Schedules.Model.Resources.ClassNames;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
 namespace Tellurian.Trains.Schedules.Model.Notes;
@@ -31,6 +32,25 @@ public abstract record GeneratedNote : ICallNote
     /// <inheritdoc/>
     public bool IsForDeparture { get; init; }
 
+    /// <summary>
+    /// The sessions or days the note holds on, where those are fewer than the ones its train runs; null
+    /// where it holds whenever the train runs, and saying so would only repeat the train.
+    /// </summary>
+    /// <remarks>
+    /// A vehicle is assigned to its schedule for sessions of its own (see <c>ScheduleAssignment</c>), so
+    /// an instruction about that vehicle is not necessarily given every time the train comes. Where it is
+    /// not, the note leads with the sessions it is for — the reader sees before anything else whether it
+    /// is for today. A note naming no vehicle takes the sessions of all the vehicles it speaks for
+    /// together.
+    /// </remarks>
+    public Sessions? Sessions { get; init; }
+
+    /// <summary>
+    /// How <see cref="Sessions"/> is written — as session numbers or as weekday names. Null where the
+    /// note has no sessions to write, when nothing is prefixed.
+    /// </summary>
+    public SessionsSettings? Settings { get; init; }
+
     /// <inheritdoc/>
     public string ToText => this.TextOf;
 
@@ -55,7 +75,14 @@ public static class GeneratedNoteExtensions
         /// carries the emphasis; destinations and meets are <see cref="NoteArg.Markup(string, string)"/>
         /// because they render themselves as coloured chips and session circles.
         /// </remarks>
-        internal NoteTemplate TemplateOf => note switch
+        internal NoteTemplate TemplateOf => OnSessions(note.WordingOf, note.Sessions, note.Settings);
+
+        /// <summary>
+        /// The note without its session qualifier: the localised format string and the values substituted
+        /// into it. <c>TemplateOf</c> is this led by the sessions, where the note holds on only some of
+        /// them.
+        /// </summary>
+        private NoteTemplate WordingOf => note switch
         {
             UseNote(var so) => new(NoteResources.Use, so),
             CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, so),
@@ -63,6 +90,13 @@ public static class GeneratedNoteExtensions
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
             FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
+            // The kind of vehicle leads the instruction — a driver reading "fetch wagon group 21" knows
+            // what to look for on the track before finding the number. It is plain: the number beside it
+            // is what identifies the vehicle and carries the emphasis.
+            FromTrackNote(var so, var track) => new(NoteResources.FetchFromTrack, NoteArg.Plain(ClassNames.InSentenceFor(so)), so, track),
+            ToTrackNote(var so, var track) => new(NoteResources.PutOnTrack, NoteArg.Plain(ClassNames.InSentenceFor(so)), so, track),
+            ShuntWagonsToDepartureTrackNote => new(NoteResources.ShuntWagonsToDepartureTrack),
+            ShuntWagonsToArrivalTrackNote => new(NoteResources.ShuntWagonsToArrivalTrack),
             CirculateNote => new(NoteResources.CirculateTractionUnit),
             TurnNote => new(NoteResources.TurnTractionUnit),
             TurnAndCirculateNote => new(NoteResources.TurnAndCirculateTractionUnit),
@@ -70,6 +104,11 @@ public static class GeneratedNoteExtensions
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
                 new(NoteResources.BringsWagonsTo, NoteArg.Markup(part.ToText, part.ToHtml)),
+            // Every destination the flow serves, not only those at this station: the wagons taken off
+            // here are sorted by where they go on to, and a destination beyond it is what says which
+            // train they are put over to.
+            CargoFlowUncoupleNote(var part) when part.CargoFlowOptions is not null =>
+                new(NoteResources.UncoupleWagonsFor, NoteArg.Markup(part.ToText, part.ToHtml)),
             // The origins are what the driver sorts the arrived wagons by, so they carry the emphasis.
             // A flow naming none still gives a usable instruction — take what arrived out to the
             // customers — so it gets the wording without the clause rather than an empty one.
@@ -91,9 +130,9 @@ public static class GeneratedNoteExtensions
             // Reuses the wording the sessions value itself uses for the marker, so a reader meets the
             // same phrase whether it is stated in a column or as a note.
             OnDemandNote => new(DaysExtensions.DayResource("OnDemandOnly")),
-            CrossingNote(var meets, var settings) => new(NoteResources.Crosses, MeetList(meets, settings)),
-            OvertakesNote(var meets, var settings) => new(NoteResources.Overtakes, MeetList(meets, settings)),
-            IsOvertakenNote(var meets, var settings) => new(NoteResources.IsOvertakenBy, MeetList(meets, settings)),
+            CrossingNote(var meets) => new(NoteResources.Crosses, MeetList(meets, note.Settings)),
+            OvertakesNote(var meets) => new(NoteResources.Overtakes, MeetList(meets, note.Settings)),
+            IsOvertakenNote(var meets) => new(NoteResources.IsOvertakenBy, MeetList(meets, note.Settings)),
             _ => new(string.Empty),
         };
 
@@ -136,6 +175,22 @@ public static class GeneratedNoteExtensions
             string.Join(", ", items.Select(item => item.Text)),
             string.Join(", ", items.Select(item => item.Html)));
     }
+
+    /// <summary>
+    /// A note that holds on only some of the sessions or days its train runs, led by those sessions or
+    /// days; the note as it is where it holds on all of them.
+    /// </summary>
+    /// <remarks>
+    /// Leading rather than trailing, so the reader sees before anything else whether the note is for
+    /// today at all. The value renders itself — session circles, or day names — exactly as it does in the
+    /// session columns, and so does the note it leads, with its own values emphasised.
+    /// </remarks>
+    private static NoteTemplate OnSessions(NoteTemplate note, Sessions? sessions, SessionsSettings? settings) =>
+        sessions is { } qualifier && settings is not null
+            ? new(NoteResources.OnSessions,
+                NoteArg.Markup(qualifier.ToText(settings), qualifier.ToHtml(settings)),
+                NoteArg.Markup(note.ToText, note.ToHtml))
+            : note;
 
     /// <summary>
     /// When a meet happens: the window both trains are present, or a single time when the other train

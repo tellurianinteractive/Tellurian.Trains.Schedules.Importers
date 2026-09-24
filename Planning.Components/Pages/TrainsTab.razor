@@ -69,10 +69,15 @@ else
                     </tr>
                 </thead>
                 <tbody>
+                    @* Category headers, trains and expanded call tables are siblings in this one loop, so
+                       every row is keyed and the keys are told apart across all three kinds. Both a train's
+                       number and its category are edited in the row itself, and either edit reorders the
+                       rows; unkeyed, Blazor diffs them by position and leaves the typed number, and the
+                       drop-down a moved-away train left behind, standing in the row that took its place. *@
                     @foreach (var (group, groupConflicts) in rows)
                     {
                         var groupExpanded = IsExpanded(group);
-                        <tr class="category @(groupConflicts.Count > 0 ? "has-conflict" : "")">
+                        <tr class="category @(groupConflicts.Count > 0 ? "has-conflict" : "")" @key="RowKey(group)">
                             @if (showConflicts)
                             {
                                 @* A collapsed category is the only place the conflicts inside it can be
@@ -99,7 +104,7 @@ else
                             foreach (var train in group.Trains)
                             {
                                 var conflicts = ConflictsOf(train);
-                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflicts.Count > 0 ? "has-conflict" : "")">
+                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflicts.Count > 0 ? "has-conflict" : "")" @key="RowKey(train)">
                                     @if (showConflicts)
                                     {
                                         <td class="conflict">
@@ -173,7 +178,7 @@ else
                                 </tr>
                                 @if (IsExpanded(train))
                                 {
-                                    <tr class="detail">
+                                    <tr class="detail" @key="CallsRowKey(train)">
                                         @if (showConflicts)
                                         {
                                             <td></td>
@@ -221,7 +226,7 @@ else
     private DayOfWeek StartDay => Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private List<Train> Trains =>
-        [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number)];
+        [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number).ThenBy(t => t.Id)];
 
     // The ExternalId column is only meaningful for imported trains; hide it when nothing uses it.
     private bool ShowExternalId => Trains.Any(HasExternalId);
@@ -279,6 +284,7 @@ else
                     .GroupBy(t => t.Category!.Id)
                     .Select(g => new TrainGroup(g.First().Category, [.. g]))
                     .OrderBy(g => g.Category!.Name, StringComparer.CurrentCulture)
+                    .ThenBy(g => g.Key)
             ];
             var uncategorised = trains.Where(t => t.Category is null).ToList();
             if (uncategorised.Count > 0) groups.Add(new TrainGroup(null, uncategorised));
@@ -287,6 +293,17 @@ else
     }
 
     private string GroupName(TrainGroup group) => group.Category?.Name ?? Translator("NoCategory");
+
+    // ---- Row keys -------------------------------------------------------------------------------
+
+    // The table puts three kinds of row in one loop, so a key has to be unlike every other row's and not
+    // only unlike those of its own kind: a category id and a train id are both small numbers, and two
+    // sibling rows keyed alike is an error. The id is what is keyed on because it outlives an edit.
+    private static string RowKey(TrainGroup group) => $"category-{group.Key}";
+
+    private static string RowKey(Train train) => $"train-{train.Id}";
+
+    private static string CallsRowKey(Train train) => $"calls-{train.Id}";
 
     protected override void OnInitialized()
     {
@@ -482,9 +499,11 @@ else
                                    @onchange="e => SetIsDeparture(call, e)" />
                         </td>
                         <td class="note">
-                            <CallNoteField Value="@call.ManualNoteText" ValueChanged="text => SetCallNote(call, text)"
-                                           Placeholder="@Translator("AddCallNote")" Title="@Translator("CallNoteHint")"
-                                           ClearTitle="@Translator("ClearCallNote")" />
+                            @* A note is written for the arrival or for the departure, so the halves on
+                               offer are the ones the two flags beside it say the train makes — none at
+                               a pass-through (see the model's ManualNoteRules). *@
+                            <CallNoteField Value="@call.ManualNoteText" Target="@call.ManualNoteTarget"
+                                           Targets="@call.ManualNoteTargets" NoteChanged="edit => SetCallNote(call, edit)" />
                         </td>
                         <td>
                             @{ var callDeletion = Plan?.MayDelete(call); }
@@ -591,11 +610,12 @@ else
         required ? Translator("CallStopRequiredButImpossible") :
         Translator("CallCannotBeStop");
 
-    // The model creates the note on first text, removes it when the text is cleared and writes it in
-    // the language being read — see StationCall.SetManualNote.
-    private void SetCallNote(StationCall call, string text)
+    // The model creates the note on first text, removes it when the text is cleared, stamps it with the
+    // half of the call it is shown at and writes it in the language being read — see
+    // StationCall.SetManualNote.
+    private void SetCallNote(StationCall call, ManualNoteEdit edit)
     {
-        call.SetManualNote(text);
+        call.SetManualNote(edit.Text, edit.Target);
         Save();
     }
 

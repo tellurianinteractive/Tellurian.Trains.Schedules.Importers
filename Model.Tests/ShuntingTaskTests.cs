@@ -172,8 +172,51 @@ public class ShuntingTaskTests
 
         var flow = train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, station));
 
+        // A travelling train has a route, and its wagons are worked into and out of it along that route
+        // rather than shunted at one place. What it gets instead is the couple and uncouple notes; the
+        // shunting instruction belongs to a task, which is nothing else.
         Assert.IsEmpty(flow.ShuntingNotes);
+        Assert.IsEmpty(calls[0].CargoFlowNotes.OfType<ShuntArrivingWagonsNote>());
+        Assert.IsEmpty(calls[0].CargoFlowNotes.OfType<FetchDepartingWagonsNote>());
+    }
+
+    [TestMethod]
+    public void AFlowOnATravellingTrainStatesItsDestinationsWhereItBeginsAndEnds()
+    {
+        var (timetable, _, station) = Arrange();
+        var train = timetable.Trains.First(t => !t.IsShuntingTask);
+        var calls = train.CallsInRunOrder;
+
+        train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, station));
+
+        // The dispatcher's two halves of the same flow: what goes on the train here, and what comes off
+        // it there. Neither reaches the loco driver, whose booklet states the flow in its cargo block.
+        var begins = calls[0].CargoFlowNotes.OfType<CargoFlowDestinationNote>().Single();
+        var ends = calls[^1].CargoFlowNotes.OfType<CargoFlowUncoupleNote>().Single();
+
+        Assert.IsTrue(begins.IsForDeparture);
+        Assert.IsTrue(begins.IsStationNote);
+        Assert.IsFalse(begins.IsDriverNote);
+        Assert.IsTrue(ends.IsForArrival);
+        Assert.IsTrue(ends.IsStationNote);
+        Assert.IsFalse(ends.IsDriverNote);
+        Assert.IsEmpty(calls[0].CargoFlowNotes.OfType<CargoFlowUncoupleNote>());
+        Assert.IsEmpty(calls[^1].CargoFlowNotes.OfType<CargoFlowDestinationNote>());
+    }
+
+    [TestMethod]
+    public void AFlowSaysNothingWhereItsCoupleAndUncoupleNotesAreTurnedOff()
+    {
+        var (timetable, _, station) = Arrange();
+        var train = timetable.Trains.First(t => !t.IsShuntingTask);
+        var calls = train.CallsInRunOrder;
+
+        var flow = train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, station));
+        flow.HasCoupleNote = false;
+        flow.HasUncoupleNote = false;
+
         Assert.IsEmpty(calls[0].CargoFlowNotes);
+        Assert.IsEmpty(calls[^1].CargoFlowNotes);
     }
 
     [TestMethod]

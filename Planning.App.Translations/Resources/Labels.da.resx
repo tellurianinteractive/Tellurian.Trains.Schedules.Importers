@@ -529,7 +529,7 @@
     <value>Togkategorier med præfiks, farve og klassifikation.</value>
   </data>
   <data name="VehicleOwnersDescription" xml:space="preserve">
-    <value>Hvem medbringer hvilket rullende materiel til køresessionen.</value>
+    <value>Hvem der medbringer hvilket rullende materiel til træffet. Den første ejer medbringer køretøjet og stiller det op på anlægget; øvrige ejere medbringer reserver.</value>
   </data>
   <data name="SchedulesDescription" xml:space="preserve">
     <value>Byg køretøjsomløb og tildel lokomotiver, vogne og godsstrømme.</value>
@@ -1197,8 +1197,8 @@
   <data name="TrackNumber" xml:space="preserve">
     <value>Spor</value>
   </data>
-  <data name="TrackReferencedByTrains" xml:space="preserve">
-    <value>Kan ikke slettes: {0} tog bruger dette spor.</value>
+  <data name="TrackReferenced" xml:space="preserve">
+    <value>Kan ikke slette: sporet bruges af tog eller materielomløb.</value>
   </data>
   <data name="Tracks" xml:space="preserve">
     <value>Spor</value>
@@ -1437,6 +1437,12 @@
   </data>
   <data name="CallNoteHint" xml:space="preserve">
     <value>Bemærkning, der vises ved dette ophold. Brug *kursiv* og **fed** til fremhævelse; opmærkningen vises, når du redigerer.</value>
+  </data>
+  <data name="CallNoteTargetHint" xml:space="preserve">
+    <value>Om bemærkningen vises ved ankomsten eller ved afgangen.</value>
+  </data>
+  <data name="CallNoteNeedsStop" xml:space="preserve">
+    <value>En bemærkning kræver et ophold: sæt kryds i Ank eller Afg for at kunne skrive en her.</value>
   </data>
   <data name="NoCalls" xml:space="preserve">
     <value>Ingen stop.</value>
@@ -1709,7 +1715,7 @@
     <value>Byg automatisk</value>
   </data>
   <data name="SchedulesBuildAutomaticallyResult" xml:space="preserve">
-    <value>{0} omløb oprettet</value>
+    <value>{0} togafsnit føjet til {1} eksisterende omløb, {2} nye omløb oprettet</value>
   </data>
   <data name="SchedulesNewSchedule" xml:space="preserve">
     <value>Nyt omløb</value>
@@ -1870,6 +1876,21 @@
   <data name="Battery" xml:space="preserve">
     <value>Batteri</value>
   </data>
+  <data name="SteamInText" xml:space="preserve">
+    <value>damp</value>
+  </data>
+  <data name="DieselInText" xml:space="preserve">
+    <value>diesel</value>
+  </data>
+  <data name="ElectricInText" xml:space="preserve">
+    <value>elektrisk</value>
+  </data>
+  <data name="DualInText" xml:space="preserve">
+    <value>dobbelt</value>
+  </data>
+  <data name="BatteryInText" xml:space="preserve">
+    <value>batteri</value>
+  </data>
   <data name="IsReversibleTrain" xml:space="preserve">
     <value>Vendetog?</value>
   </data>
@@ -1894,6 +1915,21 @@
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>Trækkraften på dette togafsnit kan vende, som den står, så der udskrives ingen omløbsbemærkning.</value>
+  </data>
+  <data name="PartFetchFromTrack" xml:space="preserve">
+    <value>Hent fra</value>
+  </data>
+  <data name="PartFetchFromTrackHelp" xml:space="preserve">
+    <value>Det spor, køretøjerne står på, før toget afgår, når det er et andet end det, toget afgår fra. Udskrives som afgangsbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="PartPutOnTrack" xml:space="preserve">
+    <value>Sæt på</value>
+  </data>
+  <data name="PartPutOnTrackHelp" xml:space="preserve">
+    <value>Det spor, køretøjerne sættes på, efter toget er ankommet, når det er et andet end det, toget ankommer til. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="SameTrackAsTrain" xml:space="preserve">
+    <value>Samme som toget (spor {0})</value>
   </data>
   <data name="NumberOfUnits" xml:space="preserve">
     <value>Antal enheder</value>
@@ -2096,6 +2132,9 @@
   <data name="ShuntingYards" xml:space="preserve">
     <value>Rangerbanegårde</value>
   </data>
+  <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
+    <value>Tabellen over rangerbanegårde udskrives på anlægssiden bagest i hæftet. Skriv den på en linje for sig for i stedet at placere den i teksten:</value>
+  </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Godsbetjenes fra</value>
   </data>
@@ -2284,5 +2323,155 @@
   </data>
   <data name="CouldNotCreateShuntingTask" xml:space="preserve">
     <value>Rangeropgaven kunne ikke oprettes. Kontrollér, at stationen har et spor, og at tiderne ligger inden for driftstiden.</value>
+  </data>
+  <data name="MaximumExplanation" xml:space="preserve">
+    <value>En lastgrænse skrives som et tal med et mærke, der siger, hvad der tælles. Hvert tal er et maksimum.</value>
+  </data>
+  <data name="MaxAxlesExplanation" xml:space="preserve">
+    <value>Antal aksler</value>
+  </data>
+  <data name="MaxWagonsExplanation" xml:space="preserve">
+    <value>Antal vogne</value>
+  </data>
+  <data name="MaxLengthExplanation" xml:space="preserve">
+    <value>Toglængde i meter</value>
+  </data>
+  <data name="AnywhereExplanation" xml:space="preserve">
+    <value>Vognene står allerede på stationen og kan være kommet hvor som helst fra</value>
+  </data>
+  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
+    <value>Også vogne til de destinationer, der betjenes af godstog derfra</value>
+  </data>
+  <data name="AndBeyondExplanation" xml:space="preserve">
+    <value>Også vogne til de destinationer på anlægget, der ligger længere fremme</value>
+  </data>
+  <data name="RegionExplanation" xml:space="preserve">
+    <value>En destination uden for anlægget, som nås via dette sted</value>
+  </data>
+  <data name="RollingStock" xml:space="preserve">
+    <value>Rullende materiel</value>
+  </data>
+  <data name="Participants" xml:space="preserve">
+    <value>Deltagere</value>
+  </data>
+  <data name="Participant" xml:space="preserve">
+    <value>Deltager</value>
+  </data>
+  <data name="FirstSession" xml:space="preserve">
+    <value>Første køresession</value>
+  </data>
+  <data name="FirstDay" xml:space="preserve">
+    <value>Første dag</value>
+  </data>
+  <data name="DccAddress" xml:space="preserve">
+    <value>DCC-adresse</value>
+  </data>
+  <data name="DccAddressHelp" xml:space="preserve">
+    <value>Hvert trækkraftkøretøj, der medbringes, skal have sin egen DCC-adresse, også reserverne. Angiv 0, hvis ejeren endnu ikke har oplyst den.</value>
+  </data>
+  <data name="DccAddressToBeProvided" xml:space="preserve">
+    <value>Ejeren oplyser</value>
+  </data>
+  <data name="DccAddressMissing" xml:space="preserve">
+    <value>DCC-adresse mangler. Hvert trækkraftkøretøj skal have en; angiv 0, hvis ejeren skal oplyse den.</value>
+  </data>
+  <data name="DccAddressInvalid" xml:space="preserve">
+    <value>Angiv en DCC-adresse fra 0 til 9999, hvor 0 betyder, at ejeren skal oplyse den.</value>
+  </data>
+  <data name="PrimaryContributor" xml:space="preserve">
+    <value>Primær</value>
+  </data>
+  <data name="PrimaryContributorHint" xml:space="preserve">
+    <value>Medbringer køretøjet og stiller det op på anlægget</value>
+  </data>
+  <data name="SpareContributor" xml:space="preserve">
+    <value>Reserve</value>
+  </data>
+  <data name="SpareContributorHint" xml:space="preserve">
+    <value>Medbringer et reservekøretøj</value>
+  </data>
+  <data name="Spares" xml:space="preserve">
+    <value>Reserver</value>
+  </data>
+  <data name="AddOwner" xml:space="preserve">
+    <value>Tilføj ejer</value>
+  </data>
+  <data name="MakePrimary" xml:space="preserve">
+    <value>Gør primær</value>
+  </data>
+  <data name="NoOwnersYet" xml:space="preserve">
+    <value>Ingen medbringer dette endnu.</value>
+  </data>
+  <data name="NoRollingStock" xml:space="preserve">
+    <value>Intet rullende materiel endnu. Køretøjer tilføjes under Omløb.</value>
+  </data>
+  <data name="NotInOperation" xml:space="preserve">
+    <value>Ikke i drift</value>
+  </data>
+  <data name="WithoutOwnerOnly" xml:space="preserve">
+    <value>Kun dem uden ejer?</value>
+  </data>
+  <data name="ParticipantNameRequired" xml:space="preserve">
+    <value>Angiv deltagerens navn.</value>
+  </data>
+  <data name="ParticipantNameInUse" xml:space="preserve">
+    <value>Der er allerede en deltager med det navn.</value>
+  </data>
+  <data name="ParticipantReferenced" xml:space="preserve">
+    <value>Kan ikke slette: deltageren medbringer rullende materiel.</value>
+  </data>
+  <data name="NewParticipant" xml:space="preserve">
+    <value>Ny deltager: {0}</value>
+  </data>
+  <data name="AddParticipant" xml:space="preserve">
+    <value>Tilføj deltager</value>
+  </data>
+  <data name="NoParticipants" xml:space="preserve">
+    <value>Ingen deltagere endnu. Et navn, der angives som ejer, tilføjes her.</value>
+  </data>
+  <data name="ParticipantsDescription" xml:space="preserve">
+    <value>Alle, der er angivet som ejere. Ret et forkert stavet navn her, så rettes det overalt, hvor det forekommer.</value>
+  </data>
+  <data name="TypeParticipantName" xml:space="preserve">
+    <value>Skriv et navn…</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>Antal</value>
+  </data>
+  <data name="VehicleContributors" xml:space="preserve">
+    <value>Medbragte køretøjer</value>
+  </data>
+  <data name="ByOperationLocation" xml:space="preserve">
+    <value>Pr. driftssted</value>
+  </data>
+  <data name="ByOwner" xml:space="preserve">
+    <value>Pr. ejer</value>
+  </data>
+  <data name="ByDccAddress" xml:space="preserve">
+    <value>Efter DCC-adresse</value>
+  </data>
+  <data name="DccAddresses" xml:space="preserve">
+    <value>DCC-adresser</value>
+  </data>
+  <data name="NotYetBooked" xml:space="preserve">
+    <value>Endnu ikke booket</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Rolle</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>Mangler</value>
+  </data>
+  <data name="NoTractionUnits" xml:space="preserve">
+    <value>Ingen lokomotiver eller togsæt endnu, så der er ingen DCC-adresser at vise.</value>
+  </data>
+  <data name="TrainCompositions" xml:space="preserve">
+    <value>Togsammensætninger</value>
+  </data>
+  <data name="NoTrainCompositions" xml:space="preserve">
+    <value>Ingen bemandet station har afgående tog med godsstrømme eller vognsæt med angivne vogne.</value>
+  </data>
+  <data name="CompositionFromLoco" xml:space="preserve">
+    <value>Sammensætning regnet fra lok</value>
   </data>
 </root>

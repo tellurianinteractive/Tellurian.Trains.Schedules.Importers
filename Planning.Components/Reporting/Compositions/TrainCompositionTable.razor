@@ -1,0 +1,165 @@
+﻿@namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@inject Translator Translator
+
+@* One printed page of a station's train compositions.
+
+   The reader is whoever makes up the trains at the station — the yard manager, where there is one — checking
+   that every train leaves with the right wagons in the right places. The departures are listed a track at a
+   time, and on each row the train's composition is drawn front first, as rectangles standing where the wagons
+   stand: a wagonset as one rectangle per wagon with its class and number, and the cargo flow wagons as one
+   rectangle per position saying where they go.
+
+   The rectangles carry no captions. Their sequence is the wagon order, so a rectangle needs to say nothing
+   about where in the train it stands, and the wagonsets are named in the turnus column instead. That leaves
+   every rectangle free to be exactly as wide as what it holds.
+
+   The heading repeats on every page and is what identifies the sheet: the pile is torn apart and handed to
+   the stations, so a page has to say whose it is on its own. *@
+
+<div class="compositions-page">
+    <header class="heading">
+        <h1>
+            @Page.Station.Station.Name
+            @if (Page.IsContinued)
+            {
+                <span class="continued">(@Translator("Continued"))</span>
+            }
+        </h1>
+        <div class="context">
+            <span>@Translator("TrainCompositions")</span>
+            <span>@ContextLine</span>
+        </div>
+    </header>
+
+    <table class="compositions">
+        <thead>
+            <tr>
+                <th class="track">@Translator("Track")</th>
+                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages and would
+                   head a column holding a few circles. *@
+                <th class="sessions">@Translator(Settings.UseDaysInsteadOfSessionNumbers ? "Days" : "SessionsShort")</th>
+                <th class="time">@Translator("Arr")</th>
+                <th class="time">@Translator("Dep")</th>
+                <th class="train">@Translator("Train")</th>
+                <th class="to">@Translator("To")</th>
+                @* Every one of these is a maximum, so the word heads the column instead of standing before
+                   each figure; the marks say which limit each figure is. *@
+                <th class="limit">@Translator("Maximum")</th>
+                @* The heading names the card the rake's identity is written on, so the right one is fetched
+                   out of several standing in the yard. *@
+                <th class="turnus">@Translator("Turnus")</th>
+                <th class="composition">@Translator("CompositionFromLoco")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Page.Departures.Count; i++)
+            {
+                var departure = Page.Departures[i];
+                var isFirstOfTrack = i == 0 || !Page.Departures[i - 1].Track.Equals(departure.Track);
+                var isLastOfTrack = i == Page.Departures.Count - 1 || !Page.Departures[i + 1].Track.Equals(departure.Track);
+                <tr class="@(isLastOfTrack ? "last-of-track" : null)">
+                    @* The track is named once, where its departures begin; the rule under its last one closes
+                       the group. Named again at the top of a page, which is read on its own. *@
+                    <td class="track">@(isFirstOfTrack ? departure.Track.Number : null)</td>
+                    <td class="sessions"><SessionsView Sessions="departure.Sessions" Settings="Settings" /></td>
+                    @* Empty where the train starts its run here: it arrives from nowhere. *@
+                    <td class="time">@departure.ArrivalTime?.HHMM()</td>
+                    <td class="time">@departure.DepartureTime.HHMM()</td>
+                    <td class="train">@departure.TrainIdentity</td>
+                    <td class="to">@departure.DestinationName</td>
+                    @* Nothing at all where the train is not restricted: a limit with no figure would read
+                       as a limit the planner forgot to fill in. *@
+                    <td class="limit"><MaxLoadView Capacity="departure.Limit" /></td>
+                    <td class="turnus">
+                        @foreach (var wagonset in departure.Turnuses)
+                        {
+                            <div class="entry">
+                                <span class="designation">@wagonset.Designation</span>
+                                @* Only where the rake is in the train on some of its sessions and not others. *@
+                                @if (wagonset.Sessions is { } sessions)
+                                {
+                                    <SessionsView Sessions="sessions" Settings="Settings" />
+                                }
+                            </div>
+                        }
+                    </td>
+                    <td class="composition">
+                        <div class="groups">
+                            @foreach (var group in departure.Groups)
+                            {
+                                @switch (group)
+                                {
+                                    case WagonsetComposition wagonset:
+                                        @* The wagons of one rake stay together: they are closer to one another
+                                           than to the rectangles beside them, and they wrap as a block. *@
+                                        <div class="group wagonset">
+                                            @foreach (var wagon in wagonset.Wagons)
+                                            {
+                                                <div class="wagon">
+                                                    <span class="class">@wagon.Class</span>
+                                                    @* One line, the number beside the class, so a long rake
+                                                       costs width rather than height. *@
+                                                    @if (!string.IsNullOrWhiteSpace(wagon.Number))
+                                                    {
+                                                        <span class="number">@wagon.Number</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        break;
+                                    case CargoPositionComposition cargo:
+                                        <div class="group cargo">
+                                            @foreach (var destination in cargo.Destinations)
+                                            {
+                                                @* One destination per line: each is a separate place the
+                                                   wagons in this rectangle are bound for. Their order says
+                                                   nothing — the wagons within a position stand as they like.
+                                                   The most that may be brought there follows the place. *@
+                                                <span class="destination">
+                                                    @destination.Html<MaxLoadView Capacity="destination.Limit" />
+                                                </span>
+                                            }
+                                        </div>
+                                        break;
+                                }
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    /// <summary>The page to print.</summary>
+    [Parameter, EditorRequired] public CompositionPage Page { get; set; } = default!;
+
+    /// <summary>
+    /// Chooses sessions or days, the operating period and the day names. Build it from the layout with
+    /// <c>Layout.Settings.General.SessionSettings()</c>.
+    /// </summary>
+    [Parameter, EditorRequired] public SessionsSettings Settings { get; set; } = default!;
+
+    /// <summary>The name of the layout the plan is for.</summary>
+    [Parameter] public string? LayoutName { get; set; }
+
+    /// <summary>The day the report was printed.</summary>
+    [Parameter] public DateOnly PrintDate { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private string ContextLine
+    {
+        get
+        {
+            var printed = string.Format(Culture, Translator("PrintedAt"), PrintDate.ToString("yyyy-MM-dd", Culture));
+            return LayoutName is { Length: > 0 } name ? $"{name} · {printed}" : printed;
+        }
+    }
+}

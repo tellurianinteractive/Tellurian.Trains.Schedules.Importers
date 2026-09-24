@@ -1,5 +1,148 @@
 # Versionsnyheter
 
+## Version 0.7.0
+
+### Nya funktioner
+
+- **Tabellen över rangerbangårdar kan nu placeras i de allmänna instruktionerna.** Tabellen över
+  rangerbangårdar skrivs ut på bansidan sist i häftet med de allmänna instruktionerna. På en bana med
+  många rangerbangårdar fyllde den sidan och tryckte bort förklaringen av godsflödenas märken. Skriv
+
+  ```
+  <ShuntingYards/>
+  ```
+
+  på en egen rad under **Inställningar**, där i texten den hör hemma, för att i stället skriva ut den
+  där. Bansidan utelämnar den då, så den skrivs aldrig ut två gånger. Förhandsvisningen bredvid texten
+  visar en ruta där tabellen kommer. Skrivs den ingenstans står tabellen kvar på bansidan som förut.
+
+- **Fordonsägare: vem som tar med vilket rullande materiel till träffen, och var det ska ställas upp.**
+  Fliken **Fordonsägare** listar varje lok, tågsätt och vagnsätt — med antalet enheter där de är fler än en,
+  och för ett vagnsätt som listar sina vagnar varje vagnklass en gång — med den första köromgång (eller dag) det är i trafik, och den station, det spår och den avgång där det
+  ska stå före den. Öppna en rad för att lägga till ägare: den första tar med fordonet och ställer upp det
+  på banan, övriga ägare tar med reserver. Välj en ägare genom att skriva de första bokstäverna i namnet —
+  eller i efternamnet — så att ett namn stavas likadant överallt; ett namn som inte matchar någon erbjuds
+  som en ny deltagare. Varje ägare till ett lok eller tågsätt, även reserverna, måste ange en DCC-adress;
+  skriv **0** när ägaren ännu inte har lämnat den. Varje fordon och varje ägare har en anmärkning, och vyn
+  **Deltagare** listar alla med vad de tar med, och där rättas ett felstavat namn en gång för alla.
+
+  Rapporten **Fordon och ägare** under **Rapporter** skriver ut samma lista på A4 liggande, ordnat på ett av
+  tre sätt som väljs ovanför sidorna: **Per driftplats**, en sida per station till dess ägare, med fordonen
+  som ska ställas upp där i ordning efter första köromgång och avgång; **Per ägare**, en sida per deltagare
+  med vad hen tar med, DCC-adresserna och var varje fordon börjar; eller **Efter DCC-adress**, alla medhavda
+  lok och tågsätt i en lista. Varje station eller ägare börjar på en ny sida och fortsätter på nästa när en
+  sida inte räcker. Fordon som inte är i trafik listas sist; de som ingen tar med ännu kommer först per
+  ägare, under **Ännu inte bokade**. Radens bakgrund visar när enheten behövs: vit när den är i trafik alla
+  köromgångar, ljusgrå för en reserv och annars ljusblå, ljusgrön eller ljusröd när fordonet är i trafik
+  först från första, andra eller tredje köromgången.
+
+- **Ett omlopp kan ange att fordonen står på ett annat spår än tåget.** När ett tågavsnitt redigeras
+  under **Omlopp** anger **Hämta från** spåret fordonen står på innan tåget avgår, och **Ställ på**
+  spåret de ställs på efter ankomsten — till exempel ett vagnsätt som lämnas på ett sidospår vid en
+  mellanstation. Tjänstehäftena och tågklareringslistorna skriver ut det som en anmärkning: *Innan
+  avgång hämta vagnsätt 21 från spår 3.* vid avgången och *Efter ankomst växla in vagnsätt 21 till
+  spår 3.* vid ankomsten, i stället för anmärkningen om att koppla till eller loss fordonet. Där
+  fordonet går i tåget bara vissa av de köromgångar eller dagar tåget går, inleds anmärkningen med dem
+  — *1,3,5: Innan avgång hämta …* — och ett fordon som inte går i tåget någon av dem får ingen
+  anmärkning. Ett spår som ett omlopp använder på det sättet kan inte tas bort under **Driftplatser**.
+
+- **Tågsammansättningar kan nu skrivas ut.** En ny rapport under **Rapporter** ger varje bemannad station en
+  egen sida på A4 liggande, med alla tåg som avgår därifrån med godsflödesvagnar eller med ett vagnsätt som
+  listar sina vagnar. Tågen listas spår för spår, och i avgångsordning på varje spår. Bredvid varje tåg ritas
+  dess sammansättning framifrån som rektanglar: ett vagnsätt som en rektangel per vagn, i vagnordning, med
+  vagnens littera och nummer; och godsflödesvagnar som en rektangel per plats i tåget, med vart de ska — med
+  *och lokala destinationer* och *och vidare* där godsdestinationen anger det, och dess regioner i sina
+  färger. Sammansättningen är den tåget avgår med, så vagnar det kom med visas liksom de som kopplas till vid
+  stationen. Ett vagnsätt som går i tåget bara vissa köromgångar eller dagar märks med dem, och
+  godsflödesvagnar utan plats visas sist, som *Var som helst i tåget*.
+
+- **Ett motorvagnståg ankommer nu till det spår det ska avgå från.** Ett motorvagnståg, och ett lok som
+  går i vändtåg, gör aldrig rundgång: det avgår från samma spår som det ankom till. När ett sådant fordon
+  går tåg efter tåg läggs därför varje tågs ankomstspår på det spår nästa tåg avgår från, och — om omloppet
+  slutar där det började — läggs sista tågets ankomstspår på det spår första tåget avgår från, så att
+  fordonet står färdigt där nästa köromgång hämtar det. Bara ankomstspår flyttas; det spår ett tåg avgår
+  från står kvar som du har angett det. Ett omlopp som dras av ett vanligt lok rörs inte, eftersom loket
+  kan köras ensamt över stationen till det spår nästa tåg står på. Spåren rättas varje gång ett tåg läggs
+  till i ett omlopp — av **Bygg automatiskt** eller av dig, sist i omloppet eller där fordonet står — och
+  varje gång du tilldelar ett fordon till ett omlopp, så ett omlopp som byggts innan motorvagnståget var
+  känt rättas så snart motorvagnståget sätts på det. Ett importerat omlopp behåller de spår det lästes in
+  med. Skulle flytten ställa två tåg på samma spår samtidigt listas det bland konflikterna för dig att lösa.
+
+### Ändringar
+
+- **Dagar och köromgångar listas utan mellanrum.** Där en anmärkning eller en kolumn anger vilka dagar
+  eller köromgångar något gäller skrivs de nu *M,O,F* och *1,3,5* i stället för *M, O, F* och *1, 3, 5*,
+  så att uppgiften tar så lite plats som möjligt. Dagar som skrivs ut i sin helhet — *Måndag, Onsdag,
+  Fredag* — är oförändrade.
+
+- **Ett vagnsätt som listar sina vagnar visar dem nu i sin etikett under Omlopp.** Etiketten anger antalet
+  vagnar och varje vagnklass en gång — *SJ 05 5 x A/B/Fv* — i stället för vagnsättets egen klass.
+
+- **En anmärkning vid ett uppehåll anger nu om den hör till ankomsten eller avgången.** Tjänstehäftena och
+  tågklareringslistorna skriver ut ett uppehålls ankomst och avgång på var sin rad, så under **Tåg** frågar
+  rutan bredvid varje **Anmärkning** vilken av dem den gäller: **Ank** för något som möter eller ska göras
+  vid ankomsten, **Avg** för något som ska göras före eller vid avgången. Där tåget bara ankommer eller bara
+  avgår finns bara den ena att välja. Där det passerar kan ingen anmärkning skrivas — kryssa i **Ank** eller
+  **Avg** först — men en som redan finns där går fortfarande att ta bort.
+
+  En anmärkning som skrevs med en tidigare version, eller som följde med en XPLN-import, angav ingetdera och
+  skrevs därför varken ut i häftena eller i listorna. Första gången en plan öppnas får varje sådan anmärkning
+  avgången där tåget avgår, och ankomsten där det bara ankommer.
+
+- **Varje block på en tågsida i ett tjänstehäfte har nu ett färgat streck längs vänsterkanten.** Dragfordon
+  markeras med rött, planerade vagnsätt med grönt, godsvagnar med fraktsedlar med blått och tidtabellen med
+  grått, så att blocken går att skilja åt med en blick, och där ett grått streck slutar tar det tågavsnittet
+  slut. Strecken skrivs ut utan att bakgrundsgrafik behöver slås på, och varje block behåller sin rubrik, så
+  en utskrift i svartvitt förlorar ingenting.
+
+- **Dragfordon och planerade vagnsätt på en tågsida i ett tjänstehäfte visar nu sina spår.** Varje rad anger
+  spåret fordonet står på vid början och spåret det lämnas på vid slutet — tågets eget spår, eller det som
+  omloppet anger under **Hämta från** eller **Ställ på**. Kolumnen som anger fordonet har nu rubriken
+  **Omlopp** i båda blocken, efter kortet som fordonets identitet står på. Med spåren i tabellen anger
+  tidtabellen nedanför inte längre varje vagnsätt och dess spår: den säger *Växla vagnar till avgångsspåret
+  före avgång.* eller *Växla vagnar till deras ankomstspår efter ankomst.*, inledd av de köromgångar eller
+  dagar det gäller när vagnarna växlas bara vissa av dem tåget går. Tågklareringslistorna anger fortfarande
+  varje vagnsätt och dess spår.
+
+- **Häftet med allmänna instruktioner förklarar nu hur godset skrivs i de andra rapporterna.** Under
+  **Godsflöden** på häftets sista sida säger en förklaring att varje lastgräns är ett högsta värde och vad
+  märket efter ett tal räknar, vad jordgloben står för, vad *och lokala destinationer* och *och vidare* lägger
+  till en destination, och vad ett färgat regionnamn betyder.
+
+- **Första sidan i häftet med allmänna instruktioner har plats för ett längre program.** Programmet sätts med
+  mindre avstånd mellan raderna, punkterna och dagrubrikerna — textstorleken är densamma — vilket ger plats
+  för fyra eller fem punkter till. Ett program som är för långt för sidan tappar sina sista punkter, och de är
+  slutet på träffen, precis det som folk slår upp.
+
+### Rättningar
+
+- **Förklaringen av godsflödenas märken rinner inte längre av häftet med de allmänna instruktionerna.**
+  Formuleringarna *och lokala destinationer* och *och vidare*, samt förklaringen av en region, sattes i
+  en så smal kolumn att var och en gick på fyra rader, och på en bana med flera rangerbangårdar föll den
+  sista av dem utanför sidans nederkant. Märkena och formuleringarna sätts nu som två listor under
+  varandra, var och en över hela sidan.
+
+- **En tidtabell som fortsätter på motstående sida i ett tjänstehäfte ser nu ut som alla andra.** När ett
+  tågavsnitt är för långt för en sida flyttas dess tidtabell till motstående sida, och där skrevs den ut utan
+  häftets egen utformning: med större text, utan de fetstilta stationerna och tiderna och utan linjerna
+  mellan uppehållen, så en lång tidtabell kunde hamna nedanför sidans nederkant.
+
+- **Att ändra ett tågs nummer eller kategori under Tåg lämnar inte längre ändringen kvar på en annan rad.**
+  Båda ändringarna sorterar om listan, och numret du skrev eller kategorin du valde kunde bli stående på raden
+  för det tåg som flyttade in på dess plats.
+
+- **Dialogerna läser nu in ett tal medan du skriver det.** **Varaktighet (minuter)** för ett nytt
+  växlingsuppdrag, **Minuter** att flytta eller kopiera tåg med och ett fordons **Nummer** under **Omlopp**
+  lästes först när du lämnade fältet, så knappen som bekräftar dialogen — och varningen att ett
+  fordonsnummer redan är upptaget — släpade efter tills du klickade någon annanstans.
+
+- **Den grafiska tidtabellen ritar nu en driftplats spår i den ordning du har gett dem.** Den brydde sig inte
+  om spårens **Ordning** under **Driftplatser** och kunde därför rita dem i en annan ordning än alla andra
+  spårlistor i appen.
+
+- **Ett omloppskort för ett fordon som går dagar som inte följer på varandra anger nu dagarna.** Ett kort för
+  måndag, onsdag och fredag skrev ut *MondayShort,WednesdayShort,FridayShort* i stället för *M,O,F*.
+
 ## Version 0.6.0
 
 ### Ändringar

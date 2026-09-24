@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Model.Notes;
+﻿namespace Tellurian.Trains.Schedules.Model.Notes;
 
 /// <summary>
 /// One other train present at a call at the same time as the reader's own train.
@@ -17,10 +17,11 @@ public sealed record Meet(Train Other, Time From, Time To, Sessions? Sessions);
 /// </summary>
 /// <param name="Meets">The trains being crossed, ordered by <see cref="Meet.From"/>, then
 /// <see cref="Meet.To"/>, then the other train's number — the order the driver reads them in.</param>
-/// <param name="Settings">How each meet's <see cref="Meet.Sessions"/> qualifier is rendered.</param>
-public sealed record CrossingNote(
-    IReadOnlyList<Meet> Meets,
-    SessionsSettings? Settings) : GeneratedNote;
+/// <remarks>
+/// How each meet's <see cref="Meet.Sessions"/> qualifier is rendered comes from the inherited
+/// <see cref="GeneratedNote.Settings"/>.
+/// </remarks>
+public sealed record CrossingNote(IReadOnlyList<Meet> Meets) : GeneratedNote;
 
 /// <summary>
 /// Every other train the driver's train overtakes here — it was already standing when this train
@@ -29,10 +30,11 @@ public sealed record CrossingNote(
 /// </summary>
 /// <param name="Meets">The trains being overtaken, ordered by <see cref="Meet.From"/>, then
 /// <see cref="Meet.To"/>, then the other train's number.</param>
-/// <param name="Settings">How each meet's <see cref="Meet.Sessions"/> qualifier is rendered.</param>
-public sealed record OvertakesNote(
-    IReadOnlyList<Meet> Meets,
-    SessionsSettings? Settings) : GeneratedNote;
+/// <remarks>
+/// How each meet's <see cref="Meet.Sessions"/> qualifier is rendered comes from the inherited
+/// <see cref="GeneratedNote.Settings"/>.
+/// </remarks>
+public sealed record OvertakesNote(IReadOnlyList<Meet> Meets) : GeneratedNote;
 
 /// <summary>
 /// Every other train that overtakes the driver's train here — it arrives after this train and leaves
@@ -41,10 +43,11 @@ public sealed record OvertakesNote(
 /// </summary>
 /// <param name="Meets">The trains doing the overtaking, ordered by <see cref="Meet.From"/>, then
 /// <see cref="Meet.To"/>, then the other train's number.</param>
-/// <param name="Settings">How each meet's <see cref="Meet.Sessions"/> qualifier is rendered.</param>
-public sealed record IsOvertakenNote(
-    IReadOnlyList<Meet> Meets,
-    SessionsSettings? Settings) : GeneratedNote;
+/// <remarks>
+/// How each meet's <see cref="Meet.Sessions"/> qualifier is rendered comes from the inherited
+/// <see cref="GeneratedNote.Settings"/>.
+/// </remarks>
+public sealed record IsOvertakenNote(IReadOnlyList<Meet> Meets) : GeneratedNote;
 
 /// <summary>
 /// The train runs through this location without stopping.
@@ -177,19 +180,21 @@ public static class MeetNoteExtensions
             // way the driver reads down the page: by when a meet starts, then when it ends, then the
             // other train's number, which is deterministic even when two meets start and end together.
             if (crossings.Count > 0)
-                yield return new CrossingNote(Order(crossings), settings) { IsForArrival = true };
+                yield return new CrossingNote(Order(crossings)) { IsForArrival = true, Settings = settings };
             if (overtakes.Count > 0)
-                yield return new OvertakesNote(Order(overtakes), settings) { IsForArrival = true };
+                yield return new OvertakesNote(Order(overtakes)) { IsForArrival = true, Settings = settings };
             if (isOvertaken.Count > 0)
-                yield return new IsOvertakenNote(Order(isOvertaken), settings) { IsForArrival = true };
+                yield return new IsOvertakenNote(Order(isOvertaken)) { IsForArrival = true, Settings = settings };
         }
 
         /// <summary>
         /// Whether this call is where its train begins or ends its run.
         /// </summary>
         /// <remarks>
-        /// Compared by reference, not by value: a train may hold two calls that compare equal, and only
-        /// identity says which of them this one is.
+        /// Read through <c>CallsInRunOrder</c>, since <see cref="Train.Calls"/> is in insertion order: a
+        /// call added last can be timed first, and it is the first and last calls the train <em>runs</em>
+        /// that begin and end its run. Compared by reference, not by value: a train may hold two calls that
+        /// compare equal, and only identity says which of them this one is.
         /// </remarks>
         public bool IsTrainOriginOrTerminus
         {
@@ -197,7 +202,7 @@ public static class MeetNoteExtensions
             {
                 call = call.ValueOrException(nameof(call));
                 if (call.Train is not { Calls.Count: > 0 } train) return false;
-                var calls = train.Calls;
+                var calls = train.CallsInRunOrder;
                 return ReferenceEquals(calls[0], call) || ReferenceEquals(calls[^1], call);
             }
         }
@@ -211,7 +216,9 @@ public static class MeetNoteExtensions
         /// station that permits it — and it is the right one, since what the driver meets is the train
         /// that came towards them, whatever it does afterwards. A train that originates here has no
         /// inbound stretch, so its outbound one is used: its direction of travel is still well defined
-        /// by where it is going.
+        /// by where it is going. The neighbours are taken in run order (<c>CallsInRunOrder</c>), since
+        /// <see cref="Train.Calls"/> is in insertion order and need not say which call the train reaches
+        /// next.
         /// </remarks>
         public TravelDirection? DirectionInto
         {
@@ -219,8 +226,8 @@ public static class MeetNoteExtensions
             {
                 call = call.ValueOrException(nameof(call));
                 if (call.Train is not { } train) return null;
-                var calls = train.Calls;
-                var index = calls.IndexOf(call);
+                var calls = train.CallsInRunOrder;
+                var index = IndexOf(calls, call);
                 if (index < 0) return null;
 
                 if (index > 0 && DirectionBetween(calls[index - 1], call) is { } inbound) return inbound;
@@ -258,5 +265,16 @@ public static class MeetNoteExtensions
             if (stretch.Start.Equals(end) && stretch.End.Equals(start)) return TravelDirection.Backward;
         }
         return null;
+    }
+
+    // Where a call stands in its train's run order. By identity, never by value: two calls of one train
+    // can compare equal (see StationCall.Equals), and it is this very call's neighbours that are wanted.
+    private static int IndexOf(IReadOnlyList<StationCall> calls, StationCall call)
+    {
+        for (var i = 0; i < calls.Count; i++)
+        {
+            if (ReferenceEquals(calls[i], call)) return i;
+        }
+        return -1;
     }
 }

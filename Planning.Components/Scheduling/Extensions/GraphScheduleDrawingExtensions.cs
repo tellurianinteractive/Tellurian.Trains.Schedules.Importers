@@ -1,4 +1,4 @@
-using Tellurian.Trains.Schedules.Model;
+﻿using Tellurian.Trains.Schedules.Model;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -120,8 +120,7 @@ public static class GraphScheduleDrawingExtensions
     /// </summary>
     public static IEnumerable<MinuteLabel> MinuteLabels(this GraphSchedule me)
     {
-        var trackArrays = new StationTrack[me.Stations.Length][];
-        for (var i = 0; i < me.Stations.Length; i++) trackArrays[i] = [.. me.Stations[i].Tracks];
+        var trackArrays = me.StationTracks;
 
         int StationIndexOf(OperationLocation station)
         {
@@ -228,8 +227,8 @@ public static class GraphScheduleDrawingExtensions
         // (lower index) faces the gap with its last track, the lower station (higher index) with its first
         // track. This is independent of travel direction, so it is derived from station order, not the
         // from/to (departure/arrival) roles.
-        var fromFacingTrack = fromStationIndex < toStationIndex ? me.Stations[fromStationIndex].Tracks.Count - 1 : 0;
-        var toFacingTrack = toStationIndex < fromStationIndex ? me.Stations[toStationIndex].Tracks.Count - 1 : 0;
+        var fromFacingTrack = fromStationIndex < toStationIndex ? me.StationTracks[fromStationIndex].Length - 1 : 0;
+        var toFacingTrack = toStationIndex < fromStationIndex ? me.StationTracks[toStationIndex].Length - 1 : 0;
 
         Offset start, end;
         double crossFrom, crossTo, crossEnter, crossExit;
@@ -283,8 +282,7 @@ public static class GraphScheduleDrawingExtensions
     /// </summary>
     public static IEnumerable<(Train Train, Offset Start, Offset End, double Offset)> TrainLabels(this GraphSchedule me)
     {
-        var trackArrays = new StationTrack[me.Stations.Length][];
-        for (var i = 0; i < me.Stations.Length; i++) trackArrays[i] = [.. me.Stations[i].Tracks];
+        var trackArrays = me.StationTracks;
 
         int StationIndexOf(OperationLocation station)
         {
@@ -549,7 +547,7 @@ public static class GraphScheduleDrawingExtensions
 
     public static Offset StationLabelOffset(this GraphSchedule me, int stationIndex)
     {
-        var offset = me.Stations[stationIndex].Tracks.Count / 2 * me.GraphSettings.TrackSpacing;
+        var offset = me.StationTracks[stationIndex].Length / 2 * me.GraphSettings.TrackSpacing;
         return me.AxisDirection switch
         {
             TimeAxisDirection.Horisontal => new(me.GraphSettings.LabelGap, me.Y(stationIndex, 0) + offset),
@@ -560,7 +558,7 @@ public static class GraphScheduleDrawingExtensions
 
     public static Offset KmLabelOffset(this GraphSchedule me, int stationIndex)
     {
-        var offset = me.Stations[stationIndex].Tracks.Count / 2 * me.GraphSettings.TrackSpacing;
+        var offset = me.StationTracks[stationIndex].Length / 2 * me.GraphSettings.TrackSpacing;
         return me.AxisDirection switch
         {
             TimeAxisDirection.Horisontal => new(me.GraphSettings.KilometerAxisSpacing.X - me.GraphSettings.KmLabelGap, me.Y(stationIndex, 0) + offset),
@@ -625,7 +623,6 @@ public static class GraphScheduleDrawingExtensions
 
     public static Offset TrackOffset(this GraphSchedule me, int stationIndex, int trackIndex)
     {
-        var tracks = me.Stations[stationIndex].Tracks.ToArray();
         var x = me.GraphSettings.TimeAxisSpacing.X;
         var y = me.GraphSettings.TimeAxisSpacing.Y;
         if (stationIndex == 0)
@@ -638,7 +635,7 @@ public static class GraphScheduleDrawingExtensions
             for (var i = 0; i < stationIndex; i++)
             {
                 var stretch = me.TrackStretches[i];
-                var fromTrackCount = me.Stations[i].Tracks.Count;
+                var fromTrackCount = me.StationTracks[i].Length;
                 var Δ1 = Math.Max(me.GraphSettings.MinStationSpacing, ((fromTrackCount - 1) * me.GraphSettings.TrackSpacing) + (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance));
                 x += Δ1;
                 y += Δ1;
@@ -663,7 +660,7 @@ public static class GraphScheduleDrawingExtensions
     public static Offset MaxTrackOffset(this GraphSchedule me)
     {
         var lastStationIndex = me.Stations.Length - 1;
-        var lastTrackIndex = me.Stations[lastStationIndex].Tracks.Count - 1;
+        var lastTrackIndex = me.StationTracks[lastStationIndex].Length - 1;
         return me.TrackOffset(lastStationIndex, lastTrackIndex);
     }
 }

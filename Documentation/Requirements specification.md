@@ -40,7 +40,8 @@ Snapshot of coverage by area (see each section for detail).
 | Cargo flows (§4.2.5) | 🟢 | reusable cargo-flow descriptions catalogue plus per-train occurrences; the **Cargo flow** tab (descriptions + per-train editor); destination note generated (report rendering pending) |
 | Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed calculation wired (train speed capped by stretch speed, mapped to a real model speed) |
 | Schedule top level (§4.4.1) | ✅ | terminology: what this document calls a *Schedule* (the whole operating plan) is called a *plan* in the data model; what it calls a *Vehicle Schedule* is called simply a *schedule* |
-| Vehicles inventory (§4.4.2) | ✅ | includes a DCC address |
+| Vehicles inventory (§4.4.2) | ✅ | the DCC address is kept per owner rather than per vehicle, since each owner's unit has its own (§4.4.5) |
+| Vehicle owners and participants (§4.4.5) | ✅ | a participant catalogue on the plan; per rolling stock item an ordered list of owners (the first primary, the rest bringing spares) and a note |
 | Vehicle schedules / driver duties (§4.4.3–4) | 🟡 | a vehicle schedule is a reusable, type-agnostic sequence of train parts; interactive and automatic turnus building and session-aware vehicle assignment (§3.8); wagon-group assignment editor not wired |
 | Note generation system (§4.5.1–4) | 🟡 | notes are assembled from schedule data and localised texts, in plain text and styled markup; about half the note types are built (see §4.5.2), the rest are not |
 | Manual note translations (§4.5.5) | 🟡 | a single language code, not a translation collection |
@@ -56,7 +57,7 @@ Snapshot of coverage by area (see each section for detail).
 | Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; calls listed in travel order, editing a departure shifts the times after it and an arrival the times before it; pass-through set via arrival/departure checkboxes; conflict highlighting |
 | Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection + conflict highlighting; interaction (drag, context menu) is still not built |
 | Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
-| Vehicle Owners (§3.9) | ❌ | stub page |
+| Vehicle Owners (§3.9) | ✅ | rolling stock list with start position and first session/day; owners per item picked by typing part of a name; DCC address required for every traction unit brought; participant list for correcting names; printed in the Vehicle Contributors report (FR-3.12.5). Online submission by owners (Module Registry) not built |
 | Automatic time calculation UI (§3.10) | 🟡 | editing a call time shifts the times on one side of it — after a departure, before an arrival — keeping run and dwell times; locking individual times and recomputing from the travel-time calculation while editing not built |
 | Validation (§3.11) | 🟡 | rules organised by scope (Layout/Timetable/Schedule/Plan); L2–L4, T1–T5, S1–S5, P1/P3–P5 done; closure (S3+S5) judged per traction unit by flow conservation; vehicle identity (P5) is the imported external id or else operator + number, refused at entry and reported for older plans; P2 partial; L1 emergent. GUI feedback: toolbar indicator + list, conflict highlighting on the graphical timetable and the Trains and Schedules tabs, click-to-locate |
 | Reports (§3.12) | 🟡 | shell + page formats present; 2 reports built — Turnus Cards and a paginated tabular Timetable report |
@@ -507,11 +508,28 @@ which layout is open.
 > neighbouring part that joins it is adapted to the new joint where its own train calls
 > there, so shortening one part turns the return working round at the new place by itself.
 > An edit the neighbour cannot follow is applied all the same and reported as a conflict.
+> A part can also name **another track** at its start or end, where its vehicles stand
+> rather than on the train's own track: they are then fetched from that track before
+> departure and put on it after arrival, each printed as a note (§4.5), and the train's own
+> track is then not counted as occupied by the vehicle between its trains. A track used
+> this way cannot be deleted.
 > A train can also be worked into the **middle** of a working: each joint between two parts
 > shows where the vehicle stands and for how long, and offers the trains it could make in
 > that time. A leg that does not bring the vehicle back to where the working goes on is
 > added all the same and reported as a conflict until the leg back is added, so an
 > out-and-back trip is worked into a layover a leg at a time.
+> A working whose vehicle **cannot change tracks on its own** — a trainset, or a locomotive
+> on a reversible train, neither of which needs running round its train — has its **arrival
+> tracks put where its next train departs from**: such a vehicle is the train, so it leaves
+> from the very track it came in on. Where the working ends where it began, its last arrival
+> is likewise put on the track its first train departs from, so the vehicle is left standing
+> where the next session fetches it. Only arrivals are moved; a departure track stays where
+> the planner set it. A working hauled by an ordinary locomotive is left alone, because the
+> locomotive runs light across the station to whatever track its next train stands on. Which
+> it is depends on the vehicle, so the tracks are put right whenever a train is added to a
+> working — automatically or by hand, at its end or into a joint — and whenever a vehicle is
+> assigned to one. An imported working keeps the tracks it was read with. A track thereby
+> taken twice over at the same time is reported as a conflict (§3.11) rather than avoided.
 > Conflicting schedules are highlighted (§3.11). **Not yet wired:** assigning a schedule
 > to a wagon group via an editor.
 >
@@ -520,9 +538,49 @@ which layout is open.
 
 ### 3.9 Vehicle Owners
 
-> **Status:** ❌ Missing. The Vehicle Owners tab is a stub.
+> **Status:** ✅ Implemented for entry in the app. Online submission by the owners themselves is not
+> built.
 
-*To be detailed — managing who brings what rolling stock for the session.*
+The Vehicle Owners tab records who brings which rolling stock to the meeting. It has two views.
+
+**Rolling stock.** Every locomotive, trainset and wagonset in the plan is listed — cargo flows and cargo
+are not rolling stock anyone brings. Each row shows:
+
+| Column | Content |
+| ------ | ------- |
+| Type, vehicle, class | What the item is, by its designation. A wagonset that lists its wagons gives each wagon class once (e.g. *A/B/Fv*) |
+| Count | The number of units making up the item — the listed wagons of a wagonset — shown only when there is more than one |
+| First session / first day | The first session (or day, for a layout counting in days) on which the item is in operation |
+| Station, track, departure | Where the item is to stand before that session: the start of the first train part it works on it. An item not yet given a schedule is shown as *not in operation* |
+| Owner, DCC address | The primary owner and the address of the unit they bring |
+| Spares | The owners bringing a spare unit |
+| Note | A note about the item as a whole |
+
+The list can be narrowed to the items that have no owner yet. It is printed, per operation location, per
+owner or by DCC address, in the Vehicle Contributors report (FR-3.12.5).
+
+**Owners of an item.** A row opens onto the item's owners, in order:
+
+- The **first owner is the primary one**, who brings the unit and sets it up on the layout. **Every
+  further owner brings a spare.** A spare owner can be made primary; when the primary owner is removed, the
+  first spare owner takes their place.
+- **Every owner of a traction unit must give a DCC address**, spares included, because each unit is driven
+  on the layout. An address is a whole number from 0 to 9999; **0 means the owner is still to provide it**
+  and is shown as such. An owner cannot be added to a traction unit without an address, and an address can
+  be changed but not cleared. A traction unit where an owner lacks one — possible when a wagonset is made a
+  locomotive after its owners were entered — is marked with a warning.
+- Each owner has a note of their own, for example that a spare arrives on the second day.
+
+**Participants.** Owners are chosen from the plan's list of participants, so a name is spelt one way
+throughout. Typing into a name field offers the participants whose name, or any later word of it, starts
+with what has been typed; case is ignored. A name that matches nobody is offered as a new participant, and
+choosing it adds them to the list. The Participants view lists everyone with the rolling stock each brings
+(the items they bring themselves marked apart from their spares); correcting a name there corrects it
+everywhere, a name already held by another participant is refused, and a participant who still brings
+rolling stock cannot be deleted.
+
+This list of names belongs to the plan. It is not the register of members a meeting is organised from,
+which stays with the Module Registry (§1.3).
 
 Beyond in-app entry, vehicle owners may **submit the rolling stock they will bring online** (planned
 as a Module Registry feature). Those submissions are folded into the SQLite database distributed to
@@ -732,9 +790,27 @@ excluded from the printed output. Each report sets its own page size and orienta
 
 > **Status:** 🟡 A **tabular** timetable report is built (A4L, per stretch and direction) —
 > a Buchfahrplan-style table of times per station, distinct from the A3L stringline. The
-> **A3L graphical** Timetable report and **Train Compositions** are not built. (The
-> graphical timetable still exists as an interactive editor, §3.7, but not yet as an A3L
-> print report.)
+> **A3L graphical** Timetable report is not built. (The graphical timetable still exists
+> as an interactive editor, §3.7, but not yet as an A3L print report.)
+>
+> **Train Compositions** is built (A4L). Each manned station gets its own pages, listing
+> every train departing from it with cargo flow wagons or a wagonset that lists its
+> wagons, track by track and in departure order on each track. Each train is given the
+> sessions or days it runs, its arrival and departure times, where it is bound, the most
+> it may be made up of and the turnus of every wagonset it works with; the arrival is
+> empty where the train starts its run at the station, and the maximum where nothing
+> restricts the train. Beside each train its composition is drawn from the front as
+> rectangles: one per wagon of a wagonset, in rake order, with class and number; and one
+> per cargo flow position, listing its destinations with *and local destinations*, *and
+> beyond*, coloured regions and the most that may be brought to each. The rectangles are
+> not captioned — their order is the order the wagons stand in, and the wagons gathered in
+> one rectangle may be marshalled freely among themselves — and each is as wide as its own
+> contents. The composition is
+> what the train leaves with, including wagons it arrived with. A wagonset in the train on
+> only some sessions or days is marked with them beside its turnus; cargo flow wagons
+> without a position come last, and wagonsets come before cargo at the same position. A
+> station with no such departures gets no page, and a station too long for one page
+> continues on the next.
 
 #### FR-3.12.4 Operational Lists
 
@@ -750,11 +826,55 @@ excluded from the printed output. Each report sets its own page size and orienta
 #### FR-3.12.5 Vehicle Start & Inventory
 
 
-| Report              | Description                                                                                                     | Format |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
-| Vehicle Start Infos | Where vehicles must be at session start — multiple views: overview, per owner, per station, with DCC addresses | A4     |
+| Report               | Description                                                                                              | Format |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | ------ |
+| Vehicle Contributors | Who brings which rolling stock and where it is to be set up — per operation location, per owner, or by DCC address | A4L    |
 
-> **Status:** ❌ Report not built. Its DCC-address dependency exists (§4.4.2).
+> **Status:** ✅ Built.
+
+The Vehicle Contributors report prints every rolling stock item listed in the Vehicle Owners tab (§3.9). The
+arrangement is chosen on screen, above the pages, and is not printed:
+
+| Arrangement | Reader | Grouping and order | Columns |
+| ----------- | ------ | ------------------ | ------- |
+| By operation location | The owner of a station | One group per location where an item is to be set up, in name order; within it, by first session or day, then departure | First session/day, track, departure, type, class, turnus, count, owner, role (primary or spare), DCC address, note |
+| By owner | A participant | One group per participant bringing something, in name order; the units they set up themselves before their spares | Role (primary or spare), type, class, turnus, count, DCC address, first session/day, station, track, departure, note |
+| By DCC address | Whoever hands out and checks addresses | One list of every locomotive and trainset unit — wagonsets take no address and are left out: known addresses ascending, then the missing ones, then the traction units nobody brings | DCC address, type, class, turnus, count, owner, role, first session/day, station, track, departure, note |
+
+The turnus column is the item's turnus number alone; its operator and class are not repeated there. The type
+column gives the kind of item followed, for a locomotive or trainset whose traction type is stated, by that
+traction type (e.g. *Trainset, diesel*); a wagonset, and a traction unit whose traction type is not stated, show
+the kind alone. For a wagonset that lists its wagons, the class column gives each wagon class once, in the order
+the wagons stand and separated by slashes (e.g. *A/B/Fv*), and the count is the number of wagons. A first day is printed by its full name, whether or
+not the layout otherwise uses short day names; a first session by its number.
+
+Every arrangement prints **a row per unit brought**: the primary unit and each spare on a row of its own. On a
+station's page and on the *Not in operation* page, an item's spares follow directly below its primary unit.
+
+- Nothing is left out of the arrangements by operation location and by owner. An item not in operation has no
+  location, so the arrangement by operation location lists it last under *Not in operation*; an item nobody
+  brings has no owner, so the arrangement by owner lists it first, before any participant, under *Not yet
+  booked*. The address list holds only what a DCC address applies to, and ends with the locomotives and
+  trainsets nobody brings. Where a plan has no locomotive or trainset, it says so instead.
+- Every group **starts on a new page** under a large heading naming the station or participant, because the
+  pages are handed to different people. A group too long for one page continues on the next under the same
+  heading, marked as continued. The report and the plan it comes from, and the day it was printed, are named
+  beside the heading.
+- The notes printed for a unit are its owner's own note and the note about the item, each on a line of its
+  own.
+- **A missing DCC address is printed in red as *Missing*.** That is where an owner is given for a locomotive or
+  trainset but no address, or 0 for one the owner is still to provide — on paper both are an address someone
+  still has to obtain. A unit that is not driven, or that nobody brings, prints no address.
+- **The background of a row shows when its unit is needed.** A spare unit is light grey. The item itself — the
+  unit its primary owner sets up, or an item nobody brings yet — is white when it is in operation on every
+  session or day of the operating period, and otherwise light blue, light green or light red when it is first
+  in operation on the first, second or third session or day. An item first in operation later, or not in
+  operation at all, is white.
+- **Only the notes wrap.** Every other column stays on one line and is exactly as wide as its widest text,
+  heading or value, so no text is ever shortened; the notes take the rest of the width. The widths follow the
+  rows on each page, so the columns of a continued page may sit slightly differently from the first.
+- Notes are expected to be short. Page breaks are counted from the rows rather than measured: a row takes one
+  line, and one more for each further note.
 
 #### FR-3.12.6 Planning Analysis
 
@@ -999,15 +1119,18 @@ Each train shall have an ordered sequence of station calls:
 > **Status:** ✅ Implemented. The individual wagons of a wagonset are held as an ordered
 > rake on the wagonset (present only for wagonsets), running the whole schedule the wagonset
 > is assigned to. It is edited in the vehicle editor (number of wagons + a re-sequenceable
-> wagon list) and persisted with the plan. This is distinct from the per-part wagon group on
+> wagon list) and persisted with the plan. On the Schedules tab such a wagonset is labelled
+> with the number of wagons and each wagon class once, in place of its own class (e.g.
+> *SJ 05 5 x A/B/Fv*). This is distinct from the per-part wagon group on
 > a train part. Freight wagons a train couples and later uncouples over a segment are
 > modelled as a **cargo flow** (DM-4.2.5) instead.
 
 **Direction-dependent ordering:** Wagon position is direction-dependent. A consist ordered
 1-2-3-4 becomes 4-3-2-1 when the train reverses direction. A tested helper splits the
 schedule into legs and flips the order at every travel-direction change. It has **no report
-consumer yet** — the Turnus Card does not apply direction changes — and will be wired into
-whichever report needs direction-aware wagon order once one is specified.
+consumer yet** — neither the Turnus Card nor the Train Compositions report (FR-3.12.3), which
+draws the wagons in rake order, applies direction changes — and will be wired into whichever
+report needs direction-aware wagon order once one is specified.
 
 #### DM-4.2.5 Cargo Flows
 
@@ -1226,12 +1349,13 @@ A schedule is the top-level planning artifact combining:
 - Vehicle schedules (locomotive and trainset assignments)
 - Driver duties
 - Vehicle inventory
+- Who brings the rolling stock, and the participants who do (DM-4.4.5)
 
 #### DM-4.4.2 Vehicles
 
 > **Status:** ✅ Implemented (a vehicle is one of: Locomotive, Trainset, Wagonset, Cargo).
-> The DCC address (optional; motorised vehicles only) is present, feeding the Vehicle Start
-> Infos report (FR-3.12.5).
+> The DCC address is not a property of the vehicle: several owners may bring a unit of the
+> same vehicle, each with an address of its own, so it is recorded per owner (DM-4.4.5).
 
 The system shall maintain a vehicle inventory:
 
@@ -1245,7 +1369,6 @@ The system shall maintain a vehicle inventory:
 | Is Double-Directed | Has a cab at each end, so it never needs turning        |
 | Reversible train   | This locomotive works a train that can be driven from either end — one with a driving trailer at the far end, or with a second locomotive there — so it is never run round its train |
 | Company            | Owning company                                          |
-| DCC-address        | For motorised vehicles only                             |
 
 A trainset is reversible by its nature and needs no such marking; the property is offered for
 locomotives only.
@@ -1310,6 +1433,36 @@ The system shall support creating driver duties:
 | Parts    | Sequence of train parts            |
 | Notes    | Duty-specific notes                |
 
+#### DM-4.4.5 Vehicle Owners and Participants
+
+> **Status:** ✅ Implemented. Edited in the Vehicle Owners tab (§3.9).
+
+A schedule keeps a **participant catalogue** — the names of the people bringing something to the meeting,
+each stored once and referred to elsewhere by an identifier:
+
+| Property | Description |
+| -------- | ----------- |
+| Name     | The participant's name; unique within the plan, ignoring case and spacing |
+
+For each rolling stock item (locomotive, trainset or wagonset) that has owners or a note, the schedule
+keeps a **vehicle contribution**, tied to the vehicle by its identifier:
+
+| Property | Description |
+| -------- | ----------- |
+| Vehicle  | The rolling stock item |
+| Note     | A note about the item as a whole |
+| Owners   | The participants bringing it, in order: the first is the primary owner, who brings the unit and sets it up; every later one brings a spare |
+
+Each **owner** records:
+
+| Property    | Description |
+| ----------- | ----------- |
+| Participant | Who brings the unit |
+| DCC address | For a traction unit, required for every owner: 1–9999, or 0 when the owner is still to provide it. None for a wagonset |
+| Note        | A note about what this owner brings |
+
+An item left with no owner and no note keeps no contribution.
+
 ---
 
 ### 4.5 Note Structure and Localized Text
@@ -1317,7 +1470,7 @@ The system shall support creating driver duties:
 > **Status:** 🟡 Partial. Notes are assembled from schedule data and localised texts as described
 > below, in plain text and in styled markup, and a manual free-text note can be written by hand.
 > Built so far are the loco and wagon connect/disconnect notes, loco exchange, moves to and from a
-> parking track, turning and circulating a loco, reinforcement, cargo destinations, whether the train
+> parking track or another track of the station, turning and circulating a loco, reinforcement, cargo destinations, whether the train
 > stops or exchanges anything, the lock key notes, and the meeting and overtaking notes. Everything a
 > vehicle schedule says is done with its vehicles now reaches both the driver's booklet and the
 > station's dispatch list. Still missing are the loco driver sorting wagons, block origins and
@@ -1340,6 +1493,7 @@ The following note types shall be generated from station call data:
 | Loco connect/disconnect        | Vehicle schedule + station call         | "Connect loco DB 218 042"                     |
 | Loco exchange                  | Two vehicle schedules at same call      | "Replace loco; Use loco DB 101 003"           |
 | Loco turn/circulate            | Vehicle properties + station call       | "Turn locomotive.", "Circulate locomotive.", "Turn and circulate locomotive." |
+| Vehicle on another track       | Vehicle schedule part + station call, qualified by the sessions the vehicle works the train on when not all it runs | "Before departure, fetch locomotive MZ 1401 from track 3.", "1,3,5: After arrival, shunt wagonset Gbs 12 to track 3." — but for wagonsets the loco driver, whose wagonset table already gives the tracks, reads only "Shunt wagons to departure track before departure." or "1,3,5: Shunt wagons to their arrival track after arrival." |
 | Loco driver sorts wagons       | Wagon group data at arrival             | "Loco driver sorts wagons at arrival"         |
 | Wagon group connect/disconnect | Wagon group assignment                  | "Connect wagons to [destinations]"            |
 | Block origin                   | Wagon block routing at arrival          | "Connect wagons from [stations]"              |

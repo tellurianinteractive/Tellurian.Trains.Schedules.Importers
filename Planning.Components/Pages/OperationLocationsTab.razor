@@ -1,6 +1,7 @@
 @page "/operation-locations"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Validations
 @using Tellurian.Utilities
 @using Tellurian.Utilities.Web
 @inject ScheduleStateService ScheduleState
@@ -400,8 +401,9 @@ else
                                 }
                                 <td><input type="text" @bind="t.Usage" @bind:after="OnEdited" /></td>
                                 <td>
-                                    <button class="danger" disabled="@TrackReferenced(t)"
-                                            title='@(TrackReferenced(t) ? string.Format(Culture, Translator("TrackReferencedByTrains"), t.Calls.Count) : null)'
+                                    @{ var trackDeletion = ScheduleState.Schedule?.MayDelete(t); }
+                                    <button class="danger" disabled="@(trackDeletion?.IsDenied == true)"
+                                            title="@DeletionPresentation.BlockedReason(trackDeletion, "TrackReferenced", Translator)"
                                             @onclick="() => DeleteTrack(t)">
                                         @Translator("Delete")
                                     </button>
@@ -626,9 +628,9 @@ else
     // Same Markdig call the editor's preview and the printed reports use, so the three agree.
     private static MarkupString Rendered(string markdown) => new(Markdig.Markdown.ToHtml(markdown));
 
-    // A location/track is referenced when any train calls there; such items cannot be deleted.
+    // A location is referenced when any train calls there; such a location cannot be deleted. Whether a
+    // single track may go is the model's to say (DeletionRules), since vehicle schedules can use it too.
     private static bool IsReferenced(OperationLocation o) => o.Tracks.Any(t => t.Calls.Count > 0);
-    private static bool TrackReferenced(StationTrack t) => t.Calls.Count > 0;
 
     private void StartAdd()
     {
@@ -772,8 +774,8 @@ else
 
     private void DeleteTrack(StationTrack track)
     {
-        if (Editing is null || TrackReferenced(track)) return;
-        Editing.Tracks.Remove(track);
+        if (Editing is null || ScheduleState.Schedule is not { } plan) return;
+        if (plan.TryDelete(track).IsDenied) return;
         OnEdited();
     }
 

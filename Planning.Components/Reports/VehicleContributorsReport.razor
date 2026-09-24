@@ -1,0 +1,115 @@
+@page "/vehicle-contributors-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* Who brings which rolling stock to the meeting, and where it is to be set up: every item listed in the Vehicle
+   owners tab, printed for one of three readers.
+
+   - By operation location, for the owner of a station: the vehicles to be set up there, before which session
+     or day, on which track, and who brings them.
+   - By owner, for a participant: what to bring, with the DCC addresses, and where to set each item up.
+   - By DCC address, for whoever hands out and checks addresses: every locomotive and trainset unit in one
+     list; a wagonset takes no address.
+
+   Printed A4 landscape. A station or a participant always starts on a fresh page, because the pile is torn
+   apart and handed out; a group too long for one page continues under the same heading.
+
+   The arrangement is chosen in the address (?by=location, owner or dcc), so a link to the one wanted can be
+   kept; the choice above the pages is not printed. *@
+
+@if (_pages is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (!_hasRollingStock)
+{
+    <DisplayedMessage ResourceKey="NoRollingStock" />
+}
+else
+{
+    <nav class="report-options no-print" aria-label="@Translator("VehicleContributors")">
+        @foreach (var (grouping, value, key) in Groupings)
+        {
+            var current = grouping == _grouping;
+            <a href="@HrefOf(value)" class="@(current ? "current" : null)" aria-current="@(current ? "page" : null)">@Translator(key)</a>
+        }
+    </nav>
+
+    @* Only the address list can come out empty with rolling stock in the plan: when all of it is wagonsets.
+       The choice above stays, so another arrangement is a click away. *@
+    @if (_pages.Count == 0)
+    {
+        <DisplayedMessage ResourceKey="NoTractionUnits" />
+    }
+
+    @* No page footer: the heading names the station or participant, the report and the day it was printed,
+       which is all a torn-off sheet needs to identify itself. *@
+    @foreach (var page in _pages)
+    {
+        <A4LPage Margin="10">
+            <VehicleContributorsTable Page="page" Grouping="_grouping" Cells="_cells!" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+        </A4LPage>
+    }
+}
+
+@code {
+    private const string Route = "vehicle-contributors-report";
+
+    // Each arrangement with the value that asks for it in the address and the label that names it.
+    private static readonly IReadOnlyList<(VehicleContributorsGrouping Grouping, string Value, string Key)> Groupings =
+    [
+        (VehicleContributorsGrouping.OperationLocation, "location", "ByOperationLocation"),
+        (VehicleContributorsGrouping.Contributor, "owner", "ByOwner"),
+        (VehicleContributorsGrouping.DccAddress, "dcc", "ByDccAddress"),
+    ];
+
+    private static VehicleContributorsPageGeometry Geometry => VehicleContributorsPageGeometry.A4Landscape;
+
+    /// <summary>
+    /// How the rolling stock is arranged: <c>location</c>, <c>owner</c> or <c>dcc</c>. Absent or unknown
+    /// arranges it by operation location.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "by")]
+    public string? By { get; set; }
+
+    private IReadOnlyList<VehicleContributorsPage>? _pages;
+    private bool _hasRollingStock;
+    private VehicleContributorsGrouping _grouping;
+    private VehicleContributorCells? _cells;
+    private DateOnly _printDate;
+
+    private SessionsSettings Settings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    // Fixed once for the whole render, so a PDF printed later still says which day's plan it shows.
+    protected override void OnInitialized() => _printDate = DateOnly.FromDateTime(DateTime.Now);
+
+    // Parameters rather than initialisation: choosing another arrangement only changes the address, which
+    // reuses this component instead of creating a new one.
+    protected override async Task OnParametersSetAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        _grouping = Groupings.FirstOrDefault(g => g.Value.Equals(By, StringComparison.OrdinalIgnoreCase)).Grouping;
+        if (ScheduleState.Schedule is not { } plan)
+        {
+            _hasRollingStock = false;
+            _pages = [];
+            return;
+        }
+
+        _hasRollingStock = plan.RollingStock.Any();
+        var settings = Settings;
+        _cells = new VehicleContributorCells(Translator, settings);
+        var groups = VehicleContributorsList.Create(plan, _grouping, settings);
+        _pages = VehicleContributorsPaginator.BuildPages(groups, Geometry);
+    }
+
+    private static string HrefOf(string value) => $"{Route}?by={value}";
+}

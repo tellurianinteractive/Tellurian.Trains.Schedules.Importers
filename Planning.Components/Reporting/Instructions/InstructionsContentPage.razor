@@ -1,0 +1,50 @@
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties
+
+@inject Translator Translator
+
+@* One page of the authored standing instructions, exactly as InstructionsPagination split them: the
+   page decides nothing about what fits, it only sets what it is given.
+
+   The wrapper is what makes the author's markdown match the rest of the booklet — the same class the
+   programme on the front page uses — and the heights the pagination estimates are read from that
+   class's rules, so the two must not drift apart.
+
+   The text is set in the stretches InstructionsPlaceholders splits it into, with the part each
+   placeholder stands for rendered between them. Every stretch is converted on its own, so a
+   placeholder can never land inside a paragraph the author started on the line above. *@
+
+<div class="instructions-body">
+    @if (IsFirstOfSection)
+    {
+        <h1 class="section-title">@Translator("Instructions")</h1>
+    }
+    @foreach (var segment in _segments)
+    {
+        if (segment.Placeholder is InstructionsPlaceholder.ShuntingYards)
+        {
+            <ShuntingYardsView Layout="Layout" />
+        }
+        else
+        {
+            @((MarkupString)Markdig.Markdown.ToHtml(segment.Markdown))
+        }
+    }
+</div>
+
+@code {
+    /// <summary>The markdown blocks on this page, already joined by the pagination.</summary>
+    [Parameter, EditorRequired] public string Markdown { get; set; } = "";
+
+    /// <summary>
+    /// Whether this is the first page of the instructions, which alone carries the section title —
+    /// the pages after it continue the same flow and would only repeat it.
+    /// </summary>
+    [Parameter] public bool IsFirstOfSection { get; set; }
+
+    /// <summary>The layout, for the parts a placeholder on this page stands for.</summary>
+    [Parameter] public Layout? Layout { get; set; }
+
+    private IReadOnlyList<InstructionsSegment> _segments = [];
+
+    protected override void OnParametersSet() => _segments = InstructionsPlaceholders.Split(Markdown);
+}

@@ -20,8 +20,10 @@
             </div>
             <div class="field">
                 <label>@Translator("Minutes")</label>
+                @* Entered on input, not on change, so the Move/Clone button follows what is typed
+                   instead of waiting for the field to lose focus. *@
                 <input type="text" class="minutes" value="@_minutes"
-                       @onchange="e => { _minutes = e.Value?.ToString() ?? _minutes; _error = null; }" />
+                       @oninput="e => { _minutes = e.Value?.ToString() ?? _minutes; _error = null; }" />
             </div>
 
             @if (IsClone)

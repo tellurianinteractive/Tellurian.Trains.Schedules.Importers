@@ -76,6 +76,21 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis fahren.</value>
   </data>
+  <data name="FetchFromTrack" xml:space="preserve">
+    <value>Vor Abfahrt {0} {1} von Gleis {2} holen.</value>
+  </data>
+  <data name="PutOnTrack" xml:space="preserve">
+    <value>Nach Ankunft {0} {1} auf Gleis {2} rangieren.</value>
+  </data>
+  <data name="ShuntWagonsToDepartureTrack" xml:space="preserve">
+    <value>Wagen vor Abfahrt zum Abfahrtsgleis rangieren.</value>
+  </data>
+  <data name="ShuntWagonsToArrivalTrack" xml:space="preserve">
+    <value>Wagen nach Ankunft zu ihrem Ankunftsgleis rangieren.</value>
+  </data>
+  <data name="OnSessions" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
   <data name="CirculateTractionUnit" xml:space="preserve">
     <value>Lok umsetzen.</value>
   </data>
@@ -94,6 +109,9 @@
   </data>
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Bringt Wagen nach {0}</value>
+  </data>
+  <data name="UncoupleWagonsFor" xml:space="preserve">
+    <value>Wagen für {0} abkuppeln.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Ankommende Wagen von {0} zu den Güterkunden rangieren.</value>

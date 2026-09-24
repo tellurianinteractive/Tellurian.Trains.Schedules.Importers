@@ -3,7 +3,7 @@
 
 @inject Translator Translator
 
-@* One vehicle block of a train part — traction units or wagonsets. The two have the same six columns
+@* One vehicle block of a train part — traction units or wagonsets. The two have the same eight columns
    and differ only in what they list, so one view serves both; the heading tells them apart.
 
    An empty block is omitted entirely, heading and rule included, so a simple part stays short and
@@ -11,35 +11,45 @@
 
 @if (Data is { HasData: true })
 {
-    <h3>@Translator(Heading)</h3>
-    <table class="dutytrain">
-        <thead>
-            <tr>
-                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
-                   and would head a column holding a few circles. *@
-                <th>@Translator(SessionsHeading)</th>
-                <th>@Translator(VehicleColumn)</th>
-                <th>@Translator("From")</th>
-                <th>@Translator("Dep")</th>
-                <th>@Translator("To")</th>
-                <th>@Translator("Arr")</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var vehicle in Data.Vehicles)
-            {
+    <div class="dutyblock @Block">
+        <h3>@Translator(Heading)</h3>
+        <table class="dutytrain">
+            <thead>
                 <tr>
-                    <td><SessionsView Sessions="vehicle.Sessions" Settings="Data.SessionsSettings" /></td>
-                    @* The identity written on the loco or wagonset card, so the driver can match it. *@
-                    <td class="designation">@vehicle.Designation</td>
-                    <td>@vehicle.TrainPart.From.OperationLocation.Name</td>
-                    <td>@vehicle.TrainPart.From.Departure.HHMM()</td>
-                    <td>@vehicle.TrainPart.To.OperationLocation.Name</td>
-                    <td>@vehicle.TrainPart.To.Arrival.HHMM()</td>
+                    @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages
+                       and would head a column holding a few circles. *@
+                    <th>@Translator(SessionsHeading)</th>
+                    @* The heading names the card the identity is written on, which serves locomotives and
+                       wagonsets alike. *@
+                    <th>@Translator("Turnus")</th>
+                    <th>@Translator("From")</th>
+                    <th class="track">@Translator("Track")</th>
+                    <th>@Translator("Dep")</th>
+                    <th>@Translator("To")</th>
+                    <th class="track">@Translator("Track")</th>
+                    <th>@Translator("Arr")</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var vehicle in Data.Vehicles)
+                {
+                    <tr>
+                        <td><SessionsView Sessions="vehicle.Sessions" Settings="Data.SessionsSettings" /></td>
+                        @* The identity written on the loco or wagonset card, so the driver can match it. *@
+                        <td class="designation">@vehicle.Designation</td>
+                        <td>@vehicle.TrainPart.From.OperationLocation.Name</td>
+                        @* The vehicle's own tracks, which differ from the train's where it is fetched from or
+                           put on another track. *@
+                        <td class="track">@vehicle.DepartureTrack.Number</td>
+                        <td>@vehicle.TrainPart.From.Departure.HHMM()</td>
+                        <td>@vehicle.TrainPart.To.OperationLocation.Name</td>
+                        <td class="track">@vehicle.ArrivalTrack.Number</td>
+                        <td>@vehicle.TrainPart.To.Arrival.HHMM()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
     <hr />
 }
 
@@ -50,8 +60,8 @@
     /// <summary>Resource key for the block heading.</summary>
     [Parameter, EditorRequired] public string Heading { get; set; } = "";
 
-    /// <summary>Resource key for the vehicle column header.</summary>
-    [Parameter, EditorRequired] public string VehicleColumn { get; set; } = "";
+    /// <summary>The block's class in the booklet CSS, which gives it its colour bar.</summary>
+    [Parameter, EditorRequired] public string Block { get; set; } = "";
 
     // The day names already say what the column is, so they head it as themselves.
     private string SessionsHeading =>

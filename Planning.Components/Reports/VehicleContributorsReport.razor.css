@@ -1,0 +1,28 @@
+/* The choice of arrangement, above the pages on screen and never printed (.no-print). Styled after the report
+   toolbar, with the arrangement shown marked as chosen. */
+.report-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 16px 8mm;
+
+    a {
+        padding: 6px 14px;
+        border: 1px solid #1a3a5c;
+        border-radius: 4px;
+        background: white;
+        color: #1a3a5c;
+        font-size: 0.85rem;
+        text-decoration: none;
+
+        &:hover {
+            background: #e6edf4;
+        }
+
+        &.current {
+            background: #1a3a5c;
+            color: white;
+        }
+    }
+}

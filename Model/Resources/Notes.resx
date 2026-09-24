@@ -82,6 +82,26 @@
     <value>After arrival, drive {0} from arrival track to parking space.</value>
     <comment>{0}=traction unit</comment>
   </data>
+  <data name="FetchFromTrack" xml:space="preserve">
+    <value>Before departure, fetch {0} {1} from track {2}.</value>
+    <comment>{0}=vehicle kind, {1}=vehicle, {2}=track number</comment>
+  </data>
+  <data name="PutOnTrack" xml:space="preserve">
+    <value>After arrival, shunt {0} {1} to track {2}.</value>
+    <comment>{0}=vehicle kind, {1}=vehicle, {2}=track number</comment>
+  </data>
+  <data name="ShuntWagonsToDepartureTrack" xml:space="preserve">
+    <value>Shunt wagons to departure track before departure.</value>
+    <comment>The wagons stand on another track than the train's departure track</comment>
+  </data>
+  <data name="ShuntWagonsToArrivalTrack" xml:space="preserve">
+    <value>Shunt wagons to their arrival track after arrival.</value>
+    <comment>The wagons are left on another track than the train's arrival track</comment>
+  </data>
+  <data name="OnSessions" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>{0}=sessions or days, {1}=the note</comment>
+  </data>
   <data name="CirculateTractionUnit" xml:space="preserve">
     <value>Circulate locomotive.</value>
   </data>
@@ -101,6 +121,10 @@
   </data>
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Brings wagons to {0}</value>
+    <comment>{0}=destinations</comment>
+  </data>
+  <data name="UncoupleWagonsFor" xml:space="preserve">
+    <value>Uncouple wagons for {0}.</value>
     <comment>{0}=destinations</comment>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">

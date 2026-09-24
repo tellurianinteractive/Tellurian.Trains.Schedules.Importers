@@ -1,0 +1,150 @@
+@using System.Globalization
+@inject Translator Translator
+
+@* A name field that offers the participants already in the plan while it is typed into, so a name is picked
+   rather than spelt again — and spelt differently. What is typed is matched against the start of each name
+   and of every later word in it (Plan.ParticipantsMatching), so a surname finds its owner too. A name that
+   matches nobody is offered as a new participant, which says plainly that one is about to be added.
+
+   The field commits a name when one is picked from the list, when Enter is pressed, or when it is left with
+   something else typed; Escape puts the committed name back. While it has no focus it shows the committed
+   Value, so a name the page refuses falls back as soon as the field is left. *@
+
+<span class="participant-combo @Class">
+    <input type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
+           aria-expanded="@(IsOpen ? "true" : "false")" aria-controls="@ListId"
+           aria-activedescendant="@(IsOpen && _highlight >= 0 ? OptionId(_highlight) : null)"
+           value="@_text" placeholder="@Placeholder"
+           @oninput="OnInput" @onchange="OnChangeAsync" @onkeydown="OnKeyDownAsync"
+           @onfocus="OnFocus" @onblur="OnBlur" />
+    @if (IsOpen)
+    {
+        <ul class="choices" role="listbox" id="@ListId">
+            @for (var index = 0; index < _choices.Count; index++)
+            {
+                var choice = _choices[index];
+                var position = index;
+                @* Picked on mouse-down, with the default prevented, so the field keeps its focus: a click would
+                   first blur the field, and the list would be gone before the click could land on it. *@
+                <li role="option" id="@OptionId(position)" aria-selected="@(position == _highlight ? "true" : "false")"
+                    class="@(position == _highlight ? "active" : null) @(choice.IsNew ? "new" : null)"
+                    @onmousedown="() => CommitAsync(choice.Name)" @onmousedown:preventDefault="true">
+                    @if (choice.IsNew)
+                    {
+                        <i class="fa-solid fa-user-plus"></i>
+                        @string.Format(CultureInfo.CurrentCulture, Translator("NewParticipant"), choice.Name)
+                    }
+                    else
+                    {
+                        @choice.Name
+                    }
+                </li>
+            }
+        </ul>
+    }
+</span>
+
+@code {
+    // Enough to pick from without the list running off the pane; typing a letter more narrows it.
+    private const int MaxChoices = 12;
+
+    private readonly string _id = $"participants-{Guid.NewGuid():N}";
+    private string _text = string.Empty;
+    private List<Choice> _choices = [];
+    private int _highlight = -1;
+    private bool _open;
+    private bool _focused;
+
+    /// <summary>The participants to offer for what has been typed so far, best match first.</summary>
+    [Parameter, EditorRequired] public Func<string, IReadOnlyList<Participant>> Suggest { get; set; } = _ => [];
+
+    /// <summary>The committed name.</summary>
+    [Parameter] public string? Value { get; set; }
+
+    /// <summary>Raised with the name committed; the page decides what becomes of it.</summary>
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>Optional text shown while the field is empty.</summary>
+    [Parameter] public string? Placeholder { get; set; }
+
+    /// <summary>Optional CSS class for the field's wrapper, e.g. to mark it invalid.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    private sealed record Choice(string Name, bool IsNew);
+
+    private bool IsOpen => _open && _choices.Count > 0;
+
+    private string ListId => $"{_id}-list";
+
+    private string OptionId(int position) => $"{_id}-{position}";
+
+    protected override void OnParametersSet()
+    {
+        if (!_focused) _text = Value ?? string.Empty;
+    }
+
+    private void OnFocus()
+    {
+        _focused = true;
+        Open();
+    }
+
+    private void OnBlur()
+    {
+        _focused = false;
+        _open = false;
+        _text = Value ?? string.Empty;
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _text = e.Value?.ToString() ?? string.Empty;
+        Open();
+    }
+
+    // Leaving the field with something else typed commits it, the same as pressing Enter.
+    private Task OnChangeAsync(ChangeEventArgs e) => CommitAsync(e.Value?.ToString() ?? string.Empty);
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                if (!IsOpen) Open();
+                else _highlight = Math.Min(_highlight + 1, _choices.Count - 1);
+                break;
+            case "ArrowUp":
+                if (IsOpen) _highlight = Math.Max(_highlight - 1, 0);
+                break;
+            case "Enter":
+                await CommitAsync(IsOpen && _highlight >= 0 ? _choices[_highlight].Name : _text);
+                break;
+            case "Escape":
+                _text = Value ?? string.Empty;
+                _open = false;
+                break;
+        }
+    }
+
+    // The matching participants, and — when what is typed names none of them — the typed name as a new one,
+    // last, so Enter picks an existing name before it adds one. The best match is highlighted as soon as
+    // anything is typed, which is what lets a few letters and Enter pick a name.
+    private void Open()
+    {
+        var typed = _text.NormalizedParticipantName;
+        var matches = Suggest(typed).Take(MaxChoices).ToList();
+        _choices = [.. matches.Select(p => new Choice(p.Name, IsNew: false))];
+        if (typed.Length > 0 && !matches.Any(p => p.IsNamed(typed))) _choices.Add(new Choice(typed, IsNew: true));
+        _highlight = typed.Length > 0 && _choices.Count > 0 ? 0 : -1;
+        _open = true;
+    }
+
+    private async Task CommitAsync(string name)
+    {
+        _text = name.NormalizedParticipantName;
+        _open = false;
+        _highlight = -1;
+        if (_text == (Value ?? string.Empty).NormalizedParticipantName) return;
+        await ValueChanged.InvokeAsync(_text);
+    }
+}

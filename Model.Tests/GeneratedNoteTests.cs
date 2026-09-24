@@ -95,8 +95,8 @@ public class GeneratedNoteTests
         var other = OtherTrain;
         var meet = new Meet(other, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 05), null);
 
-        Assert.AreEqual($"Overtakes {other} 12:02-12:05", new OvertakesNote([meet], null).ToText);
-        Assert.AreEqual($"Is overtaken by {other} 12:02-12:05", new IsOvertakenNote([meet], null).ToText);
+        Assert.AreEqual($"Overtakes {other} 12:02-12:05", new OvertakesNote([meet]).ToText);
+        Assert.AreEqual($"Is overtaken by {other} 12:02-12:05", new IsOvertakenNote([meet]).ToText);
     }
 
     [TestMethod]
@@ -107,7 +107,7 @@ public class GeneratedNoteTests
         var other = OtherTrain;
         var meet = new Meet(other, Time.FromHourAndMinute(12, 02), Time.FromHourAndMinute(12, 02), null);
 
-        Assert.AreEqual($"Is overtaken by {other} 12:02", new IsOvertakenNote([meet], null).ToText);
+        Assert.AreEqual($"Is overtaken by {other} 12:02", new IsOvertakenNote([meet]).ToText);
     }
 
     private static Train OtherTrain =>

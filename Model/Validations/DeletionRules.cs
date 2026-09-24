@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Model.Resources;
+
 namespace Tellurian.Trains.Schedules.Model.Validations;
 
 /// <summary>
@@ -142,6 +144,41 @@ public static class DeletionRules
         }
 
         /// <summary>
+        /// Determines whether a <see cref="StationTrack"/> may be deleted from its location, i.e. no train
+        /// calls at it and no vehicle schedule fetches its vehicles from it or puts them on it.
+        /// </summary>
+        public DeletionResult MayDelete(StationTrack track)
+        {
+            var references = ReferencesTo(plan, track);
+            return references.Count == 0
+                ? new DeletionResult.Success(track)
+                : new DeletionResult.Failure(track, references);
+        }
+
+        /// <summary>
+        /// Deletes a <see cref="StationTrack"/> from its location when nothing uses it. Returns the
+        /// <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when it is still used,
+        /// leaving the model untouched.
+        /// </summary>
+        /// <remarks>
+        /// A part may still name the track where it no longer counts — a track of a station the part's
+        /// call has since been moved away from (see <c>ScheduledTrainPart.OtherFromTrack</c>). That does
+        /// not keep the track, but it is forgotten with it, so the part is not left holding a track that
+        /// is no longer anywhere.
+        /// </remarks>
+        public DeletionResult TryDelete(StationTrack track)
+        {
+            if (plan.MayDelete(track) is DeletionResult.Failure failure) return failure;
+            track.Station?.Tracks.Remove(track);
+            foreach (var part in plan.Schedules.SelectMany(s => s.Parts))
+            {
+                if (ReferenceEquals(part.FromTrack, track)) part.FromTrack = null;
+                if (ReferenceEquals(part.ToTrack, track)) part.ToTrack = null;
+            }
+            return new DeletionResult.Success(track);
+        }
+
+        /// <summary>
         /// A vehicle <see cref="Schedule"/> may always be deleted: it is a planner construct that nothing
         /// outside it references (its assignments and parts are owned by it).
         /// </summary>
@@ -241,6 +278,50 @@ public static class DeletionRules
             plan.Timetable.Trains.FirstOrDefault(t => t.CargoFlows.Contains(cargoFlow))?.CargoFlows.Remove(cargoFlow);
             return new DeletionResult.Success(cargoFlow);
         }
+
+        /// <summary>
+        /// Determines whether a <see cref="Participant"/> may be removed from the plan's participant
+        /// catalogue, i.e. they bring no rolling stock.
+        /// </summary>
+        public DeletionResult MayDelete(Participant participant)
+        {
+            var references = ReferencesTo(plan, participant);
+            return references.Count == 0
+                ? new DeletionResult.Success(participant)
+                : new DeletionResult.Failure(participant, references);
+        }
+
+        /// <summary>
+        /// Removes a <see cref="Participant"/> from the plan's participant catalogue when they bring no rolling
+        /// stock. Returns the <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when they
+        /// still do, leaving the model untouched.
+        /// </summary>
+        public DeletionResult TryDelete(Participant participant)
+        {
+            if (plan.MayDelete(participant) is DeletionResult.Failure failure) return failure;
+            plan.Participants.Remove(participant);
+            return new DeletionResult.Success(participant);
+        }
+
+        /// <summary>
+        /// A <see cref="VehicleContributor"/> may always be removed: nothing else refers to one.
+        /// </summary>
+        public DeletionResult MayDelete(VehicleContributor contributor) => new DeletionResult.Success(contributor);
+
+        /// <summary>
+        /// Removes a <see cref="VehicleContributor"/> from the rolling stock item it brings. When it was the
+        /// primary contributor, the first one bringing a spare takes its place. The participant stays in the
+        /// catalogue, and an item left with no contributor and no note keeps no contribution at all.
+        /// </summary>
+        public DeletionResult TryDelete(VehicleContributor contributor)
+        {
+            if (plan.VehicleContributions.FirstOrDefault(c => c.Contributors.Contains(contributor)) is { } contribution)
+            {
+                contribution.Contributors.Remove(contributor);
+                plan.RemoveIfEmpty(contribution);
+            }
+            return new DeletionResult.Success(contributor);
+        }
     }
 
     // The minutes a call stands still: a dwell at an intermediate stop, and the driver's preparation or
@@ -324,6 +405,18 @@ public static class DeletionRules
         return references;
     }
 
+    // A station track is referenced by every train calling at it, and by every vehicle schedule with a part
+    // that fetches its vehicles from it or puts them on it.
+    private static List<Reference> ReferencesTo(Plan plan, StationTrack track)
+    {
+        var references = new List<Reference>();
+        foreach (var train in track.Calls.Select(c => c.Train).Distinct())
+            references.Add(Reference.For(train));
+        foreach (var schedule in plan.Schedules.Where(s => s.Parts.Any(p => track.Equals(p.OtherFromTrack) || track.Equals(p.OtherToTrack))))
+            references.Add(Reference.For(schedule));
+        return references;
+    }
+
     // A cargo flow description is referenced by any train carrying a cargo flow that uses it (matched by
     // the foreign key, or by instance for an as-yet-unsaved flow).
     private static List<Reference> ReferencesTo(Plan plan, CargoFlowOptions options)
@@ -333,4 +426,12 @@ public static class DeletionRules
             references.Add(Reference.For(train));
         return references;
     }
+
+    // A participant is referenced by every rolling stock item they bring, as its primary contributor or with a
+    // spare. The vehicle is named by its designation, which is how the Vehicle Owners tab lists it.
+    private static List<Reference> ReferencesTo(Plan plan, Participant participant) =>
+        [.. plan.RollingStockBroughtBy(participant)
+            .Select(item => item.Vehicle)
+            .Distinct()
+            .Select(vehicle => new Reference(ClassNames.KeyOf(vehicle), vehicle.Designation))];
 }

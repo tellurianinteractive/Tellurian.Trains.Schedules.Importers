@@ -70,7 +70,7 @@ public static class TurnusDataExtensions
             if (data.Sessions.CoversAllWithin(data.UseDays, data.MaxSessions)) return string.Empty;
             if (!data.UseDays) return data.Sessions.SessionsNumbers;
             var key = data.Sessions.ShortDayNamesResourceKey(data.StartDay);
-            var keys = key.Split('-', ',', StringSplitOptions.TrimEntries);
+            var keys = key.Split(['-', ','], StringSplitOptions.TrimEntries);
             if (keys.Length > 1)
                 return key.Contains(',')
                     ? string.Join(",", keys.Select(rk => translator(rk)))
