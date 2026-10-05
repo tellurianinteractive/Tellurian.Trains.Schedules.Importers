@@ -106,4 +106,32 @@ public class ShuntingYardTests
 
         Assert.DoesNotContain(station, layout.CargoServingStationsFor(station));
     }
+
+    [TestMethod]
+    public void AStationListsTheLocationsCargoServedFromIt()
+    {
+        var layout = CreateLayout();
+        var shuntingYard = AddStation(layout, 112, "Växjö", "Vxo");
+        var served = AddStation(layout, 113, "Ålsheda", "Als");
+        var other = AddStation(layout, 114, "Lenhovda", "Len");
+        served.CargoServedFrom = shuntingYard;
+
+        var found = layout.LocationsCargoServedFrom(shuntingYard);
+
+        Assert.AreEqual(served, found.Single());
+        Assert.IsEmpty(layout.LocationsCargoServedFrom(other));
+    }
+
+    [TestMethod]
+    public void ALocationNoLongerCargoServedIsNotListedAtItsServingStation()
+    {
+        var layout = CreateLayout();
+        var shuntingYard = AddStation(layout, 115, "Växjö", "Vxo");
+        var served = AddStation(layout, 116, "Ålsheda", "Als");
+        served.CargoServedFrom = shuntingYard;
+        served.HasCargoExchange = false;
+
+        // The serving station is kept on the location, but nothing is worked there from it.
+        Assert.IsEmpty(layout.LocationsCargoServedFrom(shuntingYard));
+    }
 }

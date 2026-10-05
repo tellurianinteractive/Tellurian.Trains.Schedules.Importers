@@ -97,18 +97,40 @@
         white-space: nowrap;
     }
 
+    /* The grid is wide, so the rows are striped and the hovered row clearly marked: the eye has to
+       follow a row a long way from the name to the far columns. */
+    ::deep tbody tr:nth-child(even) {
+        background: #f8f9fb;
+    }
+
     ::deep tbody tr:hover {
-        background: var(--hover);
+        background: #dfe8f3;
     }
 
     ::deep td.actions,
     ::deep th.actions {
-        text-align: right;
         white-space: nowrap;
     }
 
-    ::deep td.actions button {
+    ::deep td.actions button + button {
         margin-left: 0.3rem;
+    }
+
+    /* The location name opens Info: a button for the keyboard, drawn as a link. */
+    button.link {
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--primary);
+        font: inherit;
+        text-align: left;
+        text-decoration: underline;
+        text-decoration-color: transparent;
+    }
+
+    button.link:hover {
+        background: none;
+        text-decoration-color: currentColor;
     }
 
     .confirm {

@@ -67,6 +67,15 @@ public static class ShuntingYardExtensions
         /// <param name="location">The location whose serving shunting yard is being chosen.</param>
         public IEnumerable<Station> CargoServingStationsFor(OperationLocation location) =>
             layout.OperationLocations.OfType<Station>().Where(station => !station.Equals(location));
+
+        /// <summary>
+        /// The locations whose cargo is served from <paramref name="station"/>, in layout order. Only those
+        /// where the relation is in force: a location that no longer may be cargo served keeps its
+        /// serving station, but nothing is worked there from it.
+        /// </summary>
+        /// <param name="station">The serving station.</param>
+        public IReadOnlyList<OperationLocation> LocationsCargoServedFrom(Station station) =>
+            [.. layout.OperationLocations.Where(location => location.CanBeCargoServed && station.Equals(location.CargoServedFrom))];
     }
 
     extension(OperationLocation location)

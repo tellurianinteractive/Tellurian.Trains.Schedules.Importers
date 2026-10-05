@@ -7,7 +7,7 @@
 		<!-- The app has its own release cycle, separate from the NuGet libraries' version in
 		     Directory.Build.props. This is the number shown in the top bar and headed in the
 		     ReleaseNotes markdown; bump both together. -->
-		<Version>0.7.2</Version>
+		<Version>0.7.3</Version>
 		<!-- SourceLink would otherwise append "+<commit sha>" to the informational version. -->
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Nullable>enable</Nullable>

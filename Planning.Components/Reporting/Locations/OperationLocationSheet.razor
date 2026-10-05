@@ -164,6 +164,9 @@
             // Only where one serves it: on a sheet read at the location, an empty line says nothing.
             if (location.CanBeCargoServed && location.CargoServedFrom is { } servedFrom)
                 yield return ("CargoServedFrom", NameOf(servedFrom));
+            // The other side of the same relation, and likewise only where there is something to list.
+            if (location is Station servingStation && Layout.LocationsCargoServedFrom(servingStation) is { Count: > 0 } served)
+                yield return ("ServesLocations", string.Join(", ", served.Select(NameOf)));
             // The key in force only: one kept but ignored would send a driver to fetch a key nobody needs.
             if (location.CanRequireLockKey)
             {

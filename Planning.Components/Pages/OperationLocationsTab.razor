@@ -41,7 +41,20 @@ else
             {
                 <QuickGrid Items="Locations" Class="grid" Theme="tellurian">
                     <PropertyColumn Property="o => o.Signature" Title='@Translator("Signature")' Sortable="true" />
-                    <PropertyColumn Property="o => o.Name" Title='@Translator("Name")' Sortable="true" />
+                    @* The name opens Info, and the actions follow straight after it: on a grid this wide,
+                       buttons at the far right end of the row are hard to match with the right location. *@
+                    <TemplateColumn Title='@Translator("Name")' SortBy="GridSort<OperationLocation>.ByAscending(o => o.Name)">
+                        <button class="link" @onclick="() => Info(context)">@context.Name</button>
+                    </TemplateColumn>
+                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
+                        <button @onclick="() => Info(context)">@Translator("Info")</button>
+                        <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
+                        <button class="danger" disabled="@IsReferenced(context)"
+                                title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
+                                @onclick="() => _deleteTarget = context">
+                            @Translator("Delete")
+                        </button>
+                    </TemplateColumn>
                     <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<OperationLocation>.ByAscending(o => o.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Type")'>@Translator(TypeKey(context))</TemplateColumn>
                     <TemplateColumn Title='@Translator("Regions")'>
@@ -72,15 +85,6 @@ else
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
-                    <TemplateColumn Title='@Translator("Actions")' Class="actions">
-                        <button @onclick="() => Info(context)">@Translator("Info")</button>
-                        <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
-                        <button class="danger" disabled="@IsReferenced(context)"
-                                title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
-                                @onclick="() => _deleteTarget = context">
-                            @Translator("Delete")
-                        </button>
-                    </TemplateColumn>
                 </QuickGrid>
             }
 
@@ -530,6 +534,16 @@ else
                     {
                         <dt>@Translator("ControlledBy")</dt>
                         <dd>@(_selected.ControlledBy is { } c ? $"{c.Name} ({c.Signature})" : "—")</dd>
+                    }
+                    @if (_selected.CanBeCargoServed)
+                    {
+                        <dt>@Translator("CargoServedFrom")</dt>
+                        <dd>@(_selected.CargoServedFrom is { } servedFrom ? $"{servedFrom.Name} ({servedFrom.Signature})" : "—")</dd>
+                    }
+                    @if (_selected is Station servingStation && Layout.LocationsCargoServedFrom(servingStation) is { Count: > 0 } servedLocations)
+                    {
+                        <dt>@Translator("ServesLocations")</dt>
+                        <dd>@string.Join(", ", servedLocations.Select(l => $"{l.Name} ({l.Signature})"))</dd>
                     }
                     @if (_selected.CanRequireLockKey || _selected.LockKey is not null)
                     {
