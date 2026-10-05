@@ -3,7 +3,8 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 /// <summary>
 /// Verifies that a working whose traction cannot leave the track it arrived at — a trainset, or a
 /// locomotive on a reversible train — has its arrival tracks put where its next train departs from, and
-/// that a working whose locomotive can run light across the station is left as the planner set it.
+/// that a working whose locomotive can run light across the station is left as the planner set it unless
+/// the planner asks for it to be aligned.
 /// </summary>
 [TestClass]
 public class ScheduleTrackAlignmentTests
@@ -132,6 +133,47 @@ public class ScheduleTrackAlignmentTests
 
         Assert.AreEqual("2", LastCall(Forward(plan)).Track.Number,
             "The trainset is what says the working cannot change tracks, so assigning it puts the tracks right.");
+        Assert.AreEqual("3", LastCall(Back(plan)).Track.Number);
+    }
+
+    [TestMethod]
+    public void TickingReversibleTrainOnTheAssignedLocomotiveAlignsTheWorking()
+    {
+        var (plan, schedule) = Arrange(ScheduledObjectType.Locomotive);
+        _ = schedule.Append(Back(plan).AsTrainPart);
+        var locomotive = schedule.Vehicles.Single();
+
+        plan.UpdateVehicle(locomotive, locomotive.ObjectType, locomotive.ExternalId, locomotive.Class, locomotive.Number,
+            locomotive.Company, isReversibleTrain: true);
+
+        Assert.AreEqual("2", LastCall(Forward(plan)).Track.Number,
+            "The locomotive now changes cab instead of running round, so it leaves from the track it came in on.");
+        Assert.AreEqual("3", LastCall(Back(plan)).Track.Number);
+    }
+
+    [TestMethod]
+    public void EditingALocomotiveThatStillRunsRoundLeavesTheTracksAlone()
+    {
+        var (plan, schedule) = Arrange(ScheduledObjectType.Locomotive);
+        _ = schedule.Append(Back(plan).AsTrainPart);
+        var locomotive = schedule.Vehicles.Single();
+
+        plan.UpdateVehicle(locomotive, locomotive.ObjectType, locomotive.ExternalId, "T43", locomotive.Number, locomotive.Company);
+
+        Assert.AreEqual("1", LastCall(Forward(plan)).Track.Number);
+    }
+
+    [TestMethod]
+    public void AligningOnRequestMovesTheTracksOfALocomotiveWorking()
+    {
+        var (plan, schedule) = Arrange(ScheduledObjectType.Locomotive);
+        _ = schedule.Append(Back(plan).AsTrainPart);
+
+        var moved = schedule.AlignArrivalTracksWhateverTheTraction();
+
+        Assert.AreEqual(2, moved);
+        Assert.AreEqual("2", LastCall(Forward(plan)).Track.Number,
+            "The planner asked for it, so the locomotive stays with its train and the arrival is moved.");
         Assert.AreEqual("3", LastCall(Back(plan)).Track.Number);
     }
 

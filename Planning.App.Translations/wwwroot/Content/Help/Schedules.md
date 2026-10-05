@@ -19,6 +19,15 @@ first: a working carries on with whatever continues it in the same category, and
 you have made is filled before any new one is created, so a vehicle that is already turning takes on
 more work before another is put in service. Only the trains that fit no existing schedule start new
 ones, and cargo flows are left as they are.
+A schedule worked by a trainset, or by a locomotive ticked **Reversible train?**, has its arrivals
+moved to the track its next train departs from, because such a train leaves from the track it came in
+on. Where the working ends where it began, its last train arrives at the track the first one leaves
+from. This happens when the trainset or locomotive is assigned, when the tick is set, and as trains are
+added. A schedule with an ordinary locomotive, or with no vehicle yet, keeps its tracks: its next train
+may well use other coaches, which is often decided later in the planning.
+
+The **arrival tracks** button on a row moves the arrivals of that schedule at any time, whatever
+vehicle works it, for example once you know that a locomotive keeps its coaches.
 
 On a row, 
 - **+ train** appends the next train — choose only part of it (a from/to stop)

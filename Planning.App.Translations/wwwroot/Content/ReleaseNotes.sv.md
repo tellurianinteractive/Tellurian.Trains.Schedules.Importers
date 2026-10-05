@@ -1,5 +1,21 @@
 # Versionsnyheter
 
+## Version 0.7.3
+
+### Ändringar
+
+- **Ankomstspår kan läggas där nästa tåg avgår.** En ny knapp för **ankomstspår** på varje omlopp på
+  fliken **Omlopp** flyttar omloppets ankomster till spåret nästa tåg avgår från, oavsett fordon. Ett
+  omlopp med tågsätt eller vändtåg rättas fortfarande av sig självt, och nu även när
+  **Vändtåg?** kryssas i på ett lok som redan är tilldelat.
+- **Listan över driftplatser är lättare att arbeta i.** Knapparna för en driftplats står nu direkt efter
+  dess namn i stället för längst bort på den breda raden, så det syns tydligt vilken driftplats de hör
+  till. Ett klick på själva namnet öppnar informationen om driftplatsen. Varannan rad är skuggad, och
+  raden under muspekaren markeras tydligt.
+- **En station visar de platser den betjänar med gods.** På fliken **Driftplatser** listar informationen
+  om en station nu de platser vars gods betjänas från den, och informationen om en plats visar vilken
+  station som betjänar den. De utskrivna bladen för driftplatser listar också de betjänade platserna.
+
 ## Version 0.7.2
 
 ### Nya funktioner

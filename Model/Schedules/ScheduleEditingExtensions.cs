@@ -284,11 +284,19 @@ public static class ScheduleEditingExtensions
         /// (<see cref="ScheduledObject.IsReversibleTrain"/>). Applied only to a locomotive — anything
         /// else is left without the flag, since only a locomotive can be spared the runaround by one.
         /// <c>null</c> leaves it unchanged.</param>
+        /// <remarks>
+        /// An edit that spares the vehicle the runaround — a locomotive now ticked as working a reversible
+        /// train, or a locomotive turned into a trainset — means it now leaves a train from the track it
+        /// came in on, so the arrival tracks of the schedules it works are aligned (see
+        /// <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracks"/>), just as when such a vehicle
+        /// is assigned.
+        /// </remarks>
         /// <returns>The updated vehicle.</returns>
         public ScheduledObject UpdateVehicle(ScheduledObject vehicle, ScheduledObjectType objectType, string? externalId, string? @class, int number, Company? company, TractionType? tractionType = null, int? numberOfUnits = null, bool? isReversibleTrain = null)
         {
             plan = plan.ValueOrException(nameof(plan));
             vehicle = vehicle.ValueOrException(nameof(vehicle));
+            var reversedWithoutRunaround = vehicle.IsTraction && vehicle.ReversesWithoutRunaround;
             // Set the type first: its setter resets TractionType to None for non-traction vehicles and to
             // Undefined for traction ones, so any explicit tractionType below overrides that default.
             vehicle.ObjectType = objectType;
@@ -305,6 +313,9 @@ public static class ScheduleEditingExtensions
                 vehicle.IsReversibleTrain = reversible && objectType == ScheduledObjectType.Locomotive;
             // The individual-wagon rake belongs only to a wagonset; clear it when the type is anything else.
             if (!objectType.IsWagonSet) vehicle.Units.Clear();
+            if (!reversedWithoutRunaround && vehicle.IsTraction && vehicle.ReversesWithoutRunaround)
+                foreach (var schedule in plan.Schedules.Where(s => s.Vehicles.Contains(vehicle)))
+                    schedule.AlignArrivalTracks();
             return vehicle;
         }
 

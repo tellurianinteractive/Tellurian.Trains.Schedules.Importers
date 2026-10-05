@@ -307,9 +307,10 @@
         border-color: #a11;
     }
 
-    /* Clone / complement controls: sit beside the delete control and target the whole schedule. */
+    /* Clone / complement / align controls: sit beside the delete control and target the whole schedule. */
     .clone-sched,
-    .complement-sched {
+    .complement-sched,
+    .align-sched {
         border: 1px solid var(--border);
         background: #fff;
         color: var(--primary);
@@ -321,7 +322,8 @@
     }
 
     .clone-sched:hover,
-    .complement-sched:hover {
+    .complement-sched:hover,
+    .align-sched:hover {
         background: #eef3f8;
     }
 

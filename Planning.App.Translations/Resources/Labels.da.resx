@@ -1840,6 +1840,12 @@
   <data name="SchedulesNothingToComplement" xml:space="preserve">
     <value>Dette omløb har intet tog, der kører ud over dets køresessioner.</value>
   </data>
+  <data name="AlignArrivalTracks" xml:space="preserve">
+    <value>Flyt ankomster til sporet, næste tog afgår fra</value>
+  </data>
+  <data name="SchedulesArrivalTracksMoved" xml:space="preserve">
+    <value>{0} ankomstspor flyttet</value>
+  </data>
   <data name="ScheduleOperatingSessions" xml:space="preserve">
     <value>Køresessioner/dage hele omløbet kører</value>
   </data>

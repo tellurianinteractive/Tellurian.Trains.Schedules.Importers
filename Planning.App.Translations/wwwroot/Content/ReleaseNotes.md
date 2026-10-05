@@ -1,5 +1,22 @@
 # Release notes
 
+## Version 0.7.3
+
+### Changes
+
+- **Arrival tracks can be put where the next train departs from.** A new **arrival tracks** button on
+  each schedule on the **Schedules** tab moves the arrivals of that schedule to the track its next train
+  departs from, whatever vehicle works it. A schedule worked by a trainset or a reversible train is still
+  aligned by itself, and now also when **Reversible train?** is ticked on a locomotive already assigned.
+- **The operation locations list is easier to work in.** The buttons for a location now stand right after
+  its name instead of at the far end of the wide row, so it is clear which location they belong to.
+  Clicking the name itself opens the location's information. Every other row is shaded, and the row under
+  the mouse pointer is clearly marked.
+- **A station shows the locations it serves with cargo.** On the **Operation locations** tab, the
+  information about a station now lists the locations whose cargo is served from it, and the information
+  about a location shows which station serves it. The printed operation location sheets list the served
+  locations too.
+
 ## Version 0.7.2
 
 ### New features

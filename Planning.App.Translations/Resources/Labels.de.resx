@@ -1840,6 +1840,12 @@
   <data name="SchedulesNothingToComplement" xml:space="preserve">
     <value>Dieser Umlauf hat keinen Zug, der über seine Fahrrunden hinaus verkehrt.</value>
   </data>
+  <data name="AlignArrivalTracks" xml:space="preserve">
+    <value>Ankünfte auf das Gleis legen, von dem der nächste Zug abfährt</value>
+  </data>
+  <data name="SchedulesArrivalTracksMoved" xml:space="preserve">
+    <value>{0} Ankunftsgleise verlegt</value>
+  </data>
   <data name="ScheduleOperatingSessions" xml:space="preserve">
     <value>Fahrrunden/Tage, an denen der ganze Umlauf verkehrt</value>
   </data>

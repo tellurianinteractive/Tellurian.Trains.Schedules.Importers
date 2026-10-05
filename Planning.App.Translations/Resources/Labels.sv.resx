@@ -1840,6 +1840,12 @@
   <data name="SchedulesNothingToComplement" xml:space="preserve">
     <value>Detta omlopp har inget tåg som trafikerar utöver dess köromgångar.</value>
   </data>
+  <data name="AlignArrivalTracks" xml:space="preserve">
+    <value>Flytta ankomster till spåret nästa tåg avgår från</value>
+  </data>
+  <data name="SchedulesArrivalTracksMoved" xml:space="preserve">
+    <value>{0} ankomstspår flyttade</value>
+  </data>
   <data name="ScheduleOperatingSessions" xml:space="preserve">
     <value>Köromgångar/dagar hela omloppet trafikerar</value>
   </data>

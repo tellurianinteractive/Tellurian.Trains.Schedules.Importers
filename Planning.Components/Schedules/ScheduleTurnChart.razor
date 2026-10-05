@@ -70,6 +70,8 @@ else
                     {
                         <button class="complement-sched" title="@Translator("ComplementSchedule")"
                                 @onclick="() => ComplementSchedule(schedule)"><i class="fa-solid fa-calendar-plus"></i></button>
+                        <button class="align-sched" title="@Translator("AlignArrivalTracks")"
+                                @onclick="() => AlignArrivalTracks(schedule)"><i class="fa-solid fa-right-to-bracket"></i></button>
                     }
                     <button class="del-sched danger @(_deleteTarget == schedule ? "armed" : null)" title="@Translator("DeleteSchedule")"
                             @onclick="() => _deleteTarget = schedule"><i class="fa-solid fa-trash"></i></button>
@@ -265,6 +267,15 @@ else
         {
             await OnMessage.InvokeAsync(Translator("SchedulesNothingToComplement"));
         }
+    }
+
+    // Puts each arrival of the working on the track the vehicle's next train departs from, whatever its
+    // traction: the planner asking for it says the vehicle stays with its train. Reports how many moved.
+    private async Task AlignArrivalTracks(Schedule schedule)
+    {
+        var moved = schedule.AlignArrivalTracksWhateverTheTraction();
+        if (moved > 0) ScheduleState.SaveAndNotify();
+        await OnMessage.InvokeAsync(string.Format(CultureInfo.CurrentCulture, Translator("SchedulesArrivalTracksMoved"), moved));
     }
 
     // The category prefix/suffix is always part of the identity here, whatever the graph is set to draw:

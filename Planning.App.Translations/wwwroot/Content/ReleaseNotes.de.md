@@ -1,5 +1,24 @@
 # Versionshinweise
 
+## Version 0.7.3
+
+### Änderungen
+
+- **Ankunftsgleise lassen sich dorthin legen, wo der nächste Zug abfährt.** Eine neue Schaltfläche
+  für **Ankunftsgleise** an jedem Umlauf auf der Registerkarte **Umläufe** legt die Ankünfte dieses
+  Umlaufs auf das Gleis, von dem der nächste Zug abfährt, unabhängig vom Fahrzeug. Ein Umlauf mit
+  Triebzug oder Wendezug wird weiterhin von selbst angepasst, und jetzt auch, wenn **Wendezug?** bei einer
+  bereits zugewiesenen Lok angekreuzt wird.
+- **In der Liste der Betriebsstellen lässt es sich leichter arbeiten.** Die Schaltflächen einer
+  Betriebsstelle stehen jetzt direkt hinter ihrem Namen statt am fernen Ende der breiten Zeile, sodass
+  klar ist, zu welcher Betriebsstelle sie gehören. Ein Klick auf den Namen selbst öffnet die Informationen
+  zur Betriebsstelle. Jede zweite Zeile ist schattiert, und die Zeile unter dem Mauszeiger wird deutlich
+  hervorgehoben.
+- **Ein Bahnhof zeigt die Orte, die er mit Gütern bedient.** Auf der Registerkarte **Betriebsstellen**
+  listen die Informationen zu einem Bahnhof jetzt die Orte auf, deren Güter von ihm aus bedient werden, und
+  die Informationen zu einem Ort zeigen, welcher Bahnhof ihn bedient. Die gedruckten Blätter der
+  Betriebsstellen führen die bedienten Orte ebenfalls auf.
+
 ## Version 0.7.2
 
 ### Neue Funktionen

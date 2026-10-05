@@ -1,5 +1,21 @@
 # Versjonsnyheter
 
+## Versjon 0.7.3
+
+### Endringer
+
+- **Ankomstspor kan legges der neste tog går fra.** En ny knapp for **ankomstspor** på hvert omløp på
+  fanen **Omløp** flytter omløpets ankomster til sporet neste tog går fra, uansett kjøretøy. Et omløp med
+  togsett eller vendetog rettes fortsatt av seg selv, og nå også når **Vendetog?** krysses av på et
+  lokomotiv som allerede er tildelt.
+- **Listen over driftssteder er enklere å arbeide i.** Knappene for et driftssted står nå rett etter
+  navnet i stedet for helt ytterst på den brede raden, så det er tydelig hvilket driftssted de hører til.
+  Et klikk på selve navnet åpner informasjonen om driftsstedet. Annenhver rad er skyggelagt, og raden
+  under musepekeren markeres tydelig.
+- **En stasjon viser stedene den betjener med gods.** På fanen **Driftssteder** viser informasjonen om en
+  stasjon nå stedene som får godset betjent fra den, og informasjonen om et sted viser hvilken stasjon som
+  betjener det. De utskrevne arkene for driftssteder viser også de betjente stedene.
+
 ## Versjon 0.7.2
 
 ### Nye funksjoner

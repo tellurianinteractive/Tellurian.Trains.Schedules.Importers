@@ -19,6 +19,12 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// The last arrival is aligned as well where the working closes on itself, so that the vehicle is left
 /// standing where the first departure fetches it for the next session.
 /// </para>
+/// <para>
+/// A working with a locomotive that runs round, or with no traction unit yet, keeps the tracks the planner
+/// chose: its next train may well take other coaches, which is often settled only later in the planning.
+/// The planner can still ask for such a working to be aligned (see
+/// <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracksWhateverTheTraction"/>).
+/// </para>
 /// </remarks>
 public static class ScheduleTrackAlignmentExtensions
 {
@@ -62,7 +68,23 @@ public static class ScheduleTrackAlignmentExtensions
         public int AlignArrivalTracks()
         {
             schedule = schedule.ValueOrException(nameof(schedule));
-            if (!schedule.IsWorkedWithoutRunaround) return 0;
+            return schedule.IsWorkedWithoutRunaround ? schedule.AlignArrivalTracksWhateverTheTraction() : 0;
+        }
+
+        /// <summary>
+        /// Moves each arrival of the working onto the track the next train departs from, and the last
+        /// arrival onto the first train's departure track where the working ends where it began, whatever
+        /// traction works it — a locomotive that could run round, or no vehicle at all yet.
+        /// </summary>
+        /// <remarks>
+        /// This is what the planner asks for on a working afterwards, once it is known that the vehicle stays
+        /// with its train. Broken joints are passed over and occupied tracks are not avoided, as in
+        /// <see cref="ScheduleTrackAlignmentExtensions.AlignArrivalTracks"/>.
+        /// </remarks>
+        /// <returns>The number of arrivals moved to another track.</returns>
+        public int AlignArrivalTracksWhateverTheTraction()
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
             var parts = schedule.OrderedParts;
             if (parts.Count == 0) return 0;
             var moved = 0;
