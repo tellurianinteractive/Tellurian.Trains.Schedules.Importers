@@ -346,14 +346,22 @@ else
                         <HelpLabel For="MinimumStopMinutes" />
                         <input type="number" class="num" @bind="Editing.Timings.MinimumStopMinutes" @bind:after="OnEdited" />
                     </div>
-                    <div class="field">
-                        <HelpLabel For="LocoRunaroundRealMinutes" />
-                        <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
-                    </div>
-                    <div class="field">
-                        <HelpLabel For="TrainClearanceRealMinutes" />
-                        <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
-                    </div>
+                    @* A runaround needs a station's tracks, and a clearance a dispatcher on duty. Where a
+                       time does not apply its field is hidden, and a value set earlier stays unused. *@
+                    @if (Editing.HasLocoRunaroundTime)
+                    {
+                        <div class="field">
+                            <HelpLabel For="LocoRunaroundRealMinutes" />
+                            <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                        </div>
+                    }
+                    @if (Editing.HasTrainClearanceTime)
+                    {
+                        <div class="field">
+                            <HelpLabel For="TrainClearanceRealMinutes" />
+                            <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                        </div>
+                    }
                 </div>
 
                 <h3>@Translator("Tracks")</h3>
@@ -541,10 +549,16 @@ else
                     }
                     <dt>@Translator("MinimumStopMinutes")</dt>
                     <dd>@Inherited(_selected.Timings.MinimumStopMinutes)</dd>
-                    <dt>@Translator("LocoRunaroundRealMinutes")</dt>
-                    <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes)</dd>
-                    <dt>@Translator("TrainClearanceRealMinutes")</dt>
-                    <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes)</dd>
+                    @if (_selected.HasLocoRunaroundTime)
+                    {
+                        <dt>@Translator("LocoRunaroundRealMinutes")</dt>
+                        <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes)</dd>
+                    }
+                    @if (_selected.HasTrainClearanceTime)
+                    {
+                        <dt>@Translator("TrainClearanceRealMinutes")</dt>
+                        <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes)</dd>
+                    }
                 </dl>
 
                 @* Shown only where instructions apply and something is written; the rendered markdown

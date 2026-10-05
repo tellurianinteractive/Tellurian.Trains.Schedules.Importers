@@ -852,8 +852,20 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Station Duties Booklet | All trains at each station with arrival/departure details and staff instructions       | A4     |
 | Station Instructions   | Station-specific operational and shunting instructions                                 | A5     |
 | Station Train Order    | Train order tables per station with times, tracks, destinations, and dispatch contacts; a station's table also covers the locations it controls from afar, in the same time order, and its contacts the dispatchers beyond them | A4L    |
+| Operation Locations    | One sheet per operation location with its properties, regions, instructions and tracks | A4     |
 
-> **Status:** ❌ None of these four reports built yet.
+> **Status:** 🟡 **Operation Locations** is built (A4 portrait). Every operation location of the
+> layout gets a sheet of its own, in alphabetical order by name and in the language of the location's country.
+> The sheet lists only the properties that apply to the kind of location — a signal-controlled
+> location is given no passenger or cargo exchange, a manned station no lock key — and a property
+> that applies but is not set is shown as "No" or "—", so it cannot be mistaken for one left out.
+> The operational times are the ones in force: the location's own where it has one, else the
+> layout's, and only those that apply at the location. A lock key is listed only while it is in
+> force, and the station cargo is served from only where one is set. The instructions are printed where the
+> location takes them and something is written, and the tracks in their display order, with
+> platform lengths where the location exchanges passengers and routes where any track has one. A
+> location with more than fits on a sheet runs on to the next, and the next location still starts
+> on a fresh sheet. The other four reports are not built yet.
 
 #### FR-3.12.2 Vehicle Schedule Reports
 
@@ -1368,6 +1380,11 @@ fastClockMinutes = realMinutes × fastClockSpeed
 
 Stations override these defaults to reflect their specific infrastructure
 (e.g., a large station with a long runaround track takes longer).
+
+Not every location has every duration. The loco runaround duration applies only at a station,
+shadow yards included, since only a station has the tracks to run a locomotive round its train. The
+train clearance duration applies only at a manned station, since clearing a train takes a dispatcher
+on duty. Where a duration does not apply it is neither offered for editing nor printed.
 
 The loco runaround duration is allowed for only where the train actually needs it. Where a train's
 route reverses, it stands long enough for the locomotive to be run round to the other end — unless the

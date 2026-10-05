@@ -1,5 +1,24 @@
 # Versionsnyheter
 
+## Version 0.7.2
+
+### Nya funktioner
+
+- **Driftplatser kan nu skrivas ut.** En ny rapport under **Rapporter** ger varje driftplats på banan
+  ett eget blad på A4 stående: dess egenskaper, dess regioner, instruktionerna för hur den ska skötas på
+  träffen, och dess spår med längder, plattformar, vägar och användning. Bara de egenskaper som gäller
+  för den sortens driftplats listas, och de driftstider som visas är de som gäller — driftplatsens egna,
+  annars banans. Instruktionerna skrivs ut här för första gången. En driftplats med mer än vad som får
+  plats på ett blad fortsätter på nästa, och nästa driftplats börjar ändå på ett nytt blad. Med **Skriv
+  ut rapporter på lokala språk** ikryssat skrivs varje blad ut på språket i driftplatsens land.
+
+### Ändringar
+
+- **Bara de driftstider som gäller erbjuds.** På fliken **Driftplatser** erbjuds tiden för att köra runt
+  loket bara på stationer, skuggstationer inräknade, och tiden för tågklarering bara på bemannade
+  stationer, eftersom det krävs en tågklarerare i tjänst för att klarera ett tåg. En tid som angetts
+  tidigare där den inte längre gäller behålls, men varken visas eller skrivs ut.
+
 ## Version 0.7.1
 
 ### Nya funktioner

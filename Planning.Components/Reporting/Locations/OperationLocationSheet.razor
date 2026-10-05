@@ -1,0 +1,214 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Locations
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+@* Planning.Components.Layout is a namespace here, so the model type needs disambiguating. *@
+@using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
+
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* Everything the plan says about one operation location, on a sheet of its own: its properties, its regions,
+   the instructions for how it is worked at this meeting, and its tracks.
+
+   Only what applies to the kind of location is listed — the same choice the editor makes when it decides
+   which fields to offer — so a block post is not given a turntable or a passenger exchange it can never have.
+   A property it can have but does not is still listed, as "No" or "—": a sheet that left it out would not
+   say whether it was forgotten. The one exception is the station cargo is served from, listed only where
+   there is one.
+
+   The sheet is not cut to one page. A station with long instructions or many tracks runs on to the next
+   sheet, and the next location still starts on a fresh one. *@
+
+<div class="a4p location-sheet">
+    <header class="heading">
+        <h1>@Location.Name <span class="signature">@Location.Signature</span></h1>
+        <div class="context">
+            <span>@Translator("OperationLocations")</span>
+            <span>@ContextLine</span>
+        </div>
+    </header>
+
+    <dl class="properties">
+        @foreach (var (key, value) in Properties)
+        {
+            <div class="property">
+                <dt>@Translator(key)</dt>
+                <dd>@value</dd>
+            </div>
+        }
+    </dl>
+
+    @if (Location is Station { Regions.Count: > 0 } station)
+    {
+        <h2>@Translator("Regions")</h2>
+        <div class="regions">
+            @foreach (var region in station.Regions)
+            {
+                @region.ToHtml
+            }
+        </div>
+    }
+
+    @* Printed only where instructions apply and something is written. Where the kind of location no longer
+       takes instructions, whatever was written before stays with it unprinted, as the editor hides it too. *@
+    @if (Location.HasInstructions && !string.IsNullOrWhiteSpace(Location.Instructions))
+    {
+        <h2>@Translator("LocationInstructions")</h2>
+        <div class="instructions-body">@((MarkupString)Markdig.Markdown.ToHtml(Location.Instructions))</div>
+    }
+
+    <h2>@Translator("Tracks")</h2>
+    @if (Location.Tracks.Count == 0)
+    {
+        <p class="none">—</p>
+    }
+    else
+    {
+        <table class="tracks">
+            <thead>
+                <tr>
+                    <th class="number">@Translator("TrackNumber")</th>
+                    <th class="flag">@Translator("IsMain")</th>
+                    <th class="flag">@Translator("IsScheduled")</th>
+                    <th class="length">@Translator("Length")</th>
+                    @if (Location.HasPassengerExchange)
+                    {
+                        <th class="length">@Translator("PlatformLength")</th>
+                    }
+                    @if (HasTrackRoutes)
+                    {
+                        <th class="route">@Translator("TrackRoute")</th>
+                    }
+                    <th class="usage">@Translator("Usage")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var track in Location.TracksInDisplayOrder)
+                {
+                    <tr>
+                        <td class="number">@track.Number</td>
+                        <td class="flag">@Check(track.IsMain)</td>
+                        <td class="flag">@Check(track.IsScheduled)</td>
+                        <td class="length">@(track.Length > 0 ? track.Length.ToString("0.#", Culture) : "—")</td>
+                        @if (Location.HasPassengerExchange)
+                        {
+                            <td class="length">@(track.HasPlatform ? track.PlatformLength.ToString("0.0", Culture) : "—")</td>
+                        }
+                        @if (HasTrackRoutes)
+                        {
+                            <td class="route">@RouteSummary(track)</td>
+                        }
+                        <td class="usage">@track.Usage</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    /// <summary>The location the sheet is for.</summary>
+    [Parameter, EditorRequired] public OperationLocation Location { get; set; } = default!;
+
+    /// <summary>The layout the location belongs to: its countries, timing defaults and the other locations.</summary>
+    [Parameter, EditorRequired] public LayoutModel Layout { get; set; } = default!;
+
+    /// <summary>The day the report was printed.</summary>
+    [Parameter] public DateOnly PrintDate { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private string ContextLine
+    {
+        get
+        {
+            var printed = string.Format(Culture, Translator("PrintedAt"), PrintDate.ToString("yyyy-MM-dd", Culture));
+            return Layout.Name is { Length: > 0 } name ? $"{name} · {printed}" : printed;
+        }
+    }
+
+    // Built while the markup is, so the yes/no texts and numbers come out in the report culture.
+    private IEnumerable<(string Key, string Value)> Properties
+    {
+        get
+        {
+            var location = Location;
+            yield return ("Type", Translator(TypeKey(location)));
+            yield return ("Country", Layout.CountryById(location.CountryId) is { } country ? Translator(country.ResourceKey) : "—");
+            yield return ("Owner", Text(location.Owner));
+            yield return ("PhoneNumber", location.PhoneNumber?.ToString(Culture) ?? "—");
+
+            if (location is Station station)
+            {
+                yield return ("IsManned", YesNo(station.IsManned));
+                yield return ("IsShadow", YesNo(station.IsShadow));
+                yield return ("HasTurntable", YesNo(station.HasTurntable));
+            }
+            if (location is SignalControlledLocation signalControlled)
+                yield return ("TrainsCanCross", YesNo(signalControlled.TrainsCanCross));
+            if (location is Station or SignalControlledLocation)
+                yield return ("IsChangingTrainDirectionPossible", YesNo(location.IsChangingTrainDirectionPossible));
+            if (location is not SignalControlledLocation)
+                yield return ("HasPassengerExchange", YesNo(location.HasPassengerExchange));
+            // Only while the meeting is worked with passenger tickets, which is what makes an interchange one.
+            if (location is Station interchange && Layout.Settings.General.UsePassengerTickets && location.CanBePassengerInterchange)
+                yield return ("IsPassengerInterchange", YesNo(interchange.IsPassengerInterchange));
+            if (location is Station or IndustrialArea)
+                yield return ("HasCargoExchange", YesNo(location.HasCargoExchange));
+
+            if (location.CanBeControlled)
+                yield return ("ControlledBy", NameOf(location.ControlledBy));
+            // Only where one serves it: on a sheet read at the location, an empty line says nothing.
+            if (location.CanBeCargoServed && location.CargoServedFrom is { } servedFrom)
+                yield return ("CargoServedFrom", NameOf(servedFrom));
+            // The key in force only: one kept but ignored would send a driver to fetch a key nobody needs.
+            if (location.CanRequireLockKey)
+            {
+                var key = location.EffectiveLockKey;
+                yield return ("LockKeyHeldAt", NameOf(key?.HeldAt));
+                if (key is { Name.Length: > 0 }) yield return ("LockKeyName", key.Name);
+            }
+
+            yield return ("HideMeets", YesNo(location.HideMeets));
+            if (location is not OtherLocation)
+                yield return ("HidePassings", YesNo(location.HidePassings));
+
+            // The times in force here: the location's own where it has one, else the layout's.
+            var defaults = Layout.Settings.TimeAndSpeed.StationTimings;
+            yield return ("MinimumStopMinutes", Minutes(location.Timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes));
+            if (location.HasLocoRunaroundTime)
+                yield return ("LocoRunaroundRealMinutes", Minutes(location.Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes));
+            if (location.HasTrainClearanceTime)
+                yield return ("TrainClearanceRealMinutes", Minutes(location.Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes));
+        }
+    }
+
+    private bool HasTrackRoutes => Location.Tracks.Any(track => track.HasRoute);
+
+    private static string TypeKey(OperationLocation location) => location switch
+    {
+        Station => "Station",
+        SignalControlledLocation => "SignalControlledLocation",
+        IndustrialArea => "IndustrialArea",
+        _ => "OtherLocation"
+    };
+
+    private string YesNo(bool value) => Translator(value ? "Yes" : "No");
+    private static string Check(bool value) => value ? "✓" : "";
+    private static string Text(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+    private static string Minutes(int? value) => value?.ToString(Culture) ?? "—";
+    private static string NameOf(OperationLocation? location) => location is null ? "—" : $"{location.Name} ({location.Signature})";
+
+    // The way through the location a track is for, as the editor shows it: "Yb → Sti", one end alone as
+    // "Yb →" or "→ Sti", and "↔" where it counts both ways round.
+    private string RouteSummary(StationTrack track) =>
+        track.HasRoute
+            ? $"{Signature(track.PreviousLocationId)} {(track.AppliesInBothDirections ? "↔" : "→")} {Signature(track.NextLocationId)}".Trim()
+            : "";
+
+    private string Signature(int? locationId) =>
+        Layout.OperationLocations.FirstOrDefault(location => location.Id == locationId)?.Signature ?? "";
+}

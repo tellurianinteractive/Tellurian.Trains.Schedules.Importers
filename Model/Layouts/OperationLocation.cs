@@ -377,6 +377,19 @@ public static class OperationLocationExtensions
         public bool CanTurnLoco => location is Station { HasTurntable: true };
 
         /// <summary>
+        /// Whether <see cref="Settings.StationTimings.LocoRunaroundRealMinutes"/> applies here: only a
+        /// <see cref="Station"/>, shadow yards included, has the tracks for a locomotive to run around
+        /// its train.
+        /// </summary>
+        public bool HasLocoRunaroundTime => location is Station;
+
+        /// <summary>
+        /// Whether <see cref="Settings.StationTimings.TrainClearanceRealMinutes"/> applies here: clearing
+        /// a train takes a dispatcher on duty, so only a manned <see cref="Station"/> has a clearance time.
+        /// </summary>
+        public bool HasTrainClearanceTime => location is Station { IsManned: true };
+
+        /// <summary>
         /// Makes sure this location has somewhere to exchange the passengers it says it exchanges: where
         /// it exchanges passengers and not one of its tracks has a platform, all of them are given
         /// <see cref="StationTrack.DefaultPlatformLength"/>. Returns <c>true</c> when something changed.

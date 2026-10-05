@@ -1,0 +1,66 @@
+@page "/operation-locations-report"
+@layout PrintLayout
+
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Locations
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* Every operation location of the layout, one to a sheet: its properties, regions, instructions and tracks.
+
+   One sheet each because the pile is torn apart and handed out — to the owner of the station or to whoever
+   works it at the meeting — so a sheet has to say whose it is on its own, and a location with more to say
+   runs on to the next sheet rather than into another's. Each location is printed in its own language.
+
+   Printed A4 portrait, in alphabetical order. *@
+
+@if (_locations is null)
+{
+    <DisplayedMessage ResourceKey="CreatingReport" />
+}
+else if (_locations.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoOperationLocations" />
+}
+else
+{
+    @foreach (var location in _locations)
+    {
+        var culture = _cultures[location];
+        UseReportCulture(culture);
+        <CascadingValue Value="culture">
+            <OperationLocationSheet Location="location" Layout="ScheduleState.Layout!" PrintDate="_printDate" />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private IReadOnlyList<OperationLocation>? _locations;
+    private DateOnly _printDate;
+
+    // The language each location's sheet is printed in.
+    private readonly Dictionary<OperationLocation, ReportCulture> _cultures = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fixed once for the whole render, so a PDF printed later still says which day's plan it shows.
+        _printDate = DateOnly.FromDateTime(DateTime.Now);
+
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+
+        if (ScheduleState.Layout is not { } layout)
+        {
+            _locations = [];
+            return;
+        }
+
+        foreach (var location in layout.OperationLocations)
+            _cultures[location] = new ReportCulture(location.ReportCulture(layout, LanguageService.IsSupported));
+        // By name, as the sheets are looked up by name, in the layout's own language: å, ä and ö sort after z
+        // in the Nordic languages and among the a's and o's elsewhere.
+        var byName = StringComparer.Create(layout.DefaultReportCulture, ignoreCase: true);
+        _locations = [.. layout.OperationLocations.OrderBy(location => location.Name, byName)];
+    }
+}

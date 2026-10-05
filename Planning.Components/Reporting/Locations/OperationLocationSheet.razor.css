@@ -1,0 +1,135 @@
+/* A sheet of the Operation locations report: one operation location, A4 portrait.
+
+   Not wrapped in A4PPage, whose screen box is a fixed sheet that hides what overflows it. A location's
+   instructions and tracks have no limit, so the sheet is allowed to run on: on screen the box is at least a
+   sheet tall and grows, and in print the browser breaks it across as many sheets as it needs. The global
+   .a4p class still gives it the A4 portrait page and the break before every location after the first
+   (print.css). Cloned box decoration repeats the margin at the top of every continuation sheet. */
+.location-sheet {
+    box-sizing: border-box;
+    padding: 15mm;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    font-size: 10pt;
+
+    .heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 6mm;
+        margin-bottom: 5mm;
+        border-bottom: 1.5px solid #000;
+
+        h1 {
+            margin: 0;
+            font-size: 22pt;
+            line-height: 1.2;
+
+            .signature {
+                margin-left: 2mm;
+                font-size: 0.55em;
+                font-weight: 400;
+            }
+        }
+
+        .context {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-bottom: 1mm;
+            font-size: 9pt;
+            line-height: 4.5mm;
+            white-space: nowrap;
+        }
+    }
+
+    h2 {
+        margin: 6mm 0 2mm;
+        font-size: 12pt;
+        border-bottom: 1px solid #888;
+        break-after: avoid;
+    }
+
+    /* Two label/value pairs to a row: the list is long but every value is short. */
+    .properties {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 8mm;
+        margin: 0;
+
+        .property {
+            display: flex;
+            justify-content: space-between;
+            gap: 3mm;
+            padding: 0.8mm 0;
+            border-bottom: 0.5px solid #ccc;
+            break-inside: avoid;
+        }
+
+        dt {
+            color: #444;
+        }
+
+        dd {
+            margin: 0;
+            font-weight: 600;
+            text-align: right;
+        }
+    }
+
+    .regions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2mm;
+    }
+
+    .none {
+        margin: 0;
+    }
+
+    .tracks {
+        border-collapse: collapse;
+
+        th, td {
+            padding: 1mm 2.5mm;
+            border-bottom: 0.5px solid #ccc;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        th {
+            border-bottom: 1px solid #000;
+            font-size: 9pt;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        .number {
+            font-weight: 600;
+        }
+
+        .flag {
+            text-align: center;
+        }
+
+        .length {
+            text-align: right;
+        }
+
+        .route {
+            white-space: nowrap;
+        }
+    }
+}
+
+@media screen {
+    .location-sheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto 10mm;
+        background: white;
+        box-shadow: 0 0 6px rgba(0, 0, 0, .5);
+    }
+}

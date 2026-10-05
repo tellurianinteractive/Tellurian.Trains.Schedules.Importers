@@ -1,5 +1,25 @@
 # Release notes
 
+## Version 0.7.2
+
+### New features
+
+- **Operation locations can now be printed.** A new report under **Reports** gives every operation
+  location of the layout a sheet of its own, on A4 portrait: its properties, its regions, the
+  instructions for how it is worked at the meeting, and its tracks with their lengths, platforms,
+  routes and usage. Only the properties that apply to the kind of location are listed, and the
+  operational times shown are the ones in force — the location's own, or else the layout's. The
+  instructions are printed for the first time here. A location with more than fits on one sheet runs
+  on to the next, and the next location still starts on a fresh sheet. With **Print reports in local
+  languages** ticked, each sheet is printed in the language of the location's country.
+
+### Changes
+
+- **Only the operational times that apply are offered.** On the **Operation locations** tab, the loco
+  runaround time is offered only at stations, shadow yards included, and the train clearance time only at
+  manned stations, since clearing a train takes a dispatcher on duty. A time set earlier where it no
+  longer applies is kept, but neither shown nor printed.
+
 ## Version 0.7.1
 
 ### New features

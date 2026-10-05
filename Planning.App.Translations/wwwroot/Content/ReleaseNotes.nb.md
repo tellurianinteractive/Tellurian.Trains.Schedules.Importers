@@ -1,5 +1,24 @@
 # Versjonsnyheter
 
+## Versjon 0.7.2
+
+### Nye funksjoner
+
+- **Driftssteder kan nå skrives ut.** En ny rapport under **Rapporter** gir hvert driftssted på
+  anlegget sitt eget ark på A4 stående: egenskapene, regionene, instruksjonene for hvordan det betjenes
+  på treffet, og sporene med lengder, plattformer, ruter og bruk. Bare egenskapene som gjelder for den
+  typen driftssted, vises, og driftstidene som vises, er de som gjelder — driftsstedets egne, ellers
+  anleggets. Instruksjonene skrives ut her for første gang. Et driftssted med mer enn det er plass til på
+  ett ark, fortsetter på det neste, og det neste driftsstedet begynner likevel på et nytt ark. Med **Skriv
+  ut rapporter på lokale språk** krysset av skrives hvert ark ut på språket i driftsstedets land.
+
+### Endringer
+
+- **Bare driftstidene som gjelder, tilbys.** På fanen **Driftssteder** tilbys tiden for å kjøre lokomotivet
+  rundt bare på stasjoner, skyggestasjoner medregnet, og tiden for togklarering bare på bemannede
+  stasjoner, siden det trengs en togekspeditør på vakt for å klarere et tog. En tid som er satt tidligere
+  der den ikke lenger gjelder, beholdes, men verken vises eller skrives ut.
+
 ## Versjon 0.7.1
 
 ### Nye funksjoner

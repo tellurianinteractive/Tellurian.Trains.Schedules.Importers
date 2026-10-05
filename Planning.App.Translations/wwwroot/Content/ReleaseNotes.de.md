@@ -1,5 +1,26 @@
 # Versionshinweise
 
+## Version 0.7.2
+
+### Neue Funktionen
+
+- **Betriebsstellen können jetzt gedruckt werden.** Ein neuer Bericht unter **Berichte** gibt jeder
+  Betriebsstelle der Anlage ein eigenes Blatt im A4-Hochformat: ihre Eigenschaften, ihre Regionen, die
+  Anweisungen, wie sie beim Treffen bedient wird, und ihre Gleise mit Längen, Bahnsteigen, Fahrwegen und
+  Verwendung. Aufgeführt werden nur die Eigenschaften, die für die Art der Betriebsstelle gelten, und die
+  gezeigten Betriebszeiten sind die geltenden — die der Betriebsstelle selbst, sonst die der Anlage. Die
+  Anweisungen werden hier zum ersten Mal gedruckt. Eine Betriebsstelle, die mehr enthält, als auf ein Blatt
+  passt, wird auf dem nächsten fortgesetzt, und die nächste Betriebsstelle beginnt trotzdem auf einem neuen
+  Blatt. Ist **Berichte in Landessprachen drucken** angekreuzt, wird jedes Blatt in der Sprache des Landes
+  der Betriebsstelle gedruckt.
+
+### Änderungen
+
+- **Nur die geltenden Betriebszeiten werden angeboten.** Auf der Registerkarte **Betriebsstellen** wird die
+  Zeit für das Umsetzen der Lok nur bei Bahnhöfen angeboten, Schattenbahnhöfe eingeschlossen, und die Zeit
+  für die Zugabfertigung nur bei besetzten Bahnhöfen, da dafür ein Fahrdienstleiter im Dienst sein muss.
+  Eine früher eingetragene Zeit, wo sie nicht mehr gilt, bleibt erhalten, wird aber weder angezeigt noch gedruckt.
+
 ## Version 0.7.1
 
 ### Neue Funktionen
