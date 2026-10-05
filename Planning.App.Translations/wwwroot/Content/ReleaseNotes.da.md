@@ -1,5 +1,63 @@
 # Versionsnyheder
 
+## Version 0.7.1
+
+### Nye funktioner
+
+- **Rapporter udskrives på banens sprog.** Alle rapporter udskrives nu på banens standardsprog, det
+  første sprog i dens standardland, uanset hvilket sprog du selv arbejder på. De udskrevne ark læses
+  af deltagerne på træffet, ikke af dig. Datoer og tal følger også landet.
+
+  Sæt kryds ved **Udskriv rapporter på lokale sprog** under **Indstillinger › Generelt**, så udskrives
+  hver førertjeneste på sproget for det selskab, der kører den, hvert omløbskort på sproget for
+  køretøjets selskab og hver stations togekspeditionsliste på sproget for stationens land. Det gælder
+  også togekspeditionslister, der gemmes som dokumenter. En tjeneste eller et kort uden selskab får
+  sproget for togenes operatører, hvis de alle har samme sprog. Alt uden et sprog, som appen kan
+  udskrive på, beholder standardsproget.
+
+- **En togkategori angiver, hvor dens tog standser.** Fanen **Togkategorier** har et
+  **standsningsmønster**: kryds ved de driftssteder, hvor kategoriens tog standser undervejs. Et nyt tog,
+  der oprettes på fanen **Tog**, får en standsning ved hvert afkrydset driftssted, det passerer, og kører
+  igennem de øvrige — der hvor toget begynder, og der hvor det slutter, er standsninger, uanset hvad der
+  er krydset af, for det er der, det gøres klar og sættes væk. Kun de driftssteder, kategorien
+  overhovedet kan standse ved, tilbydes.
+
+  Et tog, der standser et sted, mønsteret ikke angiver, vises under **Konflikter** med tog, driftssted og
+  tid. Intet rettes for dig: kun du kan afgøre, om det er toget, der standser, hvor det burde køre
+  igennem, eller mønsteret, der mangler et driftssted, hvor kategoriens tog standser. Kontrollen kan slås
+  fra under **Indstillinger › Validering**.
+
+  **Hent fra togene** sætter kryds ved de driftssteder, hvor kategoriens eksisterende tog standser, og det
+  gøres for dig, første gang en plan fra en tidligere version åbnes — hver kategori får det mønster, dens
+  tog har kørt hele tiden, så intet rapporteres, som ikke var en fejl før. Sætter du ingen kryds, står
+  kategorien ubundet: dens tog standser da alle steder, hvor de kan aflevere det, de fører med sig, som
+  før. En rangerkategori har intet standsningsmønster, da dens opgaver ikke kører nogen steder.
+
+- **En rangeropgave behøver intet lokomotiv af sin egen, men den behøver en lokomotivfører.** En opgave
+  udføres lige så ofte af det toglokomotiv, der allerede står på stationen, eller af et rangerlokomotiv,
+  du ikke har oprettet som køretøj, som af et, der er booket til den. Et **omløb**, der kun indeholder
+  rangeropgaver, er derfor færdigt uden tildelt køretøj og vises ikke længere under **Konflikter** som et
+  omløb uden køretøj. Læg et tog, der kører et sted hen, ind i det samme omløb, så kræves der køretøj
+  igen.
+
+  Hvad en opgave derimod behøver, er nogen til at udføre den, så den tilbydes nu på fanen **Tjenester**
+  som ethvert andet togafsnit, med eller uden eget lokomotiv — skrevet med stationen én gang og de
+  tidspunkter, arbejdet løber imellem, da den ikke kører nogen steder. En opgave, ingen tjeneste dækker,
+  vises under **Konflikter** for de sessioner, den efterlades ubemandet, side om side med de afsnit, et
+  lokomotiv trækker.
+
+  I et trykt tjenestehæfte har opgavens side overskriften **Rangeropgave** med operatørens signatur, ikke
+  et tognummer, ingen bruger, og hvor et tog har sin ruteplan, har en opgave sin egen blok:
+  **Arbejdstider**, én linje med stationen og de tidspunkter, arbejdet **starter** og **slutter**, med
+  rangerinstruktionerne nedenunder. Der angives intet spor — en opgave udføres over hele stationen, ikke
+  fra ét spor.
+
+- **Søjlerne for lokomotivførere regner med ventetiden i en tjeneste.** Søjlerne over den grafiske
+  køreplan regnede kun en lokomotivfører som nødvendig, mens et tog eller en rangeropgave blev kørt. En
+  lokomotivfører med et ophold mellem to tog i sin **tjeneste** er alligevel optaget imens, på vej til
+  eller i venten på det næste, så den tid regnes nu også med — på de sessioner, tjenesten køres. Det gør
+  også et starttidspunkt, du har angivet før tjenestens første tog, eller et sluttidspunkt efter dens sidste.
+
 ## Version 0.7.0
 
 ### Nye funktioner

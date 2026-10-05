@@ -19,14 +19,36 @@ timetable stretch.
 
 ### Dispatch stretches
 
-A **dispatch stretch** runs between two staffed control points — a **manned** station or a **shadow**
-station — passing straight through any unmanned locations in between. So `A→B` and `B→C` with `B`
-unmanned form one dispatch stretch `A→C`.
+A **dispatch stretch** runs between two places where trains are cleared — a **manned** station, a
+**shadow** station, or a location **controlled from** a manned station — passing straight through any
+unmanned locations in between. So `A→B` and `B→C` with `B` unmanned form one dispatch stretch `A→C`.
+
+A junction, crossing place, unmanned station or industrial area **controlled from** a manned station is
+worked by that station's dispatcher as if it were their own station. It ends the dispatch stretches that
+meet there, its trains are on the controlling station's dispatch list, marked with its signature, and the
+stations beyond it are among those the controlling station rings. A **block post** — a signal-controlled
+location that is neither a junction nor a place where trains can cross — stays part of the line.
 
 Dispatch stretches are generated automatically from the track stretches: press **Regenerate from
 track stretches** whenever you change the network or change which stations are manned. Mark a station
 as manned or as a shadow station on the **Operation locations** tab. The *Via* column shows the
 unmanned locations a dispatch stretch passes through.
+
+#### Which trains can be on a dispatch stretch at the same time
+
+The dispatchers at the two ends agree which trains may be on the dispatch stretch between them, so the
+**Conflicts** list judges each dispatch stretch as a whole:
+
+- Each **signal-controlled location** on it, such as a block post, divides it into **sections**. A
+  section holds one train per track at a time, whatever direction the trains run in. Unmanned locations
+  that nobody controls do not divide it.
+- On **single track**, trains in opposite directions can only meet at the ends, or at a
+  signal-controlled location marked **Trains can cross?**. They can never be between two such places at
+  the same time, but trains in the same direction can follow each other there, one per section.
+- A train that passes a signal-controlled location without a time there holds every section it passes
+  through until it arrives, since nothing says when it passed.
+
+Track stretches that are not part of any dispatch stretch are judged one by one instead.
 
 ### Timetable stretches
 

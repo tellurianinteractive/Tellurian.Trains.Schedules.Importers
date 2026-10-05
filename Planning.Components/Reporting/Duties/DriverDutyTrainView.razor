@@ -5,11 +5,14 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One train part: a header block followed by four table blocks, separated by rules.
 
    The order matches how the driver works — what am I driving (traction), what am I pulling (wagonsets),
-   what is in it and where does it go (cargo), then where and when (the timetable). Each block carries a
-   colour bar down its left edge, so the four can be told apart at a glance — see .dutyblock in app.css.
+   what is in it and where does it go (cargo), then where and when (the timetable, or a shunting task's
+   working hours in its place). Each block carries a colour bar down its left edge, so the four can be
+   told apart at a glance — see .dutyblock in app.css.
 
    The three tables exist to absorb facts that would otherwise have to be squeezed into the timetable's
    note column, which is what made the prototype's notes long and repetitive exactly where a driver can
@@ -51,9 +54,12 @@
         <TrainPartVehicleView Data="Part.TractionData" Heading="TractionUnits" Block="traction" />
         <TrainPartVehicleView Data="Part.WagonsetData" Heading="ScheduledWagonsets" Block="wagonsets" />
         <TrainPartCargoWagonsWithWaybillsView Data="Part.CargoData" />
+        @* The last block is where and when: the timetable for a train that travels, and for a shunting
+           task the one line of its working hours. Each prints only when it is the one that applies. *@
         @if (ShowTimetable)
         {
             <TrainPartView Rows="Part.TimetableRows" />
+            <ShuntingTaskView Rows="Part.TimetableRows" />
         }
     </div>
 }
@@ -74,11 +80,22 @@
     // operators' trains. The number alone does not identify a train — the category prefix and suffix
     // are part of what is called out and written on the train describer — so the heading carries the
     // full identity. The double space is collapsed for the trains that have no company at all.
-    private string Heading =>
-        Part is null ? "" :
-        string.Format(Culture, Translator("DutyInTrain"),
-            Part.Train.EffectiveCompany?.Signature ?? "", Part.Train.Identity)
-            .Replace("  ", " ", StringComparison.Ordinal).Trim();
+    //
+    // A shunting task is named instead of numbered: its number is internal to the plan, never called out
+    // and never written anywhere the driver can see, so the heading says whose task it is and the line
+    // below says where and when it is worked.
+    private string Heading
+    {
+        get
+        {
+            if (Part is null) return "";
+            var company = Part.Train.EffectiveCompany?.Signature ?? "";
+            var text = Part.Train.IsShuntingTask
+                ? string.Format(Culture, Translator("DutyInShuntingTask"), company)
+                : string.Format(Culture, Translator("DutyInTrain"), company, Part.Train.Identity);
+            return text.Replace("  ", " ", StringComparison.Ordinal).Trim();
+        }
+    }
 
     // "Starts at" is the first call's ARRIVAL and "ends at" the last call's DEPARTURE: the gaps to the
     // movement times are the driver's preparation and stand-down time, the same distinction the duty's

@@ -459,6 +459,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validera tåghastighet?</value>
   </data>
+  <data name="ValidateStopPatterns" xml:space="preserve">
+    <value>Validera uppehållsmönster?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Validera resandeutbyte vid plattform?</value>
   </data>
@@ -730,7 +733,7 @@
     <value>En bansträcka med dessa ändpunkter finns redan.</value>
   </data>
   <data name="DispatchStretchesHint" xml:space="preserve">
-    <value>Trafikledningssträckor går mellan bemannade stationer eller skuggstationer och passerar obemannade platser mellan dem. De skapas från bansträckorna.</value>
+    <value>Trafikledningssträckor går mellan platserna där tåg klareras: bemannade stationer, skuggstationer och platser som fjärrstyrs från en bemannad station. De passerar obemannade platser däremellan och skapas från bansträckorna.</value>
   </data>
   <data name="RegenerateDispatchStretches" xml:space="preserve">
     <value>Skapa om från bansträckor</value>
@@ -975,11 +978,17 @@
   <data name="BreakForPrintingHelp" xml:space="preserve">
     <value>Dela dagen vid denna tid. Den grafiska tidtabellen kan då skrivas ut över flera sidor och visas en halva i taget på skärmen.</value>
   </data>
+  <data name="TrainsCanCross" xml:space="preserve">
+    <value>Tåg kan mötas?</value>
+  </data>
+  <data name="TrainsCanCrossHelp" xml:space="preserve">
+    <value>Om tåg i motsatt riktning kan mötas här, genom att det ena väntar medan det andra passerar. En signalreglerad plats som varken är en grenpunkt eller en mötesplats är en blockpost, som bara delar sträckan i avsnitt.</value>
+  </data>
   <data name="ControlledBy" xml:space="preserve">
     <value>Styrs från</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
-    <value>Den bemannade driftplats vars tågklarerare styr denna signalreglerade plats.</value>
+    <value>Den bemannade driftplats vars tågklarerare fjärrstyr denna plats. Tågklareraren där klarerar även tågen här, som på sin egen driftplats, och de står på driftplatsens tågklareringslista. Det gäller en obemannad station, ett industriområde och en signalreglerad grenpunkt eller mötesplats; en blockpost, som är ingetdera, delar bara sträckan i avsnitt som rymmer ett tåg vardera.</value>
   </data>
   <data name="Danish" xml:space="preserve">
     <value>Danska</value>
@@ -1222,10 +1231,10 @@
     <value>Planera tåg med angivna veckodagar istället för köromgångarnas nummer.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Skriv ut varje rapportpost på sitt eget språk?</value>
+    <value>Skriv ut rapporter på lokala språk?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
-    <value>När detta är på återges varje post i rapporter på det språk som härleds från posten själv – till exempel en förartjänst på dess operatörsföretags språk. Gränssnittet, och alla poster utan härledbart språk, fortsätter att använda ditt föredragna språk.</value>
+    <value>Rapporter skrivs ut på banans standardspråk: det första språket i dess standardland. När detta är på skrivs i stället varje post ut på sitt eget lokala språk: en förartjänst på språket för företaget som kör den, ett omloppskort på språket för fordonets företag, och en stations tågklareringslista på språket för stationens land. En förartjänst eller ett omloppskort utan företag använder språket för tågens operatörer, om alla har samma språk. Allt utan ett lokalt språk som appen kan skriva ut på behåller standardspråket.</value>
   </data>
   <data name="ReportFontFamily" xml:space="preserve">
     <value>Teckensnitt i rapporter</value>
@@ -1634,7 +1643,7 @@
     <value>Och lokala?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Inkludera även lokala destinationer som trafikeras från driftplatsen.</value>
+    <value>Lista även de driftplatser vars gods betjänas från denna driftplats.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>Inga destinationer.</value>
@@ -1965,7 +1974,7 @@
     <value>Förväntat antal lokförare</value>
   </data>
   <data name="ExpectedLocoDriversHelp" xml:space="preserve">
-    <value>Antalet lokförare du räknar med att ha tillgängliga. Den grafiska tidtabellen visar för varje minut hur många förare tågen faktiskt kräver, färgade mot detta antal: rött över, grönt lika med, gult en eller två under och grått tre eller fler under. Sätt till 0 för att dölja staplarna.</value>
+    <value>Antalet lokförare du räknar med att ha tillgängliga. Den grafiska tidtabellen visar för varje minut hur många förare tågen och tjänsterna faktiskt kräver, färgade mot detta antal: rött över, grönt lika med, gult en eller två under och grått tre eller fler under. Sätt till 0 för att dölja staplarna.</value>
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Behov av lokförare</value>
@@ -2180,6 +2189,15 @@
   <data name="TrainTimetable" xml:space="preserve">
     <value>Tidtabell</value>
   </data>
+  <data name="WorkingHours" xml:space="preserve">
+    <value>Arbetstider</value>
+  </data>
+  <data name="Starts" xml:space="preserve">
+    <value>Startar</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Slutar</value>
+  </data>
   <data name="Time" xml:space="preserve">
     <value>Tid</value>
   </data>
@@ -2197,6 +2215,9 @@
   </data>
   <data name="DutyInTrain" xml:space="preserve">
     <value>Tjänst i {0} tåg {1}</value>
+  </data>
+  <data name="DutyInShuntingTask" xml:space="preserve">
+    <value>Växlingsuppdrag {0}</value>
   </data>
   <data name="AtLocation" xml:space="preserve">
     <value>vid</value>
@@ -2339,9 +2360,6 @@
   <data name="AnywhereExplanation" xml:space="preserve">
     <value>Vagnarna står redan på stationen och kan ha kommit var som helst ifrån</value>
   </data>
-  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
-    <value>Även vagnar till de destinationer som trafikeras av godståg därifrån</value>
-  </data>
   <data name="AndBeyondExplanation" xml:space="preserve">
     <value>Även vagnar till de destinationer på banan som ligger längre fram</value>
   </data>
@@ -2473,5 +2491,56 @@
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Sammansättning räknat från lok</value>
+  </data>
+  <data name="Passengers" xml:space="preserve">
+    <value>Resande</value>
+  </data>
+  <data name="UsePassengerTickets" xml:space="preserve">
+    <value>Använd resandebiljetter?</value>
+  </data>
+  <data name="IsPassengerInterchange" xml:space="preserve">
+    <value>Omstigningsstation?</value>
+  </data>
+  <data name="Interchanges" xml:space="preserve">
+    <value>Omstigningsstationer</value>
+  </data>
+  <data name="InterchangesPlaceholderHint" xml:space="preserve">
+    <value>Omstigningsstationerna skrivs bara ut där du placerar dem. Skriv detta på en egen rad:</value>
+  </data>
+  <data name="StopPattern" xml:space="preserve">
+    <value>Uppehållsmönster</value>
+  </data>
+  <data name="StopPatternHelp" xml:space="preserve">
+    <value>De driftplatser där tåg i den här kategorin gör uppehåll under vägen. Ett nytt tågs väg får ett uppehåll vid var och en av dem som det passerar, och ett tåg som stannar någon annanstans rapporteras som en konflikt. Kryssa inte i något för att lämna kategorin obunden: dess tåg gör då uppehåll överallt där de kan lämna av det de för med sig, som tidigare.</value>
+  </data>
+  <data name="StopPatternHint" xml:space="preserve">
+    <value>Vid en ikryssad driftplats gör tåget uppehåll, övriga passerar det. Där ett tåg börjar och där det slutar är alltid uppehåll, oavsett vad som är ikryssat här.</value>
+  </data>
+  <data name="NoStopPatternHint" xml:space="preserve">
+    <value>Inget uppehållsmönster: ett nytt tåg i kategorin gör uppehåll överallt där det kan lämna av det det för med sig, och inget uppehåll rapporteras. Kryssa i de driftplatser där tågen gör uppehåll för att ge kategorin ett.</value>
+  </data>
+  <data name="StopPatternHasNoLocations" xml:space="preserve">
+    <value>Ingen driftplats på banan tar emot det som kategorin för med sig, så det finns ingenstans för dess tåg att stanna.</value>
+  </data>
+  <data name="DeduceStopPattern" xml:space="preserve">
+    <value>Hämta från tågen</value>
+  </data>
+  <data name="DeduceStopPatternTitle" xml:space="preserve">
+    <value>Kryssar i de driftplatser där kategorins befintliga tåg gör uppehåll och ersätter det som är ikryssat nu.</value>
+  </data>
+  <data name="ClearStopPattern" xml:space="preserve">
+    <value>Rensa</value>
+  </data>
+  <data name="ClearStopPatternTitle" xml:space="preserve">
+    <value>Tar bort uppehållsmönstret och lämnar kategorin obunden. Nästa gång planen läses in fylls det i från tågen igen.</value>
+  </data>
+  <data name="InsertFirst" xml:space="preserve">
+    <value>Infoga först</value>
+  </data>
+  <data name="RemoveFirst" xml:space="preserve">
+    <value>Ta bort första</value>
+  </data>
+  <data name="TimetableStretchNoPredecessor" xml:space="preserve">
+    <value>Ingen bansträcka leder hit.</value>
   </data>
 </root>

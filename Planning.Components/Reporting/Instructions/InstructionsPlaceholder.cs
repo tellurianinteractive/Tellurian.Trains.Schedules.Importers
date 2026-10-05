@@ -7,6 +7,13 @@ public enum InstructionsPlaceholder
 {
     /// <summary>The layout's shunting yards table, written <c>&lt;ShuntingYards/&gt;</c>.</summary>
     ShuntingYards,
+
+    /// <summary>
+    /// The stations where passengers change trains, written <c>&lt;Interchanges/&gt;</c>. Unlike the
+    /// shunting yards, this list is printed nowhere else: a booklet that does not place it does not
+    /// carry it.
+    /// </summary>
+    Interchanges,
 }
 
 /// <summary>One stretch of a page's content: either authored markdown or a placeholder standing for a
@@ -55,6 +62,7 @@ public static class InstructionsPlaceholders
     private static readonly (InstructionsPlaceholder Placeholder, string Tag)[] Tags =
     [
         (InstructionsPlaceholder.ShuntingYards, "ShuntingYards"),
+        (InstructionsPlaceholder.Interchanges, "Interchanges"),
     ];
 
     /// <summary>The tag for a placeholder, exactly as an author writes it.</summary>

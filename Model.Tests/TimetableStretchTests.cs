@@ -29,6 +29,16 @@ public class TimetableStretchTests
     }
 
     [TestMethod]
+    public void DescriptionsOfEmptyRouteLeaveOutStations()
+    {
+        // A route emptied while editing must still describe itself; it once recursed until the stack overflowed.
+        Assert.AreEqual("10: Ten", Target.ForwardDescription);
+        Assert.AreEqual("10: Ten", Target.BackwardDescription);
+        Assert.AreEqual("10: Ten", Target.ToString());
+        Assert.Throws<InvalidOperationException>(() => Target.Starts);
+    }
+
+    [TestMethod]
     public void DefaultColorIsFirstPaletteEntry()
     {
         Assert.AreEqual(TimetableStretch.Palette[0], Target.Color);
@@ -185,6 +195,24 @@ public class TimetableStretchTests
         main.Reverse();
 
         Assert.AreEqual(a, main.Starts, "Reversing a shared stretch does nothing.");
+    }
+
+    [TestMethod]
+    public void PrependsOnlyStretchEndingAtStart()
+    {
+        var (layout, a, b, c, _, _) = BuildBranchingLayout();
+        var ab = layout.TrackStretches.Single(s => s.Id == 1);
+        var bc = layout.TrackStretches.Single(s => s.Id == 2);
+        var line = new TimetableStretch(9, "9");
+        line.AddLast(bc);
+
+        Assert.IsTrue(line.CanPrepend(ab));
+        Assert.IsFalse(line.CanPrepend(bc));
+        line.AddFirst(ab);
+
+        Assert.AreEqual(a, line.Starts);
+        Assert.AreEqual(c, line.Ends);
+        CollectionAssert.AreEqual(new OperationLocation[] { a, b, c }, line.Stations.ToArray());
     }
 
     // A main line A-B-C (terminal A), a branch B-D diverging at B, and a sub-branch D-E diverging at D.

@@ -2,6 +2,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* The train timetable — where and when. It comes last of the four blocks because it is the one the
    driver returns to repeatedly during the run, so it sits closest to the following part.
 
@@ -12,9 +14,13 @@
 
    The table is table-layout: fixed with declared column widths. With automatic layout the full-width
    note rows would participate in width calculation, so one long note would widen the note column and
-   shift every other column — and column widths would then depend on content. *@
+   shift every other column — and column widths would then depend on content.
 
-@if (Rows is { Count: > 0 })
+   A shunting task has no route to tabulate, so its two rows are printed by ShuntingTaskView instead and
+   this block stays away. Each of the two states its own case, so the pages that print them can place
+   both and neither has to decide for the other. *@
+
+@if (Rows is [{ IsShuntingTask: false }, ..])
 {
     <div class="dutyblock timetable">
         <h3>@Translator("TrainTimetable")</h3>

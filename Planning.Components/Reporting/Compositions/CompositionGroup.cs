@@ -48,21 +48,35 @@ public sealed record WagonsetComposition : CompositionGroup
 }
 
 /// <summary>
-/// The cargo flow wagons placed at one position in the train, drawn as one rectangle listing where they go.
+/// One unit of cargo flow wagons in the train, drawn as one rectangle listing where they go.
 /// </summary>
 /// <remarks>
-/// Every flow sharing the position contributes its destinations to the same rectangle: the rectangle stands
-/// for a place in the train, and wagons for several flows are gathered there.
+/// A place in the train is given at two levels: the cargo flow says where its wagons stand in the train, and
+/// each of its destinations says where they stand within that. Every unit is marshalled on its own, so each
+/// gets a rectangle of its own. Every flow sharing both positions contributes its destinations to the same
+/// rectangle: the rectangle stands for a place in the train, and wagons for several flows are gathered there.
 /// </remarks>
 public sealed record CargoPositionComposition : CompositionGroup
 {
-    /// <summary>Where the wagons at this position go, one entry per destination.</summary>
+    /// <summary>
+    /// Where within the cargo flow's own position the wagons stand, 1 at the front. Zero where the
+    /// destinations give none, and then the wagons stand anywhere within that position.
+    /// </summary>
+    public int DestinationPosition { get; init; }
+
+    /// <summary>
+    /// The order the units at one cargo flow position are drawn in, front first. Zero sorts last, for the
+    /// reason given in <see cref="CompositionGroup.SortPosition"/>.
+    /// </summary>
+    public int SortDestinationPosition => DestinationPosition > 0 ? DestinationPosition : int.MaxValue;
+
+    /// <summary>Where the wagons of this unit go, one entry per destination.</summary>
     public required IReadOnlyList<CompositionDestination> Destinations { get; init; }
 }
 
 /// <summary>
-/// One destination of a cargo position: the place, with its "and local destinations" and "and beyond"
-/// qualifiers and its regions, and the most that may be brought there.
+/// One destination of a cargo position: the place, with its local destinations, its "and beyond"
+/// qualifier and its regions, and the most that may be brought there.
 /// </summary>
 /// <param name="Text">
 /// The plain text of the whole entry, the limit included, which the page-height estimate charges for.

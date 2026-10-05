@@ -1,3 +1,4 @@
+using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 
@@ -783,6 +784,101 @@ public class ValidationTests
         Assert.HasCount(1, errors);
     }
 
+    // Both schedules run at 12:00-12:55, so only the sessions decide whether the loco is double-booked.
+    private static (Plan plan, ScheduledObject loco) VehicleOnTwoSimultaneousSchedules(Sessions first, Sessions second)
+    {
+        var (plan, _) = VehicleOnTwoForwardSchedules(secondTrainStartHour: 12);
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null);
+        plan.AssignVehicle(plan.Schedules.First(), loco, first);
+        plan.AssignVehicle(plan.Schedules.Last(), loco, second);
+        return (plan, loco);
+    }
+
+    [TestMethod]
+    public void SessionsBeyondMaxSessionsDoNotMakeADoubleBooking()
+    {
+        // The two bookings share only sessions 9, 11 and 13, which a six-session meeting never runs.
+        var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
+            Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13),
+            Sessions.FromSessionNumbers(2, 4, 6, 9, 11, 13));
+        plan.Layout.Settings.General.MaxSessions = 6;
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
+
+        Assert.IsEmpty(errors);
+    }
+
+    [TestMethod]
+    public void SessionsWithinMaxSessionsStillMakeADoubleBooking()
+    {
+        var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
+            Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13),
+            Sessions.FromSessionNumbers(2, 4, 6, 9, 11, 13));
+        plan.Layout.Settings.General.MaxSessions = 14;
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
+
+        Assert.HasCount(1, errors);
+    }
+
+    [TestMethod]
+    public void DoubleBookingMessageLeavesOutSessionsBeyondMaxSessions()
+    {
+        var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
+            Sessions.FromSessionNumbers(1, 3, 5, 9),
+            Sessions.FromSessionNumbers(1, 4, 9, 11));
+        plan.Layout.Settings.General.MaxSessions = 6;
+
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
+
+        // Culture-neutral: the message language follows the test machine.
+        StringAssert.Contains(error.Message.Text, " 1,3,5 ");
+        StringAssert.Contains(error.Message.Text, " 1,4.");
+        Assert.DoesNotContain("9", error.Message.Text);
+    }
+
+    [TestMethod]
+    public void DoubleBookingMessageNamesTheDaysInDayMode()
+    {
+        // Mo,We,Fr against Mo-Sa (the whole six-day period): they clash on every day of the first.
+        var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
+            Sessions.FromSessionNumbers(2, 4, 6).ComplementWithin(useDays: true, maxSessions: 6),
+            Sessions.FromSessionNumbers().ComplementWithin(useDays: true, maxSessions: 6));
+        plan.Layout.Settings.General.UseDays = true;
+        plan.Layout.Settings.General.MaxSessions = 6;
+        var culture = CultureInfo.CurrentUICulture;
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-GB");
+        try
+        {
+            var error = plan.GetValidationErrors(Settings)
+                .Single(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
+
+            Assert.AreEqual(
+                "Vehicle 02 L is double-booked: its bookings on Mo,We,Fr overlap with those on Mo-Sa.",
+                error.Message.Text);
+        }
+        finally { CultureInfo.CurrentUICulture = culture; }
+    }
+
+    [TestMethod]
+    public void DisjointDayPatternsAreNotADoubleBooking()
+    {
+        // Mo, We, Fr against Tu, Th, Sa: two day patterns share the days marker, but no day.
+        var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
+            Sessions.FromSessionNumbers(2, 4, 6).ComplementWithin(useDays: true, maxSessions: 6),
+            Sessions.FromSessionNumbers(1, 3, 5).ComplementWithin(useDays: true, maxSessions: 6));
+        plan.Layout.Settings.General.UseDays = true;
+        plan.Layout.Settings.General.MaxSessions = 6;
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
+
+        Assert.IsEmpty(errors);
+    }
+
     // --- P5: a vehicle's identity must name one vehicle on every session. The identity is the external
     //         id where the vehicle was imported with one, else its operator and number ---
 
@@ -1164,6 +1260,33 @@ public class ValidationTests
         Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.LocomotiveCoverageGap));
         Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleDoubleBooked));
         Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleNotClosed));
+    }
+
+    // Overlapping parts belong to the schedule but are put right by retiming the trains, so they are
+    // shown on the trains too, while still marking the schedule.
+    [TestMethod]
+    public void ScheduleOverlapIsShownOnItsTrains()
+    {
+        var timetable = NewTimetable();
+        var category = Category;
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00))); // 12:00-12:55
+        timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(12, 30))); // 12:30-13:25, overlaps
+        var plan = Plan.Create("Test", timetable);
+        var first = plan.Timetable.Trains.First(t => t.Number == 1);
+        var second = plan.Timetable.Trains.First(t => t.Number == 3);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(first.AsTrainPart);
+        schedule.Add(second.AsTrainPart);
+
+        var errors = plan.GetValidationErrors(Settings).ToList();
+        var error = errors.Single(e => e.ErrorType == ValidationErrorType.VehicleScheduleOverlap);
+
+        Assert.AreEqual(ValidationScope.Schedule, error.Scope);
+        Assert.IsTrue(error.Involves(schedule), "The schedule is still marked.");
+        Assert.IsTrue(error.IsShownOnTrains);
+        Assert.IsTrue(error.Involves(first) && error.Involves(second), "Both trains are marked.");
+        Assert.IsFalse(errors.Single(e => e.ErrorType == ValidationErrorType.ScheduleHasNoVehicle).IsShownOnTrains,
+            "Other schedule-scope errors stay off the trains.");
     }
 
     // A vehicle-scope error marks its own vehicle chip only — never the parts column or another vehicle.

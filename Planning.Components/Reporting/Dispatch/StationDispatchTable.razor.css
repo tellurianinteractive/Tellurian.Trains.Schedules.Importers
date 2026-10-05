@@ -17,7 +17,7 @@
    Remeasure in the browser after changing any type size, padding or line height here — the heading is
    the one that moves most, since it is set large and a second line there costs four rows off the page.
 
-   Widths: the fixed columns total 136 mm (FixedColumnsWidthMm) and each tick-off column is 4 mm
+   Widths: the fixed columns total 144 mm (FixedColumnsWidthMm) and each tick-off column is 4 mm
    (SessionColumnWidthMm), leaving the rest of the 277 mm printable width to the notes — which is why the
    estimate derives its characters-per-line from the number of sessions rather than assuming a fixed
    notes column. */
@@ -213,8 +213,17 @@ table.dispatch {
             }
     }
     /* The column widths the estimate assumes; .notes takes whatever the others leave. */
+
+    /* 28 mm, not the 20 that held a bare identity: the cell now leads with the operating company's
+       signature, and these cells clip rather than wrap — a train read as "SJ G 43" is a worse thing to
+       hand a dispatcher than a slightly narrower notes column.
+
+       Measured at 9 pt bold in the app's font, against the 26 mm of text width the 1 mm side padding
+       leaves: "MTRX Rst 12345" is 24.7 mm and "DSB RB 12345 A" 24.9 mm, so the long case — a four-letter
+       signature, a prefix, a five-figure number and a suffix — fits with a little over. The old 20 mm
+       left 18 mm, which "DSB G 1234" filled exactly. */
     .train {
-        width: 20mm;
+        width: 28mm;
     }
 
     /* 14 mm: the values are now a short word ("All", "None") or a few session circles, and the heading is

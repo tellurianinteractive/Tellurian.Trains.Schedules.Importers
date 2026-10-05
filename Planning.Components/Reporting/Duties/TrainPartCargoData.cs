@@ -139,9 +139,11 @@ public sealed class TrainPartCargoFlow
     /// <param name="alsoShuntText">Appended when the driver also shunts after arrival.</param>
     public MarkupString To(string alsoShuntText)
     {
+        // The from-station is left out of the destinations (see StatedDestinations), which can leave
+        // nothing but the qualifier to print.
         var text = Flow.ToHtml;
         return new(Flow.AlsoShuntAfterArrival && !Flow.BringsNoWagonsFromHere
-            ? $"{text}, {alsoShuntText}"
+            ? text.Length == 0 ? alsoShuntText : $"{text}, {alsoShuntText}"
             : text);
     }
 
@@ -158,7 +160,7 @@ public sealed class TrainPartCargoFlow
     {
         get
         {
-            var destinations = Flow.CargoFlowOptions.Destinations;
+            var destinations = Flow.StatedDestinations.ToList();
             var limited = destinations.Where(destination => destination.HasMaxLoad).ToList();
             if (limited.Count == 0) return [];
 

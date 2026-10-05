@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// An <see cref="OperationLocation"/> that is unmanned and signal controlled, such as a block post or junction.
+/// An <see cref="OperationLocation"/> that is unmanned and signal controlled, worked from a manned station: a
+/// block post, a junction, a place where trains can cross, or a junction where they can also cross.
 /// </summary>
 /// <remarks>
 /// A train never stops here: it always passes through regardless of a call's
@@ -14,9 +15,12 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 public class SignalControlledLocation : OperationLocation
 {
     /// <summary>
-    /// The <see cref="Station"/> that controls this location.
+    /// Gets or sets whether trains in opposite directions can cross here, one waiting while the other
+    /// passes. Stated rather than derived: a junction needs two tracks to know which way a train goes,
+    /// whether or not trains can cross, so the tracks do not tell. A location that is neither a
+    /// junction nor a crossing place is a block post (<c>IsBlockPost</c>).
     /// </summary>
-    public Station? ControlledBy { get; set; }
+    public bool TrainsCanCross { get; set; }
 
     /// <summary>
     /// Constructor

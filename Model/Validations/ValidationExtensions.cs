@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Resources;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
@@ -48,10 +48,11 @@ public static class ValidationExtensions
             result.AddRange(timetable.Trains.SelectMany(t => t.CheckShuntingTaskCalls()));
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidatePassengerExchange) result.AddRange(timetable.Trains.SelectMany(t => t.CheckPassengerExchange()));
+            if (options.ValidateStopPatterns) result.AddRange(timetable.Trains.SelectMany(t => t.CheckStopPattern()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
-            if (options.ValidateStretches) result.AddRange(timetable.Layout.TrackStretches.SelectMany(ss => ss.GetConflictingTrains()).Distinct());
+            if (options.ValidateStretches) result.AddRange(timetable.GetStretchConflicts());
             if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             return result;
         }
@@ -95,6 +96,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateLocomotiveCoverage()
         {
+            var general = plan.Layout.Settings.General;
             var errors = new List<ValidationError>();
 
             // The workings traction is booked on, each with the sessions it is booked for: the union over
@@ -126,13 +128,14 @@ public static class ValidationExtensions
                 var hauledParts = tractionSchedules
                     .SelectMany(s => s.Schedule.Parts
                         .Where(p => p.Train.Id == train.Id)
-                        .Select(p => (Part: p, Sessions: runsOnNumberedSessions ? s.Sessions.And(train.Sessions) : s.Sessions)))
+                        .Select(p => (Part: p, Sessions: (runsOnNumberedSessions ? s.Sessions.And(train.Sessions) : s.Sessions)
+                            .WithinPeriod(general.UseDays, general.MaxSessions))))
                     .OrderBy(x => x.Part.WorkingSpan.From)
                     .ToList();
 
                 if (hauledParts.Count < 2) continue; // no traction at all, or one working: S4's concern
 
-                errors.AddRange(CheckLocomotiveCoverageOverlaps(train, hauledParts));
+                errors.AddRange(CheckLocomotiveCoverageOverlaps(train, hauledParts, general));
             }
 
             return errors;
@@ -146,6 +149,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateVehicleDoubleBooking()
         {
+            var general = plan.Layout.Settings.General;
             foreach (var vehicle in plan.ScheduledObjects)
             {
                 var assignments = vehicle.ScheduleAssignments.ToArray();
@@ -155,10 +159,14 @@ public static class ValidationExtensions
                     {
                         var a1 = assignments[i];
                         var a2 = assignments[j];
+                        // Sessions beyond the operating period never run, so they cannot collide.
+                        var sessions1 = a1.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
+                        var sessions2 = a2.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
 
-                        if (a1.Sessions.Overlaps(a2.Sessions) && SchedulesOverlapInTime(a1.Schedule, a2.Schedule))
+                        if (sessions1.Overlaps(sessions2) && SchedulesOverlapInTime(a1.Schedule, a2.Schedule))
                         {
-                            var message = Message.Information(Strings.VehicleIsDoubleBooked, vehicle.Designation, a1.Sessions.SessionsNumbers, a2.Sessions.SessionsNumbers);
+                            var message = Message.Information(general.UseDays ? Strings.VehicleIsDoubleBookedOnDays : Strings.VehicleIsDoubleBooked, vehicle.Designation,
+                                SessionsText(sessions1, general), SessionsText(sessions2, general));
                             yield return ValidationError.VehicleDoubleBooked(vehicle, a1, a2, message);
                         }
                     }
@@ -205,6 +213,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateVehicleIdentities()
         {
+            var general = plan.Layout.Settings.General;
             var duplicates = plan.ScheduledObjects
                 .Where(v => v.HasVehicleIdentity)
                 .GroupBy(v => v.Identity)
@@ -218,15 +227,17 @@ public static class ValidationExtensions
                     var claimed = vehicle.ClaimedSessions;
                     for (var j = 0; j < i; j++)
                     {
-                        var overlap = claimed.And(vehicles[j].ClaimedSessions);
-                        if (overlap.Flags == 0) continue;
+                        // Sessions beyond the operating period never run, so sharing only those is no clash.
+                        var overlap = claimed.And(vehicles[j].ClaimedSessions).WithinPeriod(general.UseDays, general.MaxSessions);
+                        if (overlap.IsNone) continue;
+                        var overlapText = SessionsText(overlap, general);
                         // Two vehicles sharing an external id have the same Designation, so naming them
                         // both would say the same thing twice; the shared id and the sessions are the news.
                         var message = group.Key.IsExternalId
-                            ? Message.Information(Strings.VehiclesShareExternalId,
-                                vehicle.IdentityText, overlap.SessionsNumbers)
-                            : Message.Information(Strings.VehiclesShareOperatorAndNumber,
-                                vehicle.Designation, vehicles[j].Designation, vehicle.IdentityText, overlap.SessionsNumbers);
+                            ? Message.Information(general.UseDays ? Strings.VehiclesShareExternalIdOnDays : Strings.VehiclesShareExternalId,
+                                vehicle.IdentityText, overlapText)
+                            : Message.Information(general.UseDays ? Strings.VehiclesShareOperatorAndNumberOnDays : Strings.VehiclesShareOperatorAndNumber,
+                                vehicle.Designation, vehicles[j].Designation, vehicle.IdentityText, overlapText);
                         yield return ValidationError.VehicleIdentityDuplicated(vehicle, vehicles[j], message);
                         break;
                     }
@@ -242,6 +253,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateDriverDuties()
         {
+            var general = plan.Layout.Settings.General;
             var duties = plan.DriverDuties.ToArray();
 
             // A pinned identity renumbering cannot repair: empty, or shared with another pinned duty.
@@ -279,7 +291,8 @@ public static class ValidationExtensions
                 {
                     var d1 = duties[i];
                     var d2 = duties[j];
-                    if (!d1.Sessions.Overlaps(d2.Sessions)) continue;
+                    if (!d1.Sessions.WithinPeriod(general.UseDays, general.MaxSessions)
+                        .Overlaps(d2.Sessions.WithinPeriod(general.UseDays, general.MaxSessions))) continue;
                     foreach (var part in d1.Parts.Where(p => d2.Parts.Contains(p)))
                     {
                         var message = Message.Information(Strings.DutyPartIsDoubleAssigned, part, d1.Identity, d2.Identity);
@@ -319,6 +332,13 @@ public static class ValidationExtensions
         /// gap is <see cref="ValidateTractionCoverage"/>'s concern); a part with traction but only partial
         /// duty coverage is reported for exactly the sessions the duty gap leaves open.
         /// </summary>
+        /// <remarks>
+        /// A shunting task is in scope whether or not a traction unit works it, and over every session the
+        /// task itself runs. A task needs no loco of its own — it is worked by whatever stands at the
+        /// station — so waiting for traction before asking who works it would leave a locoless task
+        /// unreported for good. This is the counterpart of the exemption
+        /// <see cref="ValidateTractionCoverage"/> gives a working of shunting tasks alone.
+        /// </remarks>
         internal IEnumerable<ValidationError> ValidateDriverDutyCoverage()
         {
             var general = plan.Layout.Settings.General;
@@ -331,23 +351,32 @@ public static class ValidationExtensions
                 .ToList();
             var duties = plan.DriverDuties.ToArray();
 
-            // The sessions each traction-assigned part actually runs traction on: the assignment's
-            // sessions, narrowed to the sessions the train itself runs. Several assignments (different
-            // traction units taking over on different sessions) can cover the same part, so their
-            // sessions are unioned.
-            var tractionSessionsByPart = new Dictionary<ScheduledTrainPart, Sessions>();
+            // The sessions each part must have a driver on. For a hauled part that is the traction
+            // assignment's sessions, narrowed to the sessions the train itself runs; several assignments
+            // (different traction units taking over on different sessions) can cover the same part, so
+            // their sessions are unioned.
+            var drivenSessionsByPart = new Dictionary<ScheduledTrainPart, Sessions>();
             foreach (var assignment in tractionAssignments)
             {
                 foreach (var part in assignment.Schedule?.Parts ?? [])
                 {
                     var sessions = assignment.Sessions.And(part.Train.Sessions);
-                    tractionSessionsByPart[part] = tractionSessionsByPart.TryGetValue(part, out var existing)
+                    drivenSessionsByPart[part] = drivenSessionsByPart.TryGetValue(part, out var existing)
                         ? existing.Or(sessions)
                         : sessions;
                 }
             }
 
-            foreach (var (part, tractionSessions) in tractionSessionsByPart)
+            // A shunting task is worked on every session it runs, by whatever traction stands at the
+            // station, so its own sessions are what a duty has to cover — not an assignment's.
+            foreach (var part in plan.Schedules.SelectMany(s => s.Parts).Where(p => p.Train.IsShuntingTask))
+            {
+                drivenSessionsByPart[part] = drivenSessionsByPart.TryGetValue(part, out var existing)
+                    ? existing.Or(part.Train.Sessions)
+                    : part.Train.Sessions;
+            }
+
+            foreach (var (part, tractionSessions) in drivenSessionsByPart)
             {
                 var dutySessions = duties
                     .Where(d => d.Parts.Contains(part))
@@ -360,7 +389,7 @@ public static class ValidationExtensions
                 if (missing.Count > 0)
                 {
                     var missingSessions = SessionsExtensions.FromPeriodNumbers(missing, general.UseDays);
-                    var message = Message.Information(Strings.TrainPartHasNoDriverDuty, part.Train, missingSessions.SessionsNumbers, part.From.OperationLocation, part.From.Departure.HHMM(), part.To.OperationLocation, part.To.Arrival.HHMM());
+                    var message = Message.Information(general.UseDays ? Strings.TrainPartHasNoDriverDutyOnDays : Strings.TrainPartHasNoDriverDuty, part.Train, SessionsText(missingSessions, general), part.From.OperationLocation, part.StartTime.HHMM(), part.To.OperationLocation, part.EndTime.HHMM());
                     errors.Add(ValidationError.TrainPartMissingDriverDuty(part, message));
                 }
             }
@@ -371,7 +400,10 @@ public static class ValidationExtensions
         /// Validates traction coverage (rule S4). Two things must hold:
         /// <list type="bullet">
         /// <item>A schedule (turnus) that runs regular sessions must have at least one vehicle assigned; an
-        /// orphan working with no vehicle is reported.</item>
+        /// orphan working with no vehicle is reported. A working of shunting tasks alone is exempt: a task
+        /// is worked at one location, by the train loco standing there or by a station pilot nobody has
+        /// modelled, so a loco of its own is optional. What it does need is a driver, which is
+        /// <see cref="ValidateDriverDutyCoverage"/>'s concern.</item>
         /// <item>Every leg a train runs must be hauled by a traction unit (a locomotive or a self-propelled
         /// trainset) on <em>every</em> session the train runs. The traction may be assigned through any
         /// schedule that works the train — a wagonset has its own turnus with no traction of its own and is
@@ -399,6 +431,7 @@ public static class ValidationExtensions
                 if (schedule.Parts.Count == 0) continue;
                 if (schedule.IsCargoFlow) continue;
                 if (schedule.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
+                if (schedule.Parts.All(p => p.Train.IsShuntingTask)) continue;
                 if (schedule.Vehicles.Any()) continue;
                 var message = Message.Information(Strings.VehicleScheduleHasNoVehicle, schedule.Number);
                 errors.Add(ValidationError.ScheduleHasNoVehicle(schedule, message));
@@ -458,8 +491,8 @@ public static class ValidationExtensions
 
                     var (from, to) = (calls[leg], calls[last + 1]);
                     var missingSessions = SessionsExtensions.FromPeriodNumbers(missingPerLeg[leg], general.UseDays);
-                    var message = Message.Information(Strings.TrainMissingTraction,
-                        train, from.OperationLocation, from.Departure.HHMM(), to.OperationLocation, to.Arrival.HHMM(), missingSessions.SessionsNumbers);
+                    var message = Message.Information(general.UseDays ? Strings.TrainMissingTractionOnDays : Strings.TrainMissingTraction,
+                        train, from.OperationLocation, from.Departure.HHMM(), to.OperationLocation, to.Arrival.HHMM(), SessionsText(missingSessions, general));
                     errors.Add(ValidationError.TrainMissingTraction(train, from, to, message));
                     leg = last + 1;
                 }
@@ -649,6 +682,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateTrainNumbers()
         {
+            var general = timetable.Layout.Settings.General;
             var result = new List<ValidationError>();
             var duplicates = timetable.Trains
                 .GroupBy(t => (Company: t.EffectiveCompany?.Id, t.CategoryId, t.Number))
@@ -659,10 +693,11 @@ public static class ValidationExtensions
                 for (var i = 0; i < trains.Length - 1; i++)
                     for (var j = i + 1; j < trains.Length; j++)
                     {
-                        if (trains[i].Sessions.Overlaps(trains[j].Sessions))
+                        // Sessions beyond the operating period never run, so sharing only those is no clash.
+                        var overlap = trains[i].Sessions.And(trains[j].Sessions).WithinPeriod(general.UseDays, general.MaxSessions);
+                        if (!overlap.IsNone)
                         {
-                            var overlap = trains[i].Sessions.And(trains[j].Sessions);
-                            var message = Message.Information(Strings.TrainsShareNumberOnOverlappingSessions, trains[i], trains[j], overlap.SessionsNumbers);
+                            var message = Message.Information(general.UseDays ? Strings.TrainsShareNumberOnOverlappingDays : Strings.TrainsShareNumberOnOverlappingSessions, trains[i], trains[j], SessionsText(overlap, general));
                             result.Add(ValidationError.DuplicateTrainNumber(trains[i], trains[j], message));
                         }
                     }
@@ -755,6 +790,44 @@ public static class ValidationExtensions
         }
 
         /// <summary>
+        /// Checks that the train stops on its way only where its category's stop pattern says it does
+        /// (rule T8). See <see cref="StopPatternRules"/> for what a pattern is and what it binds.
+        /// </summary>
+        /// <remarks>
+        /// Only the stops <em>between</em> the ends are looked at. A train is made ready where it starts
+        /// and put away where it ends, so its first and last call are stops whatever any pattern says —
+        /// reporting them would be reporting the train for running at all. Everything else is a stop the
+        /// planner placed, and a stop the pattern does not name is one of the two out of step: either the
+        /// train stops somewhere it should run through, or the pattern is missing a location its trains
+        /// serve. Which of them to put right is the planner's to choose, so nothing is changed here.
+        /// <para>
+        /// A category with no pattern constrains nothing and reports nothing, so a plan made before there
+        /// were stop patterns is quiet until a pattern is given (see <c>Plan.DeduceStopPatterns</c>, which
+        /// gives it the one its trains already run). A call the train cannot stop at is a pass-through
+        /// however its flags stand (see <c>StationCall.IsStop</c>), and is no more reported than it is a
+        /// stop.
+        /// </para>
+        /// </remarks>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckStopPattern()
+        {
+            if (train.Category is not { } category || !category.HasStopPattern) return [];
+            var calls = train.CallsInRunOrder;
+            if (calls.Count < 3) return [];
+            var result = new List<ValidationError>();
+            for (var i = 1; i < calls.Count - 1; i++)
+            {
+                var call = calls[i];
+                if (!call.IsStop) continue;
+                if (category.AllowsStopAt(call.OperationLocation)) continue;
+                var message = Message.Warning(Strings.TrainStopsOutsideCategoryStopPattern,
+                    train, call.OperationLocation, call.Arrival.HHMM(), category);
+                result.Add(ValidationError.StopOutsideStopPattern(call, message));
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Checks that the train's route is continuous: every leg it runs — each pair of calls it runs one
         /// after the other — is a track stretch of the layout (rule T5).
         /// </summary>
@@ -791,7 +864,7 @@ public static class ValidationExtensions
             return result;
         }
 
-        private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<(ScheduledTrainPart Part, Sessions Sessions)> hauledParts)
+        private IEnumerable<ValidationError> CheckLocomotiveCoverageOverlaps(List<(ScheduledTrainPart Part, Sessions Sessions)> hauledParts, GeneralSettings general)
         {
             // Each part is taken over its WorkingSpan: the running time plus the preparation time at the
             // train's origin and the finishing-up time at its destination, which are as much a claim on
@@ -819,12 +892,12 @@ public static class ValidationExtensions
                     // The sessions are stated only where they are a subset of the ones the train runs.
                     // Doubled whenever it runs — the ordinary case, where both bookings are for every
                     // session — there is no subset to point at, and naming them all would only be noise.
-                    var everySessionTheTrainRuns = shared.Numbers.SequenceEqual(train.Sessions.Numbers);
+                    var everySessionTheTrainRuns = shared.Numbers.SequenceEqual(train.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Numbers);
                     var message = everySessionTheTrainRuns
                         ? Message.Information(Strings.TrainHasLocomotiveCoverageOverlap,
                             train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText)
-                        : Message.Information(Strings.TrainHasLocomotiveCoverageOverlapOnSessions,
-                            train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText, shared.SessionsNumbers);
+                        : Message.Information(general.UseDays ? Strings.TrainHasLocomotiveCoverageOverlapOnDays : Strings.TrainHasLocomotiveCoverageOverlapOnSessions,
+                            train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText, SessionsText(shared, general));
                     yield return ValidationError.LocomotiveCoverageOverlap(train, part1, part2, message);
                 }
             }
@@ -940,8 +1013,12 @@ public static class ValidationExtensions
             // the same vehicle apart from two vehicles contending for the track.
             var occupancySchedules = extendByVehicleStay ? vehicleSchedules : null;
             var mine = stationCall.TrackOccupancy(occupancySchedules);
+            // A shunting task with no traction unit takes no track, so its track and times are ignored.
+            var occupies = stationCall.OccupiesTrack(vehicleSchedules);
             var conflictingWithMe = remaining.Where(r =>
+                occupies &&
                 r.Track.Equals(stationCall.Track) &&
+                r.OccupiesTrack(vehicleSchedules) &&
                 !r.Train!.Equals(stationCall.Train) &&
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
@@ -1080,6 +1157,13 @@ public static class ValidationExtensions
         }
     }
 
+    // A session value as a message states it, limited to the operating period: the session numbers, or in
+    // day mode the short day names — always named, never "Daily", since the message's "…OnDays" wording
+    // puts them after a preposition.
+    private static string SessionsText(Sessions sessions, GeneralSettings general) =>
+        general.UseDays
+            ? sessions.DayNamesText(general.SessionSettings(useShortWeekdayNames: true))
+            : sessions.SessionsNumbersWithin(useDays: false, general.MaxSessions);
 }
 
 /// <summary>

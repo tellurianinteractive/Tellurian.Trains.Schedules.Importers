@@ -42,11 +42,17 @@ public static class CargoFlowCallNoteExtensions
                 var ends = train.CargoFlows.Where(flow => ReferenceEquals(flow.To, call)).ToList();
 
                 if (train.IsShuntingTask) return [.. begins.Union(ends).SelectMany(flow => flow.ShuntingNotes)];
-                return
-                [
-                    .. begins.SelectMany(flow => flow.DepartureNotes),
-                    .. ends.SelectMany(flow => flow.ArrivalNotes),
-                ];
+
+                // One note per kind, naming the destinations of all its flows: several flows beginning at
+                // the same call would otherwise repeat the same sentence once per flow.
+                var departures = begins.SelectMany(flow => flow.DepartureNotes).OfType<CargoFlowDestinationNote>().ToList();
+                var arrivals = ends.SelectMany(flow => flow.ArrivalNotes).OfType<CargoFlowUncoupleNote>().ToList();
+                List<ICallNote> result = [];
+                if (departures.Count > 0)
+                    result.Add(departures[0] with { Parts = [.. departures.SelectMany(note => note.Parts)] });
+                if (arrivals.Count > 0)
+                    result.Add(arrivals[0] with { Parts = [.. arrivals.SelectMany(note => note.Parts)] });
+                return result;
             }
         }
     }

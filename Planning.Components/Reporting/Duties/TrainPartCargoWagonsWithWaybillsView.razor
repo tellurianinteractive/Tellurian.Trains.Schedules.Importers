@@ -3,6 +3,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* The cargo wagons with waybills carried over this part. When a duty needs two people this is the
    conductor's working document — which wagons to bring, which to set off, and where they sit in the
    train — and the one block a non-driving reader uses on its own.
@@ -48,14 +50,19 @@
                         @if (Data.HasMaxLoads)
                         {
                             <td class="maxload">
+                                @* The spaces are written out because Blazor trims the whitespace between
+                                   elements, and each figure is unbreakable: without them the cell has
+                                   nowhere to wrap and runs off the page, which clips it. *@
                                 @foreach (var limit in row.MaxLoads)
                                 {
+                                    @(" ")
                                     <span class="limit">
                                         @* Named only where the row's destinations do not share one limit —
                                            see TrainPartCargoFlow.MaxLoads. *@
                                         @if (limit.Location is { Length: > 0 } location)
                                         {
                                             <span class="at">@location</span>
+                                            @(" ")
                                         }
                                         <MaxLoadView Capacity="limit.Capacity" />
                                     </span>

@@ -3,6 +3,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One vehicle block of a train part — traction units or wagonsets. The two have the same eight columns
    and differ only in what they list, so one view serves both; the heading tells them apart.
 
@@ -41,10 +43,10 @@
                         @* The vehicle's own tracks, which differ from the train's where it is fetched from or
                            put on another track. *@
                         <td class="track">@vehicle.DepartureTrack.Number</td>
-                        <td>@vehicle.TrainPart.From.Departure.HHMM()</td>
+                        <td>@vehicle.TrainPart.StartTime.HHMM()</td>
                         <td>@vehicle.TrainPart.To.OperationLocation.Name</td>
                         <td class="track">@vehicle.ArrivalTrack.Number</td>
-                        <td>@vehicle.TrainPart.To.Arrival.HHMM()</td>
+                        <td>@vehicle.TrainPart.EndTime.HHMM()</td>
                     </tr>
                 }
             </tbody>

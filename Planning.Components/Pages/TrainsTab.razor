@@ -316,15 +316,15 @@ else
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
-    // The train-scope conflicts that involve this train; they tint its row and fill its conflict badge.
+    // The conflicts shown on trains that involve this train; they tint its row and fill its conflict badge.
     private IReadOnlyList<ValidationError> ConflictsOf(Train train) =>
-        [.. ValidationState.Errors.Where(e => e.Scope == ValidationScope.Train && e.Involves(train))];
+        [.. ValidationState.Errors.Where(e => e.IsShownOnTrains && e.Involves(train))];
 
     // Every conflict of the category's trains, gathered on the group header: once the category is collapsed
     // that header is the only place the conflicts inside it can be seen, and read.
     private IReadOnlyList<ValidationError> ConflictsOf(TrainGroup group) =>
         [.. ValidationState.Errors
-            .Where(e => e.Scope == ValidationScope.Train && group.Trains.Any(t => e.Involves(t)))];
+            .Where(e => e.IsShownOnTrains && group.Trains.Any(t => e.Involves(t)))];
 
     public void Dispose()
     {
@@ -367,11 +367,7 @@ else
 
     private string SessionsKey(Train train) => SessionsDisplay.Key(train.Sessions);
 
-    private string TrainLabel(Train train)
-    {
-        var identity = train.Category?.TrainIdentity(train.Number) ?? train.Number.ToString(Culture);
-        return train.EffectiveCompany is { } c ? $"{c.Signature} {identity}".Trim() : identity;
-    }
+    private static string TrainLabel(Train train) => train.IdentityWithCompany;
 
     // ---- Train field editing --------------------------------------------------------------------
 

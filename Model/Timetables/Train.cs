@@ -301,6 +301,17 @@ public static class TrainExtensions
         public Company? EffectiveCompany => train.Company ?? train.Category?.Company;
 
         /// <summary>
+        /// Gets the train's <c>Identity</c> prefixed with the signature of its <c>EffectiveCompany</c>,
+        /// e.g. "SJ G 4321" — how a train is named where the reader may be working with more than one
+        /// operator's trains at once. Falls back to the identity alone when neither the train nor its
+        /// category names a company, or when that company has no signature.
+        /// </summary>
+        public string IdentityWithCompany =>
+            train.EffectiveCompany is { } company && company.Signature.HasValue
+                ? $"{company.Signature} {train.Identity}"
+                : train.Identity;
+
+        /// <summary>
         /// Gets a one-line label for the train suitable for a drop-down: its identity (with the
         /// effective company signature) followed by the first and last call as station signatures and
         /// times, e.g. "G 4321  Gbg 12:00→Snu 12:55". A shunting task is written as the one place it is
@@ -319,7 +330,7 @@ public static class TrainExtensions
         {
             get
             {
-                var identity = train.EffectiveCompany is { } c ? $"{c.Signature} {train.Identity}".Trim() : train.Identity;
+                var identity = train.IdentityWithCompany;
                 if (train.Calls.Count == 0) return identity;
                 if (train.ShuntingCall is { } task)
                     return $"{identity}  {task.OperationLocation.Signature} {task.Arrival.HHMM()}-{task.Departure.HHMM()}";
@@ -432,6 +443,19 @@ public static class TrainExtensions
             train.DepartureCalls.Where(c => c.OperationLocation.HasCargoExchange);
 
         /// <summary>
+        /// The position a new cargo flow gets: one after the highest position on the train, or 1 when it has none.
+        /// </summary>
+        public int NextCargoFlowPosition =>
+            train.CargoFlows.Count == 0 ? 1 : train.CargoFlows.Max(c => c.PositionInTrain) + 1;
+
+        /// <summary>
+        /// The cargo flow furthest back in the train: the highest position, and of those the latest to connect.
+        /// Null when the train has none.
+        /// </summary>
+        public CargoFlowTrainPart? LastCargoFlow =>
+            train.CargoFlows.OrderBy(c => c.PositionInTrain).ThenBy(c => c.From.SortTime).LastOrDefault();
+
+        /// <summary>
         /// The calls at which a cargo flow connected at <paramref name="from"/> may disconnect its wagons:
         /// an arrival stop exchanging cargo later in the run — or, on a shunting task, the very call the
         /// flow connects at, because the task neither travels nor has another call to reach.
@@ -479,13 +503,18 @@ public static class TrainExtensions
         /// not yet filled in — carries nothing to exchange, so no exchange is demanded of the location and
         /// only the location type restricts it. A shadow station always exchanges both (see
         /// <see cref="Station.HasPassengerExchange"/>), so it needs no case of its own here.
+        /// <para>
+        /// What may be exchanged is the category's, so the rule itself lives there
+        /// (<see cref="TrainCategoryExtensions"/>) and is asked of the category alone wherever there is no
+        /// train to ask — choosing the locations a stop pattern may name, above all. A train with no
+        /// category carries nothing, exactly as a service category does.
+        /// </para>
         /// </remarks>
         /// <param name="location">The operation location to test.</param>
         public bool CanStopAt(OperationLocation? location) =>
-            location is not null and not SignalControlledLocation &&
-            ((train.IsPassenger && location.HasPassengerExchange) ||
-             (train.IsCargo && location.HasCargoExchange) ||
-             (!train.IsPassenger && !train.IsCargo));
+            train.Category is { } category
+                ? category.CanStopAt(location)
+                : location is not null and not SignalControlledLocation;
 
         /// <summary>
         /// Gets the train's calls where it stops to depart (a wagon can be connected here), earliest first.
@@ -608,18 +637,37 @@ public static class TrainExtensions
         /// <param name="from">The departure call where wagons are connected.</param>
         /// <param name="to">The arrival call where wagons are disconnected.</param>
         /// <param name="options">The cargo flow description (a timetable catalogue entry) to reference.</param>
-        /// <param name="positionInTrain">The position of the cargo flow within the train (default 1).</param>
+        /// <param name="positionInTrain">The position of the cargo flow within the train;
+        /// when omitted, one after the highest position already on the train (1 for the first).</param>
         /// <returns>The created cargo flow, already added to the train.</returns>
-        public CargoFlowTrainPart CreateCargoFlow(int id, StationCall from, StationCall to, CargoFlowOptions options, int positionInTrain = 1)
+        public CargoFlowTrainPart CreateCargoFlow(int id, StationCall from, StationCall to, CargoFlowOptions options, int? positionInTrain = null)
         {
             var cargoFlow = new CargoFlowTrainPart(from, to)
             {
                 Id = id,
                 CargoFlowOptions = options,
                 CargoFlowOptionsId = options.Id,
-                PositionInTrain = positionInTrain,
+                PositionInTrain = positionInTrain ?? train.NextCargoFlowPosition,
             };
             return train.Add(cargoFlow);
+        }
+
+        /// <summary>
+        /// Creates a cargo flow with the same calls, description and operations as <paramref name="source"/>,
+        /// at the next position (<c>NextCargoFlowPosition</c>), and adds it to <see cref="Train.CargoFlows"/>.
+        /// </summary>
+        /// <param name="id">The unique identifier for the new cargo flow.</param>
+        /// <param name="source">The cargo flow on this train whose settings are copied.</param>
+        /// <returns>The created cargo flow, already added to the train.</returns>
+        public CargoFlowTrainPart CopyCargoFlow(int id, CargoFlowTrainPart source)
+        {
+            var cargoFlow = train.CreateCargoFlow(id, source.From, source.To, source.CargoFlowOptions);
+            cargoFlow.BringsNoWagonsFromHere = source.BringsNoWagonsFromHere;
+            cargoFlow.AlsoShuntBeforeDeparture = source.AlsoShuntBeforeDeparture;
+            cargoFlow.AlsoShuntAfterArrival = source.AlsoShuntAfterArrival;
+            cargoFlow.HasCoupleNote = source.HasCoupleNote;
+            cargoFlow.HasUncoupleNote = source.HasUncoupleNote;
+            return cargoFlow;
         }
 
         /// <summary>

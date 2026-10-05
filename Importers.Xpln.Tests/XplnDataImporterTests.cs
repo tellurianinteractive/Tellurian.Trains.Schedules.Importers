@@ -378,7 +378,9 @@ public class XplnDataImporterTests
     // Routes worksheet, so the 40 malformed times on the Trains worksheet are no longer reached — they
     // are still there, and are reported once the section is fixed.
     [TestMethod()]
-    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 72)]
+    // One of the 73 is two trains crossing at Meierei Rothenburg: XPLN cannot say whether trains can cross at a
+    // signal-controlled location, so it imports as a block post until the planner marks it.
+    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 73)]
     [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 16)]
     [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 66)]
     [DataRow("FREMODERN-2023-Norge", 10, 41, 13, 0, 0, 20, 10, 4)]

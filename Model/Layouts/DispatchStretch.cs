@@ -2,7 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// <summary>
-/// A stretch between two stations with dispatchers.
+/// A stretch between two dispatch endpoints: stations with a dispatcher, or locations remotely
+/// dispatched from one (see <c>IsDispatchEndpoint</c>).
 /// </summary>
 public class DispatchStretch
 {
@@ -12,7 +13,7 @@ public class DispatchStretch
     /// <param name="id"></param>
     /// <param name="from"></param>
     /// <param name="to"></param>
-    public DispatchStretch(int id, Station from, Station to)
+    public DispatchStretch(int id, OperationLocation from, OperationLocation to)
     {
         Id = id;
         From = from;
@@ -22,7 +23,7 @@ public class DispatchStretch
 
     /// <summary>
     /// Creates a dispatch stretch spanning the given ordered track stretches. The end stations are
-    /// derived from the first stretch's start and the last stretch's end, which must both be stations.
+    /// derived from the first stretch's start and the last stretch's end.
     /// </summary>
     /// <param name="id">The unique identifier for this dispatch stretch.</param>
     /// <param name="stretches">The ordered, contiguous track stretches the dispatch stretch comprises.</param>
@@ -30,8 +31,8 @@ public class DispatchStretch
     {
         Id = id;
         Stretches = [.. stretches];
-        From = (Station)Stretches.First().Start;
-        To = (Station)Stretches.Last().End;
+        From = Stretches.First().Start;
+        To = Stretches.Last().End;
     }
 
     [JsonConstructor]
@@ -48,14 +49,14 @@ public class DispatchStretch
     public int Id { get; set; }
 
     /// <summary>
-    /// The station in one end of the <see cref="DispatchStretch"/>
+    /// The dispatch endpoint in one end of the <see cref="DispatchStretch"/>
     /// </summary>
-    public Station From { get; set; }
+    public OperationLocation From { get; set; }
 
     /// <summary>
-    /// The station in other end of the <see cref="DispatchStretch"/>
+    /// The dispatch endpoint in the other end of the <see cref="DispatchStretch"/>
     /// </summary>
-    public Station To { get; set; }
+    public OperationLocation To { get; set; }
 
     /// <summary>
     /// The ordered, contiguous track stretches this dispatch stretch comprises. Empty for dispatch

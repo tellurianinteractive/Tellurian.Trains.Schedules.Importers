@@ -79,24 +79,6 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to and local destinations.
-        /// </summary>
-        internal static string AndLocalDestinations {
-            get {
-                return ResourceManager.GetString("AndLocalDestinations", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to and local destinations and beyond.
-        /// </summary>
-        internal static string AndLocalDestinationsAndBeyond {
-            get {
-                return ResourceManager.GetString("AndLocalDestinationsAndBeyond", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Axles × {0}.
         /// </summary>
         internal static string Axles {
@@ -183,6 +165,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string Crosses {
             get {
                 return ResourceManager.GetString("Crosses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exchange transferring passengers here..
+        /// </summary>
+        internal static string ExchangeTransferringPassengers {
+            get {
+                return ResourceManager.GetString("ExchangeTransferringPassengers", resourceCulture);
             }
         }
         
@@ -300,6 +291,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string NoStop {
             get {
                 return ResourceManager.GetString("NoStop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shunting task {0}-{1}.
+        /// </summary>
+        internal static string ShuntingTaskFromTo {
+            get {
+                return ResourceManager.GetString("ShuntingTaskFromTo", resourceCulture);
             }
         }
         

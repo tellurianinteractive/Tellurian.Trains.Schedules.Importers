@@ -2,6 +2,7 @@
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Layouts
 @using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 @implements IDisposable
@@ -37,6 +38,7 @@ else
                         <span class="swatch" style="background-color:@context.Color"></span>
                     </TemplateColumn>
                     <TemplateColumn Title='@Translator("Company")'>@(context.Company?.Name ?? "—")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("StopPattern")'>@(context.HasStopPattern ? context.StopLocationIds.Count.ToString(Culture) : "—")</TemplateColumn>
                     <TemplateColumn Title='@Translator("ExcludeFromAutomaticScheduling")'>@if (context.ExcludeFromAutomaticScheduling) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
@@ -146,6 +148,43 @@ else
                     <p class="reapplied">@string.Format(Culture, Translator("ReappliedToTrains"), _reapplied)</p>
                 }
 
+                @* Where trains of this category stop on their way. A positive list: what is ticked is
+                   stopped at and what is not is run through, and it is the locations trains of the
+                   category could stop at at all that are offered. A shunting task works at one place and
+                   travels nowhere, so a shunting category has no route for a pattern to shape. *@
+                @if (!Editing.IsShunting)
+                {
+                    <div class="stop-pattern">
+                        <HelpLabel For="StopPattern" />
+                        @if (!StopChoices.Any())
+                        {
+                            <p class="empty">@Translator("StopPatternHasNoLocations")</p>
+                        }
+                        else
+                        {
+                            <div class="toolbar">
+                                <button disabled="@(_isNew || TrainCount == 0)" title='@Translator("DeduceStopPatternTitle")'
+                                        @onclick="DeduceStopPattern"><i class="fa-solid fa-wand-magic-sparkles"></i> @Translator("DeduceStopPattern")</button>
+                                <button disabled="@(!Editing.HasStopPattern)" title='@Translator("ClearStopPatternTitle")'
+                                        @onclick="ClearStopPattern"><i class="fa-solid fa-xmark"></i> @Translator("ClearStopPattern")</button>
+                            </div>
+                            <p class="hint">@Translator(Editing.HasStopPattern ? "StopPatternHint" : "NoStopPatternHint")</p>
+                            <ul class="stop-locations">
+                                @foreach (var location in StopChoices)
+                                {
+                                    <li>
+                                        <label>
+                                            <input type="checkbox" checked="@Editing.StopLocationIds.Contains(location.Id)"
+                                                   @onchange="e => ToggleStop(location, e.Value is true)" />
+                                            <span>@location.Name</span>
+                                        </label>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+
                 @if (_isNew)
                 {
                     <div class="form-actions">
@@ -163,6 +202,7 @@ else
 
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
+    private Plan? Plan => ScheduleState.Schedule;
     private Timetable? Timetable => ScheduleState.Timetable;
     private Layout? Layout => ScheduleState.Layout;
     private IQueryable<TrainCategory> Categories =>
@@ -260,6 +300,39 @@ else
         if (Editing is null || Timetable is null) return;
         _reapplied = Timetable.ApplyDefaultFinishingMinutes(Editing);
         ScheduleState.SaveAndNotify();
+    }
+
+    // The operating locations offered as stops: those a train of this category could stop at at all —
+    // it has somewhere to exchange what it carries, and it is not a signal-controlled location. A pattern
+    // naming anywhere else would say nothing, since the call there is a pass-through whatever it says.
+    private IEnumerable<OperationLocation> StopChoices =>
+        Editing is null || Layout is null
+            ? []
+            : Layout.OperationLocations.Where(Editing.CanStopAt).OrderBy(l => l.Name, StringComparer.CurrentCulture);
+
+    private void ToggleStop(OperationLocation location, bool stops)
+    {
+        if (Editing is null) return;
+        if (stops) { if (!Editing.StopLocationIds.Contains(location.Id)) Editing.StopLocationIds.Add(location.Id); }
+        else Editing.StopLocationIds.Remove(location.Id);
+        OnEdited();
+    }
+
+    // Fills the pattern in from the trains the category already has, replacing what is ticked.
+    private void DeduceStopPattern()
+    {
+        if (Editing is null || Plan is null) return;
+        Plan.DeduceStopPattern(Editing);
+        OnEdited();
+    }
+
+    // Leaves the category with no pattern at all, which constrains nothing — not a pattern of nowhere.
+    // Reading the plan afterwards fills it in again from the trains (see StopPatternRules).
+    private void ClearStopPattern()
+    {
+        if (Editing is null) return;
+        Editing.StopLocationIds.Clear();
+        OnEdited();
     }
 
     private void OnEdited()

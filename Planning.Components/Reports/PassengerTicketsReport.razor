@@ -22,27 +22,34 @@ else if (Items.Count == 0)
 }
 else
 {
-    @foreach (var itemsOnPage in Items.ItemsPerPage(6))
-    {
-        <A4LPage Margin="4">
-            <div class="pagebreak">
-                @foreach (var item in itemsOnPage)
-                {
-                    <PassengerTicket Item="@item" />
-                }
-            </div>
-        </A4LPage>
-    }
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var itemsOnPage in Items.ItemsPerPage(6))
+        {
+            <A4LPage Margin="4">
+                <div class="pagebreak">
+                    @foreach (var item in itemsOnPage)
+                    {
+                        <PassengerTicket Item="@item" />
+                    }
+                </div>
+            </A4LPage>
+        }
+    </CascadingValue>
 }
 
 @code {
     private IReadOnlyList<TicketData>? Items { get; set; }
+
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         Items = ScheduleState.Timetable?.ToPassengerTickets() ?? [];
     }
 }

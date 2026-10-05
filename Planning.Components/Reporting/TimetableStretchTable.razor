@@ -3,6 +3,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 <div class="timetable-section @(ShowTitle ? "" : "no-title")">
     @if (ShowTitle)
     {

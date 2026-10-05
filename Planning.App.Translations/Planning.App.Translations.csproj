@@ -3,6 +3,8 @@
   <PropertyGroup>
     <AssemblyName>Tellurian.Trains.Schedules.Planning.App.Translations</AssemblyName>
     <RootNamespace>Tellurian.Trains.Schedules.Planning.App.Translations</RootNamespace>
+    <!-- The JSImport source generator (LanguageResources) emits unsafe marshalling code. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

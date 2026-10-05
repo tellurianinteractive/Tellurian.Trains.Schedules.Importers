@@ -1,3 +1,4 @@
+@using System.Globalization
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Odt
 
@@ -97,7 +98,7 @@
     // Every station a dispatcher works: manned stations and shadow stations, in layout order. Read rather
     // than cached, because the dialog can be opened again after a station has been marked manned.
     private IReadOnlyList<Station> DispatchStations =>
-        ScheduleState.Layout is { } layout ? [.. layout.DispatchEndpoints] : [];
+        ScheduleState.Layout is { } layout ? [.. layout.Dispatchers] : [];
 
     private int DispatchStationCount => DispatchStations.Count;
 
@@ -215,17 +216,35 @@
         {
             var settings = ScheduleState.Layout?.Settings.General.SessionSettings()
                 ?? SessionsSettings.UseSessions(14);
-            var lists = DispatchStations
-                .Select(station => DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
-                .ToList();
+            // Each station's document in its own language, like its printed sheets; the list itself is
+            // built in it too, since it writes the sessions' texts.
+            var cultures = new Dictionary<DispatchList, CultureInfo>();
+            var lists = new List<DispatchList>();
+            foreach (var station in DispatchStations)
+            {
+                var culture = ScheduleState.Layout is { } layout
+                    ? station.ReportCulture(layout, LanguageService.IsSupported)
+                    : CultureInfo.CurrentUICulture;
+                using var scope = ReportCulture.Use(culture);
+                var list = DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
+                cultures[list] = culture;
+                lists.Add(list);
+            }
 
             // Set in the layout's report font, like every other report — the recipient can still
             // restyle it, since these are named styles rather than direct formatting.
             var font = ScheduleState.Layout?.Settings.General.ReportFontFamily;
             var single = lists.Count == 1;
-            var bytes = single
-                ? StationDispatchOdt.Create(lists[0], settings, Translator, DateTimeOffset.Now, font)
-                : StationDispatchOdt.CreateBundle(lists, settings, Translator, DateTimeOffset.Now, font);
+            byte[] bytes;
+            if (single)
+            {
+                using var scope = ReportCulture.Use(cultures[lists[0]]);
+                bytes = StationDispatchOdt.Create(lists[0], settings, Translator, DateTimeOffset.Now, font);
+            }
+            else
+            {
+                bytes = StationDispatchOdt.CreateBundle(lists, settings, Translator, DateTimeOffset.Now, font, list => cultures[list]);
+            }
             var fileName = single
                 ? StationDispatchOdt.FileNameOf(lists[0])
                 : $"{SafeFileName($"{timetable.Name} {Translator("DispatchLists")}")}.zip";

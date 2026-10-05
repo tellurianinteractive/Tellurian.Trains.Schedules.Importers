@@ -65,7 +65,7 @@
     else if (_editing is not null)
     {
         <div class="edit">
-            <h2>@(_isNew ? Translator("AddTimetableStretch") : _editing.ForwardDescription)</h2>
+            <h2>@(_original is null ? Translator("AddTimetableStretch") : _original.ForwardDescription)</h2>
 
             <div class="form-grid">
                 <div class="field">
@@ -108,6 +108,28 @@
                         @Translator("Stations"): @StationsText(_editing) &nbsp;·&nbsp;
                         @Translator("DistanceMeters"): @TotalDistance(_editing)
                     </p>
+                }
+
+                @if (_editing.Stretches.Count > 0)
+                {
+                    <div class="route-add">
+                        @if (Prependable.Count == 0)
+                        {
+                            <span class="dim">@Translator("TimetableStretchNoPredecessor")</span>
+                        }
+                        else
+                        {
+                            <select @bind="_prependCandidateId">
+                                <option value="0">@Translator("SelectTrackStretch")</option>
+                                @foreach (var ts in Prependable)
+                                {
+                                    <option value="@ts.Id">@ts.Start.Signature → @ts.End.Signature (@ts.Distance @Translator("DistanceMeters"))</option>
+                                }
+                            </select>
+                            <button @onclick="PrependSelected" disabled="@(_prependCandidateId == 0)">@Translator("InsertFirst")</button>
+                        }
+                        <button @onclick="RemoveFirst">@Translator("RemoveFirst")</button>
+                    </div>
                 }
 
                 <div class="route-add">
@@ -160,8 +182,17 @@
             ? []
             : [.. Layout.TrackStretches.Where(s => _editing.CanAppend(s)).OrderBy(s => s.Start.Name).ThenBy(s => s.End.Name)];
 
+    // Track stretches that can extend the route currently being built backwards (contiguous into its start).
+    private IReadOnlyList<TrackStretch> Prependable =>
+        _editing is null || Layout is null
+            ? []
+            : [.. Layout.TrackStretches.Where(s => _editing.CanPrepend(s)).OrderBy(s => s.Start.Name).ThenBy(s => s.End.Name)];
+
     private Mode _mode = Mode.List;
-    private bool _isNew;
+    // The stretch being edited, or null when a new one is being added.
+    private TimetableStretch? _original;
+    // A draft copy that all edits go to; it is applied to the original (or added) only on Save,
+    // so Cancel leaves the layout untouched.
     private TimetableStretch? _editing;
     private TimetableStretch? _deleteTarget;
     private string? _error;
@@ -169,6 +200,7 @@
     private string _number = "";
     private string _description = "";
     private int _candidateId;
+    private int _prependCandidateId;
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
@@ -176,22 +208,28 @@
 
     private void StartAdd()
     {
-        _isNew = true;
+        _original = null;
         _editing = new TimetableStretch(NextId(), "");
         _number = "";
         _description = "";
         _candidateId = 0;
+        _prependCandidateId = 0;
         _error = null;
         _mode = Mode.Edit;
     }
 
     private void Edit(TimetableStretch stretch)
     {
-        _isNew = false;
-        _editing = stretch;
+        _original = stretch;
+        _editing = new TimetableStretch(stretch.Id, stretch.Number, stretch.Description)
+        {
+            Color = stretch.Color,
+            Stretches = [.. stretch.Stretches],
+        };
         _number = stretch.Number;
         _description = stretch.Description;
         _candidateId = 0;
+        _prependCandidateId = 0;
         _error = null;
         _mode = Mode.Edit;
     }
@@ -200,7 +238,7 @@
     {
         _mode = Mode.List;
         _editing = null;
-        _isNew = false;
+        _original = null;
         _error = null;
     }
 
@@ -211,7 +249,6 @@
     {
         if (_editing is null) return;
         _editing.Color = color;
-        if (!_isNew) ScheduleState.SaveAndNotify();
     }
 
     private void AppendSelected()
@@ -221,7 +258,21 @@
         if (stretch is null || !_editing.CanAppend(stretch)) return;
         _editing.AddLast(stretch);
         _candidateId = 0;
-        if (!_isNew) ScheduleState.SaveAndNotify();
+    }
+
+    private void PrependSelected()
+    {
+        if (_editing is null || Layout is null || _prependCandidateId == 0) return;
+        var stretch = Layout.TrackStretches.FirstOrDefault(s => s.Id == _prependCandidateId);
+        if (stretch is null || !_editing.CanPrepend(stretch)) return;
+        _editing.AddFirst(stretch);
+        _prependCandidateId = 0;
+    }
+
+    private void RemoveFirst()
+    {
+        if (_editing is null || _editing.Stretches.Count == 0) return;
+        _editing.Stretches = [.. _editing.Stretches.Skip(1)];
     }
 
     private void RemoveLast()
@@ -229,7 +280,6 @@
         if (_editing is null || _editing.Stretches.Count == 0) return;
         var last = _editing.Stretches.Last();
         _editing.Stretches.Remove(last);
-        if (!_isNew) ScheduleState.SaveAndNotify();
     }
 
     private void Save()
@@ -240,7 +290,7 @@
             _error = Translator("TimetableStretchNumberRequired");
             return;
         }
-        if (Layout.TimetableStretches.Any(t => !ReferenceEquals(t, _editing) && t.Number.Equals(_number.Trim(), StringComparison.OrdinalIgnoreCase)))
+        if (Layout.TimetableStretches.Any(t => !ReferenceEquals(t, _original) && t.Number.Equals(_number.Trim(), StringComparison.OrdinalIgnoreCase)))
         {
             _error = Translator("TimetableStretchNumberDuplicate");
             return;
@@ -250,9 +300,12 @@
             _error = Translator("TimetableStretchRouteRequired");
             return;
         }
-        _editing.Number = _number.Trim();
-        _editing.Description = _description?.Trim() ?? "";
-        if (_isNew) Layout.Add(_editing);
+        var target = _original ?? _editing;
+        target.Number = _number.Trim();
+        target.Description = _description?.Trim() ?? "";
+        target.Color = _editing.Color;
+        target.Stretches = [.. _editing.Stretches];
+        if (_original is null) Layout.Add(target);
         ScheduleState.SaveAndNotify();
         BackToList();
     }

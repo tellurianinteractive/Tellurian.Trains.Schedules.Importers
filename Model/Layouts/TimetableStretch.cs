@@ -122,12 +122,18 @@ public static class TimetableStretchExtensions
 
         /// <summary>
         /// Includes stretch number, start and end station and an optional additional description.
+        /// The stations are left out while the stretch has no route, as when it is being edited.
         /// </summary>
-        public string ForwardDescription => $"{stretch.Number}: {stretch.Description} {stretch.Starts}-{stretch.Ends}".Trim();
+        public string ForwardDescription => stretch.Stretches.Count == 0
+            ? $"{stretch.Number}: {stretch.Description}".Trim()
+            : $"{stretch.Number}: {stretch.Description} {stretch.Starts}-{stretch.Ends}".Trim();
         /// <summary>
         /// Includes stretch number, start and end station and an optional additional description.
+        /// The stations are left out while the stretch has no route, as when it is being edited.
         /// </summary>
-        public string BackwardDescription => $"{stretch.Number}: {stretch.Description} {stretch.Ends}-{stretch.Starts}".Trim();
+        public string BackwardDescription => stretch.Stretches.Count == 0
+            ? $"{stretch.Number}: {stretch.Description}".Trim()
+            : $"{stretch.Number}: {stretch.Description} {stretch.Ends}-{stretch.Starts}".Trim();
         /// <summary>
         /// Finds a station along the timetable stretch. A station may occur more than once on a
         /// stretch that revisits it (reversing or branching lines); the first occurrence is returned.
@@ -143,7 +149,7 @@ public static class TimetableStretchExtensions
         /// <returns>The starting station.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
         public OperationLocation Starts =>
-            stretch?.Stretches.Count > 0 ? stretch.Stretches.First().Start : throw new InvalidOperationException($"No stretch in {stretch}.");
+            stretch?.Stretches.Count > 0 ? stretch.Stretches.First().Start : throw new InvalidOperationException($"No stretch in timetable stretch {stretch?.Number}.");
 
         /// <summary>
         /// Gets the ending station of the timetable stretch.
@@ -151,7 +157,7 @@ public static class TimetableStretchExtensions
         /// <returns>The ending station.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the stretch has no track stretches.</exception>
         public OperationLocation Ends =>
-           stretch?.Stretches.Count > 0 ? stretch.Stretches.Last().End : throw new InvalidOperationException($"No stretch in {stretch}.");
+           stretch?.Stretches.Count > 0 ? stretch.Stretches.Last().End : throw new InvalidOperationException($"No stretch in timetable stretch {stretch?.Number}.");
 
         /// <summary>
         /// Calculates the distance from the start of the timetable stretch to the specified station.
@@ -223,6 +229,14 @@ public static class TimetableStretchExtensions
             stretch.Stretches.Count == 0 || stretch.Stretches.Last().End.Equals(trackStretch.Start);
 
         /// <summary>
+        /// Whether the given track stretch could be inserted before the current first one: it must end
+        /// where this stretch currently starts (or be the very first stretch added).
+        /// </summary>
+        /// <param name="trackStretch">The candidate track stretch.</param>
+        public bool CanPrepend(TrackStretch trackStretch) =>
+            stretch.Stretches.Count == 0 || stretch.Stretches.First().Start.Equals(trackStretch.End);
+
+        /// <summary>
         /// Whether the timetable stretch may be reversed. Reversing turns each of its track stretches
         /// around, and a track stretch is shared with the layout and with any other timetable stretch
         /// that uses it, so reversal is only allowed when none of the track stretches belongs to
@@ -266,6 +280,18 @@ public static class TimetableStretchExtensions
                 stretch.Stretches.Add(trackStretch);
                 return trackStretch;
             }
+        }
+
+        /// <summary>
+        /// Inserts a track stretch at the beginning of the timetable stretch.
+        /// </summary>
+        /// <param name="trackStretch">The track stretch to insert.</param>
+        /// <returns>The inserted track stretch.</returns>
+        public TrackStretch AddFirst(TrackStretch trackStretch)
+        {
+            ArgumentNullException.ThrowIfNull(trackStretch);
+            stretch.Stretches = [trackStretch, .. stretch.Stretches];
+            return trackStretch;
         }
     }
 

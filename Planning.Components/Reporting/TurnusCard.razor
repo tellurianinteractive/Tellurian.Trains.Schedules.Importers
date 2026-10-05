@@ -1,6 +1,8 @@
 ﻿@using Tellurian.Trains.Schedules.Planning.App.Translations
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 <PocketCard>
     @if (Item is not null)
     {
@@ -51,10 +53,13 @@
                         {
                             <tr style="border-bottom: 1px solid gray">
                                 <td>@part.Train.Number</td>
+                                @* A shunting task is worked at one location, so its two columns carry the
+                                   same signature and its times read forwards: the work starts at the call's
+                                   arrival and ends at its departure. *@
                                 <td>@part.From.OperationLocation.Signature</td>
-                                <td>@part.From.Departure</td>
+                                <td>@part.StartTime</td>
                                 <td>@part.To.OperationLocation.Signature</td>
-                                <td>@part.To.Arrival</td>
+                                <td>@part.EndTime</td>
                             </tr>
                         }
                     </tbody>

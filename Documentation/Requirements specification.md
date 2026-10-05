@@ -35,7 +35,7 @@ Snapshot of coverage by area (see each section for detail).
 | Companies (§4.1.6) | ✅ | each company names the country it operates in, chosen from the layout's country catalogue |
 | Country catalogue (§4.1.7) | ✅ | the layout saves the set of countries it uses; companies, regions and the default country all reference it |
 | Train (§4.2.1) | ✅ | maximum speed, train length (axles/wagons/metres) and train continuation |
-| Train categories (§4.2.2) | ✅ | default speed and start number; categories are a catalogue on the timetable, seeded with Passenger and Freight |
+| Train categories (§4.2.2) | ✅ | default speed, start number and stop pattern; categories are a catalogue on the timetable, seeded with Passenger and Freight |
 | Station calls, wagon groups, sessions (§4.2.3–4, 4.2.6) | ✅ | station calls distinguish a stop from a pass-through; a wagonset's individual wagons are listed on the wagonset itself (§4.2.4); sessions are a catalogue on the timetable |
 | Cargo flows (§4.2.5) | 🟢 | reusable cargo-flow descriptions catalogue plus per-train occurrences; the **Cargo flow** tab (descriptions + per-train editor); destination note generated (report rendering pending) |
 | Speed mapping / fast clock / station timings (§4.3) | ✅ | effective-speed calculation wired (train speed capped by stretch speed, mapped to a real model speed) |
@@ -53,7 +53,7 @@ Snapshot of coverage by area (see each section for detail).
 | Settings tab (§3.2) | ✅ | all 5 groups + language selector |
 | Layout Operational Places (§3.3) | 🟡 | locations + tracks + manned/shadow editor and the lock key built; ModuleRegistry import (FR-3.3.1) missing |
 | Track/Dispatch/Timetable Stretches (§3.4) | ✅ | three sub-sections; direction warnings; auto dispatch + route builder |
-| Train Categories (§3.5) | ✅ | list + add/edit/delete; delete blocked when referenced by a train; start number and exclude-from-automatic-scheduling editable |
+| Train Categories (§3.5) | ✅ | list + add/edit/delete; delete blocked when referenced by a train; start number, exclude-from-automatic-scheduling and stop pattern editable |
 | Trains (§3.6) | ✅ | Trains tab: inline-edit rows + expandable calls / wagon-groups sub-tables; add/clone/move trains; calls listed in travel order, editing a departure shifts the times after it and an arrival the times before it; pass-through set via arrival/departure checkboxes; conflict highlighting |
 | Graphical Timetable (§3.7) | 🟡 | renders + display settings + orientation + stretch/half selection + conflict highlighting; interaction (drag, context menu) is still not built |
 | Vehicle Schedule Editor (§3.8) | 🟡 | Schedules tab with a turn chart: interactive and automatic turnus building, session-aware vehicle assignment, vehicle editing with wagon rakes; wagon-group assignment editor not wired |
@@ -260,12 +260,31 @@ are organised into groups by purpose, surfaced as sub-sections of the
 | Start time | Fast-time start hour of operation                                 | 06:00        |
 | End time   | Fast-time end hour of operation                                   | 18:00        |
 | Break time | Optional fast-time hour that splits the graphical timetable into two halves (start–break and break–end), for printing across pages and for the on-screen first/last-half view (see §3.7.5) | None |
+| Expected loco drivers | The number of loco drivers expected to be available; the loco driver demand bars on the graphical timetable are coloured against it, and are hidden when it is 0 (see §3.7.6) | 0 |
 
 Start, end, and break time define the operating time window used by the graphical
 timetable (see §3.7).
 
 The **user-interface language** is a user-level preference, chosen via the language selector
 in the top bar and persisted in the browser — it is not stored per layout.
+
+**Report language.** Printed reports never follow the user-interface language, since the paper is
+read by the participants at the meeting rather than by the planner. Every report is printed in the
+layout's **default language**: the first language of the layout's default country. Dates and numbers
+follow that country as well.
+
+The setting **Print reports in local languages** changes this for the reports whose items are handed
+to different people:
+
+| Report | Each item | Printed in |
+| ------ | --------- | ---------- |
+| Driver duties | A duty booklet | The language of the company working the duty; else the language of the operators of its trains, when they all share one; else the default language |
+| Turnus cards | A card | The language of the vehicle's company; else the language of the operators of the trains it works, when they all share one; else the default language |
+| Station dispatch lists | A station's sheets, and its exported document | The language of the country the station is in; else the default language |
+
+A company's or location's language is the first language of its country. A language the application
+cannot print in counts as no language, so the next rule applies. The other reports are always printed
+in the default language.
 
 #### 3.2.2 Countries
 
@@ -327,11 +346,21 @@ saving. A track stretch used by a timetable stretch cannot be deleted.
 
 #### FR-3.4.2 Dispatch stretches
 
-A **dispatch stretch** runs between two dispatch endpoints — a manned or a shadow station — passing
-through any unmanned locations between them. They are generated automatically from the track
+A **dispatch stretch** runs between two dispatch endpoints — a manned or a shadow station, or a
+location controlled from a manned station — passing through any unmanned locations between them. They are generated automatically from the track
 stretches, recording the ordered track stretches they comprise,
 and presented read-only with a **Regenerate** action. Whether a station is manned or a shadow station
 is set on the Operation locations tab (§3.3).
+
+A signal-controlled location, industrial area or unmanned station may be **controlled from** a manned
+station; a signal-controlled location always is. A signal-controlled location is a junction (more than
+two track stretches meet there), a place where trains can cross (marked by the planner, since a junction
+has two tracks whether or not trains can cross), both, or neither — a block post. A controlled unmanned
+station, industrial area, junction or crossing place is worked by the controlling station's dispatcher as
+their own: it is a dispatch endpoint, its trains are on that station's dispatch list marked with its
+signature, and the dispatchers beyond it are among those the station rings. A block post stays inside the
+dispatch stretch and divides it into sections that can each hold a train. Unmanned locations nobody
+controls are just part of the line.
 
 #### FR-3.4.3 Timetable stretches
 
@@ -361,6 +390,19 @@ behind exchanges cargo like any other freight train, and belongs in a freight ca
 Building a route for a service train gives it no stops between its ends: the one stop that matters,
 such as the work site, is added by the planner (§3.6).
 
+A category also carries a **stop pattern**: the operating locations where its trains stop on their way,
+ticked from the locations the category is able to stop at at all. It is a positive list — a ticked
+location is stopped at, and the rest are run through — and it is what a new train's route is built to
+(§3.6). Where a train starts and where it ends are stops whatever is ticked, since that is where it is
+made ready and put away. A train that stops anywhere the pattern does not name is reported (rule T8 in
+§3.11.2).
+
+Ticking nothing leaves the category with **no pattern**, which constrains nothing: its trains stop
+wherever they can hand over what they carry. The pattern of a category that has none is filled in from
+the trains it already has, the first time a plan is opened, so an existing plan keeps the stops it has
+and is reported for none of them. The planner can also fill it in on demand, which replaces what is
+ticked, or clear it again. A shunting category has no stop pattern, its tasks travelling nowhere.
+
 A new timetable is seeded with two standard categories, named in the layout's default language:
 **Passenger** (prefix `P`) and **Freight** (prefix `G`), with no operating company.
 
@@ -378,6 +420,11 @@ A new timetable is seeded with two standard categories, named in the layout's de
 > set stop vs pass-through (see DM-4.2.3). Edits are saved immediately, and deletion is
 > blocked when other data depends on the train. Rows with scheduling conflicts are
 > highlighted (§3.11).
+>
+> A new train is given a call at every operating location on the shortest way from its origin to its
+> destination, and stops where its category's stop pattern says it does (§3.5): a location the pattern
+> names, and where the train has something to hand over, is a stop, and the rest it runs through. Its
+> origin and destination are stops in any case, as is a shadow station on the way.
 >
 > A new train is put on the track that best fits the way it runs through each location it calls at.
 > A track reserved for exactly the route the train takes comes before one reserved for part of it,
@@ -405,14 +452,21 @@ A new timetable is seeded with two standard categories, named in the layout's de
 > the tabular timetable; it appears in the driver duty booklets and the station reports, where what
 > happens at a station is what is being described.
 >
+> A shunting task needs **no locomotive of its own**. It may be given one, but it is as often worked by
+> the train locomotive already standing at the station, by a station pilot nobody has set up as a vehicle,
+> or by hand — so a vehicle schedule holding nothing but shunting tasks is complete with no vehicle
+> assigned to it, and is not reported as one that has been left without. What a task does need is somebody
+> to work it, so it is put into a **driver duty** exactly as any other train part is (§3.8), and a task no
+> duty covers is reported.
+>
 > *Still to come: call-level note editing (the note-generation system, §4.5, is not built).*
 
 ### 3.7 Graphical Timetable
 
 > **Status:** 🟡 Partial (Graphical Timetable tab). SVG rendering, both orientations
 > (FR-3.7.1), visual styling (FR-3.7.2), all display settings (FR-3.7.3) and the
-> stretch/time-window selection (FR-3.7.5) are built, and trains with scheduling
-> conflicts are highlighted (§3.11). Interaction (FR-3.7.4: drag times, context menu)
+> stretch/time-window selection (FR-3.7.5) are built, as are the loco driver demand
+> bars (FR-3.7.6), and trains with scheduling conflicts are highlighted (§3.11). Interaction (FR-3.7.4: drag times, context menu)
 > is **not** built yet — no train selection, time dragging or context menu.
 
 The system shall display a graphical timetable for each timetable stretch:
@@ -495,6 +549,35 @@ The chosen half is a **user-level preference** persisted in the browser,
 not stored in the plan document, so it is retained across restarts and is independent of
 which layout is open.
 
+#### FR-3.7.6 Loco Driver Demand
+
+> **Status:** ✅ Built (Graphical Timetable tab).
+
+When an expected number of loco drivers is set (see §3.2), the graphical timetable shall show a
+strip of bars along the same time axis as the graphs — above them with a horizontal time axis,
+beside them with a vertical one — giving the number of loco drivers needed at each minute of the
+visible time window. The strip covers the whole timetable, not only the stretches drawn.
+
+A loco driver is counted as occupied:
+
+- by every train and shunting task, from its first arrival (when the driver takes over) to its last
+  departure (when the driver is released), including the time it stands at stations on the way;
+- by every driver duty, for the time between two consecutive train parts it works — from one part's
+  last departure to the next part's first arrival — while the driver waits for, or walks to, the
+  next train;
+- by every driver duty whose start time has been set earlier than its first train part, or whose
+  end time has been set later than its last, for that extra time before or after. A start set later,
+  or an end set earlier, removes nothing, since the trains still need a driver.
+
+Trains and duties on different sessions never occupy a driver at the same time, so the demand is
+worked out per session and the busiest session is shown: that is the number of drivers who have to
+be available. A train or duty that runs on no session within the layout's period is counted on
+every session. Time past midnight wraps to the start of the axis, as the train lines do.
+
+The bars are coloured against the expected number: red when more drivers are needed than expected,
+green when exactly as many, yellow when one or two are spare, and grey when three or more are. A line
+marks the expected number, and each bar shows its time span and count when pointed at.
+
 ### 3.8 Vehicle Schedule Editor
 
 > **Status:** 🟡 Partial (Schedules tab). The vehicle-schedule (turnus) editor is built
@@ -530,6 +613,10 @@ which layout is open.
 > working — automatically or by hand, at its end or into a joint — and whenever a vehicle is
 > assigned to one. An imported working keeps the tracks it was read with. A track thereby
 > taken twice over at the same time is reported as a conflict (§3.11) rather than avoided.
+> A working holding nothing but **shunting tasks** (§3.6) needs no vehicle at all: such a task is
+> worked by whatever stands at the station, so leaving the working without one is complete rather than
+> unfinished. Add a travelling train to it and a vehicle is wanted again. A shunting task is offered to a
+> **driver duty** like any other part, with or without a vehicle of its own.
 > Conflicting schedules are highlighted (§3.11). **Not yet wired:** assigning a schedule
 > to a wagon group via an editor.
 >
@@ -666,7 +753,7 @@ operation location, or on the same track stretch, at overlapping times.
 | ---- | ----------- | ------ | ----------- |
 | **L1** | Trains may only **meet** where there are **at least two tracks** — at an operation location or on a track stretch. A single-track location or stretch cannot host a meet. | 🟡 Emergent | Not asserted directly; follows from L2 (a meet at a single-track station forces both trains onto one track → conflict) and L3 (stretch capacity). No dedicated "a meet needs ≥2 tracks" diagnostic. |
 | **L2** | **At most one train may occupy a station track** at any time; two trains meeting must therefore stand on different tracks. | ✅ | Overlapping calls on the same track by different trains are flagged. Exception: calls sharing the same vehicle (e.g. a loco change) are allowed. |
-| **L3** | The number of trains **simultaneously on a track stretch** may not exceed the **number of tracks**, counting **both directions together**. Double track permits two concurrent trains (one each way, or two the same way). | ✅ | Simultaneous passings on a stretch are compared against its track count, counting both directions together. |
+| **L3** | What may be on the line at once is judged **per dispatch stretch**, as its two dispatchers agree it. The signal-controlled locations inside it divide it into sections, and a section may hold no more trains at once than it has **tracks**, counting **both directions together** — double track permits two concurrent trains. On **single track**, trains in opposite directions may not be on the line at once between two places where they can meet (the ends, or a signal-controlled location marked as a place where trains can cross); trains in the same direction may follow each other, one per section. A train passing a signal-controlled location without a time there holds every section it passes. Where the layout has no dispatch stretches, each track stretch is judged on its own. | ✅ | Each dispatch stretch is split into sections and single-track meet-free zones; section occupancy is compared against track count, and opposing trains in a meet-free zone are reported. Track stretches outside any dispatch stretch keep the per-stretch check. |
 | **L4** | A **lock key** is in force only where the location still needs one — it exchanges cargo and has nobody on duty — and the station holding it is still manned. A key either change has left meaningless is **kept but ignored**, and reported. | ✅ | Manning is edited on both sides long after a key is set. An ignored key produces no notes and is kept, so undoing the manning change brings it back; the conflict says which change did it. Always enforced. |
 
 > Layout **structural** validity — consistent track-stretch directions and contiguous
@@ -686,6 +773,7 @@ individually and as a set.
 | **T5** | A train's route must be **continuous**: every leg it runs, from one call to the next, must be a **track stretch of the layout**. A train travels a stretch by departing its start and arriving at its end, so it calls at both ends of every stretch on its way. | ✅ | Two successive calls with no stretch between them are flagged as a route that jumps a location. Two successive calls at the same location (a change of track) travel no stretch and are not flagged. This is also why only the first or last call of a train may be deleted: removing one in between would leave the route jumping the location it stood for. Can be toggled off. |
 | **T6** | A passenger train that **stops to exchange passengers** must stand at a track with a **platform**. The rule applies where the train carries passengers, the location exchanges them, and the call is an **arrival and/or a departure**. | ✅ | A stop at a track whose platform length is zero is flagged. A call that is neither an arrival nor a departure is not: a passenger train may stand at a track without a platform, which is what a meet is. The planner answers either by giving the track a platform length or by clearing the call's arrival and departure, so nothing is put right automatically. Where only one track has a platform, two trains meeting there cannot both have it. Can be toggled off. |
 | **T7** | A **shunting task** has **exactly one station call**, whose arrival is the time the work starts and whose departure the time it ends. | ✅ | A task with no call, or with more than one, is flagged. The editors do not let a second call be added, so what this catches is a train given the shunting category after it was built as a travelling train. The remedy — deleting calls or changing the category back — is the planner's to choose, so nothing is put right automatically. |
+| **T8** | A train stops on its way only where its **train category's stop pattern** says it does. The stop pattern is the list of operating locations where trains of the category stop; what it does not name, they run through. | ✅ | A stop at a location the pattern does not name is flagged. The train's first and last call are never flagged: it is made ready where it starts and put away where it ends, so those are stops whatever the pattern says. A category with an empty pattern is not checked at all — an empty list means no pattern rather than a pattern of nowhere. The planner answers either by clearing the call's arrival and departure or by adding the location to the pattern, so nothing is put right automatically. Can be toggled off. |
 
 #### FR-3.11.3 Schedule scope — vehicle schedule / turnus (S)
 
@@ -696,7 +784,7 @@ Each vehicle schedule (turnus) is a sequence of train parts forming a circulatio
 | **S1** | A schedule's train **parts do not overlap in time** (one vehicle cannot be in two places at once). | ✅ | Checked. |
 | **S2** | A **following part must start from the station where the previous part ends** (geographic contiguity). | ✅ | Each part, in working order, must start where the previous ended; applies to all vehicle types. **Skipped when the schedule's parts overlap in time** (S1 reports that instead). Entry already enforces contiguity; the check catches schedules assembled unconditionally, e.g. XPLN import. Can be toggled off. |
 | **S3** | **Circulation closure.** Over the operating period a **traction unit** must return to where it began, so the layout's vehicle distribution repeats and the working can run again. **Exemption:** a unit whose trains are all **on demand** need not close (the sequence rule S2 still applies). | ✅ | Judged **per traction unit** by flow conservation: over every session worked, the unit must depart each station as often as it arrives there. A unit that works both a forward and a return leg closes even when the legs run on **different sessions** and even when they are **split across several schedules** (the rotation case). Wagons and cargo flows are not required to close. On-demand trains are marked at import. Can be toggled off. Implemented together with S5. |
-| **S4** | A **traction unit is assigned for all of a train's sessions** (may be different units for different sessions/days), and a schedule that runs regular sessions has a vehicle assigned. | ✅ | Per-train, session-aware: every train must be hauled by a traction unit on every session it runs, provided through any schedule that works it (a wagonset has its own turnus with no traction, hauled by the loco's turnus). An orphan schedule with no vehicle is reported. On-demand trains and cargo flows are exempt. Complements P4's per-train, time-based coverage. Can be toggled off. |
+| **S4** | A **traction unit is assigned for all of a train's sessions** (may be different units for different sessions/days), and a schedule that runs regular sessions has a vehicle assigned. | ✅ | Per-train, session-aware: every train must be hauled by a traction unit on every session it runs, provided through any schedule that works it (a wagonset has its own turnus with no traction, hauled by the loco's turnus). An orphan schedule with no vehicle is reported. On-demand trains and cargo flows are exempt, as is a schedule holding nothing but **shunting tasks**, which are worked by whatever stands at the station and so need no vehicle of their own — what they need is a driver, which the driver duty check asks for. Complements P4's per-train, time-based coverage. Can be toggled off. |
 | **S5** | When a traction unit works **different parts on different sessions/days**, its working across those sessions must still form a valid, closing circulation. | ✅ | Folded into the S3 per-unit closure check: because closure is judged over all the unit's parts across all sessions worked, a unit that runs different legs on different sessions closes as long as its movements balance overall. Can be toggled off. |
 
 #### FR-3.11.4 Plan scope — cross-object consistency (P)
@@ -763,7 +851,7 @@ excluded from the printed output. Each report sets its own page size and orienta
 | Driver Duties Booklet  | Multi-page booklet with duty front pages, duty parts, and instructions                 | A4     |
 | Station Duties Booklet | All trains at each station with arrival/departure details and staff instructions       | A4     |
 | Station Instructions   | Station-specific operational and shunting instructions                                 | A5     |
-| Station Train Order    | Train order tables per station with times, tracks, destinations, and dispatch contacts | A4L    |
+| Station Train Order    | Train order tables per station with times, tracks, destinations, and dispatch contacts; a station's table also covers the locations it controls from afar, in the same time order, and its contacts the dispatchers beyond them | A4L    |
 
 > **Status:** ❌ None of these four reports built yet.
 
@@ -801,8 +889,8 @@ excluded from the printed output. Each report sets its own page size and orienta
 > empty where the train starts its run at the station, and the maximum where nothing
 > restricts the train. Beside each train its composition is drawn from the front as
 > rectangles: one per wagon of a wagonset, in rake order, with class and number; and one
-> per cargo flow position, listing its destinations with *and local destinations*, *and
-> beyond*, coloured regions and the most that may be brought to each. The rectangles are
+> per cargo flow position, listing its destinations with the locations served from them,
+> *and beyond*, coloured regions and the most that may be brought to each. The rectangles are
 > not captioned — their order is the order the wagons stand in, and the wagons gathered in
 > one rectangle may be marshalled freely among themselves — and each is as wide as its own
 > contents. The composition is
@@ -942,6 +1030,8 @@ The system shall support defining operation locations with:
 | Is Shadow | Hidden yard at line end                              | No       |
 | Regions   | Regions/countries represented (shadow stations only) | No       |
 | Lock key  | The manned station holding the key that unlocks the switches here, and optionally what the key is called. Available only where cargo is exchanged and nobody is on duty — an unmanned station or an industrial area. Drives the lock key notes (see DM-4.5.2). A key the manning on either side has left meaningless is kept but ignored, and reported as a conflict (see L4 in §3.11.1) | No       |
+| Controlled from | The manned station whose dispatcher works this location from afar. Available only at a signal-controlled location, an industrial area or an unmanned station. Makes the location a dispatch endpoint worked by that station, unless it is a block post (see FR-3.4.2 and L3 in §3.11.1) | No       |
+| Trains can cross | Whether trains in opposite directions can cross here, one waiting while the other passes. Signal-controlled locations only, and stated by the planner rather than judged from the tracks. A signal-controlled location that is neither a junction nor a crossing place is a block post (see FR-3.4.2) | No       |
 | Timings   | Per-station operational time overrides; each value optional, inheriting the layout default when unset (see §4.3.3) | No       |
 
 Subtypes:
@@ -949,8 +1039,12 @@ Subtypes:
 - **Station** — manned location; may be a shadow station. Shadow stations represent
   the outside world and are configured with the regions and countries they serve
   (used for cargo flow routing, see DM-4.2.5)
-- **Signal-Controlled Location** — unmanned, controlled by signals
+- **Signal-Controlled Location** — unmanned, controlled by signals from a manned station; a junction, a crossing place, both, or a block post
+- **Industrial Area** — unmanned, freight only
 - **Other Location** — any other operational point
+
+A signal-controlled location, an industrial area or an unmanned station may be controlled from a
+manned station; see FR-3.4.2 for what that means for trains on the line.
 
 #### DM-4.1.2 Station Tracks
 
@@ -1091,6 +1185,7 @@ The system shall support configurable train categories:
 | Default Speed             | Default scale speed for this category (km/h); used when no per-train speed is set |
 | Start Number              | First train number offered when adding a train of this category                   |
 | Exclude from auto-scheduling | When set, the automatic turnus builder never seeds or chains this category (manual add still allowed) |
+| Stop pattern              | The operating locations where the category's trains stop on their way (§3.5). A positive list: an empty one is no pattern at all, and constrains nothing |
 
 #### DM-4.2.3 Station Calls
 
@@ -1156,7 +1251,7 @@ Each cargo flow has one or several destinations, which can be:
 | Local                  | An operation location within the layout                  |
 | External               | Sent to the corresponding shadow shunting yard                    |
 | To All Destinations    | Cargo goes to all destinations on the flow                        |
-| And Local Destinations | Including local stops                                             |
+| And Local Destinations | Also names the locations whose cargo is served from the station   |
 | And Regions            | Including specific regions attached to a shadow shunting yard     |
 | And Abroad             | Including countries/regions represented by a shadow shunting yard |
 
@@ -1697,9 +1792,10 @@ and outlines implementation approaches.
   shall come from .resx resource files, one per supported language.
 - Note texts are assembled from resource strings + data at render time (see §4.5),
   so no translated text is stored in the schedule data.
-- The company's language code (see DM-4.1.6) determines the output language
-  for company-specific reports (e.g. driver duty sheets printed in the
-  operating company's language).
+- Reports are printed in the layout's default language, not the user-interface
+  language; with local languages chosen, a driver duty, a turnus card or a station's
+  dispatch list is printed in its own local language, derived from the country of its
+  company or location (see §3.2.1).
 - Manual notes use a default-text-plus-translations model (see DM-4.5.5),
   independent of the resource file system.
 

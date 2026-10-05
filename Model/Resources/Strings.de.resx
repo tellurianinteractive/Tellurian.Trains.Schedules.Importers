@@ -321,4 +321,28 @@
   <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
     <value>Zug {0} hält zum Reisendenwechsel in {1} {2}, aber Gleis {3} hat keinen Bahnsteig.</value>
   </data>
+  <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
+    <value>Zug {0} hält in {1} {2}, aber diese Betriebsstelle gehört nicht zum Haltemuster der Kategorie {3}.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
+    <value>Zug {0} hat überlappende Lokzuweisungen an den Tagen {3}: {1} und {2}.</value>
+  </data>
+  <data name="VehicleIsDoubleBookedOnDays" xml:space="preserve">
+    <value>Fahrzeug {0} ist doppelt gebucht: die Buchungen an den Tagen {1} überlappen mit denen an den Tagen {2}.</value>
+  </data>
+  <data name="TrainsShareNumberOnOverlappingDays" xml:space="preserve">
+    <value>Züge {0} und {1} haben dieselbe Nummer, verkehren aber beide an den Tagen {2}.</value>
+  </data>
+  <data name="VehiclesShareExternalIdOnDays" xml:space="preserve">
+    <value>Zwei Fahrzeuge haben dieselbe externe Id {0} an den Tagen {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumberOnDays" xml:space="preserve">
+    <value>Fahrzeuge {0} und {1} haben denselben Betreiber und dieselbe Nummer {2} an den Tagen {3}.</value>
+  </data>
+  <data name="TrainMissingTractionOnDays" xml:space="preserve">
+    <value>Zug {0} hat kein Triebfahrzeug zwischen {1} {2} und {3} {4} an den Tagen {5}.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDutyOnDays" xml:space="preserve">
+    <value>Zug {0} hat keinen Dienst an den Tagen {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
+  </data>
 </root>

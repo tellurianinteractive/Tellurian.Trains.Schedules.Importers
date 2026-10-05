@@ -1,4 +1,4 @@
-using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions;
+﻿using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 
@@ -17,6 +17,12 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 public class InstructionsPlaceholderTests
 {
     private const string Tag = "<ShuntingYards/>";
+    private const string InterchangeTag = "<Interchanges/>";
+
+    // Station names of a realistic length, since it is their joined length that decides how many lines
+    // the one paragraph they are set in wraps to.
+    private static IReadOnlyList<Station> Interchanges(int count) =>
+        [.. Enumerable.Range(1, count).Select(i => new Station(i, $"Interchange station {i}", $"I{i}"))];
 
     private static IReadOnlyList<ShuntingYard> Yards(int count, int locationsEach = 1)
     {
@@ -164,5 +170,68 @@ public class InstructionsPlaceholderTests
     {
         Assert.AreEqual(0, InstructionsPagination.ShuntingYardsHeight([]));
         Assert.AreEqual(0, InstructionsPagination.ShuntingYardsHeight(null));
+    }
+
+    [TestMethod]
+    public void TheInterchangesTagIsRecognisedAndWrittenTheWayItIsRead()
+    {
+        Assert.AreEqual(InstructionsPlaceholder.Interchanges, InstructionsPlaceholders.PlaceholderOf(InterchangeTag));
+        Assert.AreEqual(InstructionsPlaceholder.Interchanges, InstructionsPlaceholders.PlaceholderOf("  <interchanges />  "));
+        Assert.AreEqual(
+            InstructionsPlaceholder.Interchanges,
+            InstructionsPlaceholders.PlaceholderOf(InstructionsPlaceholders.TagOf(InstructionsPlaceholder.Interchanges)));
+    }
+
+    [TestMethod]
+    public void TheTwoTagsAreToldApart()
+    {
+        // One text may place both, and each must render the part it was written for.
+        var segments = InstructionsPlaceholders.Split($"{Tag}\n\n{InterchangeTag}");
+
+        Assert.HasCount(2, segments);
+        Assert.AreEqual(InstructionsPlaceholder.ShuntingYards, segments[0].Placeholder);
+        Assert.AreEqual(InstructionsPlaceholder.Interchanges, segments[1].Placeholder);
+        Assert.IsTrue(InstructionsPlaceholders.Places(InterchangeTag, InstructionsPlaceholder.Interchanges));
+        Assert.IsFalse(InstructionsPlaceholders.Places(Tag, InstructionsPlaceholder.Interchanges));
+    }
+
+    [TestMethod]
+    public void AnInterchangesPlaceholderIsChargedTheHeightOfTheListAndNotOfItsLine()
+    {
+        // Heading, the paragraph of names, and the gap below it: more than the one line the tag occupies.
+        Assert.IsTrue(InstructionsPagination.InterchangesHeight(Interchanges(3)) > 2);
+    }
+
+    [TestMethod]
+    public void ALongerListOfNamesWrapsAndCostsMore()
+    {
+        var few = InstructionsPagination.InterchangesHeight(Interchanges(2));
+        var many = InstructionsPagination.InterchangesHeight(Interchanges(12));
+
+        Assert.IsTrue(many > few, $"A wrapping paragraph must cost more than a short one ({many} against {few}).");
+    }
+
+    [TestMethod]
+    public void ALayoutWithNoInterchangesPrintsNoListAndIsChargedNothing()
+    {
+        // Which is also what a meeting not worked with passenger tickets has, so the tag costs it nothing.
+        Assert.AreEqual(0, InstructionsPagination.InterchangesHeight([]));
+        Assert.AreEqual(0, InstructionsPagination.InterchangesHeight(null));
+    }
+
+    [TestMethod]
+    public void AListTooTallForWhatIsLeftOfThePageMovesToTheNext()
+    {
+        // Text filling most of a page, then the list. Charged as one line it would follow the text onto
+        // the same page and print past the foot of it, losing its last names unannounced.
+        var text = string.Join("\n\n", Enumerable.Range(1, 31).Select(i => $"Paragraph {i}."));
+        var interchanges = Interchanges(12);
+
+        var pages = InstructionsPagination.BuildPages(
+            $"{text}\n\n{InterchangeTag}", includeOverview: false, passengerInterchanges: interchanges);
+        var content = pages.Where(p => p.Kind == InstructionsPageKind.Content).ToList();
+
+        Assert.HasCount(2, content);
+        Assert.Contains(InterchangeTag, content[1].Markdown);
     }
 }

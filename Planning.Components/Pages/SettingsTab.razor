@@ -108,6 +108,15 @@ else
                     </span>
                 </div>
 
+                @* Whether the meeting is worked with passenger tickets. It is what makes a station
+                   marked as a passenger interchange count as one, so the checkbox for that is offered
+                   on the locations tab only while this is set. *@
+                <div class="group-heading">@Translator("Passengers")</div>
+                <div class="field">
+                    <HelpLabel For="UsePassengerTickets" />
+                    <input type="checkbox" @bind="g.UsePassengerTickets" @bind:after="OnEdited" />
+                </div>
+
                 <div class="group-heading">@Translator("LocoDrivers")</div>
                 <div class="field">
                     <HelpLabel For="ExpectedLocoDrivers" />
@@ -378,6 +387,10 @@ else
                     <input type="checkbox" @bind="v.ValidatePassengerExchange" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
+                    <label>@Translator("ValidateStopPatterns")</label>
+                    <input type="checkbox" @bind="v.ValidateStopPatterns" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
                     <label>@Translator("ValidateTrainNumbers")</label>
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>
@@ -448,6 +461,15 @@ else
                         @Translator("ShuntingYardsPlaceholderHint")
                         <code>@InstructionsPlaceholders.TagOf(InstructionsPlaceholder.ShuntingYards)</code>
                     </p>
+                    @* The passenger interchanges are printed nowhere unless the author places them, so
+                       the tag is only worth offering where there are interchanges to print. *@
+                    @if (LayoutSettings.General.UsePassengerTickets)
+                    {
+                        <p class="hint">
+                            @Translator("InterchangesPlaceholderHint")
+                            <code>@InstructionsPlaceholders.TagOf(InstructionsPlaceholder.Interchanges)</code>
+                        </p>
+                    }
                     <div class="field instructions">
                         <HelpLabel For="GeneralInstructions" />
                         <MarkdownEditor Rows="24" PreviewClass="instructions-body"

@@ -1,6 +1,11 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling
 @using Tellurian.Trains.Schedules.Planning.App.Translations
+@using Tellurian.Trains.Schedules.Model.Duties
 @inject Translator Translator
+@* Printed in a report's language when a report uses it; see ReportComponentBase. *@
+@inherits Tellurian.Trains.Schedules.Planning.Components.Reporting.ReportComponentBase
+
+@{ UseReportCulture(); }
 
 @* A strip of bars showing how many train drivers the timetable actually requires at each minute of the
    graphical schedule's time window, coloured by how that compares with the number expected to be available.
@@ -36,6 +41,10 @@
     /// <summary>The timetable the demand is computed from. Always the whole timetable, not only the trains
     /// on the stretches currently graphed, since drivers are needed layout-wide.</summary>
     [Parameter, EditorRequired] public Timetable? Timetable { get; set; }
+
+    /// <summary>The plan's driver duties. The time a duty's driver spends between its trains occupies the
+    /// driver too, so those gaps are added to the trains' demand.</summary>
+    [Parameter] public IEnumerable<DriverDuty>? Duties { get; set; }
 
     /// <summary>The graph settings whose axis geometry the bars follow, so the strip lines up with the graphs
     /// drawn from the same settings. Also carries the expected number of drivers to colour against.</summary>
@@ -89,7 +98,7 @@
         // Without an expectation there is nothing to colour the demand against, so the strip stays hidden.
         if (_expected <= 0) return;
 
-        var demand = timetable.RequiredLocoDriversPerMinute(Start, End, settings.UseDays, settings.MaxSessions);
+        var demand = timetable.RequiredLocoDriversPerMinute(Start, End, settings.UseDays, settings.MaxSessions, Duties);
         if (demand.Length == 0) return;
 
         var horizontal = !IsVertical;

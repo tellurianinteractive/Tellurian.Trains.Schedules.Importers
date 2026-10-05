@@ -70,9 +70,11 @@ public static class StationDispatchOdt
     /// <param name="translator">Supplies the column headings in the reader's language.</param>
     /// <param name="created">When the documents were generated; omitted from them when <c>null</c>.</param>
     /// <param name="fontFamily">The layout's report font, or <c>null</c> for the default one.</param>
+    /// <param name="cultureOf">The language each station's document is written in, or <c>null</c> to write
+    /// them all in the ambient one.</param>
     public static byte[] CreateBundle(
         IEnumerable<DispatchList> lists, SessionsSettings settings, Translator translator,
-        DateTimeOffset? created = null, string? fontFamily = null)
+        DateTimeOffset? created = null, string? fontFamily = null, Func<DispatchList, CultureInfo>? cultureOf = null)
     {
         lists = lists.ValueOrException(nameof(lists));
 
@@ -86,6 +88,7 @@ public static class StationDispatchOdt
             used[name] = used.TryGetValue(name, out var count) ? count + 1 : 1;
             if (used[name] > 1)
                 name = $"{Path.GetFileNameWithoutExtension(name)} ({used[name]}){OdtPackage.FileExtension}";
+            using var scope = cultureOf is null ? null : ReportCulture.Use(cultureOf(list));
             files.Add((name, Create(list, settings, translator, created, fontFamily)));
         }
         return OdtPackage.CreateZip(files);
@@ -208,7 +211,7 @@ public static class StationDispatchOdt
     {
         var header = new StringBuilder();
         header.Append($"""        <text:p text:style-name="{Style.Heading}">""");
-        header.Append(OdtXml.Span(Style.StationName, list.Station.Name));
+        header.Append(OdtXml.Span(Style.StationName, list.Title));
         if (list.Neighbours.Count > 0)
         {
             header.Append("""<text:s text:c="3"/>""");
@@ -288,7 +291,7 @@ public static class StationDispatchOdt
        misread: white for a train being cleared in, light yellow for one being cleared onward. */
     private static string Row(DispatchRow row, SessionsSettings settings, IReadOnlyList<int> positions)
     {
-        var departing = row.Kind != DispatchRowKind.Arrival;
+        var departing = row.Kind is DispatchRowKind.Departure or DispatchRowKind.PassThrough;
         var cell = departing ? Style.CellDeparture : Style.CellArrival;
         var tick = departing ? Style.TickDeparture : Style.TickArrival;
 
@@ -300,7 +303,7 @@ public static class StationDispatchOdt
         text.AppendLine(Cell(cell, Style.CellStrong, row.TrainIdentity));
         // Without the on-demand marker — that is carried among the notes, where it has room to be read.
         text.AppendLine(Cell(cell, Style.Cell, row.SessionsText));
-        text.AppendLine(Cell(cell, Style.CellCentre, row.TrackNumber));
+        text.AppendLine(Cell(cell, Style.CellCentre, row.TrackText));
         text.AppendLine(Cell(cell, ParagraphFor(arrivalPair, centred: true), Bracketed(row.ArrivalTime, arrivalPair)));
         text.AppendLine(Cell(cell, ParagraphFor(arrivalPair, centred: false), row.OriginName));
         text.AppendLine(Cell(cell, ParagraphFor(departurePair, centred: true), Bracketed(row.DepartureTime, departurePair)));
@@ -370,7 +373,7 @@ public static class StationDispatchOdt
 
     // Train, runs, track, arrival, from, departure, to.
     private static IReadOnlyList<double> FixedColumnWidthsMm { get; } =
-        [20, DispatchPageGeometry.A4Landscape.SessionsColumnWidthMm, 11, 13, 34, 13, 34];
+        [28, DispatchPageGeometry.A4Landscape.SessionsColumnWidthMm, 11, 13, 34, 13, 34];
 
     /// <summary>
     /// What the notes are left once the other columns have taken theirs, which is why a long operating

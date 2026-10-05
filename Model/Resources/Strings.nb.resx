@@ -321,4 +321,28 @@
   <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
     <value>Tog {0} stopper for passasjerutveksling ved {1} {2}, men spor {3} har ingen plattform.</value>
   </data>
+  <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
+    <value>Tog {0} stopper ved {1} {2}, men driftsstedet inngår ikke i stoppmønsteret for kategorien {3}.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
+    <value>Tog {0} har overlappende lokomotivtildelinger på {3}: {1} og {2}.</value>
+  </data>
+  <data name="VehicleIsDoubleBookedOnDays" xml:space="preserve">
+    <value>Kjøretøy {0} er dobbeltbooket: bookingene på {1} overlapper med dem på {2}.</value>
+  </data>
+  <data name="TrainsShareNumberOnOverlappingDays" xml:space="preserve">
+    <value>Tog {0} og {1} har samme nummer men kjører begge på {2}.</value>
+  </data>
+  <data name="VehiclesShareExternalIdOnDays" xml:space="preserve">
+    <value>To kjøretøy har samme eksterne id {0} på {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumberOnDays" xml:space="preserve">
+    <value>Kjøretøy {0} og {1} har samme operatør og nummer {2} på {3}.</value>
+  </data>
+  <data name="TrainMissingTractionOnDays" xml:space="preserve">
+    <value>Tog {0} har ingen trekkraftenhet mellom {1} {2} og {3} {4} på {5}.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDutyOnDays" xml:space="preserve">
+    <value>Tog {0} har ingen tjeneste på {1} for avsnittet fra {2} {3} til {4} {5}.</value>
+  </data>
 </root>

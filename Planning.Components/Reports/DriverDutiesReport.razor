@@ -26,18 +26,23 @@
 }
 else
 {
-    @foreach (var side in _sheets)
+    @* Both sides of a sheet belong to the same duty — each booklet is imposed on its own — so the whole
+       sheet is printed in that duty's language. *@
+    @foreach (var (side, culture) in _sheets)
     {
-        <A4LPage>
-            <div class="dutysheet">
-                <DutyBookletPage Page="side.Left" HasMoreParts="HasMorePartsAfter(side.Left)"
-                                 Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
-                                 Settings="Settings" PrintedAt="_printedAt" />
-                <DutyBookletPage Page="side.Right" HasMoreParts="HasMorePartsAfter(side.Right)"
-                                 Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
-                                 Settings="Settings" PrintedAt="_printedAt" />
-            </div>
-        </A4LPage>
+        UseReportCulture(culture);
+        <CascadingValue Value="culture">
+            <A4LPage>
+                <div class="dutysheet">
+                    <DutyBookletPage Page="side.Left" HasMoreParts="HasMorePartsAfter(side.Left)"
+                                     Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                                     Settings="Settings" PrintedAt="_printedAt" />
+                    <DutyBookletPage Page="side.Right" HasMoreParts="HasMorePartsAfter(side.Right)"
+                                     Layout="Layout" LayoutName="@LayoutName" ValidFrom="ValidFrom" ValidTo="ValidTo"
+                                     Settings="Settings" PrintedAt="_printedAt" />
+                </div>
+            </A4LPage>
+        </CascadingValue>
     }
 }
 
@@ -54,7 +59,7 @@ else
     [SupplyParameterFromQuery(Name = "duties")]
     public string? DutyIdentities { get; set; }
 
-    private IReadOnlyList<SheetSide<DutyPage>>? _sheets;
+    private IReadOnlyList<(SheetSide<DutyPage> Side, ReportCulture Culture)>? _sheets;
     private DateTime _printedAt;
 
     // The pages of each duty, kept so the continuation marker can tell whether any part follows.
@@ -78,20 +83,23 @@ else
         // a PDF printed later still identifies the render it came from.
         _printedAt = DateTime.Now;
 
-        if (ScheduleState.Schedule is not { } plan)
+        if (ScheduleState.Schedule is not { } plan || Layout is not { } layout)
         {
             _sheets = [];
             return;
         }
 
         var selected = Selected(plan);
-        var sides = new List<SheetSide<DutyPage>>();
+        var sides = new List<(SheetSide<DutyPage>, ReportCulture)>();
 
         foreach (var duty in selected)
         {
+            // Built in the duty's own language, since the pagination measures the notes' texts.
+            var culture = new ReportCulture(duty.ReportCulture(layout, LanguageService.IsSupported));
+            using var scope = ReportCulture.Use(culture.Culture);
             var pages = DutyPagination.BuildPages(duty, Settings);
             RecordContinuations(pages);
-            sides.AddRange(DutyPagination.Impose(pages));
+            sides.AddRange(DutyPagination.Impose(pages).Select(side => (side, culture)));
         }
 
         _sheets = sides;

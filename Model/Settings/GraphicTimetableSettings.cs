@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Model.Settings;
+﻿namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
 /// User preferences controlling how the graphical timetable is drawn, for both on-screen viewing and printing.
@@ -25,9 +25,10 @@ public sealed class GraphicTimetableSettings
     public int KilometerSpacing { get; set; } = 3;
 
     /// <summary>
-    /// Minimum pixel spacing between stations on the distance axis, applied when the distance-based
-    /// spacing would be smaller. Ensures labels on train lines between close stations have room.
-    /// Default is 100.
+    /// Minimum pixel gap between two operation locations on the distance axis, measured from the last track
+    /// of one to the first track of the next, and applied when the distance-based spacing would be smaller.
+    /// Ensures labels on train lines between close locations have room, and keeps a location with many tracks
+    /// clear of the next one's tracks. Default is 100.
     /// </summary>
     public int StationSpacing { get; set; } = 100;
 
@@ -62,8 +63,9 @@ public sealed class GraphicTimetableSettings
     public double PrintKilometerSpacingMm { get; set; } = 1;
 
     /// <summary>
-    /// Minimum millimetres between two stations on the printed distance axis, applied when the distance-based
-    /// spacing would be smaller. This is a legibility floor rather than a scale: a stretch too tall for one
+    /// Minimum millimetres between two operation locations on the printed distance axis, measured from the last
+    /// track of one to the first track of the next, and applied when the distance-based spacing would be
+    /// smaller. This is a legibility floor rather than a scale: a stretch too tall for one
     /// sheet has only this reduced, never <see cref="PrintKilometerSpacingMm"/>, so real distances stay
     /// comparable between sheets. Default is 20.
     /// </summary>

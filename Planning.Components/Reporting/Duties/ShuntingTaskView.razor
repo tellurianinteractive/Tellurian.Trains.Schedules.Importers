@@ -1,0 +1,64 @@
+@using Tellurian.Trains.Schedules.Planning.App.Translations
+
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* The working hours of a shunting task, in place of the timetable a travelling train gets. A task is
+   worked at one place and travels nowhere, so a route table would print the same station twice under
+   Arr and Dep and a track the task is not confined to. What is left of it is one line — where the work
+   is done and the two times it runs between — so it is built like the traction and wagonset blocks
+   above rather than like the timetable, and reads as one more block of the same page.
+
+   Starts and Ends, not Arr and Dep: nothing arrives or departs. They are the same two times the rest of
+   the model calls the part's StartTime and EndTime.
+
+   The instructions saying what to shunt follow on full-width rows, as the timetable's notes do. They are
+   the whole point of the task, so they are never moved into a narrow column beside the times. *@
+
+@if (Rows is [{ IsShuntingTask: true } start, { } end])
+{
+    <div class="dutyblock shunting">
+        <h3>@Translator("WorkingHours")</h3>
+        <table class="dutytrain dutyshunting">
+            <thead>
+                <tr>
+                    <th>@Translator("Station")</th>
+                    <th class="time">@Translator("Starts")</th>
+                    <th class="time">@Translator("Ends")</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="station">@start.StationName</td>
+                    <td class="time">@start.Time.HHMM()</td>
+                    <td class="time">@end.Time.HHMM()</td>
+                </tr>
+                @* Both rows' notes in turn, which keeps them in the order the model gives them: the
+                   shunting instruction is an arrival note and so comes first, where the driver reads it
+                   before starting. *@
+                @foreach (var note in Notes)
+                {
+                    <tr class="note-row">
+                        <td colspan="3">@note.ToHtml</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// The rows of the task, as <c>TimetableRow.Build</c> gives them: the arrival row showing when the
+    /// work starts and the departure row showing when it ends. Nothing is rendered for anything else,
+    /// so this block and <c>TrainPartView</c> can both be placed and each prints when it is the one that
+    /// applies.
+    /// </summary>
+    [Parameter, EditorRequired] public IReadOnlyList<TimetableRow>? Rows { get; set; }
+
+    // Every note that puts something on the page, each on a full-width row of its own — there being no
+    // note column here to hold a short one. DutyPagination.TimetableHeight charges them the same way.
+    private IEnumerable<ICallNote> Notes =>
+        Rows?.SelectMany(row => row.PrintedNotes) ?? [];
+}

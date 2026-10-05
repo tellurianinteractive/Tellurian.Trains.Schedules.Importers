@@ -1,4 +1,4 @@
-using Tellurian.Trains.Schedules.Model.Settings;
+﻿using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Planning.Components.Reporting;
 using Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -149,7 +149,9 @@ public class GraphPaginationTests
     public void AGraphMeasuresItsPrintedExtentInMillimetres()
     {
         // Two stations 2 km apart, two tracks each. The distance-based spacing (2 mm) is below the 20 mm floor,
-        // so the extent is the hour-label gutter (4 mm) + 20 mm + the terminal fan-out (2 mm) + end margin (2 mm).
+        // and that floor is the gap from the first station's last track to the second station's first track, so
+        // the extent is the hour-label gutter (4 mm) + the first station's fan-out (2 mm) + 20 mm + the terminal
+        // fan-out (2 mm) + end margin (2 mm).
         var settings = Settings();
         var layout = new Layout { Name = "Test" };
         var a = new Station(1, "Alpha", "A");
@@ -168,6 +170,6 @@ public class GraphPaginationTests
 
         var graph = new GraphSchedule(line, new Timetable("Test", layout), settings.ToPrintGraphSettings(longestSignatureLength: 5));
 
-        Assert.AreEqual(28.0, graph.CrossAxisLengthMm(), 0.001);
+        Assert.AreEqual(30.0, graph.CrossAxisLengthMm(), 0.001);
     }
 }

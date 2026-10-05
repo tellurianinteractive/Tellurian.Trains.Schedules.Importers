@@ -1,5 +1,7 @@
 @inherits PageFormat
 
+@{ UseReportCulture(); }
+
 <div class="a4l" style="padding: @MarginStyle">
     @ChildContent
     @if (PageNumber > 0)

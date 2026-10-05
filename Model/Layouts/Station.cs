@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
@@ -35,6 +35,14 @@ public class Station : OperationLocation
     /// (<see cref="Schedules.TractionOptions.TurnLoco"/>).
     /// </summary>
     public bool HasTurntable { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether passengers change trains here. Only in force while the layout is worked with
+    /// passenger tickets (<see cref="Settings.GeneralSettings.UsePassengerTickets"/>): the mark is kept
+    /// either way, and <c>OperationLocation.ExchangesTransferringPassengers</c> is what says whether it
+    /// counts, so nothing has to combine the two itself.
+    /// </summary>
+    public bool IsPassengerInterchange { get; set; }
 
     /// <summary>
     /// Gets or sets the regions and countries represented by this station. Mostly meaningful for

@@ -16,6 +16,20 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// limits and wagon classes that belong to planning it; repeating it as a note would say the same thing
 /// twice on the page it is already on.
 /// </para>
+/// <para>
+/// One note for all the cargo flows that end at the call, like its counterpart.
+/// </para>
 /// </remarks>
-/// <param name="Part">The cargo flow whose wagons come off here.</param>
-public sealed record CargoFlowUncoupleNote(CargoFlowTrainPart Part) : GeneratedNote;
+/// <param name="Parts">The cargo flows whose wagons come off here.</param>
+public sealed record CargoFlowUncoupleNote(IReadOnlyList<CargoFlowTrainPart> Parts) : GeneratedNote
+{
+    /// <summary>A note for a single cargo flow.</summary>
+    public CargoFlowUncoupleNote(CargoFlowTrainPart part) : this([part]) { }
+
+    /// <inheritdoc/>
+    public bool Equals(CargoFlowUncoupleNote? other) =>
+        other is not null && base.Equals(other) && Parts.SequenceEqual(other.Parts);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => Parts.Aggregate(base.GetHashCode(), HashCode.Combine);
+}

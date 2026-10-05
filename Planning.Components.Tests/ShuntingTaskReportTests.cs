@@ -5,9 +5,10 @@ using Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 
 /// <summary>
-/// Covers how a shunting task reads in the reports: two timetable rows for its one call — the start time
-/// and the end time — with the shunting instruction on the row showing the start, its cargo flows in the
-/// duty page's cargo block, and no line on the graphical timetable, which is a diagram of travelling.
+/// Covers how a shunting task reads in the reports: two rows for its one call — the start time and the
+/// end time — with the shunting instruction on the row showing the start, printed as one line of its own
+/// block on a duty page rather than as a timetable, its cargo flows in the page's cargo block, and no
+/// line on the graphical timetable, which is a diagram of travelling.
 /// </summary>
 [TestClass]
 public class ShuntingTaskReportTests
@@ -86,6 +87,38 @@ public class ShuntingTaskReportTests
     }
 
     [TestMethod]
+    public void TheRowsSayWhetherTheyBelongToATask()
+    {
+        var (timetable, task, _) = Arrange();
+        var train = timetable.Trains.First(t => !t.IsShuntingTask);
+
+        var taskRows = TimetableRow.Build(task.AsTrainPart, Sessions.All, Settings);
+        var trainRows = TimetableRow.Build(train.AsTrainPart, Sessions.All, Settings);
+
+        // This alone decides which of the two last blocks of a duty page prints: ShuntingTaskView takes
+        // the task's rows and leaves a train's, and TrainPartView the other way round.
+        Assert.IsTrue(taskRows.All(r => r.IsShuntingTask));
+        Assert.IsFalse(trainRows.Any(r => r.IsShuntingTask));
+    }
+
+    [TestMethod]
+    public void TheTaskBlockIsChargedForOneLineAndItsInstruction()
+    {
+        var (timetable, task, station) = Arrange();
+        AddFlow(timetable, task, station);
+        var dutyPart = DutyPartFor(timetable, task);
+
+        var height = DutyPagination.TimetableHeight(dutyPart);
+
+        // One line for the station and its two times — not the two rows a timetable would print — and a
+        // full-width row for the shunting instruction beneath it.
+        var instruction = dutyPart.TimetableRows.SelectMany(r => r.PrintedNotes).Single();
+        var expected = DutyPagination.TimetableOverhead + 1
+            + 1 + instruction.ToText.Length / DutyPagination.CharactersPerNoteRow;
+        Assert.AreEqual(expected, height, 0.01);
+    }
+
+    [TestMethod]
     public void TheShuntingInstructionSitsOnTheRowShowingTheStartTime()
     {
         var (timetable, task, station) = Arrange();
@@ -97,14 +130,20 @@ public class ShuntingTaskReportTests
         Assert.IsEmpty(rows[1].Notes.OfType<ShuntArrivingWagonsNote>());
     }
 
+    // The task as one page of a duty booklet.
+    private static DriverDutyPart DutyPartFor(Timetable timetable, Train task)
+    {
+        var plan = Plan.Create("Test", timetable);
+        var duty = new DriverDuty(1, "1") { Plan = plan, Sessions = Sessions.All };
+        return new DriverDutyPart { TrainPart = task.AsTrainPart, Duty = duty, SessionsSettings = Settings };
+    }
+
     [TestMethod]
     public void TheCargoBlockOfADutyPageListsTheTasksFlows()
     {
         var (timetable, task, station) = Arrange();
         var flow = AddFlow(timetable, task, station);
-        var plan = Plan.Create("Test", timetable);
-        var duty = new DriverDuty(1, "1") { Plan = plan, Sessions = Sessions.All };
-        var dutyPart = new DriverDutyPart { TrainPart = task.AsTrainPart, Duty = duty, SessionsSettings = Settings };
+        var dutyPart = DutyPartFor(timetable, task);
 
         var cargo = dutyPart.CargoData;
 

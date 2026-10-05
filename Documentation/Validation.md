@@ -54,7 +54,7 @@ public sealed record ValidationError
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
 | `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
 | `ScheduleNotContiguous` | A schedule's parts are not geographically contiguous |
-| `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned |
+| `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned (a working of shunting tasks alone is exempt) |
 | `TrainMissingTraction` | A stretch of a train's run has no traction unit on some sessions it runs |
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
 | `VehicleIdentityDuplicated` | Two vehicles share an identity — external id, or operator and number — on a common session |
@@ -139,18 +139,46 @@ trains (`ExtendTrackOccupancyByVehicleStay`), not the call's own arrival and dep
 **Exception**: Calls sharing the same vehicle are allowed (e.g. loco changes), as are trains that
 never run on a common session.
 
+**Shunting tasks without a loco**: a shunting task with no traction unit assigned occupies no track —
+it is worked over the whole station — so its track and times are ignored (`OccupiesTrack`). A task
+with a loco of its own occupies its track like any other call.
+
 **Error**: `"Train {train1} {span1} overlaps in time with train {train2} {span2}."` where the two are
 on the track together, and `"Train {train1} {span1} is followed by train {train2} {span2} after only
 {free} minutes; at least {required} minutes are required."` where the required gap is what is missing.
 
-#### L3 — Track stretch conflicts ✅
-**Method**: `GetValidationErrors(this TrackStretch me)`
+#### L3 — Stretch conflicts ✅
+**Method**: `Timetable.GetStretchConflicts()` (`DispatchStretchValidation`)
 
-**Validates**: Trains simultaneously on a stretch ≤ track count, **both directions counted together**
+**Validates**: What may be on the line at once, judged **per dispatch stretch** — the dispatchers at its
+two ends are the ones who agree what may be on it.
 
-**Logic**: Passings sorted by departure; an *i* vs *i + TracksCount* overlap test (direction-agnostic).
-A train's passings are its pairs of calls in run order (`Train.CallsInRunOrder`), so a leg is not missed
-on a train whose calls were added in another order than it runs them.
+- **Control sections**: a dispatch stretch is divided at its *control points* (`IsControlPoint`): the
+  signal-controlled locations inside it — block posts (`IsBlockPost`), and crossing places or junctions
+  whose controlling station is missing. A
+  section holds as many trains at once as it has tracks (the fewest of its track stretches), **both
+  directions counted together**. An unmanned location nobody controls divides nothing. A controlled
+  junction, crossing place, unmanned station or industrial area is not inside a dispatch stretch but at its end
+  (`IsRemotelyDispatched`), so the line on either side of it is judged apart.
+- **Meet-free zones**: a run of single-track sections between two places where trains can meet
+  (`AllowsMeets`: a dispatch endpoint, or a signal-controlled location marked
+  `TrainsCanCross` — never judged from its tracks, since a junction has two whether or not trains
+  can cross). Trains in opposite
+  directions may never be in the same zone at once; trains in the same direction may follow each
+  other through it, one per section.
+
+**Logic**: A train's runs over a dispatch stretch are read from its calls in run order
+(`Train.CallsInRunOrder`). Moving between two calls it occupies every section between them for the
+whole time, so a train passing a control point without a call there holds all the sections it passes.
+Standing at an uncontrolled location it still occupies the section around it; standing at a control
+point it occupies none (but is still in the zone where the point allows no meet). Occupancy is
+half-open, so a train arriving as another departs is no conflict, and trains only meet on a common
+session. Sections and zones are keyed by the track stretches they span, so one shared by two dispatch
+stretches (the line up to a controlled junction) is judged once.
+
+Track stretches that no dispatch stretch covers — all of them, when the layout has none recorded — are
+judged one by one as before (`TrackStretch.GetConflictingTrains`): trains simultaneously on a stretch
+≤ track count, both directions together.
 
 **Error**: `"Train {train1} between {stretch1} is conflicting with train {train2} between {stretch2}."`
 
@@ -273,6 +301,36 @@ The rule judges a **reconciled** plan (`Plan.Reconcile()`), as every consumer va
 records no platforms at all — an XPLN import, which has no such concept — is given them there
 (`Layout.EnsurePlatforms`), so importing raises no findings from this rule.
 
+#### T8 — Stop pattern ✅
+**Method**: `CheckStopPattern(this Train me)`
+
+**Validates**: A train stops on its way only where its category's stop pattern names
+(`TrainCategory.StopLocationIds`). The pattern is a positive list of operating locations: what it names is
+stopped at, what it leaves out is run through. Gated by `ValidateStopPatterns`.
+
+**Not a fault**: the train's first and last call, which are stops because it is made ready where it starts
+and put away where it ends — reporting them would be reporting the train for running at all. Nor a call the
+train merely passes (`StationCall.IsStop` false), nor a category with **no** pattern: an empty list is no
+pattern rather than a pattern of nowhere, so a plan made before there were stop patterns, and a category
+the planner has not got to yet, report nothing.
+
+**Error**: `"Train {train} stops at {location} {time}, but that location is not in the stop pattern of
+category {category}."` (`StopOutsideStopPattern`)
+
+Nothing is put right automatically, because the two are out of step and only the planner knows which way:
+either the train stops where it should run through, or the pattern is missing a location its trains serve.
+The remedy is on the **Trains** tab (clear the call's Arr and Dep boxes) or on the **Train categories** tab
+(tick the location).
+
+The pattern also works forwards, as T5 does through `RouteRules`: building a route (`Plan.Create`) gives a
+new train a stop at each location the pattern names and runs it through the rest, so a route built in the
+app never raises this rule. A pattern can only narrow — a location it names is still stopped at only where
+the train can stop there at all (`Train.CanStopAt`), and a shadow station is always a stop.
+
+Reading a plan gives every category without a pattern the one its trains already run
+(`Plan.DeduceStopPatterns`, part of `Plan.Reconcile()`), and that is deduced from the very stops this rule
+judges — so opening an existing plan raises nothing from it.
+
 ### Schedule scope (S) — vehicle schedule / turnus
 
 #### S1 — Overlapping parts ✅
@@ -311,6 +369,8 @@ On-demand trains are marked at import (`XplnDataImporter.MarkSingleTrainWorkings
 2. **Every leg a train runs** must be hauled by a traction unit on **every session the train runs it**. Traction may come from any schedule that works the train, so a wagonset turnus alongside a loco turnus is fine — coverage is judged per train, not per schedule.
 
 **Exempt**: cargo flows (hauled across several trains, not a self-contained working) and on-demand trains. Gated by `ValidateSchedules`.
+
+**A working of shunting tasks alone needs no vehicle.** A task is worked at one location — by the train locomotive standing there, by a station pilot nobody has modelled as a vehicle of its own, or by hand — so a loco of its own is optional and rule 1 passes such a working over. Rule 2 never reached a task anyway: it has a single call and therefore no leg. What a task does need is a **driver**, which the driver-duty coverage check (`ValidateDriverDutyCoverage`) asks for on every session the task runs, traction or no traction. A working mixing a task with a travelling train is **not** exempt: nothing moves a travelling train but a traction unit.
 
 **Logic**: For each train, the legs are the pairs of calls in **run order** (`CallsInRunOrder`) — insertion order would pair up calls the train does not run one after the other. Each traction assignment whose schedule has a part spanning a leg contributes its `Sessions` to that leg; the leg is short of traction on the sessions the train runs but no assignment covers. Consecutive legs missing the same sessions are coalesced into one span, so a train with no traction at all gives one error over its whole run rather than one per leg.
 
@@ -452,7 +512,7 @@ Plan.GetValidationErrors(options)
   │     ├─► CheckRouteContinuity()            [ValidateRouteContinuity] T5
   │     ├─► StationTrack.GetValidationErrors()[ValidateStationTracks]  L2
   │     ├─► StationCall.GetValidationErrors() [ValidateStationCalls]   T2
-  │     ├─► TrackStretch.GetValidationErrors()[ValidateStretches]      L3
+  │     ├─► Timetable.GetStretchConflicts()   [ValidateStretches]      L3
   │     ├─► CheckTrainSpeed()                 [ValidateTrainSpeed]     T3
   │     └─► Timetable.ValidateTrainNumbers()  [ValidateTrainNumbers]   T4
   │
@@ -469,8 +529,8 @@ Plan.GetValidationErrors(options)
 Rules are catalogued by scope (**L**ayout, **T**imetable, **S**chedule, **P**lan) in the
 Requirements Specification §3.11. Fully implemented: L2, L3, T1, T2, T3, T4, T5, S1, S2, S3,
 S4, S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), P2. Note L3
-counts trains on a stretch **direction-agnostically** (one train per track, both directions
-together) — the existing capacity check is correct as-is, not a direction bug.
+counts trains in a control section **direction-agnostically** (one train per track, both directions
+together); direction only matters in a single-track meet-free zone.
 
 Closure (S3+S5) is judged **per vehicle** (traction units, wagonsets and cargo-only units) by
 flow conservation over the whole period, not per schedule or per session combination — so

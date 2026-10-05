@@ -1,4 +1,8 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+@* Printed in a report's language when a report uses it; see ReportComponentBase. *@
+@inherits Tellurian.Trains.Schedules.Planning.Components.Reporting.ReportComponentBase
+
+@{ UseReportCulture(); }
 
 @* Shows a sessions/days value in the one visual language used everywhere sessions appear: session
    numbers as filled circles, weekday names as text. Session numbers are new to users, so the GUI and the

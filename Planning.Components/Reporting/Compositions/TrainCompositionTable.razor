@@ -6,13 +6,17 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One printed page of a station's train compositions.
 
    The reader is whoever makes up the trains at the station — the yard manager, where there is one — checking
    that every train leaves with the right wagons in the right places. The departures are listed a track at a
    time, and on each row the train's composition is drawn front first, as rectangles standing where the wagons
-   stand: a wagonset as one rectangle per wagon with its class and number, and the cargo flow wagons as one
-   rectangle per position saying where they go.
+   stand: a wagonset as one rectangle per wagon with its class and number, and the cargo flow wagons gathered
+   here as one rectangle per unit marshalled — a flow's position in the train, and within it the position its
+   destinations give the wagons. A flow that only runs through the station is not drawn: there is nothing
+   here to make up for it.
 
    The rectangles carry no captions. Their sequence is the wagon order, so a rectangle needs to say nothing
    about where in the train it stands, and the wagonsets are named in the turnus column instead. That leaves
@@ -118,8 +122,9 @@
                                             {
                                                 @* One destination per line: each is a separate place the
                                                    wagons in this rectangle are bound for. Their order says
-                                                   nothing — the wagons within a position stand as they like.
-                                                   The most that may be brought there follows the place. *@
+                                                   nothing — they share a position, so the wagons within the
+                                                   rectangle stand as they like. The most that may be brought
+                                                   there follows the place. *@
                                                 <span class="destination">
                                                     @destination.Html<MaxLoadView Capacity="destination.Limit" />
                                                 </span>

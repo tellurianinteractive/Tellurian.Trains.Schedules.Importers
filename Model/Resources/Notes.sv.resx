@@ -130,17 +130,14 @@
   <data name="AndBeyond" xml:space="preserve">
     <value>och vidare</value>
   </data>
-  <data name="AndLocalDestinations" xml:space="preserve">
-    <value>och lokala destinationer</value>
-  </data>
-  <data name="AndLocalDestinationsAndBeyond" xml:space="preserve">
-    <value>och lokala destinationer och vidare</value>
-  </data>
   <data name="Axles" xml:space="preserve">
     <value>Axlar × {0}</value>
   </data>
   <data name="Wagons" xml:space="preserve">
     <value>Vagnar × {0}</value>
+  </data>
+  <data name="ShuntingTaskFromTo" xml:space="preserve">
+    <value>Växlingsuppdrag {0}-{1}</value>
   </data>
   <data name="NoStop" xml:space="preserve">
     <value>Ej uppehåll</value>
@@ -178,5 +175,8 @@
   <data name="LeaveUnnamedKeyFrom" xml:space="preserve">
     <value>Lämna nyckel från {0}.</value>
     <comment>{0}=platsen nyckeln låser upp</comment>
+  </data>
+  <data name="ExchangeTransferringPassengers" xml:space="preserve">
+    <value>Överlämna omstigande resande här.</value>
   </data>
 </root>

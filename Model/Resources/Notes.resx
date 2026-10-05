@@ -144,12 +144,6 @@
   <data name="AndBeyond" xml:space="preserve">
     <value>and beyond</value>
   </data>
-  <data name="AndLocalDestinations" xml:space="preserve">
-    <value>and local destinations</value>
-  </data>
-  <data name="AndLocalDestinationsAndBeyond" xml:space="preserve">
-    <value>and local destinations and beyond</value>
-  </data>
   <data name="Axles" xml:space="preserve">
     <value>Axles × {0}</value>
     <comment>{0}=maximum number of axles</comment>
@@ -157,6 +151,9 @@
   <data name="Wagons" xml:space="preserve">
     <value>Wagons × {0}</value>
     <comment>{0}=maximum number of wagons</comment>
+  </data>
+  <data name="ShuntingTaskFromTo" xml:space="preserve">
+    <value>Shunting task {0}-{1}</value>
   </data>
   <data name="NoStop" xml:space="preserve">
     <value>No stop</value>
@@ -195,5 +192,9 @@
   <data name="LeaveUnnamedKeyFrom" xml:space="preserve">
     <value>Leave key from {0}.</value>
     <comment>{0}=the location the key unlocks</comment>
+  </data>
+  <data name="ExchangeTransferringPassengers" xml:space="preserve">
+    <value>Exchange transferring passengers here.</value>
+    <comment>Arrival note at a station marked as a passenger interchange, where the passengers going on by another train are handed over</comment>
   </data>
 </root>

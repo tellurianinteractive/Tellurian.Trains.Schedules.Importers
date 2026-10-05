@@ -25,6 +25,12 @@ public sealed class ValidationSettings
     /// validated for standing at a track with a platform (rule T6).
     /// </summary>
     public bool ValidatePassengerExchange { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's stops are validated against its category's
+    /// stop pattern, i.e. that it stops on its way only where the pattern names (rule T8). A category
+    /// with no pattern is not checked; see <see cref="Validations.StopPatternRules"/>.
+    /// </summary>
+    public bool ValidateStopPatterns { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
     public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>

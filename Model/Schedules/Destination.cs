@@ -49,8 +49,14 @@ public class Destination
     public bool AndBeyond { get; set; }
 
     /// <summary>
-    /// If true, the destination note should contain 'and local destinations', meaning all operation locations served by freight trains from the station.
+    /// If true, the destination note also names the local destinations: the operation locations whose
+    /// cargo is served from the station (see <see cref="OperationLocation.CargoServedFrom"/>).
     /// </summary>
+    /// <remarks>
+    /// The names are listed rather than summed up in a phrase: <em>"Stilkøbing, Alpha, Beta"</em> tells the
+    /// reader where the wagons may go, where <em>"Stilkøbing and local destinations"</em> sent them to look
+    /// it up. A station serving nothing is listed on its own.
+    /// </remarks>
     public bool AndLocalDestinations { get; set; }
 
     /// <inheritdoc/>
@@ -84,13 +90,13 @@ public static class DestinationExtensions
         /// Where the wagons go, without how many may be brought there.
         /// </summary>
         public string PlaceText =>
-            Place(destination.Location.Name, destination.AndText, destination.Regions);
+            Place(destination.NamedLocations.Select(location => location.Name), destination.AndText, destination.Regions);
 
         /// <summary>
         /// Markup version of <c>PlaceText</c>, with regions as coloured chips.
         /// </summary>
         public MarkupString PlaceHtml =>
-            new(Place(destination.LocationNameHtml, destination.AndText, destination.RegionsHtml));
+            new(Place(destination.NamedLocations.Select(location => WebUtility.HtmlEncode(location.Name)), destination.AndText, destination.RegionsHtml));
 
         /// <summary>
         /// The most that may be brought here, as a capacity. Unspecified when the destination takes any
@@ -131,7 +137,14 @@ public static class DestinationExtensions
             }
         }
 
-        private string LocationNameHtml => WebUtility.HtmlEncode(destination.Location.Name);
+        /// <summary>
+        /// The locations the destination names: the location itself, followed — when it includes its local
+        /// destinations — by those whose cargo is served from it, in layout order.
+        /// </summary>
+        private IEnumerable<OperationLocation> NamedLocations =>
+            destination.AndLocalDestinations && destination.Location.Layout is { } layout
+                ? layout.OperationLocations.Where(location => destination.Location.Equals(location.CargoServedFrom)).Prepend(destination.Location)
+                : [destination.Location];
 
         // Only a Station has regions; other cargo-serving locations, e.g. an industrial area, have none.
         private IEnumerable<Region> LocationRegions =>
@@ -153,23 +166,14 @@ public static class DestinationExtensions
         /// </remarks>
         public static string AndBeyondPhrase => NoteResources.AndBeyond;
 
-        /// <summary>
-        /// The wording <see cref="Destination.AndLocalDestinations"/> prints in a note —
-        /// <em>"and local destinations"</em>. See <see cref="Destination.AndBeyond"/> for why it is exposed.
-        /// </summary>
-        public static string AndLocalDestinationsPhrase => NoteResources.AndLocalDestinations;
-
-        private string AndText =>
-            destination.AndLocalDestinations && destination.AndBeyond ? NoteResources.AndLocalDestinationsAndBeyond :
-            destination.AndBeyond ? NoteResources.AndBeyond :
-            destination.AndLocalDestinations ? NoteResources.AndLocalDestinations :
-            string.Empty;
+        private string AndText => destination.AndBeyond ? NoteResources.AndBeyond : string.Empty;
     }
 
     // Every part but the name is optional, so they are joined rather than interpolated: an absent
     // qualifier must leave neither a double space nor a space before the comma.
-    private static string Place(string name, string andText, string regions)
+    private static string Place(IEnumerable<string> names, string andText, string regions)
     {
+        var name = string.Join(", ", names);
         var named = andText.Length == 0 ? name : $"{name} {andText}";
         return regions.Length == 0 ? named : $"{named}, {regions}";
     }

@@ -8,9 +8,10 @@ namespace Tellurian.Trains.Schedules.Model.Duties;
 /// </summary>
 /// <remarks>
 /// A duty is a sequence of the <see cref="ScheduledTrainPart">train parts</see> already defined in the
-/// vehicle <see cref="Schedule">schedules</see> — the segments a driver actually drives, so only traction
-/// parts (parts worked by a locomotive or trainset) are offered. A part stays owned by its schedule (which
-/// resolves its traction unit) and may be referenced by several duties, but only one per session. Parts are
+/// vehicle <see cref="Schedule">schedules</see> — the segments a driver actually works, which are the
+/// traction parts (parts worked by a locomotive or trainset) and the shunting tasks, which need a driver
+/// whether or not a loco of their own is put on them. A part stays owned by its schedule (which resolves
+/// its traction unit) and may be referenced by several duties, but only one per session. Parts are
 /// appended through the guarded <see cref="DriverDutyExtensions.Append"/>; the picker is pre-filtered by
 /// <see cref="CandidatePartsFor"/> so it lists only parts that can extend the duty.
 /// </remarks>
@@ -91,11 +92,12 @@ public static class DriverDutyEditingExtensions
         ];
 
         /// <summary>
-        /// Gets the train parts that can be added to the given duty: the traction parts (worked by a
-        /// locomotive or trainset) that do not overlap in time with the duty's parts, are not already in it,
-        /// and are not worked by another duty on a session this duty also runs. For a non-empty duty only
-        /// parts departing at or after the duty's last arrival are offered (the natural continuation — from
-        /// any station, since the driver walks between parts). Ordered by departure, then train number.
+        /// Gets the train parts that can be added to the given duty: the parts a driver works (see
+        /// <c>DrivenParts</c>) that do not overlap in time with the duty's parts, are not already in
+        /// it, and are not worked by another duty on a session this duty also runs. For a non-empty duty
+        /// only parts starting at or after the duty's last part ends are offered (the natural continuation
+        /// — from any station, since the driver walks between parts). Ordered by start time, then train
+        /// number.
         /// </summary>
         /// <param name="duty">The duty being built.</param>
         /// <returns>The candidate parts.</returns>
@@ -104,32 +106,40 @@ public static class DriverDutyEditingExtensions
             plan = plan.ValueOrException(nameof(plan));
             duty = duty.ValueOrException(nameof(duty));
 
-            IEnumerable<ScheduledTrainPart> candidates = plan.TractionParts
+            IEnumerable<ScheduledTrainPart> candidates = plan.DrivenParts
                 .Where(p => !duty.Parts.Contains(p))
                 .Where(p => !p.IsOverlapping(duty.Parts))
                 .Where(p => !plan.DriverDuties.Any(other =>
                     !other.Equals(duty) && other.Parts.Contains(p) && other.Sessions.Overlaps(duty.Sessions)));
 
             if (duty.LastArrival is { } lastArrival)
-                candidates = candidates.Where(p => p.From.Departure >= lastArrival);
+                candidates = candidates.Where(p => p.StartTime >= lastArrival);
 
             return
             [
                 .. candidates
-                    .OrderBy(p => p.From.Departure)
+                    .OrderBy(p => p.StartTime)
                     .ThenBy(p => p.Train.Number)
             ];
         }
 
         /// <summary>
-        /// The scheduled train parts that are worked by a traction unit (locomotive or trainset), i.e. the
-        /// segments a driver drives. A part is included when the schedule it belongs to has an assigned
-        /// traction vehicle.
+        /// The scheduled train parts a driver works: the parts worked by a traction unit (locomotive or
+        /// trainset), and every shunting task, which is work someone has to do whether or not a loco of its
+        /// own is put on it.
         /// </summary>
-        private IEnumerable<ScheduledTrainPart> TractionParts =>
+        /// <remarks>
+        /// A travelling train is included through the vehicle: it is a part of a schedule that has a
+        /// traction vehicle assigned, since without one nothing moves and there is nothing to drive. A
+        /// shunting task is not: it is worked at one location, by the train loco that happens to stand
+        /// there, by a station pilot nobody has modelled as a vehicle of its own, or by hand — so its
+        /// schedule need have no vehicle at all (see <c>ValidateTractionCoverage</c>). What it does need is
+        /// a driver, which is what puts it in the picker regardless.
+        /// </remarks>
+        private IEnumerable<ScheduledTrainPart> DrivenParts =>
             plan.Schedules
                 .SelectMany(s => s.Parts)
-                .Where(p => plan.ScheduledObjectsFor(p).Any(so => so.IsTraction));
+                .Where(p => p.Train.IsShuntingTask || plan.ScheduledObjectsFor(p).Any(so => so.IsTraction));
 
         private int NextDriverDutyId() =>
             (plan.DriverDuties.Count == 0 ? 0 : plan.DriverDuties.Max(d => d.Id)) + 1;

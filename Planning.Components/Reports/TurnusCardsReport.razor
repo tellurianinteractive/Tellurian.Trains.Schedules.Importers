@@ -12,21 +12,30 @@ else
 {
     @* 48 x 91 mm cards on A4 landscape: 6 across, 2 down. The 4 mm page margin keeps the outermost
        cards away from the sheet edge, which most printers cannot reach. *@
-    @foreach (var itemsOnPage in Items.ItemsPerPage(12))
-    {
-        <A4LPage Margin="4">
-            <div class="pagebreak">
-                @foreach (var item in itemsOnPage)
-                {
-                    <TurnusCard Item="@item" />
-                }
-            </div>
-        </A4LPage>
-    }
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var itemsOnPage in Items.ItemsPerPage(12))
+        {
+            <A4LPage Margin="4">
+                <div class="pagebreak">
+                    @* A sheet may carry cards in several languages: each card is printed in its own. *@
+                    @foreach (var (item, culture) in itemsOnPage)
+                    {
+                        <CascadingValue Value="culture">
+                            <TurnusCard Item="@item" />
+                        </CascadingValue>
+                    }
+                </div>
+            </A4LPage>
+        }
+    </CascadingValue>
 
 }
 @code {
-    private IEnumerable<TurnusData>? Items { get; set; }
+    private IEnumerable<(TurnusData Item, ReportCulture Culture)>? Items { get; set; }
+
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,7 +46,10 @@ else
         var startDay = general?.StartDay ?? DayOfWeek.Monday;
         var useDays = general?.UseDays ?? false;
         var maxSessions = general?.MaxSessions ?? 14;
-        Items = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData(useDays, maxSessions, startDay) ?? [];
+        var cards = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData(useDays, maxSessions, startDay) ?? [];
+        Items = ScheduleState.Layout is { } layout
+            ? [.. cards.Select(card => (card, new ReportCulture(card.ReportCulture(layout, LanguageService.IsSupported))))]
+            : [];
     }
 
 }

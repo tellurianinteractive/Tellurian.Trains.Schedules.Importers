@@ -2,9 +2,10 @@ The **Duties** tab is where you plan **driver duties** — the work one loco dri
 session, as a sequence of the train parts they drive.
 
 A duty is built from the **train parts already defined in the vehicle schedules**: the traction
-segments a locomotive or trainset works. The same train can be split across several parts (for
-example where the locomotive changes at an electrification boundary), and a duty simply strings the
-parts a single driver takes together.
+segments a locomotive or trainset works, and the **shunting tasks**, which need a driver whether or
+not a locomotive of their own is booked for them. The same train can be split across several parts
+(for example where the locomotive changes at an electrification boundary), and a duty simply strings
+the parts a single driver takes together.
 
 ### Building a duty
 
@@ -12,10 +13,11 @@ Each duty is a row: the first column shows its **identity**, **company** and the
 runs; the second column lists the **train parts** in the order the driver works them.
 
 - **New duty** adds an empty duty.
-- **+ train part** appends the next part. The picker offers the traction parts a driver could take
-  next: those that do not clash in time with the parts already in the duty and — once the duty has a
-  part — those departing at or after it arrives. Adding parts in running order keeps that list to
-  the natural continuations, but the order you add them in does not matter.
+- **+ train part** appends the next part. The picker offers the parts a driver could take next:
+  those that do not clash in time with the parts already in the duty and — once the duty has a
+  part — those starting at or after it ends. Adding parts in running order keeps that list to
+  the natural continuations, but the order you add them in does not matter. A shunting task is
+  written with the station once and the times its work runs between, since it goes nowhere.
 - Parts need **not** join at the same station: between two parts the driver walks to where the next
   part starts.
 
@@ -39,3 +41,8 @@ note at the station where this happens — you do not enter it by hand.
 With **Settings › Validation › Driver duties** enabled, the plan is checked so that no train part is
 driven by two duties on a common session, and no duty has parts that overlap in time. Conflicts are
 listed in the validation indicator and open here.
+
+The same setting checks that somebody is rostered for every part that needs a driver: each part a
+locomotive or trainset works, and each **shunting task**, on every session it runs. A task is checked
+whether or not a locomotive is booked for it, because it needs no locomotive of its own but always
+needs somebody to work it.

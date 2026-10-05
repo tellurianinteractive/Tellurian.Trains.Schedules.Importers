@@ -19,22 +19,25 @@
 }
 else
 {
-    @foreach (var page in Pages)
-    {
-        <A4LPage Margin="10">
-            <div class="timetable-page">
-                @foreach (var column in page.Columns)
-                {
-                    <div class="timetable-page-column" style="width: @Mm(column.WidthMm)">
-                        @foreach (var tile in column.Tiles)
-                        {
-                            <TimetableStretchTable Table="tile.Table" Continued="tile.IsContinued" ShowTitle="tile.ShowTitle" />
-                        }
-                    </div>
-                }
-            </div>
-        </A4LPage>
-    }
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var page in Pages)
+        {
+            <A4LPage Margin="10">
+                <div class="timetable-page">
+                    @foreach (var column in page.Columns)
+                    {
+                        <div class="timetable-page-column" style="width: @Mm(column.WidthMm)">
+                            @foreach (var tile in column.Tiles)
+                            {
+                                <TimetableStretchTable Table="tile.Table" Continued="tile.IsContinued" ShowTitle="tile.ShowTitle" />
+                            }
+                        </div>
+                    }
+                </div>
+            </A4LPage>
+        }
+    </CascadingValue>
 }
 
 @code {
@@ -43,11 +46,15 @@ else
 
     private IReadOnlyList<TimetablePage> Pages { get; set; } = [];
 
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+
     protected override async Task OnInitializedAsync()
     {
         await ScheduleState.InitializeAsync();
         if (ScheduleState.Timetable is not { } timetable) return;
 
+        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         var trains = timetable.Trains;
         var useDays = ScheduleState.Layout?.Settings.General.UseDays ?? false;
         var maxSessions = ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;

@@ -1,5 +1,60 @@
 # Versjonsnyheter
 
+## Versjon 0.7.1
+
+### Nye funksjoner
+
+- **Rapporter skrives ut på banens språk.** Alle rapporter skrives nå ut på banens standardspråk, det
+  første språket i standardlandet, uansett hvilket språk du selv arbeider på. De utskrevne arkene leses
+  av deltakerne på treffet, ikke av deg. Datoer og tall følger også landet.
+
+  Kryss av for **Skriv ut rapporter på lokale språk** under **Innstillinger › Generelt**, så skrives
+  hver førertjeneste ut på språket til selskapet som kjører den, hvert omløpskort på språket til
+  kjøretøyets selskap og hver stasjons togekspederingsliste på språket til stasjonens land. Det gjelder
+  også togekspederingslister som lagres som dokumenter. En tjeneste eller et kort uten selskap får
+  språket til togenes operatører, hvis alle har samme språk. Alt uten et språk appen kan skrive ut på,
+  beholder standardspråket.
+
+- **En togkategori angir hvor togene stopper.** Fanen **Togkategorier** har et **stoppmønster**: kryss
+  ved driftsstedene der kategoriens tog stopper underveis. Et nytt tog som opprettes på fanen **Tog**, får
+  et stopp ved hvert avkrysset driftssted det passerer og kjører gjennom de øvrige — der toget begynner,
+  og der det slutter, er stopp uansett hva som er krysset av, for det er der det gjøres klart og settes
+  bort. Bare de driftsstedene kategorien i det hele tatt kan stoppe ved, tilbys.
+
+  Et tog som stopper et sted mønsteret ikke angir, vises under **Konflikter**, med tog, driftssted og tid.
+  Ingenting rettes for deg: bare du kan avgjøre om det er toget som stopper der det burde kjøre gjennom,
+  eller mønsteret som mangler et driftssted der kategoriens tog stopper. Kontrollen kan slås av under
+  **Innstillinger › Validering**.
+
+  **Hent fra togene** krysser av for driftsstedene der kategoriens eksisterende tog stopper, og det gjøres
+  for deg første gang en plan fra en tidligere versjon åpnes — hver kategori får mønsteret togene har
+  kjørt hele tiden, så ingenting rapporteres som ikke var en feil før. Krysser du ikke av for noe, står
+  kategorien ubundet: togene stopper da alle steder der de kan levere det de fører med seg, som før. En
+  skiftekategori har ikke noe stoppmønster, siden oppdragene ikke kjører noen steder.
+
+- **Et skifteoppdrag trenger ikke eget lok, men det trenger en lokfører.** Et oppdrag utføres like ofte
+  av toglokomotivet som allerede står på stasjonen, eller av et skiftelok du ikke har lagt inn som
+  kjøretøy, som av et som er satt opp for det. Et **omløp** som bare inneholder skifteoppdrag, er derfor
+  ferdig uten tildelt kjøretøy og listes ikke lenger under **Konflikter** som et omløp uten kjøretøy.
+  Legger du et tog som kjører et sted inn i det samme omløpet, kreves det kjøretøy igjen.
+
+  Det et oppdrag derimot trenger, er noen til å utføre det, så det tilbys nå på fanen **Tjenester** som
+  et hvilket som helst annet togavsnitt, med eller uten eget lok — skrevet med stasjonen én gang og
+  tidene arbeidet går mellom, siden det ikke kjører noen steder. Et oppdrag ingen tjeneste dekker, listes
+  under **Konflikter** for de øktene det blir stående ubemannet, ved siden av avsnittene et lok trekker.
+
+  I et trykt tjenestehefte har oppdragssiden overskriften **Skifteoppdrag** med signaturen til operatøren,
+  ikke et tognummer ingen bruker, og der et tog har ruteplanen sin, har et oppdrag sin egen blokk:
+  **Arbeidstider**, én linje med stasjonen og tidene arbeidet **starter** og **slutter**, med
+  skifteinstruksjonene under. Det oppgis ikke spor — et oppdrag utføres over hele stasjonen, ikke fra
+  ett spor.
+
+- **Søylene for lokførere regner med ventetiden i en tjeneste.** Søylene over den grafiske ruteplanen
+  regnet en lokfører som nødvendig bare mens et tog eller et skifteoppdrag ble kjørt. En lokfører med et
+  opphold mellom to tog i sin **tjeneste** er likevel opptatt i mellomtiden, i påvente av eller på vei til
+  det neste, så den tiden regnes nå også — på de sesjonene tjenesten kjøres. Det gjør også en starttid du
+  har angitt før tjenestens første tog, eller en sluttid etter dens siste.
+
 ## Versjon 0.7.0
 
 ### Nye funksjoner

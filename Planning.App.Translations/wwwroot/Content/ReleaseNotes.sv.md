@@ -1,5 +1,61 @@
 # Versionsnyheter
 
+## Version 0.7.1
+
+### Nya funktioner
+
+- **Rapporter skrivs ut på banans språk.** Alla rapporter skrivs nu ut på banans standardspråk, det
+  första språket i dess standardland, oavsett vilket språk du själv arbetar på. De utskrivna bladen läses
+  av deltagarna på träffen, inte av dig. Datum och tal följer också landet.
+
+  Kryssa i **Skriv ut rapporter på lokala språk** under **Inställningar › Allmänt**, så skrivs varje
+  förartjänst ut på språket för företaget som kör den, varje omloppskort på språket för fordonets
+  företag och varje stations tågklareringslista på språket för stationens land. Det gäller även
+  tågklareringslistor som sparas som dokument. En tjänst eller ett kort utan företag får språket för
+  tågens operatörer, om alla har samma språk. Allt utan ett språk som appen kan skriva ut på behåller
+  standardspråket.
+
+- **En tågkategori anger var dess tåg gör uppehåll.** Fliken **Tågkategorier** har ett
+  **uppehållsmönster**: kryss för de driftplatser där kategorins tåg gör uppehåll under vägen. Ett nytt
+  tåg som skapas på fliken **Tåg** får ett uppehåll vid varje ikryssad driftplats det passerar och kör
+  genom de övriga — där tåget börjar och där det slutar är uppehåll oavsett vad som är ikryssat, eftersom
+  det är där det görs i ordning och ställs av. Bara de driftplatser som kategorin över huvud taget kan
+  stanna vid erbjuds.
+
+  Ett tåg som stannar någonstans som mönstret inte anger listas under **Konflikter**, med tåg, driftplats
+  och tid. Ingenting rättas åt dig: bara du kan avgöra om det är tåget som stannar där det borde köra
+  genom, eller mönstret som saknar en driftplats där kategorins tåg gör uppehåll. Kontrollen kan stängas
+  av under **Inställningar › Validering**.
+
+  **Hämta från tågen** kryssar i de driftplatser där kategorins befintliga tåg gör uppehåll, och det görs
+  åt dig första gången en plan från en tidigare version öppnas — varje kategori får det mönster dess tåg
+  har kört hela tiden, så ingenting rapporteras som inte var ett fel förut. Kryssar du inte i något lämnas
+  kategorin obunden: dess tåg gör då uppehåll överallt där de kan lämna av det de för med sig, som
+  tidigare. En växlingskategori har inget uppehållsmönster, eftersom dess uppdrag inte går någonstans.
+
+- **Ett växlingsuppdrag behöver inget eget lok, men det behöver en lokförare.** Ett uppdrag utförs lika
+  ofta av det tåglok som redan står på stationen, eller av ett stationslok du inte lagt upp som fordon,
+  som av ett lok som bokats för det. Ett **omlopp** som bara innehåller växlingsuppdrag är därför färdigt
+  utan tilldelat fordon och listas inte längre under **Konflikter** som ett omlopp utan fordon. Lägg in
+  ett tåg som går någonstans i samma omlopp, så krävs fordon igen.
+
+  Vad ett uppdrag däremot behöver är någon som utför det, så det erbjuds nu på fliken **Tjänster** som
+  vilket tågavsnitt som helst, med eller utan eget lok — skrivet med stationen en gång och de tider
+  arbetet pågår mellan, eftersom det inte går någonstans. Ett uppdrag som ingen tjänst täcker listas under
+  **Konflikter** för de sessioner det lämnas obemannat, jämte de avsnitt ett lok drar.
+
+  I ett tryckt tjänstehäfte har uppdragets sida rubriken **Växlingsuppdrag** med operatörens signatur, inte
+  ett tågnummer ingen använder, och där ett tåg har sin tidtabell har ett uppdrag ett eget block:
+  **Arbetstider**, en rad med stationen och tiderna arbetet **startar** och **slutar**, med
+  växlingsinstruktionerna under. Inget spår anges — ett uppdrag utförs över hela stationen, inte från
+  ett spår.
+
+- **Staplarna för lokförare räknar med väntetiden i en tjänst.** Staplarna ovanför den grafiska
+  tidtabellen räknade en lokförare som behövd bara medan ett tåg eller ett växlingsuppdrag kördes. En
+  lokförare vars **tjänst** har ett uppehåll mellan två tåg är ändå upptagen under tiden, i väntan på eller
+  på väg till nästa, så den tiden räknas nu också — de sessioner tjänsten körs. Det gör även en starttid
+  du angett före tjänstens första tåg, eller en sluttid efter dess sista.
+
 ## Version 0.7.0
 
 ### Nya funktioner

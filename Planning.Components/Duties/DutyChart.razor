@@ -175,8 +175,12 @@ else
     {
         var color = part.Train.Category?.Color ?? "#000000";
         var identity = part.Train.GraphLabel(Settings);
-        var from = $"{part.From.OperationLocation.Signature} {part.From.Departure.HHMM()}";
-        var to = $"{part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
+        // A shunting task is worked at one location: its call's arrival opens the work and its departure
+        // closes it, so the two ends carry the same signature and the times read forwards.
+        var from = $"{part.From.OperationLocation.Signature} {part.StartTime.HHMM()}";
+        var to = part.Train.IsShuntingTask
+            ? part.EndTime.HHMM()
+            : $"{part.To.OperationLocation.Signature} {part.EndTime.HHMM()}";
         var traction = Plan?.ScheduledObjectsFor(part).FirstOrDefault(so => so.IsTraction)?.Designation;
         return new Segment(from, identity, to, traction, color, color.TextColor, $"{from} – {identity} – {to}");
     }

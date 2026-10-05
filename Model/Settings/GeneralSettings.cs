@@ -1,4 +1,4 @@
-namespace Tellurian.Trains.Schedules.Model.Settings;
+﻿namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
 /// General, layout-wide settings: language, the session/day model, and the operating time window.
@@ -72,11 +72,27 @@ public sealed class GeneralSettings
     public int ExpectedLocoDrivers { get; set; }
 
     /// <summary>
-    /// When <c>true</c>, reports render each item in the language derived from the item itself
-    /// (for example, a driver duty in its operating company's language) rather than in the user's
-    /// preferred interface language. The interface and any item without a derivable language keep
-    /// using the user's language. Default is <c>false</c>.
+    /// When <c>true</c>, the meeting is worked with passenger tickets: a passenger travels on a ticket
+    /// bought where the journey starts, and a station marked
+    /// <see cref="Layouts.Station.IsPassengerInterchange"/> is then a passenger interchange, where the
+    /// passengers going on by another train are handed over. Default is <c>false</c>.
     /// </summary>
+    /// <remarks>
+    /// This is what makes an interchange an interchange: with no tickets in use there is nobody to hand
+    /// over, so nothing is derived from the station marks meanwhile. The marks themselves are kept — a
+    /// meeting may take the tickets up again — exactly as a lock key is kept while it is out of force.
+    /// See <c>PassengerInterchangeExtensions</c>, which is what everything else asks.
+    /// </remarks>
+    public bool UsePassengerTickets { get; set; }
+
+    /// <summary>
+    /// When <c>true</c>, reports print each item in its own local language — a driver duty in its
+    /// company's language, a turnus card in its vehicle's company's language, a station's dispatch list
+    /// in its country's language — rather than in the layout's default language. An item without a
+    /// local language the application can print in keeps the default language. Reports never use the
+    /// user-interface language. Default is <c>false</c>. See <c>ReportCultureExtensions</c>.
+    /// </summary>
+    /// <remarks>Named before the setting was presented as "local languages"; renaming it would reset every saved plan's value.</remarks>
     public bool UseObjectLanguageInReports { get; set; }
 
     /// <summary>

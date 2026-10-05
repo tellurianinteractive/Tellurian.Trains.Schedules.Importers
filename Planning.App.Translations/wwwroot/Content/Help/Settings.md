@@ -9,6 +9,17 @@ You can optionally select to use **numbered sessions** or **weekdays** when you 
 have different operations for different session. If all trains, schedules and duties
 runs the same all sessions you dont have to anyting, all defaults to **all sessions**.
 
+**Use passenger tickets** says the meeting is worked with tickets: a passenger buys one where the
+journey starts and travels on it. With it set you can mark, on the **Operation locations** tab, the
+stations where passengers change trains. Those interchanges then show up as an arrival note in the
+driver duties, and can be listed in the general instructions booklet.
+
+Reports are printed in the layout's **default language**: the first language of its default
+country, whatever language you work in yourself. **Print reports in local languages** instead
+prints each driver duty in the language of the company working it, each turnus card in the language
+of the vehicle's company, and each station's dispatch list in the language of the station's country.
+Anything without such a language keeps the default language.
+
 ### Sessions & days
 
 In some planning scenarios the possibility to select sessions/days to operate is useful.

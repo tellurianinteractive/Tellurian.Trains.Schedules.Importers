@@ -120,6 +120,20 @@ public sealed record ValidationError
     };
 
     /// <summary>
+    /// True if this conflict is marked against its trains in the Trains tab: every train-scope conflict,
+    /// plus the schedule-scope ones that are usually put right by retiming a train.
+    /// </summary>
+    /// <remarks>
+    /// Parts overlapping in a schedule belong to the schedule, but the schedule is rarely what is wrong:
+    /// the trains are timed so that one vehicle cannot work them both, and the times are edited in the
+    /// Trains tab. So the conflict keeps its schedule scope — it still marks the schedule and routes there
+    /// from the toolbar — and is shown on the trains as well.
+    /// </remarks>
+    public bool IsShownOnTrains =>
+        Scope == ValidationScope.Train ||
+        ErrorType is ValidationErrorType.VehicleScheduleOverlap;
+
+    /// <summary>
     /// True if the conflict is at a single station track. False for a placeless conflict
     /// (see <see cref="FromTrack"/>).
     /// </summary>
@@ -382,6 +396,23 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a stop-pattern error: a train stops on its way at a location its category's stop pattern
+    /// does not name (rule T8).
+    /// </summary>
+    public static ValidationError StopOutsideStopPattern(
+        StationCall call,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StopOutsideStopPattern,
+            FromTrack = call.Track,
+            ToTrack = call.Track,
+            FromTime = call.Arrival,
+            ToTime = call.Departure,
+            Trains = [call.Train!],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a passenger-exchange error: a passenger train stops at a location that exchanges
     /// passengers, but at a track with no platform for them to get on and off at (rule T6).
     /// </summary>
@@ -592,8 +623,8 @@ public sealed record ValidationError
             ErrorType = ValidationErrorType.DutyPartDoubleAssigned,
             FromTrack = part.From.Track,
             ToTrack = part.To.Track,
-            FromTime = part.From.Departure,
-            ToTime = part.To.Arrival,
+            FromTime = part.StartTime,
+            ToTime = part.EndTime,
             Trains = [part.Train],
             Duty = duty,
             Message = message
@@ -612,8 +643,8 @@ public sealed record ValidationError
             ErrorType = ValidationErrorType.DutyPartsOverlap,
             FromTrack = part1.From.Track,
             ToTrack = part2.To.Track,
-            FromTime = Time.Min(part1.From.Departure, part2.From.Departure),
-            ToTime = Time.Max(part1.To.Arrival, part2.To.Arrival),
+            FromTime = Time.Min(part1.StartTime, part2.StartTime),
+            ToTime = Time.Max(part1.EndTime, part2.EndTime),
             Trains = [.. new[] { part1.Train, part2.Train }.Distinct()],
             Duty = duty,
             Message = message
@@ -677,9 +708,9 @@ public sealed record ValidationError
         };
 
     /// <summary>
-    /// Creates a train-part-missing-driver-duty error: a train part with a traction unit assigned has no
-    /// driver duty rostered on some of the sessions the traction assignment runs, so nobody is assigned
-    /// to drive it.
+    /// Creates a train-part-missing-driver-duty error: a train part with a traction unit assigned — or a
+    /// shunting task, which needs a driver whether or not a loco of its own works it — has no driver duty
+    /// rostered on some of the sessions it runs, so nobody is assigned to work it.
     /// </summary>
     public static ValidationError TrainPartMissingDriverDuty(
         ScheduledTrainPart part,
@@ -688,8 +719,8 @@ public sealed record ValidationError
             ErrorType = ValidationErrorType.TrainPartMissingDriverDuty,
             FromTrack = part.From.Track,
             ToTrack = part.To.Track,
-            FromTime = part.From.Departure,
-            ToTime = part.To.Arrival,
+            FromTime = part.StartTime,
+            ToTime = part.EndTime,
             Trains = [part.Train],
             Message = message
         };
@@ -712,16 +743,16 @@ public sealed record ValidationError
         };
 
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
-        schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Track;
+        schedule.FirstPart?.From.Track;
 
     private static StationTrack? GetLastTrack(Schedule schedule) =>
-        schedule.Parts.OrderBy(p => p.To.Arrival.Value).LastOrDefault()?.To.Track;
+        schedule.LastPart?.To.Track;
 
     private static Time? GetFirstDeparture(Schedule schedule) =>
-        schedule.Parts.OrderBy(p => p.From.Departure.Value).FirstOrDefault()?.From.Departure;
+        schedule.FirstDeparture;
 
     private static Time? GetLastArrival(Schedule schedule) =>
-        schedule.Parts.OrderBy(p => p.To.Arrival.Value).LastOrDefault()?.To.Arrival;
+        schedule.LastArrival;
 
     private static Train[] GetTrains(Schedule schedule1, Schedule schedule2) =>
         [.. schedule1.Parts.Select(p => p.Train)
@@ -823,6 +854,9 @@ public enum ValidationErrorType
     /// <summary>An operation location carries a lock key that the manning on one side or the other has
     /// left meaningless, so it is ignored.</summary>
     LockKeyIgnored,
+
+    /// <summary>A train stops on its way at a location its category's stop pattern does not name.</summary>
+    StopOutsideStopPattern,
 }
 
 /// <summary>

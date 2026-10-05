@@ -29,15 +29,22 @@ else
        torn-off sheet needs to identify itself. *@
     @foreach (var page in _pages)
     {
-        <A4LPage Margin="10">
-            <TrainCompositionTable Page="page" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
-        </A4LPage>
+        var culture = _cultures[page.Station.Station];
+        UseReportCulture(culture);
+        <CascadingValue Value="culture">
+            <A4LPage Margin="10">
+                <TrainCompositionTable Page="page" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+            </A4LPage>
+        </CascadingValue>
     }
 }
 
 @code {
     private IReadOnlyList<CompositionPage>? _pages;
     private DateOnly _printDate;
+
+    // The language each station's sheets are printed in.
+    private readonly Dictionary<OperationLocation, ReportCulture> _cultures = [];
 
     private SessionsSettings Settings =>
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
@@ -58,13 +65,19 @@ else
         }
 
         var settings = Settings;
+        var pages = new List<CompositionPage>();
         // Manned stations only, in layout order: they are where somebody is on duty to make up the trains.
-        var stations = layout.OperationLocations
-            .OfType<Station>()
-            .Where(station => station.IsManned)
-            .Select(station => StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
-            .Where(station => station.Departures.Count > 0);
-
-        _pages = CompositionPaginator.BuildPages(stations, CompositionPageGeometry.A4Landscape);
+        foreach (var station in layout.OperationLocations.OfType<Station>().Where(station => station.IsManned))
+        {
+            // Built in the station's own language: the compositions write the sessions' and destinations' texts,
+            // and the pagination measures them.
+            var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
+            using var scope = ReportCulture.Use(culture.Culture);
+            var compositions = StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
+            if (compositions.Departures.Count == 0) continue;
+            _cultures[station] = culture;
+            pages.AddRange(CompositionPaginator.BuildPages([compositions], CompositionPageGeometry.A4Landscape));
+        }
+        _pages = pages;
     }
 }

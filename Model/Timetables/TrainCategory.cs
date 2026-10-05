@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Timetables;
 
 /// <summary>
@@ -103,6 +105,33 @@ public record TrainCategory
     public bool ExcludeFromAutomaticScheduling { get; set; }
 
     /// <summary>
+    /// Gets or sets this category's <em>stop pattern</em>: the ids of the operating locations where
+    /// trains of the category stop on their way. A positive list — what is named here is stopped at, and
+    /// what is not named is run through — so it is what tells the route creator where to plan a stop
+    /// (see <c>Plan.Create</c>), and a train stopping anywhere else is reported (see
+    /// <c>Train.CheckStopPattern</c>).
+    /// </summary>
+    /// <remarks>
+    /// An empty list is no pattern at all rather than a pattern of nowhere: the route creator then stops
+    /// wherever the category can exchange what it carries, exactly as it did before there were stop
+    /// patterns, and no stop is reported. A category that runs non-stop is said so by naming only the
+    /// locations it does stop at, which for a through train is its two ends.
+    /// <para>
+    /// A pattern binds nothing that already exists. It says where a <em>new</em> route is given stops;
+    /// the trains already planned keep the stops they have, and the ones outside the pattern are reported
+    /// so the planner can decide between the train and the pattern. Reading a plan fills the pattern in
+    /// from the trains the category already has, where it has none (see <c>Plan.DeduceStopPatterns</c>).
+    /// </para>
+    /// <para>
+    /// The locations are stored by id, as a station's regions are, because they belong to the layout and
+    /// are stored there. Nothing resolves them into objects: both the route creator and the check have
+    /// the location in hand and ask only whether it is named.
+    /// </para>
+    /// </remarks>
+    [JsonConverter(typeof(Schedules.IdListConverter))]
+    public IList<int> StopLocationIds { get; set; } = [];
+
+    /// <summary>
     /// Gets or sets the foreign key to the company that operates trains in this category. Optional.
     /// Follows <see cref="Company"/> while one is set, so assigning the company is enough to keep the
     /// two in step; the stored value is what a plan is read with, before the company itself has been
@@ -117,6 +146,23 @@ public record TrainCategory
     /// the next time the plan is read.
     /// </summary>
     public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
+
+    /// <summary>
+    /// Two categories are the same category when they have the same <see cref="Id"/>, which is what the
+    /// whole plan picks one out by (a train keeps only <see cref="Train.CategoryId"/>). The catalogue
+    /// keeps the ids unique and greater than zero (see <c>Timetable.RebuildTrainCategories</c>), so this
+    /// is identity within a timetable, as it is for a <see cref="Layouts.Layout"/>, a
+    /// <see cref="Schedules.Plan"/> or a <see cref="Timetable"/>.
+    /// </summary>
+    /// <remarks>
+    /// Stated rather than left to the record's own field-by-field equality, which a collection member
+    /// silently breaks: two categories holding equal but separate stop patterns would compare unequal,
+    /// because a list is compared by reference.
+    /// </remarks>
+    public virtual bool Equals(TrainCategory? other) => other is not null && Id == other.Id;
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => Id.GetHashCode();
 
     /// <inheritdoc/>
     public override string ToString() => Name;
@@ -149,6 +195,60 @@ public static class TrainCategoryExtensions
         /// <see cref="TrainCategory.Name"/> says which.
         /// </summary>
         public bool IsService => category.Content is TrainContent.None && !category.IsShunting;
+
+        /// <summary>
+        /// Gets whether this category has a stop pattern: at least one operating location is named in
+        /// <see cref="TrainCategory.StopLocationIds"/>. Where it has none, nothing is constrained — see
+        /// <see cref="TrainCategory.StopLocationIds"/> for why an empty list is no pattern.
+        /// </summary>
+        public bool HasStopPattern => category.StopLocationIds.Count > 0;
+
+        /// <summary>
+        /// Gets whether a train of this category is able to stop at <paramref name="location"/> at all,
+        /// whatever a call there says and whatever the stop pattern names. A train stops to exchange
+        /// something, so it needs somewhere to exchange it: a passenger category needs
+        /// <see cref="Layouts.OperationLocation.HasPassengerExchange"/>, a freight category
+        /// <see cref="Layouts.OperationLocation.HasCargoExchange"/>, and one that is both needs either.
+        /// Nowhere can a train stop at a <see cref="SignalControlledLocation"/>, which exists for block and
+        /// dispatch boundaries only.
+        /// </summary>
+        /// <remarks>
+        /// A service category exchanges nothing, so no exchange is demanded of the location and only the
+        /// location type restricts it. A shadow station always exchanges both (see
+        /// <see cref="Station.HasPassengerExchange"/>), so it needs no case of its own here. This is the
+        /// rule <c>Train.CanStopAt</c> answers by, asked of the category alone — which is what the stop
+        /// pattern is chosen from, since a pattern can only name locations its trains could stop at.
+        /// </remarks>
+        /// <param name="location">The operating location to test.</param>
+        public bool CanStopAt(OperationLocation? location) =>
+            location is not null and not SignalControlledLocation &&
+            ((category.IsPassenger && location.HasPassengerExchange) ||
+             (category.IsFreight && location.HasCargoExchange) ||
+             (!category.IsPassenger && !category.IsFreight));
+
+        /// <summary>
+        /// Gets whether the stop pattern lets a train of this category stop at <paramref name="location"/>:
+        /// the location is named in <see cref="TrainCategory.StopLocationIds"/>, or the category has no
+        /// pattern, which constrains nothing.
+        /// </summary>
+        /// <remarks>
+        /// This answers the pattern alone. Whether the train can stop there at all is a separate question,
+        /// asked of the location and what the train carries (see <c>Train.CanStopAt</c>): a pattern can
+        /// only narrow where a route stops, never open a stop the location does not allow.
+        /// </remarks>
+        /// <param name="location">The operating location to test.</param>
+        public bool AllowsStopAt(OperationLocation? location) =>
+            location is not null &&
+            (!category.HasStopPattern || category.StopLocationIds.Contains(location.Id));
+
+        /// <summary>
+        /// The operating locations of <paramref name="layout"/> that this category's stop pattern names,
+        /// in the layout's own order. Empty where the category has no pattern, and where a pattern names
+        /// a location the layout no longer has.
+        /// </summary>
+        /// <param name="layout">The layout whose locations the pattern is read against.</param>
+        public IEnumerable<OperationLocation> StopLocations(Layout layout) =>
+            layout is null ? [] : layout.OperationLocations.Where(location => category.StopLocationIds.Contains(location.Id));
 
         /// <summary>
         /// Gets the full train identity string for a given train number.

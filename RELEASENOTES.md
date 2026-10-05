@@ -4,6 +4,37 @@
 
 ### New Features
 
+- **Report languages.** New `ReportCultureExtensions` decide the culture a report, or one item of it, is
+  printed in. `Layout.DefaultLanguage` is the first language of the layout's default country and
+  `Layout.DefaultReportCulture` that language in that country (for example `de-CH`); `Country.PrimaryLanguage`
+  and `Country.PrimaryCulture` give the same for any country. With `GeneralSettings.UseObjectLanguageInReports`
+  set, `DriverDuty.ReportCulture(layout, isAvailable)` gives the language of the duty's company, else of its
+  trains' operators when they all share one; `OperationLocation.ReportCulture(layout, isAvailable)` gives the
+  language of the location's country; and `Layout.ReportCultureOf(company, operators, isAvailable)` is the
+  company-then-operators rule for any other item. Each falls back to the default culture, and passes over a
+  language the `isAvailable` predicate rejects, so an application states which languages it can print in.
+
+- **A train category says where its trains stop.** New **`TrainCategory.StopLocationIds`** is the
+  category's *stop pattern*: a positive list of the operating locations where its trains stop on their way.
+  Building a route (`Plan.Create`, and so every creator built on it) gives a new train a stop at each
+  location the pattern names and runs it through the rest, and **`Train.CheckStopPattern`** (rule T8,
+  switched by `ValidationSettings.ValidateStopPatterns`) reports a stop the pattern does not name — leaving
+  the planner to decide whether the train or the pattern is wrong.
+
+  A pattern can only narrow: a location it names is still stopped at only where the train can stop there at
+  all, and a shadow station is always a stop. An empty list is **no pattern rather than a pattern of
+  nowhere**, so a category the planner has not got to yet behaves exactly as before. Reading a plan gives
+  every category without a pattern the one its trains already run (`Plan.DeduceStopPatterns`, run by
+  `Plan.Reconcile` and on deserialisation), so no plan is reported for a stop that was not a fault before;
+  `Plan.DeduceStopPattern(category)` is the same for one category and replaces what is there.
+  `TrainCategory.HasStopPattern`, `AllowsStopAt(location)` and `StopLocations(layout)` read it, and it is
+  written as a plain array of ids, left out altogether where the category has none.
+
+  New **`TrainCategory.CanStopAt(location)`** holds the rule `Train.CanStopAt` has always answered by — a
+  train needs somewhere to hand over what it carries, and never stops at a signal-controlled location —
+  asked of the category alone, which is what the locations a pattern may name are chosen from.
+  `Train.CanStopAt` now delegates to it and is unchanged in what it answers.
+
 - **A train category says what it exchanges, and can now exchange nothing.** New
   **`TrainCategory.Content`**, a `[Flags]` **`TrainContent`** of `None`, `Passenger` and `Cargo`, replaces
   the two booleans that said the same thing less exactly. `TrainContent.None` is a *service* category —
@@ -160,7 +191,95 @@
   German, which capitalises its nouns wherever they stand. The track notes name the kind of vehicle
   through it. The Swedish name for a wagonset is now *Vagnsätt*, the word the application itself uses.
 
+- **Passenger interchanges: where passengers change trains, and the note that says so.** New
+  **`GeneralSettings.UsePassengerTickets`** says the meeting is worked with passenger tickets, and new
+  **`Station.IsPassengerInterchange`** marks a station as one of the places passengers change at. Both
+  have to hold, which is what **`OperationLocation.ExchangesTransferringPassengers`** answers, so no
+  caller has to combine them; **`Layout.PassengerInterchanges`** lists the stations that qualify, and is
+  empty where the tickets are not in use. **`OperationLocation.CanBePassengerInterchange`** says where the
+  mark may be set at all — a station that exchanges passengers.
+
+  A passenger train that stops at an interchange gets a new arrival note,
+  **`ExchangeTransferringPassengersNote`**, from **`StationCall.PassengerInterchangeNotes`** and hence from
+  `StationCall.DriverNotes`. A train that only passes, and one carrying no passengers, gets nothing. Turn
+  the tickets off and the station marks are kept but nothing is derived from them, exactly as with a lock
+  key that is out of force.
+
+- **A train composition places cargo flow wagons at two levels.** The Train compositions report drew one
+  rectangle per cargo flow position, gathering every destination of every flow there into it. A cargo flow
+  says where its wagons stand in the train, and each of its destinations says where they stand within that,
+  so wagons standing in different places were drawn as one unit. **`CargoPositionComposition`** now carries
+  **`DestinationPosition`** beside `Position`, and one is built per pair: the groups are ordered by the
+  flow's position first and by the destination's within it second, with position zero — anywhere — last at
+  each level, and each pair is drawn as a rectangle of its own. Destinations sharing both positions still
+  share one rectangle, whichever flows name them, since they are one unit of wagons; a flow to all
+  destinations names no destination and so stands alone at its position as before.
+
+- **Stretch conflicts are judged per dispatch stretch.** Rule L3 (`ValidationSettings.ValidateStretches`,
+  still reported as `TrackStretchConflict`) now asks what the dispatchers at the two ends of a dispatch
+  stretch would allow, instead of looking at one track stretch at a time. A dispatch stretch is divided into
+  sections at its control points (`IsControlPoint`): the signal-controlled locations inside it, such as block
+  posts. A section holds as many trains as it has tracks, both directions together.
+  On single track, trains in opposite directions may not be at once between two places where they can meet
+  (`AllowsMeets`: a dispatch endpoint, or a signal-controlled location where trains can cross), while trains in the same
+  direction may follow each other one per section. A train passing a control point without a call there
+  holds every section it passes. So two trains crossing at an unmanned station nobody controls, or following
+  each other past one, are now reported; the per-track-stretch check missed both. Track stretches outside
+  any dispatch stretch (all of them where a layout has none recorded) are judged one by one as before.
+
+- **Locations dispatched from afar.** **`OperationLocation.ControlledBy`** replaces
+  `SignalControlledLocation.ControlledBy`, and is in force where the new **`CanBeControlled`** holds: a
+  signal-controlled location, an industrial area or an unmanned, non-shadow station. Every controlled
+  location is **`IsRemotelyDispatched`** — the controlling station's dispatcher clears its trains as their
+  own — except a block post (**`IsBlockPost`**: a signal-controlled location that is neither a junction,
+  **`IsJunction`** being more than two track stretches meeting there, nor a crossing place). So controlled
+  junctions and crossing places are dispatched remotely, and block posts stay part of the line. New
+  **`SignalControlledLocation.TrainsCanCross`** says where trains can cross; it is stated rather than
+  judged from the tracks, since a junction has two tracks whether or not trains can cross, and the XPLN
+  import leaves it off. **`IsDispatchEndpoint`** now covers these as well as the stations with a
+  dispatcher of their own (the new **`HasDispatcher`**), so `CreateDispatchStretches` ends dispatch
+  stretches there, and **`Dispatcher`** gives the station whose dispatcher clears trains at a location.
+  **`Layout.Dispatchers`** lists the stations with a dispatcher, which are the ones that get a dispatch list,
+  and **`Layout.LocationsDispatchedBy(station)`** gives a station and the locations it works.
+  `DispatchNeighboursOf` now names the dispatcher beyond every location the station works, so a controller
+  rings the stations beyond its junction or crossing place and they ring the controller. `Layout.ChangeOperationLocationType`
+  keeps the controller across a type change. The JSON property name is unchanged, so saved plans read as
+  before; in `ScheduleDbContext` the `ControlledByStationId` foreign key moves from the signal-controlled
+  locations to all operation locations.
+
+### Fixes
+
+- **A station with many tracks no longer draws over the next station in the graphical timetable.** The
+  minimum spacing between two operation locations on the distance axis — `GraphicTimetableSettings.StationSpacing`
+  on screen, `PrintStationSpacingMm` in the printed report — was measured from the first track of one location
+  to the first track of the next, with the location's own tracks fanning out inside it. A station with more
+  tracks than that spacing allowed for therefore drew them over the tracks of the following location. The
+  minimum is now a floor on the gap alone — from the last track of one location to the first track of the next —
+  so it means the same whatever the locations are made of, and a station with many tracks pushes the next one
+  further away instead of into it. Spacing taken from the real distance is unchanged wherever it already
+  exceeds the minimum, and a printed graph that grows taller than a sheet is squeezed by the same rule as
+  before.
+
 ### Breaking Changes
+
+- **`SignalControlledLocation.ControlledBy` moved to `OperationLocation`.** Source using it through a
+  `SignalControlledLocation` still compiles; code that pattern-matched on the signal-controlled type to
+  reach it can now read it from any location, and should check `CanBeControlled`.
+
+- **A dispatch endpoint need not be a station.** `DispatchStretch.From` and `To`, and the constructor's
+  endpoints, are `OperationLocation` rather than `Station`, and `Layout.DispatchEndpoints` yields
+  `OperationLocation`. Code that used `DispatchEndpoints` for the stations that get a dispatch list should
+  use `Layout.Dispatchers`. Regenerate the dispatch stretches of a layout with controlled locations to get
+  the new endpoints.
+
+- **`TrainCategory` compares by `Id`.** The record's field-by-field equality is replaced by the same
+  identity the rest of the plan picks a category out by, as `Layout`, `Plan`, `Timetable` and `Schedule`
+  already do. A collection member — the new stop pattern — would otherwise have broken value equality
+  silently, two categories holding equal but separate lists comparing unequal because a list is compared
+  by reference. Categories in one timetable have unique ids greater than zero
+  (`Timetable.RebuildTrainCategories`), so within a plan nothing changes; a caller comparing two
+  categories of different plans, or two unreconciled ones sharing an id, now gets identity rather than a
+  field-by-field answer.
 
 - **`StationCall.SetManualNote` takes the half of the call the note is written for.** The signature is
   now `SetManualNote(string? text, CallNoteTarget? target = null, string? languageCode = null)`, so a

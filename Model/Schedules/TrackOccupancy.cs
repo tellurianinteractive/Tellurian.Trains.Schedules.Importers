@@ -29,6 +29,17 @@ public static class TrackOccupancyExtensions
     extension(StationCall call)
     {
         /// <summary>
+        /// Whether this call occupies its track at all. Every call of a travelling train does. The call of
+        /// a shunting task does only when a traction unit is assigned to it: without one the task is
+        /// worked over the whole station — by a train loco already standing there, an unmodelled station
+        /// pilot or by hand — so no track is taken, and the track and times it names are ignored.
+        /// </summary>
+        /// <param name="vehicleSchedules">The schedules that assign vehicles to train parts.</param>
+        public bool OccupiesTrack(IEnumerable<Schedule>? vehicleSchedules) =>
+            !call.Train.IsShuntingTask ||
+            (vehicleSchedules ?? []).Any(s => s.Parts.Any(p => p.ContainsCall(call)) && s.Vehicles.Any(v => v.IsTraction));
+
+        /// <summary>
         /// The span for which this call occupies its track, given the vehicle schedules that may extend
         /// it beyond the call's own times.
         /// </summary>

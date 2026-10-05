@@ -116,7 +116,7 @@ public static class CargoFlowTrainPartExtensions
             get
             {
                 List<ICallNote> result = [];
-                if (trainPart.HasCoupleNote && trainPart.CargoFlowOptions is not null)
+                if (trainPart.HasCoupleNote && trainPart.HasStatedDestinations)
                     result.Add(new CargoFlowDestinationNote(trainPart) { IsForDeparture = true, IsDriverNote = false });
                 return result;
             }
@@ -134,7 +134,7 @@ public static class CargoFlowTrainPartExtensions
             get
             {
                 List<ICallNote> result = [];
-                if (trainPart.HasUncoupleNote && trainPart.CargoFlowOptions is not null)
+                if (trainPart.HasUncoupleNote && trainPart.HasStatedDestinations)
                     result.Add(new CargoFlowUncoupleNote(trainPart) { IsForArrival = true, IsDriverNote = false });
                 return result;
             }
@@ -204,6 +204,40 @@ public static class CargoFlowTrainPartExtensions
         }
 
         /// <summary>
+        /// The destinations this flow states wherever it is printed: its own, less the from-station
+        /// itself.
+        /// </summary>
+        /// <remarks>
+        /// Cargo is never sent to the station it departs from, so on a travelling train such a
+        /// destination says nothing the reader does not already know — the note stands at that station,
+        /// and the other reports name it beside the flow. It is dropped only when it names the bare
+        /// station: one qualified with "and beyond", its local destinations or its regions still says
+        /// where the wagons go. A shunting task keeps all of them, because it works a single station:
+        /// every destination there is the from-station, and the one naming it is how the task says the
+        /// wagons go out to its cargo customers (see <c>ShuntingWork</c>).
+        /// </remarks>
+        public IEnumerable<Destination> StatedDestinations
+        {
+            get
+            {
+                var destinations = trainPart.CargoFlowOptions?.Destinations ?? [];
+                if (trainPart.Train.IsShuntingTask) return destinations;
+                var from = trainPart.From.OperationLocation;
+                return destinations.Where(d =>
+                    !d.Location.Equals(from) || d.AndBeyond || d.AndLocalDestinations || d.AndRegions);
+            }
+        }
+
+        /// <summary>
+        /// Whether the flow has anywhere to state as where its wagons go: all destinations, or at least
+        /// one of its <c>StatedDestinations</c>. A flow whose only destination is its own from-station
+        /// has not, and its destination and uncouple notes are left out rather than printed empty.
+        /// </summary>
+        public bool HasStatedDestinations =>
+            trainPart.CargoFlowOptions is { } options &&
+            (options.ToAllDestinations || trainPart.StatedDestinations.Any());
+
+        /// <summary>
         /// Where this flow's wagons go, as plain text: the destinations joined with commas, or the
         /// "all destinations" text when the flow is unrestricted.
         /// </summary>
@@ -219,7 +253,7 @@ public static class CargoFlowTrainPartExtensions
             {
                 var options = trainPart.CargoFlowOptions;
                 return options.ToAllDestinations ? NoteResources.AllDestinations :
-                        string.Join(", ", options.Destinations.Select(d => d.PlaceText));
+                        string.Join(", ", trainPart.StatedDestinations.Select(d => d.PlaceText));
             }
         }
 
@@ -233,8 +267,40 @@ public static class CargoFlowTrainPartExtensions
             get
             {
                 var options = trainPart.CargoFlowOptions;
-                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", options.Destinations.Select(d => d.PlaceHtml.Value));
+                return options.ToAllDestinations ? NoteResources.AllDestinations : string.Join(", ", trainPart.StatedDestinations.Select(d => d.PlaceHtml.Value));
             }
         }
+    }
+
+    extension(IReadOnlyList<CargoFlowTrainPart> trainParts)
+    {
+        /// <summary>
+        /// Whether any of the flows has a routing to state.
+        /// </summary>
+        public bool HasCargoFlowOptions => trainParts.Any(part => part.CargoFlowOptions is not null);
+
+        /// <summary>
+        /// Where the wagons of all the flows go, as plain text: each place once, joined with commas, or
+        /// the "all destinations" text when any of the flows is unrestricted.
+        /// </summary>
+        public string DestinationsText =>
+            trainParts.AnyToAllDestinations ? NoteResources.AllDestinations :
+            string.Join(", ", trainParts.DistinctStatedDestinations.Select(d => d.PlaceText));
+
+        /// <summary>
+        /// Where the wagons of all the flows go, as markup; see <c>DestinationsText</c>.
+        /// </summary>
+        public string DestinationsHtml =>
+            trainParts.AnyToAllDestinations ? NoteResources.AllDestinations :
+            string.Join(", ", trainParts.DistinctStatedDestinations.Select(d => d.PlaceHtml.Value));
+
+        private bool AnyToAllDestinations =>
+            trainParts.Any(part => part.CargoFlowOptions is { ToAllDestinations: true });
+
+        // Two flows bound for the same place name it once.
+        private IEnumerable<Destination> DistinctStatedDestinations =>
+            trainParts.Where(part => part.CargoFlowOptions is not null)
+                .SelectMany(part => part.StatedDestinations)
+                .DistinctBy(d => d.PlaceText);
     }
 }

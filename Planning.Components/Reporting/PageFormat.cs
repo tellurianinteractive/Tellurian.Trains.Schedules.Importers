@@ -8,7 +8,7 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting;
 /// Holds the parameters common to every page format; a derived component supplies only the
 /// orientation-specific markup (its CSS class).
 /// </summary>
-public abstract class PageFormat : ComponentBase
+public abstract class PageFormat : ReportComponentBase
 {
     /// <summary>Translation lookup, shared by all page formats (e.g. for the page footer).</summary>
     [Inject] protected Translator Translator { get; set; } = default!;

@@ -74,7 +74,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         await Expect(freight.Locator("td.limit .wagons")).ToHaveTextAsync("12");
         await Expect(freight.Locator(".cargo")).ToHaveCountAsync(3);
         var destination = freight.Locator(".cargo .destination").First;
-        await Expect(destination).ToContainTextAsync("Stilkøbing and local destinations");
+        await Expect(destination).ToContainTextAsync("Stilkøbing, Vig");
         await Expect(destination.Locator(".region")).ToHaveCSSAsync("background-color", "rgb(204, 0, 0)");
         // And the most that may be brought to that destination, after the place it belongs to.
         await Expect(destination.Locator(".wagons")).ToHaveTextAsync("5");
@@ -86,7 +86,8 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         CollectionAssert.AreEqual(widths.OrderByDescending(width => width).ToArray(), widths,
             $"Widest first, as the destinations are longest first: {string.Join(", ", widths)}");
 
-        // The train that only calls here on its way through shows when it arrives as well as when it leaves.
+        // The train that only calls here on its way through shows when it arrives as well as when it leaves;
+        // it is on this sheet because it gathers wagons here, not merely because it passes.
         var stopping = Page.Locator("tbody tr").Filter(new() { HasTextString = "4800" }).First;
         await Expect(stopping.Locator("td.time").First).ToHaveTextAsync("05:15");
         await Expect(stopping.Locator("td.time").Nth(1)).ToHaveTextAsync("05:20");
@@ -137,7 +138,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
     // Munkeröd (manned, tracks 1 and 2) → Rubjerg (not manned) → Stilkøbing (manned), with Vig (not manned)
     // beyond Munkeröd the other way. A passenger train leaves Munkeröd track 1 at 05:30 with a wagonset of five
     // wagons. Sixteen freight trains follow every ten minutes, alternately from track 1 and 2, each with wagons
-    // at position 1 for Stilkøbing and its local destinations and region, at position 2 for Rubjerg and beyond,
+    // at position 1 for Stilkøbing and its local destination Vig and its region, at position 2 for Rubjerg and beyond,
     // and without a position for all destinations. The freights take at most 24 axles and 12 wagons, and at most
     // five wagons may go to Stilkøbing, so both kinds of limit are printed. One more freight runs the other way
     // and only calls at Munkeröd on its way, which is the departure that has an arrival time.
@@ -151,6 +152,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         var stilkobing = (Station)layout.Add(NewStation(3, "Stilkøbing", "Stk", manned: true, "1"));
         stilkobing.Add(layout.Regions.First(region => region.BackgroundColor == "#CC0000"));
         var vig = (Station)layout.Add(NewStation(4, "Vig", "Vig", manned: false, "1"));
+        vig.CargoServedFrom = stilkobing;
         layout.Add(new TrackStretch(1, munkerod, rubjerg, 10));
         layout.Add(new TrackStretch(2, rubjerg, stilkobing, 10));
         layout.Add(new TrackStretch(3, vig, munkerod, 10));
@@ -179,11 +181,13 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
             train.CreateCargoFlow(3, calls[0], calls[2], toAll, positionInTrain: 0);
         }
         // Stilkøbing 05:00 → Munkeröd 05:15-05:20 → Vig: it stops at Munkeröd rather than starting there, so its
-        // row is the one with an arrival. Track 2, where it leaves before the freights that start there.
+        // row is the one with an arrival. Track 2, where it leaves before the freights that start there. It
+        // gathers wagons at both stations — one flow connected at each — so both of them list it.
         var through = AddTrain(timetable, FreightTrainCount + 2, 4800, timetable.TrainCategories.First(c => c.IsFreight),
             stilkobing["1"], munkerod, vig, Time.FromHourAndMinute(5, 0), stopTrack: "2");
         var throughCalls = through.CallsInRunOrder;
-        through.CreateCargoFlow(1, throughCalls[0], throughCalls[2], toAll, positionInTrain: 1);
+        through.CreateCargoFlow(1, throughCalls[0], throughCalls[1], toAll, positionInTrain: 1);
+        through.CreateCargoFlow(2, throughCalls[1], throughCalls[2], toAll, positionInTrain: 1);
 
         plan.Reconcile();
 

@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Duties;
 using Tellurian.Trains.Schedules.Planning.Timetables;
 
 namespace Tellurian.Trains.Schedules.Planning.Tests;
@@ -39,6 +40,18 @@ public class LocoDriverDemandTests
         return train;
     }
 
+    // A shunting task: one call, whose arrival is when the work starts and whose departure is when it ends.
+    private static Train AddShuntingTask(Timetable timetable, Station at, int id, TimeSpan from, TimeSpan to)
+    {
+        var shunting = new TrainCategory { Id = 2, Name = "V", Prefix = "V", IsShunting = true };
+        var task = new Train(id, shunting, id);
+        var call = task.Add(new StationCall(id * 10 + 1, at["1"], Time.FromTimeSpan(from), Time.FromTimeSpan(to)));
+        call.IsArrival = true;
+        call.IsDeparture = true;
+        timetable.Add(task);
+        return task;
+    }
+
     private static int[] Demand(Timetable timetable, int maxSessions = 14, bool useDays = false) =>
         timetable.RequiredLocoDriversPerMinute(WindowStart, WindowEnd, useDays, maxSessions);
 
@@ -69,6 +82,22 @@ public class LocoDriverDemandTests
         Assert.AreEqual(1, demand[At(10, 59)]);
         // The window ends when the driver is released, so the last minute is no longer occupied.
         Assert.AreEqual(0, demand[At(11, 0)]);
+    }
+
+    [TestMethod]
+    public void AShuntingTaskNeedsADriverForAsLongAsTheWorkLasts()
+    {
+        var (timetable, a, _) = EmptyTimetable();
+        AddShuntingTask(timetable, a, 1, new TimeSpan(10, 30, 0), new TimeSpan(11, 15, 0));
+
+        var demand = Demand(timetable);
+
+        // A task may be worked without a locomotive of its own, but never without somebody to work it, so
+        // it counts like any other train — over its working span, which is its one call's two times.
+        Assert.AreEqual(0, demand[At(10, 29)]);
+        Assert.AreEqual(1, demand[At(10, 30)]);
+        Assert.AreEqual(1, demand[At(11, 14)]);
+        Assert.AreEqual(0, demand[At(11, 15)]);
     }
 
     [TestMethod]
@@ -154,5 +183,83 @@ public class LocoDriverDemandTests
         AddTrain(timetable, a, b, 1, new TimeSpan(10, 0, 0), new TimeSpan(11, 0, 0));
 
         Assert.IsEmpty(timetable.RequiredLocoDriversPerMinute(WindowStart, WindowStart, useDays: false, maxSessions: 14));
+    }
+
+    // A duty working the given trains whole, on the given sessions.
+    private static DriverDuty Duty(Sessions sessions, params Train[] trains)
+    {
+        var duty = new DriverDuty(1, "1") { Sessions = sessions };
+        foreach (var train in trains)
+            _ = duty.Add(new ScheduledTrainPart(train.Calls.First(), train.Calls.Last()));
+        return duty;
+    }
+
+    [TestMethod]
+    public void TheGapBetweenTrainsInADutyOccupiesTheDriver()
+    {
+        var (timetable, a, b) = EmptyTimetable();
+        var first = AddTrain(timetable, a, b, 1, new TimeSpan(10, 0, 0), new TimeSpan(10, 30, 0));
+        var second = AddTrain(timetable, b, a, 2, new TimeSpan(11, 0, 0), new TimeSpan(11, 30, 0));
+        var duty = Duty(Sessions.All, second, first);
+
+        var demand = timetable.RequiredLocoDriversPerMinute(WindowStart, WindowEnd, false, 14, [duty]);
+
+        // Between 10:30 and 11:00 the driver waits for the next train, so stays occupied.
+        Assert.AreEqual(1, demand[At(10, 15)]);
+        Assert.AreEqual(1, demand[At(10, 30)]);
+        Assert.AreEqual(1, demand[At(10, 59)]);
+        Assert.AreEqual(1, demand[At(11, 15)]);
+        Assert.AreEqual(0, demand[At(11, 30)]);
+        // Without the duty the gap needs nobody.
+        Assert.AreEqual(0, Demand(timetable)[At(10, 45)]);
+    }
+
+    [TestMethod]
+    public void AGapCountsOnlyOnTheDutysSessions()
+    {
+        var (timetable, a, b) = EmptyTimetable();
+        var first = AddTrain(timetable, a, b, 1, new TimeSpan(10, 0, 0), new TimeSpan(10, 30, 0));
+        var second = AddTrain(timetable, b, a, 2, new TimeSpan(11, 0, 0), new TimeSpan(11, 30, 0));
+        // Another train on session 2 only, during the gap of a duty running on session 1 only.
+        AddTrain(timetable, a, b, 3, new TimeSpan(10, 30, 0), new TimeSpan(11, 0, 0), Sessions.FromSessionNumbers(2));
+        var duty = Duty(Sessions.FromSessionNumbers(1), first, second);
+
+        var demand = timetable.RequiredLocoDriversPerMinute(WindowStart, WindowEnd, false, 2, [duty]);
+
+        Assert.AreEqual(1, demand[At(10, 45)]);
+    }
+
+    [TestMethod]
+    public void AnOverriddenStartAndEndOccupyTheDriverBeforeAndAfterTheTrains()
+    {
+        var (timetable, a, b) = EmptyTimetable();
+        var train = AddTrain(timetable, a, b, 1, new TimeSpan(10, 30, 0), new TimeSpan(11, 0, 0));
+        var duty = Duty(Sessions.All, train);
+        duty.OverriddenStartTime = Time.FromTimeSpan(new TimeSpan(10, 15, 0));
+        duty.OverriddenEndTime = Time.FromTimeSpan(new TimeSpan(11, 20, 0));
+
+        var demand = timetable.RequiredLocoDriversPerMinute(WindowStart, WindowEnd, false, 14, [duty]);
+
+        Assert.AreEqual(0, demand[At(10, 14)]);
+        Assert.AreEqual(1, demand[At(10, 15)]);
+        Assert.AreEqual(1, demand[At(10, 45)]);
+        Assert.AreEqual(1, demand[At(11, 19)]);
+        Assert.AreEqual(0, demand[At(11, 20)]);
+    }
+
+    [TestMethod]
+    public void AnOverrideShorteningTheDutyStillCountsTheTrain()
+    {
+        var (timetable, a, b) = EmptyTimetable();
+        var train = AddTrain(timetable, a, b, 1, new TimeSpan(10, 30, 0), new TimeSpan(11, 0, 0));
+        var duty = Duty(Sessions.All, train);
+        duty.OverriddenStartTime = Time.FromTimeSpan(new TimeSpan(10, 40, 0));
+        duty.OverriddenEndTime = Time.FromTimeSpan(new TimeSpan(10, 50, 0));
+
+        var demand = timetable.RequiredLocoDriversPerMinute(WindowStart, WindowEnd, false, 14, [duty]);
+
+        Assert.AreEqual(1, demand[At(10, 30)]);
+        Assert.AreEqual(1, demand[At(10, 59)]);
+        Assert.AreEqual(0, demand[At(11, 0)]);
     }
 }

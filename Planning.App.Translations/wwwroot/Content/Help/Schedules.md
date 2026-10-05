@@ -47,7 +47,10 @@ runs, its note starts with those. A track chosen at a station the part no
 longer starts or ends at is forgotten.
 -  **+ vehicle** assigns a vehicle, creating a new one when needed; a schedule may carry
 several vehicles (such as a locomotive and its coach set). Cargo flows are shown as turnus cards in
-the reports rather than here.
+the reports rather than here. A schedule holding nothing but **shunting tasks** needs no vehicle at
+all: such a task is worked by whatever stands at the station, so leaving it without one is complete
+rather than unfinished, and it is not reported as a schedule left without a vehicle. Add a travelling
+train to the same schedule and a vehicle is wanted again.
 
 Editing a locomotive offers **Reversible train?**. Tick it where the locomotive works a train that can
 be driven from either end — one with a driving trailer at the far end, or with a second locomotive

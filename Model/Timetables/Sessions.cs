@@ -108,8 +108,45 @@ public static class SessionsExtensions
         /// Determines whether these sessions overlap with another.
         /// </summary>
         /// <param name="other">The other sessions.</param>
+        /// <remarks>
+        /// The days marker only says how the value is written, so two day patterns sharing it do not
+        /// overlap by that alone.
+        /// </remarks>
         /// <returns><c>true</c> if there is any overlap; otherwise, <c>false</c>.</returns>
-        public bool Overlaps(Sessions other) => sessions.And(other).Flags > 0;
+        public bool Overlaps(Sessions other) => (sessions.And(other).Flags & ~DaysMarker) > 0;
+
+        /// <summary>
+        /// True when no session or day is set and the value is not on demand either; the days marker
+        /// alone counts as none.
+        /// </summary>
+        internal bool IsNone => (sessions.Flags & ~DaysMarker) == 0;
+
+        /// <summary>
+        /// The same value narrowed to the layout's operating period (defined by <paramref name="useDays"/>
+        /// and <paramref name="maxSessions"/>): sessions or days beyond it are dropped, as they never run.
+        /// The on-demand marker is kept.
+        /// </summary>
+        /// <param name="useDays">Whether the layout runs weekdays rather than numbered sessions.</param>
+        /// <param name="maxSessions">The number of operating sessions/days in the period.</param>
+        internal Sessions WithinPeriod(bool useDays, int maxSessions)
+        {
+            var within = FromPeriodNumbers(PeriodNumbers(sessions, useDays, maxSessions), useDays);
+            return new Sessions { Flags = (ushort)(within.Flags | (sessions.Flags & CommonSessionPatterns.OnDemand)) };
+        }
+
+        /// <summary>
+        /// Gets a display string for the session/day numbers within the layout's operating period, as
+        /// <c>SessionsNumbers</c> does but leaving out every number beyond the period — and, for a day
+        /// pattern, the mirrored upper bits. "All" means every session/day of the period.
+        /// </summary>
+        /// <param name="useDays">Whether the layout runs weekdays rather than numbered sessions.</param>
+        /// <param name="maxSessions">The number of operating sessions/days in the period.</param>
+        internal string SessionsNumbersWithin(bool useDays, int maxSessions)
+        {
+            var numbers = PeriodNumbers(sessions, useDays, maxSessions).Select(n => (byte)n).ToArray();
+            if (numbers.Length == 0) return "None";
+            return numbers.Length == Math.Clamp(maxSessions, 1, useDays ? 7 : 14) ? "All" : FormatSessions(numbers);
+        }
 
         /// <summary>
         /// Determines whether the given 1-based session/day number is active. For day patterns the number
@@ -330,6 +367,11 @@ public static class SessionsExtensions
         var flags = useDays ? (ushort)(low | (low << 7) | DaysMarker) : low;
         return new Sessions { Flags = flags };
     }
+
+    // The 1-based session/day numbers these sessions include within the operating period (7 days when
+    // useDays, else up to 14 sessions); numbers beyond it, and a day pattern's mirrored bits, are left out.
+    private static IEnumerable<int> PeriodNumbers(Sessions sessions, bool useDays, int maxSessions) =>
+        Enumerable.Range(1, Math.Clamp(maxSessions, 1, useDays ? 7 : 14)).Where(n => sessions.Includes(n));
 
     // The in-period session/day bits these sessions leave free: within the operating period (7 day bits
     // when useDays, else up to 14 session bits), the bits of the period that are not set.

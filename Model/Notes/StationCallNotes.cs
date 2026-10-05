@@ -35,6 +35,7 @@ public static class StationCallNoteExtensions
                     .Cast<ICallNote>()
                     .Concat(call.StopNotes)
                     .Concat(call.OnDemandNotes)
+                    .Concat(call.ShuntingTaskNotes)
                     .Concat(call.LockKeyNotes)
                     .Concat(call.MeetNotes(readerSessions, settings))
                     .Concat(call.VehicleNotes(plan))
@@ -42,6 +43,26 @@ public static class StationCallNoteExtensions
                     .Where(note => note.IsStationNote)
                     .OrderBy(note => note.DisplayOrder)
             ];
+        }
+
+        /// <summary>
+        /// The note saying the call is a shunting task, with the times its work starts and ends.
+        /// </summary>
+        /// <remarks>
+        /// It leads the notes, before even the on-demand note: whether the row is a train at all is
+        /// the first thing the reader needs, and everything else on the row is read in its light.
+        /// </remarks>
+        public IEnumerable<ICallNote> ShuntingTaskNotes
+        {
+            get
+            {
+                call = call.ValueOrException(nameof(call));
+                if (call.Train?.ShuntingCall != call) yield break;
+                yield return new ShuntingTaskNote(call.Arrival, call.Departure)
+                {
+                    IsDriverNote = false, IsForArrival = true, IsForDeparture = true, DisplayOrder = 40
+                };
+            }
         }
 
         /// <summary>

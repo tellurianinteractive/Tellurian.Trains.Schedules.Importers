@@ -35,7 +35,7 @@ public static class PlanJson
                 AcceptLegacyTrainCategoryFlags,
                 WriteCallsOnlyWithTheirTrain,
                 WriteCatalogueEntriesOnlyInTheirCatalogue,
-                WriteRegionIdsOnlyWhereAStationHasSome,
+                WriteIdListsOnlyWhereTheyHaveSome,
             },
         },
     };
@@ -83,16 +83,25 @@ public static class PlanJson
     };
 
     /// <summary>
-    /// Leaves a station's <see cref="Layouts.Station.RegionIds"/> out where it has no regions, which is
-    /// every station but the few shadow yards that stand for somewhere off the layout. An empty list
-    /// says exactly what its absence does, on every location of the plan.
+    /// Leaves an empty list of ids out altogether: a station's <see cref="Layouts.Station.RegionIds"/>
+    /// where it stands for nowhere off the layout, which is every station but the few shadow yards, and a
+    /// train category's <see cref="Timetables.TrainCategory.StopLocationIds"/> where it has no stop
+    /// pattern. An empty list says exactly what its absence does, on every station and every category of
+    /// the plan.
     /// </summary>
-    private static void WriteRegionIdsOnlyWhereAStationHasSome(JsonTypeInfo typeInfo)
+    private static void WriteIdListsOnlyWhereTheyHaveSome(JsonTypeInfo typeInfo)
     {
-        if (typeInfo.Type != typeof(Layouts.Station)) return;
-        if (typeInfo.Properties.FirstOrDefault(p => p.Name == nameof(Layouts.Station.RegionIds)) is not { } regionIds) return;
-        regionIds.ShouldSerialize = static (_, value) => value is IList<int> { Count: > 0 };
+        if (!IdLists.TryGetValue(typeInfo.Type, out var name)) return;
+        if (typeInfo.Properties.FirstOrDefault(p => p.Name == name) is not { } property) return;
+        property.ShouldSerialize = static (_, value) => value is IList<int> { Count: > 0 };
     }
+
+    // The lists of ids left out where they are empty, one per type holding one.
+    private static readonly Dictionary<Type, string> IdLists = new()
+    {
+        [typeof(Layouts.Station)] = nameof(Layouts.Station.RegionIds),
+        [typeof(Timetables.TrainCategory)] = nameof(Timetables.TrainCategory.StopLocationIds),
+    };
 
     /// <summary>
     /// Writes a station call only where it belongs — in its train — and not a second time under the

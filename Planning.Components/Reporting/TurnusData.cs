@@ -1,3 +1,5 @@
+using System.Globalization;
+using Tellurian.Trains.Schedules.Model;
 
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 using Tellurian.Utilities;
@@ -10,6 +12,9 @@ public record TurnusData
     public int Id { get; init; }
     public ScheduledObjectType ScheduledObjectType { get; init; }
     public string Company { get; init; } = string.Empty;
+
+    /// <summary>The company the vehicle belongs to, which decides the card's language when reports use local languages.</summary>
+    public Company? VehicleCompany { get; init; }
     public string Class { get; init; } = string.Empty;
     public int Number { get; init; }
     public string ExternalId { get; init; } = string.Empty;
@@ -54,6 +59,13 @@ public static class TurnusDataExtensions
         /// even when there is no turnus number (<see cref="TurnusData.Number"/> 0).
         /// </summary>
         public string KeyWithSession => $"{data.Key}.{data.Sessions}";
+
+        /// <summary>
+        /// The culture to print the card in: the language of the vehicle's company, else of the operators of
+        /// the trains it works when they agree, else the layout's default.
+        /// </summary>
+        public CultureInfo ReportCulture(Layout layout, Func<string, bool> isAvailable) =>
+            layout.ReportCultureOf(data.VehicleCompany, data.TrainParts.Select(p => p.Train.EffectiveCompany), isAvailable);
 
         public string ObjectTypeName(Translator translator) => translator(data.ScheduledObjectType.ToString());
 
@@ -101,6 +113,7 @@ public static class TurnusDataExtensions
                         Id = scheduledObject.Id,
                         ScheduledObjectType = scheduledObject.ObjectType,
                         Company = scheduledObject.Company?.Signature ?? string.Empty,
+                        VehicleCompany = scheduledObject.Company,
                         Class = scheduledObject.Class,
                         // The turnus number is carried by the assignment that covers these sessions; a
                         // combination is drawn from a single assignment in practice.

@@ -601,6 +601,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} stops at {1} {2}, but that location is not in the stop pattern of category {3}..
+        /// </summary>
+        internal static string TrainStopsOutsideCategoryStopPattern {
+            get {
+                return ResourceManager.GetString("TrainStopsOutsideCategoryStopPattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Undefined.
         /// </summary>
         internal static string Undefined {
@@ -669,6 +678,69 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string Warning {
             get {
                 return ResourceManager.GetString("Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has overlapping locomotive assignments on {3}: {1} and {2}..
+        /// </summary>
+        internal static string TrainHasLocomotiveCoverageOverlapOnDays {
+            get {
+                return ResourceManager.GetString("TrainHasLocomotiveCoverageOverlapOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} is double-booked: its bookings on {1} overlap with those on {2}..
+        /// </summary>
+        internal static string VehicleIsDoubleBookedOnDays {
+            get {
+                return ResourceManager.GetString("VehicleIsDoubleBookedOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trains {0} and {1} have the same number but both run on {2}..
+        /// </summary>
+        internal static string TrainsShareNumberOnOverlappingDays {
+            get {
+                return ResourceManager.GetString("TrainsShareNumberOnOverlappingDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Two vehicles share the external id {0} on {1}..
+        /// </summary>
+        internal static string VehiclesShareExternalIdOnDays {
+            get {
+                return ResourceManager.GetString("VehiclesShareExternalIdOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicles {0} and {1} share operator and number {2} on {3}..
+        /// </summary>
+        internal static string VehiclesShareOperatorAndNumberOnDays {
+            get {
+                return ResourceManager.GetString("VehiclesShareOperatorAndNumberOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no traction unit between {1} {2} and {3} {4} on {5}..
+        /// </summary>
+        internal static string TrainMissingTractionOnDays {
+            get {
+                return ResourceManager.GetString("TrainMissingTractionOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} has no driver duty on {1} for the part from {2} {3} to {4} {5}..
+        /// </summary>
+        internal static string TrainPartHasNoDriverDutyOnDays {
+            get {
+                return ResourceManager.GetString("TrainPartHasNoDriverDutyOnDays", resourceCulture);
             }
         }
     }

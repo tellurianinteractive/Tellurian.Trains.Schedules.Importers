@@ -75,24 +75,26 @@ public static class ScheduleExtensions
     extension(Schedule schedule)
     {
         /// <summary>
-        /// Gets the parts of the schedule ordered by departure, i.e. as the vehicle works them.
+        /// Gets the parts of the schedule ordered by the time they are worked from, i.e. as the vehicle
+        /// works them. A shunting task is placed by the time its work starts, not by the time it ends
+        /// (see <c>TrainPart.StartTime</c>).
         /// </summary>
         public IReadOnlyList<ScheduledTrainPart> OrderedParts =>
-            [.. schedule.Parts.OrderBy(p => p.From.Departure)];
+            [.. schedule.Parts.OrderBy(p => p.StartTime)];
 
         /// <summary>
-        /// Gets the first part the vehicle works (earliest departure), or <c>null</c> when the
+        /// Gets the first part the vehicle works (the earliest <c>StartTime</c>), or <c>null</c> when the
         /// schedule is empty.
         /// </summary>
         public ScheduledTrainPart? FirstPart =>
-            schedule.Parts.Count == 0 ? null : schedule.Parts.MinBy(p => p.From.Departure);
+            schedule.Parts.Count == 0 ? null : schedule.Parts.MinBy(p => p.StartTime);
 
         /// <summary>
-        /// Gets the last part the vehicle works (latest arrival), or <c>null</c> when the schedule is
-        /// empty. A new part is chained onto this one.
+        /// Gets the last part the vehicle works (the latest <c>EndTime</c>), or <c>null</c> when the
+        /// schedule is empty. A new part is chained onto this one.
         /// </summary>
         public ScheduledTrainPart? LastPart =>
-            schedule.Parts.Count == 0 ? null : schedule.Parts.MaxBy(p => p.To.Arrival);
+            schedule.Parts.Count == 0 ? null : schedule.Parts.MaxBy(p => p.EndTime);
 
         /// <summary>
         /// Gets the location the vehicle starts from, or <c>null</c> when the schedule is empty.
@@ -105,14 +107,16 @@ public static class ScheduleExtensions
         public OperationLocation? EndLocation => schedule.LastPart?.To.OperationLocation;
 
         /// <summary>
-        /// Gets the departure time of the first part, or <c>null</c> when the schedule is empty.
+        /// Gets the time the vehicle starts its first part, or <c>null</c> when the schedule is empty.
+        /// That is the departure of a travelling train and the start of the work of a shunting task.
         /// </summary>
-        public Time? FirstDeparture => schedule.FirstPart?.From.Departure;
+        public Time? FirstDeparture => schedule.FirstPart is { } first ? first.StartTime : null;
 
         /// <summary>
-        /// Gets the arrival time of the last part, or <c>null</c> when the schedule is empty.
+        /// Gets the time the vehicle is free again after its last part, or <c>null</c> when the schedule
+        /// is empty. That is the arrival of a travelling train and the end of the work of a shunting task.
         /// </summary>
-        public Time? LastArrival => schedule.LastPart?.To.Arrival;
+        public Time? LastArrival => schedule.LastPart is { } last ? last.EndTime : null;
 
         /// <summary>
         /// Gets the vehicles worked to this schedule, resolved through their
@@ -212,8 +216,8 @@ public static class ScheduleExtensions
             {
                 if (!part.From.OperationLocation.Equals(last.To.OperationLocation))
                     return new Maybe<ScheduledTrainPart>($"Part {part} does not start where schedule {schedule.Number} ends ({last.To.OperationLocation.Signature}).");
-                if (part.From.Departure < last.To.Arrival)
-                    return new Maybe<ScheduledTrainPart>($"Part {part} departs before schedule {schedule.Number} arrives at {last.To.OperationLocation.Signature} {last.To.Arrival.HHMM()}.");
+                if (part.StartTime < last.EndTime)
+                    return new Maybe<ScheduledTrainPart>($"Part {part} departs before schedule {schedule.Number} arrives at {last.To.OperationLocation.Signature} {last.EndTime.HHMM()}.");
                 // The vehicle can only work a part on sessions it also works the rest of the schedule; the
                 // train must therefore still share at least one session/day with the parts already added.
                 if (!schedule.EffectiveSessions.Overlaps(part.Train.Sessions))

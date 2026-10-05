@@ -59,10 +59,16 @@ else
                     <TemplateColumn Title='@Translator("HasTurntable")' Align="Align.Center">@if (context is Station { HasTurntable: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("Shadow")' Align="Align.Center">@if (context is Station { IsShadow: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("HasPassengerExchange")' Align="Align.Center">@if (context.HasPassengerExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    @* Only while the meeting is worked with passenger tickets: without them nothing is
+                       derived from the mark, and a column saying nothing only widens an already wide grid. *@
+                    @if (UsePassengerTickets)
+                    {
+                        <TemplateColumn Title='@Translator("IsPassengerInterchange")' Align="Align.Center">@if (context is Station { IsPassengerInterchange: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                    }
                     <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("CargoServedFrom")'>@(context.CargoServedFrom?.Name ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("LockKey")'>@LockKeySummary(context)</TemplateColumn>
-                    <TemplateColumn Title='@Translator("ControlledBy")'>@(context is SignalControlledLocation { ControlledBy: { } c } ? c.Name : "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("ControlledBy")'>@(context.CanBeControlled && context.ControlledBy is { } c ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
                     <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
@@ -155,6 +161,18 @@ else
                         </div>
                     }
 
+                    @* Where passengers change trains. Offered only where it means something: the meeting
+                       has to be worked with passenger tickets, and the location has to take passengers at
+                       all. A mark already set is kept when either stops holding — see
+                       PassengerInterchangeExtensions. *@
+                    @if (UsePassengerTickets && Editing is Station interchange && Editing.CanBePassengerInterchange)
+                    {
+                        <div class="field">
+                            <HelpLabel For="IsPassengerInterchange" />
+                            <input type="checkbox" @bind="interchange.IsPassengerInterchange" @bind:after="OnEdited" />
+                        </div>
+                    }
+
                     @if (Editing is Station)
                     {
                         <div class="field" title="@(shadow ? Translator("ShadowExchangesEverything") : null)">
@@ -195,13 +213,26 @@ else
                         </div>
                     }
 
-                    @if (Editing is SignalControlledLocation)
+                    @* Whether trains can cross here. Stated, since a junction has two tracks whether or not
+                       trains can cross; a location that is neither junction nor crossing is a block post. *@
+                    @if (Editing is SignalControlledLocation crossing)
+                    {
+                        <div class="field">
+                            <HelpLabel For="TrainsCanCross" />
+                            <input type="checkbox" @bind="crossing.TrainsCanCross" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @* The manned station working this location from afar. Offered where nobody is on duty
+                       here: a controlled location divides the dispatch stretch, and with two tracks trains
+                       can meet at it. *@
+                    @if (Editing.CanBeControlled)
                     {
                         <div class="field">
                             <HelpLabel For="ControlledBy" />
                             <select @bind="ControlledById" @bind:after="OnEdited">
                                 <option value="">@Translator("NoneOption")</option>
-                                @foreach (var s in Stations)
+                                @foreach (var s in ControllingStations)
                                 {
                                     <option value="@s.Id">@s.Name (@s.Signature)</option>
                                 }
@@ -462,6 +493,11 @@ else
                         <dd>@YesNo(infoStation.IsManned)</dd>
                         <dt>@Translator("HasTurntable")</dt>
                         <dd>@YesNo(infoStation.HasTurntable)</dd>
+                        @if (UsePassengerTickets)
+                        {
+                            <dt>@Translator("IsPassengerInterchange")</dt>
+                            <dd>@YesNo(infoStation.IsPassengerInterchange)</dd>
+                        }
                         <dt>@Translator("Regions")</dt>
                         <dd>
                             @if (infoStation.Regions.Any())
@@ -479,8 +515,13 @@ else
                     }
                     @if (_selected is SignalControlledLocation infoSignal)
                     {
+                        <dt>@Translator("TrainsCanCross")</dt>
+                        <dd>@YesNo(infoSignal.TrainsCanCross)</dd>
+                    }
+                    @if (_selected.CanBeControlled)
+                    {
                         <dt>@Translator("ControlledBy")</dt>
-                        <dd>@(infoSignal.ControlledBy is { } c ? $"{c.Name} ({c.Signature})" : "—")</dd>
+                        <dd>@(_selected.ControlledBy is { } c ? $"{c.Name} ({c.Signature})" : "—")</dd>
                     }
                     @if (_selected.CanRequireLockKey || _selected.LockKey is not null)
                     {
@@ -577,6 +618,10 @@ else
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Layout? Layout => ScheduleState.Layout;
+
+    // Whether the meeting is worked with passenger tickets, which is what makes a passenger interchange
+    // one. Everything about interchanges on this tab is offered only while it holds.
+    private bool UsePassengerTickets => Layout?.Settings.General.UsePassengerTickets ?? false;
     private IQueryable<OperationLocation> Locations =>
         (Layout?.OperationLocations ?? []).AsQueryable();
     private IEnumerable<Station> Stations =>
@@ -864,15 +909,20 @@ else
 
     private string ControlledById
     {
-        get => (Editing as SignalControlledLocation)?.ControlledBy?.Id.ToString(Culture) ?? "";
+        get => Editing?.ControlledBy?.Id.ToString(Culture) ?? "";
         set
         {
-            if (Editing is not SignalControlledLocation signal) return;
-            signal.ControlledBy = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
+            if (Editing is null) return;
+            Editing.ControlledBy = int.TryParse(value, NumberStyles.Integer, Culture, out var id)
                 ? Stations.FirstOrDefault(s => s.Id == id)
                 : null;
         }
     }
+
+    // Only a manned station has a dispatcher to work another location from afar; the one already
+    // chosen stays on offer so it can be seen and changed after its manning changes.
+    private IEnumerable<Station> ControllingStations =>
+        Stations.Where(s => (s.IsManned && !s.Equals(Editing)) || s.Equals(Editing?.ControlledBy));
 
     // Every station except the one being edited: a location cannot be served from itself.
     private IEnumerable<Station> CargoServingStations =>

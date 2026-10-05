@@ -278,6 +278,13 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
                   .OnDelete(DeleteBehavior.Restrict)
                   .IsRequired(false);
 
+            // The manned station working this location from afar. Restrict, like CargoServedFrom.
+            entity.HasOne(e => e.ControlledBy)
+                  .WithMany()
+                  .HasForeignKey("ControlledByStationId")
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .IsRequired(false);
+
             entity.HasMany(e => e.Tracks)
                   .WithOne(e => e.Station)
                   .HasForeignKey(e => e.StationId)
@@ -305,14 +312,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // holds it here, so mapping it as well would store it twice.
             entity.Ignore(e => e.RegionIds);
         });
-        modelBuilder.Entity<SignalControlledLocation>(entity =>
-        {
-            entity.HasOne(e => e.ControlledBy)
-                  .WithMany()
-                  .HasForeignKey("ControlledByStationId")
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .IsRequired(false);
-        });
+        modelBuilder.Entity<SignalControlledLocation>();
         modelBuilder.Entity<OtherLocation>();
 
         // DispatchStretch

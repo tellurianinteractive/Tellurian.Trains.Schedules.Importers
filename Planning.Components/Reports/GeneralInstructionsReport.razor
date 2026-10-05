@@ -24,7 +24,10 @@
 
    The shunting yards table is the one part of that last page the author may move: writing a
    <ShuntingYards/> tag in the instructions prints it there instead, and takes it off the layout page,
-   which a long yard list would otherwise push past the foot of. *@
+   which a long yard list would otherwise push past the foot of.
+
+   An <Interchanges/> tag works the same way but has no fixed home to be moved from: the stations where
+   passengers change trains are printed where the author placed the tag, and nowhere at all otherwise. *@
 
 @if (_sheets is null)
 {
@@ -37,17 +40,20 @@ else
         <p class="hint">@Translator("BookletPrintingHint")</p>
     </div>
 
-    @foreach (var side in _sheets)
-    {
-        <A4LPage>
-            <div class="dutysheet">
-                <InstructionsBookletPage Page="side.Left" Layout="Layout" Program="@Program"
-                                         PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
-                <InstructionsBookletPage Page="side.Right" Layout="Layout" Program="@Program"
-                                         PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
-            </div>
-        </A4LPage>
-    }
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var side in _sheets)
+        {
+            <A4LPage>
+                <div class="dutysheet">
+                    <InstructionsBookletPage Page="side.Left" Layout="Layout" Program="@Program"
+                                             PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
+                    <InstructionsBookletPage Page="side.Right" Layout="Layout" Program="@Program"
+                                             PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
+                </div>
+            </A4LPage>
+        }
+    </CascadingValue>
 }
 
 @code {
@@ -57,6 +63,9 @@ else
 
     private LayoutModel? Layout => ScheduleState.Layout;
     private string? Program => ScheduleState.Schedule?.Program;
+
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +81,11 @@ else
         // the text and again at the back would leave the reader wondering which one to trust.
         _showShuntingYards = !InstructionsPlaceholders.Places(instructions, InstructionsPlaceholder.ShuntingYards);
 
-        var pages = InstructionsPagination.BuildPages(instructions, shuntingYards: Layout?.ShuntingYards);
+        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
+        var pages = InstructionsPagination.BuildPages(
+            instructions,
+            shuntingYards: Layout?.ShuntingYards,
+            passengerInterchanges: Layout?.PassengerInterchanges);
         _sheets = BookletImposition.Impose(pages);
     }
 }

@@ -417,7 +417,10 @@ public static class ScheduleEditingExtensions
             for (var i = 0; i < joinable; i++)
             {
                 var call = calls[i];
-                if (call.OperationLocation.Equals(end) && !(call.Departure < lastArrival)) return i;
+                // A shunting task is taken up when its work starts, which is its arrival; a travelling
+                // train is joined when it departs.
+                var joinTime = train.IsShuntingTask ? call.Arrival : call.Departure;
+                if (call.OperationLocation.Equals(end) && !(joinTime < lastArrival)) return i;
             }
             return null;
         }
@@ -528,8 +531,8 @@ public static class ScheduleEditingExtensions
             schedule = schedule.ValueOrException(nameof(schedule));
             part = part.ValueOrException(nameof(part));
             if (!schedule.Parts.Contains(part)) return;
-            var from = part.From.Departure;
-            foreach (var removed in schedule.Parts.Where(p => !(p.From.Departure < from)).ToList())
+            var from = part.StartTime;
+            foreach (var removed in schedule.Parts.Where(p => !(p.StartTime < from)).ToList())
             {
                 schedule.Parts.Remove(removed);
                 removed.Schedule = null;

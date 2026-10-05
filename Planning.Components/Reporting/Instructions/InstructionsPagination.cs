@@ -136,6 +136,14 @@ public static class InstructionsPagination
     /// </remarks>
     public const int ShuntingYardsCharactersPerLine = 36;
 
+    /// <summary>Lines the "Passenger interchanges" heading above the list costs.</summary>
+    /// <remarks>
+    /// The same <c>h2</c> in the same body as the shunting yards heading, so the same figure applies.
+    /// Stated separately all the same: the two lists are free to grow apart, and a constant shared by
+    /// name would hide that the next change to one silently moved the other.
+    /// </remarks>
+    public const double InterchangesHeadingHeight = ShuntingYardsHeadingHeight;
+
     /// <summary>
     /// Builds the booklet's pages: the front page, the instructions split across content pages, blank
     /// padding to a whole number of sheets, and the layout overview last.
@@ -150,8 +158,13 @@ public static class InstructionsPagination
     /// in the authored text its true height. Left out, a placeholder is charged as one line, which is
     /// what an unrecognised line costs — so the table would print past the foot of the page.
     /// </param>
+    /// <param name="passengerInterchanges">
+    /// The layout's passenger interchanges, for an <c>&lt;Interchanges/&gt;</c> placeholder. Left out
+    /// for the same reason, and with the same consequence, as <paramref name="shuntingYards"/>.
+    /// </param>
     public static IReadOnlyList<InstructionsPage> BuildPages(
-        string? markdown, bool includeOverview = true, IReadOnlyList<ShuntingYard>? shuntingYards = null)
+        string? markdown, bool includeOverview = true, IReadOnlyList<ShuntingYard>? shuntingYards = null,
+        IReadOnlyList<Station>? passengerInterchanges = null)
     {
         var pages = new List<InstructionsPage> { new(1, InstructionsPageKind.Front) };
         var blocks = Blocks(markdown).ToList();
@@ -164,7 +177,7 @@ public static class InstructionsPagination
         for (var i = 0; i < blocks.Count; i++)
         {
             var block = blocks[i];
-            var height = HeightOf(block, shuntingYards);
+            var height = HeightOf(block, shuntingYards, passengerInterchanges);
 
             // A block taller than a page still prints, overflowing, rather than being truncated: the
             // author is the only one who knows what can go, so the report's job is to make it visible.
@@ -178,7 +191,7 @@ public static class InstructionsPagination
             // regardless. The page reads better ending on the fuller block before this one, with this
             // one carried over to join what follows instead of trailing behind on its own.
             var hasNext = i + 1 < blocks.Count;
-            var nextFitsHere = hasNext && overhead + used + HeightOf(blocks[i + 1], shuntingYards) <= PageBudget;
+            var nextFitsHere = hasNext && overhead + used + HeightOf(blocks[i + 1], shuntingYards, passengerInterchanges) <= PageBudget;
             if (hasNext && !nextFitsHere && current.Count > 1 &&
                 height <= ShortTrailingBlockHeight && PageBudget - overhead - used >= StrandedBlockGap)
             {
@@ -251,10 +264,12 @@ public static class InstructionsPagination
 
     // Estimated, never measured: each source line charged its rendered height, wrapping charged per
     // character, and the block's own bottom margin added once.
-    private static double HeightOf(string block, IReadOnlyList<ShuntingYard>? shuntingYards) =>
-        block.Split('\n').Sum(line => HeightOfLine(line, shuntingYards)) + BlockGap;
+    private static double HeightOf(
+        string block, IReadOnlyList<ShuntingYard>? shuntingYards, IReadOnlyList<Station>? passengerInterchanges) =>
+        block.Split('\n').Sum(line => HeightOfLine(line, shuntingYards, passengerInterchanges)) + BlockGap;
 
-    private static double HeightOfLine(string line, IReadOnlyList<ShuntingYard>? shuntingYards)
+    private static double HeightOfLine(
+        string line, IReadOnlyList<ShuntingYard>? shuntingYards, IReadOnlyList<Station>? passengerInterchanges)
     {
         var text = line.TrimStart();
         // The blank line that joins a heading to its body; the margins either side of it are already
@@ -262,8 +277,9 @@ public static class InstructionsPagination
         if (text.Length == 0) return 0;
         // A placeholder is one line of source standing for a whole rendered part, so it is charged what
         // that part costs and not what the line does.
-        if (InstructionsPlaceholders.PlaceholderOf(line) is InstructionsPlaceholder.ShuntingYards)
-            return ShuntingYardsHeight(shuntingYards);
+        var placed = InstructionsPlaceholders.PlaceholderOf(line);
+        if (placed is InstructionsPlaceholder.ShuntingYards) return ShuntingYardsHeight(shuntingYards);
+        if (placed is InstructionsPlaceholder.Interchanges) return InterchangesHeight(passengerInterchanges);
         if (text.StartsWith('#')) return HeadingHeight;
 
         var wrapped = 1 + line.Length / CharactersPerLine;
@@ -291,6 +307,24 @@ public static class InstructionsPagination
             return ShuntingYardsRowHeight * (1 + locations / ShuntingYardsCharactersPerLine);
         });
         return ShuntingYardsHeadingHeight + ShuntingYardsHeaderHeight + rows;
+    }
+
+    /// <summary>
+    /// Lines the passenger interchanges list costs, heading included — what an
+    /// <c>&lt;Interchanges/&gt;</c> placeholder is charged where the author wrote it.
+    /// </summary>
+    /// <remarks>
+    /// The names are set as one paragraph, so what decides the height is their joined length rather
+    /// than how many there are: five short station names cost one line where three long ones cost two.
+    /// A layout that is not worked with passenger tickets has no interchanges, renders nothing, and is
+    /// charged nothing.
+    /// </remarks>
+    public static double InterchangesHeight(IReadOnlyList<Station>? passengerInterchanges)
+    {
+        if (passengerInterchanges is not { Count: > 0 }) return 0;
+
+        var names = string.Join(", ", passengerInterchanges.Select(station => station.Name)).Length;
+        return InterchangesHeadingHeight + 1 + names / CharactersPerLine + BlockGap;
     }
 
     private static bool IsListItem(string text)

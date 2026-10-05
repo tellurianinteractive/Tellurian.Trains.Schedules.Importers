@@ -148,6 +148,21 @@ public abstract class OperationLocation : IEquatable<OperationLocation>
     public Station? CargoServedFrom { get; set; }
 
     /// <summary>
+    /// Gets or sets the manned <see cref="Station"/> whose dispatcher works this location's signals and
+    /// switches from afar, or <c>null</c> when nobody does. Offered only where <c>CanBeControlled</c> says
+    /// it could be: a signal controlled location, an unmanned station or an industrial area.
+    /// </summary>
+    /// <remarks>
+    /// The controlling station's dispatcher clears the trains here as if at their own station: a
+    /// controlled unmanned station, industrial area, signal controlled junction or crossing place is a
+    /// dispatch endpoint, and its trains are on the controller's dispatch list (see
+    /// <c>IsRemotelyDispatched</c>). A block post stays part of the line and only divides it into control
+    /// sections, controlled or not. An unmanned location nobody controls is just part of the line between
+    /// its dispatchers.
+    /// </remarks>
+    public Station? ControlledBy { get; set; }
+
+    /// <summary>
     /// Gets or sets the <see cref="LockKey"/> a train needs to unlock the switches here, or <c>null</c>
     /// when none is needed. Offered only where <c>CanRequireLockKey</c> says there could be one:
     /// somewhere that exchanges cargo and has nobody on duty to work its switches.

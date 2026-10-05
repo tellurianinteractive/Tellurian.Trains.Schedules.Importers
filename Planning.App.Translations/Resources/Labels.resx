@@ -459,6 +459,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validate train speed?</value>
   </data>
+  <data name="ValidateStopPatterns" xml:space="preserve">
+    <value>Validate stop patterns?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Validate passenger exchange at platforms?</value>
   </data>
@@ -652,11 +655,17 @@
   <data name="HidePassingsHelp" xml:space="preserve">
     <value>Do not list trains that pass through without stopping (in some reports).</value>
   </data>
+  <data name="TrainsCanCross" xml:space="preserve">
+    <value>Trains can cross?</value>
+  </data>
+  <data name="TrainsCanCrossHelp" xml:space="preserve">
+    <value>Whether trains in opposite directions can cross here, one waiting while the other passes. A signal-controlled location that is neither a junction nor a crossing place is a block post, which only divides the line into sections.</value>
+  </data>
   <data name="ControlledBy" xml:space="preserve">
     <value>Controlled from</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
-    <value>The manned station whose dispatcher controls this signal-controlled location.</value>
+    <value>The manned station whose dispatcher controls this location from afar. The dispatcher there clears the trains here too, as at their own station, and they are on that station's dispatch list. This applies to an unmanned station, an industrial area, and a signal-controlled junction or crossing place; a block post, which is neither, only divides the line into sections that can each hold a train.</value>
   </data>
   <data name="NoneOption" xml:space="preserve">
     <value>(none)</value>
@@ -880,10 +889,10 @@
     <value>Help</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Print each report item in its own language?</value>
+    <value>Print reports in local languages?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
-    <value>When on, reports render each item in the language derived from the item itself — for example, a driver duty in its operating company's language. The interface, and any item with no derivable language, keep using your preferred language.</value>
+    <value>Reports are printed in the layout's default language: the first language of its default country. When on, each item is printed in its own local language instead: a driver duty in the language of the company working it, a turnus card in the language of the vehicle's company, and a station's dispatch list in the language of the station's country. A driver duty or turnus card with no company falls back to the language of its trains' operators, if they all share one. Anything without a local language the app can print in keeps the default language.</value>
   </data>
   <data name="ReportFontFamily" xml:space="preserve">
     <value>Report font</value>
@@ -1096,7 +1105,7 @@
     <value>A track stretch with these endpoints already exists.</value>
   </data>
   <data name="DispatchStretchesHint" xml:space="preserve">
-    <value>Dispatch stretches run between manned or shadow stations, passing through any unmanned locations between them. They are generated from the track stretches.</value>
+    <value>Dispatch stretches run between the places where trains are cleared: manned and shadow stations, and locations controlled from a manned station. They pass through any unmanned locations in between and are generated from the track stretches.</value>
   </data>
   <data name="RegenerateDispatchStretches" xml:space="preserve">
     <value>Regenerate from track stretches</value>
@@ -1645,7 +1654,7 @@
     <value>And local?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Also include local destinations served from the location.</value>
+    <value>Also list the locations whose cargo is served from this location.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>No destinations.</value>
@@ -1982,7 +1991,7 @@
     <value>Expected loco drivers</value>
   </data>
   <data name="ExpectedLocoDriversHelp" xml:space="preserve">
-    <value>The number of loco drivers you expect to have available. The graphical timetable shows, for every minute, how many drivers the trains actually require, coloured against this number: red above it, green equal to it, yellow one or two below it and grey three or more below it. Set to 0 to hide the bars.</value>
+    <value>The number of loco drivers you expect to have available. The graphical timetable shows, for every minute, how many drivers the trains and duties actually require, coloured against this number: red above it, green equal to it, yellow one or two below it and grey three or more below it. Set to 0 to hide the bars.</value>
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Required loco drivers</value>
@@ -2194,6 +2203,15 @@
   <data name="TrainTimetable" xml:space="preserve">
     <value>Timetable</value>
   </data>
+  <data name="WorkingHours" xml:space="preserve">
+    <value>Working hours</value>
+  </data>
+  <data name="Starts" xml:space="preserve">
+    <value>Starts</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Ends</value>
+  </data>
   <data name="Time" xml:space="preserve">
     <value>Time</value>
   </data>
@@ -2211,6 +2229,9 @@
   </data>
   <data name="DutyInTrain" xml:space="preserve">
     <value>Duty in {0} train {1}</value>
+  </data>
+  <data name="DutyInShuntingTask" xml:space="preserve">
+    <value>Shunting task {0}</value>
   </data>
   <data name="AtLocation" xml:space="preserve">
     <value>at</value>
@@ -2353,9 +2374,6 @@
   <data name="AnywhereExplanation" xml:space="preserve">
     <value>The wagons are already at the station and may have come from anywhere</value>
   </data>
-  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
-    <value>Also wagons for the destinations served by freight trains from there</value>
-  </data>
   <data name="AndBeyondExplanation" xml:space="preserve">
     <value>Also wagons for the destinations on the layout beyond that place</value>
   </data>
@@ -2487,5 +2505,62 @@
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Composition counted from the loco</value>
+  </data>
+  <data name="Passengers" xml:space="preserve">
+    <value>Passengers</value>
+  </data>
+  <data name="UsePassengerTickets" xml:space="preserve">
+    <value>Use passenger tickets?</value>
+  </data>
+  <data name="UsePassengerTicketsHelp" xml:space="preserve">
+    <value>Whether the meeting is worked with passenger tickets: a passenger buys a ticket where the journey starts and travels on it. With this set you can mark the stations where passengers change trains, and those interchanges then show up in the driver duties and in the general instructions.</value>
+  </data>
+  <data name="IsPassengerInterchange" xml:space="preserve">
+    <value>Passenger interchange?</value>
+  </data>
+  <data name="IsPassengerInterchangeHelp" xml:space="preserve">
+    <value>Whether passengers change trains here. A passenger train stopping at an interchange is told, on arrival, to hand over the passengers going on by another train. Offered only while the meeting is worked with passenger tickets; the mark is kept if you turn those off again.</value>
+  </data>
+  <data name="Interchanges" xml:space="preserve">
+    <value>Passenger interchanges</value>
+  </data>
+  <data name="InterchangesPlaceholderHint" xml:space="preserve">
+    <value>The passenger interchanges are printed only where you place them. Write this on a line of its own:</value>
+  </data>
+  <data name="StopPattern" xml:space="preserve">
+    <value>Stop pattern</value>
+  </data>
+  <data name="StopPatternHelp" xml:space="preserve">
+    <value>The operating locations where trains of this category stop on their way. The route of a new train is given a stop at each of them it passes, and a train that stops anywhere else is reported as a conflict. Tick nothing to leave the category unconstrained: its trains then stop wherever they can hand over what they carry, as before.</value>
+  </data>
+  <data name="StopPatternHint" xml:space="preserve">
+    <value>A ticked location is stopped at, the rest are run through. Where a train starts and where it ends are always stops, whatever is ticked here.</value>
+  </data>
+  <data name="NoStopPatternHint" xml:space="preserve">
+    <value>No stop pattern: a new train of this category stops wherever it can hand over what it carries, and no stop is reported. Tick the locations where its trains stop to give it one.</value>
+  </data>
+  <data name="StopPatternHasNoLocations" xml:space="preserve">
+    <value>No operating location on the layout takes what this category carries, so there is nowhere for its trains to stop.</value>
+  </data>
+  <data name="DeduceStopPattern" xml:space="preserve">
+    <value>Fill in from the trains</value>
+  </data>
+  <data name="DeduceStopPatternTitle" xml:space="preserve">
+    <value>Ticks the operating locations where the trains this category already has stop, replacing what is ticked now.</value>
+  </data>
+  <data name="ClearStopPattern" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ClearStopPatternTitle" xml:space="preserve">
+    <value>Removes the stop pattern and leaves the category unconstrained. Reading the plan again fills it in from the trains.</value>
+  </data>
+  <data name="InsertFirst" xml:space="preserve">
+    <value>Insert first</value>
+  </data>
+  <data name="RemoveFirst" xml:space="preserve">
+    <value>Remove first</value>
+  </data>
+  <data name="TimetableStretchNoPredecessor" xml:space="preserve">
+    <value>No track stretch leads here.</value>
   </data>
 </root>

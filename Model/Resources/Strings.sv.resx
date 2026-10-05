@@ -321,4 +321,28 @@
   <data name="TrainStopsForPassengerExchangeWithoutPlatform" xml:space="preserve">
     <value>Tåg {0} gör uppehåll för resandeutbyte vid {1} {2}, men spår {3} saknar plattform.</value>
   </data>
+  <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
+    <value>Tåg {0} gör uppehåll vid {1} {2}, men driftplatsen ingår inte i uppehållsmönstret för kategorin {3}.</value>
+  </data>
+  <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
+    <value>Tåg {0} har överlappande loktilldelningar på {3}: {1} och {2}.</value>
+  </data>
+  <data name="VehicleIsDoubleBookedOnDays" xml:space="preserve">
+    <value>Fordon {0} är dubbelbokat: bokningarna på {1} överlappar med dem på {2}.</value>
+  </data>
+  <data name="TrainsShareNumberOnOverlappingDays" xml:space="preserve">
+    <value>Tåg {0} och {1} har samma nummer men körs båda på {2}.</value>
+  </data>
+  <data name="VehiclesShareExternalIdOnDays" xml:space="preserve">
+    <value>Två fordon har samma externa id {0} på {1}.</value>
+  </data>
+  <data name="VehiclesShareOperatorAndNumberOnDays" xml:space="preserve">
+    <value>Fordon {0} och {1} har samma operatör och nummer {2} på {3}.</value>
+  </data>
+  <data name="TrainMissingTractionOnDays" xml:space="preserve">
+    <value>Tåg {0} saknar dragfordon mellan {1} {2} och {3} {4} på {5}.</value>
+  </data>
+  <data name="TrainPartHasNoDriverDutyOnDays" xml:space="preserve">
+    <value>Tåg {0} saknar körande tjänst på {1} för avsnittet från {2} {3} till {4} {5}.</value>
+  </data>
 </root>

@@ -4,8 +4,9 @@
 @inject Translator Translator
 
 @* Adds a train part to a driver duty. The planner picks from the parts already defined in the vehicle
-   schedules that a driver could take next: traction parts (worked by a locomotive or trainset) that do not
-   overlap the duty's parts and, for a non-empty duty, depart at or after its last arrival — the natural
+   schedules that a driver could take next: the parts worked by a locomotive or trainset, and the shunting
+   tasks, which need a driver whether or not a loco of their own works them. Offered are those that do not
+   overlap the duty's parts and, for a non-empty duty, start at or after its last part ends — the natural
    continuation, though the part may start at any station since the driver walks between parts. *@
 
 @if (Plan is not null)
@@ -81,10 +82,14 @@
 
     private Task Abort() => OnClosed.InvokeAsync();
 
+    // A shunting task is worked at one location, so it is written once with the times its work runs
+    // between rather than as a run from one place to another.
     private string PartText(ScheduledTrainPart part)
     {
         var traction = Plan?.ScheduledObjectsFor(part).FirstOrDefault(so => so.IsTraction)?.Designation;
-        var span = $"{part.From.OperationLocation.Signature} {part.From.Departure.HHMM()} → {part.To.OperationLocation.Signature} {part.To.Arrival.HHMM()}";
+        var span = part.Train.IsShuntingTask
+            ? $"{part.From.OperationLocation.Signature} {part.StartTime.HHMM()} – {part.EndTime.HHMM()}"
+            : $"{part.From.OperationLocation.Signature} {part.StartTime.HHMM()} → {part.To.OperationLocation.Signature} {part.EndTime.HHMM()}";
         return traction is null ? $"{part.Train} {span}" : $"{part.Train} {span} [{traction}]";
     }
 }

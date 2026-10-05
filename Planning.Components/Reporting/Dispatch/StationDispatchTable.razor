@@ -6,6 +6,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One printed page of a station's dispatch list.
 
    The reader is the person on duty at the station, working down the page in time order while trains are
@@ -21,7 +23,7 @@
 <div class="dispatchlist">
     <header class="heading">
         <h2>
-            <span class="name">@Page.Station.Name</span>
+            <span class="name">@Page.List.Title</span>
             @if (Interval is { } interval)
             {
                 <span class="interval">@interval</span>
@@ -80,7 +82,7 @@
                         @* Without the on-demand marker — it appears among the notes instead, where it has
                            room to be read rather than wrapping over four lines of a 14 mm column. *@
                         <td class="sessions"><SessionsView Sessions="row.DisplayedSessions" Settings="Settings" /></td>
-                        <td class="track">@row.TrackNumber</td>
+                        <td class="track">@row.TrackText</td>
                         <td class="time arr">@row.ArrivalTime</td>
                         <td class="place from">@row.OriginName</td>
                         <td class="time dep">@row.DepartureTime</td>
@@ -135,7 +137,8 @@
     {
         var kind = row.Kind switch
         {
-            DispatchRowKind.Arrival => "arrival",
+            // A shunting task takes the arrival tint: its row is the time the work starts.
+            DispatchRowKind.Arrival or DispatchRowKind.ShuntingTask => "arrival",
             DispatchRowKind.Departure => "departure",
             _ => "departure passing",
         };

@@ -186,17 +186,21 @@ public static class DriverDutyExtensions
             return new Maybe<ScheduledTrainPart>(part);
         }
 
-        /// <summary>Gets the duty's parts ordered by departure, i.e. as the driver works them.</summary>
+        /// <summary>
+        /// Gets the duty's parts ordered by the time they are worked from, i.e. as the driver works them.
+        /// A shunting task is placed by the time its work starts, not by the time it ends (see
+        /// <c>TrainPart.StartTime</c>).
+        /// </summary>
         public IReadOnlyList<ScheduledTrainPart> OrderedParts =>
-            [.. duty.Parts.OrderBy(p => p.From.Departure)];
+            [.. duty.Parts.OrderBy(p => p.StartTime)];
 
-        /// <summary>Gets the first part the driver works (earliest departure), or <c>null</c> when empty.</summary>
+        /// <summary>Gets the first part the driver works (the earliest <c>StartTime</c>), or <c>null</c> when empty.</summary>
         public ScheduledTrainPart? FirstPart =>
-            duty.Parts.Count == 0 ? null : duty.Parts.MinBy(p => p.From.Departure);
+            duty.Parts.Count == 0 ? null : duty.Parts.MinBy(p => p.StartTime);
 
-        /// <summary>Gets the last part the driver works (latest arrival), or <c>null</c> when empty.</summary>
+        /// <summary>Gets the last part the driver works (the latest <c>EndTime</c>), or <c>null</c> when empty.</summary>
         public ScheduledTrainPart? LastPart =>
-            duty.Parts.Count == 0 ? null : duty.Parts.MaxBy(p => p.To.Arrival);
+            duty.Parts.Count == 0 ? null : duty.Parts.MaxBy(p => p.EndTime);
 
         /// <summary>Gets the location the driver starts from, or <c>null</c> when the duty is empty.</summary>
         public OperationLocation? StartLocation => duty.FirstPart?.From.OperationLocation;
@@ -204,11 +208,17 @@ public static class DriverDutyExtensions
         /// <summary>Gets the location the driver ends at, or <c>null</c> when the duty is empty.</summary>
         public OperationLocation? EndLocation => duty.LastPart?.To.OperationLocation;
 
-        /// <summary>Gets the departure time of the first part, or <c>null</c> when the duty is empty.</summary>
-        public Time? FirstDeparture => duty.FirstPart?.From.Departure;
+        /// <summary>
+        /// Gets the time the driver starts the first part, or <c>null</c> when the duty is empty. That is
+        /// the departure of a travelling train and the start of the work of a shunting task.
+        /// </summary>
+        public Time? FirstDeparture => duty.FirstPart is { } first ? first.StartTime : null;
 
-        /// <summary>Gets the arrival time of the last part, or <c>null</c> when the duty is empty.</summary>
-        public Time? LastArrival => duty.LastPart?.To.Arrival;
+        /// <summary>
+        /// Gets the time the driver is free again after the last part, or <c>null</c> when the duty is
+        /// empty. That is the arrival of a travelling train and the end of the work of a shunting task.
+        /// </summary>
+        public Time? LastArrival => duty.LastPart is { } last ? last.EndTime : null;
 
         /// <summary>
         /// Gets the duty's derived start time: the first part's first-call arrival — the time the driver

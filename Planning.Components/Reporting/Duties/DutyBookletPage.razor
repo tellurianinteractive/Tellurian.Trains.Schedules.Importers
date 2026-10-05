@@ -2,6 +2,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One A5 page body of a duty booklet, chosen by the page's kind. Not an A5PPage wrapper: two of these
    sit side by side inside one A4 landscape sheet, which is what actually gets printed. *@
 
@@ -35,6 +37,7 @@
                 {
                     <div class="dutypart">
                         <TrainPartView Rows="part.TimetableRows" />
+                        <ShuntingTaskView Rows="part.TimetableRows" />
                     </div>
                 }
                 else

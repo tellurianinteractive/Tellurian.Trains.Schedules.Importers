@@ -6,9 +6,11 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
 /// One departure of a train from a station, with the composition it leaves with.
 /// </summary>
 /// <remarks>
-/// The composition is everything the train carries over the stretch it departs onto — wagons coupled here as
-/// well as those it arrived with — because that is what the staff have to check the train against, and where
-/// wagons are added they have to see which positions are already taken.
+/// A cargo flow stands on the sheet of the station it is connected at and of no other: that station gathers
+/// the wagons and marshals them into the train, while a station the flow only runs through has nothing to
+/// make up and no wagons of its own to find. The wagonsets are everything the train carries over the stretch
+/// it departs onto — coupled here as well as arrived with — so that the positions the rakes already take can
+/// be seen where wagons are added beside them.
 /// </remarks>
 public sealed class CompositionDeparture
 {
@@ -85,8 +87,9 @@ public sealed class CompositionDeparture
     /// works the station's sidings and departs onto no stretch.
     /// </para>
     /// <para>
-    /// A departure is only listed when the train leaves with cargo flow wagons or with a wagonset whose
-    /// wagons are listed. A wagonset that lists no wagons has no rectangles to draw, so it is not drawn.
+    /// A departure is only listed when cargo flow wagons are connected here or the train leaves with a
+    /// wagonset whose wagons are listed. A wagonset that lists no wagons has no rectangles to draw, so it is
+    /// not drawn.
     /// </para>
     /// </remarks>
     /// <param name="train">The train to take departures from.</param>
@@ -116,12 +119,14 @@ public sealed class CompositionDeparture
             if (groups.Count == 0) continue;
 
             // Wagonsets before cargo at the same position: a wagonset is a fixed rake coupled as a whole,
-            // and the loose wagons are marshalled around it.
+            // and the loose wagons are marshalled around it. Cargo units then stand in the order their
+            // destinations give them within the flow's position.
             CompositionGroup[] ordered =
             [
                 .. groups
                     .OrderBy(group => group.SortPosition)
                     .ThenBy(group => group is WagonsetComposition ? 0 : 1)
+                    .ThenBy(group => (group as CargoPositionComposition)?.SortDestinationPosition ?? 0)
                     .ThenBy(group => (group as WagonsetComposition)?.Designation, StringComparer.CurrentCulture)
             ];
 
@@ -191,43 +196,64 @@ public sealed class CompositionDeparture
         }
     }
 
-    // The cargo flow wagons in the train over the stretch departed onto from calls[index], one group per
-    // position. The position is the flow's; a destination's own position is a different value.
+    // The cargo flow wagons connected at calls[index], grouped into the units they are marshalled as: the
+    // flow's position in the train, and within it the position its destinations give the wagons.
     private static IEnumerable<CargoPositionComposition> CargoPositions(
         Train train, IReadOnlyList<StationCall> calls, int index) =>
         train.CargoFlows
-            .Where(flow => flow.CargoFlowOptions is not null && Covers(calls, flow, index))
+            .Where(flow => flow.CargoFlowOptions is not null && ConnectsAt(calls, flow, index))
             .GroupBy(flow => flow.PositionInTrain)
-            .Select(flows => new CargoPositionComposition
-            {
-                Position = flows.Key,
-                Destinations = DestinationsOf([.. flows]),
-            });
+            .SelectMany(flows => UnitsAt(flows.Key, [.. flows]));
 
-    // Where the wagons of the flows at one position go, and the most that may be brought to each. A flow to
-    // all destinations says everything the others could, so it stands alone; otherwise each destination is
-    // listed once, in the order the flows name them.
-    private static IReadOnlyList<CompositionDestination> DestinationsOf(IReadOnlyList<CargoFlowTrainPart> flows)
+    // The units of wagons the flows at one position in the train bring. Each position the destinations name
+    // within the flow is a unit of its own, standing in its own place, and so gets a rectangle of its own.
+    // A flow to all destinations says everything the others at the position could, so it stands alone; it
+    // names no destination, and so nothing tells its wagons apart within the position either.
+    private static IEnumerable<CargoPositionComposition> UnitsAt(int position, IReadOnlyList<CargoFlowTrainPart> flows)
     {
         if (flows.FirstOrDefault(flow => flow.CargoFlowOptions.ToAllDestinations) is { } toAll)
-            return [new(toAll.ToText, new(toAll.ToHtml))];
+        {
+            yield return new CargoPositionComposition
+            {
+                Position = position,
+                Destinations = [new(toAll.ToText, new(toAll.ToHtml))],
+            };
+            yield break;
+        }
 
-        return
-        [
-            .. flows
-                .SelectMany(flow => flow.CargoFlowOptions.Destinations)
-                .Select(destination => new CompositionDestination(
-                    Entry(destination.PlaceText, CompactLimitText(destination.MaxLoad)),
-                    destination.PlaceHtml,
-                    destination.MaxLoad))
-                // By the whole entry, so that the same place under two different limits stays two lines: one
-                // of them would otherwise be dropped and the wagons brought under a limit nobody stated.
-                .DistinctBy(destination => destination.Text)
-        ];
+        var units = flows
+            .SelectMany(flow => flow.StatedDestinations)
+            .GroupBy(destination => destination.PositionInTrain);
+        foreach (var unit in units)
+            yield return new CargoPositionComposition
+            {
+                Position = position,
+                DestinationPosition = unit.Key,
+                Destinations = DestinationsOf([.. unit]),
+            };
     }
+
+    // Where the wagons of one unit go, and the most that may be brought to each. Each destination is listed
+    // once, in the order the flows name them.
+    private static IReadOnlyList<CompositionDestination> DestinationsOf(IReadOnlyList<Destination> destinations) =>
+    [
+        .. destinations
+            .Select(destination => new CompositionDestination(
+                Entry(destination.PlaceText, CompactLimitText(destination.MaxLoad)),
+                destination.PlaceHtml,
+                destination.MaxLoad))
+            // By the whole entry, so that the same place under two different limits stays two lines: one of
+            // them would otherwise be dropped and the wagons brought under a limit nobody stated.
+            .DistinctBy(destination => destination.Text)
+    ];
 
     // A destination as one line of a rectangle: where the wagons go, and how many may go there.
     private static string Entry(string place, string limit) => limit.Length > 0 ? $"{place} {limit}" : place;
+
+    // Whether a cargo flow's wagons are connected at calls[index], which is the flow's from-call. A flow that
+    // is only carried past this call brings the station no wagons to gather, so it is not on its sheet.
+    private static bool ConnectsAt(IReadOnlyList<StationCall> calls, CargoFlowTrainPart flow, int index) =>
+        IndexOf(calls, flow.From) == index;
 
     // Whether a part is carried over the stretch departed onto from calls[index]: it is coupled at or before
     // that call and uncoupled after it. Positions in run order, since a train's calls are held in the order

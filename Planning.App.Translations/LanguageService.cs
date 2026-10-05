@@ -25,4 +25,11 @@ public class LanguageService
         new Language("nb", true) { CultureCode = "NO"},
         new Language("sv", true) { CultureCode = "SE"},
         ];
+
+    /// <summary>
+    /// Whether the application can print in the language with the given two-letter code, which decides
+    /// whether a report item may use its own local language or must fall back to the layout's default.
+    /// </summary>
+    public static bool IsSupported(string twoLetterLanguage) =>
+        SupportedLanguages.Any(l => l.TwoLetterCode.Equals(twoLetterLanguage, StringComparison.OrdinalIgnoreCase));
 }

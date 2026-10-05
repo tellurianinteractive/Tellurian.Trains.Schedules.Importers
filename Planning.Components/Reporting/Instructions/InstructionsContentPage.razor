@@ -2,6 +2,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* One page of the authored standing instructions, exactly as InstructionsPagination split them: the
    page decides nothing about what fits, it only sets what it is given.
 
@@ -20,13 +22,19 @@
     }
     @foreach (var segment in _segments)
     {
-        if (segment.Placeholder is InstructionsPlaceholder.ShuntingYards)
+        switch (segment.Placeholder)
         {
-            <ShuntingYardsView Layout="Layout" />
-        }
-        else
-        {
-            @((MarkupString)Markdig.Markdown.ToHtml(segment.Markdown))
+            case InstructionsPlaceholder.ShuntingYards:
+                <ShuntingYardsView Layout="Layout" />
+                break;
+
+            case InstructionsPlaceholder.Interchanges:
+                <PassengerInterchangesView Layout="Layout" />
+                break;
+
+            default:
+                @((MarkupString)Markdig.Markdown.ToHtml(segment.Markdown))
+                break;
         }
     }
 </div>

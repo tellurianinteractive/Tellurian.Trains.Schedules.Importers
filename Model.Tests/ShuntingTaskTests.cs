@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -13,6 +14,7 @@ public class ShuntingTaskTests
 {
     private static readonly Time Start = Time.FromHourAndMinute(14, 0);
     private static readonly Time End = Time.FromHourAndMinute(14, 45);
+    private static readonly ValidationSettings Settings = new();
 
     private static TrainCategory ShuntingCategory => new()
     {
@@ -187,7 +189,9 @@ public class ShuntingTaskTests
         var train = timetable.Trains.First(t => !t.IsShuntingTask);
         var calls = train.CallsInRunOrder;
 
-        train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, station));
+        // Bound for where the train ends, not the station it starts at: a flow is never stated as
+        // bringing wagons to the station it departs from.
+        train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, calls[^1].OperationLocation));
 
         // The dispatcher's two halves of the same flow: what goes on the train here, and what comes off
         // it there. Neither reaches the loco driver, whose booklet states the flow in its cargo block.
@@ -202,6 +206,30 @@ public class ShuntingTaskTests
         Assert.IsFalse(ends.IsDriverNote);
         Assert.IsEmpty(calls[0].CargoFlowNotes.OfType<CargoFlowUncoupleNote>());
         Assert.IsEmpty(calls[^1].CargoFlowNotes.OfType<CargoFlowDestinationNote>());
+    }
+
+    [TestMethod]
+    public void FlowsBeginningAtOneCallShareOneNoteNamingEachPlaceOnce()
+    {
+        var (timetable, _, _) = Arrange();
+        var train = timetable.Trains.First(t => !t.IsShuntingTask);
+        var calls = train.CallsInRunOrder;
+        var places = timetable.Layout.OperationLocations
+            .Where(l => !l.Equals(calls[0].OperationLocation)).Take(2).ToArray();
+
+        train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, places[0]));
+        train.CreateCargoFlow(2, calls[0], calls[^1], FlowTo(timetable, places[1]));
+        train.CreateCargoFlow(3, calls[0], calls[^1], FlowTo(timetable, places[0]));
+
+        // One sentence listing the places, not the same sentence once per flow.
+        var begins = calls[0].CargoFlowNotes.OfType<CargoFlowDestinationNote>().Single();
+        var ends = calls[^1].CargoFlowNotes.OfType<CargoFlowUncoupleNote>().Single();
+
+        Assert.HasCount(3, begins.Parts);
+        StringAssert.Contains(begins.ToText, $"{places[0].Name}, {places[1].Name}");
+        Assert.AreEqual(begins.ToText.IndexOf(places[0].Name, StringComparison.Ordinal),
+            begins.ToText.LastIndexOf(places[0].Name, StringComparison.Ordinal), $"Note text: '{begins.ToText}'.");
+        StringAssert.Contains(ends.ToText, $"{places[0].Name}, {places[1].Name}");
     }
 
     [TestMethod]
@@ -313,5 +341,153 @@ public class ShuntingTaskTests
         var (_, task, _) = Arrange();
 
         Assert.IsEmpty(task.CheckShuntingTaskCalls());
+    }
+
+    // --- A task needs no loco of its own, but it does need a driver ------------------------------------
+
+    // A working holding nothing but the task, with no vehicle assigned to it.
+    private static (Plan Plan, ScheduledTrainPart Part) LocolessWorking()
+    {
+        var (timetable, task, _) = Arrange();
+        var plan = Plan.Create("Test", timetable);
+        var schedule = plan.CreateSchedule();
+        return (plan, schedule.Add(task.AsTrainPart));
+    }
+
+    [TestMethod]
+    public void AWorkingOfShuntingTasksAloneNeedsNoVehicle()
+    {
+        var (plan, _) = LocolessWorking();
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.ScheduleHasNoVehicle);
+
+        Assert.IsEmpty(errors, "A task is worked by whatever stands at the station, so a loco of its own is optional.");
+    }
+
+    [TestMethod]
+    public void AShuntingTaskWithoutALocoOccupiesNoTrack()
+    {
+        var (timetable, first, station) = Arrange();                                     // 14:00-14:45
+        var second = AddTask(timetable, station, Start.AddMinutes(30), End.AddMinutes(30)); // 14:30-15:15, same track
+        var plan = Plan.Create("Test", timetable);
+        plan.CreateSchedule().Add(first.AsTrainPart);
+        plan.CreateSchedule().Add(second.AsTrainPart);
+
+        Assert.IsFalse(first.Calls[0].OccupiesTrack(plan.Schedules));
+        Assert.IsEmpty(TrackConflictsBetween(plan, first, second), "A task without a loco takes no track, so its track and times are ignored.");
+    }
+
+    [TestMethod]
+    public void AShuntingTaskWithALocoOccupiesItsTrack()
+    {
+        var (timetable, first, station) = Arrange();                                     // 14:00-14:45
+        var second = AddTask(timetable, station, Start.AddMinutes(30), End.AddMinutes(30)); // 14:30-15:15, same track
+        var plan = Plan.Create("Test", timetable);
+        var firstSchedule = plan.CreateSchedule();
+        firstSchedule.Add(first.AsTrainPart);
+        var secondSchedule = plan.CreateSchedule();
+        secondSchedule.Add(second.AsTrainPart);
+        plan.AssignVehicle(firstSchedule, plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 1, null));
+        plan.AssignVehicle(secondSchedule, plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null));
+
+        Assert.IsTrue(first.Calls[0].OccupiesTrack(plan.Schedules));
+        Assert.HasCount(1, TrackConflictsBetween(plan, first, second), "A task's own loco stands on the track it names.");
+    }
+
+    private static List<ValidationError> TrackConflictsBetween(Plan plan, Train one, Train another) =>
+        [.. plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.StationTrackConflict && e.Trains.Contains(one) && e.Trains.Contains(another))];
+
+    [TestMethod]
+    public void AWorkingThatAlsoHoldsATravellingTrainStillNeedsAVehicle()
+    {
+        var (timetable, task, _) = Arrange();
+        var plan = Plan.Create("Test", timetable);
+        var schedule = plan.CreateSchedule();
+        schedule.Add(task.AsTrainPart);
+        schedule.Add(timetable.Trains.First(t => !t.IsShuntingTask).AsTrainPart);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.ScheduleHasNoVehicle);
+
+        Assert.IsNotEmpty(errors, "Nothing moves a travelling train but a traction unit, so the exemption ends there.");
+    }
+
+    [TestMethod]
+    public void AShuntingTaskIsOfferedToADriverDutyWithoutALoco()
+    {
+        var (plan, part) = LocolessWorking();
+
+        var candidates = plan.CandidatePartsFor(plan.CreateDriverDuty());
+
+        Assert.Contains(part, candidates, "A task is work a driver does whether or not a loco is booked for it.");
+    }
+
+    [TestMethod]
+    public void AShuntingTaskWithNoDriverDutyIsReported()
+    {
+        var (plan, _) = LocolessWorking();
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreEqual(ValidationScope.Duty, errors[0].Scope);
+        // The span reads forwards: the work starts at the call's arrival and ends at its departure.
+        Assert.AreEqual(Start, errors[0].FromTime);
+        Assert.AreEqual(End, errors[0].ToTime);
+    }
+
+    [TestMethod]
+    public void AShuntingTaskWorkedByADutyIsNotReported()
+    {
+        var (plan, part) = LocolessWorking();
+        var duty = plan.CreateDriverDuty();
+
+        Assert.IsTrue(duty.Append(part).HasValue);
+        Assert.IsEmpty(plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.TrainPartMissingDriverDuty));
+    }
+
+    [TestMethod]
+    public void TwoTasksAtOneStationChainIntoOneWorkingAndOneDuty()
+    {
+        var (timetable, first, station) = Arrange();                                    // 14:00-14:45
+        var second = AddTask(timetable, station, End.AddMinutes(15), End.AddMinutes(60)); // 15:00-15:45
+        var plan = Plan.Create("Test", timetable);
+        var schedule = plan.CreateSchedule();
+
+        var firstPart = schedule.Append(first.AsTrainPart);
+        var secondPart = schedule.Append(second.AsTrainPart);
+
+        Assert.IsTrue(firstPart.HasValue);
+        Assert.IsTrue(secondPart.HasValue, "The second task starts after the first one's work ends, at the same station.");
+        CollectionAssert.AreEqual(new[] { first, second }, schedule.OrderedParts.Select(p => p.Train).ToArray());
+
+        var duty = plan.CreateDriverDuty();
+        Assert.IsTrue(duty.Append(firstPart.Value).HasValue);
+        Assert.Contains(secondPart.Value, plan.CandidatePartsFor(duty), "The later task continues the duty.");
+        Assert.IsTrue(duty.Append(secondPart.Value).HasValue);
+        Assert.IsEmpty(plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType is ValidationErrorType.ScheduleHasNoVehicle or ValidationErrorType.TrainPartMissingDriverDuty));
+    }
+
+    [TestMethod]
+    public void ADutyPlacesATaskByWhenItsWorkStartsAndEnds()
+    {
+        var (plan, part) = LocolessWorking();
+        var duty = plan.CreateDriverDuty();
+        duty.Append(part);
+
+        // Read the other way round — From.Departure and To.Arrival — a task ends before it begins, and
+        // the next part a driver could take would be offered against the wrong time.
+        Assert.AreEqual(Start, part.StartTime);
+        Assert.AreEqual(End, part.EndTime);
+        Assert.AreEqual(Start, duty.FirstDeparture);
+        Assert.AreEqual(End, duty.LastArrival);
+        Assert.AreEqual(Start, duty.StartTime);
+        Assert.AreEqual(End, duty.EndTime);
     }
 }

@@ -61,6 +61,17 @@ public sealed class TimetableRow
     /// </remarks>
     public string StationName => Call.OperationLocation.Name;
 
+    /// <summary>
+    /// Whether this row belongs to a shunting task rather than to a train that travels.
+    /// </summary>
+    /// <remarks>
+    /// The two rows of a task are not a route: they are when the work starts and when it ends, at the one
+    /// place it is worked. They are printed by <c>ShuntingTaskView</c> as a single line instead of by the
+    /// timetable, and no track is named — a task is worked over the whole station, and the track its call
+    /// carries is merely the one the planner's ranking happened to pick when the task was created.
+    /// </remarks>
+    public bool IsShuntingTask => Call.Train.IsShuntingTask;
+
     /// <summary>The track the call occupies.</summary>
     public string TrackNumber => Call.Track.Number;
 
@@ -96,7 +107,7 @@ public sealed class TimetableRow
     /// place to find out about it.
     /// </para>
     /// </remarks>
-    private IReadOnlyList<ICallNote> PrintingNotes =>
+    public IReadOnlyList<ICallNote> PrintedNotes =>
         [.. Notes.Where(note => note.ToText.HasValue)];
 
     /// <summary>
@@ -105,7 +116,7 @@ public sealed class TimetableRow
     /// notes out of the column for no reason.
     /// </summary>
     public ICallNote? InlineNote =>
-        PrintingNotes is [{ } first, ..] && first.ToText.Length <= MaxCharsInNoteColumn ? first : null;
+        PrintedNotes is [{ } first, ..] && first.ToText.Length <= MaxCharsInNoteColumn ? first : null;
 
     /// <summary>
     /// The notes that get a full-width row of their own beneath this one, each on its own line.
@@ -116,7 +127,7 @@ public sealed class TimetableRow
     /// becomes the exception rather than the rule.
     /// </remarks>
     public IEnumerable<ICallNote> StackedNotes =>
-        InlineNote is null ? PrintingNotes : PrintingNotes.Skip(1);
+        InlineNote is null ? PrintedNotes : PrintedNotes.Skip(1);
 
     /// <summary>
     /// Builds the rows for a train part: the <em>whole</em> train's route, with the halves the driver

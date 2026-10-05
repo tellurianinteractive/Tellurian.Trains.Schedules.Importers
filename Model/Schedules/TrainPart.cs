@@ -144,6 +144,33 @@ public static class TrainPartExtensions
         public (Time From, Time To) WorkingSpan => (trainPart.From.WorkStart, trainPart.To.WorkEnd);
 
         /// <summary>
+        /// The time this part's working begins: a travelling train's departure from its from-call, and a
+        /// shunting task's arrival at its single call, which is when the work starts. This is what orders
+        /// the parts of a vehicle schedule or a driver duty, and what the editors and reports print as the
+        /// part's first time.
+        /// </summary>
+        /// <remarks>
+        /// A shunting task is worked at one location, so its from- and to-calls are the same call and its
+        /// times read the other way round: the arrival opens the work and the departure closes it. Reading
+        /// <c>From.Departure</c> would therefore give the time the task <em>ends</em>.
+        /// <para>
+        /// This is not the <c>WorkingSpan</c>, which reaches further out: the span says from when a part
+        /// ties up a vehicle or a driver, counting the preparation time before a train departs, whereas
+        /// this is the time the part is worked from.
+        /// </para>
+        /// </remarks>
+        public Time StartTime =>
+            trainPart.Train.IsShuntingTask ? trainPart.From.Arrival : trainPart.From.Departure;
+
+        /// <summary>
+        /// The time this part's working ends: a travelling train's arrival at its to-call, and a shunting
+        /// task's departure from its single call, which is when the work ends. The counterpart of
+        /// <c>StartTime</c>.
+        /// </summary>
+        public Time EndTime =>
+            trainPart.Train.IsShuntingTask ? trainPart.To.Departure : trainPart.To.Arrival;
+
+        /// <summary>
         /// The part written with the times of its <c>WorkingSpan</c> rather than its departure and
         /// arrival, so that a reported overlap shows the times the overlap was judged on: at the train's
         /// origin the arrival, where preparing it begins, and at its destination the departure, where

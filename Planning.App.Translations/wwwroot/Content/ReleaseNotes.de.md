@@ -1,5 +1,66 @@
 # Versionshinweise
 
+## Version 0.7.1
+
+### Neue Funktionen
+
+- **Berichte werden in der Sprache der Anlage gedruckt.** Alle Berichte werden jetzt in der
+  Standardsprache der Anlage gedruckt, der ersten Sprache ihres Standardlandes, gleich in welcher
+  Sprache Sie selbst arbeiten. Die gedruckten Blätter lesen die Teilnehmer am Treffen, nicht Sie.
+  Datum und Zahlen richten sich ebenfalls nach dem Land.
+
+  Mit **Berichte in Landessprachen drucken** unter **Einstellungen › Allgemein** wird jeder
+  Lokführerdienst in der Sprache des Unternehmens gedruckt, das ihn fährt, jede Umlaufkarte in der
+  Sprache des Unternehmens des Fahrzeugs und die Zugmeldeliste jedes Bahnhofs in der Sprache seines
+  Landes. Das gilt auch für Zugmeldelisten, die als Dokumente gespeichert werden. Ein Dienst oder eine
+  Karte ohne Unternehmen erhält die Sprache der Betreiber der Züge, sofern sie alle dieselbe haben.
+  Alles ohne eine Sprache, in der die App drucken kann, behält die Standardsprache.
+
+- **Eine Zugkategorie sagt, wo ihre Züge halten.** Der Reiter **Zugkategorien** hat ein **Haltemuster**:
+  Kreuze bei den Betriebsstellen, an denen Züge der Kategorie unterwegs halten. Ein neuer Zug, der im
+  Reiter **Züge** angelegt wird, erhält an jeder angekreuzten Betriebsstelle, die er befährt, einen Halt
+  und durchfährt die übrigen — wo ein Zug beginnt und wo er endet, ist immer ein Halt, ganz gleich, was
+  angekreuzt ist, denn dort wird er bereitgestellt und abgestellt. Angeboten werden nur die
+  Betriebsstellen, an denen die Kategorie überhaupt halten kann.
+
+  Ein Zug, der anderswo hält, erscheint unter **Konflikte**, mit Zug, Betriebsstelle und Zeit. Nichts wird
+  für Sie berichtigt: nur Sie können entscheiden, ob der Zug hält, wo er durchfahren sollte, oder ob dem
+  Muster eine Betriebsstelle fehlt, an der die Züge der Kategorie halten. Die Prüfung lässt sich unter
+  **Einstellungen › Validierung** abschalten.
+
+  **Aus den Zügen übernehmen** kreuzt die Betriebsstellen an, an denen die vorhandenen Züge der Kategorie
+  halten, und das geschieht für Sie, sobald ein Plan aus einer früheren Version zum ersten Mal geöffnet
+  wird — jede Kategorie erhält das Muster, das ihre Züge die ganze Zeit gefahren sind, sodass nichts
+  gemeldet wird, was vorher kein Fehler war. Kreuzen Sie nichts an, bleibt die Kategorie ungebunden: ihre
+  Züge halten dann überall dort, wo sie abgeben können, was sie befördern, wie bisher. Eine
+  Rangierkategorie hat kein Haltemuster, da ihre Aufgaben nirgendwohin fahren.
+
+- **Eine Rangieraufgabe braucht keine eigene Lok, aber sie braucht einen Lokführer.** Eine Aufgabe wird
+  ebenso oft von der Zuglok erledigt, die ohnehin im Bahnhof steht, oder von einer Rangierlok, die Sie
+  nicht als Fahrzeug angelegt haben, wie von einer eigens dafür eingeteilten. Ein **Umlauf**, der nichts
+  als Rangieraufgaben enthält, ist deshalb ohne zugewiesenes Fahrzeug vollständig und erscheint nicht
+  mehr unter **Konflikte** als Umlauf ohne Fahrzeug. Nehmen Sie einen fahrenden Zug in denselben Umlauf
+  auf, wird wieder ein Fahrzeug verlangt.
+
+  Was eine Aufgabe sehr wohl braucht, ist jemanden, der sie ausführt, und so wird sie nun im Reiter
+  **Dienste** wie jeder andere Zugabschnitt angeboten, mit oder ohne eigene Lok — mit der Betriebsstelle
+  einmal geschrieben und den Zeiten, zwischen denen die Arbeit läuft, denn sie fährt nirgendwohin. Eine
+  Aufgabe, die kein Dienst abdeckt, erscheint unter **Konflikte** für die Sessionen, in denen sie
+  unbesetzt bleibt, neben den Abschnitten, die eine Lok zieht.
+
+  Im gedruckten Dienstheft trägt die Seite der Aufgabe die Überschrift **Rangieraufgabe** mit der Signatur
+  des Betreibers, nicht eine Zugnummer, die niemand verwendet, und wo ein Zug seinen Fahrplan hat, hat eine
+  Aufgabe einen eigenen Block: **Arbeitszeiten**, eine Zeile mit der Betriebsstelle und den Zeiten, zu
+  denen die Arbeit **beginnt** und **endet**, darunter die Rangieranweisungen. Ein Gleis wird nicht
+  genannt — die Arbeit wird im ganzen Bahnhof getan, nicht von einem Gleis aus.
+
+- **Die Balken für Lokführer rechnen die Wartezeit in einem Dienst mit.** Die Balken über dem Bildfahrplan
+  zählten einen Lokführer nur als benötigt, solange ein Zug oder eine Rangieraufgabe gefahren
+  wurde. Ein Lokführer, dessen **Dienst** eine Lücke zwischen zwei Zügen hat, ist währenddessen trotzdem
+  gebunden, wartend oder auf dem Weg zum nächsten, deshalb zählt diese Zeit jetzt auch mit – an den Sitzungen,
+  an denen der Dienst gefahren wird. Ebenso ein selbst gesetzter Dienstbeginn vor dem ersten Zug des
+  Dienstes oder ein Dienstende nach seinem letzten.
+
 ## Version 0.7.0
 
 ### Neue Funktionen

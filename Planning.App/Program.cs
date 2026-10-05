@@ -25,4 +25,7 @@ var host = builder.Build();
 // Apply the user's stored UI culture (set by the LanguageSelector) before the app runs.
 await host.Services.ApplyStoredUiCultureAsync();
 
+// Reports print in the layout's languages, not only the user's, so every language's translations are needed.
+await LanguageResources.LoadAllSupportedLanguagesAsync();
+
 await host.RunAsync();

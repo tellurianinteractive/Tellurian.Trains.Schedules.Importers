@@ -98,11 +98,26 @@ public static class DutyPagination
     }
 
     /// <summary>The height of the timetable block alone, which is what moves on a split part.</summary>
+    /// <remarks>
+    /// A shunting task prints the same rows as one line instead (see <c>ShuntingTaskView</c>), so it is
+    /// charged for one. Its notes all take a full-width row there, the block having no note column for a
+    /// short one to sit in, and each is charged as one — a shade over, since a note spanning the whole
+    /// width holds a little more than <see cref="CharactersPerNoteRow"/>, which is measured on the
+    /// timetable's narrower note row.
+    /// </remarks>
     public static double TimetableHeight(DriverDutyPart part)
     {
         part = part.ValueOrException(nameof(part));
         var rows = part.TimetableRows;
         if (rows.Count == 0) return 0;
+
+        if (rows[0].IsShuntingTask)
+        {
+            double taskHeight = TimetableOverhead + 1;
+            foreach (var note in rows.SelectMany(row => row.PrintedNotes))
+                taskHeight += 1 + note.ToText.Length / CharactersPerNoteRow;
+            return taskHeight;
+        }
 
         double height = TimetableOverhead + rows.Count;
         foreach (var row in rows)

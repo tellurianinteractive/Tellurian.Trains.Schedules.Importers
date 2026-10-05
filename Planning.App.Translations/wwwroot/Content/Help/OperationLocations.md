@@ -3,12 +3,19 @@ locations where trains run, stop or are controlled, together with their tracks.
 
 ### How to choose type of operation location?
 
-1. **Signal-controlled**: if **unmanned** and controlled by **signals**, like an intermediate block, a meet/overtake location or a junction.
-   This type can also be defined as **controlled by** an adjacent **station**.
-2. **Industrial area**: if **unmanned** and **freight-only**. Can have s **key** for unlocking/locking, see *Lock keys** below.. 
+1. **Signal-controlled**: if **unmanned** and controlled by **signals** from an adjacent **station**, set as **controlled by**.
+   It is a **junction** where more than two track stretches meet, a **crossing place** where you tick
+   **Trains can cross?**, both, or neither — an intermediate **block post**.
+2. **Industrial area**: if **unmanned** and **freight-only**. Can be defined as **controlled by** an adjacent **station**, and have a **key** for unlocking/locking, see *Lock keys* below.
 3. **Station**: Can optionally be **manned**. A station can be designated as **shadow yard**.
    If unmanned, a station can  be defined as **controlled by** an adjacent **station**, and have a **key** for unlocking/lockin, see *Lock keys* below.
 4. **Other**: not **manned**, not controlled by **signals** but needs to be in the timetable, like an operational location is one of:
+
+An unmanned station, an industrial area, or a signal-controlled junction or crossing place **controlled
+by** a manned station is worked by that station's dispatcher as if it were their own: its trains are on
+that station's dispatch list. A block post only divides the line into sections. Tick **Trains can
+cross?** yourself: the tracks cannot tell, since a junction has two whether or not trains can cross. Where nobody controls an unmanned location, it is just part of the line between
+the dispatchers, and trains cannot meet there. See *Dispatch stretches* on the **Stretches** tab.
 
 #### Tracks at an operation location
 
@@ -122,6 +129,24 @@ trains use it. Reassign or remove those station calls first.
 A station can be linked to one or more **regions** from the layout's region catalogue (managed on the
 **Regions** tab). This is mainly used for shadow shunting yards, which represent external stations or regions
 beyond the modelled railway. If the layout has no regions yet, you can add the standard set from the form.
+
+### Passenger interchanges
+
+Where the meeting is worked with **passenger tickets** — switched on under **Settings › General** — some
+stations are the places a passenger leaves one train and goes on by the next. Tick **Passenger
+interchange?** on each of them.
+
+Nothing else has to be planned. A passenger train that **stops** at one is told, on arrival, to *exchange
+transferring passengers here*. A train that only runs past hands nobody over, and a freight train carries
+nobody to hand over, so neither is told anything.
+
+The interchanges can also be listed in the general instructions booklet, by writing `<Interchanges/>` on
+a line of its own in the standing instructions under **Settings › Information**. They are printed where
+you place that tag and nowhere else.
+
+The tick is offered only where it means something: the meeting has to use tickets, and the station has to
+exchange **passengers**. Turn the tickets off and the marks are kept, exactly as a lock key is — nothing
+is derived from them meanwhile, and turning the tickets back on brings the interchanges straight back.
 
 ### Lock keys
 

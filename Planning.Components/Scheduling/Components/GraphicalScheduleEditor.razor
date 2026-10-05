@@ -2,6 +2,10 @@
 @using Tellurian.Trains.Schedules.Model
 @using Tellurian.Trains.Schedules.Model.Validations
 @using Tellurian.Trains.Schedules.Planning.Components.Scheduling
+@* Printed in a report's language when a report uses it; see ReportComponentBase. *@
+@inherits Tellurian.Trains.Schedules.Planning.Components.Reporting.ReportComponentBase
+
+@{ UseReportCulture(); }
 
 @if (Current is null)
 {

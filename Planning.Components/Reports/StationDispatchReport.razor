@@ -30,9 +30,13 @@ else
        identifies a sheet and what orders a station's pile. *@
     @foreach (var page in _pages)
     {
-        <A4LPage Margin="10">
-            <StationDispatchTable Page="page" Settings="Settings" />
-        </A4LPage>
+        var culture = _cultures[page.List];
+        UseReportCulture(culture);
+        <CascadingValue Value="culture">
+            <A4LPage Margin="10">
+                <StationDispatchTable Page="page" Settings="Settings" />
+            </A4LPage>
+        </CascadingValue>
     }
 }
 
@@ -51,6 +55,9 @@ else
 
     private IReadOnlyList<DispatchPage>? _pages;
 
+    // The language each station's sheets are printed in, by its list.
+    private readonly Dictionary<DispatchList, ReportCulture> _cultures = [];
+
     private SessionsSettings Settings =>
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
@@ -67,20 +74,28 @@ else
         }
 
         var settings = Settings;
-        var lists = Selected(layout)
-            .Select(station => DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule))
-            .ToList();
-
-        _pages = DispatchPaginator.BuildPages(
-            lists, SessionsFormatting.PositionsOf(settings).Count, DispatchPageGeometry.A4Landscape);
+        var sessionCount = SessionsFormatting.PositionsOf(settings).Count;
+        var pages = new List<DispatchPage>();
+        foreach (var station in Selected(layout))
+        {
+            // Built in the station's own language: the list writes the sessions' texts, and the pagination
+            // measures the notes'.
+            var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
+            using var scope = ReportCulture.Use(culture.Culture);
+            var list = DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
+            _cultures[list] = culture;
+            pages.AddRange(DispatchPaginator.BuildPages([list], sessionCount, DispatchPageGeometry.A4Landscape)
+                .Select(page => page with { PageNumber = pages.Count + page.PageNumber }));
+        }
+        _pages = pages;
     }
 
-    // The stations that get a list: every dispatch endpoint — manned stations, and shadow stations
-    // whether manned or not — in layout order, narrowed by the query parameter when one is given.
+    // The stations that get a list: every station with a dispatcher — manned stations, and shadow
+    // stations whether manned or not — in layout order, narrowed by the query parameter when one is given.
     // Selection changes WHICH stations print, never their order.
     private IReadOnlyList<Station> Selected(Model.Layouts.Layout layout)
     {
-        var all = layout.DispatchEndpoints.ToList();
+        var all = layout.Dispatchers.ToList();
         if (string.IsNullOrWhiteSpace(StationSignatures)) return all;
 
         var wanted = StationSignatures

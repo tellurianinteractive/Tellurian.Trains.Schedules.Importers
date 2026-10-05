@@ -1,0 +1,33 @@
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* The stations where passengers change trains, under their own heading.
+
+   Printed only where the author wrote an <Interchanges/> tag. Unlike the shunting yards, which also
+   sit on the layout page at the back of the booklet, this list has no fixed home: it belongs to the
+   meeting's own conventions about passenger tickets, and only the author knows which part of their
+   text it explains.
+
+   A plain list of names rather than a table, because there is only one thing to say about each
+   station — that a passenger may change trains there. The stations come in layout order, so a reader
+   following the line from one end to the other meets them in the order they will.
+
+   No styling of its own: the heading and the paragraph take .instructions-body's own rules, which is
+   also what InstructionsPagination.InterchangesHeight is derived from. *@
+
+@if (Interchanges.Count > 0)
+{
+    <h2>@Translator("Interchanges")</h2>
+    <p>@string.Join(", ", Interchanges.Select(station => station.Name))</p>
+}
+
+@code {
+    /// <summary>
+    /// The layout whose passenger interchanges are listed. A layout not worked with passenger tickets
+    /// has none, and prints nothing at all — the tag then costs the booklet nothing.
+    /// </summary>
+    [Parameter, EditorRequired] public Layout? Layout { get; set; }
+
+    private IReadOnlyList<Station> Interchanges => Layout?.PassengerInterchanges ?? [];
+}

@@ -459,6 +459,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Valider toghastighet?</value>
   </data>
+  <data name="ValidateStopPatterns" xml:space="preserve">
+    <value>Valider stoppmønstre?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Valider passasjerutveksling ved plattform?</value>
   </data>
@@ -730,7 +733,7 @@
     <value>En banestrekning med disse endepunktene finnes allerede.</value>
   </data>
   <data name="DispatchStretchesHint" xml:space="preserve">
-    <value>Togledelsesstrekninger går mellom bemannede stasjoner eller skyggestasjoner og passerer ubemannede steder mellom dem. De genereres fra banestrekningene.</value>
+    <value>Togledelsesstrekninger går mellom stedene der tog klareres: bemannede stasjoner, skyggestasjoner og steder som fjernstyres fra en bemannet stasjon. De passerer ubemannede steder imellom og genereres fra banestrekningene.</value>
   </data>
   <data name="RegenerateDispatchStretches" xml:space="preserve">
     <value>Generer på nytt fra banestrekninger</value>
@@ -975,11 +978,17 @@
   <data name="BreakForPrintingHelp" xml:space="preserve">
     <value>Del dagen på dette tidspunktet. Den grafiske ruteplanen kan da skrives ut over flere sider og vises en halvdel om gangen på skjermen.</value>
   </data>
+  <data name="TrainsCanCross" xml:space="preserve">
+    <value>Tog kan krysse?</value>
+  </data>
+  <data name="TrainsCanCrossHelp" xml:space="preserve">
+    <value>Om tog i motsatt retning kan krysse her, ved at det ene venter mens det andre passerer. Et signalstyrt sted som verken er et sporskifte eller et kryssingssted, er en blokkpost, som bare deler strekningen i avsnitt.</value>
+  </data>
   <data name="ControlledBy" xml:space="preserve">
     <value>Styres fra</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
-    <value>Den bemannede stasjonen hvis togekspeditør styrer dette signalstyrte stedet.</value>
+    <value>Den bemannede stasjonen hvis togekspeditør fjernstyrer dette stedet. Togekspeditøren der klarerer også togene her, som på sin egen stasjon, og de står på stasjonens togekspederingsliste. Det gjelder en ubemannet stasjon, et industriområde og et signalstyrt sporskifte eller kryssingssted; en blokkpost, som er ingen av delene, deler bare strekningen i avsnitt som hver kan romme ett tog.</value>
   </data>
   <data name="Danish" xml:space="preserve">
     <value>Dansk</value>
@@ -1222,10 +1231,10 @@
     <value>Planlegg tog med angitte ukedager i stedet for kjøresesjonenes numre.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Skriv ut hvert rapportelement på sitt eget språk?</value>
+    <value>Skriv ut rapporter på lokale språk?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
-    <value>Når dette er på, gjengis hvert element i rapporter på språket som utledes fra elementet selv – for eksempel en førertjeneste på operatørselskapets språk. Grensesnittet, og alle elementer uten utledbart språk, fortsetter å bruke ditt foretrukne språk.</value>
+    <value>Rapporter skrives ut på banens standardspråk: det første språket i standardlandet. Når dette er på, skrives hvert element i stedet ut på sitt eget lokale språk: en førertjeneste på språket til selskapet som kjører den, et omløpskort på språket til kjøretøyets selskap, og en stasjons togekspederingsliste på språket til stasjonens land. En førertjeneste eller et omløpskort uten selskap bruker språket til togenes operatører, hvis alle har samme språk. Alt uten et lokalt språk appen kan skrive ut på, beholder standardspråket.</value>
   </data>
   <data name="ReportFontFamily" xml:space="preserve">
     <value>Skrifttype i rapporter</value>
@@ -1634,7 +1643,7 @@
     <value>Og lokale?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Inkluder også lokale destinasjoner som betjenes fra driftsstedet.</value>
+    <value>List også opp driftsstedene som får godset sitt betjent fra dette driftsstedet.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>Ingen destinasjoner.</value>
@@ -1965,7 +1974,7 @@
     <value>Forventet antall lokførere</value>
   </data>
   <data name="ExpectedLocoDriversHelp" xml:space="preserve">
-    <value>Antallet lokførere du regner med å ha tilgjengelig. Den grafiske ruteplanen viser for hvert minutt hvor mange lokførere togene faktisk krever, farget mot dette tallet: rødt over, grønt likt, gult én eller to under og grått tre eller flere under. Sett til 0 for å skjule søylene.</value>
+    <value>Antallet lokførere du regner med å ha tilgjengelig. Den grafiske ruteplanen viser for hvert minutt hvor mange lokførere togene og tjenestene faktisk krever, farget mot dette tallet: rødt over, grønt likt, gult én eller to under og grått tre eller flere under. Sett til 0 for å skjule søylene.</value>
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Nødvendige lokførere</value>
@@ -2180,6 +2189,15 @@
   <data name="TrainTimetable" xml:space="preserve">
     <value>Ruteplan</value>
   </data>
+  <data name="WorkingHours" xml:space="preserve">
+    <value>Arbeidstider</value>
+  </data>
+  <data name="Starts" xml:space="preserve">
+    <value>Starter</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Slutter</value>
+  </data>
   <data name="Time" xml:space="preserve">
     <value>Tid</value>
   </data>
@@ -2197,6 +2215,9 @@
   </data>
   <data name="DutyInTrain" xml:space="preserve">
     <value>Tjeneste i {0} tog {1}</value>
+  </data>
+  <data name="DutyInShuntingTask" xml:space="preserve">
+    <value>Skifteoppdrag {0}</value>
   </data>
   <data name="AtLocation" xml:space="preserve">
     <value>ved</value>
@@ -2339,9 +2360,6 @@
   <data name="AnywhereExplanation" xml:space="preserve">
     <value>Vognene står allerede på stasjonen og kan ha kommet hvor som helst fra</value>
   </data>
-  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
-    <value>Også vogner til destinasjonene som betjenes av godstog derfra</value>
-  </data>
   <data name="AndBeyondExplanation" xml:space="preserve">
     <value>Også vogner til destinasjonene på anlegget som ligger lenger fram</value>
   </data>
@@ -2473,5 +2491,56 @@
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Sammensetning regnet fra lok</value>
+  </data>
+  <data name="Passengers" xml:space="preserve">
+    <value>Passasjerer</value>
+  </data>
+  <data name="UsePassengerTickets" xml:space="preserve">
+    <value>Bruk passasjerbilletter?</value>
+  </data>
+  <data name="IsPassengerInterchange" xml:space="preserve">
+    <value>Omstigningsstasjon?</value>
+  </data>
+  <data name="Interchanges" xml:space="preserve">
+    <value>Omstigningsstasjoner</value>
+  </data>
+  <data name="InterchangesPlaceholderHint" xml:space="preserve">
+    <value>Omstigningsstasjonene skrives bare ut der du plasserer dem. Skriv dette på en egen linje:</value>
+  </data>
+  <data name="StopPattern" xml:space="preserve">
+    <value>Stoppmønster</value>
+  </data>
+  <data name="StopPatternHelp" xml:space="preserve">
+    <value>Driftsstedene der tog i denne kategorien stopper underveis. Ruten til et nytt tog får et stopp ved hvert av dem det passerer, og et tog som stopper andre steder, rapporteres som en konflikt. Kryss ikke av for noe for å la kategorien være ubundet: togene stopper da alle steder der de kan levere det de fører med seg, som før.</value>
+  </data>
+  <data name="StopPatternHint" xml:space="preserve">
+    <value>Ved et avkrysset driftssted stopper toget, de øvrige kjører det gjennom. Der et tog begynner, og der det slutter, er alltid stopp, uansett hva som er krysset av her.</value>
+  </data>
+  <data name="NoStopPatternHint" xml:space="preserve">
+    <value>Ikke noe stoppmønster: et nytt tog i kategorien stopper alle steder der det kan levere det det fører med seg, og ingen stopp rapporteres. Kryss av for driftsstedene der togene stopper, for å gi kategorien ett.</value>
+  </data>
+  <data name="StopPatternHasNoLocations" xml:space="preserve">
+    <value>Ingen driftssteder på anlegget tar imot det kategorien fører med seg, så det er ingen steder for togene å stoppe.</value>
+  </data>
+  <data name="DeduceStopPattern" xml:space="preserve">
+    <value>Hent fra togene</value>
+  </data>
+  <data name="DeduceStopPatternTitle" xml:space="preserve">
+    <value>Krysser av for driftsstedene der kategoriens eksisterende tog stopper, og erstatter det som er krysset av nå.</value>
+  </data>
+  <data name="ClearStopPattern" xml:space="preserve">
+    <value>Tøm</value>
+  </data>
+  <data name="ClearStopPatternTitle" xml:space="preserve">
+    <value>Fjerner stoppmønsteret og lar kategorien være ubundet. Neste gang planen leses inn, fylles det ut fra togene igjen.</value>
+  </data>
+  <data name="InsertFirst" xml:space="preserve">
+    <value>Sett inn først</value>
+  </data>
+  <data name="RemoveFirst" xml:space="preserve">
+    <value>Fjern første</value>
+  </data>
+  <data name="TimetableStretchNoPredecessor" xml:space="preserve">
+    <value>Ingen banestrekning fører hit.</value>
   </data>
 </root>

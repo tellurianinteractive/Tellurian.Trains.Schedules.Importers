@@ -1,5 +1,96 @@
 # Release notes
 
+## Version 0.7.1
+
+### New features
+
+- **Reports are printed in the layout's language.** Every report is now printed in the layout's default
+  language, the first language of its default country, whatever language you work in yourself. The
+  printed sheets are read by the participants at the meeting, not by you. Dates and numbers follow the
+  country too.
+
+  Tick **Print reports in local languages** under **Settings › General** and each driver duty is
+  printed in the language of the company working it, each turnus card in the language of the vehicle's
+  company, and each station's dispatch list in the language of the station's country. That includes the
+  dispatch lists saved as documents. A duty or card without a company takes the language of its trains'
+  operators, if they all share one. Anything without a language the app can print in keeps the default
+  language.
+
+- **A train category says where its trains stop.** The **Train categories** tab has a **stop pattern**:
+  ticks against the operating locations where trains of the category stop on their way. A new train
+  created on the **Trains** tab is given a stop at every ticked location it passes and runs through the
+  rest — where it starts and where it ends are stops whatever is ticked, since that is where it is made
+  ready and put away. Only the locations the category could stop at at all are offered.
+
+  A train that stops somewhere the pattern does not name is listed under **Conflicts**, with the train,
+  the location and the time. Nothing is put right for you: only you can say whether it is the train that
+  stops where it should run through, or the pattern that is missing a location its trains serve. The check
+  can be turned off under **Settings › Validation**.
+
+  **Fill in from the trains** ticks the locations where the trains the category already has stop, and that
+  is done for you the first time a plan made before this version is opened — every category is given the
+  pattern its trains have been running all along, so nothing is reported that was not a fault before.
+  Ticking nothing leaves the category unconstrained: its trains then stop wherever they can hand over what
+  they carry, as they always did. A shunting category has no stop pattern, its tasks travelling nowhere.
+
+- **A shunting task needs no locomotive of its own, but it does need a loco driver.** A task is as often
+  worked by the train locomotive already standing at the station, or by a station pilot you have not set
+  up as a vehicle, as by one booked for it. A **schedule** holding nothing but shunting tasks is therefore
+  complete with no vehicle assigned, and is no longer listed under **Conflicts** as one left without.
+  Put a travelling train into the same schedule and a vehicle is wanted again.
+
+  What a task does need is somebody to work it, so it is now offered on the **Duties** tab like any other
+  train part, with or without a locomotive of its own — written with the station once and the times its
+  work runs between, since it goes nowhere. A task no duty covers is listed under **Conflicts** for the
+  sessions it is left unmanned, alongside the parts a locomotive works.
+
+  In a printed duty booklet the task's page is headed **Shunting task** with the operator's signature, not
+  with a train number nobody calls out, and where a train has its timetable a task has a block of its own:
+  **Working hours**, one line naming the station and the times the work **starts** and **ends**, with the
+  shunting instructions beneath it. No track is named — a task is worked over the whole station, not from
+  one track.
+
+- **The loco driver bars count the waits within a duty.** The bars above the graphical timetable showed
+  a driver as needed only while a train or shunting task was being worked. A loco driver whose **duty**
+  has a gap between two trains is still tied up during it, waiting or walking to the next one, so that
+  time is now counted too — on the sessions the duty runs. So is a duty start you have set before its first
+  train, or an end after its last.
+
+- **Trains on the line are checked the way the dispatchers see it.** The **Conflicts** list used to look
+  at one track stretch at a time, so two trains could cross at an unmanned station, or follow each other
+  past one, without a word. It now looks at each dispatch stretch as a whole. A signal-controlled
+  location such as a block post divides the dispatch stretch into sections that can each hold one train
+  per track. On single track, trains in opposite directions can only meet at the ends, or at a
+  signal-controlled location where trains can cross.
+  Trains in the same direction can follow each other, one per section. See **Dispatch stretches** in the
+  help on the **Stretches** tab.
+
+- **A manned station can dispatch a junction or an unmanned station from afar.** The **Controlled
+  from** field on the **Operation locations** tab, until now only on signal-controlled locations, is
+  also offered on unmanned stations and industrial areas. Only manned stations are offered as the
+  controlling station. A controlled junction, crossing place, unmanned station or industrial area is worked by that
+  station's dispatcher as their own: dispatch stretches end there, its trains are on the controlling
+  station's dispatch list in time order among the station's own, with its signature before the track,
+  and the heading names it. The stations beyond it are among those the controlling station rings, and
+  they ring the controlling station. A block post, a signal-controlled location that is neither a
+  junction nor a crossing place, stays part of the line. Press **Regenerate from track stretches** on the **Stretches** tab
+  after setting a controlling station.
+
+- **Say where trains can cross.** A signal-controlled location has a new **Trains can cross?** tick
+  box on the **Operation locations** tab. Tick it where one train can wait while another passes. The
+  number of tracks cannot tell you this, because a junction has two tracks to know which way a train
+  goes whether or not trains can cross there. A signal-controlled location that is neither a junction
+  nor ticked is a block post. Imported locations start unticked, so tick the crossing places after
+  importing.
+
+### Changes
+
+- **Local destinations are named.** A cargo flow destination with **And local?** ticked no longer reads
+  *Stilkøbing and local destinations*: it names the places, *Stilkøbing, Vig, Rubjerg* — the station
+  followed by every location whose cargo is served from it (**Cargo served from** on the **Operation locations** tab). A
+  station serving nothing is named on its own. The phrase is gone from the cargo key in the general
+  instructions too, since nothing prints it any more.
+
 ## Version 0.7.0
 
 ### New features

@@ -38,6 +38,22 @@ Stations are spaced along one axis and time along the other; each train is a slo
 by its category. The orientation, spacing and labels are controlled from
 **Settings › Graphical timetable**.
 
+### Loco drivers required
+
+When **Expected loco drivers** is set under **Settings › General**, a strip of bars follows the
+graphs' time axis — above them with a horizontal time axis, to their left with a vertical one. Each
+bar shows how many loco drivers are needed at that time, on the busiest session:
+
+- every train and shunting task needs a driver from its first arrival to its last departure,
+  including its stops along the way;
+- a driver on a **duty** is also tied up between the trains the duty works — waiting, or walking to
+  the next one — and before the first train or after the last one, when the duty's start or end time
+  has been set to reach beyond them.
+
+The bars are coloured against the number you expect: red when more drivers are needed than
+expected, green when exactly that many, yellow when one or two are spare and grey when three or more
+are. A line marks the expected number. Point at a bar to see its times and count.
+
 ### Start and end time
 The graph displays the timeframe defined in **Settings > General**. 
 A special option makes the graph shows a full day from 00:00 to 24:00 for continous operation. 

@@ -48,12 +48,15 @@ else
 
     @* No page footer: the heading names the station or participant, the report and the day it was printed,
        which is all a torn-off sheet needs to identify itself. *@
-    @foreach (var page in _pages)
-    {
-        <A4LPage Margin="10">
-            <VehicleContributorsTable Page="page" Grouping="_grouping" Cells="_cells!" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
-        </A4LPage>
-    }
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var page in _pages)
+        {
+            <A4LPage Margin="10">
+                <VehicleContributorsTable Page="page" Grouping="_grouping" Cells="_cells!" Settings="Settings" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+            </A4LPage>
+        }
+    </CascadingValue>
 }
 
 @code {
@@ -82,6 +85,9 @@ else
     private VehicleContributorCells? _cells;
     private DateOnly _printDate;
 
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+
     private SessionsSettings Settings =>
         ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
@@ -104,6 +110,7 @@ else
             return;
         }
 
+        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         _hasRollingStock = plan.RollingStock.Any();
         var settings = Settings;
         _cells = new VehicleContributorCells(Translator, settings);

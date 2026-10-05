@@ -4,6 +4,8 @@
 
 @inject Translator Translator
 
+@{ UseReportCulture(); }
+
 @* The key to the marks and wordings the cargo entries are written in — the foot of the general
    instructions booklet's last page.
 
@@ -18,7 +20,7 @@
    station staff who work the wagons hold no duty booklet at all.
 
    The marks and the wordings are set as two lists, one under the other, rather than as one. A list's
-   term column is as wide as its widest term, so "and local destinations" standing over a globe would
+   term column is as wide as its widest term, so "and beyond" standing over a globe would
    have left every mark alone at the near edge of an empty column. Two lists, and each sets its own
    column: the marks keep a narrow one and the wordings a wide one.
 
@@ -49,9 +51,6 @@
         </dl>
         <dl>
             @* The phrases as the notes write them: lower case, mid-sentence, following a place name. *@
-            <dt class="phrase">@Destination.AndLocalDestinationsPhrase</dt>
-            <dd>@Translator("AndLocalDestinationsExplanation")</dd>
-
             <dt class="phrase">@Destination.AndBeyondPhrase</dt>
             <dd>@Translator("AndBeyondExplanation")</dd>
 

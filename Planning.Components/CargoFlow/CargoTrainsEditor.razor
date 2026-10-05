@@ -114,6 +114,14 @@
 
     private void AddCargoFlow(Train train)
     {
+        // A further flow starts as a copy of the last one, so only what differs needs changing.
+        if (train.LastCargoFlow is { } last)
+        {
+            train.CopyCargoFlow(NextCargoFlowId(), last);
+            _expanded.Add(train.Id);
+            Save();
+            return;
+        }
         if (CargoDestinations.FirstOrDefault() is not { } destinations) return;
         var from = CargoDepartureCalls(train).FirstOrDefault(f => CargoArrivalCallsAfter(train, f).Any());
         if (from is null) return;

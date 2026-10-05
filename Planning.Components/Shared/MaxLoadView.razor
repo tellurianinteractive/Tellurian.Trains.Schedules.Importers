@@ -4,6 +4,10 @@
 @using Tellurian.Trains.Schedules.Planning.App.Translations
 
 @inject Translator Translator
+@* Printed in a report's language when a report uses it; see ReportComponentBase. *@
+@inherits Tellurian.Trains.Schedules.Planning.Components.Reporting.ReportComponentBase
+
+@{ UseReportCulture(); }
 
 @* A capacity limit in its compact form — 24●, 12■, 2.1m.
 

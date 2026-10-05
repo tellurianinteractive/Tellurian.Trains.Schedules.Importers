@@ -154,6 +154,8 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         // Only here can the stop flags the train parts depend on be put right: the parts the vehicle
         // schedules and driver duties are planned over are read after the timetable.
         this.ApplyStopRules();
+        // After the stop flags too, which are what a call is a stop by (see StopPatternRules).
+        this.DeduceStopPatterns();
         // After the stop flags, which decide what half a note can be given (see ManualNoteRules).
         this.ApplyManualNoteTargetRules();
     }
@@ -255,8 +257,10 @@ public static class PlanExtensions
         /// catalogue references are put back, the category and company catalogues are reconciled with
         /// what the plan actually uses, every location that exchanges passengers is given somewhere to
         /// exchange them (see <c>Layout.EnsurePlatforms</c>), the stop flags the train parts depend on
-        /// are set (see <see cref="Validations.StopRules"/>), and every note is given the half of its
-        /// call it is shown at (see <see cref="Notes.ManualNoteRules"/>). Idempotent.
+        /// are set (see <see cref="Validations.StopRules"/>), every category that has no stop pattern is
+        /// given the one its trains already run (see <see cref="Validations.StopPatternRules"/>), and
+        /// every note is given the half of its call it is shown at (see
+        /// <see cref="Notes.ManualNoteRules"/>). Idempotent.
         /// </summary>
         /// <remarks>
         /// Reading a plan does all of this on its way (see the <c>OnDeserialized</c> of
@@ -283,6 +287,7 @@ public static class PlanExtensions
             plan.RebuildCompanies();
             plan.ResolveCatalogueReferences();
             plan.ApplyStopRules();
+            plan.DeduceStopPatterns();
             plan.ApplyManualNoteTargetRules();
         }
         /// <summary>

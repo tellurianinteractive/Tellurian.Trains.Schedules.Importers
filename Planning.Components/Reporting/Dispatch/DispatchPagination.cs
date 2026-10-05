@@ -51,9 +51,9 @@ public sealed record DispatchPageGeometry
 
     /// <summary>Combined width of the columns that do not depend on the number of sessions.</summary>
     /// <remarks>
-    /// Train 20, sessions 14, track 8, arrival 13, origin 34, departure 13, destination 34.
+    /// Train 28, sessions 14, track 8, arrival 13, origin 34, departure 13, destination 34.
     /// </remarks>
-    public double FixedColumnsWidthMm { get; init; } = 136;
+    public double FixedColumnsWidthMm { get; init; } = 144;
 
     /// <summary>Width of the operating sessions/days column, part of <see cref="FixedColumnsWidthMm"/>.</summary>
     /// <remarks>

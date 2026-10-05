@@ -13,6 +13,12 @@ public enum DispatchRowKind
     /// A train running past without standing: one moment, and so one clearance rather than two.
     /// </summary>
     PassThrough,
+
+    /// <summary>
+    /// A shunting task: work at the station over a span of time rather than a movement through it, so
+    /// one row at the time the work starts, carrying every note of the call.
+    /// </summary>
+    ShuntingTask,
 }
 
 /// <summary>
@@ -41,7 +47,13 @@ public sealed class DispatchRow
     public IReadOnlyList<ICallNote> Notes { get; init; } = [];
 
     /// <summary>The train, named as it is announced — company signature, category prefix and number.</summary>
-    public string TrainIdentity => Call.Train.Identity;
+    /// <remarks>
+    /// The signature is the one the train actually runs under: its own company where it has one, otherwise
+    /// its category's. A layout with a single operator names no company anywhere and the column then reads
+    /// as it always did, so the signature appears exactly where it distinguishes one operator's train from
+    /// another's.
+    /// </remarks>
+    public string TrainIdentity => Call.Train.IdentityWithCompany;
 
     /// <summary>The sessions or days the train operates.</summary>
     public Sessions Sessions => Call.Train.Sessions;
@@ -57,8 +69,26 @@ public sealed class DispatchRow
     /// <summary>The sessions as the column shows them; see <see cref="SessionsText"/>.</summary>
     public Sessions DisplayedSessions => Sessions.WithoutOnDemand;
 
-    /// <summary>The track the train occupies here.</summary>
-    public string TrackNumber => Call.Track.Number;
+    /// <summary>
+    /// Whether the call takes its track at all. A shunting task with no traction unit assigned does not:
+    /// it is worked over the whole station, so the track it names means nothing and is left out.
+    /// </summary>
+    public bool OccupiesTrack { get; init; } = true;
+
+    /// <summary>The track the train occupies here; empty where it occupies none.</summary>
+    public string TrackNumber => OccupiesTrack ? Call.Track.Number : string.Empty;
+
+    /// <summary>
+    /// True when the call is at a location the list's dispatcher works from afar rather than at the
+    /// station itself.
+    /// </summary>
+    public bool IsRemote { get; init; }
+
+    /// <summary>
+    /// The track as the column shows it: prefixed with the location's signature on a remote row, so
+    /// a clearance at the junction is never taken for one at the station — "Bj 2".
+    /// </summary>
+    public string TrackText => IsRemote && OccupiesTrack ? $"{Call.OperationLocation.Signature} {TrackNumber}" : TrackNumber;
 
     /* What the four time and place cells hold is a property of the CALL, not of which clearance the row
        stands for: every row states when the train got here and where from, and when it leaves and where
@@ -131,8 +161,10 @@ public sealed class DispatchRow
     /// <param name="settings">How sessions are rendered inside notes.</param>
     /// <param name="plan">The plan whose vehicle schedules say what is done with the vehicles here.
     /// Omit it and the rows carry no vehicle instructions.</param>
+    /// <param name="isRemote">Whether <paramref name="station"/> is worked from afar by the dispatcher
+    /// the list is for; see <see cref="IsRemote"/>.</param>
     public static IEnumerable<DispatchRow> Build(
-        Train train, OperationLocation station, SessionsSettings settings, Plan? plan = null)
+        Train train, OperationLocation station, SessionsSettings settings, Plan? plan = null, bool isRemote = false)
     {
         train = train.ValueOrException(nameof(train));
         station = station.ValueOrException(nameof(station));
@@ -151,15 +183,24 @@ public sealed class DispatchRow
             // Without the on-demand marker: that is stated as a note, and saying it in both places
             // would spend four lines of a narrow column repeating what the notes already say.
             var sessionsText = train.Sessions.WithoutOnDemand.ToText(settings);
+            var occupiesTrack = plan is null || call.OccupiesTrack(plan.Schedules);
 
+            if (call == train.ShuntingCall)
+            {
+                // A task is one span of work, not a movement: one row, at the time the work starts, with
+                // every note — the times themselves are in its shunting-task note, since the call is both
+                // origin and destination and so leaves both time columns blank.
+                yield return Row(call, DispatchRowKind.ShuntingTask, call.Arrival, notes, sessionsText, sole: true, isRemote, occupiesTrack);
+                continue;
+            }
             if (i == 0)
             {
-                yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: true);
+                yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: true, isRemote, occupiesTrack);
                 continue;
             }
             if (i == calls.Count - 1)
             {
-                yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: true);
+                yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: true, isRemote, occupiesTrack);
                 continue;
             }
             if (call.Arrival.Equals(call.Departure))
@@ -167,20 +208,22 @@ public sealed class DispatchRow
                 // One row cannot hold the arrival/departure split, so both halves' notes appear on it.
                 // Without this a note classified for the missing half would be silently dropped — most
                 // damagingly for the notes that only ever occur on a train running past.
-                yield return Row(call, DispatchRowKind.PassThrough, call.Departure, notes, sessionsText, sole: true);
+                yield return Row(call, DispatchRowKind.PassThrough, call.Departure, notes, sessionsText, sole: true, isRemote, occupiesTrack);
                 continue;
             }
 
-            yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: false);
-            yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: false);
+            yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: false, isRemote, occupiesTrack);
+            yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: false, isRemote, occupiesTrack);
         }
     }
 
     private static DispatchRow Row(
         StationCall call, DispatchRowKind kind, Time time, IReadOnlyList<ICallNote> notes,
-        string sessionsText, bool sole) =>
+        string sessionsText, bool sole, bool isRemote, bool occupiesTrack) =>
         new()
         {
+            IsRemote = isRemote,
+            OccupiesTrack = occupiesTrack,
             Call = call,
             Kind = kind,
             Time = time,

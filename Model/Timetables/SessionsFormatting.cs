@@ -52,6 +52,20 @@ public static class SessionsFormatting
         }
 
         /// <summary>
+        /// The days of the operating period this value runs, always named — <c>Monday to Saturday</c> rather
+        /// than <c>Daily</c> — so it reads as the object of a preposition inside a sentence, as a validation
+        /// message needs ("on Monday, Wednesday"). The on-demand marker is left out.
+        /// </summary>
+        /// <param name="settings">The operating period and the day names; must be a day-based setting.</param>
+        internal string DayNamesText(SessionsSettings settings)
+        {
+            settings = settings.ValueOrException(nameof(settings));
+            var form = FormOf(sessions, settings);
+            if (form.IsAll) form = form with { IsAll = false, Runs = [new(1, Math.Clamp(settings.MaxNumberOfSessions, 1, 7))] };
+            return TextBody(form, settings);
+        }
+
+        /// <summary>
         /// The markup form: the same content with session numbers drawn as filled circles, or day names as
         /// text. This is the single source of the session markup — the shared Blazor component is a thin
         /// wrapper that emits it, so the circles are drawn by one piece of code whether they are rendered

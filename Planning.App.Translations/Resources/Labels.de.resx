@@ -459,6 +459,9 @@
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Zuggeschwindigkeit prüfen?</value>
   </data>
+  <data name="ValidateStopPatterns" xml:space="preserve">
+    <value>Haltemuster prüfen?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Reisendenwechsel am Bahnsteig prüfen?</value>
   </data>
@@ -730,7 +733,7 @@
     <value>Ein Streckenabschnitt mit diesen Endpunkten existiert bereits.</value>
   </data>
   <data name="DispatchStretchesHint" xml:space="preserve">
-    <value>Zugleitabschnitte verlaufen zwischen besetzten Stationen oder Schattenbahnhöfen und führen durch unbesetzte Stellen dazwischen. Sie werden aus den Streckenabschnitten erzeugt.</value>
+    <value>Zugleitabschnitte verlaufen zwischen den Stellen, an denen Züge zugelassen werden: besetzte Stationen, Schattenbahnhöfe und Stellen, die von einer besetzten Station ferngesteuert werden. Sie führen durch unbesetzte Stellen dazwischen und werden aus den Streckenabschnitten erzeugt.</value>
   </data>
   <data name="RegenerateDispatchStretches" xml:space="preserve">
     <value>Aus Streckenabschnitten neu erzeugen</value>
@@ -975,11 +978,17 @@
   <data name="BreakForPrintingHelp" xml:space="preserve">
     <value>Den Tag zu dieser Zeit teilen. Der Bildfahrplan kann dann über mehrere Seiten gedruckt und am Bildschirm halbweise angezeigt werden.</value>
   </data>
+  <data name="TrainsCanCross" xml:space="preserve">
+    <value>Züge können kreuzen?</value>
+  </data>
+  <data name="TrainsCanCrossHelp" xml:space="preserve">
+    <value>Ob sich Züge in Gegenrichtung hier kreuzen können, indem einer wartet, während der andere vorbeifährt. Eine signalgesteuerte Stelle, die weder Abzweig- noch Kreuzungsstelle ist, ist eine Blockstelle, die die Strecke nur in Abschnitte teilt.</value>
+  </data>
   <data name="ControlledBy" xml:space="preserve">
     <value>Gesteuert von</value>
   </data>
   <data name="ControlledByHelp" xml:space="preserve">
-    <value>Die besetzte Station, deren Fahrdienstleiter diese signalgesteuerte Stelle bedient.</value>
+    <value>Die besetzte Station, deren Fahrdienstleiter diese Stelle fernsteuert. Er lässt die Züge hier ebenso zu wie auf seiner eigenen Station, und sie stehen auf deren Zugmeldeliste. Das gilt für eine unbesetzte Station, ein Industriegebiet und eine signalgesteuerte Abzweig- oder Kreuzungsstelle; eine Blockstelle, die keines von beiden ist, teilt die Strecke nur in Abschnitte, die je einen Zug aufnehmen können.</value>
   </data>
   <data name="Danish" xml:space="preserve">
     <value>Dänisch</value>
@@ -1222,10 +1231,10 @@
     <value>Züge mit angegebenen Wochentagen statt Fahrrundennummern planen.</value>
   </data>
   <data name="UseObjectLanguageInReports" xml:space="preserve">
-    <value>Jedes Berichtselement in seiner eigenen Sprache drucken?</value>
+    <value>Berichte in Landessprachen drucken?</value>
   </data>
   <data name="UseObjectLanguageInReportsHelp" xml:space="preserve">
-    <value>Wenn aktiviert, werden Berichtselemente in der vom Element selbst abgeleiteten Sprache dargestellt – zum Beispiel ein Lokführerdienst in der Sprache des betreibenden Unternehmens. Die Oberfläche und alle Elemente ohne ableitbare Sprache verwenden weiterhin Ihre bevorzugte Sprache.</value>
+    <value>Berichte werden in der Standardsprache der Anlage gedruckt: der ersten Sprache ihres Standardlandes. Wenn aktiviert, wird stattdessen jedes Element in seiner eigenen Landessprache gedruckt: ein Lokführerdienst in der Sprache des Unternehmens, das ihn fährt, eine Umlaufkarte in der Sprache des Unternehmens des Fahrzeugs und die Zugmeldeliste eines Bahnhofs in der Sprache seines Landes. Ein Lokführerdienst oder eine Umlaufkarte ohne Unternehmen verwendet die Sprache der Betreiber seiner Züge, sofern sie alle dieselbe haben. Alles ohne eine Landessprache, in der die App drucken kann, behält die Standardsprache.</value>
   </data>
   <data name="ReportFontFamily" xml:space="preserve">
     <value>Schriftart für Berichte</value>
@@ -1634,7 +1643,7 @@
     <value>Und lokal?</value>
   </data>
   <data name="AndLocalDestinationsHint" xml:space="preserve">
-    <value>Auch lokale Ziele einbeziehen, die von der Betriebsstelle aus bedient werden.</value>
+    <value>Auch die Betriebsstellen auflisten, deren Güter von dieser Betriebsstelle aus bedient werden.</value>
   </data>
   <data name="NoDestinations" xml:space="preserve">
     <value>Keine Ziele.</value>
@@ -1965,7 +1974,7 @@
     <value>Erwartete Triebfahrzeugführer</value>
   </data>
   <data name="ExpectedLocoDriversHelp" xml:space="preserve">
-    <value>Die Anzahl der Triebfahrzeugführer, die voraussichtlich zur Verfügung stehen. Der Bildfahrplan zeigt für jede Minute, wie viele Triebfahrzeugführer die Züge tatsächlich benötigen, eingefärbt im Vergleich zu dieser Zahl: rot darüber, grün gleich, gelb ein oder zwei darunter und grau drei oder mehr darunter. Mit 0 werden die Balken ausgeblendet.</value>
+    <value>Die Anzahl der Triebfahrzeugführer, die voraussichtlich zur Verfügung stehen. Der Bildfahrplan zeigt für jede Minute, wie viele Triebfahrzeugführer die Züge und Dienste tatsächlich benötigen, eingefärbt im Vergleich zu dieser Zahl: rot darüber, grün gleich, gelb ein oder zwei darunter und grau drei oder mehr darunter. Mit 0 werden die Balken ausgeblendet.</value>
   </data>
   <data name="RequiredLocoDrivers" xml:space="preserve">
     <value>Benötigte Triebfahrzeugführer</value>
@@ -2180,6 +2189,15 @@
   <data name="TrainTimetable" xml:space="preserve">
     <value>Fahrplan</value>
   </data>
+  <data name="WorkingHours" xml:space="preserve">
+    <value>Arbeitszeiten</value>
+  </data>
+  <data name="Starts" xml:space="preserve">
+    <value>Beginnt</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Endet</value>
+  </data>
   <data name="Time" xml:space="preserve">
     <value>Zeit</value>
   </data>
@@ -2197,6 +2215,9 @@
   </data>
   <data name="DutyInTrain" xml:space="preserve">
     <value>Dienst in {0} Zug {1}</value>
+  </data>
+  <data name="DutyInShuntingTask" xml:space="preserve">
+    <value>Rangieraufgabe {0}</value>
   </data>
   <data name="AtLocation" xml:space="preserve">
     <value>in</value>
@@ -2339,9 +2360,6 @@
   <data name="AnywhereExplanation" xml:space="preserve">
     <value>Die Wagen stehen bereits im Bahnhof und können von überall gekommen sein</value>
   </data>
-  <data name="AndLocalDestinationsExplanation" xml:space="preserve">
-    <value>Auch Wagen für die Ziele, die von dort mit Güterzügen bedient werden</value>
-  </data>
   <data name="AndBeyondExplanation" xml:space="preserve">
     <value>Auch Wagen für die Ziele der Anlage jenseits dieses Ortes</value>
   </data>
@@ -2473,5 +2491,56 @@
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Zugbildung ab Lok gezählt</value>
+  </data>
+  <data name="Passengers" xml:space="preserve">
+    <value>Reisende</value>
+  </data>
+  <data name="UsePassengerTickets" xml:space="preserve">
+    <value>Fahrkarten verwenden?</value>
+  </data>
+  <data name="IsPassengerInterchange" xml:space="preserve">
+    <value>Umsteigebahnhof?</value>
+  </data>
+  <data name="Interchanges" xml:space="preserve">
+    <value>Umsteigebahnhöfe</value>
+  </data>
+  <data name="InterchangesPlaceholderHint" xml:space="preserve">
+    <value>Die Umsteigebahnhöfe werden nur dort gedruckt, wo du sie platzierst. Schreibe dies in eine eigene Zeile:</value>
+  </data>
+  <data name="StopPattern" xml:space="preserve">
+    <value>Haltemuster</value>
+  </data>
+  <data name="StopPatternHelp" xml:space="preserve">
+    <value>Die Betriebsstellen, an denen Züge dieser Kategorie unterwegs halten. Der Laufweg eines neuen Zuges erhält an jeder davon, die er befährt, einen Halt, und ein Zug, der anderswo hält, wird als Konflikt gemeldet. Nichts angekreuzt lässt die Kategorie ungebunden: ihre Züge halten dann überall dort, wo sie abgeben können, was sie befördern, wie bisher.</value>
+  </data>
+  <data name="StopPatternHint" xml:space="preserve">
+    <value>An einer angekreuzten Betriebsstelle hält der Zug, die übrigen durchfährt er. Wo ein Zug beginnt und wo er endet, ist immer ein Halt, ganz gleich, was hier angekreuzt ist.</value>
+  </data>
+  <data name="NoStopPatternHint" xml:space="preserve">
+    <value>Kein Haltemuster: ein neuer Zug dieser Kategorie hält überall dort, wo er abgeben kann, was er befördert, und kein Halt wird gemeldet. Kreuzen Sie die Betriebsstellen an, an denen die Züge halten, um der Kategorie eines zu geben.</value>
+  </data>
+  <data name="StopPatternHasNoLocations" xml:space="preserve">
+    <value>Keine Betriebsstelle der Anlage nimmt auf, was diese Kategorie befördert, ihre Züge haben also nirgends einen Halt.</value>
+  </data>
+  <data name="DeduceStopPattern" xml:space="preserve">
+    <value>Aus den Zügen übernehmen</value>
+  </data>
+  <data name="DeduceStopPatternTitle" xml:space="preserve">
+    <value>Kreuzt die Betriebsstellen an, an denen die vorhandenen Züge dieser Kategorie halten, und ersetzt das jetzt Angekreuzte.</value>
+  </data>
+  <data name="ClearStopPattern" xml:space="preserve">
+    <value>Leeren</value>
+  </data>
+  <data name="ClearStopPatternTitle" xml:space="preserve">
+    <value>Entfernt das Haltemuster und lässt die Kategorie ungebunden. Beim nächsten Laden des Plans wird es wieder aus den Zügen übernommen.</value>
+  </data>
+  <data name="InsertFirst" xml:space="preserve">
+    <value>Am Anfang einfügen</value>
+  </data>
+  <data name="RemoveFirst" xml:space="preserve">
+    <value>Ersten entfernen</value>
+  </data>
+  <data name="TimetableStretchNoPredecessor" xml:space="preserve">
+    <value>Kein Streckenabschnitt führt hierher.</value>
   </data>
 </root>

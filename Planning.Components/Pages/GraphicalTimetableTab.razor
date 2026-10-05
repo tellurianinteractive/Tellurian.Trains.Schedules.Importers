@@ -22,7 +22,7 @@ else
        axis it shares their y axis and is placed leftmost in the graph row instead (see below). *@
     @if (ShowLocoDriverDemand && !IsVerticalAxis)
     {
-        <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Settings="_graphSettings"
+        <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Duties="ScheduleState.Schedule?.DriverDuties" Settings="_graphSettings"
                             Start="_driverWindow.Start" End="_driverWindow.End" />
     }
 
@@ -77,7 +77,7 @@ else
     <div class="graph-list @StackingCss">
         @if (ShowLocoDriverDemand && IsVerticalAxis)
         {
-            <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Settings="_graphSettings"
+            <LocoDriverDemandBar Timetable="ScheduleState.Timetable" Duties="ScheduleState.Schedule?.DriverDuties" Settings="_graphSettings"
                                 Start="_driverWindow.Start" End="_driverWindow.End" />
         }
         @foreach (var graphSchedule in _graphSchedules)

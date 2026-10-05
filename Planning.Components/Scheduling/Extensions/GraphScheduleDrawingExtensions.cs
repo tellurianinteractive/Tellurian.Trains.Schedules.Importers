@@ -635,8 +635,13 @@ public static class GraphScheduleDrawingExtensions
             for (var i = 0; i < stationIndex; i++)
             {
                 var stretch = me.TrackStretches[i];
-                var fromTrackCount = me.StationTracks[i].Length;
-                var Δ1 = Math.Max(me.GraphSettings.MinStationSpacing, ((fromTrackCount - 1) * me.GraphSettings.TrackSpacing) + (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance));
+                // The station's tracks fan out from its own position towards the next station, so they are
+                // reserved first and the spacing between the two stations is then measured from the last
+                // track of this one to the first track of the next. The minimum spacing is a floor on that
+                // gap alone: a station with many tracks pushes the next station further away instead of
+                // fanning into its tracks.
+                var fanOut = (me.StationTracks[i].Length - 1) * me.GraphSettings.TrackSpacing;
+                var Δ1 = fanOut + Math.Max(me.GraphSettings.MinStationSpacing, (int)Math.Round(me.GraphSettings.KilometerSpacing * stretch.Distance));
                 x += Δ1;
                 y += Δ1;
             }

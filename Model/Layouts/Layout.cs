@@ -583,34 +583,126 @@ public static class LayoutDispatchStretchExtensions
     extension(OperationLocation location)
     {
         /// <summary>
-        /// Whether this location is a <em>dispatch endpoint</em>: somewhere with a person on duty who
-        /// clears trains in and out. That is a manned station, and a shadow station whether manned or
+        /// Whether a dispatcher is on duty here: a manned station, and a shadow station whether manned or
         /// not — off-layout staging is always worked by someone, and trains have to be cleared onto and
-        /// off the modelled railway there like anywhere else.
+        /// off the modelled railway there like anywhere else. Each of these gets a dispatch list.
+        /// </summary>
+        public bool HasDispatcher =>
+            location is Station { IsManned: true } or Station { IsShadow: true };
+
+        /// <summary>
+        /// Whether trains are cleared here by the dispatcher of another station, who works it from afar
+        /// (<see cref="OperationLocation.ControlledBy"/>): an unmanned station, industrial area, signal
+        /// controlled junction or crossing place with a controlling station. A block post has no route of
+        /// its own to clear and stays part of the line between its dispatchers (see <c>IsControlPoint</c>).
+        /// </summary>
+        public bool IsRemotelyDispatched =>
+            location.CanBeControlled &&
+            location.ControlledBy is { HasDispatcher: true } &&
+            !location.IsBlockPost;
+
+        /// <summary>
+        /// Whether this is a signal controlled location with nothing to route: neither a junction
+        /// (<c>IsJunction</c>) nor a place where trains can cross
+        /// (<see cref="SignalControlledLocation.TrainsCanCross"/>). The number of tracks says nothing
+        /// here: a junction needs two to know which way a train goes, whether or not trains can cross.
+        /// </summary>
+        public bool IsBlockPost =>
+            location is SignalControlledLocation { TrainsCanCross: false } && !location.IsJunction;
+
+        /// <summary>
+        /// Whether this location is a <em>dispatch endpoint</em>, where trains are cleared in and out:
+        /// one with a dispatcher of its own (<c>HasDispatcher</c>), or one remotely dispatched from
+        /// another station (<c>IsRemotelyDispatched</c>).
         /// </summary>
         /// <remarks>
         /// The single definition of the term. A dispatch stretch runs between two of these
-        /// (see <c>CreateDispatchStretches</c>), and the station dispatch list is printed for each of
-        /// them — the two must agree, or a station would be handed a list naming neighbours it has no
-        /// dispatch stretch to.
+        /// (see <c>CreateDispatchStretches</c>), and the dispatch list of each <c>Dispatcher</c> covers
+        /// the endpoints it dispatches — the two must agree, or a station would be handed a list naming
+        /// neighbours it has no dispatch stretch to.
         /// </remarks>
         public bool IsDispatchEndpoint =>
-            location is Station { IsManned: true } or Station { IsShadow: true };
+            location.HasDispatcher || location.IsRemotelyDispatched;
+
+        /// <summary>
+        /// The station whose dispatcher clears trains here: the location itself where it has a
+        /// dispatcher, its controlling station where it is remotely dispatched, otherwise <c>null</c>.
+        /// </summary>
+        public Station? Dispatcher =>
+            location.HasDispatcher ? (Station)location :
+            location.IsRemotelyDispatched ? location.ControlledBy :
+            null;
+
+        /// <summary>
+        /// Whether more than two track stretches meet here, so trains can be routed more than one way.
+        /// </summary>
+        public bool IsJunction =>
+            location.Layout?.TrackStretches.Count(s => s.Start.Equals(location) || s.End.Equals(location)) > 2;
+
+        /// <summary>
+        /// Whether this location can be worked from a manned station (<see cref="OperationLocation.ControlledBy"/>):
+        /// a signal controlled location, an unmanned station or an industrial area. A station with a
+        /// dispatcher works itself, and an other location has nothing to control.
+        /// </summary>
+        public bool CanBeControlled =>
+            location is SignalControlledLocation or IndustrialArea or Station { IsManned: false, IsShadow: false };
+
+        /// <summary>
+        /// Whether this location divides a dispatch stretch it lies inside into control sections: a
+        /// signal controlled location that is not a dispatch endpoint (a block post, or a crossing place
+        /// or junction whose controlling station is missing). An unmanned location nobody controls is
+        /// just part of the line.
+        /// </summary>
+        public bool IsControlPoint =>
+            !location.IsDispatchEndpoint &&
+            (location is SignalControlledLocation || (location.CanBeControlled && location.ControlledBy is not null));
+
+        /// <summary>
+        /// Whether trains running in opposite directions can meet here: at a dispatch endpoint, or at a
+        /// signal controlled location where trains can cross. Trains cannot meet at a block post, nor
+        /// anywhere nobody controls.
+        /// </summary>
+        public bool AllowsMeets =>
+            location.IsDispatchEndpoint || location is SignalControlledLocation { TrainsCanCross: true };
     }
 
     extension(Layout layout)
     {
         /// <summary>
-        /// The layout's dispatch endpoints in layout order — the stations a
+        /// The layout's dispatch endpoints in layout order — the locations a
         /// <see cref="DispatchStretch"/> can begin or end at. See <c>IsDispatchEndpoint</c>.
         /// </summary>
-        public IEnumerable<Station> DispatchEndpoints =>
-            layout.OperationLocations.OfType<Station>().Where(station => station.IsDispatchEndpoint);
+        public IEnumerable<OperationLocation> DispatchEndpoints =>
+            layout.OperationLocations.Where(location => location.IsDispatchEndpoint);
 
         /// <summary>
-        /// The dispatch endpoints reachable from <paramref name="station"/> over a single dispatch
-        /// stretch — the neighbours its dispatcher talks to, and so the ones whose phone numbers belong
-        /// on its dispatch list.
+        /// The stations with a dispatcher on duty, in layout order — the ones that get a dispatch list.
+        /// See <c>HasDispatcher</c>.
+        /// </summary>
+        public IEnumerable<Station> Dispatchers =>
+            layout.OperationLocations.OfType<Station>().Where(station => station.HasDispatcher);
+
+        /// <summary>
+        /// The dispatch endpoints whose trains <paramref name="station"/>'s dispatcher clears: the
+        /// station itself first, then the locations it dispatches remotely, in layout order.
+        /// </summary>
+        /// <param name="station">The station whose dispatcher is meant.</param>
+        public IReadOnlyList<OperationLocation> LocationsDispatchedBy(Station station)
+        {
+            layout = layout.ValueOrException(nameof(layout));
+            if (station is null) return [];
+            return
+            [
+                station,
+                .. layout.OperationLocations.Where(location =>
+                    !location.Equals(station) && location.IsRemotelyDispatched && station.Equals(location.ControlledBy)),
+            ];
+        }
+
+        /// <summary>
+        /// The dispatchers <paramref name="station"/>'s dispatcher talks to: for every dispatch stretch
+        /// from a location it dispatches (see <c>LocationsDispatchedBy</c>), the <c>Dispatcher</c> of the
+        /// far end — the station to ring, and so the ones whose phone numbers belong on its dispatch list.
         /// </summary>
         /// <remarks>
         /// Read from <see cref="Layout.DispatchStretches"/> and from nowhere else — never derived on the
@@ -623,12 +715,17 @@ public static class LayoutDispatchStretchExtensions
         {
             layout = layout.ValueOrException(nameof(layout));
             if (station is null) return [];
+            var dispatched = layout.LocationsDispatchedBy(station);
 
             return
             [
                 .. layout.DispatchStretches
-                    .Where(stretch => stretch.From.Equals(station) || stretch.To.Equals(station))
-                    .Select(stretch => stretch.From.Equals(station) ? stretch.To : stretch.From)
+                    .SelectMany(stretch =>
+                        dispatched.Contains(stretch.From) ? [stretch.To] :
+                        dispatched.Contains(stretch.To) ? [stretch.From] :
+                        Array.Empty<OperationLocation>())
+                    .Select(farEnd => farEnd.Dispatcher)
+                    .OfType<Station>()
                     .Where(neighbour => !neighbour.Equals(station))
                     .DistinctBy(neighbour => neighbour.Signature, StringComparer.OrdinalIgnoreCase)
                     .OrderBy(neighbour => neighbour.Name, StringComparer.CurrentCulture)
@@ -639,10 +736,10 @@ public static class LayoutDispatchStretchExtensions
     extension(Layout layout)
     {
         /// <summary>
-        /// Creates dispatch stretches between dispatch endpoints (manned or shadow stations) by following
-        /// track stretches in their defined direction. Unmanned, non-shadow locations are passed through,
-        /// so a dispatch stretch may span several contiguous track stretches. Each dispatch stretch records
-        /// the ordered track stretches it comprises, and its Id is the Id of the first of those.
+        /// Creates dispatch stretches between dispatch endpoints (see <c>IsDispatchEndpoint</c>) by
+        /// following track stretches in their defined direction. Other locations are passed through, so a
+        /// dispatch stretch may span several contiguous track stretches. Each dispatch stretch records the
+        /// ordered track stretches it comprises, and its Id is the Id of the first of those.
         /// </summary>
         /// <returns>The collection of dispatch stretches added to the layout.</returns>
         public ICollection<DispatchStretch> CreateDispatchStretches()
@@ -659,12 +756,7 @@ public static class LayoutDispatchStretchExtensions
             }
             return result;
 
-            // A dispatch stretch begins and ends at a manned or shadow station; everything in between
-            // (unmanned stations, signal-controlled and other locations) is traversed without stopping.
-            static bool IsDispatchEndpoint(OperationLocation location) =>
-                location is Station { IsManned: true } or Station { IsShadow: true };
-
-            List<List<TrackStretch>> FindDirectlyReachableEndpoints(Station from)
+            List<List<TrackStretch>> FindDirectlyReachableEndpoints(OperationLocation from)
             {
                 var reachable = new List<List<TrackStretch>>();
                 var visited = new HashSet<OperationLocation> { from };
@@ -682,7 +774,7 @@ public static class LayoutDispatchStretchExtensions
                     if (visited.Contains(current)) continue;
                     visited.Add(current);
 
-                    if (IsDispatchEndpoint(current))
+                    if (current.IsDispatchEndpoint)
                     {
                         reachable.Add(path);
                     }
@@ -744,8 +836,8 @@ public static class LayoutOperationLocationConversionExtensions
         /// Replaces the operation location equal to <paramref name="existing"/> with a new one of the given
         /// <paramref name="kind"/>, preserving the shared state (name, signature, owner, tracks, timings, …)
         /// and repointing every reference (tracks, track stretches, controlled-by links) to the replacement.
-        /// Type-specific data the new kind cannot hold (a station's regions, a signal location's controller)
-        /// is dropped. When changing to a <see cref="SignalControlledLocation"/>, its controlling station
+        /// Type-specific data the new kind cannot hold (a station's regions) is dropped; the controlling
+        /// station is kept, and is in force only where the new kind <c>CanBeControlled</c>. When changing to a <see cref="SignalControlledLocation"/>, its controlling station
         /// defaults to the <see cref="PrecedingStation"/>. Dispatch stretches are derived and may need
         /// regenerating afterwards. Returns the replacement, or <paramref name="existing"/> unchanged when it
         /// is already of that kind.
@@ -776,6 +868,7 @@ public static class LayoutOperationLocationConversionExtensions
             replacement.HidePassings = existing.HidePassings;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;
             replacement.LockKey = existing.LockKey;
+            replacement.ControlledBy ??= existing.ControlledBy;
             replacement.Timings = existing.Timings;
             replacement.Layout = existing.Layout;
             replacement.LayoutId = existing.LayoutId;
@@ -792,10 +885,10 @@ public static class LayoutOperationLocationConversionExtensions
                 if (stretch.Start.Equals(existing)) { stretch.Start = replacement; stretch.StartId = replacement.Id; }
                 if (stretch.End.Equals(existing)) { stretch.End = replacement; stretch.EndId = replacement.Id; }
             }
-            foreach (var signal in layout.OperationLocations.OfType<SignalControlledLocation>())
+            foreach (var controlled in layout.OperationLocations)
             {
-                if (signal.ControlledBy is { } controller && controller.Equals(existing))
-                    signal.ControlledBy = replacement as Station; // null when the replacement is no longer a station
+                if (controlled.ControlledBy is { } controller && controller.Equals(existing))
+                    controlled.ControlledBy = replacement as Station; // null when the replacement is no longer a station
             }
             // Only a station can hold a lock key, so converting one is always converting it into
             // something that cannot: the locations whose keys it held are left without one rather than

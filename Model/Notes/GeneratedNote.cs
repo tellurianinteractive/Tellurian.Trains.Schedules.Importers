@@ -102,13 +102,13 @@ public static class GeneratedNoteExtensions
             TurnAndCirculateNote => new(NoteResources.TurnAndCirculateTractionUnit),
             ReinforcementNote(_, var part) => new(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
-            CargoFlowDestinationNote(var part) when part.CargoFlowOptions is not null =>
-                new(NoteResources.BringsWagonsTo, NoteArg.Markup(part.ToText, part.ToHtml)),
+            CargoFlowDestinationNote(var parts) when parts.HasCargoFlowOptions =>
+                new(NoteResources.BringsWagonsTo, NoteArg.Markup(parts.DestinationsText, parts.DestinationsHtml)),
             // Every destination the flow serves, not only those at this station: the wagons taken off
             // here are sorted by where they go on to, and a destination beyond it is what says which
             // train they are put over to.
-            CargoFlowUncoupleNote(var part) when part.CargoFlowOptions is not null =>
-                new(NoteResources.UncoupleWagonsFor, NoteArg.Markup(part.ToText, part.ToHtml)),
+            CargoFlowUncoupleNote(var parts) when parts.HasCargoFlowOptions =>
+                new(NoteResources.UncoupleWagonsFor, NoteArg.Markup(parts.DestinationsText, parts.DestinationsHtml)),
             // The origins are what the driver sorts the arrived wagons by, so they carry the emphasis.
             // A flow naming none still gives a usable instruction — take what arrived out to the
             // customers — so it gets the wording without the clause rather than an empty one.
@@ -126,10 +126,12 @@ public static class GeneratedNoteExtensions
                 ? new(NoteResources.LeaveKeyFrom, name, location)
                 : new(NoteResources.LeaveUnnamedKeyFrom, location),
             NoStopNote => new(NoteResources.NoStop),
+            ExchangeTransferringPassengersNote => new(NoteResources.ExchangeTransferringPassengers),
             NoExchangeNote => new(NoteResources.NoExchange),
             // Reuses the wording the sessions value itself uses for the marker, so a reader meets the
             // same phrase whether it is stated in a column or as a note.
             OnDemandNote => new(DaysExtensions.DayResource("OnDemandOnly")),
+            ShuntingTaskNote(var starts, var ends) => new(NoteResources.ShuntingTaskFromTo, starts.HHMM(), ends.HHMM()),
             CrossingNote(var meets) => new(NoteResources.Crosses, MeetList(meets, note.Settings)),
             OvertakesNote(var meets) => new(NoteResources.Overtakes, MeetList(meets, note.Settings)),
             IsOvertakenNote(var meets) => new(NoteResources.IsOvertakenBy, MeetList(meets, note.Settings)),

@@ -247,6 +247,49 @@ public class DispatchRowTests
     }
 
     [TestMethod]
+    public void TheTrainColumnLeadsWithTheCompanyThatRunsTheTrain()
+    {
+        var timetable = CreateTimetable(3);
+        var train = timetable.Trains.Single();
+        train.Category = new TrainCategory { Id = 1, Name = "Godståg", Prefix = "G" };
+        train.Company = new Company(1, "Green Cargo", "GC");
+
+        // The reader clears trains of several operators through the same station, so the sheet has to say
+        // whose train this is before it says which one.
+        Assert.AreEqual("GC G 1234", RowsAt(timetable, Middle)[0].TrainIdentity);
+    }
+
+    [TestMethod]
+    public void TheTrainColumnFallsBackToTheCategorysCompany()
+    {
+        var timetable = CreateTimetable(3);
+        var train = timetable.Trains.Single();
+        train.Category = new TrainCategory
+        {
+            Id = 1,
+            Name = "Godståg",
+            Prefix = "G",
+            Company = new Company(1, "Statens Järnvägar", "SJ"),
+        };
+        train.Company = null;
+
+        // A train left on its category's company is run by that company, and the sheet names it.
+        Assert.AreEqual("SJ G 1234", RowsAt(timetable, Middle)[0].TrainIdentity);
+    }
+
+    [TestMethod]
+    public void TheTrainColumnNamesNoCompanyWhereNoneIsGiven()
+    {
+        var timetable = CreateTimetable(3);
+        var train = timetable.Trains.Single();
+        train.Category = new TrainCategory { Id = 1, Name = "Godståg", Prefix = "G" };
+        train.Company = null;
+
+        // A single-operator layout names no company anywhere, and the column then reads as it always did.
+        Assert.AreEqual("G 1234", RowsAt(timetable, Middle)[0].TrainIdentity);
+    }
+
+    [TestMethod]
     public void SimultaneousClearancesPutTheArrivalFirst()
     {
         var timetable = CreateTimetable(3);
@@ -404,6 +447,33 @@ public class DispatchRowTests
         Assert.IsEmpty(RowsAt(CreateTimetable(3), Middle)
             .SelectMany(row => row.Notes)
             .Where(note => note is OnDemandNote));
+    }
+
+    [TestMethod]
+    public void AShuntingTaskGivesOneRowAtItsStartSayingItIsATaskAndWhen()
+    {
+        var timetable = CreateTimetable(3);
+        var category = new TrainCategory { Id = 9, Name = "Shunting", Prefix = "V", Content = TrainContent.Cargo, IsShunting = true };
+        var task = new Train(9, category, 9000) { Sessions = Sessions.All };
+        var call = task.Add(new StationCall(90, StationNamed(timetable, Middle)["1"], Time.FromHourAndMinute(14, 00), Time.FromHourAndMinute(14, 45)));
+        call.IsArrival = true;
+        call.IsDeparture = true;
+        timetable.Add(task);
+        call.Notes.Add(new TextCallNote("on arrival", LanguageCode) { IsForArrival = true });
+        call.Notes.Add(new TextCallNote("on departure", LanguageCode) { IsForDeparture = true });
+
+        var row = RowsAt(timetable, Middle).Single(row => row.Call.Train == task);
+
+        // The call is both origin and destination, so both time columns are blank: the note carries the
+        // span, and the row is placed at the time the work starts with every note of the call on it.
+        Assert.AreEqual(DispatchRowKind.ShuntingTask, row.Kind);
+        Assert.AreEqual(Time.FromHourAndMinute(14, 00), row.Time);
+        Assert.IsNull(row.ArrivalTime);
+        Assert.IsNull(row.DepartureTime);
+        var note = row.Notes.OfType<ShuntingTaskNote>().Single();
+        StringAssert.Contains(note.ToText, "14:00-14:45");
+        Assert.AreSame(note, row.Notes[0], "The task note leads the row's notes.");
+        Assert.HasCount(3, row.Notes);
     }
 
     [TestMethod]

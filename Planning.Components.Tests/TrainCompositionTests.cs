@@ -105,9 +105,44 @@ public class TrainCompositionTests
     }
 
     [TestMethod]
+    public void DestinationPositionsWithinAFlowAreSeparateRectanglesFrontFirst()
+    {
+        var fixture = CreateFixture();
+        AddFlow(fixture, 0, 2, 2, new Destination { Location = fixture.End, PositionInTrain = 2 });
+        AddFlow(fixture, 0, 2, 1,
+            new Destination { Location = fixture.End, PositionInTrain = 0 },
+            new Destination { Location = fixture.Middle, PositionInTrain = 2 },
+            new Destination { Location = fixture.End, PositionInTrain = 1 });
+
+        var groups = DeparturesAt(fixture, fixture.Start).Single().Groups.Cast<CargoPositionComposition>().ToArray();
+
+        CollectionAssert.AreEqual(new[] { (1, 1), (1, 2), (1, 0), (2, 2) },
+            groups.Select(group => (group.Position, group.DestinationPosition)).ToArray(),
+            "By the flow's position first, then by the destination's within it, with anywhere last at each level.");
+        CollectionAssert.AreEqual(new[] { "End", "Middle", "End", "End" },
+            groups.Select(group => group.Destinations.Single().Text).ToArray());
+    }
+
+    [TestMethod]
+    public void DestinationsSharingAPositionWithinAFlowShareOneRectangle()
+    {
+        var fixture = CreateFixture();
+        AddFlow(fixture, 0, 2, 1,
+            new Destination { Location = fixture.End, PositionInTrain = 1 },
+            new Destination { Location = fixture.Middle, PositionInTrain = 1 });
+
+        var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
+
+        Assert.AreEqual(1, cargo.DestinationPosition);
+        CollectionAssert.AreEqual(new[] { "End", "Middle" }, cargo.Destinations.Select(d => d.Text).ToArray(),
+            "They are one unit of wagons, so they are listed in one rectangle.");
+    }
+
+    [TestMethod]
     public void ACargoPositionStatesItsDestinationsWithQualifiersAndColouredRegions()
     {
         var fixture = CreateFixture();
+        fixture.Middle.CargoServedFrom = fixture.End;
         AddFlow(fixture, 0, 2, 1,
             new Destination { Location = fixture.End, AndRegions = true, AndLocalDestinations = true },
             new Destination { Location = fixture.Middle, AndBeyond = true });
@@ -115,7 +150,7 @@ public class TrainCompositionTests
         var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
 
         Assert.HasCount(2, cargo.Destinations, "One line per destination.");
-        Assert.AreEqual("End and local destinations, East", cargo.Destinations[0].Text);
+        Assert.AreEqual("End, Middle, East", cargo.Destinations[0].Text, "The local destinations are named, not summed up.");
         Assert.Contains("background-color: #CC0000", cargo.Destinations[0].Html.Value, "The region is a coloured chip.");
         Assert.AreEqual("Middle and beyond", cargo.Destinations[1].Text);
     }
@@ -146,16 +181,20 @@ public class TrainCompositionTests
     }
 
     [TestMethod]
-    public void TheCompositionIncludesWagonsCoupledEarlierAndLeavesOutThoseUncoupledHere()
+    public void OnlyTheCargoFlowsConnectedAtTheStationAreListed()
     {
         var fixture = CreateFixture();
-        AddFlow(fixture, 0, 2, 1, new Destination { Location = fixture.End });     // through
+        AddFlow(fixture, 0, 2, 1, new Destination { Location = fixture.End });     // through Middle
         AddFlow(fixture, 0, 1, 2, new Destination { Location = fixture.Middle });  // uncoupled at Middle
         AddFlow(fixture, 1, 2, 3, new Destination { Location = fixture.End });     // coupled at Middle
 
+        var atStart = DeparturesAt(fixture, fixture.Start).Single().Groups;
         var atMiddle = DeparturesAt(fixture, fixture.Middle).Single().Groups;
 
-        CollectionAssert.AreEqual(new[] { 1, 3 }, atMiddle.Select(group => group.Position).ToArray());
+        CollectionAssert.AreEqual(new[] { 1, 2 }, atStart.Select(group => group.Position).ToArray(),
+            "Both flows are gathered at Start.");
+        CollectionAssert.AreEqual(new[] { 3 }, atMiddle.Select(group => group.Position).ToArray(),
+            "Middle gathers the wagons of one flow; the others only arrive there or end there.");
     }
 
     [TestMethod]
@@ -232,6 +271,7 @@ public class TrainCompositionTests
     {
         var fixture = CreateFixture();
         AddFlow(fixture, 0, 2, 1, new Destination { Location = fixture.End });
+        AddFlow(fixture, 1, 2, 2, new Destination { Location = fixture.End });
 
         Assert.IsNull(DeparturesAt(fixture, fixture.Start).Single().ArrivalTime, "It arrives from nowhere.");
         Assert.AreEqual(Time.FromHourAndMinute(6, 20), DeparturesAt(fixture, fixture.Middle).Single().ArrivalTime);

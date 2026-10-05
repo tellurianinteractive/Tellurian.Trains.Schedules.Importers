@@ -298,7 +298,9 @@ public static class PlanExtensions
         /// the origin, the terminus — adds a minute to that leg's run time for getting away and braking.
         /// The train stops at
         /// the origin and terminus (always) and at any shadow station; at an intermediate location it stops only
-        /// when the category can exchange there (a passenger category where <see cref="OperationLocation.HasPassengerExchange"/>,
+        /// when the category's stop pattern names it (see <see cref="TrainCategory.StopLocationIds"/>, which
+        /// constrains nothing while it is empty) and the category can exchange there (a passenger category where
+        /// <see cref="OperationLocation.HasPassengerExchange"/>,
         /// a freight category where <see cref="OperationLocation.HasCargoExchange"/>) — otherwise it passes through.
         /// A <see cref="SignalControlledLocation"/> is never a stop. Where the path reverses direction the stop is
         /// long enough for the loco runaround.
@@ -412,8 +414,16 @@ public static class PlanExtensions
             bool StandsAt(int index) =>
                 index == 0 || index == locations.Count - 1 || StopsAt(locations[index]);
 
-            // A train stops at a location when the category can exchange there; shadow stations always stop and
-            // signal-controlled locations never do. The origin and terminus are handled by StandsAt above.
+            // A train stops at a location when the category's stop pattern names it and the category can
+            // exchange there; shadow stations always stop and signal-controlled locations never do. The
+            // origin and terminus are handled by StandsAt above.
+            //
+            // The stop pattern is a positive list (see the model's StopPatternRules), so what it leaves out
+            // is run through. A category with no pattern names nothing and so constrains nothing, which is
+            // how a route was built before there were patterns. A shadow station is outside the pattern's
+            // reach: it stands for everywhere beyond the layout, which is where a train enters and leaves
+            // the modelled railway, and running one through is not something a pattern should be able to
+            // say by omission.
             //
             // A service category exchanges nothing, so this stops it nowhere in between: a vehicle transfer
             // runs through, and a construction train runs to its site and no further. That is narrower on
@@ -424,6 +434,7 @@ public static class PlanExtensions
             {
                 if (location is SignalControlledLocation) return false;
                 if (location is Station { IsShadow: true }) return true;
+                if (!category.AllowsStopAt(location)) return false;
                 var passenger = category.IsPassenger && location.HasPassengerExchange;
                 var freight = category.IsFreight && location.HasCargoExchange;
                 return passenger || freight;
