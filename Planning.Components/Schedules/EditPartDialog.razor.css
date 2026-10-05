@@ -36,6 +36,10 @@
             color: #556;
         }
 
+        .position {
+            width: 5rem;
+        }
+
         .train {
             font-weight: 600;
             color: var(--primary);

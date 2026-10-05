@@ -28,32 +28,51 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         await OpenTheReportAsync();
 
         // Munkeröd and Stilkøbing, the manned stations; Rubjerg and Vig get no pages. Munkeröd's track 1 fills
-        // its first page and track 2 its second, and Stilkøbing starts on a page of its own.
+        // its first page and track 2 its second, and Stilkøbing starts on a page of its own, continued over the
+        // next because every freight also arrives there with wagons to uncouple. Every page is followed by its
+        // mirror image, for the reader on the other side of the tracks.
         var headings = Page.Locator(".compositions-page h1");
-        await Expect(headings).ToHaveCountAsync(3);
+        await Expect(headings).ToHaveCountAsync(8);
         await Expect(headings.Nth(0)).ToHaveTextAsync("Munkeröd");
-        await Expect(headings.Nth(1)).ToHaveTextAsync(new Regex(@"^Munkeröd\s*\(continued\)$"));
-        await Expect(headings.Nth(2)).ToHaveTextAsync("Stilkøbing");
+        await Expect(headings.Nth(1)).ToHaveTextAsync("Munkeröd");
+        await Expect(headings.Nth(2)).ToHaveTextAsync(new Regex(@"^Munkeröd\s*\(continued\)$"));
+        await Expect(headings.Nth(4)).ToHaveTextAsync("Stilkøbing");
+        await Expect(headings.Nth(6)).ToHaveTextAsync(new Regex(@"^Stilkøbing\s*\(continued\)$"));
 
         var first = Page.Locator(".compositions-page").First;
-        await Expect(first.Locator("th")).ToHaveTextAsync(
-            ["Track", "Runs", "Arr", "Dep", "Train", "To", "Max", "Turnus", "Composition counted from the loco"]);
+        var mirrored = Page.Locator(".compositions-page").Nth(1);
+        // The sessions, the train, its times and its limit are in the loco rectangle, not in columns of their own.
+        await Expect(first.Locator("th")).ToHaveCountAsync(3);
+        await Expect(first.Locator("th").Nth(0)).ToHaveTextAsync("Track");
+        await Expect(first.Locator("th").Nth(1)).ToHaveTextAsync("To/from");
+        await Expect(first.Locator("th.composition")).ToContainTextAsync("Composition counted from the loco");
+        // The neighbours at either end change places on the mirrored page.
+        var ends = await first.Locator("th.composition .end").AllInnerTextsAsync();
+        var mirroredEnds = await mirrored.Locator("th.composition .end").AllInnerTextsAsync();
+        Assert.AreEqual(ends[0].Trim('◀', '▶', ' '), mirroredEnds[1].Trim('◀', '▶', ' '), $"Ends: {string.Join("|", ends)} / {string.Join("|", mirroredEnds)}");
+        Assert.AreEqual(ends[1].Trim('◀', '▶', ' '), mirroredEnds[0].Trim('◀', '▶', ' '));
         // The track is named once, where its departures begin, and again at the top of the next page.
         var tracks = await first.Locator("td.track").AllInnerTextsAsync();
         Assert.AreEqual("1", tracks[0]);
         CollectionAssert.AreEqual(new[] { "1", "2" }, tracks.Where(track => track.Length > 0).ToArray(),
             $"Tracks: {string.Join(",", tracks)}");
-        await Expect(Page.Locator(".compositions-page").Nth(1).Locator("td.track").First).ToHaveTextAsync("2");
+        await Expect(Page.Locator(".compositions-page").Nth(2).Locator("td.track").First).ToHaveTextAsync("2");
 
         // The passenger train leaves first, with its wagonset wagon by wagon in rake order. It starts its run
         // here, so it arrives from nowhere and the arrival is left empty.
         var passenger = first.Locator("tbody tr").First;
-        Assert.AreEqual("", (await passenger.Locator("td.time").First.InnerTextAsync()).Trim(), "It arrives from nowhere.");
-        await Expect(passenger.Locator("td.time").Nth(1)).ToHaveTextAsync("05:30");
-        // The rake is named in the turnus column; nothing captions the rectangles.
-        await Expect(passenger.Locator("td.turnus .designation")).ToHaveTextAsync("01 B");
-        // Nothing limits the passenger train, and an empty cell is how that is said.
-        await Expect(passenger.Locator("td.limit .maxload")).ToHaveCountAsync(0, new() { Timeout = 2000 });
+        await Expect(passenger.Locator(".loco .times")).ToHaveTextAsync("-05:30");
+        // The loco leads, at the end the train travels to: mirrored, it stands at the other end.
+        var heading = await passenger.Locator(".groups").GetAttributeAsync("class");
+        var mirroredHeading = await mirrored.Locator("tbody tr").First.Locator(".groups").GetAttributeAsync("class");
+        Assert.AreNotEqual(heading, mirroredHeading);
+        var loco = (await passenger.Locator(".loco").BoundingBoxAsync())!;
+        var wagon = (await passenger.Locator(".wagon").First.BoundingBoxAsync())!;
+        Assert.AreEqual(heading!.Contains("rightwards"), loco.X > wagon.X, $"The loco leads the train: {heading}");
+        // The rake is named in a shaded rectangle at the front of its wagons; nothing captions them.
+        await Expect(passenger.Locator(".wagonset .turnus .designation")).ToHaveTextAsync("01 B");
+        // Nothing limits the passenger train, and its loco states no limit.
+        await Expect(passenger.Locator(".loco .maxload")).ToHaveCountAsync(0, new() { Timeout = 2000 });
         await Expect(first.Locator(".caption")).ToHaveCountAsync(0);
         await Expect(passenger.Locator(".wagon .class")).ToHaveTextAsync(["A", "AB", "B", "B", "BF"]);
         await Expect(passenger.Locator(".wagon").First.Locator(".number")).ToHaveTextAsync("50 74 19-1");
@@ -68,14 +87,18 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         // A freight train's cargo positions front first, the one without a position last. Nothing names the
         // positions: the order of the rectangles is what says where the wagons go.
         var freight = first.Locator("tbody tr").Nth(1);
-        await Expect(freight.Locator("td.turnus .designation")).ToHaveCountAsync(0, new() { Timeout = 2000 });
-        // The train's own limit: at most 24 axles and 12 wagons, each figure with the mark that names it.
-        await Expect(freight.Locator("td.limit .axles")).ToHaveTextAsync("24");
-        await Expect(freight.Locator("td.limit .wagons")).ToHaveTextAsync("12");
+        await Expect(freight.Locator(".wagonset .turnus .designation")).ToHaveCountAsync(0, new() { Timeout = 2000 });
+        // The train's own limit, last in the loco: at most 24 axles and 12 wagons, each figure with its mark.
+        await Expect(freight.Locator(".loco .axles")).ToHaveTextAsync("24");
+        await Expect(freight.Locator(".loco .wagons")).ToHaveTextAsync("12");
+        await Expect(freight.Locator(".loco > *").Last).ToHaveClassAsync(new Regex("arrow|maxload"));
         await Expect(freight.Locator(".cargo")).ToHaveCountAsync(3);
         var destination = freight.Locator(".cargo .destination").First;
         await Expect(destination).ToContainTextAsync("Stilkøbing, Vig");
-        await Expect(destination.Locator(".region")).ToHaveCSSAsync("background-color", "rgb(204, 0, 0)");
+        // The region follows every place in the rectangle, as a coloured chip.
+        await Expect(freight.Locator(".cargo").First.Locator(".destination").Last.Locator(".region"))
+            .ToHaveCSSAsync("background-color", "rgb(204, 0, 0)");
+        await Expect(destination.Locator(".region")).ToHaveCountAsync(0, new() { Timeout = 2000 });
         // And the most that may be brought to that destination, after the place it belongs to.
         await Expect(destination.Locator(".wagons")).ToHaveTextAsync("5");
         await Expect(freight.Locator(".cargo").Nth(1).Locator(".destination")).ToHaveTextAsync("Rubjerg and beyond");
@@ -88,9 +111,19 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
 
         // The train that only calls here on its way through shows when it arrives as well as when it leaves;
         // it is on this sheet because it gathers wagons here, not merely because it passes.
-        var stopping = Page.Locator("tbody tr").Filter(new() { HasTextString = "4800" }).First;
-        await Expect(stopping.Locator("td.time").First).ToHaveTextAsync("05:15");
-        await Expect(stopping.Locator("td.time").Nth(1)).ToHaveTextAsync("05:20");
+        // Its arrival, uncoupling the wagons gathered at Stilkøbing, is a row of its own just before, with the
+        // origin of those wagons in a dashed rectangle. It runs on, so it shows its departure time too.
+        // Munkeröd's sheets come first; Stilkøbing lists the train once more, where it starts.
+        var rows = Page.Locator("tbody tr").Filter(new() { HasTextString = "4800" });
+        // Twice over: every page is printed as drawn and mirrored.
+        await Expect(rows).ToHaveCountAsync(6);
+        var arriving = rows.Nth(0);
+        await Expect(arriving.Locator(".loco .times")).ToHaveTextAsync("05:15-05:20");
+        await Expect(arriving.Locator("td.to")).ToHaveTextAsync(new Regex(@"^from\s+Stilkøbing$"));
+        await Expect(arriving.Locator(".cargo.arriving")).ToHaveTextAsync("Stilkøbing");
+        var stopping = rows.Nth(1);
+        await Expect(stopping.Locator(".loco .times")).ToHaveTextAsync("05:15-05:20");
+        await Expect(stopping.Locator("td.to")).ToHaveTextAsync(new Regex(@"^to\s+Vig$"));
 
 
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("train-compositions.png"), FullPage = true });

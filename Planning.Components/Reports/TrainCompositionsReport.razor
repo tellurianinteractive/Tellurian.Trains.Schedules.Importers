@@ -1,4 +1,4 @@
-@page "/train-compositions-report"
+﻿@page "/train-compositions-report"
 @layout PrintLayout
 
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions
@@ -13,7 +13,8 @@
    trains, so a page that overflows is a bug, not a cosmetic issue. Every station starts on a fresh page,
    because the pile is torn apart and handed to different stations.
 
-   Printed A4 landscape, one-sided. *@
+   Printed A4 landscape, double-sided: every page is followed by its mirror image, the trains travelling the
+   other way, for a reader on the other side of the tracks. *@
 
 @if (_pages is null)
 {
@@ -65,15 +66,18 @@ else
         }
 
         var settings = Settings;
+        // A train running in the direction of its track stretch heads right, on the first of each pair of pages.
+        var orientation = new CompositionOrientation(layout);
         var pages = new List<CompositionPage>();
-        // Manned stations only, in layout order: they are where somebody is on duty to make up the trains.
-        foreach (var station in layout.OperationLocations.OfType<Station>().Where(station => station.IsManned))
+        // Manned and shadow stations, in layout order: they are where somebody is on duty to make up the trains
+        // and take the arriving wagons off them. Off-layout staging is always worked, manned or not.
+        foreach (var station in layout.OperationLocations.OfType<Station>().Where(station => station.IsManned || station.IsShadow))
         {
             // Built in the station's own language: the compositions write the sessions' and destinations' texts,
             // and the pagination measures them.
             var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
-            var compositions = StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
+            var compositions = StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule, orientation);
             if (compositions.Departures.Count == 0) continue;
             _cultures[station] = culture;
             pages.AddRange(CompositionPaginator.BuildPages([compositions], CompositionPageGeometry.A4Landscape));

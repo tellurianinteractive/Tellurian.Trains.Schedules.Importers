@@ -2507,7 +2507,7 @@
     <value>Train compositions</value>
   </data>
   <data name="NoTrainCompositions" xml:space="preserve">
-    <value>No manned station has departing trains with cargo flows or wagonsets with listed wagons.</value>
+    <value>No manned or shadow station has trains with cargo flows or wagonsets.</value>
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Composition counted from the loco</value>
@@ -2568,5 +2568,17 @@
   </data>
   <data name="TimetableStretchNoPredecessor" xml:space="preserve">
     <value>No track stretch leads here.</value>
+  </data>
+  <data name="ArrivingWagonsLegend" xml:space="preserve">
+    <value>Dashed: arriving wagons, from</value>
+  </data>
+  <data name="ToFrom" xml:space="preserve">
+    <value>To/from</value>
+  </data>
+  <data name="ToPlace" xml:space="preserve">
+    <value>to</value>
+  </data>
+  <data name="FromPlace" xml:space="preserve">
+    <value>from</value>
   </data>
 </root>

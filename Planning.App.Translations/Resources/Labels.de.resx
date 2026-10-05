@@ -2493,7 +2493,7 @@
     <value>Zugbildungen</value>
   </data>
   <data name="NoTrainCompositions" xml:space="preserve">
-    <value>Kein besetzter Bahnhof hat abfahrende Züge mit Wagenströmen oder Wagengruppen mit erfassten Wagen.</value>
+    <value>Kein besetzter Bahnhof und kein Schattenbahnhof hat Züge mit Wagenströmen oder Wagengruppen.</value>
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Zugbildung ab Lok gezählt</value>
@@ -2548,5 +2548,17 @@
   </data>
   <data name="TimetableStretchNoPredecessor" xml:space="preserve">
     <value>Kein Streckenabschnitt führt hierher.</value>
+  </data>
+  <data name="ArrivingWagonsLegend" xml:space="preserve">
+    <value>Gestrichelt: ankommende Wagen, von</value>
+  </data>
+  <data name="ToFrom" xml:space="preserve">
+    <value>Nach/von</value>
+  </data>
+  <data name="ToPlace" xml:space="preserve">
+    <value>nach</value>
+  </data>
+  <data name="FromPlace" xml:space="preserve">
+    <value>von</value>
   </data>
 </root>

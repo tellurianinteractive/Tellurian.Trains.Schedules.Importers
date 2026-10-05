@@ -15,6 +15,33 @@
 - **En station viser de steder, den betjener med gods.** På fanen **Driftssteder** viser informationen
   om en station nu de steder, hvis gods betjenes fra den, og informationen om et sted viser, hvilken
   station der betjener det. De udskrevne ark for driftssteder viser også de betjente steder.
+- **Togsammensætninger viser ankommende godsstrømsvogne.** Et tog, der ankommer med godsstrømsvogne, som
+  kobles fra på en station, får nu sin egen række på stationens ark, med sin afgangstid, hvor toget kører
+  videre, og med ét stiplet rektangel pr. plads i toget, der angiver, hvor vognene kom fra. Kun
+  godsstrømme med **Kobl fra?** afkrydset vises, undtagen på en skyggestation, hvor alle ankommende vogne
+  vises. Skyggestationer får nu også deres egne ark.
+- **Togsammensætninger viser hvert vognsæt, hvor det kobles til.** Et vognsæt, der ikke angiver sine
+  vogne, tegnes nu også, alene ved sit skraverede omløbsrektangel. Et vognsæt vises kun, hvor det kobles
+  til: ved den første afgang i sit omløb og senere kun, hvor det udtrykkeligt kobles til — med en
+  bemærkning om tilkobling, hentet fra et andet spor eller koblet til et tog, der allerede kører. Et
+  vognsæt, der bliver ved sit lokomotiv fra tog til tog, vises ikke igen. Hvor et vognsæt står i toget,
+  angives pr. tilkobling: **Plads** i dialogen **Rediger togafsnit** på fanen **Omløb**, så flere vognsæt,
+  der kobles til på samme station, tegnes i den rækkefølge.
+- **Togsammensætninger fylder mindre.** Destinationerne, og oprindelsesstederne for ankommende vogne, står
+  nu i forlængelse af hinanden som en kommasepareret liste i deres rektangel i stedet for én pr. linje.
+  Kolonnen **Omløb** er væk: hvert vognsæts omløb står i et skraveret rektangel foran dets vogne, hvilket
+  giver sammensætningerne mere bredde. Kolonnen **Til** hedder nu **Til/fra** og angiver *til*, hvor et
+  afgående tog skal hen, og *fra*, hvor et ankommende tog kom fra.
+- **Togsammensætninger tegnes, som togene kører.** Hvert tog begynder nu med et lokomotivrektangel i den
+  ende, det kører mod, med en pil, og vognene følger efter det, så rækkefølgen på papiret er rækkefølgen
+  på sporet. Lokomotivet rummer dagene eller køresessionerne, toget og dets tider på stationen
+  (**06:00-06:45**) og til sidst togets største last og erstatter fem kolonner. Et tog, der kører i sin
+  banestræknings definerede retning, peger mod højre; et, der kører imod den, peger mod venstre. Hver side
+  følges af sit spejlbillede til den anden side af sporene: udskriv dobbeltsidet, og vend arket til den
+  side, der passer med det, du ser. Nabodriftsstederne nævnes i hver sin ende af sammensætningens
+  overskrift.
+- **Regioner sidst i togsammensætninger.** Hvor flere destinationer deler en plads i toget, angives alle
+  stederne først og deres regioner efter dem, hver region én gang.
 
 ## Version 0.7.2
 
@@ -92,6 +119,39 @@
   lokomotivfører med et ophold mellem to tog i sin **tjeneste** er alligevel optaget imens, på vej til
   eller i venten på det næste, så den tid regnes nu også med — på de sessioner, tjenesten køres. Det gør
   også et starttidspunkt, du har angivet før tjenestens første tog, eller et sluttidspunkt efter dens sidste.
+
+- **Tog på linjen kontrolleres, som togekspeditørerne ser det.** Listen **Konflikter** så før på én
+  banestrækning ad gangen, så to tog kunne krydse på en ubemandet station, eller følge efter hinanden
+  forbi en, uden at der blev sagt noget. Nu ser den på hver togledelsesstrækning som helhed. Et
+  signalstyret sted, for eksempel en blokpost, deler togledelsesstrækningen i afsnit, der hver kan rumme
+  ét tog pr. spor. På enkeltsporet bane kan tog i modsat retning kun mødes ved enderne eller på et
+  signalstyret sted, hvor tog kan krydse. Tog i samme retning kan følge efter hinanden, ét pr. afsnit. Se
+  **Togledelsesstrækninger** i hjælpen på fanen **Strækninger**.
+
+- **En bemandet station kan fjernstyre en forgrening eller en ubemandet station.** Feltet **Styres fra**
+  på fanen **Driftssteder**, der hidtil kun fandtes på signalstyrede steder, tilbydes nu også på
+  ubemandede stationer og industriområder. Kun bemandede stationer tilbydes som styrende station. En
+  fjernstyret forgrening, et krydsningssted, en ubemandet station eller et industriområde betjenes af den
+  stations togekspeditør som sit eget: togledelsesstrækninger ender dér, dets tog står på den styrende
+  stations togekspeditionsliste i tidsrækkefølge blandt stationens egne, med sin signatur foran sporet,
+  og overskriften nævner det. Stationerne bag det er blandt dem, den styrende station ringer til, og de
+  ringer til den styrende station. En blokpost, et signalstyret sted, der hverken er forgrening eller
+  krydsningssted, forbliver en del af linjen. Tryk på **Gendan ud fra banestrækninger** på fanen
+  **Strækninger** efter at have angivet en styrende station.
+
+- **Angiv, hvor tog kan krydse.** Et signalstyret sted har et nyt afkrydsningsfelt **Tog kan krydse?** på
+  fanen **Driftssteder**. Sæt kryds, hvor ét tog kan vente, mens et andet passerer. Antallet af spor kan
+  ikke afgøre det, for en forgrening har to spor for at vide, hvilken vej et tog skal, uanset om tog kan
+  krydse dér. Et signalstyret sted, der hverken er forgrening eller afkrydset, er en blokpost.
+  Importerede steder starter uden kryds, så sæt kryds ved krydsningsstederne efter importen.
+
+### Ændringer
+
+- **Lokale destinationer nævnes ved navn.** En godsdestination med **Og lokale?** afkrydset lyder ikke
+  længere *Stilkøbing og lokale destinationer*: den nævner stederne, *Stilkøbing, Vig, Rubjerg* —
+  stationen efterfulgt af hvert sted, hvis gods betjenes derfra (**Godsbetjenes fra** på fanen
+  **Driftssteder**). En station, der ikke betjener noget, nævnes alene. Udtrykket er også fjernet fra
+  godsforklaringen i de generelle instruktioner, da intet udskriver det længere.
 
 ## Version 0.7.0
 
@@ -210,6 +270,15 @@
   mindre afstand mellem linjerne, punkterne og dagsoverskrifterne — skriftstørrelsen er den samme — hvilket
   giver plads til fire eller fem punkter mere. Et program, der er for langt til siden, mister sine sidste
   punkter, og de er slutningen på træffet, netop det, folk slår op.
+
+- **Byg automatisk udvider nu de omløb, du allerede har, før det laver nye.** Togene, der endnu ikke er i
+  et omløb, tilbydes først de eksisterende omløb: et omløb fortsætter med det, der fortsætter det, hvor
+  det ankommer, i den kategori, det allerede kører i, og et tomt omløb, du selv har lavet, fyldes, før et
+  nyt oprettes. Kun de tog, der ikke passer ind i noget eksisterende omløb, starter nye omløb, så når du
+  bygger igen efter at have tilføjet nogle tog, forlænges de køretøjer, der allerede kører, i stedet for at
+  sætte nye i drift. Godsstrømme lades være, som de er. Resultatet ved siden af knappen angiver nu, hvor
+  mange togafsnit de eksisterende omløb fik, hvor mange af dem der blev forlænget, og hvor mange omløb der
+  blev bygget.
 
 ### Fejlrettelser
 

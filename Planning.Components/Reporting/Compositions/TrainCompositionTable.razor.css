@@ -7,7 +7,7 @@
    CompositionPaginator fits rows to pages from CompositionPageGeometry, and every size below that it counts
    with is pinned here: the heading box of 17 mm plus its 3 mm margin (HeadingHeightMm 20), the column-header
    row (ColumnHeaderHeightMm), the row's 1 mm padding and rule (RowChromeHeightMm), the 5 mm text line, the
-   column widths (FixedColumnsWidthMm 142), the gaps between groups, the one-line 6.1 mm wagon rectangle with
+   column widths (FixedColumnsWidthMm 42), the loco rectangle's chrome (LocoChromeWidthMm), the gaps between groups, the one-line 6.1 mm wagon rectangle with
    its padding, border, type sizes and 1 mm gaps, the 8 mm narrowest rectangle, and the cargo rectangle with
    its 4.5 mm lines. Change one and remeasure the other.
 
@@ -57,6 +57,18 @@
             font-size: 9pt;
             line-height: 4.5mm;
             white-space: nowrap;
+
+            /* A dashed rectangle the size of a capital, beside the words saying what dashed stands for. */
+            .legend .arriving-sample {
+                display: inline-block;
+                box-sizing: border-box;
+                width: 4mm;
+                height: 3mm;
+                margin-right: 1mm;
+                border: 0.3mm dashed #000;
+                border-radius: 0.5mm;
+                vertical-align: -0.3mm;
+            }
         }
     }
 }
@@ -96,37 +108,30 @@ table.compositions {
         border-bottom-color: #000;
     }
 
-    .track,
-    .time {
+    .track {
         text-align: center;
     }
 
-    td.track,
-    td.train {
+    /* The neighbours at either end of the composition, and between them what the column is. */
+    th.composition .ends {
+        display: flex;
+        justify-content: space-between;
+        gap: 4mm;
+
+        .end {
+            font-weight: 700;
+            font-style: normal;
+        }
+    }
+
+    td.track {
         font-weight: 700;
     }
 
-    /* Wraps rather than truncates: clipping "on demand only" off the end of a value would drop operating
-       information the reader never learns was there. The estimate charges the wrapped lines. */
-    td.sessions {
-        white-space: normal;
-    }
-
-    /* Two limits side by side wrap between one another rather than run past the column; each is held
-       together by MaxLoadView's own nowrap, so a figure never parts from its mark. */
-    td.limit {
-        white-space: normal;
-    }
-
-    /* One entry per wagonset, each on a line of its own and wrapping within the column, for the same reason:
-       a turnus the reader cannot read in full is a rake they cannot fetch. */
-    td.turnus {
-        white-space: normal;
-
-        .entry .designation {
-            margin-right: 1mm;
-            font-weight: 700;
-        }
+    /* "to" or "from" before the place: small, so the place still reads first. */
+    td.to .direction {
+        font-size: 0.8em;
+        font-style: italic;
     }
 
     td.composition {
@@ -139,28 +144,8 @@ table.compositions {
         width: 10mm;
     }
 
-    .sessions {
-        width: 14mm;
-    }
-
-    .time {
-        width: 12mm;
-    }
-
-    .train {
-        width: 24mm;
-    }
-
     .to {
         width: 32mm;
-    }
-
-    .limit {
-        width: 18mm;
-    }
-
-    .turnus {
-        width: 20mm;
     }
 
     /* The groups stand side by side front first, and wrap onto another line where the next one does not fit.
@@ -172,6 +157,38 @@ table.compositions {
         flex-wrap: wrap;
         align-items: stretch;
         gap: 1.5mm 2mm;
+
+        /* A train heading right is laid out from the right, loco first, wrapping the same way mirrored: the
+           heights are those of the train heading left, which is all the estimate counts. */
+        &.rightwards {
+            flex-direction: row-reverse;
+
+            .wagonset {
+                flex-direction: row-reverse;
+            }
+        }
+    }
+
+    /* The front of the train: as tall as a wagon, with a heavier border so it is not read as one. Its text is on
+       one line and as wide as it needs, as the estimate charges it. */
+    .loco {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 1mm;
+        box-sizing: border-box;
+        height: 6.1mm;
+        border: 0.6mm solid #000;
+        border-radius: 1mm;
+        padding: 0.3mm 1mm;
+        font-size: 7.5pt;
+        line-height: 4.5mm;
+        white-space: nowrap;
+
+        .train {
+            font-size: 8.5pt;
+            font-weight: 700;
+        }
     }
 
     /* Sized by its contents rather than given a width, and shrinkable so a group wider than the whole
@@ -185,6 +202,31 @@ table.compositions {
         display: flex;
         flex-wrap: wrap;
         gap: 1mm;
+
+        /* The turnus card the rake belongs to: a wagon-sized rectangle, shaded so it reads as a name rather
+           than as a wagon, with the sessions beside it where the rake is in the train on only some. */
+        .turnus {
+            display: flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 1mm;
+            box-sizing: border-box;
+            height: 6.1mm;
+            min-width: 8mm;
+            border: 0.3mm solid #000;
+            border-radius: 1mm;
+            padding: 0.5mm 1.2mm;
+            background: #ddd;
+            font-size: 7.5pt;
+            line-height: 4.5mm;
+            white-space: nowrap;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+
+            .designation {
+                font-weight: 700;
+            }
+        }
 
         /* One line, class and number side by side, as tall as a one-line cargo rectangle so the two line up.
            As wide as its text rather than a fixed width, so a long wagon number is never cut short; the
@@ -214,8 +256,8 @@ table.compositions {
         }
     }
 
-    /* One rectangle for everything the train carries at one position, as wide as its longest destination and
-       no narrower than two letters. Stretched to the height of the tallest group on its line, so the
+    /* One rectangle for everything the train carries at one position, as wide as its list of places and no
+       narrower than two letters. Stretched to the height of the tallest group on its line, so the
        rectangles of a composition line up along their foot as well as their top. */
     .cargo {
         box-sizing: border-box;
@@ -226,10 +268,16 @@ table.compositions {
         font-size: 8pt;
         line-height: 4.5mm;
 
-        /* The place and the most that may be brought there on one line, the limit following the place the
-           way it does in the duty booklets. */
+        /* The places run on as one list, wrapping between words only where the rectangle had to be brought
+           within the width of the composition. The limit follows its place, as in the duty booklets. */
         .destination {
-            display: block;
+            display: inline;
+        }
+
+        /* Wagons uncoupled from an arriving train, listing where they came from. The border keeps its width,
+           so the rectangle measures the same as one going on. */
+        &.arriving {
+            border-style: dashed;
         }
     }
 }

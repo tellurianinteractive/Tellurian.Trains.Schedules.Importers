@@ -12,14 +12,23 @@
 
    The reader is whoever makes up the trains at the station — the yard manager, where there is one — checking
    that every train leaves with the right wagons in the right places. The departures are listed a track at a
-   time, and on each row the train's composition is drawn front first, as rectangles standing where the wagons
-   stand: a wagonset as one rectangle per wagon with its class and number, and the cargo flow wagons gathered
+   time, and on each row the train is drawn the way it travels past the reader: the loco at the end it heads
+   for, holding when it runs, which train it is and its times here, and behind it the rectangles standing where
+   the wagons stand, so the paper reads in the same order as the train on the track. Which side of the tracks
+   the reader stands on is not known, so every page comes twice, the second mirrored; the neighbours named at
+   either end of the composition tell the reader which of the two is theirs. The rectangles are: a wagonset
+   coupled here, by its shaded turnus rectangle and one rectangle per wagon it lists, with class and number —
+   a rake the train only runs on with is not drawn, nothing is made up for it; and the cargo flow wagons gathered
    here as one rectangle per unit marshalled — a flow's position in the train, and within it the position its
    destinations give the wagons. A flow that only runs through the station is not drawn: there is nothing
    here to make up for it.
 
+   An arriving train uncoupling cargo flow wagons here gets a row of its own, with no departure time, and one
+   dashed rectangle per position its flows take in the train, listing where the wagons came from. Only flows
+   whose uncouple note is ticked are drawn — except at a shadow station, where every train's wagons come off.
+
    The rectangles carry no captions. Their sequence is the wagon order, so a rectangle needs to say nothing
-   about where in the train it stands, and the wagonsets are named in the turnus column instead. That leaves
+   about where in the train it stands, and each wagonset is named in a shaded rectangle at its front. That leaves
    every rectangle free to be exactly as wide as what it holds.
 
    The heading repeats on every page and is what identifies the sheet: the pile is torn apart and handed to
@@ -37,6 +46,11 @@
         <div class="context">
             <span>@Translator("TrainCompositions")</span>
             <span>@ContextLine</span>
+            @* Only where the page has arrivals; the heading box has room for a third line. *@
+            @if (Page.Departures.Any(departure => departure.IsArrival))
+            {
+                <span class="legend"><span class="arriving-sample"></span>@Translator("ArrivingWagonsLegend")</span>
+            }
         </div>
     </header>
 
@@ -44,20 +58,18 @@
         <thead>
             <tr>
                 <th class="track">@Translator("Track")</th>
-                @* "Runs", not "Sessions": the noun reaches thirteen characters in the Nordic languages and would
-                   head a column holding a few circles. *@
-                <th class="sessions">@Translator(Settings.UseDaysInsteadOfSessionNumbers ? "Days" : "SessionsShort")</th>
-                <th class="time">@Translator("Arr")</th>
-                <th class="time">@Translator("Dep")</th>
-                <th class="train">@Translator("Train")</th>
-                <th class="to">@Translator("To")</th>
-                @* Every one of these is a maximum, so the word heads the column instead of standing before
-                   each figure; the marks say which limit each figure is. *@
-                <th class="limit">@Translator("Maximum")</th>
-                @* The heading names the card the rake's identity is written on, so the right one is fetched
-                   out of several standing in the yard. *@
-                <th class="turnus">@Translator("Turnus")</th>
-                <th class="composition">@Translator("CompositionFromLoco")</th>
+                @* One column for both ends: a departure names where the train goes, an arrival where it came
+                   from, each marked so the two cannot be mistaken for each other. *@
+                <th class="to">@Translator("ToFrom")</th>
+                @* The neighbours lying at either end, as this page is read: a train drawn heading left leaves
+                   for those on the left. This is how the reader picks the page for their side of the tracks. *@
+                <th class="composition">
+                    <div class="ends">
+                        <span class="end">@if (Page.LeftNeighbours.Count > 0) { @($"◀ {NamesOf(Page.LeftNeighbours)}") }</span>
+                        <span>@Translator("CompositionFromLoco")</span>
+                        <span class="end">@if (Page.RightNeighbours.Count > 0) { @($"{NamesOf(Page.RightNeighbours)} ▶") }</span>
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -70,30 +82,38 @@
                     @* The track is named once, where its departures begin; the rule under its last one closes
                        the group. Named again at the top of a page, which is read on its own. *@
                     <td class="track">@(isFirstOfTrack ? departure.Track.Number : null)</td>
-                    <td class="sessions"><SessionsView Sessions="departure.Sessions" Settings="Settings" /></td>
-                    @* Empty where the train starts its run here: it arrives from nowhere. *@
-                    <td class="time">@departure.ArrivalTime?.HHMM()</td>
-                    <td class="time">@departure.DepartureTime.HHMM()</td>
-                    <td class="train">@departure.TrainIdentity</td>
-                    <td class="to">@departure.DestinationName</td>
-                    @* Nothing at all where the train is not restricted: a limit with no figure would read
-                       as a limit the planner forgot to fill in. *@
-                    <td class="limit"><MaxLoadView Capacity="departure.Limit" /></td>
-                    <td class="turnus">
-                        @foreach (var wagonset in departure.Turnuses)
-                        {
-                            <div class="entry">
-                                <span class="designation">@wagonset.Designation</span>
-                                @* Only where the rake is in the train on some of its sessions and not others. *@
-                                @if (wagonset.Sessions is { } sessions)
+                    <td class="to"><span class="direction">@Translator(departure.IsArrival ? "FromPlace" : "ToPlace")</span> @departure.EndName</td>
+                    <td class="composition">
+                        @* Heading right, the row is laid out from the right: the loco stands at the right end
+                           and everything behind it follows to the left, the rakes' own wagons included. *@
+                        @{ var heading = Page.HeadingOf(departure); }
+                        <div class="groups @(heading == CompositionHeading.Rightwards ? "rightwards" : "leftwards")">
+                            @* The loco leads the train, so it says which way the train travels; its arrow
+                               says so again for a train with nothing behind the loco to compare it with. It
+                               holds what were columns of their own — when the train runs, which train it is,
+                               its times here and its limit — to give the width to the wagons. *@
+                            <div class="loco">
+                                @if (heading == CompositionHeading.Leftwards)
                                 {
-                                    <SessionsView Sessions="sessions" Settings="Settings" />
+                                    <span class="arrow">◀</span>
+                                }
+                                <SessionsView Sessions="departure.Sessions" Settings="Settings" />
+                                <span class="train">@departure.TrainIdentity</span>
+                                @* "-06:45" where the train starts here, "06:00-" where it ends here. *@
+                                <span class="times">@departure.TimeText</span>
+                                @* Last, the most the train may be made up of: its marks say which limit each
+                                   figure is. Nothing at all where the train is not restricted, since a limit
+                                   with no figure would read as one the planner forgot, nor on an arrival,
+                                   where nothing is made up. *@
+                                @if (departure.LimitText.Length > 0)
+                                {
+                                    <MaxLoadView Capacity="departure.Limit" />
+                                }
+                                @if (heading == CompositionHeading.Rightwards)
+                                {
+                                    <span class="arrow">▶</span>
                                 }
                             </div>
-                        }
-                    </td>
-                    <td class="composition">
-                        <div class="groups">
                             @foreach (var group in departure.Groups)
                             {
                                 @switch (group)
@@ -102,10 +122,21 @@
                                         @* The wagons of one rake stay together: they are closer to one another
                                            than to the rectangles beside them, and they wrap as a block. *@
                                         <div class="group wagonset">
+                                            @* The turnus card the rake belongs to, shaded so it is not read as a
+                                               wagon, at the front of the wagons it names: the right card is
+                                               fetched out of several standing in the yard. *@
+                                            <div class="turnus">
+                                                <span class="designation">@wagonset.Designation</span>
+                                                @* Only where the rake is in the train on some of its sessions. *@
+                                                @if (wagonset.Sessions is { } sessions)
+                                                {
+                                                    <SessionsView Sessions="sessions" Settings="Settings" />
+                                                }
+                                            </div>
                                             @foreach (var wagon in wagonset.Wagons)
                                             {
                                                 <div class="wagon">
-                                                    <span class="class">@wagon.Class</span>
+                                                        <span class="class">@wagon.Class</span>
                                                     @* One line, the number beside the class, so a long rake
                                                        costs width rather than height. *@
                                                     @if (!string.IsNullOrWhiteSpace(wagon.Number))
@@ -118,18 +149,23 @@
                                         break;
                                     case CargoPositionComposition cargo:
                                         <div class="group cargo">
-                                            @foreach (var destination in cargo.Destinations)
+                                            @* The places run on as one list, separated by commas, so a
+                                               rectangle costs width before it costs height. Their order says
+                                               nothing — they share a position, so the wagons within the
+                                               rectangle stand as they like. The most that may be brought to a
+                                               place follows it. *@
+                                            @for (var d = 0; d < cargo.Destinations.Count; d++)
                                             {
-                                                @* One destination per line: each is a separate place the
-                                                   wagons in this rectangle are bound for. Their order says
-                                                   nothing — they share a position, so the wagons within the
-                                                   rectangle stand as they like. The most that may be brought
-                                                   there follows the place. *@
-                                                <span class="destination">
-                                                    @destination.Html<MaxLoadView Capacity="destination.Limit" />
-                                                </span>
+                                                var destination = cargo.Destinations[d];
+                                                <span class="destination">@destination.Html<MaxLoadView Capacity="destination.Limit" />@(d < cargo.Destinations.Count - 1 ? ", " : null)</span>
                                             }
                                         </div>
+                                        break;
+                                    case ArrivingCargoComposition arriving:
+                                        @* Dashed, so the wagons coming off read apart from those going on:
+                                           an arrival row is otherwise drawn just like a departure. The
+                                           origins run on as one list, as the destinations do. *@
+                                        <div class="group cargo arriving">@string.Join(", ", arriving.Origins)</div>
                                         break;
                                 }
                             }
@@ -158,6 +194,9 @@
     [Parameter] public DateOnly PrintDate { get; set; }
 
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private static string NamesOf(IReadOnlyList<OperationLocation> locations) =>
+        string.Join(", ", locations.Select(location => location.Name));
 
     private string ContextLine
     {

@@ -1,4 +1,4 @@
-# Release notes
+﻿# Release notes
 
 ## Version 0.7.3
 
@@ -16,6 +16,33 @@
   information about a station now lists the locations whose cargo is served from it, and the information
   about a location shows which station serves it. The printed operation location sheets list the served
   locations too.
+- **Train compositions show arriving cargo flow wagons.** A train arriving with cargo flow wagons that
+  are uncoupled at a station now gets a row of its own on that station's sheet, with its departure
+  time where the train runs on, and with one dashed
+  rectangle per position in the train listing where the wagons came from. Only cargo flows with
+  **uncouple** ticked are shown, except at a shadow station, where all arriving wagons are. Shadow
+  stations now get sheets of their own too.
+- **Train compositions show every wagonset where it is coupled.** A wagonset that does not list its
+  wagons is now drawn too, by its shaded turnus rectangle alone. A wagonset is shown only where it is
+  coupled: at the first departure of its schedule, and later only where it is coupled explicitly — with
+  a couple note, fetched from another track, or coupled to a train already running. A wagonset that stays
+  with its loco from train to train is not shown again. Where a wagonset stands in the train is set per coupling: **Position** in the
+  **Edit train part** dialog on the **Schedules** tab, so several wagonsets coupled at the same station
+  are drawn in that order.
+- **Train compositions take less room.** The destinations, and the origins of arriving wagons, now run
+  on as one comma-separated list in their rectangle instead of one per line. The **Turnus** column is
+  gone: each wagonset's turnus is named in a shaded rectangle in front of its wagons, which gives the
+  compositions more width. The **To** column is now **To/from**, saying *to* where a departing train
+  goes and *from* where an arriving train came from.
+- **Train compositions are drawn the way the trains travel.** Each train now starts with a loco
+  rectangle at the end it is heading for, with an arrow, and the wagons follow behind it, so the order
+  on paper is the order on the track. The loco holds the days or sessions, the train and its times at
+  the station (**06:00-06:45**) and, last, the train's maximum load, replacing five columns. A train running in the defined direction of its
+  track stretch heads right; one running against it heads left. Every page is followed by its mirror image for the
+  other side of the tracks: print double-sided and turn the sheet to the side that matches what you
+  see. The neighbouring locations are named at either end of the composition heading.
+- **Regions last in train compositions.** Where several destinations share a position in the train,
+  all the places are listed first and their regions after them, each region once.
 
 ## Version 0.7.2
 

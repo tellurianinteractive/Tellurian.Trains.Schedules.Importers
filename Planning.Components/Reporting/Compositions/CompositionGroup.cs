@@ -23,15 +23,16 @@ public abstract record CompositionGroup
 }
 
 /// <summary>
-/// A wagonset in the train, drawn as one rectangle per wagon in the order the wagons stand in the rake.
+/// A wagonset coupled to the train: its turnus rectangle, followed by one rectangle per wagon in the order the
+/// wagons stand in the rake where it lists them.
 /// </summary>
 public sealed record WagonsetComposition : CompositionGroup
 {
     /// <summary>The wagonset.</summary>
     public required ScheduledObject Wagonset { get; init; }
 
-    /// <summary>The wagons, in rake order.</summary>
-    public required IReadOnlyList<Wagon> Wagons { get; init; }
+    /// <summary>The wagons it lists, in rake order; empty where it lists none.</summary>
+    public required IReadOnlyList<CompositionWagon> Wagons { get; init; }
 
     /// <summary>
     /// The sessions or days the wagonset is in the train, where that is only some of the train's own;
@@ -39,13 +40,27 @@ public sealed record WagonsetComposition : CompositionGroup
     /// </summary>
     /// <remarks>
     /// This is what tells two wagonsets apart that work the same train on different sessions: both are drawn,
-    /// each captioned with when it runs.
+    /// each with when it runs beside its turnus.
     /// </remarks>
     public Sessions? Sessions { get; init; }
 
-    /// <summary>The identity written on the wagonset's card, so the staff can match the rake to it.</summary>
+    /// <summary>
+    /// The plain-text form of <see cref="Sessions"/> as it is drawn, for the estimate; <c>null</c> where
+    /// <see cref="Sessions"/> is.
+    /// </summary>
+    public string? SessionsText { get; init; }
+
+    /// <summary>
+    /// The identity written on the wagonset's card, so the staff can match the rake to it. Drawn in a shaded
+    /// rectangle at the front of the wagonset's own, where it costs width rather than a column of its own.
+    /// </summary>
     public string Designation => Wagonset.Designation;
 }
+
+/// <summary>One listed wagon of a wagonset, with its class and number.</summary>
+/// <param name="Class">The wagon class; empty where none is given.</param>
+/// <param name="Number">The wagon's own number, where it has one.</param>
+public sealed record CompositionWagon(string Class, string? Number = null);
 
 /// <summary>
 /// One unit of cargo flow wagons in the train, drawn as one rectangle listing where they go.
@@ -72,6 +87,20 @@ public sealed record CargoPositionComposition : CompositionGroup
 
     /// <summary>Where the wagons of this unit go, one entry per destination.</summary>
     public required IReadOnlyList<CompositionDestination> Destinations { get; init; }
+}
+
+/// <summary>
+/// One unit of cargo flow wagons uncoupled from an arriving train, drawn as one rectangle listing where the
+/// wagons came from.
+/// </summary>
+/// <remarks>
+/// One per position the flows take in the train, so the rectangles stand in the order the wagons arrive in.
+/// Every flow sharing the position contributes its origins to the same rectangle.
+/// </remarks>
+public sealed record ArrivingCargoComposition : CompositionGroup
+{
+    /// <summary>Where the wagons came from, each place once, in the order the flows name them.</summary>
+    public required IReadOnlyList<string> Origins { get; init; }
 }
 
 /// <summary>

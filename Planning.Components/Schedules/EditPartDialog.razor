@@ -101,6 +101,17 @@
             }
         }
 
+        @* Where in the train the wagonset is coupled. Each coupling has its own, so wagonsets coupled to the
+           same train at the same station are marshalled in this order. *@
+        @if (ShowWagonSetOptions)
+        {
+            <div class="field">
+                <label title="@Translator("PositionInTrainHint")">@Translator("PositionInTrain")</label>
+                <input type="number" class="position" min="0" value="@_orderInTrain"
+                       @onchange="e => _orderInTrain = int.TryParse(e.Value?.ToString(), out var v) ? Math.Max(0, v) : 0" />
+            </div>
+        }
+
         @if (Preview is { } edit)
         {
             <p class="preview">@SpanText(edit.From, edit.To)</p>
@@ -147,6 +158,7 @@
     private int _to;
     private bool _turnLoco;
     private bool _runaroundLoco;
+    private int _orderInTrain;
     private StationTrack? _fromTrack;
     private StationTrack? _toTrack;
     private string? _error;
@@ -190,6 +202,9 @@
     private bool ShowTractionOptions =>
         !Schedule.Vehicles.Any() || Schedule.Vehicles.Any(v => v.IsTraction);
 
+    // Whether the part couples a wagonset, the only kind of vehicle given a position in the train.
+    private bool ShowWagonSetOptions => Schedule.Vehicles.Any(v => v.IsWagonSet);
+
     // Where the part ends as currently selected, which is where the turn would be made.
     private OperationLocation ArrivalLocation => Calls[_to].OperationLocation;
 
@@ -208,6 +223,7 @@
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
         _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
         _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
+        _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
         _fromTrack = Part.OtherFromTrack;
         _toTrack = Part.OtherToTrack;
     }
@@ -271,6 +287,7 @@
         var result = Schedule.EditPart(Part, calls[_from], calls[_to]);
         if (result.IsNone) { _error = result.Message; return; }
         ApplyTractionOptions();
+        ApplyWagonSetOptions();
         Part.FromTrack = _fromTrack;
         Part.ToTrack = _toTrack;
         ScheduleState.SaveAndNotify();
@@ -290,6 +307,20 @@
         }
         Part.TractionOptions.TurnLoco = _turnLoco;
         Part.TractionOptions.RunaroundLoco = _runaroundLoco;
+    }
+
+    // Records where in the train the wagonset is coupled. As for the traction, a part that carries no wagonset
+    // options gets them only once a position is given, and then without the couple and uncouple notes, so
+    // giving a position cannot quietly add notes at either end of the part.
+    private void ApplyWagonSetOptions()
+    {
+        if (!ShowWagonSetOptions) return;
+        if (Part.WagonSetOptions is null)
+        {
+            if (_orderInTrain == 0) return;
+            Part.WagonSetOptions = new WagonSetOptions { HasCoupleNote = false, HasUncoupleNote = false };
+        }
+        Part.WagonSetOptions.OrderInTrain = _orderInTrain;
     }
 
     private Task Abort() => OnClosed.InvokeAsync();

@@ -2493,7 +2493,7 @@
     <value>Togsammensætninger</value>
   </data>
   <data name="NoTrainCompositions" xml:space="preserve">
-    <value>Ingen bemandet station har afgående tog med godsstrømme eller vognsæt med angivne vogne.</value>
+    <value>Ingen bemandet station eller skyggestation har tog med godsstrømme eller vognsæt.</value>
   </data>
   <data name="CompositionFromLoco" xml:space="preserve">
     <value>Sammensætning regnet fra lok</value>
@@ -2548,5 +2548,17 @@
   </data>
   <data name="TimetableStretchNoPredecessor" xml:space="preserve">
     <value>Ingen banestrækning fører hertil.</value>
+  </data>
+  <data name="ArrivingWagonsLegend" xml:space="preserve">
+    <value>Stiplet: ankommende vogne, fra</value>
+  </data>
+  <data name="ToFrom" xml:space="preserve">
+    <value>Til/fra</value>
+  </data>
+  <data name="ToPlace" xml:space="preserve">
+    <value>til</value>
+  </data>
+  <data name="FromPlace" xml:space="preserve">
+    <value>fra</value>
   </data>
 </root>

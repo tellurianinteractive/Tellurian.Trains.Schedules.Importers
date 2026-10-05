@@ -18,6 +18,36 @@
   listen die Informationen zu einem Bahnhof jetzt die Orte auf, deren Güter von ihm aus bedient werden, und
   die Informationen zu einem Ort zeigen, welcher Bahnhof ihn bedient. Die gedruckten Blätter der
   Betriebsstellen führen die bedienten Orte ebenfalls auf.
+- **Zugbildungen zeigen ankommende Wagen aus Wagenströmen.** Ein Zug, der mit Wagen aus Wagenströmen
+  ankommt, die an einem Bahnhof abgekuppelt werden, erhält jetzt eine eigene Zeile auf dem Blatt dieses
+  Bahnhofs, mit seiner Abfahrtszeit, wo der Zug weiterfährt, und mit einem gestrichelten Rechteck je
+  Position im Zug, das angibt, woher die Wagen kamen. Gezeigt werden nur Wagenströme mit angekreuztem
+  **Abkuppeln?**, außer in einem Schattenbahnhof, wo alle ankommenden Wagen gezeigt werden.
+  Schattenbahnhöfe erhalten jetzt ebenfalls eigene Blätter.
+- **Zugbildungen zeigen jede Wagengruppe dort, wo sie angekuppelt wird.** Eine Wagengruppe, die ihre
+  Wagen nicht aufführt, wird jetzt ebenfalls gezeichnet, allein durch ihr schattiertes Umlauf-Rechteck.
+  Eine Wagengruppe wird nur dort gezeigt, wo sie angekuppelt wird: bei der ersten Abfahrt ihres Umlaufs
+  und danach nur, wo sie ausdrücklich angekuppelt wird — mit einem Kuppelvermerk, von einem anderen Gleis
+  geholt oder an einen bereits fahrenden Zug gekuppelt. Eine Wagengruppe, die von Zug zu Zug bei ihrer
+  Lok bleibt, wird nicht erneut gezeigt. Wo eine Wagengruppe im Zug steht, wird je Ankupplung festgelegt:
+  **Position** im Dialog **Zugabschnitt bearbeiten** auf dem Reiter **Umläufe**, sodass mehrere
+  Wagengruppen, die am selben Bahnhof angekuppelt werden, in dieser Reihenfolge gezeichnet werden.
+- **Zugbildungen brauchen weniger Platz.** Die Ziele, und die Herkunftsorte ankommender Wagen, laufen
+  jetzt als eine kommagetrennte Liste in ihrem Rechteck weiter statt einer pro Zeile. Die Spalte
+  **Umlauf** entfällt: Der Umlauf jeder Wagengruppe steht in einem schattierten Rechteck vor ihren Wagen,
+  was den Zugbildungen mehr Breite gibt. Die Spalte **Nach** heißt jetzt **Nach/von** und sagt *nach*,
+  wohin ein abfahrender Zug fährt, und *von*, woher ein ankommender Zug kam.
+- **Zugbildungen werden so gezeichnet, wie die Züge fahren.** Jeder Zug beginnt jetzt mit einem
+  Lok-Rechteck an dem Ende, auf das er zufährt, mit einem Pfeil, und die Wagen folgen dahinter, sodass
+  die Reihenfolge auf dem Papier die Reihenfolge auf dem Gleis ist. Die Lok enthält die Tage oder
+  Fahrrunden, den Zug und seine Zeiten am Bahnhof (**06:00-06:45**) und zuletzt die Höchstlast des Zuges
+  und ersetzt fünf Spalten. Ein Zug, der in der festgelegten Richtung seines Streckenabschnitts fährt,
+  zeigt nach rechts; einer, der ihr entgegen fährt, nach links. Auf jede Seite folgt ihr Spiegelbild für
+  die andere Seite der Gleise: Drucken Sie doppelseitig und drehen Sie das Blatt auf die Seite, die zu dem
+  passt, was Sie sehen. Die benachbarten Betriebsstellen stehen an beiden Enden der Überschrift der
+  Zugbildung.
+- **Regionen zuletzt in Zugbildungen.** Wo mehrere Ziele eine Position im Zug teilen, werden erst alle
+  Orte aufgeführt und danach ihre Regionen, jede Region einmal.
 
 ## Version 0.7.2
 
@@ -100,6 +130,43 @@
   gebunden, wartend oder auf dem Weg zum nächsten, deshalb zählt diese Zeit jetzt auch mit – an den Sitzungen,
   an denen der Dienst gefahren wird. Ebenso ein selbst gesetzter Dienstbeginn vor dem ersten Zug des
   Dienstes oder ein Dienstende nach seinem letzten.
+
+- **Züge auf der Strecke werden so geprüft, wie die Fahrdienstleiter sie sehen.** Die Liste
+  **Konflikte** betrachtete bisher einen Streckenabschnitt nach dem anderen, sodass zwei Züge an einem
+  unbesetzten Bahnhof kreuzen oder einander an einem vorbei folgen konnten, ohne dass es gemeldet wurde.
+  Jetzt betrachtet sie jeden Zugleitabschnitt als Ganzes. Eine signalgesteuerte Stelle wie eine
+  Blockstelle teilt den Zugleitabschnitt in Abschnitte, die je Gleis einen Zug aufnehmen können. Auf
+  eingleisiger Strecke können sich Züge in Gegenrichtung nur an den Enden begegnen oder an einer
+  signalgesteuerten Stelle, an der Züge kreuzen können. Züge in derselben Richtung können einander
+  folgen, einer je Abschnitt. Siehe **Zugleitabschnitte** in der Hilfe auf dem Reiter **Strecken**.
+
+- **Ein besetzter Bahnhof kann eine Abzweigstelle oder einen unbesetzten Bahnhof fernsteuern.** Das Feld
+  **Gesteuert von** auf dem Reiter **Betriebsstellen**, bisher nur bei signalgesteuerten Stellen, wird
+  jetzt auch bei unbesetzten Bahnhöfen und Industriegebieten angeboten. Als steuernder Bahnhof werden nur
+  besetzte Bahnhöfe angeboten. Eine ferngesteuerte Abzweigstelle, Kreuzungsstelle, ein unbesetzter
+  Bahnhof oder ein Industriegebiet wird vom Fahrdienstleiter dieses Bahnhofs wie ein eigener bedient:
+  Zugleitabschnitte enden dort, seine Züge stehen auf der Zugmeldeliste des steuernden Bahnhofs in
+  zeitlicher Reihenfolge zwischen denen des Bahnhofs, mit seiner Signatur vor dem Gleis, und die
+  Überschrift nennt ihn. Die Bahnhöfe dahinter gehören zu denen, die der steuernde Bahnhof anruft, und
+  sie rufen den steuernden Bahnhof an. Eine Blockstelle, eine signalgesteuerte Stelle, die weder
+  Abzweigstelle noch Kreuzungsstelle ist, bleibt Teil der Strecke. Klicken Sie auf **Aus
+  Streckenabschnitten neu erzeugen** auf dem Reiter **Strecken**, nachdem Sie einen steuernden Bahnhof
+  festgelegt haben.
+
+- **Angeben, wo Züge kreuzen können.** Eine signalgesteuerte Stelle hat auf dem Reiter
+  **Betriebsstellen** ein neues Kontrollkästchen **Züge können kreuzen?**. Kreuzen Sie es dort an, wo ein
+  Zug warten kann, während ein anderer vorbeifährt. Die Zahl der Gleise verrät das nicht, denn eine
+  Abzweigstelle hat zwei Gleise, damit klar ist, wohin ein Zug fährt, ob dort Züge kreuzen können oder
+  nicht. Eine signalgesteuerte Stelle, die weder Abzweigstelle noch angekreuzt ist, ist eine Blockstelle.
+  Importierte Stellen beginnen ohne Kreuz, kreuzen Sie also nach dem Import die Kreuzungsstellen an.
+
+### Änderungen
+
+- **Lokale Ziele werden genannt.** Ein Güterziel mit angekreuztem **Und lokal?** lautet nicht mehr
+  *Stilkøbing und lokale Ziele*: Es nennt die Orte, *Stilkøbing, Vig, Rubjerg* — den Bahnhof, gefolgt
+  von jeder Betriebsstelle, deren Güter von dort bedient werden (**Güterbedienung von** auf dem Reiter
+  **Betriebsstellen**). Ein Bahnhof, der nichts bedient, wird allein genannt. Die Wendung ist auch aus
+  der Güterlegende in den allgemeinen Anweisungen verschwunden, da nichts sie mehr druckt.
 
 ## Version 0.7.0
 
@@ -233,6 +300,16 @@
   Schriftgröße bleibt gleich —, was Platz für vier oder fünf weitere Einträge schafft. Ein Programm, das zu
   lang für die Seite ist, verliert seine letzten Einträge, und die sind das Ende des Treffens, also genau das,
   was man nachschlägt.
+
+- **Automatisch erstellen ergänzt jetzt Ihre vorhandenen Umläufe, bevor es neue anlegt.** Die Züge, die
+  noch in keinem Umlauf sind, werden zuerst den vorhandenen Umläufen angeboten: Ein Umlauf fährt mit dem
+  weiter, was ihn dort fortsetzt, wo er ankommt, in der Kategorie, in der er bereits fährt, und ein
+  leerer Umlauf, den Sie selbst angelegt haben, wird gefüllt, bevor ein neuer entsteht. Nur die Züge, die
+  in keinen vorhandenen Umlauf passen, beginnen neue Umläufe, sodass ein erneutes Erstellen nach dem
+  Hinzufügen einiger Züge die bereits umlaufenden Fahrzeuge verlängert, statt neue in Dienst zu stellen.
+  Wagenströme bleiben, wie sie sind. Das Ergebnis neben der Schaltfläche nennt jetzt, wie viele
+  Zugabschnitte die vorhandenen Umläufe übernommen haben, wie viele davon verlängert wurden und wie viele
+  Umläufe erstellt wurden.
 
 ### Fehlerbehebungen
 

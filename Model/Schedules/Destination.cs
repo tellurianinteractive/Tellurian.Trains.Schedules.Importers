@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using System.Net;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
@@ -97,6 +97,26 @@ public static class DestinationExtensions
         /// </summary>
         public MarkupString PlaceHtml =>
             new(Place(destination.NamedLocations.Select(location => WebUtility.HtmlEncode(location.Name)), destination.AndText, destination.RegionsHtml));
+
+        /// <summary>
+        /// Where the wagons go without the regions: the named locations and the <em>"and beyond"</em>
+        /// qualifier. For listing several destinations together with their regions gathered last
+        /// (<see cref="StatedRegions"/>).
+        /// </summary>
+        public string PlaceTextWithoutRegions =>
+            Place(destination.NamedLocations.Select(location => location.Name), destination.AndText, string.Empty);
+
+        /// <summary>
+        /// Markup version of <c>PlaceTextWithoutRegions</c>.
+        /// </summary>
+        public MarkupString PlaceHtmlWithoutRegions =>
+            new(Place(destination.NamedLocations.Select(location => WebUtility.HtmlEncode(location.Name)), destination.AndText, string.Empty));
+
+        /// <summary>
+        /// The regions the destination includes: its station's regions where it is stated with them, else none.
+        /// </summary>
+        public IReadOnlyList<Region> StatedRegions =>
+            destination.AndRegions ? [.. destination.LocationRegions] : [];
 
         /// <summary>
         /// The most that may be brought here, as a capacity. Unspecified when the destination takes any

@@ -215,6 +215,14 @@
   share one rectangle, whichever flows name them, since they are one unit of wagons; a flow to all
   destinations names no destination and so stands alone at its position as before.
 
+- **A destination can be written without its regions, so several can share them.** Where destinations are
+  listed together, as the Train compositions report does for one position in a train, writing each with its
+  own regions repeats a region for every place in it. New **`PlaceTextWithoutRegions`** and
+  **`PlaceHtmlWithoutRegions`** give the named locations and the *and beyond* qualifier alone, and
+  **`StatedRegions`** gives the regions the destination states — its station's regions where `AndRegions`
+  is set, else none — so a caller can list all the places first and each region once after them.
+  `PlaceText` and `PlaceHtml` are unchanged.
+
 - **Stretch conflicts are judged per dispatch stretch.** Rule L3 (`ValidationSettings.ValidateStretches`,
   still reported as `TrackStretchConflict`) now asks what the dispatchers at the two ends of a dispatch
   stretch would allow, instead of looking at one track stretch at a time. A dispatch stretch is divided into

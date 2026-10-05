@@ -17,8 +17,8 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
 /// Every rectangle is as wide as what it holds, so each one's width has to be worked out from its text before
 /// the groups can be laid out: a wagon rectangle from its class and number, a cargo rectangle from its longest
 /// destination, limit included. Text is charged by the character, biased high, so the estimate wraps no later
-/// than the browser does. Only a rectangle clamped to the width of the composition, the destinations within it,
-/// and the sessions, limit and turnus columns wrap onto further lines.
+/// than the browser does. Only a rectangle clamped to the width of the composition, and the destinations within
+/// it, wrap onto further lines.
 /// </para>
 /// </remarks>
 public sealed record CompositionPageGeometry
@@ -48,17 +48,10 @@ public sealed record CompositionPageGeometry
     public double TextLineHeightMm { get; init; } = 5;
 
     /// <summary>Combined width of the columns before the composition.</summary>
-    /// <remarks>Track 10, sessions 14, arrival 12, departure 12, train 24, destination 32, limit 18, turnus 20.</remarks>
-    public double FixedColumnsWidthMm { get; init; } = 142;
-
-    /// <summary>Width of the sessions column, part of <see cref="FixedColumnsWidthMm"/>.</summary>
-    public double SessionsColumnWidthMm { get; init; } = 14;
-
-    /// <summary>Width of the turnus column, part of <see cref="FixedColumnsWidthMm"/>.</summary>
-    public double TurnusColumnWidthMm { get; init; } = 20;
-
-    /// <summary>Width of the train's limit column, part of <see cref="FixedColumnsWidthMm"/>.</summary>
-    public double LimitColumnWidthMm { get; init; } = 18;
+    /// <remarks>
+    /// Track 10, to/from 32. The sessions, the train, its times and its limit are in the loco rectangle.
+    /// </remarks>
+    public double FixedColumnsWidthMm { get; init; } = 42;
 
     /// <summary>Total horizontal padding inside a cell.</summary>
     public double CellPaddingWidthMm { get; init; } = 2;
@@ -115,6 +108,12 @@ public sealed record CompositionPageGeometry
     /// <summary>The space between two wagon rectangles, across and down.</summary>
     public double WagonGapMm { get; init; } = 1;
 
+    /// <summary>
+    /// What the loco rectangle adds across to its text: its heavier border, its side padding, and the arrow at
+    /// its leading end with the gap after it.
+    /// </summary>
+    public double LocoChromeWidthMm { get; init; } = 7;
+
     /// <summary>What a cargo rectangle adds across to its text: its border and side padding.</summary>
     public double CargoChromeWidthMm { get; init; } = 2.6;
 
@@ -130,15 +129,6 @@ public sealed record CompositionPageGeometry
     /// <summary>The width the groups of a composition are laid out within.</summary>
     public double CompositionWidthMm => PrintableWidthMm - FixedColumnsWidthMm - CellPaddingWidthMm;
 
-    /// <summary>Characters that fit on one line of the sessions column.</summary>
-    public int CharactersPerSessionsLine => CharactersWithin(SessionsColumnWidthMm - CellPaddingWidthMm);
-
-    /// <summary>Characters that fit on one line of the turnus column.</summary>
-    public int CharactersPerTurnusLine => CharactersWithin(TurnusColumnWidthMm - CellPaddingWidthMm);
-
-    /// <summary>Characters that fit on one line of the limit column.</summary>
-    public int CharactersPerLimitLine => CharactersWithin(LimitColumnWidthMm - CellPaddingWidthMm);
-
     /// <summary>Characters of a column's text that fit on one line of the given width.</summary>
     /// <param name="widthMm">The width available to the text, chrome already taken off.</param>
     public int CharactersWithin(double widthMm) => Math.Max(1, (int)(widthMm / CharacterWidthMm));
@@ -152,17 +142,42 @@ public sealed record CompositionPageGeometry
 /// <param name="Station">The station the page belongs to; its name heads every one of its pages.</param>
 /// <param name="Departures">The departures on this page.</param>
 /// <param name="IsContinued">Whether an earlier page already printed the start of the station.</param>
+/// <param name="View">Which side of the tracks the page is read from.</param>
 public sealed record CompositionPage(
     StationCompositions Station,
     IReadOnlyList<CompositionDeparture> Departures,
-    bool IsContinued);
+    bool IsContinued,
+    CompositionView View = CompositionView.AsDrawn)
+{
+    /// <summary>The heading a row's train is drawn with on this page.</summary>
+    /// <param name="departure">The row.</param>
+    public CompositionHeading HeadingOf(CompositionDeparture departure) =>
+        departure.ValueOrException(nameof(departure)).Heading.SeenIn(View);
+
+    /// <summary>The station's neighbours that lie to the left as this page is read.</summary>
+    public IReadOnlyList<OperationLocation> LeftNeighbours =>
+        View == CompositionView.AsDrawn ? Station.LeftNeighbours : Station.RightNeighbours;
+
+    /// <summary>The station's neighbours that lie to the right as this page is read.</summary>
+    public IReadOnlyList<OperationLocation> RightNeighbours =>
+        View == CompositionView.AsDrawn ? Station.RightNeighbours : Station.LeftNeighbours;
+}
 
 /// <summary>Splits the stations of the Train compositions report into printed pages.</summary>
 /// <remarks>
+/// <para>
 /// Every station starts on a page of its own, because the sheets are handed to different stations. A station
 /// too long for one page continues on the next under the same heading. A station with no departures to show
 /// gets no page: unlike a dispatch list, where every manned station clears trains, most stations here would
 /// only be handed a sheet saying there is nothing to check.
+/// </para>
+/// <para>
+/// Every page is printed twice, as drawn and mirrored, one after the other: the trains are drawn travelling
+/// the way they pass the reader, and which side of the tracks the reader stands on is not known. Printed on
+/// both sides of the paper, each sheet then holds the same trains both ways round, and the reader turns it to
+/// the side that matches what they see. The two pages hold the same rows, since mirroring changes no height,
+/// so every station takes an even number of pages and starts on the front of a sheet.
+/// </para>
 /// </remarks>
 public static class CompositionPaginator
 {
@@ -181,7 +196,8 @@ public static class CompositionPaginator
             var isContinued = false;
             foreach (var departures in SplitIntoPages(station.Departures, geometry))
             {
-                pages.Add(new CompositionPage(station, departures, isContinued));
+                pages.Add(new CompositionPage(station, departures, isContinued, CompositionView.AsDrawn));
+                pages.Add(new CompositionPage(station, departures, isContinued, CompositionView.Mirrored));
                 isContinued = true;
             }
         }
@@ -189,8 +205,8 @@ public static class CompositionPaginator
     }
 
     /// <summary>
-    /// The height of one row: the tallest of the columns that wrap — the sessions and the turnus — and the
-    /// composition, and the row's chrome.
+    /// The height of one row: the taller of a line of the train's own columns, which do not wrap, and the
+    /// composition with the loco at its front, and the row's chrome.
     /// </summary>
     /// <param name="departure">The row.</param>
     /// <param name="geometry">The page geometry to paginate against.</param>
@@ -199,13 +215,37 @@ public static class CompositionPaginator
         departure = departure.ValueOrException(nameof(departure));
         geometry = geometry.ValueOrException(nameof(geometry));
 
-        var sessions = DispatchPaginator.LinesOf(departure.SessionsText, geometry.CharactersPerSessionsLine);
-        // One entry per wagonset, each starting on a line of its own and wrapping within the column.
-        var turnus = departure.TurnusTexts.Sum(text => DispatchPaginator.LinesOf(text, geometry.CharactersPerTurnusLine));
-        // Each limit is one indivisible value, so they wrap between one another and never within one.
-        var limit = DispatchPaginator.LinesOf(departure.LimitText, geometry.CharactersPerLimitLine);
-        var text = Math.Max(Math.Max(sessions, turnus), limit) * geometry.TextLineHeightMm;
-        return Math.Max(text, CompositionHeightMmOf(departure.Groups, geometry)) + geometry.RowChromeHeightMm;
+        var composition = WrappedHeightMm(
+            departure.Groups
+                .Select(group => (WidthMmOf(group, geometry), HeightMmOf(group, geometry)))
+                .Prepend((LocoWidthMmOf(departure, geometry), geometry.WagonHeightMm)),
+            geometry.CompositionWidthMm, geometry.GroupGapWidthMm, geometry.GroupGapHeightMm);
+        return Math.Max(geometry.TextLineHeightMm, composition) + geometry.RowChromeHeightMm;
+    }
+
+    /// <summary>
+    /// The width of the loco rectangle at the front of a row's train: the sessions, the train, its times here
+    /// and the most it may be made up of side by side on one line, with the arrow pointing the way it travels.
+    /// </summary>
+    /// <remarks>
+    /// The train is set in bold and charged like a wagon class; the times are figures, charged like a wagon
+    /// number; the limit, figures with their marks, is charged like the columns' text. Mirroring moves the rectangle to the other end of the train, and does not change its width.
+    /// </remarks>
+    /// <param name="departure">The row.</param>
+    /// <param name="geometry">The page geometry to paginate against.</param>
+    public static double LocoWidthMmOf(CompositionDeparture departure, CompositionPageGeometry geometry)
+    {
+        departure = departure.ValueOrException(nameof(departure));
+        geometry = geometry.ValueOrException(nameof(geometry));
+
+        var text =
+            (departure.SessionsText.Length * geometry.CharacterWidthMm) +
+            (departure.TrainIdentity.Length * geometry.WagonClassCharacterWidthMm) +
+            (departure.TimeText.Length * geometry.WagonNumberCharacterWidthMm) +
+            (2 * geometry.WagonTextGapMm);
+        if (departure.LimitText.Length > 0)
+            text += geometry.WagonTextGapMm + (departure.LimitText.Length * geometry.CharacterWidthMm);
+        return Math.Min(geometry.CompositionWidthMm, geometry.LocoChromeWidthMm + text);
     }
 
     /// <summary>
@@ -244,9 +284,9 @@ public static class CompositionPaginator
         var content = group switch
         {
             WagonsetComposition wagonset => SideBySideMm(wagonset, geometry),
-            // The rectangle holds one destination per line, so it is as wide as the longest of them.
-            CargoPositionComposition cargo => geometry.CargoChromeWidthMm + (cargo.Destinations
-                .Select(destination => destination.Text.Length).DefaultIfEmpty(0).Max() * geometry.DestinationCharacterWidthMm),
+            // The places run on as one list, so the rectangle is as wide as the whole list on one line.
+            CargoPositionComposition cargo => geometry.CargoChromeWidthMm + (ListOf(cargo).Length * geometry.DestinationCharacterWidthMm),
+            ArrivingCargoComposition arriving => geometry.CargoChromeWidthMm + (ListOf(arriving).Length * geometry.DestinationCharacterWidthMm),
             _ => 0,
         };
         return Math.Clamp(content, geometry.RectangleMinWidthMm, geometry.CompositionWidthMm);
@@ -258,42 +298,70 @@ public static class CompositionPaginator
     public static double HeightMmOf(CompositionGroup group, CompositionPageGeometry geometry) => group switch
     {
         WagonsetComposition wagonset => WrappedHeightMm(
-            wagonset.Wagons.Select(wagon => (WidthMmOf(wagon, geometry), geometry.WagonHeightMm)),
+            RectangleWidthsMmOf(wagonset, geometry).Select(width => (width, geometry.WagonHeightMm)),
             WidthMmOf(wagonset, geometry), geometry.WagonGapMm, geometry.WagonGapMm),
         CargoPositionComposition cargo =>
-            geometry.CargoChromeHeightMm + (DestinationLinesOf(cargo, geometry) * geometry.DestinationLineHeightMm),
+            geometry.CargoChromeHeightMm + (LinesOf(cargo, ListOf(cargo), geometry) * geometry.DestinationLineHeightMm),
+        ArrivingCargoComposition arriving =>
+            geometry.CargoChromeHeightMm + (LinesOf(arriving, ListOf(arriving), geometry) * geometry.DestinationLineHeightMm),
         _ => geometry.WagonHeightMm,
     };
 
-    // The lines of destination text in a cargo rectangle. A rectangle is as wide as its longest destination, so
-    // each destination takes one line — unless the rectangle was clamped to the width of the composition, where
-    // the long ones wrap within it.
-    private static int DestinationLinesOf(CargoPositionComposition cargo, CompositionPageGeometry geometry)
+    // The places of a cargo rectangle as they are printed: one list, separated by commas.
+    private static string ListOf(CargoPositionComposition cargo) =>
+        string.Join(", ", cargo.Destinations.Select(destination => destination.Text));
+
+    private static string ListOf(ArrivingCargoComposition arriving) => string.Join(", ", arriving.Origins);
+
+    // The lines of a rectangle's list. The rectangle is as wide as the list, so it takes one line — unless the
+    // rectangle was clamped to the width of the composition, where the list wraps within it between words.
+    private static int LinesOf(CompositionGroup group, string list, CompositionPageGeometry geometry)
     {
-        var characters = geometry.DestinationCharactersWithin(WidthMmOf(cargo, geometry) - geometry.CargoChromeWidthMm);
-        return Math.Max(1, cargo.Destinations.Sum(destination => DispatchPaginator.LinesOf(destination.Text, characters)));
+        var characters = geometry.DestinationCharactersWithin(WidthMmOf(group, geometry) - geometry.CargoChromeWidthMm);
+        return DispatchPaginator.LinesOf(list, characters);
     }
 
     /// <summary>
-    /// The width a wagon rectangle is drawn at: its class, and its number beside it where it has one.
+    /// The width of the shaded rectangle at the front of a wagonset naming its turnus: the designation, and
+    /// beside it the sessions where the wagonset is in the train on only some of them.
+    /// </summary>
+    /// <param name="wagonset">The wagonset.</param>
+    /// <param name="geometry">The page geometry to paginate against.</param>
+    public static double TurnusWidthMmOf(WagonsetComposition wagonset, CompositionPageGeometry geometry)
+    {
+        wagonset = wagonset.ValueOrException(nameof(wagonset));
+        geometry = geometry.ValueOrException(nameof(geometry));
+
+        var text = wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm;
+        if (wagonset.SessionsText is { Length: > 0 } sessions)
+            text += geometry.WagonTextGapMm + (sessions.Length * geometry.CharacterWidthMm);
+        return Math.Max(geometry.RectangleMinWidthMm, geometry.WagonChromeWidthMm + text);
+    }
+
+    // The rectangles of a wagonset front first: the one naming its turnus, then its wagons.
+    private static IEnumerable<double> RectangleWidthsMmOf(WagonsetComposition wagonset, CompositionPageGeometry geometry) =>
+        wagonset.Wagons.Select(wagon => WidthMmOf(wagon, geometry)).Prepend(TurnusWidthMmOf(wagonset, geometry));
+
+    /// <summary>
+    /// The width a wagon rectangle is drawn at: its class, with the number beside it where it has one.
     /// </summary>
     /// <param name="wagon">The wagon.</param>
     /// <param name="geometry">The page geometry to paginate against.</param>
-    public static double WidthMmOf(Wagon wagon, CompositionPageGeometry geometry)
+    public static double WidthMmOf(CompositionWagon wagon, CompositionPageGeometry geometry)
     {
         wagon = wagon.ValueOrException(nameof(wagon));
         geometry = geometry.ValueOrException(nameof(geometry));
 
-        var text = wagon.Class.Length * geometry.WagonClassCharacterWidthMm;
-        if (!string.IsNullOrWhiteSpace(wagon.Number))
-            text += geometry.WagonTextGapMm + (wagon.Number.Length * geometry.WagonNumberCharacterWidthMm);
+        List<double> texts = [];
+        if (wagon.Class.Length > 0) texts.Add(wagon.Class.Length * geometry.WagonClassCharacterWidthMm);
+        if (!string.IsNullOrWhiteSpace(wagon.Number)) texts.Add(wagon.Number.Length * geometry.WagonNumberCharacterWidthMm);
+        var text = texts.Sum() + (Math.Max(0, texts.Count - 1) * geometry.WagonTextGapMm);
         return Math.Max(geometry.RectangleMinWidthMm, geometry.WagonChromeWidthMm + text);
     }
 
-    // The wagons of a wagonset laid side by side on one line.
+    // The rectangles of a wagonset laid side by side on one line, its turnus first.
     private static double SideBySideMm(WagonsetComposition wagonset, CompositionPageGeometry geometry) =>
-        wagonset.Wagons.Sum(wagon => WidthMmOf(wagon, geometry)) +
-        (Math.Max(0, wagonset.Wagons.Count - 1) * geometry.WagonGapMm);
+        RectangleWidthsMmOf(wagonset, geometry).Sum() + (wagonset.Wagons.Count * geometry.WagonGapMm);
 
     // The height of items laid out the way the browser wraps a flex row: side by side until the next one does
     // not fit, then on a new line, each line as tall as its tallest item. At least one item goes on each line,

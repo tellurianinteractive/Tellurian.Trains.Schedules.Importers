@@ -1,4 +1,4 @@
-# Timetable Planning System — Requirements Specification
+﻿# Timetable Planning System — Requirements Specification
 
 > **Status:** Draft
 > **Last Updated:** 2026-07-14
@@ -893,24 +893,55 @@ excluded from the printed output. Each report sets its own page size and orienta
 > **A3L graphical** Timetable report is not built. (The graphical timetable still exists
 > as an interactive editor, §3.7, but not yet as an A3L print report.)
 >
-> **Train Compositions** is built (A4L). Each manned station gets its own pages, listing
-> every train departing from it with cargo flow wagons or a wagonset that lists its
-> wagons, track by track and in departure order on each track. Each train is given the
-> sessions or days it runs, its arrival and departure times, where it is bound, the most
-> it may be made up of and the turnus of every wagonset it works with; the arrival is
-> empty where the train starts its run at the station, and the maximum where nothing
-> restricts the train. Beside each train its composition is drawn from the front as
-> rectangles: one per wagon of a wagonset, in rake order, with class and number; and one
+> **Train Compositions** is built (A4L). Each manned or shadow station gets its own pages, listing
+> every train departing from it with cargo flow wagons or a wagonset, track by track and in departure order on each track. Each train is given where it is
+> bound (marked *to*, under the heading *To/from*). Beside it the train is drawn the way it
+> travels past the station: a departing train running in the defined direction of the
+> track stretch to its next location, or an arriving one in the direction of the stretch
+> from its previous location, travels forward and heads right on the first page; one
+> running against it heads left. First comes a loco rectangle at the end the train is heading for, with an arrow
+> pointing that way, holding the sessions or days the train runs, the train and its times
+> at the station ("06:00-06:45"; "-06:45" where it starts its run there, "06:00-" where it
+> ends it) and, last, the most it may be made up of, left out where nothing restricts the
+> train; then the wagons behind it, so the order on paper is the order on the track.
+> Because it is not known which side of the tracks the yard master works from, every page
+> is followed by its mirror image, with every train facing the other way; printed
+> double-sided, the reader turns the sheet to the side that matches what they see. The
+> neighbouring locations are named at the left and right ends of the composition heading
+> to tell the two apart. Behind the loco the wagons are drawn as rectangles: one per wagon of a wagonset that lists its wagons, in rake order, with class
+> and number — a wagonset that lists no wagons is drawn by its turnus rectangle alone; and one
 > per cargo flow position, listing its destinations with the locations served from them,
-> *and beyond*, coloured regions and the most that may be brought to each. The rectangles are
+> *and beyond* and the most that may be brought to each, followed by the coloured regions
+> of all of them, each named once, as one comma-separated list that wraps only when the rectangle would be wider than the
+> composition. Each wagonset is headed by a shaded rectangle naming its turnus, with the
+> sessions or days beside it where the wagonset is in the train on only some of them;
+> there is no turnus column, which was mostly empty. The rectangles are
 > not captioned — their order is the order the wagons stand in, and the wagons gathered in
 > one rectangle may be marshalled freely among themselves — and each is as wide as its own
-> contents. The composition is
-> what the train leaves with, including wagons it arrived with. A wagonset in the train on
-> only some sessions or days is marked with them beside its turnus; cargo flow wagons
-> without a position come last, and wagonsets come before cargo at the same position. A
-> station with no such departures gets no page, and a station too long for one page
-> continues on the next.
+> contents. A wagonset is drawn only where it is coupled: at the first departure of its
+> schedule, and later only where it is coupled explicitly — its train part has a couple
+> note, fetches it from another track, or starts where its train is already running. A
+> wagonset that stays with its loco from one train to the next is not drawn again, since
+> there is nothing to make up for it. A wagonset in the train on
+> only some sessions or days is marked with them in its turnus rectangle. A wagonset's place in
+> the train is given per coupling — on each of its schedule's train parts, in the *Edit
+> train part* dialog — so wagonsets coupled at the same station stand in that order; cargo flow wagons
+> without a position come last, and wagonsets come before cargo at the same position.
+> A train arriving with cargo flow wagons that are uncoupled at the station gets a row of
+> its own, before its departure, with no maximum in its loco and with a departure time only where the
+> train runs on, naming where the
+> train came from (marked *from*): one dashed
+> rectangle per cargo flow position, front first, listing where the wagons came from —
+> the station they were coupled at, unless the flow brings none from there, and the
+> origins it forwards. Each origin is named only once in the row, in the front-most
+> rectangle its wagons stand in; a rectangle whose origins are all named in front of it
+> is not drawn. Only flows with *uncouple* ticked are listed, except at a shadow
+> station, where all arriving flows are. A legend in the heading explains the dashed
+> rectangles on pages that have them. A
+> station with no such departures or arrivals gets no page, and a station too long for one page
+> continues on the next. A train that reverses during its run is drawn with its wagons in
+> the order they were positioned at the start; positions are not turned round when the loco
+> runs round.
 
 #### FR-3.12.4 Operational Lists
 

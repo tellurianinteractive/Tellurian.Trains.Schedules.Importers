@@ -15,6 +15,32 @@
 - **En station visar de platser den betjänar med gods.** På fliken **Driftplatser** listar informationen
   om en station nu de platser vars gods betjänas från den, och informationen om en plats visar vilken
   station som betjänar den. De utskrivna bladen för driftplatser listar också de betjänade platserna.
+- **Tågsammansättningar visar ankommande godsflödesvagnar.** Ett tåg som ankommer med godsflödesvagnar som
+  kopplas loss vid en station får nu en egen rad på stationens blad, med sin avgångstid där tåget går
+  vidare, och med en streckad rektangel per plats i tåget som anger varifrån vagnarna kom. Bara godsflöden
+  med **Koppla loss?** ikryssat visas, utom vid en skuggstation, där alla ankommande vagnar visas.
+  Skuggstationer får nu också egna blad.
+- **Tågsammansättningar visar varje vagnsätt där det kopplas till.** Ett vagnsätt som inte listar sina
+  vagnar ritas nu också, med enbart sin skuggade omloppsrektangel. Ett vagnsätt visas bara där det kopplas
+  till: vid den första avgången i sitt omlopp, och senare bara där det uttryckligen kopplas till — med en
+  anmärkning om tillkoppling, hämtat från ett annat spår eller kopplat till ett tåg som redan går. Ett
+  vagnsätt som följer sitt lok från tåg till tåg visas inte igen. Var ett vagnsätt står i tåget anges per
+  tillkoppling: **Plats** i dialogen **Redigera tågavsnitt** på fliken **Omlopp**, så att flera vagnsätt
+  som kopplas till vid samma station ritas i den ordningen.
+- **Tågsammansättningar tar mindre plats.** Destinationerna, och ursprungen för ankommande vagnar, skrivs
+  nu i följd som en kommaseparerad lista i sin rektangel i stället för en per rad. Kolumnen **Omlopp** är
+  borta: varje vagnsätts omlopp anges i en skuggad rektangel framför dess vagnar, vilket ger
+  sammansättningarna mer bredd. Kolumnen **Till** heter nu **Till/från** och anger *till* vart ett
+  avgående tåg ska och *från* varifrån ett ankommande tåg kom.
+- **Tågsammansättningar ritas åt det håll tågen går.** Varje tåg börjar nu med en lokrektangel i den ände
+  det är på väg mot, med en pil, och vagnarna följer bakom, så att ordningen på papperet är ordningen på
+  spåret. Loket rymmer dagarna eller köromgångarna, tåget och dess tider vid stationen (**06:00-06:45**)
+  och sist tågets högsta last, och ersätter fem kolumner. Ett tåg som går i sin bansträckas definierade
+  riktning pekar åt höger; ett som går mot den pekar åt vänster. Varje sida följs av sin spegelbild för
+  spårens andra sida: skriv ut dubbelsidigt och vänd bladet till den sida som stämmer med det du ser. De
+  angränsande driftplatserna anges i var sin ände av sammansättningens rubrik.
+- **Regioner sist i tågsammansättningar.** Där flera destinationer delar en plats i tåget listas alla
+  platser först och deras regioner efter dem, varje region en gång.
 
 ## Version 0.7.2
 
@@ -90,6 +116,39 @@
   lokförare vars **tjänst** har ett uppehåll mellan två tåg är ändå upptagen under tiden, i väntan på eller
   på väg till nästa, så den tiden räknas nu också — de sessioner tjänsten körs. Det gör även en starttid
   du angett före tjänstens första tåg, eller en sluttid efter dess sista.
+
+- **Tåg på linjen kontrolleras så som tågklarerarna ser det.** Listan **Konflikter** såg tidigare på en
+  bansträcka i taget, så två tåg kunde mötas vid en obemannad station, eller följa varandra förbi en, utan
+  att det sades något. Nu ser den på varje trafikledningssträcka som helhet. En signalreglerad plats, till
+  exempel en blockpost, delar trafikledningssträckan i avsnitt som vart och ett rymmer ett tåg per spår. På
+  enkelspår kan tåg i motsatt riktning bara mötas vid ändarna, eller vid en signalreglerad plats där tåg
+  kan mötas. Tåg i samma riktning kan följa varandra, ett per avsnitt. Se **Trafikledningssträckor** i
+  hjälpen på fliken **Sträckor**.
+
+- **En bemannad station kan fjärrstyra en förgreningspunkt eller en obemannad station.** Fältet **Styrs
+  från** på fliken **Driftplatser**, som hittills bara fanns på signalreglerade platser, erbjuds nu även
+  på obemannade stationer och industriområden. Bara bemannade stationer erbjuds som styrande station. En
+  fjärrstyrd förgreningspunkt, mötesplats, obemannad station eller ett fjärrstyrt industriområde sköts av
+  den stationens tågklarerare som en egen: trafikledningssträckor slutar där, dess tåg står på den
+  styrande stationens tågklareringslista i tidsordning bland stationens egna, med sin signatur före
+  spåret, och rubriken nämner den. Stationerna bortom den hör till dem som den styrande stationen ringer,
+  och de ringer den styrande stationen. En blockpost, en signalreglerad plats som varken är
+  förgreningspunkt eller mötesplats, förblir en del av linjen. Tryck på **Skapa om från bansträckor** på
+  fliken **Sträckor** efter att ha angett en styrande station.
+
+- **Ange var tåg kan mötas.** En signalreglerad plats har en ny kryssruta **Tåg kan mötas?** på fliken
+  **Driftplatser**. Kryssa i den där ett tåg kan vänta medan ett annat passerar. Antalet spår kan inte
+  avgöra det, eftersom en förgreningspunkt har två spår för att veta vart ett tåg ska, oavsett om tåg kan
+  mötas där. En signalreglerad plats som varken är förgreningspunkt eller ikryssad är en blockpost.
+  Importerade platser börjar utan kryss, så kryssa i mötesplatserna efter importen.
+
+### Ändringar
+
+- **Lokala destinationer namnges.** En godsdestination med **Och lokala?** ikryssat lyder inte längre
+  *Stilkøbing och lokala destinationer*: den namnger platserna, *Stilkøbing, Vig, Rubjerg* — stationen
+  följd av varje plats vars gods betjänas från den (**Godsbetjänas från** på fliken **Driftplatser**). En
+  station som inte betjänar något namnges ensam. Uttrycket är också borta från godsförklaringen i de
+  allmänna instruktionerna, eftersom inget skriver ut det längre.
 
 ## Version 0.7.0
 
@@ -204,6 +263,14 @@
   mindre avstånd mellan raderna, punkterna och dagrubrikerna — textstorleken är densamma — vilket ger plats
   för fyra eller fem punkter till. Ett program som är för långt för sidan tappar sina sista punkter, och de är
   slutet på träffen, precis det som folk slår upp.
+
+- **Bygg automatiskt fyller nu på de omlopp du redan har innan det gör nya.** Tågen som ännu inte ingår i
+  ett omlopp erbjuds först de befintliga omloppen: ett omlopp fortsätter med det som fortsätter det där
+  det ankommer, i den kategori det redan går i, och ett tomt omlopp som du själv har gjort fylls innan
+  något nytt skapas. Bara de tåg som inte passar i något befintligt omlopp startar nya omlopp, så att
+  bygga igen efter att ha lagt till några tåg förlänger de fordon som redan går i stället för att sätta nya
+  i trafik. Godsflöden lämnas som de är. Resultatet bredvid knappen anger nu hur många tågavsnitt de
+  befintliga omloppen tog emot, hur många av dem som förlängdes och hur många omlopp som byggdes.
 
 ### Rättningar
 
