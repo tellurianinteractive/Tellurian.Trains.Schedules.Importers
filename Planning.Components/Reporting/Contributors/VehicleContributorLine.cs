@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
+
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors;
 
 /// <summary>
@@ -20,6 +22,13 @@ public sealed record VehicleContributorLine(
     bool IsPrimary,
     IReadOnlyList<string> Notes)
 {
+    /// <summary>
+    /// The wagons a wagonset lists, in the order they stand in the train, printed as rectangles before the notes;
+    /// empty for anything else and for a wagonset listing none, whose class says all there is.
+    /// </summary>
+    public IReadOnlyList<CompositionWagon> Wagons { get; } =
+        [.. Vehicle.Wagons.OrderBy(wagon => wagon.Position).Select(wagon => new CompositionWagon(wagon.Class, wagon.Number))];
+
     /// <summary>
     /// Whether the row names an owner of a traction unit without a usable DCC address: none, or 0 for one the
     /// owner is still to provide. A unit nobody brings has no owner to ask, and one that is not driven needs none.

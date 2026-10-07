@@ -156,6 +156,47 @@
             .note {
                 display: block;
             }
+
+            /* A wagonset's wagons, side by side in train order and wrapping within a fixed width (WagonsWidthMm
+               80), so the estimate wraps them where the browser does however wide the column comes out. Each
+               line is a 5 mm line of the notes: a 4.6 mm rectangle and 0.4 mm between lines, with 0.2 mm above
+               the first and below the last. */
+            .wagons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4mm 1mm;
+                box-sizing: border-box;
+                width: fit-content;
+                max-width: 80mm;
+                padding: 0.2mm 0;
+            }
+
+            /* As drawn in the Train compositions report: class and number side by side, as wide as its text
+               (WagonChromeWidthMm 3: 1.2 mm padding and a 0.3 mm border each side), never narrower than 8 mm. */
+            .wagon {
+                display: flex;
+                flex: 0 0 auto;
+                align-items: baseline;
+                gap: 1mm;
+                box-sizing: border-box;
+                height: 4.6mm;
+                min-width: 8mm;
+                border: 0.3mm solid #000;
+                border-radius: 0.7mm;
+                padding: 0 1.2mm;
+                background: #fff;
+                line-height: 4mm;
+                white-space: nowrap;
+
+                .class {
+                    font-size: 8.5pt;
+                    font-weight: 700;
+                }
+
+                .number {
+                    font-size: 7.5pt;
+                }
+            }
         }
     }
 

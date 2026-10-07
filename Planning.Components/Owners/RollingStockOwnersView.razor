@@ -30,7 +30,6 @@ else
                 <th class="expander"></th>
                 <th>@Translator("Type")</th>
                 <th>@Translator("Vehicle")</th>
-                <th>@Translator("Class")</th>
                 <th class="units" title="@Translator("NumberOfUnits")">@Translator("Count")</th>
                 <th>@Translator(SessionSettings.UseDaysInsteadOfSessionNumbers ? "FirstDay" : "FirstSession")</th>
                 <th>@Translator("Station")</th>
@@ -57,8 +56,9 @@ else
                                 @onclick="() => ToggleExpanded(vehicle)"><i class="fa-solid @(expanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
                     </td>
                     <td>@Translator(vehicle.ObjectType.ToString())</td>
-                    <td class="designation">@vehicle.Designation</td>
-                    <td>@vehicle.Classes</td>
+                    @* Named as the Schedules tab names it: operator signature, number and class, or for a wagonset
+                       the wagons it lists. *@
+                    <td class="designation">@vehicle.DesignationWithWagons</td>
                     @* Only a count worth noticing is shown: a single unit is what every other row is, so a 1
                        would be noise, and it would hide the few items an owner has to bring several of. A wagonset
                        listing its wagons counts them. *@
@@ -99,7 +99,7 @@ else
                 {
                     <tr class="detail" @key="OwnersRowKey(vehicle)">
                         <td></td>
-                        <td colspan="12">
+                        <td colspan="11">
                             <VehicleOwnersEditor Plan="Plan" Vehicle="vehicle" />
                         </td>
                     </tr>

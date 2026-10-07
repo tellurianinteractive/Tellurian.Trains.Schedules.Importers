@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
+
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors;
 
 /// <summary>
@@ -36,6 +38,31 @@ public sealed record VehicleContributorsPageGeometry
 
     /// <summary>Height each further note adds.</summary>
     public double LineHeightMm { get; init; } = 5;
+
+    /// <summary>
+    /// The widest a wagonset's line of wagon rectangles is drawn before it wraps onto another line of the notes.
+    /// Pinned in the stylesheet, so the estimate wraps where the browser does without knowing how wide the notes
+    /// column comes out; narrow enough to fit the notes column on every arrangement's page.
+    /// </summary>
+    public double WagonsWidthMm { get; init; } = 80;
+
+    /// <summary>What a wagon rectangle adds across to its text: its border and side padding.</summary>
+    public double WagonChromeWidthMm { get; init; } = 3;
+
+    /// <summary>The space between the class and the number inside a wagon rectangle.</summary>
+    public double WagonTextGapMm { get; init; } = 1;
+
+    /// <summary>Width one character of a wagon class takes, set in bold capitals as in the Train compositions report.</summary>
+    public double WagonClassCharacterWidthMm { get; init; } = 2.4;
+
+    /// <summary>Width one character of a wagon number takes, mostly digits.</summary>
+    public double WagonNumberCharacterWidthMm { get; init; } = 1.5;
+
+    /// <summary>The space between two wagon rectangles side by side.</summary>
+    public double WagonGapMm { get; init; } = 1;
+
+    /// <summary>The narrowest a wagon rectangle is drawn: about two letters.</summary>
+    public double WagonMinWidthMm { get; init; } = 8;
 
     /// <summary>Default geometry for an A4 landscape page with 10 mm margins.</summary>
     public static VehicleContributorsPageGeometry A4Landscape { get; } = new();
@@ -81,8 +108,9 @@ public static class VehicleContributorsPaginator
     }
 
     /// <summary>
-    /// The height of one row: a line, plus a line for each further note. Nothing else in a row wraps, each note
-    /// starts a line of its own, and a note is short enough to fit on it.
+    /// The height of one row: a line, plus a line for each further line of the notes column. Nothing else in a
+    /// row wraps, each note starts a line of its own, and a note is short enough to fit on it. A wagonset's wagons
+    /// come first, on as many lines as their rectangles wrap onto.
     /// </summary>
     /// <param name="line">The row.</param>
     /// <param name="geometry">The page geometry to paginate against.</param>
@@ -91,7 +119,43 @@ public static class VehicleContributorsPaginator
         line = line.ValueOrException(nameof(line));
         geometry = geometry.ValueOrException(nameof(geometry));
 
-        return geometry.RowHeightMm + (Math.Max(line.Notes.Count, 1) - 1) * geometry.LineHeightMm;
+        var lines = WagonLinesOf(line, geometry) + line.Notes.Count;
+        return geometry.RowHeightMm + (Math.Max(lines, 1) - 1) * geometry.LineHeightMm;
+    }
+
+    /// <summary>
+    /// How many lines a wagonset's wagon rectangles take, side by side and wrapping within
+    /// <see cref="VehicleContributorsPageGeometry.WagonsWidthMm"/>; none where the row lists no wagons.
+    /// </summary>
+    /// <param name="line">The row.</param>
+    /// <param name="geometry">The page geometry to paginate against.</param>
+    public static int WagonLinesOf(VehicleContributorLine line, VehicleContributorsPageGeometry geometry)
+    {
+        line = line.ValueOrException(nameof(line));
+        geometry = geometry.ValueOrException(nameof(geometry));
+
+        var lines = 0;
+        var used = 0.0;
+        foreach (var width in line.Wagons.Select(wagon => WidthMmOf(wagon, geometry)))
+        {
+            if (lines == 0 || used + geometry.WagonGapMm + width > geometry.WagonsWidthMm)
+            {
+                lines++;
+                used = width;
+            }
+            else used += geometry.WagonGapMm + width;
+        }
+        return lines;
+    }
+
+    // As wide as its class and number, side by side, and its chrome, but never narrower than about two letters.
+    private static double WidthMmOf(CompositionWagon wagon, VehicleContributorsPageGeometry geometry)
+    {
+        var texts = new List<double>(2);
+        if (wagon.Class.Length > 0) texts.Add(wagon.Class.Length * geometry.WagonClassCharacterWidthMm);
+        if (!string.IsNullOrWhiteSpace(wagon.Number)) texts.Add(wagon.Number.Length * geometry.WagonNumberCharacterWidthMm);
+        var text = texts.Sum() + (Math.Max(0, texts.Count - 1) * geometry.WagonTextGapMm);
+        return Math.Max(geometry.WagonMinWidthMm, geometry.WagonChromeWidthMm + text);
     }
 
     // Fills pages with rows until the next one would overflow, always placing at least one row per page so that

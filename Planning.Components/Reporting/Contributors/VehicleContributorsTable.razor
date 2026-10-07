@@ -63,6 +63,24 @@
                         else if (column == VehicleContributorsColumn.Note)
                         {
                             <td class="@ClassOf(column)">
+                                @* A wagonset's wagons first, one rectangle each in the order they stand in the
+                                   train, as the Train compositions report draws them: the owner brings and the
+                                   station owner sets up the rake wagon by wagon. *@
+                                @if (line.Wagons.Count > 0)
+                                {
+                                    <div class="wagons">
+                                        @foreach (var wagon in line.Wagons)
+                                        {
+                                            <div class="wagon">
+                                                <span class="class">@wagon.Class</span>
+                                                @if (!string.IsNullOrWhiteSpace(wagon.Number))
+                                                {
+                                                    <span class="number">@wagon.Number</span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
                                 @foreach (var note in line.Notes)
                                 {
                                     @* One note per line, as the page-fit estimate counts them. *@

@@ -1,5 +1,17 @@
 # Versionsnyheder
 
+## Version 0.7.6
+
+### Ændringer
+
+- **Listen over køretøjsejere benævner hvert køretøj, som fanen Omløb gør.** På fanen **Køretøjsejere** er
+  de separate kolonner **Køretøj** og **Klasse** nu én kolonne **Køretøj** med operatørens signatur, nummer
+  og klasse (f.eks. "DB 05 BR 218"), eller for et vognsæt de vogne, det angiver (f.eks. "SJ 05 5 x A/B/Fv").
+  Et køretøj med eksternt id vises med dette id, som på fanen **Omløb**.
+- **Rapporten Medbragte køretøjer tegner vognene i et vognsæt.** Et vognsæt, der angiver sine vogne, viser
+  dem nu i sin bemærkning, et rektangel pr. vogn med klasse og nummer, i den rækkefølge de står i toget,
+  som rapporten **Togsammensætninger** tegner dem. Et langt vognsæt fortsætter på flere linjer.
+
 ## Version 0.7.5
 
 ### Ændringer
@@ -11,6 +23,12 @@
   tildriftsstederne begrænset til dem i den valgte togkategoris standsningsmønster. En kategori uden
   standsningsmønster begrænser intet. Skiftes kategorien, ryddes et driftssted, der ikke længere er blandt
   valgene.
+- **Et døgnåbent træf kan begynde når som helst på døgnet.** Når **Kører over midnat?** er markeret på
+  fanen **Indstillinger**, angiver **Første køresession starter** tidspunktet, hvor den første køresession
+  eller dag begynder. Hvert køretøj starter der, hvor det står på det tidspunkt: et togafsnit på den første
+  køresession, der afgår tidligere, er ikke der, hvor det starter, og et køretøj uden noget senere den
+  køresession starter på den næste, det kører. Fanen **Køretøjsejere** og rapporten **Medbragte køretøjer**
+  viser starten på denne måde.
 
 ## Version 0.7.4
 

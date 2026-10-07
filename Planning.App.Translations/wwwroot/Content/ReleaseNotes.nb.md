@@ -1,5 +1,17 @@
 # Versjonsnyheter
 
+## Versjon 0.7.6
+
+### Endringer
+
+- **Listen over kjøretøyseiere benevner hvert kjøretøy slik fanen Omløp gjør.** På fanen **Kjøretøyseiere**
+  er de separate kolonnene **Kjøretøy** og **Klasse** nå én kolonne **Kjøretøy** med operatørens signatur,
+  nummer og klasse (f.eks. "DB 05 BR 218"), eller for et vognsett vognene det oppgir
+  (f.eks. "SJ 05 5 x A/B/Fv"). Et kjøretøy med eksternt id vises med denne id-en, som på fanen **Omløp**.
+- **Rapporten Medbrakte kjøretøy tegner vognene i et vognsett.** Et vognsett som oppgir vognene sine, viser
+  dem nå i merknaden, et rektangel per vogn med klasse og nummer, i den rekkefølgen de står i toget, slik
+  rapporten **Togsammensetninger** tegner dem. Et langt vognsett fortsetter på flere linjer.
+
 ## Versjon 0.7.5
 
 ### Endringer
@@ -11,6 +23,12 @@
 - **Legg til tog tilbyr bare steder der kategorien stopper.** I dialogen **Legg til tog** er fra- og
   tildriftsstedene begrenset til dem i den valgte togkategoriens stoppmønster. En kategori uten
   stoppmønster begrenser ingenting. Byttes kategorien, tømmes et driftssted som ikke lenger er blant valgene.
+- **Et døgnåpent treff kan begynne når som helst på døgnet.** Når **Går over midnatt?** er krysset av på
+  fanen **Innstillinger**, angir **Første kjøresesjon starter** tiden da den første kjøresesjonen eller
+  dagen begynner. Hvert kjøretøy starter der det står på det tidspunktet: et togavsnitt i den første
+  kjøresesjonen som går tidligere, er ikke der det starter, og et kjøretøy uten noe senere i den
+  kjøresesjonen starter i den neste det kjører. Fanen **Kjøretøyseiere** og rapporten **Medbrakte
+  kjøretøy** viser starten på denne måten.
 
 ## Versjon 0.7.4
 

@@ -1,5 +1,17 @@
 ﻿# Release notes
 
+## Version 0.7.6
+
+### Changes
+
+- **The vehicle owners list names each vehicle as the Schedules tab does.** On the **Vehicle owners** tab,
+  the separate **Vehicle** and **Class** columns are now one **Vehicle** column that carries the operator
+  signature, number and class (e.g. "DB 05 BR 218"), or for a wagonset the wagons it lists
+  (e.g. "SJ 05 5 x A/B/Fv"). A vehicle with an external id is shown by that id, as in the **Schedules** tab.
+- **The Vehicle contributors report draws the wagons of a wagonset.** A wagonset that lists its wagons now
+  shows them in its note, one rectangle per wagon with class and number, in the order they stand in the
+  train, as the **Train compositions** report draws them. A long rake wraps onto further lines.
+
 ## Version 0.7.5
 
 ### Changes
@@ -10,6 +22,11 @@
 - **Add train offers only places where the category stops.** In the **Add train** dialog, the from and to
   locations are limited to those in the chosen train category's stop pattern. A category without a stop
   pattern limits nothing. Changing the category clears a location that is no longer among the choices.
+- **A round-the-clock meeting can start at any time of day.** When **Runs over midnight?** is ticked on the
+  **Settings** tab, **First session starts** gives the time the first session or day begins. Every vehicle
+  starts where it stands at that time: a train part on the first session that leaves earlier is not where
+  it starts, and a vehicle with nothing later that session starts on the next one it works. The
+  **Vehicle owners** tab and the **Vehicle contributors** report show the start this way.
 
 ## Version 0.7.4
 

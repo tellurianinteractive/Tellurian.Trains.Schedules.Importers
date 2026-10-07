@@ -1,5 +1,17 @@
 # Versionsnyheter
 
+## Version 0.7.6
+
+### Ändringar
+
+- **Listan över fordonsägare benämner varje fordon som fliken Omlopp gör.** På fliken **Fordonsägare** är
+  de separata kolumnerna **Fordon** och **Klass** nu en enda kolumn **Fordon** med operatörens signatur,
+  nummer och klass (t.ex. "DB 05 BR 218"), eller för ett vagnsätt de vagnar det listar
+  (t.ex. "SJ 05 5 x A/B/Fv"). Ett fordon med externt id visas med det id:t, som på fliken **Omlopp**.
+- **Rapporten Fordon och ägare ritar vagnarna i ett vagnsätt.** Ett vagnsätt som listar sina vagnar visar
+  dem nu i sin anmärkning, en rektangel per vagn med klass och nummer, i den ordning de står i tåget, så som
+  rapporten **Tågsammansättningar** ritar dem. Ett långt vagnsätt fortsätter på fler rader.
+
 ## Version 0.7.5
 
 ### Ändringar
@@ -10,6 +22,11 @@
 - **Lägg till tåg erbjuder bara platser där kategorin gör uppehåll.** I dialogen **Lägg till tåg** begränsas
   från- och tilldriftplatserna till dem i den valda tågkategorins uppehållsmönster. En kategori utan
   uppehållsmönster begränsar ingenting. Byts kategorin, töms en driftplats som inte längre finns bland valen.
+- **En träff dygnet runt kan börja när som helst på dygnet.** När **Kör över midnatt?** är markerad på
+  fliken **Inställningar** anger **Första köromgången börjar** tiden då den första köromgången eller dagen
+  börjar. Varje fordon startar där det står vid den tiden: ett tågavsnitt i den första köromgången som går
+  tidigare är inte där det startar, och ett fordon utan något senare i den köromgången startar i nästa
+  som det kör. Fliken **Fordonsägare** och rapporten **Fordon och ägare** visar starten på detta sätt.
 
 ## Version 0.7.4
 

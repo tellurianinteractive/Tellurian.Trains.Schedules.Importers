@@ -336,4 +336,45 @@ public class VehicleContributorsReportTests
         Assert.AreEqual(5, VehicleContributorsPaginator.HeightMmOf(anna.Lines[0], Geometry), "The Da has no notes.");
         Assert.AreEqual(9, VehicleContributorsPaginator.HeightMmOf(anna.Lines[1], Geometry), "The spare Rc has two notes.");
     }
+
+    [TestMethod]
+    public void A_wagonset_lists_its_wagons_in_train_order()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.RollingStock.Single(v => v.Class == "B");
+        wagonset.AddWagon("A", "5101");
+        wagonset.AddWagon("B");
+        wagonset.AddWagon("Fv", "3301");
+
+        var line = Groups(plan, VehicleContributorsGrouping.OperationLocation)[^1].Lines.Single();
+
+        CollectionAssert.AreEqual(new[] { "A", "B", "Fv" }, line.Wagons.Select(wagon => wagon.Class).ToArray());
+        CollectionAssert.AreEqual(new[] { "5101", null, "3301" }, line.Wagons.Select(wagon => wagon.Number).ToArray());
+        Assert.AreEqual(1, VehicleContributorsPaginator.WagonLinesOf(line, Geometry));
+        Assert.AreEqual(5, VehicleContributorsPaginator.HeightMmOf(line, Geometry), "One line of wagons and no notes.");
+    }
+
+    [TestMethod]
+    public void A_long_rake_wraps_and_makes_the_row_taller()
+    {
+        var plan = CreatePlan();
+        var wagonset = plan.RollingStock.Single(v => v.Class == "B");
+        // Each wagon 3 + 2.4 + 1 + 4 x 1.5 = 12.4 mm wide; six fit in 80 mm with the gaps between them.
+        for (var i = 0; i < 8; i++) wagonset.AddWagon("B", $"{5100 + i}");
+
+        var line = Groups(plan, VehicleContributorsGrouping.OperationLocation)[^1].Lines.Single();
+
+        Assert.AreEqual(2, VehicleContributorsPaginator.WagonLinesOf(line, Geometry));
+        Assert.AreEqual(9, VehicleContributorsPaginator.HeightMmOf(line, Geometry));
+    }
+
+    [TestMethod]
+    public void A_vehicle_that_is_not_a_wagonset_lists_no_wagons()
+    {
+        var plan = CreatePlan();
+        var anna = Groups(plan, VehicleContributorsGrouping.Contributor)[1];
+
+        Assert.IsEmpty(anna.Lines[0].Wagons);
+        Assert.AreEqual(0, VehicleContributorsPaginator.WagonLinesOf(anna.Lines[0], Geometry));
+    }
 }

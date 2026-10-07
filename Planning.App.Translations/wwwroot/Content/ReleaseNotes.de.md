@@ -1,5 +1,19 @@
 # Versionshinweise
 
+## Version 0.7.6
+
+### Änderungen
+
+- **Die Liste der Fahrzeugbesitzer benennt jedes Fahrzeug wie der Reiter Umläufe.** Auf dem Reiter
+  **Fahrzeugbesitzer** sind die getrennten Spalten **Fahrzeug** und **Klasse** jetzt eine Spalte
+  **Fahrzeug** mit Kürzel des Betreibers, Nummer und Klasse (z. B. „DB 05 BR 218“), bei einer Wagengruppe
+  mit den aufgeführten Wagen (z. B. „SJ 05 5 x A/B/Fv“). Ein Fahrzeug mit externer Id wird mit dieser Id
+  gezeigt, wie auf dem Reiter **Umläufe**.
+- **Der Bericht Mitgebrachte Fahrzeuge zeichnet die Wagen einer Wagengruppe.** Eine Wagengruppe, die ihre
+  Wagen aufführt, zeigt sie jetzt in ihrer Bemerkung, ein Rechteck je Wagen mit Klasse und Nummer, in der
+  Reihenfolge, in der sie im Zug stehen, so wie der Bericht **Zugbildungen** sie zeichnet. Eine lange
+  Wagengruppe wird auf weitere Zeilen umbrochen.
+
 ## Version 0.7.5
 
 ### Änderungen
@@ -12,6 +26,12 @@
   Start- und Zielbetriebsstelle auf die im Haltemuster der gewählten Zugkategorie beschränkt. Eine Kategorie
   ohne Haltemuster schränkt nichts ein. Ein Kategoriewechsel leert eine Betriebsstelle, die nicht mehr zur
   Auswahl steht.
+- **Ein Treffen rund um die Uhr kann zu jeder Tageszeit beginnen.** Ist **Läuft über Mitternacht?** auf dem
+  Reiter **Einstellungen** angekreuzt, gibt **Erste Fahrrunde beginnt** die Zeit an, zu der die erste
+  Fahrrunde oder der erste Tag beginnt. Jedes Fahrzeug beginnt dort, wo es zu dieser Zeit steht: Ein
+  Zugabschnitt der ersten Fahrrunde, der früher abfährt, ist nicht sein Startpunkt, und ein Fahrzeug ohne
+  spätere Fahrt in dieser Fahrrunde beginnt in der nächsten, in der es fährt. Der Reiter
+  **Fahrzeugbesitzer** und der Bericht **Mitgebrachte Fahrzeuge** zeigen den Start auf diese Weise.
 
 ## Version 0.7.4
 
