@@ -17,8 +17,6 @@ public enum VehicleContributorsColumn
     Departure,
     /// <summary>Locomotive, trainset or wagonset, followed by how a locomotive or trainset is powered where that is stated.</summary>
     Type,
-    /// <summary>The item's class.</summary>
-    Class,
     /// <summary>The number of the turnus the item runs.</summary>
     Turnus,
     /// <summary>The number of units making up the item, when more than one.</summary>
@@ -69,7 +67,7 @@ public static class VehicleContributorsColumns
         };
     }
 
-    // What the item is: what kind and how it is powered, and of which class, before the turnus that identifies it.
+    // What the item is: what kind and how it is powered, before the turnus that identifies it with its class.
     private static IReadOnlyList<VehicleContributorsColumn> Item { get; } =
-        [VehicleContributorsColumn.Type, VehicleContributorsColumn.Class, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count];
+        [VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count];
 }

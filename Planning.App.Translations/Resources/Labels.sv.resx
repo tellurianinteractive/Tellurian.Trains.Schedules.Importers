@@ -2570,4 +2570,16 @@
   <data name="FromPlace" xml:space="preserve">
     <value>från</value>
   </data>
+  <data name="DeleteNotInOperation" xml:space="preserve">
+    <value>Ta bort de som inte är i trafik</value>
+  </data>
+  <data name="DeleteVehicleConfirm" xml:space="preserve">
+    <value>Ta bort {0} och dess ägare?</value>
+  </data>
+  <data name="DeleteNotInOperationConfirm" xml:space="preserve">
+    <value>Ta bort de {0} fordon som inte är i trafik, och deras ägare?</value>
+  </data>
+  <data name="VehicleWorksTrainParts" xml:space="preserve">
+    <value>Kan inte ta bort: det är tilldelat</value>
+  </data>
 </root>

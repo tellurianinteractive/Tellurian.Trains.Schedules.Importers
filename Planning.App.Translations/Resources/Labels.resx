@@ -2590,4 +2590,16 @@
   <data name="FromPlace" xml:space="preserve">
     <value>from</value>
   </data>
+  <data name="DeleteNotInOperation" xml:space="preserve">
+    <value>Delete those not in operation</value>
+  </data>
+  <data name="DeleteVehicleConfirm" xml:space="preserve">
+    <value>Delete {0} and its owners?</value>
+  </data>
+  <data name="DeleteNotInOperationConfirm" xml:space="preserve">
+    <value>Delete the {0} vehicles not in operation, and their owners?</value>
+  </data>
+  <data name="VehicleWorksTrainParts" xml:space="preserve">
+    <value>Cannot delete: it is assigned to</value>
+  </data>
 </root>

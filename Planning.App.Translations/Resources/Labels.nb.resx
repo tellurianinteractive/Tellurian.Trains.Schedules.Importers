@@ -2570,4 +2570,16 @@
   <data name="FromPlace" xml:space="preserve">
     <value>fra</value>
   </data>
+  <data name="DeleteNotInOperation" xml:space="preserve">
+    <value>Slett dem som ikke er i drift</value>
+  </data>
+  <data name="DeleteVehicleConfirm" xml:space="preserve">
+    <value>Slette {0} og eierne?</value>
+  </data>
+  <data name="DeleteNotInOperationConfirm" xml:space="preserve">
+    <value>Slette de {0} kjøretøyene som ikke er i drift, og eierne deres?</value>
+  </data>
+  <data name="VehicleWorksTrainParts" xml:space="preserve">
+    <value>Kan ikke slette: det er tildelt</value>
+  </data>
 </root>

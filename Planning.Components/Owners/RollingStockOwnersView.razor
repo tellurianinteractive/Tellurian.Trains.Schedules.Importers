@@ -1,4 +1,5 @@
 @using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Validations
 @inject Translator Translator
 
 @* Every rolling stock item of the plan on one row: what it is, where it is to stand before the meeting begins
@@ -7,6 +8,8 @@
 @{
     var all = RollingStock;
     IReadOnlyList<ScheduledObject> vehicles = _onlyWithoutOwner ? [.. all.Where(v => Plan.ContributorsOf(v).Count == 0)] : all;
+    // Only what is listed is offered for deletion: with the filter on, an item out of sight is not deleted.
+    IReadOnlyList<ScheduledObject> deletable = [.. vehicles.Where(v => StartOf(v) is null && Plan.MayDelete(v).IsSuccess)];
 }
 
 @if (all.Count == 0)
@@ -22,7 +25,27 @@ else
             <input type="checkbox" checked="@_onlyWithoutOwner" @onchange="e => _onlyWithoutOwner = e.Value is true" />
             @Translator("WithoutOwnerOnly")
         </label>
+        <button class="danger" disabled="@(deletable.Count == 0)" @onclick="() => { _deleteTarget = null; _confirmDeleteAll = true; }">
+            <i class="fa-solid fa-trash"></i> @Translator("DeleteNotInOperation")
+        </button>
     </div>
+
+    @if (_deleteTarget is not null)
+    {
+        <div class="confirm">
+            <span>@string.Format(CultureInfo.CurrentCulture, Translator("DeleteVehicleConfirm"), _deleteTarget.Designation)</span>
+            <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+            <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+        </div>
+    }
+    else if (_confirmDeleteAll && deletable.Count > 0)
+    {
+        <div class="confirm">
+            <span>@string.Format(CultureInfo.CurrentCulture, Translator("DeleteNotInOperationConfirm"), deletable.Count)</span>
+            <button class="danger" @onclick="() => DeleteAllConfirmed(deletable)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+            <button @onclick="() => _confirmDeleteAll = false">@Translator("Cancel")</button>
+        </div>
+    }
 
     <table class="owners">
         <thead>
@@ -39,6 +62,7 @@ else
                 <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
                 <th>@Translator("Spares")</th>
                 <th>@Translator("Note")</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -49,7 +73,7 @@ else
                 var expanded = _expanded.Contains(vehicle.Id);
                 var contributors = Plan.ContributorsOf(vehicle);
                 var primary = contributors.FirstOrDefault();
-                var start = vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions, Plan.Layout.Settings.General.FirstSessionStart);
+                var start = StartOf(vehicle);
                 <tr class="vehicle @(expanded ? "expanded" : null)" @key="VehicleRowKey(vehicle)">
                     <td class="expander">
                         <button class="toggle" title="@Translator(expanded ? "Collapse" : "Expand")"
@@ -94,12 +118,24 @@ else
                         <input type="text" class="note" value="@Plan.ContributionFor(vehicle)?.Note"
                                @onchange="e => SetNote(vehicle, e)" />
                     </td>
+                    <td class="actions">
+                        @* Only an item not in operation may go; one in operation is taken out of its schedules first. *@
+                        @if (start is null)
+                        {
+                            var deletion = Plan.MayDelete(vehicle);
+                            @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
+                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "VehicleWorksTrainParts", Translator)">
+                                <button class="danger small" disabled="@deletion.IsDenied"
+                                        @onclick="() => { _confirmDeleteAll = false; _deleteTarget = vehicle; }"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            </span>
+                        }
+                    </td>
                 </tr>
                 @if (expanded)
                 {
                     <tr class="detail" @key="OwnersRowKey(vehicle)">
                         <td></td>
-                        <td colspan="11">
+                        <td colspan="12">
                             <VehicleOwnersEditor Plan="Plan" Vehicle="vehicle" />
                         </td>
                     </tr>
@@ -114,6 +150,8 @@ else
 
     private readonly HashSet<int> _expanded = [];
     private bool _onlyWithoutOwner;
+    private ScheduledObject? _deleteTarget;
+    private bool _confirmDeleteAll;
 
     /// <summary>The plan whose rolling stock is listed.</summary>
     [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
@@ -131,6 +169,9 @@ else
             .OrderBy(v => v.ObjectType)
             .ThenBy(v => v.Designation, StringComparer.CurrentCulture)
             .ThenBy(v => v.Id)];
+
+    private VehicleStart? StartOf(ScheduledObject vehicle) =>
+        vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions, Plan.Layout.Settings.General.FirstSessionStart);
 
     private static string VehicleRowKey(ScheduledObject vehicle) => $"vehicle-{vehicle.Id}";
 
@@ -154,6 +195,25 @@ else
         DccAddresses.ToBeProvided => Translator("DccAddressToBeProvided"),
         var address => address.Value.ToString(CultureInfo.CurrentCulture),
     };
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is not null && Plan.TryDelete(_deleteTarget).IsSuccess)
+        {
+            _expanded.Remove(_deleteTarget.Id);
+            ScheduleState.SaveAndNotify();
+        }
+        _deleteTarget = null;
+    }
+
+    private void DeleteAllConfirmed(IEnumerable<ScheduledObject> vehicles)
+    {
+        _confirmDeleteAll = false;
+        var deleted = vehicles.Where(v => Plan.TryDelete(v).IsSuccess).ToList();
+        if (deleted.Count == 0) return;
+        foreach (var vehicle in deleted) _expanded.Remove(vehicle.Id);
+        ScheduleState.SaveAndNotify();
+    }
 
     private void SetNote(ScheduledObject vehicle, ChangeEventArgs e)
     {

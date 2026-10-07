@@ -49,12 +49,9 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         VehicleContributorsColumn.Track => line.Start?.Track.Number ?? string.Empty,
         VehicleContributorsColumn.Departure => line.Start?.Departure.HHMM() ?? string.Empty,
         VehicleContributorsColumn.Type => TypeOf(line.Vehicle),
-        // A wagonset listing its wagons gives each of their classes once, and counts the wagons.
-        VehicleContributorsColumn.Class => line.Vehicle.Classes,
-        // The number alone: the operator and class the designation also holds are in the columns beside it.
-        VehicleContributorsColumn.Turnus => line.Vehicle.Number > 0
-            ? line.Vehicle.Number.ToString("D2", CultureInfo.CurrentCulture)
-            : string.Empty,
+        // The designation as the Schedules tab names the turnus, e.g. "DSB 01 ME": the operator's signature,
+        // the number and the class, so no class column of its own is needed.
+        VehicleContributorsColumn.Turnus => line.Vehicle.Designation,
         // As in the Vehicle owners tab: a single unit is what nearly every row is, so only a count worth
         // noticing is printed.
         VehicleContributorsColumn.Count => line.Vehicle.NumberOfUnits > 1

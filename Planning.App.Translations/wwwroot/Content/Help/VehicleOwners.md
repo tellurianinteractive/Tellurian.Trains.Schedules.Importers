@@ -18,6 +18,11 @@ Every locomotive, trainset and wagonset in the plan is listed, with:
 
 Tick **Only those without an owner?** to see what nobody has offered to bring yet.
 
+A vehicle **Not in operation** can be removed from the plan with its **Delete** button, and
+**Delete those not in operation** removes every one of them listed — only those shown when the filter is
+ticked. Their owners are removed with them; the participants stay. A vehicle given work has to be taken out
+of its schedules on the **Schedules** tab first.
+
 ### Owners of an item
 
 Open a row to see and edit its owners. The first owner is the **primary** one, who brings the unit and

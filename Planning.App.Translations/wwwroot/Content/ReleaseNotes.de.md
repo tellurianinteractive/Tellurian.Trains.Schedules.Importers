@@ -1,5 +1,19 @@
 # Versionshinweise
 
+## Version 0.7.7
+
+### Änderungen
+
+- **Nicht eingesetzte Fahrzeuge lassen sich löschen.** Auf dem Reiter **Fahrzeugbesitzer** hat ein
+  Fahrzeug, das als **Nicht im Einsatz** gezeigt wird, eine Schaltfläche **Löschen**, und
+  **Nicht eingesetzte löschen** entfernt alle solchen aufgeführten Fahrzeuge — nur die gezeigten, wenn
+  **Nur die ohne Eigentümer?** angekreuzt ist. Beide fragen zuerst nach. Die Eigentümer des Fahrzeugs werden
+  mit entfernt; die Teilnehmer bleiben. Ein Fahrzeug mit Aufgaben muss zuerst auf dem Reiter **Umläufe** aus
+  seinen Umläufen genommen werden.
+- **Der Bericht Mitgebrachte Fahrzeuge benennt jedes Fahrzeug wie der Reiter Umläufe.** Die eigene Spalte
+  **Klasse** entfällt: Die Spalte **Umlauf** enthält jetzt Kürzel des Betreibers, Nummer und Klasse
+  (z. B. „SJ 01 Rc“), bei einem Fahrzeug mit externer Id diese Id, wie auf dem Reiter **Umläufe**.
+
 ## Version 0.7.6
 
 ### Änderungen

@@ -1,5 +1,18 @@
 ﻿# Release notes
 
+## Version 0.7.7
+
+### Changes
+
+- **Vehicles not in operation can be deleted.** On the **Vehicle owners** tab, a vehicle shown as
+  **Not in operation** has a **Delete** button, and **Delete those not in operation** removes every such
+  vehicle listed — only those shown when **Only those without an owner?** is ticked. Both ask first. The
+  vehicle's owners are removed with it; the participants stay. A vehicle given work has to be taken out of
+  its schedules on the **Schedules** tab first.
+- **The Vehicle contributors report names each vehicle as the Schedules tab does.** The separate **Class**
+  column is gone: the **Turnus** column now carries the operator signature, number and class
+  (e.g. "SJ 01 Rc"), or the external id of a vehicle that has one, as in the **Schedules** tab.
+
 ## Version 0.7.6
 
 ### Changes

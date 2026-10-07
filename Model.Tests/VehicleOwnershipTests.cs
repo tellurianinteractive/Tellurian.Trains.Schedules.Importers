@@ -184,6 +184,60 @@ public class VehicleOwnershipTests
         Assert.IsEmpty(plan.Participants);
     }
 
+    // ---- Deleting an item -----------------------------------------------------------------------
+
+    [TestMethod]
+    public void AnItemNotInOperationIsDeletedWithWhoBringsIt()
+    {
+        var plan = CreatePlan();
+        var loco = Loco(plan);
+        var wagons = Wagons(plan);
+        var anna = plan.FindOrAddParticipant("Anna")!;
+        plan.AddContributor(loco, anna, 3);
+        plan.AddContributor(wagons, anna, null);
+
+        Assert.IsTrue(plan.TryDelete(loco).IsSuccess);
+
+        CollectionAssert.AreEqual(new[] { wagons }, plan.ScheduledObjects.ToList());
+        Assert.IsNull(plan.ContributionFor(loco), "Nobody is left recorded as bringing it.");
+        Assert.IsNotNull(plan.ContributionFor(wagons), "What the other item is brought by is kept.");
+        Assert.HasCount(1, plan.Participants, "The participant stays in the catalogue.");
+    }
+
+    [TestMethod]
+    public void AnItemAssignedOnlyToAnEmptyScheduleIsDeletedAndTheScheduleKept()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        var loco = Loco(plan);
+        plan.AssignVehicle(schedule, loco);
+
+        Assert.IsTrue(plan.TryDelete(loco).IsSuccess);
+
+        Assert.IsEmpty(plan.ScheduledObjects);
+        Assert.Contains(schedule, plan.Schedules);
+        Assert.IsEmpty(schedule.Vehicles);
+    }
+
+    [TestMethod]
+    public void AnItemWorkingATrainPartCannotBeDeleted()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        var loco = Loco(plan);
+        plan.AssignVehicle(schedule, loco);
+        plan.AddContributor(loco, plan.FindOrAddParticipant("Anna")!, 3);
+
+        var deletion = plan.TryDelete(loco);
+
+        Assert.IsInstanceOfType<DeletionResult.Failure>(deletion);
+        Assert.AreEqual(schedule.ToString(), ((DeletionResult.Failure)deletion).References.Single().Name);
+        Assert.Contains(loco, plan.ScheduledObjects, "The item is left untouched while it works.");
+        Assert.HasCount(1, loco.ScheduleAssignments);
+        Assert.IsNotNull(plan.ContributionFor(loco));
+    }
+
     [TestMethod]
     public void TheRollingStockAParticipantBringsSaysWhereTheyAreThePrimaryOne()
     {

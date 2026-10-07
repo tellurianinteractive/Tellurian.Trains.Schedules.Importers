@@ -178,13 +178,12 @@ public class VehicleContributorsReportTests
         var wagons = Groups(plan, VehicleContributorsGrouping.OperationLocation)[^1].Lines[0];
 
         CollectionAssert.AreEqual(
-            new[] { VehicleContributorsColumn.Type, VehicleContributorsColumn.Class, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count },
-            munkerod.Kind.Columns.SkipWhile(column => column != VehicleContributorsColumn.Type).Take(4).ToArray());
+            new[] { VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count },
+            munkerod.Kind.Columns.SkipWhile(column => column != VehicleContributorsColumn.Type).Take(3).ToArray());
         Assert.AreEqual("Locomotive, electric", Cells.TextOf(rc, VehicleContributorsColumn.Type));
         Assert.AreEqual("Trainset", Cells.TextOf(x2, VehicleContributorsColumn.Type), "Not stated: left out rather than Any.");
         Assert.AreEqual("Wagonset", Cells.TextOf(wagons, VehicleContributorsColumn.Type), "A wagonset is not powered.");
-        Assert.AreEqual("Rc", Cells.TextOf(rc, VehicleContributorsColumn.Class));
-        Assert.AreEqual("01", Cells.TextOf(rc, VehicleContributorsColumn.Turnus), $"Only the number of {rc.Vehicle.Designation}.");
+        Assert.AreEqual("SJ 01 Rc", Cells.TextOf(rc, VehicleContributorsColumn.Turnus), "As the Schedules tab names it.");
         Assert.AreEqual("Turnus", Cells.HeadingOf(VehicleContributorsColumn.Turnus));
 
         x2.Vehicle.TractionType = TractionType.Diesel;
@@ -192,7 +191,7 @@ public class VehicleContributorsReportTests
     }
 
     [TestMethod]
-    public void A_wagonset_listing_its_wagons_prints_each_class_once_and_counts_the_wagons()
+    public void A_wagonset_listing_its_wagons_counts_the_wagons()
     {
         var plan = CreatePlan();
         var wagonset = plan.RollingStock.Single(v => v.Class == "B");
@@ -200,7 +199,6 @@ public class VehicleContributorsReportTests
 
         var line = Groups(plan, VehicleContributorsGrouping.OperationLocation)[^1].Lines.Single();
 
-        Assert.AreEqual("A/B/Fv", Cells.TextOf(line, VehicleContributorsColumn.Class));
         Assert.AreEqual("5", Cells.TextOf(line, VehicleContributorsColumn.Count));
     }
 

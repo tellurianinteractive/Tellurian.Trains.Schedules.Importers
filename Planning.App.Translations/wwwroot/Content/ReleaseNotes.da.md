@@ -1,5 +1,18 @@
 # Versionsnyheder
 
+## Version 0.7.7
+
+### Ændringer
+
+- **Køretøjer, der ikke er i drift, kan slettes.** På fanen **Køretøjsejere** har et køretøj, der vises som
+  **Ikke i drift**, en knap **Slet**, og **Slet dem, der ikke er i drift** fjerner alle sådanne viste
+  køretøjer — kun de viste, når **Kun dem uden ejer?** er afkrydset. Begge spørger først. Køretøjets ejere
+  fjernes sammen med det; deltagerne bliver. Et køretøj med opgaver skal først tages ud af sine omløb på
+  fanen **Omløb**.
+- **Rapporten Medbragte køretøjer benævner hvert køretøj, som fanen Omløb gør.** Den separate kolonne
+  **Klasse** er væk: kolonnen **Omløb** har nu operatørens signatur, nummer og klasse (f.eks. "SJ 01 Rc"),
+  eller det eksterne id for et køretøj, der har et, som på fanen **Omløb**.
+
 ## Version 0.7.6
 
 ### Ændringer

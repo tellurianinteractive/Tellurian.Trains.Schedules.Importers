@@ -35,7 +35,7 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
         await Expect(headings.Nth(2)).ToHaveTextAsync("Stenungsund");
         await Expect(headings.Nth(3)).ToHaveTextAsync("Not in operation");
         await Expect(Page.Locator(".contributors-page").First.Locator("th")).ToHaveTextAsync(
-            ["First session", "Track", "Departure", "Type", "Class", "Turnus", "Count", "Owner", "Role", "DCC", "Note"]);
+            ["First session", "Track", "Departure", "Type", "Turnus", "Count", "Owner", "Role", "DCC", "Note"]);
         // Bert's spare of the first locomotive on a row of its own right below Anna's, shaded grey as a spare.
         var munkerod = Page.Locator(".contributors-page").First.Locator("tbody tr");
         await Expect(munkerod.Nth(0).Locator("td.role")).ToHaveTextAsync("Primary");

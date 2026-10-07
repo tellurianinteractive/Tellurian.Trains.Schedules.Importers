@@ -1,5 +1,18 @@
 # Versionsnyheter
 
+## Version 0.7.7
+
+### Ändringar
+
+- **Fordon som inte är i trafik kan tas bort.** På fliken **Fordonsägare** har ett fordon som visas som
+  **Inte i trafik** en knapp **Ta bort**, och **Ta bort de som inte är i trafik** tar bort alla sådana
+  fordon i listan — bara de som visas när **Bara de utan ägare?** är ikryssad. Båda frågar först. Fordonets
+  ägare tas bort tillsammans med det; deltagarna finns kvar. Ett fordon som har uppgifter måste först tas ur
+  sina omlopp på fliken **Omlopp**.
+- **Rapporten Fordon och ägare benämner varje fordon som fliken Omlopp gör.** Den separata kolumnen
+  **Klass** är borta: kolumnen **Omlopp** har nu operatörens signatur, nummer och klass (t.ex. "SJ 01 Rc"),
+  eller det externa id:t för ett fordon som har ett, som på fliken **Omlopp**.
+
 ## Version 0.7.6
 
 ### Ändringar

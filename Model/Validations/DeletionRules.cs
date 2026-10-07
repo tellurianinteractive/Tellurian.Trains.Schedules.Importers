@@ -322,6 +322,33 @@ public static class DeletionRules
             }
             return new DeletionResult.Success(contributor);
         }
+
+        /// <summary>
+        /// Determines whether a vehicle (<see cref="ScheduledObject"/>) may be deleted from the plan, i.e. it
+        /// works no train part: every schedule it is assigned to, if any, is still empty.
+        /// </summary>
+        public DeletionResult MayDelete(ScheduledObject vehicle)
+        {
+            var references = ReferencesTo(vehicle);
+            return references.Count == 0
+                ? new DeletionResult.Success(vehicle)
+                : new DeletionResult.Failure(vehicle, references);
+        }
+
+        /// <summary>
+        /// Deletes a vehicle that works no train part: unassigns it from the empty schedules it may be
+        /// assigned to (the schedules stay), forgets who brings it, and removes it from the plan. Returns the
+        /// <see cref="DeletionResult.Failure"/> from <c>MayDelete</c> unchanged when it still works a train
+        /// part, leaving the model untouched.
+        /// </summary>
+        public DeletionResult TryDelete(ScheduledObject vehicle)
+        {
+            if (plan.MayDelete(vehicle) is DeletionResult.Failure failure) return failure;
+            vehicle.ScheduleAssignments.Clear();
+            if (plan.ContributionFor(vehicle) is { } contribution) plan.VehicleContributions.Remove(contribution);
+            plan.ScheduledObjects.Remove(vehicle);
+            return new DeletionResult.Success(vehicle);
+        }
     }
 
     // The minutes a call stands still: a dwell at an intermediate stop, and the driver's preparation or
@@ -434,4 +461,13 @@ public static class DeletionRules
             .Select(item => item.Vehicle)
             .Distinct()
             .Select(vehicle => new Reference(ClassNames.KeyOf(vehicle), vehicle.Designation))];
+
+    // A vehicle is referenced by every schedule it is assigned to that has train parts: deleting it would take
+    // away work the schedule plans for it. An assignment to an empty schedule plans nothing yet.
+    private static List<Reference> ReferencesTo(ScheduledObject vehicle) =>
+        [.. vehicle.ScheduleAssignments
+            .Select(a => a.Schedule)
+            .Where(s => s is not null && s.Parts.Count > 0)
+            .Distinct()
+            .Select(Reference.For)];
 }

@@ -2570,4 +2570,16 @@
   <data name="FromPlace" xml:space="preserve">
     <value>von</value>
   </data>
+  <data name="DeleteNotInOperation" xml:space="preserve">
+    <value>Nicht eingesetzte löschen</value>
+  </data>
+  <data name="DeleteVehicleConfirm" xml:space="preserve">
+    <value>{0} und seine Eigentümer löschen?</value>
+  </data>
+  <data name="DeleteNotInOperationConfirm" xml:space="preserve">
+    <value>Die {0} nicht eingesetzten Fahrzeuge und ihre Eigentümer löschen?</value>
+  </data>
+  <data name="VehicleWorksTrainParts" xml:space="preserve">
+    <value>Löschen nicht möglich: Es ist eingeteilt in</value>
+  </data>
 </root>
