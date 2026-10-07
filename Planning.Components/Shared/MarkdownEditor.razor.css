@@ -53,6 +53,20 @@
         font-style: italic;
         text-align: center;
     }
+
+    /* The language a version of a passage is written in, ahead of the version itself. A small tag
+       rather than a heading: it is the app's annotation, not part of the text. */
+    .preview ::deep .report-language {
+        display: inline-block;
+        margin: 0.2em 0.3em 0.2em 0;
+        padding: 0 0.35em;
+        border-radius: 3px;
+        background: #e3e8ee;
+        color: #5a6570;
+        font-size: 0.75em;
+        font-weight: 600;
+        font-style: normal;
+    }
 }
 
 /* Narrower than this the two panes are each too cramped to read, so the preview moves below the

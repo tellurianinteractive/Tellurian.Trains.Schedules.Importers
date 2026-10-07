@@ -149,8 +149,12 @@
     private IEnumerable<TrainCategory> CategoryChoices =>
         (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
 
+    // Only where the chosen category's stop pattern lets its trains stop; a category without a pattern
+    // constrains nothing (see TrainCategory.AllowsStopAt).
     private IEnumerable<OperationLocation> LocationChoices =>
-        (Layout?.OperationLocations ?? []).OrderBy(l => l.Name, StringComparer.CurrentCulture);
+        (Layout?.OperationLocations ?? [])
+            .Where(l => SelectedCategory?.AllowsStopAt(l) != false)
+            .OrderBy(l => l.Name, StringComparer.CurrentCulture);
 
     private int? _categoryId;
     private int? _fromId;
@@ -212,6 +216,10 @@
     private void UpdateCategoryDefaults()
     {
         if (SelectedCategory is not { } category) return;
+        // A location chosen under the previous category may be outside this one's stop pattern, and so
+        // no longer among the choices.
+        if (_fromId is not null && !LocationChoices.Any(l => l.Id == _fromId)) _fromId = null;
+        if (_toId is not null && !LocationChoices.Any(l => l.Id == _toId)) _toId = null;
         _preparationMinutes = category.DefaultPreparationMinutes;
         _finishingMinutes = category.DefaultFinishingMinutes;
         // A shunting task travels in no direction, so the parity that numbers travelling trains says

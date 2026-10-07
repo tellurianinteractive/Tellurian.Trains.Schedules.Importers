@@ -39,14 +39,33 @@ public static class VehicleOwnershipExtensions
         /// Where the vehicle is to stand before the meeting begins: the start of the first train part it works
         /// on the first session or day it is in operation, or <c>null</c> when it works no train part at all.
         /// </summary>
+        /// <remarks>
+        /// When the meeting begins later than 00:00 on its first session/day (see
+        /// <see cref="Settings.GeneralSettings.FirstSessionStartTime"/>), the parts that start before then on
+        /// that session/day are not worked from the meeting's start, so the vehicle starts at its first part
+        /// from then on — later on the first session/day, or else on the next one it works. A vehicle working
+        /// nothing from then on starts at its first part all the same.
+        /// </remarks>
         /// <param name="useDays">Whether the operating period is counted in days rather than sessions.</param>
         /// <param name="maxSessions">The number of sessions or days in the operating period.</param>
-        public VehicleStart? Start(bool useDays, int maxSessions)
+        /// <param name="firstSessionStart">The fast-clock time the first session/day begins; see
+        /// the <c>FirstSessionStart</c> extension of <see cref="Settings.GeneralSettings"/>.</param>
+        public VehicleStart? Start(bool useDays, int maxSessions, TimeSpan firstSessionStart = default)
         {
             var combinations = vehicle.SessionCombinations(useDays, maxSessions);
             if (combinations.FirstOrDefault() is not { Parts.Count: > 0 } first) return null;
             var worked = combinations.Aggregate(new Sessions(), (all, combination) => all.Or(combination.Sessions));
-            return new(first.Sessions.FirstNumber, first.Parts[0], worked.CoversAllWithin(useDays, maxSessions));
+            var isEverySession = worked.CoversAllWithin(useDays, maxSessions);
+            var periodMax = Math.Clamp(maxSessions, 1, useDays ? 7 : 14);
+            return Enumerable.Range(1, periodMax)
+                .SelectMany(number => combinations
+                    .Where(combination => combination.Sessions.Includes(number))
+                    .SelectMany(combination => combination.Parts)
+                    .Where(part => number > 1 || part.StartTime.Value >= firstSessionStart)
+                    .Take(1)
+                    .Select(part => new VehicleStart(number, part, isEverySession)))
+                .FirstOrDefault()
+                ?? new(first.Sessions.FirstNumber, first.Parts[0], isEverySession);
         }
     }
 

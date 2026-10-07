@@ -50,7 +50,7 @@ else
                 var expanded = _expanded.Contains(vehicle.Id);
                 var contributors = Plan.ContributorsOf(vehicle);
                 var primary = contributors.FirstOrDefault();
-                var start = vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions);
+                var start = vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions, Plan.Layout.Settings.General.FirstSessionStart);
                 <tr class="vehicle @(expanded ? "expanded" : null)" @key="VehicleRowKey(vehicle)">
                     <td class="expander">
                         <button class="toggle" title="@Translator(expanded ? "Collapse" : "Expand")"

@@ -1,5 +1,18 @@
 # Versionshinweise
 
+## Version 0.7.5
+
+### Änderungen
+
+- **Ein neuer Dienst beginnt mit seinem ersten Zugabschnitt.** **Neuer Dienst** auf dem Reiter **Dienste**
+  öffnet jetzt sofort den Dialog **Zugabschnitt hinzufügen**, sodass der Dienst gleich seinen Platz im
+  Diagramm erhält, statt leer ganz unten zu stehen. Wird der Dialog geschlossen, ohne einen Abschnitt
+  hinzuzufügen, bleibt kein leerer Dienst zurück.
+- **Zug hinzufügen bietet nur Orte an, an denen die Kategorie hält.** Im Dialog **Zug hinzufügen** sind
+  Start- und Zielbetriebsstelle auf die im Haltemuster der gewählten Zugkategorie beschränkt. Eine Kategorie
+  ohne Haltemuster schränkt nichts ein. Ein Kategoriewechsel leert eine Betriebsstelle, die nicht mehr zur
+  Auswahl steht.
+
 ## Version 0.7.4
 
 ### Änderungen

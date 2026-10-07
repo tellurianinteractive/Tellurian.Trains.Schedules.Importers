@@ -85,6 +85,12 @@ else
                     <HelpLabel For="RunsOverMidnight" />
                     <input type="checkbox" @bind="RunsOverMidnight" @bind:after="OnEdited" />
                 </div>
+                @* Round the clock the start time is pinned to 00:00, so when the meeting actually begins on
+                   its first session/day is given here; it decides where every vehicle starts. *@
+                <div class="field">
+                    <HelpLabel For="FirstSessionStartTime" />
+                    <input type="time" @bind="FirstSessionStartTime" @bind:after="OnEdited" disabled="@(!RunsOverMidnight)" />
+                </div>
                 <div class="field">
                     <HelpLabel For="StartTime" />
                     <input type="time" @bind="StartTime" @bind:after="OnEdited" disabled="@RunsOverMidnight" />
@@ -447,6 +453,7 @@ else
                     <div class="field instructions">
                         <HelpLabel For="Program" />
                         <MarkdownEditor Rows="8" PreviewClass="instructions-body"
+                                        Preprocess="InstructionsLanguages.ToPreviewMarkdown"
                                         @bind-Value="Plan.Program" @bind-Value:after="OnEdited" />
                     </div>
 
@@ -470,6 +477,11 @@ else
                             <code>@InstructionsPlaceholders.TagOf(InstructionsPlaceholder.Interchanges)</code>
                         </p>
                     }
+                    @* Language tags are not markdown either, so their syntax is spelt out here too. *@
+                    <p class="hint">
+                        @Translator("LanguageTagsHint")
+                        <code>[sv]Svensk text[/sv][nb]Norsk tekst[/nb]</code>
+                    </p>
                     <div class="field instructions">
                         <HelpLabel For="GeneralInstructions" />
                         <MarkdownEditor Rows="24" PreviewClass="instructions-body"
@@ -486,9 +498,11 @@ else
     private SettingsSection _section = SettingsSection.General;
 
     // The preview renders markdown only, so a placeholder tag would vanish from it. Shown as a named
-    // box instead, so the author can see the tag was recognised without printing the booklet.
+    // box instead, so the author can see the tag was recognised without printing the booklet. Every
+    // language version is shown too, each labelled with its language.
     private string PreviewInstructions(string markdown) =>
-        InstructionsPlaceholders.ToPreviewMarkdown(markdown, placeholder => Translator(placeholder.ToString()));
+        InstructionsPlaceholders.ToPreviewMarkdown(
+            InstructionsLanguages.ToPreviewMarkdown(markdown), placeholder => Translator(placeholder.ToString()));
 
     private static readonly SettingsSection[] Sections = Enum.GetValues<SettingsSection>();
 
@@ -632,6 +646,12 @@ else
     {
         get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.StartTime);
         set { if (LayoutSettings is not null) LayoutSettings.General.StartTime = value.ToTimeSpan(); }
+    }
+
+    private TimeOnly FirstSessionStartTime
+    {
+        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.FirstSessionStartTime);
+        set { if (LayoutSettings is not null) LayoutSettings.General.FirstSessionStartTime = value.ToTimeSpan(); }
     }
 
     private TimeOnly EndTime

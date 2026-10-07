@@ -1,5 +1,6 @@
 @page "/duties"
 @using Tellurian.Trains.Schedules.Planning.Components.Duties
+@using Tellurian.Trains.Schedules.Model.Validations
 @inject ScheduleStateService ScheduleState
 @inject ValidationStateService ValidationState
 @inject Translator Translator
@@ -21,6 +22,13 @@ else
 
         <DutyChart Duties="Duties" />
     </div>
+
+    @if (_newDuty is { } newDuty)
+    {
+        <AddDutyPartDialog Duty="newDuty"
+                           OnAdded="() => _newDuty = null"
+                           OnClosed="AbandonNewDuty" />
+    }
 }
 
 @code {
@@ -46,10 +54,21 @@ else
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
+    // A new duty opens straight into picking its first part: once it has one, it sorts into its place in
+    // the chart instead of sitting empty at the bottom, where a long chart would need scrolling to reach it.
+    private DriverDuty? _newDuty;
+
     private void NewDuty()
     {
         if (ScheduleState.Schedule is not { } plan) return;
-        plan.CreateDriverDuty();
+        _newDuty = plan.CreateDriverDuty();
+    }
+
+    // Dismissing the first-part dialog abandons the duty, so no empty row is left behind.
+    private void AbandonNewDuty()
+    {
+        if (_newDuty is { } duty && duty.Parts.Count == 0) ScheduleState.Schedule?.TryDelete(duty);
+        _newDuty = null;
         ScheduleState.SaveAndNotify();
     }
 

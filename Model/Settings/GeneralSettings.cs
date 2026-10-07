@@ -46,6 +46,15 @@ public sealed class GeneralSettings
     public bool RunsOverMidnight { get; set; }
 
     /// <summary>
+    /// Fast-clock time the first session or day begins when <see cref="RunsOverMidnight"/> is set. Normally a
+    /// session begins at <see cref="StartTime"/>, but round-the-clock operation pins that to 00:00, so the
+    /// meeting's actual start is given here instead. It decides where every vehicle stands when the meeting
+    /// begins: a train part on the first session/day that starts before this time is not where the vehicle
+    /// starts. Ignored while <see cref="RunsOverMidnight"/> is not set. Default is 00:00.
+    /// </summary>
+    public TimeSpan FirstSessionStartTime { get; set; }
+
+    /// <summary>
     /// Optional fast-clock break that splits the graphical timetable into two halves when printing:
     /// the first half is <see cref="StartTime"/>–<see cref="BreakTime"/>, the second half is
     /// <see cref="BreakTime"/>–<see cref="EndTime"/>. <c>null</c> means no break.
@@ -124,5 +133,13 @@ public static class GeneralSettingsExtensions
             SessionFirstWeekday = settings.StartDay,
             UseShortWeekdayNames = useShortWeekdayNames,
         };
+
+        /// <summary>
+        /// The fast-clock time the first session/day begins, as far as where vehicles start is concerned:
+        /// <see cref="GeneralSettings.FirstSessionStartTime"/> when the layout runs over midnight, otherwise
+        /// 00:00, since every train part then lies within the session's own operating window.
+        /// </summary>
+        public TimeSpan FirstSessionStart =>
+            settings.RunsOverMidnight ? settings.FirstSessionStartTime : TimeSpan.Zero;
     }
 }

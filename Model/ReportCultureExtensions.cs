@@ -90,6 +90,24 @@ public static class ReportCultureExtensions
                     : layout.DefaultReportCulture;
         }
 
+        /// <summary>
+        /// The culture to print a whole report in a chosen language: <c>DefaultReportCulture</c> when it is
+        /// the default language, else the language in the first of the layout's countries that speaks it
+        /// first, else the language's neutral culture.
+        /// </summary>
+        /// <remarks>
+        /// For a report printed once per language, such as the general instructions written in several
+        /// languages, where the language is decided by the text rather than by an item's company or location.
+        /// </remarks>
+        /// <param name="language">A two-letter ISO language code.</param>
+        public CultureInfo ReportCultureIn(string language)
+        {
+            if (language.Equals(layout.DefaultLanguage, StringComparison.OrdinalIgnoreCase)) return layout.DefaultReportCulture;
+            return layout.Countries.FirstOrDefault(c => c.PrimaryLanguage.Equals(language, StringComparison.OrdinalIgnoreCase)) is { } country
+                ? country.PrimaryCulture
+                : CultureOf(language, null);
+        }
+
         private Country? AvailableCountryOf(Company? company, Func<string, bool> isAvailable) =>
             layout.CountryById(company?.CountryId) is { } country && isAvailable(country.PrimaryLanguage)
                 ? country

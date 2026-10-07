@@ -321,6 +321,12 @@
   <data name="RunsOverMidnightHelp" xml:space="preserve">
     <value>Omfatter hele døgnet (00:00–23:59) slik at tog som kjører over midnatt vises over hele dagen. Start- og sluttid låses da og deaktiveres.</value>
   </data>
+  <data name="FirstSessionStartTime" xml:space="preserve">
+    <value>Første kjøresesjon starter</value>
+  </data>
+  <data name="FirstSessionStartTimeHelp" xml:space="preserve">
+    <value>Når det kjøres over midnatt: modelltiden da den første kjøresesjonen eller dagen begynner. Hvert kjøretøy starter der det står på dette tidspunktet, slik det vises under Kjøretøyseiere og i rapporten Medbrakte kjøretøy.</value>
+  </data>
   <data name="StartTime" xml:space="preserve">
     <value>Starttid</value>
   </data>
@@ -2149,6 +2155,9 @@
   </data>
   <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
     <value>Tabellen over skiftestasjoner skrives ut på anleggssiden bakerst i heftet. Skriv den på en egen linje for i stedet å plassere den i teksten:</value>
+  </data>
+  <data name="LanguageTagsHint" xml:space="preserve">
+    <value>For å skrive et avsnitt på flere språk omslutter du hver versjon med en tagg for språket. Heftet skrives da ut én gang per språk som brukes, standardspråket først: et avsnitt uten versjon på et språk skrives ut på standardspråket, og tekst uten tagg skrives ut i alle heftene. For eksempel:</value>
   </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Godsbetjenes fra</value>

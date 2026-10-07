@@ -87,4 +87,15 @@ public class ReportCultureTests
         var station = new Station(1, "Ort", "O");
         Assert.AreEqual("da-DK", station.ReportCulture(layout, IsAvailable).Name);
     }
+
+    [TestMethod]
+    public void AChosenLanguageIsPrintedInTheCountryOfTheLayoutThatSpeaksIt()
+    {
+        var layout = LayoutIn(Sweden);
+        layout.Countries.Add(Country.ById(2)!);
+        Assert.AreEqual("sv-SE", layout.ReportCultureIn("sv").Name);
+        Assert.AreEqual("nb-NO", layout.ReportCultureIn("nb").Name);
+        // No country of the layout speaks it first: the language alone.
+        Assert.AreEqual("de", layout.ReportCultureIn("de").Name);
+    }
 }

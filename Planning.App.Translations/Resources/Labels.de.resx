@@ -321,6 +321,12 @@
   <data name="RunsOverMidnightHelp" xml:space="preserve">
     <value>Umfasst den ganzen Tag (00:00–23:59), damit über Mitternacht verkehrende Züge über den gesamten Tag dargestellt werden. Start- und Endzeit sind dann fest und deaktiviert.</value>
   </data>
+  <data name="FirstSessionStartTime" xml:space="preserve">
+    <value>Erste Fahrrunde beginnt</value>
+  </data>
+  <data name="FirstSessionStartTimeHelp" xml:space="preserve">
+    <value>Wenn über Mitternacht gefahren wird: die Modellzeit, zu der die erste Fahrrunde oder der erste Tag beginnt. Jedes Fahrzeug beginnt dort, wo es zu dieser Zeit steht, wie unter Fahrzeugbesitzer und im Bericht Mitgebrachte Fahrzeuge gezeigt.</value>
+  </data>
   <data name="StartTime" xml:space="preserve">
     <value>Startzeit</value>
   </data>
@@ -2149,6 +2155,9 @@
   </data>
   <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
     <value>Die Tabelle der Rangierbahnhöfe wird auf der Anlagenseite hinten im Heft gedruckt. Um sie stattdessen im Text zu platzieren, schreibe sie in eine eigene Zeile:</value>
+  </data>
+  <data name="LanguageTagsHint" xml:space="preserve">
+    <value>Um einen Abschnitt in mehreren Sprachen zu schreiben, schließe jede Fassung in ein Tag ihrer Sprache ein. Das Heft wird dann einmal je verwendeter Sprache gedruckt, die Standardsprache zuerst: Ein Abschnitt ohne Fassung in einer Sprache wird in der Standardsprache gedruckt, Text ohne Tag in jedem Heft. Zum Beispiel:</value>
   </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Güterbedienung von</value>

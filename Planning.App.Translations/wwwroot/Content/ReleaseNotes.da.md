@@ -1,5 +1,17 @@
 # Versionsnyheder
 
+## Version 0.7.5
+
+### Ændringer
+
+- **En ny tjeneste begynder med sit første togafsnit.** **Ny tjeneste** på fanen **Tjenester** åbner nu
+  straks dialogen **Tilføj togafsnit**, så tjenesten med det samme får sin plads i diagrammet i stedet for
+  at stå tom nederst. Lukkes dialogen, uden at et afsnit tilføjes, efterlades ingen tom tjeneste.
+- **Tilføj tog tilbyder kun steder, hvor kategorien standser.** I dialogen **Tilføj tog** er fra- og
+  tildriftsstederne begrænset til dem i den valgte togkategoris standsningsmønster. En kategori uden
+  standsningsmønster begrænser intet. Skiftes kategorien, ryddes et driftssted, der ikke længere er blandt
+  valgene.
+
 ## Version 0.7.4
 
 ### Ændringer

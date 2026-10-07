@@ -1,5 +1,16 @@
 # Versionsnyheter
 
+## Version 0.7.5
+
+### Ändringar
+
+- **En ny tjänst börjar med sitt första tågavsnitt.** **Ny tjänst** på fliken **Tjänster** öppnar nu
+  dialogen **Lägg till tågavsnitt** direkt, så att tjänsten genast får sin plats i diagrammet i stället för
+  att stå tom längst ned. Stängs dialogen utan att något avsnitt läggs till, blir ingen tom tjänst kvar.
+- **Lägg till tåg erbjuder bara platser där kategorin gör uppehåll.** I dialogen **Lägg till tåg** begränsas
+  från- och tilldriftplatserna till dem i den valda tågkategorins uppehållsmönster. En kategori utan
+  uppehållsmönster begränsar ingenting. Byts kategorin, töms en driftplats som inte längre finns bland valen.
+
 ## Version 0.7.4
 
 ### Ändringar

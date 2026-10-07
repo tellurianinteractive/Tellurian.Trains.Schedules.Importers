@@ -1,5 +1,17 @@
 # Versjonsnyheter
 
+## Versjon 0.7.5
+
+### Endringer
+
+- **En ny tjeneste begynner med sitt første togavsnitt.** **Ny tjeneste** på fanen **Tjenester** åpner nå
+  dialogen **Legg til togavsnitt** med en gang, slik at tjenesten straks får sin plass i diagrammet i stedet
+  for å stå tom nederst. Lukkes dialogen uten at et avsnitt legges til, blir ingen tom tjeneste liggende
+  igjen.
+- **Legg til tog tilbyr bare steder der kategorien stopper.** I dialogen **Legg til tog** er fra- og
+  tildriftsstedene begrenset til dem i den valgte togkategoriens stoppmønster. En kategori uten
+  stoppmønster begrenser ingenting. Byttes kategorien, tømmes et driftssted som ikke lenger er blant valgene.
+
 ## Versjon 0.7.4
 
 ### Endringer

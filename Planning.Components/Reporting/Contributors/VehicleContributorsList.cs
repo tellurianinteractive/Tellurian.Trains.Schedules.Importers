@@ -29,7 +29,7 @@ public static class VehicleContributorsList
             .ThenBy(vehicle => vehicle.Id)
             .Select(vehicle => new Item(
                 vehicle,
-                vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions),
+                vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions, plan.Layout.Settings.General.FirstSessionStart),
                 plan.ContributionFor(vehicle)))
             .ToList();
 

@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+## Version 0.7.5
+
+### Changes
+
+- **A new duty starts with its first train part.** **New duty** on the **Duties** tab now opens the
+  **Add train part** dialog straight away, so the duty takes its place in the chart at once instead of
+  sitting empty at the bottom. Closing the dialog without adding a part leaves no empty duty behind.
+- **Add train offers only places where the category stops.** In the **Add train** dialog, the from and to
+  locations are limited to those in the chosen train category's stop pattern. A category without a stop
+  pattern limits nothing. Changing the category clears a location that is no longer among the choices.
+
 ## Version 0.7.4
 
 ### Changes

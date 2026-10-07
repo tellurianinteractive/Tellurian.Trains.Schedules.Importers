@@ -321,6 +321,12 @@
   <data name="RunsOverMidnightHelp" xml:space="preserve">
     <value>Omfattar hela dygnet (00:00–23:59) så att tåg som kör över midnatt visas över hela dagen. Start- och sluttid låses då och inaktiveras.</value>
   </data>
+  <data name="FirstSessionStartTime" xml:space="preserve">
+    <value>Första köromgången börjar</value>
+  </data>
+  <data name="FirstSessionStartTimeHelp" xml:space="preserve">
+    <value>När banan körs över midnatt: modelltiden då den första köromgången eller dagen börjar. Varje fordon startar där det står vid denna tid, så som det visas under Fordonsägare och i rapporten Fordon och ägare.</value>
+  </data>
   <data name="StartTime" xml:space="preserve">
     <value>Starttid</value>
   </data>
@@ -2149,6 +2155,9 @@
   </data>
   <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
     <value>Tabellen över rangerbangårdar skrivs ut på bansidan sist i häftet. Skriv den på en egen rad för att i stället placera den i texten:</value>
+  </data>
+  <data name="LanguageTagsHint" xml:space="preserve">
+    <value>För att skriva ett stycke på flera språk omsluter du varje version med en tagg för dess språk. Häftet skrivs då ut en gång per använt språk, standardspråket först: ett stycke som saknar version på ett språk skrivs ut på standardspråket, och text utan tagg skrivs ut i alla häften. Till exempel:</value>
   </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Godsbetjänas från</value>

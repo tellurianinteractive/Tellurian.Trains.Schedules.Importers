@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -238,6 +239,52 @@ public class VehicleOwnershipTests
 
         Assert.IsTrue(loco.Start(useDays: false, maxSessions: 4)!.IsEverySession, "Two schedules between them work all four.");
         Assert.IsFalse(loco.Start(useDays: false, maxSessions: 5)!.IsEverySession, "Nothing on session 5.");
+    }
+
+    [TestMethod]
+    public void AVehicleStartsAtItsFirstPartFromWhenTheFirstSessionBegins()
+    {
+        var (plan, loco) = PlanWithRoundTrip();
+
+        var start = loco.Start(useDays: false, maxSessions: 7, TimeSpan.FromHours(12.5));
+
+        Assert.IsNotNull(start);
+        Assert.AreEqual(1, start.FirstPosition);
+        Assert.AreEqual(Return(plan), start.FirstPart.Train, "The 12:00 departure is before the meeting begins.");
+    }
+
+    [TestMethod]
+    public void AVehicleWorkingNothingAfterTheFirstSessionBeginsStartsOnTheNextSession()
+    {
+        var (plan, loco) = PlanWithRoundTrip();
+
+        var start = loco.Start(useDays: false, maxSessions: 7, TimeSpan.FromHours(14));
+
+        Assert.IsNotNull(start);
+        Assert.AreEqual(2, start.FirstPosition);
+        Assert.AreEqual(Forward(plan), start.FirstPart.Train);
+    }
+
+    [TestMethod]
+    public void TheFirstSessionStartTimeCountsOnlyWhenRunningOverMidnight()
+    {
+        var general = new GeneralSettings { FirstSessionStartTime = TimeSpan.FromHours(6) };
+        Assert.AreEqual(TimeSpan.Zero, general.FirstSessionStart);
+
+        general.RunsOverMidnight = true;
+        Assert.AreEqual(TimeSpan.FromHours(6), general.FirstSessionStart);
+    }
+
+    // A loco working the 12:00 out and the 13:00 back every day of the week.
+    private static (Plan Plan, ScheduledObject Loco) PlanWithRoundTrip()
+    {
+        var plan = CreatePlan();
+        var schedule = plan.CreateSchedule();
+        schedule.Append(Forward(plan).AsTrainPart);
+        schedule.Append(Return(plan).AsTrainPart);
+        var loco = Loco(plan);
+        plan.AssignVehicle(schedule, loco, Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6, 7));
+        return (plan, loco);
     }
 
     [TestMethod]

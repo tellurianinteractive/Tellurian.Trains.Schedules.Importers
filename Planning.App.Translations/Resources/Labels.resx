@@ -321,6 +321,12 @@
   <data name="RunsOverMidnightHelp" xml:space="preserve">
     <value>Span the whole day (00:00–23:59) so services running past midnight are graphed across the full day. The start and end times are then fixed and disabled.</value>
   </data>
+  <data name="FirstSessionStartTime" xml:space="preserve">
+    <value>First session starts</value>
+  </data>
+  <data name="FirstSessionStartTimeHelp" xml:space="preserve">
+    <value>When the layout runs over midnight, the fast-clock time the first session or day begins. Every vehicle starts where it stands at this time, as shown under Vehicle owners and in the Vehicle contributors report.</value>
+  </data>
   <data name="StartTime" xml:space="preserve">
     <value>Start time</value>
   </data>
@@ -2163,6 +2169,9 @@
   </data>
   <data name="ShuntingYardsPlaceholderHint" xml:space="preserve">
     <value>The shunting yards table is printed on the layout page at the back of the booklet. To place it in the text instead, write it on a line of its own:</value>
+  </data>
+  <data name="LanguageTagsHint" xml:space="preserve">
+    <value>To write a passage in several languages, enclose each version in a tag for its language. The booklet is then printed once per language used, the default language first: a passage with no version in a language is printed in the default language, and untagged text is printed in every booklet. For example:</value>
   </data>
   <data name="CargoServedFrom" xml:space="preserve">
     <value>Cargo served from</value>

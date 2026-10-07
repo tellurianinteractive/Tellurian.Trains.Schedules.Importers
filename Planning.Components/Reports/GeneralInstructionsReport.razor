@@ -1,6 +1,7 @@
 @page "/general-instructions-report"
 @layout PrintLayout
 
+@using System.Globalization
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Instructions
 @* Planning.Components.Layout is a namespace here, so the model type needs disambiguating. *@
 @using LayoutModel = Tellurian.Trains.Schedules.Model.Layouts.Layout
@@ -27,9 +28,14 @@
    which a long yard list would otherwise push past the foot of.
 
    An <Interchanges/> tag works the same way but has no fixed home to be moved from: the stations where
-   passengers change trains are printed where the author placed the tag, and nowhere at all otherwise. *@
+   passengers change trains are printed where the author placed the tag, and nowhere at all otherwise.
 
-@if (_sheets is null)
+   The programme and the instructions may be written in several languages with language tags, such as
+   [sv]Svensk text[/sv][nb]Norsk tekst[/nb] (see InstructionsLanguages). The whole booklet is then printed
+   once per language tagged, the layout's default language first; without tags it is printed once, in
+   the default language. *@
+
+@if (_booklets is null)
 {
     <DisplayedMessage ResourceKey="CreatingReport" />
 }
@@ -40,32 +46,42 @@ else
         <p class="hint">@Translator("BookletPrintingHint")</p>
     </div>
 
-    UseReportCulture(DefaultCulture);
-    <CascadingValue Value="DefaultCulture">
-        @foreach (var side in _sheets)
+    @* One whole booklet per language, each imposed on its own and printed in its own language. *@
+    @foreach (var booklet in _booklets)
+    {
+        if (_booklets.Count > 1)
         {
-            <A4LPage>
-                <div class="dutysheet">
-                    <InstructionsBookletPage Page="side.Left" Layout="Layout" Program="@Program"
-                                             PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
-                    <InstructionsBookletPage Page="side.Right" Layout="Layout" Program="@Program"
-                                             PrintDate="_printDate" ShowShuntingYards="_showShuntingYards" />
-                </div>
-            </A4LPage>
+            <div class="no-print sheet-index">
+                <h3>@booklet.LanguageName</h3>
+            </div>
         }
-    </CascadingValue>
+        UseReportCulture(booklet.Culture);
+        <CascadingValue Value="booklet.Culture">
+            @foreach (var side in booklet.Sheets)
+            {
+                <A4LPage>
+                    <div class="dutysheet">
+                        <InstructionsBookletPage Page="side.Left" Layout="Layout" Program="@booklet.Program"
+                                                 PrintDate="_printDate" ShowShuntingYards="booklet.ShowShuntingYards" />
+                        <InstructionsBookletPage Page="side.Right" Layout="Layout" Program="@booklet.Program"
+                                                 PrintDate="_printDate" ShowShuntingYards="booklet.ShowShuntingYards" />
+                    </div>
+                </A4LPage>
+            }
+        </CascadingValue>
+    }
 }
 
 @code {
-    private IReadOnlyList<SheetSide<InstructionsPage>>? _sheets;
+    private IReadOnlyList<Booklet>? _booklets;
     private DateOnly _printDate;
-    private bool _showShuntingYards = true;
+
+    /// <summary>The booklet in one language: its culture, programme, sheets, and where the yards go.</summary>
+    private sealed record Booklet(
+        ReportCulture Culture, string LanguageName, string Program,
+        IReadOnlyList<SheetSide<InstructionsPage>> Sheets, bool ShowShuntingYards);
 
     private LayoutModel? Layout => ScheduleState.Layout;
-    private string? Program => ScheduleState.Schedule?.Program;
-
-    private ReportCulture? DefaultCulture =>
-        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,17 +91,42 @@ else
         // Fixed once for the whole render, so a PDF printed later still identifies the render it came from.
         _printDate = DateOnly.FromDateTime(DateTime.Now);
 
+        var program = ScheduleState.Schedule?.Program;
         var instructions = ScheduleState.Schedule?.GeneralInstructions;
+        if (Layout is not { } layout) { _booklets = []; return; }
+
+        // Without language tags this is the default language alone: one booklet, as it always was.
+        var defaultLanguage = layout.DefaultLanguage;
+        var languages = InstructionsLanguages.BookletLanguages(defaultLanguage, LanguageService.IsSupported, program, instructions);
+        _booklets = [.. languages.Select(language => BookletIn(layout, language, defaultLanguage, program, instructions))];
+    }
+
+    private static Booklet BookletIn(LayoutModel layout, string language, string defaultLanguage, string? program, string? instructions)
+    {
+        var culture = layout.ReportCultureIn(language);
+        var text = InstructionsLanguages.Resolve(instructions, language, defaultLanguage);
 
         // The table goes where the author put it, and nowhere else: a booklet that printed it both in
-        // the text and again at the back would leave the reader wondering which one to trust.
-        _showShuntingYards = !InstructionsPlaceholders.Places(instructions, InstructionsPlaceholder.ShuntingYards);
+        // the text and again at the back would leave the reader wondering which one to trust. Decided
+        // per language, since the tag may sit inside one language's version of a passage.
+        var showShuntingYards = !InstructionsPlaceholders.Places(text, InstructionsPlaceholder.ShuntingYards);
 
-        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
+        using var scope = ReportCulture.Use(culture);
         var pages = InstructionsPagination.BuildPages(
-            instructions,
-            shuntingYards: Layout?.ShuntingYards,
-            passengerInterchanges: Layout?.PassengerInterchanges);
-        _sheets = BookletImposition.Impose(pages);
+            text,
+            shuntingYards: layout.ShuntingYards,
+            passengerInterchanges: layout.PassengerInterchanges);
+        return new(
+            new ReportCulture(culture), LanguageNameOf(language),
+            InstructionsLanguages.Resolve(program, language, defaultLanguage),
+            BookletImposition.Impose(pages), showShuntingYards);
+    }
+
+    // The language's own name for itself, for the on-screen heading above its booklet.
+    private static string LanguageNameOf(string language)
+    {
+        var culture = CultureInfo.GetCultureInfo(language);
+        var name = culture.NativeName;
+        return name.Length > 0 ? char.ToUpper(name[0], culture) + name[1..] : language;
     }
 }
