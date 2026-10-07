@@ -235,7 +235,7 @@
         _tractionType = Enum.TryParse<TractionType>(e.Value?.ToString(), out var t) ? t : _tractionType;
 
     private void AddWagon() =>
-        _wagons.Add(new Wagon { Class = string.Empty, Position = _wagons.Count + 1, IsCargo = true });
+        _wagons.Add(new Wagon { Class = string.Empty, Position = _wagons.Count + 1, IsPassenger = true });
 
     private void MoveWagon(int index, int delta)
     {

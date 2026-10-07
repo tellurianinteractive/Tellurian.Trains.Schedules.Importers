@@ -12,7 +12,9 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties;
 /// </remarks>
 public sealed class TrainPartCargoData
 {
-    /// <summary>The cargo flows, ordered by position in the rake and then by session.</summary>
+    /// <summary>
+    /// The cargo rows, ordered by the station the wagons are coupled at and then by position in the rake.
+    /// </summary>
     public IReadOnlyList<TrainPartCargoFlow> Flows { get; init; } = [];
 
     /// <summary>How the sessions column is rendered.</summary>
@@ -44,39 +46,54 @@ public sealed class TrainPartCargoData
 public sealed record DestinationMaxLoad(string? Location, TrainCapacity Capacity);
 
 /// <summary>
-/// One row of the cargo block: a whole <see cref="CargoFlowTrainPart"/>, not one destination.
+/// One row of the cargo block: the <see cref="CargoFlowTrainPart"/>s coupled at one station into one
+/// position in the train, not one destination.
 /// </summary>
 /// <remarks>
 /// A flow's destinations belong together as a single statement of where these wagons go, and the flow is
 /// also what carries the per-occurrence behaviour the row must show — position, shunting, and whether
 /// wagons are taken here at all.
+///
+/// Flows coupled at the same station into the same position are one unit of wagons standing together in
+/// the train, and are merged into one row the way the train compositions report merges them: each place
+/// named once, the regions gathered after all the places, and one limit for the whole unit — the sum of
+/// its destinations' limits. Printed as separate rows they would read as separate places in the rake.
 /// </remarks>
 public sealed class TrainPartCargoFlow
 {
-    /// <summary>The cargo flow this row describes.</summary>
-    public required CargoFlowTrainPart Flow { get; init; }
+    /// <summary>
+    /// The cargo flows this row describes: at least one, all coupled at the same station into the same
+    /// position in the train.
+    /// </summary>
+    public required IReadOnlyList<CargoFlowTrainPart> Flows { get; init; }
 
-    /// <summary>The sessions the flow runs, which are its train's.</summary>
-    public Sessions Sessions => Flow.Train.Sessions;
+    // The flows share the station, the position and the train, so any of them answers for those.
+    private CargoFlowTrainPart First => Flows[0];
+
+    /// <summary>The sessions the flows run, which are their train's.</summary>
+    public Sessions Sessions => First.Train.Sessions;
+
+    /// <summary>The flows' position in the rake; zero means anywhere in the train.</summary>
+    public int PositionInTrain => First.PositionInTrain;
 
     /// <summary>
-    /// The wagon's place in the rake, so the driver and conductor can find it. Zero means anywhere in
+    /// The wagons' place in the rake, so the driver and conductor can find them. Zero means anywhere in
     /// the train, which is stated as a word: a cell showing <c>0</c> would be read as a position at the
     /// front.
     /// </summary>
     /// <param name="anyText">The translated text for "anywhere in the train".</param>
     public string PositionText(string anyText) =>
-        Flow.PositionInTrain == 0 ? anyText : Flow.PositionInTrain.ToString();
+        PositionInTrain == 0 ? anyText : PositionInTrain.ToString();
 
     /// <summary>
-    /// Where the wagons come from: the flow's forwarded origins together with this station itself,
+    /// Where the wagons come from: the flows' forwarded origins together with this station itself,
     /// de-duplicated so a name never appears twice.
     /// </summary>
     /// <remarks>
     /// The from-station is included unless the flow brings no wagons from here — that flag removes
     /// exactly one of the two sources, never the whole column, since a flow that takes nothing on here
     /// may still be forwarding wagons from its origins. The de-duplication matters because an origin
-    /// list may already name the from-station.
+    /// list may already name the from-station, and merged flows each name it.
     ///
     /// A shunting task working arrived wagons out to the cargo customers is the exception: there the
     /// station is where the wagons stand, not where they came from — some earlier train brought them
@@ -91,14 +108,19 @@ public sealed class TrainPartCargoFlow
     /// <param name="anywhereText">The translated wording the globe carries as its label.</param>
     public MarkupString From(string alsoShuntText, string anywhereText)
     {
-        IEnumerable<string> names = Flow.CargoFlowOptions.Origins.Select(o => o.Location.Name);
-        if (!Flow.BringsNoWagonsFromHere && !TakesArrivedWagonsOut)
-            names = names.Append(Flow.From.OperationLocation.Name);
-        var html = string.Join(", ", names.Distinct().Select(WebUtility.HtmlEncode));
-        if (html.Length == 0 && TakesArrivedWagonsOut) html = AnywhereGlobe(anywhereText);
+        var html = string.Join(", ", Flows.SelectMany(OriginsOf).Distinct().Select(WebUtility.HtmlEncode));
+        if (html.Length == 0 && Flows.Any(TakesArrivedWagonsOut)) html = AnywhereGlobe(anywhereText);
         // The qualifier belongs beside the movement it qualifies, rather than in a column of its own
         // that would be empty on most rows.
-        return new(Flow.AlsoShuntBeforeDeparture ? $"{html}, {alsoShuntText}" : html);
+        return new(Flows.Any(flow => flow.AlsoShuntBeforeDeparture) ? $"{html}, {alsoShuntText}" : html);
+    }
+
+    // Where one flow's wagons come from: its forwarded origins, and its from-station unless it brings
+    // nothing from there or the station is only where arrived wagons stand.
+    private static IEnumerable<string> OriginsOf(CargoFlowTrainPart flow)
+    {
+        foreach (var origin in flow.CargoFlowOptions.Origins) yield return origin.Location.Name;
+        if (!flow.BringsNoWagonsFromHere && !TakesArrivedWagonsOut(flow)) yield return flow.From.OperationLocation.Name;
     }
 
     /// <summary>
@@ -121,7 +143,7 @@ public sealed class TrainPartCargoFlow
     }
 
     /// <summary>
-    /// Whether the row is a shunting task's flow of wagons that arrived at the worked station and are
+    /// Whether a flow is a shunting task's flow of wagons that arrived at the worked station and are
     /// taken out to its cargo customers — the case where the from-station is not an origin.
     /// </summary>
     /// <remarks>
@@ -129,23 +151,36 @@ public sealed class TrainPartCargoFlow
     /// direction of the working from where the flow's wagons are bound; the guard on the train keeps it
     /// from being consulted for a travelling train, where it means nothing.
     /// </remarks>
-    private bool TakesArrivedWagonsOut =>
-        Flow.Train.IsShuntingTask && Flow.ShuntingWork == ShuntingWork.ToCargoCustomers;
+    private static bool TakesArrivedWagonsOut(CargoFlowTrainPart flow) =>
+        flow.Train.IsShuntingTask && flow.ShuntingWork == ShuntingWork.ToCargoCustomers;
 
     /// <summary>
     /// Where the wagons go, with destination regions as the same coloured chips used in the cargo notes.
     /// How many may be brought is left out — that has a column of its own.
     /// </summary>
+    /// <remarks>
+    /// Each place is named once, in the order the flows name them, and the regions follow all the places,
+    /// each once: a region is the widest of destinations, and among the places it would read as one more
+    /// station. A flow to all destinations says everything the others could, so it stands alone.
+    /// </remarks>
     /// <param name="alsoShuntText">Appended when the driver also shunts after arrival.</param>
     public MarkupString To(string alsoShuntText)
     {
         // The from-station is left out of the destinations (see StatedDestinations), which can leave
         // nothing but the qualifier to print.
-        var text = Flow.ToHtml;
-        return new(Flow.AlsoShuntAfterArrival && !Flow.BringsNoWagonsFromHere
+        var text = Flows.FirstOrDefault(flow => flow.CargoFlowOptions.ToAllDestinations) is { } toAll
+            ? toAll.ToHtml
+            : string.Join(", ", Places.Concat(Regions));
+        return new(Flows.Any(flow => flow.AlsoShuntAfterArrival && !flow.BringsNoWagonsFromHere)
             ? text.Length == 0 ? alsoShuntText : $"{text}, {alsoShuntText}"
             : text);
     }
+
+    private IEnumerable<string> Places =>
+        Destinations.DistinctBy(d => d.PlaceTextWithoutRegions).Select(d => d.PlaceHtmlWithoutRegions.Value);
+
+    private IEnumerable<string> Regions =>
+        Destinations.SelectMany(d => d.StatedRegions).DistinctBy(region => region.Name).Select(region => region.ToHtml.Value);
 
     /// <summary>
     /// How much may be brought, one entry per limit the row states. Empty when the row limits nothing.
@@ -153,16 +188,31 @@ public sealed class TrainPartCargoFlow
     /// <remarks>
     /// A figure standing on its own says "this is what the row may carry", so it may only stand alone
     /// when that is true: one destination, or every destination carrying the same limit. Where the
-    /// destinations differ — or where only some of them are limited at all — each figure is named,
-    /// because an unnamed one would be read as applying to the whole row.
+    /// destinations of a single flow differ — or where only some of them are limited at all — each figure
+    /// is named, because an unnamed one would be read as applying to the whole row.
+    ///
+    /// Merged flows are one unit in the train, and their limit is summed instead, as the train
+    /// compositions report sums it: figure by figure, the same place under the same limit counting once.
+    /// A destination taking any number in some respect leaves the unit unlimited in it, so a figure only
+    /// some of them state is not a total and is dropped.
     /// </remarks>
     public IReadOnlyList<DestinationMaxLoad> MaxLoads
     {
         get
         {
-            var destinations = Flow.StatedDestinations.ToList();
+            if (Flows.Any(flow => flow.CargoFlowOptions.ToAllDestinations)) return [];
+            var destinations = Destinations.ToList();
             var limited = destinations.Where(destination => destination.HasMaxLoad).ToList();
             if (limited.Count == 0) return [];
+
+            if (Flows.Count > 1)
+            {
+                var sum = destinations
+                    .DistinctBy(d => (d.PlaceTextWithoutRegions, d.MaxNumberOfAxles, d.MaxNumberOfWagons))
+                    .Select(d => d.MaxLoad)
+                    .Aggregate((first, second) => new TrainCapacity(first.Axles + second.Axles, first.Wagons + second.Wagons, null));
+                return sum.Axles is null && sum.Wagons is null ? [] : [new(null, sum)];
+            }
 
             var first = limited[0];
             var isRowLimit =
@@ -177,9 +227,27 @@ public sealed class TrainPartCargoFlow
     }
 
     /// <summary>
-    /// The UIC wagon-class letters limiting which wagons the flow brings. An empty cell means no
+    /// The UIC wagon-class letters limiting which wagons the flows bring. An empty cell means no
     /// restriction, printed as nothing rather than "all" or a dash: an absent restriction says more by
     /// being absent than by being spelled out on every row.
     /// </summary>
-    public string WagonClasses => Flow.CargoFlowOptions.OnlyWagonClasses;
+    /// <remarks>
+    /// Merged flows bring the classes of all of them, so their letters are united — and a flow
+    /// restricted to no class leaves the row unrestricted.
+    /// </remarks>
+    public string WagonClasses
+    {
+        get
+        {
+            var classes = Flows.Select(flow => flow.CargoFlowOptions.OnlyWagonClasses).Distinct().ToList();
+            if (classes.Count == 1) return classes[0];
+            if (classes.Any(string.IsNullOrWhiteSpace)) return string.Empty;
+            return string.Join(",", classes
+                .SelectMany(letters => letters.Split([',', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                .Distinct(StringComparer.OrdinalIgnoreCase));
+        }
+    }
+
+    // The destinations of all the flows, in the order the flows name them.
+    private IEnumerable<Destination> Destinations => Flows.SelectMany(flow => flow.StatedDestinations);
 }

@@ -103,6 +103,7 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     void IJsonOnDeserialized.OnDeserialized()
     {
         this.RebuildStationCalls();
+        this.PlaceTimesAfterMidnight();
         this.ResolveCatalogueReferences();
         this.RebuildTrainCategories();
         Layout.EnsurePlatforms();
@@ -213,6 +214,60 @@ public static class TimetableExtensions
         timetable = timetable.ValueOrException(nameof(timetable));
         foreach (var track in timetable.Layout.OperationLocations.SelectMany(l => l.Tracks)) track.Calls.Clear();
         foreach (var call in timetable.Trains.SelectMany(t => t.Calls)) call.Track.Add(call);
+    }
+
+    /// <summary>
+    /// Puts the times of every train running past midnight on the day they belong to: a time after
+    /// midnight is stored on the next day (24:10 as <c>1.00:10</c>), which is what keeps it after the
+    /// times before midnight wherever calls are ordered by time. Only done when the layout runs over
+    /// midnight (<see cref="Settings.GeneralSettings.RunsOverMidnight"/>). Idempotent.
+    /// </summary>
+    /// <remarks>
+    /// Plans edited before times were entered on the right day hold after-midnight times on the first
+    /// day, so such a train's last calls sort before its first. The calls cannot tell their run order,
+    /// so it is recovered from the clock: a train runs for less than a day, so its times leave one gap
+    /// on the clock longer than any other — the time it does not run — and it starts at the end of that
+    /// gap. Every time earlier than the start goes on the next day; the start itself is always before
+    /// midnight.
+    /// </remarks>
+    /// <param name="timetable">The timetable whose trains to put on the right day.</param>
+    public static void PlaceTimesAfterMidnight(this Timetable timetable)
+    {
+        timetable = timetable.ValueOrException(nameof(timetable));
+        if (timetable.Layout?.Settings?.General?.RunsOverMidnight != true) return;
+        foreach (var train in timetable.Trains) PlaceTimesAfterMidnight(train);
+    }
+
+    private static readonly TimeSpan OneDay = TimeSpan.FromDays(1);
+
+    private static TimeSpan ClockTime(Time time) =>
+        TimeSpan.FromTicks(((time.Value.Ticks % OneDay.Ticks) + OneDay.Ticks) % OneDay.Ticks);
+
+    private static void PlaceTimesAfterMidnight(Train train)
+    {
+        var clock = train.Calls.SelectMany(c => new[] { ClockTime(c.Arrival), ClockTime(c.Departure) }).Distinct().Order().ToArray();
+        if (clock.Length == 0) return;
+        // The gap round midnight is the one to beat, so a train within one day keeps every time on it.
+        var start = clock[0];
+        var longestGap = clock[0] + OneDay - clock[^1];
+        for (var i = 1; i < clock.Length; i++)
+        {
+            var gap = clock[i] - clock[i - 1];
+            if (gap > longestGap) (longestGap, start) = (gap, clock[i]);
+        }
+        foreach (var call in train.Calls)
+        {
+            var arrival = OnItsDay(call.Arrival);
+            if (arrival != call.Arrival) call.Arrival = arrival;
+            var departure = OnItsDay(call.Departure);
+            if (departure != call.Departure) call.Departure = departure;
+        }
+
+        Time OnItsDay(Time time)
+        {
+            var clockTime = ClockTime(time);
+            return Time.FromTimeSpan(clockTime < start ? clockTime + OneDay : clockTime);
+        }
     }
 
     /// <summary>

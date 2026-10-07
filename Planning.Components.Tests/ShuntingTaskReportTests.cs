@@ -148,7 +148,7 @@ public class ShuntingTaskReportTests
         var cargo = dutyPart.CargoData;
 
         Assert.IsTrue(cargo.HasData);
-        Assert.AreSame(flow, cargo.Flows.Single().Flow);
+        Assert.AreSame(flow, cargo.Flows.Single().Flows.Single());
     }
 
     [TestMethod]
@@ -156,7 +156,7 @@ public class ShuntingTaskReportTests
     {
         var (timetable, task, station) = Arrange();
         // Destination is the worked station, so these wagons arrived here and go out to its customers.
-        var row = new TrainPartCargoFlow { Flow = AddFlow(timetable, task, station) };
+        var row = new TrainPartCargoFlow { Flows = [AddFlow(timetable, task, station)] };
 
         var html = FromCell(row);
 
@@ -175,7 +175,7 @@ public class ShuntingTaskReportTests
         flow.CargoFlowOptions.Origins.Add(new Origin { Location = timetable.Layout.OperationLocations.Last() });
 
         // Where the flow says where the wagons came from, that answers the column instead of the globe.
-        Assert.AreEqual("Stilkøbing", FromCell(new() { Flow = flow }));
+        Assert.AreEqual("Stilkøbing", FromCell(new() { Flows = [flow] }));
     }
 
     [TestMethod]
@@ -185,7 +185,7 @@ public class ShuntingTaskReportTests
         // Destination elsewhere, so the task gathers wagons from this station's customers.
         var flow = AddFlow(timetable, task, timetable.Layout.OperationLocations.Last());
 
-        Assert.AreEqual("Munkeröd", FromCell(new() { Flow = flow }));
+        Assert.AreEqual("Munkeröd", FromCell(new() { Flows = [flow] }));
     }
 
     // The From cell is markup, and the location names in it are encoded; decoding gives back the names

@@ -1,5 +1,38 @@
 # Versionsnyheter
 
+## Version 0.7.4
+
+### Ändringar
+
+- **Ett tjänstehäfte visar varje tåg en gång.** Där en tjänst delar upp ett tåg i flera avsnitt — för att
+  dragfordonet byts, eller vagnar kopplas till eller från på vägen — men lokföraren stannar på tåget hela
+  vägen, skriver häftet nu ut tåget en gång, från där föraren tar det till där föraren lämnar det, i stället
+  för en sida per avsnitt. Blocken för dragfordon och vagnsätt visar vilket fordon som går vilken del av
+  tåget.
+- **Godsvagnar som står tillsammans är en rad i ett tjänstehäfte.** Godsflöden som kopplas till vid samma
+  station på samma plats i tåget delar nu en rad i blocket med godsvagnar med fraktsedlar, på samma sätt
+  som tågsammansättningarna visar dem: varje plats nämns en gång, regionerna efter platserna, och en högsta
+  last för hela gruppen, summan av destinationernas. Raderna ordnas efter stationen där vagnarna kopplas
+  till, i den ordning tåget når dit, och sedan efter plats i tåget.
+- **Tågsammansättningar visar hela tåget där ett vagnsätt kopplas till.** Ett tåg får fortfarande en rad
+  bara där ett vagnsätt kopplas till eller godsflödesvagnar tas med, men raden visar nu varje vagnsätt som
+  tåget avgår med, även dem det redan har med sig, så att platserna för dem som kopplas till där blir
+  begripliga.
+- **Tågsammansättningar ramar in varje vagnsätt.** Ett vagnsätts omlopp och dess vagnar står nu tillsammans
+  i en skuggad ram, så att de läses som en grupp under ett omlopp i stället för att omloppet läses som
+  ännu ett vagnsätt bredvid dem.
+- **En högsta last per godsrektangel i tågsammansättningar.** En godsrektangel med flera destinationer
+  anger nu summan av deras högsta last en gång, sist, i stället för en siffra per destination.
+- **En vagn som läggs till ett vagnsätt är en personvagn.** En ny vagn i dialogen **Redigera fordon** är
+  nu från början en personvagn, inte en godsvagn.
+
+### Rättningar
+
+- **Tider efter midnatt hamnar på rätt dygn.** På en bana med **Kör över midnatt?** ikryssat hamnar en
+  tid efter midnatt som anges på ett tåg som går över midnatt — till exempel 00:10 som skrivs över
+  23:55 — nu på nästa dygn, så att tågets uppehåll står kvar i den ordning tåget går. Planer som sparats
+  tidigare med sådana tider rättas när de öppnas.
+
 ## Version 0.7.3
 
 ### Ändringar

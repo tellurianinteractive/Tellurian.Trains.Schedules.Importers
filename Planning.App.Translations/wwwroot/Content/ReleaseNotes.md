@@ -1,5 +1,40 @@
 ﻿# Release notes
 
+## Version 0.7.4
+
+### Changes
+
+- **A driver duty booklet shows each train once.** Where a duty cuts a train into several parts —
+  because the traction unit changes, or wagons are coupled or uncoupled on the way — but the loco driver
+  stays on it throughout, the booklet now prints the train once, from where the driver takes it to where
+  they leave it, instead of a page per part. The traction unit and wagonset blocks show which vehicle
+  works which stretch of the train.
+- **Cargo wagons standing together are one row in a driver duty booklet.** Cargo flows coupled at the
+  same station into the same position in the train now share one row in the block of cargo wagons with
+  waybills, the way the train compositions show them: each place named once, the regions after the
+  places, and one maximum load for the whole group, the sum of its destinations' loads. The rows are
+  ordered by the station the wagons are coupled at, in the order the train gets there, and then by
+  position.
+- **Train compositions show the whole train where a wagonset is coupled.** A train still gets a row only
+  where a wagonset is coupled or cargo flow wagons are taken on, but the row now shows every wagonset the
+  train leaves with, those it already carries included, so the positions of the ones coupled there make
+  sense.
+- **Train compositions frame each wagonset.** The turnus of a wagonset and its wagons now stand together
+  in one shaded frame, so they read as one group under one turnus rather than the turnus as one more
+  wagonset beside them.
+- **One maximum load per cargo rectangle in train compositions.** A cargo rectangle with several
+  destinations now gives the sum of their maximum loads once, last, instead of one figure per
+  destination.
+- **A wagon added to a wagonset is a passenger wagon.** A new wagon in the **Edit vehicle** dialog is now
+  a passenger wagon to begin with, not a cargo wagon.
+
+### Fixes
+
+- **Times after midnight are put on the right day.** On a layout with **Runs over midnight?** ticked, a
+  time after midnight entered on a train that runs past it — 00:10 entered over 23:55, say — now goes on
+  the next day, so the train's calls stay in running order. Plans saved earlier with such times are put
+  right when they are opened.
+
 ## Version 0.7.3
 
 ### Changes

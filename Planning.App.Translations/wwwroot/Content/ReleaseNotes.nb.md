@@ -1,5 +1,37 @@
 # Versjonsnyheter
 
+## Versjon 0.7.4
+
+### Endringer
+
+- **Et tjenestehefte viser hvert tog én gang.** Der en tjeneste deler et tog opp i flere avsnitt — fordi
+  trekkraftenheten byttes, eller vogner kobles til eller fra underveis — men lokføreren blir på toget hele
+  veien, skriver heftet nå ut toget én gang, fra der føreren tar det til der føreren forlater det, i stedet
+  for én side per avsnitt. Blokkene for trekkraftenheter og vognsett viser hvilket kjøretøy som går hvilken
+  del av toget.
+- **Godsvogner som står sammen, er én rad i et tjenestehefte.** Godsstrømmer som kobles til på samme
+  stasjon på samme plass i toget, deler nå én rad i blokken med godsvogner med fraktbrev, slik
+  togsammensetningene viser dem: hvert sted nevnt én gang, regionene etter stedene og én største last for
+  hele gruppen, summen av destinasjonenes. Radene ordnes etter stasjonen der vognene kobles til, i den
+  rekkefølgen toget kommer dit, og deretter etter plass.
+- **Togsammensetninger viser hele toget der et vognsett kobles til.** Et tog får fortsatt bare en rad der
+  et vognsett kobles til eller godsstrømvogner tas med, men raden viser nå hvert vognsett toget går med,
+  også dem det allerede har med seg, slik at plassene til dem som kobles til der, gir mening.
+- **Togsammensetninger rammer inn hvert vognsett.** Et vognsetts omløp og vognene står nå sammen i én
+  skyggelagt ramme, slik at de leses som én gruppe under ett omløp i stedet for at omløpet leses som enda
+  et vognsett ved siden av dem.
+- **Én største last per godsrektangel i togsammensetninger.** Et godsrektangel med flere destinasjoner
+  angir nå summen av deres største last én gang, til slutt, i stedet for ett tall per destinasjon.
+- **En vogn som legges til et vognsett, er en personvogn.** En ny vogn i dialogen **Rediger kjøretøy** er
+  nå i utgangspunktet en personvogn, ikke en godsvogn.
+
+### Feilrettinger
+
+- **Tider etter midnatt havner på riktig døgn.** På en bane med **Går over midnatt?** krysset av havner en
+  tid etter midnatt som skrives inn på et tog som går over midnatt — for eksempel 00:10 skrevet over
+  23:55 — nå på neste døgn, slik at togets opphold blir stående i den rekkefølgen toget kjører. Planer som
+  er lagret tidligere med slike tider, rettes når de åpnes.
+
 ## Versjon 0.7.3
 
 ### Endringer

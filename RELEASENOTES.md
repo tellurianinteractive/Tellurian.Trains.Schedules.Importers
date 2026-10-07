@@ -268,6 +268,14 @@
   exceeds the minimum, and a printed graph that grows taller than a sheet is squeezed by the same rule as
   before.
 
+- **Times after midnight are stored on the next day.** With `GeneralSettings.RunsOverMidnight` set, a train
+  running past midnight keeps its later times on the next day (24:10 as `1.00:10`), which is what keeps them
+  after the times before midnight wherever calls are ordered by time. New `Timetable.PlaceTimesAfterMidnight()`
+  restores this for plans that hold such times on the first day: a train runs for less than a day, so the
+  longest gap on the clock is when it does not run, and every time before the end of that gap moves to the next
+  day. It is idempotent, does nothing unless the layout runs over midnight, and runs on deserialisation and in
+  `Plan.Reconcile`.
+
 ### Breaking Changes
 
 - **`SignalControlledLocation.ControlledBy` moved to `OperationLocation`.** Source using it through a

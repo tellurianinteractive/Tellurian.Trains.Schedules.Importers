@@ -7,9 +7,10 @@
    CompositionPaginator fits rows to pages from CompositionPageGeometry, and every size below that it counts
    with is pinned here: the heading box of 17 mm plus its 3 mm margin (HeadingHeightMm 20), the column-header
    row (ColumnHeaderHeightMm), the row's 1 mm padding and rule (RowChromeHeightMm), the 5 mm text line, the
-   column widths (FixedColumnsWidthMm 42), the loco rectangle's chrome (LocoChromeWidthMm), the gaps between groups, the one-line 6.1 mm wagon rectangle with
-   its padding, border, type sizes and 1 mm gaps, the 8 mm narrowest rectangle, and the cargo rectangle with
-   its 4.5 mm lines. Change one and remeasure the other.
+   column widths (FixedColumnsWidthMm 42), the loco rectangle's chrome (LocoChromeWidthMm), the gaps between groups,
+   the 6.1 mm line of rectangles, the wagonset frame's 0.6 mm border and padding (WagonsetFrameMm) round its
+   4.9 mm wagons and turnus, the wagon's side padding, border, type sizes and 1 mm gaps, the turnus's side padding
+   (TurnusChromeWidthMm), the 8 mm narrowest rectangle, and the cargo rectangle with its 4.5 mm lines. Change one and remeasure the other.
 
    Every rectangle is as wide as what it holds, which is why no rectangle is given a width here: the estimate
    works the same width out from the text, and a width set in CSS would be the one the browser used and the
@@ -198,51 +199,59 @@ table.compositions {
         min-width: 0;
     }
 
+    /* A shaded frame round the turnus and every wagon of the rake, so they read as one group under one turnus
+       number rather than the turnus as a further wagonset beside them. As tall as the loco on one line; its
+       wagons are the frame's border and padding shorter, and wrap within it. Its lines keep to the top where a
+       taller group beside it stretches the frame. */
     .wagonset {
         display: flex;
         flex-wrap: wrap;
+        align-content: flex-start;
         gap: 1mm;
+        box-sizing: border-box;
+        min-width: 8mm;
+        border: 0.3mm solid #000;
+        border-radius: 1mm;
+        padding: 0.3mm;
+        background: #ddd;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
 
-        /* The turnus card the rake belongs to: a wagon-sized rectangle, shaded so it reads as a name rather
-           than as a wagon, with the sessions beside it where the rake is in the train on only some. */
+        /* The turnus card the rake belongs to: no border of its own, on the frame's shading, so it reads as a
+           name rather than as a wagon, with the sessions beside it where the rake is in the train on only some. */
         .turnus {
             display: flex;
             flex: 0 0 auto;
             align-items: center;
             gap: 1mm;
             box-sizing: border-box;
-            height: 6.1mm;
-            min-width: 8mm;
-            border: 0.3mm solid #000;
-            border-radius: 1mm;
-            padding: 0.5mm 1.2mm;
-            background: #ddd;
+            height: 4.9mm;
+            padding: 0 0.9mm;
             font-size: 7.5pt;
-            line-height: 4.5mm;
+            line-height: 4.3mm;
             white-space: nowrap;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
 
             .designation {
                 font-weight: 700;
             }
         }
 
-        /* One line, class and number side by side, as tall as a one-line cargo rectangle so the two line up.
-           As wide as its text rather than a fixed width, so a long wagon number is never cut short; the
-           estimate charges the text by the character, biased high. */
+        /* One line, class and number side by side, white against the frame's shading. As wide as its text
+           rather than a fixed width, so a long wagon number is never cut short; the estimate charges the text
+           by the character, biased high. */
         .wagon {
             display: flex;
             flex: 0 0 auto;
             align-items: baseline;
             gap: 1mm;
             box-sizing: border-box;
-            height: 6.1mm;
+            height: 4.9mm;
             min-width: 8mm;
             border: 0.3mm solid #000;
-            border-radius: 1mm;
-            padding: 0.5mm 1.2mm;
-            line-height: 4.5mm;
+            border-radius: 0.7mm;
+            padding: 0 1.2mm;
+            background: #fff;
+            line-height: 4.3mm;
             white-space: nowrap;
 
             .class {

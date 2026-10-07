@@ -176,8 +176,26 @@ public class TrainCompositionTests
 
         var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
 
-        CollectionAssert.AreEqual(new[] { "End", "Middle 4■", "East" },
+        CollectionAssert.AreEqual(new[] { "End", "Middle", "East" },
+            cargo.Destinations.Select(destination => destination.Text).ToArray(),
+            "End takes any number, so the unit as a whole is not limited.");
+    }
+
+    [TestMethod]
+    public void TheLimitsOfOneUnitAreAddedAndFollowTheRegions()
+    {
+        var fixture = CreateFixture();
+        fixture.Middle.Regions.Add(fixture.End.Regions.Single());
+        AddFlow(fixture, 0, 2, 1,
+            new Destination { Location = fixture.End, AndRegions = true, MaxNumberOfWagons = 4 },
+            new Destination { Location = fixture.Middle, AndRegions = true, MaxNumberOfWagons = 4 });
+
+        var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
+
+        CollectionAssert.AreEqual(new[] { "End", "Middle", "East 8■" },
             cargo.Destinations.Select(destination => destination.Text).ToArray());
+        Assert.IsNull(cargo.Destinations[0].Limit.Wagons);
+        Assert.AreEqual(8, cargo.Destinations[2].Limit.Wagons, "The total is drawn last, after the regions.");
     }
 
     [TestMethod]
@@ -269,15 +287,41 @@ public class TrainCompositionTests
     public void AWagonsetIsListedOnlyWhereItIsCoupledToTheTrain()
     {
         var fixture = CreateFixture();
+        AddWagonset(fixture, null, "A");
+
+        Assert.IsEmpty(DeparturesAt(fixture, fixture.Middle),
+            "The rake coupled at Start only runs on with the train at Middle; nothing is made up for it there.");
+    }
+
+    [TestMethod]
+    public void WhereARakeIsCoupledTheRakesTheTrainAlreadyCarriesAreDrawnToo()
+    {
+        var fixture = CreateFixture();
         var fromStart = AddWagonset(fixture, null, "A");
         var fromMiddle = AddWagonsetFrom(fixture, 1, null, "B");
+        PartOf(fixture, fromStart).WagonSetOptions = new WagonSetOptions { OrderInTrain = 1 };
+        PartOf(fixture, fromMiddle).WagonSetOptions = new WagonSetOptions { OrderInTrain = 2 };
 
         var atStart = DeparturesAt(fixture, fixture.Start).Single().Groups.Cast<WagonsetComposition>();
         var atMiddle = DeparturesAt(fixture, fixture.Middle).Single().Groups.Cast<WagonsetComposition>();
 
         CollectionAssert.AreEqual(new[] { fromStart }, atStart.Select(group => group.Wagonset).ToArray());
-        CollectionAssert.AreEqual(new[] { fromMiddle }, atMiddle.Select(group => group.Wagonset).ToArray(),
-            "The rake coupled at Start only runs on with the train at Middle; nothing is made up for it there.");
+        CollectionAssert.AreEqual(new[] { fromStart, fromMiddle }, atMiddle.Select(group => group.Wagonset).ToArray(),
+            "Without the rake from Start, the one coupled at Middle would read as the whole train.");
+    }
+
+    [TestMethod]
+    public void WhereCargoIsGatheredTheRakesTheTrainAlreadyCarriesAreDrawnToo()
+    {
+        var fixture = CreateFixture();
+        var fromStart = AddWagonset(fixture, null, "A");
+        PartOf(fixture, fromStart).WagonSetOptions = new WagonSetOptions { OrderInTrain = 1 };
+        AddFlow(fixture, 1, 2, 2, new Destination { Location = fixture.End });
+
+        var groups = DeparturesAt(fixture, fixture.Middle).Single().Groups;
+
+        Assert.AreEqual(fromStart, ((WagonsetComposition)groups[0]).Wagonset);
+        Assert.IsInstanceOfType<CargoPositionComposition>(groups[1]);
     }
 
     [TestMethod]
@@ -442,15 +486,15 @@ public class TrainCompositionTests
         WagonsetComposition Of(string? sessions) =>
             new() { Wagonset = wagonset, Wagons = [new CompositionWagon("B")], Position = 0, SessionsText = sessions };
 
-        Assert.AreEqual(geometry.WagonChromeWidthMm + (wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm),
+        Assert.AreEqual(geometry.TurnusChromeWidthMm + (wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm),
             CompositionPaginator.TurnusWidthMmOf(Of(null), geometry), 0.001);
         Assert.AreEqual(
-            geometry.WagonChromeWidthMm + (wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm) +
+            geometry.TurnusChromeWidthMm + (wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm) +
             geometry.WagonTextGapMm + (5 * geometry.CharacterWidthMm),
             CompositionPaginator.TurnusWidthMmOf(Of("1,3,5"), geometry), 0.001);
         Assert.AreEqual(
-            CompositionPaginator.TurnusWidthMmOf(Of(null), geometry) + geometry.WagonGapMm + geometry.RectangleMinWidthMm,
-            CompositionPaginator.WidthMmOf(Of(null), geometry), 0.001, "The turnus stands before the wagons, on the same line.");
+            (2 * geometry.WagonsetFrameMm) + CompositionPaginator.TurnusWidthMmOf(Of(null), geometry) + geometry.WagonGapMm + geometry.RectangleMinWidthMm,
+            CompositionPaginator.WidthMmOf(Of(null), geometry), 0.001, "The frame holds the turnus before the wagons, on the same line.");
     }
 
     [TestMethod]
@@ -468,13 +512,14 @@ public class TrainCompositionTests
         };
         // The turnus stands first on the line, and the wagons fill what it leaves.
         var turnus = CompositionPaginator.TurnusWidthMmOf(Of(0), geometry);
-        var perLine = (int)((geometry.CompositionWidthMm - turnus) / (width + geometry.WagonGapMm));
+        var perLine = (int)((geometry.CompositionWidthMm - (2 * geometry.WagonsetFrameMm) - turnus) / (width + geometry.WagonGapMm));
 
-        Assert.AreEqual(geometry.WagonHeightMm, CompositionPaginator.HeightMmOf(Of(perLine), geometry), 0.001);
+        Assert.AreEqual(geometry.WagonHeightMm, CompositionPaginator.HeightMmOf(Of(perLine), geometry), 0.001,
+            "On one line the frame is as tall as the loco.");
         Assert.AreEqual(geometry.CompositionWidthMm, CompositionPaginator.WidthMmOf(Of(perLine + 1), geometry), 0.001,
             "A wagonset too long for a line takes the whole width.");
-        Assert.AreEqual((2 * geometry.WagonHeightMm) + geometry.WagonGapMm,
-            CompositionPaginator.HeightMmOf(Of(perLine + 1), geometry), 0.001);
+        Assert.AreEqual((2 * geometry.WagonsetFrameMm) + (2 * geometry.FramedWagonHeightMm) + geometry.WagonGapMm,
+            CompositionPaginator.HeightMmOf(Of(perLine + 1), geometry), 0.001, "The wagons wrap within the frame.");
     }
 
     [TestMethod]
@@ -483,18 +528,18 @@ public class TrainCompositionTests
         var fixture = CreateFixture();
         AddFlow(fixture, 0, 2, 1,
             new Destination { Location = fixture.End, MaxNumberOfAxles = 16, MaxNumberOfWagons = 12 },
-            new Destination { Location = fixture.Middle });
+            new Destination { Location = fixture.Middle, MaxNumberOfWagons = 3 });
 
         var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
 
-        Assert.AreEqual("End 16● 12■", cargo.Destinations[0].Text, "The rectangle is sized for the limit too.");
-        Assert.AreEqual(16, cargo.Destinations[0].Limit.Axles);
-        Assert.AreEqual(12, cargo.Destinations[0].Limit.Wagons);
-        Assert.AreEqual("Middle", cargo.Destinations[1].Text, "A destination that takes any number says nothing.");
+        Assert.AreEqual("End", cargo.Destinations[0].Text);
+        Assert.AreEqual("Middle 15■", cargo.Destinations[1].Text, "The rectangle is sized for the limit too.");
+        Assert.IsNull(cargo.Destinations[1].Limit.Axles, "Middle takes any number of axles, so no total is stated.");
+        Assert.AreEqual(15, cargo.Destinations[1].Limit.Wagons);
     }
 
     [TestMethod]
-    public void OnePlaceUnderTwoDifferentLimitsStaysTwoLines()
+    public void OnePlaceUnderTwoDifferentLimitsAddsUp()
     {
         var fixture = CreateFixture();
         AddFlow(fixture, 0, 2, 1, new Destination { Location = fixture.End, MaxNumberOfWagons = 5 });
@@ -504,8 +549,8 @@ public class TrainCompositionTests
 
         var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
 
-        CollectionAssert.AreEqual(new[] { "End 5■", "End 8■" }, cargo.Destinations.Select(d => d.Text).ToArray(),
-            "The same place under the same limit is listed once; under another limit it is a line of its own.");
+        CollectionAssert.AreEqual(new[] { "End 13■" }, cargo.Destinations.Select(d => d.Text).ToArray(),
+            "The same place under the same limit counts once; under another limit it adds to the total.");
     }
 
     [TestMethod]

@@ -769,6 +769,7 @@ public static class PlanExtensions
         public Train? SetDeparture(StationCall call, Time departure)
         {
             ArgumentNullException.ThrowIfNull(call);
+            departure = OnTheDayOf(call.Departure, departure);
             return plan.ApplyCallTimes(call, call.Arrival, departure, MinutesBetween(call.Departure, departure), CallEditDirection.Forwards);
         }
 
@@ -794,6 +795,7 @@ public static class PlanExtensions
         public Train? SetArrival(StationCall call, Time arrival)
         {
             ArgumentNullException.ThrowIfNull(call);
+            arrival = OnTheDayOf(call.Arrival, arrival);
             return plan.ApplyCallTimes(call, arrival, call.Departure, MinutesBetween(call.Arrival, arrival), CallEditDirection.Backwards);
         }
 
@@ -1091,6 +1093,18 @@ public static class PlanExtensions
     // Which side of an edited call follows the change: a departure edit carries the rest of the run with it,
     // an arrival edit the run leading up to it.
     private enum CallEditDirection { Forwards, Backwards }
+
+    // A time is entered as a clock time, but a train running past midnight has its later times on the next
+    // day (24:10 is stored as 1.00:10), which is what keeps them after the times before midnight. The clock
+    // time is put on whichever day lies nearest the time it replaces, so 00:10 entered over 23:55 becomes
+    // 24:10, and 23:50 entered over 24:05 stays before midnight; a tie keeps the first day.
+    private static Time OnTheDayOf(Time current, Time entered)
+    {
+        var oneDay = TimeSpan.FromDays(1);
+        var clock = TimeSpan.FromTicks(((entered.Value.Ticks % oneDay.Ticks) + oneDay.Ticks) % oneDay.Ticks);
+        var nextDay = clock + oneDay;
+        return Time.FromTimeSpan((nextDay - current.Value).Duration() < (clock - current.Value).Duration() ? nextDay : clock);
+    }
 
     private static int MinutesBetween(Time from, Time to) =>
         (int)Math.Round((to.Value - from.Value).TotalMinutes);

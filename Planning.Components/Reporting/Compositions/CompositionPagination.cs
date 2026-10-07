@@ -80,7 +80,7 @@ public sealed record CompositionPageGeometry
     public double GroupGapHeightMm { get; init; } = 1.5;
 
     /// <summary>
-    /// Height of one wagon rectangle: a single line with the class and the number side by side, as tall as a
+    /// Height of one line of rectangles: the loco, and a wagonset frame with its wagons on one line, as tall as a
     /// one-line cargo rectangle.
     /// </summary>
     public double WagonHeightMm { get; init; } = 6.1;
@@ -107,6 +107,23 @@ public sealed record CompositionPageGeometry
 
     /// <summary>The space between two wagon rectangles, across and down.</summary>
     public double WagonGapMm { get; init; } = 1;
+
+    /// <summary>
+    /// What the shaded wagonset frame adds on each side of what it holds, across and down: its border and its
+    /// padding.
+    /// </summary>
+    /// <remarks>
+    /// The frame encloses the turnus and every wagon, so it reads as one group of wagons under one turnus number
+    /// rather than as a further wagonset beside them. It is as tall as the loco, so a wagon inside it is the
+    /// frame shorter.
+    /// </remarks>
+    public double WagonsetFrameMm { get; init; } = 0.6;
+
+    /// <summary>Height of one wagon rectangle inside a wagonset frame, and of the turnus beside it.</summary>
+    public double FramedWagonHeightMm => WagonHeightMm - (2 * WagonsetFrameMm);
+
+    /// <summary>What the turnus adds across to its text inside the frame: its side padding.</summary>
+    public double TurnusChromeWidthMm { get; init; } = 1.8;
 
     /// <summary>
     /// What the loco rectangle adds across to its text: its heavier border, its side padding, and the arrow at
@@ -254,8 +271,8 @@ public static class CompositionPaginator
     /// </summary>
     /// <remarks>
     /// This follows the browser's own wrapping of the groups, which is why every group has a width that is
-    /// known in advance: a cargo rectangle is as wide as its longest destination and a wagonset as wide as its
-    /// wagons laid side by side, neither narrower than a rectangle is drawn nor wider than the composition.
+    /// known in advance: a cargo rectangle is as wide as its longest destination and a wagonset frame as wide as
+    /// its turnus and wagons laid side by side, neither narrower than a rectangle is drawn nor wider than the composition.
     /// </remarks>
     /// <param name="groups">The groups, front first.</param>
     /// <param name="geometry">The page geometry to paginate against.</param>
@@ -297,9 +314,9 @@ public static class CompositionPaginator
     /// <param name="geometry">The page geometry to paginate against.</param>
     public static double HeightMmOf(CompositionGroup group, CompositionPageGeometry geometry) => group switch
     {
-        WagonsetComposition wagonset => WrappedHeightMm(
-            RectangleWidthsMmOf(wagonset, geometry).Select(width => (width, geometry.WagonHeightMm)),
-            WidthMmOf(wagonset, geometry), geometry.WagonGapMm, geometry.WagonGapMm),
+        WagonsetComposition wagonset => (2 * geometry.WagonsetFrameMm) + WrappedHeightMm(
+            RectangleWidthsMmOf(wagonset, geometry).Select(width => (width, geometry.FramedWagonHeightMm)),
+            WidthMmOf(wagonset, geometry) - (2 * geometry.WagonsetFrameMm), geometry.WagonGapMm, geometry.WagonGapMm),
         CargoPositionComposition cargo =>
             geometry.CargoChromeHeightMm + (LinesOf(cargo, ListOf(cargo), geometry) * geometry.DestinationLineHeightMm),
         ArrivingCargoComposition arriving =>
@@ -322,8 +339,8 @@ public static class CompositionPaginator
     }
 
     /// <summary>
-    /// The width of the shaded rectangle at the front of a wagonset naming its turnus: the designation, and
-    /// beside it the sessions where the wagonset is in the train on only some of them.
+    /// The width of the turnus at the front of a wagonset, inside its shaded frame: the designation, and beside
+    /// it the sessions where the wagonset is in the train on only some of them.
     /// </summary>
     /// <param name="wagonset">The wagonset.</param>
     /// <param name="geometry">The page geometry to paginate against.</param>
@@ -335,7 +352,7 @@ public static class CompositionPaginator
         var text = wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm;
         if (wagonset.SessionsText is { Length: > 0 } sessions)
             text += geometry.WagonTextGapMm + (sessions.Length * geometry.CharacterWidthMm);
-        return Math.Max(geometry.RectangleMinWidthMm, geometry.WagonChromeWidthMm + text);
+        return geometry.TurnusChromeWidthMm + text;
     }
 
     // The rectangles of a wagonset front first: the one naming its turnus, then its wagons.
@@ -359,9 +376,9 @@ public static class CompositionPaginator
         return Math.Max(geometry.RectangleMinWidthMm, geometry.WagonChromeWidthMm + text);
     }
 
-    // The rectangles of a wagonset laid side by side on one line, its turnus first.
+    // The rectangles of a wagonset laid side by side on one line, its turnus first, within the frame.
     private static double SideBySideMm(WagonsetComposition wagonset, CompositionPageGeometry geometry) =>
-        RectangleWidthsMmOf(wagonset, geometry).Sum() + (wagonset.Wagons.Count * geometry.WagonGapMm);
+        (2 * geometry.WagonsetFrameMm) + RectangleWidthsMmOf(wagonset, geometry).Sum() + (wagonset.Wagons.Count * geometry.WagonGapMm);
 
     // The height of items laid out the way the browser wraps a flex row: side by side until the next one does
     // not fit, then on a new line, each line as tall as its tallest item. At least one item goes on each line,

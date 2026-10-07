@@ -1,5 +1,37 @@
 # Versionsnyheder
 
+## Version 0.7.4
+
+### Ændringer
+
+- **Et tjenestehæfte viser hvert tog én gang.** Hvor en tjeneste deler et tog op i flere afsnit — fordi
+  trækkraftenheden skiftes, eller vogne kobles til eller fra undervejs — men lokomotivføreren bliver på
+  toget hele vejen, udskriver hæftet nu toget én gang, fra hvor føreren tager det, til hvor føreren
+  forlader det, i stedet for én side pr. afsnit. Blokkene for trækkraftenheder og vognsæt viser, hvilket
+  køretøj der kører hvilken del af toget.
+- **Godsvogne, der står sammen, er én række i et tjenestehæfte.** Godsstrømme, der kobles til på samme
+  station på samme plads i toget, deler nu én række i blokken med godsvogne med fragtbreve, på samme måde
+  som togsammensætningerne viser dem: hvert sted nævnt én gang, regionerne efter stederne og én største
+  last for hele gruppen, summen af destinationernes. Rækkerne ordnes efter den station, hvor vognene kobles
+  til, i den rækkefølge toget når frem, og derefter efter plads.
+- **Togsammensætninger viser hele toget, hvor et vognsæt kobles til.** Et tog får stadig kun en række,
+  hvor et vognsæt kobles til, eller godsstrømsvogne tages med, men rækken viser nu hvert vognsæt, toget
+  afgår med, også dem, det allerede har med, så pladserne for dem, der kobles til dér, giver mening.
+- **Togsammensætninger indrammer hvert vognsæt.** Et vognsæts omløb og dets vogne står nu sammen i én
+  skraveret ramme, så de læses som én gruppe under ét omløb i stedet for, at omløbet læses som endnu et
+  vognsæt ved siden af dem.
+- **Én største last pr. godsrektangel i togsammensætninger.** Et godsrektangel med flere destinationer
+  angiver nu summen af deres største last én gang, til sidst, i stedet for ét tal pr. destination.
+- **En vogn, der tilføjes et vognsæt, er en personvogn.** En ny vogn i dialogen **Rediger køretøj** er nu
+  fra starten en personvogn, ikke en godsvogn.
+
+### Fejlrettelser
+
+- **Tider efter midnat havner på det rigtige døgn.** På et anlæg med **Kører over midnat?** afkrydset
+  havner en tid efter midnat, der indtastes på et tog, som kører over midnat — f.eks. 00:10 skrevet over
+  23:55 — nu på det næste døgn, så togets ophold bliver stående i den rækkefølge, toget kører. Planer, der
+  er gemt tidligere med sådanne tider, rettes, når de åbnes.
+
 ## Version 0.7.3
 
 ### Ændringer

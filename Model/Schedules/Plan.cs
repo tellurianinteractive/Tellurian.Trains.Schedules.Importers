@@ -279,6 +279,7 @@ public static class PlanExtensions
             if (plan.Timetable is { } timetable)
             {
                 timetable.RebuildStationCalls();
+                timetable.PlaceTimesAfterMidnight();
                 timetable.ResolveCatalogueReferences();
                 timetable.RebuildTrainCategories();
                 timetable.Layout.RebuildRegions();

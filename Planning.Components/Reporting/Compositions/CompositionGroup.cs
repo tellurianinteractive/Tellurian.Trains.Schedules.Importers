@@ -23,8 +23,8 @@ public abstract record CompositionGroup
 }
 
 /// <summary>
-/// A wagonset coupled to the train: its turnus rectangle, followed by one rectangle per wagon in the order the
-/// wagons stand in the rake where it lists them.
+/// A wagonset coupled to the train: a shaded frame holding its turnus, followed by one rectangle per wagon in the
+/// order the wagons stand in the rake where it lists them.
 /// </summary>
 public sealed record WagonsetComposition : CompositionGroup
 {
@@ -51,8 +51,8 @@ public sealed record WagonsetComposition : CompositionGroup
     public string? SessionsText { get; init; }
 
     /// <summary>
-    /// The identity written on the wagonset's card, so the staff can match the rake to it. Drawn in a shaded
-    /// rectangle at the front of the wagonset's own, where it costs width rather than a column of its own.
+    /// The identity written on the wagonset's card, so the staff can match the rake to it. Drawn at the front of
+    /// the shaded frame round the wagons, where it costs width rather than a column of its own.
     /// </summary>
     public string Designation => Wagonset.Designation;
 }

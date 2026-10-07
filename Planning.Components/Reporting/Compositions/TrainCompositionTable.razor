@@ -17,7 +17,7 @@
    the wagons stand, so the paper reads in the same order as the train on the track. Which side of the tracks
    the reader stands on is not known, so every page comes twice, the second mirrored; the neighbours named at
    either end of the composition tell the reader which of the two is theirs. The rectangles are: a wagonset
-   coupled here, by its shaded turnus rectangle and one rectangle per wagon it lists, with class and number —
+   coupled here, by a shaded frame holding its turnus and one rectangle per wagon it lists, with class and number —
    a rake the train only runs on with is not drawn, nothing is made up for it; and the cargo flow wagons gathered
    here as one rectangle per unit marshalled — a flow's position in the train, and within it the position its
    destinations give the wagons. A flow that only runs through the station is not drawn: there is nothing
@@ -28,7 +28,7 @@
    whose uncouple note is ticked are drawn — except at a shadow station, where every train's wagons come off.
 
    The rectangles carry no captions. Their sequence is the wagon order, so a rectangle needs to say nothing
-   about where in the train it stands, and each wagonset is named in a shaded rectangle at its front. That leaves
+   about where in the train it stands, and each wagonset is named at the front of its shaded frame. That leaves
    every rectangle free to be exactly as wide as what it holds.
 
    The heading repeats on every page and is what identifies the sheet: the pile is torn apart and handed to
@@ -119,12 +119,14 @@
                                 @switch (group)
                                 {
                                     case WagonsetComposition wagonset:
-                                        @* The wagons of one rake stay together: they are closer to one another
-                                           than to the rectangles beside them, and they wrap as a block. *@
+                                        @* The wagons of one rake stay together inside a shaded frame, which
+                                           encloses them all so they read as one group under one turnus rather
+                                           than the turnus as a further wagonset beside them. They wrap as a
+                                           block within the frame. *@
                                         <div class="group wagonset">
-                                            @* The turnus card the rake belongs to, shaded so it is not read as a
-                                               wagon, at the front of the wagons it names: the right card is
-                                               fetched out of several standing in the yard. *@
+                                            @* The turnus card the rake belongs to, unboxed on the frame's shading
+                                               so it is not read as a wagon, at the front of the wagons it names:
+                                               the right card is fetched out of several standing in the yard. *@
                                             <div class="turnus">
                                                 <span class="designation">@wagonset.Designation</span>
                                                 @* Only where the rake is in the train on some of its sessions. *@
@@ -136,7 +138,7 @@
                                             @foreach (var wagon in wagonset.Wagons)
                                             {
                                                 <div class="wagon">
-                                                        <span class="class">@wagon.Class</span>
+                                                    <span class="class">@wagon.Class</span>
                                                     @* One line, the number beside the class, so a long rake
                                                        costs width rather than height. *@
                                                     @if (!string.IsNullOrWhiteSpace(wagon.Number))

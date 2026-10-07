@@ -1,5 +1,40 @@
 # Versionshinweise
 
+## Version 0.7.4
+
+### Änderungen
+
+- **Ein Dienstheft zeigt jeden Zug einmal.** Wo ein Dienst einen Zug in mehrere Abschnitte teilt — weil
+  das Triebfahrzeug wechselt oder unterwegs Wagen an- oder abgekuppelt werden —, der Lokführer aber die
+  ganze Zeit auf dem Zug bleibt, druckt das Heft den Zug jetzt einmal, von dort, wo der Lokführer ihn
+  übernimmt, bis dort, wo er ihn verlässt, statt einer Seite je Abschnitt. Die Blöcke der Triebfahrzeuge
+  und Wagengruppen zeigen, welches Fahrzeug welchen Teil des Zuges fährt.
+- **Güterwagen, die zusammen stehen, sind eine Zeile im Dienstheft.** Wagenströme, die am selben Bahnhof
+  an derselben Position im Zug angekuppelt werden, teilen sich jetzt eine Zeile im Block der Güterwagen mit
+  Frachtbriefen, so wie die Zugbildungen sie zeigen: jeder Ort einmal genannt, die Regionen nach den Orten
+  und eine Höchstlast für die ganze Gruppe, die Summe der Höchstlasten ihrer Ziele. Die Zeilen sind nach
+  dem Bahnhof geordnet, an dem die Wagen angekuppelt werden, in der Reihenfolge, in der der Zug ihn
+  erreicht, und dann nach der Position.
+- **Zugbildungen zeigen den ganzen Zug, wo eine Wagengruppe angekuppelt wird.** Ein Zug erhält weiterhin
+  nur dort eine Zeile, wo eine Wagengruppe angekuppelt wird oder Wagen aus Wagenströmen mitgenommen werden,
+  aber die Zeile zeigt jetzt jede Wagengruppe, mit der der Zug abfährt, auch die, die er schon mitführt,
+  sodass die Positionen der dort angekuppelten verständlich sind.
+- **Zugbildungen rahmen jede Wagengruppe ein.** Der Umlauf einer Wagengruppe und ihre Wagen stehen jetzt
+  zusammen in einem schattierten Rahmen, sodass sie als eine Gruppe unter einem Umlauf gelesen werden statt
+  der Umlauf als eine weitere Wagengruppe daneben.
+- **Eine Höchstlast je Güterrechteck in den Zugbildungen.** Ein Güterrechteck mit mehreren Zielen nennt
+  jetzt die Summe ihrer Höchstlasten einmal, zuletzt, statt einer Zahl je Ziel.
+- **Ein Wagen, der einer Wagengruppe hinzugefügt wird, ist ein Personenwagen.** Ein neuer Wagen im Dialog
+  **Fahrzeug bearbeiten** ist jetzt zunächst ein Personenwagen, kein Güterwagen.
+
+### Fehlerbehebungen
+
+- **Zeiten nach Mitternacht landen am richtigen Tag.** Auf einer Anlage mit angekreuztem **Läuft über
+  Mitternacht?** kommt eine Zeit nach Mitternacht, die bei einem Zug über Mitternacht eingegeben wird —
+  etwa 00:10 anstelle von 23:55 —, jetzt auf den nächsten Tag, sodass die Halte des Zuges in der
+  Reihenfolge bleiben, in der er fährt. Früher gespeicherte Pläne mit solchen Zeiten werden beim Öffnen
+  berichtigt.
+
 ## Version 0.7.3
 
 ### Änderungen

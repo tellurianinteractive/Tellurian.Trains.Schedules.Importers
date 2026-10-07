@@ -10,8 +10,23 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties;
 /// </remarks>
 public sealed class DriverDutyPart
 {
-    /// <summary>The scheduled train part the driver works.</summary>
+    /// <summary>
+    /// The stretch of the train the driver works. When the driver stays with a train over several of
+    /// the duty's parts, this is one span from the first part's start to the last part's end.
+    /// </summary>
     public required ScheduledTrainPart TrainPart { get; init; }
+
+    /// <summary>
+    /// The duty's own parts this printed part is made of, in running order. Empty means the one part
+    /// <see cref="TrainPart"/> itself.
+    /// </summary>
+    /// <remarks>
+    /// A train is printed once however many of the duty's parts it is cut into: where the traction unit
+    /// changes, or wagons are coupled or uncoupled on the way, the driver still works one train, and a
+    /// page per part made it read as several. The parts are kept because each vehicle works its own
+    /// stretch of the span, and the vehicle blocks show which.
+    /// </remarks>
+    public IReadOnlyList<ScheduledTrainPart> Parts { get; init; } = [];
 
     /// <summary>The duty this part belongs to.</summary>
     public required DriverDuty Duty { get; init; }
@@ -37,9 +52,7 @@ public static class DriverDutyPartExtensions
         {
             Vehicles =
             [
-                .. dutyPart.Vehicles.Where(vehicle => vehicle.IsTraction)
-                    .Select(dutyPart.VehicleRow)
-                    .OrderBy(v => v.Sessions.FirstNumber)
+                .. dutyPart.VehicleRows.Where(row => row.Vehicle.IsTraction)
             ],
             SessionsSettings = dutyPart.SessionsSettings,
         };
@@ -53,17 +66,15 @@ public static class DriverDutyPartExtensions
         {
             Vehicles =
             [
-                .. dutyPart.Vehicles.Where(vehicle => vehicle.IsWagonSet)
-                    .Select(dutyPart.VehicleRow)
-                    .OrderBy(v => v.Sessions.FirstNumber)
+                .. dutyPart.VehicleRows.Where(row => row.Vehicle.IsWagonSet)
             ],
             SessionsSettings = dutyPart.SessionsSettings,
         };
 
         /// <summary>
-        /// The cargo wagons with waybills carried over this part, ordered by position in the rake and
-        /// then by session — so everything about one place in the rake sits together and a driver
-        /// reading position 2 sees both session variants side by side.
+        /// The cargo wagons with waybills carried over this part, ordered by the station they are coupled
+        /// at, in the order the train reaches it, and then by position in the rake. The flows coupled at
+        /// one station into one position are one row (see <see cref="TrainPartCargoFlow"/>).
         /// </summary>
         public TrainPartCargoData CargoData => new()
         {
@@ -71,11 +82,10 @@ public static class DriverDutyPartExtensions
             [
                 .. dutyPart.Train.CargoFlows
                     .Where(dutyPart.Covers)
-                    .Select(flow => new TrainPartCargoFlow { Flow = flow })
-                    // Position leads, so everything about one place in the rake sits together; the
-                    // session order within it is deterministic, putting 1,3,5 before 2,4,6.
-                    .OrderBy(row => row.Flow.PositionInTrain)
-                    .ThenBy(row => row.Sessions.SortOrder)
+                    .GroupBy(flow => (flow.From, flow.PositionInTrain))
+                    .Select(flows => new TrainPartCargoFlow { Flows = [.. flows] })
+                    .OrderBy(row => row.Flows[0].From.SortTime)
+                    .ThenBy(row => row.PositionInTrain)
             ],
             SessionsSettings = dutyPart.SessionsSettings,
         };
@@ -84,7 +94,7 @@ public static class DriverDutyPartExtensions
         /// The rows of the train timetable, in the order the driver runs them.
         /// </summary>
         public IReadOnlyList<TimetableRow> TimetableRows =>
-            TimetableRow.Build(dutyPart.TrainPart, dutyPart.Duty.Sessions, dutyPart.SessionsSettings);
+            TimetableRow.Build(dutyPart.TrainPart, dutyPart.Duty.Sessions, dutyPart.SessionsSettings, dutyPart.Duty.Plan);
 
         /// <summary>
         /// Whether the train carries any limit at all, and so whether the header prints a limits line.
@@ -101,7 +111,23 @@ public static class DriverDutyPartExtensions
             dutyPart.Train.Length.Meters is not null;
 
         /// <summary>
-        /// The vehicles working this part, resolved through the duty's plan.
+        /// One row per vehicle and the stretch it works: the span as a whole, and each of the duty's
+        /// parts it is made of. Ordered by where the stretch starts, then by session.
+        /// </summary>
+        /// <remarks>
+        /// A vehicle working the whole span is matched by the span, and one working only a stretch of it
+        /// by that stretch — so on a train cut into parts, the rows themselves say that the traction unit
+        /// changes, or that wagons are coupled or uncoupled, at the station where one row ends and the
+        /// next begins.
+        /// </remarks>
+        private IEnumerable<TrainPartVehicle> VehicleRows =>
+            new[] { dutyPart.TrainPart }.Concat(dutyPart.Parts).Distinct()
+                .SelectMany(part => dutyPart.VehiclesOn(part).Select(vehicle => dutyPart.VehicleRow(vehicle, part)))
+                .OrderBy(row => row.TrainPart.StartTime)
+                .ThenBy(row => row.Sessions.FirstNumber);
+
+        /// <summary>
+        /// The vehicles working one stretch, resolved through the duty's plan.
         /// </summary>
         /// <remarks>
         /// The plan is asked, not the part's own <see cref="ScheduledTrainPart.Schedule"/> back-reference,
@@ -111,20 +137,20 @@ public static class DriverDutyPartExtensions
         /// rest of the application uses; the duty always knows its plan, whereas a part need not know its
         /// schedule.
         /// </remarks>
-        private IEnumerable<ScheduledObject> Vehicles =>
+        private IEnumerable<ScheduledObject> VehiclesOn(ScheduledTrainPart part) =>
             dutyPart.Duty.Plan is { } plan
-                ? plan.ScheduledObjectsFor(dutyPart.TrainPart)
-                : dutyPart.TrainPart.ScheduledObjects;
+                ? plan.ScheduledObjectsFor(part)
+                : part.ScheduledObjects;
 
-        // One row of a vehicle block: the vehicle, the sessions it works this part on, and the tracks it
-        // is fetched from and left on.
-        private TrainPartVehicle VehicleRow(ScheduledObject vehicle) => new()
+        // One row of a vehicle block: the vehicle, the stretch it works, the sessions it works it on, and
+        // the tracks it is fetched from and left on.
+        private TrainPartVehicle VehicleRow(ScheduledObject vehicle, ScheduledTrainPart part) => new()
         {
             Vehicle = vehicle,
-            TrainPart = dutyPart.TrainPart,
-            Sessions = vehicle.SessionsOn(dutyPart.TrainPart),
-            DepartureTrack = vehicle.DepartureTrackOn(dutyPart.TrainPart),
-            ArrivalTrack = vehicle.ArrivalTrackOn(dutyPart.TrainPart),
+            TrainPart = part,
+            Sessions = vehicle.SessionsOn(part),
+            DepartureTrack = vehicle.DepartureTrackOn(part),
+            ArrivalTrack = vehicle.ArrivalTrackOn(part),
         };
 
         // A cargo flow belongs on this part's page when it is carried over any of the part's span. On a

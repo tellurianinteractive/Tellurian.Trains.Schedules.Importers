@@ -157,4 +157,96 @@ public class DriverDutyPartTests
         Assert.AreEqual("1", part.TractionData.Vehicles[0].DepartureTrack.Number, "The loco stands on the train's track.");
         Assert.AreEqual("2", part.WagonsetData.Vehicles[0].DepartureTrack.Number, "The wagonset is fetched from its own track.");
     }
+
+    [TestMethod]
+    public void PartsOfOneTrainWorkedInARowPrintAsOneTrain()
+    {
+        // The train is cut at the middle station: one loco to it and another from it, one wagonset
+        // uncoupled there and another running through. The driver stays on the train throughout.
+        var (duty, stations) = CreateDutyOverACutTrain();
+
+        var printed = DutyPagination.PrintedParts(duty, Settings);
+
+        Assert.HasCount(1, printed, "The two parts of one train must print as one train.");
+        Assert.AreSame(stations[0], printed[0].TrainPart.From.OperationLocation);
+        Assert.AreSame(stations[2], printed[0].TrainPart.To.OperationLocation);
+    }
+
+    [TestMethod]
+    public void TheVehicleBlocksOfAJoinedTrainShowWhereEachVehicleIsChangedOrUncoupled()
+    {
+        var (duty, stations) = CreateDutyOverACutTrain();
+
+        var printed = DutyPagination.PrintedParts(duty, Settings)[0];
+
+        var traction = printed.TractionData.Vehicles;
+        Assert.HasCount(2, traction);
+        Assert.AreEqual("A", traction[0].Vehicle.Class);
+        Assert.AreSame(stations[1], traction[0].TrainPart.To.OperationLocation, "The first loco is changed at the middle station.");
+        Assert.AreEqual("B", traction[1].Vehicle.Class);
+        Assert.AreSame(stations[1], traction[1].TrainPart.From.OperationLocation, "The second loco takes over at the middle station.");
+
+        var wagonsets = printed.WagonsetData.Vehicles;
+        Assert.HasCount(2, wagonsets);
+        var uncoupled = wagonsets.Single(w => w.Vehicle.Number == 1);
+        var through = wagonsets.Single(w => w.Vehicle.Number == 2);
+        Assert.AreSame(stations[1], uncoupled.TrainPart.To.OperationLocation, "This wagonset is uncoupled at the middle station.");
+        Assert.AreSame(stations[2], through.TrainPart.To.OperationLocation, "This wagonset runs the whole train.");
+    }
+
+    [TestMethod]
+    public void TheTimetableOfAJoinedTrainIsWorkedThroughTheStationWhereItWasCut()
+    {
+        var (duty, _) = CreateDutyOverACutTrain();
+
+        var rows = DutyPagination.PrintedParts(duty, Settings)[0].TimetableRows;
+
+        Assert.IsTrue(rows.All(row => row.IsInPart), "No stretch of the train may show as not the driver's.");
+    }
+
+    // A three-station train cut into two parts at the middle station, both in one duty.
+    private static (DriverDuty Duty, IReadOnlyList<OperationLocation> Stations) CreateDutyOverACutTrain()
+    {
+        var layout = new Layout { Name = "Test" };
+        var stations = new List<OperationLocation>();
+        for (var i = 0; i < 3; i++)
+        {
+            var station = new Station(i + 1, $"Station{i + 1}", $"S{i + 1}");
+            station.Add(new StationTrack(i + 1, "1"));
+            stations.Add(layout.Add(station));
+        }
+        layout.Add(new TrackStretch(1, stations[0], stations[1], 10));
+        layout.Add(new TrackStretch(2, stations[1], stations[2], 10));
+
+        var timetable = new Timetable("Test", layout);
+        var plan = Plan.Create("Test", timetable);
+
+        var train = new Train(1, 100);
+        var start = Time.FromHourAndMinute(6, 00);
+        for (var c = 0; c < 3; c++)
+        {
+            var call = train.Add(new StationCall(c + 1, stations[c]["1"], start.AddMinutes(c * 10), start.AddMinutes(c * 10 + 5)));
+            call.IsArrival = true;
+            call.IsDeparture = true;
+        }
+        timetable.Add(train);
+
+        Schedule ScheduleFor(ScheduledTrainPart part, ScheduledObjectType type, string @class, int number)
+        {
+            var schedule = plan.CreateSchedule();
+            schedule.Add(part);
+            plan.AssignVehicle(schedule, plan.CreateVehicle(type, @class, number, null));
+            return schedule;
+        }
+
+        var first = ScheduleFor(train.AsTrainPart(0, 1), ScheduledObjectType.Locomotive, "A", 1);
+        var second = ScheduleFor(train.AsTrainPart(1, 2), ScheduledObjectType.Locomotive, "B", 2);
+        ScheduleFor(train.AsTrainPart(0, 1), ScheduledObjectType.Wagonset, "Bm", 1);
+        ScheduleFor(train.AsTrainPart(0, 2), ScheduledObjectType.Wagonset, "Bm", 2);
+
+        var duty = plan.CreateDriverDuty();
+        duty.Add(first.OrderedParts[0]);
+        duty.Add(second.OrderedParts[0]);
+        return (duty, stations);
+    }
 }

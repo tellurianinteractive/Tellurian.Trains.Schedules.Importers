@@ -9,10 +9,13 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
 /// <remarks>
 /// A cargo flow stands on the sheet of the station it is connected at and of no other: that station gathers
 /// the wagons and marshals them into the train, while a station the flow only runs through has nothing to
-/// make up and no wagons of its own to find. A wagonset stands likewise only where it is coupled: at the
-/// first departure of its schedule, and later only where it is coupled explicitly — with a couple note,
-/// fetched from another track, or coupled to a train already running. A rake that stays with its loco from
-/// one train to the next is nothing the station has to make up.
+/// make up and no wagons of its own to find. A wagonset likewise puts a departure on the sheet only where it
+/// is coupled: at the first departure of its schedule, and later only where it is coupled explicitly — with a
+/// couple note, fetched from another track, or coupled to a train already running. A rake that stays with its
+/// loco from one train to the next is nothing the station has to make up. But once a departure is on the
+/// sheet, every wagonset the train leaves with is drawn, those it already carries included: drawn without
+/// them, the rakes coupled here would read as the whole train, and their positions would place them among
+/// wagons the reader cannot see.
 /// An arrival is a row of its own, showing only the cargo flow wagons uncoupled there, each unit with where
 /// its wagons came from: the station takes them off the train and sorts them on, and the origins tell the
 /// units apart.
@@ -115,8 +118,8 @@ public sealed class CompositionDeparture
     /// ticked or not, because every train ends its run there and all its wagons come off.
     /// </para>
     /// <para>
-    /// A departure is only listed when cargo flow wagons are connected here or the train leaves with a
-    /// wagonset.
+    /// A departure is only listed when cargo flow wagons are connected here or a wagonset is coupled here.
+    /// It then shows every wagonset the train leaves with, those already in it included.
     /// </para>
     /// </remarks>
     /// <param name="train">The train to take departures from.</param>
@@ -154,12 +157,14 @@ public sealed class CompositionDeparture
 
             if (i == calls.Count - 1 || (i > 0 && !call.IsStop)) continue;
 
+            var cargo = CargoPositions(train, calls, i).ToList();
+            if (cargo.Count == 0 && !Wagonsets(train, calls, i, settings, plan, coupledHereOnly: true).Any()) continue;
+
             List<CompositionGroup> groups =
             [
-                .. Wagonsets(train, calls, i, settings, plan),
-                .. CargoPositions(train, calls, i),
+                .. Wagonsets(train, calls, i, settings, plan, coupledHereOnly: false),
+                .. cargo,
             ];
-            if (groups.Count == 0) continue;
 
             // Wagonsets before cargo at the same position: a wagonset is a fixed rake coupled as a whole,
             // and the loose wagons are marshalled around it. Cargo units then stand in the order their
@@ -195,10 +200,11 @@ public sealed class CompositionDeparture
         return string.Join(" ", limits);
     }
 
-    // The wagonsets coupled to the train at calls[index], each with the sessions it is coupled on where those
-    // are not all the train's. See IsCoupling for which parts count as a coupling.
+    // The wagonsets the train leaves calls[index] with, each with the sessions it is in the train on where
+    // those are not all the train's. With coupledHereOnly, only those coupled to the train there; see
+    // IsCoupling for which parts count as a coupling.
     private static IEnumerable<WagonsetComposition> Wagonsets(
-        Train train, IReadOnlyList<StationCall> calls, int index, SessionsSettings settings, Plan? plan)
+        Train train, IReadOnlyList<StationCall> calls, int index, SessionsSettings settings, Plan? plan, bool coupledHereOnly)
     {
         if (plan is null) yield break;
 
@@ -207,8 +213,9 @@ public sealed class CompositionDeparture
         {
             var covering = wagonset.ScheduleAssignments
                 .Select(assignment => (assignment.Sessions, Part: (assignment.Schedule?.Parts ?? [])
-                    .FirstOrDefault(part => part.Train.Equals(train) && IsCoupledAt(calls, part, index) &&
-                        IsCoupling(assignment.Schedule!, part, index))))
+                    .FirstOrDefault(part => part.Train.Equals(train) && (coupledHereOnly
+                        ? IsCoupledAt(calls, part, index) && IsCoupling(assignment.Schedule!, part, index)
+                        : IsCarriedFrom(calls, part, index)))))
                 .Where(assignment => assignment.Part is not null)
                 .ToList();
             if (covering.Count == 0) continue;
@@ -231,7 +238,7 @@ public sealed class CompositionDeparture
     }
 
     // The rectangles a wagonset is drawn as: wagon by wagon in rake order, with class and number. One that
-    // lists no wagons is drawn by its turnus rectangle alone, since its designation already names its class.
+    // lists no wagons is drawn by its shaded frame with the turnus alone, since its designation already names its class.
     private static IReadOnlyList<CompositionWagon> WagonsOf(ScheduledObject wagonset) =>
         [.. wagonset.Wagons.OrderBy(wagon => wagon.Position).Select(wagon => new CompositionWagon(wagon.Class, wagon.Number))];
 
@@ -309,24 +316,37 @@ public sealed class CompositionDeparture
         foreach (var origin in flow.CargoFlowOptions.Origins) yield return origin.Location.Name;
     }
 
-    // Where the wagons of one unit go, and the most that may be brought to each. Each place is listed once, in
+    // Where the wagons of one unit go, and the most that may be brought there. Each place is listed once, in
     // the order the flows name them, and the regions the destinations include follow all the places, each once:
-    // a region is the widest of destinations, and among the places it would read as one more station.
-    private static IReadOnlyList<CompositionDestination> DestinationsOf(IReadOnlyList<Destination> destinations) =>
-    [
-        .. destinations
-            .Select(destination => new CompositionDestination(
-                Entry(destination.PlaceTextWithoutRegions, CompactLimitText(destination.MaxLoad)),
-                destination.PlaceHtmlWithoutRegions,
-                destination.MaxLoad))
-            // By the whole entry, so that the same place under two different limits stays two entries: one of
-            // them would otherwise be dropped and the wagons brought under a limit nobody stated.
-            .DistinctBy(destination => destination.Text),
-        .. destinations
-            .SelectMany(destination => destination.StatedRegions)
-            .DistinctBy(region => region.Name)
-            .Select(region => new CompositionDestination(region.Name, region.ToHtml)),
-    ];
+    // a region is the widest of destinations, and among the places it would read as one more station. The
+    // rectangle is one unit in the train, so its limit is the sum of its destinations' limits, said once, last.
+    private static IReadOnlyList<CompositionDestination> DestinationsOf(IReadOnlyList<Destination> destinations)
+    {
+        // The same place under the same limit is the same destination named twice, and counts once; under
+        // another limit it is more wagons, and adds to the total.
+        var limit = destinations
+            .DistinctBy(destination => (destination.PlaceTextWithoutRegions, CompactLimitText(destination.MaxLoad)))
+            .Select(destination => destination.MaxLoad)
+            .Aggregate(Sum);
+        List<CompositionDestination> entries =
+        [
+            .. destinations
+                .DistinctBy(destination => destination.PlaceTextWithoutRegions)
+                .Select(destination => new CompositionDestination(destination.PlaceTextWithoutRegions, destination.PlaceHtmlWithoutRegions)),
+            .. destinations
+                .SelectMany(destination => destination.StatedRegions)
+                .DistinctBy(region => region.Name)
+                .Select(region => new CompositionDestination(region.Name, region.ToHtml)),
+        ];
+        var last = entries[^1];
+        entries[^1] = last with { Text = Entry(last.Text, CompactLimitText(limit)), Limit = limit };
+        return entries;
+    }
+
+    // Two limits added together, figure by figure. A destination taking any number in some respect leaves the
+    // unit unlimited in it, so a figure only one of them states is not a total and is dropped.
+    private static TrainCapacity Sum(TrainCapacity first, TrainCapacity second) =>
+        new(first.Axles + second.Axles, first.Wagons + second.Wagons, first.Meters + second.Meters);
 
     // A destination as one line of a rectangle: where the wagons go, and how many may go there.
     private static string Entry(string place, string limit) => limit.Length > 0 ? $"{place} {limit}" : place;
@@ -340,6 +360,10 @@ public sealed class CompositionDeparture
     // order, since a train's calls are held in the order they were added.
     private static bool IsCoupledAt(IReadOnlyList<StationCall> calls, TrainPart part, int index) =>
         IndexOf(calls, part.From) == index && IndexOf(calls, part.To) > index;
+
+    // Whether a part is in the train when it leaves calls[index]: coupled there or earlier, and carried on.
+    private static bool IsCarriedFrom(IReadOnlyList<StationCall> calls, TrainPart part, int index) =>
+        IndexOf(calls, part.From) is var from && from >= 0 && from <= index && IndexOf(calls, part.To) > index;
 
     // Whether the wagonset is coupled to the train at the start of a part, rather than staying in the train
     // its loco works on from the previous part: the schedule starts there, the part says the wagonset is to be

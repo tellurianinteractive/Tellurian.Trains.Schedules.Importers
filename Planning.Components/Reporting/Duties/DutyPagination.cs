@@ -143,9 +143,7 @@ public static class DutyPagination
     {
         duty = duty.ValueOrException(nameof(duty));
 
-        var parts = duty.OrderedParts
-            .Select(p => new DriverDutyPart { TrainPart = p, Duty = duty, SessionsSettings = settings })
-            .ToList();
+        var parts = PrintedParts(duty, settings);
 
         var pages = new List<DutyPage> { DutyPage.Front(1, duty) };
         var index = 0;
@@ -194,6 +192,43 @@ public static class DutyPagination
             pages.Add(DutyPage.Part(pages.Count + 1, duty, pending));
             pending = [];
         }
+    }
+
+    /// <summary>
+    /// The duty's parts as they are printed: one per train the driver works in one go.
+    /// </summary>
+    /// <remarks>
+    /// Consecutive parts of the same train that meet at the same call are joined into one, spanning from
+    /// the first one's start to the last one's end. They are cut where the traction unit changes or
+    /// wagons are coupled or uncoupled, but the driver stays on the train throughout — so the booklet
+    /// shows one train, whose vehicle blocks tell which vehicle works which stretch of it.
+    /// </remarks>
+    /// <param name="duty">The duty to print.</param>
+    /// <param name="settings">How sessions are displayed.</param>
+    public static IReadOnlyList<DriverDutyPart> PrintedParts(DriverDuty duty, SessionsSettings settings)
+    {
+        duty = duty.ValueOrException(nameof(duty));
+
+        var groups = new List<List<ScheduledTrainPart>>();
+        foreach (var part in duty.OrderedParts)
+        {
+            // By reference: StationCall equality is by value, and a train can hold two equal-valued calls.
+            if (groups.Count > 0 && groups[^1][^1] is var previous &&
+                previous.Train.Equals(part.Train) && ReferenceEquals(previous.To, part.From))
+                groups[^1].Add(part);
+            else
+                groups.Add([part]);
+        }
+
+        return [.. groups.Select(group => group.Count == 1
+            ? new DriverDutyPart { TrainPart = group[0], Duty = duty, SessionsSettings = settings }
+            : new DriverDutyPart
+            {
+                TrainPart = new ScheduledTrainPart(group[0].From, group[^1].To),
+                Parts = group,
+                Duty = duty,
+                SessionsSettings = settings,
+            })];
     }
 
     /// <inheritdoc cref="BookletImposition.PageOrder"/>

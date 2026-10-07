@@ -238,4 +238,63 @@ public class PlanCallTimeEditTests
             Assert.AreEqual(before[i].Departure, after[i].Departure);
         }
     }
+
+    // A time is entered as a clock time; on a train running past midnight it belongs to the next day, so that
+    // it still comes after the times before midnight.
+    private static Plan OverMidnightPlan()
+    {
+        var plan = SimplePlan();
+        plan.Layout.Settings.General.RunsOverMidnight = true;
+        return plan;
+    }
+
+    private static Time ClockTime(Time time) => Time.FromTimeSpan(TimeSpan.FromTicks(time.Value.Ticks % TimeSpan.TicksPerDay));
+
+    [TestMethod]
+    public void AClockTimeAfterMidnightGoesOnTheNextDayAndKeepsTheRunOrder()
+    {
+        var plan = OverMidnightPlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Time.FromHourAndMinute(23, 40))!;
+        var edited = train.CallsInRunOrder[1];
+        var callsBefore = train.CallsInRunOrder.ToArray();
+
+        var result = plan.SetDeparture(edited, Time.FromHourAndMinute(0, 5));
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(Time.FromDayHourMinute(1, 0, 5), edited.Departure, "00:05 after a call before midnight is 24:05.");
+        CollectionAssert.AreEqual(callsBefore, train.CallsInRunOrder.ToArray(), "The calls stay in the order the train runs them.");
+        for (var i = 2; i < callsBefore.Length; i++)
+            Assert.IsTrue(callsBefore[i].Arrival >= edited.Departure, $"Call {i} still comes after the edited departure.");
+    }
+
+    [TestMethod]
+    public void AClockTimeEnteredOverATimeAfterMidnightStaysOnTheNextDay()
+    {
+        var plan = OverMidnightPlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Time.FromHourAndMinute(23, 50))!;
+        var edited = train.CallsInRunOrder[^1];
+        Assert.IsTrue(edited.Arrival.Value >= TimeSpan.FromDays(1), "The test needs a train arriving after midnight.");
+        var expected = edited.Arrival.AddMinutes(2);
+
+        var result = plan.SetArrival(edited, ClockTime(expected));
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expected, edited.Arrival);
+        Assert.AreSame(edited, train.CallsInRunOrder[^1], "The destination is still the last call.");
+    }
+
+    [TestMethod]
+    public void AClockTimeBeforeMidnightEnteredOverATimeAfterItMovesBackToTheFirstDay()
+    {
+        var plan = OverMidnightPlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Time.FromHourAndMinute(23, 50))!;
+        var edited = train.CallsInRunOrder[^1];
+        var origin = train.CallsInRunOrder[0];
+        var clock = Time.FromHourAndMinute(23, 59);
+
+        plan.SetArrival(edited, clock);
+
+        Assert.AreEqual(clock, edited.Arrival, "23:59 is nearer a time just after midnight on the same night.");
+        Assert.IsTrue(origin.Departure < edited.Arrival);
+    }
 }

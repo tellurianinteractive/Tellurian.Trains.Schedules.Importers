@@ -149,15 +149,18 @@ public sealed class TimetableRow
     /// <param name="trainPart">The part being printed.</param>
     /// <param name="readerSessions">The duty's sessions, for qualifying meet notes.</param>
     /// <param name="settings">How sessions render inside notes.</param>
+    /// <param name="plan">The plan whose vehicle schedules give the vehicle instructions. Omitted, the
+    /// part's own schedule's plan is used.</param>
     public static IReadOnlyList<TimetableRow> Build(
-        ScheduledTrainPart trainPart, Sessions readerSessions, SessionsSettings settings)
+        ScheduledTrainPart trainPart, Sessions readerSessions, SessionsSettings settings, Plan? plan = null)
     {
         trainPart = trainPart.ValueOrException(nameof(trainPart));
 
         // What the driver is told to do with the vehicles comes from the vehicle schedules, which hang
-        // off the plan the part's own schedule belongs to. A part detached from one still prints; it
-        // simply has no vehicle instructions to give.
-        var plan = trainPart.Schedule?.Plan;
+        // off the plan. A part spanning several of the duty's parts belongs to no schedule, so the duty's
+        // plan is passed in; a part detached from every plan still prints, it simply has no vehicle
+        // instructions to give.
+        plan ??= trainPart.Schedule?.Plan;
         var calls = trainPart.Train.Calls.ToList();
         // By reference: StationCall equality is by value, and a train can hold two equal-valued calls.
         var fromIndex = calls.FindIndex(c => ReferenceEquals(c, trainPart.From));
