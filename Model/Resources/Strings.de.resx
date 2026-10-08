@@ -291,6 +291,9 @@
   <data name="ScheduleLayoverMismatch" xml:space="preserve">
     <value>Fahrzeugplan {0}: {1} endet mit „{2}“, aber {3} beginnt mit „{4}“.</value>
   </data>
+  <data name="VehicleLayoverMismatchBetweenSessions" xml:space="preserve">
+    <value>Fahrzeug {0}: {1} endet mit „{2}“, aber {3}, den es danach fährt, beginnt mit „{4}“.</value>
+  </data>
   <data name="ScheduleStandingTrackMismatch" xml:space="preserve">
     <value>Fahrzeugplan {0}: {1} stellt die Fahrzeuge auf Gleis {2} ab, aber {3} holt sie von Gleis {4}.</value>
   </data>

@@ -1,5 +1,19 @@
 ﻿# Release notes
 
+## Version 0.8.2
+
+### Changes
+
+- **The trains of a category can be renumbered.** On the **Train categories** tab, change the
+  **Start number** and click **Renumber** next to it. All trains of the category move by the same amount,
+  so the lowest numbered one gets the first number at or above the start number. No train changes between
+  odd and even, and gaps and pairs of numbers are kept: with start number 100, trains 1, 2 and 3 become
+  101, 102 and 103. A shunting category has no odd and even, so its first task gets the start number itself.
+- **A unit taken from stabling before its first train must be stabled after its last.** Where a
+  locomotive or trainset is fetched from stabling, or lifted on, before its first train of a session, the
+  validation now shows a warning unless it is also stabled, or lifted off, after its last train where it
+  returns to that station — in the same session, or a later one when it circulates over several sessions.
+
 ## Version 0.8.1
 
 ### Changes

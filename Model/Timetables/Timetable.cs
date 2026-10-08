@@ -382,6 +382,32 @@ public static class TimetableExtensions
     }
 
     /// <summary>
+    /// Renumbers every train of <paramref name="category"/> from the category's
+    /// <see cref="TrainCategory.StartNumber"/>, moving all of them up or down by the same amount so that the
+    /// lowest numbered train gets the first number of its parity at or above the start number. Gaps and
+    /// pairings between the numbers stay as they were.
+    /// </summary>
+    /// <remarks>
+    /// The amount is even, so no train goes from odd to even or back: parity encodes the direction a train
+    /// travels. A shunting category travels nowhere, so its tasks move by exactly the difference and its
+    /// lowest numbered task gets the start number itself. As every train moves by the same amount, two
+    /// trains of the category never end up with the same number.
+    /// </remarks>
+    /// <param name="timetable">The timetable whose trains to renumber.</param>
+    /// <param name="category">The category whose trains to renumber, from its start number.</param>
+    /// <returns>The number of trains renumbered; zero when they already start from the start number.</returns>
+    public static int RenumberTrains(this Timetable timetable, TrainCategory category)
+    {
+        var trains = timetable.TrainsIn(category).ToList();
+        if (trains.Count == 0) return 0;
+        var offset = Math.Max(category.StartNumber, 1) - trains.Min(t => t.Number);
+        if (!category.IsShunting && offset % 2 != 0) offset++;
+        if (offset == 0) return 0;
+        foreach (var train in trains) train.Number += offset;
+        return trains.Count;
+    }
+
+    /// <summary>
     /// Adds a train to the timetable.
     /// </summary>
     /// <param name="timetable">The timetable to add the train to.</param>

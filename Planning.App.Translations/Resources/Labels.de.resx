@@ -1828,6 +1828,12 @@
   <data name="ReappliedToTrains" xml:space="preserve">
     <value>{0} Zug/Züge geändert.</value>
   </data>
+  <data name="Renumber" xml:space="preserve">
+    <value>Neu nummerieren</value>
+  </data>
+  <data name="RenumberTrainsTitle" xml:space="preserve">
+    <value>Alle Züge dieser Kategorie ab der Startnummer neu nummerieren. Alle Züge werden um denselben Betrag verschoben, sodass keiner zwischen ungerade und gerade wechselt; Lücken und Nummernpaare bleiben erhalten.</value>
+  </data>
   <data name="Assign" xml:space="preserve">
     <value>Zuweisen</value>
   </data>

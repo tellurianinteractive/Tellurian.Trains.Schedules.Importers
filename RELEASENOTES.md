@@ -4,6 +4,12 @@
 
 ### New Features
 
+- **Renumbering the trains of a category.** New **`Timetable.RenumberTrains(category)`** moves every
+  train of the category by the same amount so the lowest numbered one gets the first number of its parity
+  at or above `TrainCategory.StartNumber`. The amount is even, so no train changes between odd and even,
+  and gaps and pairs of numbers are kept; a shunting category moves by exactly the difference. Returns the
+  number of trains renumbered, zero when they already start from the start number.
+
 - **A traction unit can be lifted off the layout during a layover.** New enum **`TractionLayover`**
   (`None`, `Stabling`, `LiftedOff`) on **`TractionOptions.FromLayover`** and **`ToLayover`** says where a
   locomotive or trainset spends the time between two trains. `LiftedOff` gives the new **`LiftOffNote`** on
@@ -14,6 +20,9 @@
   forgetting a track named at either end; across a broken joint nothing is paired. New rule S6
   (`ValidateLayoverPairs`, under `ValidateSchedules`) reports a joint whose two ends differ as a
   `Severity.Warning` of the new `ValidationErrorType.ScheduleLayoverMismatch` (schedule scope).
+  S6 also pairs the wrap between sessions per traction unit (`ValidateLayoverPairsBetweenSessions`): a
+  unit fetched from stabling before its first train must be stabled after its last train where it returns
+  to that station — the same session, or a later one for a circulation over several sessions.
 
 - **The other track vehicles are put on and fetched from is paired across a joint.** New
   **`Schedule.SetArrivalTrack`** and **`SetDepartureTrack`** set a part's `ToTrack`/`FromTrack` and have the

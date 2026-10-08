@@ -1,5 +1,20 @@
 # Versionsnyheder
 
+## Version 0.8.2
+
+### Ændringer
+
+- **Togene i en kategori kan omnummereres.** Ændr **Startnummer** på fanen **Togkategorier**, og klik på
+  **Omnummerér** ved siden af. Alle tog i kategorien flyttes lige meget, så toget med det laveste nummer
+  får det første nummer på eller over startnummeret. Intet tog skifter mellem ulige og lige, og huller og
+  par af numre bevares: med startnummer 100 bliver tog 1, 2 og 3 til 101, 102 og 103. En rangerkategori
+  har ingen ulige og lige numre, så dens første opgave får selve startnummeret.
+- **En enhed, der hentes fra opstilling før sit første tog, skal sættes til opstilling efter sit
+  sidste.** Hvor et lokomotiv eller et togsæt hentes fra opstilling, eller løftes på, før sit første tog i
+  en køresession, viser valideringen nu en advarsel, medmindre det også sættes til opstilling, eller løftes
+  af, efter sit sidste tog, hvor det vender tilbage til den station — i samme køresession, eller i en
+  senere, når det kører i omløb over flere køresessioner.
+
 ## Version 0.8.1
 
 ### Ændringer

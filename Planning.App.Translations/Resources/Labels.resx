@@ -1839,6 +1839,12 @@
   <data name="ReappliedToTrains" xml:space="preserve">
     <value>Changed {0} train(s).</value>
   </data>
+  <data name="Renumber" xml:space="preserve">
+    <value>Renumber</value>
+  </data>
+  <data name="RenumberTrainsTitle" xml:space="preserve">
+    <value>Renumber every train in this category from the start number. All trains move by the same amount, so none changes between odd and even, and gaps and pairs of numbers are kept.</value>
+  </data>
   <data name="Assign" xml:space="preserve">
     <value>Assign</value>
   </data>

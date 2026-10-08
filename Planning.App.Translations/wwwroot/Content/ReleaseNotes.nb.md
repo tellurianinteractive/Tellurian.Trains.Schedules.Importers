@@ -1,5 +1,20 @@
 # Versjonsnyheter
 
+## Versjon 0.8.2
+
+### Endringer
+
+- **Togene i en kategori kan nummereres om.** Endre **Startnummer** på fanen **Togkategorier**, og klikk
+  på **Nummerer om** ved siden av. Alle tog i kategorien flyttes like mye, slik at toget med lavest nummer
+  får det første nummeret på eller over startnummeret. Ingen tog bytter mellom odde og like, og hull og
+  par av numre beholdes: med startnummer 100 blir tog 1, 2 og 3 til 101, 102 og 103. En skiftekategori har
+  ingen odde og like numre, så den første oppgaven får selve startnummeret.
+- **En enhet som hentes fra hensetting før sitt første tog, skal settes til hensetting etter sitt
+  siste.** Der et lok eller et togsett hentes fra hensetting, eller løftes på, før sitt første tog i en
+  kjøresesjon, viser valideringen nå en advarsel, med mindre det også settes til hensetting, eller løftes av,
+  etter sitt siste tog der det kommer tilbake til den stasjonen — i samme kjøresesjon, eller i en senere
+  når det går i omløp over flere kjøresesjoner.
+
 ## Versjon 0.8.1
 
 ### Endringer

@@ -165,4 +165,93 @@ public class TractionLayoverTests
 
         Assert.IsEmpty(Mismatches(plan), "A broken joint is S2's to report.");
     }
+
+    [TestMethod]
+    public void FetchedFromStablingBeforeTheFirstTrainMustBeStabledAfterTheLast()
+    {
+        // G → Snu → G every session: the unit ends each session where it starts the next.
+        var (plan, _, parts) = Arrange(1, 2);
+        parts[0].TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+
+        var error = Mismatches(plan).Single();
+
+        Assert.AreEqual(Severity.Warning, error.Message.Severity);
+        Assert.IsNotNull(error.Vehicle);
+        StringAssert.Contains(error.Message.Text, "‘on track’");
+        StringAssert.Contains(error.Message.Text, "‘from stabling’");
+    }
+
+    [TestMethod]
+    public void StabledAfterTheLastTrainWhereItWasFetchedFromStablingIsNotReported()
+    {
+        var (plan, _, parts) = Arrange(1, 2);
+        parts[0].TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+        parts[1].TractionOptions = new TractionOptions { ToLayover = TractionLayover.Stabling };
+
+        Assert.IsEmpty(Mismatches(plan));
+    }
+
+    [TestMethod]
+    public void AWorkingEndingElsewhereIsNotPairedOverTheWrap()
+    {
+        // G → Snu → G → Snu: the unit ends the session at Snu but starts it at G — the closure rule's concern.
+        var (plan, _, parts) = Arrange(1, 2, 3);
+        parts[0].TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+
+        Assert.IsEmpty(Mismatches(plan));
+    }
+
+    // Forward G → Snu on the odd sessions and back on the even, each in its own schedule, by one locomotive:
+    // a circulation over two sessions, returning to G only at the end of the second.
+    private static (Plan Plan, ScheduledTrainPart Forward, ScheduledTrainPart Return) ArrangeTwoSessionCirculation()
+    {
+        var (plan, _, _) = Arrange();
+        plan.Layout.Settings.General.MaxSessions = 2;
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1);
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2);
+        forward.Sessions = Sessions.FromSessionNumbers(1);
+        @return.Sessions = Sessions.FromSessionNumbers(2);
+        var odd = plan.CreateSchedule();
+        odd.Add(forward.AsTrainPart);
+        var even = plan.CreateSchedule();
+        even.Add(@return.AsTrainPart);
+        var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "T43", 7, null);
+        plan.AssignVehicle(odd, vehicle, Sessions.FromSessionNumbers(1));
+        plan.AssignVehicle(even, vehicle, Sessions.FromSessionNumbers(2));
+        return (plan, odd.Parts.Single(), even.Parts.Single());
+    }
+
+    [TestMethod]
+    public void OverTwoSessionsTheStablingIsMatchedWhenTheUnitReturns()
+    {
+        var (plan, forward, @return) = ArrangeTwoSessionCirculation();
+        forward.TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+        @return.TractionOptions = new TractionOptions { ToLayover = TractionLayover.Stabling };
+
+        Assert.IsEmpty(Mismatches(plan), "Left on the track at Snu overnight, stabled again at G after the return.");
+    }
+
+    [TestMethod]
+    public void OverTwoSessionsAMissingStablingOnReturnIsReported()
+    {
+        var (plan, forward, _) = ArrangeTwoSessionCirculation();
+        forward.TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+
+        var error = Mismatches(plan).Single();
+
+        Assert.HasCount(2, error.Schedules, "The two parts belong to different schedules.");
+    }
+
+    [TestMethod]
+    public void OverTwoSessionsTheOvernightLayoverInBetweenIsPairedToo()
+    {
+        var (plan, forward, @return) = ArrangeTwoSessionCirculation();
+        forward.TractionOptions = new TractionOptions { ToLayover = TractionLayover.LiftedOff };
+
+        Assert.HasCount(1, Mismatches(plan), "Lifted off at Snu after session 1, but not lifted on before session 2.");
+
+        @return.TractionOptions = new TractionOptions { FromLayover = TractionLayover.LiftedOff };
+
+        Assert.IsEmpty(Mismatches(plan));
+    }
 }

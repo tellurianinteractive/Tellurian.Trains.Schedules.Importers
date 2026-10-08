@@ -84,7 +84,11 @@ else
                     </div>
                     <div class="field">
                         <label>@Translator("StartNumber")</label>
-                        <input type="number" class="short" min="1" @bind="Editing.StartNumber" @bind:after="OnEdited" />
+                        <span class="with-action">
+                            <input type="number" class="short" min="1" @bind="Editing.StartNumber" @bind:after="OnEdited" />
+                            <button disabled="@(_isNew || TrainCount == 0)" title='@Translator("RenumberTrainsTitle")'
+                                    @onclick="RenumberTrains"><i class="fa-solid fa-arrow-down-1-9"></i> @Translator("Renumber")</button>
+                        </span>
                     </div>
                     <div class="field">
                         <label>@Translator("Type")</label>
@@ -299,6 +303,15 @@ else
     {
         if (Editing is null || Timetable is null) return;
         _reapplied = Timetable.ApplyDefaultFinishingMinutes(Editing);
+        ScheduleState.SaveAndNotify();
+    }
+
+    // Moves the numbers of every train of the category so they start from its start number. All trains
+    // move by the same even amount, so none changes direction (odd/even) and their pairings are kept.
+    private void RenumberTrains()
+    {
+        if (Editing is null || Timetable is null) return;
+        _reapplied = Timetable.RenumberTrains(Editing);
         ScheduleState.SaveAndNotify();
     }
 

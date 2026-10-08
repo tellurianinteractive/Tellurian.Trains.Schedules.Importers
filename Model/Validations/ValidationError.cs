@@ -590,6 +590,30 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a layover-mismatch error over the wrap between sessions: where the traction unit goes after
+    /// the last part it works on one session is not where it comes from before the first part it works
+    /// on the next (rule S6). The two parts may belong to different schedules.
+    /// </summary>
+    public static ValidationError LayoverMismatch(
+        ScheduledObject vehicle,
+        Schedule previousSchedule,
+        ScheduledTrainPart previous,
+        Schedule nextSchedule,
+        ScheduledTrainPart next,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ScheduleLayoverMismatch,
+            FromTrack = previous.To.Track,
+            ToTrack = next.From.Track,
+            FromTime = previous.To.Arrival,
+            ToTime = next.From.Departure,
+            Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
+            Schedules = [.. new[] { previousSchedule, nextSchedule }.Distinct()],
+            Vehicle = vehicle,
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a standing-track-mismatch error: the track the vehicles are put on after one part arrives
     /// is not the track the next part fetches them from (rule S7).
     /// </summary>

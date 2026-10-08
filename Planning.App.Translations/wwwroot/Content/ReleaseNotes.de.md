@@ -1,5 +1,22 @@
 # Versionshinweise
 
+## Version 0.8.2
+
+### Änderungen
+
+- **Die Züge einer Kategorie können neu nummeriert werden.** Ändern Sie auf dem Reiter
+  **Zugkategorien** die **Startnummer** und klicken Sie daneben auf **Neu nummerieren**. Alle Züge der
+  Kategorie werden um denselben Betrag verschoben, sodass der Zug mit der niedrigsten Nummer die erste
+  Nummer ab der Startnummer erhält. Kein Zug wechselt zwischen ungerade und gerade, und Lücken und
+  Nummernpaare bleiben erhalten: Mit der Startnummer 100 werden die Züge 1, 2 und 3 zu 101, 102 und 103.
+  Eine Rangierkategorie kennt kein Ungerade und Gerade, daher erhält ihre erste Aufgabe die Startnummer
+  selbst.
+- **Ein Fahrzeug, das vor seinem ersten Zug vom Abstellgleis geholt wird, muss nach seinem letzten
+  abgestellt werden.** Wird eine Lok oder ein Triebzug vor seinem ersten Zug einer Fahrrunde vom
+  Abstellgleis geholt oder aufgegleist, zeigt die Prüfung jetzt eine Warnung, sofern es nicht auch nach
+  seinem letzten Zug, wo es zu diesem Bahnhof zurückkehrt, abgestellt oder abgehoben wird — in derselben
+  Fahrrunde oder in einer späteren, wenn es über mehrere Fahrrunden umläuft.
+
 ## Version 0.8.1
 
 ### Änderungen

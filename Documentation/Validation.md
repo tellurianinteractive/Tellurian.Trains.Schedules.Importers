@@ -378,7 +378,9 @@ locations** tab.
 
 **Validates**: At every joint where the vehicle stands between two parts, the arriving part's `TractionOptions.ToLayover` equals the departing part's `TractionOptions.FromLayover`. A `TractionLayover` is `None` (the unit stays on a track of the station — the train's own or one the part names), `Stabling` (driven to and from stabling) or `LiftedOff` (lifted off the track and on again). A part with no traction options counts as `None`. So a unit driven to stabling must be fetched from stabling, one lifted off must be lifted on, and one left on the track needs neither. `Schedule.SetArrivalLayover` and `SetDepartureLayover` set both ends together, so the rule catches plans edited otherwise (or a mismatch left from before). Gated by `ValidateSchedules`; severity Warning.
 
-**Not paired**: a broken joint (reported by S2) and a schedule whose parts overlap (see S2). The wrap from the last part of the day to the first is not paired either.
+**Between sessions** (`ValidateLayoverPairsBetweenSessions(this Plan plan)`): the same pairing over the wrap from the last part a traction unit works on one session to the first part it works on the next session it works — followed **per traction unit**, so the two parts may lie in different schedules. A unit fetched from stabling before its first train must be stabled after its last train where it finally returns to that station: at the end of the same session for a working repeated every session, or at the end of a later session for a circulation over two or more sessions (where each overnight stay in between is paired the same way). The wrap is paired only where the unit starts the next session where it ended the last; otherwise the circulation is broken and S3 + S5 report it. Each mismatched pair is reported once. Message: `"Vehicle {vehicle}: {trainPart} ends with '{arrival}', but {trainPart}, which it works next, begins with '{departure}'."`
+
+**Not paired**: a broken joint (reported by S2) and a schedule whose parts overlap (see S2).
 
 **Error**: `"Vehicle schedule {number}: {trainPart} ends with '{arrival}', but {trainPart} begins with '{departure}'."` (`ScheduleLayoverMismatch`)
 

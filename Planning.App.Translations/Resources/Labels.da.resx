@@ -1828,6 +1828,12 @@
   <data name="ReappliedToTrains" xml:space="preserve">
     <value>{0} tog blev ændret.</value>
   </data>
+  <data name="Renumber" xml:space="preserve">
+    <value>Omnummerér</value>
+  </data>
+  <data name="RenumberTrainsTitle" xml:space="preserve">
+    <value>Omnummerér alle tog i kategorien fra startnummeret. Alle tog flyttes lige meget, så intet skifter mellem ulige og lige, og huller og par af numre bevares.</value>
+  </data>
   <data name="Assign" xml:space="preserve">
     <value>Tildel</value>
   </data>

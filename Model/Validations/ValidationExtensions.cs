@@ -25,6 +25,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateLayoverPairs()));
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateLayoverPairsBetweenSessions());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateStandingTrackPairs()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
@@ -562,6 +563,61 @@ public static class ValidationExtensions
                 var toPart = end is not null ? arriveAt[end] : departFrom[start!];
                 var message = Message.Information(Strings.VehicleDoesNotReturnToStart, vehicle.Designation, (start ?? end)!, (end ?? start)!);
                 errors.Add(ValidationError.VehicleNotClosed(vehicle, fromPart, toPart, message));
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates layover pairing over the wrap between sessions (rule S6, continued): a traction unit
+        /// fetched from stabling, or lifted on, before the first train it works on a session must have been
+        /// driven to stabling, or lifted off, after the last train it worked where it stood before — which,
+        /// for a circulation over two or more sessions, is the end of the previous session it works, and
+        /// for one worked the same every session, the end of the same session.
+        /// </summary>
+        /// <remarks>
+        /// <para>Followed per traction unit, not per schedule, because the sessions a unit works can be
+        /// split over several schedules (the rotation case, see <see cref="ValidateVehicleClosure"/>). The
+        /// wrap is paired only where the unit starts the next session where it ended the last; where it
+        /// does not, the circulation is broken and that is the closure rule's to report.</para>
+        /// <para>Each mismatched pair of parts is reported once, however many sessions or units share it.</para>
+        /// </remarks>
+        internal IEnumerable<ValidationError> ValidateLayoverPairsBetweenSessions()
+        {
+            var general = plan.Layout.Settings.General;
+            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
+            var errors = new List<ValidationError>();
+            var reported = new List<(ScheduledTrainPart Previous, ScheduledTrainPart Next)>();
+            foreach (var vehicle in plan.ScheduledObjects.Where(v => v.IsTraction))
+            {
+                // The unit's working on each session it works, in the order it works the parts.
+                var workings = new List<List<(Schedule Schedule, ScheduledTrainPart Part)>>();
+                for (var number = 1; number <= periodMax; number++)
+                {
+                    var working = vehicle.ScheduleAssignments
+                        .Where(a => a.Schedule is not null && a.Sessions.Includes(number))
+                        .SelectMany(a => a.Schedule!.Parts
+                            .Where(p => p.Train.Sessions.Includes(number))
+                            .Select(p => (Schedule: a.Schedule!, Part: p)))
+                        .DistinctBy(x => x.Part, ReferenceEqualityComparer.Instance)
+                        .OrderBy(x => x.Part.StartTime)
+                        .ToList();
+                    if (working.Count > 0) workings.Add(working);
+                }
+
+                for (var i = 0; i < workings.Count; i++)
+                {
+                    var (previousSchedule, previous) = workings[i][^1];
+                    var (nextSchedule, next) = workings[(i + 1) % workings.Count][0];
+                    if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
+                    var arrival = previous.TractionOptions?.ToLayover ?? TractionLayover.None;
+                    var departure = next.TractionOptions?.FromLayover ?? TractionLayover.None;
+                    if (arrival == departure) continue;
+                    if (reported.Any(r => ReferenceEquals(r.Previous, previous) && ReferenceEquals(r.Next, next))) continue;
+                    reported.Add((previous, next));
+                    var message = Message.Warning(Strings.VehicleLayoverMismatchBetweenSessions,
+                        vehicle.Designation, previous, ArrivalLayoverText(arrival), next, DepartureLayoverText(departure));
+                    errors.Add(ValidationError.LayoverMismatch(vehicle, previousSchedule, previous, nextSchedule, next, message));
+                }
             }
             return errors;
         }

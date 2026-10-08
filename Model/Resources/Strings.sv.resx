@@ -291,6 +291,9 @@
   <data name="ScheduleLayoverMismatch" xml:space="preserve">
     <value>Fordonsomlopp {0}: {1} slutar med ”{2}”, men {3} börjar med ”{4}”.</value>
   </data>
+  <data name="VehicleLayoverMismatchBetweenSessions" xml:space="preserve">
+    <value>Fordon {0}: {1} slutar med ”{2}”, men {3}, som det kör härnäst, börjar med ”{4}”.</value>
+  </data>
   <data name="ScheduleStandingTrackMismatch" xml:space="preserve">
     <value>Fordonsomlopp {0}: {1} ställer fordonen på spår {2}, men {3} hämtar dem från spår {4}.</value>
   </data>

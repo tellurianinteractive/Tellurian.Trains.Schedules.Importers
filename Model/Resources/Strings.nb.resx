@@ -291,6 +291,9 @@
   <data name="ScheduleLayoverMismatch" xml:space="preserve">
     <value>Vognløp {0}: {1} slutter med «{2}», men {3} begynner med «{4}».</value>
   </data>
+  <data name="VehicleLayoverMismatchBetweenSessions" xml:space="preserve">
+    <value>Kjøretøy {0}: {1} slutter med «{2}», men {3}, som det kjører deretter, begynner med «{4}».</value>
+  </data>
   <data name="ScheduleStandingTrackMismatch" xml:space="preserve">
     <value>Vognløp {0}: {1} setter kjøretøyene på spor {2}, men {3} henter dem fra spor {4}.</value>
   </data>

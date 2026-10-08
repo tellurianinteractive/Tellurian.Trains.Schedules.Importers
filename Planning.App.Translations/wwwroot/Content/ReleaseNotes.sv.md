@@ -1,5 +1,20 @@
 # Versionsnyheter
 
+## Version 0.8.2
+
+### Ändringar
+
+- **Tågen i en kategori kan numreras om.** Ändra **Startnummer** på fliken **Tågkategorier** och klicka
+  på **Numrera om** bredvid. Alla tåg i kategorin flyttas lika mycket, så att tåget med lägst nummer får
+  det första numret på eller över startnumret. Inget tåg byter mellan udda och jämnt, och luckor och par
+  av nummer behålls: med startnummer 100 blir tåg 1, 2 och 3 tåg 101, 102 och 103. En växlingskategori har
+  inga udda och jämna nummer, så dess första uppgift får själva startnumret.
+- **Ett fordon som hämtas från uppställning före sitt första tåg ska ställas upp efter sitt sista.** Där
+  ett lok eller en motorvagn hämtas från uppställning, eller lyfts på, före sitt första tåg i en köromgång
+  visar valideringen nu en varning, om det inte också ställs upp, eller lyfts av, efter sitt sista tåg där
+  det kommer tillbaka till den stationen — i samma köromgång, eller i en senare när det går i omlopp
+  över flera köromgångar.
+
 ## Version 0.8.1
 
 ### Ändringar

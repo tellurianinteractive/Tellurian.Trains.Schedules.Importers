@@ -1828,6 +1828,12 @@
   <data name="ReappliedToTrains" xml:space="preserve">
     <value>{0} tåg ändrades.</value>
   </data>
+  <data name="Renumber" xml:space="preserve">
+    <value>Numrera om</value>
+  </data>
+  <data name="RenumberTrainsTitle" xml:space="preserve">
+    <value>Numrera om alla tåg i kategorin från startnumret. Alla tåg flyttas lika mycket, så inget byter mellan udda och jämnt, och luckor och par av nummer behålls.</value>
+  </data>
   <data name="Assign" xml:space="preserve">
     <value>Tilldela</value>
   </data>

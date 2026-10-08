@@ -691,6 +691,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0}: {1} ends with ‘{2}’, but {3}, which it works next, begins with ‘{4}’..
+        /// </summary>
+        internal static string VehicleLayoverMismatchBetweenSessions {
+            get {
+                return ResourceManager.GetString("VehicleLayoverMismatchBetweenSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle {0} does not return to its start {1}; it ends at {2}..
         /// </summary>
         internal static string VehicleDoesNotReturnToStart {
