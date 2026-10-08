@@ -324,9 +324,12 @@ public static class CompositionPaginator
         _ => geometry.WagonHeightMm,
     };
 
-    // The places of a cargo rectangle as they are printed: one list, separated by commas.
+    // The places of a cargo rectangle as they are printed: one list, separated by commas. Origins are printed
+    // after a "wagons from" in the report's language, charged at its English length.
     private static string ListOf(CargoPositionComposition cargo) =>
-        string.Join(", ", cargo.Destinations.Select(destination => destination.Text));
+        string.Join(", ", cargo.Destinations.Select(destination => destination.IsOrigins ? OriginsPrefix + destination.Text : destination.Text));
+
+    private const string OriginsPrefix = "Wagons from ";
 
     private static string ListOf(ArrivingCargoComposition arriving) => string.Join(", ", arriving.Origins);
 

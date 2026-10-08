@@ -795,6 +795,35 @@ public class TrainCompositionTests
     }
 
     [TestMethod]
+    public void AFlowForwardingWagonsFromOriginsNamesTheOriginsInsteadOfItsDestinations()
+    {
+        var fixture = CreateFixture();
+        AddFlow(fixture, 1, 2, 1, new Destination { Location = fixture.End })
+            .CargoFlowOptions.Origins.Add(new Origin { Location = fixture.Start });
+        AddFlow(fixture, 1, 2, 1, new Destination { Location = fixture.End });
+
+        var cargo = (CargoPositionComposition)DeparturesAt(fixture, fixture.Middle).Single().Groups.Single();
+
+        CollectionAssert.AreEqual(new[] { (false, "End"), (true, "Start") },
+            cargo.Destinations.Select(entry => (entry.IsOrigins, entry.Text)).ToArray(),
+            "The forwarded wagons are named by where they came from, after the places.");
+    }
+
+    [TestMethod]
+    public void AFlowToAllDestinationsForwardingWagonsFromOriginsNamesTheOrigins()
+    {
+        var fixture = CreateFixture();
+        var flow = AddFlow(fixture, 1, 2, 1);
+        flow.CargoFlowOptions.ToAllDestinations = true;
+        flow.CargoFlowOptions.Origins.Add(new Origin { Location = fixture.Start });
+
+        var entry = ((CargoPositionComposition)DeparturesAt(fixture, fixture.Middle).Single().Groups.Single()).Destinations.Single();
+
+        Assert.IsTrue(entry.IsOrigins);
+        Assert.AreEqual("Start", entry.Text);
+    }
+
+    [TestMethod]
     public void AnArrivalIsListedBeforeTheDepartureOfTheSameCall()
     {
         var fixture = CreateFixture();

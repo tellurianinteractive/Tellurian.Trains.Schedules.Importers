@@ -1567,6 +1567,9 @@
   <data name="WagonsToDestinations" xml:space="preserve">
     <value>Vagnar till {0}</value>
   </data>
+  <data name="WagonsFromPlaces" xml:space="preserve">
+    <value>Vagnar från {0}</value>
+  </data>
   <data name="WagonsFromTo" xml:space="preserve">
     <value>Vagnar från {0} till {1}</value>
   </data>

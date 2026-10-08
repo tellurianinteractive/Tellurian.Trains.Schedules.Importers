@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.7.9
+
+### Änderungen
+
+- **Zugbildungen benennen weitergeleitete Wagen nach ihrer Herkunft.** Ein Wagenstrom mit
+  **Herkunftsbetriebsstellen** wird in seinem Rechteck jetzt als „Wagen von“ seinen Herkunftsorten gezeigt
+  statt mit seinen Zielen, sodass die Wagen danach gefunden werden können, woher sie kommen. Andere
+  Wagenströme an derselben Stelle im Zug zeigen weiterhin ihre Ziele, und die Begrenzung zählt weiterhin
+  alle mit.
+
 ## Version 0.7.8
 
 ### Änderungen

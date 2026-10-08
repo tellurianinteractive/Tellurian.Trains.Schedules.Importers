@@ -115,4 +115,8 @@ public sealed record ArrivingCargoComposition : CompositionGroup
 /// The most that may be brought to this destination, drawn after the place in its compact form.
 /// Unspecified where the destination takes any number, and then nothing is drawn.
 /// </param>
-public sealed record CompositionDestination(string Text, MarkupString Html, TrainCapacity Limit = default);
+/// <param name="IsOrigins">
+/// Whether the entry names where a forwarding flow's wagons came from rather than where they go: drawn as
+/// "wagons from" the places, so it is not read as a destination.
+/// </param>
+public sealed record CompositionDestination(string Text, MarkupString Html, TrainCapacity Limit = default, bool IsOrigins = false);

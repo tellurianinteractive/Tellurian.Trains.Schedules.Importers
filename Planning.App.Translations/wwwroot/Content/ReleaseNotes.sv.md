@@ -1,5 +1,14 @@
 # Versionsnyheter
 
+## Version 0.7.9
+
+### Ändringar
+
+- **Tågsammansättningar anger vidarebefordrade vagnar efter var de kommer ifrån.** Ett godsflöde med
+  **Ursprungsdriftplatser** visas nu som "Vagnar från" sina ursprung i sin rektangel, i stället för med
+  sina destinationer, så att vagnarna kan hittas efter var de kommer ifrån. Andra godsflöden på samma plats
+  i tåget visar fortfarande sina destinationer, och begränsningen räknar fortfarande med dem alla.
+
 ## Version 0.7.8
 
 ### Ändringar

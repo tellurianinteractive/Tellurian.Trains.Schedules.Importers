@@ -1,5 +1,14 @@
 ﻿# Release notes
 
+## Version 0.7.9
+
+### Changes
+
+- **Train compositions name forwarded wagons by where they came from.** A cargo flow with
+  **Origin locations** is now shown as "Wagons from" its origins in its rectangle, instead of by its
+  destinations, so the wagons can be found by where they came from. Other cargo flows at the same place in
+  the train still list their destinations, and the limit still counts them all.
+
 ## Version 0.7.8
 
 ### Changes

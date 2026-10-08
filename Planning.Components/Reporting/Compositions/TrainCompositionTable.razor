@@ -155,11 +155,16 @@
                                                rectangle costs width before it costs height. Their order says
                                                nothing — they share a position, so the wagons within the
                                                rectangle stand as they like. The most that may be brought to a
-                                               place follows it. *@
+                                               place follows it. A flow forwarding wagons from origins of its own
+                                               names those instead of where it takes them. *@
                                             @for (var d = 0; d < cargo.Destinations.Count; d++)
                                             {
                                                 var destination = cargo.Destinations[d];
-                                                <span class="destination">@destination.Html<MaxLoadView Capacity="destination.Limit" />@(d < cargo.Destinations.Count - 1 ? ", " : null)</span>
+                                                @* A forwarding flow's wagons are found by where they came from. *@
+                                                var place = destination.IsOrigins
+                                                    ? new MarkupString(string.Format(Culture, Translator("WagonsFromPlaces"), destination.Html))
+                                                    : destination.Html;
+                                                <span class="destination">@place<MaxLoadView Capacity="destination.Limit" />@(d < cargo.Destinations.Count - 1 ? ", " : null)</span>
                                             }
                                         </div>
                                         break;

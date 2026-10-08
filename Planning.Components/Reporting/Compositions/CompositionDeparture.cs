@@ -262,14 +262,14 @@ public sealed class CompositionDeparture
             yield return new CargoPositionComposition
             {
                 Position = position,
-                Destinations = [new(toAll.ToText, new(toAll.ToHtml))],
+                Destinations = [HasOrigins(toAll) ? OriginEntryOf(toAll) : new(toAll.ToText, new(toAll.ToHtml))],
             };
             yield break;
         }
 
         var units = flows
-            .SelectMany(flow => flow.StatedDestinations)
-            .GroupBy(destination => destination.PositionInTrain);
+            .SelectMany(flow => flow.StatedDestinations.Select(destination => (Flow: flow, Destination: destination)))
+            .GroupBy(entry => entry.Destination.PositionInTrain);
         foreach (var unit in units)
             yield return new CargoPositionComposition
             {
@@ -278,6 +278,14 @@ public sealed class CompositionDeparture
                 Destinations = DestinationsOf([.. unit]),
             };
     }
+
+    // Whether a flow forwards wagons from origins of its own. The station then finds those wagons by where
+    // they came from, which is what is written on them, rather than by where the flow takes them.
+    private static bool HasOrigins(CargoFlowTrainPart flow) => flow.CargoFlowOptions.Origins.Count > 0;
+
+    // A flow's origins as one entry of a rectangle, marked as origins so they are not read as destinations.
+    private static CompositionDestination OriginEntryOf(CargoFlowTrainPart flow) =>
+        new(flow.FromText, new(flow.FromHtml), IsOrigins: true);
 
     // The cargo flow wagons uncoupled at calls[index], one unit per position the flows take in the train, front
     // first, each naming where its wagons came from.
@@ -320,8 +328,13 @@ public sealed class CompositionDeparture
     // the order the flows name them, and the regions the destinations include follow all the places, each once:
     // a region is the widest of destinations, and among the places it would read as one more station. The
     // rectangle is one unit in the train, so its limit is the sum of its destinations' limits, said once, last.
-    private static IReadOnlyList<CompositionDestination> DestinationsOf(IReadOnlyList<Destination> destinations)
+    // A flow forwarding wagons from origins of its own names those origins instead of its destinations, each
+    // list once, after the places; its destinations still count towards the limit.
+    private static IReadOnlyList<CompositionDestination> DestinationsOf(
+        IReadOnlyList<(CargoFlowTrainPart Flow, Destination Destination)> unit)
     {
+        var destinations = unit.Select(entry => entry.Destination).ToList();
+        var placed = unit.Where(entry => !HasOrigins(entry.Flow)).Select(entry => entry.Destination).ToList();
         // The same place under the same limit is the same destination named twice, and counts once; under
         // another limit it is more wagons, and adds to the total.
         var limit = destinations
@@ -330,10 +343,14 @@ public sealed class CompositionDeparture
             .Aggregate(Sum);
         List<CompositionDestination> entries =
         [
-            .. destinations
+            .. placed
                 .DistinctBy(destination => destination.PlaceTextWithoutRegions)
                 .Select(destination => new CompositionDestination(destination.PlaceTextWithoutRegions, destination.PlaceHtmlWithoutRegions)),
-            .. destinations
+            .. unit
+                .Where(entry => HasOrigins(entry.Flow))
+                .Select(entry => OriginEntryOf(entry.Flow))
+                .DistinctBy(origins => origins.Text),
+            .. placed
                 .SelectMany(destination => destination.StatedRegions)
                 .DistinctBy(region => region.Name)
                 .Select(region => new CompositionDestination(region.Name, region.ToHtml)),

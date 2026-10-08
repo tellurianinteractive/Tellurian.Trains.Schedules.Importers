@@ -1,5 +1,14 @@
 # Versionsnyheder
 
+## Version 0.7.9
+
+### Ændringer
+
+- **Togsammensætninger angiver videresendte vogne efter, hvor de kommer fra.** En godsstrøm med
+  **Oprindelsesdriftssteder** vises nu som "Vogne fra" sine oprindelser i sit rektangel i stedet for med
+  sine destinationer, så vognene kan findes efter, hvor de kommer fra. Andre godsstrømme på samme plads i
+  toget viser stadig deres destinationer, og begrænsningen tæller stadig dem alle med.
+
 ## Version 0.7.8
 
 ### Ændringer
