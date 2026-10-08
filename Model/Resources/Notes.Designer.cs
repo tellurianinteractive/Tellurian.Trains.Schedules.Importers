@@ -214,7 +214,7 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Before departure, drive {0} from parking space to departure track..
+        ///   Looks up a localized string similar to Before departure, drive {0} from stabling to departure track..
         /// </summary>
         internal static string MoveTractionUnitFromParkingToDepartureTrack {
             get {
@@ -223,11 +223,29 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to After arrival, drive {0} from arrival track to parking space..
+        ///   Looks up a localized string similar to After arrival, drive {0} from arrival track to stabling..
         /// </summary>
         internal static string MoveTractionUnitToParking {
             get {
                 return ResourceManager.GetString("MoveTractionUnitToParking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before departure, lift {0} on to the departure track..
+        /// </summary>
+        internal static string LiftTractionUnitOnToDepartureTrack {
+            get {
+                return ResourceManager.GetString("LiftTractionUnitOnToDepartureTrack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After arrival, lift {0} off the arrival track..
+        /// </summary>
+        internal static string LiftTractionUnitOffArrivalTrack {
+            get {
+                return ResourceManager.GetString("LiftTractionUnitOffArrivalTrack", resourceCulture);
             }
         }
         
@@ -255,6 +273,42 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string PutOnTrack {
             get {
                 return ResourceManager.GetString("PutOnTrack", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Before departure, fetch {0} {1} from track {2} ({3})..
+        /// </summary>
+        internal static string FetchFromTrackWithUsage {
+            get {
+                return ResourceManager.GetString("FetchFromTrackWithUsage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Before departure, fetch {0} {1} from {2}..
+        /// </summary>
+        internal static string FetchFromUsage {
+            get {
+                return ResourceManager.GetString("FetchFromUsage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to After arrival, shunt {0} {1} to track {2} ({3})..
+        /// </summary>
+        internal static string PutOnTrackWithUsage {
+            get {
+                return ResourceManager.GetString("PutOnTrackWithUsage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to After arrival, shunt {0} {1} to {2}..
+        /// </summary>
+        internal static string PutOnUsage {
+            get {
+                return ResourceManager.GetString("PutOnUsage", resourceCulture);
             }
         }
 

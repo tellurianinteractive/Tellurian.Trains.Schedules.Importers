@@ -40,13 +40,13 @@ public class TrackOccupancyTests
     private StationCall ArrivalCall => Arriving.Calls[^1];
 
     // A vehicle schedule working the arriving train and then the leaving one.
-    private Schedule Continuing(bool toParking = false, bool fromParking = false, StationTrack? toTrack = null, StationTrack? fromTrack = null)
+    private Schedule Continuing(TractionLayover toLayover = TractionLayover.None, TractionLayover fromLayover = TractionLayover.None, StationTrack? toTrack = null, StationTrack? fromTrack = null)
     {
         var schedule = new Schedule(1);
         var first = Arriving.AsTrainPart(0, 1);
         var second = Leaving.AsTrainPart(0, 1);
-        first.TractionOptions = new TractionOptions { ToParking = toParking };
-        second.TractionOptions = new TractionOptions { FromParking = fromParking };
+        first.TractionOptions = new TractionOptions { ToLayover = toLayover };
+        second.TractionOptions = new TractionOptions { FromLayover = fromLayover };
         first.ToTrack = toTrack;
         second.FromTrack = fromTrack;
         schedule.Add(first);
@@ -79,7 +79,7 @@ public class TrackOccupancyTests
     [TestMethod]
     public void AUnitBookedToParkingOccupiesOnlyTheTrainsOwnWindow()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toParking: true)]);
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toLayover: TractionLayover.Stabling)]);
 
         Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
             "Booked away to parking, the unit is not standing on this track between the two trains.");
@@ -88,10 +88,19 @@ public class TrackOccupancyTests
     [TestMethod]
     public void AUnitPickedUpFromParkingOccupiesOnlyTheTrainsOwnWindow()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromParking: true)]);
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromLayover: TractionLayover.Stabling)]);
 
         Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
             "Coming from parking, the unit was not on this track waiting for its next train.");
+    }
+
+    [TestMethod]
+    public void AUnitLiftedOffOccupiesOnlyTheTrainsOwnWindow()
+    {
+        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toLayover: TractionLayover.LiftedOff, fromLayover: TractionLayover.LiftedOff)]);
+
+        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
+            "Lifted off the layout, the unit is not standing on this track between the two trains.");
     }
 
     [TestMethod]

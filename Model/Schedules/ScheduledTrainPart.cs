@@ -198,7 +198,7 @@ public static class ScheduledTrainPartExtensions
             var options = trainPart.TractionOptions;
             if (options is null) return;
             // Fetching the units from their other track is what brings them to the train, so that note
-            // says all these would: there is nothing left to use, to couple or to bring from parking.
+            // says all these would: there is nothing left to use, to couple, to bring from stabling or to lift on.
             if (trainPart.OtherFromTrack is null) trainPart.AddTractionUnitJoiningNotes(options, callNotes);
             if (options.IsReinforcement)
             {
@@ -213,10 +213,15 @@ public static class ScheduledTrainPartExtensions
         {
             var settings = trainPart.PlanSessionsSettings;
             var units = trainPart.Working(trainPart.TractionUnits);
-            if (options.FromParking)
+            if (options.FromLayover == TractionLayover.Stabling)
             {
                 callNotes.AddRange(units
                     .Select(u => new FromParkingNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+            }
+            else if (options.FromLayover == TractionLayover.LiftedOff)
+            {
+                callNotes.AddRange(units
+                    .Select(u => new LiftOnNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
             }
             else if (options.HasCoupleNote)
             {
@@ -235,7 +240,7 @@ public static class ScheduledTrainPartExtensions
             var options = trainPart.TractionOptions;
             if (options is null) return;
             // Putting the units on their other track takes them off the train, so that note says all these
-            // would: there is nothing left to uncouple or to drive to parking.
+            // would: there is nothing left to uncouple, to drive to stabling or to lift off.
             if (trainPart.OtherToTrack is null) trainPart.AddTractionUnitLeavingNotes(options, callNotes);
             // Not part of the chain above: uncoupling is what a circulating loco does first, so a part
             // asking for both wants both notes, in that order. One note whatever the consist — the whole
@@ -256,10 +261,15 @@ public static class ScheduledTrainPartExtensions
         {
             var settings = trainPart.PlanSessionsSettings;
             var units = trainPart.Working(trainPart.TractionUnits);
-            if (options.ToParking)
+            if (options.ToLayover == TractionLayover.Stabling)
             {
                 callNotes.AddRange(units
                     .Select(u => new ToParkingNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+            }
+            else if (options.ToLayover == TractionLayover.LiftedOff)
+            {
+                callNotes.AddRange(units
+                    .Select(u => new LiftOffNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
             }
             else if (options.HasUncoupleNote)
             {

@@ -90,11 +90,13 @@ public static class GeneratedNoteExtensions
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
             FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
+            LiftOnNote(var so) => new(NoteResources.LiftTractionUnitOnToDepartureTrack, so),
+            LiftOffNote(var so) => new(NoteResources.LiftTractionUnitOffArrivalTrack, so),
             // The kind of vehicle leads the instruction — a driver reading "fetch wagon group 21" knows
             // what to look for on the track before finding the number. It is plain: the number beside it
             // is what identifies the vehicle and carries the emphasis.
-            FromTrackNote(var so, var track) => new(NoteResources.FetchFromTrack, NoteArg.Plain(ClassNames.InSentenceFor(so)), so, track),
-            ToTrackNote(var so, var track) => new(NoteResources.PutOnTrack, NoteArg.Plain(ClassNames.InSentenceFor(so)), so, track),
+            FromTrackNote(var so, var track) => TrackTemplate(track, NoteResources.FetchFromTrack, NoteResources.FetchFromTrackWithUsage, NoteResources.FetchFromUsage, so),
+            ToTrackNote(var so, var track) => TrackTemplate(track, NoteResources.PutOnTrack, NoteResources.PutOnTrackWithUsage, NoteResources.PutOnUsage, so),
             ShuntWagonsToDepartureTrackNote => new(NoteResources.ShuntWagonsToDepartureTrack),
             ShuntWagonsToArrivalTrackNote => new(NoteResources.ShuntWagonsToArrivalTrack),
             CirculateNote => new(NoteResources.CirculateTractionUnit),
@@ -200,4 +202,19 @@ public static class GeneratedNoteExtensions
     /// </summary>
     private static string When(Meet meet) =>
         meet.From == meet.To ? meet.From.HHMM() : $"{meet.From.HHMM()}-{meet.To.HHMM()}";
+
+    // A track named in a note is given by its number, followed by its usage where it has one — "track 5
+    // (loco shed)" — or by its usage alone where it has no number, since "track" then names nothing. The
+    // number is what is looked for on the layout and carries the emphasis; beside it the usage is plain.
+    // The kind of vehicle leads the instruction, as for the other vehicle notes.
+    private static NoteTemplate TrackTemplate(StationTrack track, string numbered, string numberedWithUsage, string usageOnly, ScheduledObject so)
+    {
+        var kind = NoteArg.Plain(ClassNames.InSentenceFor(so));
+        var number = track.Number.Trim();
+        var usage = track.Usage.Trim();
+        if (number.Length == 0 && usage.Length > 0) return new(usageOnly, kind, so, usage);
+        return usage.Length > 0
+            ? new(numberedWithUsage, kind, so, number, NoteArg.Plain(usage))
+            : new(numbered, kind, so, number);
+    }
 }

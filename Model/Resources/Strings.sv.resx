@@ -288,6 +288,27 @@
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Fordonsomlopp {0}: {1} fortsätter inte där föregående avsnitt slutade vid {2}.</value>
   </data>
+  <data name="ScheduleLayoverMismatch" xml:space="preserve">
+    <value>Fordonsomlopp {0}: {1} slutar med ”{2}”, men {3} börjar med ”{4}”.</value>
+  </data>
+  <data name="ScheduleStandingTrackMismatch" xml:space="preserve">
+    <value>Fordonsomlopp {0}: {1} ställer fordonen på spår {2}, men {3} hämtar dem från spår {4}.</value>
+  </data>
+  <data name="TractionLayoverNone" xml:space="preserve">
+    <value>på spår</value>
+  </data>
+  <data name="TractionLayoverToStabling" xml:space="preserve">
+    <value>till uppställning</value>
+  </data>
+  <data name="TractionLayoverToLiftedOff" xml:space="preserve">
+    <value>lyft av</value>
+  </data>
+  <data name="TractionLayoverFromStabling" xml:space="preserve">
+    <value>från uppställning</value>
+  </data>
+  <data name="TractionLayoverFromLiftedOff" xml:space="preserve">
+    <value>lyft på</value>
+  </data>
   <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
     <value>Fordonsomlopp {0} har inget fordon tilldelat.</value>
   </data>

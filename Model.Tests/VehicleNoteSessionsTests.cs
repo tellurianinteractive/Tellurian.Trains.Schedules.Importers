@@ -123,8 +123,8 @@ public class VehicleNoteSessionsTests
     public void TheParkingNotesLeadWithTheSessionsTheVehicleWorks()
     {
         var (plan, part, vehicle) = Arrange(vehicleAssigned: Sessions.FromSessionNumbers(2, 4));
-        part.TractionOptions!.FromParking = true;
-        part.TractionOptions.ToParking = true;
+        part.TractionOptions!.FromLayover = TractionLayover.Stabling;
+        part.TractionOptions.ToLayover = TractionLayover.Stabling;
 
         var departure = DepartureNotes(plan, part).OfType<FromParkingNote>().Single();
         var arrival = ArrivalNotes(plan, part).OfType<ToParkingNote>().Single();

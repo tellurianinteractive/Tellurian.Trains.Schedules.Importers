@@ -140,7 +140,7 @@ public class VehicleCallNoteTests
     {
         // The notes were generated on the train part all along; nothing read them. These two are the
         // ends of the same journey: fetched from parking before leaving, driven back after arriving.
-        var (plan, arrival, departure) = Arrange(o => { o.ToParking = true; o.FromParking = true; });
+        var (plan, arrival, departure) = Arrange(o => { o.ToLayover = TractionLayover.Stabling; o.FromLayover = TractionLayover.Stabling; });
 
         Assert.ContainsSingle(arrival.StationNotes(Sessions.All, Settings, plan).OfType<ToParkingNote>());
         Assert.ContainsSingle(departure.DriverNotes(Sessions.All, Settings, plan).OfType<FromParkingNote>());

@@ -1,5 +1,22 @@
 # Versjonsnyheter
 
+## Versjon 0.8.1
+
+### Endringer
+
+- **Et lok eller et togsett kan settes til hensetting eller løftes av mellom to tog.** Når du redigerer
+  et togavsnitt i et vognløp, angir **Trekkraft før avgang** og **Trekkraft etter ankomst** hvor
+  trekkraften er: på sporet, på hensetting, eller løftet av anlegget, for eksempel opp på et bord under en
+  lang ventetid. Lokfører og togekspeditør får en merknad om å kjøre den til eller fra hensetting, eller å
+  løfte den av eller på. Valget settes også på togavsnittet før eller etter, slik at en avløftet enhet
+  løftes på igjen før neste tog. Der de to ikke stemmer overens, viser valideringen en advarsel.
+- **Hent fra og Sett på holdes i takt med togavsnittet før eller etter.** Velger du sporet kjøretøyene
+  settes på etter ankomsten, henter neste togavsnitt dem fra det sporet, og omvendt. Der et spor er angitt
+  i den ene enden, men ikke møtes i den andre, viser valideringen en advarsel.
+- **Merknadene om å hente fra eller sette på et spor sier hva sporet brukes til.** Et spor med en bruk på
+  fanen **Driftssteder** nevnes med den, som i «spor 5 (Lokstall)». Et spor uten nummer nevnes bare med
+  bruken sin.
+
 ## Versjon 0.8.0
 
 ### Endringer

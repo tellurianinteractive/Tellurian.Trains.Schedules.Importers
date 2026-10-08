@@ -51,7 +51,20 @@
             <div class="field">
                 <label title="@Translator("PartFetchFromTrackHelp")">@Translator("PartFetchFromTrack")</label>
                 <ListBoxView Items="@(OtherTracks(FromCall).ToListItems(Translator))" Placeholder="@SameTrackText(FromCall)"
-                             Value="_fromTrack?.Id" ValueChanged="id => _fromTrack = OtherTrack(FromCall, id)" />
+                             Value="_fromTrack?.Id" ValueChanged="SetFromTrack" />
+            </div>
+        }
+        @* Stabling and lifting off take the traction off the station's tracks, so they are asked for apart
+           from them, and exclude a named track: that already says where the traction comes from. *@
+        @if (ShowTractionOptions)
+        {
+            <div class="field">
+                <label title="@Translator("TractionBeforeDepartureHelp")">@Translator("TractionBeforeDeparture")</label>
+                <select value="@_fromLayover" @onchange="SetFromLayover">
+                    <option value="@TractionLayover.None">@Translator("LayoverOnTrack")</option>
+                    <option value="@TractionLayover.Stabling">@Translator("LayoverFromStabling")</option>
+                    <option value="@TractionLayover.LiftedOff">@Translator("LayoverLiftOn")</option>
+                </select>
             </div>
         }
         <div class="field">
@@ -68,7 +81,18 @@
             <div class="field">
                 <label title="@Translator("PartPutOnTrackHelp")">@Translator("PartPutOnTrack")</label>
                 <ListBoxView Items="@(OtherTracks(ToCall).ToListItems(Translator))" Placeholder="@SameTrackText(ToCall)"
-                             Value="_toTrack?.Id" ValueChanged="id => _toTrack = OtherTrack(ToCall, id)" />
+                             Value="_toTrack?.Id" ValueChanged="SetToTrack" />
+            </div>
+        }
+        @if (ShowTractionOptions)
+        {
+            <div class="field">
+                <label title="@Translator("TractionAfterArrivalHelp")">@Translator("TractionAfterArrival")</label>
+                <select value="@_toLayover" @onchange="SetToLayover">
+                    <option value="@TractionLayover.None">@Translator("LayoverOnTrack")</option>
+                    <option value="@TractionLayover.Stabling">@Translator("LayoverToStabling")</option>
+                    <option value="@TractionLayover.LiftedOff">@Translator("LayoverLiftOff")</option>
+                </select>
             </div>
         }
 
@@ -158,6 +182,8 @@
     private int _to;
     private bool _turnLoco;
     private bool _runaroundLoco;
+    private TractionLayover _fromLayover;
+    private TractionLayover _toLayover;
     private int _orderInTrain;
     private StationTrack? _fromTrack;
     private StationTrack? _toTrack;
@@ -223,6 +249,8 @@
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
         _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
         _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
+        _fromLayover = Part.TractionOptions?.FromLayover ?? TractionLayover.None;
+        _toLayover = Part.TractionOptions?.ToLayover ?? TractionLayover.None;
         _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
         _fromTrack = Part.OtherFromTrack;
         _toTrack = Part.OtherToTrack;
@@ -252,6 +280,32 @@
     {
         if (_fromTrack is not null && !OtherTracks(FromCall).Contains(_fromTrack)) _fromTrack = null;
         if (_toTrack is not null && !OtherTracks(ToCall).Contains(_toTrack)) _toTrack = null;
+    }
+
+    // Naming a track to fetch from or put on and stabling or lifting off exclude each other, so choosing
+    // one clears the other rather than leaving a choice the notes would silently ignore.
+    private void SetFromTrack(int? id)
+    {
+        _fromTrack = OtherTrack(FromCall, id);
+        if (_fromTrack is not null) _fromLayover = TractionLayover.None;
+    }
+
+    private void SetToTrack(int? id)
+    {
+        _toTrack = OtherTrack(ToCall, id);
+        if (_toTrack is not null) _toLayover = TractionLayover.None;
+    }
+
+    private void SetFromLayover(ChangeEventArgs e)
+    {
+        _fromLayover = Enum.TryParse<TractionLayover>(e.Value?.ToString(), out var layover) ? layover : TractionLayover.None;
+        if (_fromLayover != TractionLayover.None) _fromTrack = null;
+    }
+
+    private void SetToLayover(ChangeEventArgs e)
+    {
+        _toLayover = Enum.TryParse<TractionLayover>(e.Value?.ToString(), out var layover) ? layover : TractionLayover.None;
+        if (_toLayover != TractionLayover.None) _toTrack = null;
     }
 
     // The tracks at the call's station other than the one the train uses there, in the station's order.
@@ -288,8 +342,8 @@
         if (result.IsNone) { _error = result.Message; return; }
         ApplyTractionOptions();
         ApplyWagonSetOptions();
-        Part.FromTrack = _fromTrack;
-        Part.ToTrack = _toTrack;
+        ApplyTracks();
+        ApplyLayovers();
         ScheduleState.SaveAndNotify();
         await OnSaved.InvokeAsync();
     }
@@ -307,6 +361,29 @@
         }
         Part.TractionOptions.TurnLoco = _turnLoco;
         Part.TractionOptions.RunaroundLoco = _runaroundLoco;
+    }
+
+    // Records the other tracks the vehicles are fetched from and put on. As for the layovers below, only a
+    // changed end is set, since setting it also sets the neighbouring part to match (rule S7). A track the
+    // edit has left at another station is forgotten all the same, as it was when the span was saved.
+    private void ApplyTracks()
+    {
+        if (!Equals(_fromTrack, Part.OtherFromTrack)) Schedule.SetDepartureTrack(Part, _fromTrack);
+        else if (_fromTrack is null) Part.FromTrack = null;
+        if (!Equals(_toTrack, Part.OtherToTrack)) Schedule.SetArrivalTrack(Part, _toTrack);
+        else if (_toTrack is null) Part.ToTrack = null;
+    }
+
+    // Records where the traction comes from and goes to. Only a changed end is set, because setting it
+    // also sets the neighbouring part to match (rule S6); an end left as it was keeps whatever the
+    // neighbour says, so a mismatch already there is still reported rather than silently put right.
+    private void ApplyLayovers()
+    {
+        if (!ShowTractionOptions) return;
+        if (_fromLayover != (Part.TractionOptions?.FromLayover ?? TractionLayover.None))
+            Schedule.SetDepartureLayover(Part, _fromLayover);
+        if (_toLayover != (Part.TractionOptions?.ToLayover ?? TractionLayover.None))
+            Schedule.SetArrivalLayover(Part, _toLayover);
     }
 
     // Records where in the train the wagonset is coupled. As for the traction, a part that carries no wagonset

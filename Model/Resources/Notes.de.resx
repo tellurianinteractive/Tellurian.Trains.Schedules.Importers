@@ -76,11 +76,29 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis fahren.</value>
   </data>
+  <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
+    <value>Vor Abfahrt {0} auf das Abfahrtsgleis aufgleisen.</value>
+  </data>
+  <data name="LiftTractionUnitOffArrivalTrack" xml:space="preserve">
+    <value>Nach Ankunft {0} vom Ankunftsgleis abheben.</value>
+  </data>
   <data name="FetchFromTrack" xml:space="preserve">
     <value>Vor Abfahrt {0} {1} von Gleis {2} holen.</value>
   </data>
   <data name="PutOnTrack" xml:space="preserve">
     <value>Nach Ankunft {0} {1} auf Gleis {2} rangieren.</value>
+  </data>
+  <data name="FetchFromTrackWithUsage" xml:space="preserve">
+    <value>Vor Abfahrt {0} {1} von Gleis {2} ({3}) holen.</value>
+  </data>
+  <data name="FetchFromUsage" xml:space="preserve">
+    <value>Vor Abfahrt {0} {1} von {2} holen.</value>
+  </data>
+  <data name="PutOnTrackWithUsage" xml:space="preserve">
+    <value>Nach Ankunft {0} {1} auf Gleis {2} ({3}) rangieren.</value>
+  </data>
+  <data name="PutOnUsage" xml:space="preserve">
+    <value>Nach Ankunft {0} {1} nach {2} rangieren.</value>
   </data>
   <data name="ShuntWagonsToDepartureTrack" xml:space="preserve">
     <value>Wagen vor Abfahrt zum Abfahrtsgleis rangieren.</value>

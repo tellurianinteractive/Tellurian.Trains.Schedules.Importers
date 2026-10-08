@@ -1937,6 +1937,33 @@
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Die Lok wird nach der Ankunft ans andere Zugende umgesetzt, damit der Zug in die Richtung abfahren kann, aus der er gekommen ist. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
   </data>
+  <data name="TractionBeforeDeparture" xml:space="preserve">
+    <value>Triebfahrzeug vor Abfahrt</value>
+  </data>
+  <data name="TractionBeforeDepartureHelp" xml:space="preserve">
+    <value>Woher die Lok oder der Triebzug vor der Abfahrt des Zuges kommt: von einem Gleis des Bahnhofs, vom Abstellgleis, oder aufgegleist. Abstellgleis und Aufgleisen werden als Abfahrtsvermerk für Lokführer und Fahrdienstleiter gedruckt. Die Wahl gilt auch dafür, wohin das Triebfahrzeug nach der Ankunft des vorherigen Zugteils kommt, damit beide übereinstimmen.</value>
+  </data>
+  <data name="TractionAfterArrival" xml:space="preserve">
+    <value>Triebfahrzeug nach Ankunft</value>
+  </data>
+  <data name="TractionAfterArrivalHelp" xml:space="preserve">
+    <value>Wohin die Lok oder der Triebzug nach der Ankunft des Zuges kommt: sie bleibt auf einem Gleis des Bahnhofs, fährt zum Abstellgleis, oder wird abgehoben. Abstellgleis und Abheben werden als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt. Die Wahl gilt auch dafür, woher das Triebfahrzeug vor der Abfahrt des nächsten Zugteils kommt, damit beide übereinstimmen.</value>
+  </data>
+  <data name="LayoverOnTrack" xml:space="preserve">
+    <value>Auf dem Gleis</value>
+  </data>
+  <data name="LayoverFromStabling" xml:space="preserve">
+    <value>Vom Abstellgleis</value>
+  </data>
+  <data name="LayoverLiftOn" xml:space="preserve">
+    <value>Aufgleisen</value>
+  </data>
+  <data name="LayoverToStabling" xml:space="preserve">
+    <value>Zum Abstellgleis</value>
+  </data>
+  <data name="LayoverLiftOff" xml:space="preserve">
+    <value>Abheben</value>
+  </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>Das Triebfahrzeug dieses Zugabschnitts kann wenden, wie es steht; daher wird kein Umsetzvermerk gedruckt.</value>
   </data>
@@ -1944,13 +1971,13 @@
     <value>Holen von</value>
   </data>
   <data name="PartFetchFromTrackHelp" xml:space="preserve">
-    <value>Das Gleis, auf dem die Fahrzeuge vor der Abfahrt des Zuges stehen, wenn es ein anderes ist als das, von dem der Zug abfährt. Wird als Abfahrtsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+    <value>Das Gleis, auf dem die Fahrzeuge vor der Abfahrt des Zuges stehen, wenn es ein anderes ist als das, von dem der Zug abfährt. Wird als Abfahrtsvermerk für Lokführer und Fahrdienstleiter gedruckt. Die Wahl gilt auch für den vorherigen Zugteil, der die Fahrzeuge auf dieses Gleis stellt, damit beide übereinstimmen.</value>
   </data>
   <data name="PartPutOnTrack" xml:space="preserve">
     <value>Abstellen auf</value>
   </data>
   <data name="PartPutOnTrackHelp" xml:space="preserve">
-    <value>Das Gleis, auf das die Fahrzeuge nach der Ankunft des Zuges gestellt werden, wenn es ein anderes ist als das, auf dem der Zug ankommt. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+    <value>Das Gleis, auf das die Fahrzeuge nach der Ankunft des Zuges gestellt werden, wenn es ein anderes ist als das, auf dem der Zug ankommt. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt. Die Wahl gilt auch für den nächsten Zugteil, der die Fahrzeuge von diesem Gleis holt, damit beide übereinstimmen.</value>
   </data>
   <data name="SameTrackAsTrain" xml:space="preserve">
     <value>Wie der Zug (Gleis {0})</value>

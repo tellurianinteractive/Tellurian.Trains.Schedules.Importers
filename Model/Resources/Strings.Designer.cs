@@ -304,6 +304,69 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: {1} ends with ‘{2}’, but {3} begins with ‘{4}’..
+        /// </summary>
+        internal static string ScheduleLayoverMismatch {
+            get {
+                return ResourceManager.GetString("ScheduleLayoverMismatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: {1} puts the vehicles on track {2}, but {3} fetches them from track {4}..
+        /// </summary>
+        internal static string ScheduleStandingTrackMismatch {
+            get {
+                return ResourceManager.GetString("ScheduleStandingTrackMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to on track.
+        /// </summary>
+        internal static string TractionLayoverNone {
+            get {
+                return ResourceManager.GetString("TractionLayoverNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to to stabling.
+        /// </summary>
+        internal static string TractionLayoverToStabling {
+            get {
+                return ResourceManager.GetString("TractionLayoverToStabling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to lift off.
+        /// </summary>
+        internal static string TractionLayoverToLiftedOff {
+            get {
+                return ResourceManager.GetString("TractionLayoverToLiftedOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to from stabling.
+        /// </summary>
+        internal static string TractionLayoverFromStabling {
+            get {
+                return ResourceManager.GetString("TractionLayoverFromStabling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to lift on.
+        /// </summary>
+        internal static string TractionLayoverFromLiftedOff {
+            get {
+                return ResourceManager.GetString("TractionLayoverFromLiftedOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Signature of {0} is required..
         /// </summary>
         internal static string SignatureOfObjectIsRequired {

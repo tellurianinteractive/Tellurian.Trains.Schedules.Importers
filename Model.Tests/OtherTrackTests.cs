@@ -92,6 +92,38 @@ public class OtherTrackTests
     }
 
     [TestMethod]
+    public void ATrackWithAUsageIsNamedWithIt()
+    {
+        var (plan, part, vehicle) = Arrange();
+        part.FromTrack = TrackAt(plan, "G", "1");
+        part.FromTrack.Usage = "Loco shed";
+        part.ToTrack = TrackAt(plan, "Snu", "2");
+        part.ToTrack.Usage = "Goods";
+
+        var fetch = DepartureNotes(plan, part).OfType<FromTrackNote>().Single();
+        var put = ArrivalNotes(plan, part).OfType<ToTrackNote>().Single();
+
+        Assert.AreEqual($"Before departure, fetch locomotive {vehicle} from track 1 (Loco shed).", fetch.ToText);
+        Assert.AreEqual($"After arrival, shunt locomotive {vehicle} to track 2 (Goods).", put.ToText);
+        StringAssert.Contains(fetch.ToHtml.Value, "<b class=\"value\">1</b> (Loco shed)",
+            "The number is what is looked for on the layout, so it alone carries the emphasis.");
+    }
+
+    [TestMethod]
+    public void ATrackWithNoNumberIsNamedByItsUsageAlone()
+    {
+        var (plan, part, vehicle) = Arrange();
+        var shed = new StationTrack(99, "") { Usage = "Loco shed" };
+        ((Station)plan.Layout.OperationLocations.Single(l => l.Signature == "Snu")).Add(shed);
+        part.ToTrack = shed;
+
+        var note = ArrivalNotes(plan, part).OfType<ToTrackNote>().Single();
+
+        Assert.AreEqual($"After arrival, shunt locomotive {vehicle} to Loco shed.", note.ToText);
+        StringAssert.Contains(note.ToHtml.Value, "<b class=\"value\">Loco shed</b>");
+    }
+
+    [TestMethod]
     public void FetchingFromAnotherTrackSaysAllTheCoupleNoteWould()
     {
         // Fetching the vehicle is what brings it to the train; being told to couple it as well is being
@@ -111,8 +143,8 @@ public class OtherTrackTests
     {
         // Parking says only that the vehicle is not on the train's track; the named track says which one.
         var (plan, part, _) = Arrange();
-        part.TractionOptions!.FromParking = true;
-        part.TractionOptions.ToParking = true;
+        part.TractionOptions!.FromLayover = TractionLayover.Stabling;
+        part.TractionOptions.ToLayover = TractionLayover.Stabling;
         part.FromTrack = TrackAt(plan, "G", "1");
         part.ToTrack = TrackAt(plan, "Snu", "2");
 

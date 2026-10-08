@@ -24,6 +24,8 @@ public static class ValidationExtensions
             result.AddRange(plan.ValidateLockKeys());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
+            if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateLayoverPairs()));
+            if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateStandingTrackPairs()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
@@ -593,6 +595,73 @@ public static class ValidationExtensions
                     var message = Message.Information(Strings.ScheduleIsNotContiguous, schedule.Number, next, previous.To.OperationLocation);
                     errors.Add(ValidationError.ScheduleNotContiguous(schedule, previous, next, message));
                 }
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates that the two ends of every layover in the schedule agree (rule S6): where a part's
+        /// traction goes after arrival — staying on a track, to stabling, or lifted off — is where the next
+        /// part's traction comes from before departure. A unit driven to stabling cannot be lifted on again,
+        /// and one left on the track needs neither fetching from stabling nor lifting on.
+        /// </summary>
+        /// <remarks>
+        /// Only joints the vehicle stands at are paired: a broken joint is reported by S2, and a schedule
+        /// whose parts overlap is not one vehicle's working (see <see cref="ValidateContiguity"/>).
+        /// </remarks>
+        private List<ValidationError> ValidateLayoverPairs()
+        {
+            var errors = new List<ValidationError>();
+            if (schedule.HasOverlappingParts()) return errors;
+            var parts = schedule.OrderedParts;
+            for (var i = 0; i < parts.Count - 1; i++)
+            {
+                var previous = parts[i];
+                var next = parts[i + 1];
+                if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
+                var arrival = previous.TractionOptions?.ToLayover ?? TractionLayover.None;
+                var departure = next.TractionOptions?.FromLayover ?? TractionLayover.None;
+                if (arrival == departure) continue;
+                var message = Message.Warning(Strings.ScheduleLayoverMismatch,
+                    schedule.Number, previous, ArrivalLayoverText(arrival), next, DepartureLayoverText(departure));
+                errors.Add(ValidationError.LayoverMismatch(schedule, previous, next, message));
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates that a track named at one end of a stay is met at the other (rule S7): where a part puts
+        /// its vehicles on another track after arrival, the next part fetches them from that track, and where
+        /// a part fetches them from another track, the previous part left them there.
+        /// </summary>
+        /// <remarks>
+        /// <para>Only a named track is checked. Where neither end names one, the vehicles stand on the arrival
+        /// track and the next train may well leave from another — a locomotive is simply driven over — and
+        /// the couple or use note covers that.</para>
+        /// <para>The track the vehicles stand on is the one named or else the train's own, at both ends, so a
+        /// track put on that the next train departs from needs nothing named for departure. A stay spent in
+        /// stabling or lifted off is left to S6, and broken joints and overlapping schedules are passed over
+        /// as there (see <see cref="ValidateLayoverPairs"/>).</para>
+        /// </remarks>
+        private List<ValidationError> ValidateStandingTrackPairs()
+        {
+            var errors = new List<ValidationError>();
+            if (schedule.HasOverlappingParts()) return errors;
+            var parts = schedule.OrderedParts;
+            for (var i = 0; i < parts.Count - 1; i++)
+            {
+                var previous = parts[i];
+                var next = parts[i + 1];
+                if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
+                if (previous.OtherToTrack is null && next.OtherFromTrack is null) continue;
+                if (previous.TractionOptions is { ToLayover: not TractionLayover.None }) continue;
+                if (next.TractionOptions is { FromLayover: not TractionLayover.None }) continue;
+                var putOn = previous.OtherToTrack ?? previous.To.Track;
+                var fetchedFrom = next.OtherFromTrack ?? next.From.Track;
+                if (putOn.Equals(fetchedFrom)) continue;
+                var message = Message.Warning(Strings.ScheduleStandingTrackMismatch,
+                    schedule.Number, previous, putOn.Number, next, fetchedFrom.Number);
+                errors.Add(ValidationError.StandingTrackMismatch(schedule, previous, next, message));
             }
             return errors;
         }
@@ -1193,6 +1262,20 @@ public static class ValidationExtensions
     // A session value as a message states it, limited to the operating period: the session numbers, or in
     // day mode the short day names — always named, never "Daily", since the message's "…OnDays" wording
     // puts them after a preposition.
+    private static string ArrivalLayoverText(TractionLayover layover) => layover switch
+    {
+        TractionLayover.Stabling => Strings.TractionLayoverToStabling,
+        TractionLayover.LiftedOff => Strings.TractionLayoverToLiftedOff,
+        _ => Strings.TractionLayoverNone,
+    };
+
+    private static string DepartureLayoverText(TractionLayover layover) => layover switch
+    {
+        TractionLayover.Stabling => Strings.TractionLayoverFromStabling,
+        TractionLayover.LiftedOff => Strings.TractionLayoverFromLiftedOff,
+        _ => Strings.TractionLayoverNone,
+    };
+
     private static string SessionsText(Sessions sessions, GeneralSettings general) =>
         general.UseDays
             ? sessions.DayNamesText(general.SessionSettings(useShortWeekdayNames: true))

@@ -1953,6 +1953,33 @@
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>The locomotive is run round to the other end of the train after it arrives, so the train can leave the way it came. Printed as an arrival note for the loco driver and the dispatcher.</value>
   </data>
+  <data name="TractionBeforeDeparture" xml:space="preserve">
+    <value>Traction before departure</value>
+  </data>
+  <data name="TractionBeforeDepartureHelp" xml:space="preserve">
+    <value>Where the locomotive or trainset comes from before the train departs: a track of the station, stabling, or lifted on to the track. Stabling and lifting on are printed as a departure note for the loco driver and the dispatcher. Setting it also sets where the traction goes after the part before arrives, so the two match.</value>
+  </data>
+  <data name="TractionAfterArrival" xml:space="preserve">
+    <value>Traction after arrival</value>
+  </data>
+  <data name="TractionAfterArrivalHelp" xml:space="preserve">
+    <value>Where the locomotive or trainset goes after the train arrives: it stays on a track of the station, is driven to stabling, or is lifted off the track. Stabling and lifting off are printed as an arrival note for the loco driver and the dispatcher. Setting it also sets where the traction comes from before the next part departs, so the two match.</value>
+  </data>
+  <data name="LayoverOnTrack" xml:space="preserve">
+    <value>On track</value>
+  </data>
+  <data name="LayoverFromStabling" xml:space="preserve">
+    <value>From stabling</value>
+  </data>
+  <data name="LayoverLiftOn" xml:space="preserve">
+    <value>Lift on</value>
+  </data>
+  <data name="LayoverToStabling" xml:space="preserve">
+    <value>To stabling</value>
+  </data>
+  <data name="LayoverLiftOff" xml:space="preserve">
+    <value>Lift off</value>
+  </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>The traction working this train part reverses as it stands, so no runaround note is printed.</value>
   </data>
@@ -1960,13 +1987,13 @@
     <value>Fetch from</value>
   </data>
   <data name="PartFetchFromTrackHelp" xml:space="preserve">
-    <value>The track the vehicles stand on before the train departs, where it is another than the one the train departs from. Printed as a departure note for the loco driver and the dispatcher.</value>
+    <value>The track the vehicles stand on before the train departs, where it is another than the one the train departs from. Printed as a departure note for the loco driver and the dispatcher. Setting it also has the part before put the vehicles on that track, so the two match.</value>
   </data>
   <data name="PartPutOnTrack" xml:space="preserve">
     <value>Put on</value>
   </data>
   <data name="PartPutOnTrackHelp" xml:space="preserve">
-    <value>The track the vehicles are put on after the train arrives, where it is another than the one the train arrives at. Printed as an arrival note for the loco driver and the dispatcher.</value>
+    <value>The track the vehicles are put on after the train arrives, where it is another than the one the train arrives at. Printed as an arrival note for the loco driver and the dispatcher. Setting it also has the next part fetch the vehicles from that track, so the two match.</value>
   </data>
   <data name="SameTrackAsTrain" xml:space="preserve">
     <value>Same as the train (track {0})</value>

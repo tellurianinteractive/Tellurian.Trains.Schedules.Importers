@@ -1,5 +1,22 @@
 ﻿# Release notes
 
+## Version 0.8.1
+
+### Changes
+
+- **A locomotive or trainset can be stabled or lifted off between two trains.** When you edit a part of
+  a vehicle schedule, **Traction before departure** and **Traction after arrival** say where the traction
+  is: on the track, at stabling, or lifted off the layout, for example onto a table during a long wait.
+  The loco driver and the dispatcher get a note to drive it to or from stabling, or to lift it off or on.
+  Choosing an end also sets the part before or after to match, so a unit lifted off is lifted on again
+  before its next train. Where the two do not match, the validation shows a warning.
+- **Fetch from and Put on are kept in step with the part before or after.** Choosing the track the
+  vehicles are put on after arrival also has the next part fetch them from that track, and the other way
+  round. Where a track is named at one end but not met at the other, the validation shows a warning.
+- **The notes to fetch from or put on a track name what the track is for.** A track with a usage on the
+  **Operation locations** tab is named with it, as in "track 5 (Loco shed)". A track with no number is
+  named by its usage alone.
+
 ## Version 0.8.0
 
 ### Changes

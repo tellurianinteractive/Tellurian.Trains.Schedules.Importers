@@ -1937,6 +1937,33 @@
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Lokomotivet køres om til den anden ende af toget efter ankomsten, så toget kan afgå den vej, det kom fra. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
   </data>
+  <data name="TractionBeforeDeparture" xml:space="preserve">
+    <value>Trækkraft før afgang</value>
+  </data>
+  <data name="TractionBeforeDepartureHelp" xml:space="preserve">
+    <value>Hvorfra lokomotivet eller togsættet kommer, før toget afgår: et spor på stationen, opstilling, eller løftes på sporet. Opstilling og løft på udskrives som afgangsbemærkning for lokomotivfører og fjernstyringsleder. Valget sættes også på, hvor trækkraften bliver af efter forrige togafsnits ankomst, så de stemmer overens.</value>
+  </data>
+  <data name="TractionAfterArrival" xml:space="preserve">
+    <value>Trækkraft efter ankomst</value>
+  </data>
+  <data name="TractionAfterArrivalHelp" xml:space="preserve">
+    <value>Hvor lokomotivet eller togsættet bliver af, efter toget er ankommet: det bliver stående på et spor på stationen, køres til opstilling, eller løftes af sporet. Opstilling og løft af udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder. Valget sættes også på, hvorfra trækkraften kommer før næste togafsnits afgang, så de stemmer overens.</value>
+  </data>
+  <data name="LayoverOnTrack" xml:space="preserve">
+    <value>På spor</value>
+  </data>
+  <data name="LayoverFromStabling" xml:space="preserve">
+    <value>Fra opstilling</value>
+  </data>
+  <data name="LayoverLiftOn" xml:space="preserve">
+    <value>Løft på</value>
+  </data>
+  <data name="LayoverToStabling" xml:space="preserve">
+    <value>Til opstilling</value>
+  </data>
+  <data name="LayoverLiftOff" xml:space="preserve">
+    <value>Løft af</value>
+  </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>Trækkraften på dette togafsnit kan vende, som den står, så der udskrives ingen omløbsbemærkning.</value>
   </data>
@@ -1944,13 +1971,13 @@
     <value>Hent fra</value>
   </data>
   <data name="PartFetchFromTrackHelp" xml:space="preserve">
-    <value>Det spor, køretøjerne står på, før toget afgår, når det er et andet end det, toget afgår fra. Udskrives som afgangsbemærkning for lokomotivfører og fjernstyringsleder.</value>
+    <value>Det spor, køretøjerne står på, før toget afgår, når det er et andet end det, toget afgår fra. Udskrives som afgangsbemærkning for lokomotivfører og fjernstyringsleder. Valget sættes også på det forrige togafsnit, som sætter køretøjerne på det spor, så de stemmer overens.</value>
   </data>
   <data name="PartPutOnTrack" xml:space="preserve">
     <value>Sæt på</value>
   </data>
   <data name="PartPutOnTrackHelp" xml:space="preserve">
-    <value>Det spor, køretøjerne sættes på, efter toget er ankommet, når det er et andet end det, toget ankommer til. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+    <value>Det spor, køretøjerne sættes på, efter toget er ankommet, når det er et andet end det, toget ankommer til. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder. Valget sættes også på det næste togafsnit, som henter køretøjerne fra det spor, så de stemmer overens.</value>
   </data>
   <data name="SameTrackAsTrain" xml:space="preserve">
     <value>Samme som toget (spor {0})</value>

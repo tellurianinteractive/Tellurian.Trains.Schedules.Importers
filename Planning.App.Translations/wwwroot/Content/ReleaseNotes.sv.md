@@ -1,5 +1,23 @@
 # Versionsnyheter
 
+## Version 0.8.1
+
+### Ändringar
+
+- **Ett lok eller en motorvagn kan ställas upp eller lyftas av mellan två tåg.** När du redigerar ett
+  avsnitt i ett fordonsomlopp anger **Dragfordon före avgång** och **Dragfordon efter ankomst** var
+  dragfordonet finns: på spåret, på uppställning, eller avlyft från banan, till exempel på ett bord under
+  en lång väntan. Lokförare och tågklarerare får en anmärkning om att köra det till eller från
+  uppställning, eller att lyfta av eller på det. Valet sätts också på avsnittet före eller efter, så att
+  ett avlyft fordon lyfts på igen före nästa tåg. Där de två inte stämmer överens visar valideringen en
+  varning.
+- **Hämta från och Ställ på hålls i takt med avsnittet före eller efter.** Väljer du spåret fordonen
+  ställs på efter ankomsten hämtar nästa avsnitt dem från det spåret, och tvärtom. Där ett spår anges i
+  ena änden men inte möts i den andra visar valideringen en varning.
+- **Anmärkningarna om att hämta från eller ställa på ett spår säger vad spåret används till.** Ett spår
+  med en användning på fliken **Driftplatser** nämns med den, som i ”spår 5 (Lokstall)”. Ett spår utan
+  nummer nämns bara med sin användning.
+
 ## Version 0.8.0
 
 ### Ändringar

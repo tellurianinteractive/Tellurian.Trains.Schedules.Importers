@@ -111,6 +111,8 @@ public sealed record ValidationError
 
         ValidationErrorType.VehicleScheduleOverlap or
         ValidationErrorType.ScheduleNotContiguous or
+        ValidationErrorType.ScheduleLayoverMismatch or
+        ValidationErrorType.ScheduleStandingTrackMismatch or
         ValidationErrorType.ScheduleHasNoVehicle or
         ValidationErrorType.TrainMissingTraction or
         ValidationErrorType.LocomotiveCoverageGap or
@@ -568,6 +570,46 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a layover-mismatch error: where the traction goes after one part arrives is not where it
+    /// comes from before the next part departs (rule S6).
+    /// </summary>
+    public static ValidationError LayoverMismatch(
+        Schedule schedule,
+        ScheduledTrainPart previous,
+        ScheduledTrainPart next,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ScheduleLayoverMismatch,
+            FromTrack = previous.To.Track,
+            ToTrack = next.From.Track,
+            FromTime = previous.To.Arrival,
+            ToTime = next.From.Departure,
+            Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
+            Schedules = [schedule],
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a standing-track-mismatch error: the track the vehicles are put on after one part arrives
+    /// is not the track the next part fetches them from (rule S7).
+    /// </summary>
+    public static ValidationError StandingTrackMismatch(
+        Schedule schedule,
+        ScheduledTrainPart previous,
+        ScheduledTrainPart next,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.ScheduleStandingTrackMismatch,
+            FromTrack = previous.To.Track,
+            ToTrack = next.From.Track,
+            FromTime = previous.To.Arrival,
+            ToTime = next.From.Departure,
+            Trains = [.. new[] { previous.Train, next.Train }.Distinct()],
+            Schedules = [schedule],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a schedule-has-no-vehicle error: a schedule that runs regular sessions has no vehicle
     /// assigned at all (rule S4).
     /// </summary>
@@ -839,6 +881,18 @@ public enum ValidationErrorType
 
     /// <summary>A vehicle schedule's parts are not geographically contiguous.</summary>
     ScheduleNotContiguous,
+
+    /// <summary>
+    /// Where a vehicle schedule's traction goes after one part arrives — on track, to stabling or lifted
+    /// off — is not where it comes from before the next part departs.
+    /// </summary>
+    ScheduleLayoverMismatch,
+
+    /// <summary>
+    /// The track a vehicle schedule's vehicles are put on after one part arrives is not the track the
+    /// next part fetches them from, where either end names another track than the train's.
+    /// </summary>
+    ScheduleStandingTrackMismatch,
 
     /// <summary>A vehicle schedule that runs regular sessions has no vehicle assigned.</summary>
     ScheduleHasNoVehicle,

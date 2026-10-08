@@ -54,6 +54,8 @@ public sealed record ValidationError
 | `LocomotiveCoverageOverlap` | Train has overlapping locomotive assignments |
 | `VehicleDoubleBooked` | Vehicle has overlapping schedule assignments |
 | `ScheduleNotContiguous` | A schedule's parts are not geographically contiguous |
+| `ScheduleStandingTrackMismatch` | A track named for the vehicles to be put on after one part arrives, or fetched from before the next departs, is not met at the other end |
+| `ScheduleLayoverMismatch` | Where the traction goes after one part arrives (on track, to stabling, lifted off) is not where it comes from before the next part departs |
 | `ScheduleHasNoVehicle` | A schedule that runs regular sessions has no vehicle assigned (a working of shunting tasks alone is exempt) |
 | `TrainMissingTraction` | A stretch of a train's run has no traction unit on some sessions it runs |
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
@@ -370,6 +372,24 @@ locations** tab.
 **Skipped when the schedule's parts overlap in time** (`HasOverlappingParts`): such a schedule is not one vehicle's working — typically two vehicles an import merged under one identifier — so S1 already reports the overlap and ordering the parts for a contiguity test would only cascade misleading gaps.
 
 **Error**: `"Vehicle schedule {number}: {trainPart} does not continue from where the previous part ended at {location}."` (`ScheduleNotContiguous`)
+
+#### S6 — Layover pairing ✅
+**Method**: `ValidateLayoverPairs(this Schedule me)`
+
+**Validates**: At every joint where the vehicle stands between two parts, the arriving part's `TractionOptions.ToLayover` equals the departing part's `TractionOptions.FromLayover`. A `TractionLayover` is `None` (the unit stays on a track of the station — the train's own or one the part names), `Stabling` (driven to and from stabling) or `LiftedOff` (lifted off the track and on again). A part with no traction options counts as `None`. So a unit driven to stabling must be fetched from stabling, one lifted off must be lifted on, and one left on the track needs neither. `Schedule.SetArrivalLayover` and `SetDepartureLayover` set both ends together, so the rule catches plans edited otherwise (or a mismatch left from before). Gated by `ValidateSchedules`; severity Warning.
+
+**Not paired**: a broken joint (reported by S2) and a schedule whose parts overlap (see S2). The wrap from the last part of the day to the first is not paired either.
+
+**Error**: `"Vehicle schedule {number}: {trainPart} ends with '{arrival}', but {trainPart} begins with '{departure}'."` (`ScheduleLayoverMismatch`)
+
+#### S7 — Standing track pairing ✅
+**Method**: `ValidateStandingTrackPairs(this Schedule me)`
+
+**Validates**: At every joint where the vehicle stands between two parts and **either end names another track** (`OtherToTrack` on the arriving part, `OtherFromTrack` on the departing one), the track the vehicles are put on (`OtherToTrack ?? To.Track`) is the track they are fetched from (`OtherFromTrack ?? From.Track`). Where neither end names a track nothing is checked: a locomotive arriving on one track and leaving from another is driven over, and the use or couple note covers that. Applies to all vehicle kinds. `Schedule.SetArrivalTrack` and `SetDepartureTrack` set both ends together; a track the other train already uses needs no name at that end. Gated by `ValidateSchedules`; severity Warning.
+
+**Not checked**: a joint whose traction is stabled or lifted off at either end (S6's), a broken joint (S2's) and a schedule whose parts overlap.
+
+**Error**: `"Vehicle schedule {number}: {trainPart} puts the vehicles on track {track}, but {trainPart} fetches them from track {track}."` (`ScheduleStandingTrackMismatch`)
 
 #### S3 + S5 — Circulation closure (per vehicle) ✅
 **Method**: `ValidateVehicleClosure(this Plan plan)`

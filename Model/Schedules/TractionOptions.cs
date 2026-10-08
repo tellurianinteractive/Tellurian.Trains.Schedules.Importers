@@ -15,14 +15,19 @@ public sealed class TractionOptions : TrainPartOptions
     public bool DisplayUseNote { get; set; } = true;
 
     /// <summary>
-    /// If true, overrides the <see cref="DisplayUseNote"/> with instruction to get traction unit from parking before departure time.
+    /// Where the traction unit comes from before departure: from stabling, lifted on to the track, or
+    /// (<see cref="TractionLayover.None"/>) from a track of the station. Anything but none overrides the
+    /// <see cref="DisplayUseNote"/> with an instruction to bring the unit to the departure track.
     /// </summary>
-    public bool FromParking { get; set; }
+    /// <remarks>Must match the <see cref="ToLayover"/> of the part the unit worked before (rule S6).</remarks>
+    public TractionLayover FromLayover { get; set; }
 
     /// <summary>
-    /// If true, should present a note to drivers/stations to move traction unit to parking after arrival.
+    /// Where the traction unit goes after arrival: to stabling, lifted off the track, or
+    /// (<see cref="TractionLayover.None"/>) it stays on a track of the station.
     /// </summary>
-    public bool ToParking { get; set; }
+    /// <remarks>Must match the <see cref="FromLayover"/> of the part the unit works next (rule S6).</remarks>
+    public TractionLayover ToLayover { get; set; }
 
     /// <summary>
     /// If true, the traction unit should be turned on arrival, so it faces the other way. Only asked for

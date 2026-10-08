@@ -1937,6 +1937,33 @@
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Loket körs runt till andra änden av tåget efter ankomsten, så att tåget kan avgå åt det håll det kom ifrån. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
   </data>
+  <data name="TractionBeforeDeparture" xml:space="preserve">
+    <value>Dragfordon före avgång</value>
+  </data>
+  <data name="TractionBeforeDepartureHelp" xml:space="preserve">
+    <value>Varifrån loket eller motorvagnen kommer innan tåget avgår: ett spår på stationen, uppställning, eller lyfts på spåret. Uppställning och lyft på skrivs ut som avgångsanmärkning för lokförare och tågklarerare. Valet sätts också på vart dragfordonet tar vägen efter föregående avsnitts ankomst, så att de stämmer överens.</value>
+  </data>
+  <data name="TractionAfterArrival" xml:space="preserve">
+    <value>Dragfordon efter ankomst</value>
+  </data>
+  <data name="TractionAfterArrivalHelp" xml:space="preserve">
+    <value>Vart loket eller motorvagnen tar vägen efter att tåget har ankommit: det står kvar på ett spår på stationen, körs till uppställning, eller lyfts av spåret. Uppställning och lyft av skrivs ut som ankomstanmärkning för lokförare och tågklarerare. Valet sätts också på varifrån dragfordonet kommer före nästa avsnitts avgång, så att de stämmer överens.</value>
+  </data>
+  <data name="LayoverOnTrack" xml:space="preserve">
+    <value>På spår</value>
+  </data>
+  <data name="LayoverFromStabling" xml:space="preserve">
+    <value>Från uppställning</value>
+  </data>
+  <data name="LayoverLiftOn" xml:space="preserve">
+    <value>Lyft på</value>
+  </data>
+  <data name="LayoverToStabling" xml:space="preserve">
+    <value>Till uppställning</value>
+  </data>
+  <data name="LayoverLiftOff" xml:space="preserve">
+    <value>Lyft av</value>
+  </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
     <value>Dragfordonet som går på tågavsnittet kan vända som det står, så ingen anmärkning om rundgång skrivs ut.</value>
   </data>
@@ -1944,13 +1971,13 @@
     <value>Hämta från</value>
   </data>
   <data name="PartFetchFromTrackHelp" xml:space="preserve">
-    <value>Spåret fordonen står på innan tåget avgår, när det är ett annat än det tåget avgår från. Skrivs ut som avgångsanmärkning för lokförare och tågklarerare.</value>
+    <value>Spåret fordonen står på innan tåget avgår, när det är ett annat än det tåget avgår från. Skrivs ut som avgångsanmärkning för lokförare och tågklarerare. Valet sätts också på föregående avsnitt, som ställer fordonen på det spåret, så att de stämmer överens.</value>
   </data>
   <data name="PartPutOnTrack" xml:space="preserve">
     <value>Ställ på</value>
   </data>
   <data name="PartPutOnTrackHelp" xml:space="preserve">
-    <value>Spåret fordonen ställs på efter att tåget har ankommit, när det är ett annat än det tåget ankommer till. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+    <value>Spåret fordonen ställs på efter att tåget har ankommit, när det är ett annat än det tåget ankommer till. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare. Valet sätts också på nästa avsnitt, som hämtar fordonen från det spåret, så att de stämmer överens.</value>
   </data>
   <data name="SameTrackAsTrain" xml:space="preserve">
     <value>Samma som tåget (spår {0})</value>

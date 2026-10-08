@@ -76,11 +76,29 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Etter ankomst, kjør {0} fra ankomstsporet til hensettingsplassen.</value>
   </data>
+  <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
+    <value>Før avgang, løft {0} opp på avgangssporet.</value>
+  </data>
+  <data name="LiftTractionUnitOffArrivalTrack" xml:space="preserve">
+    <value>Etter ankomst, løft {0} av ankomstsporet.</value>
+  </data>
   <data name="FetchFromTrack" xml:space="preserve">
     <value>Før avgang, hent {0} {1} fra spor {2}.</value>
   </data>
   <data name="PutOnTrack" xml:space="preserve">
     <value>Etter ankomst, skift {0} {1} til spor {2}.</value>
+  </data>
+  <data name="FetchFromTrackWithUsage" xml:space="preserve">
+    <value>Før avgang, hent {0} {1} fra spor {2} ({3}).</value>
+  </data>
+  <data name="FetchFromUsage" xml:space="preserve">
+    <value>Før avgang, hent {0} {1} fra {2}.</value>
+  </data>
+  <data name="PutOnTrackWithUsage" xml:space="preserve">
+    <value>Etter ankomst, skift {0} {1} til spor {2} ({3}).</value>
+  </data>
+  <data name="PutOnUsage" xml:space="preserve">
+    <value>Etter ankomst, skift {0} {1} til {2}.</value>
   </data>
   <data name="ShuntWagonsToDepartureTrack" xml:space="preserve">
     <value>Skift vogner til avgangssporet før avgang.</value>

@@ -1,5 +1,24 @@
 # Versionshinweise
 
+## Version 0.8.1
+
+### Änderungen
+
+- **Eine Lok oder ein Triebzug kann zwischen zwei Zügen abgestellt oder abgehoben werden.** Beim
+  Bearbeiten eines Zugteils in einem Fahrzeugplan geben **Triebfahrzeug vor Abfahrt** und
+  **Triebfahrzeug nach Ankunft** an, wo das Triebfahrzeug ist: auf dem Gleis, auf dem Abstellgleis, oder
+  von der Anlage abgehoben, etwa auf einen Tisch während einer langen Wartezeit. Lokführer und
+  Fahrdienstleiter erhalten einen Vermerk, es zum oder vom Abstellgleis zu fahren, abzuheben oder
+  aufzugleisen. Die Wahl gilt auch für den Zugteil davor oder danach, sodass ein abgehobenes Fahrzeug vor
+  dem nächsten Zug wieder aufgegleist wird. Stimmen beide nicht überein, zeigt die Prüfung eine Warnung.
+- **Holen von und Abstellen auf bleiben mit dem Zugteil davor oder danach im Einklang.** Wählen Sie das
+  Gleis, auf das die Fahrzeuge nach der Ankunft gestellt werden, holt der nächste Zugteil sie von diesem
+  Gleis, und umgekehrt. Ist ein Gleis an einem Ende angegeben, am anderen aber nicht getroffen, zeigt die
+  Prüfung eine Warnung.
+- **Die Vermerke zum Holen von oder Abstellen auf einem Gleis nennen, wofür das Gleis dient.** Ein Gleis
+  mit einer Verwendung auf dem Reiter **Betriebsstellen** wird mit ihr genannt, wie in „Gleis 5
+  (Lokschuppen)“. Ein Gleis ohne Nummer wird nur mit seiner Verwendung genannt.
+
 ## Version 0.8.0
 
 ### Änderungen

@@ -1,5 +1,23 @@
 # Versionsnyheder
 
+## Version 0.8.1
+
+### Ændringer
+
+- **Et lokomotiv eller et togsæt kan sættes til opstilling eller løftes af mellem to tog.** Når du
+  redigerer et togafsnit i et vognløb, angiver **Trækkraft før afgang** og **Trækkraft efter ankomst**,
+  hvor trækkraften er: på sporet, på opstilling, eller løftet af anlægget, for eksempel op på et bord under
+  en lang ventetid. Lokomotivfører og fjernstyringsleder får en bemærkning om at køre den til eller fra
+  opstilling, eller at løfte den af eller på. Valget sættes også på togafsnittet før eller efter, så en
+  afløftet enhed løftes på igen før næste tog. Hvor de to ikke stemmer overens, viser valideringen en
+  advarsel.
+- **Hent fra og Sæt på holdes i trit med togafsnittet før eller efter.** Vælger du det spor, køretøjerne
+  sættes på efter ankomsten, henter næste togafsnit dem fra det spor, og omvendt. Hvor et spor er angivet
+  i den ene ende, men ikke mødes i den anden, viser valideringen en advarsel.
+- **Bemærkningerne om at hente fra eller sætte på et spor siger, hvad sporet bruges til.** Et spor med en
+  anvendelse på fanen **Driftssteder** nævnes med den, som i »spor 5 (Remise)«. Et spor uden nummer nævnes
+  kun med sin anvendelse.
+
 ## Version 0.8.0
 
 ### Ændringer

@@ -288,6 +288,27 @@
   <data name="ScheduleIsNotContiguous" xml:space="preserve">
     <value>Vognløp {0}: {1} fortsetter ikke der forrige avsnitt sluttet ved {2}.</value>
   </data>
+  <data name="ScheduleLayoverMismatch" xml:space="preserve">
+    <value>Vognløp {0}: {1} slutter med «{2}», men {3} begynner med «{4}».</value>
+  </data>
+  <data name="ScheduleStandingTrackMismatch" xml:space="preserve">
+    <value>Vognløp {0}: {1} setter kjøretøyene på spor {2}, men {3} henter dem fra spor {4}.</value>
+  </data>
+  <data name="TractionLayoverNone" xml:space="preserve">
+    <value>på spor</value>
+  </data>
+  <data name="TractionLayoverToStabling" xml:space="preserve">
+    <value>til hensetting</value>
+  </data>
+  <data name="TractionLayoverToLiftedOff" xml:space="preserve">
+    <value>løft av</value>
+  </data>
+  <data name="TractionLayoverFromStabling" xml:space="preserve">
+    <value>fra hensetting</value>
+  </data>
+  <data name="TractionLayoverFromLiftedOff" xml:space="preserve">
+    <value>løft på</value>
+  </data>
   <data name="VehicleScheduleHasNoVehicle" xml:space="preserve">
     <value>Vognløp {0} har ingen kjøretøy tildelt.</value>
   </data>

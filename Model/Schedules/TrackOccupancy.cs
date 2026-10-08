@@ -18,8 +18,8 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// own window covers it.
 /// </para>
 /// <para>
-/// Unless it is parked. Where the unit is booked to parking on arrival, or comes from parking before
-/// departing, it is not standing on this track between the two trains, and occupancy falls back to what
+/// Unless it is stabled or lifted off. Where the unit is driven to stabling or lifted off on arrival, or
+/// comes from stabling or is lifted on before departing, it is not standing on this track between the two trains, and occupancy falls back to what
 /// each train occupies by itself. The same holds where it is put on another track of the station on
 /// arrival, or fetched from another track before departing.
 /// </para>
@@ -77,8 +77,9 @@ public static class TrackOccupancyExtensions
 
                     var arriving = parts[i];
                     var leaving = parts[i + 1];
-                    if (arriving.TractionOptions?.ToParking == true) return own;
-                    if (leaving.TractionOptions?.FromParking == true) return own;
+                    // Stabled or lifted off, the unit is not on this track between the two trains.
+                    if (arriving.TractionOptions is { ToLayover: not TractionLayover.None }) return own;
+                    if (leaving.TractionOptions is { FromLayover: not TractionLayover.None }) return own;
                     // Where the vehicles are put after arriving and where they are fetched from before
                     // leaving: the other track a part names, or else the train's own. Only a stay on this
                     // call's track at both ends keeps this track occupied.

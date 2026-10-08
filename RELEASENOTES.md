@@ -4,6 +4,31 @@
 
 ### New Features
 
+- **A traction unit can be lifted off the layout during a layover.** New enum **`TractionLayover`**
+  (`None`, `Stabling`, `LiftedOff`) on **`TractionOptions.FromLayover`** and **`ToLayover`** says where a
+  locomotive or trainset spends the time between two trains. `LiftedOff` gives the new **`LiftOffNote`** on
+  arrival and **`LiftOnNote`** on departure; `Stabling` gives the existing `ToParkingNote`/`FromParkingNote`.
+  Either keeps the train's track free between the two trains in track occupancy, and a part's named
+  `ToTrack`/`FromTrack` still wins over it in the notes. New **`Schedule.SetArrivalLayover`** and
+  **`SetDepartureLayover`** set one end of a layover and the matching end of the neighbouring part with it,
+  forgetting a track named at either end; across a broken joint nothing is paired. New rule S6
+  (`ValidateLayoverPairs`, under `ValidateSchedules`) reports a joint whose two ends differ as a
+  `Severity.Warning` of the new `ValidationErrorType.ScheduleLayoverMismatch` (schedule scope).
+
+- **The other track vehicles are put on and fetched from is paired across a joint.** New
+  **`Schedule.SetArrivalTrack`** and **`SetDepartureTrack`** set a part's `ToTrack`/`FromTrack` and have the
+  neighbouring part fetch from or put on the same track — nothing named where the other train uses that
+  track itself — and clear stabling or lifting off at both ends. Going back to the train's own track
+  forgets the neighbour's track only where it was the paired one. New rule S7
+  (`ValidateStandingTrackPairs`, under `ValidateSchedules`) reports, as a `Severity.Warning` of the new
+  `ValidationErrorType.ScheduleStandingTrackMismatch`, a joint where one end names a track the other end
+  does not meet. Joints with no named track are not checked.
+
+- **A track's usage is named in the fetch-from and put-on notes.** `FromTrackNote` and `ToTrackNote`
+  read "from track 5 (Loco shed)" where the track has a `StationTrack.Usage`, and "from Loco shed" where its
+  `Number` is empty. Four new note texts (`FetchFromTrackWithUsage`, `FetchFromUsage`,
+  `PutOnTrackWithUsage`, `PutOnUsage`) in all five languages; the number keeps the emphasis.
+
 - **Deleting an operation location trains call at.** New **`DeletionRules.PreviewDelete(OperationLocation)`**
   returns a `LocationDeletionPreview` of everything a delete would change, without changing anything;
   **`MayDelete(OperationLocation)`** / **`TryDelete(OperationLocation)`** follow the usual pair. The trains'
@@ -299,6 +324,10 @@
   `Plan.Reconcile`.
 
 ### Breaking Changes
+
+- **`TractionOptions.FromParking` and `ToParking` are replaced by `FromLayover` and `ToLayover`.** Use
+  `TractionLayover.Stabling` for `true`. A plan saved with the old flags set loses them on load; nothing in
+  the importers or the Planning app set them before.
 
 - **`SignalControlledLocation.ControlledBy` moved to `OperationLocation`.** Source using it through a
   `SignalControlledLocation` still compiles; code that pattern-matched on the signal-controlled type to

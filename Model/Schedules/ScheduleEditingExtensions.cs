@@ -550,7 +550,142 @@ public static class ScheduleEditingExtensions
                 removed.ScheduleId = null;
             }
         }
+
+        /// <summary>
+        /// Sets where the traction goes after a part arrives — staying on a track, driven to stabling, or
+        /// lifted off — and says the same for where it comes from before the next part departs, so the two
+        /// ends of the layover agree (rule S6).
+        /// </summary>
+        /// <remarks>
+        /// The next part is the one the vehicle works next from the same station. Across a broken joint,
+        /// where the next part leaves from somewhere else, there is no layover to pair, and that part is
+        /// left alone. Stabling or lifting off takes the unit off the station's tracks, so a track named at
+        /// that end of either part is forgotten.
+        /// </remarks>
+        /// <param name="part">The part whose arrival is set; it must be in this schedule.</param>
+        /// <param name="layover">Where the traction goes after arrival.</param>
+        public void SetArrivalLayover(ScheduledTrainPart part, TractionLayover layover)
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
+            part = part.ValueOrException(nameof(part));
+            SetToLayover(part, layover);
+            if (schedule.LayoverPartner(part, after: true) is { } next) SetFromLayover(next, layover);
+        }
+
+        /// <summary>
+        /// Sets where the traction comes from before a part departs — from a track, from stabling, or
+        /// lifted on — and says the same for where it goes after the previous part arrives, so the two
+        /// ends of the layover agree (rule S6). See <see cref="SetArrivalLayover"/>.
+        /// </summary>
+        /// <param name="part">The part whose departure is set; it must be in this schedule.</param>
+        /// <param name="layover">Where the traction comes from before departure.</param>
+        public void SetDepartureLayover(ScheduledTrainPart part, TractionLayover layover)
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
+            part = part.ValueOrException(nameof(part));
+            SetFromLayover(part, layover);
+            if (schedule.LayoverPartner(part, after: false) is { } previous) SetToLayover(previous, layover);
+        }
+
+        /// <summary>
+        /// Sets the other track the vehicles are put on after a part arrives — or, with null, leaves them on
+        /// the train's own track — and has the next part fetch them from that track, so the two ends of the
+        /// stay agree (rule S7).
+        /// </summary>
+        /// <remarks>
+        /// The next part is paired as for <see cref="SetArrivalLayover"/>: the one the vehicle works next from
+        /// the same station, and none across a broken joint. Where the next train departs from the very
+        /// track the vehicles are put on, it needs no track of its own named. Going back to the train's own
+        /// track forgets the track the next part fetched from only where it was the one put on. A named
+        /// track keeps the vehicles at the station, so it clears stabling or lifting off at both ends.
+        /// </remarks>
+        /// <param name="part">The part whose arrival is set; it must be in this schedule.</param>
+        /// <param name="track">Another track of the station the part arrives at, or null for the train's own.</param>
+        public void SetArrivalTrack(ScheduledTrainPart part, StationTrack? track)
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
+            part = part.ValueOrException(nameof(part));
+            var before = part.OtherToTrack;
+            part.ToTrack = track;
+            var put = part.OtherToTrack;
+            if (put is not null) ClearLayover(part, arrival: true);
+            if (schedule.LayoverPartner(part, after: true) is not { } next) return;
+            if (put is not null)
+            {
+                next.FromTrack = put.Equals(next.From.Track) ? null : put;
+                ClearLayover(next, arrival: false);
+            }
+            else if (before is not null && before.Equals(next.OtherFromTrack)) next.FromTrack = null;
+        }
+
+        /// <summary>
+        /// Sets the other track the vehicles are fetched from before a part departs — or, with null, the
+        /// train's own track — and has the previous part put them on that track, so the two ends of the stay
+        /// agree (rule S7). See <see cref="SetArrivalTrack"/>.
+        /// </summary>
+        /// <param name="part">The part whose departure is set; it must be in this schedule.</param>
+        /// <param name="track">Another track of the station the part departs from, or null for the train's own.</param>
+        public void SetDepartureTrack(ScheduledTrainPart part, StationTrack? track)
+        {
+            schedule = schedule.ValueOrException(nameof(schedule));
+            part = part.ValueOrException(nameof(part));
+            var before = part.OtherFromTrack;
+            part.FromTrack = track;
+            var fetched = part.OtherFromTrack;
+            if (fetched is not null) ClearLayover(part, arrival: false);
+            if (schedule.LayoverPartner(part, after: false) is not { } previous) return;
+            if (fetched is not null)
+            {
+                previous.ToTrack = fetched.Equals(previous.To.Track) ? null : fetched;
+                ClearLayover(previous, arrival: true);
+            }
+            else if (before is not null && before.Equals(previous.OtherToTrack)) previous.ToTrack = null;
+        }
+
+        // The part the vehicle works next after this one (or worked before it) from the same station, or
+        // null at an open end of the working or across a broken joint.
+        private ScheduledTrainPart? LayoverPartner(ScheduledTrainPart part, bool after)
+        {
+            var parts = schedule.OrderedParts;
+            var index = parts.TakeWhile(p => !ReferenceEquals(p, part)).Count();
+            if (index == parts.Count) return null;
+            var (previous, next) = after
+                ? (part, index < parts.Count - 1 ? parts[index + 1] : null)
+                : (index > 0 ? parts[index - 1] : null, part);
+            if (previous is null || next is null) return null;
+            if (!previous.To.OperationLocation.Equals(next.From.OperationLocation)) return null;
+            return after ? next : previous;
+        }
     }
+
+    // Records where a part's traction goes after arrival. A part without traction options gets them only
+    // when there is something to say, and then without the departure "use this locomotive" note, so pairing
+    // a layover cannot quietly add notes at the other end of the part.
+    private static void SetToLayover(ScheduledTrainPart part, TractionLayover layover)
+    {
+        if (TractionOptionsFor(part, layover) is not { } options) return;
+        options.ToLayover = layover;
+        if (layover != TractionLayover.None) part.ToTrack = null;
+    }
+
+    // Records where a part's traction comes from before departure; see SetToLayover.
+    private static void SetFromLayover(ScheduledTrainPart part, TractionLayover layover)
+    {
+        if (TractionOptionsFor(part, layover) is not { } options) return;
+        options.FromLayover = layover;
+        if (layover != TractionLayover.None) part.FromTrack = null;
+    }
+
+    // A named track keeps the traction at the station, so it is neither stabled nor lifted off there.
+    private static void ClearLayover(ScheduledTrainPart part, bool arrival)
+    {
+        if (part.TractionOptions is not { } options) return;
+        if (arrival) options.ToLayover = TractionLayover.None;
+        else options.FromLayover = TractionLayover.None;
+    }
+
+    private static TractionOptions? TractionOptionsFor(ScheduledTrainPart part, TractionLayover layover) =>
+        part.TractionOptions ?? (layover == TractionLayover.None ? null : part.TractionOptions = new TractionOptions { DisplayUseNote = false });
 
     // The call the previous part is adapted to arrive at, so the vehicle hands over to the edited part at
     // its new start location: the latest call there the vehicle still reaches in time, or — when every such
