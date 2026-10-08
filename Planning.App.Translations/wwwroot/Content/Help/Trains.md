@@ -9,6 +9,18 @@ Trains drawn here appear as lines on the **Graphical timetable**, coloured by th
 are checked against the validation rules in **Settings › Validation** (speeds, track usage, train
 numbers and so on).
 
+## Per train or per operation location
+
+The tab has two views of the same calls:
+
+- **Per train** lists the trains by category. Open a train to edit its calls, one train at a time.
+- **Per operation location** lists every train that calls at one location, in the order they come
+  there: whether it starts, ends, stops or passes, where it comes from and goes on to, its times and
+  the track it uses. Pick another track in the list to move the train there. This is the view for
+  sorting out the tracks of a busy station, where the per-train view would mean opening every train
+  that calls there. A conflict at the location, such as two trains on one track at the same time, is
+  marked on the row.
+
 ## What makes a train unique in the plan?
 
 Trains are identified by it's **train number**.

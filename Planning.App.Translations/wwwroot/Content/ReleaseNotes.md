@@ -1,5 +1,29 @@
 ﻿# Release notes
 
+## Version 0.8.0
+
+### Changes
+
+- **The Trains tab can show the calls of one operation location.** A choice between **Per train** and
+  **Per operation location** is new on the **Trains** tab. Per operation location lists every train that
+  calls at the chosen location, in the order they come there: whether it starts, ends, stops or passes,
+  where it comes from and goes on to, its times and its track. Pick another track in the list to move the
+  train there, without opening each train in turn. A conflict at the location, such as two trains on one
+  track at the same time, is marked on the row. The tab remembers the view and the location you chose.
+- **An operation location trains call at can be deleted.** On the **Operation locations** tab, **Delete**
+  is no longer blocked while trains call there. Instead you are first shown everything the delete would
+  change, and you confirm or cancel. Trains lose their calls there: one running through now runs straight
+  past, and one starting or ending there now starts or ends at its next or previous call. Where the
+  location lies between exactly two neighbours, its two track stretches are replaced by one joining the
+  neighbours, as long and taking as long as the two together, and the timetable stretches through it run
+  over that one. The delete is refused, with the reasons listed, while a vehicle schedule, driver duty or
+  cargo flow starts or ends there, or while a train turns back there or runs through it as a junction.
+
+### Fixes
+
+- **A drop-down list no longer shows another choice than the one made.** When the choices offered in a
+  list changed but the chosen value did not, the list could show a different entry from the one saved.
+
 ## Version 0.7.9
 
 ### Changes

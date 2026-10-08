@@ -10,6 +10,8 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
     private const string SettingsSectionKey = "planning.ui.settingsSection";
     private const string StretchesSectionKey = "planning.ui.stretchesSection";
     private const string CargoFlowSectionKey = "planning.ui.cargoFlowSection";
+    private const string TrainsSectionKey = "planning.ui.trainsSection";
+    private const string TrainsLocationKey = "planning.ui.trainsLocation";
     private const string LastRouteKey = "planning.ui.lastRoute";
     private const string GraphHalfKey = "planning.ui.graphHalf";
 
@@ -19,6 +21,10 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
     private bool _stretchesSectionLoaded;
     private string? _cargoFlowSection;
     private bool _cargoFlowSectionLoaded;
+    private string? _trainsSection;
+    private bool _trainsSectionLoaded;
+    private string? _trainsLocation;
+    private bool _trainsLocationLoaded;
     private string? _lastRoute;
     private bool _lastRouteLoaded;
     private string? _graphHalf;
@@ -76,6 +82,45 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
         _cargoFlowSection = section;
         _cargoFlowSectionLoaded = true;
         await storage.SetStringAsync(CargoFlowSectionKey, section);
+    }
+
+    /// <summary>The last active view in the Trains page (per train or per location), or null when none
+    /// has been stored.</summary>
+    public async Task<string?> GetTrainsSectionAsync()
+    {
+        if (_trainsSectionLoaded) return _trainsSection;
+        _trainsSection = await storage.GetStringAsync(TrainsSectionKey);
+        _trainsSectionLoaded = true;
+        return _trainsSection;
+    }
+
+    /// <summary>Remembers the active view in the Trains page.</summary>
+    public async Task SetTrainsSectionAsync(string section)
+    {
+        if (_trainsSection == section) return;
+        _trainsSection = section;
+        _trainsSectionLoaded = true;
+        await storage.SetStringAsync(TrainsSectionKey, section);
+    }
+
+    /// <summary>The signature of the location last chosen in the Trains page's per-location view, or null
+    /// when none has been stored. The signature, not the id, so the choice still means something in
+    /// another plan of the same layout.</summary>
+    public async Task<string?> GetTrainsLocationAsync()
+    {
+        if (_trainsLocationLoaded) return _trainsLocation;
+        _trainsLocation = await storage.GetStringAsync(TrainsLocationKey);
+        _trainsLocationLoaded = true;
+        return _trainsLocation;
+    }
+
+    /// <summary>Remembers the location chosen in the Trains page's per-location view.</summary>
+    public async Task SetTrainsLocationAsync(string signature)
+    {
+        if (_trainsLocation == signature) return;
+        _trainsLocation = signature;
+        _trainsLocationLoaded = true;
+        await storage.SetStringAsync(TrainsLocationKey, signature);
     }
 
     /// <summary>The last active top-level route (e.g. "settings", "workspace"), or null when none.</summary>

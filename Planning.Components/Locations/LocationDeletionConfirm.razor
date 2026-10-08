@@ -1,0 +1,161 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Locations
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject Translator Translator
+
+@* Everything deleting the location changes, shown before anything is changed: the planner confirms
+   or aborts. Where something blocks the delete, that is all that is shown, since the rest would not
+   happen. *@
+<div class="location-deletion">
+    <strong>@string.Format(Culture, Translator("DeleteLocationConfirm"), Preview.Location.Name)</strong>
+
+    @if (!Preview.IsAllowed)
+    {
+        <p>@Translator("LocationDeletionBlocked")</p>
+        <ul>
+            @foreach (var blocker in Preview.Blockers)
+            {
+                <li>@blocker</li>
+            }
+        </ul>
+        <div class="actions">
+            <button @onclick="OnCancel">@Translator("Close")</button>
+        </div>
+    }
+    else
+    {
+        @if (HasConsequences)
+        {
+            <p>@Translator("LocationDeletionChanges")</p>
+        }
+
+        @if (Preview.Trains.Count > 0)
+        {
+            <h4>@Translator("Trains")</h4>
+            <ul>
+                @foreach (var change in Preview.Trains.OrderBy(t => t.Train.Number))
+                {
+                    <li>@change.Train: @TrainEffect(change)</li>
+                }
+            </ul>
+        }
+
+        @if (Preview.RemovedStretches.Count > 0)
+        {
+            <h4>@Translator("TrackStretches")</h4>
+            <ul>
+                @foreach (var stretch in Preview.RemovedStretches)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionStretchRemoved"), stretch)</li>
+                }
+                @if (Preview.Replacement is { } replacement)
+                {
+                    @if (Preview.IsReplacementNew)
+                    {
+                        <li>
+                            @string.Format(Culture, Translator("LocationDeletionStretchAdded"), replacement)
+                            (@Translator("DistanceMeters") @replacement.Distance.ToString(Culture),
+                            @Translator("TimeMinutes") @replacement.Time.ToString(Culture))
+                        </li>
+                    }
+                    else
+                    {
+                        <li>@string.Format(Culture, Translator("LocationDeletionStretchReused"), replacement)</li>
+                    }
+                }
+            </ul>
+        }
+
+        @if (Preview.ChangedTimetableStretches.Count > 0 || Preview.RemovedTimetableStretches.Count > 0)
+        {
+            <h4>@Translator("TimetableStretches")</h4>
+            <ul>
+                @foreach (var route in Preview.ChangedTimetableStretches)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionRouteChanged"), route.Number)</li>
+                }
+                @foreach (var route in Preview.RemovedTimetableStretches)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionRouteRemoved"), route.Number)</li>
+                }
+            </ul>
+        }
+
+        @if (HasOtherChanges)
+        {
+            <h4>@Translator("LocationDeletionOther")</h4>
+            <ul>
+                @if (Preview.RegeneratesDispatchStretches)
+                {
+                    <li>@Translator("LocationDeletionDispatchRegenerated")</li>
+                }
+                @if (Preview.NoLongerControlled.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionNoLongerControlled"), Names(Preview.NoLongerControlled))</li>
+                }
+                @if (Preview.NoLongerCargoServed.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionNoLongerCargoServed"), Names(Preview.NoLongerCargoServed))</li>
+                }
+                @if (Preview.LockKeysRemoved.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionLockKeysRemoved"), Names(Preview.LockKeysRemoved))</li>
+                }
+                @if (Preview.StopPatternsChanged.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionStopPatterns"), string.Join(", ", Preview.StopPatternsChanged.Select(c => c.Name)))</li>
+                }
+                @if (Preview.CargoFlowOptionsChanged.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionCargoFlowOptions"), Preview.CargoFlowOptionsChanged.Count)</li>
+                }
+            </ul>
+        }
+
+        <div class="actions">
+            <button class="danger" @onclick="OnConfirm"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+            <button @onclick="OnCancel">@Translator("Cancel")</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public LocationDeletionPreview Preview { get; set; } = default!;
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private bool HasOtherChanges =>
+        Preview.RegeneratesDispatchStretches ||
+        Preview.NoLongerControlled.Count > 0 ||
+        Preview.NoLongerCargoServed.Count > 0 ||
+        Preview.LockKeysRemoved.Count > 0 ||
+        Preview.StopPatternsChanged.Count > 0 ||
+        Preview.CargoFlowOptionsChanged.Count > 0;
+
+    private bool HasConsequences =>
+        Preview.Trains.Count > 0 || Preview.RemovedStretches.Count > 0 || HasOtherChanges;
+
+    private static string Names(IEnumerable<OperationLocation> locations) =>
+        string.Join(", ", locations.Select(l => l.Name));
+
+    // What happens to the train, in the planner's terms: where it now starts or ends is named, since
+    // that is what changes on its timetable.
+    private string TrainEffect(TrainCallRemoval change)
+    {
+        if (change.IsDeleted) return Translator("LocationDeletionTrainDeleted");
+        var remaining = change.Train.CallsInRunOrder
+            .Where(c => !c.OperationLocation.Equals(Preview.Location))
+            .ToList();
+        var effects = new List<string>();
+        if (change.Kind.HasFlag(TrainCallRemovalKind.Origin))
+            effects.Add(string.Format(Culture, Translator("LocationDeletionTrainStartsAt"), remaining[0].OperationLocation.Name));
+        if (change.Kind.HasFlag(TrainCallRemovalKind.Intermediate))
+            effects.Add(Translator("LocationDeletionTrainRunsPast"));
+        if (change.Kind.HasFlag(TrainCallRemovalKind.Terminus))
+            effects.Add(string.Format(Culture, Translator("LocationDeletionTrainEndsAt"), remaining[^1].OperationLocation.Name));
+        return string.Join("; ", effects);
+    }
+}

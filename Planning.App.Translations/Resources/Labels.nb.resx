@@ -1104,9 +1104,6 @@
   <data name="PlatformLength" xml:space="preserve">
     <value>Plattformlengde (meter)</value>
   </data>
-  <data name="LocationReferencedByTrains" xml:space="preserve">
-    <value>Kan ikke slettes: tog stopper på dette stedet.</value>
-  </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
     <value>Reelle minutter tillatt for et lokomotiv å gå rundt til togets motsatte ende.</value>
   </data>
@@ -2587,5 +2584,86 @@
   </data>
   <data name="VehicleWorksTrainParts" xml:space="preserve">
     <value>Kan ikke slette: det er tildelt</value>
+  </data>
+  <data name="PerTrain" xml:space="preserve">
+    <value>Per tog</value>
+  </data>
+  <data name="PerOperationLocation" xml:space="preserve">
+    <value>Per driftssted</value>
+  </data>
+  <data name="LocationCallsDescription" xml:space="preserve">
+    <value>Alle tog som går via et driftssted, i den rekkefølgen de kommer dit. Velg sporet hvert tog bruker.</value>
+  </data>
+  <data name="NoCallsAtLocation" xml:space="preserve">
+    <value>Ingen tog går via dette driftsstedet.</value>
+  </data>
+  <data name="CallKind" xml:space="preserve">
+    <value>Hendelse</value>
+  </data>
+  <data name="CallKindStarts" xml:space="preserve">
+    <value>Starter</value>
+  </data>
+  <data name="CallKindEnds" xml:space="preserve">
+    <value>Slutter</value>
+  </data>
+  <data name="CallKindStops" xml:space="preserve">
+    <value>Stopper</value>
+  </data>
+  <data name="CallKindPasses" xml:space="preserve">
+    <value>Passerer</value>
+  </data>
+  <data name="LocationDeletionBlocked" xml:space="preserve">
+    <value>Det kan ikke slettes så lenge følgende avhenger av det:</value>
+  </data>
+  <data name="LocationDeletionChanges" xml:space="preserve">
+    <value>Slettingen endrer også følgende:</value>
+  </data>
+  <data name="LocationDeletionTrainDeleted" xml:space="preserve">
+    <value>slettes, da det ikke er noen rute igjen</value>
+  </data>
+  <data name="LocationDeletionTrainStartsAt" xml:space="preserve">
+    <value>starter nå på {0}</value>
+  </data>
+  <data name="LocationDeletionTrainEndsAt" xml:space="preserve">
+    <value>slutter nå på {0}</value>
+  </data>
+  <data name="LocationDeletionTrainRunsPast" xml:space="preserve">
+    <value>betjener ikke lenger stedet</value>
+  </data>
+  <data name="LocationDeletionStretchRemoved" xml:space="preserve">
+    <value>Fjernes: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchAdded" xml:space="preserve">
+    <value>Legges til: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchReused" xml:space="preserve">
+    <value>Togene kjører nå på den eksisterende strekningen {0}</value>
+  </data>
+  <data name="LocationDeletionRouteChanged" xml:space="preserve">
+    <value>{0}: legges om forbi stedet</value>
+  </data>
+  <data name="LocationDeletionRouteRemoved" xml:space="preserve">
+    <value>{0}: fjernes, da det ikke er noen rute igjen</value>
+  </data>
+  <data name="LocationDeletionOther" xml:space="preserve">
+    <value>Andre endringer</value>
+  </data>
+  <data name="LocationDeletionDispatchRegenerated" xml:space="preserve">
+    <value>Togledelsesstrekningene genereres på nytt</value>
+  </data>
+  <data name="LocationDeletionNoLongerControlled" xml:space="preserve">
+    <value>Styres ikke lenger fra noe sted: {0}</value>
+  </data>
+  <data name="LocationDeletionNoLongerCargoServed" xml:space="preserve">
+    <value>Godsbetjenes ikke lenger fra noe sted: {0}</value>
+  </data>
+  <data name="LocationDeletionLockKeysRemoved" xml:space="preserve">
+    <value>Nøkkel fjernes: {0}</value>
+  </data>
+  <data name="LocationDeletionStopPatterns" xml:space="preserve">
+    <value>Fjernes fra stoppmønsteret for: {0}</value>
+  </data>
+  <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
+    <value>Fjernes som opprinnelse eller destinasjon i {0} beskrivelser av godsstrømmer</value>
   </data>
 </root>

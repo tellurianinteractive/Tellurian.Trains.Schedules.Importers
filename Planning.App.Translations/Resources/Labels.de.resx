@@ -1104,9 +1104,6 @@
   <data name="PlatformLength" xml:space="preserve">
     <value>Bahnsteiglänge (Meter)</value>
   </data>
-  <data name="LocationReferencedByTrains" xml:space="preserve">
-    <value>Kann nicht gelöscht werden: Züge halten an dieser Stelle.</value>
-  </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
     <value>Echte Minuten, die einer Lok zum Umsetzen ans andere Zugende zugestanden werden.</value>
   </data>
@@ -2587,5 +2584,86 @@
   </data>
   <data name="VehicleWorksTrainParts" xml:space="preserve">
     <value>Löschen nicht möglich: Es ist eingeteilt in</value>
+  </data>
+  <data name="PerTrain" xml:space="preserve">
+    <value>Pro Zug</value>
+  </data>
+  <data name="PerOperationLocation" xml:space="preserve">
+    <value>Pro Betriebsstelle</value>
+  </data>
+  <data name="LocationCallsDescription" xml:space="preserve">
+    <value>Alle Züge, die eine Betriebsstelle berühren, in der Reihenfolge ihres Eintreffens. Wählen Sie das Gleis, das jeder Zug benutzt.</value>
+  </data>
+  <data name="NoCallsAtLocation" xml:space="preserve">
+    <value>Keine Züge berühren diese Betriebsstelle.</value>
+  </data>
+  <data name="CallKind" xml:space="preserve">
+    <value>Vorgang</value>
+  </data>
+  <data name="CallKindStarts" xml:space="preserve">
+    <value>Beginnt</value>
+  </data>
+  <data name="CallKindEnds" xml:space="preserve">
+    <value>Endet</value>
+  </data>
+  <data name="CallKindStops" xml:space="preserve">
+    <value>Hält</value>
+  </data>
+  <data name="CallKindPasses" xml:space="preserve">
+    <value>Fährt durch</value>
+  </data>
+  <data name="LocationDeletionBlocked" xml:space="preserve">
+    <value>Sie kann nicht gelöscht werden, solange Folgendes von ihr abhängt:</value>
+  </data>
+  <data name="LocationDeletionChanges" xml:space="preserve">
+    <value>Das Löschen ändert außerdem Folgendes:</value>
+  </data>
+  <data name="LocationDeletionTrainDeleted" xml:space="preserve">
+    <value>wird gelöscht, da kein Laufweg übrig bleibt</value>
+  </data>
+  <data name="LocationDeletionTrainStartsAt" xml:space="preserve">
+    <value>beginnt jetzt in {0}</value>
+  </data>
+  <data name="LocationDeletionTrainEndsAt" xml:space="preserve">
+    <value>endet jetzt in {0}</value>
+  </data>
+  <data name="LocationDeletionTrainRunsPast" xml:space="preserve">
+    <value>berührt die Betriebsstelle nicht mehr</value>
+  </data>
+  <data name="LocationDeletionStretchRemoved" xml:space="preserve">
+    <value>Entfernt: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchAdded" xml:space="preserve">
+    <value>Hinzugefügt: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchReused" xml:space="preserve">
+    <value>Die Züge fahren jetzt über den bestehenden Abschnitt {0}</value>
+  </data>
+  <data name="LocationDeletionRouteChanged" xml:space="preserve">
+    <value>{0}: wird ohne die Betriebsstelle geführt</value>
+  </data>
+  <data name="LocationDeletionRouteRemoved" xml:space="preserve">
+    <value>{0}: wird gelöscht, da kein Laufweg übrig bleibt</value>
+  </data>
+  <data name="LocationDeletionOther" xml:space="preserve">
+    <value>Weitere Änderungen</value>
+  </data>
+  <data name="LocationDeletionDispatchRegenerated" xml:space="preserve">
+    <value>Die Zugleitabschnitte werden neu erzeugt</value>
+  </data>
+  <data name="LocationDeletionNoLongerControlled" xml:space="preserve">
+    <value>Wird von keiner Stelle mehr gesteuert: {0}</value>
+  </data>
+  <data name="LocationDeletionNoLongerCargoServed" xml:space="preserve">
+    <value>Keine Güterbedienung mehr: {0}</value>
+  </data>
+  <data name="LocationDeletionLockKeysRemoved" xml:space="preserve">
+    <value>Schlüssel entfällt: {0}</value>
+  </data>
+  <data name="LocationDeletionStopPatterns" xml:space="preserve">
+    <value>Aus dem Haltemuster entfernt: {0}</value>
+  </data>
+  <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
+    <value>Als Herkunft oder Ziel aus {0} Güterstrombeschreibungen entfernt</value>
   </data>
 </root>

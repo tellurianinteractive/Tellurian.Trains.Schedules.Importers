@@ -13,7 +13,7 @@ namespace Tellurian.Trains.Schedules.Model.Validations;
 /// the query allows it. Neither persists: a <see cref="DeletionResult.Success"/> from <c>TryDelete</c>
 /// obliges the caller to save and refresh (in the app, <c>ScheduleState.SaveAndNotify()</c>).
 /// </remarks>
-public static class DeletionRules
+public static partial class DeletionRules
 {
     extension(Plan plan)
     {

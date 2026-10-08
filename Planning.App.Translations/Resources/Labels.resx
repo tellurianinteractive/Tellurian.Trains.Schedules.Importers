@@ -752,9 +752,6 @@
   <data name="TrackReferenced" xml:space="preserve">
     <value>Cannot delete: this track is used by trains or vehicle schedules.</value>
   </data>
-  <data name="LocationReferencedByTrains" xml:space="preserve">
-    <value>Cannot delete: trains call at this location.</value>
-  </data>
   <data name="DeleteLocationConfirm" xml:space="preserve">
     <value>Delete operation location '{0}' and its tracks?</value>
   </data>
@@ -2607,5 +2604,86 @@
   </data>
   <data name="VehicleWorksTrainParts" xml:space="preserve">
     <value>Cannot delete: it is assigned to</value>
+  </data>
+  <data name="PerTrain" xml:space="preserve">
+    <value>Per train</value>
+  </data>
+  <data name="PerOperationLocation" xml:space="preserve">
+    <value>Per operation location</value>
+  </data>
+  <data name="LocationCallsDescription" xml:space="preserve">
+    <value>All trains calling at an operation location, in the order they come there. Choose the track each train uses.</value>
+  </data>
+  <data name="NoCallsAtLocation" xml:space="preserve">
+    <value>No trains call at this location.</value>
+  </data>
+  <data name="CallKind" xml:space="preserve">
+    <value>Activity</value>
+  </data>
+  <data name="CallKindStarts" xml:space="preserve">
+    <value>Starts</value>
+  </data>
+  <data name="CallKindEnds" xml:space="preserve">
+    <value>Ends</value>
+  </data>
+  <data name="CallKindStops" xml:space="preserve">
+    <value>Stops</value>
+  </data>
+  <data name="CallKindPasses" xml:space="preserve">
+    <value>Passes</value>
+  </data>
+  <data name="LocationDeletionBlocked" xml:space="preserve">
+    <value>It cannot be deleted while these depend on it:</value>
+  </data>
+  <data name="LocationDeletionChanges" xml:space="preserve">
+    <value>Deleting it also changes the following:</value>
+  </data>
+  <data name="LocationDeletionTrainDeleted" xml:space="preserve">
+    <value>deleted, as it has no route left</value>
+  </data>
+  <data name="LocationDeletionTrainStartsAt" xml:space="preserve">
+    <value>now starts at {0}</value>
+  </data>
+  <data name="LocationDeletionTrainEndsAt" xml:space="preserve">
+    <value>now ends at {0}</value>
+  </data>
+  <data name="LocationDeletionTrainRunsPast" xml:space="preserve">
+    <value>no longer calls here</value>
+  </data>
+  <data name="LocationDeletionStretchRemoved" xml:space="preserve">
+    <value>Removed: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchAdded" xml:space="preserve">
+    <value>Added: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchReused" xml:space="preserve">
+    <value>Trains now run over the existing stretch {0}</value>
+  </data>
+  <data name="LocationDeletionRouteChanged" xml:space="preserve">
+    <value>{0}: runs past the location</value>
+  </data>
+  <data name="LocationDeletionRouteRemoved" xml:space="preserve">
+    <value>{0}: removed, as it has no route left</value>
+  </data>
+  <data name="LocationDeletionOther" xml:space="preserve">
+    <value>Other changes</value>
+  </data>
+  <data name="LocationDeletionDispatchRegenerated" xml:space="preserve">
+    <value>Dispatch stretches are generated again</value>
+  </data>
+  <data name="LocationDeletionNoLongerControlled" xml:space="preserve">
+    <value>No longer controlled from anywhere: {0}</value>
+  </data>
+  <data name="LocationDeletionNoLongerCargoServed" xml:space="preserve">
+    <value>Cargo no longer served from anywhere: {0}</value>
+  </data>
+  <data name="LocationDeletionLockKeysRemoved" xml:space="preserve">
+    <value>Lock key removed: {0}</value>
+  </data>
+  <data name="LocationDeletionStopPatterns" xml:space="preserve">
+    <value>Removed from the stop pattern of: {0}</value>
+  </data>
+  <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
+    <value>Removed as origin or destination from {0} cargo flow descriptions</value>
   </data>
 </root>

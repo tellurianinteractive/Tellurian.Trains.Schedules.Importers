@@ -1,5 +1,30 @@
 # Versjonsnyheter
 
+## Versjon 0.8.0
+
+### Endringer
+
+- **Fanen Tog kan vise anropene ved ett driftssted.** På fanen **Tog** kan det nå velges mellom
+  **Per tog** og **Per driftssted**. Per driftssted viser alle tog som anroper det valgte driftsstedet, i
+  den rekkefølgen de kommer dit: om toget starter, slutter, stopper eller kjører gjennom, hvor det kommer
+  fra og fortsetter til, tidene og sporet. Velg et annet spor i listen for å flytte toget dit, uten å åpne
+  hvert tog for seg. En konflikt ved driftsstedet, for eksempel to tog på samme spor samtidig, markeres på
+  raden. Fanen husker visningen og driftsstedet du valgte.
+- **Et driftssted som tog anroper, kan slettes.** På fanen **Driftssteder** er **Slett** ikke lenger
+  sperret mens tog anroper der. I stedet får du først se alt slettingen ville endre, og du bekrefter eller
+  avbryter. Togene mister anropene sine der: et tog som kjører gjennom, kjører nå rett forbi, og et som
+  starter eller slutter der, starter eller slutter nå ved neste eller forrige anrop. Der driftsstedet
+  ligger mellom nøyaktig to naboer, erstattes de to sporstrekningene av én som forbinder naboene, like lang
+  og med samme kjøretid som de to til sammen, og ruteplanstrekningene gjennom det går over den i stedet.
+  Slettingen avvises, med årsakene listet, så lenge en omløpsplan, en lokførertjeneste eller en godsstrøm
+  starter eller slutter der, eller så lenge et tog snur der eller kjører gjennom det som et
+  forgreningspunkt.
+
+### Rettelser
+
+- **En nedtrekksliste viser ikke lenger et annet valg enn det som ble gjort.** Når valgene i en liste
+  endret seg, men den valgte verdien ikke gjorde det, kunne listen vise en annen oppføring enn den lagrede.
+
 ## Versjon 0.7.9
 
 ### Endringer

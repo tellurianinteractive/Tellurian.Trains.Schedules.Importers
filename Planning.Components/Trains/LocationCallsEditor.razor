@@ -1,0 +1,194 @@
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
+@inject UiPreferenceService UiPrefs
+@inject Translator Translator
+@implements IDisposable
+
+@if (Timetable is null || Layout is null)
+{
+    <p>@Translator("TrainsNoSchedule")</p>
+}
+else
+{
+    <div class="location-calls">
+        <p class="hint">@Translator("LocationCallsDescription")</p>
+
+        <div class="toolbar">
+            <label>@Translator("OperationLocation")</label>
+            <ListBoxView Items="@(LocationChoices.ToListItems())" Value="Location?.Id" ValueChanged="SelectLocation" />
+        </div>
+
+        @if (Location is { } location)
+        {
+            var calls = CallsAt(location);
+            if (calls.Count == 0)
+            {
+                <p class="empty">@Translator("NoCallsAtLocation")</p>
+            }
+            else
+            {
+                @* The conflicts are read once per call here: the badges need them, and so does the decision
+                   whether the table carries a conflict column at all. *@
+                var rows = calls.Select(c => (Call: c, Conflicts: ConflictsOf(c, location))).ToList();
+                var showConflicts = rows.Any(r => r.Conflicts.Count > 0);
+                var tracks = location.TracksInDisplayOrder.ToListItems(Translator).ToList();
+
+                <table class="calls">
+                    <thead>
+                        <tr>
+                            @if (showConflicts)
+                            {
+                                <th class="conflict"></th>
+                            }
+                            <th>@Translator("Train")</th>
+                            <th>@Translator(UseDays ? "Days" : "Sessions")</th>
+                            <th>@Translator("CallKind")</th>
+                            <th>@Translator("From")</th>
+                            <th>@Translator("Arrival")</th>
+                            <th>@Translator("Departure")</th>
+                            <th>@Translator("To")</th>
+                            <th>@Translator("Track")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (call, conflicts) in rows)
+                        {
+                            var train = call.Train;
+                            var (previous, next) = Neighbours(call);
+                            @* Keyed on the call itself: a call moved to another track may change places with
+                               its neighbours, and unkeyed the drop-down would be diffed against whichever row
+                               took its place. *@
+                            <tr class="@(conflicts.Count > 0 ? "has-conflict" : null)" @key="call">
+                                @if (showConflicts)
+                                {
+                                    <td class="conflict">
+                                        <ConflictBadge Errors="conflicts" For="@train.IdentityWithCompany" />
+                                    </td>
+                                }
+                                <td class="train">
+                                    @if (train.Category is { } category)
+                                    {
+                                        <span class="swatch" style="background-color:@category.Color" title="@category.Name"></span>
+                                    }
+                                    @train.IdentityWithCompany
+                                </td>
+                                <td><SessionsView Sessions="train.Sessions" Settings="SessionSettings" /></td>
+                                <td class="kind">@Translator(KindKey(call))</td>
+                                <td>@previous?.Signature</td>
+                                @* Both times also at the ends of the run: where a train starts or ends, the time on the other
+                                   side is how long it stands on the track being prepared or finished up. *@
+                                <td class="time">@call.Arrival.HHMM()</td>
+                                <td class="time">@call.Departure.HHMM()</td>
+                                <td>@next?.Signature</td>
+                                <td>
+                                    <ListBoxView Items="tracks" Value="call.TrackId" ValueChanged="id => SetTrack(call, id)" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+}
+
+@code {
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+
+    private bool UseDays => Layout?.Settings.General.UseDays ?? false;
+
+    private SessionsSettings SessionSettings =>
+        Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    // Only a location with tracks can have a train calling at it.
+    private IEnumerable<OperationLocation> LocationChoices =>
+        (Layout?.OperationLocations ?? []).Where(l => l.Tracks.Count > 0);
+
+    private int? _locationId;
+
+    // Looked up on every render rather than held, so a location removed or replaced under the view (another
+    // plan loaded, say) falls back to the first one instead of showing calls nobody can see elsewhere.
+    private OperationLocation? Location =>
+        LocationChoices.FirstOrDefault(l => l.Id == _locationId) ??
+        LocationChoices.OrderBy(l => l.Name, StringComparer.CurrentCulture).FirstOrDefault();
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (await UiPrefs.GetTrainsLocationAsync() is { } signature &&
+            LocationChoices.FirstOrDefault(l => l.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)) is { } location)
+            _locationId = location.Id;
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    private void SelectLocation(int? id)
+    {
+        _locationId = id;
+        if (Location is { } location) _ = UiPrefs.SetTrainsLocationAsync(location.Signature);
+    }
+
+    // Every call at the location, in the order the trains come to it. Read from the trains, which own their
+    // calls, rather than from the tracks' index of them.
+    private IReadOnlyList<StationCall> CallsAt(OperationLocation location) =>
+        [.. (Timetable?.Trains ?? [])
+            .SelectMany(t => t.Calls)
+            .Where(c => c.OperationLocation.Id == location.Id)
+            .OrderBy(c => c.Arrival)
+            .ThenBy(c => c.Departure)
+            .ThenBy(c => c.Train.Number)];
+
+    // Where the train comes from and goes on to: the calls either side of this one in the order it runs
+    // them. Null at the end it starts or finishes at.
+    private static (OperationLocation? Previous, OperationLocation? Next) Neighbours(StationCall call)
+    {
+        var ordered = call.Train.CallsInRunOrder;
+        var index = -1;
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            if (ReferenceEquals(ordered[i], call)) { index = i; break; }
+        }
+        if (index < 0) return (null, null);
+        return (
+            index > 0 ? ordered[index - 1].OperationLocation : null,
+            index < ordered.Count - 1 ? ordered[index + 1].OperationLocation : null);
+    }
+
+    // What the train does here: starts, ends, stops on the way or runs through. A shunting task is work at
+    // this one place and none of those.
+    private static string KindKey(StationCall call) =>
+        call.Train.IsShuntingTask ? "ShuntingTask" :
+        call.IsTrainOrigin ? "CallKindStarts" :
+        call.IsTrainDestination ? "CallKindEnds" :
+        call.IsPassthrough ? "CallKindPasses" :
+        "CallKindStops";
+
+    // The train's conflicts that are placed at this location; those elsewhere on its run are the per-train
+    // view's to show.
+    private IReadOnlyList<ValidationError> ConflictsOf(StationCall call, OperationLocation location) =>
+        [.. ValidationState.Errors.Where(e =>
+            e.IsShownOnTrains && e.Involves(call.Train) &&
+            (e.FromTrack?.Station.Id == location.Id || e.ToTrack?.Station.Id == location.Id))];
+
+    private void SetTrack(StationCall call, int? id)
+    {
+        if (call.OperationLocation.Tracks.FirstOrDefault(t => t.Id == id) is not { } track) return;
+        if (call.MoveTo(track)) ScheduleState.SaveAndNotify();
+    }
+}

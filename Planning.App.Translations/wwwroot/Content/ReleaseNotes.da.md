@@ -1,5 +1,30 @@
 # Versionsnyheder
 
+## Version 0.8.0
+
+### Ændringer
+
+- **Fanen Tog kan vise kaldene ved ét driftssted.** På fanen **Tog** kan der nu vælges mellem **Pr. tog**
+  og **Pr. driftssted**. Pr. driftssted viser alle tog, der kalder ved det valgte driftssted, i den
+  rækkefølge de kommer dertil: om toget starter, slutter, holder eller kører igennem, hvor det kommer fra
+  og fortsætter til, dets tider og dets spor. Vælg et andet spor i listen for at flytte toget dertil, uden
+  at åbne hvert tog for sig. En konflikt ved driftsstedet, for eksempel to tog på samme spor på samme tid,
+  markeres på rækken. Fanen husker den valgte visning og det valgte driftssted.
+- **Et driftssted, som tog kalder ved, kan slettes.** På fanen **Driftssteder** er **Slet** ikke længere
+  spærret, mens tog kalder der. I stedet får du først vist alt, hvad sletningen ville ændre, og du
+  bekræfter eller fortryder. Togene mister deres kald der: et tog, der kører igennem, kører nu lige forbi,
+  og et, der starter eller slutter der, starter eller slutter nu ved sit næste eller forrige kald. Hvor
+  driftsstedet ligger mellem præcis to naboer, erstattes dets to sporstrækninger af én, der forbinder
+  naboerne, lige så lang og med samme køretid som de to tilsammen, og køreplansstrækningerne gennem det
+  kører over den i stedet. Sletningen afvises, med årsagerne listet, så længe en omløbsplan, en
+  lokførertjeneste eller en godsstrøm starter eller slutter der, eller så længe et tog vender der eller
+  kører igennem det som et forgreningspunkt.
+
+### Rettelser
+
+- **En rulleliste viser ikke længere et andet valg end det, der blev truffet.** Når valgmulighederne i en
+  liste ændrede sig, men den valgte værdi ikke gjorde, kunne listen vise en anden post end den gemte.
+
 ## Version 0.7.9
 
 ### Ændringer

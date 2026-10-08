@@ -1,5 +1,30 @@
 # Versionsnyheter
 
+## Version 0.8.0
+
+### Ändringar
+
+- **Fliken Tåg kan visa uppehållen vid en driftplats.** På fliken **Tåg** går det nu att välja mellan
+  **Per tåg** och **Per driftplats**. Per driftplats listar alla tåg som berör den valda driftplatsen, i
+  den ordning de kommer dit: om tåget börjar, slutar, stannar eller passerar, var det kommer ifrån och
+  fortsätter till, dess tider och dess spår. Välj ett annat spår i listan för att flytta tåget dit, utan
+  att öppna varje tåg för sig. En konflikt vid driftplatsen, till exempel två tåg på samma spår samtidigt,
+  markeras på raden. Fliken kommer ihåg den valda vyn och driftplatsen.
+- **En driftplats som tåg berör kan tas bort.** På fliken **Driftplatser** är **Ta bort** inte längre
+  spärrad medan tåg berör platsen. I stället visas först allt som borttagningen skulle ändra, och du
+  bekräftar eller avbryter. Tågen förlorar sina uppehåll där: ett tåg som passerar kör nu rakt förbi, och
+  ett som börjar eller slutar där börjar eller slutar nu vid sitt nästa eller föregående uppehåll. Där
+  driftplatsen ligger mellan exakt två grannar ersätts dess två spårsträckor av en som förbinder grannarna,
+  lika lång och med samma gångtid som de två tillsammans, och tidtabellssträckorna genom den går över den
+  i stället. Borttagningen nekas, med skälen listade, så länge en omloppsplan, en lokförartjänst eller ett
+  godsflöde börjar eller slutar där, eller så länge ett tåg vänder där eller passerar den som en
+  förgreningspunkt.
+
+### Rättelser
+
+- **En rullgardinslista visar inte längre ett annat val än det som gjordes.** När valen i en lista
+  ändrades men det valda värdet inte gjorde det, kunde listan visa en annan post än den sparade.
+
 ## Version 0.7.9
 
 ### Ändringar

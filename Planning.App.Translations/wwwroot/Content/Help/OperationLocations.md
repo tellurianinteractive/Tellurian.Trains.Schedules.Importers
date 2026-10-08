@@ -102,7 +102,15 @@ many tracks it has. For each row you can:
 
 - **Info** — view all details, including the tracks, read-only.
 - **Edit** — open an in-place form with the fields for that location's type.
-- **Delete** — remove the location. Blocked while any train calls there.
+- **Delete** — remove the location. First you are shown everything the delete would change, and
+  you confirm or cancel. Trains calling there lose those calls: a train running through now runs
+  straight past, and one starting or ending there now starts or ends at its next or previous call.
+  Where the location lies between exactly two neighbours, its two track stretches are replaced by one
+  joining the neighbours (as long, and taking as long, as the two together), and the timetable
+  stretches through it run over that one instead. The delete is refused, with the reasons listed,
+  while a vehicle schedule, driver duty or cargo flow starts or ends there, or while a train would be
+  left with a route that does not join up — one turning back there, or running through it as a
+  junction.
 
 **Add new** asks for the type first (station, signal-controlled, or other location), then opens the
 edit form for that type. A new location is saved once its name and a unique signature are filled in.

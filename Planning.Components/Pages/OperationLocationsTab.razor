@@ -49,9 +49,9 @@ else
                     <TemplateColumn Title='@Translator("Actions")' Class="actions">
                         <button @onclick="() => Info(context)">@Translator("Info")</button>
                         <button @onclick="() => Edit(context)"><i class="fa-solid fa-pen"></i> @Translator("Edit")</button>
-                        <button class="danger" disabled="@IsReferenced(context)"
-                                title='@(IsReferenced(context) ? Translator("LocationReferencedByTrains") : null)'
-                                @onclick="() => _deleteTarget = context">
+                        @* Always offered: what a delete would change, or what stops it, is shown
+                           before anything is changed (LocationDeletionConfirm). *@
+                        <button class="danger" @onclick="() => StartDelete(context)">
                             @Translator("Delete")
                         </button>
                     </TemplateColumn>
@@ -88,13 +88,9 @@ else
                 </QuickGrid>
             }
 
-            @if (_deleteTarget is not null)
+            @if (_deletion is not null)
             {
-                <div class="confirm">
-                    <span>@string.Format(Culture, Translator("DeleteLocationConfirm"), _deleteTarget.Name)</span>
-                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
-                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
-                </div>
+                <LocationDeletionConfirm Preview="_deletion" OnConfirm="DeleteConfirmed" OnCancel="() => _deletion = null" />
             }
         }
         else if (_mode == Mode.Edit && Editing is not null)
@@ -660,7 +656,7 @@ else
     private bool _isNew;
     private OperationLocation? Editing { get; set; }
     private OperationLocation? _selected;
-    private OperationLocation? _deleteTarget;
+    private LocationDeletionPreview? _deletion;
     private string? _error;
 
     protected override void OnInitialized()
@@ -700,10 +696,6 @@ else
 
     // Same Markdig call the editor's preview and the printed reports use, so the three agree.
     private static MarkupString Rendered(string markdown) => new(Markdig.Markdown.ToHtml(markdown));
-
-    // A location is referenced when any train calls there; such a location cannot be deleted. Whether a
-    // single track may go is the model's to say (DeletionRules), since vehicle schedules can use it too.
-    private static bool IsReferenced(OperationLocation o) => o.Tracks.Any(t => t.Calls.Count > 0);
 
     private void StartAdd()
     {
@@ -798,17 +790,19 @@ else
         BackToList();
     }
 
+    // Works out what deleting the location would change, for the planner to confirm or abort.
+    private void StartDelete(OperationLocation location) =>
+        _deletion = ScheduleState.Schedule?.PreviewDelete(location);
+
+    // The model removes the location and everything depending on it, exactly as previewed: the trains'
+    // calls there, its track stretches (joining its neighbours where it lay between two), the timetable
+    // stretches through it, and every reference to it elsewhere in the layout.
     private void DeleteConfirmed()
     {
-        if (_deleteTarget is null) return;
-        Layout!.OperationLocations.Remove(_deleteTarget);
-        // A track's route names a location by id, so the tracks reserved for trains to or from this one
-        // are released with it rather than left pointing at a location the layout no longer has.
-        Layout.ForgetTrackRoutesTo(_deleteTarget);
-        // The topology diagram places a location by id too, so its saved position goes with it.
-        Layout.ForgetTopologyPositionOf(_deleteTarget);
-        _deleteTarget = null;
-        ScheduleState.SaveAndNotify();
+        if (_deletion is null || ScheduleState.Schedule is not { } plan) return;
+        var deleted = plan.TryDelete(_deletion.Location).IsSuccess;
+        _deletion = null;
+        if (deleted) ScheduleState.SaveAndNotify();
     }
 
     private void AddTrack()

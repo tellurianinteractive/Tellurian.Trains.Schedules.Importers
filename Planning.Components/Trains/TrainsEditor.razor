@@ -1,0 +1,697 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Timetables
+@using Tellurian.Trains.Schedules.Model.Validations
+@using Tellurian.Trains.Schedules.Planning.Timetables
+@inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
+@inject Translator Translator
+@implements IDisposable
+
+@if (Timetable is null || Layout is null)
+{
+    <p>@Translator("TrainsNoSchedule")</p>
+}
+else
+{
+    @* The widest external id sets the width of that column, so imported ids are not clipped. *@
+    <div class="trains-editor" style="--ext-width:@ExternalIdWidth">
+        <p class="hint">@Translator("TrainsDescription")</p>
+
+        @{ var groups = TrainGroups; }
+
+        <div class="toolbar">
+            <button class="primary" @onclick="AddTrain">@Translator("AddTrain")</button>
+            @if (groups.Count > 1)
+            {
+                <button @onclick="() => ExpandAllCategories(groups)"><i class="fa-solid fa-angles-down"></i> @Translator("ExpandAll")</button>
+                <button @onclick="CollapseAllCategories"><i class="fa-solid fa-angles-up"></i> @Translator("CollapseAll")</button>
+            }
+        </div>
+
+        @if (groups.Count == 0)
+        {
+            <p class="empty">@Translator("NoTrains")</p>
+        }
+        else
+        {
+            @* Each category's conflicts are read once here: the badges need them, and so does the decision
+               whether the table carries a conflict column at all. A category gathers the conflicts of its
+               trains, so a category without any has no train with one either. *@
+            var rows = groups.Select(g => (Group: g, Conflicts: ConflictsOf(g))).ToList();
+            var showConflicts = rows.Any(r => r.Conflicts.Count > 0);
+            @* What a category name and an expanded train's calls span: everything after the leading cells. *@
+            var bodySpan = ColumnCount(showConflicts) - (showConflicts ? 2 : 1);
+
+            <table class="trains">
+                <thead>
+                    <tr>
+                        @if (showConflicts)
+                        {
+                            <th class="conflict"></th>
+                        }
+                        <th class="expander"></th>
+                        @if (ShowExternalId)
+                        {
+                            <th>@Translator("ExternalId")</th>
+                        }
+                        <th>@Translator("Company")</th>
+                        <th>@Translator("Number")</th>
+                        <th>@Translator(UseDays ? "Days" : "Sessions")</th>
+                        <th>@Translator("Category")</th>
+                        <th>@Translator("MaxSpeed")</th>
+                        <th>@Translator("Axles")</th>
+                        <th>@Translator("Wagons")</th>
+                        <th>@Translator("LengthMeters")</th>
+                        <th>@Translator("ContinuesAs")</th>
+                        <th class="actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @* Category headers, trains and expanded call tables are siblings in this one loop, so
+                       every row is keyed and the keys are told apart across all three kinds. Both a train's
+                       number and its category are edited in the row itself, and either edit reorders the
+                       rows; unkeyed, Blazor diffs them by position and leaves the typed number, and the
+                       drop-down a moved-away train left behind, standing in the row that took its place. *@
+                    @foreach (var (group, groupConflicts) in rows)
+                    {
+                        var groupExpanded = IsExpanded(group);
+                        <tr class="category @(groupConflicts.Count > 0 ? "has-conflict" : "")" @key="RowKey(group)">
+                            @if (showConflicts)
+                            {
+                                @* A collapsed category is the only place the conflicts inside it can be
+                                   seen, so the badge here stands for every train of the category. *@
+                                <td class="conflict">
+                                    <ConflictBadge Errors="groupConflicts" For="@GroupName(group)" />
+                                </td>
+                            }
+                            <td class="expander">
+                                <button class="toggle" title="@Translator(groupExpanded ? "Collapse" : "Expand")"
+                                        @onclick="() => ToggleExpanded(group)"><i class="fa-solid @(groupExpanded ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                            </td>
+                            <td colspan="@bodySpan">
+                                @if (group.Category is { } groupCategory)
+                                {
+                                    <span class="swatch" style="background-color:@groupCategory.Color"></span>
+                                }
+                                <span class="name">@GroupName(group)</span>
+                                <span class="count">(@group.Trains.Count)</span>
+                            </td>
+                        </tr>
+                        @if (groupExpanded)
+                        {
+                            foreach (var train in group.Trains)
+                            {
+                                var conflicts = ConflictsOf(train);
+                                <tr class="train @(IsExpanded(train) ? "expanded" : "") @(conflicts.Count > 0 ? "has-conflict" : "")" @key="RowKey(train)">
+                                    @if (showConflicts)
+                                    {
+                                        <td class="conflict">
+                                            <ConflictBadge Errors="conflicts" For="@TrainLabel(train)" />
+                                        </td>
+                                    }
+                                    <td class="expander">
+                                        <button class="toggle" title="@Translator(IsExpanded(train) ? "Collapse" : "Expand")"
+                                                @onclick="() => ToggleExpanded(train)"><i class="fa-solid @(IsExpanded(train) ? "fa-chevron-down" : "fa-chevron-right")"></i></button>
+                                    </td>
+                                    @if (ShowExternalId)
+                                    {
+                                        <td>
+                                            @* An external id belongs to the system the train came from, so it can be
+                                               corrected but never invented here: a train imported without one has no
+                                               field to type into. *@
+                                            @if (HasExternalId(train))
+                                            {
+                                                <input type="text" class="ext" value="@train.ExternalId"
+                                                       @onchange="e => SetExternalId(train, e)" />
+                                            }
+                                        </td>
+                                    }
+                                    <td>
+                                        @{ var inheritedCompany = train.Category?.Company; }
+                                        <ListBoxView Items="@(CompanyChoices.ToListItems())"
+                                                     Value="train.CompanyId" ValueChanged="id => SetCompany(train, id)"
+                                                     Class="@(train.Company is null ? "inherited" : null)"
+                                                     Placeholder="@(inheritedCompany is { } ic ? string.Format(Culture, Translator("CompanyFromCategory"), ic.Name) : "—")" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="num" value="@train.Number" @onchange="e => SetNumber(train, e)" />
+                                    </td>
+                                    <td>
+                                        <select value="@SessionsKey(train)" @onchange="e => SetSessions(train, e)">
+                                            @if (!SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == SessionsKey(train)))
+                                            {
+                                                <option value="@SessionsKey(train)" selected>@SessionsText(train.Sessions)</option>
+                                            }
+                                            @foreach (var sessions in SessionsCatalogue)
+                                            {
+                                                <option value="@SessionsDisplay.Key(sessions)">@SessionsText(sessions)</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <ListBoxView Items="@(CategoryChoices.ToListItems())"
+                                                     Value="train.CategoryId" ValueChanged="id => SetCategory(train, id)"
+                                                     Placeholder="—" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="num" min="0" value="@train.MaxSpeed"
+                                               placeholder="@(train.Category?.DefaultSpeed.ToString(Culture))"
+                                               @onchange="e => SetMaxSpeed(train, e)" />
+                                    </td>
+                                    <td><input type="number" class="num3" min="0" value="@train.Length.Axles" @onchange="e => SetAxles(train, e)" /></td>
+                                    <td><input type="number" class="num3" min="0" value="@train.Length.Wagons" @onchange="e => SetWagons(train, e)" /></td>
+                                    <td><input type="text" class="num3"
+                                               value="@train.Length.Meters?.ToString("0.#", Culture)" @onchange="e => SetMeters(train, e)" /></td>
+                                    <td class="continues">
+                                        <input type="checkbox" checked="@train.ShowContinuesAs"
+                                               title="@Translator("ShowContinuesAsHint")" @onchange="e => SetShowContinuesAs(train, e)" />
+                                    </td>
+                                    <td class="actions">
+                                        @{ var deletion = Plan?.MayDelete(train); }
+                                        <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(deletion, "TrainReferenced", Translator)">
+                                            <button class="danger" disabled="@(deletion?.IsDenied == true)"
+                                                    @onclick="() => _deleteTarget = train"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                                        </span>
+                                    </td>
+                                </tr>
+                                @if (IsExpanded(train))
+                                {
+                                    <tr class="detail" @key="CallsRowKey(train)">
+                                        @if (showConflicts)
+                                        {
+                                            <td></td>
+                                        }
+                                        <td></td>
+                                        <td colspan="@bodySpan">
+                                            @CallsTable(train)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (_deleteTarget is not null)
+        {
+            <div class="confirm-backdrop" @onclick="() => _deleteTarget = null">
+                <div class="confirm" @onclick:stopPropagation="true">
+                    <span>@string.Format(Culture, Translator("DeleteTrainConfirm"), TrainLabel(_deleteTarget))</span>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </div>
+            </div>
+        }
+
+        @if (_showAdd)
+        {
+            <AddTrainDialog OnCreated="OnTrainCreated" OnClosed="() => _showAdd = false" />
+        }
+    </div>
+}
+
+@code {
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    private Plan? Plan => ScheduleState.Schedule;
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private Layout? Layout => ScheduleState.Layout;
+
+    private bool UseDays => Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => Layout?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+
+    private List<Train> Trains =>
+        [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number).ThenBy(t => t.Id)];
+
+    // The ExternalId column is only meaningful for imported trains; hide it when nothing uses it.
+    private bool ShowExternalId => Trains.Any(HasExternalId);
+
+    // True when the train carries an external id from the system it was imported from. Only such a train
+    // gets an editable field, so an id can be corrected but not added to a train that never had one.
+    private static bool HasExternalId(Train train) => !string.IsNullOrWhiteSpace(train.ExternalId);
+
+    // External ids are as long as the system they were imported from made them, so the field is sized to
+    // the longest one instead of clipping every id to a fixed width. Bounded so that neither a very short
+    // nor a stray very long id makes the column look wrong.
+    private string ExternalIdWidth =>
+        $"{Math.Clamp(Trains.Select(t => t.ExternalId.Length).DefaultIfEmpty(0).Max() + 2, 8, 32)}ch";
+
+    // The leading conflict column when the table shows one, the expander, the optional ExternalId, the nine
+    // train fields and the actions cell.
+    private int ColumnCount(bool withConflicts) =>
+        (withConflicts ? 12 : 11) + (ShowExternalId ? 1 : 0);
+
+    private IEnumerable<Company> CompanyChoices =>
+        (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<TrainCategory> CategoryChoices =>
+        (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    private IEnumerable<Sessions> SessionsCatalogue =>
+        Timetable?.Sessions ?? [];
+
+    private readonly HashSet<int> _expanded = [];
+    private readonly HashSet<int> _expandedCategories = [];
+    private Train? _deleteTarget;
+
+    // ---- Category grouping ----------------------------------------------------------------------
+
+    // The trains of one category, which is the level the tab is organised by: category > train > calls.
+    // A null category is the group of trains that have not been given one; they are kept together at the
+    // end rather than left out of the table.
+    private sealed record TrainGroup(TrainCategory? Category, IReadOnlyList<Train> Trains)
+    {
+        // Category ids start at one, so zero identifies the group without a category.
+        public int Key => Category?.Id ?? 0;
+    }
+
+    // Grouped by category id rather than by the category itself: TrainCategory is a record, so grouping on
+    // the instance would merge two categories that happen to hold the same values.
+    private IReadOnlyList<TrainGroup> TrainGroups
+    {
+        get
+        {
+            var trains = Trains;
+            List<TrainGroup> groups =
+            [
+                .. trains
+                    .Where(t => t.Category is not null)
+                    .GroupBy(t => t.Category!.Id)
+                    .Select(g => new TrainGroup(g.First().Category, [.. g]))
+                    .OrderBy(g => g.Category!.Name, StringComparer.CurrentCulture)
+                    .ThenBy(g => g.Key)
+            ];
+            var uncategorised = trains.Where(t => t.Category is null).ToList();
+            if (uncategorised.Count > 0) groups.Add(new TrainGroup(null, uncategorised));
+            return groups;
+        }
+    }
+
+    private string GroupName(TrainGroup group) => group.Category?.Name ?? Translator("NoCategory");
+
+    // ---- Row keys -------------------------------------------------------------------------------
+
+    // The table puts three kinds of row in one loop, so a key has to be unlike every other row's and not
+    // only unlike those of its own kind: a category id and a train id are both small numbers, and two
+    // sibling rows keyed alike is an error. The id is what is keyed on because it outlives an edit.
+    private static string RowKey(TrainGroup group) => $"category-{group.Key}";
+
+    private static string RowKey(Train train) => $"train-{train.Id}";
+
+    private static string CallsRowKey(Train train) => $"calls-{train.Id}";
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
+        // Older/imported timetables have no session catalogue yet; seed the standard patterns so the
+        // Sessions drop-down is usable. Only persists when something was actually added.
+        if (Timetable is { } timetable && timetable.EnsureSessions()) ScheduleState.SaveAndNotify();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    // The conflicts shown on trains that involve this train; they tint its row and fill its conflict badge.
+    private IReadOnlyList<ValidationError> ConflictsOf(Train train) =>
+        [.. ValidationState.Errors.Where(e => e.IsShownOnTrains && e.Involves(train))];
+
+    // Every conflict of the category's trains, gathered on the group header: once the category is collapsed
+    // that header is the only place the conflicts inside it can be seen, and read.
+    private IReadOnlyList<ValidationError> ConflictsOf(TrainGroup group) =>
+        [.. ValidationState.Errors
+            .Where(e => e.IsShownOnTrains && group.Trains.Any(t => e.Involves(t)))];
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
+        ScheduleState.FlushPendingSave();
+    }
+
+    // ---- Expansion state ------------------------------------------------------------------------
+
+    private bool IsExpanded(Train train) => _expanded.Contains(train.Id);
+
+    private void ToggleExpanded(Train train)
+    {
+        if (!_expanded.Remove(train.Id)) _expanded.Add(train.Id);
+    }
+
+    // Categories start out collapsed, so the tab opens on the list of categories rather than on every train.
+    private bool IsExpanded(TrainGroup group) => _expandedCategories.Contains(group.Key);
+
+    private void ToggleExpanded(TrainGroup group)
+    {
+        if (!_expandedCategories.Remove(group.Key)) _expandedCategories.Add(group.Key);
+    }
+
+    private void ExpandAllCategories(IEnumerable<TrainGroup> groups)
+    {
+        foreach (var group in groups) _expandedCategories.Add(group.Key);
+    }
+
+    private void CollapseAllCategories() => _expandedCategories.Clear();
+
+    // ---- Display helpers ------------------------------------------------------------------------
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+
+    // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
+    private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
+
+    private string SessionsKey(Train train) => SessionsDisplay.Key(train.Sessions);
+
+    private static string TrainLabel(Train train) => train.IdentityWithCompany;
+
+    // ---- Train field editing --------------------------------------------------------------------
+
+    private void SetExternalId(Train train, ChangeEventArgs e)
+    {
+        train.ExternalId = e.Value?.ToString() ?? "";
+        Save();
+    }
+
+    private void SetNumber(Train train, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var number)) train.Number = number;
+        Save();
+    }
+
+    private void SetCompany(Train train, int? id)
+    {
+        train.Company = id is null ? null : Layout!.Companies.FirstOrDefault(c => c.Id == id);
+        train.CompanyId = train.Company?.Id;
+        Save();
+    }
+
+    private void SetCategory(Train train, int? id)
+    {
+        train.Category = id is null ? null : Timetable!.TrainCategories.FirstOrDefault(c => c.Id == id);
+        train.CategoryId = train.Category?.Id;
+        // The train moves to the group of its new category; open that group so it does not vanish from view.
+        _expandedCategories.Add(train.CategoryId ?? 0);
+        Save();
+    }
+
+    private void SetSessions(Train train, ChangeEventArgs e)
+    {
+        var key = e.Value?.ToString();
+        var match = SessionsCatalogue.FirstOrDefault(s => SessionsDisplay.Key(s) == key);
+        if (SessionsCatalogue.Any(s => SessionsDisplay.Key(s) == key)) train.Sessions = match;
+        Save();
+    }
+
+    private void SetMaxSpeed(Train train, ChangeEventArgs e)
+    {
+        train.MaxSpeed = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, Culture, out var speed) ? speed : null;
+        Save();
+    }
+
+    private void SetAxles(Train train, ChangeEventArgs e) =>
+        SetLength(train, train.Length with { Axles = ParseInt(e) });
+
+    private void SetWagons(Train train, ChangeEventArgs e) =>
+        SetLength(train, train.Length with { Wagons = ParseInt(e) });
+
+    private void SetMeters(Train train, ChangeEventArgs e) =>
+        // Train length in metres is kept to at most one decimal place.
+        SetLength(train, train.Length with { Meters = ParseDouble(e) is double m ? Math.Round(m, 1, MidpointRounding.AwayFromZero) : null });
+
+    private void SetLength(Train train, TrainCapacity length)
+    {
+        train.Length = length;
+        Save();
+    }
+
+    private void SetShowContinuesAs(Train train, ChangeEventArgs e)
+    {
+        train.ShowContinuesAs = e.Value is true;
+        Save();
+    }
+
+    // ---- Calls sub-table ------------------------------------------------------------------------
+
+    private RenderFragment CallsTable(Train train) => @<div class="sub">
+        <table class="sub-grid">
+            <thead>
+                <tr>
+                    <th>@Translator("Station")</th>
+                    <th>@Translator("Track")</th>
+                    <th>@Translator("Arrival")</th>
+                    <th>@Translator("Departure")</th>
+                    <th title="@Translator("IsArrival")">@Translator("Arr")</th>
+                    <th title="@Translator("IsDeparture")">@Translator("Dep")</th>
+                    <th class="note" title="@Translator("CallNoteHint")">@Translator("Remark")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @* The calls are listed in the order the train travels them, which is what CallsInRunOrder
+                   gives: the route runs from the earliest call to the latest, over the track stretches
+                   between them. Editing a time therefore moves the row to where the train now runs it, and
+                   times that do not ascend are reported as a conflict on the train (rules T2 and T5). *@
+                @foreach (var call in train.CallsInRunOrder)
+                {
+                    @* A call is only the planner's to make a stop where the train can stop at all, and the
+                       two flags a train part hangs on cannot be taken away — see the model's StopRules. *@
+                    var canBeStop = call.CanBeStop;
+                    var arrivalRequired = Plan?.IsArrivalRequired(call) == true;
+                    var departureRequired = Plan?.IsDepartureRequired(call) == true;
+                    @* Keyed on the call itself: editing a time re-sorts the rows, and without a key the two
+                       drop-downs would be diffed against whichever row moved into this position. *@
+                    <tr @key="call">
+                        @* Where the train calls and which track it takes are asked separately: one list of
+                           every location-and-track pair in the layout is long enough to pick the wrong line
+                           out of, and changing track — much the commoner edit — should not mean finding the
+                           station again. The locations offered are the ones that keep the route whole (see
+                           the model's RouteRules), and the tracks are that location's own. *@
+                        <td>
+                            <ListBoxView Items="@(train.LocationChoicesFor(call).ToListItems())"
+                                         Value="call.OperationLocation.Id" ValueChanged="id => SetCallLocation(call, id)" />
+                        </td>
+                        <td>
+                            <ListBoxView Items="@(call.OperationLocation.TracksInDisplayOrder.ToListItems(Translator))"
+                                         Value="call.TrackId" ValueChanged="id => SetCallTrack(call, id)" />
+                        </td>
+                        @* Keyed on _timeEdits so a refused or unreadable time is discarded: without a changed
+                           key Blazor's diff sees the model value it already rendered and leaves what was
+                           typed standing in the field. *@
+                        <td><input type="text" class="time" @key="_timeEdits" value="@call.Arrival.HHMM()" @onchange="e => SetArrival(call, e)" /></td>
+                        <td><input type="text" class="time" @key="_timeEdits" value="@call.Departure.HHMM()" @onchange="e => SetDeparture(call, e)" /></td>
+                        @* The title sits on the cell: a disabled input takes no pointer events, so a title
+                           on it would never be seen. *@
+                        <td title="@StopFlagHint(canBeStop, arrivalRequired)">
+                            <input type="checkbox" checked="@(arrivalRequired || (canBeStop && call.IsArrival))" disabled="@(!canBeStop || arrivalRequired)"
+                                   @onchange="e => SetIsArrival(call, e)" />
+                        </td>
+                        <td title="@StopFlagHint(canBeStop, departureRequired)">
+                            <input type="checkbox" checked="@(departureRequired || (canBeStop && call.IsDeparture))" disabled="@(!canBeStop || departureRequired)"
+                                   @onchange="e => SetIsDeparture(call, e)" />
+                        </td>
+                        <td class="note">
+                            @* A note is written for the arrival or for the departure, so the halves on
+                               offer are the ones the two flags beside it say the train makes — none at
+                               a pass-through (see the model's ManualNoteRules). *@
+                            <CallNoteField Value="@call.ManualNoteText" Target="@call.ManualNoteTarget"
+                                           Targets="@call.ManualNoteTargets" NoteChanged="edit => SetCallNote(call, edit)" />
+                        </td>
+                        <td>
+                            @{ var callDeletion = Plan?.MayDelete(call); }
+                            <span class="delete-wrap" title="@DeletionPresentation.BlockedReason(callDeletion, "CallReferenced", Translator)">
+                                <button class="danger small" disabled="@(callDeletion?.IsDenied == true)"
+                                        @onclick="() => RemoveCall(call)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            </span>
+                        </td>
+                    </tr>
+                }
+                @if (train.Calls.Count == 0)
+                {
+                    <tr><td colspan="8" class="empty">@Translator("NoCalls")</td></tr>
+                }
+            </tbody>
+        </table>
+        <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
+            <button class="small" disabled="@(!CanAddCall(train))" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
+        </span>
+    </div>;
+
+    // A shunting task is work at one place, so its one call is all it may ever have: a second would make
+    // it a route, which is a travelling train and not a task (see the model's CheckShuntingTaskCalls).
+    private bool CanAddCall(Train train) =>
+        !(train.IsShuntingTask && train.Calls.Count > 0) && NextCallLocations(train).Any();
+
+    // The locations a call added at the end of this train's run may be at. Empty means there is nowhere
+    // to add one — a layout with no track anywhere, or a train that has run out of onward locations.
+    private IReadOnlyList<OperationLocation> NextCallLocations(Train train) =>
+        Layout is { } layout ? train.LocationChoicesForNextCall(layout) : [];
+
+    // Moving a call to another location puts it on that location's first track; the planner picks another
+    // from the track list beside it if the first is not the one wanted. A location with no track is never
+    // offered, so finding no track here means the location was emptied under the call.
+    private void SetCallLocation(StationCall call, int? id)
+    {
+        if (call.Train.LocationChoicesFor(call).FirstOrDefault(l => l.Id == id) is not { } location) return;
+        if (location.TracksInDisplayOrder.FirstOrDefault() is not { } track) return;
+        MoveCall(call, track);
+    }
+
+    private void SetCallTrack(StationCall call, int? id)
+    {
+        if (call.OperationLocation.Tracks.FirstOrDefault(t => t.Id == id) is not { } track) return;
+        MoveCall(call, track);
+    }
+
+    private void MoveCall(StationCall call, StationTrack track)
+    {
+        if (call.MoveTo(track)) Save();
+    }
+
+    // A time is not edited on its own: the calls on one side of it follow. Setting a departure carries the
+    // rest of the run with it, setting an arrival the run leading up to it, each of those calls moving by the
+    // same amount so their run and dwell times are kept (Plan.SetDeparture / Plan.SetArrival). The change is
+    // refused as a whole — and the field falls back to the stored time — when it would take the train outside
+    // the plan's operating window.
+    // Counts the times entered, only to key the time fields: bumping it on a refused edit rebuilds them
+    // from the model, which is what makes the field fall back to the stored time.
+    private int _timeEdits;
+
+    private void SetArrival(StationCall call, ChangeEventArgs e)
+    {
+        var applied = Plan is { } plan && TryParseTime(e, out var time) && plan.SetArrival(call, time) is not null;
+        if (!applied) _timeEdits++;
+        Save();
+    }
+
+    private void SetDeparture(StationCall call, ChangeEventArgs e)
+    {
+        var applied = Plan is { } plan && TryParseTime(e, out var time) && plan.SetDeparture(call, time) is not null;
+        if (!applied) _timeEdits++;
+        Save();
+    }
+
+    // The two flags are the planner's only where the train can stop and nothing depends on the stop; the
+    // checkbox is disabled otherwise, and these guards keep a stale event from getting past it.
+    private void SetIsArrival(StationCall call, ChangeEventArgs e)
+    {
+        if (!call.CanBeStop || Plan?.IsArrivalRequired(call) == true) return;
+        call.IsArrival = e.Value is true;
+        Save();
+    }
+
+    private void SetIsDeparture(StationCall call, ChangeEventArgs e)
+    {
+        if (!call.CanBeStop || Plan?.IsDepartureRequired(call) == true) return;
+        call.IsDeparture = e.Value is true;
+        Save();
+    }
+
+    // Explains a disabled Arr or Dep checkbox. Both rules can hold at once — a train part ending where its
+    // train cannot stop — and that is the one worth saying plainly, because only moving the call or the
+    // part will put it right.
+    private string? StopFlagHint(bool canBeStop, bool required) =>
+        canBeStop ? (required ? Translator("CallStopRequired") : null) :
+        required ? Translator("CallStopRequiredButImpossible") :
+        Translator("CallCannotBeStop");
+
+    // The model creates the note on first text, removes it when the text is cleared, stamps it with the
+    // half of the call it is shown at and writes it in the language being read — see
+    // StationCall.SetManualNote.
+    private void SetCallNote(StationCall call, ManualNoteEdit edit)
+    {
+        call.SetManualNote(edit.Text, edit.Target);
+        Save();
+    }
+
+    // The call is added where the train can run on to, so a route built with this button stays whole: the
+    // first of the onward locations, or the first location of the layout when the train has no calls yet.
+    // It goes at the end of the run, so the train reaches the location from its last one and goes on
+    // nowhere from it, and that is what decides the track it is put on — a track the planner has reserved
+    // for trains running this way first of all (see OperationLocation.PreferredTrack).
+    private void AddCall(Train train)
+    {
+        if (!CanAddCall(train)) return;
+        if (NextCallLocations(train).FirstOrDefault() is not { } location) return;
+        var previous = train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
+        var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
+        if (location.PreferredTrack(previous, null, preference) is not { } track) return;
+        var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
+        var call = new StationCall(NextCallId(), track, start, start);
+        train.Add(call);
+        Save();
+    }
+
+    private void RemoveCall(StationCall call)
+    {
+        if (Plan?.TryDelete(call).IsSuccess == true) Save();
+    }
+
+    private int NextCallId() =>
+        ((Timetable?.Trains.SelectMany(t => t.Calls).Select(c => c.Id) ?? []).DefaultIfEmpty(0).Max()) + 1;
+
+    // ---- Add / delete train ---------------------------------------------------------------------
+
+    private bool _showAdd;
+
+    private void AddTrain() => _showAdd = true;
+
+    // The dialog has already built the train, added it to the timetable and saved; just reveal it.
+    private void OnTrainCreated(Train train)
+    {
+        _showAdd = false;
+        _expandedCategories.Add(train.CategoryId ?? 0);
+        _expanded.Add(train.Id);
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (_deleteTarget is not { } train || Plan is not { } plan) return;
+        if (plan.TryDelete(train).IsSuccess)
+        {
+            _expanded.Remove(train.Id);
+            Save();
+        }
+        _deleteTarget = null;
+    }
+
+    // ---- Parsing helpers ------------------------------------------------------------------------
+
+    // Every edit here can move a train part's ends: adding, deleting or retiming a call changes where the
+    // train starts and finishes, so the flags those ends depend on are set again before the plan is saved
+    // (see the model's StopRules).
+    private void Save()
+    {
+        Plan?.ApplyStopRules();
+        ScheduleState.SaveAndNotify();
+    }
+
+    private static int? ParseInt(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var value) ? value : null;
+
+    // Accept a decimal typed in either the current culture (e.g. "2,5") or with a dot ("2.5"); the
+    // value is displayed back in the current culture.
+    private static double? ParseDouble(ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var value)) return value;
+        if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value)) return value;
+        return null;
+    }
+
+    private static bool TryParseTime(ChangeEventArgs e, out Time time)
+    {
+        var text = e.Value?.ToString();
+        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span))
+        {
+            time = Time.FromTimeSpan(span);
+            return true;
+        }
+        time = Time.Zero;
+        return false;
+    }
+}

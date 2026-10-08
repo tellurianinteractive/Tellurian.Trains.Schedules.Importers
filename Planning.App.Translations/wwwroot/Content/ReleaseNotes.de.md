@@ -1,5 +1,33 @@
 # Versionshinweise
 
+## Version 0.8.0
+
+### Änderungen
+
+- **Der Reiter Züge kann die Halte an einer Betriebsstelle zeigen.** Auf dem Reiter **Züge** kann jetzt
+  zwischen **Pro Zug** und **Pro Betriebsstelle** gewählt werden. Pro Betriebsstelle listet jeden Zug, der
+  die gewählte Betriebsstelle berührt, in der Reihenfolge, in der er dort ankommt: ob er beginnt, endet,
+  hält oder durchfährt, woher er kommt und wohin er weiterfährt, seine Zeiten und sein Gleis. Wählen Sie in
+  der Liste ein anderes Gleis, um den Zug dorthin zu verlegen, ohne jeden Zug einzeln zu öffnen. Ein
+  Konflikt an der Betriebsstelle, etwa zwei Züge gleichzeitig auf einem Gleis, wird in der Zeile markiert.
+  Der Reiter merkt sich die gewählte Ansicht und Betriebsstelle.
+- **Eine Betriebsstelle, die von Zügen berührt wird, lässt sich löschen.** Auf dem Reiter
+  **Betriebsstellen** ist **Löschen** nicht mehr gesperrt, solange Züge dort halten oder durchfahren.
+  Stattdessen wird Ihnen zuerst alles gezeigt, was das Löschen ändern würde, und Sie bestätigen oder
+  brechen ab. Die Züge verlieren ihre Halte dort: ein durchfahrender Zug fährt jetzt einfach vorbei, und
+  einer, der dort beginnt oder endet, beginnt oder endet jetzt an seinem nächsten oder vorigen Halt. Liegt
+  die Betriebsstelle zwischen genau zwei Nachbarn, werden ihre beiden Streckenabschnitte durch einen
+  ersetzt, der die Nachbarn verbindet, so lang und mit derselben Fahrzeit wie die beiden zusammen, und die
+  Fahrplanstrecken durch sie führen über diesen. Das Löschen wird mit Angabe der Gründe abgelehnt, solange
+  ein Fahrzeugumlauf, ein Triebfahrzeugführerdienst oder ein Wagenstrom dort beginnt oder endet, oder
+  solange ein Zug dort wendet oder sie als Abzweig durchfährt.
+
+### Fehlerbehebungen
+
+- **Eine Auswahlliste zeigt keine andere Wahl mehr als die getroffene.** Änderten sich die angebotenen
+  Einträge einer Liste, der gewählte Wert aber nicht, konnte die Liste einen anderen Eintrag als den
+  gespeicherten zeigen.
+
 ## Version 0.7.9
 
 ### Änderungen

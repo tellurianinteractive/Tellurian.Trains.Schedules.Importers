@@ -1,0 +1,92 @@
+.location-calls {
+    --primary: #1a3a5c;
+    --border: #ddd;
+    --hover: #f3f6fa;
+
+    .hint {
+        margin: 0.25rem 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+
+        label {
+            font-weight: 600;
+        }
+    }
+
+    .empty {
+        color: #667;
+        font-style: italic;
+    }
+
+    /* Sized to its content like the per-train table: a row is read across, from the train to the track
+       it stands on, and every value in it is short. */
+    table.calls {
+        border-collapse: collapse;
+        font-size: 0.9rem;
+
+        > thead th {
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 0.4rem 0.6rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        > tbody > tr > td {
+            padding: 0.3rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        > tbody > tr:hover {
+            background: var(--hover);
+        }
+
+        /* A call involved in a conflict here: the same amber tint and accent as in the per-train table. */
+        > tbody > tr.has-conflict {
+            background: #fff8e1;
+        }
+
+        > tbody > tr.has-conflict:hover {
+            background: #ffefc2;
+        }
+
+        > tbody > tr.has-conflict > td:first-child {
+            box-shadow: inset 3px 0 0 #d9a406;
+        }
+
+        td.time {
+            font-variant-numeric: tabular-nums;
+        }
+
+        td.kind {
+            color: #556;
+        }
+
+        .swatch {
+            display: inline-block;
+            width: 0.75rem;
+            height: 0.75rem;
+            margin-right: 0.45rem;
+            border: 1px solid #99a;
+            border-radius: 2px;
+            vertical-align: baseline;
+        }
+    }
+
+    th.conflict,
+    td.conflict {
+        width: 1.9rem;
+        text-align: center;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+}

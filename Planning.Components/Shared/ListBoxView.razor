@@ -1,12 +1,17 @@
 @* A <select> driven by a sequence of ListboxItem, hiding the option markup. The selected value is the
    item's integer id; null is the optional leading placeholder ("none") option. Supports @bind-Value,
    or pass Value + ValueChanged for per-row handlers. Build the items with the ToListItems extensions. *@
-<select value="@(Value?.ToString() ?? "")" class="@Class" @onchange="OnChangedAsync">
+@* Keyed on the options offered: when they change but the value does not, the diff rewrites the options
+   in place and leaves the value alone, so the browser keeps the selected position and shows whichever
+   option has been written into it — a different one from the value. A new select gets its value set
+   again. *@
+@{ var items = Items.ToList(); }
+<select @key="OptionsKey(items)" value="@(Value?.ToString() ?? "")" class="@Class" @onchange="OnChangedAsync">
     @if (Placeholder is not null)
     {
         <option value="">@Placeholder</option>
     }
-    @foreach (var item in Items)
+    @foreach (var item in items)
     {
         <option value="@item.Value">@item.LocalizedDescription</option>
     }
@@ -27,6 +32,9 @@
 
     /// <summary>Optional CSS class for the underlying select.</summary>
     [Parameter] public string? Class { get; set; }
+
+    private static string OptionsKey(IEnumerable<ListboxItem> items) =>
+        string.Join(',', items.Select(i => i.Value));
 
     private async Task OnChangedAsync(ChangeEventArgs e)
     {

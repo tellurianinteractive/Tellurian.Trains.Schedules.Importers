@@ -268,5 +268,24 @@ public static class StationCallExtensions
         /// is real work, done after it has stopped. Anywhere else the working ends when the train arrives.
         /// </summary>
         public Time WorkEnd => call.IsTrainDestination ? call.Departure : call.Arrival;
+
+        /// <summary>
+        /// Puts the call on another track, at this location or another. Returns false when the call is
+        /// already on that track.
+        /// </summary>
+        /// <remarks>
+        /// The per-track index of calls is the track's own (see <c>Timetable.RebuildStationCalls</c>), so
+        /// the call is taken off the track it leaves and put on the one it moves to.
+        /// </remarks>
+        public bool MoveTo(StationTrack track)
+        {
+            ArgumentNullException.ThrowIfNull(track);
+            if (ReferenceEquals(call.Track, track)) return false;
+            call.Track.Calls.Remove(call);
+            call.Track = track;
+            call.TrackId = track.Id;
+            track.Add(call);
+            return true;
+        }
     }
 }

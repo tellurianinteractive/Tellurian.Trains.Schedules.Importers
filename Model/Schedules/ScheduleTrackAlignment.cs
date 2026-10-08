@@ -94,18 +94,12 @@ public static class ScheduleTrackAlignmentExtensions
     }
 
     // Puts the arriving part's last call on the track the departing part leaves from, where both are at the
-    // same location and it is not there already. The per-track call index is the track's own (see
-    // Timetable.RebuildStationCalls), so the call has to be taken off the one track and put on the other.
+    // same location and it is not there already.
     private static int ArriveWhereNextDeparts(ScheduledTrainPart arriving, ScheduledTrainPart departing)
     {
         var call = arriving.To;
         var track = departing.From.Track;
         if (!call.OperationLocation.Equals(track.Station)) return 0;
-        if (ReferenceEquals(call.Track, track)) return 0;
-        call.Track.Calls.Remove(call);
-        call.Track = track;
-        call.TrackId = track.Id;
-        track.Add(call);
-        return 1;
+        return call.MoveTo(track) ? 1 : 0;
     }
 }

@@ -4,6 +4,20 @@
 
 ### New Features
 
+- **Deleting an operation location trains call at.** New **`DeletionRules.PreviewDelete(OperationLocation)`**
+  returns a `LocationDeletionPreview` of everything a delete would change, without changing anything;
+  **`MayDelete(OperationLocation)`** / **`TryDelete(OperationLocation)`** follow the usual pair. The trains'
+  calls at the location are removed (a train starting or ending there is promoted at its neighbouring call,
+  which takes over the service time; one left with no route is deleted). A location between exactly two
+  neighbours A and C has its stretches A–B and B–C replaced by one A–C (summed distance and time, lowest
+  speed and track count) or by the stretch already joining A and C, and every timetable stretch through it
+  is rerouted over that; one left empty is removed. Track routes at A and C naming B now name C and A,
+  and controlled-by, cargo-served-from, lock keys, stop patterns, cargo flow origins/destinations and the
+  topology position are cleared; dispatch stretches are regenerated where the layout has any. Blocked
+  (`DeletionResult.Failure`) by a vehicle schedule, driver duty or cargo flow starting or ending at a call
+  there, a train reversing there, a train or timetable stretch running through it as a junction, or a
+  joining stretch running the other way round.
+
 - **A warning for a train that arrives at or departs from an unscheduled track.** New
   **`Train.CheckScheduledTracks`** (rule T9, switched by the new `ValidationSettings.ValidateScheduledTracks`,
   on by default) reports each call marked as an arrival and/or a departure at a track whose

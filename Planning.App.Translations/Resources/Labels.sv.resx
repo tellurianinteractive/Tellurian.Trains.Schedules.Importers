@@ -1104,9 +1104,6 @@
   <data name="PlatformLength" xml:space="preserve">
     <value>Plattformslängd (meter)</value>
   </data>
-  <data name="LocationReferencedByTrains" xml:space="preserve">
-    <value>Kan inte tas bort: tåg stannar på denna plats.</value>
-  </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
     <value>Verkliga minuter som tillåts för ett lok att göra rundgång till tågets motsatta ände.</value>
   </data>
@@ -2587,5 +2584,86 @@
   </data>
   <data name="VehicleWorksTrainParts" xml:space="preserve">
     <value>Kan inte ta bort: det är tilldelat</value>
+  </data>
+  <data name="PerTrain" xml:space="preserve">
+    <value>Per tåg</value>
+  </data>
+  <data name="PerOperationLocation" xml:space="preserve">
+    <value>Per driftplats</value>
+  </data>
+  <data name="LocationCallsDescription" xml:space="preserve">
+    <value>Alla tåg som går via en driftplats, i den ordning de kommer dit. Välj vilket spår varje tåg använder.</value>
+  </data>
+  <data name="NoCallsAtLocation" xml:space="preserve">
+    <value>Inga tåg går via denna driftplats.</value>
+  </data>
+  <data name="CallKind" xml:space="preserve">
+    <value>Händelse</value>
+  </data>
+  <data name="CallKindStarts" xml:space="preserve">
+    <value>Startar</value>
+  </data>
+  <data name="CallKindEnds" xml:space="preserve">
+    <value>Slutar</value>
+  </data>
+  <data name="CallKindStops" xml:space="preserve">
+    <value>Stannar</value>
+  </data>
+  <data name="CallKindPasses" xml:space="preserve">
+    <value>Passerar</value>
+  </data>
+  <data name="LocationDeletionBlocked" xml:space="preserve">
+    <value>Den kan inte tas bort så länge följande är beroende av den:</value>
+  </data>
+  <data name="LocationDeletionChanges" xml:space="preserve">
+    <value>Borttagningen ändrar även följande:</value>
+  </data>
+  <data name="LocationDeletionTrainDeleted" xml:space="preserve">
+    <value>tas bort, eftersom inget återstår av dess färdväg</value>
+  </data>
+  <data name="LocationDeletionTrainStartsAt" xml:space="preserve">
+    <value>utgår nu från {0}</value>
+  </data>
+  <data name="LocationDeletionTrainEndsAt" xml:space="preserve">
+    <value>slutar nu i {0}</value>
+  </data>
+  <data name="LocationDeletionTrainRunsPast" xml:space="preserve">
+    <value>trafikerar inte längre platsen</value>
+  </data>
+  <data name="LocationDeletionStretchRemoved" xml:space="preserve">
+    <value>Tas bort: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchAdded" xml:space="preserve">
+    <value>Läggs till: {0}</value>
+  </data>
+  <data name="LocationDeletionStretchReused" xml:space="preserve">
+    <value>Tågen går nu på den befintliga sträckan {0}</value>
+  </data>
+  <data name="LocationDeletionRouteChanged" xml:space="preserve">
+    <value>{0}: dras om förbi platsen</value>
+  </data>
+  <data name="LocationDeletionRouteRemoved" xml:space="preserve">
+    <value>{0}: tas bort, eftersom inget återstår av dess färdväg</value>
+  </data>
+  <data name="LocationDeletionOther" xml:space="preserve">
+    <value>Övriga ändringar</value>
+  </data>
+  <data name="LocationDeletionDispatchRegenerated" xml:space="preserve">
+    <value>Trafikledningssträckorna genereras på nytt</value>
+  </data>
+  <data name="LocationDeletionNoLongerControlled" xml:space="preserve">
+    <value>Styrs inte längre från någon plats: {0}</value>
+  </data>
+  <data name="LocationDeletionNoLongerCargoServed" xml:space="preserve">
+    <value>Godsbetjänas inte längre från någon plats: {0}</value>
+  </data>
+  <data name="LocationDeletionLockKeysRemoved" xml:space="preserve">
+    <value>Låsnyckel tas bort: {0}</value>
+  </data>
+  <data name="LocationDeletionStopPatterns" xml:space="preserve">
+    <value>Tas bort ur uppehållsmönstret för: {0}</value>
+  </data>
+  <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
+    <value>Tas bort som ursprung eller destination i {0} beskrivningar av godsflöden</value>
   </data>
 </root>
