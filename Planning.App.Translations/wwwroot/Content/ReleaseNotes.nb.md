@@ -1,5 +1,16 @@
 # Versjonsnyheter
 
+## Versjon 0.7.8
+
+### Endringer
+
+- **Det varsles om et tog som ankommer til eller går fra et spor som ikke er planlagt.** Et tog med
+  ankomst eller avgang på et spor der feltet **Planlagt?** ikke er avkrysset på fanen **Driftssteder**,
+  vises nå under **Konflikter**, med tog, driftssted, tid og spor. Et tog som bare venter på et slikt
+  spor, for eksempel på en kryssing, vises ikke, og heller ikke et skifteoppdrag. Ingenting endres for
+  deg: flytt enten stoppet til et planlagt spor på fanen **Tog**, eller kryss av i sporets felt
+  **Planlagt?**. Kontrollen kan slås av under **Innstillinger › Validering**.
+
 ## Versjon 0.7.7
 
 ### Endringer

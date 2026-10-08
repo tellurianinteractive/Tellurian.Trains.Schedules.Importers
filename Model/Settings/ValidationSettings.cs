@@ -31,6 +31,11 @@ public sealed class ValidationSettings
     /// with no pattern is not checked; see <see cref="Validations.StopPatternRules"/>.
     /// </summary>
     public bool ValidateStopPatterns { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train is validated for arriving at and departing from
+    /// only scheduled tracks (rule T9). Shunting tasks are not checked.
+    /// </summary>
+    public bool ValidateScheduledTracks { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
     public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>

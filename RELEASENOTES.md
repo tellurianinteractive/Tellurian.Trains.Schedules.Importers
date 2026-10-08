@@ -4,6 +4,14 @@
 
 ### New Features
 
+- **A warning for a train that arrives at or departs from an unscheduled track.** New
+  **`Train.CheckScheduledTracks`** (rule T9, switched by the new `ValidationSettings.ValidateScheduledTracks`,
+  on by default) reports each call marked as an arrival and/or a departure at a track whose
+  `StationTrack.IsScheduled` is false, as a `Severity.Warning` of the new
+  `ValidationErrorType.StopAtUnscheduledTrack`. A call that is neither — a train standing in a siding for a
+  meet — is not reported, and neither is a shunting task. It runs from `Plan.GetValidationErrors` and from
+  `Train.GetValidationErrors`.
+
 - **Report languages.** New `ReportCultureExtensions` decide the culture a report, or one item of it, is
   printed in. `Layout.DefaultLanguage` is the first language of the layout's default country and
   `Layout.DefaultReportCulture` that language in that country (for example `de-CH`); `Country.PrimaryLanguage`

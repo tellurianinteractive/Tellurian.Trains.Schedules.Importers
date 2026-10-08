@@ -413,6 +413,23 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates an unscheduled-track error: a train arrives at or departs from a track that is not
+    /// scheduled (rule T9).
+    /// </summary>
+    public static ValidationError StopAtUnscheduledTrack(
+        StationCall call,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StopAtUnscheduledTrack,
+            FromTrack = call.Track,
+            ToTrack = call.Track,
+            FromTime = call.Arrival,
+            ToTime = call.Departure,
+            Trains = [call.Train!],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a passenger-exchange error: a passenger train stops at a location that exchanges
     /// passengers, but at a track with no platform for them to get on and off at (rule T6).
     /// </summary>
@@ -857,6 +874,9 @@ public enum ValidationErrorType
 
     /// <summary>A train stops on its way at a location its category's stop pattern does not name.</summary>
     StopOutsideStopPattern,
+
+    /// <summary>A train arrives at or departs from a track that is not scheduled.</summary>
+    StopAtUnscheduledTrack,
 }
 
 /// <summary>

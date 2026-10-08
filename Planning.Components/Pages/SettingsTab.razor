@@ -397,6 +397,10 @@ else
                     <input type="checkbox" @bind="v.ValidateStopPatterns" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
+                    <label>@Translator("ValidateScheduledTracks")</label>
+                    <input type="checkbox" @bind="v.ValidateScheduledTracks" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
                     <label>@Translator("ValidateTrainNumbers")</label>
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>

@@ -380,9 +380,9 @@ public class XplnDataImporterTests
     [TestMethod()]
     // One of the 73 is two trains crossing at Meierei Rothenburg: XPLN cannot say whether trains can cross at a
     // signal-controlled location, so it imports as a block post until the planner marks it.
-    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 73)]
-    [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 16)]
-    [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 66)]
+    [DataRow("Barmstedt2022", 14, 61, 18, 21, 14, 45, 10, 90)]
+    [DataRow("DreamTrack2015", 12, 62, 24, 0, 0, 40, 11, 19)]
+    [DataRow("FREMODERN-2023-Final-1-1", 14, 142, 58, 37, 0, 119, 14, 70)]
     [DataRow("FREMODERN-2023-Norge", 10, 41, 13, 0, 0, 20, 10, 4)]
     [DataRow("Givskud2021", 25, 143, 49, 74, 80, 109, 25, 63)]
     [DataRow("H0e-Schutterwald2013", 10, 26, 6, 0, 20, 25, 10, 12)]
@@ -396,7 +396,7 @@ public class XplnDataImporterTests
     [DataRow("Magdeburg_v_DB33_DSB32_WTB11", 0, 0, 0, 0, 0, 0, 0, 0, 1)]
     [DataRow("Montan2023H0e", 5, 32, 3, 4, 24, 3, 5, 19)]
     [DataRow("Rotebro2015", 12, 39, 15, 0, 0, 31, 12, 63)]
-    [DataRow("Rotebro2016", 16, 32, 12, 0, 0, 24, 16, 14)]
+    [DataRow("Rotebro2016", 16, 32, 12, 0, 0, 24, 16, 37)]
     [DataRow("Timmele2015", 12, 37, 13, 0, 0, 33, 12, 31)]
     [DataRow("Värnamo2016", 8, 40, 13, 0, 0, 27, 8, 23)]
     [DataRow("Värnamo2017", 9, 40, 12, 0, 0, 29, 9, 17)]

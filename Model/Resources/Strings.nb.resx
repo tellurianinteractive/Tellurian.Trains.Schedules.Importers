@@ -324,6 +324,9 @@
   <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
     <value>Tog {0} stopper ved {1} {2}, men driftsstedet inngår ikke i stoppmønsteret for kategorien {3}.</value>
   </data>
+  <data name="TrainStopsAtUnscheduledTrack" xml:space="preserve">
+    <value>Tog {0} ankommer eller går fra {1} {2} på spor {3}, men sporet er ikke planlagt.</value>
+  </data>
   <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
     <value>Tog {0} har overlappende lokomotivtildelinger på {3}: {1} og {2}.</value>
   </data>

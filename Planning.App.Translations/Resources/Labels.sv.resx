@@ -468,6 +468,9 @@
   <data name="ValidateStopPatterns" xml:space="preserve">
     <value>Validera uppehållsmönster?</value>
   </data>
+  <data name="ValidateScheduledTracks" xml:space="preserve">
+    <value>Validera tidtabellslagda spår?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Validera resandeutbyte vid plattform?</value>
   </data>

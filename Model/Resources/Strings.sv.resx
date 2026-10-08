@@ -324,6 +324,9 @@
   <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
     <value>Tåg {0} gör uppehåll vid {1} {2}, men driftplatsen ingår inte i uppehållsmönstret för kategorin {3}.</value>
   </data>
+  <data name="TrainStopsAtUnscheduledTrack" xml:space="preserve">
+    <value>Tåg {0} ankommer eller avgår vid {1} {2} på spår {3}, men spåret är inte tidtabellslagt.</value>
+  </data>
   <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
     <value>Tåg {0} har överlappande loktilldelningar på {3}: {1} och {2}.</value>
   </data>

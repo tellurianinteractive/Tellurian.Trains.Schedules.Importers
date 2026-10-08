@@ -49,6 +49,7 @@ public static class ValidationExtensions
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidatePassengerExchange) result.AddRange(timetable.Trains.SelectMany(t => t.CheckPassengerExchange()));
             if (options.ValidateStopPatterns) result.AddRange(timetable.Trains.SelectMany(t => t.CheckStopPattern()));
+            if (options.ValidateScheduledTracks) result.AddRange(timetable.Trains.SelectMany(t => t.CheckScheduledTracks()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
@@ -723,6 +724,7 @@ public static class ValidationExtensions
             result.AddRange(train.CheckShuntingTaskCalls());
             if (options.ValidateRouteContinuity) result.AddRange(train.CheckRouteContinuity());
             if (options.ValidatePassengerExchange) result.AddRange(train.CheckPassengerExchange());
+            if (options.ValidateScheduledTracks) result.AddRange(train.CheckScheduledTracks());
             return result;
         }
 
@@ -823,6 +825,37 @@ public static class ValidationExtensions
                 var message = Message.Warning(Strings.TrainStopsOutsideCategoryStopPattern,
                     train, call.OperationLocation, call.Arrival.HHMM(), category);
                 result.Add(ValidationError.StopOutsideStopPattern(call, message));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Checks that the train arrives at and departs from only tracks that are scheduled
+        /// (<see cref="StationTrack.IsScheduled"/>) (rule T9).
+        /// </summary>
+        /// <remarks>
+        /// Only a call marked as an arrival, a departure or both is looked at — its ends included, where the
+        /// train is made ready and put away. A train merely standing at or running through an unscheduled
+        /// track, which is what a meet in a siding is, is not reported. Neither is a shunting task: it is
+        /// worked in sidings and yards, which is what unscheduled tracks are for.
+        /// <para>
+        /// Nothing is put right automatically, because the planner may have meant either: move the call to
+        /// a scheduled track, or tick the track as scheduled.
+        /// </para>
+        /// </remarks>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckScheduledTracks()
+        {
+            if (train.IsShuntingTask) return [];
+            var result = new List<ValidationError>();
+            foreach (var call in train.CallsInRunOrder)
+            {
+                if (!call.IsArrival && !call.IsDeparture) continue;
+                if (call.Track.IsScheduled) continue;
+                var time = call.IsArrival ? call.Arrival : call.Departure;
+                var message = Message.Warning(Strings.TrainStopsAtUnscheduledTrack,
+                    train, call.OperationLocation, time.HHMM(), call.Track);
+                result.Add(ValidationError.StopAtUnscheduledTrack(call, message));
             }
             return result;
         }

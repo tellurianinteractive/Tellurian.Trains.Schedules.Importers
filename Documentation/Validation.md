@@ -58,6 +58,8 @@ public sealed record ValidationError
 | `TrainMissingTraction` | A stretch of a train's run has no traction unit on some sessions it runs |
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
 | `VehicleIdentityDuplicated` | Two vehicles share an identity — external id, or operator and number — on a common session |
+| `StopOutsideStopPattern` | A train stops on its way at a location its category's stop pattern does not name |
+| `StopAtUnscheduledTrack` | A train arrives at or departs from a track that is not scheduled |
 | `LockKeyIgnored` | An operation location carries a lock key the manning on one side or the other has left meaningless |
 
 ## ValidationSettings
@@ -74,6 +76,8 @@ public sealed class ValidationSettings
     public bool ValidateTrainSpeed { get; set; } = true;
     public bool ValidateRouteContinuity { get; set; } = true;
     public bool ValidatePassengerExchange { get; set; } = true;
+    public bool ValidateStopPatterns { get; set; } = true;
+    public bool ValidateScheduledTracks { get; set; } = true;
     public bool ValidateTrainNumbers { get; set; } = true;
     public bool ValidateSchedules { get; set; } = true;
     public bool ValidateLocomotiveCoverage { get; set; } = true;
@@ -330,6 +334,24 @@ the train can stop there at all (`Train.CanStopAt`), and a shadow station is alw
 Reading a plan gives every category without a pattern the one its trains already run
 (`Plan.DeduceStopPatterns`, part of `Plan.Reconcile()`), and that is deduced from the very stops this rule
 judges — so opening an existing plan raises nothing from it.
+
+#### T9 — Stops only at scheduled tracks ✅
+**Method**: `CheckScheduledTracks(this Train me)`
+
+**Validates**: A train arrives at and departs from only tracks that are scheduled
+(`StationTrack.IsScheduled`). Every call marked `IsArrival`, `IsDeparture` or both is looked at, the
+train's first and last call included. Gated by `ValidateScheduledTracks`.
+
+**Not a fault**: a call that is neither an arrival nor a departure — a train merely standing at or running
+through an unscheduled track, which is what a meet in a siding is. Nor a shunting task
+(`Train.IsShuntingTask`), which is worked in sidings and yards, the very tracks left unscheduled.
+
+**Warning**: `"Train {train} arrives or departs at {location} {time} on track {track}, but that track is
+not scheduled."` (`StopAtUnscheduledTrack`)
+
+Nothing is put right automatically, because the planner may have meant either: move the call to a
+scheduled track on the **Trains** tab, or tick the track's **Scheduled?** box on the **Operation
+locations** tab.
 
 ### Schedule scope (S) — vehicle schedule / turnus
 

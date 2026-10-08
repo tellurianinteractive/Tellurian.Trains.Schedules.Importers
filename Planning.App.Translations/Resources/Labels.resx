@@ -468,6 +468,9 @@
   <data name="ValidateStopPatterns" xml:space="preserve">
     <value>Validate stop patterns?</value>
   </data>
+  <data name="ValidateScheduledTracks" xml:space="preserve">
+    <value>Validate scheduled tracks?</value>
+  </data>
   <data name="ValidatePassengerExchange" xml:space="preserve">
     <value>Validate passenger exchange at platforms?</value>
   </data>

@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+## Version 0.7.8
+
+### Changes
+
+- **A train that arrives at or departs from an unscheduled track is warned about.** A train with an
+  arrival or departure on a track whose **Scheduled?** box is cleared on the **Operation locations** tab is
+  now listed under **Conflicts**, with train, location, time and track. A train only waiting on such a
+  track, for example for a meet, is not listed, and neither is a shunting task. Nothing is changed for
+  you: either move the stop to a scheduled track on the **Trains** tab, or tick the track's
+  **Scheduled?** box. The check can be switched off under **Settings › Validation**.
+
 ## Version 0.7.7
 
 ### Changes

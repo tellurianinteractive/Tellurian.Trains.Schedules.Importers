@@ -1,5 +1,17 @@
 # Versionshinweise
 
+## Version 0.7.8
+
+### Änderungen
+
+- **Ein Zug, der an einem nicht geplanten Gleis ankommt oder abfährt, wird gemeldet.** Ein Zug mit
+  Ankunft oder Abfahrt an einem Gleis, dessen Kästchen **Geplant?** auf dem Reiter **Betriebsstellen**
+  nicht angekreuzt ist, erscheint jetzt unter **Konflikte**, mit Zug, Betriebsstelle, Zeit und Gleis. Ein
+  Zug, der an einem solchen Gleis nur wartet, etwa auf eine Kreuzung, erscheint nicht, ebenso wenig eine
+  Rangieraufgabe. Nichts wird für Sie geändert: verlegen Sie entweder den Halt auf dem Reiter **Züge** an
+  ein geplantes Gleis, oder kreuzen Sie das Kästchen **Geplant?** des Gleises an. Die Prüfung lässt sich
+  unter **Einstellungen › Validierung** abschalten.
+
 ## Version 0.7.7
 
 ### Änderungen

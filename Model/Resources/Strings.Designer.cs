@@ -608,6 +608,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
                 return ResourceManager.GetString("TrainStopsOutsideCategoryStopPattern", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} arrives or departs at {1} {2} on track {3}, but that track is not scheduled..
+        /// </summary>
+        internal static string TrainStopsAtUnscheduledTrack {
+            get {
+                return ResourceManager.GetString("TrainStopsAtUnscheduledTrack", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Undefined.

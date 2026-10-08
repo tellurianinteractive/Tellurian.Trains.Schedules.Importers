@@ -1,5 +1,17 @@
 # Versionsnyheter
 
+## Version 0.7.8
+
+### Ändringar
+
+- **Ett tåg som ankommer till eller avgår från ett spår som inte är tidtabellslagt varnas för.** Ett tåg
+  som ankommer eller avgår på ett spår där rutan **Tidtabellslagd?** inte är ikryssad på fliken
+  **Driftplatser** listas nu under **Konflikter**, med tåg, driftplats, tid och spår. Ett tåg som bara
+  väntar på ett sådant spår, till exempel på ett möte, listas inte, och inte heller ett växlingsuppdrag.
+  Ingenting ändras åt dig: flytta antingen uppehållet till ett tidtabellslagt spår på fliken **Tåg**,
+  eller kryssa i spårets ruta **Tidtabellslagd?**. Kontrollen kan stängas av under
+  **Inställningar › Validering**.
+
 ## Version 0.7.7
 
 ### Ändringar

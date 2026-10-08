@@ -324,6 +324,9 @@
   <data name="TrainStopsOutsideCategoryStopPattern" xml:space="preserve">
     <value>Zug {0} hält in {1} {2}, aber diese Betriebsstelle gehört nicht zum Haltemuster der Kategorie {3}.</value>
   </data>
+  <data name="TrainStopsAtUnscheduledTrack" xml:space="preserve">
+    <value>Zug {0} kommt in {1} {2} auf Gleis {3} an oder fährt dort ab, aber dieses Gleis ist nicht geplant.</value>
+  </data>
   <data name="TrainHasLocomotiveCoverageOverlapOnDays" xml:space="preserve">
     <value>Zug {0} hat überlappende Lokzuweisungen an den Tagen {3}: {1} und {2}.</value>
   </data>
