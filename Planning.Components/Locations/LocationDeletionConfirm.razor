@@ -110,6 +110,10 @@
                 {
                     <li>@string.Format(Culture, Translator("LocationDeletionCargoFlowOptions"), Preview.CargoFlowOptionsChanged.Count)</li>
                 }
+                @if (Preview.ShuntersRemoved.Count > 0)
+                {
+                    <li>@string.Format(Culture, Translator("LocationDeletionShuntersRemoved"), string.Join(", ", Preview.ShuntersRemoved.Select(s => s.Designation)))</li>
+                }
             </ul>
         }
 
@@ -133,7 +137,8 @@
         Preview.NoLongerCargoServed.Count > 0 ||
         Preview.LockKeysRemoved.Count > 0 ||
         Preview.StopPatternsChanged.Count > 0 ||
-        Preview.CargoFlowOptionsChanged.Count > 0;
+        Preview.CargoFlowOptionsChanged.Count > 0 ||
+        Preview.ShuntersRemoved.Count > 0;
 
     private bool HasConsequences =>
         Preview.Trains.Count > 0 || Preview.RemovedStretches.Count > 0 || HasOtherChanges;

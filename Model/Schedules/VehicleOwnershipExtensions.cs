@@ -16,16 +16,17 @@ public static class VehicleOwnershipExtensions
     {
         /// <summary>
         /// Whether the vehicle is rolling stock a participant brings to the meeting: a locomotive, a
-        /// trainset or a wagonset. A cargo flow is wagons routed by waybills, and cargo is no vehicle at all.
+        /// trainset, a wagonset or a shunter. A cargo flow is wagons routed by waybills, and cargo is no
+        /// vehicle at all.
         /// </summary>
         public bool IsRollingStock =>
-            vehicle.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset or ScheduledObjectType.Wagonset;
+            vehicle.ObjectType is ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset or ScheduledObjectType.Wagonset or ScheduledObjectType.Shunter;
 
         /// <summary>
         /// Whether every unit of the vehicle brought — the spares included — must have a DCC address: true
-        /// for a traction unit, which is driven on the layout.
+        /// for a traction unit or a shunter, which is driven on the layout.
         /// </summary>
-        public bool NeedsDccAddress => vehicle.IsTraction;
+        public bool NeedsDccAddress => vehicle.IsPowered;
 
         /// <summary>
         /// Whether <paramref name="address"/> may be stored for a unit of this vehicle: a valid address (see
@@ -37,9 +38,10 @@ public static class VehicleOwnershipExtensions
 
         /// <summary>
         /// Whether each unit of the vehicle brought — the spares included — may be given a number of its own:
-        /// true for a traction unit. A wagonset's numbers are those of its wagons, kept on the wagonset itself.
+        /// true for a traction unit or a shunter. A wagonset's numbers are those of its wagons, kept on the
+        /// wagonset itself.
         /// </summary>
-        public bool TakesVehicleNumber => vehicle.IsTraction;
+        public bool TakesVehicleNumber => vehicle.IsPowered;
 
         /// <summary>
         /// Where the vehicle is to stand before the meeting begins: the start of the first train part it works

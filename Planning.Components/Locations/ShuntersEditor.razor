@@ -1,0 +1,163 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Locations
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* The shunters stationed at a location, edited where they stand, one row each. A shunter works no schedule:
+   it is at hand for any shunting the location needs. Who brings it, its DCC address and its unit number are
+   entered in the Vehicle owners tab, as for any locomotive.
+
+   Operator and number are the shunter's identity, and a shunter claims it on every session, so a number
+   another vehicle already has is refused here rather than left to the conflict list (rule P5). *@
+<div class="shunters">
+    <p class="hint">@Translator("ShuntersHint")</p>
+    @if (Shunters.Count > 0)
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>@Translator("Operator")</th>
+                    <th>@Translator("Number")</th>
+                    <th>@Translator("Class")</th>
+                    <th>@Translator("TractionType")</th>
+                    <th>@Translator("Remark")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shunter in Shunters)
+                {
+                    <tr @key="shunter.Id">
+                        <td>
+                            <select value="@(shunter.CompanyId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)"
+                                    @onchange="e => SetCompany(shunter, e)">
+                                <option value="">@Translator("None")</option>
+                                @foreach (var company in Companies)
+                                {
+                                    <option value="@company.Id">@company.Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="number" class="num" min="1" value="@shunter.Number" @onchange="e => SetNumber(shunter, e)" /></td>
+                        <td><input type="text" value="@shunter.Class" @onchange="e => SetClass(shunter, e)" /></td>
+                        <td>
+                            <select value="@shunter.TractionType" @onchange="e => SetTractionType(shunter, e)">
+                                @foreach (var traction in TractionTypes)
+                                {
+                                    <option value="@traction">@Translator(traction.ToString())</option>
+                                }
+                            </select>
+                        </td>
+                        <td><input type="text" class="remark" value="@shunter.Remark" @onchange="e => SetRemark(shunter, e)" /></td>
+                        <td>
+                            <button class="danger" @onclick="() => Delete(shunter)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+    <button @onclick="Add"><i class="fa-solid fa-plus"></i> @Translator("AddShunter")</button>
+</div>
+
+@code {
+    /// <summary>The plan the shunters belong to.</summary>
+    [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
+
+    /// <summary>The location the shunters are stationed at.</summary>
+    [Parameter, EditorRequired] public OperationLocation Location { get; set; } = default!;
+
+    private string? _error;
+
+    private IReadOnlyList<ScheduledObject> Shunters => Plan.ShuntersAt(Location);
+
+    private IEnumerable<Company> Companies =>
+        Plan.Layout.Companies.OrderBy(c => c.Name, StringComparer.CurrentCulture);
+
+    // All but None, which only a vehicle that is not powered has.
+    private static IEnumerable<TractionType> TractionTypes =>
+        Enum.GetValues<TractionType>().Where(t => t != TractionType.None);
+
+    // A new shunter takes the next number free on every session, so it never starts out clashing with another
+    // vehicle; the planner then gives it its real one.
+    private void Add()
+    {
+        _error = null;
+        var number = Enumerable.Range(1, int.MaxValue - 1)
+            .First(n => Plan.VehicleClaiming(VehicleIdentity.Of(null, null, n), Sessions.All) is null);
+        if (Plan.AddShunter(Location, null, number, null, TractionType.Diesel) is not null) ScheduleState.SaveAndNotify();
+    }
+
+    private void SetCompany(ScheduledObject shunter, ChangeEventArgs e)
+    {
+        var company = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)
+            ? Plan.Layout.Companies.FirstOrDefault(c => c.Id == id)
+            : null;
+        if (IsClaimed(shunter, company?.Id, shunter.Number)) return;
+        shunter.Company = company;
+        shunter.CompanyId = company?.Id;
+        Saved();
+    }
+
+    private void SetNumber(ScheduledObject shunter, ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.CurrentCulture, out var number) || number < 1)
+        {
+            _error = Translator("NumberMustBePositive");
+            return;
+        }
+        if (IsClaimed(shunter, shunter.CompanyId, number)) return;
+        shunter.Number = number;
+        Saved();
+    }
+
+    private void SetClass(ScheduledObject shunter, ChangeEventArgs e)
+    {
+        shunter.Class = e.Value?.ToString()?.Trim() ?? string.Empty;
+        Saved();
+    }
+
+    private void SetTractionType(ScheduledObject shunter, ChangeEventArgs e)
+    {
+        if (!Enum.TryParse<TractionType>(e.Value?.ToString(), out var traction)) return;
+        shunter.TractionType = traction;
+        Saved();
+    }
+
+    private void SetRemark(ScheduledObject shunter, ChangeEventArgs e)
+    {
+        var remark = e.Value?.ToString()?.Trim();
+        shunter.Remark = string.IsNullOrEmpty(remark) ? null : remark;
+        Saved();
+    }
+
+    private void Delete(ScheduledObject shunter)
+    {
+        _error = null;
+        if (Plan.TryDelete(shunter).IsSuccess) ScheduleState.SaveAndNotify();
+    }
+
+    // Whether another vehicle already has the operator and number the shunter would be given; if so, says which.
+    private bool IsClaimed(ScheduledObject shunter, int? companyId, int number)
+    {
+        var identity = VehicleIdentity.Of(shunter.ExternalId, companyId, number);
+        if (Plan.VehicleClaiming(identity, Sessions.All, excluding: shunter) is not { } other)
+        {
+            _error = null;
+            return false;
+        }
+        _error = string.Format(CultureInfo.CurrentCulture, Translator("VehicleIdentityAlreadyUsed"), other.IdentityText, other.Designation);
+        return true;
+    }
+
+    private void Saved()
+    {
+        _error = null;
+        ScheduleState.SaveAndNotify();
+    }
+}

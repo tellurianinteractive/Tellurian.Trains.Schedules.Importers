@@ -54,13 +54,13 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
         get; set
         {
             field = value;
-            if (field.IsTraction && TractionType == TractionType.None) TractionType = TractionType.Undefined;
-            else if (!field.IsTraction) TractionType = TractionType.None;
+            if (field.IsPowered && TractionType == TractionType.None) TractionType = TractionType.Undefined;
+            else if (!field.IsPowered) TractionType = TractionType.None;
         }
     }
 
     /// <summary>
-    /// Gets or sets the traction type for traction units; otherwise None.
+    /// Gets or sets the traction type for traction units and shunters; otherwise None.
     /// </summary>
     public TractionType TractionType { get; set; } = TractionType.Undefined;
 
@@ -79,6 +79,14 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// a reversible train does not, because the train itself can be driven from either end.
     /// </remarks>
     public bool IsReversibleTrain { get; set; }
+
+    /// <summary>
+    /// Gets or sets the <see cref="OperationLocation.Id"/> of the location a
+    /// <see cref="ScheduledObjectType.Shunter"/> is stationed at, there for any shunting the location needs;
+    /// <c>null</c> for every other kind of vehicle, which goes where its schedules take it. Kept by id, as
+    /// the location belongs to the layout, so it survives a change of the location's type.
+    /// </summary>
+    public int? StationedAtId { get; set; }
 
     /// <summary>
     /// Gets or sets the class designation of this vehicle.
@@ -272,7 +280,19 @@ public static class ScheduledObjectExtensions
         /// <summary>
         /// Determines if a turnus card should be printed for this object.
         /// </summary>
-        public bool HasTurnusCard => !scheduledObject.IsCargoFlow;
+        public bool HasTurnusCard => !scheduledObject.IsCargoFlow && !scheduledObject.IsShunter;
+
+        /// <summary>
+        /// True if <see cref="ScheduledObject"/> is a shunter: a locomotive stationed at one location for any
+        /// shunting there, which works no schedule and so is never assigned to a train.
+        /// </summary>
+        public bool IsShunter => scheduledObject.ObjectType.IsShunter;
+
+        /// <summary>
+        /// True if <see cref="ScheduledObject"/> moves under its own power — a traction unit or a shunter —
+        /// and so has a <see cref="ScheduledObject.TractionType"/> and is driven with a DCC address.
+        /// </summary>
+        public bool IsPowered => scheduledObject.ObjectType.IsPowered;
 
         /// <summary>
         /// The broad operating <see cref="VehicleRole"/> of this vehicle: traction (locomotive or trainset),
@@ -548,6 +568,13 @@ public enum ScheduledObjectType
     /// A unit of cargo (non-rolling stock)
     /// </summary>
     Cargo,
+
+    /// <summary>
+    /// A locomotive stationed at one operation location for any shunting there. It has no schedule and is
+    /// never assigned to a train, but is brought by a participant like any other locomotive.
+    /// </summary>
+    /// <remarks>Added last, as vehicle types are stored by their number.</remarks>
+    Shunter,
 }
 
 /// <summary>
@@ -605,6 +632,16 @@ public static class ScheduledObjectTypeExtensions
         /// True if <see cref="ScheduledObjectType"/> is a kind of traction unit.
         /// </summary>
         public bool IsTraction => type == ScheduledObjectType.Locomotive || type == ScheduledObjectType.Trainset;
+
+        /// <summary>
+        /// True if <see cref="ScheduledObjectType"/> is a shunter, stationed at one location rather than scheduled.
+        /// </summary>
+        public bool IsShunter => type == ScheduledObjectType.Shunter;
+
+        /// <summary>
+        /// True if <see cref="ScheduledObjectType"/> moves under its own power: a traction unit or a shunter.
+        /// </summary>
+        public bool IsPowered => type.IsTraction || type.IsShunter;
 
         /// <summary>
         /// True if <see cref="ScheduledObjectType"/> is cargo only, i.e.a nunit of cargo non-rolling stock.

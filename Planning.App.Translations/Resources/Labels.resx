@@ -2725,4 +2725,22 @@
   <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
     <value>Removed as origin or destination from {0} cargo flow descriptions</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Shunter</value>
+  </data>
+  <data name="Shunters" xml:space="preserve">
+    <value>Shunters</value>
+  </data>
+  <data name="AddShunter" xml:space="preserve">
+    <value>Add shunter</value>
+  </data>
+  <data name="ShuntersHint" xml:space="preserve">
+    <value>Locomotives stationed here for any shunting the location needs. They work no schedule. Who brings them, their DCC address and their number are entered in the Vehicle owners tab.</value>
+  </data>
+  <data name="NumberMustBePositive" xml:space="preserve">
+    <value>The number must be 1 or more.</value>
+  </data>
+  <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
+    <value>Shunters stationed here deleted: {0}</value>
+  </data>
 </root>

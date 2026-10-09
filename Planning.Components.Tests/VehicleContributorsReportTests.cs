@@ -160,6 +160,26 @@ public class VehicleContributorsReportTests
     }
 
     [TestMethod]
+    public void A_shunter_is_listed_last_on_the_page_of_the_station_it_is_stationed_at()
+    {
+        var plan = CreatePlan();
+        var munkerod = plan.Layout.OperationLocations.Single(location => location.Name == "Munkeröd");
+        var shunter = plan.AddShunter(munkerod, "Z65", 5, null, TractionType.Diesel)!;
+        plan.AddContributor(shunter, plan.ParticipantNamed("Bert")!, 65);
+
+        var groups = Groups(plan, VehicleContributorsGrouping.OperationLocation);
+
+        var line = groups[0].Lines[^1];
+        Assert.AreEqual("Munkeröd", groups[0].Name);
+        Assert.AreSame(shunter, line.Vehicle);
+        Assert.IsNull(line.Start, "A shunter starts no train part.");
+        Assert.AreEqual("Munkeröd", Cells.TextOf(line, VehicleContributorsColumn.Station));
+        Assert.AreEqual("Shunter, diesel", Cells.TextOf(line, VehicleContributorsColumn.Type));
+        Assert.AreEqual("65", Cells.TextOf(line, VehicleContributorsColumn.DccAddress));
+        CollectionAssert.DoesNotContain(groups[^1].Lines.Select(l => l.Vehicle).ToList(), shunter, "It is not 'not in operation'.");
+    }
+
+    [TestMethod]
     public void A_vehicle_not_in_operation_is_listed_last_under_a_heading_of_its_own()
     {
         var groups = Groups(CreatePlan(), VehicleContributorsGrouping.OperationLocation);

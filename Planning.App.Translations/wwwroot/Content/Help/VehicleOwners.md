@@ -6,7 +6,7 @@ put their stock on the layout before the first session.
 
 ### Rolling stock
 
-Every locomotive, trainset and wagonset in the plan is listed, with:
+Every locomotive, trainset, wagonset and shunter in the plan is listed, with:
 
 - its **type**, **vehicle** designation and **class** — for a wagonset that lists its wagons, each wagon
   class once, as in *A/B/Fv*;
@@ -14,6 +14,7 @@ Every locomotive, trainset and wagonset in the plan is listed, with:
 - the **first session** (or **first day**) it is in operation;
 - the **station**, **track** and **departure** time where it is to stand before that session — the start
   of the first train it works that session. A vehicle not yet given a schedule shows **Not in operation**;
+  a shunter shows only the location it is stationed at;
 - its **owner**, the owner's **DCC address**, the owners bringing **spares**, and a **note** about the item.
 
 Tick **Only those without an owner?** to see what nobody has offered to bring yet.
@@ -21,7 +22,7 @@ Tick **Only those without an owner?** to see what nobody has offered to bring ye
 A vehicle **Not in operation** can be removed from the plan with its **Delete** button, and
 **Delete those not in operation** removes every one of them listed — only those shown when the filter is
 ticked. Their owners are removed with them; the participants stay. A vehicle given work has to be taken out
-of its schedules on the **Schedules** tab first.
+of its schedules on the **Schedules** tab first. A shunter is deleted on the **Operation locations** tab, where it is stationed.
 
 ### Owners of an item
 
@@ -35,7 +36,7 @@ nobody is offered as a **New participant** — check the spelling before adding 
 
 ### DCC addresses
 
-A locomotive or trainset needs a **DCC address** for every owner, spares included, because each of them
+A locomotive, trainset or shunter needs a **DCC address** for every owner, spares included, because each of them
 is driven on the layout. Enter **0** when the owner has not yet said which address it is; it is shown as
 **Owner to provide**. An owner cannot be added to a traction unit without an address, and an address can be
 changed but not cleared. A warning sign marks a traction unit where an owner still lacks one — which
@@ -53,7 +54,8 @@ everywhere. A participant who still brings rolling stock cannot be deleted.
 above the pages:
 
 - **By operation location** — a page for each station, to hand to its owner: the vehicles to be set up there,
-  in order of first session and departure, with their owners and DCC addresses. Each spare is on a row of its
+  in order of first session and departure, with their owners and DCC addresses, and the shunters stationed
+  there last. Each spare is on a row of its
   own, right below the unit it stands in for. The items not in operation follow on a page of their own.
 - **By owner** — a page for each participant: what they bring, the units they set up themselves first, with
   the DCC address and where each item is to be set up. The items nobody brings yet come first, on a page

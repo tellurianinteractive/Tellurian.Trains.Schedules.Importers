@@ -1,0 +1,41 @@
+.shunters {
+    table {
+        border-collapse: separate;
+        border-spacing: 2px 0;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    th,
+    td {
+        padding: 0.25rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        font-weight: 600;
+    }
+
+    input[type="text"] {
+        width: 9rem;
+    }
+
+    input.remark {
+        width: 16rem;
+    }
+
+    input.num {
+        width: 5rem;
+    }
+
+    .hint {
+        color: #667;
+        font-style: italic;
+    }
+
+    .error {
+        color: #b00020;
+    }
+}

@@ -1,5 +1,16 @@
 # Versionsnyheder
 
+## Version 0.8.4
+
+### Nye funktioner
+
+- **Rangerlokomotiver kan stationeres på et driftsted.** Under fanen **Driftssteder** åbnes en station, et
+  industriområde eller et andet driftsted med **Rediger**, og der klikkes på **Tilføj rangerlokomotiv**. Et
+  rangerlokomotiv står der til den rangering, stedet har brug for: det kører ikke i noget omløb og sættes
+  aldrig på et tog. Det vises sammen med det øvrige rullende materiel under **Køretøjsejere**, hvor ejer,
+  DCC-adresse og køretøjsnummer angives som for ethvert andet lokomotiv, og rapporten over medbragte
+  køretøjer udskriver det på siden for den station, hvor det er stationeret.
+
 ## Version 0.8.3
 
 ### Ændringer

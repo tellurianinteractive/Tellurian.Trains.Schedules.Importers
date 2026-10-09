@@ -47,16 +47,17 @@
                 <tr class="@RowClass(line)">
                     @foreach (var column in Columns)
                     {
-                        if (column.IsStart && line.Start is null)
+                        if (column.IsStart && line.Location is null)
                         {
                             @* A vehicle given no work has nowhere to be set up; saying so once reads better than
-                               four empty cells, which look like something left out. *@
+                               four empty cells, which look like something left out. A shunter is given no work
+                               either, but is set up where it is stationed, so only its station is printed. *@
                             if (column == FirstStartColumn)
                             {
                                 <td class="not-in-operation" colspan="@StartColumnCount">@Cells.NotInOperation</td>
                             }
                         }
-                        else if (column == VehicleContributorsColumn.FirstSession)
+                        else if (column == VehicleContributorsColumn.FirstSession && line.Start is not null)
                         {
                             <td class="@ClassOf(column)">@SessionsFormatting.PositionHeadingOf(line.Start!.FirstPosition, Settings, useShortDayName: false)</td>
                         }

@@ -103,4 +103,7 @@
   <data name="Participant" xml:space="preserve">
     <value>Participant</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Shunter</value>
+  </data>
 </root>

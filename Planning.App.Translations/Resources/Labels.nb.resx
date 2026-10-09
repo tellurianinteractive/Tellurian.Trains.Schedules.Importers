@@ -2705,4 +2705,22 @@
   <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
     <value>Fjernes som opprinnelse eller destinasjon i {0} beskrivelser av godsstrømmer</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Skiftelok</value>
+  </data>
+  <data name="Shunters" xml:space="preserve">
+    <value>Skiftelok</value>
+  </data>
+  <data name="AddShunter" xml:space="preserve">
+    <value>Legg til skiftelok</value>
+  </data>
+  <data name="ShuntersHint" xml:space="preserve">
+    <value>Lokomotiver som er stasjonert her for den skiftingen stedet trenger. De går ikke i noe omløp. Hvem som tar dem med, DCC-adressen og nummeret deres angis under fanen Kjøretøyseiere.</value>
+  </data>
+  <data name="NumberMustBePositive" xml:space="preserve">
+    <value>Nummeret må være 1 eller større.</value>
+  </data>
+  <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
+    <value>Skiftelok stasjonert her fjernes: {0}</value>
+  </data>
 </root>

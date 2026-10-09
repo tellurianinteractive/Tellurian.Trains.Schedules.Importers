@@ -1,5 +1,16 @@
 # Versionsnyheter
 
+## Version 0.8.4
+
+### Nya funktioner
+
+- **Växellok kan stationeras på en driftplats.** Under fliken **Driftplatser**, öppna en station, ett
+  industriområde eller en annan driftplats med **Redigera** och klicka på **Lägg till växellok**. Ett
+  växellok finns där för den växling platsen behöver: det går inte i något omlopp och sätts aldrig på ett
+  tåg. Det listas med övrig rullande materiel under **Fordonsägare**, där ägare, DCC-adress och
+  fordonsnummer anges som för vilket lok som helst, och rapporten Fordon och ägare skriver det på sidan för
+  den station där det är stationerat.
+
 ## Version 0.8.3
 
 ### Ändringar

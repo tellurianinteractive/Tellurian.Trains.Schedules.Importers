@@ -111,7 +111,9 @@ else
                             <label>@Translator("Type")</label>
                             <select value="@TypeKey(Editing)" @onchange="OnTypeChanged">
                                 <option value="Station">@Translator("Station")</option>
-                                <option value="SignalControlledLocation">@Translator("SignalControlledLocation")</option>
+                                @* No shunter may be stationed at a signal controlled location, so one where shunters
+                                   are stationed is not turned into one until they have gone. *@
+                                <option value="SignalControlledLocation" disabled="@HasShunters(Editing)">@Translator("SignalControlledLocation")</option>
                                 <option value="IndustrialArea">@Translator("IndustrialArea")</option>
                                 <option value="OtherLocation">@Translator("OtherLocation")</option>
                             </select>
@@ -453,6 +455,13 @@ else
                 </table>
                 <button @onclick="AddTrack">@Translator("AddTrack")</button>
 
+                @* Shunters are stationed at a location already in the layout, so a new one is saved first. *@
+                @if (!_isNew && Editing.CanHaveShunters && Plan is { } plan)
+                {
+                    <h3>@Translator("Shunters")</h3>
+                    <ShuntersEditor Plan="plan" Location="Editing" />
+                }
+
                 @if (_error is not null)
                 {
                     <p class="error">@_error</p>
@@ -630,6 +639,17 @@ else
                     <p class="empty">—</p>
                 }
 
+                @if (_selected.CanHaveShunters && Plan?.ShuntersAt(_selected) is { Count: > 0 } shunters)
+                {
+                    <h3>@Translator("Shunters")</h3>
+                    <ul class="shunters">
+                        @foreach (var shunter in shunters)
+                        {
+                            <li>@ShunterSummary(shunter)</li>
+                        }
+                    </ul>
+                }
+
             </div>
         }
     </div>
@@ -642,6 +662,8 @@ else
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Layout? Layout => ScheduleState.Layout;
+
+    private Plan? Plan => ScheduleState.Schedule;
 
     // Whether the meeting is worked with passenger tickets, which is what makes a passenger interchange
     // one. Everything about interchanges on this tab is offered only while it holds.
@@ -692,6 +714,14 @@ else
     };
 
     private string YesNo(bool value) => Translator(value ? "Yes" : "No");
+
+    private bool HasShunters(OperationLocation location) => Plan?.ShuntersAt(location).Count > 0;
+
+    // The shunter as the Vehicle owners tab names it, with how it is powered where that is stated.
+    private string ShunterSummary(ScheduledObject shunter) =>
+        shunter.TractionType is TractionType.Undefined or TractionType.None
+            ? shunter.Designation
+            : $"{shunter.Designation} ({Translator(shunter.TractionType.ToString())})";
     private string Inherited(int? value) => value?.ToString(Culture) ?? "—";
 
     // Same Markdig call the editor's preview and the printed reports use, so the three agree.

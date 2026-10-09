@@ -60,6 +60,8 @@ public static partial class DeletionRules
                 foreach (var origin in options.Origins.Where(o => o.Location.Equals(location)).ToList()) options.Origins.Remove(origin);
                 foreach (var destination in options.Destinations.Where(d => d.Location.Equals(location)).ToList()) options.Destinations.Remove(destination);
             }
+            // A shunter works no train part, so nothing stops it going with the location it is stationed at.
+            foreach (var shunter in preview.ShuntersRemoved) plan.TryDelete(shunter);
             layout.ForgetTopologyPositionOf(location);
             layout.OperationLocations.Remove(location);
             if (preview.RegeneratesDispatchStretches) layout.DispatchStretches = layout.CreateDispatchStretches();
@@ -122,6 +124,7 @@ public static partial class DeletionRules
             CargoFlowOptionsChanged = [.. plan.Timetable.CargoFlowOptions.Where(o =>
                 o.Origins.Any(origin => origin.Location.Equals(location)) ||
                 o.Destinations.Any(destination => destination.Location.Equals(location)))],
+            ShuntersRemoved = plan.ShuntersAt(location),
         };
     }
 
@@ -331,6 +334,11 @@ public sealed record LocationDeletionPreview
 
     /// <summary>The cargo flow descriptions with the location as an origin or destination, which drop it.</summary>
     public required IReadOnlyList<CargoFlowOptions> CargoFlowOptionsChanged { get; init; }
+
+    /// <summary>
+    /// The shunters stationed at the location, which are deleted with it, together with who was to bring them.
+    /// </summary>
+    public IReadOnlyList<ScheduledObject> ShuntersRemoved { get; init; } = [];
 }
 
 /// <summary>

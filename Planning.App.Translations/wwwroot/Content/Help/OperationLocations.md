@@ -175,3 +175,15 @@ manning off the station that keeps the key, and the key stops applying: no notes
 **Conflicts** says which of the two changes did it. The key itself is kept, not thrown away, so undoing
 that change brings it straight back — and it stays on the form, where you can point it at another
 station or clear it altogether.
+
+#### Shunters
+
+A station, an industrial area or an other location can have **shunters**: locomotives stationed there for
+whatever shunting the location needs. Open the location with **Edit** and click **Add shunter** under
+**Shunters**. Give each one its operator, number, class and traction type, and a remark if you like. A
+shunter has no schedule and is never put on a train. It is there on every session, so its operator and
+number may not be used by any other vehicle; a number that is already taken is refused.
+
+Who brings a shunter, its DCC address and its unit number are entered on the **Vehicle owners** tab, as for
+any locomotive. A signal-controlled location cannot have shunters, so a location with shunters cannot be
+changed into one. Deleting a location deletes its shunters too, which you are told before you confirm.

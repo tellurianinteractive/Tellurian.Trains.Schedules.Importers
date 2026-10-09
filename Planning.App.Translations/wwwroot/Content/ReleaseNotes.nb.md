@@ -1,5 +1,16 @@
 # Versjonsnyheter
 
+## Versjon 0.8.4
+
+### Nye funksjoner
+
+- **Skiftelok kan stasjoneres på et driftssted.** Under fanen **Driftssteder** åpner du en stasjon, et
+  industriområde eller et annet driftssted med **Rediger** og klikker på **Legg til skiftelok**. Et
+  skiftelok står der for den skiftingen stedet trenger: det går ikke i noe omløp og settes aldri på et tog.
+  Det vises sammen med det øvrige rullende materiellet under **Kjøretøyseiere**, der eier, DCC-adresse og
+  kjøretøynummer angis som for et hvilket som helst lokomotiv, og rapporten over medbrakte kjøretøy skriver
+  det ut på siden for stasjonen der det er stasjonert.
+
 ## Versjon 0.8.3
 
 ### Endringer

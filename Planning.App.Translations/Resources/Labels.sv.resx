@@ -2705,4 +2705,22 @@
   <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
     <value>Tas bort som ursprung eller destination i {0} beskrivningar av godsflöden</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Växellok</value>
+  </data>
+  <data name="Shunters" xml:space="preserve">
+    <value>Växellok</value>
+  </data>
+  <data name="AddShunter" xml:space="preserve">
+    <value>Lägg till växellok</value>
+  </data>
+  <data name="ShuntersHint" xml:space="preserve">
+    <value>Lok som är stationerade här för den växling platsen behöver. De går inte i något omlopp. Vem som tar med dem, deras DCC-adress och nummer anges under fliken Fordonsägare.</value>
+  </data>
+  <data name="NumberMustBePositive" xml:space="preserve">
+    <value>Numret måste vara 1 eller större.</value>
+  </data>
+  <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
+    <value>Växellok stationerade här tas bort: {0}</value>
+  </data>
 </root>

@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+## Version 0.8.4
+
+### New features
+
+- **Shunters can be stationed at a location.** On the **Operation locations** tab, open a station, an
+  industrial area or an other location with **Edit** and click **Add shunter**. A shunter is a locomotive
+  kept there for any shunting the location needs: it has no schedule and is never put on a train. It is
+  listed with the rest of the rolling stock under **Vehicle owners**, where its owner, DCC address and unit
+  number are entered as for any locomotive, and the Vehicle contributors report prints it on the page of
+  the station where it is stationed.
+
 ## Version 0.8.3
 
 ### Changes

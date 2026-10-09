@@ -4,6 +4,17 @@
 
 ### New Features
 
+- **Shunters stationed at an operation location.** New **`ScheduledObjectType.Shunter`** (added last, so
+  stored values are unchanged) and **`ScheduledObject.StationedAtId`**, the id of the location it is kept at.
+  A shunter is powered — new `IsPowered` (traction unit or shunter) keeps its `TractionType` — but is not
+  `IsTraction`, so it is never assigned to a schedule, and `HasTurnusCard` is false. It is rolling stock:
+  `IsRollingStock`, `NeedsDccAddress` and `TakesVehicleNumber` include it. New `ShunterExtensions`:
+  **`OperationLocation.CanHaveShunters`** (anything but a `SignalControlledLocation`),
+  **`Plan.AddShunter`**, **`Plan.ShuntersAt(location)`** and **`Plan.StationOf(vehicle)`**. Having no
+  assignment, a shunter claims its identity on every session (rule P5). Deleting a location deletes its
+  shunters, listed in the new **`LocationDeletionPreview.ShuntersRemoved`**; `UpdateVehicle` to any other
+  type clears `StationedAtId`.
+
 - **Renumbering the trains of a category.** New **`Timetable.RenumberTrains(category)`** moves every
   train of the category by the same amount so the lowest numbered one gets the first number of its parity
   at or above `TrainCategory.StartNumber`. The amount is even, so no train changes between odd and even,

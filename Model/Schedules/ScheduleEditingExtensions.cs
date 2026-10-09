@@ -305,7 +305,9 @@ public static class ScheduleEditingExtensions
             vehicle.Number = number == 0 ? vehicle.Id : number;
             vehicle.Company = company;
             vehicle.CompanyId = company?.Id;
-            if (tractionType is { } traction && vehicle.IsTraction) vehicle.TractionType = traction;
+            if (tractionType is { } traction && vehicle.IsPowered) vehicle.TractionType = traction;
+            // Only a shunter is stationed anywhere; any other vehicle goes where its schedules take it.
+            if (!objectType.IsShunter) vehicle.StationedAtId = null;
             if (numberOfUnits is { } units) vehicle.NumberOfUnits = Math.Max(1, units);
             // Only a locomotive is spared the runaround by working a reversible train; a trainset reverses
             // freely anyway and nothing else is traction, so neither keeps the flag.

@@ -30,6 +30,7 @@ public static class VehicleContributorsList
             .Select(vehicle => new Item(
                 vehicle,
                 vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions, plan.Layout.Settings.General.FirstSessionStart),
+                plan.StationOf(vehicle),
                 plan.ContributionFor(vehicle)))
             .ToList();
 
@@ -47,22 +48,23 @@ public static class VehicleContributorsList
 
     // A station's page lists what is set up there by track, and on each track in the order the units leave, a row
     // per unit brought as in the other arrangements: the primary unit, then its spares right below it, so whoever
-    // has to find a replacement sees who has one and its address.
+    // has to find a replacement sees who has one and its address. The shunters stationed there, which stand on no
+    // particular track, come last.
     private static IEnumerable<VehicleContributorsGroup> ByOperationLocation(Plan plan, IReadOnlyList<Item> items)
     {
         var groups = items
-            .Where(item => item.Start is not null)
-            .GroupBy(item => item.Start!.Location)
+            .Where(item => item.Location is not null)
+            .GroupBy(item => item.Location!)
             .OrderBy(group => group.Key.Name, StringComparer.CurrentCulture)
             .Select(group => new VehicleContributorsGroup(
                 VehicleContributorsGroupKind.OperationLocation,
                 group.Key.Name,
                 [.. group
-                    .OrderBy(item => item.Start!.Track, TrackNumberOrder)
-                    .ThenBy(item => item.Start!.Departure)
+                    .OrderBy(item => item.Start?.Track, TrackNumberOrder)
+                    .ThenBy(item => item.Start?.Departure)
                     .SelectMany(item => UnitLinesOf(plan, item))]));
         return [.. groups, new(VehicleContributorsGroupKind.NotInOperation, null,
-            [.. items.Where(item => item.Start is null).SelectMany(item => UnitLinesOf(plan, item))])];
+            [.. items.Where(item => item.Location is null).SelectMany(item => UnitLinesOf(plan, item))])];
     }
 
     // A participant's page lists the units they bring in the order they are to be set up: by the first session or
@@ -85,7 +87,7 @@ public static class VehicleContributorsList
 
         static IEnumerable<VehicleContributorLine> InSetUpOrder(IEnumerable<VehicleContributorLine> lines) => lines
             .OrderBy(line => line.Start?.FirstPosition ?? int.MaxValue)
-            .ThenBy(line => line.Start?.Location.Name, StringComparer.CurrentCulture)
+            .ThenBy(line => line.Location?.Name, StringComparer.CurrentCulture)
             .ThenBy(line => line.Start?.Departure)
             .ThenBy(line => line.Start?.Track, TrackNumberOrder);
     }
@@ -138,7 +140,10 @@ public static class VehicleContributorsList
             contributor,
             contributor is null ? null : NameOf(plan, contributor),
             contributor is not null && item.Contribution!.IsPrimary(contributor),
-            NotesOf(item, contributor));
+            NotesOf(item, contributor))
+        {
+            StationedAt = item.StationedAt,
+        };
 
     private static string NameOf(Plan plan, VehicleContributor contributor) =>
         plan.ParticipantById(contributor.ParticipantId)?.Name ?? "?";
@@ -150,8 +155,10 @@ public static class VehicleContributorsList
             .Select(note => note!.Trim())
             .Distinct(StringComparer.CurrentCulture)];
 
-    private sealed record Item(ScheduledObject Vehicle, VehicleStart? Start, VehicleContribution? Contribution)
+    private sealed record Item(ScheduledObject Vehicle, VehicleStart? Start, OperationLocation? StationedAt, VehicleContribution? Contribution)
     {
+        public OperationLocation? Location => Start?.Location ?? StationedAt;
+
         public IReadOnlyList<VehicleContributor> Contributors { get; } = [.. Contribution?.Contributors ?? []];
     }
 }

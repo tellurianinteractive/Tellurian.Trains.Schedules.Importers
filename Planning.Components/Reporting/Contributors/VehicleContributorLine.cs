@@ -36,6 +36,17 @@ public sealed record VehicleContributorLine(
     public bool IsDccAddressMissing =>
         Vehicle.NeedsDccAddress && Contributor is { DccAddress: null or DccAddresses.ToBeProvided };
 
+    /// <summary>
+    /// The location a shunter is stationed at, or <c>null</c> for anything else (see <see cref="Location"/>).
+    /// </summary>
+    public OperationLocation? StationedAt { get; init; }
+
+    /// <summary>
+    /// The location the item is set up at: where it starts its first train part, or where a shunter is
+    /// stationed; <c>null</c> when it is neither in operation nor stationed anywhere.
+    /// </summary>
+    public OperationLocation? Location => Start?.Location ?? StationedAt;
+
     /// <summary>Whether the row is about a spare unit, brought but not set up.</summary>
     public bool IsSpare => Contributor is not null && !IsPrimary;
 

@@ -1,5 +1,17 @@
 # Versionshinweise
 
+## Version 0.8.4
+
+### Neue Funktionen
+
+- **Rangierloks können an einer Betriebsstelle stationiert werden.** Im Reiter **Betriebsstellen** einen
+  Bahnhof, ein Industriegebiet oder eine sonstige Betriebsstelle mit **Bearbeiten** öffnen und auf
+  **Rangierlok hinzufügen** klicken. Eine Rangierlok steht dort für den anfallenden Rangierdienst: Sie fährt
+  in keinem Umlauf und wird nie einem Zug zugeteilt. Sie wird mit dem übrigen Rollmaterial unter
+  **Fahrzeugbesitzer** aufgeführt, wo Besitzer, DCC-Adresse und Fahrzeugnummer wie bei jeder anderen Lok
+  eingetragen werden, und der Bericht über mitgebrachte Fahrzeuge druckt sie auf der Seite des Bahnhofs, an
+  dem sie stationiert ist.
+
 ## Version 0.8.3
 
 ### Änderungen

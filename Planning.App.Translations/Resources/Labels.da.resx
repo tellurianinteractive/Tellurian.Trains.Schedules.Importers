@@ -2705,4 +2705,22 @@
   <data name="LocationDeletionCargoFlowOptions" xml:space="preserve">
     <value>Fjernes som oprindelse eller destination i {0} beskrivelser af godsstrømme</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Rangerlokomotiv</value>
+  </data>
+  <data name="Shunters" xml:space="preserve">
+    <value>Rangerlokomotiver</value>
+  </data>
+  <data name="AddShunter" xml:space="preserve">
+    <value>Tilføj rangerlokomotiv</value>
+  </data>
+  <data name="ShuntersHint" xml:space="preserve">
+    <value>Lokomotiver, der er stationeret her til den rangering, stedet har brug for. De kører ikke i noget omløb. Hvem der medbringer dem, deres DCC-adresse og nummer angives under fanen Køretøjsejere.</value>
+  </data>
+  <data name="NumberMustBePositive" xml:space="preserve">
+    <value>Nummeret skal være 1 eller større.</value>
+  </data>
+  <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
+    <value>Rangerlokomotiver stationeret her fjernes: {0}</value>
+  </data>
 </root>

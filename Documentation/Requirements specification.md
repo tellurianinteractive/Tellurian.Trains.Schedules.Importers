@@ -323,6 +323,14 @@ from, the next one it goes on to, or both, and saying whether the same track ser
 direction as well. Only the locations reached by a stretch from here can be named. This is what decides
 which track a new train is put on (§3.6); leaving it unsaid changes nothing.
 
+At any location but a signal-controlled one, the user may station **shunters**: locomotives kept there
+for whatever shunting the location needs. A shunter works no schedule and is never put on a train, so it
+has no turnus card. It is described like any locomotive — operator, number, class, traction type and a
+remark — and its number must be free on every session, since it is at hand throughout the meeting. Who
+brings it, its DCC address and its unit number are entered in the Vehicle Owners tab (§3.9). A location
+with shunters cannot be turned into a signal-controlled one, and deleting a location deletes its
+shunters, which the user is told before confirming.
+
 #### FR-3.3.1 Data Import
 
 - **From the [ModuleRegistry](https://moduleregistry.azurewebsites.net)**: if the modules have been submitted to the meeting layout, it shall be possible to import the operation locations using its web API. This API requires an API key, stored in settings.
@@ -630,15 +638,15 @@ marks the expected number, and each bar shows its time span and count when point
 
 The Vehicle Owners tab records who brings which rolling stock to the meeting. It has two views.
 
-**Rolling stock.** Every locomotive, trainset and wagonset in the plan is listed — cargo flows and cargo
-are not rolling stock anyone brings. Each row shows:
+**Rolling stock.** Every locomotive, trainset, wagonset and shunter in the plan is listed — cargo flows and
+cargo are not rolling stock anyone brings. Each row shows:
 
 | Column | Content |
 | ------ | ------- |
 | Type, vehicle, class | What the item is, by its designation. A wagonset that lists its wagons gives each wagon class once (e.g. *A/B/Fv*) |
 | Count | The number of units making up the item — the listed wagons of a wagonset — shown only when there is more than one |
 | First session / first day | The first session (or day, for a layout counting in days) on which the item is in operation |
-| Station, track, departure | Where the item is to stand before that session: the start of the first train part it works on it. An item not yet given a schedule is shown as *not in operation* |
+| Station, track, departure | Where the item is to stand before that session: the start of the first train part it works on it. An item not yet given a schedule is shown as *not in operation*. A shunter shows the location it is stationed at, and nothing else, as it is there on every session |
 | Owner, DCC address | The primary owner and the address of the unit they bring |
 | Spares | The owners bringing a spare unit |
 | Note | A note about the item as a whole |
@@ -651,8 +659,8 @@ owner or by DCC address, in the Vehicle Contributors report (FR-3.12.5).
 - The **first owner is the primary one**, who brings the unit and sets it up on the layout. **Every
   further owner brings a spare.** A spare owner can be made primary; when the primary owner is removed, the
   first spare owner takes their place.
-- **Every owner of a traction unit must give a DCC address**, spares included, because each unit is driven
-  on the layout. An address is a whole number from 0 to 9999; **0 means the owner is still to provide it**
+- **Every owner of a traction unit or a shunter must give a DCC address**, spares included, because each
+  unit is driven on the layout. An address is a whole number from 0 to 9999; **0 means the owner is still to provide it**
   and is shown as such. An owner cannot be added to a traction unit without an address, and an address can
   be changed but not cleared. A traction unit where an owner lacks one — possible when a wagonset is made a
   locomotive after its owners were entered — is marked with a warning.
@@ -969,7 +977,7 @@ arrangement is chosen on screen, above the pages, and is not printed:
 
 | Arrangement | Reader | Grouping and order | Columns |
 | ----------- | ------ | ------------------ | ------- |
-| By operation location | The owner of a station | One group per location where an item is to be set up, in name order; within it, by track number (track 2 before track 10), then departure | First session/day, track, departure, type, class, turnus, count, owner, role (primary or spare), DCC address, note |
+| By operation location | The owner of a station | One group per location where an item is to be set up, in name order; within it, by track number (track 2 before track 10), then departure, with the shunters stationed there last | First session/day, track, departure, type, class, turnus, count, owner, role (primary or spare), DCC address, note |
 | By owner | A participant | One group per participant bringing something, in name order; within it, by first session or day, then station, departure and track number, with items not in operation last | Role (primary or spare), type, class, turnus, count, DCC address, first session/day, station, track, departure, note |
 | By DCC address | Whoever hands out and checks addresses | One list of every locomotive and trainset unit — wagonsets take no address and are left out: known addresses ascending, then the missing ones, then the traction units nobody brings | DCC address, type, class, turnus, count, owner, role, first session/day, station, track, departure, note |
 
@@ -1079,6 +1087,7 @@ The system shall support defining operation locations with:
 | Instructions | Markdown text for how this location is worked at this meeting — which tracks are used for what, how the shunting is arranged. General instructions on operating the location come from its owner. Available at a station or an industrial area, where passengers and/or cargo are exchanged; never at a signal-controlled or other location | No |
 | Is Shadow | Hidden yard at line end                              | No       |
 | Regions   | Regions/countries represented (shadow stations only) | No       |
+| Shunters  | Locomotives stationed here for any shunting, working no schedule (see §3.3). Anywhere but a signal-controlled location | No       |
 | Lock key  | The manned station holding the key that unlocks the switches here, and optionally what the key is called. Available only where cargo is exchanged and nobody is on duty — an unmanned station or an industrial area. Drives the lock key notes (see DM-4.5.2). A key the manning on either side has left meaningless is kept but ignored, and reported as a conflict (see L4 in §3.11.1) | No       |
 | Controlled from | The manned station whose dispatcher works this location from afar. Available only at a signal-controlled location, an industrial area or an unmanned station. Makes the location a dispatch endpoint worked by that station, unless it is a block post (see FR-3.4.2 and L3 in §3.11.1) | No       |
 | Trains can cross | Whether trains in opposite directions can cross here, one waiting while the other passes. Signal-controlled locations only, and stated by the planner rather than judged from the tracks. A signal-controlled location that is neither a junction nor a crossing place is a block post (see FR-3.4.2) | No       |
@@ -1503,7 +1512,7 @@ A schedule is the top-level planning artifact combining:
 
 #### DM-4.4.2 Vehicles
 
-> **Status:** ✅ Implemented (a vehicle is one of: Locomotive, Trainset, Wagonset, Cargo).
+> **Status:** ✅ Implemented (a vehicle is one of: Locomotive, Trainset, Wagonset, Shunter, Cargo).
 > The DCC address is not a property of the vehicle: several owners may bring a unit of the
 > same vehicle, each with an address of its own, so it is recorded per owner (DM-4.4.5).
 
@@ -1519,6 +1528,7 @@ The system shall maintain a vehicle inventory:
 | Is Double-Directed | Has a cab at each end, so it never needs turning        |
 | Reversible train   | This locomotive works a train that can be driven from either end — one with a driving trailer at the far end, or with a second locomotive there — so it is never run round its train |
 | Company            | Owning company                                          |
+| Stationed at       | For a shunter only: the operation location it is kept at |
 
 A trainset is reversible by its nature and needs no such marking; the property is offered for
 locomotives only.
@@ -1594,7 +1604,7 @@ each stored once and referred to elsewhere by an identifier:
 | -------- | ----------- |
 | Name     | The participant's name; unique within the plan, ignoring case and spacing |
 
-For each rolling stock item (locomotive, trainset or wagonset) that has owners or a note, the schedule
+For each rolling stock item (locomotive, trainset, wagonset or shunter) that has owners or a note, the schedule
 keeps a **vehicle contribution**, tied to the vehicle by its identifier:
 
 | Property | Description |
@@ -1608,7 +1618,7 @@ Each **owner** records:
 | Property    | Description |
 | ----------- | ----------- |
 | Participant | Who brings the unit |
-| DCC address | For a traction unit, required for every owner: 1–9999, or 0 when the owner is still to provide it. None for a wagonset |
+| DCC address | For a traction unit or a shunter, required for every owner: 1–9999, or 0 when the owner is still to provide it. None for a wagonset |
 | Note        | A note about what this owner brings |
 
 An item left with no owner and no note keeps no contribution.

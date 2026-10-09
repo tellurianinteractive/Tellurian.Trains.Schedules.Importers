@@ -8,8 +8,9 @@
 @{
     var all = RollingStock;
     IReadOnlyList<ScheduledObject> vehicles = _onlyWithoutOwner ? [.. all.Where(v => Plan.ContributorsOf(v).Count == 0)] : all;
-    // Only what is listed is offered for deletion: with the filter on, an item out of sight is not deleted.
-    IReadOnlyList<ScheduledObject> deletable = [.. vehicles.Where(v => StartOf(v) is null && Plan.MayDelete(v).IsSuccess)];
+    // Only what is listed is offered for deletion: with the filter on, an item out of sight is not deleted. A
+    // shunter is never in operation, but it is stationed somewhere, and is removed where it is stationed.
+    IReadOnlyList<ScheduledObject> deletable = [.. vehicles.Where(v => StartOf(v) is null && Plan.StationOf(v) is null && Plan.MayDelete(v).IsSuccess)];
 }
 
 @if (all.Count == 0)
@@ -75,6 +76,7 @@ else
                 var contributors = Plan.ContributorsOf(vehicle);
                 var primary = contributors.FirstOrDefault();
                 var start = StartOf(vehicle);
+                var stationedAt = Plan.StationOf(vehicle);
                 <tr class="vehicle @(expanded ? "expanded" : null)" @key="VehicleRowKey(vehicle)">
                     <td class="expander">
                         <button class="toggle" title="@Translator(expanded ? "Collapse" : "Expand")"
@@ -88,7 +90,14 @@ else
                        would be noise, and it would hide the few items an owner has to bring several of. A wagonset
                        listing its wagons counts them. *@
                     <td class="units">@(vehicle.NumberOfUnits > 1 ? vehicle.NumberOfUnits.ToString(CultureInfo.CurrentCulture) : null)</td>
-                    @if (start is null)
+                    @if (stationedAt is not null)
+                    {
+                        @* A shunter works no train part: it is at hand on every session where it is stationed. *@
+                        <td class="first-session"></td>
+                        <td>@stationedAt.Name</td>
+                        <td colspan="2"></td>
+                    }
+                    else if (start is null)
                     {
                         @* A vehicle given no work yet has nowhere to stand; saying so reads better than four
                            empty cells. *@
@@ -123,8 +132,9 @@ else
                                @onchange="e => SetNote(vehicle, e)" />
                     </td>
                     <td class="actions">
-                        @* Only an item not in operation may go; one in operation is taken out of its schedules first. *@
-                        @if (start is null)
+                        @* Only an item not in operation may go; one in operation is taken out of its schedules first.
+                           A shunter is removed from the location it is stationed at. *@
+                        @if (start is null && stationedAt is null)
                         {
                             var deletion = Plan.MayDelete(vehicle);
                             @* The span owns the hover so its tooltip shows even though the inner button is disabled. *@
@@ -166,7 +176,7 @@ else
     /// </summary>
     [Parameter, EditorRequired] public SessionsSettings SessionSettings { get; set; } = default!;
 
-    // Locomotives, then trainsets, then wagonsets, each kind in designation order: how an owner looks for their
+    // Locomotives, then trainsets, then wagonsets, then shunters, each kind in designation order: how an owner looks for their
     // own stock in the list.
     private IReadOnlyList<ScheduledObject> RollingStock =>
         [.. Plan.RollingStock

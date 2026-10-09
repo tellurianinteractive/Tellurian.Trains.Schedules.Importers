@@ -103,4 +103,7 @@
   <data name="Participant" xml:space="preserve">
     <value>Deltagare</value>
   </data>
+  <data name="Shunter" xml:space="preserve">
+    <value>Växellok</value>
+  </data>
 </root>

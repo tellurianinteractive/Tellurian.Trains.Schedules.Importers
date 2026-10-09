@@ -45,7 +45,7 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         VehicleContributorsColumn.FirstSession => line.Start is { } start
             ? SessionsFormatting.PositionTextOf(start.FirstPosition, settings, useShortDayName: false)
             : string.Empty,
-        VehicleContributorsColumn.Station => line.Start?.Location.Name ?? string.Empty,
+        VehicleContributorsColumn.Station => line.Location?.Name ?? string.Empty,
         VehicleContributorsColumn.Track => line.Start?.Track.Number ?? string.Empty,
         VehicleContributorsColumn.Departure => line.Start?.Departure.HHMM() ?? string.Empty,
         VehicleContributorsColumn.Type => TypeOf(line.Vehicle),
