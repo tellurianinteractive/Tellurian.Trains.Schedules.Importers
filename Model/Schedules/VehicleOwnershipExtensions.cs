@@ -36,6 +36,12 @@ public static class VehicleOwnershipExtensions
             vehicle.NeedsDccAddress ? address is { } value && DccAddresses.IsValid(value) : address is null;
 
         /// <summary>
+        /// Whether each unit of the vehicle brought — the spares included — may be given a number of its own:
+        /// true for a traction unit. A wagonset's numbers are those of its wagons, kept on the wagonset itself.
+        /// </summary>
+        public bool TakesVehicleNumber => vehicle.IsTraction;
+
+        /// <summary>
         /// Where the vehicle is to stand before the meeting begins: the start of the first train part it works
         /// on the first session or day it is in operation, or <c>null</c> when it works no train part at all.
         /// </summary>
@@ -175,14 +181,21 @@ public static class VehicleOwnershipExtensions
         /// <param name="participant">The participant bringing it; added to the catalogue when not already there.</param>
         /// <param name="dccAddress">The DCC address of the unit this participant brings, or <c>null</c> for none.</param>
         /// <param name="note">An optional note about what this participant brings.</param>
-        public VehicleContributor? AddContributor(ScheduledObject vehicle, Participant participant, int? dccAddress, string? note = null)
+        /// <param name="vehicleNumber">
+        /// The number of the unit this participant brings; ignored for a vehicle that takes none (see
+        /// <c>TakesVehicleNumber</c>).
+        /// </param>
+        public VehicleContributor? AddContributor(ScheduledObject vehicle, Participant participant, int? dccAddress, string? note = null, string? vehicleNumber = null)
         {
             plan = plan.ValueOrException(nameof(plan));
             vehicle = vehicle.ValueOrException(nameof(vehicle));
             participant = participant.ValueOrException(nameof(participant));
             if (!vehicle.IsRollingStock || !vehicle.AcceptsDccAddress(dccAddress)) return null;
             if (!plan.Participants.Contains(participant)) plan.Participants.Add(participant);
-            var contributor = new VehicleContributor(participant.Id, dccAddress, note);
+            var contributor = new VehicleContributor(participant.Id, dccAddress, note)
+            {
+                VehicleNumber = vehicle.TakesVehicleNumber ? vehicleNumber : null,
+            };
             plan.ContributionOf(vehicle).Contributors.Add(contributor);
             return contributor;
         }

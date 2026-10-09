@@ -1,5 +1,22 @@
 # Versjonsnyheter
 
+## Versjon 0.8.3
+
+### Endringer
+
+- **Rapporten Medbrakte kjøretøy er ordnet etter hvordan hver side brukes.** Ordnet **Per eier** viser en
+  deltakers side det vedkommende tar med etter den første kjøresesjonen eller dagen det trengs, deretter
+  etter stasjon, avgang og spor. Ordnet **Per driftssted** viser en stasjons side kjøretøyene etter
+  spornummer, spor 2 før spor 10, og på hvert spor etter avgang.
+- **Radenes farger er enklere.** På en eiers side er bare et kjøretøy som ikke trengs den første
+  kjøresesjonen eller dagen, lysegult. På en stasjons side er et kjøretøy som ikke er i drift alle
+  kjøresesjoner eller dager, lysegult når det starter en odde kjøresesjon eller dag, og lyseblått når det
+  starter en jevn. Reserver er fortsatt lysegrå.
+- **Lok og togsett kan få et kjøretøynummer.** Under **Kjøretøyseiere**, **Rullende materiell**, kan hver
+  eier av et lok eller et togsett skrive inn nummeret på kjøretøyet de tar med, også reservene, ved siden av
+  DCC-adressen. Rapporten Medbrakte kjøretøy viser det rett etter omløpet. Et vognsetts numre er fortsatt
+  vognenes.
+
 ## Versjon 0.8.2
 
 ### Endringer

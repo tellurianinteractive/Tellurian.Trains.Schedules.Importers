@@ -39,12 +39,15 @@ public static class VehicleContributorsList
             VehicleContributorsGrouping.Contributor => ByContributor(plan, items),
             _ => ByDccAddress(plan, items),
         };
-        return [.. groups.Where(group => group.Lines.Count > 0)];
+        var shade = VehicleContributorShading.For(grouping);
+        return [.. groups
+            .Where(group => group.Lines.Count > 0)
+            .Select(group => group with { Lines = [.. group.Lines.Select(line => line with { Shade = shade(line) })] })];
     }
 
-    // A station's page lists what is set up there, a row per unit brought as in the other arrangements: the
-    // primary unit, then its spares right below it, so whoever has to find a replacement sees who has one and
-    // its address.
+    // A station's page lists what is set up there by track, and on each track in the order the units leave, a row
+    // per unit brought as in the other arrangements: the primary unit, then its spares right below it, so whoever
+    // has to find a replacement sees who has one and its address.
     private static IEnumerable<VehicleContributorsGroup> ByOperationLocation(Plan plan, IReadOnlyList<Item> items)
     {
         var groups = items
@@ -55,31 +58,51 @@ public static class VehicleContributorsList
                 VehicleContributorsGroupKind.OperationLocation,
                 group.Key.Name,
                 [.. group
-                    .OrderBy(item => item.Start!.FirstPosition)
+                    .OrderBy(item => item.Start!.Track, TrackNumberOrder)
                     .ThenBy(item => item.Start!.Departure)
                     .SelectMany(item => UnitLinesOf(plan, item))]));
         return [.. groups, new(VehicleContributorsGroupKind.NotInOperation, null,
             [.. items.Where(item => item.Start is null).SelectMany(item => UnitLinesOf(plan, item))])];
     }
 
-    // A participant's page lists the units they bring, the ones they set up themselves first. The items nobody has
-    // booked come before everyone's pages.
+    // A participant's page lists the units they bring in the order they are to be set up: by the first session or
+    // day they are needed, then by station, departure and track. What is not in operation comes last. The items
+    // nobody has booked come before everyone's pages, in the same order.
     private static IEnumerable<VehicleContributorsGroup> ByContributor(Plan plan, IReadOnlyList<Item> items)
     {
         var notYetBooked = new VehicleContributorsGroup(VehicleContributorsGroupKind.NotYetBooked, null,
-            [.. items.Where(item => item.Contributors.Count == 0).Select(item => UnitLine(plan, item, null))]);
+            [.. InSetUpOrder(items.Where(item => item.Contributors.Count == 0).Select(item => UnitLine(plan, item, null)))]);
         var groups = plan.Participants
             .OrderBy(participant => participant.Name, StringComparer.CurrentCulture)
             .Select(participant => new VehicleContributorsGroup(
                 VehicleContributorsGroupKind.Contributor,
                 participant.Name,
-                [.. items
+                [.. InSetUpOrder(items
                     .SelectMany(item => item.Contributors
                         .Where(contributor => contributor.ParticipantId == participant.Id)
-                        .Select(contributor => UnitLine(plan, item, contributor)))
-                    .OrderBy(line => line.IsPrimary ? 0 : 1)]));
+                        .Select(contributor => UnitLine(plan, item, contributor))))]));
         return [notYetBooked, .. groups];
+
+        static IEnumerable<VehicleContributorLine> InSetUpOrder(IEnumerable<VehicleContributorLine> lines) => lines
+            .OrderBy(line => line.Start?.FirstPosition ?? int.MaxValue)
+            .ThenBy(line => line.Start?.Location.Name, StringComparer.CurrentCulture)
+            .ThenBy(line => line.Start?.Departure)
+            .ThenBy(line => line.Start?.Track, TrackNumberOrder);
     }
+
+    // Tracks by number as a person reads it, track 2 before track 10, then by the letter after the digits.
+    private static readonly Comparer<StationTrack?> TrackNumberOrder = Comparer<StationTrack?>.Create((x, y) =>
+    {
+        if (x is null || y is null) return (x is null).CompareTo(y is null);
+        var byDigits = LeadingNumber(x.Number).CompareTo(LeadingNumber(y.Number));
+        return byDigits != 0 ? byDigits : StringComparer.OrdinalIgnoreCase.Compare(x.Number, y.Number);
+
+        static int LeadingNumber(string number)
+        {
+            var digits = number.TakeWhile(char.IsAsciiDigit).Count();
+            return digits > 0 && int.TryParse(number.AsSpan(0, digits), out var value) ? value : int.MaxValue;
+        }
+    });
 
     // Every unit a DCC address applies to — the traction units; a wagonset is not driven — in address order. The
     // missing addresses, none or one still to be provided, come after the known ones, and last the traction units

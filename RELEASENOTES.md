@@ -311,6 +311,13 @@
   before; in `ScheduleDbContext` the `ControlledByStationId` foreign key moves from the signal-controlled
   locations to all operation locations.
 
+- **Each traction unit brought can carry its own vehicle number.** New **`VehicleContributor.VehicleNumber`**
+  (string, stored trimmed, blank is `null`) holds the number of the locomotive or trainset one participant
+  brings, so a spare can carry a number of its own. New **`ScheduledObject.TakesVehicleNumber`** says which
+  vehicles take one: traction units only, since a wagonset's numbers are those of its wagons
+  (`ScheduledUnit.Number`). `Plan.AddContributor` takes an optional `vehicleNumber` and ignores it for a
+  vehicle that takes none. Plans saved before read with no numbers.
+
 ### Fixes
 
 - **A station with many tracks no longer draws over the next station in the graphical timetable.** The

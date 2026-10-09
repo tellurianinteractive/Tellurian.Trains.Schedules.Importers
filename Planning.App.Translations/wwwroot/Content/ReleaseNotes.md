@@ -1,5 +1,22 @@
 ﻿# Release notes
 
+## Version 0.8.3
+
+### Changes
+
+- **The Vehicle contributors report is ordered for how each page is used.** Arranged **By owner**, a
+  participant's page lists what they bring by the first session or day it is needed, then by station,
+  departure and track. Arranged **By operation location**, a station's page lists its vehicles by track
+  number, track 2 before track 10, and on each track by departure.
+- **Row colours are simpler.** On an owner's page, only a vehicle that is not needed on the first session
+  or day is light yellow. On a station's page, a vehicle that is not in operation on every session or day is
+  light yellow when it starts on an odd-numbered session or day and light blue when it starts on an even one.
+  Spares stay light grey.
+- **Locomotives and trainsets can be given a vehicle number.** Under **Vehicle owners**, **Rolling stock**,
+  each owner of a locomotive or trainset can enter the number of the unit they bring, spares included, next
+  to its DCC address. The Vehicle contributors report prints it right after the turnus. A wagonset's numbers
+  are still those of its wagons.
+
 ## Version 0.8.2
 
 ### Changes

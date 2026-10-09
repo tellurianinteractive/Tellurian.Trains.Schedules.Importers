@@ -88,28 +88,31 @@
             vertical-align: bottom;
         }
 
-        /* The background says what the unit is for the meeting: white when it is set up and in operation on
-           every session, light grey for a spare, and light blue, green or red for an item first in operation
-           on the first, second or third session. Light enough to read black text on, apart enough to tell on
-           paper, and forced to print, which browsers otherwise suppress for background colours. */
+        /* The background points out when a unit is needed; what each colour means depends on the arrangement
+           (light grey is always a spare). Light enough to read black text on, apart enough to tell on paper,
+           and forced to print, which browsers otherwise suppress for background colours. */
         tbody tr {
             background: #fff;
             print-color-adjust: exact;
             -webkit-print-color-adjust: exact;
 
-            &.spare {
+            &.shade-grey {
                 background: #e3e3e3;
             }
 
-            &.from-session-1 {
+            &.shade-yellow {
+                background: #fbf3c4;
+            }
+
+            &.shade-blue {
                 background: #d6e8fa;
             }
 
-            &.from-session-2 {
+            &.shade-green {
                 background: #d8f0d2;
             }
 
-            &.from-session-3 {
+            &.shade-red {
                 background: #f8d7d7;
             }
         }

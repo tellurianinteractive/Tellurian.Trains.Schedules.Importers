@@ -36,18 +36,12 @@ public sealed record VehicleContributorLine(
     public bool IsDccAddressMissing =>
         Vehicle.NeedsDccAddress && Contributor is { DccAddress: null or DccAddresses.ToBeProvided };
 
+    /// <summary>Whether the row is about a spare unit, brought but not set up.</summary>
+    public bool IsSpare => Contributor is not null && !IsPrimary;
+
     /// <summary>
-    /// The background the row is printed on. A spare is always shaded as a spare; the item itself — the primary
-    /// unit, or an item nobody brings yet — by the session or day it is first in operation, unless it is in
-    /// operation on all of them. An item first in operation from the fourth session or day on is not shaded.
+    /// The background the row is printed on, set by the arrangement the row is printed in (see
+    /// <see cref="VehicleContributorShading"/>).
     /// </summary>
-    public VehicleContributorShade Shade => this switch
-    {
-        { Contributor: not null, IsPrimary: false } => VehicleContributorShade.Spare,
-        { Start: null or { IsEverySession: true } } => VehicleContributorShade.None,
-        { Start.FirstPosition: 1 } => VehicleContributorShade.FirstSession,
-        { Start.FirstPosition: 2 } => VehicleContributorShade.SecondSession,
-        { Start.FirstPosition: 3 } => VehicleContributorShade.ThirdSession,
-        _ => VehicleContributorShade.None,
-    };
+    public VehicleContributorShade Shade { get; init; }
 }

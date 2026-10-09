@@ -52,6 +52,10 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         // The designation as the Schedules tab names the turnus, e.g. "DSB 01 ME": the operator's signature,
         // the number and the class, so no class column of its own is needed.
         VehicleContributorsColumn.Turnus => line.Vehicle.Designation,
+        // Each unit brought, a spare included, has its own; a wagonset's numbers are its wagons', printed with them.
+        VehicleContributorsColumn.VehicleNumber => line.Vehicle.TakesVehicleNumber
+            ? line.Contributor?.VehicleNumber ?? string.Empty
+            : string.Empty,
         // As in the Vehicle owners tab: a single unit is what nearly every row is, so only a count worth
         // noticing is printed.
         VehicleContributorsColumn.Count => line.Vehicle.NumberOfUnits > 1

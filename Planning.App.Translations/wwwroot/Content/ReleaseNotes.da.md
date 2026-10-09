@@ -1,5 +1,22 @@
 # Versionsnyheder
 
+## Version 0.8.3
+
+### Ændringer
+
+- **Rapporten Medbragte køretøjer er ordnet efter, hvordan hver side bruges.** Ordnet **Pr. ejer** viser
+  en deltagers side det, vedkommende medbringer, efter den første køresession eller dag, det skal bruges,
+  derefter efter station, afgang og spor. Ordnet **Pr. driftssted** viser en stations side køretøjerne efter
+  spornummer, spor 2 før spor 10, og på hvert spor efter afgang.
+- **Rækkernes farver er enklere.** På en ejers side er kun et køretøj, der ikke skal bruges den første
+  køresession eller dag, lysegult. På en stations side er et køretøj, der ikke er i drift alle køresessioner
+  eller dage, lysegult, når det starter en ulige køresession eller dag, og lyseblåt, når det starter en lige.
+  Reserver er stadig lysegrå.
+- **Lokomotiver og togsæt kan få et køretøjsnummer.** Under **Køretøjsejere**, **Rullende materiel**, kan hver
+  ejer af et lokomotiv eller et togsæt angive nummeret på det køretøj, de medbringer, også reserverne, ved
+  siden af dets DCC-adresse. Rapporten Medbragte køretøjer viser det lige efter omløbet. Et vognsæts
+  numre er fortsat vognenes.
+
 ## Version 0.8.2
 
 ### Ændringer

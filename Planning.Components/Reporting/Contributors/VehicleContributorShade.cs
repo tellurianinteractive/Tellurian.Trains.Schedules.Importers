@@ -1,23 +1,27 @@
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors;
 
 /// <summary>
-/// The background a row of the Vehicle contributors report is printed on, which tells at a glance whether the
-/// unit is set up for the whole meeting, joins it later, or is a spare.
+/// The background a row of the Vehicle contributors report is printed on. What a colour means is up to the
+/// arrangement the row is printed in (see <see cref="VehicleContributorShading"/>), apart from grey, which is
+/// a spare unit everywhere.
 /// </summary>
 public enum VehicleContributorShade
 {
-    /// <summary>White: an item in operation on every session, or one given no work at all.</summary>
+    /// <summary>White: nothing to point out.</summary>
     None,
 
     /// <summary>Light grey: a spare unit, brought but not set up.</summary>
-    Spare,
+    Grey,
 
-    /// <summary>Light blue: first in operation on the first session or day, but not on all of them.</summary>
-    FirstSession,
+    /// <summary>Light yellow.</summary>
+    Yellow,
 
-    /// <summary>Light green: first in operation on the second session or day.</summary>
-    SecondSession,
+    /// <summary>Light blue.</summary>
+    Blue,
 
-    /// <summary>Light red: first in operation on the third session or day.</summary>
-    ThirdSession,
+    /// <summary>Light green.</summary>
+    Green,
+
+    /// <summary>Light red.</summary>
+    Red,
 }

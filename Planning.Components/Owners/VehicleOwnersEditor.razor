@@ -6,11 +6,14 @@
 @* The owners of one rolling stock item, each on a row of their own, and a last row to add another. The first
    owner is the primary one, who brings the unit and sets it up; every later one brings a spare. A traction
    unit asks every owner for the DCC address of the unit they bring, and takes 0 for an address the owner is
-   still to provide. *@
+   still to provide; it may also be given the number of each unit. A wagonset's numbers are those of its
+   wagons, entered with the wagonset itself. *@
 
 @{
     var contributors = Plan.ContributorsOf(Vehicle);
     var needsAddress = Vehicle.NeedsDccAddress;
+    var takesNumber = Vehicle.TakesVehicleNumber;
+    var columns = 4 + (needsAddress ? 1 : 0) + (takesNumber ? 1 : 0);
 }
 
 <div class="sub">
@@ -19,6 +22,10 @@
             <tr>
                 <th></th>
                 <th>@Translator("Participant")</th>
+                @if (takesNumber)
+                {
+                    <th title="@Translator("VehicleNumberHelp")">@Translator("VehicleNumber")</th>
+                }
                 @if (needsAddress)
                 {
                     <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
@@ -40,6 +47,13 @@
                                              Value="@NameOf(contributor)"
                                              ValueChanged="@(name => SetParticipant(contributor, name))" />
                     </td>
+                    @if (takesNumber)
+                    {
+                        <td>
+                            <input type="text" class="vehicle-number" value="@contributor.VehicleNumber"
+                                   @onchange="e => SetVehicleNumber(contributor, e)" />
+                        </td>
+                    }
                     @if (needsAddress)
                     {
                         <td>
@@ -69,7 +83,7 @@
             }
             @if (contributors.Count == 0)
             {
-                <tr><td colspan="@(needsAddress ? 5 : 4)" class="empty">@Translator("NoOwnersYet")</td></tr>
+                <tr><td colspan="@columns" class="empty">@Translator("NoOwnersYet")</td></tr>
             }
             <tr class="add">
                 <td class="role">@RoleLabel(contributors.Count == 0)</td>
@@ -78,6 +92,14 @@
                                          Value="@_name" ValueChanged="@((string name) => _name = name)"
                                          Placeholder="@Translator("TypeParticipantName")" />
                 </td>
+                @if (takesNumber)
+                {
+                    <td>
+                        <input type="text" class="vehicle-number" value="@_vehicleNumber"
+                               @oninput="e => _vehicleNumber = e.Value?.ToString() ?? string.Empty"
+                               @onkeydown="AddOnEnter" />
+                    </td>
+                }
                 @if (needsAddress)
                 {
                     <td>
@@ -106,6 +128,7 @@
     // What is typed into the add row, kept until the owner is added.
     private string _name = string.Empty;
     private string _dccAddress = string.Empty;
+    private string _vehicleNumber = string.Empty;
     private string _note = string.Empty;
 
     // The last refused edit, shown under the table until the next edit.
@@ -159,8 +182,8 @@
             address = value;
         }
         if (Plan.FindOrAddParticipant(_name) is not { } participant) return;
-        if (Plan.AddContributor(Vehicle, participant, address, _note) is null) return;
-        (_name, _dccAddress, _note) = (string.Empty, string.Empty, string.Empty);
+        if (Plan.AddContributor(Vehicle, participant, address, _note, _vehicleNumber) is null) return;
+        (_name, _dccAddress, _vehicleNumber, _note) = (string.Empty, string.Empty, string.Empty, string.Empty);
         Save();
     }
 
@@ -182,6 +205,12 @@
         }
         _error = Translator("DccAddressInvalid");
         _refusedEdits++;
+    }
+
+    private void SetVehicleNumber(VehicleContributor contributor, ChangeEventArgs e)
+    {
+        contributor.VehicleNumber = e.Value?.ToString();
+        Save();
     }
 
     private void SetNote(VehicleContributor contributor, ChangeEventArgs e)

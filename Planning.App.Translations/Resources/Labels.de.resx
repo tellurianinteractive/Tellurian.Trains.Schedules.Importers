@@ -2444,6 +2444,12 @@
   <data name="DccAddressMissing" xml:space="preserve">
     <value>DCC-Adresse fehlt. Jedes Triebfahrzeug braucht eine; geben Sie 0 ein, wenn der Eigentümer sie nennen soll.</value>
   </data>
+  <data name="VehicleNumber" xml:space="preserve">
+    <value>Fahrzeugnummer</value>
+  </data>
+  <data name="VehicleNumberHelp" xml:space="preserve">
+    <value>Die Nummer des Fahrzeugs, das dieser Eigentümer mitbringt, z. B. 1328. Jedes Fahrzeug kann seine eigene Nummer tragen, auch die Reservefahrzeuge.</value>
+  </data>
   <data name="DccAddressInvalid" xml:space="preserve">
     <value>Geben Sie eine DCC-Adresse von 0 bis 9999 ein; 0 bedeutet, dass der Eigentümer sie nennen soll.</value>
   </data>

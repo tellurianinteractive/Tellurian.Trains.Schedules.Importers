@@ -19,6 +19,8 @@ public enum VehicleContributorsColumn
     Type,
     /// <summary>The number of the turnus the item runs.</summary>
     Turnus,
+    /// <summary>The number of the traction unit the row's owner brings, when they have given one.</summary>
+    VehicleNumber,
     /// <summary>The number of units making up the item, when more than one.</summary>
     Count,
     /// <summary>The participant bringing the unit.</summary>
@@ -67,7 +69,8 @@ public static class VehicleContributorsColumns
         };
     }
 
-    // What the item is: what kind and how it is powered, before the turnus that identifies it with its class.
+    // What the item is: what kind and how it is powered, before the turnus that identifies it with its class,
+    // and the number of the very unit brought.
     private static IReadOnlyList<VehicleContributorsColumn> Item { get; } =
-        [VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count];
+        [VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.VehicleNumber, VehicleContributorsColumn.Count];
 }

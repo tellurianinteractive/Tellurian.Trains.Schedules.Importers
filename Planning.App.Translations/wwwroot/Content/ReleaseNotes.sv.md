@@ -1,5 +1,22 @@
 # Versionsnyheter
 
+## Version 0.8.3
+
+### Ändringar
+
+- **Rapporten Fordon och ägare är ordnad efter hur varje sida används.** Ordnad **Per ägare** visar en
+  deltagares sida det hen tar med efter den första session eller dag det behövs, sedan efter station,
+  avgång och spår. Ordnad **Per driftplats** visar en stations sida fordonen efter spårnummer, spår 2 före
+  spår 10, och på varje spår efter avgång.
+- **Radernas färger är enklare.** På en ägares sida är bara ett fordon som inte behövs den första sessionen
+  eller dagen ljusgult. På en stations sida är ett fordon som inte är i drift alla sessioner eller dagar
+  ljusgult när det börjar en udda session eller dag och ljusblått när det börjar en jämn. Reserver är
+  fortfarande ljusgrå.
+- **Lok och tågsätt kan få ett fordonsnummer.** Under **Fordonsägare**, **Rullande materiel**, kan varje
+  ägare av ett lok eller ett tågsätt ange numret på det fordon hen tar med, även reserverna, bredvid dess
+  DCC-adress. Rapporten Fordon och ägare skriver det direkt efter omloppet. Ett vagnsätts nummer är
+  fortfarande vagnarnas.
+
 ## Version 0.8.2
 
 ### Ändringar

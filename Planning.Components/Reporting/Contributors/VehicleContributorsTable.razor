@@ -161,14 +161,11 @@
     // The address list is looked up by its address, so that column is set apart there.
     private string? KindClass => Page.Group.Kind == VehicleContributorsGroupKind.AllUnits ? "all-units" : null;
 
-    // Named apart from the first-session column's own class, which would otherwise centre the whole row.
+    // Named by colour, and apart from the first-session column's own class, which would otherwise centre the row.
     private static string? RowClass(VehicleContributorLine line) => line.Shade switch
     {
-        VehicleContributorShade.Spare => "spare",
-        VehicleContributorShade.FirstSession => "from-session-1",
-        VehicleContributorShade.SecondSession => "from-session-2",
-        VehicleContributorShade.ThirdSession => "from-session-3",
-        _ => null,
+        VehicleContributorShade.None => null,
+        var shade => $"shade-{shade.ToString().ToLowerInvariant()}",
     };
 
     private static string ClassOf(VehicleContributorsColumn column) => column switch

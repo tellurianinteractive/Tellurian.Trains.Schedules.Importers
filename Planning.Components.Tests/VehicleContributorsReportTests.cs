@@ -101,14 +101,14 @@ public class VehicleContributorsReportTests
     private static string[] Classes(VehicleContributorsGroup group) => [.. group.Lines.Select(line => line.Vehicle.Class)];
 
     [TestMethod]
-    public void A_station_lists_the_vehicles_set_up_there_by_session_then_departure()
+    public void A_station_lists_the_vehicles_set_up_there_by_track_then_departure()
     {
         var groups = Groups(CreatePlan(), VehicleContributorsGrouping.OperationLocation);
 
         CollectionAssert.AreEqual(new[] { "Munkeröd", "Stenungsund", null }, groups.Select(group => group.Name).ToArray());
-        // The Rc leaves at 09:00 on session 1, before the X2 leaving at 07:00 but only from session 2.
-        CollectionAssert.AreEqual(new[] { "Rc", "Rc", "X2" }, Classes(groups[0]));
-        var rc = groups[0].Lines[0];
+        // Both on track 1: the X2 leaving at 07:00, though only from session 2, before the Rc leaving at 09:00.
+        CollectionAssert.AreEqual(new[] { "X2", "Rc", "Rc" }, Classes(groups[0]));
+        var rc = groups[0].Lines[1];
         Assert.AreEqual("Bert", rc.OwnerName);
         Assert.AreEqual("Primary", Cells.TextOf(rc, VehicleContributorsColumn.Role));
         Assert.AreEqual(1234, rc.Contributor!.DccAddress, "A station page gives the address of the unit set up there.");
@@ -116,17 +116,45 @@ public class VehicleContributorsReportTests
     }
 
     [TestMethod]
+    public void A_station_orders_its_tracks_by_number_as_read_track_2_before_track_10()
+    {
+        var plan = CreatePlan();
+        var timetable = plan.Timetable!;
+        var munkerod = timetable.Layout.OperationLocations.Single(location => location.Name == "Munkeröd");
+        var stenungsund = timetable.Layout.OperationLocations.Single(location => location.Name == "Stenungsund");
+        munkerod.Add(new StationTrack(210, "10"));
+        munkerod.Add(new StationTrack(202, "2"));
+        AssignedVehicle(plan, ScheduledObjectType.Locomotive, "T43", 10, AddTrainFrom(timetable, 4, munkerod["10"], stenungsund, Time.FromHourAndMinute(6, 0)), null);
+        AssignedVehicle(plan, ScheduledObjectType.Locomotive, "Z65", 11, AddTrainFrom(timetable, 5, munkerod["2"], stenungsund, Time.FromHourAndMinute(10, 0)), null);
+        plan.Reconcile();
+
+        var lines = Groups(plan, VehicleContributorsGrouping.OperationLocation)[0].Lines;
+
+        CollectionAssert.AreEqual(new[] { "1", "1", "1", "2", "10" }, lines.Select(line => line.Start!.Track.Number).ToArray());
+    }
+
+    private static Train AddTrainFrom(Timetable timetable, int number, StationTrack from, OperationLocation to, Time departure)
+    {
+        var train = new Train(number, 1000 + number) { Category = timetable.TrainCategories.First() };
+        train.Add(new StationCall(number * 10 + 1, from, departure.AddMinutes(-5), departure));
+        var arrival = departure.AddMinutes(20);
+        train.Add(new StationCall(number * 10 + 2, to["1"], arrival, arrival.AddMinutes(5)));
+        timetable.Add(train);
+        return train;
+    }
+
+    [TestMethod]
     public void A_station_lists_each_spare_on_a_row_of_its_own_below_its_primary_shaded_as_a_spare()
     {
         var munkerod = Groups(CreatePlan(), VehicleContributorsGrouping.OperationLocation)[0];
 
-        var spare = munkerod.Lines[1];
+        var spare = munkerod.Lines[2];
         Assert.AreEqual("Anna", spare.OwnerName);
         Assert.IsFalse(spare.IsPrimary);
         Assert.AreEqual("Spare", Cells.TextOf(spare, VehicleContributorsColumn.Role));
         Assert.AreEqual("Missing", Cells.TextOf(spare, VehicleContributorsColumn.DccAddress), "Her address is still to be provided.");
-        Assert.AreEqual(VehicleContributorShade.Spare, spare.Shade, "As on the owner's page.");
-        Assert.AreEqual(VehicleContributorShade.None, munkerod.Lines[0].Shade, "The primary Rc is in operation on every session.");
+        Assert.AreEqual(VehicleContributorShade.Grey, spare.Shade, "As on the owner's page.");
+        Assert.AreEqual(VehicleContributorShade.None, munkerod.Lines[1].Shade, "The primary Rc is in operation on every session.");
         CollectionAssert.AreEqual(new[] { "Arrives on Saturday", "Needs a sound decoder" }, spare.Notes.ToArray());
         CollectionAssert.Contains(munkerod.Kind.Columns.ToArray(), VehicleContributorsColumn.Role);
     }
@@ -146,7 +174,7 @@ public class VehicleContributorsReportTests
     }
 
     [TestMethod]
-    public void An_owner_is_given_what_they_bring_the_units_they_set_up_first()
+    public void An_owner_is_given_what_they_bring_by_first_session_then_station_departure_and_track()
     {
         var groups = Groups(CreatePlan(), VehicleContributorsGrouping.Contributor);
 
@@ -155,8 +183,11 @@ public class VehicleContributorsReportTests
         Assert.AreEqual(VehicleContributorsGroupKind.NotYetBooked, groups[0].Kind);
         CollectionAssert.AreEqual(new[] { "B" }, Classes(groups[0]));
 
-        CollectionAssert.AreEqual(new[] { "Da", "Rc" }, Classes(groups[1]));
-        var spare = groups[1].Lines[1];
+        // Both of Anna's from session 1: Munkeröd before Stenungsund, though the Da leaves earlier.
+        CollectionAssert.AreEqual(new[] { "Rc", "Da" }, Classes(groups[1]));
+        // Bert's X2 leaves at 07:00, but only from session 2.
+        CollectionAssert.AreEqual(new[] { "Rc", "X2" }, Classes(groups[2]));
+        var spare = groups[1].Lines[0];
         Assert.IsFalse(spare.IsPrimary);
         Assert.AreEqual("Spare", Cells.TextOf(spare, VehicleContributorsColumn.Role));
         Assert.AreEqual("Missing", Cells.TextOf(spare, VehicleContributorsColumn.DccAddress), "Her address is still to be provided.");
@@ -174,12 +205,12 @@ public class VehicleContributorsReportTests
         locomotive.TractionType = TractionType.Electric;
         locomotive.Company = company;
         var munkerod = Groups(plan, VehicleContributorsGrouping.OperationLocation)[0];
-        var (rc, x2) = (munkerod.Lines[0], munkerod.Lines.Single(line => line.Vehicle.Class == "X2"));
+        var (rc, x2) = (munkerod.Lines.First(line => line.Vehicle.Class == "Rc"), munkerod.Lines.Single(line => line.Vehicle.Class == "X2"));
         var wagons = Groups(plan, VehicleContributorsGrouping.OperationLocation)[^1].Lines[0];
 
         CollectionAssert.AreEqual(
-            new[] { VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.Count },
-            munkerod.Kind.Columns.SkipWhile(column => column != VehicleContributorsColumn.Type).Take(3).ToArray());
+            new[] { VehicleContributorsColumn.Type, VehicleContributorsColumn.Turnus, VehicleContributorsColumn.VehicleNumber, VehicleContributorsColumn.Count },
+            munkerod.Kind.Columns.SkipWhile(column => column != VehicleContributorsColumn.Type).Take(4).ToArray());
         Assert.AreEqual("Locomotive, electric", Cells.TextOf(rc, VehicleContributorsColumn.Type));
         Assert.AreEqual("Trainset", Cells.TextOf(x2, VehicleContributorsColumn.Type), "Not stated: left out rather than Any.");
         Assert.AreEqual("Wagonset", Cells.TextOf(wagons, VehicleContributorsColumn.Type), "A wagonset is not powered.");
@@ -188,6 +219,21 @@ public class VehicleContributorsReportTests
 
         x2.Vehicle.TractionType = TractionType.Diesel;
         Assert.AreEqual("Trainset, diesel", Cells.TextOf(x2, VehicleContributorsColumn.Type));
+    }
+
+    [TestMethod]
+    public void Each_unit_brought_prints_its_own_vehicle_number_after_the_turnus()
+    {
+        var plan = CreatePlan();
+        var rc = plan.RollingStock.Single(v => v.Class == "Rc");
+        var contributors = plan.ContributorsOf(rc);
+        contributors[0].VehicleNumber = "1328";
+
+        var lines = Groups(plan, VehicleContributorsGrouping.OperationLocation)[0].Lines.Where(line => line.Vehicle == rc).ToList();
+
+        Assert.AreEqual("1328", Cells.TextOf(lines[0], VehicleContributorsColumn.VehicleNumber), "The primary unit's number.");
+        Assert.AreEqual("", Cells.TextOf(lines[1], VehicleContributorsColumn.VehicleNumber), "The spare has been given none.");
+        Assert.AreEqual("VehicleNumber", Cells.HeadingOf(VehicleContributorsColumn.VehicleNumber), "Its own label.");
     }
 
     [TestMethod]
@@ -255,7 +301,7 @@ public class VehicleContributorsReportTests
     }
 
     [TestMethod]
-    public void A_row_is_shaded_by_when_its_item_is_first_in_operation_and_a_spare_grey()
+    public void An_owners_row_is_shaded_yellow_only_when_not_needed_from_the_first_session_and_a_spare_grey()
     {
         var plan = CreatePlan();
         var dawn = plan.Timetable!.Trains.Single(t => t.Id == 3);
@@ -266,10 +312,29 @@ public class VehicleContributorsReportTests
             .ToDictionary(line => $"{line.Vehicle.Class} {line.OwnerName}", line => line.Shade);
 
         Assert.AreEqual(VehicleContributorShade.None, shades["Rc Bert"], "In operation on every session.");
-        Assert.AreEqual(VehicleContributorShade.Spare, shades["Rc Anna"]);
-        Assert.AreEqual(VehicleContributorShade.FirstSession, shades["Da Anna"], "Sessions 1 and 2 of 4.");
-        Assert.AreEqual(VehicleContributorShade.SecondSession, shades["X2 Bert"]);
-        Assert.AreEqual(VehicleContributorShade.ThirdSession, shades["Bm "], "Nobody brings it; the item itself is shaded.");
+        Assert.AreEqual(VehicleContributorShade.Grey, shades["Rc Anna"]);
+        Assert.AreEqual(VehicleContributorShade.None, shades["Da Anna"], "Sessions 1 and 2 of 4: needed from the start.");
+        Assert.AreEqual(VehicleContributorShade.Yellow, shades["X2 Bert"]);
+        Assert.AreEqual(VehicleContributorShade.Yellow, shades["Bm "], "Nobody brings it; the item itself is shaded.");
+        Assert.AreEqual(VehicleContributorShade.None, shades["B "], "Not in operation.");
+    }
+
+    [TestMethod]
+    public void A_station_row_not_in_operation_throughout_is_yellow_from_an_odd_session_and_blue_from_an_even_one()
+    {
+        var plan = CreatePlan();
+        var dawn = plan.Timetable!.Trains.Single(t => t.Id == 3);
+        AssignedVehicle(plan, ScheduledObjectType.Wagonset, "Bm", 5, dawn, Sessions.FromSessionNumbers(3));
+
+        var shades = Groups(plan, VehicleContributorsGrouping.OperationLocation)
+            .SelectMany(group => group.Lines)
+            .ToDictionary(line => $"{line.Vehicle.Class} {line.OwnerName}", line => line.Shade);
+
+        Assert.AreEqual(VehicleContributorShade.None, shades["Rc Bert"], "In operation on every session.");
+        Assert.AreEqual(VehicleContributorShade.Grey, shades["Rc Anna"]);
+        Assert.AreEqual(VehicleContributorShade.Yellow, shades["Da Anna"], "Sessions 1 and 2 of 4.");
+        Assert.AreEqual(VehicleContributorShade.Blue, shades["X2 Bert"]);
+        Assert.AreEqual(VehicleContributorShade.Yellow, shades["Bm "], "Nobody brings it; the item itself is shaded.");
         Assert.AreEqual(VehicleContributorShade.None, shades["B "], "Not in operation.");
     }
 
@@ -319,9 +384,9 @@ public class VehicleContributorsReportTests
 
         var pages = VehicleContributorsPaginator.BuildPages(Groups(plan, VehicleContributorsGrouping.Contributor), Geometry);
 
-        // Anna: the Da, the spare Rc and five wagonsets — seven rows, four to a page.
+        // Anna: the spare Rc, the Da and five wagonsets — seven rows; the Rc's two notes leave room for three.
         CollectionAssert.AreEqual(new[] { null, "Anna", "Anna", "Bert" }, pages.Select(page => page.Group.Name).ToArray());
-        CollectionAssert.AreEqual(new[] { 1, 4, 3, 2 }, pages.Select(page => page.Lines.Count).ToArray());
+        CollectionAssert.AreEqual(new[] { 1, 3, 4, 2 }, pages.Select(page => page.Lines.Count).ToArray());
         CollectionAssert.AreEqual(new[] { false, false, true, false }, pages.Select(page => page.IsContinued).ToArray());
     }
 
@@ -331,8 +396,8 @@ public class VehicleContributorsReportTests
         var plan = CreatePlan();
         var anna = Groups(plan, VehicleContributorsGrouping.Contributor)[1];
 
-        Assert.AreEqual(5, VehicleContributorsPaginator.HeightMmOf(anna.Lines[0], Geometry), "The Da has no notes.");
-        Assert.AreEqual(9, VehicleContributorsPaginator.HeightMmOf(anna.Lines[1], Geometry), "The spare Rc has two notes.");
+        Assert.AreEqual(9, VehicleContributorsPaginator.HeightMmOf(anna.Lines[0], Geometry), "The spare Rc has two notes.");
+        Assert.AreEqual(5, VehicleContributorsPaginator.HeightMmOf(anna.Lines[1], Geometry), "The Da has no notes.");
     }
 
     [TestMethod]

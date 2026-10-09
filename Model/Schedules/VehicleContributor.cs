@@ -44,6 +44,18 @@ public sealed class VehicleContributor
     public int? DccAddress { get; set; }
 
     /// <summary>
+    /// Gets or sets the number of the unit this participant brings, e.g. "1328": each traction unit brought, the
+    /// spares included, may carry a number of its own. <c>null</c> when none is given, and always for a
+    /// wagonset, whose numbers are those of its wagons (see <see cref="ScheduledUnit.Number"/>). Stored
+    /// trimmed; blank is none.
+    /// </summary>
+    public string? VehicleNumber
+    {
+        get;
+        set => field = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    /// <summary>
     /// Gets or sets a note about what this participant brings, e.g. that a spare arrives on the second day.
     /// Empty when there is none.
     /// </summary>

@@ -59,6 +59,7 @@ else
                 <th>@Translator("Track")</th>
                 <th>@Translator("Departure")</th>
                 <th>@Translator("Owner")</th>
+                <th title="@Translator("VehicleNumberHelp")">@Translator("VehicleNumber")</th>
                 <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
                 <th>@Translator("Spares")</th>
                 <th>@Translator("Note")</th>
@@ -101,6 +102,9 @@ else
                         <td>@start.Departure.HHMM()</td>
                     }
                     <td>@(primary is null ? "—" : NameOf(primary))</td>
+                    @* The primary unit's number, as the DCC address beside it; a wagonset's wagon numbers are in its
+                       designation. *@
+                    <td>@(vehicle.TakesVehicleNumber ? primary?.VehicleNumber : null)</td>
                     <td class="dcc">
                         @if (vehicle.NeedsDccAddress && primary is not null)
                         {
@@ -135,7 +139,7 @@ else
                 {
                     <tr class="detail" @key="OwnersRowKey(vehicle)">
                         <td></td>
-                        <td colspan="12">
+                        <td colspan="13">
                             <VehicleOwnersEditor Plan="Plan" Vehicle="vehicle" />
                         </td>
                     </tr>

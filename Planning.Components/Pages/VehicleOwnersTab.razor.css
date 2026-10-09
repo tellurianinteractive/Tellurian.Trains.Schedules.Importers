@@ -159,6 +159,10 @@
     width: 5.5rem;
 }
 
+.vehicle-owners ::deep input.vehicle-number {
+    width: 7rem;
+}
+
 .vehicle-owners ::deep input.invalid {
     border-color: var(--danger);
     background: #fff5f5;

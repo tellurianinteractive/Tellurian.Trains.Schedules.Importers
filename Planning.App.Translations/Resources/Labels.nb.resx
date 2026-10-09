@@ -2444,6 +2444,12 @@
   <data name="DccAddressMissing" xml:space="preserve">
     <value>DCC-adresse mangler. Hvert trekkraftkjøretøy trenger en; skriv 0 hvis eieren skal oppgi den.</value>
   </data>
+  <data name="VehicleNumber" xml:space="preserve">
+    <value>Kjøretøynummer</value>
+  </data>
+  <data name="VehicleNumberHelp" xml:space="preserve">
+    <value>Nummeret på kjøretøyet denne eieren tar med, f.eks. 1328. Hvert kjøretøy kan ha sitt eget nummer, også reservene.</value>
+  </data>
   <data name="DccAddressInvalid" xml:space="preserve">
     <value>Skriv en DCC-adresse fra 0 til 9999, der 0 betyr at eieren skal oppgi den.</value>
   </data>

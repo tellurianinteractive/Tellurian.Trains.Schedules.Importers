@@ -2458,6 +2458,12 @@
   <data name="DccAddressMissing" xml:space="preserve">
     <value>No DCC address. Every traction unit needs one; enter 0 if the owner is to provide it.</value>
   </data>
+  <data name="VehicleNumber" xml:space="preserve">
+    <value>Vehicle number</value>
+  </data>
+  <data name="VehicleNumberHelp" xml:space="preserve">
+    <value>The number on the unit this owner brings, e.g. 1328. Each unit may carry its own number, spares included.</value>
+  </data>
   <data name="DccAddressInvalid" xml:space="preserve">
     <value>Enter a DCC address from 0 to 9999, where 0 means the owner is to provide it.</value>
   </data>

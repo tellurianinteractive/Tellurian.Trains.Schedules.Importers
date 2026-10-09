@@ -135,6 +135,26 @@ public class VehicleOwnershipTests
     }
 
     [TestMethod]
+    public void EachTractionUnitBroughtMayHaveANumberOfItsOwnButAWagonsetDoesNot()
+    {
+        var plan = CreatePlan();
+        var anna = plan.FindOrAddParticipant("Anna")!;
+        var bert = plan.FindOrAddParticipant("Bert")!;
+        var loco = Loco(plan);
+        var wagons = Wagons(plan);
+
+        var primary = plan.AddContributor(loco, anna, 3, vehicleNumber: " 218 105 ")!;
+        var spare = plan.AddContributor(loco, bert, 4, vehicleNumber: "  ")!;
+        var wagonOwner = plan.AddContributor(wagons, anna, null, vehicleNumber: "50 80")!;
+
+        Assert.AreEqual("218 105", primary.VehicleNumber, "The number is stored trimmed.");
+        Assert.IsNull(spare.VehicleNumber, "A blank number is none.");
+        Assert.IsNull(wagonOwner.VehicleNumber, "A wagonset's numbers are those of its wagons.");
+        spare.VehicleNumber = "218 106";
+        Assert.AreEqual("218 106", spare.VehicleNumber, "A spare carries a number of its own.");
+    }
+
+    [TestMethod]
     public void RemovingThePrimaryContributorLetsTheFirstSpareTakeItsPlace()
     {
         var plan = CreatePlan();
@@ -356,7 +376,7 @@ public class VehicleOwnershipTests
     {
         var plan = CreatePlan();
         var loco = Loco(plan);
-        plan.AddContributor(loco, plan.FindOrAddParticipant("Anna Berg")!, 218, "Brings the sound decoder");
+        plan.AddContributor(loco, plan.FindOrAddParticipant("Anna Berg")!, 218, "Brings the sound decoder", "218 105");
         plan.AddContributor(loco, plan.FindOrAddParticipant("Bert")!, DccAddresses.ToBeProvided);
         plan.SetContributionNote(loco, "Weathered");
 
@@ -373,6 +393,8 @@ public class VehicleOwnershipTests
         Assert.AreEqual("Anna Berg", restored.ParticipantById(contributors[0].ParticipantId)!.Name, "The primary one stays first.");
         Assert.AreEqual(218, contributors[0].DccAddress);
         Assert.AreEqual("Brings the sound decoder", contributors[0].Note);
+        Assert.AreEqual("218 105", contributors[0].VehicleNumber);
+        Assert.IsNull(contributors[1].VehicleNumber);
         Assert.AreEqual(DccAddresses.ToBeProvided, contributors[1].DccAddress);
     }
 

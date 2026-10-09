@@ -1,5 +1,25 @@
 # Versionshinweise
 
+## Version 0.8.3
+
+### Änderungen
+
+- **Der Bericht Mitgebrachte Fahrzeuge ist danach geordnet, wofür jede Seite gebraucht wird.** **Nach
+  Eigentümer** geordnet, listet die Seite eines Teilnehmenden das Mitgebrachte nach der ersten Sitzung oder
+  dem ersten Tag, an dem es gebraucht wird, dann nach Bahnhof, Abfahrt und Gleis. **Nach Betriebsstelle**
+  geordnet, listet die Seite eines Bahnhofs die Fahrzeuge nach Gleisnummer, Gleis 2 vor Gleis 10, und auf
+  jedem Gleis nach Abfahrt.
+- **Die Farben der Zeilen sind einfacher.** Auf der Seite eines Eigentümers ist nur ein Fahrzeug hellgelb,
+  das in der ersten Sitzung oder am ersten Tag nicht gebraucht wird. Auf der Seite eines Bahnhofs ist ein
+  Fahrzeug, das nicht in allen Sitzungen oder an allen Tagen im Einsatz ist, hellgelb, wenn es in einer
+  ungeraden Sitzung oder an einem ungeraden Tag beginnt, und hellblau, wenn es in einer geraden beginnt.
+  Reservefahrzeuge bleiben hellgrau.
+- **Lokomotiven und Triebzüge können eine Fahrzeugnummer erhalten.** Unter **Fahrzeugbesitzer**,
+  **Rollendes Material**, kann jeder Eigentümer einer Lokomotive oder eines Triebzugs neben der DCC-Adresse
+  die Nummer des Fahrzeugs eintragen, das er mitbringt, auch die der Reservefahrzeuge. Der Bericht
+  Mitgebrachte Fahrzeuge druckt sie direkt nach dem Umlauf. Die Nummern einer Wagengruppe sind weiterhin die
+  ihrer Wagen.
+
 ## Version 0.8.2
 
 ### Änderungen

@@ -969,8 +969,8 @@ arrangement is chosen on screen, above the pages, and is not printed:
 
 | Arrangement | Reader | Grouping and order | Columns |
 | ----------- | ------ | ------------------ | ------- |
-| By operation location | The owner of a station | One group per location where an item is to be set up, in name order; within it, by first session or day, then departure | First session/day, track, departure, type, class, turnus, count, owner, role (primary or spare), DCC address, note |
-| By owner | A participant | One group per participant bringing something, in name order; the units they set up themselves before their spares | Role (primary or spare), type, class, turnus, count, DCC address, first session/day, station, track, departure, note |
+| By operation location | The owner of a station | One group per location where an item is to be set up, in name order; within it, by track number (track 2 before track 10), then departure | First session/day, track, departure, type, class, turnus, count, owner, role (primary or spare), DCC address, note |
+| By owner | A participant | One group per participant bringing something, in name order; within it, by first session or day, then station, departure and track number, with items not in operation last | Role (primary or spare), type, class, turnus, count, DCC address, first session/day, station, track, departure, note |
 | By DCC address | Whoever hands out and checks addresses | One list of every locomotive and trainset unit — wagonsets take no address and are left out: known addresses ascending, then the missing ones, then the traction units nobody brings | DCC address, type, class, turnus, count, owner, role, first session/day, station, track, departure, note |
 
 The turnus column is the item's turnus number alone; its operator and class are not repeated there. The type
@@ -997,11 +997,17 @@ station's page and on the *Not in operation* page, an item's spares follow direc
 - **A missing DCC address is printed in red as *Missing*.** That is where an owner is given for a locomotive or
   trainset but no address, or 0 for one the owner is still to provide — on paper both are an address someone
   still has to obtain. A unit that is not driven, or that nobody brings, prints no address.
-- **The background of a row shows when its unit is needed.** A spare unit is light grey. The item itself — the
-  unit its primary owner sets up, or an item nobody brings yet — is white when it is in operation on every
-  session or day of the operating period, and otherwise light blue, light green or light red when it is first
-  in operation on the first, second or third session or day. An item first in operation later, or not in
-  operation at all, is white.
+- **The background of a row shows when its unit is needed.** A spare unit is light grey in every arrangement.
+  How the item itself — the unit its primary owner sets up, or an item nobody brings yet — is shaded depends on
+  the arrangement:
+  - *By owner:* light yellow when it is first in operation after the first session or day, so an owner sees
+    at once what is not needed when the meeting begins; otherwise white, as is an item not in operation.
+  - *By operation location:* white when it is in operation on every session or day of the operating period;
+    otherwise light yellow when it is first in operation on an odd-numbered session or day, and light blue on
+    an even-numbered one. An item not in operation at all is white.
+  - *By DCC address:* white when it is in operation on every session or day of the operating period, and
+    otherwise light blue, light green or light red when it is first in operation on the first, second or third
+    session or day. An item first in operation later, or not in operation at all, is white.
 - **Only the notes wrap.** Every other column stays on one line and is exactly as wide as its widest text,
   heading or value, so no text is ever shortened; the notes take the rest of the width. The widths follow the
   rows on each page, so the columns of a continued page may sit slightly differently from the first.

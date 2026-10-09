@@ -2444,6 +2444,12 @@
   <data name="DccAddressMissing" xml:space="preserve">
     <value>DCC-adress saknas. Varje dragfordon behöver en; ange 0 om ägaren ska lämna den.</value>
   </data>
+  <data name="VehicleNumber" xml:space="preserve">
+    <value>Fordonsnummer</value>
+  </data>
+  <data name="VehicleNumberHelp" xml:space="preserve">
+    <value>Numret på det fordon som den här ägaren tar med, t.ex. 1328. Varje fordon kan ha sitt eget nummer, även reserverna.</value>
+  </data>
   <data name="DccAddressInvalid" xml:space="preserve">
     <value>Ange en DCC-adress från 0 till 9999, där 0 betyder att ägaren ska lämna den.</value>
   </data>
