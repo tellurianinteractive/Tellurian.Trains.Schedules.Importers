@@ -718,6 +718,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Scheduled?</value>
   </data>
+  <data name="IsLockable" xml:space="preserve">
+    <value>Lockable?</value>
+  </data>
   <data name="Length" xml:space="preserve">
     <value>Length (metres)</value>
   </data>

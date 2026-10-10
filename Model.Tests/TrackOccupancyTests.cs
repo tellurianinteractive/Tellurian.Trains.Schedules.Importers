@@ -246,4 +246,46 @@ public class TrackOccupancyTests
         StringAssert.Contains(text, "12:50");
         Assert.IsFalse(text.Contains("dep 12:00"), $"Message should not show the arriving call's own departure: {text}");
     }
+
+    private static (Time From, Time To) Span(int day, int fromHour, int toHour) =>
+        (Time.FromDayHourMinute(day, fromHour, 0), Time.FromDayHourMinute(day, toHour, 0));
+
+    private static readonly Sessions Odd = Sessions.FromSessionNumbers(1, 3, 5);
+    private static readonly Sessions Even = Sessions.FromSessionNumbers(2, 4, 6);
+
+    [TestMethod]
+    public void SpansOnTheSameClockTimeConflictWhenTheSessionsLineUpAcrossTheDay()
+    {
+        // 01:00-02:00 and the next day's 01:00-02:00 (25:00-26:00) are the same time on the clock. The
+        // stored-late span is on the day after its session, so it meets the early span one session on.
+        var early = Span(0, 1, 2);
+        var late = Span(1, 1, 2);
+
+        Assert.IsTrue(early.ConflictsInTime(Odd, late, Even, 0), "The 25:00 span on session 2 is 01:00 on session 3.");
+        Assert.IsTrue(late.ConflictsInTime(Even, early, Odd, 0));
+        Assert.IsTrue(early.ConflictsInTime(Odd, late, Sessions.All, 0));
+    }
+
+    [TestMethod]
+    public void SpansADayApartDoNotConflictWhenBothTrainsRunTheSameSessions()
+    {
+        // 25:00 on sessions 1,3,5 is 01:00 on sessions 2,4,6, where the early train does not run.
+        Assert.IsFalse(Span(0, 1, 2).ConflictsInTime(Odd, Span(1, 1, 2), Odd, 0));
+        Assert.IsFalse(Span(1, 1, 2).ConflictsInTime(Odd, Span(0, 1, 2), Odd, 0));
+    }
+
+    [TestMethod]
+    public void SpansOnDifferentClockTimesDoNotConflictAcrossDays()
+    {
+        Assert.IsFalse(Span(0, 1, 2).ConflictsInTime(Sessions.All, Span(1, 3, 4), Sessions.All, 0));
+        Assert.IsFalse(Span(0, 1, 2).ConflictsInTime(Sessions.All, Span(1, 2, 3), Sessions.All, 0), "A handover is no conflict.");
+    }
+
+    [TestMethod]
+    public void RequiredGapIsKeptAcrossDays()
+    {
+        Assert.IsTrue(Span(0, 1, 2).ConflictsInTime(Sessions.All, Span(1, 2, 3), Sessions.All, 10));
+        Assert.AreEqual(60, Span(0, 1, 2).FreeMinutesBetween(Sessions.All, Span(1, 3, 4), Sessions.All));
+        Assert.IsLessThan(0, Span(0, 1, 3).FreeMinutesBetween(Sessions.All, Span(1, 2, 4), Sessions.All));
+    }
 }

@@ -88,6 +88,14 @@ public sealed class StationTrack : IEquatable<StationTrack>
     public double PlatformLength { get; set; }
 
     /// <summary>
+    /// Gets or sets whether a train standing on this track can be locked in: kept there, switches
+    /// locked, so that other trains may pass or meet it on the line. A train is locked in when the
+    /// location is controlled from a manned station, or when it has collected the location's lock key
+    /// on the way (see <c>StationCall.IsLockedIn</c>). How that is done in operation is outside the plan.
+    /// </summary>
+    public bool IsLockable { get; set; }
+
+    /// <summary>
     /// Gets or sets the usage description for this track.
     /// </summary>
     public string Usage { get; set; } = string.Empty;

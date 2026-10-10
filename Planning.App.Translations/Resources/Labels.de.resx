@@ -1086,6 +1086,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Geplant?</value>
   </data>
+  <data name="IsLockable" xml:space="preserve">
+    <value>Abschliessbar?</value>
+  </data>
   <data name="ShadowExchangesEverything" xml:space="preserve">
     <value>Ein Schattenbahnhof hat immer Reisenden- und Frachtaustausch: Er steht für alles außerhalb der Modellbahnanlage.</value>
   </data>

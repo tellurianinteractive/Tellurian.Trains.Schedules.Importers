@@ -1,5 +1,23 @@
 # Versionsnyheder
 
+## Version 0.8.7
+
+### Ændringer
+
+- **Et tog kan låses inde på et spor, så andre tog kan passere.** Sæt kryds i **Kan aflåses?** for et spor på et
+  sted med godsudveksling, for eksempel et industriområde. Et tog, der holder der, regnes som indlåst og
+  blokerer ikke længere strækningen, når stedet fjernstyres fra en bemandet station (indlåst fra ankomsten),
+  eller når stedet har en låsenøgle, og toget tidligere på sin køretur har stoppet ved stationen, der
+  opbevarer nøglen. Det er nok, at ét af kravene er opfyldt. Hvordan det gøres i driften, ligger uden for planen.
+
+### Rettelser
+
+- **Tog, der kører efter midnat, slipper ikke længere forbi konfliktadvarslerne.** Et tog, der står på et
+  spor eller er på strækningen mellem to stationer efter midnat, har samme klokkeslæt som et, der er der
+  tidligere samme døgn, men advarslerne så dem ikke sammen. Nu gør de det med hensyn til sessionerne: et
+  tidspunkt efter midnat hører til næste dag, så to tog, der begge kører sessionerne 1, 3 og 5, advares ikke
+  mod hinanden for et tidspunkt, der falder på sessionerne 2, 4 og 6.
+
 ## Version 0.8.6
 
 ### Ændringer

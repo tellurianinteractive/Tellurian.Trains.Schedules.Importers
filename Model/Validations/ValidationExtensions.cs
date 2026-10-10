@@ -1180,8 +1180,8 @@ public static class ValidationExtensions
                 !r.Train!.Equals(stationCall.Train) &&
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
-                r.Train!.Sessions.Overlaps(stationCall.Train!.Sessions) &&
-                r.TrackOccupancy(occupancySchedules).ConflictsInTime(mine, minMinutesBetweenTrackUsage) &&
+                // A span a day apart is the same time on the clock, but then on the session a day later.
+                r.TrackOccupancy(occupancySchedules).ConflictsInTime(r.Train!.Sessions, mine, stationCall.Train!.Sessions, minMinutesBetweenTrackUsage) &&
                 !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
             if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, extendByVehicleStay, minMinutesBetweenTrackUsage));
@@ -1229,7 +1229,7 @@ public static class ValidationExtensions
                 // Two occupancies that do not overlap are only in conflict because the required free time
                 // between them is missing, and saying they overlap would then be plainly wrong: the times
                 // in the message do not, and the planner needs to be told how short the gap actually is.
-                var free = second.TrackOccupancy(occupancySchedules).FreeMinutesBetween(first.TrackOccupancy(occupancySchedules));
+                var free = second.TrackOccupancy(occupancySchedules).FreeMinutesBetween(second.Train!.Sessions, first.TrackOccupancy(occupancySchedules), first.Train!.Sessions);
                 var message = free < 0
                     ? Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan)
                     : Message.Information(Strings.CallAtStationTooCloseInTimeToOtherCall, first.Train!, firstSpan, second.Train!, secondSpan, free, minMinutesBetweenTrackUsage);

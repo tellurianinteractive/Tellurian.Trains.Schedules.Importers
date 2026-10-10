@@ -1086,6 +1086,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Planlagt?</value>
   </data>
+  <data name="IsLockable" xml:space="preserve">
+    <value>Kan aflåses?</value>
+  </data>
   <data name="ShadowExchangesEverything" xml:space="preserve">
     <value>En skyggebanegård har altid udveksling af både passagerer og gods: den repræsenterer alt uden for anlægget.</value>
   </data>

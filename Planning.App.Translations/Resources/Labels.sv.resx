@@ -1086,6 +1086,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Tidtabellslagd?</value>
   </data>
+  <data name="IsLockable" xml:space="preserve">
+    <value>Låsbart?</value>
+  </data>
   <data name="ShadowExchangesEverything" xml:space="preserve">
     <value>Ett magasin har alltid utbyte av både resande och gods: det representerar allt utanför banan.</value>
   </data>

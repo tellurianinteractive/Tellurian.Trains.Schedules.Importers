@@ -1,5 +1,23 @@
 ﻿# Release notes
 
+## Version 0.8.7
+
+### Changes
+
+- **A train can be locked in on a track, so other trains may pass it.** Tick **Lockable?** on a track at a
+  location that exchanges cargo, such as an industrial area. A train standing on it is then locked in, and
+  no longer counted as blocking the line, when the location is controlled from a manned station (locked in
+  from arrival), or when the location has a lock key and the train has stopped at the station holding the
+  key earlier in its run. Either is enough. How it is handled in operation is outside the plan.
+
+### Fixes
+
+- **Trains running past midnight no longer slip past the conflict warnings.** A train that is on a track or
+  on the line between two stations after midnight is the same time of day as one that is there earlier the
+  same day, but the warnings did not see them together. They now do, taking the sessions into account: an
+  after-midnight time belongs to the day after, so two trains that both run on sessions 1, 3 and 5 are not
+  reported against each other for a time that falls on sessions 2, 4 and 6.
+
 ## Version 0.8.6
 
 ### Changes

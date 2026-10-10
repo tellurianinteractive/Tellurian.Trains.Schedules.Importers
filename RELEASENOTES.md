@@ -329,7 +329,25 @@
   (`ScheduledUnit.Number`). `Plan.AddContributor` takes an optional `vehicleNumber` and ignores it for a
   vehicle that takes none. Plans saved before read with no numbers.
 
+- **A train can be locked in on a lockable track and let other trains pass.** New
+  **`StationTrack.IsLockable`**. New **`StationCall.IsLockedIn`**: the call is a stop on a lockable track
+  and either the location is controlled from a manned station (`ControlledBy`), or it has a lock key in
+  force (`EffectiveLockKey`) and the train has stopped at the key-holding station earlier in its run.
+  Either is enough. A locked-in train no longer occupies the line while it stands (rule L3), so other
+  trains may pass or meet it. Plans saved before read as not lockable.
+
 ### Fixes
+
+- **Trains a day apart on the clock now conflict on station tracks and in the line between stations.** A
+  train running past midnight stores its later times on the next day (`1.00:27`), so 00:35 and `1.00:27`
+  were never judged to be at the same time even though they are the same moment on the clock. The station
+  track check (`ConflictsInTime`, `FreeMinutesBetween`) and the dispatch stretch check (rule L3, capacity
+  and opposing trains) now also compare spans a day either way. The day belongs to a session: when the
+  other train's times are moved `d` days it must run on a session `d` later, so two trains on sessions
+  1,3,5 whose times are a day apart no longer conflict — the after-midnight part is on sessions 2,4,6.
+  New overloads `ConflictsInTime(span, sessions, other, otherSessions, minMinutesBetween)` and
+  `FreeMinutesBetween(span, sessions, other, otherSessions)` do this; the overloads without sessions
+  compare plainly as before, and so do vehicle double-booking, driver-duty overlap and train-part overlap.
 
 - **A station with many tracks no longer draws over the next station in the graphical timetable.** The
   minimum spacing between two operation locations on the distance axis — `GraphicTimetableSettings.StationSpacing`

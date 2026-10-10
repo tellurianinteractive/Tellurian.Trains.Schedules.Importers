@@ -120,9 +120,42 @@ public static class TrackOccupancyExtensions
         span.From < other.To.AddMinutes(minMinutesBetween) && span.To.AddMinutes(minMinutesBetween) > other.From;
 
     /// <summary>
+    /// The same test for spans of trains running on given sessions. A time past midnight is stored on the
+    /// next day, so a span is the same time on the clock as one a day earlier or later — but only on the
+    /// session that day belongs to: when the other span is moved <c>d</c> days, its train must run on a
+    /// session <c>d</c> later than the session the first runs on. Two spans a day apart therefore conflict
+    /// only where the sessions line up that way, not wherever both trains run.
+    /// </summary>
+    public static bool ConflictsInTime(this (Time From, Time To) span, Sessions sessions, (Time From, Time To) other, Sessions otherSessions, int minMinutesBetween) =>
+        DayShifts.Any(d => RunTogether(sessions, otherSessions, d) && span.ConflictsInTime(other.Shifted(d), minMinutesBetween));
+
+    private static (Time From, Time To) Shifted(this (Time From, Time To) span, int days) => (span.From.AddDays(days), span.To.AddDays(days));
+
+    /// <summary>The day shifts worth trying: a train spans less than a day, so only the neighbouring days can meet.</summary>
+    internal static readonly int[] DayShifts = [-1, 0, 1];
+
+    // Same day: the trains' sessions overlap (on-demand trains included). A day apart: SharesSession.
+    private static bool RunTogether(Sessions sessions, Sessions other, int dayShift) =>
+        dayShift == 0 ? sessions.Overlaps(other) : SharesSession(sessions, other, dayShift);
+
+    /// <summary>
+    /// Whether some session of <paramref name="sessions"/> has a session of <paramref name="other"/>
+    /// <paramref name="dayShift"/> days later.
+    /// </summary>
+    internal static bool SharesSession(Sessions sessions, Sessions other, int dayShift) =>
+        Enumerable.Range(1, 14).Any(s => s + dayShift is >= 1 and <= 14 && sessions.Includes(s) && other.Includes(s + dayShift));
+
+    /// <summary>
     /// The free time between two occupancy spans that do not overlap, in whole fast-clock minutes.
     /// Negative where they do overlap.
     /// </summary>
     public static int FreeMinutesBetween(this (Time From, Time To) span, (Time From, Time To) other) =>
         (int)(span.From >= other.To ? span.From.Subtract(other.To).TotalMinutes : other.From.Subtract(span.To).TotalMinutes);
+
+    /// <summary>
+    /// The free time between spans of trains running on given sessions: the least over the day shifts the
+    /// sessions allow (see <see cref="ConflictsInTime(ValueTuple{Time, Time}, Sessions, ValueTuple{Time, Time}, Sessions, int)"/>).
+    /// </summary>
+    public static int FreeMinutesBetween(this (Time From, Time To) span, Sessions sessions, (Time From, Time To) other, Sessions otherSessions) =>
+        DayShifts.Where(d => RunTogether(sessions, otherSessions, d)).Select(d => span.FreeMinutesBetween(other.Shifted(d))).DefaultIfEmpty(int.MaxValue).Min();
 }

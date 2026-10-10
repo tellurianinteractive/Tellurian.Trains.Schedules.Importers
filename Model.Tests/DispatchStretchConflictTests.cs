@@ -80,6 +80,32 @@ public class DispatchStretchConflictTests
         Assert.HasCount(1, StretchConflicts(line), "Nobody can let two trains meet where nobody controls the location.");
     }
 
+    private static void MeetADayApart(Line line, Sessions first, Sessions second)
+    {
+        // The second train is stored a day later (past midnight), but on the clock it runs just as the first does.
+        const int day = 24 * 60;
+        Run(line, 1, (line.A, 0, 0), (line.M, 10, 15), (line.B, 25, 25)).Sessions = first;
+        Run(line, 2, (line.B, day, day), (line.M, day + 10, day + 15), (line.A, day + 25, day + 25)).Sessions = second;
+    }
+
+    [TestMethod]
+    public void TrainsCannotMeetOnTheSameClockTimeOnDifferentDays()
+    {
+        var line = NewLine(Unmanned, middleTracks: 2);
+        MeetADayApart(line, Sessions.FromSessionNumbers(1, 3, 5), Sessions.FromSessionNumbers(2, 4, 6));
+
+        Assert.HasCount(1, StretchConflicts(line), "Train 2 runs 25:10 on session 2, which is 01:10 on session 3, where train 1 is.");
+    }
+
+    [TestMethod]
+    public void TrainsADayApartOnTheSameSessionsDoNotMeet()
+    {
+        var line = NewLine(Unmanned, middleTracks: 2);
+        MeetADayApart(line, Sessions.FromSessionNumbers(1, 3, 5), Sessions.FromSessionNumbers(1, 3, 5));
+
+        Assert.IsEmpty(StretchConflicts(line), "Train 2 runs 25:10 on session 1, which is 01:10 on session 2, where train 1 does not run.");
+    }
+
     [TestMethod]
     public void TrainsCanMeetAtAControlledStationWithTwoTracks()
     {
@@ -184,5 +210,78 @@ public class DispatchStretchConflictTests
         var manned = new Station(9, "Manned", "Mn") { IsManned = true, ControlledBy = new Station(1, "Alpha", "A") };
 
         Assert.IsFalse(manned.IsControlPoint);
+    }
+
+    // A freight train that stops at every call: only then can it work an industrial area or collect a key.
+    private static Train Stopping(Train train)
+    {
+        train.Category = new TrainCategory { Id = 2, Name = "G", Prefix = "G", Content = TrainContent.Cargo };
+        foreach (var call in train.Calls) call.IsArrival = call.IsDeparture = true;
+        return train;
+    }
+
+    // Train 1 stands at the industrial area 12:10-12:50 while train 2 runs through it the other way, after
+    // train 1 has left the line for the siding.
+    private static Line LockedInLine(bool lockable, Station? keyHolder)
+    {
+        var line = NewLine(new IndustrialArea(2, "Works", "W"), middleTracks: 2);
+        line.M.Tracks.First(t => t.Number == "1").IsLockable = lockable;
+        if (keyHolder is not null) line.M.LockKey = new LockKey { HeldAt = keyHolder };
+        Stopping(Run(line, 1, (line.A, 0, 0), (line.M, 10, 50), (line.B, 60, 60)));
+        Run(line, 2, (line.B, 15, 15), (line.M, 25, 25), (line.A, 35, 35));
+        return line;
+    }
+
+    [TestMethod]
+    public void TrainStandingAtAnIndustrialAreaBlocksTheLineWithoutLockingIn()
+    {
+        var line = LockedInLine(lockable: false, keyHolder: null);
+
+        Assert.HasCount(1, StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void LockedInTrainLetsOthersPassWhenItHasPassedTheKeyHolder()
+    {
+        var line = LockedInLine(lockable: true, keyHolder: null);
+        line.M.LockKey = new LockKey { HeldAt = line.A };
+        Assert.IsEmpty(StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void LockKeyDoesNothingOnATrackThatIsNotLockable()
+    {
+        var line = LockedInLine(lockable: false, keyHolder: null);
+        line.M.LockKey = new LockKey { HeldAt = line.A };
+
+        Assert.HasCount(1, StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void TrainIsNotLockedInWhenItReachesTheKeyHolderOnlyAfterwards()
+    {
+        var line = LockedInLine(lockable: true, keyHolder: null);
+        line.M.LockKey = new LockKey { HeldAt = line.B };
+
+        Assert.HasCount(1, StretchConflicts(line), "Beta is passed after the industrial area, so the key was never collected.");
+    }
+
+    [TestMethod]
+    public void LockableTrackWithNeitherControllerNorKeyDoesNotLockInATrain()
+    {
+        var line = LockedInLine(lockable: true, keyHolder: null);
+
+        Assert.HasCount(1, StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void TrainIsLockedInFromArrivalWhereTheLocationIsControlledFromAMannedStation()
+    {
+        var line = NewLine(new IndustrialArea(2, "Works", "W") { ControlledBy = new Station(1, "Alpha", "A") { IsManned = true } }, middleTracks: 2);
+        line.M.Tracks.First(t => t.Number == "1").IsLockable = true;
+        var train = Stopping(Run(line, 1, (line.A, 0, 0), (line.M, 10, 50), (line.B, 60, 60)));
+
+        Assert.IsTrue(train.CallsInRunOrder.Single(c => c.OperationLocation.Equals(line.M)).IsLockedIn);
+        Assert.IsFalse(train.CallsInRunOrder.First().IsLockedIn);
     }
 }

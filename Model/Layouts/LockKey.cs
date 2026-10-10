@@ -64,6 +64,37 @@ public static class LockKeyExtensions
             layout.OperationLocations.OfType<Station>().Where(station => station.IsManned);
     }
 
+    extension(StationCall call)
+    {
+        /// <summary>
+        /// Whether the train is locked in at this call: it stands on a lockable track
+        /// (<see cref="StationTrack.IsLockable"/>) and either the location is controlled from a manned
+        /// station — locked in from arrival — or the location has a lock key in force and the train has
+        /// stopped at the station holding it earlier in its run. Either is enough. A locked-in train
+        /// leaves the line free, so other trains may pass or meet it.
+        /// </summary>
+        /// <remarks>
+        /// The train must <em>stop</em> at the key-holding station, since a key cannot be collected in
+        /// passing — the same rule the lock key notes follow (see <c>StationCall.LockKeyNotes</c>).
+        /// </remarks>
+        public bool IsLockedIn
+        {
+            get
+            {
+                if (!call.Track.IsLockable || !call.IsStop) return false;
+                var location = call.OperationLocation;
+                if (location.ControlledBy is { IsManned: true }) return true;
+                if (location.EffectiveLockKey is not { HeldAt: { } holder }) return false;
+
+                // By reference: calls that compare equal are still different calls.
+                var calls = call.Train.CallsInRunOrder;
+                for (var i = 0; i < calls.Count && !ReferenceEquals(calls[i], call); i++)
+                    if (calls[i].IsStop && calls[i].OperationLocation.Equals(holder)) return true;
+                return false;
+            }
+        }
+    }
+
     extension(OperationLocation location)
     {
         /// <summary>

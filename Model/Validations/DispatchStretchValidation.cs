@@ -1,4 +1,5 @@
 using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Schedules;
 
 namespace Tellurian.Trains.Schedules.Model.Validations;
 
@@ -26,7 +27,8 @@ namespace Tellurian.Trains.Schedules.Model.Validations;
 /// A train occupies the sections it runs over from its departure to its arrival. Where it passes a
 /// control point without a call there, nothing says when it passed, so it occupies every section between
 /// its two calls for the whole time. While it stands at an uncontrolled location it still occupies the
-/// section around it; standing at a control point it occupies none. As everywhere else, trains only meet
+/// section around it; standing at a control point it occupies none, and neither does a train locked in on
+/// a lockable track (see <c>StationCall.IsLockedIn</c>). As everywhere else, trains only meet
 /// on a common session, and a train arriving just as another departs is no conflict.
 /// </para>
 /// <para>
@@ -186,6 +188,8 @@ internal static class DispatchStretchValidation
                 var next = IndexOf(calls[c + 2].OperationLocation);
                 var standingDirection = Math.Sign(next - b) == direction ? direction : 0; // 0: turns back here
                 var standing = new StretchPassing(visit.Train, visit.First, visit.Last);
+                // A train locked in on a siding is off the line, so it blocks nothing.
+                if (to.IsLockedIn) continue;
                 if (!_boundaries.Contains(b))
                 {
                     var s = Array.FindLastIndex(_boundaries, x => x < b);
@@ -228,8 +232,14 @@ internal static class DispatchStretchValidation
     /// </summary>
     private sealed record Occupancy(Visit Visit, StretchPassing Passing, int Direction, Time Start, Time End)
     {
-        public bool IsActiveAt(Time instant) => Start <= instant && End > instant;
-        public bool Overlaps(Occupancy other) => Start < other.End && other.Start < End;
+        // A time past midnight is stored on the next day, so it is the same moment on the clock as the same
+        // time before it — but on the session that day belongs to. Moved d days, an occupancy counts only
+        // for the train's sessions d later (see TrackOccupancyExtensions.SharesSession).
+        public bool IsActiveAt(Time instant, int session) => TrackOccupancyExtensions.DayShifts.Any(d =>
+            session + d is >= 1 and <= 14 && Visit.Train.Sessions.Includes(session + d) && Start.AddDays(d) <= instant && End.AddDays(d) > instant);
+
+        public bool Overlaps(Occupancy other) => TrackOccupancyExtensions.DayShifts.Any(d =>
+            TrackOccupancyExtensions.SharesSession(Visit.Train.Sessions, other.Visit.Train.Sessions, d) && Start < other.End.AddDays(d) && other.Start.AddDays(d) < End);
         public bool IsOpposing(Occupancy other) => Direction == 0 || other.Direction == 0 || Direction != other.Direction;
     }
 
@@ -249,11 +259,10 @@ internal static class DispatchStretchValidation
 
             foreach (var entering in occupancies)
             {
-                var active = occupancies.Where(o => o.IsActiveAt(entering.Start)).DistinctBy(o => o.Visit).ToList();
                 for (var session = 1; session <= 14; session++)
                 {
                     if (!entering.Visit.Train.Sessions.Includes(session)) continue;
-                    var onSession = active.Where(o => o.Visit.Train.Sessions.Includes(session)).ToList();
+                    var onSession = occupancies.Where(o => o.IsActiveAt(entering.Start, session)).DistinctBy(o => o.Visit).ToList();
                     if (onSession.Count <= Capacity) continue;
 
                     // Report the earliest other train in the section with the one that tips it over.
@@ -276,7 +285,7 @@ internal static class DispatchStretchValidation
                 {
                     var (one, another) = (occupancies[i], occupancies[j]);
                     if (one.Visit == another.Visit || one.Visit.Train.Number == another.Visit.Train.Number) continue;
-                    if (!one.Overlaps(another) || !one.IsOpposing(another) || !ShareSession(one.Visit.Train, another.Visit.Train)) continue;
+                    if (!one.Overlaps(another) || !one.IsOpposing(another)) continue;
                     if (Report(reported, one, another) is { } error) yield return error;
                 }
             }
@@ -290,8 +299,5 @@ internal static class DispatchStretchValidation
                 first.Visit.Train.Identity, first.Passing.SpanText, second.Visit.Train.Identity, second.Passing.SpanText);
             return ValidationError.StretchConflict(first.Passing.From.Track, first.Passing.To.Track, first.Passing, second.Passing, message);
         }
-
-        private static bool ShareSession(Train one, Train another) =>
-            Enumerable.Range(1, 14).Any(session => one.Sessions.Includes(session) && another.Sessions.Includes(session));
     }
 }

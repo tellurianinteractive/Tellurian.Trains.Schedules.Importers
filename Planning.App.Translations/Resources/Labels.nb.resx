@@ -1086,6 +1086,9 @@
   <data name="IsScheduled" xml:space="preserve">
     <value>Planlagt?</value>
   </data>
+  <data name="IsLockable" xml:space="preserve">
+    <value>Låsbart?</value>
+  </data>
   <data name="ShadowExchangesEverything" xml:space="preserve">
     <value>En skyggestasjon har alltid utveksling av både passasjerer og gods: den representerer alt utenfor anlegget.</value>
   </data>

@@ -1,5 +1,23 @@
 # Versionsnyheter
 
+## Version 0.8.7
+
+### Ändringar
+
+- **Ett tåg kan låsas in på ett spår så att andra tåg får passera.** Kryssa i **Låsbart?** för ett spår på en
+  plats med godsutbyte, till exempel ett industriområde. Ett tåg som står där räknas som inlåst, och
+  blockerar inte längre linjen, när platsen fjärrstyrs från en bemannad station (inlåst från ankomsten),
+  eller när platsen har en låsnyckel och tåget har stannat vid stationen som förvarar nyckeln tidigare i
+  sin körning. Det räcker att ett av villkoren är uppfyllt. Hur det görs i driften ligger utanför planen.
+
+### Rättningar
+
+- **Tåg som går efter midnatt slinker inte längre förbi konfliktvarningarna.** Ett tåg som står på ett spår
+  eller är på sträckan mellan två stationer efter midnatt har samma klockslag som ett som är där tidigare
+  samma dygn, men varningarna såg dem inte tillsammans. Nu gör de det, med hänsyn till sessionerna: en tid
+  efter midnatt hör till nästa dag, så två tåg som båda går sessionerna 1, 3 och 5 varnas inte mot varandra
+  för en tid som hamnar på sessionerna 2, 4 och 6.
+
 ## Version 0.8.6
 
 ### Ändringar

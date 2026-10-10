@@ -1,5 +1,23 @@
 # Versjonsnyheter
 
+## Versjon 0.8.7
+
+### Endringer
+
+- **Et tog kan låses inne på et spor, slik at andre tog kan passere.** Kryss av for **Låsbart?** for et spor på et
+  sted med godsutveksling, for eksempel et industriområde. Et tog som står der regnes som innlåst, og
+  blokkerer ikke lenger strekningen, når stedet fjernstyres fra en bemannet stasjon (innlåst fra ankomst),
+  eller når stedet har en låsenøkkel og toget tidligere på kjøreturen har stoppet ved stasjonen som
+  oppbevarer nøkkelen. Det holder at ett av vilkårene er oppfylt. Hvordan det gjøres i driften, ligger utenfor planen.
+
+### Rettelser
+
+- **Tog som går etter midnatt slipper ikke lenger forbi konfliktvarslene.** Et tog som står på et spor
+  eller er på strekningen mellom to stasjoner etter midnatt, har samme klokkeslett som et som er der
+  tidligere samme døgn, men varslene så dem ikke sammen. Nå gjør de det, med hensyn til øktene: et
+  tidspunkt etter midnatt hører til neste dag, så to tog som begge går øktene 1, 3 og 5, varsles ikke mot
+  hverandre for et tidspunkt som havner på øktene 2, 4 og 6.
+
 ## Versjon 0.8.6
 
 ### Endringer

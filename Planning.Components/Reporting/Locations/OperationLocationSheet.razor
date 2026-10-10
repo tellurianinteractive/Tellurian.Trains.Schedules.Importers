@@ -73,6 +73,10 @@
                     <th class="number">@Translator("TrackNumber")</th>
                     <th class="flag">@Translator("IsMain")</th>
                     <th class="flag">@Translator("IsScheduled")</th>
+                    @if (Location.HasCargoExchange)
+                    {
+                        <th class="flag">@Translator("IsLockable")</th>
+                    }
                     <th class="length">@Translator("Length")</th>
                     @if (Location.HasPassengerExchange)
                     {
@@ -92,6 +96,10 @@
                         <td class="number">@track.Number</td>
                         <td class="flag">@Check(track.IsMain)</td>
                         <td class="flag">@Check(track.IsScheduled)</td>
+                        @if (Location.HasCargoExchange)
+                        {
+                            <td class="flag">@Check(track.IsLockable)</td>
+                        }
                         <td class="length">@(track.Length > 0 ? track.Length.ToString("0.#", Culture) : "—")</td>
                         @if (Location.HasPassengerExchange)
                         {

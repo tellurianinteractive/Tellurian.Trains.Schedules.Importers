@@ -1,5 +1,25 @@
 # Versionshinweise
 
+## Version 0.8.7
+
+### Änderungen
+
+- **Ein Zug kann auf einem Gleis eingeschlossen werden, damit andere Züge vorbeifahren können.** Setzen Sie bei
+  einem Gleis an einem Ort mit Güterumschlag, etwa einem Industriegebiet, das Häkchen bei **Abschliessbar?**.
+  Ein Zug, der dort steht, gilt dann als eingeschlossen und blockiert die Strecke nicht mehr, wenn der Ort
+  von einem besetzten Bahnhof ferngesteuert wird (eingeschlossen ab Ankunft) oder wenn der Ort einen
+  Schlüssel hat und der Zug zuvor am Bahnhof gehalten hat, der den Schlüssel verwahrt. Eine der beiden
+  Bedingungen genügt. Wie das im Betrieb gehandhabt wird, liegt ausserhalb der Planung.
+
+### Fehlerbehebungen
+
+- **Züge, die nach Mitternacht fahren, entgehen den Konfliktwarnungen nicht mehr.** Ein Zug, der nach
+  Mitternacht auf einem Gleis steht oder auf der Strecke zwischen zwei Bahnhöfen ist, hat dieselbe Uhrzeit
+  wie einer, der früher am selben Tag dort ist, doch die Warnungen sahen beide nicht zusammen. Jetzt tun
+  sie es und berücksichtigen dabei die Sitzungen: Eine Zeit nach Mitternacht gehört zum Folgetag, sodass
+  zwei Züge, die beide an den Sitzungen 1, 3 und 5 fahren, nicht gegeneinander gemeldet werden, wenn die
+  Zeit auf die Sitzungen 2, 4 und 6 fällt.
+
 ## Version 0.8.6
 
 ### Änderungen
