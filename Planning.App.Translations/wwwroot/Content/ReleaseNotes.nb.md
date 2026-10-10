@@ -1,5 +1,14 @@
 # Versjonsnyheter
 
+## Versjon 0.8.5
+
+### Endringer
+
+- **Bekreftelser vises midt i vinduet.** Spørsmålet før noe slettes, eller før en ny bane erstatter den
+  nåværende, åpnes nå i en boks midt på skjermen, så du slipper å rulle for å finne den. Trykk **Esc** for
+  å avbryte. Et klikk utenfor boksen avbryter også en enkel sletting, men ikke det utfyllende spørsmålet
+  ved sletting av et driftssted eller spørsmålet ved utskifting av banen.
+
 ## Versjon 0.8.4
 
 ### Nye funksjoner

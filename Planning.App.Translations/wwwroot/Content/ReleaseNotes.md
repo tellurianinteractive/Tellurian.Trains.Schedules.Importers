@@ -1,5 +1,14 @@
 ﻿# Release notes
 
+## Version 0.8.5
+
+### Changes
+
+- **Confirmations appear in the middle of the window.** Asking before something is deleted, or before a new
+  layout replaces the current one, now opens a box centred on the screen, so there is no need to scroll to
+  find it. Press **Esc** to cancel. Clicking outside the box also cancels a simple delete, but not the
+  detailed question when deleting an operation location or the question when replacing the layout.
+
 ## Version 0.8.4
 
 ### New features

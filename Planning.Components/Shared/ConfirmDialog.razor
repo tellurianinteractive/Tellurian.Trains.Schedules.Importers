@@ -1,0 +1,29 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Shared
+
+@* A confirmation centred in the current window, so it is always in view however far the page is
+   scrolled. The caller supplies the question and its buttons. Clicking outside cancels only when
+   DismissOnBackdrop is set: use it for simple deletes, not where the planner is reviewing details.
+   Escape always cancels. *@
+<div class="confirm-backdrop" @onclick="OnBackdropClick">
+    <div class="confirm-dialog" role="alertdialog" aria-modal="true" tabindex="-1" @ref="_dialog"
+         @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool DismissOnBackdrop { get; set; }
+
+    private ElementReference _dialog;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await _dialog.FocusAsync();
+    }
+
+    private Task OnBackdropClick() => DismissOnBackdrop ? OnCancel.InvokeAsync() : Task.CompletedTask;
+
+    private Task OnKeyDown(KeyboardEventArgs e) => e.Key == "Escape" ? OnCancel.InvokeAsync() : Task.CompletedTask;
+}

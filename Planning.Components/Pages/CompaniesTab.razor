@@ -54,13 +54,11 @@ else
 
             @if (_deleteTarget is not null)
             {
-                <div class="confirm-backdrop" @onclick="() => _deleteTarget = null">
-                    <div class="confirm" @onclick:stopPropagation="true">
-                        <span>@string.Format(Culture, Translator("DeleteCompanyConfirm"), _deleteTarget.Name)</span>
-                        <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
-                        <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
-                    </div>
-                </div>
+                <ConfirmDialog OnCancel="() => _deleteTarget = null" DismissOnBackdrop="true">
+                    <span>@string.Format(Culture, Translator("DeleteCompanyConfirm"), _deleteTarget.Name)</span>
+                    <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                    <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
+                </ConfirmDialog>
             }
         }
         else if (_mode == Mode.Edit && Editing is not null)

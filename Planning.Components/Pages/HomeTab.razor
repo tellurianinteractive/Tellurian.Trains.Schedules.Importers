@@ -20,11 +20,11 @@
 
     @if (_confirmReplace)
     {
-        <div class="confirm">
+        <ConfirmDialog OnCancel="() => _confirmReplace = false">
             <span>@Translator("NewLayoutReplaceConfirm")</span>
             <button class="danger" @onclick="CreateNewLayout">@Translator("CreateNewLayout")</button>
             <button @onclick="() => _confirmReplace = false">@Translator("Cancel")</button>
-        </div>
+        </ConfirmDialog>
     }
 </div>
 

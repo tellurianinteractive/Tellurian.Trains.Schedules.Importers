@@ -54,11 +54,11 @@
 
             @if (_deleteTarget is not null)
             {
-                <div class="confirm">
+                <ConfirmDialog OnCancel="() => _deleteTarget = null" DismissOnBackdrop="true">
                     <span>@string.Format(Translator("DeleteTimetableStretchConfirm"), _deleteTarget.Number)</span>
                     <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                     <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
-                </div>
+                </ConfirmDialog>
             }
         }
     }

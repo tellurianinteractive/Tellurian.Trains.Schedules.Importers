@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.8.5
+
+### Änderungen
+
+- **Rückfragen erscheinen in der Mitte des Fensters.** Die Rückfrage vor dem Löschen oder bevor eine neue
+  Anlage die aktuelle ersetzt, öffnet sich jetzt in einem Feld in der Bildschirmmitte, sodass man nicht
+  mehr scrollen muss, um sie zu finden. Mit **Esc** wird abgebrochen. Ein Klick außerhalb des Feldes
+  bricht ebenfalls ein einfaches Löschen ab, nicht aber die ausführliche Rückfrage beim Löschen einer
+  Betriebsstelle und nicht die Rückfrage beim Ersetzen der Anlage.
+
 ## Version 0.8.4
 
 ### Neue Funktionen

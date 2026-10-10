@@ -366,6 +366,14 @@ else
                     }
                 </div>
 
+                @* Shunters are stationed at a location already in the layout, so a new one is saved first.
+                   Placed above the tracks, which can run long enough to push them out of sight. *@
+                @if (!_isNew && Editing.CanHaveShunters && Plan is { } plan)
+                {
+                    <h3>@Translator("Shunters")</h3>
+                    <ShuntersEditor Plan="plan" Location="Editing" />
+                }
+
                 <h3>@Translator("Tracks")</h3>
                 @* Which way through the location a track is for. Only worth asking where there is a
                    choice to make: a location with one track, or one with nowhere to run on to, has
@@ -454,13 +462,6 @@ else
                     </tbody>
                 </table>
                 <button @onclick="AddTrack">@Translator("AddTrack")</button>
-
-                @* Shunters are stationed at a location already in the layout, so a new one is saved first. *@
-                @if (!_isNew && Editing.CanHaveShunters && Plan is { } plan)
-                {
-                    <h3>@Translator("Shunters")</h3>
-                    <ShuntersEditor Plan="plan" Location="Editing" />
-                }
 
                 @if (_error is not null)
                 {

@@ -1,5 +1,14 @@
 # Versionsnyheder
 
+## Version 0.8.5
+
+### Ændringer
+
+- **Bekræftelser vises midt i vinduet.** Spørgsmålet, før noget slettes, eller før en ny bane erstatter den
+  nuværende, åbner nu i en boks midt på skærmen, så man ikke skal rulle for at finde den. Tryk på **Esc**
+  for at annullere. Et klik uden for boksen annullerer også en enkel sletning, men ikke det udførlige
+  spørgsmål ved sletning af et driftssted eller spørgsmålet ved udskiftning af banen.
+
 ## Version 0.8.4
 
 ### Nye funktioner

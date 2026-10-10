@@ -1,5 +1,14 @@
 # Versionsnyheter
 
+## Version 0.8.5
+
+### Ändringar
+
+- **Bekräftelser visas mitt i fönstret.** Frågan innan något tas bort, eller innan en ny bana ersätter den
+  nuvarande, öppnas nu i en ruta mitt på skärmen, så att man slipper rulla för att hitta den. Tryck på
+  **Esc** för att avbryta. Ett klick utanför rutan avbryter också en enkel borttagning, men inte den
+  utförliga frågan vid borttagning av en driftplats eller frågan vid utbyte av banan.
+
 ## Version 0.8.4
 
 ### Nya funktioner

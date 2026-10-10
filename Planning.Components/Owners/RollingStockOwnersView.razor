@@ -33,19 +33,19 @@ else
 
     @if (_deleteTarget is not null)
     {
-        <div class="confirm">
+        <ConfirmDialog OnCancel="() => _deleteTarget = null" DismissOnBackdrop="true">
             <span>@string.Format(CultureInfo.CurrentCulture, Translator("DeleteVehicleConfirm"), _deleteTarget.Designation)</span>
             <button class="danger" @onclick="DeleteConfirmed"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
             <button @onclick="() => _deleteTarget = null">@Translator("Cancel")</button>
-        </div>
+        </ConfirmDialog>
     }
     else if (_confirmDeleteAll && deletable.Count > 0)
     {
-        <div class="confirm">
+        <ConfirmDialog OnCancel="() => _confirmDeleteAll = false" DismissOnBackdrop="true">
             <span>@string.Format(CultureInfo.CurrentCulture, Translator("DeleteNotInOperationConfirm"), deletable.Count)</span>
             <button class="danger" @onclick="() => DeleteAllConfirmed(deletable)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
             <button @onclick="() => _confirmDeleteAll = false">@Translator("Cancel")</button>
-        </div>
+        </ConfirmDialog>
     }
 
     <table class="owners">

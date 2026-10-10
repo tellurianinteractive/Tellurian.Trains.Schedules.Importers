@@ -7,6 +7,7 @@
 @* Everything deleting the location changes, shown before anything is changed: the planner confirms
    or aborts. Where something blocks the delete, that is all that is shown, since the rest would not
    happen. *@
+<ConfirmDialog OnCancel="OnCancel">
 <div class="location-deletion">
     <strong>@string.Format(Culture, Translator("DeleteLocationConfirm"), Preview.Location.Name)</strong>
 
@@ -123,6 +124,7 @@
         </div>
     }
 </div>
+</ConfirmDialog>
 
 @code {
     [Parameter, EditorRequired] public LocationDeletionPreview Preview { get; set; } = default!;

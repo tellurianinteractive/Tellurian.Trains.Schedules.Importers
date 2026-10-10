@@ -979,17 +979,6 @@ code {
         margin-left: 0.3rem;
     }
 
-    .confirm {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 0.9rem;
-        padding: 0.6rem 0.75rem;
-        background: #fbeaea;
-        border: 1px solid #e0b4b4;
-        border-radius: 5px;
-    }
 
     .warning {
         margin-top: 1rem;
