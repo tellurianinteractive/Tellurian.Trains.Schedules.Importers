@@ -122,6 +122,15 @@
         color: var(--primary);
     }
 
+    /* Graded duties only; an ungraded duty shows nothing. Same colours as the front page of the booklet. */
+    .duty-info .difficulty {
+        font-size: 0.8rem;
+    }
+
+    .duty-info .difficulty.easy { color: #009933; }
+    .duty-info .difficulty.medium { color: #cc7000; }
+    .duty-info .difficulty.experienced { color: #c00; }
+
     .duty-info .company {
         color: #445;
         font-size: 0.78rem;

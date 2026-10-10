@@ -134,6 +134,11 @@
                                                 {
                                                     <SessionsView Sessions="sessions" Settings="Settings" />
                                                 }
+                                                @* No wagons listed: the count of them, last in the box. *@
+                                                @if (wagonset.UnlistedWagonCount > 0)
+                                                {
+                                                    <span class="count">x @wagonset.UnlistedWagonCount</span>
+                                                }
                                             </div>
                                             @foreach (var wagon in wagonset.Wagons)
                                             {

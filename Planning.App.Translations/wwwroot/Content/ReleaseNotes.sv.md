@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 0.8.6
+
+### Ändringar
+
+- **Tjänster visar svårighetsgrad.** På fliken **Tjänster** får en tjänst som har graderats en liten färgad
+  mätare bredvid sin beteckning: grön för lätt, orange för medel och röd för erfaren. Håll muspekaren över
+  den för att se graden. En tjänst som inte har graderats visar ingen ikon.
+
 ## Version 0.8.5
 
 ### Ändringar

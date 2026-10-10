@@ -44,6 +44,11 @@ else
                 }
                 <div class="duty-info">
                     <span class="ident">@duty.Identity</span>
+                    @if (duty.Difficulty is { } difficulty)
+                    {
+                        <i class="fa-solid fa-gauge-high difficulty @difficulty.ToString().ToLowerInvariant()"
+                           title="@Translator("DutyDifficulty"): @Translator(difficulty.ToString())"></i>
+                    }
                     @if (CompanyOf(duty) is { } company)
                     {
                         <span class="company">@company</span>

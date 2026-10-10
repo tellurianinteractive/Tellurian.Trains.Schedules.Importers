@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 0.8.6
+
+### Changes
+
+- **Driver duties show their difficulty.** On the **Duties** tab, a duty that has been graded gets a small
+  coloured gauge next to its identity: green for easy, orange for medium and red for experienced. Hover over
+  it to see the grade. A duty that has not been graded shows no icon.
+
 ## Version 0.8.5
 
 ### Changes

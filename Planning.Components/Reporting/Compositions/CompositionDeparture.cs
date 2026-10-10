@@ -11,7 +11,7 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions;
 /// the wagons and marshals them into the train, while a station the flow only runs through has nothing to
 /// make up and no wagons of its own to find. A wagonset likewise puts a departure on the sheet only where it
 /// is coupled: at the first departure of its schedule, and later only where it is coupled explicitly — with a
-/// couple note, fetched from another track, or coupled to a train already running. A rake that stays with its
+/// couple note, fetched from another track, or coupled to a train already running — and a freight train's wagonsets are all listed where it starts, since it is made up there. A rake that stays with its
 /// loco from one train to the next is nothing the station has to make up. But once a departure is on the
 /// sheet, every wagonset the train leaves with is drawn, those it already carries included: drawn without
 /// them, the rakes coupled here would read as the whole train, and their positions would place them among
@@ -145,13 +145,19 @@ public sealed class CompositionDeparture
             if (!call.OperationLocation.Equals(station)) continue;
 
             // Uncoupled before anything is coupled, so the arrival comes first where the train does both.
-            if (i > 0 && ArrivingCargo(train, calls, i) is { Count: > 0 } arriving)
+            // Wagonsets left behind along the route; at the last call the whole train comes off, so none are named.
+            List<CompositionGroup> arriving =
+            [
+                .. i > 0 ? ArrivingCargo(train, calls, i) : [],
+                .. i > 0 && i < calls.Count - 1 ? Wagonsets(train, calls, i, settings, plan, uncoupledHere: true) : [],
+            ];
+            if (arriving.Count > 0)
                 yield return new CompositionDeparture
                 {
                     Call = call,
                     Movement = CompositionMovement.Arriving,
                     Heading = orientation?.HeadingFrom(calls[i - 1].OperationLocation, station) ?? CompositionHeading.Leftwards,
-                    Groups = arriving,
+                    Groups = [.. arriving.OrderBy(group => group.SortPosition)],
                     SessionsText = train.Sessions.ToText(settings),
                 };
 
@@ -204,21 +210,34 @@ public sealed class CompositionDeparture
     // those are not all the train's. With coupledHereOnly, only those coupled to the train there; see
     // IsCoupling for which parts count as a coupling.
     private static IEnumerable<WagonsetComposition> Wagonsets(
-        Train train, IReadOnlyList<StationCall> calls, int index, SessionsSettings settings, Plan? plan, bool coupledHereOnly)
+        Train train, IReadOnlyList<StationCall> calls, int index, SessionsSettings settings, Plan? plan,
+        bool coupledHereOnly = false, bool uncoupledHere = false)
     {
         if (plan is null) yield break;
 
         var runs = train.Sessions.Capped(settings.MaxNumberOfSessions);
         foreach (var wagonset in plan.ScheduledObjects.Where(vehicle => vehicle.IsWagonSet))
         {
-            var covering = wagonset.ScheduleAssignments
-                .Select(assignment => (assignment.Sessions, Part: (assignment.Schedule?.Parts ?? [])
-                    .FirstOrDefault(part => part.Train.Equals(train) && (coupledHereOnly
-                        ? IsCoupledAt(calls, part, index) && IsCoupling(assignment.Schedule!, part, index)
-                        : IsCarriedFrom(calls, part, index)))))
-                .Where(assignment => assignment.Part is not null)
+            var parts = wagonset.ScheduleAssignments
+                .SelectMany(assignment => (assignment.Schedule?.Parts ?? [])
+                    .Where(part => part.Train.Equals(train))
+                    .Select(part => (assignment.Sessions, Schedule: assignment.Schedule!, Part: part)))
+                .ToList();
+            // Uncoupled here: a part ends at this call and none carries the wagonset on from it.
+            if (uncoupledHere && parts.Any(p => IsCarriedFrom(calls, p.Part, index))) continue;
+            var covering = parts
+                .Where(p => uncoupledHere
+                    ? IndexOf(calls, p.Part.To) == index && IndexOf(calls, p.Part.From) is var from && from >= 0 && from < index
+                    : coupledHereOnly
+                        ? IsCoupledAt(calls, p.Part, index) && IsCoupling(p.Schedule, p.Part, index)
+                        : IsCarriedFrom(calls, p.Part, index))
+                .Select(p => (p.Sessions, p.Part))
                 .ToList();
             if (covering.Count == 0) continue;
+            var action = uncoupledHere ? WagonsetAction.Uncoupled
+                : parts.Any(p => IsCoupledAt(calls, p.Part, index) && IsCoupling(p.Schedule, p.Part, index))
+                    ? WagonsetAction.Coupled
+                    : WagonsetAction.None;
 
             var assigned = covering.Aggregate(Sessions.FromBitPattern(0), (all, assignment) => all.Or(assignment.Sessions));
             var shared = assigned.And(runs);
@@ -233,6 +252,7 @@ public sealed class CompositionDeparture
                 Position = covering.Select(assignment => assignment.Part!.WagonSetOptions?.OrderInTrain ?? 0).Max(),
                 Sessions = sessions,
                 SessionsText = sessions?.ToText(settings),
+                Action = action,
             };
         }
     }
@@ -389,7 +409,9 @@ public sealed class CompositionDeparture
         ReferenceEquals(part, schedule.FirstPart) ||
         part.WagonSetOptions?.HasCoupleNote == true ||
         part.OtherFromTrack is not null ||
-        fromIndex > 0;
+        fromIndex > 0 ||
+        // A freight train is made up where it starts, whatever wagons its loco brought from the train before.
+        part.Train.IsCargo;
 
     private static int IndexOf(IReadOnlyList<StationCall> calls, StationCall call)
     {

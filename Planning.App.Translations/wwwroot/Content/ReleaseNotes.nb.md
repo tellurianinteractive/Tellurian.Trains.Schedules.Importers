@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 0.8.6
+
+### Endringer
+
+- **Tjenester viser vanskelighetsgrad.** På fanen **Tjenester** får en tjeneste som er gradert, en liten farget
+  måler ved siden av betegnelsen: grønn for lett, oransje for middels og rød for erfaren. Hold musepekeren
+  over den for å se graden. En tjeneste som ikke er gradert, viser ikke noe ikon.
+
 ## Versjon 0.8.5
 
 ### Endringer

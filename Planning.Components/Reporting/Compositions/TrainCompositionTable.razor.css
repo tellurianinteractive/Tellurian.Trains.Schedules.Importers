@@ -233,8 +233,7 @@ table.compositions {
 
             .designation {
                 font-weight: 700;
-            }
-        }
+            }        }
 
         /* One line, class and number side by side, white against the frame's shading. As wide as its text
            rather than a fixed width, so a long wagon number is never cut short; the estimate charges the text

@@ -55,6 +55,28 @@ public sealed record WagonsetComposition : CompositionGroup
     /// the shaded frame round the wagons, where it costs width rather than a column of its own.
     /// </summary>
     public string Designation => Wagonset.Designation;
+
+    /// <summary>
+    /// The number of wagons, where the wagonset lists none of its own and so can only be said by its count;
+    /// zero where the wagons are drawn one by one.
+    /// </summary>
+    public int UnlistedWagonCount => Wagons.Count == 0 ? Math.Max(0, Wagonset.NumberOfUnits) : 0;
+
+    /// <summary>Whether the wagonset is coupled to the train or uncoupled from it at this call, which the row notes.</summary>
+    public WagonsetAction Action { get; init; } = WagonsetAction.None;
+}
+
+/// <summary>What is done with a wagonset at the call a composition row is for.</summary>
+public enum WagonsetAction
+{
+    /// <summary>It is carried through; nothing is done.</summary>
+    None,
+
+    /// <summary>It is coupled to the train here.</summary>
+    Coupled,
+
+    /// <summary>It is uncoupled from the train here.</summary>
+    Uncoupled,
 }
 
 /// <summary>One listed wagon of a wagonset, with its class and number.</summary>

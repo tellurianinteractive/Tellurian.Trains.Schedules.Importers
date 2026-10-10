@@ -42,7 +42,7 @@ public sealed record CompositionPageGeometry
     public double HeaderHeightMm => HeadingHeightMm + ColumnHeaderHeightMm;
 
     /// <summary>What a row adds to its content: the cell padding above and below, and its rule.</summary>
-    public double RowChromeHeightMm { get; init; } = 2.3;
+    public double RowChromeHeightMm { get; init; } = 2.25;
 
     /// <summary>One line of text in the train's own columns.</summary>
     public double TextLineHeightMm { get; init; } = 5;
@@ -355,6 +355,9 @@ public static class CompositionPaginator
         var text = wagonset.Designation.Length * geometry.WagonClassCharacterWidthMm;
         if (wagonset.SessionsText is { Length: > 0 } sessions)
             text += geometry.WagonTextGapMm + (sessions.Length * geometry.CharacterWidthMm);
+        // " x 12" after the turnus where the wagons are only counted.
+        if (wagonset.UnlistedWagonCount > 0)
+            text += geometry.WagonTextGapMm + ((3 + wagonset.UnlistedWagonCount.ToString().Length) * geometry.CharacterWidthMm);
         return geometry.TurnusChromeWidthMm + text;
     }
 

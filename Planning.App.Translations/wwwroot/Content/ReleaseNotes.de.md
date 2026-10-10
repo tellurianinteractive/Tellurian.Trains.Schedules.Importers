@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 0.8.6
+
+### Änderungen
+
+- **Fahrdienste zeigen ihren Schwierigkeitsgrad.** Auf dem Reiter **Dienste** erhält ein Dienst, der eingestuft
+  wurde, neben seiner Bezeichnung ein kleines farbiges Messgerät: grün für leicht, orange für mittel und rot
+  für erfahren. Mit dem Mauszeiger darüber ist die Stufe zu sehen. Ein Dienst ohne Einstufung zeigt kein Symbol.
+
 ## Version 0.8.5
 
 ### Änderungen

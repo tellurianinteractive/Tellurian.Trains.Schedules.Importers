@@ -94,6 +94,24 @@ public class TrainCompositionTests
         StationCompositions.Create(station, fixture.Timetable.Trains, Settings, fixture.Plan).Departures;
 
     [TestMethod]
+    public void AWagonsetUncoupledAlongTheRouteGetsAnArrivalRowAndCouplingsAreMarked()
+    {
+        var fixture = CreateFixture();
+        var calls = fixture.Train.CallsInRunOrder;
+        var schedule = fixture.Plan.CreateSchedule();
+        schedule.Add(new ScheduledTrainPart(calls[0], calls[1]));
+        var wagonset = fixture.Plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", 1, null);
+        fixture.Plan.AssignVehicle(schedule, wagonset, null);
+
+        var atStart = DeparturesAt(fixture, fixture.Start).Single();
+        var atMiddle = DeparturesAt(fixture, fixture.Middle).Single();
+
+        Assert.AreEqual(WagonsetAction.Coupled, ((WagonsetComposition)atStart.Groups.Single()).Action);
+        Assert.IsTrue(atMiddle.IsArrival);
+        Assert.AreEqual(WagonsetAction.Uncoupled, ((WagonsetComposition)atMiddle.Groups.Single()).Action);
+    }
+
+    [TestMethod]
     public void ATrainWithNothingToShowIsNotListed()
     {
         var fixture = CreateFixture();
@@ -498,6 +516,18 @@ public class TrainCompositionTests
     }
 
     [TestMethod]
+    public void AWagonsetListingNoWagonsStatesItsCount()
+    {
+        var fixture = CreateFixture();
+        var wagonset = AddWagonset(fixture);
+        wagonset.NumberOfUnits = 12;
+
+        var group = (WagonsetComposition)DeparturesAt(fixture, fixture.Start).Single().Groups.Single();
+
+        Assert.AreEqual(12, group.UnlistedWagonCount);
+    }
+
+    [TestMethod]
     public void AWagonsetIsOneLineHighUntilItsWagonsNoLongerFitSideBySide()
     {
         var fixture = CreateFixture();
@@ -511,7 +541,7 @@ public class TrainCompositionTests
             Position = 0,
         };
         // The turnus stands first on the line, and the wagons fill what it leaves.
-        var turnus = CompositionPaginator.TurnusWidthMmOf(Of(0), geometry);
+        var turnus = CompositionPaginator.TurnusWidthMmOf(Of(1), geometry);
         var perLine = (int)((geometry.CompositionWidthMm - (2 * geometry.WagonsetFrameMm) - turnus) / (width + geometry.WagonGapMm));
 
         Assert.AreEqual(geometry.WagonHeightMm, CompositionPaginator.HeightMmOf(Of(perLine), geometry), 0.001,
