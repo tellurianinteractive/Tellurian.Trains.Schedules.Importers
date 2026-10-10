@@ -134,7 +134,7 @@ public static class CargoFlowTrainPartExtensions
             get
             {
                 List<ICallNote> result = [];
-                if (trainPart.HasUncoupleNote && trainPart.HasStatedDestinations)
+                if (trainPart.HasUncoupleNote)
                     result.Add(new CargoFlowUncoupleNote(trainPart) { IsForArrival = true, IsDriverNote = false });
                 return result;
             }

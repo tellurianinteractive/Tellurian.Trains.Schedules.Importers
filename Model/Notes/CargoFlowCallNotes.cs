@@ -51,9 +51,28 @@ public static class CargoFlowCallNoteExtensions
                 if (departures.Count > 0)
                     result.Add(departures[0] with { Parts = [.. departures.SelectMany(note => note.Parts)] });
                 if (arrivals.Count > 0)
-                    result.Add(arrivals[0] with { Parts = [.. arrivals.SelectMany(note => note.Parts)] });
+                {
+                    var parts = arrivals.SelectMany(note => note.Parts).ToList();
+                    result.Add(arrivals[0] with { Parts = parts, Handling = call.ArrivedWagonHandlingFor(parts) });
+                }
                 return result;
             }
+        }
+
+        /// <summary>
+        /// What is done with the wagons that arrive here: a shadow station moves them on or places them at
+        /// the table, any other shunting yard shunts them on or to the customer, and anywhere else they are
+        /// shunted to the customers only where a flow asks for that.
+        /// </summary>
+        private ArrivedWagonHandling ArrivedWagonHandlingFor(IReadOnlyList<CargoFlowTrainPart> flows)
+        {
+            if (call.OperationLocation is Station { IsShadow: true }) return ArrivedWagonHandling.MoveToDepartingTrackOrTable;
+            if (call.OperationLocation is Station station && call.OperationLocation.Layout is { } layout &&
+                (station.Regions.Count > 0 || layout.LocationsCargoServedFrom(station).Count > 0))
+                return ArrivedWagonHandling.ShuntToDepartingTrackOrCustomer;
+            return flows.Any(flow => flow.AlsoShuntAfterArrival)
+                ? ArrivedWagonHandling.ShuntToCustomers
+                : ArrivedWagonHandling.None;
         }
     }
 }

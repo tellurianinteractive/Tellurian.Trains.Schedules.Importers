@@ -229,7 +229,7 @@ public class ShuntingTaskTests
         StringAssert.Contains(begins.ToText, $"{places[0].Name}, {places[1].Name}");
         Assert.AreEqual(begins.ToText.IndexOf(places[0].Name, StringComparison.Ordinal),
             begins.ToText.LastIndexOf(places[0].Name, StringComparison.Ordinal), $"Note text: '{begins.ToText}'.");
-        StringAssert.Contains(ends.ToText, $"{places[0].Name}, {places[1].Name}");
+        Assert.HasCount(3, ends.Parts);
     }
 
     [TestMethod]

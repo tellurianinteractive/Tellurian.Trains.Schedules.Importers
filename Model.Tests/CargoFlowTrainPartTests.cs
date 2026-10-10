@@ -166,7 +166,7 @@ public class CargoFlowTrainPartTests
     }
 
     [TestMethod]
-    public void AFlowOnlyToItsFromStationHasNoNotes()
+    public void AFlowOnlyToItsFromStationHasNoDepartureNote()
     {
         var (_, train, description) = Arrange();
         var calls = train.Calls.OrderBy(c => c.SortTime).ToList();
@@ -176,6 +176,6 @@ public class CargoFlowTrainPartTests
 
         Assert.IsFalse(cargoFlow.HasStatedDestinations);
         Assert.IsEmpty(cargoFlow.DepartureNotes.ToList(), "An empty \"brings wagons to\" note says nothing.");
-        Assert.IsEmpty(cargoFlow.ArrivalNotes.ToList());
+        Assert.ContainsSingle(cargoFlow.ArrivalNotes.ToList(), "Every wagon is uncoupled, whatever its destination.");
     }
 }

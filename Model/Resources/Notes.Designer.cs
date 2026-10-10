@@ -97,11 +97,38 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Uncouple wagons for {0}..
+        ///   Looks up a localized string similar to Uncouple all wagons..
         /// </summary>
-        internal static string UncoupleWagonsFor {
+        internal static string UncoupleAllWagons {
             get {
-                return ResourceManager.GetString("UncoupleWagonsFor", resourceCulture);
+                return ResourceManager.GetString("UncoupleAllWagons", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Uncouple all wagons. Move arrived wagons to departing track after their destination, or place at table if at destination..
+        /// </summary>
+        internal static string UncoupleAllWagonsMoveToDepartingTrackOrTable {
+            get {
+                return ResourceManager.GetString("UncoupleAllWagonsMoveToDepartingTrackOrTable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Uncouple all wagons. Shunt arrived wagons to departing track after their destination, or shunt to customer if at destination..
+        /// </summary>
+        internal static string UncoupleAllWagonsShuntToDepartingTrackOrCustomer {
+            get {
+                return ResourceManager.GetString("UncoupleAllWagonsShuntToDepartingTrackOrCustomer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Uncouple all wagons. Shunt arrived wagons to customers..
+        /// </summary>
+        internal static string UncoupleAllWagonsShuntToCustomers {
+            get {
+                return ResourceManager.GetString("UncoupleAllWagonsShuntToCustomers", resourceCulture);
             }
         }
 

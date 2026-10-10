@@ -118,7 +118,28 @@ public class DispatchVehicleNoteTests
         train.CreateCargoFlow(1, calls[0], calls[^1], options);
 
         Assert.Contains($"Brings wagons to {elsewhere.Name}", NoteTextsAt(plan, Origin));
-        Assert.Contains($"Uncouple wagons for {elsewhere.Name}.", NoteTextsAt(plan, Terminus));
+        Assert.Contains("Uncouple all wagons.", NoteTextsAt(plan, Terminus));
+    }
+
+    [TestMethod]
+    public void ArrivingCargoFlowWagonsAreAllUncoupledAndHandledByKindOfLocation()
+    {
+        var (plan, train) = Arrange();
+        var terminus = (Station)plan.Layout.OperationLocations.Single(l => l.Name == Terminus);
+        var options = plan.Timetable.Add(new CargoFlowOptions { ToAllDestinations = true });
+        var calls = train.CallsInRunOrder;
+        var flow = train.CreateCargoFlow(1, calls[0], calls[^1], options);
+
+        Assert.Contains("Uncouple all wagons.", NoteTextsAt(plan, Terminus));
+
+        flow.AlsoShuntAfterArrival = true;
+        Assert.Contains("Uncouple all wagons. Shunt arrived wagons to customers.", NoteTextsAt(plan, Terminus));
+
+        terminus.Regions.Add(new Region { Id = 1, Name = "Elsewhere" });
+        Assert.Contains("Uncouple all wagons. Shunt arrived wagons to departing track after their destination, or shunt to customer if at destination.", NoteTextsAt(plan, Terminus));
+
+        terminus.IsShadow = true;
+        Assert.Contains("Uncouple all wagons. Move arrived wagons to departing track after their destination, or place at table if at destination.", NoteTextsAt(plan, Terminus));
     }
 
     [TestMethod]

@@ -128,8 +128,17 @@
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Bringt Wagen nach {0}</value>
   </data>
-  <data name="UncoupleWagonsFor" xml:space="preserve">
-    <value>Wagen für {0} abkuppeln.</value>
+  <data name="UncoupleAllWagons" xml:space="preserve">
+    <value>Alle Wagen abkuppeln.</value>
+  </data>
+  <data name="UncoupleAllWagonsMoveToDepartingTrackOrTable" xml:space="preserve">
+    <value>Alle Wagen abkuppeln. Angekommene Wagen nach ihrem Ziel auf das Abfahrtsgleis umsetzen oder auf den Tisch stellen, wenn sie am Ziel sind.</value>
+  </data>
+  <data name="UncoupleAllWagonsShuntToDepartingTrackOrCustomer" xml:space="preserve">
+    <value>Alle Wagen abkuppeln. Angekommene Wagen nach ihrem Ziel auf das Abfahrtsgleis rangieren oder zum Kunden rangieren, wenn sie am Ziel sind.</value>
+  </data>
+  <data name="UncoupleAllWagonsShuntToCustomers" xml:space="preserve">
+    <value>Alle Wagen abkuppeln. Angekommene Wagen zu den Güterkunden rangieren.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Ankommende Wagen von {0} zu den Güterkunden rangieren.</value>

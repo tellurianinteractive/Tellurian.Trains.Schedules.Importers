@@ -128,8 +128,17 @@
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Medbringer vogne til {0}</value>
   </data>
-  <data name="UncoupleWagonsFor" xml:space="preserve">
-    <value>Frakobl vogne til {0}.</value>
+  <data name="UncoupleAllWagons" xml:space="preserve">
+    <value>Frakobl alle vogne.</value>
+  </data>
+  <data name="UncoupleAllWagonsMoveToDepartingTrackOrTable" xml:space="preserve">
+    <value>Frakobl alle vogne. Flyt ankomne vogne til afgangssporet efter deres destination, eller sæt på bordet, hvis de er fremme ved destinationen.</value>
+  </data>
+  <data name="UncoupleAllWagonsShuntToDepartingTrackOrCustomer" xml:space="preserve">
+    <value>Frakobl alle vogne. Rangér ankomne vogne til afgangssporet efter deres destination, eller rangér til kunde, hvis de er fremme ved destinationen.</value>
+  </data>
+  <data name="UncoupleAllWagonsShuntToCustomers" xml:space="preserve">
+    <value>Frakobl alle vogne. Rangér ankomne vogne til godskunderne.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Rangér ankomne vogne fra {0} til godskunderne.</value>
