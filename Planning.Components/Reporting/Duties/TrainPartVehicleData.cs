@@ -17,6 +17,13 @@ public sealed class TrainPartVehicleData
 
     /// <summary>Whether the block has anything to show. An empty block is omitted entirely.</summary>
     public bool HasData => Vehicles.Count > 0;
+
+    /// <summary>
+    /// The vehicles whose rake is printed under the table: one entry per wagonset that lists wagons, the
+    /// first row it appears in (a wagonset working several movements of the part would repeat the rake).
+    /// </summary>
+    public IReadOnlyList<TrainPartVehicle> Rakes =>
+        [.. Vehicles.Where(v => v.Rake.Count > 0).DistinctBy(v => v.Vehicle)];
 }
 
 /// <summary>
@@ -58,4 +65,10 @@ public sealed class TrainPartVehicle
     /// rake out of several standing in the yard.
     /// </remarks>
     public string Designation => Vehicle.Designation;
+
+    /// <summary>
+    /// The wagons of a wagonset that lists them, in the order they stand when the movement departs; empty
+    /// for any other vehicle, and for a wagonset that lists none.
+    /// </summary>
+    public IReadOnlyList<Wagon> Rake { get; init; } = [];
 }

@@ -71,7 +71,7 @@
     // Most severe first, so the worst problems are read first.
     private IEnumerable<ValidationError> Ordered => Validation.Errors.OrderByDescending(e => e.Severity);
 
-    private string IconCss => Validation.MaxSeverity switch
+    private string IconCss => Validation.IsComputing ? "fa-spinner fa-spin" : Validation.MaxSeverity switch
     {
         Severity.Error or Severity.System => "fa-circle-exclamation",
         Severity.Warning => "fa-triangle-exclamation",

@@ -221,6 +221,25 @@ public static class SessionsExtensions
         }
 
         /// <summary>
+        /// The same value moved <paramref name="days"/> sessions/days later within the layout's operating
+        /// period (defined by <paramref name="useDays"/> and <paramref name="maxSessions"/>), wrapping from
+        /// the last session/day of the period to the first. For what a train does after midnight, when it
+        /// is already on the next session or day. The on-demand marker is kept.
+        /// </summary>
+        /// <param name="days">How many sessions/days later; zero returns the value unchanged.</param>
+        /// <param name="useDays">Whether the layout runs weekdays rather than numbered sessions.</param>
+        /// <param name="maxSessions">The number of operating sessions/days in the period.</param>
+        public Sessions ShiftedWithinPeriod(int days, bool useDays, int maxSessions)
+        {
+            if (days == 0) return sessions;
+            var period = Math.Clamp(maxSessions, 1, useDays ? 7 : 14);
+            var shifted = PeriodNumbers(sessions, useDays, maxSessions)
+                .Select(n => (((n - 1 + days) % period) + period) % period + 1);
+            var result = FromPeriodNumbers(shifted, useDays);
+            return new Sessions { Flags = (ushort)(result.Flags | (sessions.Flags & CommonSessionPatterns.OnDemand)) };
+        }
+
+        /// <summary>
         /// Gets the sessions within the layout's operating period (defined by <paramref name="useDays"/>
         /// and <paramref name="maxSessions"/>) that these sessions do <em>not</em> cover — i.e. the free
         /// sessions/days still available. Bits outside the period are ignored.

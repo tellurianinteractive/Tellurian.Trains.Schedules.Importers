@@ -91,7 +91,8 @@ public static class DutyPagination
         if (!part.HasLimits) height -= 1;
 
         height += TableHeight(part.TractionData.Vehicles.Count);
-        height += TableHeight(part.WagonsetData.Vehicles.Count);
+        var wagonsets = part.WagonsetData;
+        height += TableHeight(wagonsets.Vehicles.Count) + RakeHeight(wagonsets);
         height += TableHeight(part.CargoData.Flows.Count);
         height += TimetableHeight(part);
         return height;
@@ -132,6 +133,14 @@ public static class DutyPagination
     }
 
     private static double TableHeight(int rowCount) => rowCount == 0 ? 0 : TableOverhead + rowCount;
+
+    /// <summary>Wagon rectangles that fit on one line of a rake on an A5 page.</summary>
+    public const int WagonsPerRakeLine = 8;
+
+    // A rake costs its label's line plus one line per WagonsPerRakeLine wagons; the rectangles are padded
+    // a little taller than a table row, so a line is charged as a row and a quarter.
+    private static double RakeHeight(TrainPartVehicleData data) =>
+        data.Rakes.Sum(v => 1 + 1.25 * Math.Ceiling(v.Rake.Count / (double)WagonsPerRakeLine));
 
     /// <summary>
     /// Builds the logical pages of one duty's booklet: front page, part pages, blank padding, overview.

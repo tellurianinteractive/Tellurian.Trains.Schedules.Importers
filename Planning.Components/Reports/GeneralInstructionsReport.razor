@@ -37,7 +37,7 @@
 
 @if (_booklets is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="GeneralInstructions" />
 }
 else
 {
@@ -87,6 +87,7 @@ else
     {
         // Uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
 
         // Fixed once for the whole render, so a PDF printed later still identifies the render it came from.
         _printDate = DateOnly.FromDateTime(DateTime.Now);

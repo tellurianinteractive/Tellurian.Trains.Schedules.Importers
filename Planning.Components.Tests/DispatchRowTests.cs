@@ -247,6 +247,30 @@ public class DispatchRowTests
     }
 
     [TestMethod]
+    public void AClearanceAfterMidnightSortsByClockTimeAndBelongsToTheNextSession()
+    {
+        var timetable = CreateTimetable(30);
+        var first = StationNamed(timetable, Origin);
+        var middle = StationNamed(timetable, Middle);
+        var last = StationNamed(timetable, Terminus);
+        middle.Add(new StationTrack(99, "2"));
+        // Arrives at Slokärr 23:40 on session 1 and leaves at 00:10, which is session 2.
+        var night = CreateTrain(2, 5678, first, middle, last, Time.FromHourAndMinute(23, 30), 30, "2");
+        night.Sessions = Sessions.FromSessionNumbers(1);
+        timetable.Add(night);
+
+        var all = RowsAt(timetable, Middle).ToList();
+        var rows = all.Where(r => r.Call.Train == night).ToList();
+
+        var departure = rows.Single(r => r.Kind == DispatchRowKind.Departure);
+        var arrival = rows.Single(r => r.Kind == DispatchRowKind.Arrival);
+        Assert.AreEqual("00:10", departure.TimeOfDay.HHMM());
+        Assert.IsTrue(departure.Sessions.Numbers.SequenceEqual(new byte[] { 2 }));
+        Assert.IsTrue(arrival.Sessions.Numbers.SequenceEqual(new byte[] { 1 }));
+        Assert.IsLessThan(all.IndexOf(arrival), all.IndexOf(departure), "Sorted by clock time only.");
+    }
+
+    [TestMethod]
     public void TheTrainColumnLeadsWithTheCompanyThatRunsTheTrain()
     {
         var timetable = CreateTimetable(3);

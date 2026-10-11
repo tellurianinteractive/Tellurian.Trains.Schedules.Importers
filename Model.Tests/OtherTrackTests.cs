@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Model.Validations;
@@ -279,6 +279,22 @@ public class OtherTrackTests
         var note = DepartureNotes(plan, part).OfType<ShuntWagonsToDepartureTrackNote>().Single();
 
         Assert.AreEqual($"{sessions.ToText(settings)}: Shunt wagons to departure track before departure.", note.ToText);
+    }
+
+    [TestMethod]
+    public void WagonsShuntedOnEverySessionOfThePeriodAreNotPrefixedWithAllSessions()
+    {
+        // The vehicle works sessions 1-7 of a train that runs all 14 bits, but the layout's period is only
+        // seven sessions long: the qualifier differs from the train's sessions yet spans the whole period,
+        // so it would only read "All sessions: ...".
+        var (plan, part, _) = Arrange(ScheduledObjectType.Wagonset,
+            vehicleAssigned: Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6, 7));
+        part.FromTrack = TrackAt(plan, "G", "2");
+        plan.Layout.Settings.General.MaxSessions = 7;
+
+        var note = DepartureNotes(plan, part).OfType<ShuntWagonsToDepartureTrackNote>().Single();
+
+        Assert.AreEqual("Shunt wagons to departure track before departure.", note.ToText);
     }
 
     [TestMethod]

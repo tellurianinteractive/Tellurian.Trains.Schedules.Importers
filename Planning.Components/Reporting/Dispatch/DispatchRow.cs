@@ -55,8 +55,18 @@ public sealed class DispatchRow
     /// </remarks>
     public string TrainIdentity => Call.Train.IdentityWithCompany;
 
-    /// <summary>The sessions or days the train operates.</summary>
-    public Sessions Sessions => Call.Train.Sessions;
+    /// <summary>
+    /// The clock time of the clearance, without the day it falls on. The list is worked through by the
+    /// clock, so this is what orders it: a clearance after midnight sorts among the early hours.
+    /// </summary>
+    public Time TimeOfDay => Time.FromHourAndMinute(Time.Value.Hours, Time.Value.Minutes);
+
+    /// <summary>
+    /// The sessions or days the clearance is given on. A clearance after midnight belongs to the session
+    /// or day after the one the train started on, so these are the train's own moved on by the days its
+    /// time has passed.
+    /// </summary>
+    public required Sessions Sessions { get; init; }
 
     /// <summary>
     /// The plain-text form of the sessions as the column shows them — without the on-demand marker,
@@ -180,9 +190,6 @@ public sealed class DispatchRow
             // context — the row states one train's working.
             var notes = call.StationNotes(train.Sessions, settings, plan);
 
-            // Without the on-demand marker: that is stated as a note, and saying it in both places
-            // would spend four lines of a narrow column repeating what the notes already say.
-            var sessionsText = train.Sessions.WithoutOnDemand.ToText(settings);
             var occupiesTrack = plan is null || call.OccupiesTrack(plan.Schedules);
 
             if (call == train.ShuntingCall)
@@ -190,17 +197,17 @@ public sealed class DispatchRow
                 // A task is one span of work, not a movement: one row, at the time the work starts, with
                 // every note — the times themselves are in its shunting-task note, since the call is both
                 // origin and destination and so leaves both time columns blank.
-                yield return Row(call, DispatchRowKind.ShuntingTask, call.Arrival, notes, sessionsText, sole: true, isRemote, occupiesTrack);
+                yield return Row(call, DispatchRowKind.ShuntingTask, call.Arrival, notes, settings, sole: true, isRemote, occupiesTrack);
                 continue;
             }
             if (i == 0)
             {
-                yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: true, isRemote, occupiesTrack);
+                yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, settings, sole: true, isRemote, occupiesTrack);
                 continue;
             }
             if (i == calls.Count - 1)
             {
-                yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: true, isRemote, occupiesTrack);
+                yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, settings, sole: true, isRemote, occupiesTrack);
                 continue;
             }
             if (call.Arrival.Equals(call.Departure))
@@ -208,26 +215,33 @@ public sealed class DispatchRow
                 // One row cannot hold the arrival/departure split, so both halves' notes appear on it.
                 // Without this a note classified for the missing half would be silently dropped — most
                 // damagingly for the notes that only ever occur on a train running past.
-                yield return Row(call, DispatchRowKind.PassThrough, call.Departure, notes, sessionsText, sole: true, isRemote, occupiesTrack);
+                yield return Row(call, DispatchRowKind.PassThrough, call.Departure, notes, settings, sole: true, isRemote, occupiesTrack);
                 continue;
             }
 
-            yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, sessionsText, sole: false, isRemote, occupiesTrack);
-            yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, sessionsText, sole: false, isRemote, occupiesTrack);
+            yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, settings, sole: false, isRemote, occupiesTrack);
+            yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, settings, sole: false, isRemote, occupiesTrack);
         }
     }
 
     private static DispatchRow Row(
         StationCall call, DispatchRowKind kind, Time time, IReadOnlyList<ICallNote> notes,
-        string sessionsText, bool sole, bool isRemote, bool occupiesTrack) =>
-        new()
+        SessionsSettings settings, bool sole, bool isRemote, bool occupiesTrack)
+    {
+        // Past midnight the train is on the next session or day, so the row is for those instead.
+        var sessions = call.Train.Sessions.ShiftedWithinPeriod(
+            time.Value.Days, settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions);
+        return new()
         {
             IsRemote = isRemote,
             OccupiesTrack = occupiesTrack,
             Call = call,
             Kind = kind,
             Time = time,
-            SessionsText = sessionsText,
+            Sessions = sessions,
+            // Without the on-demand marker: that is stated as a note, and saying it in both places
+            // would spend four lines of a narrow column repeating what the notes already say.
+            SessionsText = sessions.WithoutOnDemand.ToText(settings),
             IsSoleRow = sole,
             Notes = kind switch
             {
@@ -236,4 +250,5 @@ public sealed class DispatchRow
                 _ => notes,
             },
         };
+    }
 }

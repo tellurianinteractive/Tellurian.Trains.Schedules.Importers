@@ -51,6 +51,18 @@
                 }
             </tbody>
         </table>
+        @* The rake of each wagonset that lists its wagons, just below the table that names it. One
+           rectangle per wagon, in the order the wagons stand when the movement departs. *@
+        @foreach (var vehicle in Data.Rakes)
+        {
+            <div class="rake">
+                <span class="label">@Translator("WagonRake") @vehicle.Designation:</span>
+                @foreach (var wagon in vehicle.Rake)
+                {
+                    <span class="wagon">@wagon.Class@(string.IsNullOrWhiteSpace(wagon.Number) ? "" : $" {wagon.Number}")</span>
+                }
+            </div>
+        }
     </div>
     <hr />
 }

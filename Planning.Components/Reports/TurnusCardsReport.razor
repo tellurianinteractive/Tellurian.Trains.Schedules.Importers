@@ -6,7 +6,7 @@
 
 @if (Items == null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="TurnusCards" />
 }
 else
 {
@@ -42,6 +42,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is
         // loaded (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
         var general = ScheduleState.Layout?.Settings.General;
         var startDay = general?.StartDay ?? DayOfWeek.Monday;
         var useDays = general?.UseDays ?? false;

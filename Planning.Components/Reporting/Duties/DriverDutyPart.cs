@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Planning.Timetables;
+
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Duties;
 
 /// <summary>
@@ -151,6 +153,7 @@ public static class DriverDutyPartExtensions
             Sessions = vehicle.SessionsOn(part),
             DepartureTrack = vehicle.DepartureTrackOn(part),
             ArrivalTrack = vehicle.ArrivalTrackOn(part),
+            Rake = vehicle.RakeOn(part),
         };
 
         // A cargo flow belongs on this part's page when it is carried over any of the part's span. On a
@@ -200,6 +203,26 @@ public static class DriverDutyPartExtensions
         internal StationTrack ArrivalTrackOn(ScheduledTrainPart trainPart) =>
             vehicle.OwnPartsEqualTo(trainPart).Select(part => part.OtherToTrack).FirstOrDefault(track => track is not null)
             ?? trainPart.To.Track;
+
+        /// <summary>
+        /// The wagons of this wagonset as they stand when the given part departs: the arranged order, or
+        /// the reverse of it where the wagonset has turned round on the way there (see
+        /// <c>WagonOrderByLeg</c>). Empty for a vehicle that lists no wagons.
+        /// </summary>
+        internal IReadOnlyList<Wagon> RakeOn(ScheduledTrainPart trainPart)
+        {
+            if (!vehicle.IsWagonSet) return [];
+            var arranged = vehicle.Wagons.OrderBy(w => w.Position).ToList();
+            if (arranged.Count == 0) return [];
+
+            var schedule = vehicle.ScheduleAssignments
+                .Select(assignment => assignment.Schedule)
+                .FirstOrDefault(s => s.Parts.Contains(trainPart));
+            var leg = schedule is null
+                ? null
+                : vehicle.WagonOrderByLeg(schedule.OrderedParts).FirstOrDefault(l => l.Part.Equals(trainPart));
+            return leg is null ? arranged : [.. leg.Wagons.OfType<Wagon>()];
+        }
 
         private IEnumerable<ScheduledTrainPart> OwnPartsEqualTo(ScheduledTrainPart trainPart) =>
             vehicle.ScheduleAssignments

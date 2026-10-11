@@ -23,7 +23,7 @@
 
 @if (_pages is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="VehicleContributors" />
 }
 else if (!_hasRollingStock)
 {
@@ -101,6 +101,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
 
         _grouping = Groupings.FirstOrDefault(g => g.Value.Equals(By, StringComparison.OrdinalIgnoreCase)).Grouping;
         if (ScheduleState.Schedule is not { } plan)

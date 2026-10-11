@@ -22,7 +22,7 @@
 
 @if (_report is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="GraphicalTimetableReport" />
 }
 else if (_report.Pages.Count == 0)
 {
@@ -63,6 +63,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
 
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         _report = ScheduleState.Timetable is { } timetable && Layout is { } layout

@@ -14,7 +14,7 @@
 
 @if (Items is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="PassengerTickets" />
 }
 else if (Items.Count == 0)
 {
@@ -49,6 +49,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         Items = ScheduleState.Timetable?.ToPassengerTickets() ?? [];
     }

@@ -22,7 +22,7 @@
 
 @if (_sheets is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="DriverDuties" />
 }
 else
 {
@@ -78,6 +78,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
 
         // Fixed once for the whole render, so every booklet in one print carries the same timestamp and
         // a PDF printed later still identifies the render it came from.

@@ -185,7 +185,8 @@ public static class GeneratedNoteExtensions
 
     /// <summary>
     /// A note that holds on only some of the sessions or days its train runs, led by those sessions or
-    /// days; the note as it is where it holds on all of them.
+    /// days; the note as it is where it holds on all of them — including where the qualifier itself spans
+    /// the whole operating period, which would only read "Daily: …".
     /// </summary>
     /// <remarks>
     /// Leading rather than trailing, so the reader sees before anything else whether the note is for
@@ -194,6 +195,7 @@ public static class GeneratedNoteExtensions
     /// </remarks>
     private static NoteTemplate OnSessions(NoteTemplate note, Sessions? sessions, SessionsSettings? settings) =>
         sessions is { } qualifier && settings is not null
+            && !qualifier.CoversAllWithin(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions)
             ? new(NoteResources.OnSessions,
                 NoteArg.Markup(qualifier.ToText(settings), qualifier.ToHtml(settings)),
                 NoteArg.Markup(note.ToText, note.ToHtml))

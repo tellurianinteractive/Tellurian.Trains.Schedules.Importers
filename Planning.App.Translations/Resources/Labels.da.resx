@@ -237,6 +237,9 @@
   <data name="CreatingReport" xml:space="preserve">
     <value>Opretter rapport…</value>
   </data>
+  <data name="CreatingReportNamed" xml:space="preserve">
+    <value>Opretter rapporten {0}. Vent venligst…</value>
+  </data>
   <data name="TurnForNextDay" xml:space="preserve">
     <value>Vend til næste dag?</value>
   </data>
@@ -2299,6 +2302,9 @@
   </data>
   <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
     <value>Ikke flere tog i denne tjeneste.</value>
+  </data>
+  <data name="WagonRake" xml:space="preserve">
+    <value>Oprangering</value>
   </data>
   <data name="ScheduledWagonsets" xml:space="preserve">
     <value>Planlagte vognsæt</value>

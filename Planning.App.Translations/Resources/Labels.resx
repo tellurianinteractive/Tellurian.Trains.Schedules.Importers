@@ -237,6 +237,9 @@
   <data name="CreatingReport" xml:space="preserve">
     <value>Creating report…</value>
   </data>
+  <data name="CreatingReportNamed" xml:space="preserve">
+    <value>Creating report {0}. Please wait…</value>
+  </data>
   <data name="TurnForNextDay" xml:space="preserve">
     <value>Turn for next day?</value>
   </data>
@@ -2313,6 +2316,9 @@
   </data>
   <data name="NoMoreTrainsInThisDuty" xml:space="preserve">
     <value>No more trains in this duty.</value>
+  </data>
+  <data name="WagonRake" xml:space="preserve">
+    <value>Formation</value>
   </data>
   <data name="ScheduledWagonsets" xml:space="preserve">
     <value>Scheduled wagonsets</value>

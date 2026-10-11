@@ -15,6 +15,8 @@ public sealed class ValidationStateService : IDisposable
     // single pass once the user pauses. Shorter than the persistence debounce: feedback should feel live.
     private const int RecomputeDebounceMilliseconds = 300;
 
+    private const int InitialComputeDelayMilliseconds = 200;
+
     private readonly ScheduleStateService _schedule;
     private readonly ILogger<ValidationStateService> _logger;
     private CancellationTokenSource? _debounceCts;
@@ -32,17 +34,23 @@ public sealed class ValidationStateService : IDisposable
     public event Action? OnValidationChanged;
 
     /// <summary>
-    /// The current validation errors. Computed lazily on first read (covering a warm start where the
-    /// plan was already restored and no change event fires) and refreshed on every schedule change.
+    /// The current validation errors. The first read does not validate: validating a large plan can block
+    /// the single browser thread for many seconds, so it returns an empty set and schedules the pass for
+    /// after the first paint (covering a warm start where the plan was already restored and no change
+    /// event fires). <see cref="OnValidationChanged"/> follows when the real set is ready. Refreshed on
+    /// every schedule change.
     /// </summary>
     public IReadOnlyList<ValidationError> Errors
     {
         get
         {
-            if (!_hasComputed) Recompute();
+            if (!_hasComputed && !IsComputing) StartInitialCompute();
             return _errors;
         }
     }
+
+    /// <summary>Whether the first validation pass is still waiting to run, so the error set is not yet real.</summary>
+    public bool IsComputing { get; private set; }
 
     /// <summary>The number of current validation errors.</summary>
     public int Count => Errors.Count;
@@ -58,6 +66,21 @@ public sealed class ValidationStateService : IDisposable
         _schedule.OnChanged -= OnScheduleChanged;
         _debounceCts?.Cancel();
         _debounceCts?.Dispose();
+    }
+
+    private void StartInitialCompute()
+    {
+        IsComputing = true;
+        _ = RunInitialComputeAsync();
+    }
+
+    private async Task RunInitialComputeAsync()
+    {
+        // Lets the browser paint what has been rendered so far; the pass below blocks the thread.
+        await Task.Delay(InitialComputeDelayMilliseconds);
+        if (!_hasComputed) Recompute();
+        IsComputing = false;
+        OnValidationChanged?.Invoke();
     }
 
     private void OnScheduleChanged()

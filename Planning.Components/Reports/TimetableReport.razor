@@ -13,7 +13,11 @@
    and the flex row below is what puts them side by side. Each column is given the exact width the paginator
    reserved for it, so what the estimate called a fit is what the browser lays out. *@
 
-@if (Pages.Count == 0)
+@if (_building)
+{
+    <ReportBusy Name="TimetableReport" />
+}
+else if (Pages.Count == 0)
 {
     <DisplayedMessage ResourceKey="TimetableNoSchedule" />
 }
@@ -44,6 +48,8 @@ else
     // Invariant, or a Swedish or German culture writes the decimal comma the CSS parser then throws away.
     private static string Mm(double value) => $"{value.ToString("0.##", CultureInfo.InvariantCulture)}mm";
 
+    private bool _building = true;
+
     private IReadOnlyList<TimetablePage> Pages { get; set; } = [];
 
     private ReportCulture? DefaultCulture =>
@@ -52,6 +58,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
+        _building = false;
         if (ScheduleState.Timetable is not { } timetable) return;
 
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;

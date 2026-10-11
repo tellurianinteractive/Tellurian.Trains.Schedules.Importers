@@ -75,7 +75,7 @@ public sealed record DispatchList(
             // Time first, because the list is worked through in time order. The tie-breaks only make the
             // order of simultaneous clearances stable from one print to the next: arrivals before
             // departures, since a train pulling in has to be cleared in before the platform is given away.
-            .OrderBy(row => row.Time)
+            .OrderBy(row => row.TimeOfDay)
             .ThenBy(row => row.Kind is DispatchRowKind.Arrival or DispatchRowKind.ShuntingTask ? 0 : 1)
             .ThenBy(row => row.TrainIdentity, StringComparer.CurrentCulture)
             .ToList();

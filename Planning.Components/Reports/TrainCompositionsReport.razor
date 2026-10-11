@@ -18,7 +18,7 @@
 
 @if (_pages is null)
 {
-    <DisplayedMessage ResourceKey="CreatingReport" />
+    <ReportBusy Name="TrainCompositions" />
 }
 else if (_pages.Count == 0)
 {
@@ -58,6 +58,7 @@ else
         // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
 
         if (ScheduleState.Layout is not { } layout || ScheduleState.Timetable is not { } timetable)
         {

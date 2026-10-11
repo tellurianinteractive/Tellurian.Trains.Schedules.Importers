@@ -235,11 +235,36 @@ internal static class DispatchStretchValidation
         // A time past midnight is stored on the next day, so it is the same moment on the clock as the same
         // time before it — but on the session that day belongs to. Moved d days, an occupancy counts only
         // for the train's sessions d later (see TrackOccupancyExtensions.SharesSession).
-        public bool IsActiveAt(Time instant, int session) => TrackOccupancyExtensions.DayShifts.Any(d =>
-            session + d is >= 1 and <= 14 && Visit.Train.Sessions.Includes(session + d) && Start.AddDays(d) <= instant && End.AddDays(d) > instant);
+        //
+        // These two run in the innermost loops of the validation, so they work on cached ticks and session
+        // bits rather than on Time and Sessions values: it is the plan's size that decides how often they run.
+        private readonly long _start = Start.Value.Ticks;
+        private readonly long _end = End.Value.Ticks;
+        private readonly int _sessionBits = Visit.Train.Sessions.Flags & TrackOccupancyExtensions.SessionBits;
 
-        public bool Overlaps(Occupancy other) => TrackOccupancyExtensions.DayShifts.Any(d =>
-            TrackOccupancyExtensions.SharesSession(Visit.Train.Sessions, other.Visit.Train.Sessions, d) && Start < other.End.AddDays(d) && other.Start.AddDays(d) < End);
+        public bool IsActiveAt(long instantTicks, int session)
+        {
+            foreach (var d in TrackOccupancyExtensions.DayShifts)
+            {
+                var shifted = session + d;
+                if (shifted is < 1 or > 14 || (_sessionBits & (1 << (shifted - 1))) == 0) continue;
+                var offset = d * TimeSpan.TicksPerDay;
+                if (_start + offset <= instantTicks && _end + offset > instantTicks) return true;
+            }
+            return false;
+        }
+
+        public bool Overlaps(Occupancy other)
+        {
+            foreach (var d in TrackOccupancyExtensions.DayShifts)
+            {
+                var offset = d * TimeSpan.TicksPerDay;
+                if (_start < other._end + offset && other._start + offset < _end
+                    && TrackOccupancyExtensions.SharesSession(_sessionBits, other._sessionBits, d)) return true;
+            }
+            return false;
+        }
+
         public bool IsOpposing(Occupancy other) => Direction == 0 || other.Direction == 0 || Direction != other.Direction;
     }
 
@@ -257,12 +282,18 @@ internal static class DispatchStretchValidation
             var occupancies = Occupancies.OrderBy(o => o.Start.Value).ToArray();
             if (occupancies.Select(o => o.Visit).Distinct().Count() <= Capacity) yield break;
 
+            var onSession = new List<Occupancy>();
+            var seen = new HashSet<Visit>();
             foreach (var entering in occupancies)
             {
+                var instant = entering.Start.Value.Ticks;
                 for (var session = 1; session <= 14; session++)
                 {
                     if (!entering.Visit.Train.Sessions.Includes(session)) continue;
-                    var onSession = occupancies.Where(o => o.IsActiveAt(entering.Start, session)).DistinctBy(o => o.Visit).ToList();
+                    onSession.Clear();
+                    seen.Clear();
+                    foreach (var o in occupancies)
+                        if (o.IsActiveAt(instant, session) && seen.Add(o.Visit)) onSession.Add(o);
                     if (onSession.Count <= Capacity) continue;
 
                     // Report the earliest other train in the section with the one that tips it over.

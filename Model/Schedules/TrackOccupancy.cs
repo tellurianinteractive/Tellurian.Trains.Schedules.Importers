@@ -143,7 +143,18 @@ public static class TrackOccupancyExtensions
     /// <paramref name="dayShift"/> days later.
     /// </summary>
     internal static bool SharesSession(Sessions sessions, Sessions other, int dayShift) =>
-        Enumerable.Range(1, 14).Any(s => s + dayShift is >= 1 and <= 14 && sessions.Includes(s) && other.Includes(s + dayShift));
+        SharesSession(sessions.Flags & SessionBits, other.Flags & SessionBits, dayShift);
+
+    /// <summary>The bits of <see cref="Sessions.Flags"/> that stand for sessions 1 to 14.</summary>
+    internal const int SessionBits = 0x3FFF;
+
+    /// <summary>
+    /// <see cref="SharesSession(Sessions, Sessions, int)"/> on session bits already masked with
+    /// <see cref="SessionBits"/>: session s is bit s-1, so moving the other bits <paramref name="dayShift"/>
+    /// places session s + dayShift under s.
+    /// </summary>
+    internal static bool SharesSession(int sessionBits, int otherBits, int dayShift) =>
+        (sessionBits & (dayShift >= 0 ? otherBits >> dayShift : otherBits << -dayShift) & SessionBits) != 0;
 
     /// <summary>
     /// The free time between two occupancy spans that do not overlap, in whole fast-clock minutes.
