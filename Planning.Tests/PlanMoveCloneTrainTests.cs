@@ -20,6 +20,65 @@ public class PlanMoveCloneTrainTests
         return plan;
     }
 
+    private static Plan RoundTheClockPlanWithTrain(Time departure, out Train train)
+    {
+        var layout = TestLayoutFactory.CreateSimpleLayout();
+        var plan = new Plan("Test", new Timetable("Test", layout));
+        plan.Layout.Settings.General.RunsOverMidnight = true;
+        var from = plan.Layout.OperationLocations.First(l => l.Signature == "M2");
+        var to = plan.Layout.OperationLocations.First(l => l.Signature == "Hm");
+        train = plan.Create(Passenger, from, to, departure)!;
+        Assert.IsNotNull(train);
+        return plan;
+    }
+
+    [TestMethod]
+    public void RoundTheClockMovePastMidnightBackwardsWrapsTheTrainToTheEndOfTheDay()
+    {
+        var plan = RoundTheClockPlanWithTrain(Time.FromHourAndMinute(1, 0), out var train);
+        var origin = train.CallsInRunOrder[0];
+        var span = train.DriverEndTime.Value - train.DriverStartTime.Value;
+
+        var moved = plan.Move(train, -(60 + 10));
+
+        Assert.AreSame(train, moved, "A 24-hour timetable has no start of day to stop at.");
+        Assert.AreEqual(Time.FromHourAndMinute(23, 50), origin.Departure);
+        Assert.IsTrue(train.DriverStartTime.Value >= TimeSpan.Zero && train.DriverStartTime.Value < TimeSpan.FromDays(1));
+        Assert.AreEqual(span, train.DriverEndTime.Value - train.DriverStartTime.Value, "The train takes as long as it did.");
+        Assert.IsTrue(train.DriverEndTime.Value >= TimeSpan.FromDays(1), "It runs on past midnight.");
+    }
+
+    [TestMethod]
+    public void RoundTheClockMoveForwardsPastMidnightWrapsTheTrainToTheStartOfTheDay()
+    {
+        var plan = RoundTheClockPlanWithTrain(Time.FromHourAndMinute(23, 40), out var train);
+        var origin = train.CallsInRunOrder[0];
+
+        Assert.IsNotNull(plan.Move(train, 30));
+
+        Assert.AreEqual(Time.FromHourAndMinute(0, 10), origin.Departure);
+    }
+
+    [TestMethod]
+    public void MovingAnOrdinaryTrainBeforeTheStartOfTheDayIsStillRefused()
+    {
+        var plan = PlanWithTrain(out var train);
+        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+
+        Assert.IsNull(plan.Move(train, -(8 * 60 + 30)));
+    }
+
+    [TestMethod]
+    public void RoundTheClockCloneBeforeTheStartOfTheDayWrapsToo()
+    {
+        var plan = RoundTheClockPlanWithTrain(Time.FromHourAndMinute(1, 0), out var train);
+
+        var clone = plan.Clone(train, -70);
+
+        Assert.IsNotNull(clone);
+        Assert.AreEqual(Time.FromHourAndMinute(23, 50), clone.CallsInRunOrder[0].Departure);
+    }
+
     [TestMethod]
     public void MoveShiftsEveryCallForwardByTheGivenMinutes()
     {

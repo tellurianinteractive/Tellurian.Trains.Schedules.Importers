@@ -279,6 +279,41 @@ public class PlanCallTimeEditTests
     private static Time ClockTime(Time time) => Time.FromTimeSpan(TimeSpan.FromTicks(time.Value.Ticks % TimeSpan.TicksPerDay));
 
     [TestMethod]
+    public void RoundTheClockAnOriginDepartureBeforeMidnightMovesTheWholeTrainEarlierAcrossIt()
+    {
+        var plan = OverMidnightPlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Time.FromHourAndMinute(1, 0))!;
+        var route = train.CallsInRunOrder.ToArray();
+        var origin = route[0];
+        var preparation = train.PreparationMinutes;
+        var span = train.DriverEndTime.Value - train.DriverStartTime.Value;
+
+        var result = plan.SetDeparture(origin, Time.FromHourAndMinute(23, 50));
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(Time.FromHourAndMinute(23, 50), origin.Departure, "01:00 set to 23:50 is 70 minutes earlier, the evening before.");
+        Assert.AreEqual(preparation, train.PreparationMinutes, "The driver still prepares for as long as before.");
+        Assert.AreEqual(span, train.DriverEndTime.Value - train.DriverStartTime.Value, "The train takes as long as it did.");
+        CollectionAssert.AreEqual(route, train.CallsInRunOrder.ToArray());
+        Assert.IsTrue(train.DriverStartTime.Value >= TimeSpan.Zero && train.DriverStartTime.Value < TimeSpan.FromDays(1));
+    }
+
+    [TestMethod]
+    public void RoundTheClockAnArrivalThatPullsTheStartBeforeMidnightWrapsTheTrain()
+    {
+        var plan = OverMidnightPlan();
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Time.FromHourAndMinute(0, 30))!;
+        var route = train.CallsInRunOrder.ToArray();
+        var edited = route[1];
+
+        var result = plan.SetArrival(edited, edited.Arrival.AddMinutes(-40));
+
+        Assert.IsNotNull(result, "The start moves to 23:40, the evening before, which a 24-hour timetable allows.");
+        Assert.IsTrue(train.DriverStartTime.Value >= TimeSpan.FromHours(23));
+        CollectionAssert.AreEqual(route, train.CallsInRunOrder.ToArray());
+    }
+
+    [TestMethod]
     public void AClockTimeAfterMidnightGoesOnTheNextDayAndKeepsTheRunOrder()
     {
         var plan = OverMidnightPlan();

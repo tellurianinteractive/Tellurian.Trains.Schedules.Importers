@@ -223,8 +223,25 @@ public static class PlanExtensions
         public bool FitsWhenMovedBy(Train train, int minutes)
         {
             ArgumentNullException.ThrowIfNull(train);
-            return train.Calls.Count > 0 &&
-                plan.OperatingWindowContains(train.DriverStartTime.AddMinutes(minutes), train.DriverEndTime.AddMinutes(minutes));
+            return train.Calls.Count > 0 && plan.FitsAfterShift(train, plan.ShiftWithinDay(train, minutes));
+        }
+
+        // Whether the train fits after being shifted by exactly this many minutes, with no wrapping round the day.
+        private bool FitsAfterShift(Train train, int minutes) =>
+            train.Calls.Count > 0 &&
+            plan.OperatingWindowContains(train.DriverStartTime.AddMinutes(minutes), train.DriverEndTime.AddMinutes(minutes));
+
+        // In a plan that runs round the clock the day is a circle: a train that starts 00:10 and is moved 20
+        // minutes earlier starts 23:50 instead, and runs on past midnight, so the shift is taken as the
+        // one that keeps the start within the day (00:00–24:00). Otherwise the shift is as asked, and a
+        // start outside the day is refused.
+        private int ShiftWithinDay(Train train, int minutes)
+        {
+            if (!plan.IsWrappingMidnight || train.Calls.Count == 0) return minutes;
+            const int minutesPerDay = 24 * 60;
+            var start = train.DriverStartTime.Value.TotalMinutes;
+            var wrapped = (((start + minutes) % minutesPerDay) + minutesPerDay) % minutesPerDay;
+            return (int)Math.Round(wrapped - start);
         }
 
         /// <summary>
@@ -242,7 +259,9 @@ public static class PlanExtensions
         {
             ArgumentNullException.ThrowIfNull(train);
             if (train.Calls.Count == 0) return false;
-            return plan.FitsWhenMovedBy(train, direction == CloneDirection.Opposite ? OppositeShiftMinutes(train, minutes) : minutes);
+            return direction == CloneDirection.Opposite
+                ? plan.FitsAfterShift(train, OppositeShiftMinutes(train, minutes))
+                : plan.FitsWhenMovedBy(train, minutes);
         }
 
         // The shared operating-window rule. The start must always lie within the operating day (00:00–24:00);
@@ -738,6 +757,7 @@ public static class PlanExtensions
             ArgumentNullException.ThrowIfNull(train);
             if (!plan.FitsWhenMovedBy(train, minutes)) return null;
 
+            minutes = plan.ShiftWithinDay(train, minutes);
             foreach (var call in train.Calls)
             {
                 call.Arrival = call.Arrival.AddMinutes(minutes);
@@ -769,7 +789,7 @@ public static class PlanExtensions
         public Train? SetDeparture(StationCall call, Time departure)
         {
             ArgumentNullException.ThrowIfNull(call);
-            departure = OnTheDayOf(call.Departure, departure);
+            departure = OnTheDayOf(call.Departure, departure, plan.IsWrappingMidnight);
             return plan.ApplyCallTimes(call, call.Arrival, departure, MinutesBetween(call.Departure, departure), CallEditDirection.Forwards);
         }
 
@@ -795,7 +815,7 @@ public static class PlanExtensions
         public Train? SetArrival(StationCall call, Time arrival)
         {
             ArgumentNullException.ThrowIfNull(call);
-            arrival = OnTheDayOf(call.Arrival, arrival);
+            arrival = OnTheDayOf(call.Arrival, arrival, plan.IsWrappingMidnight);
             return plan.ApplyCallTimes(call, arrival, call.Departure, MinutesBetween(call.Arrival, arrival), CallEditDirection.Backwards);
         }
 
@@ -810,6 +830,11 @@ public static class PlanExtensions
             var calls = train.CallsInRunOrder;
             var index = IndexOfCall(calls, call);
             if (index < 0) return null;
+
+            // Round the clock, an origin departure set before its own arrival moves the whole train, keeping
+            // its preparation time: 23:50 entered for a train that leaves 00:10 means leaving 20 minutes earlier.
+            if (direction == CallEditDirection.Forwards && index == 0 && plan.IsWrappingMidnight && departure < arrival)
+                arrival = arrival.AddMinutes(shiftMinutes);
 
             var arrivals = new Time[calls.Count];
             var departures = new Time[calls.Count];
@@ -830,6 +855,19 @@ public static class PlanExtensions
                     arrivals[i] = calls[i].Arrival;
                     departures[i] = calls[i].Departure;
                 }
+            }
+
+            // Round the clock the day is a circle, so a train that now starts before 00:00 (or after 24:00) is
+            // the same train a whole day later (or earlier): 23:40 the evening before is 23:40 on the day.
+            if (plan.IsWrappingMidnight)
+            {
+                var days = (int)Math.Floor(arrivals[0].Value.TotalDays);
+                if (days != 0)
+                    for (var i = 0; i < calls.Count; i++)
+                    {
+                        arrivals[i] = arrivals[i].AddMinutes(-days * 24 * 60);
+                        departures[i] = departures[i].AddMinutes(-days * 24 * 60);
+                    }
             }
 
             // The train's span is the driver's: from the first call's arrival to the last call's departure.
@@ -889,6 +927,7 @@ public static class PlanExtensions
             };
             plan.Timetable.Add(clone);
 
+            var shift = plan.ShiftWithinDay(train, minutes);
             var nextCallId = plan.NextCallId;
             if (direction == CloneDirection.Opposite) AddReversedCalls();
             else AddShiftedCalls();
@@ -899,7 +938,7 @@ public static class PlanExtensions
                 foreach (var call in train.Calls)
                 {
                     var copy = new StationCall(nextCallId++, call.Track,
-                        call.Arrival.AddMinutes(minutes), call.Departure.AddMinutes(minutes));
+                        call.Arrival.AddMinutes(shift), call.Departure.AddMinutes(shift));
                     clone.Add(copy);
                     copy.IsArrival = call.IsArrival;
                     copy.IsDeparture = call.IsDeparture;
@@ -1097,13 +1136,16 @@ public static class PlanExtensions
     // A time is entered as a clock time, but a train running past midnight has its later times on the next
     // day (24:10 is stored as 1.00:10), which is what keeps them after the times before midnight. The clock
     // time is put on whichever day lies nearest the time it replaces, so 00:10 entered over 23:55 becomes
-    // 24:10, and 23:50 entered over 24:05 stays before midnight; a tie keeps the first day.
-    private static Time OnTheDayOf(Time current, Time entered)
+    // 24:10, and 23:50 entered over 24:05 stays before midnight; a tie keeps the first day. Round the clock
+    // the day before is a candidate too, so 23:50 entered over 00:10 is 20 minutes earlier, not 23 hours later.
+    private static Time OnTheDayOf(Time current, Time entered, bool aroundTheClock)
     {
         var oneDay = TimeSpan.FromDays(1);
         var clock = TimeSpan.FromTicks(((entered.Value.Ticks % oneDay.Ticks) + oneDay.Ticks) % oneDay.Ticks);
-        var nextDay = clock + oneDay;
-        return Time.FromTimeSpan((nextDay - current.Value).Duration() < (clock - current.Value).Duration() ? nextDay : clock);
+        var best = clock;
+        if ((clock + oneDay - current.Value).Duration() < (best - current.Value).Duration()) best = clock + oneDay;
+        if (aroundTheClock && (clock - oneDay - current.Value).Duration() < (best - current.Value).Duration()) best = clock - oneDay;
+        return Time.FromTimeSpan(best);
     }
 
     private static int MinutesBetween(Time from, Time to) =>
