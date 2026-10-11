@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 0.9.1
+
+### Endringer
+
+- **Kjøretøyenes kjøringer i tjenester stemmer med toget.** I tjenester viser traksjons- og vognsetttabellene ikke lenger dager da toget ikke går, eller da tjenesten ikke kjøres. De viser nå bare dagene kjøretøyet faktisk kjører toget innenfor tjenesten, slik turnusrapporten allerede gjorde.
+
+- **Tjenester som kjøres på dager da togene deres ikke går.** En tjeneste som kjøres en dag da et av togene ikke går, rapporteres nå som en konflikt.
+
 ## Versjon 0.9.0
 
 ### Endringer

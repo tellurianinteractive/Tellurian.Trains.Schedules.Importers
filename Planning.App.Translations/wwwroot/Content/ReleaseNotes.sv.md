@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 0.9.1
+
+### Ändringar
+
+- **Fordonens körningar i förartjänster stämmer med tåget.** I förartjänster visar traktions- och vagnsettabellerna inte längre dagar då tåget inte går, eller då tjänsten inte körs. De visar nu bara de dagar fordonet verkligen kör tåget inom tjänsten, som turnusrapporten redan gjorde.
+
+- **Tjänster som körs dagar då deras tåg inte går.** En tjänst som körs en dag då ett av dess tåg inte går rapporteras nu som en konflikt.
+
 ## Version 0.9.0
 
 ### Ändringar

@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 0.9.1
+
+### Änderungen
+
+- **Fahrzeug-Verkehrstage in Diensten passen zum Zug.** In Diensten zeigen die Tabellen für Triebfahrzeuge und Wagengruppen keine Tage mehr an, an denen der Zug nicht verkehrt oder der Dienst nicht gefahren wird. Sie zeigen nun nur noch die Tage, an denen das Fahrzeug den Zug innerhalb des Dienstes tatsächlich fährt, wie es der Umlaufbericht bereits tat.
+
+- **Dienste, die an Tagen gefahren werden, an denen ihre Züge nicht verkehren.** Ein Dienst, der an einem Tag gefahren wird, an dem einer seiner Züge nicht verkehrt, wird nun als Konflikt gemeldet.
+
 ## Version 0.9.0
 
 ### Änderungen

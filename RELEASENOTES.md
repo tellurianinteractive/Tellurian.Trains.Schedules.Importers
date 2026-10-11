@@ -338,6 +338,8 @@
 
 ### Fixes
 
+- **Driver duties must stay within their trains' sessions.** New validation error **`ValidationErrorType.DutyRunsWhenTrainDoesNot`** (scope `Duty`, messages in all five languages) for a duty whose sessions or days include one on which one of its trains does not run. New public **`Sessions.LimitedTo(limit)`** narrows sessions to those of `limit` while keeping the value's own days and on-demand markers, so a day pattern stays a day pattern.
+
 - **Stretch conflict validation is about four times faster on large plans.** The capacity and opposing-train checks
   in `DispatchStretchValidation` no longer allocate per pair of occupancies, and `SharesSession` is one bit test
   instead of a loop over sessions 1–14. Results are unchanged.

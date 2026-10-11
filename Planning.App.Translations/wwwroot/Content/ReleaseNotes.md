@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 0.9.1
+
+### Changes
+
+- **Duty vehicle sessions match the train.** In driver duties, the traction and wagonset tables no longer list days on which the train does not run, or on which the duty is not worked. They now show only the days the vehicle really works the train within the duty, as the turnus report already did.
+
+- **Duties running on days their trains do not.** A duty that is worked on a day when one of its trains does not run is now reported as a conflict.
+
 ## Version 0.9.0
 
 ### Changes
