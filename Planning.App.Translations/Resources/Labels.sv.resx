@@ -2738,4 +2738,28 @@
   <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
     <value>Växellok stationerade här tas bort: {0}</value>
   </data>
+  <data name="WagonSetKind" xml:space="preserve">
+    <value>Används till</value>
+  </data>
+  <data name="WagonSetKindUnspecified" xml:space="preserve">
+    <value>Inte angivet</value>
+  </data>
+  <data name="WagonSetKindPassenger" xml:space="preserve">
+    <value>Persontrafik</value>
+  </data>
+  <data name="WagonSetKindCargo" xml:space="preserve">
+    <value>Godstrafik</value>
+  </data>
+  <data name="LoadWagons" xml:space="preserve">
+    <value>Lasta vagnarna?</value>
+  </data>
+  <data name="LoadWagonsHelp" xml:space="preserve">
+    <value>Vagnarna lastas där tågavsnittet slutar.</value>
+  </data>
+  <data name="UnloadWagons" xml:space="preserve">
+    <value>Lossa vagnarna och skicka tillbaka?</value>
+  </data>
+  <data name="UnloadWagonsHelp" xml:space="preserve">
+    <value>Vagnarna lossas där tågavsnittet slutar och skickas tillbaka till där vagnsetets omlopp senast lastade dem. Ett annat tåg kan föra tillbaka dem.</value>
+  </data>
 </root>

@@ -115,6 +115,7 @@ public sealed record ValidationError
         ValidationErrorType.ScheduleLayoverMismatch or
         ValidationErrorType.ScheduleStandingTrackMismatch or
         ValidationErrorType.ScheduleHasNoVehicle or
+        ValidationErrorType.WagonSetLoadingMismatch or
         ValidationErrorType.TrainMissingTraction or
         ValidationErrorType.LocomotiveCoverageGap or
         ValidationErrorType.LocomotiveCoverageOverlap => ValidationScope.Schedule,
@@ -653,6 +654,25 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a loading mismatch error: a cargo wagonset is unloaded without being loaded first, loaded
+    /// while it is still loaded, or left loaded at the end of its schedule.
+    /// </summary>
+    public static ValidationError WagonSetLoadingMismatch(
+        Schedule schedule,
+        ScheduledTrainPart part,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.WagonSetLoadingMismatch,
+            FromTrack = part.From.Track,
+            ToTrack = part.To.Track,
+            FromTime = part.StartTime,
+            ToTime = part.EndTime,
+            Trains = [part.Train],
+            Schedules = [schedule],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a train-missing-traction error: over the stretch from <paramref name="from"/> to
     /// <paramref name="to"/> the train runs on sessions for which it has no traction unit (locomotive or
     /// self-propelled trainset) assigned through any schedule (rule S4). The stretch is the run of
@@ -940,6 +960,9 @@ public enum ValidationErrorType
 
     /// <summary>A vehicle schedule that runs regular sessions has no vehicle assigned.</summary>
     ScheduleHasNoVehicle,
+
+    /// <summary>A cargo wagonset's loading and unloading do not alternate, load first.</summary>
+    WagonSetLoadingMismatch,
 
     /// <summary>A train has no traction unit on some of the sessions it runs.</summary>
     TrainMissingTraction,

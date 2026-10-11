@@ -8,6 +8,8 @@
 
 - **Duties running on days their trains do not.** A duty that is worked on a day when one of its trains does not run is now reported as a conflict.
 
+- **Loading and unloading cargo wagonsets.** A wagonset now has a *Used for* choice (passenger or freight traffic). For a freight wagonset, a train part can be ticked *Load wagons?* or *Unload wagons and return?*, which gives a note on arrival. The unload note names the station the wagons were last loaded at in the wagonset's schedule, so another train can bring them back. Loading and unloading are checked: a freight wagonset must be loaded before it is unloaded, not loaded again before it is unloaded, and not left loaded at the end of its schedule.
+
 ## Version 0.9.0
 
 ### Changes

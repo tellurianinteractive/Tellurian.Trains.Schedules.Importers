@@ -4,6 +4,8 @@
 
 ### New Features
 
+- **Loading and unloading wagons.** New **`WagonSetKind`** (`Unspecified`, `Passenger`, `Cargo`) and **`ScheduledObject.WagonSetKind`**, stated on the wagonset itself. `WagonSetOptions` gains **`LoadWagons`** and **`UnloadWagons`**, which generate the arrival notes **`LoadWagonsNote`** and **`UnloadWagonsNote`** (messages in all five languages). The unload note carries `ReturnTo`: where the wagonset's schedule last loaded the wagons, so a different train may bring them back. New validation error **`WagonSetLoadingMismatch`** for an unload without an earlier load, a load while still loaded, or wagons left loaded at the end of the schedule.
+
 - **Shunters stationed at an operation location.** New **`ScheduledObjectType.Shunter`** (added last, so
   stored values are unchanged) and **`ScheduledObject.StationedAtId`**, the id of the location it is kept at.
   A shunter is powered — new `IsPowered` (traction unit or shunter) keeps its `TractionType` — but is not

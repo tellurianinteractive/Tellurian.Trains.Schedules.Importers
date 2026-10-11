@@ -336,6 +336,15 @@
   <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
     <value>Tjeneste {0} kører på {1}, hvor tog {2} ikke kører.</value>
   </data>
+  <data name="WagonSetUnloadedWithoutLoad" xml:space="preserve">
+    <value>Vognløb {0}: Vognene aflæsses i {1}, uden at de er læsset.</value>
+  </data>
+  <data name="WagonSetLoadedTwice" xml:space="preserve">
+    <value>Vognløb {0}: Vognene læsses i {1}, men er stadig læsset fra {2}.</value>
+  </data>
+  <data name="WagonSetNeverUnloaded" xml:space="preserve">
+    <value>Vognløb {0}: Vognene læsses i {1}, men aflæsses aldrig.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tog {0} har ingen tjeneste på køresessioner {1} for afsnittet fra {2} {3} til {4} {5}.</value>
   </data>

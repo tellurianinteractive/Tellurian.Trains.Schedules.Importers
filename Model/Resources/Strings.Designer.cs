@@ -745,6 +745,33 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: the wagons are unloaded at {1} without having been loaded..
+        /// </summary>
+        internal static string WagonSetUnloadedWithoutLoad {
+            get {
+                return ResourceManager.GetString("WagonSetUnloadedWithoutLoad", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: the wagons are loaded at {1} but are still loaded from {2}..
+        /// </summary>
+        internal static string WagonSetLoadedTwice {
+            get {
+                return ResourceManager.GetString("WagonSetLoadedTwice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: the wagons are loaded at {1} but never unloaded..
+        /// </summary>
+        internal static string WagonSetNeverUnloaded {
+            get {
+                return ResourceManager.GetString("WagonSetNeverUnloaded", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle schedule {0} has no vehicle assigned..
         /// </summary>
         internal static string VehicleScheduleHasNoVehicle {

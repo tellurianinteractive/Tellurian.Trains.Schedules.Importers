@@ -158,6 +158,7 @@ public static class ScheduledTrainPartExtensions
                 List<ICallNote> result = [];
                 trainPart.AddTractionUnitArrivalNotes(result);
                 trainPart.AddWagonSetArrivalNotes(result);
+                trainPart.AddWagonSetLoadingNotes(result);
                 trainPart.AddToOtherTrackNotes(result);
                 return result;
             }
@@ -426,6 +427,40 @@ public static class ScheduledTrainPartExtensions
                 var settings = trainPart.PlanSessionsSettings;
                 callNotes.AddRange(trainPart.Working(trainPart.WagonSets)
                     .Select(u => new UncoupleNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+            }
+        }
+
+        // Loading and unloading happen where the part ends, whatever is done with the wagons after that, so
+        // they are said whether or not the wagonset is uncoupled or put on another track.
+        private void AddWagonSetLoadingNotes(List<ICallNote> callNotes)
+        {
+            var options = trainPart.WagonSetOptions;
+            if (options is null || !(options.LoadWagons || options.UnloadWagons)) return;
+            var settings = trainPart.PlanSessionsSettings;
+            foreach (var (vehicle, sessions) in trainPart.Working(trainPart.WagonSets))
+            {
+                if (options.UnloadWagons)
+                    callNotes.Add(new UnloadWagonsNote(vehicle, trainPart.LoadedAt) { IsForArrival = true, Sessions = sessions, Settings = settings });
+                if (options.LoadWagons)
+                    callNotes.Add(new LoadWagonsNote(vehicle) { IsForArrival = true, Sessions = sessions, Settings = settings });
+            }
+        }
+
+        /// <summary>
+        /// Where the wagons arriving with this part were loaded: the end of the nearest earlier part of its
+        /// schedule that loads wagons or, where none does before it, the last one in the schedule, since a
+        /// wagonset's working goes round. Null where its schedule loads nowhere.
+        /// </summary>
+        private OperationLocation? LoadedAt
+        {
+            get
+            {
+                if (trainPart.Schedule is not { } schedule) return null;
+                var parts = schedule.OrderedParts.ToList();
+                var index = parts.IndexOf(trainPart);
+                var loading = parts.Where(p => p.WagonSetOptions?.LoadWagons == true).ToList();
+                var before = loading.LastOrDefault(p => parts.IndexOf(p) < index);
+                return (before ?? loading.LastOrDefault())?.To.OperationLocation;
             }
         }
 

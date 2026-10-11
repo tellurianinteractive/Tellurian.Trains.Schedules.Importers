@@ -67,6 +67,15 @@
   <data name="CoupleToTrainInPosition" xml:space="preserve">
     <value>Kobl {0} til toget i position {1}.</value>
   </data>
+  <data name="LoadWagons" xml:space="preserve">
+    <value>Læs {0}.</value>
+  </data>
+  <data name="UnloadWagons" xml:space="preserve">
+    <value>Aflæs {0}.</value>
+  </data>
+  <data name="UnloadWagonsAndReturn" xml:space="preserve">
+    <value>Aflæs {0} og send tilbage til {1}.</value>
+  </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Frakobl {0} fra toget.</value>
   </data>

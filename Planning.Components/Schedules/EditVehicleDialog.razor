@@ -83,6 +83,18 @@
             </div>
             @if (IsWagonsetType)
             {
+                <div class="field">
+                    <label>@Translator("WagonSetKind")</label>
+                    <select value="@_wagonSetKind" @onchange="e => _wagonSetKind = Enum.TryParse<WagonSetKind>(e.Value?.ToString(), out var k) ? k : _wagonSetKind">
+                        @foreach (var kind in Enum.GetValues<WagonSetKind>())
+                        {
+                            <option value="@kind">@Translator("WagonSetKind" + kind)</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (IsWagonsetType)
+            {
                 <div class="field wagons">
                     <label>@Translator("Wagons")</label>
                     <div class="wagon-list">
@@ -191,6 +203,7 @@
     private int? _companyId;
     private TractionType _tractionType = TractionType.Undefined;
     private bool _isReversibleTrain;
+    private WagonSetKind _wagonSetKind;
     private int _numberOfUnits = 1;
     private readonly List<Wagon> _wagons = [];
     private Sessions _sessions;
@@ -217,6 +230,7 @@
         _companyId = Vehicle.CompanyId;
         _tractionType = Vehicle.TractionType == TractionType.None ? TractionType.Undefined : Vehicle.TractionType;
         _isReversibleTrain = Vehicle.IsReversibleTrain;
+        _wagonSetKind = Vehicle.WagonSetKind;
         _numberOfUnits = Math.Max(1, Vehicle.NumberOfUnits);
         // Stage clones so the dialog can be cancelled without touching the vehicle's rake.
         _wagons.AddRange(Vehicle.Units.OfType<Wagon>().OrderBy(w => w.Position).Select(w => new Wagon
@@ -294,6 +308,7 @@
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
         plan.UpdateVehicle(Vehicle, type, _externalId, _class, number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
+        Vehicle.WagonSetKind = type.IsWagonSet ? _wagonSetKind : WagonSetKind.Unspecified;
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)
         {

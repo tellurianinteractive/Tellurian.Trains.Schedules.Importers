@@ -67,6 +67,15 @@
   <data name="CoupleToTrainInPosition" xml:space="preserve">
     <value>{0} an den Zug in Position {1} kuppeln.</value>
   </data>
+  <data name="LoadWagons" xml:space="preserve">
+    <value>{0} beladen.</value>
+  </data>
+  <data name="UnloadWagons" xml:space="preserve">
+    <value>{0} entladen.</value>
+  </data>
+  <data name="UnloadWagonsAndReturn" xml:space="preserve">
+    <value>{0} entladen und nach {1} zurückführen.</value>
+  </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>{0} vom Zug abkuppeln.</value>
   </data>

@@ -136,6 +136,22 @@
             </div>
         }
 
+        @* Loading and unloading of a cargo wagonset, said as arrival notes where the part ends. A different
+           train may bring the wagons back, so these belong to the wagonset's part, not to the train. *@
+        @if (ShowLoadingOptions)
+        {
+            <div class="field">
+                <label title="@Translator("LoadWagonsHelp")">@Translator("LoadWagons")</label>
+                <input type="checkbox" checked="@_loadWagons"
+                       @onchange="e => _loadWagons = e.Value as bool? ?? false" />
+            </div>
+            <div class="field">
+                <label title="@Translator("UnloadWagonsHelp")">@Translator("UnloadWagons")</label>
+                <input type="checkbox" checked="@_unloadWagons"
+                       @onchange="e => _unloadWagons = e.Value as bool? ?? false" />
+            </div>
+        }
+
         @if (Preview is { } edit)
         {
             <p class="preview">@SpanText(edit.From, edit.To)</p>
@@ -182,6 +198,8 @@
     private int _to;
     private bool _turnLoco;
     private bool _runaroundLoco;
+    private bool _loadWagons;
+    private bool _unloadWagons;
     private TractionLayover _fromLayover;
     private TractionLayover _toLayover;
     private int _orderInTrain;
@@ -231,6 +249,10 @@
     // Whether the part couples a wagonset, the only kind of vehicle given a position in the train.
     private bool ShowWagonSetOptions => Schedule.Vehicles.Any(v => v.IsWagonSet);
 
+    // Whether the part can load or unload wagons: only a wagonset stated to be for freight can.
+    private bool ShowLoadingOptions =>
+        Schedule.Vehicles.Any(v => v.IsWagonSet && v.WagonSetKind == WagonSetKind.Cargo);
+
     // Where the part ends as currently selected, which is where the turn would be made.
     private OperationLocation ArrivalLocation => Calls[_to].OperationLocation;
 
@@ -252,6 +274,8 @@
         _fromLayover = Part.TractionOptions?.FromLayover ?? TractionLayover.None;
         _toLayover = Part.TractionOptions?.ToLayover ?? TractionLayover.None;
         _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
+        _loadWagons = Part.WagonSetOptions?.LoadWagons ?? false;
+        _unloadWagons = Part.WagonSetOptions?.UnloadWagons ?? false;
         _fromTrack = Part.OtherFromTrack;
         _toTrack = Part.OtherToTrack;
     }
@@ -392,12 +416,18 @@
     private void ApplyWagonSetOptions()
     {
         if (!ShowWagonSetOptions) return;
+        var loading = ShowLoadingOptions;
         if (Part.WagonSetOptions is null)
         {
-            if (_orderInTrain == 0) return;
+            if (_orderInTrain == 0 && !(loading && (_loadWagons || _unloadWagons))) return;
             Part.WagonSetOptions = new WagonSetOptions { HasCoupleNote = false, HasUncoupleNote = false };
         }
         Part.WagonSetOptions.OrderInTrain = _orderInTrain;
+        if (loading)
+        {
+            Part.WagonSetOptions.LoadWagons = _loadWagons;
+            Part.WagonSetOptions.UnloadWagons = _unloadWagons;
+        }
     }
 
     private Task Abort() => OnClosed.InvokeAsync();

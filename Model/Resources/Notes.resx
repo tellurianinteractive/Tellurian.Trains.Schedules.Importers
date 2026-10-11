@@ -70,6 +70,15 @@
     <value>Couple {0} to train in position {1}.</value>
     <comment>{0}=vehicle, {1}=position in train</comment>
   </data>
+  <data name="LoadWagons" xml:space="preserve">
+    <value>Load {0}.</value>
+  </data>
+  <data name="UnloadWagons" xml:space="preserve">
+    <value>Unload {0}.</value>
+  </data>
+  <data name="UnloadWagonsAndReturn" xml:space="preserve">
+    <value>Unload {0} and return it to {1}.</value>
+  </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Uncouple {0} from train.</value>
     <comment>{0}=vehicle</comment>

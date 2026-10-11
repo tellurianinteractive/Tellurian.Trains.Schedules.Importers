@@ -457,6 +457,33 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Load {0}..
+        /// </summary>
+        internal static string LoadWagons {
+            get {
+                return ResourceManager.GetString("LoadWagons", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unload {0}..
+        /// </summary>
+        internal static string UnloadWagons {
+            get {
+                return ResourceManager.GetString("UnloadWagons", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unload {0} and return it to {1}..
+        /// </summary>
+        internal static string UnloadWagonsAndReturn {
+            get {
+                return ResourceManager.GetString("UnloadWagonsAndReturn", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Uncouple {0} from train..
         /// </summary>
         internal static string UncoupleFromTrain {

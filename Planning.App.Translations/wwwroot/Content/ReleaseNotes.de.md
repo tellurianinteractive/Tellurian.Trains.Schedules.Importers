@@ -8,6 +8,8 @@
 
 - **Dienste, die an Tagen gefahren werden, an denen ihre Züge nicht verkehren.** Ein Dienst, der an einem Tag gefahren wird, an dem einer seiner Züge nicht verkehrt, wird nun als Konflikt gemeldet.
 
+- **Be- und Entladen von Güterwagengruppen.** Eine Wagengruppe hat nun die Auswahl *Verwendung* (Personen- oder Güterverkehr). Für eine Güterwagengruppe lässt sich ein Zugabschnitt mit *Wagen beladen?* oder *Wagen entladen und zurückführen?* ankreuzen, was einen Hinweis bei der Ankunft ergibt. Der Entladehinweis nennt den Bahnhof, an dem die Wagen im Umlauf der Wagengruppe zuletzt beladen wurden, sodass ein anderer Zug sie zurückbringen kann. Be- und Entladen werden geprüft: eine Güterwagengruppe muss vor dem Entladen beladen sein, darf nicht erneut beladen werden, bevor sie entladen ist, und darf am Ende des Umlaufs nicht beladen bleiben.
+
 ## Version 0.9.0
 
 ### Änderungen

@@ -336,6 +336,15 @@
   <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
     <value>Dienst {0} fährt an den Tagen {1}, an denen Zug {2} nicht verkehrt.</value>
   </data>
+  <data name="WagonSetUnloadedWithoutLoad" xml:space="preserve">
+    <value>Fahrzeugplan {0}: Die Wagen werden in {1} entladen, ohne beladen worden zu sein.</value>
+  </data>
+  <data name="WagonSetLoadedTwice" xml:space="preserve">
+    <value>Fahrzeugplan {0}: Die Wagen werden in {1} beladen, sind aber seit {2} noch beladen.</value>
+  </data>
+  <data name="WagonSetNeverUnloaded" xml:space="preserve">
+    <value>Fahrzeugplan {0}: Die Wagen werden in {1} beladen, aber nie entladen.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
   </data>

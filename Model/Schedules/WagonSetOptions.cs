@@ -13,4 +13,17 @@ public sealed class WagonSetOptions : TrainPartOptions
     /// The wagon groups overall order in the train.
     /// </summary>
     public int OrderInTrain { get; set; }
+
+    /// <summary>
+    /// If true, the wagons are loaded where this part ends. Only meaningful for a wagonset of kind
+    /// <see cref="WagonSetKind.Cargo"/>. Generates an arrival note.
+    /// </summary>
+    public bool LoadWagons { get; set; }
+
+    /// <summary>
+    /// If true, the wagons are unloaded where this part ends and sent back to where their schedule last
+    /// loaded them. Only meaningful for a wagonset of kind <see cref="WagonSetKind.Cargo"/>. Generates an
+    /// arrival note.
+    /// </summary>
+    public bool UnloadWagons { get; set; }
 }

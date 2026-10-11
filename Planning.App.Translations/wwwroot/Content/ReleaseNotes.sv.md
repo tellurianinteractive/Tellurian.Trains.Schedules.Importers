@@ -8,6 +8,8 @@
 
 - **Tjänster som körs dagar då deras tåg inte går.** En tjänst som körs en dag då ett av dess tåg inte går rapporteras nu som en konflikt.
 
+- **Lastning och lossning av godsvagnsätt.** Ett vagnsätt har nu valet *Används till* (persontrafik eller godstrafik). För ett godsvagnsätt kan ett tågavsnitt kryssas för *Lasta vagnarna?* eller *Lossa vagnarna och skicka tillbaka?*, vilket ger en notering vid ankomst. Lossningsnoteringen nämner stationen där vagnarna senast lastades i vagnsetets omlopp, så ett annat tåg kan föra tillbaka dem. Lastning och lossning kontrolleras: ett godsvagnsätt ska lastas före lossning, inte lastas igen innan det lossats och inte stå lastat vid omloppets slut.
+
 ## Version 0.9.0
 
 ### Ändringar

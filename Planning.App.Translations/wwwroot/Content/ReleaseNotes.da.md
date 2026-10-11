@@ -8,6 +8,8 @@
 
 - **Tjenester, der køres på dage, hvor deres tog ikke kører.** En tjeneste, der køres en dag, hvor et af dens tog ikke kører, rapporteres nu som en konflikt.
 
+- **Læsning og aflæsning af godsvognsæt.** Et vognsæt har nu valget *Bruges til* (persontrafik eller godstrafik). For et godsvognsæt kan et togafsnit afkrydses *Læs vognene?* eller *Aflæs vognene og send tilbage?*, hvilket giver en note ved ankomst. Aflæsningsnoten nævner stationen, hvor vognene sidst blev læsset i vognsættets omløb, så et andet tog kan føre dem tilbage. Læsning og aflæsning kontrolleres: et godsvognsæt skal læsses før aflæsning, ikke læsses igen før det er aflæst og ikke stå læsset ved omløbets slutning.
+
 ## Version 0.9.0
 
 ### Ændringer

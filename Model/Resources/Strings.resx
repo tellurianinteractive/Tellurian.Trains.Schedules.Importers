@@ -336,6 +336,15 @@
   <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
     <value>Driver duty {0} runs on {1}, when train {2} does not run.</value>
   </data>
+  <data name="WagonSetUnloadedWithoutLoad" xml:space="preserve">
+    <value>Vehicle schedule {0}: the wagons are unloaded at {1} without having been loaded.</value>
+  </data>
+  <data name="WagonSetLoadedTwice" xml:space="preserve">
+    <value>Vehicle schedule {0}: the wagons are loaded at {1} but are still loaded from {2}.</value>
+  </data>
+  <data name="WagonSetNeverUnloaded" xml:space="preserve">
+    <value>Vehicle schedule {0}: the wagons are loaded at {1} but never unloaded.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}.</value>
   </data>

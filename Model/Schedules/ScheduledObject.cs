@@ -47,6 +47,12 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public string? Remark { get; set; }
 
     /// <summary>
+    /// Gets or sets what a wagonset is used for. Only a wagonset of kind <see cref="WagonSetKind.Cargo"/> is
+    /// offered loading and unloading. Unspecified for any other vehicle.
+    /// </summary>
+    public WagonSetKind WagonSetKind { get; set; }
+
+    /// <summary>
     /// Gets or sets the type of this vehicle.
     /// </summary>
     public ScheduledObjectType ObjectType

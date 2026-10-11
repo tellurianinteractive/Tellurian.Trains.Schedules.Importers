@@ -2738,4 +2738,28 @@
   <data name="LocationDeletionShuntersRemoved" xml:space="preserve">
     <value>Skiftelok stasjonert her fjernes: {0}</value>
   </data>
+  <data name="WagonSetKind" xml:space="preserve">
+    <value>Brukes til</value>
+  </data>
+  <data name="WagonSetKindUnspecified" xml:space="preserve">
+    <value>Ikke angitt</value>
+  </data>
+  <data name="WagonSetKindPassenger" xml:space="preserve">
+    <value>Persontrafikk</value>
+  </data>
+  <data name="WagonSetKindCargo" xml:space="preserve">
+    <value>Godstrafikk</value>
+  </data>
+  <data name="LoadWagons" xml:space="preserve">
+    <value>Laste vognene?</value>
+  </data>
+  <data name="LoadWagonsHelp" xml:space="preserve">
+    <value>Vognene lastes der togavsnittet slutter.</value>
+  </data>
+  <data name="UnloadWagons" xml:space="preserve">
+    <value>Losse vognene og sende tilbake?</value>
+  </data>
+  <data name="UnloadWagonsHelp" xml:space="preserve">
+    <value>Vognene losses der togavsnittet slutter, og sendes tilbake til stedet der vognsettets omløp sist lastet dem. Et annet tog kan føre dem tilbake.</value>
+  </data>
 </root>

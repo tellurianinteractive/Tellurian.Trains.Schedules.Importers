@@ -28,6 +28,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.ValidateLayoverPairsBetweenSessions());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateStandingTrackPairs()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateWagonSetLoading());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleIdentities());
@@ -414,6 +415,44 @@ public static class ValidationExtensions
                     var message = Message.Information(general.UseDays ? Strings.TrainPartHasNoDriverDutyOnDays : Strings.TrainPartHasNoDriverDuty, part.Train, SessionsText(missingSessions, general), part.From.OperationLocation, part.StartTime.HHMM(), part.To.OperationLocation, part.EndTime.HHMM());
                     errors.Add(ValidationError.TrainPartMissingDriverDuty(part, message));
                 }
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates the loading and unloading of cargo wagonsets: through its schedule, in time order, a
+        /// wagonset has to be loaded before it is unloaded, not loaded again before it has been unloaded,
+        /// and not left loaded at the end. A part that both unloads and loads unloads first.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateWagonSetLoading()
+        {
+            var errors = new List<ValidationError>();
+            foreach (var schedule in plan.Schedules)
+            {
+                if (!schedule.Vehicles.Any(v => v.IsWagonSet && v.WagonSetKind == WagonSetKind.Cargo)) continue;
+                ScheduledTrainPart? loadedAt = null;
+                foreach (var part in schedule.OrderedParts)
+                {
+                    if (part.WagonSetOptions is not { } options) continue;
+                    var place = part.To.OperationLocation;
+                    if (options.UnloadWagons)
+                    {
+                        if (loadedAt is null)
+                            errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, part,
+                                Message.Information(Strings.WagonSetUnloadedWithoutLoad, schedule.Number, place)));
+                        loadedAt = null;
+                    }
+                    if (options.LoadWagons)
+                    {
+                        if (loadedAt is not null)
+                            errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, part,
+                                Message.Information(Strings.WagonSetLoadedTwice, schedule.Number, place, loadedAt.To.OperationLocation)));
+                        loadedAt = part;
+                    }
+                }
+                if (loadedAt is not null)
+                    errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, loadedAt,
+                        Message.Information(Strings.WagonSetNeverUnloaded, schedule.Number, loadedAt.To.OperationLocation)));
             }
             return errors;
         }

@@ -8,6 +8,8 @@
 
 - **Tjenester som kjøres på dager da togene deres ikke går.** En tjeneste som kjøres en dag da et av togene ikke går, rapporteres nå som en konflikt.
 
+- **Lasting og lossing av godsvognsett.** Et vognsett har nå valget *Brukes til* (persontrafikk eller godstrafikk). For et godsvognsett kan et togavsnitt krysses av for *Laste vognene?* eller *Losse vognene og sende tilbake?*, som gir en merknad ved ankomst. Lossemerknaden nevner stasjonen vognene sist ble lastet på i vognsettets omløp, slik at et annet tog kan føre dem tilbake. Lasting og lossing kontrolleres: et godsvognsett skal lastes før lossing, ikke lastes igjen før det er lossa og ikke stå lastet ved omløpets slutt.
+
 ## Versjon 0.9.0
 
 ### Endringer

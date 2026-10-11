@@ -336,6 +336,15 @@
   <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
     <value>Tjänst {0} körs på {1}, när tåg {2} inte går.</value>
   </data>
+  <data name="WagonSetUnloadedWithoutLoad" xml:space="preserve">
+    <value>Fordonsomlopp {0}: Vagnarna lossas i {1} utan att ha lastats.</value>
+  </data>
+  <data name="WagonSetLoadedTwice" xml:space="preserve">
+    <value>Fordonsomlopp {0}: Vagnarna lastas i {1} men är fortfarande lastade från {2}.</value>
+  </data>
+  <data name="WagonSetNeverUnloaded" xml:space="preserve">
+    <value>Fordonsomlopp {0}: Vagnarna lastas i {1} men lossas aldrig.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tåg {0} saknar körande tjänst på köromgångar {1} för avsnittet från {2} {3} till {4} {5}.</value>
   </data>
