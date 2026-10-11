@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 0.9.0
+
+### Changes
+
+- **Missing vehicle numbers are called out in the vehicle contributors report.** A unit brought without a number now shows *Specify!* in the number column, as a missing DCC address already did, so the sheet makes someone provide it. The count column now always shows the number of units, also when it is one.
+
+- **Wagon formation under the wagonset it belongs to.** In driver duties the wagons are now listed directly below the row that names the wagonset, instead of below the whole table. The label no longer repeats the turnus number.
+
+- **Neater turnus column.** The turnus is now left-aligned in the vehicle contributors report.
+
 ## Version 0.8.9
 
 ### Changes

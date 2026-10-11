@@ -2550,7 +2550,7 @@
     <value>Rolle</value>
   </data>
   <data name="Missing" xml:space="preserve">
-    <value>Mangler</value>
+    <value>Angi!</value>
   </data>
   <data name="NoTractionUnits" xml:space="preserve">
     <value>Ingen lok eller togsett ennå, så det er ingen DCC-adresser å vise.</value>

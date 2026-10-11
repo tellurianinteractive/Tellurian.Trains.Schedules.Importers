@@ -2310,7 +2310,7 @@
     <value>Inga fler tåg i denna tjänst.</value>
   </data>
   <data name="WagonRake" xml:space="preserve">
-    <value>Vagnordning</value>
+    <value>Vagnsordning</value>
   </data>
   <data name="ScheduledWagonsets" xml:space="preserve">
     <value>Planerade vagnsätt</value>
@@ -2550,7 +2550,7 @@
     <value>Roll</value>
   </data>
   <data name="Missing" xml:space="preserve">
-    <value>Saknas</value>
+    <value>Ange!</value>
   </data>
   <data name="NoTractionUnits" xml:space="preserve">
     <value>Inga lok eller tågsätt ännu, så det finns inga DCC-adresser att lista.</value>

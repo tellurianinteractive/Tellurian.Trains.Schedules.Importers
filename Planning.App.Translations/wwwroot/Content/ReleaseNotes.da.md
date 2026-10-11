@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 0.9.0
+
+### Ændringer
+
+- **Manglende køretøjsnumre fremhæves i rapporten over bidragydere af køretøjer.** En enhed, der medbringes uden nummer, viser nu *Angiv!* i nummerkolonnen, som en manglende DCC-adresse allerede gjorde, så arket får nogen til at oplyse det. Antalskolonnen viser nu altid antallet af enheder, også når det er én.
+
+- **Oprangering under det vognsæt, den hører til.** I tjenester står vognene nu lige under rækken, der nævner vognsættet, i stedet for under hele tabellen. Betegnelsen gentager ikke længere turnusnummeret.
+
+- **Pænere turnuskolonne.** Turnus er nu venstrejusteret i rapporten over bidragydere af køretøjer.
+
 ## Version 0.8.9
 
 ### Ændringer

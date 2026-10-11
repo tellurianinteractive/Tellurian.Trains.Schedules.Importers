@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.9.0
+
+### Änderungen
+
+- **Fehlende Fahrzeugnummern werden im Bericht über Fahrzeugbeiträge hervorgehoben.** Eine Einheit, die ohne Nummer mitgebracht wird, zeigt in der Nummernspalte jetzt *Angeben!*, wie es bei einer fehlenden DCC-Adresse schon der Fall war, damit das Blatt jemanden dazu bringt, sie anzugeben. Die Anzahlspalte zeigt jetzt immer die Zahl der Einheiten, auch wenn es eine ist.
+
+- **Wagenreihung unter dem Wagensatz, zu dem sie gehört.** In den Diensten stehen die Wagen jetzt direkt unter der Zeile, die den Wagensatz nennt, statt unter der ganzen Tabelle. Die Beschriftung wiederholt die Turnusnummer nicht mehr.
+
+- **Ordentlichere Turnusspalte.** Der Turnus ist im Bericht über Fahrzeugbeiträge jetzt linksbündig.
+
 ## Version 0.8.9
 
 ### Änderungen

@@ -2564,7 +2564,7 @@
     <value>Role</value>
   </data>
   <data name="Missing" xml:space="preserve">
-    <value>Missing</value>
+    <value>Specify!</value>
   </data>
   <data name="NoTractionUnits" xml:space="preserve">
     <value>No locomotives or trainsets yet, so there are no DCC addresses to list.</value>

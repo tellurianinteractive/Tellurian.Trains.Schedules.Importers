@@ -54,13 +54,9 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         VehicleContributorsColumn.Turnus => line.Vehicle.Designation,
         // Each unit brought, a spare included, has its own; a wagonset's numbers are its wagons', printed with them.
         VehicleContributorsColumn.VehicleNumber => line.Vehicle.TakesVehicleNumber
-            ? line.Contributor?.VehicleNumber ?? string.Empty
+            ? VehicleNumberOf(line)
             : string.Empty,
-        // As in the Vehicle owners tab: a single unit is what nearly every row is, so only a count worth
-        // noticing is printed.
-        VehicleContributorsColumn.Count => line.Vehicle.NumberOfUnits > 1
-            ? line.Vehicle.NumberOfUnits.ToString(CultureInfo.CurrentCulture)
-            : string.Empty,
+        VehicleContributorsColumn.Count => line.Vehicle.NumberOfUnits.ToString(CultureInfo.CurrentCulture),
         VehicleContributorsColumn.Owner => line.OwnerName ?? Nobody,
         _ => string.Join(" ", line.Notes),
     };
@@ -88,6 +84,14 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
             var traction => $"{type}, {translator($"{traction}InText")}",
         };
     }
+
+    // A unit brought without a number is as much something to make the owner provide as a missing DCC address.
+    private string VehicleNumberOf(VehicleContributorLine line) => line.Contributor switch
+    {
+        null => string.Empty,
+        { VehicleNumber: { } number } when !string.IsNullOrWhiteSpace(number) => number,
+        _ => translator("Missing"),
+    };
 
     // Only a traction unit has one; for anything else the cell stays empty rather than saying "none", which
     // would read as something missing. On paper an address the owner is still to provide is as good as none: it

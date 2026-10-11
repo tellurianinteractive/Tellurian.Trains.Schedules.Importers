@@ -252,7 +252,7 @@ public class VehicleContributorsReportTests
         var lines = Groups(plan, VehicleContributorsGrouping.OperationLocation)[0].Lines.Where(line => line.Vehicle == rc).ToList();
 
         Assert.AreEqual("1328", Cells.TextOf(lines[0], VehicleContributorsColumn.VehicleNumber), "The primary unit's number.");
-        Assert.AreEqual("", Cells.TextOf(lines[1], VehicleContributorsColumn.VehicleNumber), "The spare has been given none.");
+        Assert.AreEqual("Missing", Cells.TextOf(lines[1], VehicleContributorsColumn.VehicleNumber), "The spare has been given none, which the sheet asks for.");
         Assert.AreEqual("VehicleNumber", Cells.HeadingOf(VehicleContributorsColumn.VehicleNumber), "Its own label.");
     }
 

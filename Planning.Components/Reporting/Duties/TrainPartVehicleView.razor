@@ -48,21 +48,26 @@
                         <td class="track">@vehicle.ArrivalTrack.Number</td>
                         <td>@vehicle.TrainPart.EndTime.HHMM()</td>
                     </tr>
+                    @* The rake of a wagonset that lists its wagons, directly under the row that names it, so
+                       the label needs no turnus number. One rectangle per wagon, in the order the wagons
+                       stand when the movement departs. *@
+                    @if (Data.Rakes.Contains(vehicle))
+                    {
+                        <tr class="rakerow">
+                            <td colspan="8">
+                                <div class="rake">
+                                    <span class="label">@Translator("WagonRake"):</span>
+                                    @foreach (var wagon in vehicle.Rake)
+                                    {
+                                        <span class="wagon">@wagon.Class@(string.IsNullOrWhiteSpace(wagon.Number) ? "" : $" {wagon.Number}")</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
-        @* The rake of each wagonset that lists its wagons, just below the table that names it. One
-           rectangle per wagon, in the order the wagons stand when the movement departs. *@
-        @foreach (var vehicle in Data.Rakes)
-        {
-            <div class="rake">
-                <span class="label">@Translator("WagonRake") @vehicle.Designation:</span>
-                @foreach (var wagon in vehicle.Rake)
-                {
-                    <span class="wagon">@wagon.Class@(string.IsNullOrWhiteSpace(wagon.Number) ? "" : $" {wagon.Number}")</span>
-                }
-            </div>
-        }
     </div>
     <hr />
 }

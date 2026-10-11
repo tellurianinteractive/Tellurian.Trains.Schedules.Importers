@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 0.9.0
+
+### Ändringar
+
+- **Saknade fordonsnummer lyfts fram i rapporten över fordonsbidrag.** En enhet som tas med utan nummer visar nu *Ange!* i nummerkolumnen, som en saknad DCC-adress redan gjorde, så att bladet får någon att uppge det. Antalskolumnen visar nu alltid antalet enheter, även när det är en.
+
+- **Vagnsordning under det vagnset den hör till.** I förartjänster står vagnarna nu strax under raden som nämner vagnsetet, i stället för under hela tabellen. Etiketten upprepar inte längre turnusnumret.
+
+- **Snyggare turnuskolumn.** Turnus är nu vänsterjusterad i rapporten över fordonsbidrag.
+
 ## Version 0.8.9
 
 ### Ändringar

@@ -2550,7 +2550,7 @@
     <value>Rolle</value>
   </data>
   <data name="Missing" xml:space="preserve">
-    <value>Fehlt</value>
+    <value>Angeben!</value>
   </data>
   <data name="NoTractionUnits" xml:space="preserve">
     <value>Noch keine Lokomotiven oder Triebzüge, daher gibt es keine DCC-Adressen aufzulisten.</value>

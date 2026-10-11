@@ -125,12 +125,15 @@
 
         .track,
         .departure,
-        .first-session,
-        .turnus {
+        .first-session {
             text-align: center;
         }
 
         /* The turnus is what an owner recognises their own stock by. */
+        .turnus {
+            text-align: left;
+        }
+
         td.turnus {
             font-weight: 700;
         }

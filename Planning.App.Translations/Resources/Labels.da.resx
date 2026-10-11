@@ -2550,7 +2550,7 @@
     <value>Rolle</value>
   </data>
   <data name="Missing" xml:space="preserve">
-    <value>Mangler</value>
+    <value>Angiv!</value>
   </data>
   <data name="NoTractionUnits" xml:space="preserve">
     <value>Ingen lokomotiver eller togsæt endnu, så der er ingen DCC-adresser at vise.</value>
