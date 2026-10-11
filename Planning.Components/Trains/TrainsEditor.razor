@@ -619,7 +619,7 @@ else
         if (location.PreferredTrack(previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
-        train.Add(call);
+        train.AddLast(call);
         Save();
     }
 

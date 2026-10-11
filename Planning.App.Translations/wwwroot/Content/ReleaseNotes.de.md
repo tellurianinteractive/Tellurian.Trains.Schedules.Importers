@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 0.9.4
+
+### Änderungen
+
+- **Die Fahrtroute eines Zuges ändert sich nicht mehr, wenn eine Zeit bearbeitet wird.** Die Reihenfolge der Halte eines Zuges wird jetzt beim Hinzufügen der Halte festgelegt, statt aus den Zeiten abgeleitet zu werden. Bisher konnte eine Zeitänderung (zum Beispiel einige Minuten mehr bei einer Abfahrt, nachdem der Zug die Fahrtrichtung gewechselt hatte) einen Halt ans Zugende verschieben, während die späteren Halte unverändert blieben. Zeiten, die nicht mehr aufsteigen, werden stattdessen als Konflikt gemeldet. Früher gespeicherte Pläne werden einmalig in der Reihenfolge nummeriert, in der ihre Halte jetzt verlaufen.
+
 ## Version 0.9.3
 
 ### Änderungen

@@ -214,6 +214,8 @@ public static class TimetableExtensions
         timetable = timetable.ValueOrException(nameof(timetable));
         foreach (var track in timetable.Layout.OperationLocations.SelectMany(l => l.Tracks)) track.Calls.Clear();
         foreach (var call in timetable.Trains.SelectMany(t => t.Calls)) call.Track.Add(call);
+        // A plan saved before calls were numbered gets its routes fixed as they run now (StationCall.Sequence).
+        foreach (var train in timetable.Trains) train.NumberCalls();
     }
 
     /// <summary>

@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 0.9.4
+
+### Ändringar
+
+- **Ett tågs färdväg ändras inte längre när du ändrar en tid.** Ordningen på tågets uppehåll bestäms nu när uppehållen läggs till, i stället för att räknas ut från tiderna. Tidigare kunde en tidsändring (till exempel några minuter extra på en avgång efter att tåget bytt riktning) flytta ett uppehåll till tågets slut, medan de senare uppehållen lämnades oförändrade. Tider som inte längre stiger rapporteras i stället som en konflikt. Tidigare sparade planer numreras en gång, i den ordning uppehållen går nu.
+
 ## Version 0.9.3
 
 ### Ändringar

@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 0.9.4
+
+### Endringer
+
+- **Et togs rute endres ikke lenger når du endrer et tidspunkt.** Rekkefølgen på togets stopp fastsettes nå når stoppene legges til, i stedet for å utledes av tidene. Tidligere kunne en tidsendring (for eksempel noen ekstra minutter på en avgang etter at toget hadde skiftet retning) flytte et stopp til slutten av toget, mens de senere stoppene ble stående uendret. Tider som ikke lenger stiger, rapporteres i stedet som en konflikt. Tidligere lagrede planer nummereres én gang i den rekkefølgen stoppene går nå.
+
 ## Versjon 0.9.3
 
 ### Endringer

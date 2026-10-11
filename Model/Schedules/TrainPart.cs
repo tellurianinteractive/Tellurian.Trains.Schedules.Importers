@@ -193,7 +193,16 @@ public static class TrainPartExtensions
         /// <summary>
         /// Subset of train's call that are on the train part.
         /// </summary>
-        public IEnumerable<StationCall> Calls =>
-            trainPart.Train.Calls.Where(c => c.Departure >= trainPart.From.Departure && c.Arrival <= trainPart.To.Arrival).OrderBy(c => c.SortTime);
+        public IEnumerable<StationCall> Calls
+        {
+            get
+            {
+                var all = trainPart.Train.CallsInRunOrder;
+                var from = all.TakeWhile(c => !ReferenceEquals(c, trainPart.From)).Count();
+                var to = all.TakeWhile(c => !ReferenceEquals(c, trainPart.To)).Count();
+                if (from < all.Count && to < all.Count && from <= to) return all.Skip(from).Take(to - from + 1);
+                return all.Where(c => c.Departure >= trainPart.From.Departure && c.Arrival <= trainPart.To.Arrival);
+            }
+        }
     }
 }

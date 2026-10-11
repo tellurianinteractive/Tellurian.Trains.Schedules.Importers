@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.4
+
+### Changes
+
+- **A train's route no longer changes when you edit a time.** The order of a train's calls is now fixed when the calls are added, instead of being worked out from the times. Previously, changing a time (for instance adding minutes to a departure after the train had changed direction) could move a call to the end of the train and leave the later calls unchanged. Times that no longer ascend are reported as a conflict instead. Plans saved earlier are numbered once, in the order their calls run now.
+
 ## Version 0.9.3
 
 ### Changes

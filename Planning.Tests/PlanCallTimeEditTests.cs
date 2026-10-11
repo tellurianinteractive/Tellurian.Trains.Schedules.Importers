@@ -239,6 +239,34 @@ public class PlanCallTimeEditTests
         }
     }
 
+    [TestMethod]
+    public void EditingAPassThroughArrivalPastLaterCallsDoesNotChangeTheRoute()
+    {
+        var plan = SimplePlan();
+        var train = MalmöToHässleholm(plan);
+        var route = train.CallsInRunOrder.ToArray();
+        var passThrough = route[1];
+        passThrough.IsArrival = false;
+        passThrough.IsDeparture = false;
+
+        plan.SetArrival(passThrough, passThrough.Arrival.AddMinutes(40));
+
+        CollectionAssert.AreEqual(route, train.CallsInRunOrder.ToArray(), "The route is the planner's; times do not reorder it.");
+    }
+
+    [TestMethod]
+    public void EditingADepartureNeverChangesTheRoute()
+    {
+        var plan = SimplePlan();
+        var train = MalmöToHässleholm(plan);
+        var route = train.CallsInRunOrder.ToArray();
+
+        plan.SetDeparture(route[1], route[1].Departure.AddMinutes(20));
+        plan.SetDeparture(route[1], route[1].Departure.AddMinutes(-90));
+
+        CollectionAssert.AreEqual(route, train.CallsInRunOrder.ToArray());
+    }
+
     // A time is entered as a clock time; on a train running past midnight it belongs to the next day, so that
     // it still comes after the times before midnight.
     private static Plan OverMidnightPlan()

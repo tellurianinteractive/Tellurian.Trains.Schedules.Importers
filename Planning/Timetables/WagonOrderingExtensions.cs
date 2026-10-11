@@ -48,7 +48,7 @@ public static class WagonOrderingExtensions
             var steps = new List<(ScheduledTrainPart Part, StationCall From, StationCall To, TrainPathDirection? Direction)>();
             foreach (var part in orderedParts)
             {
-                var calls = part.Train.Calls.OrderBy(c => c.SortTime).ToList();
+                var calls = part.Train.CallsInRunOrder.ToList();
                 var fromIndex = calls.FindIndex(c => ReferenceEquals(c, part.From));
                 var toIndex = calls.FindIndex(c => ReferenceEquals(c, part.To));
                 if (fromIndex < 0 || toIndex <= fromIndex)

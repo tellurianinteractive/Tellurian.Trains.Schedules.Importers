@@ -157,7 +157,7 @@ public class Train : IEquatable<Train>
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when the train has no calls.</exception>
     [JsonIgnore]
-    public Time DriverStartTime => Calls.MinBy(c => c.SortTime) is { } first ? first.Arrival : throw NoCalls();
+    public Time DriverStartTime => this.CallsInRunOrder is [{ } first, ..] ? first.Arrival : throw NoCalls();
 
     /// <summary>
     /// Gets the driver's end time (departure time of last call). The last call is the one the train runs
@@ -165,7 +165,7 @@ public class Train : IEquatable<Train>
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when the train has no calls.</exception>
     [JsonIgnore]
-    public Time DriverEndTime => Calls.MaxBy(c => c.SortTime) is { } last ? last.Departure : throw NoCalls();
+    public Time DriverEndTime => this.CallsInRunOrder is [.., { } last] ? last.Departure : throw NoCalls();
 
     /// <summary>
     /// Gets the station call at the specified index.
@@ -177,7 +177,7 @@ public class Train : IEquatable<Train>
     /// <summary>
     /// Gets the distinct tracks used by this train, ordered by arrival time.
     /// </summary>
-    internal IEnumerable<StationTrack> Tracks => Calls.OrderBy(c => c.Arrival.Value).Select(c => c.Track).Distinct();
+    internal IEnumerable<StationTrack> Tracks => this.CallsInRunOrder.Select(c => c.Track).Distinct();
 
     /// <summary>
     /// Gets the layout from the first station call, or <c>null</c> when the train has no calls yet and
@@ -334,7 +334,7 @@ public static class TrainExtensions
                 if (train.Calls.Count == 0) return identity;
                 if (train.ShuntingCall is { } task)
                     return $"{identity}  {task.OperationLocation.Signature} {task.Arrival.HHMM()}-{task.Departure.HHMM()}";
-                var ordered = train.Calls.OrderBy(call => call.SortTime).ToList();
+                var ordered = train.CallsInRunOrder;
                 var first = ordered[0];
                 var last = ordered[^1];
                 return $"{identity}  {first.OperationLocation.Signature} {first.Departure.HHMM()}→{last.OperationLocation.Signature} {last.Arrival.HHMM()}";
@@ -345,12 +345,29 @@ public static class TrainExtensions
         /// Gets the train's calls in the order it runs them, earliest first.
         /// </summary>
         /// <remarks>
-        /// <see cref="Train.Calls"/> is in insertion order, which is not the run order: a call added last
-        /// can be timed first, and editing a time reorders the route without touching the collection.
-        /// Anything reasoning about the route — where it starts and ends, which legs it travels — must read
-        /// the calls through here, ordered by <see cref="StationCall.SortTime"/>.
+        /// <see cref="Train.Calls"/> is in insertion order, which is not the run order. Anything reasoning
+        /// about the route — where it starts and ends, which legs it travels — must read the calls through
+        /// here, ordered by <see cref="StationCall.Sequence"/>. The route is the planner's, so editing a time
+        /// never moves a call to another place in it. Calls that are not numbered yet (a plan saved before
+        /// the numbers existed) are ordered by <see cref="StationCall.SortTime"/> until
+        /// <see cref="NumberCalls"/> numbers them.
         /// </remarks>
-        public IReadOnlyList<StationCall> CallsInRunOrder => [.. train.Calls.OrderBy(c => c.SortTime)];
+        public IReadOnlyList<StationCall> CallsInRunOrder =>
+            [.. train.Calls.OrderBy(c => c.Sequence).ThenBy(c => c.SortTime)];
+
+        /// <summary>
+        /// Gives every call of the train its place in the route, in the order the train runs them now, so
+        /// that later time edits can no longer change it. Does nothing to a train whose calls are numbered
+        /// already, and so is safe to call whenever a plan is loaded.
+        /// </summary>
+        /// <returns><c>true</c> when any call was given a new number.</returns>
+        public bool NumberCalls()
+        {
+            var calls = train.CallsInRunOrder;
+            if (calls.Select(c => c.Sequence).Distinct().Count() == calls.Count && calls.All(c => c.Sequence > 0)) return false;
+            Renumber(calls);
+            return true;
+        }
 
         /// <summary>
         /// The train's preparation time in minutes: the gap at its origin call between the arrival, where
@@ -520,7 +537,7 @@ public static class TrainExtensions
         /// Gets the train's calls where it stops to depart (a wagon can be connected here), earliest first.
         /// </summary>
         public IEnumerable<StationCall> DepartureCalls =>
-            train.Calls.Where(c => c.IsStop && c.IsDeparture).OrderBy(c => c.SortTime);
+            train.CallsInRunOrder.Where(c => c.IsStop && c.IsDeparture);
 
         /// <summary>
         /// Gets the train's arrival stops that fall after the given call (a wagon connected at
@@ -528,7 +545,7 @@ public static class TrainExtensions
         /// </summary>
         /// <param name="call">The call the later arrivals must follow.</param>
         public IEnumerable<StationCall> ArrivalCallsAfter(StationCall call) =>
-            train.Calls.Where(c => c.IsStop && c.IsArrival && c.SortTime > call.SortTime).OrderByDescending(c => c.SortTime);
+            train.CallsInRunOrder.Where(c => c.IsStop && c.IsArrival && c.CompareTo(call) > 0).Reverse();
 
         /// <summary>
         /// Gets the effective scale speed (km/h) for this train on a track stretch:
@@ -691,22 +708,48 @@ public static class TrainExtensions
         {
             train = train.ValueOrException(nameof(train));
             call = call.ValueOrException(nameof(call));
-            if (!train.Calls.Contains(call))
-            {
-                call.SetTrain(train);
-                if (train.Calls.Count == 0)
-                {
-                    call.IsArrival = false;
-                    call.IsDeparture = true;
-                }
-
-                train.Calls.Add(call);
-                // The train owns the call; keep the per-track call index in step as the call joins the train.
-                call.Track.Add(call);
-            }
-            return call;
+            return Join(train, call, atEnd: false);
         }
 
+        /// <summary>
+        /// Adds a station call to the train as the last of its route, whatever its times are.
+        /// </summary>
+        /// <param name="call">The station call to add.</param>
+        /// <returns>The added station call.</returns>
+        public StationCall AddLast(StationCall call)
+        {
+            train = train.ValueOrException(nameof(train));
+            call = call.ValueOrException(nameof(call));
+            return Join(train, call, atEnd: true);
+        }
+
+    }
+
+    // Puts the call into the train's route: at the end when asked, otherwise where its times place it among
+    // the calls the train already runs. It keeps that place whatever its times become (StationCall.Sequence).
+    private static StationCall Join(Train train, StationCall call, bool atEnd)
+    {
+        if (train.Calls.Contains(call)) return call;
+        call.SetTrain(train);
+        if (train.Calls.Count == 0)
+        {
+            call.IsArrival = false;
+            call.IsDeparture = true;
+        }
+
+        train.NumberCalls();
+        var ordered = train.CallsInRunOrder;
+        var position = atEnd ? ordered.Count : ordered.TakeWhile(c => c.SortTime <= call.SortTime).Count();
+        train.Calls.Add(call);
+        Renumber([.. ordered.Take(position), call, .. ordered.Skip(position)]);
+        // The train owns the call; keep the per-track call index in step as the call joins the train.
+        call.Track.Add(call);
+        return call;
+    }
+
+    private static void Renumber(IReadOnlyList<StationCall> calls)
+    {
+        for (var i = 0; i < calls.Count; i++) calls[i].Sequence = i + 1;
     }
 
     // The minutes a call is held, from its arrival to its departure. At a train's origin that is its

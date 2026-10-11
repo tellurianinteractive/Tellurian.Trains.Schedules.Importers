@@ -506,7 +506,7 @@ public static class ScheduleEditingExtensions
                 return new Maybe<PartEdit>($"Part {part} is not in schedule {schedule.Number}.");
             if (!part.Train.Calls.Contains(from) || !part.Train.Calls.Contains(to))
                 return new Maybe<PartEdit>($"Both calls must be calls of train {part.Train}.");
-            if (!(from.SortTime < to.SortTime))
+            if (from.CompareTo(to) >= 0)
                 return new Maybe<PartEdit>($"A train part must run from {from} to a later call, but {to} is not later.");
             if (parts.Any(p => !ReferenceEquals(p, part) && p.From.Equals(from) && p.To.Equals(to)))
                 return new Maybe<PartEdit>($"Schedule {schedule.Number} already works {part.Train} from {from} to {to}.");
@@ -701,7 +701,7 @@ public static class ScheduleEditingExtensions
         if (!previous.To.OperationLocation.Equals(oldFrom.OperationLocation)) return null;
         if (newFrom.OperationLocation.Equals(oldFrom.OperationLocation)) return null;
         var candidates = previous.Train.CallsInRunOrder
-            .Where(c => c.SortTime > previous.From.SortTime && c.OperationLocation.Equals(newFrom.OperationLocation))
+            .Where(c => c.CompareTo(previous.From) > 0 && c.OperationLocation.Equals(newFrom.OperationLocation))
             .ToList();
         return candidates.LastOrDefault(c => !(c.Arrival > newFrom.Departure)) ?? candidates.FirstOrDefault();
     }
@@ -715,7 +715,7 @@ public static class ScheduleEditingExtensions
         if (!next.From.OperationLocation.Equals(oldTo.OperationLocation)) return null;
         if (newTo.OperationLocation.Equals(oldTo.OperationLocation)) return null;
         var candidates = next.Train.CallsInRunOrder
-            .Where(c => c.SortTime < next.To.SortTime && c.OperationLocation.Equals(newTo.OperationLocation))
+            .Where(c => c.CompareTo(next.To) < 0 && c.OperationLocation.Equals(newTo.OperationLocation))
             .ToList();
         return candidates.FirstOrDefault(c => !(c.Departure < newTo.Arrival)) ?? candidates.LastOrDefault();
     }

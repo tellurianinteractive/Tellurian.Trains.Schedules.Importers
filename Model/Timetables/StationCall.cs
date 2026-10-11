@@ -82,6 +82,19 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     public OperationLocation OperationLocation => Track.Station;
 
     /// <summary>
+    /// Gets or sets the position of this call in the route of its train: the call with the lowest number is
+    /// where the train starts, the one with the highest where it ends.
+    /// </summary>
+    /// <remarks>
+    /// The order of the route is the planner's, not something to be worked out from the times, so editing a
+    /// time never moves a call to another place in the route — times that then fail to ascend are reported
+    /// as a conflict instead (see <c>Train.CallsInRunOrder</c>). The numbers only have to ascend; they need
+    /// not be consecutive. Zero means not yet numbered, as in a plan saved before the numbers existed, and
+    /// such calls are ordered by their times until the train numbers them (see <c>Train.NumberCalls</c>).
+    /// </remarks>
+    public int Sequence { get; set; }
+
+    /// <summary>
     /// Gets or sets the arrival time at the station.
     /// </summary>
     public Time Arrival { get; set; }
@@ -167,9 +180,17 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     public override string ToString() =>
         string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackDuringTimes, OperationLocation, Track, Arrival.HHMM(), Departure.HHMM());
 
-    /// <inheritdoc/>
-    public int CompareTo([AllowNull] StationCall other) =>
-        other is null ? 1 : SortTime.CompareTo(other.SortTime);
+    /// <summary>
+    /// Compares by position in the route when both calls belong to the same train and are numbered,
+    /// otherwise by <see cref="SortTime"/>.
+    /// </summary>
+    public int CompareTo([AllowNull] StationCall other)
+    {
+        if (other is null) return 1;
+        if (Sequence != other.Sequence && Sequence != 0 && other.Sequence != 0 && ReferenceEquals(Train, other.Train))
+            return Sequence.CompareTo(other.Sequence);
+        return SortTime.CompareTo(other.SortTime);
+    }
 
     /// <summary>
     /// Determines whether the first station call is earlier than the second.

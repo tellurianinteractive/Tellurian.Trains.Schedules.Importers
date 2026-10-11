@@ -190,10 +190,10 @@ public static class PlanScheduleBuilderExtensions
     {
         /// <summary>
         /// Gets the call the train runs first. <see cref="Train.Calls"/> is in insertion order, which on
-        /// a hand-edited train is not the order it runs them, so the origin is the earliest call rather
-        /// than the first one added.
+        /// a hand-edited train is not the order it runs them, so the origin is the first call of the route
+        /// rather than the first one added.
         /// </summary>
-        private StationCall ScheduleOrigin() => train.Calls.MinBy(c => c.SortTime)!;
+        private StationCall ScheduleOrigin() => train.CallsInRunOrder[0];
 
         /// <summary>Gets the location the train starts from (its first call).</summary>
         private OperationLocation ScheduleStart() => train.ScheduleOrigin().OperationLocation;
