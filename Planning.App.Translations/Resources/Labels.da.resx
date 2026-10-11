@@ -246,6 +246,12 @@
   <data name="TurnForNextSession" xml:space="preserve">
     <value>Vend til næste køresession?</value>
   </data>
+  <data name="TurnToContinue" xml:space="preserve">
+    <value>Vend for at fortsætte</value>
+  </data>
+  <data name="ContinuationFromPrevious" xml:space="preserve">
+    <value>Fortsættelse fra forrige</value>
+  </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Lokomotiv</value>
   </data>

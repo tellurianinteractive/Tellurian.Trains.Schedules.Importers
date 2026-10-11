@@ -338,6 +338,10 @@
 
 ### Fixes
 
+- **Stretch conflict validation is about four times faster on large plans.** The capacity and opposing-train checks
+  in `DispatchStretchValidation` no longer allocate per pair of occupancies, and `SharesSession` is one bit test
+  instead of a loop over sessions 1–14. Results are unchanged.
+
 - **Trains a day apart on the clock now conflict on station tracks and in the line between stations.** A
   train running past midnight stores its later times on the next day (`1.00:27`), so 00:35 and `1.00:27`
   were never judged to be at the same time even though they are the same moment on the clock. The station

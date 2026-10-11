@@ -32,6 +32,12 @@ public record TurnusData
     /// <summary>The number of sessions/days in the operating period, used to tell a whole-period card from a partial one.</summary>
     public int MaxSessions { get; init; } = 14;
 
+    /// <summary>Whether this card carries on from the previous card of the same turnus (a turnus too long for one card).</summary>
+    public bool ContinuesFromPrevious { get; init; }
+
+    /// <summary>Whether the turnus carries on to the next card.</summary>
+    public bool ContinuesOnNext { get; init; }
+
 }
 
 public static class TurnusDataExtensions
@@ -151,7 +157,67 @@ public static class TurnusDataExtensions
 
             return [.. cards
                     .Select(card => card with { TurnForNextSession = sessionVariants[card.Key] > 1 })
-                    .OrderBy(card => card.KeyWithSession)];
+                    .OrderBy(card => card.KeyWithSession)
+                    .SelectMany(card => card.SplitToFit())];
+        }
+    }
+
+    // Card layout budget in points, matching the CSS of PocketCard (91 mm card, 2 pt padding) and
+    // TurnusCard. Estimated, not measured: a card that is slightly too generous only costs one extra row.
+    private const double CardContentHeight = 250;
+    private const double HeaderLineHeight = 14;
+    private const double RemarkLineHeight = 13;
+    private const int RemarkCharsPerLine = 22;
+    private const double TableHeadHeight = 17;
+    private const double RowHeight = 17;
+    private const double AlertHeight = 12;
+
+    extension(TurnusData card)
+    {
+        /// <summary>
+        /// How many train rows fit on the card below its header, keeping room for the red line at the foot
+        /// and, on a continuation card, the "Continuation from previous" line above the first train.
+        /// </summary>
+        private int RowCapacity(bool continuation)
+        {
+            var headerLines = 2
+                + (card.HasClass ? 1 : 0)
+                + (card.OperatingPeriod(static key => key).Length > 0 ? 1 : 0);
+            var remarkLines = card.Remark.Length == 0 ? 0 : (int)Math.Ceiling(card.Remark.Length / (double)RemarkCharsPerLine);
+            var available = CardContentHeight
+                - headerLines * HeaderLineHeight
+                - remarkLines * RemarkLineHeight
+                - TableHeadHeight
+                - AlertHeight
+                - (continuation ? RowHeight : 0);
+            return Math.Max(1, (int)Math.Floor(available / RowHeight));
+        }
+
+        /// <summary>
+        /// Splits a card with more train parts than fit into consecutive cards of the same turnus. Every
+        /// card but the last says "Turn to continue"; every card but the first says "Continuation from previous".
+        /// </summary>
+        public IEnumerable<TurnusData> SplitToFit()
+        {
+            var parts = card.TrainParts.ToList();
+            if (parts.Count <= card.RowCapacity(false)) return [card];
+
+            var result = new List<TurnusData>();
+            var index = 0;
+            while (index < parts.Count)
+            {
+                var continuation = index > 0;
+                var capacity = card.RowCapacity(continuation);
+                var take = Math.Min(capacity, parts.Count - index);
+                result.Add(card with
+                {
+                    TrainParts = parts.GetRange(index, take),
+                    ContinuesFromPrevious = continuation,
+                    ContinuesOnNext = index + take < parts.Count,
+                });
+                index += take;
+            }
+            return result;
         }
     }
 }

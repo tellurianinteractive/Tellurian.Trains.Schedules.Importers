@@ -1,5 +1,25 @@
 ﻿# Release notes
 
+## Version 0.8.9
+
+### Changes
+
+- **Large plans open faster.** The window now appears before the plan is checked for conflicts, instead of
+  freezing until the check is done. The conflicts icon in the top bar spins until the first result is in.
+  The check itself is also about four times quicker on a large plan.
+
+- **A message while a report is being created.** Reports that take a while to build now show *Creating report …* until they are ready.
+
+- **Wagon formation in driver duties.** Where a wagonset lists its wagons, the duty now shows them in order, one rectangle per wagon, below the wagonset's table.
+
+- **Long turnus cards are split over several cards.** A turnus with more trains than fit on one card now continues on a second card. The first card ends with *Turn to continue* in red, and the next one has *Continuation from previous* in red just above its first train.
+
+### Fixes
+
+- **The station dispatch list handles clearances after midnight.** They are now listed among the early hours by the clock, and are shown on the session or day after the one the train started on.
+
+- **Notes no longer start with *Daily:* when they hold on every session or day the train runs.**
+
 ## Version 0.8.7
 
 ### Changes

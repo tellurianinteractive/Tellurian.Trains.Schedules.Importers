@@ -1,5 +1,25 @@
 # Versionsnyheter
 
+## Version 0.8.9
+
+### Ändringar
+
+- **Stora planer öppnas snabbare.** Fönstret visas nu innan planen kontrolleras för konflikter, i stället för att
+  frysa tills kontrollen är klar. Konfliktikonen i toppfältet snurrar tills det första resultatet finns.
+  Själva kontrollen går dessutom ungefär fyra gånger snabbare på en stor plan.
+
+- **Ett meddelande medan en rapport skapas.** Rapporter som tar tid att bygga visar nu *Skapar rapporten …* tills de är klara.
+
+- **Vagnordning i förartjänster.** Där ett vagnset anger sina vagnar visar tjänsten dem nu i ordning, en rektangel per vagn, under vagnsetets tabell.
+
+- **Långa turnuskort delas på flera kort.** En turnus med fler tåg än som ryms på ett kort fortsätter nu på ett andra kort. Det första kortet slutar med *Vänd för att fortsätta* i rött, och nästa kort har *Fortsättning från föregående* i rött strax ovanför sitt första tåg.
+
+### Rättningar
+
+- **Stationens expedieringslista hanterar expedieringar efter midnatt.** De ligger nu bland småtimmarna efter klockan och visas på sessionen eller dagen efter den tåget startade på.
+
+- **Noteringar börjar inte längre med *Dagligen:* när de gäller alla sessioner eller dagar tåget går.**
+
 ## Version 0.8.7
 
 ### Ändringar

@@ -246,6 +246,12 @@
   <data name="TurnForNextSession" xml:space="preserve">
     <value>Turn for next session?</value>
   </data>
+  <data name="TurnToContinue" xml:space="preserve">
+    <value>Turn to continue</value>
+  </data>
+  <data name="ContinuationFromPrevious" xml:space="preserve">
+    <value>Continuation from previous</value>
+  </data>
   <data name="Locomotive" xml:space="preserve">
     <value>Locomotive</value>
   </data>

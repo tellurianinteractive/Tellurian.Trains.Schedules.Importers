@@ -1,5 +1,25 @@
 # Versionshinweise
 
+## Version 0.8.9
+
+### Änderungen
+
+- **Grosse Pläne öffnen schneller.** Das Fenster erscheint jetzt, bevor der Plan auf Konflikte geprüft wird, statt
+  bis zum Ende der Prüfung einzufrieren. Das Konfliktsymbol in der oberen Leiste dreht sich, bis das erste Ergebnis vorliegt.
+  Die Prüfung selbst ist bei einem grossen Plan ausserdem etwa viermal schneller.
+
+- **Eine Meldung, während ein Bericht erstellt wird.** Berichte, deren Aufbau etwas dauert, zeigen jetzt *Bericht … wird erstellt*, bis sie fertig sind.
+
+- **Wagenreihung in den Diensten.** Wo ein Wagensatz seine Wagen aufführt, zeigt der Dienst sie jetzt der Reihe nach, ein Rechteck je Wagen, unter der Tabelle des Wagensatzes.
+
+- **Lange Turnuskarten werden auf mehrere Karten verteilt.** Ein Turnus mit mehr Zügen, als auf eine Karte passen, wird nun auf einer zweiten Karte fortgesetzt. Die erste Karte endet mit *Zum Fortsetzen wenden* in Rot, und die nächste hat *Fortsetzung von vorheriger Karte* in Rot direkt über ihrem ersten Zug.
+
+### Fehlerbehebungen
+
+- **Die Abfertigungsliste des Bahnhofs behandelt Abfertigungen nach Mitternacht.** Sie stehen jetzt nach der Uhrzeit unter den frühen Stunden und erscheinen in der Session bzw. am Tag nach dem, an dem der Zug gestartet ist.
+
+- **Hinweise beginnen nicht mehr mit *Täglich:*, wenn sie für jede Session bzw. jeden Tag gelten, an dem der Zug fährt.**
+
 ## Version 0.8.7
 
 ### Änderungen

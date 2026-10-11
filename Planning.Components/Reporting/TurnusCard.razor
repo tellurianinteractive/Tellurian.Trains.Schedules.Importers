@@ -49,6 +49,12 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @if (Item.ContinuesFromPrevious)
+                        {
+                            <tr class="continuation">
+                                <td colspan="5">@Translator("ContinuationFromPrevious")</td>
+                            </tr>
+                        }
                         @if (Item.TrainParts != null) foreach (var part in Item.TrainParts)
                         {
                             <tr style="border-bottom: 1px solid gray">
@@ -66,7 +72,11 @@
                 </table>
             </div>
             <div class="schedule alert">
-                @if (Item.TurnForNextSession)
+                @if (Item.ContinuesOnNext)
+                {
+                    <span>@Translator("TurnToContinue")</span>
+                }
+                else if (Item.TurnForNextSession)
                 {
                     <span>@Translator(Item.UseDays ? "TurnForNextDay" : "TurnForNextSession")</span>
                 }

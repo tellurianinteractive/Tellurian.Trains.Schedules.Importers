@@ -21,6 +21,11 @@
         color: red;
     }
 
+.continuation td {
+    color: red;
+    font-style: italic;
+}
+
 .spare {
     color: red;
 }

@@ -1,5 +1,25 @@
 # Versjonsnyheter
 
+## Versjon 0.8.9
+
+### Endringer
+
+- **Store planer åpnes raskere.** Vinduet vises nå før planen kontrolleres for konflikter, i stedet for å
+  fryse til kontrollen er ferdig. Konfliktikonet i toppfeltet snurrer til det første resultatet er klart.
+  Selve kontrollen er dessuten omtrent fire ganger raskere på en stor plan.
+
+- **En melding mens en rapport lages.** Rapporter som tar tid å bygge, viser nå *Lager rapporten …* til de er klare.
+
+- **Vognrekkefølge i tjenester.** Der et vognsett oppgir vognene sine, viser tjenesten dem nå i rekkefølge, ett rektangel per vogn, under vognsettets tabell.
+
+- **Lange turnuskort deles på flere kort.** En turnus med flere tog enn det er plass til på ett kort, fortsetter nå på et annet kort. Det første kortet slutter med *Snu for å fortsette* i rødt, og det neste har *Fortsettelse fra forrige* i rødt rett over sitt første tog.
+
+### Feilrettinger
+
+- **Stasjonens ekspedisjonsliste håndterer ekspedisjoner etter midnatt.** De står nå blant de tidlige timene etter klokken og vises på sesjonen eller dagen etter den toget startet på.
+
+- **Merknader begynner ikke lenger med *Daglig:* når de gjelder alle sesjoner eller dager toget går.**
+
 ## Versjon 0.8.7
 
 ### Endringer
