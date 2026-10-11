@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 0.9.5
+
+### Ändringar
+
+- **Tåg kan flyttas och få nya tider över midnatt i en dygnet-runt-tidtabell.** När banan går över midnatt kan ett tåg som startar 00:10 nu flyttas 20 minuter tidigare och starta 23:50 och fortsätta förbi midnatt, och tvärtom. Det fungerar i dialogerna Flytta och Kopiera och när du ändrar tider på fliken Tåg, där 23:50 inskrivet över 00:10 nu betyder 20 minuter tidigare. Tidtabeller som inte går över midnatt vägrar fortfarande en start före 00:00.
+
 ## Version 0.9.4
 
 ### Ändringar

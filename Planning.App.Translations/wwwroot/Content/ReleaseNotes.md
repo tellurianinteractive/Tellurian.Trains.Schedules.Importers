@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.5
+
+### Changes
+
+- **Trains can be moved and retimed across midnight in a 24-hour timetable.** When the layout runs over midnight, a train that starts at 00:10 can now be moved 20 minutes earlier to start at 23:50 and run on past midnight, and the other way round. This works in the Move and Clone dialogs and when editing times in the Trains tab, where 23:50 typed over 00:10 now means 20 minutes earlier. Timetables that do not run over midnight still refuse a start before 00:00.
+
 ## Version 0.9.4
 
 ### Changes

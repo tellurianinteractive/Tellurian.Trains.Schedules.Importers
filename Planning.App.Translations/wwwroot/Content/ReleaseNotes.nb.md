@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 0.9.5
+
+### Endringer
+
+- **Tog kan flyttes og få nye tider over midnatt i en døgnrutetabell.** Når banen går over midnatt, kan et tog som starter 00:10, nå flyttes 20 minutter tidligere og starte 23:50 og kjøre videre forbi midnatt, og omvendt. Det fungerer i dialogene Flytt og Kopier og når du endrer tider på fanen Tog, der 23:50 skrevet over 00:10 nå betyr 20 minutter tidligere. Rutetabeller som ikke går over midnatt, avviser fortsatt en start før 00:00.
+
 ## Versjon 0.9.4
 
 ### Endringer

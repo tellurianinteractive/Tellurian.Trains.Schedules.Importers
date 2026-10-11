@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 0.9.5
+
+### Änderungen
+
+- **Züge lassen sich in einem 24-Stunden-Fahrplan über Mitternacht verschieben und neu takten.** Wenn die Anlage über Mitternacht fährt, kann ein Zug, der um 00:10 startet, jetzt 20 Minuten früher verschoben werden, sodass er um 23:50 startet und über Mitternacht hinaus fährt, und umgekehrt. Das funktioniert in den Dialogen Verschieben und Kopieren sowie beim Ändern von Zeiten auf dem Reiter Züge, wo 23:50, über 00:10 eingegeben, jetzt 20 Minuten früher bedeutet. Fahrpläne, die nicht über Mitternacht fahren, lehnen einen Start vor 00:00 weiterhin ab.
+
 ## Version 0.9.4
 
 ### Änderungen

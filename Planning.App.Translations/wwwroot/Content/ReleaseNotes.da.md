@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 0.9.5
+
+### Ændringer
+
+- **Tog kan flyttes og få nye tider hen over midnat i en døgnkøreplan.** Når banen kører over midnat, kan et tog, der starter 00:10, nu flyttes 20 minutter tidligere og starte 23:50 og køre videre forbi midnat, og omvendt. Det virker i dialogerne Flyt og Kopiér og ved ændring af tider på fanen Tog, hvor 23:50 skrevet over 00:10 nu betyder 20 minutter tidligere. Køreplaner, der ikke kører over midnat, afviser stadig en start før 00:00.
+
 ## Version 0.9.4
 
 ### Ændringer
