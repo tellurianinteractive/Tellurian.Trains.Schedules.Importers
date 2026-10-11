@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.9.3
+
+### Änderungen
+
+- **Ausgeschriebene Wochentage auf der Titelseite des Dienstes.** Die Titelseite eines Lokführerdienstes schreibt die Wochentage nun immer aus, auch wenn die Anlage Kurzformen verwendet, da eine Abkürzung beim Lesen vieler Seiten leicht übersehen wird.
+
+- **Fahrplanstrecken in Nummernreihenfolge.** Der Editor für Fahrplanstrecken listet die Strecken nun numerisch geordnet auf, sodass 2 vor 10 steht.
+
+- **Umnummerieren einer Fahrplanstrecke stört den grafischen Fahrplan nicht mehr.** Nach dem Umnummerieren konnte eine Strecke im grafischen Fahrplan sichtbar bleiben, obwohl ihr Häkchen entfernt war. Welche Strecken angezeigt werden, hängt nicht mehr von ihren Nummern ab. Die Auswahl der Strecken im grafischen Fahrplan wird durch dieses Update einmalig zurückgesetzt.
+
 ## Version 0.9.1
 
 ### Änderungen

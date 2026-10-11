@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 0.9.3
+
+### Ændringer
+
+- **Fulde ugedagsnavne på tjenestens forside.** Forsiden på en lokomotivførertjeneste skriver nu altid ugedagene fuldt ud, også når banen bruger korte navne, da en forkortelse let overses, når siderne læses i bunkevis.
+
+- **Tidtabelstrækninger vises i nummerorden.** Redigeringen af tidtabelstrækninger viser nu strækningerne i numerisk orden, så 2 kommer før 10.
+
+- **Omnummerering af en tidtabelstrækning ødelægger ikke længere grafisk tidtabel.** Efter omnummerering kunne en strækning forblive synlig i den grafiske tidtabel, selv om dens felt var fjernet. Hvilke strækninger der vises, afhænger ikke længere af deres numre. Valget af strækninger i den grafiske tidtabel nulstilles én gang af denne opdatering.
+
 ## Version 0.9.1
 
 ### Ændringer

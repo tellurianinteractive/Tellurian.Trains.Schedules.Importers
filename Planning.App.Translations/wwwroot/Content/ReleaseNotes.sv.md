@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 0.9.3
+
+### Ändringar
+
+- **Hela veckodagsnamn på förartjänstens försättsblad.** Försättsbladet till en förartjänst skriver nu alltid ut veckodagarna, även när banan använder korta namn, eftersom en förkortning lätt missas när sidorna läses i bunt.
+
+- **Tidtabellssträckor listas i nummerordning.** Redigeringen av tidtabellssträckor visar nu sträckorna i numerisk ordning, så att 2 kommer före 10.
+
+- **Omnumrering av en tidtabellssträcka förstör inte längre den grafiska tidtabellen.** Efter omnumrering kunde en sträcka bli kvar i den grafiska tidtabellen trots att dess ruta var avbockad. Vilka sträckor som visas beror inte längre på deras nummer. Valet av sträckor i den grafiska tidtabellen nollställs en gång av denna uppdatering.
+
 ## Version 0.9.1
 
 ### Ändringar

@@ -40,7 +40,7 @@
            instructions, which are handed out before the first session — not at a page of this booklet. *@
         <p class="readfirst">@Translator("ReadGeneralInstructions")</p>
 
-        <p class="sessions"><SessionsView Sessions="Duty.Sessions" Settings="Settings" /></p>
+        <p class="sessions"><SessionsView Sessions="Duty.Sessions" Settings="FullDayNames" /></p>
 
         @* Start time and station belong on one line: together they answer the chooser's question of
            whether this duty starts soon enough and near enough to be worth taking now. *@
@@ -151,6 +151,16 @@
     [Parameter] public DateTime PrintedAt { get; set; }
 
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    // The front page is read closed and in bulk, where an abbreviated weekday is easy to miss. The
+    // layout's short-names choice still applies everywhere else, so only this page overrides it.
+    private SessionsSettings FullDayNames => new()
+    {
+        MaxNumberOfSessions = Settings.MaxNumberOfSessions,
+        UseDaysInsteadOfSessionNumbers = Settings.UseDaysInsteadOfSessionNumbers,
+        UseShortWeekdayNames = false,
+        SessionFirstWeekday = Settings.SessionFirstWeekday,
+    };
 
     // Both the operator and the category lines follow one rule: project the duty's parts, take the
     // distinct values, and keep them in WORKING order. The booklet is read in sequence, so the front

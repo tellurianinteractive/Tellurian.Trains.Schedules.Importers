@@ -174,7 +174,11 @@
     private Layout? Layout => ScheduleState.Layout;
     private bool HasTrackStretches => Layout?.TrackStretches.Count > 0;
     private IReadOnlyList<TimetableStretch> Stretches =>
-        Layout is null ? [] : [.. Layout.TimetableStretches];
+        Layout is null ? [] : [.. Layout.TimetableStretches.OrderBy(s => s.Number, NumberComparer)];
+
+    // Numeric-aware, so "2" sorts before "10".
+    private static readonly StringComparer NumberComparer =
+        StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, System.Globalization.CompareOptions.NumericOrdering | System.Globalization.CompareOptions.IgnoreCase);
 
     // Track stretches that can extend the route currently being built (contiguous from its end).
     private IReadOnlyList<TrackStretch> Appendable =>

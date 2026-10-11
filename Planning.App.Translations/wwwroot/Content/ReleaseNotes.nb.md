@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 0.9.3
+
+### Endringer
+
+- **Fulle ukedagsnavn på tjenestens forside.** Forsiden på en lokførertjeneste skriver nå alltid ukedagene fullt ut, også når banen bruker korte navn, siden en forkortelse lett overses når sidene leses i bunker.
+
+- **Rutestrekninger vises i nummerrekkefølge.** Redigeringen av rutestrekninger viser nå strekningene i numerisk rekkefølge, slik at 2 kommer før 10.
+
+- **Omnummerering av en rutestrekning ødelegger ikke lenger den grafiske ruten.** Etter omnummerering kunne en strekning bli stående synlig i den grafiske ruten selv om avkrysningen var fjernet. Hvilke strekninger som vises, avhenger ikke lenger av numrene. Valget av strekninger i den grafiske ruten nullstilles én gang av denne oppdateringen.
+
 ## Versjon 0.9.1
 
 ### Endringer

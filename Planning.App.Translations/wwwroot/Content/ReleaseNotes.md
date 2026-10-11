@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 0.9.3
+
+### Changes
+
+- **Full weekday names on the duty front page.** The front page of a driver duty now always spells out the weekdays, even when the layout uses short names, since an abbreviation is easy to miss when the pages are read in bulk.
+
+- **Timetable stretches listed in number order.** The timetable stretches editor now lists the stretches in numeric order, so 2 comes before 10.
+
+- **Renumbering a timetable stretch no longer breaks the graphical timetable.** After a stretch was renumbered, it could stay visible in the graphical timetable even with its box unticked. Which stretches are shown no longer depends on their numbers. The selection of stretches in the graphical timetable is reset once by this update.
+
 ## Version 0.9.1
 
 ### Changes

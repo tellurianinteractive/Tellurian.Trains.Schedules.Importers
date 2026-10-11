@@ -15,7 +15,7 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Services;
 public sealed class ScheduleStateService(BrowserStorageService storage, CrossWindowSyncService sync, ILogger<ScheduleStateService> logger)
 {
     private const string ScheduleStorageKey = "planning.schedule.v2";
-    private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v1";
+    private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v2";
 
     /// <summary>
     /// JSON options matching the schedule importer/exporter, see <see cref="PlanJson"/>.
@@ -37,7 +37,9 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     public string? SaveError { get; private set; }
 
     private Plan? _schedule;
-    private readonly HashSet<TimetableStretch> _selectedStretches = [];
+    // Keyed by Id, not by the stretch: its equality and hash follow Number, so renumbering a stretch
+    // that sits in a hash set would make it unfindable (still drawn, but neither ticked nor removable).
+    private readonly HashSet<int> _selectedStretchIds = [];
     private bool _loaded;
 
     // Debounced persistence: an edit notifies subscribers immediately (cheap, keeps docked views live)
@@ -58,16 +60,16 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     /// More than one may be selected so several graphical schedules can be shown at once.
     /// </summary>
     public IReadOnlyList<TimetableStretch> SelectedStretches =>
-        [.. _selectedStretches.OrderBy(NumericOrderKey).ThenBy(s => s.Number, StringComparer.OrdinalIgnoreCase)];
+        [.. TimetableStretches.Where(s => _selectedStretchIds.Contains(s.Id))];
 
-    public bool IsSelected(TimetableStretch stretch) => _selectedStretches.Contains(stretch);
+    public bool IsSelected(TimetableStretch stretch) => _selectedStretchIds.Contains(stretch.Id);
 
     /// <summary>
     /// Adds or removes a timetable stretch from the displayed selection and notifies subscribers.
     /// </summary>
     public void SetStretchSelected(TimetableStretch stretch, bool selected)
     {
-        var changed = selected ? _selectedStretches.Add(stretch) : _selectedStretches.Remove(stretch);
+        var changed = selected ? _selectedStretchIds.Add(stretch.Id) : _selectedStretchIds.Remove(stretch.Id);
         if (!changed) return;
         PersistSelectedStretches();
         NotifyChanged();
@@ -100,8 +102,8 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
 
     private void ResetSelectionToFirstStretch()
     {
-        _selectedStretches.Clear();
-        if (TimetableStretches.Count > 0) _selectedStretches.Add(TimetableStretches[0]);
+        _selectedStretchIds.Clear();
+        if (TimetableStretches.Count > 0) _selectedStretchIds.Add(TimetableStretches[0].Id);
     }
 
     /// <summary>
@@ -136,14 +138,15 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         var storedNumbers = await storage.GetStringAsync(SelectedStretchesStorageKey);
         if (!string.IsNullOrEmpty(storedNumbers))
         {
-            var numbers = storedNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            var restored = TimetableStretches
-                .Where(s => numbers.Contains(s.Number, StringComparer.OrdinalIgnoreCase))
-                .ToArray();
+            var ids = storedNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(t => int.TryParse(t, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id) ? id : (int?)null)
+                .OfType<int>()
+                .ToHashSet();
+            var restored = TimetableStretches.Where(s => ids.Contains(s.Id)).ToArray();
             if (restored.Length > 0)
             {
-                _selectedStretches.Clear();
-                foreach (var stretch in restored) _selectedStretches.Add(stretch);
+                _selectedStretchIds.Clear();
+                foreach (var stretch in restored) _selectedStretchIds.Add(stretch.Id);
             }
         }
 
@@ -272,8 +275,8 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     private void PersistSelectedStretches()
     {
         if (!_loaded) return;
-        _ = _selectedStretches.Count > 0
-            ? storage.SetStringAsync(SelectedStretchesStorageKey, string.Join(',', SelectedStretches.Select(s => s.Number)))
+        _ = _selectedStretchIds.Count > 0
+            ? storage.SetStringAsync(SelectedStretchesStorageKey, string.Join(',', _selectedStretchIds.Select(id => id.ToString(CultureInfo.InvariantCulture))))
             : storage.RemoveAsync(SelectedStretchesStorageKey);
     }
 }
