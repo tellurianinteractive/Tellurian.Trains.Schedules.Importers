@@ -330,6 +330,12 @@
   <data name="DutyStaffCountIsOutOfRange" xml:space="preserve">
     <value>Dienst {0} benötigt {1} Personen und liegt damit außerhalb des zulässigen Bereichs von 1 bis 3.</value>
   </data>
+  <data name="DutyRunsWhenTrainDoesNot" xml:space="preserve">
+    <value>Dienst {0} fährt in den Fahrrunden {1}, in denen Zug {2} nicht verkehrt.</value>
+  </data>
+  <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
+    <value>Dienst {0} fährt an den Tagen {1}, an denen Zug {2} nicht verkehrt.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
   </data>

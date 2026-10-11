@@ -330,6 +330,12 @@
   <data name="DutyStaffCountIsOutOfRange" xml:space="preserve">
     <value>Tjänst {0} kräver {1} personer, vilket ligger utanför det tillåtna intervallet 1 till 3.</value>
   </data>
+  <data name="DutyRunsWhenTrainDoesNot" xml:space="preserve">
+    <value>Tjänst {0} körs på köromgångar {1}, när tåg {2} inte går.</value>
+  </data>
+  <data name="DutyRunsWhenTrainDoesNotOnDays" xml:space="preserve">
+    <value>Tjänst {0} körs på {1}, när tåg {2} inte går.</value>
+  </data>
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tåg {0} saknar körande tjänst på köromgångar {1} för avsnittet från {2} {3} till {4} {5}.</value>
   </data>

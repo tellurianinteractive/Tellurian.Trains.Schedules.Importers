@@ -150,7 +150,7 @@ public static class DriverDutyPartExtensions
         {
             Vehicle = vehicle,
             TrainPart = part,
-            Sessions = vehicle.SessionsOn(part),
+            Sessions = vehicle.SessionsOn(part, dutyPart.Duty.Sessions),
             DepartureTrack = vehicle.DepartureTrackOn(part),
             ArrivalTrack = vehicle.ArrivalTrackOn(part),
             Rake = vehicle.RakeOn(part),
@@ -168,19 +168,22 @@ public static class DriverDutyPartExtensions
     extension(ScheduledObject vehicle)
     {
         /// <summary>
-        /// The sessions this vehicle works the given part on: the union of the sessions of the schedule
-        /// assignments whose schedule holds the part. A vehicle with no assignment covering the part
-        /// falls back to the train's own sessions.
+        /// The sessions this vehicle works the given part on within the duty: the union of the sessions of
+        /// the schedule assignments whose schedule holds the part, narrowed to the sessions the part's train
+        /// actually runs and the duty is worked. An assignment may cover sessions the train does not run, and
+        /// the duty only some of the sessions the vehicle works the part, so neither may be claimed here. A
+        /// vehicle with no assignment covering the part falls back to the train's own sessions.
         /// </summary>
-        internal Sessions SessionsOn(ScheduledTrainPart trainPart)
+        internal Sessions SessionsOn(ScheduledTrainPart trainPart, Sessions dutySessions)
         {
             var assigned = vehicle.ScheduleAssignments
                 .Where(assignment => assignment.Schedule.Parts.Contains(trainPart))
                 .Select(assignment => assignment.Sessions)
                 .ToList();
-            return assigned.Count == 0
+            var worked = assigned.Count == 0
                 ? trainPart.Train.Sessions
                 : assigned.Aggregate((left, right) => left.Or(right));
+            return worked.LimitedTo(trainPart.Train.Sessions).LimitedTo(dutySessions);
         }
 
         /// <summary>

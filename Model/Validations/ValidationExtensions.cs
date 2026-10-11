@@ -305,6 +305,24 @@ public static class ValidationExtensions
                 }
             }
 
+            // A duty running on a session or day on which one of its trains does not.
+            foreach (var duty in duties)
+            {
+                var dutySessions = duty.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
+                foreach (var part in duty.Parts)
+                {
+                    var surplus = dutySessions.Numbers
+                        .Where(n => !part.Train.Sessions.Includes(n))
+                        .Select(n => (int)n)
+                        .ToList();
+                    if (surplus.Count == 0) continue;
+                    var surplusSessions = SessionsExtensions.FromPeriodNumbers(surplus, general.UseDays);
+                    var message = Message.Information(general.UseDays ? Strings.DutyRunsWhenTrainDoesNotOnDays : Strings.DutyRunsWhenTrainDoesNot,
+                        duty.Identity, SessionsText(surplusSessions, general), part.Train);
+                    yield return ValidationError.DutyRunsWhenTrainDoesNot(duty, part, message);
+                }
+            }
+
             // Two parts within one duty overlapping in time, counting the preparation and finishing-up
             // time at the trains' ends: a driver still making one train ready cannot be driving another.
             foreach (var duty in duties)

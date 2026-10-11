@@ -178,6 +178,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Driver duty {0} runs on sessions {1}, when train {2} does not run..
+        /// </summary>
+        internal static string DutyRunsWhenTrainDoesNot {
+            get {
+                return ResourceManager.GetString("DutyRunsWhenTrainDoesNot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Driver duty {0} runs on {1}, when train {2} does not run..
+        /// </summary>
+        internal static string DutyRunsWhenTrainDoesNotOnDays {
+            get {
+                return ResourceManager.GetString("DutyRunsWhenTrainDoesNotOnDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Driver duty {0} needs {1} people, which is outside the allowed range of 1 to 3..
         /// </summary>
         internal static string DutyStaffCountIsOutOfRange {

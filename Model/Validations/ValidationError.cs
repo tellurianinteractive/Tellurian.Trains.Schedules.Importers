@@ -107,6 +107,7 @@ public sealed record ValidationError
         ValidationErrorType.DutyIdentityDuplicated or
         ValidationErrorType.DutyIdentityMissing or
         ValidationErrorType.DutyStaffCountOutOfRange or
+        ValidationErrorType.DutyRunsWhenTrainDoesNot or
         ValidationErrorType.TrainPartMissingDriverDuty => ValidationScope.Duty,
 
         ValidationErrorType.VehicleScheduleOverlap or
@@ -714,6 +715,25 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a duty session error: the duty runs on sessions or days on which one of its trains does not
+    /// run, so it would have nothing to drive then.
+    /// </summary>
+    public static ValidationError DutyRunsWhenTrainDoesNot(
+        DriverDuty duty,
+        ScheduledTrainPart part,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.DutyRunsWhenTrainDoesNot,
+            FromTrack = part.From.Track,
+            ToTrack = part.To.Track,
+            FromTime = part.StartTime,
+            ToTime = part.EndTime,
+            Trains = [part.Train],
+            Duty = duty,
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a duty overlap error: two parts within one duty overlap in time, so the driver would have to
     /// be in two places at once.
     /// </summary>
@@ -955,6 +975,9 @@ public enum ValidationErrorType
 
     /// <summary>A train arrives at or departs from a track that is not scheduled.</summary>
     StopAtUnscheduledTrack,
+
+    /// <summary>A driver duty runs on sessions or days on which one of its trains does not run.</summary>
+    DutyRunsWhenTrainDoesNot,
 }
 
 /// <summary>

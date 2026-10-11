@@ -73,6 +73,20 @@ public class DriverDutyPartTests
     }
 
     [TestMethod]
+    public void TheTractionBlockSessionsAreLimitedToTheTrainAndTheDuty()
+    {
+        // The loco is assigned every session, the train runs 1-3 and the duty 2-4: the loco works the
+        // part on 2-3 only, as the duty is not worked on 1 and the train does not run on 4.
+        var fixture = CreateFixture();
+        fixture.Plan.Timetable.Trains.Single().Sessions = Sessions.FromSessionNumbers(1, 2, 3);
+        fixture.Duty.Sessions = Sessions.FromSessionNumbers(2, 3, 4);
+
+        var row = PartOf(fixture).TractionData.Vehicles[0];
+
+        CollectionAssert.AreEqual(new byte[] { 2, 3 }, row.Sessions.Numbers);
+    }
+
+    [TestMethod]
     public void TheTractionBlockListsTheLocomotiveForAPartThatDoesNotKnowItsSchedule()
     {
         // Plans stored before the Job import was made to share the schedule's part instances hold a

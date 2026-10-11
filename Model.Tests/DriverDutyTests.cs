@@ -196,6 +196,40 @@ public class DriverDutyTests
         Assert.IsEmpty(errors);
     }
 
+    [TestMethod]
+    public void DutyRunningWhenItsTrainDoesNotIsReported()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2);
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var duty = plan.CreateDriverDuty();
+        duty.Sessions = Sessions.FromSessionNumbers(2, 3);
+        duty.Add(part);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyRunsWhenTrainDoesNot)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreEqual(ValidationScope.Duty, errors[0].Scope);
+    }
+
+    [TestMethod]
+    public void DutyRunningOnlyWhenItsTrainDoesIsNotReported()
+    {
+        var plan = CreatePlan();
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3);
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var duty = plan.CreateDriverDuty();
+        duty.Sessions = Sessions.FromSessionNumbers(2, 3);
+        duty.Add(part);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyRunsWhenTrainDoesNot);
+
+        Assert.IsEmpty(errors);
+    }
+
     // --- Driver duty coverage: a traction-assigned part must have a driver duty on every session it runs ---
 
     [TestMethod]

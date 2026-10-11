@@ -105,6 +105,18 @@ public static class SessionsExtensions
         public Sessions Or(Sessions other) => new() { Flags = sessions.Flags.Or(other.Flags) };
 
         /// <summary>
+        /// These sessions or days narrowed to those that <paramref name="limit"/> also has, keeping this
+        /// value's own days and on-demand markers. Unlike <see cref="And"/>, the result is written the way
+        /// this value is, so a day pattern narrowed by a limit that carries no days marker stays a day pattern.
+        /// </summary>
+        /// <param name="limit">The sessions or days the result may not go beyond.</param>
+        public Sessions LimitedTo(Sessions limit)
+        {
+            const ushort sessionBits = 0b00_1111111_1111111;
+            return new() { Flags = (ushort)((sessions.Flags & limit.Flags & sessionBits) | (sessions.Flags & ~sessionBits)) };
+        }
+
+        /// <summary>
         /// Determines whether these sessions overlap with another.
         /// </summary>
         /// <param name="other">The other sessions.</param>
