@@ -144,13 +144,16 @@ public static class GraphScheduleDrawingExtensions
                 // The line descends on screen (cross-axis grows with time) when it runs to a later station.
                 var descending = toStationIndex > fromStationIndex;
 
-                if (me.GraphSettings.ShowDepartureMinutes && use.From.IsDeparture && use.From.IsStop && me.IsTimeVisible(use.From.Departure.Value))
+                if ((me.GraphSettings.ShowDepartureMinutes || (me.GraphSettings.ShowArrivalMinutes && IsMergedPass(use.From)))
+                    && use.From.IsDeparture && me.IsTimeVisible(use.From.Departure.Value))
                 {
                     var point = me.MinuteAt(fromStationIndex, fromTrackIndex, use.From.Departure.Value);
                     yield return me.MinuteLabelAt(point, use.From.Departure.MinutesText(), isDeparture: true, descending);
                 }
 
-                if (me.GraphSettings.ShowArrivalMinutes && use.To.IsArrival && use.To.IsStop && me.IsTimeVisible(use.To.Arrival.Value))
+                if (me.GraphSettings.ShowArrivalMinutes && use.To.IsArrival && me.IsTimeVisible(use.To.Arrival.Value)
+                    // A passing train with equal arrival and departure is labelled once, by its departure.
+                    && !IsMergedPass(use.To))
                 {
                     var point = me.MinuteAt(toStationIndex, toTrackIndex, use.To.Arrival.Value);
                     yield return me.MinuteLabelAt(point, use.To.Arrival.MinutesText(), isDeparture: false, descending);
@@ -158,6 +161,10 @@ public static class GraphScheduleDrawingExtensions
             }
         }
     }
+
+    // A call the train passes without stopping whose arrival and departure times are equal: one point, one label.
+    private static bool IsMergedPass(StationCall call) =>
+        !call.IsStop && call.IsArrival && call.IsDeparture && call.Arrival.Value == call.Departure.Value;
 
     // Chooses which corner of the minute text touches the call point, following the requested placement:
     // on a descending (down-slope) line the departure tucks its upper-left corner to its point and the
