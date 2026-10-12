@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.6
+
+### Changes
+
+- **Minute labels for passing trains in the graphical timetable.** The settings for showing arrival and departure minutes now also apply to trains that pass a station without stopping. When a passing train has the same arrival and departure time, it gets a single label, the departure minute, as soon as either setting is ticked.
+
 ## Version 0.9.5
 
 ### Changes
