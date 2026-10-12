@@ -1,5 +1,45 @@
 # Versionsnyheder
 
+## Version 0.9.12
+
+### Ændringer
+
+- **Ny fane: Sporbelægning.** Viser hvert spor på hver station gennem døgnet, med tiden langs aksen. Tog er farvede blokke fra ankomst til afgang, og køretøjer, der bliver stående mellem deres tog, er stiplede, skraverede blokke (når *Køretøjer optager sporet, mens de holder?* er slået til). Blokke, der er på samme spor samtidig, lægges i egne linjer oven på hinanden, så de kan skelnes, og blokke, der indgår i en sporkonflikt, har rød kant; hold musen over en blok for at se detaljerne. Træk et tog til et andet spor på samme station for at flytte det. Du kan vælge, hvilke stationer der vises, og zoome tidsaksen.
+
+## Version 0.9.11
+
+### Ændringer
+
+- **Sporkonflikter med holdende køretøjer markeres på sporene igen.** Når *Køretøjer optager sporet, mens de holder?* er slået til, markeres en konflikt mellem et tog og køretøjer, der holder på sporet, nu også på de tog, der er involveret, i fanen Tog og i den grafiske køreplan. Det ventende togs ophold på sporet fremhæves, og det samme gør den stiplede linje for de holdende køretøjer, der er i vejen; hold musen over en af dem for at se meddelelsen. Kun det ophold, der reelt støder sammen, markeres: tog og køretøjer, der aldrig kører på samme køresession, rapporteres ikke. Konflikten vises stadig også på køretøjernes omløb i fanen Omløb.
+
+## Version 0.9.10
+
+### Ændringer
+
+- **Kun den konfliktende del af et tog fremhæves i den grafiske køreplan.** En konflikt, for eksempel et overbooket spor, markerer nu kun opholdet på det spor eller strækningen mellem sporene, hvor den opstår, i stedet for togets hele linje. Hold musen over den fremhævede del for at se meddelelsen.
+
+## Version 0.9.9
+
+### Ændringer
+
+- **Rangeropgaver uden lokomotiv lader ikke længere køretøjer holde på et spor.** Når *Køretøjer optager sporet, mens de holder?* er slået til, regnes køretøjer, der kun indgår i en rangeropgave uden trækkraft, ikke længere for at holde på sporet før og efter den. En sådan opgave optager ikke noget spor, så køretøjerne gav sporkonflikter, der ikke var reelle.
+
+## Version 0.9.7
+
+### Ændringer
+
+- **Sporkonflikter med holdende køretøjer vises på omløbet.** Når *Køretøjer optager sporet, mens de holder?* er slået til, markeres en konflikt mellem et tog og køretøjer, der holder på sporet, nu på køretøjernes omløb i fanen Omløb, hvor den oftest rettes, og ikke længere på togene i fanen Tog og i den grafiske køreplan. Konflikter mellem to tog vises stadig på togene.
+
+## Version 0.9.6
+
+### Ændringer
+
+- **Minutetiketter for gennemkørende tog i den grafiske køreplan.** Indstillingerne for at vise ankomst- og afgangsminutter gælder nu også for tog, der kører gennem en station uden at stoppe. Når et gennemkørende tog har samme ankomst- og afgangstid, får det én enkelt etiket, afgangsminuttet, så snart en af indstillingerne er afkrydset.
+
+- **Køretøjer optager sporet, mens de holder.** En ny indstilling under Validering, *Køretøjer optager sporet, mens de holder?*, får sporkontrollen til at regne med, hvor lokomotiver, togsæt og vognsæt holder mellem deres tog. Et køretøj, der ankommer og ikke flyttes, optager sit ankomstspor, indtil det afgår igen. Et køretøj, der sættes på eller hentes fra et andet spor, optager det spor fra ankomst til næste afgang, mens ankomstsporet stadig er optaget af det ankommende tog. Et køretøj, der er ankommet og ikke har nogen yderligere afgang, optager sit spor resten af døgnet, og et køretøj uden ankomst før sin første afgang optager det fra døgnets begyndelse. Opstilling og aflæsning frigiver sporet, indtil køretøjet hentes igen. Et tog, der tager et spor, hvor et køretøj holder, rapporteres som en konflikt. Den grafiske køreplan, på skærmen og på print, markerer hvert ophold med en stiplet linje langs sporet.
+
+- **Vognsæt kan opstilles eller løftes af.** Når du redigerer en togdel for et vognsæt, tilbyder *Vognsæt før afgang* og *Vognsæt efter ankomst* nu de samme valg som for lokomotiver: på spor, opstilling eller løft af og på. Valget udskrives som en note i begge ender, de to ender holdes i takt, en uoverensstemmelse rapporteres, og et vognsæt, der er væk fra banen, optager ikke noget spor.
+
 ## Version 0.9.5
 
 ### Ændringer

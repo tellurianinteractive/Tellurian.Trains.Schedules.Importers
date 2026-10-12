@@ -1,5 +1,45 @@
 # Versjonsnyheter
 
+## Versjon 0.9.12
+
+### Endringer
+
+- **Ny fane: Sporbelegg.** Viser hvert spor på hver stasjon gjennom døgnet, med tiden langs aksen. Tog er fargede blokker fra ankomst til avgang, og kjøretøy som blir stående mellom togene sine, er stiplede, skraverte blokker (når *Kjøretøy opptar sporet mens de står?* er på). Blokker som er på samme spor samtidig, legges i egne linjer oppå hverandre slik at du kan skille dem fra hverandre, og blokker som inngår i en sporkonflikt, har rød kant; hold pekeren over en blokk for å se detaljene. Dra et tog til et annet spor på samme stasjon for å flytte det. Du kan velge hvilke stasjoner som vises, og zoome tidsaksen.
+
+## Versjon 0.9.11
+
+### Endringer
+
+- **Sporkonflikter med stillestående kjøretøy markeres på sporene igjen.** Når *Kjøretøy opptar sporet mens de står?* er på, markeres en konflikt mellom et tog og kjøretøy som står på sporet, nå også på de togene som berøres, i fanen Tog og i den grafiske ruteplanen. Det ventende togets opphold på sporet utheves, og det samme gjør den stiplede linjen for de stillestående kjøretøyene som er i veien; hold pekeren over en av dem for å se meldingen. Bare oppholdet som faktisk kolliderer, markeres: tog og kjøretøy som aldri går på samme kjøresesjon, rapporteres ikke. Konflikten vises fortsatt også på kjøretøyenes omløp i fanen Omløp.
+
+## Versjon 0.9.10
+
+### Endringer
+
+- **Bare den konfliktende delen av et tog utheves i den grafiske ruteplanen.** En konflikt, for eksempel et overbooket spor, markerer nå bare oppholdet på det sporet eller strekningen mellom sporene der den oppstår, i stedet for togets hele linje. Hold pekeren over den uthevede delen for å se meldingen.
+
+## Versjon 0.9.9
+
+### Endringer
+
+- **Skiftoppgaver uten lok lar ikke lenger kjøretøy bli stående på et spor.** Når *Kjøretøy opptar sporet mens de står?* er på, regnes kjøretøy som bare inngår i en skiftoppgave uten trekkraft, ikke lenger som stående på sporet før og etter den. En slik oppgave opptar ikke noe spor, så kjøretøyene ga sporkonflikter som ikke var reelle.
+
+## Versjon 0.9.7
+
+### Endringer
+
+- **Sporkonflikter med stillestående kjøretøy vises på omløpet.** Når *Kjøretøy opptar sporet mens de står?* er på, markeres en konflikt mellom et tog og kjøretøy som står på sporet, nå på kjøretøyenes omløp i fanen Omløp, der den oftest rettes, og ikke lenger på togene i fanen Tog og i den grafiske ruteplanen. Konflikter mellom to tog vises fortsatt på togene.
+
+## Versjon 0.9.6
+
+### Endringer
+
+- **Minuttetiketter for gjennomkjørende tog i den grafiske ruteplanen.** Innstillingene for å vise ankomst- og avgangsminutter gjelder nå også for tog som kjører gjennom en stasjon uten å stoppe. Når et gjennomkjørende tog har samme ankomst- og avgangstid, får det én enkelt etikett, avgangsminuttet, så snart en av innstillingene er avkrysset.
+
+- **Kjøretøy opptar sporet mens de står.** En ny innstilling under Validering, *Kjøretøy opptar sporet mens de står?*, får sporkontrollen til å regne med hvor lok, togsett og vognsett står mellom togene sine. Et kjøretøy som kommer frem og ikke flyttes, opptar ankomstsporet sitt til det avgår igjen. Et kjøretøy som settes på eller hentes fra et annet spor, opptar det sporet fra ankomst til neste avgang, mens ankomstsporet fortsatt er opptatt av det ankommende toget. Et kjøretøy som er kommet frem og ikke har noen videre avgang, opptar sporet sitt resten av døgnet, og et kjøretøy uten ankomst før sin første avgang opptar det fra døgnets begynnelse. Hensetting og avløft frigjør sporet til kjøretøyet hentes igjen. Et tog som tar et spor der et kjøretøy står, rapporteres som en konflikt. Den grafiske ruteplanen, på skjermen og på utskrift, markerer hvert opphold med en stiplet linje langs sporet.
+
+- **Vognsett kan hensettes eller løftes av.** Når du redigerer en togdel for et vognsett, tilbyr *Vognsett før avgang* og *Vognsett etter ankomst* nå de samme valgene som for lok: på spor, hensetting eller løft av og på. Valget skrives ut som en merknad i begge ender, de to endene holdes i takt, et avvik rapporteres, og et vognsett som er borte fra banen, opptar ikke noe spor.
+
 ## Versjon 0.9.5
 
 ### Endringer

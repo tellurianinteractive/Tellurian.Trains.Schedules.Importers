@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.12
+
+### Changes
+
+- **New Track occupancy tab.** Shows every track of every station over the day, with time along the axis. Trains are coloured blocks from arrival to departure, and vehicles left standing between their trains are dashed, hatched blocks (when *Vehicles occupy the track while standing?* is on). Blocks that are on the same track at the same time are stacked on separate lines so you can tell them apart, and blocks that take part in a track conflict have a red outline; hover over a block to see the details. Drag a train onto another track of the same station to move it. You can choose which stations to show and zoom the time axis.
+
 ## Version 0.9.11
 
 ### Changes
@@ -11,6 +17,12 @@
 ### Changes
 
 - **Only the conflicting part of a train is highlighted in the graphical timetable.** A conflict, such as an overbooked track, now marks just the stay on that track or the stretch between the tracks where it occurs, instead of the train's whole line. Hover over the highlighted part to see the message.
+
+## Version 0.9.9
+
+### Changes
+
+- **Shunting tasks without a locomotive no longer leave vehicles standing on a track.** When *Vehicles occupy the track while standing?* is on, vehicles that appear only in a shunting task with no traction unit are no longer counted as standing on the track before and after it. Such a task takes no track, so these vehicles caused track conflicts that were not real.
 
 ## Version 0.9.7
 

@@ -1,5 +1,45 @@
 # Versionsnyheter
 
+## Version 0.9.12
+
+### Ändringar
+
+- **Ny flik: Spårbeläggning.** Visar varje spår på varje station under dygnet, med tiden längs axeln. Tåg är färgade block från ankomst till avgång, och fordon som står kvar mellan sina tåg är streckade, snedskrafferade block (när *Fordon upptar spåret medan de står?* är på). Block som står på samma spår samtidigt läggs i egna rader ovanpå varandra så att du kan skilja dem åt, och block som ingår i en spårkonflikt har röd kant; håll pekaren över ett block för att se detaljerna. Dra ett tåg till ett annat spår på samma station för att flytta det. Du kan välja vilka stationer som visas och zooma tidsaxeln.
+
+## Version 0.9.11
+
+### Ändringar
+
+- **Spårkonflikter med stillastående fordon markeras på spåren igen.** När *Fordon upptar spåret medan de står?* är på markeras en konflikt mellan ett tåg och fordon som står på spåret nu också på de tåg som berörs, på fliken Tåg och i den grafiska tidtabellen. Det väntande tågets uppehåll på spåret markeras, liksom den streckade linjen för de stillastående fordon som är i vägen; håll pekaren över någon av dem för att se meddelandet. Bara det uppehåll som verkligen krockar markeras: tåg och fordon som aldrig går på samma köromgång rapporteras inte. Konflikten visas fortfarande också på fordonens omlopp på fliken Omlopp.
+
+## Version 0.9.10
+
+### Ändringar
+
+- **Bara den konflikterande delen av ett tåg markeras i den grafiska tidtabellen.** En konflikt, till exempel ett överbokat spår, markerar nu bara uppehållet på det spåret eller sträckan mellan spåren där den uppstår, i stället för tågets hela linje. Håll pekaren över den markerade delen för att se meddelandet.
+
+## Version 0.9.9
+
+### Ändringar
+
+- **Växlingsuppgifter utan lok lämnar inte längre fordon stående på ett spår.** När *Fordon upptar spåret medan de står?* är på räknas fordon som bara förekommer i en växlingsuppgift utan dragkraft inte längre som stillastående på spåret före och efter den. En sådan uppgift tar inget spår, så fordonen gav spårkonflikter som inte var verkliga.
+
+## Version 0.9.7
+
+### Ändringar
+
+- **Spårkonflikter med stillastående fordon visas på omloppet.** När *Fordon upptar spåret medan de står?* är på markeras en konflikt mellan ett tåg och fordon som står på spåret nu på fordonens omlopp på fliken Omlopp, där den oftast rättas till, och inte längre på tågen på fliken Tåg och i den grafiska tidtabellen. Konflikter mellan två tåg visas fortfarande på tågen.
+
+## Version 0.9.6
+
+### Ändringar
+
+- **Minutetiketter för förbipasserande tåg i den grafiska tidtabellen.** Inställningarna för att visa ankomst- och avgångsminuter gäller nu också tåg som passerar en station utan att stanna. När ett passerande tåg har samma ankomst- och avgångstid får det en enda etikett, avgångsminuten, så snart någon av inställningarna är ikryssad.
+
+- **Fordon upptar spåret medan de står.** En ny inställning under Validering, *Fordon upptar spåret medan de står?*, gör att spårkontrollen räknar med var lok, tågset och vagnsätt står mellan sina tåg. Ett fordon som kommer fram och inte flyttas upptar sitt ankomstspår tills det avgår igen. Ett fordon som sätts på eller hämtas från ett annat spår upptar det spåret från ankomst till nästa avgång, medan ankomstspåret fortfarande upptas av det ankommande tåget. Ett fordon som har kommit fram och inte har någon ytterligare avgång upptar sitt spår resten av dygnet, och ett fordon utan ankomst före sin första avgång upptar det från dygnets början. Uppställning och avlyft frigör spåret tills fordonet hämtas igen. Ett tåg som tar ett spår där ett fordon står rapporteras som en konflikt. Den grafiska tidtabellen, på skärmen och utskriven, markerar varje uppehåll med en streckad linje längs spåret.
+
+- **Vagnsätt kan ställas upp eller lyftas av.** När du redigerar en tågdel för ett vagnsätt erbjuder *Vagnsätt före avgång* och *Vagnsätt efter ankomst* nu samma val som för lok: på spår, uppställning eller lyft av och på. Valet skrivs ut som en notering i båda ändar, de två ändarna hålls i takt, en avvikelse rapporteras, och ett vagnsätt som är borta från banan upptar inget spår.
+
 ## Version 0.9.5
 
 ### Ändringar

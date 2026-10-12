@@ -1,5 +1,45 @@
 # Versionshinweise
 
+## Version 0.9.12
+
+### Änderungen
+
+- **Neuer Reiter „Gleisbelegung“.** Zeigt über den Tag jedes Gleis jedes Bahnhofs, mit der Zeit entlang der Achse. Züge sind farbige Blöcke von der Ankunft bis zur Abfahrt, und Fahrzeuge, die zwischen ihren Zügen stehen bleiben, sind gestrichelte, schraffierte Blöcke (wenn *Fahrzeuge belegen das Gleis, solange sie stehen?* aktiviert ist). Blöcke, die gleichzeitig auf demselben Gleis liegen, werden in eigenen Zeilen übereinander gestapelt, damit man sie unterscheiden kann, und Blöcke, die an einem Gleiskonflikt beteiligt sind, haben einen roten Rand; fahren Sie mit der Maus über einen Block, um die Einzelheiten zu sehen. Ziehen Sie einen Zug auf ein anderes Gleis desselben Bahnhofs, um ihn zu verschieben. Sie können wählen, welche Bahnhöfe angezeigt werden, und die Zeitachse zoomen.
+
+## Version 0.9.11
+
+### Änderungen
+
+- **Gleiskonflikte mit stehenden Fahrzeugen werden wieder an den Gleisen markiert.** Ist *Fahrzeuge belegen das Gleis, solange sie stehen?* aktiviert, wird ein Konflikt zwischen einem Zug und Fahrzeugen, die auf dem Gleis stehen, jetzt auch an den beteiligten Zügen markiert, im Reiter „Züge“ und im Bildfahrplan. Der Halt des wartenden Zuges auf dem Gleis wird hervorgehoben, ebenso die gestrichelte Linie der im Weg stehenden Fahrzeuge; fahren Sie mit der Maus über eines von beiden, um die Meldung zu sehen. Markiert wird nur der Halt, der tatsächlich kollidiert: Züge und Fahrzeuge, die nie in derselben Fahrrunde verkehren, werden nicht gemeldet. Der Konflikt wird weiterhin auch im Umlauf der Fahrzeuge im Reiter „Umläufe“ angezeigt.
+
+## Version 0.9.10
+
+### Änderungen
+
+- **Im Bildfahrplan wird nur der kollidierende Teil eines Zuges hervorgehoben.** Ein Konflikt, etwa ein überbuchtes Gleis, markiert jetzt nur den Halt auf diesem Gleis oder die Strecke zwischen den Gleisen, an der er auftritt, statt der ganzen Linie des Zuges. Fahren Sie mit der Maus über den hervorgehobenen Teil, um die Meldung zu sehen.
+
+## Version 0.9.9
+
+### Änderungen
+
+- **Rangieraufgaben ohne Lokomotive lassen keine Fahrzeuge mehr auf einem Gleis stehen.** Ist *Fahrzeuge belegen das Gleis, solange sie stehen?* aktiviert, gelten Fahrzeuge, die nur in einer Rangieraufgabe ohne Zugkraft vorkommen, vor und nach ihr nicht mehr als auf dem Gleis stehend. Eine solche Aufgabe belegt kein Gleis, daher verursachten diese Fahrzeuge Gleiskonflikte, die nicht echt waren.
+
+## Version 0.9.7
+
+### Änderungen
+
+- **Gleiskonflikte mit stehenden Fahrzeugen werden im Umlauf angezeigt.** Ist *Fahrzeuge belegen das Gleis, solange sie stehen?* aktiviert, wird ein Konflikt zwischen einem Zug und Fahrzeugen, die auf dem Gleis stehen, jetzt im Umlauf der Fahrzeuge im Reiter „Umläufe“ markiert, wo er meist behoben wird, und nicht mehr an den Zügen im Reiter „Züge“ und im Bildfahrplan. Konflikte zwischen zwei Zügen werden weiterhin an den Zügen angezeigt.
+
+## Version 0.9.6
+
+### Änderungen
+
+- **Minutenbeschriftungen für durchfahrende Züge im Bildfahrplan.** Die Einstellungen zum Anzeigen der Ankunfts- und Abfahrtsminuten gelten jetzt auch für Züge, die einen Bahnhof ohne Halt durchfahren. Hat ein durchfahrender Zug dieselbe Ankunfts- und Abfahrtszeit, erhält er eine einzige Beschriftung, die Abfahrtsminute, sobald eine der beiden Einstellungen aktiviert ist.
+
+- **Fahrzeuge belegen das Gleis, solange sie stehen.** Eine neue Einstellung unter Validierung, *Fahrzeuge belegen das Gleis, solange sie stehen?*, lässt die Gleisprüfung berücksichtigen, wo Lokomotiven, Triebzüge und Wagengruppen zwischen ihren Zügen stehen. Ein Fahrzeug, das ankommt und nicht umgesetzt wird, belegt sein Ankunftsgleis, bis es wieder abfährt. Ein Fahrzeug, das auf ein anderes Gleis gestellt oder von dort geholt wird, belegt dieses Gleis von der Ankunft bis zur nächsten Abfahrt, während das Ankunftsgleis noch vom ankommenden Zug belegt ist. Ein Fahrzeug, das angekommen ist und keine weitere Abfahrt hat, belegt sein Gleis für den Rest des Tages, und eines ohne Ankunft vor seiner ersten Abfahrt belegt es ab Tagesbeginn. Abstellen und Abheben geben das Gleis frei, bis das Fahrzeug wieder abgeholt wird. Ein Zug, der ein Gleis belegt, auf dem ein Fahrzeug steht, wird als Konflikt gemeldet. Der Bildfahrplan markiert, am Bildschirm und im Ausdruck, jeden Aufenthalt mit einer gestrichelten Linie entlang des Gleises.
+
+- **Wagengruppen können abgestellt oder abgehoben werden.** Beim Bearbeiten eines Zugteils einer Wagengruppe bieten *Wagengruppe vor Abfahrt* und *Wagengruppe nach Ankunft* jetzt dieselben Auswahlmöglichkeiten wie für Lokomotiven: auf dem Gleis, Abstellen oder Abheben und Aufgleisen. Die Auswahl wird an beiden Enden als Hinweis gedruckt, die beiden Enden werden aufeinander abgestimmt, eine Abweichung wird gemeldet, und eine Wagengruppe außerhalb der Anlage belegt kein Gleis.
+
 ## Version 0.9.5
 
 ### Änderungen
