@@ -1,0 +1,205 @@
+@page "/track-occupancy"
+@using System.Globalization
+@using Tellurian.Utilities.Web
+@inject ScheduleStateService ScheduleState
+@inject ValidationStateService ValidationState
+@inject Translator Translator
+@implements IDisposable
+
+@if (!ScheduleState.HasSchedule)
+{
+    <p>@Translator("GraphNoSchedule")</p>
+}
+else if (_board is null || _board.Stations.Count == 0)
+{
+    <p>@Translator("TrackOccupancyNoTracks")</p>
+}
+else
+{
+    <div class="occupancy-toolbar">
+        <div class="station-selector">
+            <span class="label">@Translator("Stations"):</span>
+            @foreach (var station in _board.Stations)
+            {
+                <label class="station-option">
+                    <input type="checkbox"
+                           checked="@IsShown(station)"
+                           @onchange="e => OnStationToggled(station, e)" />
+                    <span>@station.Location.Name</span>
+                </label>
+            }
+        </div>
+        <label class="zoom">
+            <span class="label">@Translator("TrackOccupancyZoom"):</span>
+            <select @onchange="OnZoomChanged">
+                @foreach (var pixels in ZoomLevels)
+                {
+                    <option value="@pixels" selected="@(pixels == _hourWidth)">@pixels px</option>
+                }
+            </select>
+        </label>
+    </div>
+
+    <p class="occupancy-hint">@Translator("TrackOccupancyDragHint")</p>
+
+    <div class="occupancy-legend">
+        <span class="legend-item"><span class="swatch train"></span>@Translator("Trains")</span>
+        <span class="legend-item"><span class="swatch hold"></span>@Translator("TrackOccupancyHeld")</span>
+        <span class="legend-item"><span class="swatch conflict"></span>@Translator("Conflicts")</span>
+    </div>
+
+    <div class="occupancy-board @(_dragged is not null ? "dragging" : null)" style="@BoardStyle">
+        <div class="axis">
+            <div class="name-cell"></div>
+            <div class="ticks">
+                @foreach (var hour in Hours)
+                {
+                    <span class="tick" style="left:@TickLeft(hour)">@hour.ToString("00", CultureInfo.InvariantCulture)</span>
+                }
+            </div>
+        </div>
+
+        @foreach (var station in _board.Stations.Where(IsShown))
+        {
+            <section class="station">
+                <h3 class="station-name">@station.Location.Name</h3>
+                @foreach (var row in station.Rows)
+                {
+                    <div class="track-row @(IsDropTarget(row) ? "drop-allowed" : null) @(ReferenceEquals(_hover, row) ? "drop-hover" : null)"
+                         @key="row.Track">
+                        <div class="name-cell" title="@station.Location.Name @row.Track.Number">@row.Track.Number</div>
+                        <div class="lanes"
+                             style="--lanes:@row.Lanes"
+                             @ondragenter="() => OnDragEnter(row)"
+                             @ondragover:preventDefault="IsDropTarget(row)"
+                             @ondrop="() => OnDrop(row)">
+                            @foreach (var block in row.Blocks)
+                            {
+                                @foreach (var segment in block.Segments)
+                                {
+                                    @if (block.Kind == OccupancyKind.Call)
+                                    {
+                                        <div class="block call @(block.Conflict is not null ? "conflict" : null) @(ReferenceEquals(_dragged, block.Call) ? "being-dragged" : null)"
+                                             style="@BlockStyle(block, segment); background:@block.Color; color:@(block.Color!.TextColor)"
+                                             title="@Title(block)"
+                                             draggable="true"
+                                             @ondragstart="() => _dragged = block.Call"
+                                             @ondragend="OnDragEnd">
+                                            <span class="text">@block.Label</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="block hold @(block.Conflict is not null ? "conflict" : null)"
+                                             style="@BlockStyle(block, segment)"
+                                             title="@Title(block)">
+                                            <span class="text">@block.Label</span>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+}
+
+@code {
+    private static readonly int[] ZoomLevels = [60, 90, 120, 180, 240];
+
+    private TrackOccupancyBoard? _board;
+    private readonly List<OperationLocation> _hidden = [];
+    private int _hourWidth = 120;
+
+    // The call being dragged and the track it is held over. Only the tracks of the call's own station accept
+    // it: moving a call to another station would change the route of the train, which is not what this view is for.
+    private StationCall? _dragged;
+    private TrackOccupancyRow? _hover;
+
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
+        BuildBoard();
+    }
+
+    private IEnumerable<int> Hours
+    {
+        get
+        {
+            if (_board is null) yield break;
+            for (var hour = (int)Math.Ceiling(_board.Start.TotalHours); hour <= (int)Math.Floor(_board.End.TotalHours); hour++)
+                yield return hour;
+        }
+    }
+
+    private string TickLeft(int hour) => Px((hour - _board!.Start.TotalHours));
+
+    private static string Number(double value) => value.ToString("0.####", CultureInfo.InvariantCulture);
+
+    // A length on the axis in hours, as the width it takes with the zoom in force. The number is written
+    // for CSS, so it must not follow the culture of the browser.
+    private static string Px(double hours) => $"calc(var(--hour) * {Number(hours)})";
+
+    private string BoardStyle =>
+        $"--hour:{_hourWidth}px; --width:calc(var(--hour) * {Number((_board!.End - _board.Start).TotalHours)})";
+
+    private string BlockStyle(OccupancyBlock block, (TimeSpan Start, TimeSpan End) segment) =>
+        $"left:{Px((segment.Start - _board!.Start).TotalHours)}; width:{Px((segment.End - segment.Start).TotalHours)}; top:calc(var(--lane) * {block.Lane})";
+
+    private static string Title(OccupancyBlock block) =>
+        block.Conflict is null ? block.Title : $"{block.Title}\n{block.Conflict}";
+
+    private bool IsShown(TrackOccupancyStation station) => !_hidden.Contains(station.Location);
+
+    private void OnStationToggled(TrackOccupancyStation station, ChangeEventArgs e)
+    {
+        if (e.Value is true) _hidden.Remove(station.Location);
+        else if (!_hidden.Contains(station.Location)) _hidden.Add(station.Location);
+    }
+
+    private void OnZoomChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var pixels)) _hourWidth = pixels;
+    }
+
+    private bool IsDropTarget(TrackOccupancyRow row) =>
+        _dragged is { } call && !ReferenceEquals(call.Track, row.Track) && call.Track.Station.Equals(row.Track.Station);
+
+    private void OnDragEnter(TrackOccupancyRow row) => _hover = IsDropTarget(row) ? row : null;
+
+    private void OnDragEnd()
+    {
+        _dragged = null;
+        _hover = null;
+    }
+
+    private void OnDrop(TrackOccupancyRow row)
+    {
+        var call = _dragged;
+        OnDragEnd();
+        if (call is null || !call.Track.Station.Equals(row.Track.Station)) return;
+        if (call.MoveTo(row.Track)) ScheduleState.SaveAndNotify();
+    }
+
+    private void OnStateChanged()
+    {
+        BuildBoard();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void BuildBoard()
+    {
+        _board = ScheduleState.Schedule is { } plan && ScheduleState.Layout is { } layout
+            ? TrackOccupancyBoard.Create(plan, layout.Settings.ToGraphSettings(), ValidationState.Errors)
+            : null;
+    }
+
+    public void Dispose()
+    {
+        ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
+    }
+}

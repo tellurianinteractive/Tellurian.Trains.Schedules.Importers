@@ -2777,4 +2777,19 @@
   <data name="UnloadWagonsHelp" xml:space="preserve">
     <value>Die Wagen werden dort entladen, wo der Zugabschnitt endet, und dorthin zurückgeführt, wo der Umlauf der Wagengruppe sie zuletzt beladen hat. Ein anderer Zug kann sie zurückbringen.</value>
   </data>
+  <data name="TrackOccupancy" xml:space="preserve">
+    <value>Gleisbelegung</value>
+  </data>
+  <data name="TrackOccupancyNoTracks" xml:space="preserve">
+    <value>Es gibt keine Bahnhöfe mit Gleisen zum Anzeigen.</value>
+  </data>
+  <data name="TrackOccupancyDragHint" xml:space="preserve">
+    <value>Ziehen Sie einen Zug auf ein anderes Gleis desselben Bahnhofs, um ihn zu verschieben.</value>
+  </data>
+  <data name="TrackOccupancyHeld" xml:space="preserve">
+    <value>Abgestellte Fahrzeuge</value>
+  </data>
+  <data name="TrackOccupancyZoom" xml:space="preserve">
+    <value>Zoom (Pixel pro Stunde)</value>
+  </data>
 </root>

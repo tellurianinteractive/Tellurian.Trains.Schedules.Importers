@@ -2777,4 +2777,19 @@
   <data name="UnloadWagonsHelp" xml:space="preserve">
     <value>Vognene aflæsses, hvor togafsnittet slutter, og sendes tilbage til det sted, hvor vognsættets omløb sidst læssede dem. Et andet tog kan føre dem tilbage.</value>
   </data>
+  <data name="TrackOccupancy" xml:space="preserve">
+    <value>Sporbelægning</value>
+  </data>
+  <data name="TrackOccupancyNoTracks" xml:space="preserve">
+    <value>Der er ingen stationer med spor at vise.</value>
+  </data>
+  <data name="TrackOccupancyDragHint" xml:space="preserve">
+    <value>Træk et tog til et andet spor på samme station for at flytte det.</value>
+  </data>
+  <data name="TrackOccupancyHeld" xml:space="preserve">
+    <value>Holdende køretøjer</value>
+  </data>
+  <data name="TrackOccupancyZoom" xml:space="preserve">
+    <value>Zoom (pixel pr. time)</value>
+  </data>
 </root>

@@ -2797,4 +2797,19 @@
   <data name="UnloadWagonsHelp" xml:space="preserve">
     <value>The wagons are unloaded where the train part ends and sent back to where the wagonset's schedule last loaded them. Another train may bring them back.</value>
   </data>
+  <data name="TrackOccupancy" xml:space="preserve">
+    <value>Track occupancy</value>
+  </data>
+  <data name="TrackOccupancyNoTracks" xml:space="preserve">
+    <value>There are no stations with tracks to show.</value>
+  </data>
+  <data name="TrackOccupancyDragHint" xml:space="preserve">
+    <value>Drag a train to another track of the same station to move it.</value>
+  </data>
+  <data name="TrackOccupancyHeld" xml:space="preserve">
+    <value>Vehicles standing</value>
+  </data>
+  <data name="TrackOccupancyZoom" xml:space="preserve">
+    <value>Zoom (pixels per hour)</value>
+  </data>
 </root>

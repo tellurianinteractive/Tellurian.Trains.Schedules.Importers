@@ -1,0 +1,195 @@
+.occupancy-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 2rem;
+    font-size: 0.85rem;
+
+    .label {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .station-selector {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem 1rem;
+        padding: 0.25rem 0;
+    }
+
+    .station-option,
+    .zoom {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+}
+
+.occupancy-hint {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    color: #667;
+}
+
+.occupancy-legend {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .swatch {
+        display: inline-block;
+        width: 1.6rem;
+        height: 0.8rem;
+        border-radius: 3px;
+    }
+
+    .swatch.train { background: #5b7ea6; }
+    .swatch.hold { border: 1px dashed #5b7ea6; background: repeating-linear-gradient(135deg, #eef3f8 0 4px, #fff 4px 8px); }
+    .swatch.conflict { border: 2px solid #c00; }
+}
+
+/* The board is as wide as its time axis needs at the chosen zoom and scrolls sideways; the names of the
+   tracks stay in view at the left. */
+.occupancy-board {
+    --lane: 1.7rem;
+    --block: 1.45rem;
+    --names: 3.5rem;
+    --border: #ddd;
+
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 0.78rem;
+    width: fit-content;
+    max-width: 100%;
+
+    .axis,
+    .track-row {
+        display: flex;
+        width: calc(var(--names) + var(--width));
+    }
+
+    .name-cell {
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        flex: 0 0 var(--names);
+        box-sizing: border-box;
+        padding: 0.2rem 0.4rem;
+        background: #f4f6f9;
+        border-right: 1px solid var(--border);
+        font-weight: 600;
+        color: #1a3a5c;
+    }
+
+    .axis {
+        background: #f4f6f9;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ticks {
+        position: relative;
+        flex: 0 0 var(--width);
+        height: 1.4rem;
+    }
+
+    .tick {
+        position: absolute;
+        top: 0.2rem;
+        padding-left: 0.2rem;
+        color: #667;
+    }
+
+    .station-name {
+        position: sticky;
+        left: 0;
+        margin: 0;
+        padding: 0.25rem 0.5rem;
+        width: max-content;
+        font-size: 0.85rem;
+        color: #1a3a5c;
+    }
+
+    .station {
+        border-top: 1px solid var(--border);
+    }
+
+    .track-row {
+        border-top: 1px solid #eee;
+    }
+
+    /* A line every hour, matching the ticks of the axis. */
+    .lanes {
+        position: relative;
+        flex: 0 0 var(--width);
+        height: calc(var(--lane) * var(--lanes) + 0.2rem);
+        background: repeating-linear-gradient(90deg, #e8ebef 0 1px, transparent 1px var(--hour));
+    }
+
+    /* While a train is being dragged, the tracks it may be dropped on stand out. */
+    .track-row.drop-allowed .lanes {
+        background-color: #f3f9ee;
+        outline: 1px dashed #7aa35a;
+        outline-offset: -1px;
+    }
+
+    .track-row.drop-hover .lanes {
+        background-color: #dff0d0;
+        outline: 2px solid #5b9a3a;
+        outline-offset: -2px;
+    }
+
+    .block {
+        position: absolute;
+        box-sizing: border-box;
+        height: var(--block);
+        margin-top: 0.1rem;
+        min-width: 4px;
+        border-radius: 3px;
+        overflow: hidden;
+        white-space: nowrap;
+        line-height: var(--block);
+        padding: 0 0.25rem;
+    }
+
+    .block .text {
+        font-weight: 700;
+    }
+
+    .block.call {
+        cursor: grab;
+    }
+
+    .block.call.being-dragged {
+        opacity: 0.45;
+    }
+
+    /* Vehicles left standing: the same footprint as a train, but hatched and dashed, so it reads as the
+       implied occupancy rather than a train. */
+    .block.hold {
+        border: 1px dashed #5b7ea6;
+        background: repeating-linear-gradient(135deg, #eef3f8 0 4px, #fff 4px 8px);
+        color: #446;
+        cursor: default;
+    }
+
+    .block.hold .text {
+        font-weight: 500;
+    }
+
+    .block.conflict {
+        outline: 2px solid #c00;
+        outline-offset: -1px;
+        z-index: 2;
+    }
+}
