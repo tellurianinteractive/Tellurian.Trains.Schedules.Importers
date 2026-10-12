@@ -665,25 +665,49 @@ public static class ScheduleEditingExtensions
     // a layover cannot quietly add notes at the other end of the part.
     private static void SetToLayover(ScheduledTrainPart part, TractionLayover layover)
     {
-        if (TractionOptionsFor(part, layover) is not { } options) return;
-        options.ToLayover = layover;
+        if (IsWagonSetWorking(part))
+        {
+            if (WagonSetOptionsFor(part, layover) is { } wagons) wagons.ToLayover = layover;
+        }
+        else if (TractionOptionsFor(part, layover) is { } options) options.ToLayover = layover;
+        else return;
         if (layover != TractionLayover.None) part.ToTrack = null;
     }
 
     // Records where a part's traction comes from before departure; see SetToLayover.
     private static void SetFromLayover(ScheduledTrainPart part, TractionLayover layover)
     {
-        if (TractionOptionsFor(part, layover) is not { } options) return;
-        options.FromLayover = layover;
+        if (IsWagonSetWorking(part))
+        {
+            if (WagonSetOptionsFor(part, layover) is { } wagons) wagons.FromLayover = layover;
+        }
+        else if (TractionOptionsFor(part, layover) is { } options) options.FromLayover = layover;
+        else return;
         if (layover != TractionLayover.None) part.FromTrack = null;
     }
+
+    // Whether the part belongs to a working of nothing but wagonsets, whose layover lives in the wagonset
+    // options. Any other working, including one with no vehicle yet, keeps it in the traction options.
+    private static bool IsWagonSetWorking(ScheduledTrainPart part) =>
+        part.Schedule?.Vehicles.ToList() is { Count: > 0 } vehicles && vehicles.All(v => v.IsWagonSet);
+
+    // As TractionOptionsFor, without the couple and uncouple notes.
+    private static WagonSetOptions? WagonSetOptionsFor(ScheduledTrainPart part, TractionLayover layover) =>
+        part.WagonSetOptions ?? (layover == TractionLayover.None ? null : part.WagonSetOptions = new WagonSetOptions { HasCoupleNote = false, HasUncoupleNote = false });
 
     // A named track keeps the traction at the station, so it is neither stabled nor lifted off there.
     private static void ClearLayover(ScheduledTrainPart part, bool arrival)
     {
-        if (part.TractionOptions is not { } options) return;
-        if (arrival) options.ToLayover = TractionLayover.None;
-        else options.FromLayover = TractionLayover.None;
+        if (part.TractionOptions is { } options)
+        {
+            if (arrival) options.ToLayover = TractionLayover.None;
+            else options.FromLayover = TractionLayover.None;
+        }
+        if (part.WagonSetOptions is { } wagons)
+        {
+            if (arrival) wagons.ToLayover = TractionLayover.None;
+            else wagons.FromLayover = TractionLayover.None;
+        }
     }
 
     private static TractionOptions? TractionOptionsFor(ScheduledTrainPart part, TractionLayover layover) =>

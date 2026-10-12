@@ -468,6 +468,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Validera stationsspår?</value>
   </data>
+  <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
+    <value>Fordon upptar spåret medan de står?</value>
+  </data>
   <data name="ValidateStretches" xml:space="preserve">
     <value>Validera sträckor?</value>
   </data>
@@ -1966,6 +1969,18 @@
   </data>
   <data name="TractionAfterArrivalHelp" xml:space="preserve">
     <value>Vart loket eller motorvagnen tar vägen efter att tåget har ankommit: det står kvar på ett spår på stationen, körs till uppställning, eller lyfts av spåret. Uppställning och lyft av skrivs ut som ankomstanmärkning för lokförare och tågklarerare. Valet sätts också på varifrån dragfordonet kommer före nästa avsnitts avgång, så att de stämmer överens.</value>
+  </data>
+  <data name="WagonsetBeforeDeparture" xml:space="preserve">
+    <value>Vagnsätt före avgång</value>
+  </data>
+  <data name="WagonsetBeforeDepartureHelp" xml:space="preserve">
+    <value>Var vagnsättet kommer ifrån innan tåget avgår: ett spår på stationen, uppställning eller pålyft på spåret. Uppställning och påslyft skrivs ut som en avgångsnotering. Inställningen sätter också vart vagnsättet tar vägen efter föregående tågavsnitt, så att de stämmer överens.</value>
+  </data>
+  <data name="WagonsetAfterArrival" xml:space="preserve">
+    <value>Vagnsätt efter ankomst</value>
+  </data>
+  <data name="WagonsetAfterArrivalHelp" xml:space="preserve">
+    <value>Vart vagnsättet tar vägen när tåget har ankommit: det står kvar på ett spår på stationen, flyttas till uppställning eller lyfts av spåret. Uppställning och avlyft skrivs ut som en ankomstnotering. Inställningen sätter också varifrån vagnsättet kommer innan nästa tågavsnitt avgår, så att de stämmer överens.</value>
   </data>
   <data name="LayoverOnTrack" xml:space="preserve">
     <value>På spår</value>

@@ -644,7 +644,7 @@ public static class ValidationExtensions
             var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
             var reported = new List<(ScheduledTrainPart Previous, ScheduledTrainPart Next)>();
-            foreach (var vehicle in plan.ScheduledObjects.Where(v => v.IsTraction))
+            foreach (var vehicle in plan.ScheduledObjects.Where(v => v.IsTraction || v.IsWagonSet))
             {
                 // The unit's working on each session it works, in the order it works the parts.
                 var workings = new List<List<(Schedule Schedule, ScheduledTrainPart Part)>>();
@@ -666,8 +666,8 @@ public static class ValidationExtensions
                     var (previousSchedule, previous) = workings[i][^1];
                     var (nextSchedule, next) = workings[(i + 1) % workings.Count][0];
                     if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
-                    var arrival = previous.TractionOptions?.ToLayover ?? TractionLayover.None;
-                    var departure = next.TractionOptions?.FromLayover ?? TractionLayover.None;
+                    var arrival = previous.ArrivalLayover;
+                    var departure = next.DepartureLayover;
                     if (arrival == departure) continue;
                     if (reported.Any(r => ReferenceEquals(r.Previous, previous) && ReferenceEquals(r.Next, next))) continue;
                     reported.Add((previous, next));
@@ -732,8 +732,8 @@ public static class ValidationExtensions
                 var previous = parts[i];
                 var next = parts[i + 1];
                 if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
-                var arrival = previous.TractionOptions?.ToLayover ?? TractionLayover.None;
-                var departure = next.TractionOptions?.FromLayover ?? TractionLayover.None;
+                var arrival = previous.ArrivalLayover;
+                var departure = next.DepartureLayover;
                 if (arrival == departure) continue;
                 var message = Message.Warning(Strings.ScheduleLayoverMismatch,
                     schedule.Number, previous, ArrivalLayoverText(arrival), next, DepartureLayoverText(departure));
@@ -767,8 +767,8 @@ public static class ValidationExtensions
                 var next = parts[i + 1];
                 if (!next.From.OperationLocation.Equals(previous.To.OperationLocation)) continue;
                 if (previous.OtherToTrack is null && next.OtherFromTrack is null) continue;
-                if (previous.TractionOptions is { ToLayover: not TractionLayover.None }) continue;
-                if (next.TractionOptions is { FromLayover: not TractionLayover.None }) continue;
+                if (previous.ArrivalLayover != TractionLayover.None) continue;
+                if (next.DepartureLayover != TractionLayover.None) continue;
                 var putOn = previous.OtherToTrack ?? previous.To.Track;
                 var fetchedFrom = next.OtherFromTrack ?? next.From.Track;
                 if (putOn.Equals(fetchedFrom)) continue;
@@ -1221,13 +1221,10 @@ public static class ValidationExtensions
             return result;
         }
 
-        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, bool extendByVehicleStay = false, int minMinutesBetweenTrackUsage = 0)
+        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage = 0)
         {
             var result = new List<(StationCall, StationCall)>();
-            // The schedules are still needed when the extension is off: they are what tells two calls of
-            // the same vehicle apart from two vehicles contending for the track.
-            var occupancySchedules = extendByVehicleStay ? vehicleSchedules : null;
-            var mine = stationCall.TrackOccupancy(occupancySchedules);
+            var mine = stationCall.TrackOccupancy;
             // A shunting task with no traction unit takes no track, so its track and times are ignored.
             var occupies = stationCall.OccupiesTrack(vehicleSchedules);
             var conflictingWithMe = remaining.Where(r =>
@@ -1238,22 +1235,19 @@ public static class ValidationExtensions
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
                 // A span a day apart is the same time on the clock, but then on the session a day later.
-                r.TrackOccupancy(occupancySchedules).ConflictsInTime(r.Train!.Sessions, mine, stationCall.Train!.Sessions, minMinutesBetweenTrackUsage) &&
+                r.TrackOccupancy.ConflictsInTime(r.Train!.Sessions, mine, stationCall.Train!.Sessions, minMinutesBetweenTrackUsage) &&
                 !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
-            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, extendByVehicleStay, minMinutesBetweenTrackUsage));
+            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage));
             return result;
         }
 
         /// <summary>
-        /// Describes the span this call actually occupies its track for, rather than the call's own
-        /// arrival and departure — the two differ when a traction unit staying on for the next train
-        /// extends the occupancy (<see cref="TrackOccupancyExtensions.TrackOccupancy"/>), which is the
-        /// span a reported conflict needs to show to make sense of a meet the calls' own times do not.
+        /// Describes the span this call occupies its track for: its own arrival to its departure.
         /// </summary>
-        internal string TrackOccupancySpanText(IEnumerable<Schedule>? vehicleSchedules)
+        internal string TrackOccupancySpanText()
         {
-            var (from, to) = stationCall.TrackOccupancy(vehicleSchedules);
+            var (from, to) = stationCall.TrackOccupancy;
             return string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationCall.OperationLocation, stationCall.Track, from.HHMM(), to.HHMM());
         }
     }
@@ -1264,39 +1258,69 @@ public static class ValidationExtensions
         /// Validates a station track for conflicting calls, using the schedule's vehicle schedules to tell whether conflicting calls share a vehicle.
         /// </summary>
         /// <param name="vehicleSchedules">The vehicle schedules used to determine whether conflicting calls share a vehicle.</param>
-        /// <param name="extendOccupancyByVehicleStay">Whether a traction unit waiting between two trains
-        /// counts as occupying the track; see <see cref="ValidationSettings.ExtendTrackOccupancyByVehicleStay"/>.</param>
+        /// <param name="extendOccupancyByVehicleStay">Whether the vehicles standing on the track between
+        /// their trains count as occupying it; see <see cref="ValidationSettings.ExtendTrackOccupancyByVehicleStay"/>
+        /// and <see cref="TrackHold"/>.</param>
         /// <param name="minMinutesBetweenTrackUsage">The free time the track needs between two occupancies,
         /// in fast-clock minutes; see <see cref="ValidationSettings.MinMinutesBetweenTrackUsage"/>. At zero
         /// only overlapping occupancies conflict.</param>
         /// <returns>The validation errors found.</returns>
-        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false, int minMinutesBetweenTrackUsage = 0) =>
-            stationTrack is null ? [] :
-            stationTrack.GetConflicts(vehicleSchedules, extendOccupancyByVehicleStay, minMinutesBetweenTrackUsage).Select(c =>
+        public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false, int minMinutesBetweenTrackUsage = 0)
+        {
+            if (stationTrack is null) return [];
+            var errors = stationTrack.GetConflicts(vehicleSchedules, minMinutesBetweenTrackUsage).Select(c =>
             {
-                // Same occupancy the conflict was detected with, not each call's own arrival/departure,
-                // so a conflict caused by a traction unit's stay (rather than the calls' own times) still
-                // shows the span that actually overlaps.
-                var occupancySchedules = extendOccupancyByVehicleStay ? vehicleSchedules : null;
                 // The call that takes the track first is named first, so the two spans in the message read
                 // in time order and the overlap between them is easy to see.
-                var (first, second) = c.one.TrackOccupancy(occupancySchedules).From <= c.another.TrackOccupancy(occupancySchedules).From ? (c.one, c.another) : (c.another, c.one);
-                var firstSpan = first.TrackOccupancySpanText(occupancySchedules);
-                var secondSpan = second.TrackOccupancySpanText(occupancySchedules);
+                var (first, second) = c.one.TrackOccupancy.From <= c.another.TrackOccupancy.From ? (c.one, c.another) : (c.another, c.one);
+                var firstSpan = first.TrackOccupancySpanText();
+                var secondSpan = second.TrackOccupancySpanText();
                 // Two occupancies that do not overlap are only in conflict because the required free time
                 // between them is missing, and saying they overlap would then be plainly wrong: the times
                 // in the message do not, and the planner needs to be told how short the gap actually is.
-                var free = second.TrackOccupancy(occupancySchedules).FreeMinutesBetween(second.Train!.Sessions, first.TrackOccupancy(occupancySchedules), first.Train!.Sessions);
+                var free = second.TrackOccupancy.FreeMinutesBetween(second.Train!.Sessions, first.TrackOccupancy, first.Train!.Sessions);
                 var message = free < 0
                     ? Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan)
                     : Message.Information(Strings.CallAtStationTooCloseInTimeToOtherCall, first.Train!, firstSpan, second.Train!, secondSpan, free, minMinutesBetweenTrackUsage);
                 return ValidationError.StationTrackConflict(stationTrack, first, second, message);
             });
+            return extendOccupancyByVehicleStay
+                ? errors.Concat(stationTrack.GetHoldConflicts(vehicleSchedules, minMinutesBetweenTrackUsage))
+                : errors;
+        }
 
-        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay, int minMinutesBetweenTrackUsage)
+        // The calls of other schedules that take a track while the vehicles of a schedule stand on it.
+        // Holds of different vehicles are not tested against each other: a track holds several vehicles,
+        // and two that stay on it together (a locomotive and the wagons it brought) are no conflict.
+        private IEnumerable<ValidationError> GetHoldConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage)
+        {
+            var holds = vehicleSchedules.TrackHolds.Where(h => h.Track.Equals(stationTrack)).ToList();
+            if (holds.Count == 0) return [];
+            var result = new List<ValidationError>();
+            foreach (var hold in holds)
+            {
+                foreach (var call in stationTrack.Calls)
+                {
+                    if (call.Train is not { } train || !call.OccupiesTrack(vehicleSchedules)) continue;
+                    if (hold.Schedule.Parts.Any(p => p.ContainsCall(call))) continue;
+                    if (!call.TrackOccupancy.ConflictsInTime(train.Sessions, hold.Span, hold.Sessions, minMinutesBetweenTrackUsage)) continue;
+
+                    var callSpan = call.TrackOccupancySpanText();
+                    var holdSpan = string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationTrack.Station, stationTrack, hold.From.HHMM(), hold.To.HHMM());
+                    var free = hold.Span.FreeMinutesBetween(hold.Sessions, call.TrackOccupancy, train.Sessions);
+                    var message = free < 0
+                        ? Message.Information(Strings.CallAtStationOverlapsInTimeWithStandingVehicles, train, callSpan, hold.Vehicles, holdSpan)
+                        : Message.Information(Strings.CallAtStationTooCloseInTimeToStandingVehicles, train, callSpan, hold.Vehicles, holdSpan, free, minMinutesBetweenTrackUsage);
+                    result.Add(ValidationError.StationTrackConflict(stationTrack, call, hold, message));
+                }
+            }
+            return result;
+        }
+
+        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage)
         {
             if (stationTrack.Calls.Count < 2) return [];
-            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, extendOccupancyByVehicleStay, minMinutesBetweenTrackUsage);
+            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage);
             return result.Distinct();
         }
 

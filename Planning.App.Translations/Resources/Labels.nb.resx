@@ -468,6 +468,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Valider stasjonsspor?</value>
   </data>
+  <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
+    <value>Kjøretøy opptar sporet mens de står?</value>
+  </data>
   <data name="ValidateStretches" xml:space="preserve">
     <value>Valider strekninger?</value>
   </data>
@@ -1966,6 +1969,18 @@
   </data>
   <data name="TractionAfterArrivalHelp" xml:space="preserve">
     <value>Hvor loket eller togsettet tar veien etter at toget har ankommet: det blir stående på et spor på stasjonen, kjøres til hensetting, eller løftes av sporet. Hensetting og løft av skrives ut som ankomstmerknad for lokfører og togekspeditør. Valget settes også på hvor trekkraften kommer fra før neste togavsnitts avgang, slik at de stemmer overens.</value>
+  </data>
+  <data name="WagonsetBeforeDeparture" xml:space="preserve">
+    <value>Vognsett før avgang</value>
+  </data>
+  <data name="WagonsetBeforeDepartureHelp" xml:space="preserve">
+    <value>Hvor vognsettet kommer fra før toget går: et spor på stasjonen, hensetting eller løftet opp på sporet. Hensetting og oppløfting skrives ut som et avgangsnotat. Innstillingen setter også hvor vognsettet blir av etter forrige togavsnitt, slik at de stemmer overens.</value>
+  </data>
+  <data name="WagonsetAfterArrival" xml:space="preserve">
+    <value>Vognsett etter ankomst</value>
+  </data>
+  <data name="WagonsetAfterArrivalHelp" xml:space="preserve">
+    <value>Hvor vognsettet blir av når toget har ankommet: det står på et spor på stasjonen, flyttes til hensetting eller løftes av sporet. Hensetting og avløfting skrives ut som et ankomstnotat. Innstillingen setter også hvor vognsettet kommer fra før neste togavsnitt går, slik at de stemmer overens.</value>
   </data>
   <data name="LayoverOnTrack" xml:space="preserve">
     <value>På spor</value>

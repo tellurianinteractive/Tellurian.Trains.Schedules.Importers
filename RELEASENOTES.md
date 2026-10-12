@@ -4,6 +4,12 @@
 
 ### New Features
 
+- **Wagonsets can be stabled or lifted off.** **`WagonSetOptions.FromLayover`** and **`ToLayover`** (the existing `TractionLayover`) work as the traction options do: `Schedule.SetArrivalLayover`/`SetDepartureLayover` store them in the wagonset options for a working of nothing but wagonsets and pair the neighbouring part, `Stabling`/`LiftedOff` give `ToParkingNote`/`FromParkingNote` (worded "move" for a wagonset, not "drive") and `LiftOffNote`/`LiftOnNote`, rule S6 and the between-sessions pairing include wagonsets, and track holds are freed. New **`ScheduledTrainPart.ArrivalLayover`** and **`DepartureLayover`** read the layover from either options type.
+
+- **Track occupancy by standing vehicles.** New **`TrackHold`** and **`Schedule.TrackHolds`** / **`IEnumerable<Schedule>.TrackHolds`** say where the vehicles of a schedule stand between their trains: on the arrival track until the next train (or until departure when fetched), on the track a part puts them on or fetches them from, from the start of the day to the first departure and from the last arrival to the end of the day. Stabling and lifting off (traction only) hold no track. `Plan.MarkedTrackHolds` gives them when `ValidationSettings.ExtendTrackOccupancyByVehicleStay` is on. With that setting, `StationTrack.GetValidationErrors` also reports a train that takes a track while another schedule's vehicles stand on it. Wagonsets count as well as traction units.
+
+  **Breaking:** `StationCall.TrackOccupancy(vehicleSchedules)` is now the property **`StationCall.TrackOccupancy`**, the call's own arrival and departure; the stay is a `TrackHold`. A traction unit that leaves from a different track than it arrived on, with nothing named, now holds its arrival track until it departs (previously the gap was left unclaimed).
+
 - **Loading and unloading wagons.** New **`WagonSetKind`** (`Unspecified`, `Passenger`, `Cargo`) and **`ScheduledObject.WagonSetKind`**, stated on the wagonset itself. `WagonSetOptions` gains **`LoadWagons`** and **`UnloadWagons`**, which generate the arrival notes **`LoadWagonsNote`** and **`UnloadWagonsNote`** (messages in all five languages). The unload note carries `ReturnTo`: where the wagonset's schedule last loaded the wagons, so a different train may bring them back. New validation error **`WagonSetLoadingMismatch`** for an unload without an earlier load, a load while still loaded, or wagons left loaded at the end of the schedule.
 
 - **Shunters stationed at an operation location.** New **`ScheduledObjectType.Shunter`** (added last, so

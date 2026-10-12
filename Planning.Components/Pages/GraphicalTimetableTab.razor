@@ -204,8 +204,9 @@ else
             _graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
             // A break may have been cleared since it was last selected; fall back to the whole graph.
             if (!HasBreak) _half = GraphHalf.Whole;
+            var holds = ScheduleState.Schedule?.MarkedTrackHolds ?? [];
             _graphSchedules = [.. ScheduleState.SelectedStretches
-                .Select(stretch => new GraphSchedule(stretch, timetable, _graphSettings, _half))];
+                .Select(stretch => new GraphSchedule(stretch, timetable, _graphSettings, _half, trackHolds: holds))];
 
             // The loco driver demand strip shares the graphs' time axis. Take the window from a drawn graph whenever
             // there is one, so the two line up exactly; with nothing selected there is no graph to match, so

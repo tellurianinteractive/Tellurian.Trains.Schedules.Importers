@@ -1,4 +1,5 @@
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Schedules;
 using Tellurian.Trains.Schedules.Model.Settings;
 using Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -26,6 +27,7 @@ public sealed class GraphReport
     private readonly Timetable? _timetable;
     private readonly LayoutSettings _settings;
     private readonly int _longestSignature;
+    private IReadOnlyList<TrackHold> _trackHolds = [];
     private readonly Dictionary<double, GraphSettings> _byStationSpacing = [];
 
     /// <summary>A report with nothing to print, for when no plan is loaded.</summary>
@@ -53,7 +55,7 @@ public sealed class GraphReport
     public bool Monochrome => _settings.GraphicTimetable.PrintMonochrome;
 
     /// <summary>Builds the report. Returns a report with no pages when there is nothing to print.</summary>
-    public static GraphReport Create(Timetable timetable, IReadOnlyList<TimetableStretch> stretches, LayoutSettings settings, GraphPageGeometry geometry)
+    public static GraphReport Create(Timetable timetable, IReadOnlyList<TimetableStretch> stretches, LayoutSettings settings, GraphPageGeometry geometry, IReadOnlyList<TrackHold>? trackHolds = null)
     {
         ArgumentNullException.ThrowIfNull(timetable);
         ArgumentNullException.ThrowIfNull(stretches);
@@ -68,7 +70,7 @@ public sealed class GraphReport
             .SelectMany(stretch => stretch.Stations)
             .Max(station => station.Signature?.Length ?? 0);
 
-        var report = new GraphReport(timetable, settings, longestSignature);
+        var report = new GraphReport(timetable, settings, longestSignature) { _trackHolds = trackHolds ?? [] };
         var print = report.SettingsFor(settings.GraphicTimetable.PrintStationSpacingMm);
 
         var items = stretches.Select(stretch => report.Fit(stretch, geometry)).ToList();
@@ -91,7 +93,7 @@ public sealed class GraphReport
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(page);
         if (_timetable is null) throw new InvalidOperationException("An empty report has no graphs to draw.");
-        return new GraphSchedule(item.Stretch, _timetable, SettingsFor(item.StationSpacingMm), GraphHalf.Whole, (page.From, page.To));
+        return new GraphSchedule(item.Stretch, _timetable, SettingsFor(item.StationSpacingMm), GraphHalf.Whole, (page.From, page.To), _trackHolds);
     }
 
     /// <summary>

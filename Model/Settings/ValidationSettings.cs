@@ -59,8 +59,9 @@ public sealed class ValidationSettings
     public int MinMinutesBetweenTrackUsage { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether a traction unit's stay between two trains counts as
-    /// occupying the track, on top of what the trains themselves occupy.
+    /// Gets or sets a value indicating whether the vehicles (traction units and wagonsets) standing
+    /// between their trains count as occupying tracks, on top of what the trains themselves occupy. See
+    /// <see cref="Schedules.TrackHold"/>.
     /// </summary>
     /// <remarks>
     /// Off by default, because it is only sound where the plan actually records parking. A unit that

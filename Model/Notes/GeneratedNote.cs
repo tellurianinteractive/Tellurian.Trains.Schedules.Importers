@@ -91,6 +91,9 @@ public static class GeneratedNoteExtensions
             LoadWagonsNote(var so) => new(NoteResources.LoadWagons, so),
             UnloadWagonsNote(var so, null) => new(NoteResources.UnloadWagons, so),
             UnloadWagonsNote(var so, var returnTo) => new(NoteResources.UnloadWagonsAndReturn, so, returnTo),
+            // Wagons are not driven; they are moved.
+            FromParkingNote(var so) when so.IsWagonSet => new(NoteResources.MoveWagonSetFromParkingToDepartureTrack, so),
+            ToParkingNote(var so) when so.IsWagonSet => new(NoteResources.MoveWagonSetToParking, so),
             FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
             ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
             LiftOnNote(var so) => new(NoteResources.LiftTractionUnitOnToDepartureTrack, so),

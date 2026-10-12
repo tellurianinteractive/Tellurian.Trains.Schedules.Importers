@@ -1,4 +1,5 @@
 ﻿using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.Schedules;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
@@ -11,13 +12,14 @@ public class GraphSchedule
     /// <param name="window">An explicit time window that replaces the one derived from the settings and
     /// <paramref name="half"/>. Used when printing, where the paginator slices the operating window into
     /// page-sized spans; lines and labels outside the slice are clipped away as usual.</param>
-    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null, GraphHalf half = GraphHalf.Whole, (TimeSpan Start, TimeSpan End)? window = null)
+    public GraphSchedule(TimetableStretch timetableStretch, Timetable timetable, GraphSettings? graphSettings = null, GraphHalf half = GraphHalf.Whole, (TimeSpan Start, TimeSpan End)? window = null, IReadOnlyList<TrackHold>? trackHolds = null)
     {
         TimetableStretch = timetableStretch;
         Timetable = timetable;
         GraphSettings = graphSettings ?? GraphSettings.Default;
         Half = half;
         _window = window;
+        TrackHolds = trackHolds ?? [];
 
         var stretchStations = new HashSet<OperationLocation>(timetableStretch.Stations);
         Stations = [.. timetableStretch.Stations];
@@ -83,6 +85,10 @@ public class GraphSchedule
     public StationTrack[][] StationTracks { get; }
     public TrackStretch[] TrackStretches { get; }
     public Train[] Trains { get; }
+
+    /// <summary>Where vehicles stand on the tracks between their trains, drawn as dashed lines on the track.
+    /// Empty unless the plan counts a vehicle's stay as occupying the track.</summary>
+    public IReadOnlyList<TrackHold> TrackHolds { get; }
 
     // The time axis comes from the layout's operating window (General settings), which the importer
     // initialises from the timetable's driver service span (earliest arrival = first start of service,

@@ -83,6 +83,24 @@ else
                 }
             }
 
+            @* Draw vehicles left standing on a track between their trains as dashed lines, in the colour of
+               the train that left them there. *@
+            @for (var s = 0; s < Current.Stations.Length; s++)
+            {
+                var stationTracks = Current.StationTracks[s];
+                @for (var t = 0; t < stationTracks.Length; t++)
+                {
+                    var track = stationTracks[t];
+                    @foreach (var hold in Current.TrackHolds.Where(h => track.Equals(h.Track)))
+                    {
+                        @foreach (var trackLine in Current.OnStationTrackLine(s, t, hold.From, hold.To))
+                        {
+                            <line class="track-hold" stroke="@TrainStroke(hold.Train)" stroke-width="@TrainStrokeWidth" stroke-dasharray="@HoldDashArray" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"><title>@hold.Vehicles @hold.From.HHMM()–@hold.To.HHMM()</title></line>
+                        }
+                    }
+                }
+            }
+
             @* Draw trains between stations (forward direction) *@
             @for (var toStationIndex = 1; toStationIndex < Current.Stations.Length; toStationIndex++)
             {
@@ -228,6 +246,16 @@ else
 
     string TrackStroke(StationTrack t) => t.IsMain ? "#404040" : t.IsScheduled ? "#bfbfbf" : "#ff8080";
     string TrainStroke(Train t) => Monochrome ? "#000000" : t.Category?.Color ?? "#000000";
+    // Dashes scale with the stroke so a dashed line looks the same on screen and on paper, where a drawing
+    // unit is a hundredth of a millimetre.
+    string HoldDashArray
+    {
+        get
+        {
+            var width = Current!.GraphSettings.TrainStrokeWidth;
+            return string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{width * 4} {width * 3}");
+        }
+    }
     string TrainStrokeWidth => Current!.GraphSettings.TrainStrokeWidth.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     // Perpendicular lift of a train identity label off its line, via <textPath> dy, so the digits sit just

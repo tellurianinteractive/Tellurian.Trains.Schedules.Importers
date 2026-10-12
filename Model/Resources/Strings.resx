@@ -126,6 +126,12 @@
   <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
     <value>Train {0} {1} is followed by train {2} {3} after only {4} minutes; at least {5} minutes are required.</value>
   </data>
+  <data name="CallAtStationOverlapsInTimeWithStandingVehicles" xml:space="preserve">
+    <value>Train {0} {1} overlaps in time with {2} standing {3}.</value>
+  </data>
+  <data name="CallAtStationTooCloseInTimeToStandingVehicles" xml:space="preserve">
+    <value>Train {0} {1} is only {4} minutes from {2} standing {3}; at least {5} minutes are required.</value>
+  </data>
   <data name="CallMustBeAfterPreviousCall" xml:space="preserve">
     <value>Call {0} must be after previous call {1} for train {2}.</value>
   </data>

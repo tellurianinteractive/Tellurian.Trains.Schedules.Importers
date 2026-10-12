@@ -126,6 +126,12 @@
   <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
     <value>Auf Zug {0} {1} folgt Zug {2} {3} schon nach {4} Minuten; erforderlich sind mindestens {5} Minuten.</value>
   </data>
+  <data name="CallAtStationOverlapsInTimeWithStandingVehicles" xml:space="preserve">
+    <value>Zug {0} {1} überschneidet sich zeitlich mit {2}, stehend {3}.</value>
+  </data>
+  <data name="CallAtStationTooCloseInTimeToStandingVehicles" xml:space="preserve">
+    <value>Zug {0} {1} liegt nur {4} Minuten von {2}, stehend {3}, entfernt; erforderlich sind mindestens {5} Minuten.</value>
+  </data>
   <data name="CallAtStationTrackDuringTimes" xml:space="preserve">
     <value>bei {0} Gleis {1} an {2} ab {3}</value>
   </data>

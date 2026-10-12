@@ -13,15 +13,9 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// happens only while a train is on its way and is therefore suppressed at those two calls.
 /// </para>
 /// <para>
-/// The traction unit then extends it. A unit that arrives with one train and leaves with the next stands
-/// on the track for the whole time between, so the track is not free in that gap even though no train's
-/// own window covers it.
-/// </para>
-/// <para>
-/// Unless it is stabled or lifted off. Where the unit is driven to stabling or lifted off on arrival, or
-/// comes from stabling or is lifted on before departing, it is not standing on this track between the two trains, and occupancy falls back to what
-/// each train occupies by itself. The same holds where it is put on another track of the station on
-/// arrival, or fetched from another track before departing.
+/// The vehicles then extend it: a traction unit or a wagonset stands where it was left until it is moved
+/// or leaves with its next train. That stay is not a call and is described by a <see cref="TrackHold"/>,
+/// which is also what the graph draws as a dashed line.
 /// </para>
 /// </remarks>
 public static class TrackOccupancyExtensions
@@ -40,58 +34,10 @@ public static class TrackOccupancyExtensions
             (vehicleSchedules ?? []).Any(s => s.Parts.Any(p => p.ContainsCall(call)) && s.Vehicles.Any(v => v.IsTraction));
 
         /// <summary>
-        /// The span for which this call occupies its track, given the vehicle schedules that may extend
-        /// it beyond the call's own times.
+        /// The span for which this call occupies its track by itself: its arrival to its departure. What
+        /// the vehicles standing there add before and after is a <see cref="TrackHold"/>.
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The extension runs only to where the next train's <em>own</em> window begins, not to its
-        /// departure. The two spans are then contiguous rather than nested, so between them they cover
-        /// the unit's whole stay while a third train standing in the gap conflicts with exactly one of
-        /// them — one clash reported once, instead of the same clash reported against both trains.
-        /// </para>
-        /// <para>
-        /// Only a continuation onto the <em>same track</em> extends anything. A unit that leaves on a
-        /// train departing from another track has moved between the two, and nothing in the data says
-        /// when — so the gap is left unclaimed rather than attributed to a track it may not be on. The
-        /// same goes for a unit put on another track after arriving. One fetched from this track for a
-        /// train departing from another stays here until then, so that one does extend it.
-        /// </para>
-        /// </remarks>
-        /// <param name="vehicleSchedules">The schedules that assign vehicles to train parts. Occupancy
-        /// falls back to the call's own window when none of them covers this call.</param>
-        public (Time From, Time To) TrackOccupancy(IEnumerable<Schedule>? vehicleSchedules)
-        {
-            call = call.ValueOrException(nameof(call));
-            var own = (From: call.Arrival, To: call.Departure);
-            if (vehicleSchedules is null) return own;
-
-            foreach (var schedule in vehicleSchedules)
-            {
-                var parts = schedule.OrderedParts;
-                for (var i = 0; i < parts.Count - 1; i++)
-                {
-                    // By reference: StationCall equality is by value and a train may hold two calls that
-                    // compare equal, so only identity says this is the call the unit arrives on.
-                    if (!ReferenceEquals(parts[i].To, call)) continue;
-
-                    var arriving = parts[i];
-                    var leaving = parts[i + 1];
-                    // Stabled or lifted off, the unit is not on this track between the two trains.
-                    if (arriving.TractionOptions is { ToLayover: not TractionLayover.None }) return own;
-                    if (leaving.TractionOptions is { FromLayover: not TractionLayover.None }) return own;
-                    // Where the vehicles are put after arriving and where they are fetched from before
-                    // leaving: the other track a part names, or else the train's own. Only a stay on this
-                    // call's track at both ends keeps this track occupied.
-                    var leftOn = arriving.OtherToTrack ?? call.Track;
-                    var fetchedFrom = leaving.OtherFromTrack ?? leaving.From.Track;
-                    if (!leftOn.Equals(call.Track) || !fetchedFrom.Equals(call.Track)) return own;
-
-                    return leaving.From.Arrival > own.To ? (own.From, leaving.From.Arrival) : own;
-                }
-            }
-            return own;
-        }
+        public (Time From, Time To) TrackOccupancy => (call.Arrival, call.Departure);
     }
 
     /// <summary>

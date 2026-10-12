@@ -85,6 +85,12 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Efter ankomst, kör {0} från ankomstspåret till uppställningsplatsen.</value>
   </data>
+  <data name="MoveWagonSetFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Före avgång, flytta {0} från uppställningsplatsen till avgångsspåret.</value>
+  </data>
+  <data name="MoveWagonSetToParking" xml:space="preserve">
+    <value>Efter ankomst, flytta {0} från ankomstspåret till uppställningsplatsen.</value>
+  </data>
   <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
     <value>Före avgång, lyft på {0} på avgångsspåret.</value>
   </data>

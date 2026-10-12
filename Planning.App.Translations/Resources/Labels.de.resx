@@ -468,6 +468,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Stationsgleise prüfen?</value>
   </data>
+  <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
+    <value>Fahrzeuge belegen das Gleis, solange sie stehen?</value>
+  </data>
   <data name="ValidateStretches" xml:space="preserve">
     <value>Strecken prüfen?</value>
   </data>
@@ -1966,6 +1969,18 @@
   </data>
   <data name="TractionAfterArrivalHelp" xml:space="preserve">
     <value>Wohin die Lok oder der Triebzug nach der Ankunft des Zuges kommt: sie bleibt auf einem Gleis des Bahnhofs, fährt zum Abstellgleis, oder wird abgehoben. Abstellgleis und Abheben werden als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt. Die Wahl gilt auch dafür, woher das Triebfahrzeug vor der Abfahrt des nächsten Zugteils kommt, damit beide übereinstimmen.</value>
+  </data>
+  <data name="WagonsetBeforeDeparture" xml:space="preserve">
+    <value>Wagengruppe vor Abfahrt</value>
+  </data>
+  <data name="WagonsetBeforeDepartureHelp" xml:space="preserve">
+    <value>Woher die Wagengruppe vor der Abfahrt kommt: von einem Gleis des Bahnhofs, vom Abstellgleis oder aufgegleist. Abstellen und Aufgleisen erscheinen als Abfahrtshinweis. Die Einstellung legt auch fest, wohin die Wagengruppe nach dem vorherigen Zugabschnitt kommt, damit beide übereinstimmen.</value>
+  </data>
+  <data name="WagonsetAfterArrival" xml:space="preserve">
+    <value>Wagengruppe nach Ankunft</value>
+  </data>
+  <data name="WagonsetAfterArrivalHelp" xml:space="preserve">
+    <value>Wohin die Wagengruppe nach der Ankunft kommt: sie bleibt auf einem Gleis des Bahnhofs, wird ins Abstellgleis umgesetzt oder vom Gleis abgehoben. Abstellen und Abheben erscheinen als Ankunftshinweis. Die Einstellung legt auch fest, woher die Wagengruppe vor der Abfahrt des nächsten Zugabschnitts kommt, damit beide übereinstimmen.</value>
   </data>
   <data name="LayoverOnTrack" xml:space="preserve">
     <value>Auf dem Gleis</value>

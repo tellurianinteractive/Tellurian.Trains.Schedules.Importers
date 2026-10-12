@@ -468,6 +468,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Validate station tracks?</value>
   </data>
+  <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
+    <value>Vehicles occupy the track while standing?</value>
+  </data>
   <data name="ValidateStretches" xml:space="preserve">
     <value>Validate stretches?</value>
   </data>
@@ -1982,6 +1985,18 @@
   </data>
   <data name="TractionAfterArrivalHelp" xml:space="preserve">
     <value>Where the locomotive or trainset goes after the train arrives: it stays on a track of the station, is driven to stabling, or is lifted off the track. Stabling and lifting off are printed as an arrival note for the loco driver and the dispatcher. Setting it also sets where the traction comes from before the next part departs, so the two match.</value>
+  </data>
+  <data name="WagonsetBeforeDeparture" xml:space="preserve">
+    <value>Wagonset before departure</value>
+  </data>
+  <data name="WagonsetBeforeDepartureHelp" xml:space="preserve">
+    <value>Where the wagonset comes from before the train departs: a track of the station, stabling, or lifted on to the track. Stabling and lifting on are printed as a departure note. Setting it also sets where the wagonset goes after the train part before arrives, so the two match.</value>
+  </data>
+  <data name="WagonsetAfterArrival" xml:space="preserve">
+    <value>Wagonset after arrival</value>
+  </data>
+  <data name="WagonsetAfterArrivalHelp" xml:space="preserve">
+    <value>Where the wagonset goes after the train arrives: it stays on a track of the station, is moved to stabling, or is lifted off the track. Stabling and lifting off are printed as an arrival note. Setting it also sets where the wagonset comes from before the next train part departs, so the two match.</value>
   </data>
   <data name="LayoverOnTrack" xml:space="preserve">
     <value>On track</value>

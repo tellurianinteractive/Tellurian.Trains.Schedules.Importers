@@ -56,10 +56,10 @@
         }
         @* Stabling and lifting off take the traction off the station's tracks, so they are asked for apart
            from them, and exclude a named track: that already says where the traction comes from. *@
-        @if (ShowTractionOptions)
+        @if (ShowLayoverOptions)
         {
             <div class="field">
-                <label title="@Translator("TractionBeforeDepartureHelp")">@Translator("TractionBeforeDeparture")</label>
+                <label title="@Translator(ShowTractionOptions ? "TractionBeforeDepartureHelp" : "WagonsetBeforeDepartureHelp")">@Translator(ShowTractionOptions ? "TractionBeforeDeparture" : "WagonsetBeforeDeparture")</label>
                 <select value="@_fromLayover" @onchange="SetFromLayover">
                     <option value="@TractionLayover.None">@Translator("LayoverOnTrack")</option>
                     <option value="@TractionLayover.Stabling">@Translator("LayoverFromStabling")</option>
@@ -84,10 +84,10 @@
                              Value="_toTrack?.Id" ValueChanged="SetToTrack" />
             </div>
         }
-        @if (ShowTractionOptions)
+        @if (ShowLayoverOptions)
         {
             <div class="field">
-                <label title="@Translator("TractionAfterArrivalHelp")">@Translator("TractionAfterArrival")</label>
+                <label title="@Translator(ShowTractionOptions ? "TractionAfterArrivalHelp" : "WagonsetAfterArrivalHelp")">@Translator(ShowTractionOptions ? "TractionAfterArrival" : "WagonsetAfterArrival")</label>
                 <select value="@_toLayover" @onchange="SetToLayover">
                     <option value="@TractionLayover.None">@Translator("LayoverOnTrack")</option>
                     <option value="@TractionLayover.Stabling">@Translator("LayoverToStabling")</option>
@@ -246,6 +246,9 @@
     private bool ShowTractionOptions =>
         !Schedule.Vehicles.Any() || Schedule.Vehicles.Any(v => v.IsTraction);
 
+    // Stabling and lifting off are offered for traction and for wagonsets alike.
+    private bool ShowLayoverOptions => ShowTractionOptions || ShowWagonSetOptions;
+
     // Whether the part couples a wagonset, the only kind of vehicle given a position in the train.
     private bool ShowWagonSetOptions => Schedule.Vehicles.Any(v => v.IsWagonSet);
 
@@ -271,8 +274,8 @@
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
         _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
         _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
-        _fromLayover = Part.TractionOptions?.FromLayover ?? TractionLayover.None;
-        _toLayover = Part.TractionOptions?.ToLayover ?? TractionLayover.None;
+        _fromLayover = Part.DepartureLayover;
+        _toLayover = Part.ArrivalLayover;
         _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
         _loadWagons = Part.WagonSetOptions?.LoadWagons ?? false;
         _unloadWagons = Part.WagonSetOptions?.UnloadWagons ?? false;
@@ -403,10 +406,10 @@
     // neighbour says, so a mismatch already there is still reported rather than silently put right.
     private void ApplyLayovers()
     {
-        if (!ShowTractionOptions) return;
-        if (_fromLayover != (Part.TractionOptions?.FromLayover ?? TractionLayover.None))
+        if (!ShowLayoverOptions) return;
+        if (_fromLayover != Part.DepartureLayover)
             Schedule.SetDepartureLayover(Part, _fromLayover);
-        if (_toLayover != (Part.TractionOptions?.ToLayover ?? TractionLayover.None))
+        if (_toLayover != Part.ArrivalLayover)
             Schedule.SetArrivalLayover(Part, _toLayover);
     }
 

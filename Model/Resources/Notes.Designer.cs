@@ -250,6 +250,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Before departure, move {0} from stabling to departure track.
+        /// </summary>
+        internal static string MoveWagonSetFromParkingToDepartureTrack {
+            get {
+                return ResourceManager.GetString("MoveWagonSetFromParkingToDepartureTrack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to After arrival, move {0} from arrival track to stabling.
+        /// </summary>
+        internal static string MoveWagonSetToParking {
+            get {
+                return ResourceManager.GetString("MoveWagonSetToParking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After arrival, drive {0} from arrival track to stabling..
         /// </summary>
         internal static string MoveTractionUnitToParking {

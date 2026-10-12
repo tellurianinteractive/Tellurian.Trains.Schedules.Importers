@@ -91,6 +91,12 @@
     <value>After arrival, drive {0} from arrival track to stabling.</value>
     <comment>{0}=traction unit</comment>
   </data>
+  <data name="MoveWagonSetFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Before departure, move {0} from stabling to departure track.</value>
+  </data>
+  <data name="MoveWagonSetToParking" xml:space="preserve">
+    <value>After arrival, move {0} from arrival track to stabling.</value>
+  </data>
   <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
     <value>Before departure, lift {0} on to the departure track.</value>
   </data>

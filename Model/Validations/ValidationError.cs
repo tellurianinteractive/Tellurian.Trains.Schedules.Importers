@@ -242,6 +242,26 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a station track conflict error between a train's call and vehicles standing on the track
+    /// (see <see cref="TrackHold"/>). Both the calling train and the train that brought the vehicles
+    /// there are involved, so both are highlighted.
+    /// </summary>
+    public static ValidationError StationTrackConflict(
+        StationTrack track,
+        StationCall call,
+        TrackHold hold,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StationTrackConflict,
+            FromTrack = track,
+            ToTrack = track,
+            FromTime = Time.Min(call.Arrival, hold.From),
+            ToTime = Time.Max(call.Departure, hold.To),
+            Trains = [call.Train!, hold.Train],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a track stretch conflict error.
     /// </summary>
     public static ValidationError StretchConflict(

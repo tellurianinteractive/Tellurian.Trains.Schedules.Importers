@@ -126,6 +126,12 @@
   <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
     <value>Tog {0} {1} etterfølges av tog {2} {3} etter bare {4} minutter; minst {5} minutter kreves.</value>
   </data>
+  <data name="CallAtStationOverlapsInTimeWithStandingVehicles" xml:space="preserve">
+    <value>Tog {0} {1} overlapper i tid med {2}, som står {3}.</value>
+  </data>
+  <data name="CallAtStationTooCloseInTimeToStandingVehicles" xml:space="preserve">
+    <value>Tog {0} {1} ligger bare {4} minutter fra {2}, som står {3}; minst {5} minutter kreves.</value>
+  </data>
   <data name="CallMustBeAfterPreviousCall" xml:space="preserve">
     <value>Anløp {0} skal være senere en foregående anløp {1} for tog {2}.</value>
   </data>

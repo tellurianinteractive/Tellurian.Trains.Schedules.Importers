@@ -28,18 +28,25 @@ public static class GraphScheduleDrawingExtensions
         else throw new NotSupportedException(me.AxisDirection.ToString());
     }
 
-    public static IEnumerable<(Offset Start, Offset End)> TrainAtStationLine(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall)
+    public static IEnumerable<(Offset Start, Offset End)> TrainAtStationLine(this GraphSchedule me, int stationIndex, int trackIndex, StationCall stationCall) =>
+        me.OnStationTrackLine(stationIndex, trackIndex, stationCall.Arrival, stationCall.Departure);
+
+    /// <summary>
+    /// The pieces of a line along a station track between two times — a train standing there, or
+    /// vehicles left standing (see <see cref="TrackHold"/>). Split at midnight and clipped to the window.
+    /// </summary>
+    public static IEnumerable<(Offset Start, Offset End)> OnStationTrackLine(this GraphSchedule me, int stationIndex, int trackIndex, Time from, Time to)
     {
         if (me.AxisDirection == TimeAxisDirection.Horisontal)
         {
             var y = me.Y(stationIndex, trackIndex);
-            foreach (var piece in me.ClipToWindow(WrapPieces(stationCall.Arrival.Value, y, stationCall.Departure.Value, y)))
+            foreach (var piece in me.ClipToWindow(WrapPieces(from.Value, y, to.Value, y)))
                 yield return (new(me.TimeOffset(piece.FromTime).X, piece.FromCross), new(me.TimeOffset(piece.ToTime).X, piece.ToCross));
         }
         else if (me.AxisDirection == TimeAxisDirection.Vertical)
         {
             var x = me.X(stationIndex, trackIndex);
-            foreach (var piece in me.ClipToWindow(WrapPieces(stationCall.Arrival.Value, x, stationCall.Departure.Value, x)))
+            foreach (var piece in me.ClipToWindow(WrapPieces(from.Value, x, to.Value, x)))
                 yield return (new(piece.FromCross, me.TimeOffset(piece.FromTime).Y), new(piece.ToCross, me.TimeOffset(piece.ToTime).Y));
         }
         else throw new NotSupportedException(me.AxisDirection.ToString());

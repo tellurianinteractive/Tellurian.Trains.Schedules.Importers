@@ -139,8 +139,20 @@ at most one train on the track at a time — and one train arriving exactly as a
 handover, not a conflict. Above 0 the same test also requires that much free time in between; exactly
 the required number of minutes is enough, one minute less is a conflict.
 
-**Occupancy**: Each call's whole window, optionally extended by a traction unit's stay between two
-trains (`ExtendTrackOccupancyByVehicleStay`), not the call's own arrival and departure alone.
+**Occupancy**: Each call's whole window, not the call's own arrival and departure alone. With
+`ExtendTrackOccupancyByVehicleStay` on, the vehicles standing between their trains also occupy tracks
+(`TrackHold`), for traction units and wagonsets alike:
+
+- A vehicle not moved after arrival holds the arrival track until it departs again (same schedule).
+- A vehicle put on, or fetched from, another track holds that track from arrival to the next
+  departure; the arrival track is still held by the arriving train, so both are occupied together.
+- After the last arrival of a schedule the track is held to the end of the day, and before the first
+  departure from the start of the day.
+- Stabling and lifting off (traction only) hold no track until the unit is picked up again.
+
+A train taking a track while another schedule's vehicles hold it is a conflict. Vehicles holding the
+same track together are not tested against each other. The held spans are drawn as dashed lines along
+the track in the graphical timetable.
 
 **Exception**: Calls sharing the same vehicle are allowed (e.g. loco changes), as are trains that
 never run on a common session.

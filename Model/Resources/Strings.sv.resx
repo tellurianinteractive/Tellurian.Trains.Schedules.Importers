@@ -150,6 +150,12 @@
   <data name="CallAtStationTooCloseInTimeToOtherCall" xml:space="preserve">
     <value>Tåg {0} {1} följs av tåg {2} {3} efter bara {4} minuter; minst {5} minuter krävs.</value>
   </data>
+  <data name="CallAtStationOverlapsInTimeWithStandingVehicles" xml:space="preserve">
+    <value>Tåg {0} {1} överlappar i tid med {2} som står {3}.</value>
+  </data>
+  <data name="CallAtStationTooCloseInTimeToStandingVehicles" xml:space="preserve">
+    <value>Tåg {0} {1} ligger bara {4} minuter från {2} som står {3}; minst {5} minuter krävs.</value>
+  </data>
   <data name="ConflictOnStretchBetweenPassingTrains" xml:space="preserve">
     <value>Konflikt på sträckan {0} mellan {1} och {2}.</value>
   </data>

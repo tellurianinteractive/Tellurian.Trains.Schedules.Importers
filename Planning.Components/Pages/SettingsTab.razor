@@ -377,6 +377,10 @@ else
                     <input type="checkbox" @bind="v.ValidateStationTracks" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
+                    <label>@Translator("ExtendTrackOccupancyByVehicleStay")</label>
+                    <input type="checkbox" @bind="v.ExtendTrackOccupancyByVehicleStay" @bind:after="OnEdited" disabled="@(!v.ValidateStationTracks)" />
+                </div>
+                <div class="field">
                     <label>@Translator("ValidateStretches")</label>
                     <input type="checkbox" @bind="v.ValidateStretches" @bind:after="OnEdited" />
                 </div>

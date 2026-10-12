@@ -6,6 +6,10 @@
 
 - **Minute labels for passing trains in the graphical timetable.** The settings for showing arrival and departure minutes now also apply to trains that pass a station without stopping. When a passing train has the same arrival and departure time, it gets a single label, the departure minute, as soon as either setting is ticked.
 
+- **Vehicles occupy the track while they stand.** A new setting in the Validation settings, *Vehicles occupy the track while standing?*, makes the track check count where locomotives, trainsets and wagonsets stand between their trains. A vehicle that arrives and is not moved occupies its arrival track until it departs again. A vehicle put on or fetched from another track occupies that track from arrival to the next departure, while the arrival track is still occupied by the arriving train. A vehicle that has arrived and has no further departure occupies its track for the rest of the day, and one with no arrival before its first departure occupies it from the start of the day. Stabling and lifting off free the track until the vehicle is picked up again. A train that takes a track where a vehicle stands is reported as a conflict. The graphical timetable, on screen and in print, marks each stay with a dashed line along the track.
+
+- **Wagonsets can be stabled or lifted off.** When editing a train part of a wagonset, *Wagonset before departure* and *Wagonset after arrival* now offer the same choices as for locomotives: on a track, stabling, or lifted off and on. The choice is printed as a note at both ends, the two ends are kept in step, a mismatch is reported, and a wagonset away from the layout does not occupy a track.
+
 ## Version 0.9.5
 
 ### Changes

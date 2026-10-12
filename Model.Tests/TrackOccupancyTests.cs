@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Schedules;
 using Tellurian.Trains.Schedules.Model.Validations;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -54,53 +55,122 @@ public class TrackOccupancyTests
         return schedule;
     }
 
+    private static Time At(int hour, int minute) => Time.FromHourAndMinute(hour, minute);
+
+    // The holds on a track, in time order.
+    private static List<TrackHold> HoldsOn(Schedule schedule, StationTrack track) =>
+        [.. schedule.TrackHolds.Where(h => h.Track.Equals(track)).OrderBy(h => h.From.Value)];
+
+    // The stay between the two trains: the hold that begins at the given time.
+    private static TrackHold? StayOn(Schedule schedule, StationTrack track, Time from) =>
+        HoldsOn(schedule, track).FirstOrDefault(h => h.From == from);
+
     [TestMethod]
-    public void WithoutVehicleSchedulesACallOccupiesOnlyItsOwnWindow()
+    public void ACallOccupiesItsOwnWindowAtTheTrackItself()
     {
-        var (from, to) = ArrivalCall.TrackOccupancy(null);
+        var (from, to) = ArrivalCall.TrackOccupancy;
 
         // The whole call window, ends included: at a terminus the departure time is the driver standing
         // down, and the train is standing on the track for it.
-        Assert.AreEqual(Time.FromHourAndMinute(11, 50), from);
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to);
+        Assert.AreEqual(At(11, 50), from);
+        Assert.AreEqual(At(12, 00), to);
     }
 
     [TestMethod]
-    public void AUnitStayingOnForTheNextTrainKeepsTheTrackOccupied()
+    public void AUnitStayingOnForTheNextTrainHoldsTheTrackBetween()
     {
-        var (from, to) = ArrivalCall.TrackOccupancy([Continuing()]);
+        var hold = StayOn(Continuing(), Track, At(12, 00));
 
-        // Up to where the next train's own window starts, so the two spans are contiguous and together
-        // cover the unit's whole stay without either claiming the other's time.
-        Assert.AreEqual(Time.FromHourAndMinute(11, 50), from);
-        Assert.AreEqual(Time.FromHourAndMinute(12, 50), to);
+        // From where the arriving train window ends to where the next train own window starts, so the
+        // spans are contiguous and together cover the whole stay.
+        Assert.IsNotNull(hold);
+        Assert.AreEqual(At(12, 50), hold.To);
     }
 
     [TestMethod]
-    public void AUnitBookedToParkingOccupiesOnlyTheTrainsOwnWindow()
+    public void AUnitBookedToStablingHoldsNoTrack()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toLayover: TractionLayover.Stabling)]);
-
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
-            "Booked away to parking, the unit is not standing on this track between the two trains.");
+        Assert.IsNull(StayOn(Continuing(toLayover: TractionLayover.Stabling), Track, At(12, 00)),
+            "Booked away to stabling, the unit is not standing on this track between the two trains.");
     }
 
     [TestMethod]
-    public void AUnitPickedUpFromParkingOccupiesOnlyTheTrainsOwnWindow()
+    public void AUnitPickedUpFromStablingHoldsNoTrack()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromLayover: TractionLayover.Stabling)]);
-
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
-            "Coming from parking, the unit was not on this track waiting for its next train.");
+        Assert.IsNull(StayOn(Continuing(fromLayover: TractionLayover.Stabling), Track, At(12, 00)),
+            "Coming from stabling, the unit was not on this track waiting for its next train.");
     }
 
     [TestMethod]
-    public void AUnitLiftedOffOccupiesOnlyTheTrainsOwnWindow()
+    public void AUnitLiftedOffHoldsNoTrackBetweenItsTrains()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toLayover: TractionLayover.LiftedOff, fromLayover: TractionLayover.LiftedOff)]);
+        var schedule = Continuing(toLayover: TractionLayover.LiftedOff, fromLayover: TractionLayover.LiftedOff);
 
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
-            "Lifted off the layout, the unit is not standing on this track between the two trains.");
+        Assert.IsNull(StayOn(schedule, Track, At(12, 00)));
+        Assert.HasCount(2, schedule.TrackHolds, "Only the start of the day before the first train and the end of the day after the last remain.");
+    }
+
+    [TestMethod]
+    public void AUnitLeavingFromAnotherTrackStillHoldsTheArrivalTrackUntilItDeparts()
+    {
+        // Nothing says the unit was moved, so it stands where it arrived until it departs.
+        Leaving.Calls[0].Track = OtherTrack;
+
+        var hold = StayOn(Continuing(), Track, At(12, 00));
+
+        Assert.IsNotNull(hold);
+        Assert.AreEqual(At(13, 00), hold.To);
+    }
+
+    [TestMethod]
+    public void AUnitPutOnAnotherTrackHoldsThatTrackFromArrivalToDeparture()
+    {
+        var schedule = Continuing(toTrack: OtherTrack);
+
+        var hold = StayOn(schedule, OtherTrack, At(11, 50));
+
+        Assert.IsNotNull(hold, "The track it is put on is taken from the arrival.");
+        Assert.AreEqual(At(13, 00), hold.To, "Until the next train departs.");
+        Assert.IsNull(StayOn(schedule, Track, At(12, 00)), "The arrival track is held by the train own window only.");
+    }
+
+    [TestMethod]
+    public void AUnitFetchedFromAnotherTrackHoldsThatTrackUntilDeparture()
+    {
+        var schedule = Continuing(toTrack: OtherTrack, fromTrack: OtherTrack);
+
+        var hold = StayOn(schedule, OtherTrack, At(11, 50));
+
+        Assert.IsNotNull(hold);
+        Assert.AreEqual(At(13, 00), hold.To);
+    }
+
+    [TestMethod]
+    public void ALastArrivalHoldsItsTrackForTheRestOfTheDay()
+    {
+        var hold = HoldsOn(Continuing(), OtherTrack).Last();
+
+        Assert.AreEqual(At(14, 00), hold.From);
+        Assert.AreEqual(Time.FromDayHourMinute(1, 0, 0), hold.To);
+    }
+
+    [TestMethod]
+    public void AFirstDepartureHoldsItsTrackFromTheStartOfTheDay()
+    {
+        var hold = HoldsOn(Continuing(), OtherTrack).First();
+
+        Assert.AreEqual(Time.Zero, hold.From);
+        Assert.AreEqual(At(11, 00), hold.To);
+    }
+
+    [TestMethod]
+    public void AUnitStabledAtTheEndOrFetchedFromStablingAtTheStartHoldsNoDayEnd()
+    {
+        var schedule = Continuing();
+        schedule.OrderedParts[^1].TractionOptions = new TractionOptions { ToLayover = TractionLayover.Stabling };
+        schedule.OrderedParts[0].TractionOptions = new TractionOptions { FromLayover = TractionLayover.Stabling };
+
+        Assert.IsEmpty(HoldsOn(schedule, OtherTrack));
     }
 
     [TestMethod]
@@ -108,7 +178,7 @@ public class TrackOccupancyTests
     {
         var schedules = new[] { Continuing() };
 
-        // Off by default: a plan that never records parking cannot tell "the unit stayed" from "nothing
+        // Off by default: a plan that never records stabling cannot tell "the unit stayed" from "nothing
         // was noted", so the stay is not asserted as occupancy.
         Assert.IsEmpty(Track.GetValidationErrors(schedules),
             "Without the extension the two trains only occupy their own windows, which do not overlap.");
@@ -120,45 +190,31 @@ public class TrackOccupancyTests
     }
 
     [TestMethod]
-    public void AUnitLeavingFromAnotherTrackDoesNotExtendThisOne()
+    public void AConflictWithAStandingUnitReportsTheSpanItStandsFor()
     {
-        // The second train now leaves from the other track, so the unit moved between the two and
-        // nothing says when. The gap is left unclaimed rather than charged to a track it may have left.
-        Leaving.Calls[0].Track = OtherTrack;
+        // A call in the gap between the two trains (12:00-12:50) - it never overlaps either train own
+        // window, only the unit stay between them.
+        var third = new Train(3, Category, 3) { Category = Category };
+        _ = third.Add(new StationCall(1, OtherTrack, At(12, 05), At(12, 05)));
+        _ = third.Add(new StationCall(2, Track, At(12, 10), At(12, 20)));
 
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing()]);
+        var errors = Track.GetValidationErrors([Continuing()], extendOccupancyByVehicleStay: true).ToList();
 
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to);
+        Assert.HasCount(1, errors);
+        StringAssert.Contains(errors[0].Message.Text, "12:00-12:50", "The message shows the span the unit stands for.");
     }
 
     [TestMethod]
-    public void AUnitPutOnAnotherTrackOccupiesOnlyTheTrainsOwnWindow()
+    public void ATrainTakingTheTrackWhereAUnitStandsForTheRestOfTheDayConflicts()
     {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(toTrack: OtherTrack)]);
+        var late = new Train(3, Category, 3) { Category = Category };
+        _ = late.Add(new StationCall(1, Track, At(20, 00), At(20, 10)));
+        _ = late.Add(new StationCall(2, OtherTrack, At(20, 40), At(20, 50)));
 
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
-            "Put on another track after arriving, the unit is not standing on this one between the two trains.");
-    }
+        var errors = OtherTrack.GetValidationErrors([Continuing()], extendOccupancyByVehicleStay: true).ToList();
 
-    [TestMethod]
-    public void AUnitFetchedFromAnotherTrackOccupiesOnlyTheTrainsOwnWindow()
-    {
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromTrack: OtherTrack)]);
-
-        Assert.AreEqual(Time.FromHourAndMinute(12, 00), to,
-            "Fetched from another track, the unit was not on this one waiting for its next train.");
-    }
-
-    [TestMethod]
-    public void AUnitFetchedFromThisTrackForATrainLeavingFromAnotherStaysOnIt()
-    {
-        // The next train leaves from the other track, but the unit is fetched from this one for it: it
-        // has been standing here all along, and is taken away only for that train.
-        Leaving.Calls[0].Track = OtherTrack;
-
-        var (_, to) = ArrivalCall.TrackOccupancy([Continuing(fromTrack: Track)]);
-
-        Assert.AreEqual(Time.FromHourAndMinute(12, 50), to);
+        Assert.HasCount(1, errors, "The unit that arrived at 14:00 is still on the track at 20:40.");
+        Assert.IsEmpty(OtherTrack.GetValidationErrors([Continuing()]), "Not without the extension.");
     }
 
     // A train taking the track shortly after the arriving one has left it: no overlap at all, so it is a
@@ -226,25 +282,6 @@ public class TrackOccupancyTests
         // as the overlap it is rather than as two trains merely following each other too closely.
         Assert.IsFalse(errors[0].Message.Text.Contains("17", StringComparison.Ordinal),
             $"Overlapping trains overlap; they are not merely too close together: {errors[0].Message.Text}");
-    }
-
-    [TestMethod]
-    public void AConflictFromTheExtendedStayReportsTheOccupiedSpanNotEitherCallsOwnTimes()
-    {
-        // Calls in the gap between the two trains (12:00-12:50) - it never overlaps either train's own
-        // window, only the unit's extended stay between them.
-        var third = new Train(3, Category, 3) { Category = Category };
-        _ = third.Add(new StationCall(1, OtherTrack, Time.FromHourAndMinute(12, 05), Time.FromHourAndMinute(12, 05)));
-        _ = third.Add(new StationCall(2, Track, Time.FromHourAndMinute(12, 10), Time.FromHourAndMinute(12, 20)));
-
-        var errors = Track.GetValidationErrors([Continuing()], extendOccupancyByVehicleStay: true).ToList();
-
-        Assert.HasCount(1, errors);
-        var text = errors[0].Message.Text;
-        // The message must show the span that actually overlaps (the extended stay to 12:50), not the
-        // arriving call's own arr/dep, which the third train's 12:10-12:20 call does not overlap at all.
-        StringAssert.Contains(text, "12:50");
-        Assert.IsFalse(text.Contains("dep 12:00"), $"Message should not show the arriving call's own departure: {text}");
     }
 
     private static (Time From, Time To) Span(int day, int fromHour, int toHour) =>

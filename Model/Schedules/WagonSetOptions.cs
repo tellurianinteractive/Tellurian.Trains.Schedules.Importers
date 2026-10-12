@@ -26,4 +26,19 @@ public sealed class WagonSetOptions : TrainPartOptions
     /// arrival note.
     /// </summary>
     public bool UnloadWagons { get; set; }
+
+    /// <summary>
+    /// Where the wagonset comes from before departure: from stabling, lifted on to the track, or
+    /// (<see cref="TractionLayover.None"/>) from a track of the station. Anything but none replaces the
+    /// couple note with an instruction to bring the wagonset to the departure track.
+    /// </summary>
+    /// <remarks>Must match the <see cref="ToLayover"/> of the part the wagonset worked before (rule S6).</remarks>
+    public TractionLayover FromLayover { get; set; }
+
+    /// <summary>
+    /// Where the wagonset goes after arrival: to stabling, lifted off the track, or
+    /// (<see cref="TractionLayover.None"/>) it stays on a track of the station.
+    /// </summary>
+    /// <remarks>Must match the <see cref="FromLayover"/> of the part the wagonset works next (rule S6).</remarks>
+    public TractionLayover ToLayover { get; set; }
 }

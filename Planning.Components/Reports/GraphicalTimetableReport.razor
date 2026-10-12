@@ -67,7 +67,7 @@ else
 
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         _report = ScheduleState.Timetable is { } timetable && Layout is { } layout
-            ? GraphReport.Create(timetable, ScheduleState.TimetableStretches, layout.Settings, GraphPageGeometry.A4)
+            ? GraphReport.Create(timetable, ScheduleState.TimetableStretches, layout.Settings, GraphPageGeometry.A4, ScheduleState.Schedule?.MarkedTrackHolds)
             : GraphReport.Empty;
     }
 

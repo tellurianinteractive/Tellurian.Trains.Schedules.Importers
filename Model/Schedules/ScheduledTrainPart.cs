@@ -184,6 +184,23 @@ public static class ScheduledTrainPartExtensions
         public StationTrack? OtherToTrack => OtherTrackAt(trainPart.ToTrack, trainPart.To);
 
         /// <summary>
+        /// Where the vehicles working this part go after it arrives — stabling or lifted off — or
+        /// <see cref="TractionLayover.None"/> where they stay on a track of the station. Read from the
+        /// traction options, or else the wagonset options, whichever says something.
+        /// </summary>
+        public TractionLayover ArrivalLayover =>
+            trainPart.TractionOptions is { ToLayover: not TractionLayover.None } traction ? traction.ToLayover
+            : trainPart.WagonSetOptions?.ToLayover ?? TractionLayover.None;
+
+        /// <summary>
+        /// Where the vehicles working this part come from before it departs — stabling or lifted off — or
+        /// <see cref="TractionLayover.None"/> where they stand on a track of the station.
+        /// </summary>
+        public TractionLayover DepartureLayover =>
+            trainPart.TractionOptions is { FromLayover: not TractionLayover.None } traction ? traction.FromLayover
+            : trainPart.WagonSetOptions?.FromLayover ?? TractionLayover.None;
+
+        /// <summary>
         /// Forgets the other tracks that are no longer at the location the part departs from or arrives
         /// at, so that a part moved to another station and back does not bring back a track the planner
         /// last saw it lose.
@@ -405,13 +422,17 @@ public static class ScheduledTrainPartExtensions
         {
             var options = trainPart.WagonSetOptions;
             if (options is null) return;
-            // As for traction: fetching the wagonset from its other track is what brings it to the train.
-            if (options.HasCoupleNote && trainPart.OtherFromTrack is null)
-            {
-                var settings = trainPart.PlanSessionsSettings;
-                callNotes.AddRange(trainPart.Working(trainPart.WagonSets)
-                    .Select(u => new CoupleNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
-            }
+            // As for traction: fetching the wagonset from its other track is what brings it to the train, and
+            // stabling or lifting off say all the couple note would.
+            if (trainPart.OtherFromTrack is not null) return;
+            var settings = trainPart.PlanSessionsSettings;
+            var units = trainPart.Working(trainPart.WagonSets);
+            if (options.FromLayover == TractionLayover.Stabling)
+                callNotes.AddRange(units.Select(u => new FromParkingNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+            else if (options.FromLayover == TractionLayover.LiftedOff)
+                callNotes.AddRange(units.Select(u => new LiftOnNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+            else if (options.HasCoupleNote)
+                callNotes.AddRange(units.Select(u => new CoupleNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
         }
 
         /// <remarks>
@@ -422,12 +443,15 @@ public static class ScheduledTrainPartExtensions
         {
             var options = trainPart.WagonSetOptions;
             if (options is null) return;
-            if (options.HasUncoupleNote && trainPart.OtherToTrack is null)
-            {
-                var settings = trainPart.PlanSessionsSettings;
-                callNotes.AddRange(trainPart.Working(trainPart.WagonSets)
-                    .Select(u => new UncoupleNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
-            }
+            if (trainPart.OtherToTrack is not null) return;
+            var settings = trainPart.PlanSessionsSettings;
+            var units = trainPart.Working(trainPart.WagonSets);
+            if (options.ToLayover == TractionLayover.Stabling)
+                callNotes.AddRange(units.Select(u => new ToParkingNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+            else if (options.ToLayover == TractionLayover.LiftedOff)
+                callNotes.AddRange(units.Select(u => new LiftOffNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+            else if (options.HasUncoupleNote)
+                callNotes.AddRange(units.Select(u => new UncoupleNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
         }
 
         // Loading and unloading happen where the part ends, whatever is done with the wagons after that, so

@@ -85,6 +85,12 @@
   <data name="MoveTractionUnitToParking" xml:space="preserve">
     <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis fahren.</value>
   </data>
+  <data name="MoveWagonSetFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Vor Abfahrt {0} vom Abstellgleis zum Abfahrtsgleis umsetzen.</value>
+  </data>
+  <data name="MoveWagonSetToParking" xml:space="preserve">
+    <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis umsetzen.</value>
+  </data>
   <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
     <value>Vor Abfahrt {0} auf das Abfahrtsgleis aufgleisen.</value>
   </data>
