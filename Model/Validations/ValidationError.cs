@@ -62,6 +62,14 @@ public sealed record ValidationError
     public IReadOnlyList<Schedule> Schedules { get; init; } = [];
 
     /// <summary>
+    /// The stay of vehicles on a track that a train's call conflicts with, for a
+    /// <see cref="ValidationErrorType.StationTrackHeldByVehicles"/> error; <c>null</c> otherwise. The
+    /// conflict was found with the sessions of the call and of the stay taken into account, so the graph
+    /// marks exactly this stay rather than every stay near it in time.
+    /// </summary>
+    public TrackHold? Hold { get; init; }
+
+    /// <summary>
     /// The vehicle (scheduled object) this error is attributed to, for <see cref="ValidationScope.Vehicle"/>
     /// errors (double-booked, non-closing circulation). Lets the Schedules tab mark the exact vehicle chip
     /// in the Vehicle column.
@@ -133,10 +141,13 @@ public sealed record ValidationError
     /// the trains are timed so that one vehicle cannot work them both, and the times are edited in the
     /// Trains tab. So the conflict keeps its schedule scope — it still marks the schedule and routes there
     /// from the toolbar — and is shown on the trains as well.
+    /// Likewise vehicles standing on a track that a train needs
+    /// (<see cref="ValidationErrorType.StationTrackHeldByVehicles"/>): they are moved in the schedule, but
+    /// the conflict is on the track, so the calls on it show it too.
     /// </remarks>
     public bool IsShownOnTrains =>
         Scope == ValidationScope.Train ||
-        ErrorType is ValidationErrorType.VehicleScheduleOverlap;
+        ErrorType is ValidationErrorType.VehicleScheduleOverlap or ValidationErrorType.StationTrackHeldByVehicles;
 
     /// <summary>
     /// True if the conflict is at a single station track. False for a placeless conflict
@@ -260,6 +271,7 @@ public sealed record ValidationError
             ToTime = Time.Max(call.Departure, hold.To),
             Trains = [call.Train!, hold.Train],
             Schedules = [hold.Schedule],
+            Hold = hold,
             Message = message
         };
 

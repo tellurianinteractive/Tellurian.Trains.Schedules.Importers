@@ -95,7 +95,8 @@ else
                     {
                         @foreach (var trackLine in Current.OnStationTrackLine(s, t, hold.From, hold.To))
                         {
-                            <line class="track-hold" stroke="@TrainStroke(hold.Train)" stroke-width="@TrainStrokeWidth" stroke-dasharray="@HoldDashArray" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"><title>@hold.Vehicles @hold.From.HHMM()–@hold.To.HHMM()</title></line>
+                            var holdConflict = HoldConflictTitle(hold);
+                            <line class="track-hold @(holdConflict is null ? null : "conflict")" stroke="@TrainStroke(hold.Train)" stroke-width="@TrainStrokeWidth" stroke-dasharray="@HoldDashArray" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"><title>@hold.Vehicles @hold.From.HHMM()–@hold.To.HHMM()@(holdConflict is null ? null : "\n" + holdConflict)</title></line>
                         }
                     }
                 }
@@ -277,7 +278,21 @@ else
         // Restrict to errors whose location is on this stretch, so a train is not flagged on a graph
         // where its conflict does not occur (the same train may run on several stretches).
         var graphTracks = Current.Stations.SelectMany(s => s.Tracks).ToList();
-        _graphErrors.AddRange(Errors.Where(e => e.Scope == ValidationScope.Train && graphTracks.Any(t => e.Involves(t))));
+        // Vehicles standing on a track a train needs are schedule-scope, but they lie on a track of this graph
+        // like any other track conflict: the train's call is marked, and so is the dashed line of the stay.
+        _graphErrors.AddRange(Errors.Where(e => (e.Scope == ValidationScope.Train || e.ErrorType == ValidationErrorType.StationTrackHeldByVehicles) && graphTracks.Any(t => e.Involves(t))));
+    }
+
+    // The message of the vehicle-stay conflicts this very stay is part of. The validation has already weighed
+    // the operating sessions of the stay and of the train, so only the stay it names is marked.
+    private string? HoldConflictTitle(TrackHold hold)
+    {
+        var messages = _graphErrors
+            .Where(e => e.Hold is { } h && h.Equals(hold))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count > 0 ? string.Join("\n", messages) : null;
     }
 
     // The messages of the errors lying on a segment of the train's line: the train is involved, the error's
@@ -287,6 +302,9 @@ else
     {
         if (_graphErrors.Count == 0) return null;
         var messages = _graphErrors
+            // A stay conflict marks the call that waits for the track (the first train); the train that left
+            // the vehicles is shown by the dashed line of the stay instead.
+            .Where(e => e.Hold is null || e.Trains[0].Equals(train))
             .Where(e => e.Involves(train) && (e.ErrorType == ValidationErrorType.DuplicateTrainNumber || (e.OverlapsTimeRange(from, to) && OnSegment(e, fromTrack, toTrack))))
             .Select(e => e.Message.Text)
             .Distinct()
