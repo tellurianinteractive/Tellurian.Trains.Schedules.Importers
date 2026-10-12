@@ -81,7 +81,11 @@ public static class TrackHoldExtensions
             {
                 // A cargo flow is a circulation of wagons directed by waybills, not a working with times.
                 if (schedule.IsCargoFlow) return [];
-                var parts = schedule.OrderedParts;
+                // A shunting task without a traction unit takes no track (see StationCall.OccupiesTrack),
+                // so vehicles that only appear in such a task do not stand anywhere because of it.
+                var parts = schedule.Vehicles.Any(v => v.IsTraction)
+                    ? schedule.OrderedParts
+                    : [.. schedule.OrderedParts.Where(p => !p.Train.IsShuntingTask)];
                 if (parts.Count == 0) return [];
 
                 List<TrackHold> holds = [];
