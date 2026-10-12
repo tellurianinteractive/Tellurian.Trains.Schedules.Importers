@@ -346,6 +346,8 @@
 
 ### Fixes
 
+- **Track conflicts with standing vehicles are marked on the schedule.** The conflict between a train's call and the vehicles of a schedule standing on the track (`ValidationSettings.ExtendTrackOccupancyByVehicleStay`) now has its own error type, **`ValidationErrorType.StationTrackHeldByVehicles`**, with scope `Schedule` and `ValidationError.Schedules` set to the schedule whose vehicles stand there. It was `StationTrackConflict` (scope `Train`), which marked the trains, but it is put right in the schedule. Conflicts between two trains are unchanged.
+
 - **Driver duties must stay within their trains' sessions.** New validation error **`ValidationErrorType.DutyRunsWhenTrainDoesNot`** (scope `Duty`, messages in all five languages) for a duty whose sessions or days include one on which one of its trains does not run. New public **`Sessions.LimitedTo(limit)`** narrows sessions to those of `limit` while keeping the value's own days and on-demand markers, so a day pattern stays a day pattern.
 
 - **Stretch conflict validation is about four times faster on large plans.** The capacity and opposing-train checks

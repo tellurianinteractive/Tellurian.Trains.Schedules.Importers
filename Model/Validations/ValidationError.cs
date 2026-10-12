@@ -115,6 +115,7 @@ public sealed record ValidationError
         ValidationErrorType.ScheduleLayoverMismatch or
         ValidationErrorType.ScheduleStandingTrackMismatch or
         ValidationErrorType.ScheduleHasNoVehicle or
+        ValidationErrorType.StationTrackHeldByVehicles or
         ValidationErrorType.WagonSetLoadingMismatch or
         ValidationErrorType.TrainMissingTraction or
         ValidationErrorType.LocomotiveCoverageGap or
@@ -243,8 +244,8 @@ public sealed record ValidationError
 
     /// <summary>
     /// Creates a station track conflict error between a train's call and vehicles standing on the track
-    /// (see <see cref="TrackHold"/>). Both the calling train and the train that brought the vehicles
-    /// there are involved, so both are highlighted.
+    /// (see <see cref="TrackHold"/>). Keyed to the schedule whose vehicles stand there, which is where it
+    /// is put right (by moving them to another track or time); the trains are still carried for context.
     /// </summary>
     public static ValidationError StationTrackConflict(
         StationTrack track,
@@ -252,12 +253,13 @@ public sealed record ValidationError
         TrackHold hold,
         Message message) => new()
         {
-            ErrorType = ValidationErrorType.StationTrackConflict,
+            ErrorType = ValidationErrorType.StationTrackHeldByVehicles,
             FromTrack = track,
             ToTrack = track,
             FromTime = Time.Min(call.Arrival, hold.From),
             ToTime = Time.Max(call.Departure, hold.To),
             Trains = [call.Train!, hold.Train],
+            Schedules = [hold.Schedule],
             Message = message
         };
 
@@ -1021,6 +1023,10 @@ public enum ValidationErrorType
 
     /// <summary>A driver duty runs on sessions or days on which one of its trains does not run.</summary>
     DutyRunsWhenTrainDoesNot,
+
+    /// <summary>A train's call takes a station track while the vehicles of a schedule stand on it
+    /// between their trains. Put right in the schedule, so marked there and not on the trains.</summary>
+    StationTrackHeldByVehicles,
 }
 
 /// <summary>

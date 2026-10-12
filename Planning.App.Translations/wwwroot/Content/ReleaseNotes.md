@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.7
+
+### Changes
+
+- **Track conflicts with standing vehicles are shown on the schedule.** When *Vehicles occupy the track while standing?* is on, a conflict between a train and vehicles standing on the track is now marked on the vehicles' schedule in the Schedules tab, where it is usually put right, and no longer on the trains in the Trains tab and the graphical timetable. Conflicts between two trains are still shown on the trains.
+
 ## Version 0.9.6
 
 ### Changes

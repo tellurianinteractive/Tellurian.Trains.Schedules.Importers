@@ -1257,6 +1257,7 @@ public class ValidationTests
         Assert.AreEqual(ValidationScope.Train, ValidationError.ScopeOf(ValidationErrorType.DuplicateTrainNumber));
         Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.ScheduleNotContiguous));
         Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.TrainMissingTraction));
+        Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.StationTrackHeldByVehicles));
         Assert.AreEqual(ValidationScope.Schedule, ValidationError.ScopeOf(ValidationErrorType.LocomotiveCoverageGap));
         Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleDoubleBooked));
         Assert.AreEqual(ValidationScope.Vehicle, ValidationError.ScopeOf(ValidationErrorType.VehicleNotClosed));
