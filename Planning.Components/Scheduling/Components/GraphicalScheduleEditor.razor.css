@@ -128,7 +128,7 @@
     text-anchor: middle;
 }
 
-/* A train line involved in a validation conflict: an amber glow around its own coloured line so it
+/* The part of a train line (a call on a track, or a stretch between tracks) where a validation conflict lies: an amber glow around its own coloured line so it
    reads as highlighted without hiding the category colour. Hovering shows the message via <title>. */
 .conflict {
     filter: drop-shadow(0 0 2.5px #f5c518) drop-shadow(0 0 2.5px #f5c518);

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.10
+
+### Changes
+
+- **Only the conflicting part of a train is highlighted in the graphical timetable.** A conflict, such as an overbooked track, now marks just the stay on that track or the stretch between the tracks where it occurs, instead of the train's whole line. Hover over the highlighted part to see the message.
+
 ## Version 0.9.7
 
 ### Changes

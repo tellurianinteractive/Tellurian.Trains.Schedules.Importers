@@ -77,7 +77,7 @@ else
                     {
                         @foreach (var trackLine in Current.TrainAtStationLine(s, t, stationCall))
                         {
-                            <line class="@ConflictCss(stationCall.Train)" stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stationCall.Train) is { } ct) { <title>@ct</title> }</line>
+                            <line class="@ConflictCss(stationCall)" stroke="@TrainStroke(stationCall.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stationCall) is { } ct) { <title>@ct</title> }</line>
                         }
                     }
                 }
@@ -121,7 +121,7 @@ else
                         {
                             @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
                             {
-                                <line class="@ConflictCss(stretch.Train)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch.Train) is { } ct) { <title>@ct</title> }</line>
+                                <line class="@ConflictCss(stretch)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch) is { } ct) { <title>@ct</title> }</line>
                             }
                         }
                     }
@@ -148,7 +148,7 @@ else
                         {
                             @foreach (var trackLine in Current.TrainBetweenStationsLine(fromStationIndex, fromTrackIndex, toStationIndex, toTrackIndex, stretch.From.Departure, stretch.To.Arrival))
                             {
-                                <line class="@ConflictCss(stretch.Train)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch.Train) is { } ct) { <title>@ct</title> }</line>
+                                <line class="@ConflictCss(stretch)" stroke="@TrainStroke(stretch.Train)" stroke-width="@TrainStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y">@if (ConflictTitle(stretch) is { } ct) { <title>@ct</title> }</line>
                             }
                         }
                     }
@@ -187,8 +187,8 @@ else
 {
     [Parameter] public GraphSchedule? Schedule { get; set; }
 
-    /// <summary>Validation errors for the plan; the graph highlights the trains involved in those that
-    /// touch a track it shows. Passed from the tab, sourced from the shared ValidationStateService.</summary>
+    /// <summary>Validation errors for the plan; the graph highlights the part of each train's line where
+    /// those that touch a track it shows occur. Passed from the tab, sourced from the shared ValidationStateService.</summary>
     [Parameter] public IReadOnlyList<ValidationError> Errors { get; set; } = [];
 
     /// <summary>
@@ -205,9 +205,10 @@ else
 
     GraphSchedule? Current;
 
-    // Trains drawn in this graph that are involved in a validation error touching a track shown here,
-    // mapped to the newline-joined messages shown as a hover tooltip. Rebuilt when parameters change.
-    readonly Dictionary<Train, string> _conflictTitles = [];
+    // Train-scope validation errors that touch a track shown in this graph. A line segment is highlighted
+    // only if one of these lies on that segment (see ConflictMessages), so a train is marked where its
+    // conflict is, not along its whole run. Rebuilt when parameters change.
+    readonly List<ValidationError> _graphErrors = [];
 
     // Unique per component instance so the <textPath> path IDs don't collide when several
     // GraphicalScheduleEditor instances render into the same document. SVG resolves href="#id"
@@ -271,25 +272,42 @@ else
 
     private void BuildConflicts()
     {
-        _conflictTitles.Clear();
+        _graphErrors.Clear();
         if (Current is null || Errors.Count == 0) return;
         // Restrict to errors whose location is on this stretch, so a train is not flagged on a graph
         // where its conflict does not occur (the same train may run on several stretches).
         var graphTracks = Current.Stations.SelectMany(s => s.Tracks).ToList();
-        foreach (var train in Current.Trains)
-        {
-            var messages = Errors
-                .Where(e => e.Scope == ValidationScope.Train && e.Involves(train) && graphTracks.Any(t => e.Involves(t)))
-                .Select(e => e.Message.Text)
-                .Distinct()
-                .ToList();
-            if (messages.Count > 0) _conflictTitles[train] = string.Join("\n", messages);
-        }
+        _graphErrors.AddRange(Errors.Where(e => e.Scope == ValidationScope.Train && graphTracks.Any(t => e.Involves(t))));
     }
 
-    private string? ConflictCss(Train train) => _conflictTitles.ContainsKey(train) ? "conflict" : null;
+    // The messages of the errors lying on a segment of the train's line: the train is involved, the error's
+    // time span overlaps the segment, and the segment is on the error's track (a call) or between its tracks
+    // (a stretch). A duplicated train number has no place of its own, so it marks the train's whole run.
+    private string? ConflictMessages(Train train, Time from, Time to, StationTrack fromTrack, StationTrack toTrack)
+    {
+        if (_graphErrors.Count == 0) return null;
+        var messages = _graphErrors
+            .Where(e => e.Involves(train) && (e.ErrorType == ValidationErrorType.DuplicateTrainNumber || (e.OverlapsTimeRange(from, to) && OnSegment(e, fromTrack, toTrack))))
+            .Select(e => e.Message.Text)
+            .Distinct()
+            .ToList();
+        return messages.Count > 0 ? string.Join("\n", messages) : null;
+    }
 
-    private string? ConflictTitle(Train train) => _conflictTitles.GetValueOrDefault(train);
+    private static bool OnSegment(ValidationError e, StationTrack fromTrack, StationTrack toTrack) =>
+        fromTrack.Equals(toTrack)
+            ? e.Involves(fromTrack)
+            : (fromTrack.Equals(e.FromTrack) && toTrack.Equals(e.ToTrack)) || (fromTrack.Equals(e.ToTrack) && toTrack.Equals(e.FromTrack));
+
+    private string? ConflictTitle(StationCall call) =>
+        ConflictMessages(call.Train!, call.Arrival, call.Departure, call.Track, call.Track);
+
+    private string? ConflictTitle(StretchUse stretch) =>
+        ConflictMessages(stretch.Train, stretch.From.Departure, stretch.To.Arrival, stretch.From.Track, stretch.To.Track);
+
+    private string? ConflictCss(StationCall call) => ConflictTitle(call) is null ? null : "conflict";
+
+    private string? ConflictCss(StretchUse stretch) => ConflictTitle(stretch) is null ? null : "conflict";
 
     void OnClick(MouseEventArgs e)
     {
