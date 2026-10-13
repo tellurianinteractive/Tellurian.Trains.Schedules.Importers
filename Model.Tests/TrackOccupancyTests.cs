@@ -107,7 +107,7 @@ public class TrackOccupancyTests
         var schedule = Continuing(toLayover: TractionLayover.LiftedOff, fromLayover: TractionLayover.LiftedOff);
 
         Assert.IsNull(StayOn(schedule, Track, At(12, 00)));
-        Assert.HasCount(2, schedule.TrackHolds, "Only the start of the day before the first train and the end of the day after the last remain.");
+        Assert.HasCount(1, schedule.TrackHolds, "Only the night between the last train and the first train of the next day remains.");
     }
 
     [TestMethod]
@@ -146,21 +146,36 @@ public class TrackOccupancyTests
     }
 
     [TestMethod]
-    public void ALastArrivalHoldsItsTrackForTheRestOfTheDay()
+    public void ALastArrivalHoldsItsTrackThroughTheNightUntilTheFirstDepartureOfTheNextDay()
     {
-        var hold = HoldsOn(Continuing(), OtherTrack).Last();
+        var holds = HoldsOn(Continuing(), OtherTrack);
 
-        Assert.AreEqual(At(14, 00), hold.From);
-        Assert.AreEqual(Time.FromDayHourMinute(1, 0, 0), hold.To);
+        // One stay, not the end of one day plus the start of the next.
+        Assert.HasCount(1, holds);
+        Assert.AreEqual(At(14, 00), holds[0].From);
+        Assert.AreEqual(Time.FromDayHourMinute(1, 11, 0), holds[0].To);
     }
 
     [TestMethod]
-    public void AFirstDepartureHoldsItsTrackFromTheStartOfTheDay()
+    public void ANightStayAfterAnArrivalPastMidnightIsOnlyTheTimeUntilTheFirstDeparture()
     {
-        var hold = HoldsOn(Continuing(), OtherTrack).First();
+        // Arrives 01:07 (stored on the day after) and leaves 03:50 the same clock day: under three hours,
+        // not the rest of the day plus the start of the day.
+        var arriving = new Train(3, Category, 3) { Category = Category };
+        _ = arriving.Add(new StationCall(1, OtherTrack, At(23, 00), At(23, 10)));
+        _ = arriving.Add(new StationCall(2, Track, Time.FromDayHourMinute(1, 0, 47), Time.FromDayHourMinute(1, 1, 7)));
+        var leaving = new Train(4, Category, 4) { Category = Category };
+        _ = leaving.Add(new StationCall(1, Track, At(3, 40), At(3, 50)));
+        _ = leaving.Add(new StationCall(2, OtherTrack, At(5, 40), At(6, 0)));
+        var schedule = new Schedule(2);
+        schedule.Add(arriving.AsTrainPart(0, 1));
+        schedule.Add(leaving.AsTrainPart(0, 1));
 
-        Assert.AreEqual(Time.Zero, hold.From);
-        Assert.AreEqual(At(11, 00), hold.To);
+        var hold = HoldsOn(schedule, Track).Last();
+
+        Assert.AreEqual(Time.FromDayHourMinute(1, 1, 7), hold.From);
+        Assert.AreEqual(Time.FromDayHourMinute(1, 3, 40), hold.To);
+        Assert.IsNull(HoldsOn(schedule, Track).FirstOrDefault(h => h.From == Time.Zero), "No separate start-of-day hold.");
     }
 
     [TestMethod]

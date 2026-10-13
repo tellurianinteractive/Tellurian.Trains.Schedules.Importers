@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 0.9.13
+
+### Ändringar
+
+- **Fordon som står över natten räknas inte längre som stående mer än ett dygn.** På fliken Spårbeläggning visas fordon som slutar dygnet på ett spår och lämnar det nästa dygn nu som en enda uppställning, från sista ankomsten till första avgången. Tidigare visades ett fordon som kom efter midnatt som stående från ankomsten till dygnets slut plus från dygnets början till avgången, så att tre timmar kunde se ut som 27.
+
 ## Version 0.9.12
 
 ### Ändringar

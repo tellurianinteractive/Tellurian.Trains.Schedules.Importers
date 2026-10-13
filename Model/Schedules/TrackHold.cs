@@ -89,10 +89,21 @@ public static class TrackHoldExtensions
                 if (parts.Count == 0) return [];
 
                 List<TrackHold> holds = [];
-                Add(holds, FirstHold(schedule, parts[0]));
+                var first = FirstHold(schedule, parts[0]);
+                var last = LastHold(schedule, parts[^1]);
+                // The vehicles that end the day on the track their first train leaves from the next day stand
+                // there once, through the night, rather than at the end of one day and at the start of another.
+                if (first is not null && last is not null && first.Track.Equals(last.Track) &&
+                    TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
+                    first.To.AddDays(1) > last.From)
+                {
+                    last = last with { To = first.To.AddDays(1) };
+                    first = null;
+                }
+                Add(holds, first);
                 for (var i = 0; i < parts.Count - 1; i++)
                     Add(holds, HoldBetween(schedule, parts[i], parts[i + 1]));
-                Add(holds, LastHold(schedule, parts[^1]));
+                Add(holds, last);
                 return holds;
             }
         }

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.13
+
+### Changes
+
+- **A vehicle standing overnight is no longer counted as standing for more than a day.** On the Track occupancy tab, vehicles that end the day on a track and leave from it the next day are now shown as one stay from the last arrival to the first departure. Before, a vehicle arriving after midnight was shown as standing from its arrival to the end of the day plus from the start of the day to its departure, so a stay of three hours could look like 27.
+
 ## Version 0.9.12
 
 ### Changes

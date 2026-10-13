@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 0.9.13
+
+### Änderungen
+
+- **Fahrzeuge, die über Nacht stehen, werden nicht mehr als länger als einen Tag stehend gezählt.** Im Reiter „Gleisbelegung“ werden Fahrzeuge, die den Tag auf einem Gleis beenden und am nächsten Tag von dort abfahren, jetzt als ein einziger Aufenthalt von der letzten Ankunft bis zur ersten Abfahrt gezeigt. Zuvor wurde ein Fahrzeug, das nach Mitternacht ankam, von der Ankunft bis zum Tagesende plus vom Tagesbeginn bis zur Abfahrt stehend gezeigt, sodass drei Stunden wie 27 aussehen konnten.
+
 ## Version 0.9.12
 
 ### Änderungen

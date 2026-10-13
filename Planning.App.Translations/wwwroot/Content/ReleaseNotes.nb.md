@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 0.9.13
+
+### Endringer
+
+- **Kjøretøy som står over natten regnes ikke lenger som stående mer enn et døgn.** På fanen Sporbelegg vises kjøretøy som avslutter døgnet på et spor og kjører fra det neste døgnet nå som ett opphold fra siste ankomst til første avgang. Før ble et kjøretøy som kom etter midnatt vist som stående fra ankomsten til døgnets slutt pluss fra døgnets start til avgangen, slik at tre timer kunne se ut som 27.
+
 ## Versjon 0.9.12
 
 ### Endringer

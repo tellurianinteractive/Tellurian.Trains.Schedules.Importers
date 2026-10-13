@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 0.9.13
+
+### Ændringer
+
+- **Køretøjer, der holder natten over, regnes ikke længere som stående mere end et døgn.** På fanen Sporbelægning vises køretøjer, der slutter døgnet på et spor og kører fra det næste døgn, nu som ét ophold fra sidste ankomst til første afgang. Før blev et køretøj, der ankom efter midnat, vist som stående fra ankomsten til døgnets slutning plus fra døgnets start til afgangen, så tre timer kunne se ud som 27.
+
 ## Version 0.9.12
 
 ### Ændringer
