@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 0.9.16
+
+### Rättelser
+
+- **Ett vagnsset som delats i två visas nu i förartjänsterna.** När en tjänst har ett helt tåg som en enda del, men tåget har sitt vagnsset uppdelat i två delar, till exempel för att lastas halvvägs, var vagnssetsavsnittet på tjänstesidan tomt. Båda sträckorna för vagnssetet visas nu.
+
+### Ändringar
+
+- **Tydligare ordalydelse för lossning av vagnar.** Valet på ett tågavsnitt heter nu *Lossa vagnarna och för tillbaka godset?*, och noten vid ankomst säger att vagnarna ska lossas och godset föras tillbaka till stationen där de lastades.
+
 ## Version 0.9.15
 
 ### Rättelser
@@ -90,7 +100,7 @@
 
 - **Tjänster som körs dagar då deras tåg inte går.** En tjänst som körs en dag då ett av dess tåg inte går rapporteras nu som en konflikt.
 
-- **Lastning och lossning av godsvagnsätt.** Ett vagnsätt har nu valet *Används till* (persontrafik eller godstrafik). För ett godsvagnsätt kan ett tågavsnitt kryssas för *Lasta vagnarna?* eller *Lossa vagnarna och skicka tillbaka?*, vilket ger en notering vid ankomst. Lossningsnoteringen nämner stationen där vagnarna senast lastades i vagnsetets omlopp, så ett annat tåg kan föra tillbaka dem. Lastning och lossning kontrolleras: ett godsvagnsätt ska lastas före lossning, inte lastas igen innan det lossats och inte stå lastat vid omloppets slut.
+- **Lastning och lossning av godsvagnsätt.** Ett vagnsätt har nu valet *Används till* (persontrafik eller godstrafik). För ett godsvagnsätt kan ett tågavsnitt kryssas för *Lasta vagnarna?* eller *Lossa vagnarna och för tillbaka godset?*, vilket ger en notering vid ankomst. Lossningsnoteringen nämner stationen där vagnarna senast lastades i vagnsetets omlopp, så ett annat tåg kan föra tillbaka dem. Lastning och lossning kontrolleras: ett godsvagnsätt ska lastas före lossning, inte lastas igen innan det lossats och inte stå lastat vid omloppets slut.
 
 ## Version 0.9.0
 

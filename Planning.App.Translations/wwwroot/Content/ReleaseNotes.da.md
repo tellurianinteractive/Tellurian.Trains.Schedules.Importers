@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 0.9.16
+
+### Fejlrettelser
+
+- **Et vognsæt, der er delt i to, vises nu i tjenesterne.** Når en tjeneste har et helt tog som én del, men togets vognsæt er planlagt i to dele, f.eks. for at blive læsset halvvejs, var vognsætsafsnittet på tjenestesiden tomt. Begge strækninger af vognsættet vises nu.
+
+### Ændringer
+
+- **Tydeligere formulering ved aflæsning af vogne.** Valget på et togafsnit hedder nu *Aflæs vognene og bring godset tilbage?*, og noten ved ankomst siger, at vognene skal aflæses, og godset bringes tilbage til den station, hvor de blev læsset.
+
 ## Version 0.9.15
 
 ### Fejlrettelser
@@ -90,7 +100,7 @@
 
 - **Tjenester, der køres på dage, hvor deres tog ikke kører.** En tjeneste, der køres en dag, hvor et af dens tog ikke kører, rapporteres nu som en konflikt.
 
-- **Læsning og aflæsning af godsvognsæt.** Et vognsæt har nu valget *Bruges til* (persontrafik eller godstrafik). For et godsvognsæt kan et togafsnit afkrydses *Læs vognene?* eller *Aflæs vognene og send tilbage?*, hvilket giver en note ved ankomst. Aflæsningsnoten nævner stationen, hvor vognene sidst blev læsset i vognsættets omløb, så et andet tog kan føre dem tilbage. Læsning og aflæsning kontrolleres: et godsvognsæt skal læsses før aflæsning, ikke læsses igen før det er aflæst og ikke stå læsset ved omløbets slutning.
+- **Læsning og aflæsning af godsvognsæt.** Et vognsæt har nu valget *Bruges til* (persontrafik eller godstrafik). For et godsvognsæt kan et togafsnit afkrydses *Læs vognene?* eller *Aflæs vognene og bring godset tilbage?*, hvilket giver en note ved ankomst. Aflæsningsnoten nævner stationen, hvor vognene sidst blev læsset i vognsættets omløb, så et andet tog kan føre dem tilbage. Læsning og aflæsning kontrolleres: et godsvognsæt skal læsses før aflæsning, ikke læsses igen før det er aflæst og ikke stå læsset ved omløbets slutning.
 
 ## Version 0.9.0
 

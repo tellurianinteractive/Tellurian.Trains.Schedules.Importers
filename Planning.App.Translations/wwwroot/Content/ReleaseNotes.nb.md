@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 0.9.16
+
+### Feilrettinger
+
+- **Et vognsett som er delt i to, vises nå i tjenestene.** Når en tjeneste har et helt tog som én del, men togets vognsett er planlagt i to deler, for eksempel for å lastes halvveis, var vognsettavsnittet på tjenestesiden tomt. Begge strekningene av vognsettet vises nå.
+
+### Endringer
+
+- **Tydeligere ordlyd ved lossing av vogner.** Valget på et togavsnitt heter nå *Loss vognene og bær tilbake godset?*, og notatet ved ankomst sier at vognene skal losses og godset bæres tilbake til stasjonen der de ble lastet.
+
 ## Versjon 0.9.15
 
 ### Feilrettinger
@@ -90,7 +100,7 @@
 
 - **Tjenester som kjøres på dager da togene deres ikke går.** En tjeneste som kjøres en dag da et av togene ikke går, rapporteres nå som en konflikt.
 
-- **Lasting og lossing av godsvognsett.** Et vognsett har nå valget *Brukes til* (persontrafikk eller godstrafikk). For et godsvognsett kan et togavsnitt krysses av for *Laste vognene?* eller *Losse vognene og sende tilbake?*, som gir en merknad ved ankomst. Lossemerknaden nevner stasjonen vognene sist ble lastet på i vognsettets omløp, slik at et annet tog kan føre dem tilbake. Lasting og lossing kontrolleres: et godsvognsett skal lastes før lossing, ikke lastes igjen før det er lossa og ikke stå lastet ved omløpets slutt.
+- **Lasting og lossing av godsvognsett.** Et vognsett har nå valget *Brukes til* (persontrafikk eller godstrafikk). For et godsvognsett kan et togavsnitt krysses av for *Laste vognene?* eller *Loss vognene og bær tilbake godset?*, som gir en merknad ved ankomst. Lossemerknaden nevner stasjonen vognene sist ble lastet på i vognsettets omløp, slik at et annet tog kan føre dem tilbake. Lasting og lossing kontrolleres: et godsvognsett skal lastes før lossing, ikke lastes igjen før det er lossa og ikke stå lastet ved omløpets slutt.
 
 ## Versjon 0.9.0
 

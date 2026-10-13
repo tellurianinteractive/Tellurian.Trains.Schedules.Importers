@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 0.9.16
+
+### Fixes
+
+- **A wagonset split in two now shows in the driver duties.** When a duty holds a whole train as one part but its wagonset is scheduled in two parts, for example to be loaded half way, the wagonset section of the duty page was empty. Both stretches of the wagonset are now listed.
+
+### Changes
+
+- **Clearer wording for unloading wagons.** The choice on a train part is now *Unload wagons and carry the goods back?*, and the note on arrival says to unload the wagons and carry the goods back to the station they were loaded at.
+
 ## Version 0.9.15
 
 ### Fixes
@@ -90,7 +100,7 @@
 
 - **Duties running on days their trains do not.** A duty that is worked on a day when one of its trains does not run is now reported as a conflict.
 
-- **Loading and unloading cargo wagonsets.** A wagonset now has a *Used for* choice (passenger or freight traffic). For a freight wagonset, a train part can be ticked *Load wagons?* or *Unload wagons and return?*, which gives a note on arrival. The unload note names the station the wagons were last loaded at in the wagonset's schedule, so another train can bring them back. Loading and unloading are checked: a freight wagonset must be loaded before it is unloaded, not loaded again before it is unloaded, and not left loaded at the end of its schedule.
+- **Loading and unloading cargo wagonsets.** A wagonset now has a *Used for* choice (passenger or freight traffic). For a freight wagonset, a train part can be ticked *Load wagons?* or *Unload wagons and carry the goods back?*, which gives a note on arrival. The unload note names the station the wagons were last loaded at in the wagonset's schedule, so another train can bring them back. Loading and unloading are checked: a freight wagonset must be loaded before it is unloaded, not loaded again before it is unloaded, and not left loaded at the end of its schedule.
 
 ## Version 0.9.0
 

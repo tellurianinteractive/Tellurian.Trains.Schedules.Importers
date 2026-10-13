@@ -74,7 +74,7 @@
     <value>{0} entladen.</value>
   </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
-    <value>{0} entladen und nach {1} zurückführen.</value>
+    <value>{0} entladen und das Gut nach {1} zurückbringen.</value>
   </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>{0} vom Zug abkuppeln.</value>

@@ -74,7 +74,7 @@
     <value>Lossa {0}.</value>
   </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
-    <value>Lossa {0} och skicka tillbaka till {1}.</value>
+    <value>Lossa {0} och för tillbaka godset till {1}.</value>
   </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Koppla loss {0} från tåget.</value>

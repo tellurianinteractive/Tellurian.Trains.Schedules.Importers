@@ -77,7 +77,7 @@
     <value>Unload {0}.</value>
   </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
-    <value>Unload {0} and return it to {1}.</value>
+    <value>Unload {0} and carry the goods back to {1}.</value>
   </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Uncouple {0} from train.</value>

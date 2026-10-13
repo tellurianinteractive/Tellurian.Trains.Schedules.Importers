@@ -209,6 +209,34 @@ public class DriverDutyPartTests
     }
 
     [TestMethod]
+    public void AWagonsetSplitInTwoUnderAWholeTrainDutyPartShowsBothStretches()
+    {
+        // The duty holds the whole train as one part, while its wagonset is scheduled as two parts met at
+        // the middle station (to be loaded there). Neither equals the duty's part, but both must print.
+        var (duty, stations) = CreateDutyOverACutTrain();
+        var train = duty.OrderedParts[0].Train;
+        var plan = duty.Plan!;
+        var wagonset = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Bm", 3, null);
+        foreach (var stretch in new[] { train.AsTrainPart(0, 1), train.AsTrainPart(1, 2) })
+        {
+            var schedule = plan.CreateSchedule();
+            schedule.Add(stretch);
+            plan.AssignVehicle(schedule, wagonset);
+        }
+        duty.Parts.Clear();
+        var wholeTrain = plan.CreateSchedule();
+        wholeTrain.Add(train.AsTrainPart(0, 2));
+        duty.Add(wholeTrain.OrderedParts[0]);
+
+        var printed = DutyPagination.PrintedParts(duty, Settings)[0];
+
+        var rows = printed.WagonsetData.Vehicles.Where(w => w.Vehicle.Number == 3).ToList();
+        Assert.HasCount(2, rows);
+        Assert.AreSame(stations[1], rows[0].TrainPart.To.OperationLocation);
+        Assert.AreSame(stations[1], rows[1].TrainPart.From.OperationLocation);
+    }
+
+    [TestMethod]
     public void TheTimetableOfAJoinedTrainIsWorkedThroughTheStationWhereItWasCut()
     {
         var (duty, _) = CreateDutyOverACutTrain();

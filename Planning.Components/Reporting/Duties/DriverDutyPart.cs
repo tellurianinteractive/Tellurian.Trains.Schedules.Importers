@@ -122,11 +122,42 @@ public static class DriverDutyPartExtensions
         /// changes, or that wagons are coupled or uncoupled, at the station where one row ends and the
         /// next begins.
         /// </remarks>
-        private IEnumerable<TrainPartVehicle> VehicleRows =>
-            new[] { dutyPart.TrainPart }.Concat(dutyPart.Parts).Distinct()
-                .SelectMany(part => dutyPart.VehiclesOn(part).Select(vehicle => dutyPart.VehicleRow(vehicle, part)))
-                .OrderBy(row => row.TrainPart.StartTime)
-                .ThenBy(row => row.Sessions.FirstNumber);
+        private IEnumerable<TrainPartVehicle> VehicleRows
+        {
+            get
+            {
+                var matched = new[] { dutyPart.TrainPart }.Concat(dutyPart.Parts).Distinct()
+                    .SelectMany(part => dutyPart.VehiclesOn(part).Select(vehicle => dutyPart.VehicleRow(vehicle, part)))
+                    .ToList();
+                return matched.Concat(dutyPart.StretchRowsOfVehiclesWithoutRow(matched))
+                    .OrderBy(row => row.TrainPart.StartTime)
+                    .ThenBy(row => row.Sessions.FirstNumber);
+            }
+        }
+
+        /// <summary>
+        /// The rows of vehicles that work the span only in stretches of their own, none of them equal to the
+        /// span or a part of the duty — a wagonset split in two to be loaded half way, say, under a duty that
+        /// holds the whole train as one part.
+        /// </summary>
+        /// <remarks>
+        /// Parts are matched by their two calls, so such a vehicle is not found by <c>VehiclesOn</c> and
+        /// its block would print empty. Its own stretches that lie within the span are listed instead,
+        /// each as its own row, as for a train cut into parts.
+        /// </remarks>
+        private IEnumerable<TrainPartVehicle> StretchRowsOfVehiclesWithoutRow(IReadOnlyCollection<TrainPartVehicle> matched)
+        {
+            if (dutyPart.Duty.Plan is not { } plan) return [];
+            var span = dutyPart.TrainPart;
+            var rowless = plan.ScheduledObjects.Where(vehicle => matched.All(row => !row.Vehicle.Equals(vehicle)));
+            return rowless.SelectMany(vehicle => vehicle.ScheduleAssignments
+                .SelectMany(assignment => assignment.Schedule.Parts)
+                .Where(part => part.Train.Equals(span.Train) &&
+                               part.From.Sequence >= span.From.Sequence &&
+                               part.To.Sequence <= span.To.Sequence)
+                .Distinct()
+                .Select(part => dutyPart.VehicleRow(vehicle, part)));
+        }
 
         /// <summary>
         /// The vehicles working one stretch, resolved through the duty's plan.

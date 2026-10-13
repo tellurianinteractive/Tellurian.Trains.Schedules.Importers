@@ -74,7 +74,7 @@
     <value>Losse {0}.</value>
   </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
-    <value>Losse {0} og send tilbake til {1}.</value>
+    <value>Loss {0} og bær tilbake godset til {1}.</value>
   </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Koble {0} fra toget.</value>

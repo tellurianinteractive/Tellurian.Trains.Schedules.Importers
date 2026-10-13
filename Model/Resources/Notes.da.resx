@@ -74,7 +74,7 @@
     <value>Aflæs {0}.</value>
   </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
-    <value>Aflæs {0} og send tilbage til {1}.</value>
+    <value>Aflæs {0} og bring godset tilbage til {1}.</value>
   </data>
   <data name="UncoupleFromTrain" xml:space="preserve">
     <value>Frakobl {0} fra toget.</value>

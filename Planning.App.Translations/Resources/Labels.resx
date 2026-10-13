@@ -2792,7 +2792,7 @@
     <value>The wagons are loaded where the train part ends.</value>
   </data>
   <data name="UnloadWagons" xml:space="preserve">
-    <value>Unload wagons and return?</value>
+    <value>Unload wagons and carry the goods back?</value>
   </data>
   <data name="UnloadWagonsHelp" xml:space="preserve">
     <value>The wagons are unloaded where the train part ends and sent back to where the wagonset's schedule last loaded them. Another train may bring them back.</value>

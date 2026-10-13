@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.9.16
+
+### Fehlerbehebungen
+
+- **Ein in zwei Teile geteilter Wagensatz erscheint jetzt in den Fahrdiensten.** Wenn ein Dienst einen ganzen Zug als einen Teil enthält, dessen Wagensatz aber in zwei Teilen geplant ist, zum Beispiel um auf halber Strecke beladen zu werden, war der Wagensatz-Abschnitt der Dienstseite leer. Beide Abschnitte des Wagensatzes werden jetzt aufgeführt.
+
+### Änderungen
+
+- **Klarere Formulierung beim Entladen von Wagen.** Die Auswahl bei einem Zugabschnitt heißt jetzt *Wagen entladen und das Gut zurückbringen?*, und der Hinweis bei der Ankunft sagt, dass die Wagen zu entladen und das Gut zu dem Bahnhof zurückzubringen ist, an dem sie beladen wurden.
+
 ## Version 0.9.15
 
 ### Fehlerbehebungen
@@ -90,7 +100,7 @@
 
 - **Dienste, die an Tagen gefahren werden, an denen ihre Züge nicht verkehren.** Ein Dienst, der an einem Tag gefahren wird, an dem einer seiner Züge nicht verkehrt, wird nun als Konflikt gemeldet.
 
-- **Be- und Entladen von Güterwagengruppen.** Eine Wagengruppe hat nun die Auswahl *Verwendung* (Personen- oder Güterverkehr). Für eine Güterwagengruppe lässt sich ein Zugabschnitt mit *Wagen beladen?* oder *Wagen entladen und zurückführen?* ankreuzen, was einen Hinweis bei der Ankunft ergibt. Der Entladehinweis nennt den Bahnhof, an dem die Wagen im Umlauf der Wagengruppe zuletzt beladen wurden, sodass ein anderer Zug sie zurückbringen kann. Be- und Entladen werden geprüft: eine Güterwagengruppe muss vor dem Entladen beladen sein, darf nicht erneut beladen werden, bevor sie entladen ist, und darf am Ende des Umlaufs nicht beladen bleiben.
+- **Be- und Entladen von Güterwagengruppen.** Eine Wagengruppe hat nun die Auswahl *Verwendung* (Personen- oder Güterverkehr). Für eine Güterwagengruppe lässt sich ein Zugabschnitt mit *Wagen beladen?* oder *Wagen entladen und das Gut zurückbringen?* ankreuzen, was einen Hinweis bei der Ankunft ergibt. Der Entladehinweis nennt den Bahnhof, an dem die Wagen im Umlauf der Wagengruppe zuletzt beladen wurden, sodass ein anderer Zug sie zurückbringen kann. Be- und Entladen werden geprüft: eine Güterwagengruppe muss vor dem Entladen beladen sein, darf nicht erneut beladen werden, bevor sie entladen ist, und darf am Ende des Umlaufs nicht beladen bleiben.
 
 ## Version 0.9.0
 

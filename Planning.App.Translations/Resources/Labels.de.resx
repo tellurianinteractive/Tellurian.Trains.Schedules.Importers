@@ -2772,7 +2772,7 @@
     <value>Die Wagen werden dort beladen, wo der Zugabschnitt endet.</value>
   </data>
   <data name="UnloadWagons" xml:space="preserve">
-    <value>Wagen entladen und zurückführen?</value>
+    <value>Wagen entladen und das Gut zurückbringen?</value>
   </data>
   <data name="UnloadWagonsHelp" xml:space="preserve">
     <value>Die Wagen werden dort entladen, wo der Zugabschnitt endet, und dorthin zurückgeführt, wo der Umlauf der Wagengruppe sie zuletzt beladen hat. Ein anderer Zug kann sie zurückbringen.</value>
