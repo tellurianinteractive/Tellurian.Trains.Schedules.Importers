@@ -120,10 +120,12 @@ public static class GraphScheduleDrawingExtensions
     /// <summary>
     /// Enumerates every arrival/departure minute label to draw, each already positioned by a corner anchored
     /// at its call point. Intended for a single final pass over all trains so the labels sit above every graph
-    /// line. A label is produced only for a stop (<see cref="StationCall.IsStop"/>, never a pass-through) on the matching side
-    /// (departure where the train departs, arrival where it arrives) when that minute kind is enabled and the
-    /// time is inside the visible window. Uses whose endpoints are not adjacent stations on this schedule are
-    /// omitted, matching the lines actually drawn.
+    /// line. At a stop (<see cref="StationCall.IsStop"/>) a label is produced on the matching side (departure
+    /// where the train departs, arrival where it arrives) when that minute kind is enabled and the time is
+    /// inside the visible window. A pass-through has neither flag set, so it is labelled by its times alone:
+    /// with equal arrival and departure times it gets a single label, the departure minute, as soon as either
+    /// minute kind is enabled; with differing times each side follows its own setting. Uses whose endpoints
+    /// are not adjacent stations on this schedule are omitted, matching the lines actually drawn.
     /// </summary>
     public static IEnumerable<MinuteLabel> MinuteLabels(this GraphSchedule me)
     {
@@ -151,14 +153,15 @@ public static class GraphScheduleDrawingExtensions
                 // The line descends on screen (cross-axis grows with time) when it runs to a later station.
                 var descending = toStationIndex > fromStationIndex;
 
-                if ((me.GraphSettings.ShowDepartureMinutes || (me.GraphSettings.ShowArrivalMinutes && IsMergedPass(use.From)))
-                    && use.From.IsDeparture && me.IsTimeVisible(use.From.Departure.Value))
+                // A pass-through has neither flag set, so it is labelled by its times alone.
+                var showDeparture = me.GraphSettings.ShowDepartureMinutes || (me.GraphSettings.ShowArrivalMinutes && IsMergedPass(use.From));
+                if (showDeparture && (use.From.IsDeparture || !use.From.IsStop) && me.IsTimeVisible(use.From.Departure.Value))
                 {
                     var point = me.MinuteAt(fromStationIndex, fromTrackIndex, use.From.Departure.Value);
                     yield return me.MinuteLabelAt(point, use.From.Departure.MinutesText(), isDeparture: true, descending);
                 }
 
-                if (me.GraphSettings.ShowArrivalMinutes && use.To.IsArrival && me.IsTimeVisible(use.To.Arrival.Value)
+                if (me.GraphSettings.ShowArrivalMinutes && (use.To.IsArrival || !use.To.IsStop) && me.IsTimeVisible(use.To.Arrival.Value)
                     // A passing train with equal arrival and departure is labelled once, by its departure.
                     && !IsMergedPass(use.To))
                 {
@@ -171,7 +174,7 @@ public static class GraphScheduleDrawingExtensions
 
     // A call the train passes without stopping whose arrival and departure times are equal: one point, one label.
     private static bool IsMergedPass(StationCall call) =>
-        !call.IsStop && call.IsArrival && call.IsDeparture && call.Arrival.Value == call.Departure.Value;
+        !call.IsStop && call.Arrival.Value == call.Departure.Value;
 
     // Chooses which corner of the minute text touches the call point, following the requested placement:
     // on a descending (down-slope) line the departure tucks its upper-left corner to its point and the
