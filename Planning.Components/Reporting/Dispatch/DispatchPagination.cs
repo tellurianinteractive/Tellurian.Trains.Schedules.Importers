@@ -20,8 +20,11 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch;
 /// </remarks>
 public sealed record DispatchPageGeometry
 {
-    /// <summary>Printable height of one page (A4 landscape: 210 − 2 × 10 mm margin).</summary>
-    public double PrintableHeightMm { get; init; } = 190;
+    /// <summary>The type size of the table, in points; must match <c>font-size</c> in the stylesheet.</summary>
+    public const double FontSizePt = 9;
+
+    /// <summary>Printable height of one page (A4 landscape: 210 − 2 × 6 mm top and bottom margin).</summary>
+    public double PrintableHeightMm { get; init; } = 198;
 
     /// <summary>Printable width of one page (A4 landscape: 297 − 2 × 10 mm margin).</summary>
     public double PrintableWidthMm { get; init; } = 277;
@@ -91,6 +94,17 @@ public sealed record DispatchPageGeometry
     /// </remarks>
     public double CellPaddingWidthMm { get; init; } = 2;
 
+    /// <summary>
+    /// Widths of the words in the report font, measured in the browser. When set, notes are wrapped by
+    /// their real width; when <c>null</c>, or for a word it has not measured, the character estimate
+    /// above is used instead.
+    /// </summary>
+    public NoteTextMeasure? NoteMeasure { get; init; }
+
+    /// <summary>Width the text of the notes column wraps within, with the sessions' tick-off columns taken off.</summary>
+    public double NoteTextWidthMm(int sessionCount) =>
+        PrintableWidthMm - FixedColumnsWidthMm - (sessionCount * SessionColumnWidthMm) - CellPaddingWidthMm;
+
     /// <summary>Default geometry for an A4 landscape page with 10 mm margins.</summary>
     public static DispatchPageGeometry A4Landscape { get; } = new();
 
@@ -111,6 +125,70 @@ public sealed record DispatchPageGeometry
 
     private int CharactersWithin(double columnWidthMm) =>
         Math.Max(1, (int)((columnWidthMm - CellPaddingWidthMm) / NoteCharacterWidthMm));
+}
+
+/// <summary>
+/// Word widths measured in the font the report is set in, used to count the lines a note wraps onto.
+/// </summary>
+/// <remarks>
+/// The report font is the planner's choice, so no fixed character width is right for it. The browser
+/// measures the words once; this class then wraps by those widths. A small margin is kept because the
+/// notes can carry bold or italic runs that measure a little wider than plain text, and an under-count
+/// prints a row past the foot of the page.
+/// </remarks>
+public sealed class NoteTextMeasure
+{
+    /// <summary>Margin added to every measured width.</summary>
+    public const double Margin = 1.05;
+
+    private readonly IReadOnlyDictionary<string, double> _wordWidthsMm;
+    private readonly double _spaceWidthMm;
+
+    /// <param name="wordWidthsMm">Width in millimetres of each word, by the word.</param>
+    /// <param name="spaceWidthMm">Width in millimetres of one space.</param>
+    public NoteTextMeasure(IReadOnlyDictionary<string, double> wordWidthsMm, double spaceWidthMm)
+    {
+        _wordWidthsMm = wordWidthsMm.ValueOrException(nameof(wordWidthsMm));
+        _spaceWidthMm = spaceWidthMm;
+    }
+
+    /// <summary>The words of a text, as the wrapping sees them.</summary>
+    public static IEnumerable<string> WordsOf(string text) =>
+        text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// The lines <paramref name="text"/> wraps onto in a column <paramref name="widthMm"/> wide, or
+    /// <c>null</c> when a word has not been measured and the caller has to estimate instead.
+    /// </summary>
+    public int? LinesOf(string text, double widthMm)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return 1;
+
+        var lines = 1;
+        var used = 0.0;
+        foreach (var word in WordsOf(text))
+        {
+            if (!_wordWidthsMm.TryGetValue(word, out var measured)) return null;
+            var width = measured * Margin;
+            var withWord = used == 0 ? width : used + (_spaceWidthMm * Margin) + width;
+            if (used > 0 && withWord > widthMm)
+            {
+                lines++;
+                used = width;
+            }
+            else
+            {
+                used = withWord;
+            }
+            // A word wider than the column breaks across lines of its own.
+            while (used > widthMm)
+            {
+                lines++;
+                used -= widthMm;
+            }
+        }
+        return lines;
+    }
 }
 
 /// <summary>
@@ -179,7 +257,9 @@ public static class DispatchPaginator
         geometry = geometry.ValueOrException(nameof(geometry));
 
         var perNoteLine = geometry.CharactersPerNoteLine(sessionCount);
-        var noteLines = row.PrintingNotes.Sum(note => LinesOf(note.ToText, perNoteLine));
+        var noteWidth = geometry.NoteTextWidthMm(sessionCount);
+        var noteLines = row.PrintingNotes.Sum(note =>
+            geometry.NoteMeasure?.LinesOf(note.ToText, noteWidth) ?? LinesOf(note.ToText, perNoteLine));
         var sessionsLines = LinesOf(row.SessionsText, geometry.CharactersPerSessionsLine);
 
         var lines = Math.Max(Math.Max(noteLines, sessionsLines), 1);

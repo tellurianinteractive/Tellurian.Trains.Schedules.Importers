@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 0.9.17
+
+### Fehlerbehebungen
+
+- **Vollere Seiten in den Fahrdienstlisten.** Die Breite der Notizen wird jetzt in der gewählten Berichtsschrift gemessen statt angenommen, sodass eine lange Notiz keine Zeile mehr bekommt, die sie nicht braucht, und mehr Zeilen auf eine Seite passen. Die Seiten haben außerdem oben und unten 6 mm Rand statt 10 mm.
+
+### Änderungen
+
+- **Die Notiz bei Ankunft eines Güterflusses richtet sich danach, wohin die Wagen gehen.** In einem Schattenbahnhof lautet sie *Angekommene Wagen gemäß den Anweisungen des Bahnhofs sortieren.* In anderen Bahnhöfen lautet sie *Angekommene Wagen rangieren.*, wenn ein Teil der Wagen andere Ziele hat als der Bahnhof, und *Angekommene Wagen zu den Güterkunden rangieren.*, wenn alle für den Bahnhof bestimmt sind und der Fluss sie rangiert. Sonst gibt es keine Notiz. Der Satz *Alle Wagen abkuppeln.* entfällt.
+
 ## Version 0.9.16
 
 ### Fehlerbehebungen

@@ -146,6 +146,29 @@ public class DispatchPaginationTests
     }
 
     [TestMethod]
+    public void MeasuredWordWidthsDecideTheLinesNotTheCharacterCount()
+    {
+        // Ten-millimetre words and 1 mm spaces, in a 25 mm column (margin aside): two words fit a line.
+        var measure = new NoteTextMeasure(
+            new Dictionary<string, double> { ["aaaa"] = 10, ["bbbb"] = 10, ["cccc"] = 10 }, 1);
+
+        Assert.AreEqual(1, measure.LinesOf("aaaa bbbb", 25));
+        Assert.AreEqual(2, measure.LinesOf("aaaa bbbb cccc", 25));
+        // A narrower font (smaller widths) fits the same words on fewer lines.
+        var narrow = new NoteTextMeasure(
+            new Dictionary<string, double> { ["aaaa"] = 5, ["bbbb"] = 5, ["cccc"] = 5 }, 1);
+        Assert.AreEqual(1, narrow.LinesOf("aaaa bbbb cccc", 25));
+    }
+
+    [TestMethod]
+    public void AnUnmeasuredWordLeavesTheCharacterEstimateToDecide()
+    {
+        var measure = new NoteTextMeasure(new Dictionary<string, double> { ["aaaa"] = 10 }, 1);
+
+        Assert.IsNull(measure.LinesOf("aaaa unknown", 25));
+    }
+
+    [TestMethod]
     public void TheCellPaddingIsTakenOffTheWidthTextWrapsWithin()
     {
         // 2 mm of a 14 mm column is a sixth of it; measuring against the column rather than the text

@@ -156,17 +156,14 @@
     <value>Brings wagons to {0}</value>
     <comment>{0}=destinations</comment>
   </data>
-  <data name="UncoupleAllWagons" xml:space="preserve">
-    <value>Uncouple all wagons.</value>
+  <data name="SortArrivedWagonsAccordingToStationInstructions" xml:space="preserve">
+    <value>Sort arrived wagons according to the station instructions.</value>
   </data>
-  <data name="UncoupleAllWagonsMoveToDepartingTrackOrTable" xml:space="preserve">
-    <value>Uncouple all wagons. Move arrived wagons to departing track after their destination, or place at table if at destination.</value>
+  <data name="ShuntArrivedWagons" xml:space="preserve">
+    <value>Shunt arrived wagons.</value>
   </data>
-  <data name="UncoupleAllWagonsShuntToDepartingTrackOrCustomer" xml:space="preserve">
-    <value>Uncouple all wagons. Shunt arrived wagons to departing track after their destination, or shunt to customer if at destination.</value>
-  </data>
-  <data name="UncoupleAllWagonsShuntToCustomers" xml:space="preserve">
-    <value>Uncouple all wagons. Shunt arrived wagons to customers.</value>
+  <data name="ShuntArrivedWagonsToCustomers" xml:space="preserve">
+    <value>Shunt arrived wagons to customers.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Shunt arriving wagons from {0} to cargo customers.</value>

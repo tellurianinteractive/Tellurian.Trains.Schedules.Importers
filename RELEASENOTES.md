@@ -4,6 +4,8 @@
 
 ### New Features
 
+- **Dispatch note widths measured in the report font.** New **`NoteTextMeasure`** and **`DispatchPageGeometry.NoteMeasure`**: when set, `DispatchPaginator` wraps each note by the real width of its words, measured by the browser (`js/text-width.js`), instead of by a fixed character width. Without it the character estimate is used as before. New **`PageFormat.VerticalMargin`** sets the top and bottom margin apart from the sides; the dispatch report uses 6 mm, and `DispatchPageGeometry.PrintableHeightMm` is now 198.
+
 - **Vehicle-stay conflicts name their stay.** New **`ValidationError.Hold`**: for `StationTrackHeldByVehicles`, the `TrackHold` the train's call conflicts with, found with the sessions of both taken into account, so a client can mark exactly that stay. `ValidationError.IsShownOnTrains` is now also true for `StationTrackHeldByVehicles`, so the conflict is shown on the trains' calls as well as on the schedule.
 
 - **Wagonsets can be stabled or lifted off.** **`WagonSetOptions.FromLayover`** and **`ToLayover`** (the existing `TractionLayover`) work as the traction options do: `Schedule.SetArrivalLayover`/`SetDepartureLayover` store them in the wagonset options for a working of nothing but wagonsets and pair the neighbouring part, `Stabling`/`LiftedOff` give `ToParkingNote`/`FromParkingNote` (worded "move" for a wagonset, not "drive") and `LiftOffNote`/`LiftOnNote`, rule S6 and the between-sessions pairing include wagonsets, and track holds are freed. New **`ScheduledTrainPart.ArrivalLayover`** and **`DepartureLayover`** read the layover from either options type.
@@ -389,6 +391,8 @@
   `Plan.Reconcile`.
 
 ### Breaking Changes
+
+- **The arrival note of a cargo flow follows where the wagons are bound.** `ArrivedWagonHandling` is now `None`, `SortAccordingToStationInstructions` (a shadow station), `ShuntToDestinations` (some wagons are for other destinations than the station) and `ShuntToCustomers`; `MoveToDepartingTrackOrTable` and `ShuntToDepartingTrackOrCustomer` are gone. New **`CargoFlowTrainPart.HasDestinationsBeyond(station)`** says whether a flow has wagons for somewhere other than the station. A station that would get nothing to say, because all the wagons are its own and no flow shunts them, now gets no `CargoFlowUncoupleNote` at all, and the sentence "Uncouple all wagons." is no longer part of any of the notes. A station with regions or cargo-served locations is no longer treated differently.
 
 - **`TractionOptions.FromParking` and `ToParking` are replaced by `FromLayover` and `ToLayover`.** Use
   `TractionLayover.Stabling` for `true`. A plan saved with the old flags set loses them on load; nothing in

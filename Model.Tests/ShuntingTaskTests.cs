@@ -191,7 +191,11 @@ public class ShuntingTaskTests
 
         // Bound for where the train ends, not the station it starts at: a flow is never stated as
         // bringing wagons to the station it departs from.
-        train.CreateCargoFlow(1, calls[0], calls[^1], FlowTo(timetable, calls[^1].OperationLocation));
+        // "And beyond", so some of the wagons arriving at the end are for somewhere else and the
+        // dispatcher there has an instruction to be given.
+        var flow = FlowTo(timetable, calls[^1].OperationLocation);
+        flow.Destinations.Single().AndBeyond = true;
+        train.CreateCargoFlow(1, calls[0], calls[^1], flow);
 
         // The dispatcher's two halves of the same flow: what goes on the train here, and what comes off
         // it there. Neither reaches the loco driver, whose booklet states the flow in its cargo block.

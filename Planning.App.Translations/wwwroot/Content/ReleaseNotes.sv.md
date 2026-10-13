@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 0.9.17
+
+### Felrättningar
+
+- **Fylligare sidor i expedieringslistorna.** Anteckningarnas bredd mäts nu i det rapportsnitt du valt i stället för att antas, så att en lång anteckning inte får en rad den inte använder och fler rader ryms på en sida. Sidorna har också 6 mm marginal upptill och nedtill i stället för 10 mm.
+
+### Ändringar
+
+- **Anteckningen vid ankomst av ett godsflöde följer vart vagnarna ska.** På en skuggstation lyder den *Sortera ankomna vagnar enligt stationens instruktioner.* På andra stationer lyder den *Växla ankomna vagnar.* när en del av vagnarna ska till andra destinationer än stationen, och *Växla ankomna vagnar till godskunderna.* när alla är till stationen och flödet växlar dem. Annars finns ingen anteckning. Meningen *Koppla från alla vagnar.* har tagits bort.
+
 ## Version 0.9.16
 
 ### Rättelser

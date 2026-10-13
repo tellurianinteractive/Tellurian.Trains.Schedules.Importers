@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 0.9.17
+
+### Feilrettinger
+
+- **Fyldigere sider i ekspedisjonslistene.** Bredden på merknadene måles nå i skriften du har valgt for rapportene, i stedet for å antas, slik at en lang merknad ikke får en linje den ikke bruker, og flere rader får plass på en side. Sidene har også 6 mm marg øverst og nederst i stedet for 10 mm.
+
+### Endringer
+
+- **Notatet ved ankomst av en godsflyt følger hvor vognene skal.** På en skyggestasjon lyder det *Sorter ankomne vogner etter stasjonens instruksjoner.* På andre stasjoner lyder det *Skift ankomne vogner.* når noen av vognene skal til andre destinasjoner enn stasjonen, og *Skift ankomne vogner til godskundene.* når de alle er til stasjonen og flyten skifter dem. Ellers er det ikke noe notat. Setningen *Koble fra alle vogner.* er fjernet.
+
 ## Versjon 0.9.16
 
 ### Feilrettinger

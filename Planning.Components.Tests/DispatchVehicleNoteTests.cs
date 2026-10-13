@@ -118,28 +118,32 @@ public class DispatchVehicleNoteTests
         train.CreateCargoFlow(1, calls[0], calls[^1], options);
 
         Assert.Contains($"Brings wagons to {elsewhere.Name}", NoteTextsAt(plan, Origin));
-        Assert.Contains("Uncouple all wagons.", NoteTextsAt(plan, Terminus));
+        // Every wagon is for the station itself and nobody shunts them, so the dispatcher is told nothing.
+        Assert.IsEmpty(RowsAt(plan, Terminus).Single().Notes.OfType<CargoFlowUncoupleNote>());
     }
 
     [TestMethod]
-    public void ArrivingCargoFlowWagonsAreAllUncoupledAndHandledByKindOfLocation()
+    public void ArrivingCargoFlowWagonsAreHandledByWhereTheyAreBoundAndKindOfLocation()
     {
         var (plan, train) = Arrange();
         var terminus = (Station)plan.Layout.OperationLocations.Single(l => l.Name == Terminus);
-        var options = plan.Timetable.Add(new CargoFlowOptions { ToAllDestinations = true });
+        var options = plan.Timetable.Add(new CargoFlowOptions());
+        options.Destinations.Add(new Destination { Location = terminus });
         var calls = train.CallsInRunOrder;
         var flow = train.CreateCargoFlow(1, calls[0], calls[^1], options);
 
-        Assert.Contains("Uncouple all wagons.", NoteTextsAt(plan, Terminus));
+        // All wagons are for the station itself and nobody shunts them: nothing to say.
+        Assert.IsEmpty(RowsAt(plan, Terminus).Single().Notes.OfType<CargoFlowUncoupleNote>());
 
         flow.AlsoShuntAfterArrival = true;
-        Assert.Contains("Uncouple all wagons. Shunt arrived wagons to customers.", NoteTextsAt(plan, Terminus));
+        Assert.Contains("Shunt arrived wagons to customers.", NoteTextsAt(plan, Terminus));
 
-        terminus.Regions.Add(new Region { Id = 1, Name = "Elsewhere" });
-        Assert.Contains("Uncouple all wagons. Shunt arrived wagons to departing track after their destination, or shunt to customer if at destination.", NoteTextsAt(plan, Terminus));
+        // Some wagons are for somewhere else: they are shunted on, whether or not a flow shunts to customers.
+        options.ToAllDestinations = true;
+        Assert.Contains("Shunt arrived wagons.", NoteTextsAt(plan, Terminus));
 
         terminus.IsShadow = true;
-        Assert.Contains("Uncouple all wagons. Move arrived wagons to departing track after their destination, or place at table if at destination.", NoteTextsAt(plan, Terminus));
+        Assert.Contains("Sort arrived wagons according to the station instructions.", NoteTextsAt(plan, Terminus));
     }
 
     [TestMethod]

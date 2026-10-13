@@ -3,6 +3,7 @@
 
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch
 
+@inject IJSRuntime JS
 @inject Translator Translator
 @inject ScheduleStateService ScheduleState
 
@@ -33,7 +34,7 @@ else
         var culture = _cultures[page.List];
         UseReportCulture(culture);
         <CascadingValue Value="culture">
-            <A4LPage Margin="10">
+            <A4LPage Margin="10" VerticalMargin="6">
                 <StationDispatchTable Page="page" Settings="Settings" />
             </A4LPage>
         </CascadingValue>
@@ -76,19 +77,55 @@ else
 
         var settings = Settings;
         var sessionCount = SessionsFormatting.PositionsOf(settings).Count;
-        var pages = new List<DispatchPage>();
+
+        // Built in the station's own language: the list writes the sessions' texts, and the pagination
+        // measures the notes'.
+        var lists = new List<DispatchList>();
+        var words = new HashSet<string>();
         foreach (var station in Selected(layout))
         {
-            // Built in the station's own language: the list writes the sessions' texts, and the pagination
-            // measures the notes'.
             var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
             var list = DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
             _cultures[list] = culture;
-            pages.AddRange(DispatchPaginator.BuildPages([list], sessionCount, DispatchPageGeometry.A4Landscape)
+            lists.Add(list);
+            foreach (var note in list.Rows.SelectMany(row => row.PrintingNotes))
+                words.UnionWith(NoteTextMeasure.WordsOf(note.ToText));
+        }
+
+        var geometry = DispatchPageGeometry.A4Landscape with { NoteMeasure = await MeasureAsync(words) };
+        var pages = new List<DispatchPage>();
+        foreach (var list in lists)
+        {
+            using var scope = ReportCulture.Use(_cultures[list].Culture);
+            pages.AddRange(DispatchPaginator.BuildPages([list], sessionCount, geometry)
                 .Select(page => page with { PageNumber = pages.Count + page.PageNumber }));
         }
         _pages = pages;
+    }
+
+    // The width of every word of the notes in the font the report is set in, measured by the browser. The
+    // font is the planner's choice, so no fixed character width fits it. Null when the browser cannot
+    // measure, which leaves the pagination on its character estimate.
+    private async Task<NoteTextMeasure?> MeasureAsync(HashSet<string> words)
+    {
+        if (words.Count == 0) return null;
+        try
+        {
+            var list = words.ToList();
+            await using var module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Tellurian.Trains.Schedules.Planning.Components/js/text-width.js");
+            var font = ReportFonts.CssFontFamily(ScheduleState.Layout?.Settings.General.ReportFontFamily);
+            var widths = await module.InvokeAsync<double[]>("measure", font, DispatchPageGeometry.FontSizePt, list);
+            if (widths.Length != list.Count + 1) return null;
+            return new NoteTextMeasure(
+                list.Select((word, i) => (word, width: widths[i])).ToDictionary(x => x.word, x => x.width),
+                widths[^1]);
+        }
+        catch (JSException)
+        {
+            return null;
+        }
     }
 
     // The stations that get a list: every station with a dispatcher — manned stations, and shadow

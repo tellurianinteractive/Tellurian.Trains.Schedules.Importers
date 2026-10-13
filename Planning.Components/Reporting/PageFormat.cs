@@ -22,12 +22,19 @@ public abstract class PageFormat : ReportComponentBase
     /// </summary>
     [Parameter] public int Margin { get; set; }
 
+    /// <summary>
+    /// Top and bottom margin in millimetres when it differs from <see cref="Margin"/>, which then applies
+    /// to the sides only.
+    /// </summary>
+    [Parameter] public int? VerticalMargin { get; set; }
+
     /// <summary>The page number shown in the footer. A footer is rendered only when this is &gt; 0.</summary>
     [Parameter] public int PageNumber { get; set; }
 
     /// <summary>Optional text shown alongside the page number in the footer.</summary>
     [Parameter] public string? Footnote { get; set; }
 
-    /// <summary>The <see cref="Margin"/> as a CSS length, e.g. "10mm".</summary>
-    protected string MarginStyle => $"{Margin}mm";
+    /// <summary>The margins as a CSS padding, e.g. "10mm", or "6mm 10mm" with a vertical margin.</summary>
+    protected string MarginStyle =>
+        VerticalMargin is { } vertical ? $"{vertical}mm {Margin}mm" : $"{Margin}mm";
 }

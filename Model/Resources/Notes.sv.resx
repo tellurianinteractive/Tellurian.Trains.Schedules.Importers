@@ -143,17 +143,14 @@
   <data name="BringsWagonsTo" xml:space="preserve">
     <value>Medför vagnar till {0}</value>
   </data>
-  <data name="UncoupleAllWagons" xml:space="preserve">
-    <value>Koppla från alla vagnar.</value>
+  <data name="SortArrivedWagonsAccordingToStationInstructions" xml:space="preserve">
+    <value>Sortera ankomna vagnar enligt stationens instruktioner.</value>
   </data>
-  <data name="UncoupleAllWagonsMoveToDepartingTrackOrTable" xml:space="preserve">
-    <value>Koppla från alla vagnar. Flytta ankomna vagnar till avgångsspåret efter deras destination, eller ställ på bordet om de är framme vid destinationen.</value>
+  <data name="ShuntArrivedWagons" xml:space="preserve">
+    <value>Växla ankomna vagnar.</value>
   </data>
-  <data name="UncoupleAllWagonsShuntToDepartingTrackOrCustomer" xml:space="preserve">
-    <value>Koppla från alla vagnar. Växla ankomna vagnar till avgångsspåret efter deras destination, eller växla till kund om de är framme vid destinationen.</value>
-  </data>
-  <data name="UncoupleAllWagonsShuntToCustomers" xml:space="preserve">
-    <value>Koppla från alla vagnar. Växla ankomna vagnar till godskunderna.</value>
+  <data name="ShuntArrivedWagonsToCustomers" xml:space="preserve">
+    <value>Växla ankomna vagnar till godskunderna.</value>
   </data>
   <data name="ShuntArrivingWagonsFromToCargoCustomers" xml:space="preserve">
     <value>Växla ankommande vagnar från {0} till godskunderna.</value>

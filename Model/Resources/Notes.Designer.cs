@@ -97,38 +97,29 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Uncouple all wagons..
+        ///   Looks up a localized string similar to Sort arrived wagons according to the station instructions..
         /// </summary>
-        internal static string UncoupleAllWagons {
+        internal static string SortArrivedWagonsAccordingToStationInstructions {
             get {
-                return ResourceManager.GetString("UncoupleAllWagons", resourceCulture);
+                return ResourceManager.GetString("SortArrivedWagonsAccordingToStationInstructions", resourceCulture);
             }
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Uncouple all wagons. Move arrived wagons to departing track after their destination, or place at table if at destination..
+        ///   Looks up a localized string similar to Shunt arrived wagons..
         /// </summary>
-        internal static string UncoupleAllWagonsMoveToDepartingTrackOrTable {
+        internal static string ShuntArrivedWagons {
             get {
-                return ResourceManager.GetString("UncoupleAllWagonsMoveToDepartingTrackOrTable", resourceCulture);
+                return ResourceManager.GetString("ShuntArrivedWagons", resourceCulture);
             }
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Uncouple all wagons. Shunt arrived wagons to departing track after their destination, or shunt to customer if at destination..
+        ///   Looks up a localized string similar to Shunt arrived wagons to customers..
         /// </summary>
-        internal static string UncoupleAllWagonsShuntToDepartingTrackOrCustomer {
+        internal static string ShuntArrivedWagonsToCustomers {
             get {
-                return ResourceManager.GetString("UncoupleAllWagonsShuntToDepartingTrackOrCustomer", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Uncouple all wagons. Shunt arrived wagons to customers..
-        /// </summary>
-        internal static string UncoupleAllWagonsShuntToCustomers {
-            get {
-                return ResourceManager.GetString("UncoupleAllWagonsShuntToCustomers", resourceCulture);
+                return ResourceManager.GetString("ShuntArrivedWagonsToCustomers", resourceCulture);
             }
         }
 

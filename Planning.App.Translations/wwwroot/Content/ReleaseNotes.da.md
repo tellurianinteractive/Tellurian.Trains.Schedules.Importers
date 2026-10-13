@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 0.9.17
+
+### Fejlrettelser
+
+- **Fyldigere sider i ekspeditionslisterne.** Noternes bredde måles nu i den rapportskrifttype, du har valgt, i stedet for at blive antaget, så en lang note ikke får en linje, den ikke bruger, og der er plads til flere rækker på en side. Siderne har også 6 mm margen foroven og forneden i stedet for 10 mm.
+
+### Ændringer
+
+- **Noten ved ankomst af et godsflow følger, hvor vognene skal hen.** På en skyggestation lyder den *Sortér ankomne vogne efter stationens instruktioner.* På andre stationer lyder den *Rangér ankomne vogne.*, når nogle af vognene skal til andre destinationer end stationen, og *Rangér ankomne vogne til godskunderne.*, når de alle er til stationen, og flowet rangerer dem. Ellers er der ingen note. Sætningen *Frakobl alle vogne.* er fjernet.
+
 ## Version 0.9.16
 
 ### Fejlrettelser

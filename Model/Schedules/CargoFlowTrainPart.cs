@@ -159,6 +159,16 @@ public static class CargoFlowTrainPartExtensions
                 : ShuntingWork.FromCargoCustomers;
 
         /// <summary>
+        /// Whether some of the flow's wagons are bound for somewhere other than <paramref name="station"/>
+        /// itself: a flow to all destinations, or one naming another place — or the station "and beyond"
+        /// or with its regions. The station's own local destinations are the station itself: its customers.
+        /// </summary>
+        public bool HasDestinationsBeyond(OperationLocation station) =>
+            trainPart.CargoFlowOptions is { } options &&
+            (options.ToAllDestinations ||
+                options.Destinations.Any(d => !d.Location.Equals(station) || d.AndBeyond || d.AndRegions));
+
+        /// <summary>
         /// Where this flow's wagons came from, as plain text: the forwarded origin locations joined with
         /// commas, or empty when the flow names none.
         /// </summary>

@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 0.9.17
+
+### Fixes
+
+- **Fuller pages in the dispatch lists.** The width of the notes is now measured in the report font you have chosen instead of being assumed, so a long note is no longer given a line it does not use and more rows fit on a page. The pages also have a 6 mm margin at the top and bottom, instead of 10 mm.
+
+### Changes
+
+- **The note on arrival of a cargo flow follows where the wagons are bound.** At a shadow yard it says *Sort arrived wagons according to the station instructions.* At other stations it says *Shunt arrived wagons.* when some of the wagons are for other destinations than the station, and *Shunt arrived wagons to customers.* when they are all for the station and the flow shunts them. Otherwise there is no note. The sentence *Uncouple all wagons.* is gone.
+
 ## Version 0.9.16
 
 ### Fixes

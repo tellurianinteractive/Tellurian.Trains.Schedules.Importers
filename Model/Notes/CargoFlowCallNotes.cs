@@ -53,23 +53,26 @@ public static class CargoFlowCallNoteExtensions
                 if (arrivals.Count > 0)
                 {
                     var parts = arrivals.SelectMany(note => note.Parts).ToList();
-                    result.Add(arrivals[0] with { Parts = parts, Handling = call.ArrivedWagonHandlingFor(parts) });
+                    var handling = call.ArrivedWagonHandlingFor(parts);
+                    // Nothing to tell the dispatcher: the wagons are the station's own and nobody shunts them.
+                    if (handling != ArrivedWagonHandling.None)
+                        result.Add(arrivals[0] with { Parts = parts, Handling = handling });
                 }
                 return result;
             }
         }
 
         /// <summary>
-        /// What is done with the wagons that arrive here: a shadow station moves them on or places them at
-        /// the table, any other shunting yard shunts them on or to the customer, and anywhere else they are
-        /// shunted to the customers only where a flow asks for that.
+        /// What is done with the wagons that arrive here: a shadow station sorts them by its own
+        /// instructions. Anywhere else it depends on where the arriving flows are bound — shunted on to their
+        /// destinations if any wagons are for somewhere other than the station itself, otherwise to the
+        /// customers if a flow asks for that, otherwise nothing is said.
         /// </summary>
         private ArrivedWagonHandling ArrivedWagonHandlingFor(IReadOnlyList<CargoFlowTrainPart> flows)
         {
-            if (call.OperationLocation is Station { IsShadow: true }) return ArrivedWagonHandling.MoveToDepartingTrackOrTable;
-            if (call.OperationLocation is Station station && call.OperationLocation.Layout is { } layout &&
-                (station.Regions.Count > 0 || layout.LocationsCargoServedFrom(station).Count > 0))
-                return ArrivedWagonHandling.ShuntToDepartingTrackOrCustomer;
+            if (call.OperationLocation is Station { IsShadow: true }) return ArrivedWagonHandling.SortAccordingToStationInstructions;
+            if (flows.Any(flow => flow.HasDestinationsBeyond(call.OperationLocation)))
+                return ArrivedWagonHandling.ShuntToDestinations;
             return flows.Any(flow => flow.AlsoShuntAfterArrival)
                 ? ArrivedWagonHandling.ShuntToCustomers
                 : ArrivedWagonHandling.None;

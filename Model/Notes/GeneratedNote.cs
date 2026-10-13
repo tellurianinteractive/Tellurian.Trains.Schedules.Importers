@@ -112,13 +112,13 @@ public static class GeneratedNoteExtensions
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var parts) when parts.HasCargoFlowOptions =>
                 new(NoteResources.BringsWagonsTo, NoteArg.Markup(parts.DestinationsText, parts.DestinationsHtml)),
-            // Every wagon comes off; what is done with them depends on the kind of location they arrive at.
+            // What is done with the arrived wagons depends on the kind of location and on where they are bound.
             CargoFlowUncoupleNote { Handling: var handling } => new(handling switch
             {
-                ArrivedWagonHandling.MoveToDepartingTrackOrTable => NoteResources.UncoupleAllWagonsMoveToDepartingTrackOrTable,
-                ArrivedWagonHandling.ShuntToDepartingTrackOrCustomer => NoteResources.UncoupleAllWagonsShuntToDepartingTrackOrCustomer,
-                ArrivedWagonHandling.ShuntToCustomers => NoteResources.UncoupleAllWagonsShuntToCustomers,
-                _ => NoteResources.UncoupleAllWagons,
+                ArrivedWagonHandling.SortAccordingToStationInstructions => NoteResources.SortArrivedWagonsAccordingToStationInstructions,
+                ArrivedWagonHandling.ShuntToDestinations => NoteResources.ShuntArrivedWagons,
+                ArrivedWagonHandling.ShuntToCustomers => NoteResources.ShuntArrivedWagonsToCustomers,
+                _ => string.Empty,
             }),
             // The origins are what the driver sorts the arrived wagons by, so they carry the emphasis.
             // A flow naming none still gives a usable instruction — take what arrived out to the

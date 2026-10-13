@@ -5,29 +5,28 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// </summary>
 public enum ArrivedWagonHandling
 {
-    /// <summary>Nothing beyond uncoupling them.</summary>
+    /// <summary>Nothing to say: the wagons are for the station itself and no flow asks for them to be shunted.</summary>
     None,
 
-    /// <summary>At a shadow station: moved to the departing track after their destination, or placed at the table.</summary>
-    MoveToDepartingTrackOrTable,
+    /// <summary>At a shadow station: sorted as the station's own instructions say.</summary>
+    SortAccordingToStationInstructions,
 
-    /// <summary>At a shunting yard that is not a shadow station: shunted to the departing track or to the customer.</summary>
-    ShuntToDepartingTrackOrCustomer,
+    /// <summary>Some wagons are bound for other destinations than the station: shunted on to them.</summary>
+    ShuntToDestinations,
 
-    /// <summary>Elsewhere, where the flow asks for it: shunted to the customers.</summary>
+    /// <summary>All wagons are for the station itself and a flow asks for them to be shunted: shunted to the customers.</summary>
     ShuntToCustomers,
 }
 
 /// <summary>
-/// Note telling the station's dispatcher to take all of the cargo flow's freight wagons off the train
-/// here, and what to do with them once they are.
+/// Note telling the station's dispatcher what to do with the cargo flow's freight wagons that arrive here.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The arrival counterpart of <see cref="CargoFlowDestinationNote"/>, and derived the same way: from
 /// <see cref="CargoFlowTrainPart.HasUncoupleNote"/> at the call the flow's wagons are disconnected at.
-/// Every wagon comes off, whatever its destination; what follows depends on the kind of location
-/// (<see cref="ArrivedWagonHandling"/>).
+/// What is said depends on the kind of location and on where the wagons are bound
+/// (<see cref="ArrivedWagonHandling"/>); where there is nothing to say, no note is made.
 /// </para>
 /// <para>
 /// For the dispatcher only. The loco driver's booklet states the flow in its cargo block, with the load
