@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 0.9.15
+
+### Rättelser
+
+- **Tågklarerarlistorna har nu alla tåg som passerar en plats som stationen styr.** En station som styr en obemannad förgrening, till exempel Steinsnes med Triangeln, saknade de tåg där som också stannar på själva stationen, till exempel godståg som vänder i Tveiten och passerar Triangeln två gånger. Alla passager visas nu, i båda riktningarna.
+- **Första passet är gråat för klareringar som inte kan göras under det.** I tågklarerarlistorna är kryssrutan för första passet gråad när träffen börjar senare än driftdygnet och tåget började tidigare eller klareringen ligger efter midnatt.
+- **Fullare sidor i tågklarerarlistorna.** Anmärkningar antas inte längre vara bredare än de är, så färre rader får en extra rad och de utskrivna sidorna utnyttjas bättre.
+
 ## Version 0.9.14
 
 ### Rättelser

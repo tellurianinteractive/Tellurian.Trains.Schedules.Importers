@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 0.9.15
+
+### Fejlrettelser
+
+- **Ekspeditionslister har nu alle tog, der passerer et sted, stationen styrer.** En station, der styrer en ubemandet sporforgrening, f.eks. Steinsnes med Triangeln, manglede de tog dér, som også standser på stationen selv, f.eks. godstog, der vender i Tveiten og passerer Triangeln to gange. Alle passager vises nu, i begge retninger.
+- **Første session er gråtonet for ekspeditioner, der ikke kan nås på den.** På ekspeditionslisterne er første sessions afkrydsningsfelt gråtonet, når træffet starter senere end driftsdøgnet, og toget begyndte tidligere, eller ekspeditionen ligger efter midnat.
+- **Fyldigere sider i ekspeditionslisterne.** Bemærkninger antages ikke længere at være bredere, end de er, så færre rækker får en ekstra linje, og de udskrevne sider udnyttes bedre.
+
 ## Version 0.9.14
 
 ### Fejlrettelser

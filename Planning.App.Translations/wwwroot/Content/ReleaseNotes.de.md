@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 0.9.15
+
+### Fehlerbehebungen
+
+- **Zugmeldelisten enthalten jetzt alle Züge, die einen von der Station gesteuerten Ort passieren.** Eine Station, die eine unbesetzte Abzweigstelle steuert, etwa Steinsnes mit Triangeln, vermisste dort die Züge, die auch in der Station selbst halten, zum Beispiel Güterzüge, die in Tveiten wenden und Triangeln zweimal passieren. Jetzt werden alle Durchfahrten in beiden Richtungen aufgeführt.
+- **Die erste Sitzung ist bei Meldungen, die darin nicht bearbeitet werden können, ausgegraut.** In den Zugmeldelisten ist das Kästchen der ersten Sitzung ausgegraut, wenn das Treffen später beginnt als der Betriebstag und der Zug früher begann oder die Meldung nach Mitternacht liegt.
+- **Vollere Seiten in den Zugmeldelisten.** Bemerkungen werden nicht mehr als breiter angenommen, als sie sind; dadurch bekommen weniger Zeilen eine zusätzliche Zeile, und die gedruckten Seiten werden besser gefüllt.
+
 ## Version 0.9.14
 
 ### Fehlerbehebungen

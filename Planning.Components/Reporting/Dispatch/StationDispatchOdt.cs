@@ -312,7 +312,7 @@ public static class StationDispatchOdt
         {
             // Left empty by design: the box is ticked by hand as the session is worked. A session the
             // train does not run is greyed so it cannot be ticked by mistake.
-            var covered = row.Sessions.Covers(position, settings);
+            var covered = row.Sessions.Covers(position, settings) && !(position == 1 && row.IsOutsideFirstSession);
             text.AppendLine(Cell(covered ? tick : Style.TickOff, Style.CellCentre, null));
         }
         text.AppendLine(NotesCell(cell, row));

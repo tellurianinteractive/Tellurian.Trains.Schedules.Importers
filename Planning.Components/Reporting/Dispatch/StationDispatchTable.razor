@@ -91,7 +91,7 @@
                         {
                             @* Empty by design: the box is ticked by hand as the session is worked.
                                A session the train does not run is greyed so it cannot be ticked by mistake. *@
-                            <td class="tick @(row.Sessions.Covers(position, Settings) ? "" : "off")"></td>
+                            <td class="tick @(row.Sessions.Covers(position, Settings) && !(position == 1 && row.IsOutsideFirstSession) ? "" : "off")"></td>
                         }
                         <td class="notes">
                             @foreach (var note in row.PrintingNotes)

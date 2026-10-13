@@ -140,6 +140,14 @@ public sealed class DispatchRow
     /// </remarks>
     public required bool IsSoleRow { get; init; }
 
+    /// <summary>
+    /// True when the first session or day is over before this clearance could be worked: the meeting
+    /// begins later than the operating window does, and either the train started before it began or the
+    /// clearance falls after midnight, on the first session only because the period wraps round.
+    /// </summary>
+    /// <remarks>The first session's tick box is then greyed, as for a session the train does not run.</remarks>
+    public bool IsOutsideFirstSession { get; init; }
+
     /// <summary>The notes that actually put something on the page.</summary>
     /// <remarks>
     /// A note rendering to nothing still renders an empty element, which costs a blank line the reader
@@ -224,6 +232,18 @@ public sealed class DispatchRow
         }
     }
 
+    // The meeting's first session begins after the operating window does: what lies before that moment
+    // was never worked on the first session. A train that began before it, or a clearance after midnight
+    // (reached on the first session only by the period wrapping round), is greyed there.
+    private static bool IsBeforeFirstSessionStart(StationCall call, Time time)
+    {
+        var firstSessionStart = call.OperationLocation.Layout?.Settings.General.FirstSessionStart ?? TimeSpan.Zero;
+        if (firstSessionStart <= TimeSpan.Zero) return false;
+        if (time.Value.Days > 0) return true;
+        var first = call.Train.CallsInRunOrder.FirstOrDefault();
+        return first is not null && first.Arrival.Value.Days == 0 && first.Arrival.Value < firstSessionStart;
+    }
+
     private static DispatchRow Row(
         StationCall call, DispatchRowKind kind, Time time, IReadOnlyList<ICallNote> notes,
         SessionsSettings settings, bool sole, bool isRemote, bool occupiesTrack)
@@ -233,6 +253,7 @@ public sealed class DispatchRow
             time.Value.Days, settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions);
         return new()
         {
+            IsOutsideFirstSession = IsBeforeFirstSessionStart(call, time),
             IsRemote = isRemote,
             OccupiesTrack = occupiesTrack,
             Call = call,

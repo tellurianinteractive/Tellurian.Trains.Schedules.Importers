@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 0.9.15
+
+### Feilrettinger
+
+- **Ekspedisjonslistene har nå alle tog som passerer et sted stasjonen styrer.** En stasjon som styrer en ubemannet sporforgrening, for eksempel Steinsnes med Triangeln, manglet togene der som også stopper på selve stasjonen, for eksempel godstog som snur i Tveiten og passerer Triangeln to ganger. Alle passeringer vises nå, i begge retninger.
+- **Første økt er gråtonet for ekspedisjoner som ikke kan nås i den.** På ekspedisjonslistene er avkrysningsboksen for første økt gråtonet når treffet starter senere enn driftsdøgnet, og toget begynte tidligere eller ekspedisjonen ligger etter midnatt.
+- **Fyldigere sider i ekspedisjonslistene.** Merknader antas ikke lenger å være bredere enn de er, slik at færre rader får en ekstra linje og de utskrevne sidene utnyttes bedre.
+
 ## Versjon 0.9.14
 
 ### Feilrettinger

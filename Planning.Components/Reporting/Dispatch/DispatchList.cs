@@ -19,8 +19,8 @@ public sealed record DispatchNeighbour(string Name, int PhoneNumber);
 /// <remarks>
 /// A dispatcher who also works locations from afar — a junction or an unmanned station controlled from
 /// here — clears the trains there too, so their rows are in the same list, in time order among the
-/// station's own: a second sheet would have to be merged by eye while trains are moving. Rows at a remote
-/// location are only listed for trains that do not also call at the station itself.
+/// station's own: a second sheet would have to be merged by eye while trains are moving. A remote call
+/// directly beside the train's own call at the station is left out, since the rows there already cover it.
 /// </remarks>
 /// <param name="Station">The station the list is for.</param>
 /// <param name="Rows">Every clearance, ascending by time.</param>
@@ -67,11 +67,12 @@ public sealed record DispatchList(
         var trainList = trains.ToList();
         var rows = dispatched
             .SelectMany(location => trainList
-                // A train that also calls at the station itself is already in the list through its rows
-                // there; its rows at a remote location would only repeat it. Only a train that passes the
-                // remote location without touching the station needs rows of its own.
-                .Where(train => location.Equals(station) || !train.Calls.Any(call => call.OperationLocation.Equals(station)))
-                .SelectMany(train => DispatchRow.Build(train, location, settings, plan, isRemote: !location.Equals(station))))
+                .SelectMany(train => DispatchRow.Build(train, location, settings, plan, isRemote: !location.Equals(station)))
+                // A remote call straight next to the train's call at the station is already covered by the
+                // rows there: the dispatcher sets that route when clearing the train in or out. A call
+                // elsewhere in the run — a train from the station that comes back through the junction
+                // after turning, or one that never calls at the station at all — has no such row.
+                .Where(row => !row.IsRemote || !IsNextToCallAt(row.Call, station)))
             // Time first, because the list is worked through in time order. The tie-breaks only make the
             // order of simultaneous clearances stable from one print to the next: arrivals before
             // departures, since a train pulling in has to be cleared in before the platform is given away.
@@ -95,5 +96,14 @@ public sealed record DispatchList(
             .ToList();
 
         return new DispatchList(station, rows, neighbours) { RemoteLocations = remoteLocations };
+    }
+
+    private static bool IsNextToCallAt(StationCall call, OperationLocation station)
+    {
+        var calls = call.Train.CallsInRunOrder;
+        var index = -1;
+        for (var i = 0; i < calls.Count; i++) if (calls[i] == call) index = i;
+        return (index > 0 && calls[index - 1].OperationLocation.Equals(station)) ||
+               (index >= 0 && index < calls.Count - 1 && calls[index + 1].OperationLocation.Equals(station));
     }
 }

@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 0.9.15
+
+### Fixes
+
+- **Dispatch lists now include every train passing a location the station controls.** A station that controls an unmanned junction, such as Steinsnes with Triangeln, was missing the trains there that also call at the station itself, for example goods trains that turn at Tveiten and pass Triangeln twice. Every passing is now listed, in both directions.
+- **The first session is greyed out for clearances that cannot be worked on it.** On the dispatch lists, the first session's tick box is greyed when the meeting starts later than the operating day does and the train began earlier or the clearance falls after midnight.
+- **Fuller pages in the dispatch lists.** Notes are no longer assumed to be wider than they are, so fewer rows are given an extra line and the printed pages are filled better.
+
 ## Version 0.9.14
 
 ### Fixes

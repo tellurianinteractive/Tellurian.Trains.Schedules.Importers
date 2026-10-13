@@ -73,10 +73,13 @@ public sealed record DispatchPageGeometry
     /// under-charged: notes are full of times, train numbers and capitals, all wider than lower-case prose.
     /// </summary>
     /// <remarks>
-    /// Over-charging is cheap here because most rows carry a short note or none, so the error costs a
-    /// little slack at the foot of a page rather than a line on every row.
+    /// Measured at 9 pt in the app's font: the real notes of a plan come to 1.38–1.47 mm a character,
+    /// capitals and digits included. 1.55 keeps a margin of about 5 % over the widest of them. It was
+    /// 1.75, which put a 68-character note on two lines when it fits on one, and a station whose rows
+    /// carry three such notes each was then charged six lines a row and printed pages two-thirds full.
+    /// The cost of too low a value is a row falling off the foot of the page, so do not trim the margin.
     /// </remarks>
-    public double NoteCharacterWidthMm { get; init; } = 1.75;
+        public double NoteCharacterWidthMm { get; init; } = 1.55;
 
     /// <summary>
     /// Total horizontal padding inside a cell, taken off a column's width to leave the width text
