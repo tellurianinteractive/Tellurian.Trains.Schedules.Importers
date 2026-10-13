@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 0.9.14
+
+### Rättelser
+
+- **En vagnsuppsättning som slutar dygnet lastad rapporteras inte längre.** När en godsvagnsuppsättning lastas av och sedan lastas igen senare i sin tur står den helt enkelt kvar lastad till nästa körpass, där den lastas av först. Tidigare rapporterades detta både som avlastning utan föregående lastning och som vagnar som lämnats lastade vid slutet. En vagnsuppsättning som aldrig lastas av, eller aldrig lastas innan den lastas av, rapporteras fortfarande.
+
 ## Version 0.9.13
 
 ### Ändringar

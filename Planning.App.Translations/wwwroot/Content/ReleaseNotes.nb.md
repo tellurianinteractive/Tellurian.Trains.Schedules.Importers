@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 0.9.14
+
+### Feilrettinger
+
+- **Et vognsett som avslutter døgnet lastet, rapporteres ikke lenger.** Når et godsvognsett losses og senere lastes igjen i sitt omløp, blir det rett og slett stående lastet til neste kjøredag, der det losses først. Før ble dette rapportert både som lossing uten foregående lasting og som vogner som ble stående lastet på slutten. Et vognsett som aldri losses, eller aldri lastes før det losses, rapporteres fortsatt.
+
 ## Versjon 0.9.13
 
 ### Endringer

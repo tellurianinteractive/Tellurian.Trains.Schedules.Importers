@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 0.9.14
+
+### Fejlrettelser
+
+- **Et vognsæt, der slutter døgnet læsset, rapporteres ikke længere.** Når et godsvognsæt aflæsses og senere læsses igen i sit omløb, bliver det simpelthen stående læsset til næste kørselsdag, hvor det aflæsses først. Før blev dette rapporteret både som aflæsning uden forudgående læsning og som vogne efterladt læsset til sidst. Et vognsæt, der aldrig aflæsses, eller aldrig læsses før det aflæsses, rapporteres stadig.
+
 ## Version 0.9.13
 
 ### Ændringer

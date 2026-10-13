@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 0.9.14
+
+### Fixes
+
+- **A wagonset that ends the day loaded is no longer reported.** When a cargo wagonset is unloaded and then loaded again later in its schedule, it simply stays loaded until the next operating session, where it is unloaded first. Before, this was reported both as an unload without an earlier load and as wagons left loaded at the end. A wagonset that is never unloaded, or never loaded before it is unloaded, is still reported.
+
 ## Version 0.9.13
 
 ### Changes

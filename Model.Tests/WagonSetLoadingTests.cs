@@ -94,14 +94,15 @@ public class WagonSetLoadingTests
     }
 
     [TestMethod]
-    public void UnloadBeforeLoadIsReportedTwice()
+    public void UnloadBeforeLoadIsNotReported()
     {
-        // Unload on the outward part and load on the way back: unloaded first, and then left loaded.
+        // Unload on the outward part and load on the way back: the wagons are left loaded at the end of the
+        // session and are unloaded by the first unloading of the next one.
         var (outward, returning) = CreateWorking(load: false, unload: false);
         outward.WagonSetOptions!.UnloadWagons = true;
         returning.WagonSetOptions!.LoadWagons = true;
 
-        Assert.HasCount(2, Mismatches(outward));
+        Assert.IsEmpty(Mismatches(outward));
     }
 
     private static List<ValidationError> Mismatches(ScheduledTrainPart part) =>

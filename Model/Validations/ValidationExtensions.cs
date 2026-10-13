@@ -431,6 +431,10 @@ public static class ValidationExtensions
             {
                 if (!schedule.Vehicles.Any(v => v.IsWagonSet && v.WagonSetKind == WagonSetKind.Cargo)) continue;
                 ScheduledTrainPart? loadedAt = null;
+                // A schedule repeats session after session: a wagonset still loaded at the end is unloaded by
+                // the first unloading of the next session, so that first unloading needs no load before it.
+                ValidationError? leadingUnload = null;
+                var seenOperation = false;
                 foreach (var part in schedule.OrderedParts)
                 {
                     if (part.WagonSetOptions is not { } options) continue;
@@ -438,10 +442,15 @@ public static class ValidationExtensions
                     if (options.UnloadWagons)
                     {
                         if (loadedAt is null)
-                            errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, part,
-                                Message.Information(Strings.WagonSetUnloadedWithoutLoad, schedule.Number, place)));
+                        {
+                            var error = ValidationError.WagonSetLoadingMismatch(schedule, part,
+                                Message.Information(Strings.WagonSetUnloadedWithoutLoad, schedule.Number, place));
+                            errors.Add(error);
+                            if (!seenOperation) leadingUnload = error;
+                        }
                         loadedAt = null;
                     }
+                    seenOperation = true;
                     if (options.LoadWagons)
                     {
                         if (loadedAt is not null)
@@ -450,7 +459,9 @@ public static class ValidationExtensions
                         loadedAt = part;
                     }
                 }
-                if (loadedAt is not null)
+                if (loadedAt is not null && leadingUnload is not null)
+                    errors.Remove(leadingUnload);
+                else if (loadedAt is not null)
                     errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, loadedAt,
                         Message.Information(Strings.WagonSetNeverUnloaded, schedule.Number, loadedAt.To.OperationLocation)));
             }

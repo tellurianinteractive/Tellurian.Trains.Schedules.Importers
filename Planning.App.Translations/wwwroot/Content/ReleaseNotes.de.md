@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 0.9.14
+
+### Fehlerbehebungen
+
+- **Eine Wagengruppe, die den Tag beladen beendet, wird nicht mehr gemeldet.** Wird eine Güterwagengruppe entladen und später in ihrem Umlauf wieder beladen, bleibt sie einfach bis zum nächsten Betriebstag beladen und wird dort zuerst entladen. Zuvor wurde das sowohl als Entladen ohne vorheriges Beladen als auch als am Ende beladen gebliebene Wagen gemeldet. Eine Wagengruppe, die nie entladen oder vor dem Entladen nie beladen wird, wird weiterhin gemeldet.
+
 ## Version 0.9.13
 
 ### Änderungen
