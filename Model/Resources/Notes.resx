@@ -144,6 +144,13 @@
   <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
     <value>Turn and circulate locomotive.</value>
   </data>
+  <data name="PushWagons" xml:space="preserve">
+    <value>Push wagons.</value>
+  </data>
+  <data name="PushWagonsTo" xml:space="preserve">
+    <value>Push wagons to {0}</value>
+    <comment>{0}=destinations</comment>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Reinforces {0} between {1} and {2}.</value>
     <comment>{0}=train, {1}=from station, {2}=to station</comment>

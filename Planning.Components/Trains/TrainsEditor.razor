@@ -444,6 +444,9 @@ else
                     <th>@Translator("Departure")</th>
                     <th title="@Translator("IsArrival")">@Translator("Arr")</th>
                     <th title="@Translator("IsDeparture")">@Translator("Dep")</th>
+                    <th title="@Translator("TurnLocoHelp")">@Translator("CallTurnLoco")</th>
+                    <th title="@Translator("RunaroundLocoHelp")">@Translator("CallRunaroundLoco")</th>
+                    <th title="@Translator("PushWagonsHelp")">@Translator("CallPushWagons")</th>
                     <th class="note" title="@Translator("CallNoteHint")">@Translator("Remark")</th>
                     <th></th>
                 </tr>
@@ -491,6 +494,21 @@ else
                             <input type="checkbox" checked="@(departureRequired || (canBeStop && call.IsDeparture))" disabled="@(!canBeStop || departureRequired)"
                                    @onchange="e => SetIsDeparture(call, e)" />
                         </td>
+                        @* Turning needs a turntable; it is offered closed without one, except where it was
+                           asked for and the turntable has since gone, so it can be cleared here. *@
+                        <td title="@(call.OperationLocation.CanTurnLoco ? null : string.Format(CultureInfo.CurrentCulture, Translator("TurnLocoNoTurntable"), call.OperationLocation.Name))">
+                            <input type="checkbox" checked="@call.TurnLoco" disabled="@(!call.OperationLocation.CanTurnLoco && !call.TurnLoco)"
+                                   @onchange="e => SetTurnLoco(call, e)" />
+                        </td>
+                        <td>
+                            <input type="checkbox" checked="@call.RunaroundLoco" @onchange="e => SetRunaroundLoco(call, e)" />
+                        </td>
+                        @* Nothing departs from where the train's run ends, so pushing cannot be asked for
+                           there — except where it was asked for and the call has since become the end. *@
+                        <td>
+                            <input type="checkbox" checked="@call.PushWagons" disabled="@(call.IsTrainDestination && !call.PushWagons)"
+                                   @onchange="e => SetPushWagons(call, e)" />
+                        </td>
                         <td class="note">
                             @* A note is written for the arrival or for the departure, so the halves on
                                offer are the ones the two flags beside it say the train makes — none at
@@ -509,7 +527,7 @@ else
                 }
                 @if (train.Calls.Count == 0)
                 {
-                    <tr><td colspan="8" class="empty">@Translator("NoCalls")</td></tr>
+                    <tr><td colspan="11" class="empty">@Translator("NoCalls")</td></tr>
                 }
             </tbody>
         </table>
@@ -585,6 +603,24 @@ else
     {
         if (!call.CanBeStop || Plan?.IsDepartureRequired(call) == true) return;
         call.IsDeparture = e.Value is true;
+        Save();
+    }
+
+    private void SetTurnLoco(StationCall call, ChangeEventArgs e)
+    {
+        call.TurnLoco = e.Value is true && call.OperationLocation.CanTurnLoco;
+        Save();
+    }
+
+    private void SetRunaroundLoco(StationCall call, ChangeEventArgs e)
+    {
+        call.RunaroundLoco = e.Value is true;
+        Save();
+    }
+
+    private void SetPushWagons(StationCall call, ChangeEventArgs e)
+    {
+        call.PushWagons = e.Value is true;
         Save();
     }
 

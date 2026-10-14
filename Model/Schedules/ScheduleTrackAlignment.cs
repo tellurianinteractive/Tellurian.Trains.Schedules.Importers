@@ -9,7 +9,7 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// A locomotive is free of the train it brought in: it uncouples, runs light across the station and takes
 /// over whatever stands on another track. Which track its next train leaves from is therefore no concern
 /// of the track it arrived at. A double-directed unit — a trainset, or a locomotive working a reversible
-/// train, the traction that <see cref="ScheduledObjectExtensions.get_ReversesWithoutRunaround(ScheduledObject)"/>
+/// train, the traction that <see cref="ScheduledObjectExtensions.get_ChangesDirectionWithoutRunaround(ScheduledObject)"/>
 /// describes — is a different matter: it <em>is</em> the train, so it leaves from the very track it came in
 /// on. Its next train must therefore depart from that track, and the automatic build says so by moving the
 /// arrival rather than the departure: a departure track is where the planner put the train, and the arrival
@@ -33,7 +33,7 @@ public static class ScheduleTrackAlignmentExtensions
         /// <summary>
         /// True when the vehicles working this schedule leave a train on the track they brought it in on:
         /// every traction unit assigned to it reverses without a runaround (see
-        /// <see cref="ScheduledObjectExtensions.get_ReversesWithoutRunaround(ScheduledObject)"/>), and at
+        /// <see cref="ScheduledObjectExtensions.get_ChangesDirectionWithoutRunaround(ScheduledObject)"/>), and at
         /// least one is assigned.
         /// </summary>
         /// <remarks>
@@ -47,7 +47,7 @@ public static class ScheduleTrackAlignmentExtensions
             get
             {
                 var traction = schedule.Vehicles.Where(vehicle => vehicle.IsTraction).ToList();
-                return traction.Count > 0 && traction.All(vehicle => vehicle.ReversesWithoutRunaround);
+                return traction.Count > 0 && traction.All(vehicle => vehicle.ChangesDirectionWithoutRunaround);
             }
         }
 

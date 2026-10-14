@@ -1,0 +1,35 @@
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* One start label: a card folded across the middle and stood on the start track, so the train can be read
+   from both sides of it. The two halves are stacked vertically and say the same thing; the upper one is
+   turned upside down, so that once folded it reads the right way up from the far side of the track.
+
+   The markup is written once and rendered twice. Everything on the card is the train's own: the station
+   and track it starts from, its number, when it departs, the duty that drives it and the train its
+   traction unit arrived as, if it did. *@
+<div class="startlabel">
+    @foreach (var upsideDown in new[] { true, false })
+    {
+        <div class="half @(upsideDown ? "flipped" : null)">
+            <div class="station">@Item?.Location.Name</div>
+            <div class="track">@Translator("Track") @Item?.Track.Number</div>
+            <div class="train">@Item?.Train.IdentityWithCompany</div>
+            <div class="departure">@Item?.Time.HHMM()</div>
+            @if (Item is { Duties.Count: > 0 })
+            {
+                <div class="duty">@Translator("Duty") @string.Join(", ", Item.Duties)</div>
+            }
+            @if (Item is { ArrivedAs.Count: > 0 })
+            {
+                <div class="arrived">@Translator("ArrivedAs") @string.Join(", ", Item.ArrivedAs.Select(t => t.IdentityWithCompany))</div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The label to print. Nothing is rendered without one.</summary>
+    [Parameter] public StartLabel? Item { get; set; }
+}

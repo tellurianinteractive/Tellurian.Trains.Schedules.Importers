@@ -1955,8 +1955,20 @@
   <data name="RunaroundLoco" xml:space="preserve">
     <value>Omløb lokomotiv?</value>
   </data>
+  <data name="CallTurnLoco" xml:space="preserve">
+    <value>Drej</value>
+  </data>
+  <data name="CallRunaroundLoco" xml:space="preserve">
+    <value>Omløb</value>
+  </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Lokomotivet køres om til den anden ende af toget efter ankomsten, så toget kan afgå den vej, det kom fra. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="CallPushWagons" xml:space="preserve">
+    <value>Skub</value>
+  </data>
+  <data name="PushWagonsHelp" xml:space="preserve">
+    <value>Vognene skubbes fra dette stop og resten af togets kørsel, ofte i stedet for omløb. Udskrives som afgangsbemærkning for lokomotivfører og fjernstyringsleder.</value>
   </data>
   <data name="TractionBeforeDeparture" xml:space="preserve">
     <value>Trækkraft før afgang</value>
@@ -1998,7 +2010,7 @@
     <value>Løft af</value>
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
-    <value>Trækkraften på dette togafsnit kan vende, som den står, så der udskrives ingen omløbsbemærkning.</value>
+    <value>Trækkraften på dette togafsnit kan vende, som den står, så der udskrives ingen drej- eller omløbsbemærkning.</value>
   </data>
   <data name="PartFetchFromTrack" xml:space="preserve">
     <value>Hent fra</value>
@@ -2791,5 +2803,26 @@
   </data>
   <data name="TrackOccupancyZoom" xml:space="preserve">
     <value>Zoom (pixel pr. time)</value>
+  </data>
+  <data name="TrackOccupancySignalControlled" xml:space="preserve">
+    <value>Signalstyrede steder?</value>
+  </data>
+  <data name="TrackOccupancyOtherLocations" xml:space="preserve">
+    <value>Andre steder?</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>Første</value>
+  </data>
+  <data name="StartLabels" xml:space="preserve">
+    <value>Startsedler</value>
+  </data>
+  <data name="StartLabelsHelp" xml:space="preserve">
+    <value>Hvilke tog der får en startseddel: et foldet kort, der stilles på startsporet. Ingen: ingen seddel. Første: kun toget, der starter dagen for et lokomotiv eller et togsæt. Alle: hvert tog, der starter her. Et tog får kun en seddel, hvis både dets togkategori og dets station tillader det, og det snævreste valg gælder.</value>
+  </data>
+  <data name="NoStartLabels" xml:space="preserve">
+    <value>Ingen startsedler at udskrive: vælg Første eller Alle både for en togkategori og for stationen, hvor dens tog starter.</value>
+  </data>
+  <data name="ArrivedAs" xml:space="preserve">
+    <value>Ankom som tog</value>
   </data>
 </root>

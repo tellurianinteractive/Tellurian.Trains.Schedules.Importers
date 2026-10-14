@@ -20,6 +20,16 @@ namespace Tellurian.Trains.Schedules.Model.Notes;
 /// </remarks>
 public static class VehicleCallNoteExtensions
 {
+    // Where the call comes in the train's run, matched by reference because a train can hold two calls
+    // that compare equal. A call the train does not hold is before everything (-1).
+    private static int RunPosition(Train train, StationCall call)
+    {
+        var ordered = train.CallsInRunOrder;
+        for (var i = 0; i < ordered.Count; i++)
+            if (ReferenceEquals(ordered[i], call)) return i;
+        return -1;
+    }
+
     extension(StationCall call)
     {
         /// <summary>
@@ -40,9 +50,12 @@ public static class VehicleCallNoteExtensions
         public IEnumerable<ICallNote> VehicleNotes(Plan? plan)
         {
             call = call.ValueOrException(nameof(call));
-            if (plan is null) return [];
+            // Pushing wagons is the call's own say-so and needs no schedule, so it is given without a plan.
+            // Nothing departs from the end of the train's run, so nothing is pushed from there.
+            var push = call.PushWagons && !call.IsTrainDestination ? call.PushNote(plan) : null;
+            if (plan is null) return push is null ? [] : [push];
 
-            List<ICallNote> notes = [];
+            List<ICallNote> notes = push is null ? [] : [push];
             foreach (var part in plan.Schedules.SelectMany(schedule => schedule.Parts))
             {
                 // By reference, not by value: a train can hold two calls that compare equal, and a part
@@ -50,12 +63,70 @@ public static class VehicleCallNoteExtensions
                 if (ReferenceEquals(part.To, call)) notes.AddRange(part.GeneratedArrivalNotes);
                 if (ReferenceEquals(part.From, call)) notes.AddRange(part.GeneratedDepartureNotes);
             }
+            notes = call.WithTurningAsked(plan, notes);
             if (call.Train is not { } train) return notes.Distinct();
             return
             [
                 .. notes.Where(note => note is not ShuntWagonsNote).Distinct(),
                 .. ShuntWagonsNote.SaidOnce(notes.OfType<ShuntWagonsNote>(), train.Sessions),
             ];
+        }
+
+        /// <summary>
+        /// The departure note for pushing wagons from this call, naming where the wagons are bound: the
+        /// destinations of the train's cargo flows that still have a way to go, otherwise the places the
+        /// wagonsets' parts end — those parts that run on past this call. Where neither says anything the
+        /// note is the bare instruction.
+        /// </summary>
+        /// <remarks>
+        /// Positions are by <c>CallsInRunOrder</c>, never by <c>Train.Calls</c>, which is in insertion
+        /// order. The wagonsets need the plan; the cargo flows belong to the train and do not.
+        /// </remarks>
+        private PushWagonsNote PushNote(Plan? plan)
+        {
+            var train = call.Train;
+            if (train is null) return new PushWagonsNote { IsForDeparture = true };
+            var here = RunPosition(train, call);
+
+            var flows = train.CargoFlows
+                .Where(flow => RunPosition(train, flow.To) > here && flow.HasStatedDestinations)
+                .ToList();
+            if (flows.Count > 0) return new PushWagonsNote(flows, []) { IsForDeparture = true };
+
+            var places = (plan?.Schedules ?? []).SelectMany(schedule => schedule.Parts)
+                .Where(part => ReferenceEquals(part.From.Train, train)
+                    && RunPosition(train, part.From) <= here && RunPosition(train, part.To) > here
+                    && part.WagonSets.Any())
+                .Select(part => part.To.OperationLocation.Name)
+                .Distinct()
+                .ToList();
+            return new PushWagonsNote([], places) { IsForDeparture = true };
+        }
+
+        /// <summary>
+        /// Adds what the call itself asks for — <see cref="StationCall.TurnLoco"/> and
+        /// <see cref="StationCall.RunaroundLoco"/> — to the turning notes already derived from the parts
+        /// ending here, as the one note the two together give.
+        /// </summary>
+        /// <remarks>
+        /// Unlike the part's flags, the call's are not tied to where a schedule part ends, so they work
+        /// anywhere in the train. They are dropped where every traction unit working the train reverses
+        /// as it stands (a trainset, a push-pull train): there is then nothing to turn round or run round.
+        /// </remarks>
+        internal List<ICallNote> WithTurningAsked(Plan plan, List<ICallNote> notes)
+        {
+            if (!(call.TurnLoco || call.RunaroundLoco) || call.Train is not { } train) return notes;
+            if (!plan.NeedsLocoRunaround(train)) return notes;
+
+            var turn = call.TurnLoco || notes.Any(n => n is TurnNote or TurnAndCirculateNote);
+            var circulate = call.RunaroundLoco || notes.Any(n => n is CirculateNote or TurnAndCirculateNote);
+            GeneratedNote merged = (turn, circulate) switch
+            {
+                (true, true) => new TurnAndCirculateNote { IsForArrival = true },
+                (true, false) => new TurnNote { IsForArrival = true },
+                _ => new CirculateNote { IsForArrival = true },
+            };
+            return [.. notes.Where(n => n is not (TurnNote or CirculateNote or TurnAndCirculateNote)), merged];
         }
     }
 }

@@ -1971,8 +1971,20 @@
   <data name="RunaroundLoco" xml:space="preserve">
     <value>Runaround loco?</value>
   </data>
+  <data name="CallTurnLoco" xml:space="preserve">
+    <value>Turn</value>
+  </data>
+  <data name="CallRunaroundLoco" xml:space="preserve">
+    <value>Runaround</value>
+  </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>The locomotive is run round to the other end of the train after it arrives, so the train can leave the way it came. Printed as an arrival note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="CallPushWagons" xml:space="preserve">
+    <value>Push</value>
+  </data>
+  <data name="PushWagonsHelp" xml:space="preserve">
+    <value>The wagons are pushed from this call on, for the rest of the train&apos;s run — often instead of running the locomotive round. Printed as a departure note for the loco driver and the dispatcher.</value>
   </data>
   <data name="TractionBeforeDeparture" xml:space="preserve">
     <value>Traction before departure</value>
@@ -2014,7 +2026,7 @@
     <value>Lift off</value>
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
-    <value>The traction working this train part reverses as it stands, so no runaround note is printed.</value>
+    <value>The traction working this train part changes direction without runaround, so no turn or runaround note is printed.</value>
   </data>
   <data name="PartFetchFromTrack" xml:space="preserve">
     <value>Fetch from</value>
@@ -2811,5 +2823,26 @@
   </data>
   <data name="TrackOccupancyZoom" xml:space="preserve">
     <value>Zoom (pixels per hour)</value>
+  </data>
+  <data name="TrackOccupancySignalControlled" xml:space="preserve">
+    <value>Signal-controlled locations?</value>
+  </data>
+  <data name="TrackOccupancyOtherLocations" xml:space="preserve">
+    <value>Other locations?</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>First</value>
+  </data>
+  <data name="StartLabels" xml:space="preserve">
+    <value>Start labels</value>
+  </data>
+  <data name="StartLabelsHelp" xml:space="preserve">
+    <value>Which trains get a start label: a card folded and stood on the start track. None: no label. First: only the train that starts the day for a locomotive or trainset. All: every train that starts here. A train gets a label only where both its category and its station allow it, and the narrower choice wins.</value>
+  </data>
+  <data name="NoStartLabels" xml:space="preserve">
+    <value>No start labels to print: choose First or All for both a train category and the station its trains start from.</value>
+  </data>
+  <data name="ArrivedAs" xml:space="preserve">
+    <value>Arrived as train</value>
   </data>
 </root>

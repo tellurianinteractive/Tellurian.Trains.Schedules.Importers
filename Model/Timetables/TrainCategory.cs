@@ -105,6 +105,12 @@ public record TrainCategory
     public bool ExcludeFromAutomaticScheduling { get; set; }
 
     /// <summary>
+    /// Gets or sets which trains of this category get a start label. A station can narrow this further
+    /// (see <see cref="Station.StartLabels"/>); the narrower of the two decides. None by default.
+    /// </summary>
+    public StartLabelPrinting StartLabels { get; set; }
+
+    /// <summary>
     /// Gets or sets this category's <em>stop pattern</em>: the ids of the operating locations where
     /// trains of the category stop on their way. A positive list — what is named here is stopped at, and
     /// what is not named is run through — so it is what tells the route creator where to plan a stop

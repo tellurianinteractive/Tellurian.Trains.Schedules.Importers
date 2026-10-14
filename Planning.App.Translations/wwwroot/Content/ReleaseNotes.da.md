@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 0.9.18
+
+### Nye funktioner
+
+- **Startsedler.** Den nye rapport **Startsedler** udskriver et kort for et togs første afgang, foldet på midten og stillet på startsporet, så det kan læses fra begge sider. Det viser station, spor, tognummer, afgangstid, tjeneste og, hvor lokomotivet eller togsættet kom som et andet tog, hvilket tog det var. Vælg, hvilke tog der får et – **Ingen**, **Første** eller **Alle** – på togkategorien og på hver bemandet station. *Første* er toget, der starter dagen for et lokomotiv eller et togsæt, og et tog får kun en seddel, hvis både dets togkategori og dets station tillader det; det snævreste valg gælder.
+
+- **Skub vognene fra et stop.** På fanen Tog angiver den nye kolonne **Skub**, at vognene skubbes fra det stop og frem, ofte i stedet for omløb. Det giver en bemærkning ved afgangen, til lokomotivføreren og i fjernstyringslisten: *Skub vogne til* efterfulgt af, hvor vognene skal hen — godsstrømmenes kommende destinationer, ellers hvor vognsættets togafsnit slutter — eller blot *Skub vognene.*, når ingen af dem siger noget. Fra togets sidste stop skubbes der ikke.
+
 ## Version 0.9.17
 
 ### Fejlrettelser

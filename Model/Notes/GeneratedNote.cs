@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Net;
+using Microsoft.AspNetCore.Components;
 using ClassNames = Tellurian.Trains.Schedules.Model.Resources.ClassNames;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
@@ -108,6 +109,11 @@ public static class GeneratedNoteExtensions
             CirculateNote => new(NoteResources.CirculateTractionUnit),
             TurnNote => new(NoteResources.TurnTractionUnit),
             TurnAndCirculateNote => new(NoteResources.TurnAndCirculateTractionUnit),
+            PushWagonsNote { Flows: var flows } when flows.Any(flow => flow.HasStatedDestinations) =>
+                new(NoteResources.PushWagonsTo, NoteArg.Markup(flows.DestinationsText, flows.DestinationsHtml)),
+            PushWagonsNote { Places: { Count: > 0 } places } =>
+                new(NoteResources.PushWagonsTo, NoteArg.Markup(string.Join(", ", places), string.Join(", ", places.Select(WebUtility.HtmlEncode)))),
+            PushWagonsNote => new(NoteResources.PushWagons),
             ReinforcementNote(_, var part) => new(NoteResources.ReinforcesBetweenAnd, part.Train, part.From.OperationLocation, part.To.OperationLocation),
             TractionUnitExchangeNote(_, var from, var to) => new(NoteResources.TractionUnitExchange, from, to),
             CargoFlowDestinationNote(var parts) when parts.HasCargoFlowOptions =>

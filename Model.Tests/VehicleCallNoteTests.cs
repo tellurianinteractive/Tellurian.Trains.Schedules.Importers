@@ -123,16 +123,122 @@ public class VehicleCallNoteTests
     }
 
     [TestMethod]
-    public void ATrainsetAskedToTurnAndRunRoundOnlyTurns()
+    public void ATrainsetAskedToTurnAndRunRoundGetsNoNote()
     {
-        // Turning is the errand a trainset can still have; what is left of the pair is the turn alone,
-        // not the combined note.
+        // A trainset has no loco to turn or run round, so nothing is printed.
         var (plan, arrival, _) = Arrange(
             o => { o.TurnLoco = true; o.RunaroundLoco = true; }, ScheduledObjectType.Trainset);
 
         var notes = arrival.DriverNotes(Sessions.All, Settings, plan);
-        Assert.ContainsSingle(notes.OfType<TurnNote>());
+        Assert.IsEmpty(notes.OfType<TurnNote>());
+        Assert.IsEmpty(notes.OfType<CirculateNote>());
         Assert.IsEmpty(notes.OfType<TurnAndCirculateNote>());
+    }
+
+    [TestMethod]
+    public void ACallAsksForTurningAndCirculatingWithoutAnyPartDoingSo()
+    {
+        var (plan, arrival, departure) = Arrange(_ => { });
+        departure.TurnLoco = true;
+        departure.RunaroundLoco = true;
+
+        foreach (var notes in new[] { departure.DriverNotes(Sessions.All, Settings, plan), departure.StationNotes(Sessions.All, Settings, plan) })
+        {
+            var note = notes.OfType<TurnAndCirculateNote>().Single();
+            Assert.IsTrue(note.IsForArrival);
+            Assert.IsEmpty(notes.OfType<TurnNote>());
+            Assert.IsEmpty(notes.OfType<CirculateNote>());
+        }
+        Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<TurnAndCirculateNote>());
+    }
+
+    [TestMethod]
+    public void PushingWagonsGivesADepartureNoteForDriverAndDispatcher()
+    {
+        var (plan, _, departure) = Arrange(_ => { });
+        departure.PushWagons = true;
+
+        foreach (var notes in new[] { departure.DriverNotes(Sessions.All, Settings, plan), departure.StationNotes(Sessions.All, Settings, plan) })
+        {
+            var note = notes.OfType<PushWagonsNote>().Single();
+            Assert.IsTrue(note.IsForDeparture);
+            Assert.IsFalse(note.IsForArrival);
+            Assert.AreEqual("Push wagons.", note.ToText);
+        }
+    }
+
+    [TestMethod]
+    public void PushingWagonsNamesTheDestinationsOfTheCargoFlowsAhead()
+    {
+        var (plan, arrival, departure) = Arrange(_ => { });
+        var description = plan.Timetable.Add(new CargoFlowOptions { Destinations = { new Destination { Location = arrival.OperationLocation } } });
+        plan.Timetable.Trains.Single().CreateCargoFlow(1, departure, arrival, description);
+        departure.PushWagons = true;
+
+        var note = departure.StationNotes(Sessions.All, Settings, plan).OfType<PushWagonsNote>().Single();
+        Assert.StartsWith("Push wagons to ", note.ToText);
+        Assert.Contains(arrival.OperationLocation.Name, note.ToText);
+    }
+
+    [TestMethod]
+    public void PushingWagonsNamesWhereAWagonsetEndsItsPartWhenThereIsNoCargoFlow()
+    {
+        var (plan, arrival, departure) = Arrange(_ => { }, ScheduledObjectType.Wagonset);
+        departure.PushWagons = true;
+
+        var note = departure.DriverNotes(Sessions.All, Settings, plan).OfType<PushWagonsNote>().Single();
+        Assert.AreEqual($"Push wagons to {arrival.OperationLocation.Name}", note.ToText);
+    }
+
+    [TestMethod]
+    public void PushingWagonsNeedsNoPlan()
+    {
+        var (_, _, departure) = Arrange(_ => { });
+        departure.PushWagons = true;
+
+        Assert.ContainsSingle(departure.DriverNotes(Sessions.All, Settings).OfType<PushWagonsNote>());
+    }
+
+    [TestMethod]
+    public void NothingIsPushedFromWhereTheTrainEnds()
+    {
+        var (plan, arrival, _) = Arrange(_ => { });
+        arrival.PushWagons = true;
+
+        Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<PushWagonsNote>());
+        Assert.IsEmpty(arrival.StationNotes(Sessions.All, Settings, plan).OfType<PushWagonsNote>());
+    }
+
+    [TestMethod]
+    public void ACallThatDoesNotPushGivesNoPushNote()
+    {
+        var (plan, _, departure) = Arrange(_ => { });
+
+        Assert.IsEmpty(departure.DriverNotes(Sessions.All, Settings, plan).OfType<PushWagonsNote>());
+    }
+
+    [TestMethod]
+    public void ACallFlagJoinsTheFlagOfAPartEndingThereInOneNote()
+    {
+        var (plan, arrival, _) = Arrange(o => o.TurnLoco = true);
+        arrival.RunaroundLoco = true;
+
+        var notes = arrival.DriverNotes(Sessions.All, Settings, plan);
+        Assert.ContainsSingle(notes.OfType<TurnAndCirculateNote>());
+        Assert.IsEmpty(notes.OfType<TurnNote>());
+    }
+
+    [TestMethod]
+    [DataRow(ScheduledObjectType.Trainset, false)]
+    [DataRow(ScheduledObjectType.Locomotive, true)]
+    public void ACallFlagIsNotPrintedForATrainsetOrAPushPullTrain(ScheduledObjectType type, bool reversible)
+    {
+        var (plan, arrival, _) = Arrange(_ => { }, type, reversible);
+        arrival.TurnLoco = true;
+        arrival.RunaroundLoco = true;
+
+        Assert.IsEmpty(arrival.DriverNotes(Sessions.All, Settings, plan).OfType<GeneratedNote>()
+            .Where(n => n is TurnNote or CirculateNote or TurnAndCirculateNote));
     }
 
     [TestMethod]

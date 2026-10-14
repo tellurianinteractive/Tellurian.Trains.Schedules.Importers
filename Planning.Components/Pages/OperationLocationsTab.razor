@@ -207,6 +207,15 @@ else
                             <HelpLabel For="IsManned" />
                             <input type="checkbox" @bind="station.IsManned" @bind:after="OnEdited" />
                         </div>
+                        @* Which trains starting here get a start label; the train's category can narrow it
+                           further. Offered at a manned station, where somebody puts the train out. *@
+                        @if (station.IsManned)
+                        {
+                            <div class="field">
+                                <HelpLabel For="StartLabels" />
+                                <StartLabelPrintingChoice @bind-Value="station.StartLabels" @bind-Value:after="OnEdited" />
+                            </div>
+                        }
                         @* What decides whether a train part arriving here may ask for its locomotive to
                            be turned (see the schedule's part editor). *@
                         <div class="field">

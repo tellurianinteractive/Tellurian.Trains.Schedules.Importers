@@ -4,6 +4,10 @@
 
 ### New Features
 
+- **Start labels.** New **`StartLabelPrinting`** (`None`, `First`, `All`) and the properties **`TrainCategory.StartLabels`** and **`Station.StartLabels`** (`None` by default, so a plan saved before them prints no labels). **`Plan.StartLabels()`** gives the **`StartLabel`**s to print, one for each train that starts at a station when its category and the station both want one — the narrower choice wins (`StartLabelPrinting.Narrower`), `First` meaning the train that starts the day for a traction unit (`ScheduledObject.Start`, so the first session start is respected) and `All` every train starting there. A shunting task has none. Each label carries the train, its first call (station, track, departure), the identities of the driver duties working it and the trains the traction unit arrived as, and they are ordered by station name, then departure time. The Planning app has a **Start labels** report that prints them, 48 x 182 mm (two turnus-card halves, the upper turned upside down, with a dashed fold line), six to an A4 landscape page, in the language of the station's country when the layout prints reports in the language of the object.
+
+- **Pushing wagons from a call.** New **`StationCall.PushWagons`**: the wagons are pushed from this call on, for the rest of the train's run — often instead of running the locomotive round. It is a departure note, so it gives the new **`PushWagonsNote`** to the loco driver and the dispatcher through `StationCall.VehicleNotes`, with or without a plan (all five languages). It says where the wagons are bound: "Push wagons to …" names the destinations of the train's cargo flows still ahead of the call or, where there are none, the places the wagonsets' parts end (needs the plan); with neither it is "Push wagons." Nothing is pushed from the call where the train's run ends. The Trains tab has a **Push** column beside Turn and Runaround.
+
 - **Dispatch note widths measured in the report font.** New **`NoteTextMeasure`** and **`DispatchPageGeometry.NoteMeasure`**: when set, `DispatchPaginator` wraps each note by the real width of its words, measured by the browser (`js/text-width.js`), instead of by a fixed character width. Without it the character estimate is used as before. New **`PageFormat.VerticalMargin`** sets the top and bottom margin apart from the sides; the dispatch report uses 6 mm, and `DispatchPageGeometry.PrintableHeightMm` is now 198.
 
 - **Vehicle-stay conflicts name their stay.** New **`ValidationError.Hold`**: for `StationTrackHeldByVehicles`, the `TrackHold` the train's call conflicts with, found with the sessions of both taken into account, so a client can mark exactly that stay. `ValidationError.IsShownOnTrains` is now also true for `StationTrackHeldByVehicles`, so the conflict is shown on the trains' calls as well as on the schedule.
@@ -149,7 +153,7 @@
   **`Schedule.AlignArrivalTracks()`** puts the arrival call of each part of a working on the track the next
   part departs from, and the last arrival on the first part's departure track where the working ends where
   it began. It applies only where new **`Schedule.IsWorkedWithoutRunaround`** holds — every traction unit
-  assigned to the schedule reverses as it stands (a trainset, or a locomotive on a reversible train) and at
+  assigned to the schedule changes direction without runaround (a trainset, or a locomotive on a reversible train) and at
   least one is assigned — because such a unit *is* the train and leaves from the very track it came in on,
   while a locomotive runs light to whatever track its next train stands on. Only arrival calls are moved,
   and a joint where the parts do not meet at one location is passed over.

@@ -133,6 +133,12 @@
   <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
     <value>Vänd loket och gör rundgång.</value>
   </data>
+  <data name="PushWagons" xml:space="preserve">
+    <value>Skjut vagnarna.</value>
+  </data>
+  <data name="PushWagonsTo" xml:space="preserve">
+    <value>Skjut vagnar till {0}</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Förstärker {0} mellan {1} och {2}.</value>
   </data>

@@ -1955,8 +1955,20 @@
   <data name="RunaroundLoco" xml:space="preserve">
     <value>Lok umsetzen?</value>
   </data>
+  <data name="CallTurnLoco" xml:space="preserve">
+    <value>Drehen</value>
+  </data>
+  <data name="CallRunaroundLoco" xml:space="preserve">
+    <value>Umsetzen</value>
+  </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Die Lok wird nach der Ankunft ans andere Zugende umgesetzt, damit der Zug in die Richtung abfahren kann, aus der er gekommen ist. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="CallPushWagons" xml:space="preserve">
+    <value>Schieben</value>
+  </data>
+  <data name="PushWagonsHelp" xml:space="preserve">
+    <value>Die Wagen werden ab diesem Halt für den Rest der Zugfahrt geschoben, oft statt die Lok umzusetzen. Wird als Abfahrtsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
   </data>
   <data name="TractionBeforeDeparture" xml:space="preserve">
     <value>Triebfahrzeug vor Abfahrt</value>
@@ -1998,7 +2010,7 @@
     <value>Abheben</value>
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
-    <value>Das Triebfahrzeug dieses Zugabschnitts kann wenden, wie es steht; daher wird kein Umsetzvermerk gedruckt.</value>
+    <value>Das Triebfahrzeug dieses Zugabschnitts kann wenden, wie es steht; daher wird kein Dreh- oder Umsetzvermerk gedruckt.</value>
   </data>
   <data name="PartFetchFromTrack" xml:space="preserve">
     <value>Holen von</value>
@@ -2791,5 +2803,26 @@
   </data>
   <data name="TrackOccupancyZoom" xml:space="preserve">
     <value>Zoom (Pixel pro Stunde)</value>
+  </data>
+  <data name="TrackOccupancySignalControlled" xml:space="preserve">
+    <value>Signalgesteuerte Orte?</value>
+  </data>
+  <data name="TrackOccupancyOtherLocations" xml:space="preserve">
+    <value>Sonstige Orte?</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>Erste</value>
+  </data>
+  <data name="StartLabels" xml:space="preserve">
+    <value>Startzettel</value>
+  </data>
+  <data name="StartLabelsHelp" xml:space="preserve">
+    <value>Welche Züge einen Startzettel bekommen: eine gefaltete Karte, die auf das Startgleis gestellt wird. Keine: kein Zettel. Erste: nur der Zug, der den Tag für eine Lok oder einen Triebzug beginnt. Alle: jeder Zug, der hier startet. Ein Zug bekommt nur dann einen Zettel, wenn sowohl seine Zuggattung als auch sein Bahnhof es erlauben; die engere Wahl gilt.</value>
+  </data>
+  <data name="NoStartLabels" xml:space="preserve">
+    <value>Keine Startzettel zu drucken: Wählen Sie Erste oder Alle sowohl für eine Zuggattung als auch für den Bahnhof, an dem ihre Züge starten.</value>
+  </data>
+  <data name="ArrivedAs" xml:space="preserve">
+    <value>Angekommen als Zug</value>
   </data>
 </root>

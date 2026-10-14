@@ -3,6 +3,7 @@
 @using Tellurian.Utilities.Web
 @inject ScheduleStateService ScheduleState
 @inject ValidationStateService ValidationState
+@inject UiPreferenceService UiPrefs
 @inject Translator Translator
 @implements IDisposable
 
@@ -17,6 +18,16 @@ else if (_board is null || _board.Stations.Count == 0)
 else
 {
     <div class="occupancy-toolbar">
+        <div class="station-selector">
+            <label class="station-option">
+                <input type="checkbox" checked="@_signalControlled" @onchange="OnSignalControlledToggled" />
+                <span>@Translator("TrackOccupancySignalControlled")</span>
+            </label>
+            <label class="station-option">
+                <input type="checkbox" checked="@_otherLocations" @onchange="OnOtherLocationsToggled" />
+                <span>@Translator("TrackOccupancyOtherLocations")</span>
+            </label>
+        </div>
         <div class="station-selector">
             <span class="label">@Translator("Stations"):</span>
             @foreach (var station in _board.Stations)
@@ -110,7 +121,9 @@ else
     private static readonly int[] ZoomLevels = [60, 90, 120, 180, 240];
 
     private TrackOccupancyBoard? _board;
-    private readonly List<OperationLocation> _hidden = [];
+    private HashSet<string> _hidden = new(StringComparer.OrdinalIgnoreCase);
+    private bool _signalControlled = true;
+    private bool _otherLocations = true;
     private int _hourWidth = 120;
 
     // The call being dragged and the track it is held over. Only the tracks of the call's own station accept
@@ -118,10 +131,13 @@ else
     private StationCall? _dragged;
     private TrackOccupancyRow? _hover;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ScheduleState.OnChanged += OnStateChanged;
         ValidationState.OnValidationChanged += OnStateChanged;
+        _hidden = new HashSet<string>(await UiPrefs.GetOccupancyHiddenAsync(), StringComparer.OrdinalIgnoreCase);
+        _signalControlled = await UiPrefs.GetOccupancySignalControlledAsync();
+        _otherLocations = await UiPrefs.GetOccupancyOtherLocationsAsync();
         BuildBoard();
     }
 
@@ -152,13 +168,36 @@ else
     private static string Title(OccupancyBlock block) =>
         block.Conflict is null ? block.Title : $"{block.Title}\n{block.Conflict}";
 
-    private bool IsShown(TrackOccupancyStation station) => !_hidden.Contains(station.Location);
+    private bool IsShown(TrackOccupancyStation station) => !_hidden.Contains(station.Location.Signature);
 
     private void OnStationToggled(TrackOccupancyStation station, ChangeEventArgs e)
     {
-        if (e.Value is true) _hidden.Remove(station.Location);
-        else if (!_hidden.Contains(station.Location)) _hidden.Add(station.Location);
+        if (e.Value is true) _hidden.Remove(station.Location.Signature);
+        else _hidden.Add(station.Location.Signature);
+        _ = UiPrefs.SetOccupancyHiddenAsync(_hidden);
     }
+
+    private void OnSignalControlledToggled(ChangeEventArgs e)
+    {
+        _signalControlled = e.Value is true;
+        _ = UiPrefs.SetOccupancySignalControlledAsync(_signalControlled);
+        BuildBoard();
+    }
+
+    private void OnOtherLocationsToggled(ChangeEventArgs e)
+    {
+        _otherLocations = e.Value is true;
+        _ = UiPrefs.SetOccupancyOtherLocationsAsync(_otherLocations);
+        BuildBoard();
+    }
+
+    // Stations always count; the other kinds of location are on the board only while their box is checked.
+    private bool IsIncluded(OperationLocation location) => location switch
+    {
+        SignalControlledLocation => _signalControlled,
+        OtherLocation => _otherLocations,
+        _ => true,
+    };
 
     private void OnZoomChanged(ChangeEventArgs e)
     {
@@ -193,7 +232,7 @@ else
     private void BuildBoard()
     {
         _board = ScheduleState.Schedule is { } plan && ScheduleState.Layout is { } layout
-            ? TrackOccupancyBoard.Create(plan, layout.Settings.ToGraphSettings(), ValidationState.Errors)
+            ? TrackOccupancyBoard.Create(plan, layout.Settings.ToGraphSettings(), ValidationState.Errors, IsIncluded)
             : null;
     }
 

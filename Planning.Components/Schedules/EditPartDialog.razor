@@ -119,7 +119,7 @@
             </div>
             @* Said rather than silently unticked: what the planner asked for is kept, in case the
                traction working the part changes to one that does have to be run round. *@
-            @if (_runaroundLoco && !Part.NeedsRunaround)
+            @if ((_runaroundLoco || _turnLoco) && !Part.NeedsRunaround)
             {
                 <p class="hint">@Translator("RunaroundLocoNotNeeded")</p>
             }

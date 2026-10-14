@@ -133,6 +133,12 @@
   <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
     <value>Snu og omløp lok.</value>
   </data>
+  <data name="PushWagons" xml:space="preserve">
+    <value>Skyv vognene.</value>
+  </data>
+  <data name="PushWagonsTo" xml:space="preserve">
+    <value>Skyv vogner til {0}</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Forsterker {0} mellom {1} og {2}.</value>
   </data>

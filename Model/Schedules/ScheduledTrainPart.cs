@@ -410,7 +410,8 @@ public static class ScheduledTrainPartExtensions
         /// reads as two independent movements.
         /// </remarks>
         private GeneratedNote? TurningNote(TractionOptions options) =>
-            (options.TurnLoco, options.RunaroundLoco && trainPart.NeedsRunaround) switch
+            // Nothing is said where the traction changes direction without runaround (a trainset, a push-pull train).
+            (options.TurnLoco && trainPart.NeedsRunaround, options.RunaroundLoco && trainPart.NeedsRunaround) switch
             {
                 (true, true) => new TurnAndCirculateNote { IsForArrival = true },
                 (true, false) => new TurnNote { IsForArrival = true },
@@ -503,8 +504,8 @@ public static class ScheduledTrainPartExtensions
         /// <summary>
         /// Whether leaving in the direction the train arrived from costs this part's traction a runaround
         /// — the locomotive being run round to the other end of the train. It does not where every
-        /// traction unit working the part reverses as it stands: a trainset, or a locomotive working a
-        /// reversible train (see <c>ScheduledObject.ReversesWithoutRunaround</c>). A part whose traction
+        /// traction unit working the part changes direction without runaround: a trainset, or a locomotive working a
+        /// reversible train (see <c>ScheduledObject.ChangesDirectionWithoutRunaround</c>). A part whose traction
         /// cannot be resolved — one not yet worked by any vehicle, above all — is taken to need it, so
         /// what the planner asked for stands until the vehicles say otherwise.
         /// </summary>
@@ -517,7 +518,7 @@ public static class ScheduledTrainPartExtensions
             get
             {
                 var units = trainPart.TractionUnits.ToList();
-                return units.Count == 0 || units.Any(unit => !unit.ReversesWithoutRunaround);
+                return units.Count == 0 || units.Any(unit => !unit.ChangesDirectionWithoutRunaround);
             }
         }
 

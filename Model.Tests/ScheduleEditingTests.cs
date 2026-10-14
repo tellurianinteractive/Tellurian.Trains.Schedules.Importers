@@ -257,7 +257,7 @@ public class ScheduleEditingTests
         plan.UpdateVehicle(vehicle, ScheduledObjectType.Locomotive, "Rc 6", "Rc", 6, null, isReversibleTrain: true);
 
         Assert.IsTrue(vehicle.IsReversibleTrain);
-        Assert.IsTrue(vehicle.ReversesWithoutRunaround);
+        Assert.IsTrue(vehicle.ChangesDirectionWithoutRunaround);
     }
 
     [TestMethod]
@@ -269,7 +269,7 @@ public class ScheduleEditingTests
         plan.UpdateVehicle(vehicle, ScheduledObjectType.Trainset, "X2", "X2", 1, null, isReversibleTrain: true);
 
         Assert.IsFalse(vehicle.IsReversibleTrain, "Only a locomotive can be spared the runaround by one.");
-        Assert.IsTrue(vehicle.ReversesWithoutRunaround, "A trainset turns round as it stands regardless.");
+        Assert.IsTrue(vehicle.ChangesDirectionWithoutRunaround, "A trainset changes direction without runaround regardless.");
     }
 
     [TestMethod]
@@ -282,7 +282,7 @@ public class ScheduleEditingTests
         plan.UpdateVehicle(vehicle, ScheduledObjectType.Wagonset, "Gbs", "Gbs", 6, null, isReversibleTrain: true);
 
         Assert.IsFalse(vehicle.IsReversibleTrain);
-        Assert.IsFalse(vehicle.ReversesWithoutRunaround, "A wagonset is not traction at all.");
+        Assert.IsFalse(vehicle.ChangesDirectionWithoutRunaround, "A wagonset is not traction at all.");
     }
 
     [TestMethod]

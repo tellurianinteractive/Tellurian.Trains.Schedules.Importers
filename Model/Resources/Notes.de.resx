@@ -133,6 +133,12 @@
   <data name="TurnAndCirculateTractionUnit" xml:space="preserve">
     <value>Lok drehen und umsetzen.</value>
   </data>
+  <data name="PushWagons" xml:space="preserve">
+    <value>Wagen schieben.</value>
+  </data>
+  <data name="PushWagonsTo" xml:space="preserve">
+    <value>Wagen nach {0} schieben</value>
+  </data>
   <data name="ReinforcesBetweenAnd" xml:space="preserve">
     <value>Verstärkt {0} zwischen {1} und {2}.</value>
   </data>

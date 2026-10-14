@@ -115,6 +115,34 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     public bool IsDeparture { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the locomotive is turned, usually on a turntable, after the train arrives here.
+    /// </summary>
+    /// <remarks>
+    /// Asked for on the call, so it holds wherever in the train the call is — not only where a part of
+    /// a schedule ends. It gives an arrival note for the driver and the dispatcher (see
+    /// <c>VehicleNotes</c>), none where the traction needs no turning round (a trainset or a push-pull
+    /// train).
+    /// </remarks>
+    public bool TurnLoco { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the locomotive is run round to the other end of the train after it arrives
+    /// here. Like <see cref="TurnLoco"/>, it holds for any call in the train.
+    /// </summary>
+    public bool RunaroundLoco { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the wagons are pushed from here, for the rest of the train's run — often
+    /// instead of running the locomotive round, but not always.
+    /// </summary>
+    /// <remarks>
+    /// It concerns the departure only, and gives a departure note for the driver and the dispatcher (see
+    /// <c>VehicleNotes</c>). It is asked for on the call, so it holds wherever in the train the call is,
+    /// and it is not repeated at the calls after it: the note is where the pushing starts.
+    /// </remarks>
+    public bool PushWagons { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of notes associated with this call.
     /// </summary>
     public ICollection<CallNote> Notes { get; set; }

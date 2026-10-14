@@ -126,7 +126,9 @@ public sealed class TrackOccupancyBoard
     /// <param name="plan">The plan whose tracks to show.</param>
     /// <param name="settings">How trains are labelled, and the hours of the day.</param>
     /// <param name="errors">The conflicts found by the validation; the blocks they name are marked.</param>
-    public static TrackOccupancyBoard Create(Plan plan, GraphSettings settings, IReadOnlyList<ValidationError> errors)
+    /// <param name="include">Which locations to put on the board; all of those with tracks when omitted.</param>
+    public static TrackOccupancyBoard Create(Plan plan, GraphSettings settings, IReadOnlyList<ValidationError> errors,
+        Func<OperationLocation, bool>? include = null)
     {
         var timetable = plan.Timetable;
         var holds = plan.MarkedTrackHolds;
@@ -138,7 +140,7 @@ public sealed class TrackOccupancyBoard
         var (start, end) = GraphSchedule.TimeWindow(settings, crossesMidnight, GraphHalf.Whole);
 
         var stations = new List<TrackOccupancyStation>();
-        foreach (var location in timetable.Stations().Where(l => l.Tracks.Count > 0))
+        foreach (var location in timetable.Stations().Where(l => l.Tracks.Count > 0 && (include?.Invoke(l) ?? true)))
         {
             var rows = new List<TrackOccupancyRow>();
             foreach (var track in location.TracksInDisplayOrder)

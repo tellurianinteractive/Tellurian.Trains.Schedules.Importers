@@ -1955,8 +1955,20 @@
   <data name="RunaroundLoco" xml:space="preserve">
     <value>Gör rundgång?</value>
   </data>
+  <data name="CallTurnLoco" xml:space="preserve">
+    <value>Vänd</value>
+  </data>
+  <data name="CallRunaroundLoco" xml:space="preserve">
+    <value>Rundgång</value>
+  </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Loket körs runt till andra änden av tåget efter ankomsten, så att tåget kan avgå åt det håll det kom ifrån. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+  </data>
+  <data name="CallPushWagons" xml:space="preserve">
+    <value>Skjut</value>
+  </data>
+  <data name="PushWagonsHelp" xml:space="preserve">
+    <value>Vagnarna skjuts från denna hållplats och resten av tågets färd, ofta i stället för rundgång. Skrivs ut som avgångsanmärkning för lokförare och tågklarerare.</value>
   </data>
   <data name="TractionBeforeDeparture" xml:space="preserve">
     <value>Dragfordon före avgång</value>
@@ -1998,7 +2010,7 @@
     <value>Lyft av</value>
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
-    <value>Dragfordonet som går på tågavsnittet kan vända som det står, så ingen anmärkning om rundgång skrivs ut.</value>
+    <value>Dragfordonet som går på tågavsnittet kan vända som det står, så ingen anmärkning om vändning eller rundgång skrivs ut.</value>
   </data>
   <data name="PartFetchFromTrack" xml:space="preserve">
     <value>Hämta från</value>
@@ -2791,5 +2803,26 @@
   </data>
   <data name="TrackOccupancyZoom" xml:space="preserve">
     <value>Zoom (pixlar per timme)</value>
+  </data>
+  <data name="TrackOccupancySignalControlled" xml:space="preserve">
+    <value>Signalstyrda platser?</value>
+  </data>
+  <data name="TrackOccupancyOtherLocations" xml:space="preserve">
+    <value>Övriga platser?</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>Första</value>
+  </data>
+  <data name="StartLabels" xml:space="preserve">
+    <value>Startlappar</value>
+  </data>
+  <data name="StartLabelsHelp" xml:space="preserve">
+    <value>Vilka tåg som får en startlapp: ett vikt kort som ställs på starträcket. Ingen: ingen lapp. Första: bara tåget som startar dagen för ett lok eller ett tågset. Alla: varje tåg som startar här. Ett tåg får en lapp bara om både dess tågslag och dess driftplats tillåter det, och det snävaste valet gäller.</value>
+  </data>
+  <data name="NoStartLabels" xml:space="preserve">
+    <value>Inga startlappar att skriva ut: välj Första eller Alla både för ett tågslag och för driftplatsen där dess tåg startar.</value>
+  </data>
+  <data name="ArrivedAs" xml:space="preserve">
+    <value>Ankom som tåg</value>
   </data>
 </root>

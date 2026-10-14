@@ -75,8 +75,8 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// be driven from either end, either because it carries a driving trailer at the far end or because
     /// a second locomotive stands there. Such a train changes direction the way a trainset does — the
     /// driver walks to the other cab — so no time is allowed for running the locomotive round its train
-    /// where the route reverses (see <c>ReversesWithoutRunaround</c>). Only meaningful for
-    /// <see cref="ScheduledObjectType.Locomotive"/>: a trainset reverses freely whatever this says, and
+    /// where the route changes direction (see <c>ChangesDirectionWithoutRunaround</c>). Only meaningful for
+    /// <see cref="ScheduledObjectType.Locomotive"/>: a trainset changes direction freely whatever this says, and
     /// anything else is not traction at all.
     /// </summary>
     /// <remarks>
@@ -267,7 +267,7 @@ public static class ScheduledObjectExtensions
         /// trailer or a second locomotive. A train worked by such a unit therefore stands no longer at a
         /// reversal than at any other stop.
         /// </summary>
-        public bool ReversesWithoutRunaround =>
+        public bool ChangesDirectionWithoutRunaround =>
             scheduledObject.ObjectType == ScheduledObjectType.Trainset ||
             (scheduledObject.ObjectType == ScheduledObjectType.Locomotive && scheduledObject.IsReversibleTrain);
 

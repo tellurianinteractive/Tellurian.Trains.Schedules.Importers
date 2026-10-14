@@ -34,3 +34,27 @@ public sealed record TurnNote : GeneratedNote;
 /// would read as two independent moves.
 /// </remarks>
 public sealed record TurnAndCirculateNote : GeneratedNote;
+
+/// <summary>
+/// Note saying the wagons are pushed from this call on — the loco is at the other end of the train from
+/// the direction of travel. A departure note, derived from <see cref="StationCall.PushWagons"/>, for the
+/// loco driver and the dispatcher alike. Like the circulating note it names no vehicle.
+/// </summary>
+/// <remarks>
+/// Where the wagons are bound it says so — the destinations of the cargo flows still ahead on the train,
+/// otherwise the places the wagonsets' parts end — and is otherwise a bare instruction.
+/// </remarks>
+/// <param name="Flows">The cargo flows still ahead of the call, whose destinations the note names.</param>
+/// <param name="Places">The places the wagonsets end their part at, named when there are no flows.</param>
+public sealed record PushWagonsNote(IReadOnlyList<CargoFlowTrainPart> Flows, IReadOnlyList<string> Places) : GeneratedNote
+{
+    /// <summary>A note that names no destination.</summary>
+    public PushWagonsNote() : this([], []) { }
+
+    /// <inheritdoc/>
+    public bool Equals(PushWagonsNote? other) =>
+        other is not null && base.Equals(other) && Flows.SequenceEqual(other.Flows) && Places.SequenceEqual(other.Places);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => Places.Aggregate(Flows.Aggregate(base.GetHashCode(), HashCode.Combine), HashCode.Combine);
+}

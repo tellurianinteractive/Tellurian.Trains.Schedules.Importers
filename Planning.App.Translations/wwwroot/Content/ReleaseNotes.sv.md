@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 0.9.18
+
+### Nya funktioner
+
+- **Startlappar.** Den nya rapporten **Startlappar** skriver ut ett kort för ett tågs första avgång, vikt på mitten och ställt på starträcket så att det kan läsas från båda sidor. Det visar driftplats, spår, tågnummer, avgångstid, tur och, när loket eller tågsetet kom som ett annat tåg, vilket tåg det var. Välj vilka tåg som får ett – **Ingen**, **Första** eller **Alla** – på tågslaget och på varje bemannad driftplats. *Första* är tåget som startar dagen för ett lok eller ett tågset, och ett tåg får en lapp bara om både dess tågslag och dess driftplats tillåter det; det snävaste valet gäller.
+
+- **Skjut vagnarna från en hållplats.** På fliken Tåg anger den nya kolumnen **Skjut** att vagnarna skjuts från den hållplatsen och framåt, ofta i stället för rundgång. Det ger en anteckning vid avgången, för lokföraren och i expedieringslistan: *Skjut vagnar till* följt av vart vagnarna ska — godsflödenas kommande destinationer, annars där vagnsättets tågavsnitt slutar — eller bara *Skjut vagnarna.* när inget av dem säger något. Från tågets sista hållplats skjuts inget.
+
 ## Version 0.9.17
 
 ### Felrättningar

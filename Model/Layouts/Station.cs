@@ -37,6 +37,13 @@ public class Station : OperationLocation
     public bool HasTurntable { get; set; }
 
     /// <summary>
+    /// Gets or sets which trains starting at this station get a start label. The train's category can
+    /// narrow this further (see <see cref="Timetables.TrainCategory.StartLabels"/>); the narrower of the
+    /// two decides. None by default.
+    /// </summary>
+    public Timetables.StartLabelPrinting StartLabels { get; set; }
+
+    /// <summary>
     /// Gets or sets whether passengers change trains here. Only in force while the layout is worked with
     /// passenger tickets (<see cref="Settings.GeneralSettings.UsePassengerTickets"/>): the mark is kept
     /// either way, and <c>OperationLocation.ExchangesTransferringPassengers</c> is what says whether it

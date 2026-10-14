@@ -376,7 +376,7 @@ public static class PlanExtensions
         /// <remarks>
         /// It does not where every traction unit working the train can turn round as it stands — a
         /// self-propelled trainset, or a locomotive working a reversible train (see
-        /// <see cref="ScheduledObjectExtensions.get_ReversesWithoutRunaround(ScheduledObject)"/>). A
+        /// <see cref="ScheduledObjectExtensions.get_ChangesDirectionWithoutRunaround(ScheduledObject)"/>). A
         /// train no traction unit works yet — one just created, above all — is taken to need the
         /// runaround, so nothing changes until the planner says what works it.
         /// </remarks>
@@ -389,7 +389,7 @@ public static class PlanExtensions
             var traction = plan.ScheduledObjects
                 .Where(vehicle => vehicle.IsTraction && vehicle.Works(train))
                 .ToList();
-            return traction.Count == 0 || traction.Any(vehicle => !vehicle.ReversesWithoutRunaround);
+            return traction.Count == 0 || traction.Any(vehicle => !vehicle.ChangesDirectionWithoutRunaround);
         }
     }
 

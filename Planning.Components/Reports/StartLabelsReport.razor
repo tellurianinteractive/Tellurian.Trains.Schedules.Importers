@@ -1,0 +1,62 @@
+@page "/start-labels-report"
+@layout PrintLayout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The start labels: a card for each train that starts where a label is wanted, folded across the middle and
+   stood on the start track. Which trains get one is chosen on the train category and on the station (see
+   StartLabelPrinting).
+
+   48 x 182 mm labels (two turnus-card halves stacked) on A4 landscape: 6 across, 1 down. Labels are ordered by station name, then by departure,
+   and flow on without regard to station so no sheet is left half empty. Each is printed in the language of
+   the country of the station it is stood at when the layout is set to print reports in the language of the
+   object (UseObjectLanguageInReports), otherwise in the layout's default language. *@
+
+@if (_labels is null)
+{
+    <ReportBusy Name="StartLabels" />
+}
+else if (_labels.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoStartLabels" />
+}
+else
+{
+    @foreach (var labelsOnPage in _labels.ItemsPerPage(6))
+    {
+        <A4LPage Margin="4">
+            <div class="pagebreak">
+                @foreach (var label in labelsOnPage)
+                {
+                    var culture = CultureOf(label);
+                    UseReportCulture(culture);
+                    <CascadingValue Value="culture">
+                        <StartLabelCard Item="label" />
+                    </CascadingValue>
+                }
+            </div>
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<StartLabel>? _labels;
+    private readonly Dictionary<OperationLocation, ReportCulture> _cultures = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
+        _labels = ScheduleState.Schedule?.StartLabels() ?? [];
+    }
+
+    private ReportCulture CultureOf(StartLabel label)
+    {
+        if (_cultures.TryGetValue(label.Location, out var known)) return known;
+        var layout = ScheduleState.Layout!;
+        return _cultures[label.Location] = new(label.Location.ReportCulture(layout, LanguageService.IsSupported));
+    }
+}

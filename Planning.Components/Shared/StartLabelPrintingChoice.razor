@@ -1,0 +1,35 @@
+@inject Translator Translator
+
+@* The choice of which trains get a start label: three radio buttons, None, First or All. Used on a train
+   category and on a manned station; a train gets a label only where both allow it, the narrower choice
+   winning (see StartLabelPrinting). *@
+<span class="start-label-choice" role="radiogroup">
+    @foreach (var choice in Choices)
+    {
+        <label>
+            <input type="radio" name="@_group" checked="@(Value == choice.Value)"
+                   @onchange="() => Select(choice.Value)" />
+            @Translator(choice.Key)
+        </label>
+    }
+</span>
+
+@code {
+    private static readonly (StartLabelPrinting Value, string Key)[] Choices =
+    [
+        (StartLabelPrinting.None, "None"),
+        (StartLabelPrinting.First, "First"),
+        (StartLabelPrinting.All, "All"),
+    ];
+
+    // Radio buttons belong to one group by name, so each choice on a page needs a name of its own.
+    private readonly string _group = $"start-labels-{Guid.NewGuid():N}";
+
+    /// <summary>The current choice.</summary>
+    [Parameter] public StartLabelPrinting Value { get; set; }
+
+    /// <summary>Raised with the new choice when the person picks another.</summary>
+    [Parameter] public EventCallback<StartLabelPrinting> ValueChanged { get; set; }
+
+    private Task Select(StartLabelPrinting value) => ValueChanged.InvokeAsync(value);
+}

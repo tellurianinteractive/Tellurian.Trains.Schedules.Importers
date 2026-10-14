@@ -1,0 +1,73 @@
+/* A start label is two halves, each the size of a turnus card (48 x 91 mm, see PocketCard), stacked
+   vertically: 48 x 182 mm. An A4 landscape sheet holds 6 across (6 x 48 = 288 mm of the 297 mm width) and
+   one down (182 of 210 mm) = 6 labels. The label is a flex item in .pagebreak and its size is physical —
+   it is cut out and folded — so it must never be squeezed to make a row fit; overflow the row instead. */
+.startlabel {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 48mm;
+    height: 182mm;
+    box-sizing: border-box;
+    border: 1px solid gainsboro;
+
+    .half {
+        flex: 1 1 0;
+        min-height: 0;
+        box-sizing: border-box;
+        padding: 2mm;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: center;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+
+        /* The fold runs between the halves. It is the top edge of the lower half rather than the bottom edge
+           of the upper one: the upper half is turned upside down, which would carry its bottom edge to the
+           outside of the label. Dashing it tells it apart from the cut lines round the outside. */
+        & + .half {
+            border-top: 1px dashed dimgray;
+        }
+
+        &.flipped {
+            transform: rotate(180deg);
+        }
+    }
+
+    .station {
+        font-size: 9pt;
+        line-height: 11pt;
+    }
+
+    .track {
+        font-size: 14pt;
+        line-height: 17pt;
+        font-weight: 700;
+        color: #c00000;
+    }
+
+    .train {
+        font-size: 20pt;
+        line-height: 23pt;
+        font-weight: 700;
+    }
+
+    .departure {
+        font-size: 26pt;
+        line-height: 29pt;
+        font-weight: 700;
+        color: #c00000;
+    }
+
+    .duty {
+        font-size: 10pt;
+        line-height: 12pt;
+    }
+
+    .arrived {
+        font-size: 9pt;
+        line-height: 11pt;
+    }
+}

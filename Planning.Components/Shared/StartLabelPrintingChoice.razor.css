@@ -1,0 +1,11 @@
+.start-label-choice {
+    display: inline-flex;
+    gap: 1rem;
+
+    label {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-weight: normal;
+    }
+}

@@ -296,7 +296,7 @@ public static class ScheduleEditingExtensions
         {
             plan = plan.ValueOrException(nameof(plan));
             vehicle = vehicle.ValueOrException(nameof(vehicle));
-            var reversedWithoutRunaround = vehicle.IsTraction && vehicle.ReversesWithoutRunaround;
+            var changedDirectionWithoutRunaround = vehicle.IsTraction && vehicle.ChangesDirectionWithoutRunaround;
             // Set the type first: its setter resets TractionType to None for non-traction vehicles and to
             // Undefined for traction ones, so any explicit tractionType below overrides that default.
             vehicle.ObjectType = objectType;
@@ -315,7 +315,7 @@ public static class ScheduleEditingExtensions
                 vehicle.IsReversibleTrain = reversible && objectType == ScheduledObjectType.Locomotive;
             // The individual-wagon rake belongs only to a wagonset; clear it when the type is anything else.
             if (!objectType.IsWagonSet) vehicle.Units.Clear();
-            if (!reversedWithoutRunaround && vehicle.IsTraction && vehicle.ReversesWithoutRunaround)
+            if (!changedDirectionWithoutRunaround && vehicle.IsTraction && vehicle.ChangesDirectionWithoutRunaround)
                 foreach (var schedule in plan.Schedules.Where(s => s.Vehicles.Contains(vehicle)))
                     schedule.AlignArrivalTracks();
             return vehicle;

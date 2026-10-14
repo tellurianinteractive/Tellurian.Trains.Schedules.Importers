@@ -14,6 +14,9 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
     private const string TrainsLocationKey = "planning.ui.trainsLocation";
     private const string LastRouteKey = "planning.ui.lastRoute";
     private const string GraphHalfKey = "planning.ui.graphHalf";
+    private const string OccupancyHiddenKey = "planning.ui.occupancyHidden";
+    private const string OccupancySignalControlledKey = "planning.ui.occupancySignalControlled";
+    private const string OccupancyOtherLocationsKey = "planning.ui.occupancyOtherLocations";
 
     private string? _settingsSection;
     private bool _settingsSectionLoaded;
@@ -29,6 +32,8 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
     private bool _lastRouteLoaded;
     private string? _graphHalf;
     private bool _graphHalfLoaded;
+    private HashSet<string> _occupancyHidden = new(StringComparer.OrdinalIgnoreCase);
+    private bool _occupancyHiddenLoaded;
 
     /// <summary>The last active sub-tab in the Settings page, or null when none has been stored.</summary>
     public async Task<string?> GetSettingsSectionAsync()
@@ -159,4 +164,40 @@ public sealed class UiPreferenceService(BrowserStorageService storage)
         _graphHalfLoaded = true;
         await storage.SetStringAsync(GraphHalfKey, half);
     }
+
+    /// <summary>The signatures of the locations left unchecked on the track occupancy board. The signature,
+    /// not the id, so the choice still means something in another plan of the same layout.</summary>
+    public async Task<IReadOnlySet<string>> GetOccupancyHiddenAsync()
+    {
+        if (!_occupancyHiddenLoaded)
+        {
+            var stored = await storage.GetStringAsync(OccupancyHiddenKey);
+            _occupancyHidden = new HashSet<string>(
+                (stored ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
+            _occupancyHiddenLoaded = true;
+        }
+        return _occupancyHidden;
+    }
+
+    /// <summary>Remembers the locations left unchecked on the track occupancy board.</summary>
+    public async Task SetOccupancyHiddenAsync(IEnumerable<string> signatures)
+    {
+        _occupancyHidden = new HashSet<string>(signatures, StringComparer.OrdinalIgnoreCase);
+        _occupancyHiddenLoaded = true;
+        await storage.SetStringAsync(OccupancyHiddenKey, string.Join('\n', _occupancyHidden));
+    }
+
+    /// <summary>Whether signal-controlled locations are on the track occupancy board; true until turned off.</summary>
+    public async Task<bool> GetOccupancySignalControlledAsync() =>
+        await storage.GetStringAsync(OccupancySignalControlledKey) != bool.FalseString;
+
+    public Task SetOccupancySignalControlledAsync(bool include) =>
+        storage.SetStringAsync(OccupancySignalControlledKey, include.ToString());
+
+    /// <summary>Whether other locations are on the track occupancy board; true until turned off.</summary>
+    public async Task<bool> GetOccupancyOtherLocationsAsync() =>
+        await storage.GetStringAsync(OccupancyOtherLocationsKey) != bool.FalseString;
+
+    public Task SetOccupancyOtherLocationsAsync(bool include) =>
+        storage.SetStringAsync(OccupancyOtherLocationsKey, include.ToString());
 }

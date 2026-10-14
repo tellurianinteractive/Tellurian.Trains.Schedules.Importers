@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 0.9.18
+
+### New features
+
+- **Start labels.** The new **Start labels** report prints a card for a train's first departure, folded across the middle and stood on the start track so it reads from both sides. It gives the station, the track, the train number, the departure time, the duty and, where the locomotive or trainset arrived as another train, which train that was. Choose which trains get one — **None**, **First** or **All** — on the train category and on each manned station. *First* is the train that starts the day for a locomotive or trainset, and a train gets a label only where both its category and its station allow it, the narrower choice winning.
+
+- **Push wagons from a call.** On the Trains tab, the new **Push** column says that the wagons are pushed from that call on, often instead of running the locomotive round. It gives a note on the departure, for the loco driver and in the dispatch list: *Push wagons to* followed by where the wagons are bound — the destinations of the cargo flows still ahead, or else where the wagonset's part ends — or just *Push wagons.* when neither says. There is no push from the last call of a train.
+
 ## Version 0.9.17
 
 ### Fixes

@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 0.9.18
+
+### Neue Funktionen
+
+- **Startzettel.** Der neue Bericht **Startzettel** druckt für die erste Abfahrt eines Zuges eine in der Mitte gefaltete Karte, die auf das Startgleis gestellt wird und von beiden Seiten lesbar ist. Sie nennt Bahnhof, Gleis, Zugnummer, Abfahrtszeit, Dienst und, wenn die Lok oder der Triebzug als anderer Zug angekommen ist, welcher Zug das war. Welche Züge einen bekommen – **Keine**, **Erste** oder **Alle** – wählen Sie bei der Zuggattung und bei jedem besetzten Bahnhof. *Erste* ist der Zug, der den Tag für eine Lok oder einen Triebzug beginnt, und ein Zug bekommt nur dann einen Zettel, wenn sowohl seine Zuggattung als auch sein Bahnhof es erlauben; die engere Wahl gilt.
+
+- **Wagen ab einem Halt schieben.** Auf der Registerkarte Züge gibt die neue Spalte **Schieben** an, dass die Wagen ab diesem Halt geschoben werden, oft statt die Lok umzusetzen. Das ergibt einen Vermerk bei der Abfahrt, für den Lokführer und in der Fahrdienstleiterliste: *Wagen nach* … *schieben*, mit dem Ziel der Wagen — den weiteren Zielen der Güterströme, sonst dem Ende des Zugabschnitts der Wagengruppe — oder nur *Wagen schieben.*, wenn beides nichts hergibt. Ab dem letzten Halt eines Zuges wird nicht geschoben.
+
 ## Version 0.9.17
 
 ### Fehlerbehebungen

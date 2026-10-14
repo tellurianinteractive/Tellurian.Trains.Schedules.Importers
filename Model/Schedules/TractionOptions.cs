@@ -42,7 +42,7 @@ public sealed class TractionOptions : TrainPartOptions
     /// train can leave in the opposite direction to the one it arrived from.
     /// </summary>
     /// <remarks>
-    /// <para>Ignored where the traction working the part reverses as it stands — a trainset, or a
+    /// <para>Ignored where the traction working the part changes direction without runaround — a trainset, or a
     /// locomotive working a reversible train — since there is then nothing to run round; see
     /// <c>ScheduledTrainPart.NeedsRunaround</c>.</para>
     /// <para>If both <see cref="TurnLoco"/> and <see cref="RunaroundLoco"/> apply, they give one note,

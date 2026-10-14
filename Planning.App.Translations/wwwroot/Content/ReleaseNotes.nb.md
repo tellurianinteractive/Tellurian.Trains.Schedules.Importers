@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 0.9.18
+
+### Nye funksjoner
+
+- **Startlapper.** Den nye rapporten **Startlapper** skriver ut et kort for et togs første avgang, brettet på midten og satt på startsporet slik at det kan leses fra begge sider. Det viser stasjon, spor, tognummer, avgangstid, tjeneste og, der lokomotivet eller togsettet kom som et annet tog, hvilket tog det var. Velg hvilke tog som får et – **Ingen**, **Første** eller **Alle** – på togkategorien og på hver bemannede stasjon. *Første* er toget som starter dagen for et lokomotiv eller et togsett, og et tog får bare en lapp hvis både togkategorien og stasjonen tillater det; det snevreste valget gjelder.
+
+- **Skyv vognene fra et stopp.** På fanen Tog angir den nye kolonnen **Skyv** at vognene skyves fra det stoppet og videre, ofte i stedet for omløp. Det gir en merknad ved avgangen, for lokføreren og i ekspedisjonslisten: *Skyv vogner til* etterfulgt av hvor vognene skal — godsstrømmenes kommende destinasjoner, ellers der vognsettets togavsnitt slutter — eller bare *Skyv vognene.* når ingen av dem sier noe. Fra togets siste stopp skyves det ikke.
+
 ## Versjon 0.9.17
 
 ### Feilrettinger

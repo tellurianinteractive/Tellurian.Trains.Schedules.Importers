@@ -1955,8 +1955,20 @@
   <data name="RunaroundLoco" xml:space="preserve">
     <value>Omløp lok?</value>
   </data>
+  <data name="CallTurnLoco" xml:space="preserve">
+    <value>Snu</value>
+  </data>
+  <data name="CallRunaroundLoco" xml:space="preserve">
+    <value>Omløp</value>
+  </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
     <value>Loket kjøres om til den andre enden av toget etter ankomsten, slik at toget kan avgå den veien det kom fra. Skrives ut som ankomstmerknad for lokfører og togekspeditør.</value>
+  </data>
+  <data name="CallPushWagons" xml:space="preserve">
+    <value>Skyv</value>
+  </data>
+  <data name="PushWagonsHelp" xml:space="preserve">
+    <value>Vognene skyves fra dette stoppet og resten av togets kjøring, ofte i stedet for omløp. Skrives ut som avgangsmerknad for lokfører og togekspeditør.</value>
   </data>
   <data name="TractionBeforeDeparture" xml:space="preserve">
     <value>Trekkraft før avgang</value>
@@ -1998,7 +2010,7 @@
     <value>Løft av</value>
   </data>
   <data name="RunaroundLocoNotNeeded" xml:space="preserve">
-    <value>Trekkraften på dette togavsnittet kan snu som den står, så det skrives ingen omløpsmerknad.</value>
+    <value>Trekkraften på dette togavsnittet kan snu som den står, så det skrives ingen snu- eller omløpsmerknad.</value>
   </data>
   <data name="PartFetchFromTrack" xml:space="preserve">
     <value>Hent fra</value>
@@ -2791,5 +2803,26 @@
   </data>
   <data name="TrackOccupancyZoom" xml:space="preserve">
     <value>Zoom (piksler per time)</value>
+  </data>
+  <data name="TrackOccupancySignalControlled" xml:space="preserve">
+    <value>Signalstyrte steder?</value>
+  </data>
+  <data name="TrackOccupancyOtherLocations" xml:space="preserve">
+    <value>Andre steder?</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>Første</value>
+  </data>
+  <data name="StartLabels" xml:space="preserve">
+    <value>Startlapper</value>
+  </data>
+  <data name="StartLabelsHelp" xml:space="preserve">
+    <value>Hvilke tog som får en startlapp: et brettet kort som settes på startsporet. Ingen: ingen lapp. Første: bare toget som starter dagen for et lokomotiv eller et togsett. Alle: hvert tog som starter her. Et tog får bare en lapp hvis både togkategorien og stasjonen tillater det, og det snevreste valget gjelder.</value>
+  </data>
+  <data name="NoStartLabels" xml:space="preserve">
+    <value>Ingen startlapper å skrive ut: velg Første eller Alle både for en togkategori og for stasjonen der togene starter.</value>
+  </data>
+  <data name="ArrivedAs" xml:space="preserve">
+    <value>Ankom som tog</value>
   </data>
 </root>

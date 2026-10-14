@@ -394,6 +394,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Push wagons..
+        /// </summary>
+        internal static string PushWagons {
+            get {
+                return ResourceManager.GetString("PushWagons", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Push wagons to {0}.
+        /// </summary>
+        internal static string PushWagonsTo {
+            get {
+                return ResourceManager.GetString("PushWagonsTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overtakes {0}.
         /// </summary>
         internal static string Overtakes {
