@@ -393,4 +393,10 @@
   <data name="TrainPartHasNoDriverDutyOnDays" xml:space="preserve">
     <value>Zug {0} hat keinen Dienst an den Tagen {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
   </data>
+  <data name="StandingVehiclesOverlapInTimeWithOtherStandingVehicles" xml:space="preserve">
+    <value>{0} {1} überschneidet sich zeitlich mit {2} {3}.</value>
+  </data>
+  <data name="StandingVehiclesTooCloseInTimeToOtherStandingVehicles" xml:space="preserve">
+    <value>{0} {1} liegt nur {4} Minuten von {2} {3} entfernt; erforderlich sind mindestens {5} Minuten.</value>
+  </data>
 </root>

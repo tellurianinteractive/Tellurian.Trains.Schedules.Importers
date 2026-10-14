@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 1.0.0
+
+### Endringer
+
+- **Togkategorien på startlapper.** En startlapp angir nå togets kategori over tognummeret, i et bånd i kategoriens egen farge.
+
+- **Hvit tekst på flere farger.** Tekst på farget bakgrunn, for eksempel kategoribåndene, regionenes markeringer og diagrammene for tjenester og omløp, er nå hvit også på middels lyse farger som rosa, ikke bare på mørke. Lyse farger som gult og oransje beholder svart tekst.
+
+- **Overlappende stillestående kjøretøy meldes.** Når *Kjøretøy opptar sporet mens de står?* er slått på, meldes kjøretøy fra ulike omløp som står på samme spor samtidig, eller nærmere i tid enn minimumstiden mellom sporbruk, nå som en informasjonsmelding på begge oppholdene. Kjøretøy som kommer eller går med samme tog meldes ikke, siden de står sammen med vilje.
+
 ## Versjon 0.9.18
 
 ### Nye funksjoner

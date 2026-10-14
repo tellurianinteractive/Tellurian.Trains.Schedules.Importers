@@ -1,3 +1,4 @@
+@using Tellurian.Utilities.Web
 @inject Translator Translator
 
 @{ UseReportCulture(); }
@@ -15,6 +16,10 @@
         <div class="half @(upsideDown ? "flipped" : null)">
             <div class="station">@Item?.Location.Name</div>
             <div class="track">@Translator("Track") @Item?.Track.Number</div>
+            @if (Item?.Train.Category is { Name.Length: > 0 } category)
+            {
+                <div class="category" style="background-color:@category.Color; color:@category.Color.TextColor">@category.Name</div>
+            }
             <div class="train">@Item?.Train.IdentityWithCompany</div>
             <div class="departure">@Item?.Time.HHMM()</div>
             @if (Item is { Duties.Count: > 0 })

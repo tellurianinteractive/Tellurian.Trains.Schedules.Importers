@@ -14,6 +14,19 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// is the day's first.</param>
 public sealed record TrackHold(StationTrack Track, Time From, Time To, Sessions Sessions, Schedule Schedule, Train Train)
 {
+    /// <summary>The train that takes the vehicles on from the track, when there is one that day.</summary>
+    public Train? DepartingTrain { get; init; }
+
+    /// <summary>
+    /// Whether the vehicles of the two holds arrive or depart in a common train. They then stand on the
+    /// track together by design, and are no double booking of it.
+    /// </summary>
+    public bool SharesTrainWith(TrackHold other) =>
+        (Train.Equals(other.Train)) ||
+        (DepartingTrain is not null && DepartingTrain.Equals(other.DepartingTrain)) ||
+        (DepartingTrain is not null && DepartingTrain.Equals(other.Train)) ||
+        (other.DepartingTrain is not null && other.DepartingTrain.Equals(Train));
+
     /// <summary>The time the vehicles stand on the track.</summary>
     public (Time From, Time To) Span => (From, To);
 
@@ -128,7 +141,7 @@ public static class TrackHoldExtensions
         // Up to where the next train's own window begins if the vehicles go with it from this very track;
         // otherwise they are fetched, and are on the track until the train departs.
         var to = leaving.OtherFromTrack is null && track.Equals(leaving.From.Track) ? leaving.From.Arrival : leaving.From.Departure;
-        return new TrackHold(track, from, to, sessions, schedule, arriving.Train);
+        return new TrackHold(track, from, to, sessions, schedule, arriving.Train) { DepartingTrain = leaving.Train };
     }
 
     private static TrackHold? LastHold(Schedule schedule, ScheduledTrainPart last)
@@ -144,7 +157,7 @@ public static class TrackHoldExtensions
         if (first.DepartureLayover != TractionLayover.None) return null;
         var track = first.OtherFromTrack ?? first.From.Track;
         var to = track.Equals(first.From.Track) ? first.From.Arrival : first.From.Departure;
-        return new TrackHold(track, StartOfDay(to), to, first.Train.Sessions, schedule, first.Train);
+        return new TrackHold(track, StartOfDay(to), to, first.Train.Sessions, schedule, first.Train) { DepartingTrain = first.Train };
     }
 
     // The day a time is stored on: times past midnight are on the day after.

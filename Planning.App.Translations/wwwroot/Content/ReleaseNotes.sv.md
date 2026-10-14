@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 1.0.0
+
+### Ändringar
+
+- **Tågslaget på startlappar.** En startlapp anger nu tågets tågslag ovanför tågnumret, i ett band med tågslagets egen färg.
+
+- **Vit text på fler färger.** Text på färgad bakgrund, till exempel tågslagsbanden, regionernas markeringar och diagrammen för turer och omlopp, är nu vit även på medelljusa färger som rosa, inte bara på mörka. Ljusa färger som gult och orange behåller svart text.
+
+- **Stillastående fordon som överlappar rapporteras.** När *Fordon upptar spåret medan de står?* är på rapporteras fordon från olika omlopp som står på samma spår samtidigt, eller närmare i tid än minimitiden mellan spårbruk, nu som ett informationsmeddelande på båda uppställningarna. Fordon som kommer eller går med samma tåg rapporteras inte, eftersom de står tillsammans med avsikt.
+
 ## Version 0.9.18
 
 ### Nya funktioner

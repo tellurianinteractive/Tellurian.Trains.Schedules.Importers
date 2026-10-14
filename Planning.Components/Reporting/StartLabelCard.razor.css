@@ -48,6 +48,19 @@
         color: #c00000;
     }
 
+    /* The category's own colour, with the text colour chosen for contrast. Printed backgrounds are only
+       kept where the browser is told to, hence print-color-adjust. */
+    .category {
+        align-self: stretch;
+        margin: 1mm 0;
+        padding: 0.5mm 1mm;
+        font-size: 11pt;
+        line-height: 14pt;
+        font-weight: 700;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
     .train {
         font-size: 20pt;
         line-height: 23pt;

@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 1.0.0
+
+### Ændringer
+
+- **Togkategorien på startsedler.** En startseddel angiver nu togets kategori over tognummeret, i et bånd i kategoriens egen farve.
+
+- **Hvid tekst på flere farver.** Tekst på farvet baggrund, for eksempel kategoribåndene, regionernes markeringer og diagrammerne for tjenester og omløb, er nu hvid også på middellyse farver som pink, ikke kun på mørke. Lyse farver som gul og orange beholder sort tekst.
+
+- **Overlappende holdende køretøjer meldes.** Når *Køretøjer optager sporet, mens de holder?* er slået til, meldes køretøjer fra forskellige omløb, der holder på samme spor på samme tid eller tættere end minimumstiden mellem sporbrug, nu som en informationsmeddelelse på begge ophold. Køretøjer, der kommer eller kører med samme tog, meldes ikke, da de holder sammen med vilje.
+
 ## Version 0.9.18
 
 ### Nye funktioner

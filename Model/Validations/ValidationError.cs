@@ -276,6 +276,28 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a station track conflict error between two stays of different vehicles on the same track.
+    /// Keyed to the schedule of <paramref name="hold"/>; one such error is created for each of the two
+    /// stays so that both are marked.
+    /// </summary>
+    public static ValidationError StationTrackConflict(
+        StationTrack track,
+        TrackHold hold,
+        TrackHold other,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StationTrackHeldByVehicles,
+            FromTrack = track,
+            ToTrack = track,
+            FromTime = Time.Min(hold.From, other.From),
+            ToTime = Time.Max(hold.To, other.To),
+            Trains = [hold.Train, other.Train],
+            Schedules = [hold.Schedule],
+            Hold = hold,
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a track stretch conflict error.
     /// </summary>
     public static ValidationError StretchConflict(

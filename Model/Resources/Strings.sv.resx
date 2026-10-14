@@ -393,4 +393,10 @@
   <data name="TrainPartHasNoDriverDutyOnDays" xml:space="preserve">
     <value>Tåg {0} saknar körande tjänst på {1} för avsnittet från {2} {3} till {4} {5}.</value>
   </data>
+  <data name="StandingVehiclesOverlapInTimeWithOtherStandingVehicles" xml:space="preserve">
+    <value>{0} {1} överlappar i tid med {2} {3}.</value>
+  </data>
+  <data name="StandingVehiclesTooCloseInTimeToOtherStandingVehicles" xml:space="preserve">
+    <value>{0} {1} ligger bara {4} minuter från {2} {3}; minst {5} minuter krävs.</value>
+  </data>
 </root>

@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 1.0.0
+
+### Änderungen
+
+- **Die Zuggattung auf Startzetteln.** Ein Startzettel nennt jetzt die Zuggattung über der Zugnummer, in einem Band in der eigenen Farbe der Gattung.
+
+- **Weißer Text auf mehr Farben.** Text auf farbigem Hintergrund, etwa die Gattungsbänder, die Regionsmarkierungen und die Diagramme für Dienste und Umläufe, ist jetzt auch auf mittelhellen Farben wie Rosa weiß, nicht nur auf dunklen. Helle Farben wie Gelb und Orange behalten schwarzen Text.
+
+- **Überlappende abgestellte Fahrzeuge werden gemeldet.** Wenn *Fahrzeuge belegen das Gleis, solange sie stehen?* eingeschaltet ist, werden Fahrzeuge aus verschiedenen Umläufen, die gleichzeitig oder näher beieinander als die Mindestzeit zwischen Gleisbelegungen auf demselben Gleis stehen, jetzt als Informationsmeldung bei beiden Aufenthalten gemeldet. Fahrzeuge, die im selben Zug kommen oder gehen, werden nicht gemeldet, da sie absichtlich zusammen stehen.
+
 ## Version 0.9.18
 
 ### Neue Funktionen

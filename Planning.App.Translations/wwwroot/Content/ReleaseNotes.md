@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 1.0.0
+
+### Changes
+
+- **The category on start labels.** A start label now names the train's category above the train number, in a band of the category's own colour.
+
+- **White text on more colours.** Text on a coloured background, such as the category bands, the region chips and the duty and turnus charts, is now white on medium-bright colours like pink as well, not only on dark ones. Bright colours such as yellow and orange keep black text.
+
+- **Standing vehicles that overlap are reported.** When *Vehicles occupy the track while standing?* is on, vehicles from different schedules that stand on the same track at the same time, or closer in time than the minimum between track uses, are now reported as an information message on both stays. Vehicles that arrive or depart in the same train are not reported, since they stand together by design.
+
 ## Version 0.9.18
 
 ### New features

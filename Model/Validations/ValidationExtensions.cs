@@ -1325,6 +1325,27 @@ public static class ValidationExtensions
                     result.Add(ValidationError.StationTrackConflict(stationTrack, call, hold, message));
                 }
             }
+            // Vehicles of different schedules standing on the same track at the same time, unless they came or
+            // go in the same train (a locomotive with the wagons it brought is no double booking).
+            for (var i = 0; i < holds.Count; i++)
+            {
+                for (var j = i + 1; j < holds.Count; j++)
+                {
+                    var (a, b) = (holds[i], holds[j]);
+                    if (a.Schedule.Equals(b.Schedule) || a.SharesTrainWith(b)) continue;
+                    if (!a.Span.ConflictsInTime(a.Sessions, b.Span, b.Sessions, minMinutesBetweenTrackUsage)) continue;
+
+                    var (first, second) = a.From <= b.From ? (a, b) : (b, a);
+                    var firstSpan = string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationTrack.Station, stationTrack, first.From.HHMM(), first.To.HHMM());
+                    var secondSpan = string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationTrack.Station, stationTrack, second.From.HHMM(), second.To.HHMM());
+                    var free = second.Span.FreeMinutesBetween(second.Sessions, first.Span, first.Sessions);
+                    var message = free < 0
+                        ? Message.Information(Strings.StandingVehiclesOverlapInTimeWithOtherStandingVehicles, first.Vehicles, firstSpan, second.Vehicles, secondSpan)
+                        : Message.Information(Strings.StandingVehiclesTooCloseInTimeToOtherStandingVehicles, first.Vehicles, firstSpan, second.Vehicles, secondSpan, free, minMinutesBetweenTrackUsage);
+                    result.Add(ValidationError.StationTrackConflict(stationTrack, a, b, message));
+                    result.Add(ValidationError.StationTrackConflict(stationTrack, b, a, message));
+                }
+            }
             return result;
         }
 

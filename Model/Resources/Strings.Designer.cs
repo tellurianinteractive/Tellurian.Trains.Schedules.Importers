@@ -106,6 +106,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} {1} overlaps in time with {2} {3}..
+        /// </summary>
+        internal static string StandingVehiclesOverlapInTimeWithOtherStandingVehicles {
+            get {
+                return ResourceManager.GetString("StandingVehiclesOverlapInTimeWithOtherStandingVehicles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1} is only {4} minutes from {2} {3}; at least {5} minutes are required..
+        /// </summary>
+        internal static string StandingVehiclesTooCloseInTimeToOtherStandingVehicles {
+            get {
+                return ResourceManager.GetString("StandingVehiclesTooCloseInTimeToOtherStandingVehicles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to at {0} track {1} arr {2} dep {3}.
         /// </summary>
         internal static string CallAtStationTrackDuringTimes {
