@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.0.1
+
+### Ændringer
+
+- **Køretøjer, der holder natten over.** Køretøjer, der holder på et spor natten over og kører med samme tog om morgenen, meldes ikke længere som holdende på sporet samtidig med hinanden.
+
 ## Version 1.0.0
 
 ### Ændringer

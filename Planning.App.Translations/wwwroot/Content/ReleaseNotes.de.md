@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.0.1
+
+### Änderungen
+
+- **Fahrzeuge, die über Nacht stehen.** Fahrzeuge, die über Nacht auf einem Gleis stehen und am Morgen im selben Zug abfahren, werden nicht mehr als gleichzeitig auf dem Gleis stehend gemeldet.
+
 ## Version 1.0.0
 
 ### Änderungen

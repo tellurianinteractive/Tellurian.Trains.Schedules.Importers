@@ -88,6 +88,16 @@ public class TrackOccupancyTests
     }
 
     [TestMethod]
+    public void AUnitStandingThroughTheNightKnowsTheTrainItDepartsWith()
+    {
+        // The last arrival and the first departure are on the same track, so they are one stay through the
+        // night. Units that leave in the same morning train must still be recognised as standing together.
+        var hold = HoldsOn(Continuing(), OtherTrack).Single();
+
+        Assert.AreSame(Arriving, hold.DepartingTrain);
+    }
+
+    [TestMethod]
     public void AUnitBookedToStablingHoldsNoTrack()
     {
         Assert.IsNull(StayOn(Continuing(toLayover: TractionLayover.Stabling), Track, At(12, 00)),

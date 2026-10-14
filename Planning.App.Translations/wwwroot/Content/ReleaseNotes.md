@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.0.1
+
+### Changes
+
+- **Vehicles standing overnight.** Vehicles that stand on a track through the night and leave in the same morning train are no longer reported as standing on the track at the same time as each other.
+
 ## Version 1.0.0
 
 ### Changes

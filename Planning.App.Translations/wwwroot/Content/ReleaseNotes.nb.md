@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.0.1
+
+### Endringer
+
+- **Kjøretøy som står over natten.** Kjøretøy som står på et spor over natten og kjører med samme tog om morgenen, meldes ikke lenger som stående på sporet samtidig med hverandre.
+
 ## Versjon 1.0.0
 
 ### Endringer

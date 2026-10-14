@@ -106,7 +106,7 @@ public static class SessionsExtensions
 
         /// <summary>
         /// These sessions or days narrowed to those that <paramref name="limit"/> also has, keeping this
-        /// value's own days and on-demand markers. Unlike <see cref="And"/>, the result is written the way
+        /// value's own days and on-demand markers. Unlike <see cref="SessionsExtensions.And(Sessions, Sessions)"/>, the result is written the way
         /// this value is, so a day pattern narrowed by a limit that carries no days marker stays a day pattern.
         /// </summary>
         /// <param name="limit">The sessions or days the result may not go beyond.</param>

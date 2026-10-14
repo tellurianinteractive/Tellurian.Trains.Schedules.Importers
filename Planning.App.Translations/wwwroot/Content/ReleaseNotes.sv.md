@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.0.1
+
+### Ändringar
+
+- **Fordon som står över natten.** Fordon som står på ett spår över natten och lämnar med samma tåg på morgonen rapporteras inte längre som att de står på spåret samtidigt som varandra.
+
 ## Version 1.0.0
 
 ### Ändringar

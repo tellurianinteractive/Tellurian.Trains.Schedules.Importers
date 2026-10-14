@@ -182,7 +182,7 @@ public static class TurnusDataExtensions
         {
             var headerLines = 2
                 + (card.HasClass ? 1 : 0)
-                + (card.OperatingPeriod(static key => key).Length > 0 ? 1 : 0);
+                + (card.OperatingPeriod(static key => key ?? string.Empty).Length > 0 ? 1 : 0);
             var remarkLines = card.Remark.Length == 0 ? 0 : (int)Math.Ceiling(card.Remark.Length / (double)RemarkCharsPerLine);
             var available = CardContentHeight
                 - headerLines * HeaderLineHeight

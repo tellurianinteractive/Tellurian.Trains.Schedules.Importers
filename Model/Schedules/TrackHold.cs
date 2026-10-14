@@ -110,7 +110,7 @@ public static class TrackHoldExtensions
                     TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
                     first.To.AddDays(1) > last.From)
                 {
-                    last = last with { To = first.To.AddDays(1) };
+                    last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain };
                     first = null;
                 }
                 Add(holds, first);

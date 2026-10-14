@@ -101,7 +101,7 @@ public static class DestinationExtensions
         /// <summary>
         /// Where the wagons go without the regions: the named locations and the <em>"and beyond"</em>
         /// qualifier. For listing several destinations together with their regions gathered last
-        /// (<see cref="StatedRegions"/>).
+        /// (<c>StatedRegions</c>).
         /// </summary>
         public string PlaceTextWithoutRegions =>
             Place(destination.NamedLocations.Select(location => location.Name), destination.AndText, string.Empty);

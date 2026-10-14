@@ -360,7 +360,7 @@ public static class ScheduledObjectExtensions
 
         /// <summary>
         /// The vehicle as a schedule names it: its <see cref="ScheduledObject.Designation"/>, but for a wagonset
-        /// that lists its wagons followed by the <see cref="WagonsText"/> (e.g. "SJ 05 5 x A/B/Fv"). A composed
+        /// that lists its wagons followed by the <c>WagonsText</c> (e.g. "SJ 05 5 x A/B/Fv"). A composed
         /// designation then gives the wagons in place of the vehicle's own class, so the class is not said twice.
         /// </summary>
         public string DesignationWithWagons => scheduledObject.WagonsText switch
