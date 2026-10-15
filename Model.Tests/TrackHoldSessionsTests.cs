@@ -86,6 +86,18 @@ public class TrackHoldSessionsTests
     }
 
     [TestMethod]
+    public void VehiclesWorkingAnotherScheduleOnTheOtherSessionsAreNotIdle()
+    {
+        var (plan, track) = Arrange();
+        var other = plan.CreateSchedule();
+        var vehicles = plan.ScheduledObjects.ToList();
+        plan.AssignVehicle(other, vehicles.Single(v => v.Number == 11), Even);
+        plan.AssignVehicle(other, vehicles.Single(v => v.Number == 12), Odd);
+
+        Assert.IsFalse(plan.Schedules.TrackHolds.Any(h => h.IsIdle), "Each vehicle is away on the other schedule when it does not work this one.");
+    }
+
+    [TestMethod]
     public void WagonsetsAssignedToAllSessionsHaveNoIdleHolds()
     {
         TestDataFactory.Init();

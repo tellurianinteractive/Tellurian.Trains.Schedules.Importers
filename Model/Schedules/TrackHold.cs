@@ -159,8 +159,11 @@ public static class TrackHoldExtensions
 
     private static List<VehicleGroup> VehicleGroups(Schedule schedule)
     {
+        // Assignments may be written either as sessions or as days, so they are read within the operating period.
+        var general = schedule.Plan?.Layout.Settings.General;
         var assigned = (schedule.Plan?.ScheduledObjects ?? [])
-            .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule)).Select(a => (Vehicle: v, a.Sessions)))
+            .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule))
+                .Select(a => (Vehicle: v, Sessions: general is null ? a.Sessions : a.Sessions.WithinPeriod(general.UseDays, general.MaxSessions))))
             .ToList();
         if (assigned.Count == 0) return [new VehicleGroup(null, [])];
         return [.. assigned
@@ -208,7 +211,8 @@ public static class TrackHoldExtensions
         // Where the vehicles do not work the schedule they stay where it left them, all day.
         if (told && group.Sessions is { } working2 && (last ?? first) is { } resting)
         {
-            var idle = schedule.IdleSessions(working2);
+            // Vehicles that work another schedule on a session are away on it, not standing here.
+            var idle = Sessions.FromBitPattern(schedule.IdleSessions(working2).Flags & ~BusyElsewhere(schedule, group.Vehicles).Flags);
             if (!idle.IsNone)
             {
                 var others = groups.Where(g => g != group && g.Sessions is not null)
@@ -234,6 +238,21 @@ public static class TrackHoldExtensions
             }
         }
         return holds;
+    }
+
+    // The sessions on which every one of the vehicles works some other schedule than this one, so that none of
+    // them is left standing where this schedule ended.
+    private static Sessions BusyElsewhere(Schedule schedule, IReadOnlyList<ScheduledObject> vehicles)
+    {
+        if (vehicles.Count == 0) return new Sessions();
+        // Assignments may be written either as sessions or as days, so compare them within the operating period.
+        var general = schedule.Plan?.Layout.Settings.General;
+        if (general is null) return new Sessions();
+        var bits = vehicles
+            .Select(v => v.ScheduleAssignments.Where(a => !schedule.Equals(a.Schedule))
+                .Aggregate(0, (acc, a) => acc | a.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Flags))
+            .Aggregate(-1, (acc, b) => acc & b);
+        return Sessions.FromBitPattern(bits);
     }
 
     // Whether every session within the operating period is next to another one of the set, i.e. the set is
