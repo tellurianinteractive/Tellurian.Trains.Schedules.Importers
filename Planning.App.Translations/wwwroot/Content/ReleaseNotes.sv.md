@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.0.7
+
+### Ändringar
+
+- **Fordon som växlar mellan körplaner.** Ett lok eller vagnset som kör en körplan vissa köromgångar eller dagar och en annan körplan de övriga räknas inte längre som stående overksamt på den första körplanens sista spår de dagar det kör den andra. Det tar bort falska spårkonflikter när två fordon turas om på två körplaner, och när köromgångarna hade angetts som dagar.
+
 ## Version 1.0.6
 
 ### Ändringar

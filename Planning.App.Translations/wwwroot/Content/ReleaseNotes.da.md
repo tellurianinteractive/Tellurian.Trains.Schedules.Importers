@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.0.7
+
+### Ændringer
+
+- **Køretøjer, der skifter mellem køreplaner.** Et lokomotiv eller vognsæt, der kører én køreplan nogle køresessioner eller dage og en anden køreplan de øvrige, regnes ikke længere for at holde ubrugt på den første køreplans sidste spor de dage, det kører den anden. Det fjerner falske sporkonflikter, når to køretøjer skiftes til at køre to køreplaner, og når køresessionerne var angivet som dage.
+
 ## Version 1.0.6
 
 ### Ændringer

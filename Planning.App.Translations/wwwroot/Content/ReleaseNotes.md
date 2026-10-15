@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.0.7
+
+### Changes
+
+- **Vehicles that swap between schedules.** A locomotive or wagonset that works one schedule on some sessions or days and another schedule on the rest is no longer counted as standing idle on the first schedule's last track on the days it works the other one. This removed false track conflicts when two vehicles take turns on two schedules, and when the sessions had been entered as days.
+
 ## Version 1.0.6
 
 ### Changes

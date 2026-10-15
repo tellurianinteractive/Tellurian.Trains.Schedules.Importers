@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.0.7
+
+### Änderungen
+
+- **Fahrzeuge, die zwischen Umlaufplänen wechseln.** Eine Lokomotive oder ein Wagensatz, der an einigen Fahrrunden oder Tagen einen Umlaufplan fährt und an den übrigen einen anderen, gilt an den Tagen, an denen er den anderen fährt, nicht mehr als ungenutzt auf dem letzten Gleis des ersten Umlaufplans stehend. Das beseitigt falsche Gleiskonflikte, wenn zwei Fahrzeuge sich auf zwei Umlaufplänen abwechseln und wenn die Fahrrunden als Tage angegeben waren.
+
 ## Version 1.0.6
 
 ### Änderungen

@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.0.7
+
+### Endringer
+
+- **Kjøretøy som bytter mellom kjøreplaner.** Et lok eller vognsett som kjører én kjøreplan noen kjøresesjoner eller dager og en annen kjøreplan de øvrige, regnes ikke lenger som stående ubrukt på den første kjøreplanens siste spor de dagene det kjører den andre. Det fjerner falske sporkonflikter når to kjøretøy bytter på å kjøre to kjøreplaner, og når kjøresesjonene var oppgitt som dager.
+
 ## Versjon 1.0.6
 
 ### Endringer
