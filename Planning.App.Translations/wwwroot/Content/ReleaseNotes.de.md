@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 1.0.6
+
+### Änderungen
+
+- **Startetiketten.** Das Kürzel des Unternehmens steht jetzt in einer eigenen Zeile auf der Startetikette, und Präfix, Nummer und Suffix des Zuges stehen immer zusammen in der Zeile darunter. Die Zugnummer wird damit nicht mehr mal umbrochen und mal nicht.
+
+- **Fahrzeugbemerkungen.** Die im Fahrplan zu einem Fahrzeug eingetragene Bemerkung wird jetzt auf dem Reiter „Fahrzeugeigentümer“ und im Bericht über die Fahrzeugbeiträge angezeigt. Eine Bemerkung, die nur die externe ID des Fahrzeugs wiederholt, wird weggelassen.
+
 ## Version 1.0.5
 
 ### Änderungen

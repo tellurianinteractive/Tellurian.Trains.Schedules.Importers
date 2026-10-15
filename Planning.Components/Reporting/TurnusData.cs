@@ -139,9 +139,7 @@ public static class TurnusDataExtensions
                         MaxSessions = maxSessions,
                         // Suppress a remark that only repeats the turnus (the external id), e.g. an
                         // imported wagonset whose remark is a copy of its identifier.
-                        Remark = scheduledObject.Remark.EqualsCaseInsensitive(scheduledObject.ExternalId)
-                            ? string.Empty
-                            : scheduledObject.Remark ?? string.Empty,
+                        Remark = scheduledObject.DisplayRemark,
                         TrainParts = combination.Parts,
                     }));
 

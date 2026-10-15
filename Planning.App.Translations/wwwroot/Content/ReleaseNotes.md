@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.0.6
+
+### Changes
+
+- **Start labels.** The company signature now has a row of its own on a start label, and the train prefix, number and suffix always stand together on the row below it, so the train number no longer wraps in some places and not in others.
+
+- **Vehicle remarks.** The remark entered on a vehicle in the schedule is now shown on the Vehicle owners tab and in the vehicle contributors report. A remark that only repeats the vehicle's external id is left out.
+
 ## Version 1.0.5
 
 ### Changes

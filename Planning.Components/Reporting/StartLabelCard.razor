@@ -20,7 +20,11 @@
             {
                 <div class="category" style="background-color:@category.Color; color:@category.Color.TextColor">@category.Name</div>
             }
-            <div class="train">@Item?.Train.IdentityWithCompany</div>
+            @if (Item?.Train.EffectiveCompany is { } company && company.Signature.HasValue)
+            {
+                <div class="company">@company.Signature</div>
+            }
+            <div class="train">@Item?.Train.Identity</div>
             <div class="departure">@Item?.Time.HHMM()</div>
             @if (Item is { Duties.Count: > 0 })
             {

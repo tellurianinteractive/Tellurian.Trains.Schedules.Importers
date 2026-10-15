@@ -61,7 +61,15 @@
         print-color-adjust: exact;
     }
 
+    /* The company signature has a row of its own, so the train identity below it is one unbroken line. */
+    .company {
+        font-size: 11pt;
+        line-height: 13pt;
+        font-weight: 700;
+    }
+
     .train {
+        white-space: nowrap;
         font-size: 20pt;
         line-height: 23pt;
         font-weight: 700;

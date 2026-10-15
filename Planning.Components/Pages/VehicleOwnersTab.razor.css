@@ -196,6 +196,13 @@
     font-weight: 600;
 }
 
+.vehicle-owners ::deep table.owners .remark {
+    display: block;
+    font-size: 0.85em;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
 .vehicle-owners ::deep table.owners th.units,
 .vehicle-owners ::deep table.owners td.units {
     text-align: right;

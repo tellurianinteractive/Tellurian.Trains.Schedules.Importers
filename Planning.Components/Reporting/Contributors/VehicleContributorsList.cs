@@ -148,9 +148,10 @@ public static class VehicleContributorsList
     private static string NameOf(Plan plan, VehicleContributor contributor) =>
         plan.ParticipantById(contributor.ParticipantId)?.Name ?? "?";
 
-    // The contributor's note says something about their unit only, so it comes before the one about the item.
+    // The contributor's note says something about their unit only, so it comes before the one about the item,
+    // and the remark entered on the vehicle in the schedule comes last.
     private static IReadOnlyList<string> NotesOf(Item item, VehicleContributor? contributor) =>
-        [.. new[] { contributor?.Note, item.Contribution?.Note }
+        [.. new[] { contributor?.Note, item.Contribution?.Note, item.Vehicle.DisplayRemark }
             .Where(note => !string.IsNullOrWhiteSpace(note))
             .Select(note => note!.Trim())
             .Distinct(StringComparer.CurrentCulture)];

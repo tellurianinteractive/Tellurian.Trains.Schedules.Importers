@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 1.0.6
+
+### Endringer
+
+- **Startetiketter.** Selskapets signatur står nå på en egen linje på startetiketten, og togets prefiks, nummer og suffiks står alltid sammen på linjen under, slik at tognummeret ikke lenger brytes noen steder og andre ikke.
+
+- **Kjøretøymerknader.** Merknaden som er oppgitt på et kjøretøy i kjøreplanen, vises nå på fanen Kjøretøyeiere og i rapporten over kjøretøybidrag. En merknad som bare gjentar kjøretøyets eksterne id, utelates.
+
 ## Versjon 1.0.5
 
 ### Endringer

@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 1.0.6
+
+### Ändringar
+
+- **Startetiketter.** Företagets signatur står nu på en egen rad på startetiketten, och tågets prefix, nummer och suffix står alltid tillsammans på raden under, så att tågnumret inte längre bryts på vissa ställen och inte på andra.
+
+- **Fordonsanmärkningar.** Anmärkningen som angetts på ett fordon i körplanen visas nu på fliken Fordonsägare och i rapporten över fordonsbidrag. En anmärkning som bara upprepar fordonets externa id utelämnas.
+
 ## Version 1.0.5
 
 ### Ändringar

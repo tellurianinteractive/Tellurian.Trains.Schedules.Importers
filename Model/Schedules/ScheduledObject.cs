@@ -260,6 +260,14 @@ public static class ScheduledObjectExtensions
         /// </summary>
         public bool IsTraction => scheduledObject.ObjectType.IsTraction;
         /// <summary>
+        /// The vehicle's <see cref="ScheduledObject.Remark"/> when it says something worth printing, otherwise
+        /// empty: a remark that only repeats the external id (an imported vehicle's copy of its identifier) is left out.
+        /// </summary>
+        public string DisplayRemark =>
+            string.IsNullOrWhiteSpace(scheduledObject.Remark) || scheduledObject.Remark.EqualsCaseInsensitive(scheduledObject.ExternalId)
+                ? string.Empty
+                : scheduledObject.Remark.Trim();
+        /// <summary>
         /// True when this traction unit can change the direction its train runs in without the
         /// locomotive being run round to the other end: a self-propelled trainset, which is driven from
         /// either end as it stands, or a locomotive working a reversible train

@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 1.0.6
+
+### Ændringer
+
+- **Startetiketter.** Virksomhedens signatur står nu på en række for sig på startetiketten, og togets præfiks, nummer og suffiks står altid sammen på rækken under, så tognummeret ikke længere brydes nogle steder og andre ikke.
+
+- **Køretøjsbemærkninger.** Bemærkningen, der er angivet på et køretøj i køreplanen, vises nu på fanen Køretøjsejere og i rapporten over køretøjsbidrag. En bemærkning, der kun gentager køretøjets eksterne id, udelades.
+
 ## Version 1.0.5
 
 ### Ændringer

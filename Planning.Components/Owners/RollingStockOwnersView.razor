@@ -128,6 +128,11 @@ else
                     </td>
                     <td><span class="spares">@string.Join(", ", contributors.Skip(1).Select(NameOf))</span></td>
                     <td>
+                        @* The remark entered on the vehicle in the schedule is read-only here; it is edited there. *@
+                        @if (vehicle.DisplayRemark.Length > 0)
+                        {
+                            <span class="remark" title="@Translator("Remark")">@vehicle.DisplayRemark</span>
+                        }
                         <input type="text" class="note" value="@Plan.ContributionFor(vehicle)?.Note"
                                @onchange="e => SetNote(vehicle, e)" />
                     </td>
