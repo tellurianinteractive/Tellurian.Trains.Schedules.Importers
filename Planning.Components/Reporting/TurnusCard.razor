@@ -85,6 +85,10 @@
                 {
                     <span>@Translator("TurnToContinue")</span>
                 }
+                else if (Item.ContinuesFromPrevious)
+                {
+                    <span>@Translator("TurnToStart")</span>
+                }
                 else if (Item.TurnForNextSession)
                 {
                     <span>@Translator(Item.UseDays ? "TurnForNextDay" : "TurnForNextSession")</span>

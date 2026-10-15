@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 1.0.3
+
+### Ändringar
+
+- **Dra tåg på fliken Spårbeläggning.** När ett tåg dras till ett annat spår uppstår inte längre felet "More than one sibling … has the same key value" om en station har två spår med samma nummer.
+
+- **Offlinestödet kunde inte installeras.** Appens service worker försökte lagra en konfigurationsfil som webbhotellet inte levererar, och det stoppade hela installationen. Filen utelämnas nu. Om du har installerat appen tidigare rekommenderar vi att du **avinstallerar den och installerar den på nytt**, så att den nya versionen tar över och offlinestödet fungerar.
+
 ## Version 1.0.2
 
 ### Ändringar

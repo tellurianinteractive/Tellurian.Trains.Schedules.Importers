@@ -77,7 +77,7 @@ else
                 @foreach (var row in station.Rows)
                 {
                     <div class="track-row @(IsDropTarget(row) ? "drop-allowed" : null) @(ReferenceEquals(_hover, row) ? "drop-hover" : null)"
-                         @key="row.Track">
+                         @key="row">
                         <div class="name-cell" title="@station.Location.Name @row.Track.Number">@row.Track.Number</div>
                         <div class="lanes"
                              style="--lanes:@row.Lanes"

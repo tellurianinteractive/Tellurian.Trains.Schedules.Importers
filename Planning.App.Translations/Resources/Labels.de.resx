@@ -249,6 +249,9 @@
   <data name="TurnToContinue" xml:space="preserve">
     <value>Zum Fortsetzen wenden</value>
   </data>
+  <data name="TurnToStart" xml:space="preserve">
+    <value>Zum Anfang wenden</value>
+  </data>
   <data name="ContinuationFromPrevious" xml:space="preserve">
     <value>Fortsetzung von vorheriger Karte</value>
   </data>

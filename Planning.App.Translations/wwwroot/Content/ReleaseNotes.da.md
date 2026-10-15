@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 1.0.3
+
+### Ændringer
+
+- **Træk af tog på fanen Sporbelægning.** Når et tog trækkes til et andet spor, opstår der ikke længere fejlen "More than one sibling … has the same key value", hvis en station har to spor med samme nummer.
+
+- **Offlinefunktionen kunne ikke installeres.** Appens service worker forsøgte at gemme en konfigurationsfil, som webværten ikke leverer, og det standsede hele installationen. Filen er nu udeladt. Hvis du har installeret appen tidligere, anbefaler vi, at du **afinstallerer den og installerer den igen**, så den nye version overtager, og offlinefunktionen virker.
+
 ## Version 1.0.2
 
 ### Ændringer

@@ -12,8 +12,10 @@ const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 // allow-list of file extensions is deliberately not used: it silently dropped whatever it did not
 // list, so the markdown help/about/release notes (.md) and the train categories catalogue (.csv) —
 // all fetched over HTTP at runtime — were missing offline. Only the service worker itself, which
-// must always come from the network so a new version can take over, is excluded.
-const offlineAssetsExclude = [ /^service-worker\.js$/ ];
+// must always come from the network so a new version can take over, is excluded. So is
+// staticwebapp.config.json: it configures Azure Static Web Apps, which does not serve it, so the
+// fetch fails its integrity check and, because addAll is all-or-nothing, the whole install with it.
+const offlineAssetsExclude = [ /^service-worker\.js$/, /^staticwebapp\.config\.json$/ ];
 
 // Replace with your base path if you are hosting on a subfolder. Ensure there is a trailing '/'.
 const base = "/";

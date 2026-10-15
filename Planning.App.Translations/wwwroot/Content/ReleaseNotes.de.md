@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 1.0.3
+
+### Änderungen
+
+- **Ziehen eines Zuges auf der Registerkarte Gleisbelegung.** Beim Ziehen eines Zuges auf ein anderes Gleis tritt nicht mehr der Fehler „More than one sibling … has the same key value“ auf, wenn ein Bahnhof zwei Gleise mit derselben Nummer hat.
+
+- **Die Offline-Unterstützung ließ sich unter Umständen nicht installieren.** Der Service Worker der App versuchte, eine Konfigurationsdatei zwischenzuspeichern, die der Webhost nicht ausliefert, wodurch die gesamte Installation abbrach. Die Datei wird jetzt ausgelassen. Wenn Sie die App bereits früher installiert haben, empfehlen wir, sie zu **deinstallieren und erneut zu installieren**, damit die neue Version übernimmt und die Offline-Unterstützung funktioniert.
+
 ## Version 1.0.2
 
 ### Änderungen

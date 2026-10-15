@@ -178,7 +178,7 @@ public static class TurnusDataExtensions
     private const double RemarkLineHeight = 13;
     private const int RemarkCharsPerLine = 22;
     private const double TableHeadHeight = 17;
-    private const double RowHeight = 17;
+    private const double RowHeight = 13;
     private const double AlertHeight = 12;
 
     extension(TurnusData card)
@@ -204,7 +204,8 @@ public static class TurnusDataExtensions
 
         /// <summary>
         /// Splits a card with more train parts than fit into consecutive cards of the same turnus. Every
-        /// card but the last says "Turn to continue"; every card but the first says "Continuation from previous".
+        /// card but the last says "Turn to continue", the last says "Turn to start"; every card but the first says
+        /// "Continuation from previous".
         /// </summary>
         public IEnumerable<TurnusData> SplitToFit()
         {

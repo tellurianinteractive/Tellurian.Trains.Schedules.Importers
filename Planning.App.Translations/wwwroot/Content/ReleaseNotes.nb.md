@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 1.0.3
+
+### Endringer
+
+- **Dra tog på fanen Sporbelegg.** Når et tog dras til et annet spor, oppstår det ikke lenger feilen «More than one sibling … has the same key value» hvis en stasjon har to spor med samme nummer.
+
+- **Frakoblet bruk kunne ikke installeres.** Appens service worker prøvde å lagre en konfigurasjonsfil som webverten ikke leverer, og det stoppet hele installasjonen. Filen er nå utelatt. Hvis du har installert appen tidligere, anbefaler vi at du **avinstallerer den og installerer den på nytt**, slik at den nye versjonen tar over og frakoblet bruk fungerer.
+
 ## Versjon 1.0.2
 
 ### Endringer

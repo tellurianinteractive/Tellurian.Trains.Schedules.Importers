@@ -249,6 +249,9 @@
   <data name="TurnToContinue" xml:space="preserve">
     <value>Turn to continue</value>
   </data>
+  <data name="TurnToStart" xml:space="preserve">
+    <value>Turn to start</value>
+  </data>
   <data name="ContinuationFromPrevious" xml:space="preserve">
     <value>Continuation from previous</value>
   </data>

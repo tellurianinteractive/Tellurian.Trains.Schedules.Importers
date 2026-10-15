@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.0.3
+
+### Changes
+
+- **Dragging a train on the Track occupancy tab.** Dragging a train to another track no longer fails with a "More than one sibling … has the same key value" error when a station has two tracks with the same number.
+
+- **Offline support could fail to install.** The app's service worker tried to cache a configuration file that the web host does not serve, which stopped the whole installation. The file is now left out. If you installed the app earlier, we recommend that you **uninstall it and install it again** so that the new version takes over and offline support works.
+
 ## Version 1.0.2
 
 ### Changes
