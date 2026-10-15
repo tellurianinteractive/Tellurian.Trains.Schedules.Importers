@@ -22,10 +22,49 @@ public sealed record TrackHold(StationTrack Track, Time From, Time To, Sessions 
     /// track together by design, and are no double booking of it.
     /// </summary>
     public bool SharesTrainWith(TrackHold other) =>
+        !IsIdle && !other.IsIdle && (
         (Train.Equals(other.Train)) ||
         (DepartingTrain is not null && DepartingTrain.Equals(other.DepartingTrain)) ||
         (DepartingTrain is not null && DepartingTrain.Equals(other.Train)) ||
-        (other.DepartingTrain is not null && other.DepartingTrain.Equals(Train));
+        (other.DepartingTrain is not null && other.DepartingTrain.Equals(Train)));
+
+    /// <summary>
+    /// The vehicles of the schedule that this hold is about, when the schedule's vehicles work different
+    /// sessions and so do not stand together. Empty when the schedule's vehicles all work the same ones.
+    /// </summary>
+    public IReadOnlyList<ScheduledObject> Group { get; init; } = [];
+
+    /// <summary>
+    /// Identifies the group of vehicles of the schedule that works the same sessions, so that two holds of
+    /// one schedule are known to belong to the same vehicles or to different ones. Minus one when the
+    /// schedule's vehicles are not told apart.
+    /// </summary>
+    public int GroupKey { get; init; } = -1;
+
+    /// <summary>Whether the group has a traction unit; a locomotive and wagons working different sessions still stand together.</summary>
+    public bool IsTractionGroup { get; init; }
+
+    /// <summary>
+    /// Whether the two holds are of the same vehicles of a schedule, which therefore cannot be in each
+    /// other's way: they are of the same schedule and either the same group, or groups of different kinds
+    /// (a locomotive and the wagons it works with, which stand together even if they are booked for
+    /// different sessions).
+    /// </summary>
+    public bool IsOfSameVehiclesAs(TrackHold other) =>
+        Schedule.Equals(other.Schedule) && (GroupKey == other.GroupKey || IsTractionGroup != other.IsTractionGroup);
+
+    /// <summary>
+    /// Whether the vehicles stand here because their schedule is not worked by them on these sessions
+    /// (another vehicle works it), rather than between two trains of theirs. They stand where they were
+    /// left, all day.
+    /// </summary>
+    public bool IsIdle { get; init; }
+
+    /// <summary>
+    /// For an idle hold: the sessions on which other vehicles work the schedule, and so on which the
+    /// schedule's own trains may call on the track the idle vehicles stand on. <c>null</c> when none do.
+    /// </summary>
+    public Sessions? OtherVehicleSessions { get; init; }
 
     /// <summary>The time the vehicles stand on the track.</summary>
     public (Time From, Time To) Span => (From, To);
@@ -35,7 +74,7 @@ public sealed record TrackHold(StationTrack Track, Time From, Time To, Sessions 
     {
         get
         {
-            var names = Schedule.Vehicles.Select(v => v.Designation).ToList();
+            var names = (Group.Count > 0 ? Group : [.. Schedule.Vehicles]).Select(v => v.Designation).ToList();
             return names.Count > 0 ? string.Join(" + ", names) : Schedule.Number.ToString(System.Globalization.CultureInfo.CurrentCulture);
         }
     }
@@ -94,32 +133,98 @@ public static class TrackHoldExtensions
             {
                 // A cargo flow is a circulation of wagons directed by waybills, not a working with times.
                 if (schedule.IsCargoFlow) return [];
-                // A shunting task without a traction unit takes no track (see StationCall.OccupiesTrack),
-                // so vehicles that only appear in such a task do not stand anywhere because of it.
-                var parts = schedule.Vehicles.Any(v => v.IsTraction)
-                    ? schedule.OrderedParts
-                    : [.. schedule.OrderedParts.Where(p => !p.Train.IsShuntingTask)];
-                if (parts.Count == 0) return [];
-
-                List<TrackHold> holds = [];
-                var first = FirstHold(schedule, parts[0]);
-                var last = LastHold(schedule, parts[^1]);
-                // The vehicles that end the day on the track their first train leaves from the next day stand
-                // there once, through the night, rather than at the end of one day and at the start of another.
-                if (first is not null && last is not null && first.Track.Equals(last.Track) &&
-                    TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
-                    first.To.AddDays(1) > last.From)
-                {
-                    last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain };
-                    first = null;
-                }
-                Add(holds, first);
-                for (var i = 0; i < parts.Count - 1; i++)
-                    Add(holds, HoldBetween(schedule, parts[i], parts[i + 1]));
-                Add(holds, last);
-                return holds;
+                var groups = VehicleGroups(schedule);
+                // Vehicles that work different sessions of the schedule do not stand together: each group has
+                // holds of its own, and where it is not working the schedule it stands idle.
+                var told = groups.Count > 1 || groups.Any(g => g.Sessions is { } w && !schedule.IdleSessions(w).IsNone);
+                return [.. groups.SelectMany(g => HoldsOf(schedule, g, groups, told))];
             }
         }
+
+        /// <summary>
+        /// The sessions of the schedule's trains that none of the vehicles in <paramref name="working"/>
+        /// works, within the layout's operating period.
+        /// </summary>
+        internal Sessions IdleSessions(Sessions working)
+        {
+            var general = schedule.Plan?.Layout.Settings.General;
+            var free = general is null ? new Sessions() : working.ComplementWithin(general.UseDays, general.MaxSessions);
+            return free.And(schedule.EffectiveSessions);
+        }
+    }
+
+    // The vehicles of a schedule, grouped by the sessions they are assigned to it for. A schedule whose
+    // vehicles are not assigned (or which has no plan) is one group of no particular vehicles and sessions.
+    private sealed record VehicleGroup(Sessions? Sessions, IReadOnlyList<ScheduledObject> Vehicles);
+
+    private static List<VehicleGroup> VehicleGroups(Schedule schedule)
+    {
+        var assigned = (schedule.Plan?.ScheduledObjects ?? [])
+            .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule)).Select(a => (Vehicle: v, a.Sessions)))
+            .ToList();
+        if (assigned.Count == 0) return [new VehicleGroup(null, [])];
+        return [.. assigned
+            .GroupBy(x => x.Sessions.Flags)
+            .Select(g => new VehicleGroup(g.First().Sessions, [.. g.Select(x => x.Vehicle)]))];
+    }
+
+    private static IEnumerable<TrackHold> HoldsOf(Schedule schedule, VehicleGroup group, List<VehicleGroup> groups, bool told)
+    {
+        // A shunting task without a traction unit takes no track (see StationCall.OccupiesTrack),
+        // so vehicles that only appear in such a task do not stand anywhere because of it.
+        var vehicles = group.Vehicles.Count > 0 ? group.Vehicles : [.. schedule.Vehicles];
+        var parts = vehicles.Any(v => v.IsTraction)
+            ? schedule.OrderedParts
+            : [.. schedule.OrderedParts.Where(p => !p.Train.IsShuntingTask)];
+        if (parts.Count == 0) return [];
+
+        var tractionGroup = vehicles.Any(v => v.IsTraction);
+        var key = told && group.Sessions is { } s ? s.Flags : -1;
+        TrackHold? Mark(TrackHold? hold)
+        {
+            if (hold is null) return null;
+            if (group.Sessions is not { } working) return hold;
+            if (!hold.Sessions.Overlaps(working)) return null;
+            return hold with { Sessions = hold.Sessions.And(working), Group = told ? group.Vehicles : [], GroupKey = key, IsTractionGroup = tractionGroup };
+        }
+
+        List<TrackHold> holds = [];
+        var first = Mark(FirstHold(schedule, parts[0]));
+        var last = Mark(LastHold(schedule, parts[^1]));
+        // The vehicles that end the day on the track their first train leaves from the next day stand
+        // there once, through the night, rather than at the end of one day and at the start of another.
+        if (first is not null && last is not null && first.Track.Equals(last.Track) &&
+            TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
+            first.To.AddDays(1) > last.From)
+        {
+            last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain };
+            first = null;
+        }
+        Add(holds, first);
+        for (var i = 0; i < parts.Count - 1; i++)
+            Add(holds, Mark(HoldBetween(schedule, parts[i], parts[i + 1])));
+        Add(holds, last);
+
+        // Where the vehicles do not work the schedule they stay where it left them, all day.
+        if (told && group.Sessions is { } working2 && (last ?? first) is { } resting)
+        {
+            var idle = schedule.IdleSessions(working2);
+            if (!idle.IsNone)
+            {
+                var others = groups.Where(g => g != group && g.Sessions is not null)
+                    .Aggregate(new Sessions(), (union, g) => union.Or(g.Sessions!.Value)).And(idle);
+                var day = Time.FromDayHourMinute(0, 0, 0);
+                holds.Add(new TrackHold(resting.Track, day, day.AddDays(1), idle, schedule, resting.Train)
+                {
+                    IsIdle = true,
+                    Group = group.Vehicles,
+                    GroupKey = key,
+                    IsTractionGroup = tractionGroup,
+                    OtherVehicleSessions = others.IsNone ? null : others,
+                });
+            }
+        }
+        return holds;
     }
 
     private static void Add(List<TrackHold> holds, TrackHold? hold)

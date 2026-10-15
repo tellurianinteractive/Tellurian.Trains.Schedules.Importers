@@ -1300,9 +1300,10 @@ public static class ValidationExtensions
                 : errors;
         }
 
-        // The calls of other schedules that take a track while the vehicles of a schedule stand on it.
-        // Holds of different vehicles are not tested against each other: a track holds several vehicles,
-        // and two that stay on it together (a locomotive and the wagons it brought) are no conflict.
+        // The calls of other schedules that take a track while the vehicles of a schedule stand on it, and
+        // other vehicles standing there at the same time. Vehicles that stay on it together (a locomotive
+        // and the wagons it brought) are no conflict; vehicles of one schedule that work different
+        // sessions are, as one of them stands idle where the other works.
         private IEnumerable<ValidationError> GetHoldConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage)
         {
             var holds = vehicleSchedules.TrackHolds.Where(h => h.Track.Equals(stationTrack)).ToList();
@@ -1313,8 +1314,14 @@ public static class ValidationExtensions
                 foreach (var call in stationTrack.Calls)
                 {
                     if (call.Train is not { } train || !call.OccupiesTrack(vehicleSchedules)) continue;
-                    if (hold.Schedule.Parts.Any(p => p.ContainsCall(call))) continue;
-                    if (!call.TrackOccupancy.ConflictsInTime(train.Sessions, hold.Span, hold.Sessions, minMinutesBetweenTrackUsage)) continue;
+                    // A call of the vehicles' own schedule is theirs, unless they stand idle while others work it.
+                    var callSessions = train.Sessions;
+                    if (hold.Schedule.Parts.Any(p => p.ContainsCall(call)))
+                    {
+                        if (hold.OtherVehicleSessions is not { } others || !train.Sessions.Overlaps(others)) continue;
+                        callSessions = train.Sessions.And(others);
+                    }
+                    if (!call.TrackOccupancy.ConflictsInTime(callSessions, hold.Span, hold.Sessions, minMinutesBetweenTrackUsage)) continue;
 
                     var callSpan = call.TrackOccupancySpanText();
                     var holdSpan = string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationTrack.Station, stationTrack, hold.From.HHMM(), hold.To.HHMM());
@@ -1332,7 +1339,7 @@ public static class ValidationExtensions
                 for (var j = i + 1; j < holds.Count; j++)
                 {
                     var (a, b) = (holds[i], holds[j]);
-                    if (a.Schedule.Equals(b.Schedule) || a.SharesTrainWith(b)) continue;
+                    if (a.IsOfSameVehiclesAs(b) || a.SharesTrainWith(b)) continue;
                     if (!a.Span.ConflictsInTime(a.Sessions, b.Span, b.Sessions, minMinutesBetweenTrackUsage)) continue;
 
                     var (first, second) = a.From <= b.From ? (a, b) : (b, a);

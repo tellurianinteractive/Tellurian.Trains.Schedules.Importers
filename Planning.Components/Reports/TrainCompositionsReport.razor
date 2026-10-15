@@ -1,4 +1,4 @@
-﻿@page "/train-compositions-report"
+@page "/train-compositions-report"
 @layout PrintLayout
 
 @using Tellurian.Trains.Schedules.Planning.Components.Reporting.Compositions
@@ -78,7 +78,9 @@ else
             // and the pagination measures them.
             var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
-            var compositions = StationCompositions.Create(station, timetable.Trains, settings, ScheduleState.Schedule, orientation);
+            // The trains follow the start label settings (category and station), arriving ones too.
+            var trains = ScheduleState.Schedule?.TrainsAllowedAt(station, timetable.Trains) ?? [.. timetable.Trains];
+            var compositions = StationCompositions.Create(station, trains, settings, ScheduleState.Schedule, orientation);
             if (compositions.Departures.Count == 0) continue;
             _cultures[station] = culture;
             pages.AddRange(CompositionPaginator.BuildPages([compositions], CompositionPageGeometry.A4Landscape));

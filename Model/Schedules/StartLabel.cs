@@ -42,6 +42,43 @@ public static class StartLabelExtensions
     extension(Plan plan)
     {
         /// <summary>
+        /// The trains, of those given, that the start label settings allow at <paramref name="station"/>: the
+        /// narrower of the train's category and the station decides, as for start labels. <c>None</c> leaves the
+        /// train out, <c>All</c> keeps it, and <c>First</c> keeps it only if it is the first train a traction
+        /// unit works. Used by reports that list a station's trains whether they start there or arrive.
+        /// </summary>
+        /// <param name="station">The station the report is for.</param>
+        /// <param name="trains">The trains to choose among.</param>
+        public IReadOnlyList<Train> TrainsAllowedAt(Station station, IEnumerable<Train> trains)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            station = station.ValueOrException(nameof(station));
+            trains = trains.ValueOrException(nameof(trains));
+            var firstTrains = plan.FirstTrainCalls();
+            return [.. trains.Where(train =>
+                (train.Category?.StartLabels ?? StartLabelPrinting.None).Narrower(station.StartLabels) switch
+                {
+                    StartLabelPrinting.All => true,
+                    StartLabelPrinting.First => train.CallsInRunOrder.FirstOrDefault() is { } first && firstTrains.Contains(first),
+                    _ => false,
+                })];
+        }
+
+        // The first call of each train that is the first one a traction unit works.
+        private HashSet<StationCall> FirstTrainCalls()
+        {
+            var layout = plan.Layout;
+            var settings = layout.Settings.General.SessionSettings();
+            var firstSessionStart = layout.Settings.General.FirstSessionStart;
+            return plan.ScheduledObjects
+                .Where(vehicle => vehicle.IsPowered)
+                .Select(vehicle => vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions, firstSessionStart))
+                .OfType<VehicleStart>()
+                .Select(start => start.FirstPart.From)
+                .ToHashSet();
+        }
+
+        /// <summary>
         /// The start labels to print: one for each train that starts at a station and that the train's
         /// category and the station both want a label for (see <see cref="StartLabelPrinting"/>), ordered by
         /// station name, then by departure time, then by train number.
@@ -55,15 +92,7 @@ public static class StartLabelExtensions
         public IReadOnlyList<StartLabel> StartLabels()
         {
             plan = plan.ValueOrException(nameof(plan));
-            var layout = plan.Layout;
-            var settings = layout.Settings.General.SessionSettings();
-            var firstSessionStart = layout.Settings.General.FirstSessionStart;
-            var firstTrains = plan.ScheduledObjects
-                .Where(vehicle => vehicle.IsPowered)
-                .Select(vehicle => vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions, firstSessionStart))
-                .OfType<VehicleStart>()
-                .Select(start => start.FirstPart.From)
-                .ToHashSet();
+            var firstTrains = plan.FirstTrainCalls();
 
             return [.. plan.Timetable.Trains
                 .Where(train => !train.IsShuntingTask)

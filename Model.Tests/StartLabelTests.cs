@@ -59,6 +59,27 @@ public class StartLabelTests
     }
 
     [TestMethod]
+    public void TrainsAllowedAtFollowsTheSameSettingsForDepartingAndArrivingTrains()
+    {
+        var (plan, forward, back, _) = CreatePlan();
+        var station = forward.Calls.Select(c => c.OperationLocation).OfType<Station>().First();
+        Trains(StartLabelPrinting.None, StartLabelPrinting.All);
+        Assert.IsEmpty(plan.TrainsAllowedAt(station, [forward, back]), "None on the category leaves the trains out.");
+        Trains(StartLabelPrinting.All, StartLabelPrinting.None);
+        Assert.IsEmpty(plan.TrainsAllowedAt(station, [forward, back]), "None at the station leaves the trains out.");
+        Trains(StartLabelPrinting.All, StartLabelPrinting.All);
+        Assert.HasCount(2, plan.TrainsAllowedAt(station, [forward, back]));
+        Trains(StartLabelPrinting.First, StartLabelPrinting.All);
+        Assert.AreEqual(forward, plan.TrainsAllowedAt(station, [forward, back]).Single(), "First keeps only the train starting the unit's day.");
+
+        void Trains(StartLabelPrinting category, StartLabelPrinting stationSetting)
+        {
+            forward.Category!.StartLabels = category;
+            station.StartLabels = stationSetting;
+        }
+    }
+
+    [TestMethod]
     public void TheNarrowerOfCategoryAndStationDecides()
     {
         var (plan, forward, _, _) = CreatePlan();
