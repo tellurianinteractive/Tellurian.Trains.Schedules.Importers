@@ -1,5 +1,17 @@
 ﻿# Release notes
 
+## Version 1.0.2
+
+### Changes
+
+- **Locomotives and trainsets on the Trains tab.** The new **Vehicles** column shows which locomotive or trainset works each train, so you can see at a glance which trains are scheduled with the same one.
+
+- **Move or clone to a start time.** In the move and clone dialog you can now enter the new start time (hh:mm) of the first selected train instead of a number of minutes. A preview shows how far the trains move.
+
+- **First start underlined on turnus cards.** On the turnus cards, the start time where the vehicle begins its first working day is now underlined.
+
+- **Help for the validation settings.** Every validation setting now has a **?** that explains what the rule reports, and the option that makes standing vehicles occupy the track is indented under the station track validation it depends on.
+
 ## Version 1.0.1
 
 ### Changes

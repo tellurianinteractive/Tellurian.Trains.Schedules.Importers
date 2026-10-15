@@ -1,5 +1,17 @@
 # Versjonsnyheter
 
+## Versjon 1.0.2
+
+### Endringer
+
+- **Lok og togsett på fanen Tog.** Den nye kolonnen **Kjøretøy** viser hvilket lok eller togsett som kjører hvert tog, slik at du med en gang ser hvilke tog som er planlagt med det samme kjøretøyet.
+
+- **Flytt eller kopier til en starttid.** I dialogen for å flytte og kopiere kan du nå oppgi det første valgte togets nye starttid (tt:mm) i stedet for et antall minutter. En forhåndsvisning viser hvor langt togene flyttes.
+
+- **Første start understreket på omløpskort.** På omløpskortene er starttiden der kjøretøyet begynner sin første arbeidsdag, nå understreket.
+
+- **Hjelp til valideringsinnstillingene.** Hver valideringsinnstilling har nå et **?** som forklarer hva regelen melder, og valget som gjør at stående kjøretøy opptar sporet, er rykket inn under valideringen av stasjonsspor som det avhenger av.
+
 ## Versjon 1.0.1
 
 ### Endringer

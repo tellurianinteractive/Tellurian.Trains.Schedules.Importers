@@ -19,12 +19,16 @@
                 </select>
             </div>
             <div class="field">
-                <label>@Translator("Minutes")</label>
+                <label>@Translator(_selectedIds.Count > 1 ? "MinutesOrFirstStartTime" : "MinutesOrStartTime")</label>
                 @* Entered on input, not on change, so the Move/Clone button follows what is typed
                    instead of waiting for the field to lose focus. *@
                 <input type="text" class="minutes" value="@_minutes"
                        @oninput="e => { _minutes = e.Value?.ToString() ?? _minutes; _error = null; }" />
             </div>
+            @if (Preview is { } preview)
+            {
+                <p class="hint">@preview</p>
+            }
 
             @if (IsClone)
             {
@@ -103,7 +107,39 @@
     // A copy runs the route backwards only when asked to; a move always keeps the train as it runs.
     private CloneDirection Direction => IsClone && _opposite ? CloneDirection.Opposite : CloneDirection.Same;
 
-    private bool CanApply => _selectedIds.Count > 0 && TryParseSignedMinutes(_minutes, out _);
+    private bool CanApply => _selectedIds.Count > 0 && TryResolveMinutes(out _);
+
+    private List<Train> SelectedTrains =>
+        (Timetable?.Trains ?? []).Where(t => _selectedIds.Contains(t.Id) && t.Calls.Count > 0).ToList();
+
+    // The origin departure of the earliest-starting selected train: the reference for a typed start time.
+    private Time? FirstStart =>
+        SelectedTrains.Select(t => t.CallsInRunOrder[0].Departure).Cast<Time?>().DefaultIfEmpty(null).Min();
+
+    // The entry is either minutes ("5", "+5", "-5") or, when it holds a colon, the new start time of the first
+    // selected train; a time is turned into the number of minutes that moves that train there.
+    private bool TryResolveMinutes(out int minutes)
+    {
+        minutes = 0;
+        if (!_minutes.Contains(':')) return TryParseSignedMinutes(_minutes, out minutes);
+        if (!TryParseTime(_minutes, out var target) || FirstStart is not { } first) return false;
+        minutes = (int)Math.Round((target.Value - first.Value).TotalMinutes);
+        return true;
+    }
+
+    // Shows what the entry will do, so it is clear which train a typed time applies to.
+    private string? Preview
+    {
+        get
+        {
+            if (!TryResolveMinutes(out var minutes) || FirstStart is not { } first) return null;
+            var count = SelectedTrains.Count;
+            var signed = minutes.ToString("+0;-0;0", CultureInfo.InvariantCulture);
+            return count > 1
+                ? string.Format(Culture, Translator("ShiftPreviewMany"), count, signed, first.HHMM(), first.AddMinutes(minutes).HHMM())
+                : string.Format(Culture, Translator("ShiftPreview"), signed, first.HHMM(), first.AddMinutes(minutes).HHMM());
+        }
+    }
 
     protected override void OnInitialized() =>
         _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
@@ -134,7 +170,7 @@
     {
         _error = null;
         if (Plan is not { } plan || Timetable is not { } timetable) return;
-        if (!TryParseSignedMinutes(_minutes, out var minutes)) { _error = "InvalidMinutes"; return; }
+        if (!TryResolveMinutes(out var minutes)) { _error = "InvalidMinutesOrTime"; return; }
 
         var trains = timetable.Trains.Where(t => _selectedIds.Contains(t.Id)).ToList();
 
@@ -175,7 +211,8 @@
 
     private static bool TryParseTime(string text, out Time time)
     {
-        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span))
+        if (!string.IsNullOrWhiteSpace(text) && TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var span)
+            && span >= TimeSpan.Zero && span < TimeSpan.FromDays(1))
         {
             time = Time.FromTimeSpan(span);
             return true;

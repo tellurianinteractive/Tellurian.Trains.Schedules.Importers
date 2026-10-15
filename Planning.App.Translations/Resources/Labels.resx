@@ -1404,6 +1404,21 @@
   <data name="InvalidMinutes" xml:space="preserve">
     <value>Enter a whole number of minutes, e.g. 5, +5 or -5.</value>
   </data>
+  <data name="MinutesOrStartTime" xml:space="preserve">
+    <value>Minutes, or new start time (hh:mm)</value>
+  </data>
+  <data name="MinutesOrFirstStartTime" xml:space="preserve">
+    <value>Minutes, or new start time of the first train (hh:mm)</value>
+  </data>
+  <data name="InvalidMinutesOrTime" xml:space="preserve">
+    <value>Enter whole minutes (e.g. 5, +5 or -5) or a start time (e.g. 08:30).</value>
+  </data>
+  <data name="ShiftPreview" xml:space="preserve">
+    <value>{0} min · first train {1} → {2}</value>
+  </data>
+  <data name="ShiftPreviewMany" xml:space="preserve">
+    <value>{0} trains, {1} min · first train {2} → {3}</value>
+  </data>
   <data name="TrainsOutOfDayBounds" xml:space="preserve">
     <value>The shift would take a selected train's start time outside the day (00:00–23:59).</value>
   </data>
@@ -2844,5 +2859,44 @@
   </data>
   <data name="ArrivedAs" xml:space="preserve">
     <value>Arrived as train</value>
+  </data>
+  <data name="ValidateStationCallsHelp" xml:space="preserve">
+    <value>Reports a station call whose arrival is later than its departure.</value>
+  </data>
+  <data name="ValidateStationTracksHelp" xml:space="preserve">
+    <value>Reports two trains on the same station track at the same time, and trains that turn a track round faster than the minimum time between uses set under Thresholds.</value>
+  </data>
+  <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
+    <value>Counts a locomotive or wagon set standing between its trains as occupying the track, not just the trains themselves. Turn it on only when the plan records parking; otherwise it reports many false conflicts. Needs station track validation.</value>
+  </data>
+  <data name="ValidateStretchesHelp" xml:space="preserve">
+    <value>Reports trains that conflict on a track stretch between stations, for example meeting on a single track.</value>
+  </data>
+  <data name="ValidateTrainSpeedHelp" xml:space="preserve">
+    <value>Reports a train whose speed between two calls is below the minimum or above the maximum set under Thresholds.</value>
+  </data>
+  <data name="ValidateRouteContinuityHelp" xml:space="preserve">
+    <value>Reports a train whose route has a leg that is not a track stretch of the layout, so the train would jump between places that are not connected.</value>
+  </data>
+  <data name="ValidatePassengerExchangeHelp" xml:space="preserve">
+    <value>Reports a passenger train that stops to exchange passengers at a track without a platform.</value>
+  </data>
+  <data name="ValidateStopPatternsHelp" xml:space="preserve">
+    <value>Reports a train that stops where the stop pattern of its category does not allow. Categories without a stop pattern are not checked.</value>
+  </data>
+  <data name="ValidateScheduledTracksHelp" xml:space="preserve">
+    <value>Reports a train that arrives at or departs from a track that is not scheduled. Shunting tasks are not checked.</value>
+  </data>
+  <data name="ValidateTrainNumbersHelp" xml:space="preserve">
+    <value>Reports trains with the same company, category and number that run in the same sessions, so that one train identity would run twice at once.</value>
+  </data>
+  <data name="ValidateSchedulesHelp" xml:space="preserve">
+    <value>Reports problems in the vehicle schedules: a vehicle booked twice at once, parts that overlap or do not connect, vehicles that do not end up where they started, and trains left without traction.</value>
+  </data>
+  <data name="ValidateLocomotiveCoverageHelp" xml:space="preserve">
+    <value>Reports gaps and overlaps in locomotive coverage.</value>
+  </data>
+  <data name="ValidateDriverDutiesHelp" xml:space="preserve">
+    <value>Reports problems in the driver duties, and trains that no loco driver covers.</value>
   </data>
 </root>

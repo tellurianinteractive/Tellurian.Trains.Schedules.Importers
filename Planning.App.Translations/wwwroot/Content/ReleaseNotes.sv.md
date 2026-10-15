@@ -1,5 +1,17 @@
 # Versionsnyheter
 
+## Version 1.0.2
+
+### Ändringar
+
+- **Lok och tågsätt på fliken Tåg.** Den nya kolumnen **Fordon** visar vilket lok eller tågsätt som kör varje tåg, så att du direkt ser vilka tåg som är planerade med samma fordon.
+
+- **Flytta eller kopiera till en starttid.** I dialogen för att flytta och kopiera kan du nu ange det första valda tågets nya starttid (tt:mm) i stället för ett antal minuter. En förhandsvisning visar hur långt tågen flyttas.
+
+- **Första start understruken på omloppskort.** På omloppskorten är starttiden där fordonet börjar sin första arbetsdag nu understruken.
+
+- **Hjälp till valideringsinställningarna.** Varje valideringsinställning har nu ett **?** som förklarar vad regeln rapporterar, och alternativet som låter stående fordon uppta spåret är indraget under valideringen av stationsspår som det beror på.
+
 ## Version 1.0.1
 
 ### Ändringar

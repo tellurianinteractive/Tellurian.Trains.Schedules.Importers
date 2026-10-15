@@ -1395,6 +1395,21 @@
   <data name="InvalidMinutes" xml:space="preserve">
     <value>Angi et helt antall minutter, f.eks. 5, +5 eller -5.</value>
   </data>
+  <data name="MinutesOrStartTime" xml:space="preserve">
+    <value>Minutter eller ny starttid (tt:mm)</value>
+  </data>
+  <data name="MinutesOrFirstStartTime" xml:space="preserve">
+    <value>Minutter eller ny starttid for første tog (tt:mm)</value>
+  </data>
+  <data name="InvalidMinutesOrTime" xml:space="preserve">
+    <value>Angi hele minutter (f.eks. 5, +5 eller -5) eller en starttid (f.eks. 08:30).</value>
+  </data>
+  <data name="ShiftPreview" xml:space="preserve">
+    <value>{0} min · første tog {1} → {2}</value>
+  </data>
+  <data name="ShiftPreviewMany" xml:space="preserve">
+    <value>{0} tog, {1} min · første tog {2} → {3}</value>
+  </data>
   <data name="TrainsOutOfDayBounds" xml:space="preserve">
     <value>Forskyvningen ville ta et valgt togs starttid utenfor døgnet (00:00–23:59).</value>
   </data>
@@ -2597,8 +2612,14 @@
   <data name="UsePassengerTickets" xml:space="preserve">
     <value>Bruk passasjerbilletter?</value>
   </data>
+  <data name="UsePassengerTicketsHelp" xml:space="preserve">
+    <value>Om treffet kjøres med passasjerbilletter: en passasjer kjøper en billett der reisen begynner og reiser på den. Når dette er slått på, kan du merke stasjonene der passasjerer bytter tog, og disse omstigningene vises deretter i førertjenestene og i de generelle instruksjonene.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Omstigningsstasjon?</value>
+  </data>
+  <data name="IsPassengerInterchangeHelp" xml:space="preserve">
+    <value>Om passasjerer bytter tog her. Et persontog som stopper ved en omstigningsstasjon, får ved ankomst beskjed om å overlevere passasjerene som reiser videre med et annet tog. Tilbys bare når treffet kjøres med passasjerbilletter; merkingen beholdes hvis du slår dem av igjen.</value>
   </data>
   <data name="Interchanges" xml:space="preserve">
     <value>Omstigningsstasjoner</value>
@@ -2824,5 +2845,44 @@
   </data>
   <data name="ArrivedAs" xml:space="preserve">
     <value>Ankom som tog</value>
+  </data>
+  <data name="ValidateStationCallsHelp" xml:space="preserve">
+    <value>Melder et stopp der ankomsten ligger etter avgangen.</value>
+  </data>
+  <data name="ValidateStationTracksHelp" xml:space="preserve">
+    <value>Melder to tog på samme stasjonsspor samtidig, og tog som bruker et spor på nytt raskere enn minstetiden mellom to bruk som er satt under Terskelverdier.</value>
+  </data>
+  <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
+    <value>Regner et lokomotiv eller et vognsett som står mellom togene sine som opptatt spor, ikke bare togene selv. Slå det bare på når planen registrerer henstilling; ellers meldes mange falske konflikter. Krever validering av stasjonsspor.</value>
+  </data>
+  <data name="ValidateStretchesHelp" xml:space="preserve">
+    <value>Melder tog som er i konflikt på en strekning mellom stasjoner, for eksempel ved et møte på enkeltspor.</value>
+  </data>
+  <data name="ValidateTrainSpeedHelp" xml:space="preserve">
+    <value>Melder et tog hvis hastighet mellom to stopp er under minimum eller over maksimum som er satt under Terskelverdier.</value>
+  </data>
+  <data name="ValidateRouteContinuityHelp" xml:space="preserve">
+    <value>Melder et tog hvis togvei har et ledd som ikke er en strekning på anlegget, slik at toget ville hoppe mellom steder som ikke henger sammen.</value>
+  </data>
+  <data name="ValidatePassengerExchangeHelp" xml:space="preserve">
+    <value>Melder et persontog som stopper for passasjerutveksling ved et spor uten plattform.</value>
+  </data>
+  <data name="ValidateStopPatternsHelp" xml:space="preserve">
+    <value>Melder et tog som stopper et sted der stoppmønsteret for kategorien ikke tillater det. Kategorier uten stoppmønster kontrolleres ikke.</value>
+  </data>
+  <data name="ValidateScheduledTracksHelp" xml:space="preserve">
+    <value>Melder et tog som ankommer til eller avgår fra et spor som ikke er planlagt. Skiftearbeid kontrolleres ikke.</value>
+  </data>
+  <data name="ValidateTrainNumbersHelp" xml:space="preserve">
+    <value>Melder tog med samme selskap, kategori og nummer som går i de samme sesjonene, slik at én togidentitet ville gå to ganger samtidig.</value>
+  </data>
+  <data name="ValidateSchedulesHelp" xml:space="preserve">
+    <value>Melder problemer i kjøretøysomløpene: et kjøretøy som er booket to ganger samtidig, togavsnitt som overlapper eller ikke henger sammen, kjøretøy som ikke ender der de begynte, og tog uten trekkraft.</value>
+  </data>
+  <data name="ValidateLocomotiveCoverageHelp" xml:space="preserve">
+    <value>Melder hull og overlappinger i lokomotivdekningen.</value>
+  </data>
+  <data name="ValidateDriverDutiesHelp" xml:space="preserve">
+    <value>Melder problemer i førertjenestene og tog som ingen lokfører dekker.</value>
   </data>
 </root>

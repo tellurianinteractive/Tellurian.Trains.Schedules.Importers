@@ -369,55 +369,55 @@ else
             {
                 var v = LayoutSettings.Validation;
                 <div class="field">
-                    <label>@Translator("ValidateStationCalls")</label>
+                    <HelpLabel For="ValidateStationCalls" />
                     <input type="checkbox" @bind="v.ValidateStationCalls" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateStationTracks")</label>
+                    <HelpLabel For="ValidateStationTracks" />
                     <input type="checkbox" @bind="v.ValidateStationTracks" @bind:after="OnEdited" />
                 </div>
-                <div class="field">
-                    <label>@Translator("ExtendTrackOccupancyByVehicleStay")</label>
+                <div class="field sub-option">
+                    <HelpLabel For="ExtendTrackOccupancyByVehicleStay" />
                     <input type="checkbox" @bind="v.ExtendTrackOccupancyByVehicleStay" @bind:after="OnEdited" disabled="@(!v.ValidateStationTracks)" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateStretches")</label>
+                    <HelpLabel For="ValidateStretches" />
                     <input type="checkbox" @bind="v.ValidateStretches" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateTrainSpeed")</label>
+                    <HelpLabel For="ValidateTrainSpeed" />
                     <input type="checkbox" @bind="v.ValidateTrainSpeed" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateRouteContinuity")</label>
+                    <HelpLabel For="ValidateRouteContinuity" />
                     <input type="checkbox" @bind="v.ValidateRouteContinuity" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidatePassengerExchange")</label>
+                    <HelpLabel For="ValidatePassengerExchange" />
                     <input type="checkbox" @bind="v.ValidatePassengerExchange" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateStopPatterns")</label>
+                    <HelpLabel For="ValidateStopPatterns" />
                     <input type="checkbox" @bind="v.ValidateStopPatterns" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateScheduledTracks")</label>
+                    <HelpLabel For="ValidateScheduledTracks" />
                     <input type="checkbox" @bind="v.ValidateScheduledTracks" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateTrainNumbers")</label>
+                    <HelpLabel For="ValidateTrainNumbers" />
                     <input type="checkbox" @bind="v.ValidateTrainNumbers" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateSchedules")</label>
+                    <HelpLabel For="ValidateSchedules" />
                     <input type="checkbox" @bind="v.ValidateSchedules" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateLocomotiveCoverage")</label>
+                    <HelpLabel For="ValidateLocomotiveCoverage" />
                     <input type="checkbox" @bind="v.ValidateLocomotiveCoverage" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
-                    <label>@Translator("ValidateDriverDuties")</label>
+                    <HelpLabel For="ValidateDriverDuties" />
                     <input type="checkbox" @bind="v.ValidateDriverDuties" @bind:after="OnEdited" />
                 </div>
 

@@ -1,5 +1,17 @@
 # Versionshinweise
 
+## Version 1.0.2
+
+### Änderungen
+
+- **Lokomotiven und Triebzüge auf der Registerkarte Züge.** Die neue Spalte **Fahrzeuge** zeigt, welche Lokomotive oder welcher Triebzug jeden Zug fährt, sodass sofort zu sehen ist, welche Züge mit demselben Fahrzeug geplant sind.
+
+- **Verschieben oder Kopieren auf eine Startzeit.** Im Dialog zum Verschieben und Kopieren kann jetzt statt einer Minutenzahl die neue Startzeit (hh:mm) des ersten ausgewählten Zuges eingegeben werden. Eine Vorschau zeigt, wie weit die Züge verschoben werden.
+
+- **Erster Start auf Umlaufkarten unterstrichen.** Auf den Umlaufkarten ist die Startzeit, zu der das Fahrzeug seinen ersten Arbeitstag beginnt, jetzt unterstrichen.
+
+- **Hilfe zu den Prüfeinstellungen.** Jede Prüfeinstellung hat jetzt ein **?**, das erklärt, was die Regel meldet, und die Option, mit der stehende Fahrzeuge das Gleis belegen, ist unter der Prüfung der Bahnhofsgleise eingerückt, von der sie abhängt.
+
 ## Version 1.0.1
 
 ### Änderungen

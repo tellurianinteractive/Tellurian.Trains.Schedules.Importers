@@ -38,6 +38,12 @@ public record TurnusData
     /// <summary>Whether the turnus carries on to the next card.</summary>
     public bool ContinuesOnNext { get; init; }
 
+    /// <summary>
+    /// The train part whose start is where the vehicle begins its first working day, as in the vehicle
+    /// owners report (see <see cref="VehicleOwnershipExtensions"/>); its start time is underlined. Null on
+    /// cards that do not hold it.
+    /// </summary>
+    public ScheduledTrainPart? FirstStartPart { get; init; }
 }
 
 public static class TurnusDataExtensions
@@ -109,13 +115,15 @@ public static class TurnusDataExtensions
         /// <param name="useDays">Whether the operating period is measured in weekdays rather than session numbers.</param>
         /// <param name="maxSessions">The number of sessions/days in the operating period (1-14).</param>
         /// <param name="startDay">The first weekday of the operating week, used to name the operating days.</param>
-        public IEnumerable<TurnusData> ToTurnusData(bool useDays, int maxSessions, DayOfWeek startDay)
+        /// <param name="firstSessionStart">The fast-clock time the first session/day begins, deciding which part is the vehicle's first start.</param>
+        public IEnumerable<TurnusData> ToTurnusData(bool useDays, int maxSessions, DayOfWeek startDay, TimeSpan firstSessionStart = default)
         {
             // One row per (vehicle, session/day combination); each row carries the parts worked on it.
             var rows = items.Where(i => i.HasTurnusCard)
                 .SelectMany(scheduledObject => scheduledObject.SessionCombinations(useDays, maxSessions)
                     .Select(combination => new TurnusData
                     {
+                        FirstStartPart = scheduledObject.Start(useDays, maxSessions, firstSessionStart)?.FirstPart,
                         Id = scheduledObject.Id,
                         ScheduledObjectType = scheduledObject.ObjectType,
                         Company = scheduledObject.Company?.Signature ?? string.Empty,
@@ -143,6 +151,7 @@ public static class TurnusDataExtensions
                 .GroupBy(row => row.KeyWithSession)
                 .Select(group => group.First() with
                 {
+                    FirstStartPart = group.Select(row => row.FirstStartPart).FirstOrDefault(part => part is not null),
                     TrainParts = [.. group
                             .SelectMany(row => row.TrainParts)
                             .Distinct()

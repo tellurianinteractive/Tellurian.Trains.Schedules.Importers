@@ -1395,6 +1395,21 @@
   <data name="InvalidMinutes" xml:space="preserve">
     <value>Geben Sie eine ganze Zahl von Minuten ein, z. B. 5, +5 oder -5.</value>
   </data>
+  <data name="MinutesOrStartTime" xml:space="preserve">
+    <value>Minuten oder neue Startzeit (hh:mm)</value>
+  </data>
+  <data name="MinutesOrFirstStartTime" xml:space="preserve">
+    <value>Minuten oder neue Startzeit des ersten Zuges (hh:mm)</value>
+  </data>
+  <data name="InvalidMinutesOrTime" xml:space="preserve">
+    <value>Geben Sie ganze Minuten (z. B. 5, +5 oder -5) oder eine Startzeit (z. B. 08:30) ein.</value>
+  </data>
+  <data name="ShiftPreview" xml:space="preserve">
+    <value>{0} Min. · erster Zug {1} → {2}</value>
+  </data>
+  <data name="ShiftPreviewMany" xml:space="preserve">
+    <value>{0} Züge, {1} Min. · erster Zug {2} → {3}</value>
+  </data>
   <data name="TrainsOutOfDayBounds" xml:space="preserve">
     <value>Die Verschiebung würde die Startzeit eines ausgewählten Zuges aus dem Tag (00:00–23:59) verschieben.</value>
   </data>
@@ -2597,8 +2612,14 @@
   <data name="UsePassengerTickets" xml:space="preserve">
     <value>Fahrkarten verwenden?</value>
   </data>
+  <data name="UsePassengerTicketsHelp" xml:space="preserve">
+    <value>Ob das Treffen mit Fahrkarten betrieben wird: Ein Reisender kauft eine Fahrkarte dort, wo die Reise beginnt, und fährt damit. Ist dies gesetzt, können Sie die Bahnhöfe markieren, an denen Reisende umsteigen, und diese Umsteigebahnhöfe erscheinen dann in den Lokführerdiensten und in den allgemeinen Anweisungen.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Umsteigebahnhof?</value>
+  </data>
+  <data name="IsPassengerInterchangeHelp" xml:space="preserve">
+    <value>Ob Reisende hier umsteigen. Ein Personenzug, der an einem Umsteigebahnhof hält, wird bei der Ankunft angewiesen, die Reisenden zu übergeben, die mit einem anderen Zug weiterfahren. Wird nur angeboten, solange das Treffen mit Fahrkarten betrieben wird; die Markierung bleibt erhalten, wenn Sie diese wieder ausschalten.</value>
   </data>
   <data name="Interchanges" xml:space="preserve">
     <value>Umsteigebahnhöfe</value>
@@ -2824,5 +2845,44 @@
   </data>
   <data name="ArrivedAs" xml:space="preserve">
     <value>Angekommen als Zug</value>
+  </data>
+  <data name="ValidateStationCallsHelp" xml:space="preserve">
+    <value>Meldet einen Halt, dessen Ankunft nach der Abfahrt liegt.</value>
+  </data>
+  <data name="ValidateStationTracksHelp" xml:space="preserve">
+    <value>Meldet zwei Züge, die gleichzeitig auf demselben Bahnhofsgleis stehen, sowie Züge, die ein Gleis schneller wieder belegen als die unter Schwellenwerte eingestellte Mindestzeit zwischen zwei Belegungen.</value>
+  </data>
+  <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
+    <value>Zählt eine Lokomotive oder Wagengarnitur, die zwischen ihren Zügen steht, als Belegung des Gleises, nicht nur die Züge selbst. Nur einschalten, wenn der Plan das Abstellen erfasst; sonst werden viele falsche Konflikte gemeldet. Setzt die Prüfung der Bahnhofsgleise voraus.</value>
+  </data>
+  <data name="ValidateStretchesHelp" xml:space="preserve">
+    <value>Meldet Züge, die auf einer Strecke zwischen Bahnhöfen in Konflikt geraten, zum Beispiel bei einer Begegnung auf einem eingleisigen Abschnitt.</value>
+  </data>
+  <data name="ValidateTrainSpeedHelp" xml:space="preserve">
+    <value>Meldet einen Zug, dessen Geschwindigkeit zwischen zwei Halten unter dem Minimum oder über dem Maximum liegt, die unter Schwellenwerte eingestellt sind.</value>
+  </data>
+  <data name="ValidateRouteContinuityHelp" xml:space="preserve">
+    <value>Meldet einen Zug, dessen Laufweg einen Abschnitt enthält, der keine Strecke der Anlage ist, sodass der Zug zwischen nicht verbundenen Orten springen würde.</value>
+  </data>
+  <data name="ValidatePassengerExchangeHelp" xml:space="preserve">
+    <value>Meldet einen Reisezug, der zum Reisendenwechsel an einem Gleis ohne Bahnsteig hält.</value>
+  </data>
+  <data name="ValidateStopPatternsHelp" xml:space="preserve">
+    <value>Meldet einen Zug, der dort hält, wo das Haltemuster seiner Kategorie es nicht erlaubt. Kategorien ohne Haltemuster werden nicht geprüft.</value>
+  </data>
+  <data name="ValidateScheduledTracksHelp" xml:space="preserve">
+    <value>Meldet einen Zug, der an einem nicht geplanten Gleis ankommt oder von dort abfährt. Rangieraufgaben werden nicht geprüft.</value>
+  </data>
+  <data name="ValidateTrainNumbersHelp" xml:space="preserve">
+    <value>Meldet Züge mit gleicher Gesellschaft, Kategorie und Nummer, die in denselben Sessions fahren, sodass dieselbe Zugidentität zweimal gleichzeitig fahren würde.</value>
+  </data>
+  <data name="ValidateSchedulesHelp" xml:space="preserve">
+    <value>Meldet Probleme in den Fahrzeugumläufen: ein Fahrzeug, das doppelt zur gleichen Zeit eingeplant ist, Zugabschnitte, die sich überlappen oder nicht anschließen, Fahrzeuge, die nicht dort enden, wo sie begonnen haben, und Züge ohne Traktion.</value>
+  </data>
+  <data name="ValidateLocomotiveCoverageHelp" xml:space="preserve">
+    <value>Meldet Lücken und Überlappungen in der Lokomotivabdeckung.</value>
+  </data>
+  <data name="ValidateDriverDutiesHelp" xml:space="preserve">
+    <value>Meldet Probleme in den Triebfahrzeugführerdiensten sowie Züge, die kein Triebfahrzeugführer übernimmt.</value>
   </data>
 </root>

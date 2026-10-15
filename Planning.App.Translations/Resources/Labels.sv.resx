@@ -1395,6 +1395,21 @@
   <data name="InvalidMinutes" xml:space="preserve">
     <value>Ange ett heltal antal minuter, t.ex. 5, +5 eller -5.</value>
   </data>
+  <data name="MinutesOrStartTime" xml:space="preserve">
+    <value>Minuter eller ny starttid (tt:mm)</value>
+  </data>
+  <data name="MinutesOrFirstStartTime" xml:space="preserve">
+    <value>Minuter eller ny starttid för första tåget (tt:mm)</value>
+  </data>
+  <data name="InvalidMinutesOrTime" xml:space="preserve">
+    <value>Ange hela minuter (t.ex. 5, +5 eller -5) eller en starttid (t.ex. 08:30).</value>
+  </data>
+  <data name="ShiftPreview" xml:space="preserve">
+    <value>{0} min · första tåget {1} → {2}</value>
+  </data>
+  <data name="ShiftPreviewMany" xml:space="preserve">
+    <value>{0} tåg, {1} min · första tåget {2} → {3}</value>
+  </data>
   <data name="TrainsOutOfDayBounds" xml:space="preserve">
     <value>Förflyttningen skulle ta ett valt tågs starttid utanför dygnet (00:00–23:59).</value>
   </data>
@@ -2597,8 +2612,14 @@
   <data name="UsePassengerTickets" xml:space="preserve">
     <value>Använd resandebiljetter?</value>
   </data>
+  <data name="UsePassengerTicketsHelp" xml:space="preserve">
+    <value>Om träffen körs med resandebiljetter: en resande köper en biljett där resan börjar och reser med den. När detta är aktiverat kan du markera de stationer där resande byter tåg, och dessa omstigningar visas sedan i förartjänsterna och i de allmänna instruktionerna.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Omstigningsstation?</value>
+  </data>
+  <data name="IsPassengerInterchangeHelp" xml:space="preserve">
+    <value>Om resande byter tåg här. Ett persontåg som stannar vid en omstigningsstation får vid ankomsten veta att det ska lämna över de resande som reser vidare med ett annat tåg. Erbjuds bara när träffen körs med resandebiljetter; markeringen behålls om du stänger av dem igen.</value>
   </data>
   <data name="Interchanges" xml:space="preserve">
     <value>Omstigningsstationer</value>
@@ -2824,5 +2845,44 @@
   </data>
   <data name="ArrivedAs" xml:space="preserve">
     <value>Ankom som tåg</value>
+  </data>
+  <data name="ValidateStationCallsHelp" xml:space="preserve">
+    <value>Rapporterar ett stationsuppehåll där ankomsten ligger efter avgången.</value>
+  </data>
+  <data name="ValidateStationTracksHelp" xml:space="preserve">
+    <value>Rapporterar två tåg på samma stationsspår samtidigt, och tåg som använder ett spår igen snabbare än den kortaste tiden mellan två användningar som anges under Tröskelvärden.</value>
+  </data>
+  <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
+    <value>Räknar ett lok eller en vagnssats som står mellan sina tåg som upptagande av spåret, inte bara tågen själva. Slå bara på det när planen registrerar uppställning; annars rapporteras många falska konflikter. Kräver validering av stationsspår.</value>
+  </data>
+  <data name="ValidateStretchesHelp" xml:space="preserve">
+    <value>Rapporterar tåg som är i konflikt på en sträcka mellan stationer, till exempel vid ett möte på enkelspår.</value>
+  </data>
+  <data name="ValidateTrainSpeedHelp" xml:space="preserve">
+    <value>Rapporterar ett tåg vars hastighet mellan två uppehåll är under minimum eller över maximum som anges under Tröskelvärden.</value>
+  </data>
+  <data name="ValidateRouteContinuityHelp" xml:space="preserve">
+    <value>Rapporterar ett tåg vars tågväg har ett led som inte är en sträcka på banan, så att tåget skulle hoppa mellan platser som inte hänger ihop.</value>
+  </data>
+  <data name="ValidatePassengerExchangeHelp" xml:space="preserve">
+    <value>Rapporterar ett persontåg som stannar för resandeutbyte vid ett spår utan plattform.</value>
+  </data>
+  <data name="ValidateStopPatternsHelp" xml:space="preserve">
+    <value>Rapporterar ett tåg som stannar där uppehållsmönstret för dess kategori inte tillåter det. Kategorier utan uppehållsmönster kontrolleras inte.</value>
+  </data>
+  <data name="ValidateScheduledTracksHelp" xml:space="preserve">
+    <value>Rapporterar ett tåg som ankommer till eller avgår från ett spår som inte är tidtabellslagt. Rangeruppgifter kontrolleras inte.</value>
+  </data>
+  <data name="ValidateTrainNumbersHelp" xml:space="preserve">
+    <value>Rapporterar tåg med samma bolag, kategori och nummer som går i samma sessioner, så att en tågidentitet skulle gå två gånger samtidigt.</value>
+  </data>
+  <data name="ValidateSchedulesHelp" xml:space="preserve">
+    <value>Rapporterar problem i fordonsomloppen: ett fordon som är bokat två gånger samtidigt, tågavsnitt som överlappar eller inte hänger ihop, fordon som inte slutar där de började och tåg utan dragkraft.</value>
+  </data>
+  <data name="ValidateLocomotiveCoverageHelp" xml:space="preserve">
+    <value>Rapporterar luckor och överlappningar i loktäckningen.</value>
+  </data>
+  <data name="ValidateDriverDutiesHelp" xml:space="preserve">
+    <value>Rapporterar problem i förartjänsterna och tåg som ingen lokförare täcker.</value>
   </data>
 </root>
