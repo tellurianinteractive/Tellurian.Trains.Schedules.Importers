@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.0.5
+
+### Ändringar
+
+- **Lok som tar över i block av köromgångar.** När ett lok kör köromgång 1–3 och ett annat köromgång 4–6 anses det första nu vara bortplockat från spåren när det andra tar över, så att de två inte längre står i konflikt på ett spår där båda står. Lok som alternerar (1, 3, 5 och 2, 4, 6) räknas fortfarande som stående overksamma de dagar de inte kör. Köromgångar över banans högsta antal köromgångar bortses från.
+
 ## Version 1.0.3
 
 ### Ändringar

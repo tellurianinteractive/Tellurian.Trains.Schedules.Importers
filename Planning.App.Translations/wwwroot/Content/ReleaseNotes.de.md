@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.0.5
+
+### Änderungen
+
+- **Lokomotiven, die in Blöcken von Fahrrunden übernehmen.** Fährt eine Lokomotive die Fahrrunden 1–3 und eine andere die Fahrrunden 4–6, gilt die erste jetzt als von den Gleisen genommen, wenn die zweite übernimmt; die beiden geraten also auf einem Gleis, auf dem beide stehen, nicht mehr in Konflikt. Lokomotiven, die sich abwechseln (1, 3, 5 und 2, 4, 6), gelten weiterhin an den Tagen, an denen sie nicht fahren, als ungenutzt stehend. Fahrrunden über der höchsten Anzahl von Fahrrunden der Anlage werden ignoriert.
+
 ## Version 1.0.3
 
 ### Änderungen

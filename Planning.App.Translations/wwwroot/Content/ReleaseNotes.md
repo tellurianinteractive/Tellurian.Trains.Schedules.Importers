@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.0.5
+
+### Changes
+
+- **Locomotives taking over in blocks of sessions.** When one locomotive works sessions 1–3 and another sessions 4–6, the first is now taken to be removed from the tracks when the second takes over, so the two no longer conflict on a track where they both stand. Locomotives that alternate (1, 3, 5 and 2, 4, 6) still count as standing idle on the days they do not work. Sessions beyond the maximum number of sessions of the layout are ignored.
+
 ## Version 1.0.3
 
 ### Changes

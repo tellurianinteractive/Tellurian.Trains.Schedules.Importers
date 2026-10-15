@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.0.5
+
+### Ændringer
+
+- **Lokomotiver, der overtager i blokke af køresessioner.** Når ét lokomotiv kører køresession 1–3 og et andet køresession 4–6, regnes det første nu for fjernet fra sporene, når det andet overtager, så de to ikke længere er i konflikt på et spor, hvor begge holder. Lokomotiver, der skiftes til at køre (1, 3, 5 og 2, 4, 6), regnes stadig for at holde ubrugt de dage, de ikke kører. Køresessioner ud over banens højeste antal køresessioner ses der bort fra.
+
 ## Version 1.0.3
 
 ### Ændringer

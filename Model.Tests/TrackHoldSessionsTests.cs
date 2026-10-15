@@ -69,6 +69,23 @@ public class TrackHoldSessionsTests
     }
 
     [TestMethod]
+    public void VehiclesTakingOverInBlocksOfSessionsAreNotIdleWhereTheOthersWork()
+    {
+        var (plan, track) = Arrange();
+        var first = Sessions.FromSessionNumbers(1, 2, 3);
+        var second = Sessions.FromSessionNumbers(4, 5, 6);
+        foreach (var assignment in plan.ScheduledObjects.SelectMany(v => v.ScheduleAssignments).ToList())
+            assignment.Sessions = assignment.Sessions.Overlaps(Odd) ? first : second;
+
+        var idle = plan.Schedules.TrackHolds.Where(h => h.Track.Equals(track) && h.IsIdle).ToList();
+
+        Assert.IsFalse(idle.Any(h => h.Sessions.Overlaps(first) && h.Group.Any(v => v.Number == 11)), "The first vehicles work sessions 1-3.");
+        Assert.IsFalse(idle.Any(h => h.Sessions.Overlaps(second) && h.Group.Any(v => v.Number == 12)), "The second vehicles work sessions 4-6.");
+        Assert.IsFalse(idle.Any(h => h.Sessions.Overlaps(second) && h.Group.Any(v => v.Number == 11)), "The first vehicles are taken off when the second take over.");
+        Assert.IsFalse(idle.Any(h => h.Sessions.Overlaps(first) && h.Group.Any(v => v.Number == 12)), "The second vehicles are not there before they take over.");
+    }
+
+    [TestMethod]
     public void WagonsetsAssignedToAllSessionsHaveNoIdleHolds()
     {
         TestDataFactory.Init();

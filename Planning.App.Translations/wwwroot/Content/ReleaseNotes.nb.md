@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.0.5
+
+### Endringer
+
+- **Lok som overtar i blokker av kjøresesjoner.** Når ett lok kjører kjøresesjon 1–3 og et annet kjøresesjon 4–6, regnes det første nå som fjernet fra sporene når det andre overtar, slik at de to ikke lenger er i konflikt på et spor der begge står. Lok som skifter på å kjøre (1, 3, 5 og 2, 4, 6) regnes fortsatt som stående ubrukt de dagene de ikke kjører. Kjøresesjoner utover banens høyeste antall kjøresesjoner blir ignorert.
+
 ## Versjon 1.0.3
 
 ### Endringer

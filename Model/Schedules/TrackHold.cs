@@ -213,6 +213,15 @@ public static class TrackHoldExtensions
             {
                 var others = groups.Where(g => g != group && g.Sessions is not null)
                     .Aggregate(new Sessions(), (union, g) => union.Or(g.Sessions!.Value)).And(idle);
+                // Vehicles that take over in blocks of consecutive sessions (1-3, then 4-6) are swapped: the
+                // ones leaving are implicitly taken off the tracks for the others to stand there. Only where
+                // they alternate (1,3,5 and 2,4,6) do the idle ones stay put, a day at a time.
+                if (!others.IsNone && groups.All(g => g.Sessions is not { } w || w.IsInBlocks(schedule.Plan?.Layout.Settings.General.MaxSessions ?? 14)))
+                {
+                    idle = Sessions.FromBitPattern(idle.Flags & ~others.Flags);
+                    others = new Sessions();
+                }
+                if (idle.IsNone) return holds;
                 var day = Time.FromDayHourMinute(0, 0, 0);
                 holds.Add(new TrackHold(resting.Track, day, day.AddDays(1), idle, schedule, resting.Train)
                 {
@@ -225,6 +234,15 @@ public static class TrackHoldExtensions
             }
         }
         return holds;
+    }
+
+    // Whether every session within the operating period is next to another one of the set, i.e. the set is
+    // runs of two or more consecutive sessions rather than a pattern of single, alternating ones. Sessions
+    // beyond the period never run, so they do not count.
+    private static bool IsInBlocks(this Sessions sessions, int maxSessions)
+    {
+        var bits = sessions.Flags & ((1 << Math.Clamp(maxSessions, 1, 14)) - 1);
+        return (bits & ((bits << 1) | (bits >> 1))) == bits;
     }
 
     private static void Add(List<TrackHold> holds, TrackHold? hold)
