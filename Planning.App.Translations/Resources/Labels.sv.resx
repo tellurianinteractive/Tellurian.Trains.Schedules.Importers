@@ -2888,4 +2888,28 @@
   <data name="ValidateDriverDutiesHelp" xml:space="preserve">
     <value>Rapporterar problem i förartjänsterna och tåg som ingen lokförare täcker.</value>
   </data>
+  <data name="OtherVehicles" xml:space="preserve">
+    <value>Övriga fordon</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Övrigt</value>
+  </data>
+  <data name="VehicleIdentity" xml:space="preserve">
+    <value>Identitet</value>
+  </data>
+  <data name="TypeVehicleIdentity" xml:space="preserve">
+    <value>Skriv fordonets identitet</value>
+  </data>
+  <data name="VehicleIdentityRequired" xml:space="preserve">
+    <value>Ange fordonets identitet.</value>
+  </data>
+  <data name="AddOtherVehicle" xml:space="preserve">
+    <value>Lägg till fordon</value>
+  </data>
+  <data name="NoOtherVehicles" xml:space="preserve">
+    <value>Inga övriga fordon registrerade än.</value>
+  </data>
+  <data name="OtherVehiclesDescription" xml:space="preserve">
+    <value>Fordon som måste registreras men inte ingår i trafiken: varken tidtabellsatta eller växlingslok. De skrivs ut för sin ägare i rapporten Fordon och ägare.</value>
+  </data>
 </root>

@@ -74,6 +74,7 @@ public static class VehicleContributorsList
     {
         var notYetBooked = new VehicleContributorsGroup(VehicleContributorsGroupKind.NotYetBooked, null,
             [.. InSetUpOrder(items.Where(item => item.Contributors.Count == 0).Select(item => UnitLine(plan, item, null)))]);
+        // The vehicles registered without any work come after the participant's rolling stock.
         var groups = plan.Participants
             .OrderBy(participant => participant.Name, StringComparer.CurrentCulture)
             .Select(participant => new VehicleContributorsGroup(
@@ -82,7 +83,11 @@ public static class VehicleContributorsList
                 [.. InSetUpOrder(items
                     .SelectMany(item => item.Contributors
                         .Where(contributor => contributor.ParticipantId == participant.Id)
-                        .Select(contributor => UnitLine(plan, item, contributor))))]));
+                        .Select(contributor => UnitLine(plan, item, contributor)))),
+                 .. plan.OtherVehiclesBroughtBy(participant)
+                    .OrderBy(other => other.Type)
+                    .ThenBy(other => other.Identity, StringComparer.CurrentCulture)
+                    .Select(other => OtherLine(plan, other))]));
         return [notYetBooked, .. groups];
 
         static IEnumerable<VehicleContributorLine> InSetUpOrder(IEnumerable<VehicleContributorLine> lines) => lines
@@ -114,6 +119,7 @@ public static class VehicleContributorsList
         var lines = items
             .Where(item => item.Vehicle.NeedsDccAddress)
             .SelectMany(item => UnitLinesOf(plan, item))
+            .Concat(plan.OtherVehicles.Where(other => other.Type.NeedsDccAddress || other.DccAddress is not null).Select(other => OtherLine(plan, other)))
             .OrderBy(AddressRank)
             .ThenBy(line => line.Contributor?.DccAddress ?? 0);
         return [new(VehicleContributorsGroupKind.AllUnits, null, [.. lines])];
@@ -143,6 +149,17 @@ public static class VehicleContributorsList
             NotesOf(item, contributor))
         {
             StationedAt = item.StationedAt,
+        };
+
+    // A registered vehicle has no start and no notes; its owner and number and address are the unit brought.
+    private static VehicleContributorLine OtherLine(Plan plan, OtherVehicle other) =>
+        new(null, null,
+            new VehicleContributor(other.ParticipantId, other.DccAddress) { VehicleNumber = other.VehicleNumber },
+            plan.ParticipantById(other.ParticipantId)?.Name ?? "?",
+            true,
+            [])
+        {
+            Other = other,
         };
 
     private static string NameOf(Plan plan, VehicleContributor contributor) =>

@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 1.0.8
+
+### Ändringar
+
+- **Övriga fordon.** Fliken Fordonsägare har en ny underflik, **Övriga fordon**, för fordon som måste registreras men inte ingår i trafiken: varken tidtabellsatta eller växlingslok. Ange typ (lok, tågsätt, vagnsätt eller övrigt), en identitet med egna ord, ägare, nummer och DCC-adress. De skrivs ut för sin ägare i rapporten Fordon och ägare, utan dag, station eller tid.
+
+- **Växlingslokets operatör.** Att byta operatör på ett växlingslok avbryts inte längre när numret redan är upptaget av ett annat fordon hos operatören. Operatören byts, krockan rapporteras och du kan stega numret till ett ledigt.
+
 ## Version 1.0.7
 
 ### Ändringar

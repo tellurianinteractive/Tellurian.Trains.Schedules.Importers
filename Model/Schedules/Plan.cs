@@ -22,6 +22,7 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         DriverDuties = [];
         Participants = [];
         VehicleContributions = [];
+        OtherVehicles = [];
     }
 
     /// <summary>
@@ -39,6 +40,7 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
         DriverDuties = [];
         Participants = [];
         VehicleContributions = [];
+        OtherVehicles = [];
     }
 
     /// <summary>
@@ -119,6 +121,12 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
     /// has contributors or a note, tied to its vehicle by <see cref="VehicleContribution.ScheduledObjectId"/>.
     /// </summary>
     public ICollection<VehicleContribution> VehicleContributions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the vehicles participants bring that have to be registered but take no part in the
+    /// operation: neither scheduled nor shunters.
+    /// </summary>
+    public ICollection<OtherVehicle> OtherVehicles { get; set; }
 
     /// <summary>
     /// Completes a plan as soon as it has been read, so it is never looked at half-resolved.

@@ -413,4 +413,49 @@ public class VehicleOwnershipTests
         Assert.IsEmpty(restored.Participants);
         Assert.IsEmpty(restored.VehicleContributions);
     }
+
+    // ---- Other vehicles -------------------------------------------------------------------------
+
+    [TestMethod]
+    public void AnOtherVehicleIsRegisteredForItsOwnerAndSurvivesASave()
+    {
+        var plan = CreatePlan();
+        var anna = plan.FindOrAddParticipant("Anna Berg")!;
+
+        var loco = plan.AddOtherVehicle(OtherVehicleType.Locomotive, "  Rc 1328 red ", anna, " 1328 ", 17);
+
+        Assert.IsNotNull(loco);
+        Assert.AreEqual("Rc 1328 red", loco.Identity);
+        Assert.AreEqual("1328", loco.VehicleNumber);
+        CollectionAssert.AreEqual(new[] { loco }, plan.OtherVehiclesBroughtBy(anna).ToList());
+
+        var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, Options), Options)!;
+        var again = restored.OtherVehicles.Single();
+        Assert.AreEqual((OtherVehicleType.Locomotive, "Rc 1328 red", 17), (again.Type, again.Identity, again.DccAddress));
+    }
+
+    [TestMethod]
+    public void AnOtherVehicleIsRefusedWithoutIdentityOrWithAnAddressItsTypeDoesNotTake()
+    {
+        var plan = CreatePlan();
+        var anna = plan.FindOrAddParticipant("Anna Berg")!;
+
+        Assert.IsNull(plan.AddOtherVehicle(OtherVehicleType.Other, " ", anna, null, null), "No identity.");
+        Assert.IsNull(plan.AddOtherVehicle(OtherVehicleType.Locomotive, "Loco", anna, null, null), "A locomotive needs an address.");
+        Assert.IsNull(plan.AddOtherVehicle(OtherVehicleType.Wagonset, "Rake", anna, null, 3), "A wagonset has none.");
+        Assert.IsNotNull(plan.AddOtherVehicle(OtherVehicleType.Other, "Crane", anna, null, null), "Another vehicle may do without.");
+        Assert.IsNotNull(plan.AddOtherVehicle(OtherVehicleType.Locomotive, "Loco", anna, null, DccAddresses.ToBeProvided));
+    }
+
+    [TestMethod]
+    public void AParticipantBringingAnOtherVehicleCannotBeDeletedUntilItIsRemoved()
+    {
+        var plan = CreatePlan();
+        var anna = plan.FindOrAddParticipant("Anna Berg")!;
+        var wagons = plan.AddOtherVehicle(OtherVehicleType.Wagonset, "Rake", anna, null, null)!;
+
+        Assert.IsTrue(plan.MayDelete(anna).IsDenied);
+        Assert.IsTrue(plan.TryDelete(wagons).IsSuccess);
+        Assert.IsTrue(plan.TryDelete(anna).IsSuccess);
+    }
 }

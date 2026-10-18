@@ -48,6 +48,10 @@ else
                                 <span class="@(isPrimary ? "primary" : "spare")"
                                       title="@Translator(isPrimary ? "PrimaryContributorHint" : "SpareContributorHint")">@vehicle.Designation</span>
                             }
+                            @foreach (var other in Plan.OtherVehiclesBroughtBy(participant))
+                            {
+                                <span class="primary" title="@Translator("OtherVehicles")">@other.Identity</span>
+                            }
                         </span>
                     </td>
                     <td class="actions">

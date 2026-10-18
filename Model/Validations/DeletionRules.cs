@@ -304,6 +304,20 @@ public static partial class DeletionRules
         }
 
         /// <summary>
+        /// An <see cref="OtherVehicle"/> may always be removed: nothing else refers to one.
+        /// </summary>
+        public DeletionResult MayDelete(OtherVehicle vehicle) => new DeletionResult.Success(vehicle);
+
+        /// <summary>
+        /// Removes an <see cref="OtherVehicle"/> from the plan. Its owner stays in the participant catalogue.
+        /// </summary>
+        public DeletionResult TryDelete(OtherVehicle vehicle)
+        {
+            plan.OtherVehicles.Remove(vehicle);
+            return new DeletionResult.Success(vehicle);
+        }
+
+        /// <summary>
         /// A <see cref="VehicleContributor"/> may always be removed: nothing else refers to one.
         /// </summary>
         public DeletionResult MayDelete(VehicleContributor contributor) => new DeletionResult.Success(contributor);
@@ -460,7 +474,8 @@ public static partial class DeletionRules
         [.. plan.RollingStockBroughtBy(participant)
             .Select(item => item.Vehicle)
             .Distinct()
-            .Select(vehicle => new Reference(ClassNames.KeyOf(vehicle), vehicle.Designation))];
+            .Select(vehicle => new Reference(ClassNames.KeyOf(vehicle), vehicle.Designation))
+            .Concat(plan.OtherVehiclesBroughtBy(participant).Select(vehicle => new Reference(ClassNames.KeyOf(vehicle), vehicle.Identity)))];
 
     // A vehicle is referenced by every schedule it is assigned to that has train parts: deleting it would take
     // away work the schedule plans for it. An assignment to an empty schedule plans nothing yet.

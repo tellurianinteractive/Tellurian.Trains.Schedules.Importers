@@ -2888,4 +2888,28 @@
   <data name="ValidateDriverDutiesHelp" xml:space="preserve">
     <value>Meldet Probleme in den Triebfahrzeugführerdiensten sowie Züge, die kein Triebfahrzeugführer übernimmt.</value>
   </data>
+  <data name="OtherVehicles" xml:space="preserve">
+    <value>Weitere Fahrzeuge</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Sonstiges</value>
+  </data>
+  <data name="VehicleIdentity" xml:space="preserve">
+    <value>Kennung</value>
+  </data>
+  <data name="TypeVehicleIdentity" xml:space="preserve">
+    <value>Kennung des Fahrzeugs eingeben</value>
+  </data>
+  <data name="VehicleIdentityRequired" xml:space="preserve">
+    <value>Geben Sie die Kennung des Fahrzeugs ein.</value>
+  </data>
+  <data name="AddOtherVehicle" xml:space="preserve">
+    <value>Fahrzeug hinzufügen</value>
+  </data>
+  <data name="NoOtherVehicles" xml:space="preserve">
+    <value>Noch keine weiteren Fahrzeuge registriert.</value>
+  </data>
+  <data name="OtherVehiclesDescription" xml:space="preserve">
+    <value>Fahrzeuge, die registriert werden müssen, aber nicht am Betrieb teilnehmen: weder im Fahrplan noch Rangierlokomotiven. Sie werden für ihren Eigentümer im Bericht Mitgebrachte Fahrzeuge gedruckt.</value>
+  </data>
 </root>

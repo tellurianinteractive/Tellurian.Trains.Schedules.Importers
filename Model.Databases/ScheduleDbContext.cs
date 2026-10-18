@@ -553,6 +553,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // layout's country catalogue: a participant and a vehicle are referred to by a plain int id, and
             // the order of a vehicle's contributors — the first is the primary one — is the order of the array.
             entity.OwnsMany(e => e.Participants, b => b.ToJson());
+            entity.OwnsMany(e => e.OtherVehicles, b => b.ToJson());
             entity.OwnsMany(e => e.VehicleContributions, b =>
             {
                 b.ToJson();

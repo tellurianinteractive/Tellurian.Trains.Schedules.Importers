@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 1.0.8
+
+### Änderungen
+
+- **Weitere Fahrzeuge.** Der Reiter Fahrzeugbesitzer hat einen neuen Unterreiter, **Weitere Fahrzeuge**, für Fahrzeuge, die registriert werden müssen, aber nicht am Betrieb teilnehmen: weder im Fahrplan noch Rangierlokomotiven. Geben Sie Typ (Lokomotive, Triebzug, Wagengruppe oder Sonstiges), eine Kennung in eigenen Worten, Eigentümer, Nummer und DCC-Adresse an. Sie werden für ihren Eigentümer im Bericht Mitgebrachte Fahrzeuge gedruckt, ohne Tag, Bahnhof oder Uhrzeit.
+
+- **Betreiber einer Rangierlok.** Der Wechsel des Betreibers einer Rangierlok bricht nicht mehr ab, wenn die Nummer bereits von einem anderen Fahrzeug des Betreibers belegt ist. Der Betreiber wird gewechselt, der Konflikt gemeldet, und Sie können die Nummer auf eine freie weiterstellen.
+
 ## Version 1.0.7
 
 ### Änderungen

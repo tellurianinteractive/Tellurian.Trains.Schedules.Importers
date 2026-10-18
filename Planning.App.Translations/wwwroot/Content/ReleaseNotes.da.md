@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 1.0.8
+
+### Ændringer
+
+- **Øvrige køretøjer.** Fanen Køretøjsejere har en ny underfane, **Øvrige køretøjer**, til køretøjer, der skal registreres, men ikke indgår i driften: hverken planlagte eller rangerlokomotiver. Angiv type (lokomotiv, togsæt, vognsæt eller andet), en identitet med egne ord, ejer, nummer og DCC-adresse. De udskrives til deres ejer i rapporten Medbragte køretøjer, uden dag, station eller tid.
+
+- **Rangerlokomotivets operatør.** Når man skifter operatør på et rangerlokomotiv, afbrydes det ikke længere, hvis nummeret allerede er optaget af et andet køretøj hos operatøren. Operatøren skiftes, konflikten rapporteres, og du kan stige nummeret til et ledigt.
+
 ## Version 1.0.7
 
 ### Ændringer

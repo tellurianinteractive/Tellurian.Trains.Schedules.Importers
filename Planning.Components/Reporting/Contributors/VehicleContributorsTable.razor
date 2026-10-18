@@ -47,7 +47,15 @@
                 <tr class="@RowClass(line)">
                     @foreach (var column in Columns)
                     {
-                        if (column.IsStart && line.Location is null)
+                        if (column.IsStart && line.Other is not null)
+                        {
+                            @* A registered vehicle takes part in no operation: no day, station or time. *@
+                            if (column == FirstStartColumn)
+                            {
+                                <td colspan="@StartColumnCount"></td>
+                            }
+                        }
+                        else if (column.IsStart && line.Location is null)
                         {
                             @* A vehicle given no work has nowhere to be set up; saying so once reads better than
                                four empty cells, which look like something left out. A shunter is given no work

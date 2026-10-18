@@ -1,0 +1,240 @@
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Validations
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* Vehicles that have to be registered although they take no part in the operation: not scheduled, not shunters.
+   Each is known by a free-text identity and its owner, and is printed for that owner in the Vehicle contributors
+   report. They have no day, station or time. *@
+
+<p class="hint">@Translator("OtherVehiclesDescription")</p>
+
+<table class="owners other-vehicles">
+    <thead>
+        <tr>
+            <th>@Translator("Type")</th>
+            <th>@Translator("VehicleIdentity")</th>
+            <th>@Translator("Owner")</th>
+            <th title="@Translator("VehicleNumberHelp")">@Translator("VehicleNumber")</th>
+            <th title="@Translator("DccAddressHelp")">@Translator("DccAddress")</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vehicle in Plan.OtherVehicles)
+        {
+            @* Keyed by the vehicle: a delete must not leave its typed values in the row that took its place. *@
+            <tr @key="vehicle">
+                <td>
+                    <select @onchange="e => SetType(vehicle, e)">
+                        @foreach (var type in Types)
+                        {
+                            <option value="@type" selected="@(type == vehicle.Type)">@Translator(type.ToString())</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="identity" @key="_refusedEdits" value="@vehicle.Identity"
+                           @onchange="e => SetIdentity(vehicle, e)" />
+                </td>
+                <td>
+                    <ParticipantComboBox Suggest="@(typed => Plan.ParticipantsMatching(typed))"
+                                         Value="@NameOf(vehicle)"
+                                         ValueChanged="@(name => SetParticipant(vehicle, name))" />
+                </td>
+                <td>
+                    <input type="text" class="vehicle-number" value="@vehicle.VehicleNumber" @onchange="e => SetVehicleNumber(vehicle, e)" />
+                </td>
+                <td>
+                    @if (vehicle.Type != OtherVehicleType.Wagonset)
+                    {
+                        <input type="number" class="dcc @(vehicle.Type.NeedsDccAddress && vehicle.DccAddress is null ? "invalid" : null)"
+                               min="@DccAddresses.ToBeProvided" max="@DccAddresses.Highest" step="1"
+                               @key="_refusedEdits" value="@vehicle.DccAddress" @onchange="e => SetDccAddress(vehicle, e)" />
+                        @if (vehicle.DccAddress == DccAddresses.ToBeProvided)
+                        {
+                            <span class="to-be-provided">@Translator("DccAddressToBeProvided")</span>
+                        }
+                    }
+                </td>
+                <td class="actions">
+                    <button class="danger small" @onclick="() => Remove(vehicle)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                </td>
+            </tr>
+        }
+        @if (Plan.OtherVehicles.Count == 0)
+        {
+            <tr><td colspan="6" class="empty">@Translator("NoOtherVehicles")</td></tr>
+        }
+        <tr class="add">
+            <td>
+                <select @onchange="e => _type = Enum.Parse<OtherVehicleType>(e.Value?.ToString() ?? nameof(OtherVehicleType.Locomotive))">
+                    @foreach (var type in Types)
+                    {
+                        <option value="@type" selected="@(type == _type)">@Translator(type.ToString())</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <input type="text" class="identity" value="@_identity" placeholder="@Translator("TypeVehicleIdentity")"
+                       @oninput="e => _identity = e.Value?.ToString() ?? string.Empty" @onkeydown="AddOnEnter" />
+            </td>
+            <td>
+                <ParticipantComboBox Suggest="@(typed => Plan.ParticipantsMatching(typed))"
+                                     Value="@_name" ValueChanged="@((string name) => _name = name)"
+                                     Placeholder="@Translator("TypeParticipantName")" />
+            </td>
+            <td>
+                <input type="text" class="vehicle-number" value="@_vehicleNumber"
+                       @oninput="e => _vehicleNumber = e.Value?.ToString() ?? string.Empty" @onkeydown="AddOnEnter" />
+            </td>
+            <td>
+                @if (_type != OtherVehicleType.Wagonset)
+                {
+                    <input type="number" class="dcc" min="@DccAddresses.ToBeProvided" max="@DccAddresses.Highest" step="1"
+                           value="@_dccAddress" @oninput="e => _dccAddress = e.Value?.ToString() ?? string.Empty"
+                           @onkeydown="AddOnEnter" />
+                }
+            </td>
+            <td class="actions">
+                <button class="primary small" @onclick="Add"><i class="fa-solid fa-plus"></i> @Translator("AddOtherVehicle")</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
+@code {
+    private static readonly OtherVehicleType[] Types = Enum.GetValues<OtherVehicleType>();
+
+    // What is typed into the add row, kept until the vehicle is added.
+    private OtherVehicleType _type = OtherVehicleType.Locomotive;
+    private string _identity = string.Empty;
+    private string _name = string.Empty;
+    private string _vehicleNumber = string.Empty;
+    private string _dccAddress = string.Empty;
+
+    // The last refused edit, shown under the table until the next edit.
+    private string? _error;
+
+    // Counts the refused edits, only to key the fields: a changed key rebuilds a field from the model.
+    private int _refusedEdits;
+
+    /// <summary>The plan whose other vehicles are listed.</summary>
+    [Parameter, EditorRequired] public Plan Plan { get; set; } = default!;
+
+    private string NameOf(OtherVehicle vehicle) => Plan.ParticipantById(vehicle.ParticipantId)?.Name ?? "?";
+
+    private static bool TryParseDccAddress(string? text, out int address) =>
+        int.TryParse(text?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out address) && DccAddresses.IsValid(address);
+
+    private void Save()
+    {
+        _error = null;
+        ScheduleState.SaveAndNotify();
+    }
+
+    private void AddOnEnter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Add();
+    }
+
+    // Everything is checked before anything is added, so a refused vehicle leaves no new participant behind.
+    private void Add()
+    {
+        _error = null;
+        if (string.IsNullOrWhiteSpace(_identity))
+        {
+            _error = Translator("VehicleIdentityRequired");
+            return;
+        }
+        if (_name.NormalizedParticipantName.IsEmpty)
+        {
+            _error = Translator("ParticipantNameRequired");
+            return;
+        }
+        int? address = null;
+        if (_type != OtherVehicleType.Wagonset && !string.IsNullOrWhiteSpace(_dccAddress))
+        {
+            if (!TryParseDccAddress(_dccAddress, out var value))
+            {
+                _error = Translator("DccAddressInvalid");
+                return;
+            }
+            address = value;
+        }
+        if (!_type.AcceptsDccAddress(address))
+        {
+            _error = Translator("DccAddressInvalid");
+            return;
+        }
+        if (Plan.FindOrAddParticipant(_name) is not { } participant) return;
+        if (Plan.AddOtherVehicle(_type, _identity, participant, _vehicleNumber, address) is null) return;
+        (_identity, _name, _vehicleNumber, _dccAddress) = (string.Empty, string.Empty, string.Empty, string.Empty);
+        Save();
+    }
+
+    // A change of type keeps the address acceptable: a wagonset has none, and a locomotive or trainset must have one.
+    private void SetType(OtherVehicle vehicle, ChangeEventArgs e)
+    {
+        if (!Enum.TryParse<OtherVehicleType>(e.Value?.ToString(), out var type)) return;
+        vehicle.Type = type;
+        if (!type.AcceptsDccAddress(vehicle.DccAddress))
+            vehicle.DccAddress = type.NeedsDccAddress ? DccAddresses.ToBeProvided : null;
+        Save();
+    }
+
+    private void SetIdentity(OtherVehicle vehicle, ChangeEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Value?.ToString()))
+        {
+            _error = Translator("VehicleIdentityRequired");
+            _refusedEdits++;
+            return;
+        }
+        vehicle.Identity = e.Value!.ToString()!;
+        Save();
+    }
+
+    // Picking another name hands the vehicle to that participant, and a name nobody has yet adds them. A blank
+    // name is nobody, so nothing changes.
+    private void SetParticipant(OtherVehicle vehicle, string name)
+    {
+        if (Plan.FindOrAddParticipant(name) is not { } participant) return;
+        vehicle.ParticipantId = participant.Id;
+        Save();
+    }
+
+    private void SetVehicleNumber(OtherVehicle vehicle, ChangeEventArgs e)
+    {
+        vehicle.VehicleNumber = e.Value?.ToString();
+        Save();
+    }
+
+    // Another vehicle may be left without an address; a locomotive or a trainset never is.
+    private void SetDccAddress(OtherVehicle vehicle, ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString();
+        var parsed = TryParseDccAddress(text, out var value);
+        if (string.IsNullOrWhiteSpace(text) || parsed)
+        {
+            int? address = parsed ? value : null;
+            if (vehicle.AcceptsDccAddress(address))
+            {
+                vehicle.DccAddress = address;
+                Save();
+                return;
+            }
+        }
+        _error = Translator("DccAddressInvalid");
+        _refusedEdits++;
+    }
+
+    private void Remove(OtherVehicle vehicle)
+    {
+        if (Plan.TryDelete(vehicle).IsSuccess) Save();
+    }
+}

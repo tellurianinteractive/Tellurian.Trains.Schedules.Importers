@@ -2902,4 +2902,28 @@
   <data name="ValidateDriverDutiesHelp" xml:space="preserve">
     <value>Reports problems in the driver duties, and trains that no loco driver covers.</value>
   </data>
+  <data name="OtherVehicles" xml:space="preserve">
+    <value>Other vehicles</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="VehicleIdentity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="TypeVehicleIdentity" xml:space="preserve">
+    <value>Type the vehicle's identity</value>
+  </data>
+  <data name="VehicleIdentityRequired" xml:space="preserve">
+    <value>Enter the vehicle's identity.</value>
+  </data>
+  <data name="AddOtherVehicle" xml:space="preserve">
+    <value>Add vehicle</value>
+  </data>
+  <data name="NoOtherVehicles" xml:space="preserve">
+    <value>No other vehicles registered yet.</value>
+  </data>
+  <data name="OtherVehiclesDescription" xml:space="preserve">
+    <value>Vehicles that must be registered but take no part in the operation: not scheduled and not shunters. They are printed for their owner in the Vehicle contributors report.</value>
+  </data>
 </root>

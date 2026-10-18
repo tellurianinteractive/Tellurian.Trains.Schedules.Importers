@@ -5,7 +5,7 @@
 		<Company>Tellurian Interactive</Company>
 		<Copyright>© Stefan Fjällemark 2023-2026</Copyright>
 		<Authors>Stefan Fjällemark</Authors>
-		<Version>3.3.5</Version>
+		<Version>3.3.6</Version>
 		<NeutralLanguage>en-GB</NeutralLanguage>
 		<Platforms>AnyCPU</Platforms>
 		<ImplicitUsings>true</ImplicitUsings>
@@ -17,7 +17,7 @@
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageTags>model-trains scheduling timetables FREMO XPLN</PackageTags>
 		<PackageReleaseNotes>
-			3.1.0: See release note document.
+			3.3.6: See release note document.
 		</PackageReleaseNotes>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<IncludeSymbols>true</IncludeSymbols>

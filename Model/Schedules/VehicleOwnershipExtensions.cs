@@ -272,6 +272,36 @@ public static class VehicleOwnershipExtensions
             return contribution;
         }
 
+        /// <summary>
+        /// The other vehicles <paramref name="participant"/> brings, in the order they were registered.
+        /// </summary>
+        /// <param name="participant">The participant to ask about.</param>
+        public IReadOnlyList<OtherVehicle> OtherVehiclesBroughtBy(Participant participant) =>
+            [.. plan.OtherVehicles.Where(vehicle => vehicle.ParticipantId == participant.Id)];
+
+        /// <summary>
+        /// Registers another vehicle brought by <paramref name="participant"/>. Refused, returning <c>null</c>,
+        /// for a blank identity and for a DCC address the type does not accept (see <c>AcceptsDccAddress</c>).
+        /// </summary>
+        /// <param name="type">What kind of vehicle it is.</param>
+        /// <param name="identity">Free text saying which vehicle it is.</param>
+        /// <param name="participant">The participant bringing it; added to the catalogue when not already there.</param>
+        /// <param name="vehicleNumber">Its number, or <c>null</c> for none.</param>
+        /// <param name="dccAddress">Its DCC address, or <c>null</c> for none.</param>
+        public OtherVehicle? AddOtherVehicle(OtherVehicleType type, string? identity, Participant participant, string? vehicleNumber, int? dccAddress)
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            participant = participant.ValueOrException(nameof(participant));
+            if (string.IsNullOrWhiteSpace(identity) || !type.AcceptsDccAddress(dccAddress)) return null;
+            if (!plan.Participants.Contains(participant)) plan.Participants.Add(participant);
+            var vehicle = new OtherVehicle(plan.OtherVehicles.Select(v => v.Id).DefaultIfEmpty(0).Max() + 1, type, identity, participant.Id, dccAddress)
+            {
+                VehicleNumber = vehicleNumber,
+            };
+            plan.OtherVehicles.Add(vehicle);
+            return vehicle;
+        }
+
         private int NextParticipantId() =>
             plan.Participants.Select(p => p.Id).DefaultIfEmpty(0).Max() + 1;
     }

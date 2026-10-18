@@ -98,10 +98,13 @@
         var company = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)
             ? Plan.Layout.Companies.FirstOrDefault(c => c.Id == id)
             : null;
-        if (IsClaimed(shunter, company?.Id, shunter.Number)) return;
+        // The operator is kept even when the current number clashes with it, so the planner can step the number
+        // on to a free one; the clash is reported until then.
+        var claimed = IsClaimed(shunter, company?.Id, shunter.Number);
         shunter.Company = company;
         shunter.CompanyId = company?.Id;
-        Saved();
+        ScheduleState.SaveAndNotify();
+        if (!claimed) _error = null;
     }
 
     private void SetNumber(ScheduledObject shunter, ChangeEventArgs e)

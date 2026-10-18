@@ -38,7 +38,7 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
     /// <param name="column">The column.</param>
     public string TextOf(VehicleContributorLine line, VehicleContributorsColumn column) => column switch
     {
-        VehicleContributorsColumn.Role => line.Contributor is null
+        VehicleContributorsColumn.Role => line.Contributor is null || line.Other is not null
             ? string.Empty
             : translator(line.IsPrimary ? "PrimaryContributor" : "SpareContributor"),
         VehicleContributorsColumn.DccAddress => DccAddressOf(line),
@@ -48,15 +48,15 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         VehicleContributorsColumn.Station => line.Location?.Name ?? string.Empty,
         VehicleContributorsColumn.Track => line.Start?.Track.Number ?? string.Empty,
         VehicleContributorsColumn.Departure => line.Start?.Departure.HHMM() ?? string.Empty,
-        VehicleContributorsColumn.Type => TypeOf(line.Vehicle),
+        VehicleContributorsColumn.Type => line.Other is { } other ? translator(other.Type.ToString()) : TypeOf(line.Vehicle!),
         // The designation as the Schedules tab names the turnus, e.g. "DSB 01 ME": the operator's signature,
         // the number and the class, so no class column of its own is needed.
-        VehicleContributorsColumn.Turnus => line.Vehicle.Designation,
+        VehicleContributorsColumn.Turnus => line.Other?.Identity ?? line.Vehicle!.Designation,
         // Each unit brought, a spare included, has its own; a wagonset's numbers are its wagons', printed with them.
-        VehicleContributorsColumn.VehicleNumber => line.Vehicle.TakesVehicleNumber
+        VehicleContributorsColumn.VehicleNumber => line.Other is not null || line.Vehicle!.TakesVehicleNumber
             ? VehicleNumberOf(line)
             : string.Empty,
-        VehicleContributorsColumn.Count => line.Vehicle.NumberOfUnits.ToString(CultureInfo.CurrentCulture),
+        VehicleContributorsColumn.Count => line.Vehicle?.NumberOfUnits.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
         VehicleContributorsColumn.Owner => line.OwnerName ?? Nobody,
         _ => string.Join(" ", line.Notes),
     };
@@ -85,11 +85,13 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
         };
     }
 
-    // A unit brought without a number is as much something to make the owner provide as a missing DCC address.
+    // A unit brought without a number is as much something to make the owner provide as a missing DCC address —
+    // except an other vehicle, which is often a wagon or a carriage that has none.
     private string VehicleNumberOf(VehicleContributorLine line) => line.Contributor switch
     {
         null => string.Empty,
         { VehicleNumber: { } number } when !string.IsNullOrWhiteSpace(number) => number,
+        _ when line.Other is not null => string.Empty,
         _ => translator("Missing"),
     };
 

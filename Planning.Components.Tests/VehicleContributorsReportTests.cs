@@ -460,4 +460,24 @@ public class VehicleContributorsReportTests
         Assert.IsEmpty(anna.Lines[0].Wagons);
         Assert.AreEqual(0, VehicleContributorsPaginator.WagonLinesOf(anna.Lines[0], Geometry));
     }
+
+    [TestMethod]
+    public void AnOtherVehicleIsPrintedOnItsOwnersPageWithoutAStartAndAMissingAddressIsFlagged()
+    {
+        var plan = CreatePlan();
+        var anna = plan.FindOrAddParticipant("Anna")!;
+        plan.AddOtherVehicle(OtherVehicleType.Locomotive, "Museum loco", anna, "42", DccAddresses.ToBeProvided);
+
+        var page = Groups(plan, VehicleContributorsGrouping.Contributor).Single(group => group.Name == "Anna");
+        var line = page.Lines.Last();
+
+        Assert.IsNotNull(line.Other);
+        Assert.AreEqual("Museum loco", Cells.TextOf(line, VehicleContributorsColumn.Turnus));
+        Assert.AreEqual("42", Cells.TextOf(line, VehicleContributorsColumn.VehicleNumber));
+        Assert.AreEqual("Missing", Cells.TextOf(line, VehicleContributorsColumn.DccAddress));
+        Assert.IsNull(line.Start);
+        Assert.AreEqual(string.Empty, Cells.TextOf(line, VehicleContributorsColumn.Role));
+        Assert.IsFalse(Groups(plan, VehicleContributorsGrouping.OperationLocation).SelectMany(group => group.Lines).Any(l => l.Other is not null),
+            "A vehicle with no station is on no station's page.");
+    }
 }

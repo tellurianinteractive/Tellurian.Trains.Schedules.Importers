@@ -2888,4 +2888,28 @@
   <data name="ValidateDriverDutiesHelp" xml:space="preserve">
     <value>Melder problemer i førertjenestene og tog som ingen lokfører dekker.</value>
   </data>
+  <data name="OtherVehicles" xml:space="preserve">
+    <value>Øvrige kjøretøy</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Annet</value>
+  </data>
+  <data name="VehicleIdentity" xml:space="preserve">
+    <value>Identitet</value>
+  </data>
+  <data name="TypeVehicleIdentity" xml:space="preserve">
+    <value>Skriv kjøretøyets identitet</value>
+  </data>
+  <data name="VehicleIdentityRequired" xml:space="preserve">
+    <value>Skriv kjøretøyets identitet.</value>
+  </data>
+  <data name="AddOtherVehicle" xml:space="preserve">
+    <value>Legg til kjøretøy</value>
+  </data>
+  <data name="NoOtherVehicles" xml:space="preserve">
+    <value>Ingen øvrige kjøretøy registrert ennå.</value>
+  </data>
+  <data name="OtherVehiclesDescription" xml:space="preserve">
+    <value>Kjøretøy som må registreres, men som ikke inngår i driften: verken planlagte eller skiftelokomotiver. De skrives ut til eieren i rapporten Medbrakte kjøretøy.</value>
+  </data>
 </root>

@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 1.0.8
+
+### Endringer
+
+- **Øvrige kjøretøy.** Fanen Kjøretøyseiere har en ny underfane, **Øvrige kjøretøy**, for kjøretøy som må registreres, men som ikke inngår i driften: verken planlagte eller skiftelokomotiver. Oppgi type (lok, togsett, vognsett eller annet), en identitet med egne ord, eier, nummer og DCC-adresse. De skrives ut til eieren i rapporten Medbrakte kjøretøy, uten dag, stasjon eller tid.
+
+- **Skiftelokets operatør.** Å bytte operatør på et skiftelok avbrytes ikke lenger når nummeret allerede er opptatt av et annet kjøretøy hos operatøren. Operatøren byttes, konflikten rapporteres, og du kan stige nummeret til et ledig.
+
 ## Versjon 1.0.7
 
 ### Endringer

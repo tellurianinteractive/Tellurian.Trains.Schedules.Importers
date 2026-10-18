@@ -142,6 +142,30 @@
     min-width: 16rem;
 }
 
+.vehicle-owners ::deep input.identity {
+    min-width: 16rem;
+}
+
+.vehicle-owners ::deep table.other-vehicles select {
+    font-size: 0.85rem;
+    padding: 0.15rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: #fff;
+}
+
+.vehicle-owners ::deep table.other-vehicles tr.add > td {
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+}
+
+.vehicle-owners ::deep table.other-vehicles .to-be-provided {
+    margin-left: 0.4rem;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #667;
+}
+
 .vehicle-owners ::deep input.dcc {
     width: 5.5rem;
 }

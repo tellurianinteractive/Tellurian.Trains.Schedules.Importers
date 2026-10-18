@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.0.8
+
+### Changes
+
+- **Other vehicles.** The Vehicle owners tab has a new sub-tab, **Other vehicles**, for vehicles that must be registered but take no part in the operation: not scheduled and not shunters. Enter the type (locomotive, trainset, wagonset or other), an identity of your own wording, the owner, the number and the DCC address. They are printed for their owner in the vehicle contributors report, without a day, station or time.
+
+- **Shunter operator.** Changing the operator of a shunter no longer stops when its number is already taken by another vehicle of that operator. The operator is changed, the clash is reported, and you can step the number on to a free one.
+
 ## Version 1.0.7
 
 ### Changes
