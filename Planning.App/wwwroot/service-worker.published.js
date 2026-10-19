@@ -30,6 +30,11 @@ async function onInstall(event) {
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
         .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' }));
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
+
+    // Take over at once instead of waiting until every window of the old version is closed;
+    // otherwise an accepted update keeps serving (and showing) the old version until restart.
+    // The page reloads on controllerchange (see index.html).
+    await self.skipWaiting();
 }
 
 async function onActivate(event) {

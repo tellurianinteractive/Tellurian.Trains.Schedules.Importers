@@ -123,7 +123,7 @@
                     </div>
                 </div>
             }
-            @if (IsTractionType && Schedule.Vehicles.Count(v => v.IsTraction) > 1)
+            @if (IsTractionType)
             {
                 <div class="field">
                     <label title="@Translator("TractionRoleHelp")">@Translator("TractionRole")</label>

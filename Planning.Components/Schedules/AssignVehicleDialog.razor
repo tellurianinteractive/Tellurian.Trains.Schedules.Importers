@@ -125,12 +125,12 @@
     private bool _creatingNew;
     private TractionRole _role;
 
-    // Only a traction unit has a place in the train, and only beside another one.
+    // Only a traction unit has a place in the train. Its partner may work the train from a schedule of its own,
+    // so the role is offered whether or not this schedule has another traction unit.
     private bool CanChooseRole =>
-        Schedule.Vehicles.Any(v => v.IsTraction) &&
-        (_creatingNew
+        _creatingNew
             ? Enum.TryParse<ScheduledObjectType>(_newType, out var type) && type != ScheduledObjectType.Wagonset
-            : Plan?.ScheduledObjects.FirstOrDefault(v => v.Id == _existingId)?.IsTraction == true);
+            : Plan?.ScheduledObjects.FirstOrDefault(v => v.Id == _existingId)?.IsTraction == true;
     private int? _existingId;
     private string _newType = ScheduledObjectType.Locomotive.ToString();
     private string _newClass = "";
