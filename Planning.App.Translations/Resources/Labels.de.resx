@@ -2912,4 +2912,19 @@
   <data name="OtherVehiclesDescription" xml:space="preserve">
     <value>Fahrzeuge, die registriert werden müssen, aber nicht am Betrieb teilnehmen: weder im Fahrplan noch Rangierlokomotiven. Sie werden für ihren Eigentümer im Bericht Mitgebrachte Fahrzeuge gedruckt.</value>
   </data>
+  <data name="TractionRole" xml:space="preserve">
+    <value>Position im Zug</value>
+  </data>
+  <data name="TractionRoleHelp" xml:space="preserve">
+    <value>Wo die Lok in den Zügen dieses Umlaufs steht: Vorn führt den Zug, Hinten steht am anderen Ende, sodass der Zug an beiden Enden eine Lok hat, Verstärkung ist an die führende Lok gekuppelt.</value>
+  </data>
+  <data name="TractionRoleFront" xml:space="preserve">
+    <value>Vorn</value>
+  </data>
+  <data name="TractionRoleBack" xml:space="preserve">
+    <value>Hinten</value>
+  </data>
+  <data name="TractionRoleReinforcement" xml:space="preserve">
+    <value>Verstärkung</value>
+  </data>
 </root>

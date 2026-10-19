@@ -46,8 +46,12 @@ public static class ScheduleTrackAlignmentExtensions
         {
             get
             {
-                var traction = schedule.Vehicles.Where(vehicle => vehicle.IsTraction).ToList();
-                return traction.Count > 0 && traction.All(vehicle => vehicle.ChangesDirectionWithoutRunaround);
+                IReadOnlyCollection<(ScheduledObject Vehicle, TractionRole Role)> traction =
+                [
+                    .. schedule.Vehicles.Where(vehicle => vehicle.IsTraction)
+                        .Select(vehicle => (vehicle, vehicle.ScheduleAssignments.First(a => schedule.Equals(a.Schedule)).Role))
+                ];
+                return traction.Count > 0 && !traction.NeedRunaround;
             }
         }
 

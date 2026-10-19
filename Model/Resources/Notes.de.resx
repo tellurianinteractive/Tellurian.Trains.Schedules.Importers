@@ -83,13 +83,13 @@
     <value>Vor Abfahrt {0} vom Abstellgleis zum Abfahrtsgleis fahren.</value>
   </data>
   <data name="MoveTractionUnitToParking" xml:space="preserve">
-    <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis fahren.</value>
+    <value>Nach Ankunft {0} zum Abstellgleis fahren.</value>
   </data>
   <data name="MoveWagonSetFromParkingToDepartureTrack" xml:space="preserve">
     <value>Vor Abfahrt {0} vom Abstellgleis zum Abfahrtsgleis umsetzen.</value>
   </data>
   <data name="MoveWagonSetToParking" xml:space="preserve">
-    <value>Nach Ankunft {0} vom Ankunftsgleis zum Abstellgleis umsetzen.</value>
+    <value>Nach Ankunft {0} zum Abstellgleis umsetzen.</value>
   </data>
   <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
     <value>Vor Abfahrt {0} auf das Abfahrtsgleis aufgleisen.</value>
@@ -223,5 +223,41 @@
   </data>
   <data name="ExchangeTransferringPassengers" xml:space="preserve">
     <value>Umsteigende Reisende hier austauschen.</value>
+  </data>
+  <data name="FetchTrainFromTrack" xml:space="preserve">
+    <value>Vor Abfahrt den Zug von Gleis {0} holen.</value>
+  </data>
+  <data name="FetchTrainFromTrackWithUsage" xml:space="preserve">
+    <value>Vor Abfahrt den Zug von Gleis {0} ({1}) holen.</value>
+  </data>
+  <data name="FetchTrainFromUsage" xml:space="preserve">
+    <value>Vor Abfahrt den Zug von {0} holen.</value>
+  </data>
+  <data name="ShuntTrainToTrack" xml:space="preserve">
+    <value>Nach Ankunft den Zug auf Gleis {0} rangieren.</value>
+  </data>
+  <data name="ShuntTrainToTrackWithUsage" xml:space="preserve">
+    <value>Nach Ankunft den Zug auf Gleis {0} ({1}) rangieren.</value>
+  </data>
+  <data name="ShuntTrainToUsage" xml:space="preserve">
+    <value>Nach Ankunft den Zug nach {0} rangieren.</value>
+  </data>
+  <data name="MoveTrainFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Vor Abfahrt den Zug vom Abstellgleis zum Abfahrtsgleis fahren.</value>
+  </data>
+  <data name="MoveTrainToParking" xml:space="preserve">
+    <value>Nach Ankunft den Zug zum Abstellgleis fahren.</value>
+  </data>
+  <data name="LiftTrainOnToDepartureTrack" xml:space="preserve">
+    <value>Vor Abfahrt den Zug auf das Abfahrtsgleis aufgleisen.</value>
+  </data>
+  <data name="LiftTrainOffArrivalTrack" xml:space="preserve">
+    <value>Nach Ankunft den Zug vom Ankunftsgleis abheben.</value>
+  </data>
+  <data name="ListAnd" xml:space="preserve">
+    <value>und</value>
+  </data>
+  <data name="LocomotiveAtEachEnd" xml:space="preserve">
+    <value>Der Zug fährt mit einer Lok an jedem Ende: {0} und {1}.</value>
   </data>
 </root>

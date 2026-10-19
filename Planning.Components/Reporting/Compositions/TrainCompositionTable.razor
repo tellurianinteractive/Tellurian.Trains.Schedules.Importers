@@ -181,6 +181,15 @@
                                         break;
                                 }
                             }
+                            @* The other end of a train with a loco at each end: drawn last, so it stands at the
+                               far end of the row from the loco rectangle whichever way the train is heading. *@
+                            @if (departure.BackLocos.Count > 0)
+                            {
+                                <div class="loco back">
+                                    <span class="train">@string.Join(" ", departure.BackLocos)</span>
+                                    <span class="times">@departure.TrainIdentity</span>
+                                </div>
+                            }
                         </div>
                     </td>
                 </tr>

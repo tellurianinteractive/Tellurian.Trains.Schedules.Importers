@@ -399,4 +399,7 @@
   <data name="StandingVehiclesTooCloseInTimeToOtherStandingVehicles" xml:space="preserve">
     <value>{0} {1} ligger kun {4} minutter fra {2} {3}; mindst {5} minutter kræves.</value>
   </data>
+  <data name="BackLocomotiveWithoutFront" xml:space="preserve">
+    <value>Køretøjsomløb {0}: {1} står bagest i toget {2}, men intet lokomotiv trækker toget da.</value>
+  </data>
 </root>

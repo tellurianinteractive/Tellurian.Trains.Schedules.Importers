@@ -49,6 +49,10 @@ else
                             <span class="chip @(vehicle.HasExternalId ? "external-id" : null) @(vehicleConflicts.Count > 0 ? "conflict" : null)" style="border-color:@vehicle.BorderColor"
                                   title="@Translator(vehicle.ObjectType.ToString())">
                                 @vehicle.DesignationWithWagons
+                                @if (assignment.Role != TractionRole.Front)
+                                {
+                                    <span class="role">@Translator("TractionRole" + assignment.Role)</span>
+                                }
                                 @if (!assignment.Sessions.CoversAllWithin(UseDays, MaxSessions))
                                 {
                                     <span class="sessions"><SessionsView Sessions="assignment.Sessions" Settings="SessionSettings" /></span>

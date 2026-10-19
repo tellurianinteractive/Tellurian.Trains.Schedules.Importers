@@ -29,6 +29,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateStandingTrackPairs()));
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateWagonSetLoading());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionRoles());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleIdentities());
@@ -464,6 +465,43 @@ public static class ValidationExtensions
                 else if (loadedAt is not null)
                     errors.Add(ValidationError.WagonSetLoadingMismatch(schedule, loadedAt,
                         Message.Information(Strings.WagonSetNeverUnloaded, schedule.Number, loadedAt.To.OperationLocation)));
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates that a traction unit in the <see cref="TractionRole.Back"/> role has a unit in the
+        /// <see cref="TractionRole.Front"/> role to stand at the other end from, on every session it works
+        /// the schedule (rule S8). A locomotive at the back of a train nothing leads is no working at all.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateTractionRoles()
+        {
+            var general = plan.Layout.Settings.General;
+            var errors = new List<ValidationError>();
+            foreach (var schedule in plan.Schedules)
+            {
+                var traction = plan.ScheduledObjects
+                    .Where(v => v.IsTraction)
+                    .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule)).Select(a => (Vehicle: v, Assignment: a)))
+                    .ToList();
+                var back = traction.Where(t => t.Assignment.Role == TractionRole.Back).ToList();
+                if (back.Count == 0) continue;
+
+                var front = traction
+                    .Where(t => t.Assignment.Role == TractionRole.Front)
+                    .Aggregate(new Sessions(), (union, t) => union.Or(t.Assignment.Sessions))
+                    .WithinPeriod(general.UseDays, general.MaxSessions);
+                foreach (var (vehicle, assignment) in back)
+                {
+                    var without = assignment.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Numbers
+                        .Where(n => !front.Includes(n))
+                        .Select(n => (int)n)
+                        .ToList();
+                    if (without.Count == 0) continue;
+                    var message = Message.Warning(Strings.BackLocomotiveWithoutFront,
+                        schedule.Number, vehicle.Designation, SessionsText(SessionsExtensions.FromPeriodNumbers(without, general.UseDays), general));
+                    errors.Add(ValidationError.BackLocomotiveWithoutFront(schedule, message));
+                }
             }
             return errors;
         }

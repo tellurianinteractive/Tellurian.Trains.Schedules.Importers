@@ -436,6 +436,13 @@ Coverage is judged **leg by leg, not by whether the train appears in some turnus
 - `"Vehicle schedule {number} has no vehicle assigned."` (`ScheduleHasNoVehicle`)
 - `"Train {0} has no traction unit between {1} {2} and {3} {4} on sessions {5}."` (`TrainMissingTraction`)
 
+#### S8 — Back locomotive needs a front locomotive ✅
+**Method**: `ValidateTractionRoles(this Plan plan)`
+
+**Validates**: A traction unit assigned to a schedule in the `Back` role (`TractionRole`) stands at the other end of the train from the leading one, so on every session it works the schedule there must be a traction unit in the `Front` role assigned to the **same schedule** on that session. A `Reinforcement` unit does not count: it is coupled to the leading one, not a substitute for it. Gated by `ValidateSchedules`; severity Warning.
+
+**Error**: `"Vehicle schedule {number}: {vehicle} stands at the back of the train on {sessions}, but no locomotive leads it then."` (`BackLocomotiveWithoutFront`)
+
 ### Plan scope (P) — cross-object consistency
 
 #### P1 — Referential integrity ✅ (always enforced)

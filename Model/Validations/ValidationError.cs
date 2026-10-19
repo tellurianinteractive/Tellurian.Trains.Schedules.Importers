@@ -125,6 +125,7 @@ public sealed record ValidationError
         ValidationErrorType.ScheduleHasNoVehicle or
         ValidationErrorType.StationTrackHeldByVehicles or
         ValidationErrorType.WagonSetLoadingMismatch or
+        ValidationErrorType.BackLocomotiveWithoutFront or
         ValidationErrorType.TrainMissingTraction or
         ValidationErrorType.LocomotiveCoverageGap or
         ValidationErrorType.LocomotiveCoverageOverlap => ValidationScope.Schedule,
@@ -710,6 +711,25 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a back-locomotive error: a schedule has a traction unit in the <see cref="TractionRole.Back"/>
+    /// role on sessions where it has none in the <see cref="TractionRole.Front"/> role to stand at the
+    /// other end of the train from.
+    /// </summary>
+    public static ValidationError BackLocomotiveWithoutFront(
+        Schedule schedule,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.BackLocomotiveWithoutFront,
+            FromTrack = GetFirstTrack(schedule) ?? StationTrack.Example,
+            ToTrack = GetLastTrack(schedule) ?? StationTrack.Example,
+            FromTime = GetFirstDeparture(schedule) ?? Time.Zero,
+            ToTime = GetLastArrival(schedule) ?? Time.Zero,
+            Trains = [.. schedule.Parts.Select(p => p.Train).Distinct()],
+            Schedules = [schedule],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a loading mismatch error: a cargo wagonset is unloaded without being loaded first, loaded
     /// while it is still loaded, or left loaded at the end of its schedule.
     /// </summary>
@@ -1019,6 +1039,9 @@ public enum ValidationErrorType
 
     /// <summary>A cargo wagonset's loading and unloading do not alternate, load first.</summary>
     WagonSetLoadingMismatch,
+
+    /// <summary>A locomotive stands at the back of a schedule's trains on sessions where nothing leads them.</summary>
+    BackLocomotiveWithoutFront,
 
     /// <summary>A train has no traction unit on some of the sessions it runs.</summary>
     TrainMissingTraction,

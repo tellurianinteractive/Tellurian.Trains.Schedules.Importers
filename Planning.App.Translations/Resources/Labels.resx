@@ -2926,4 +2926,19 @@
   <data name="OtherVehiclesDescription" xml:space="preserve">
     <value>Vehicles that must be registered but take no part in the operation: not scheduled and not shunters. They are printed for their owner in the Vehicle contributors report.</value>
   </data>
+  <data name="TractionRole" xml:space="preserve">
+    <value>Position in train</value>
+  </data>
+  <data name="TractionRoleHelp" xml:space="preserve">
+    <value>Where the locomotive stands in the trains of this schedule: Front leads the train; Back stands at the other end, so the train has a locomotive at each end; Reinforcement is coupled to the leading locomotive.</value>
+  </data>
+  <data name="TractionRoleFront" xml:space="preserve">
+    <value>Front</value>
+  </data>
+  <data name="TractionRoleBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="TractionRoleReinforcement" xml:space="preserve">
+    <value>Reinforcement</value>
+  </data>
 </root>

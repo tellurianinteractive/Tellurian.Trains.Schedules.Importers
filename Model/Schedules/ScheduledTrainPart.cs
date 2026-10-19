@@ -218,6 +218,7 @@ public static class ScheduledTrainPartExtensions
             // Fetching the units from their other track is what brings them to the train, so that note
             // says all these would: there is nothing left to use, to couple, to bring from stabling or to lift on.
             if (trainPart.OtherFromTrack is null) trainPart.AddTractionUnitJoiningNotes(options, callNotes);
+            trainPart.AddLocomotiveAtEachEndNote(callNotes);
             if (options.IsReinforcement)
             {
                 var settings = trainPart.PlanSessionsSettings;
@@ -227,19 +228,39 @@ public static class ScheduledTrainPartExtensions
             }
         }
 
+        // Traction units with the same instruction for the same sessions share one note — "drive A, B from
+        // stabling" — rather than a line each. A locomotive moving the whole train says the same however
+        // many there are, so those collapse too and the others need not be named.
+        private IEnumerable<(ScheduledObject Vehicle, Sessions? Sessions, bool MovesTrain, IReadOnlyList<ScheduledObject> Also)> Together(
+            List<(ScheduledObject Vehicle, Sessions? Sessions)> units) =>
+            units
+                .GroupBy(u => (Moves: trainPart.MovesTrain(u.Vehicle), u.Sessions))
+                .Select(g => (g.First().Vehicle, g.Key.Sessions, g.Key.Moves, (IReadOnlyList<ScheduledObject>)[.. g.Skip(1).Select(u => u.Vehicle)]));
+
+        // A locomotive at each end is not something a train hauled from one end suggests, so a departure
+        // with units in the Back role says so, whatever else it is told about getting them to the train.
+        private void AddLocomotiveAtEachEndNote(List<ICallNote> callNotes)
+        {
+            var roles = trainPart.TractionRoles;
+            var back = roles.Where(u => u.Role == TractionRole.Back).Select(u => u.Vehicle).ToList();
+            var front = roles.Where(u => u.Role != TractionRole.Back).Select(u => u.Vehicle).ToList();
+            if (back.Count == 0 || front.Count == 0) return;
+            callNotes.Add(new LocomotiveAtEachEndNote(front, back) { IsForDeparture = true, Settings = trainPart.PlanSessionsSettings });
+        }
+
         private void AddTractionUnitJoiningNotes(TractionOptions options, List<ICallNote> callNotes)
         {
             var settings = trainPart.PlanSessionsSettings;
             var units = trainPart.Working(trainPart.TractionUnits);
             if (options.FromLayover == TractionLayover.Stabling)
             {
-                callNotes.AddRange(units
-                    .Select(u => new FromParkingNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units)
+                    .Select(g => new FromParkingNote(g.Vehicle) { IsForDeparture = true, MovesTrain = g.MovesTrain, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             }
             else if (options.FromLayover == TractionLayover.LiftedOff)
             {
-                callNotes.AddRange(units
-                    .Select(u => new LiftOnNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units)
+                    .Select(g => new LiftOnNote(g.Vehicle) { IsForDeparture = true, MovesTrain = g.MovesTrain, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             }
             else if (options.HasCoupleNote)
             {
@@ -281,13 +302,13 @@ public static class ScheduledTrainPartExtensions
             var units = trainPart.Working(trainPart.TractionUnits);
             if (options.ToLayover == TractionLayover.Stabling)
             {
-                callNotes.AddRange(units
-                    .Select(u => new ToParkingNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units)
+                    .Select(g => new ToParkingNote(g.Vehicle) { IsForArrival = true, MovesTrain = g.MovesTrain, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             }
             else if (options.ToLayover == TractionLayover.LiftedOff)
             {
-                callNotes.AddRange(units
-                    .Select(u => new LiftOffNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units)
+                    .Select(g => new LiftOffNote(g.Vehicle) { IsForArrival = true, MovesTrain = g.MovesTrain, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             }
             else if (options.HasUncoupleNote)
             {
@@ -302,6 +323,12 @@ public static class ScheduledTrainPartExtensions
         // Wagonsets are the exception for the loco driver. The wagonset block of the duty booklet already
         // gives each one's track, so the driver is told once to shunt the wagons, and only the dispatcher
         // reads each wagonset and its track.
+        // A locomotive on a reversible (push/pull) train always moves together with the wagonset of the
+        // same schedule, so what is done with it is done with the train.
+        private bool MovesTrain(ScheduledObject vehicle) =>
+            vehicle is { ObjectType: ScheduledObjectType.Locomotive, IsReversibleTrain: true }
+            && trainPart.Schedule is { } schedule && schedule.Vehicles.Any(v => v.IsWagonSet);
+
         private void AddFromOtherTrackNotes(List<ICallNote> callNotes)
         {
             if (trainPart.OtherFromTrack is not { } track) return;
@@ -310,6 +337,7 @@ public static class ScheduledTrainPartExtensions
             callNotes.AddRange(own.Select(o => new FromTrackNote(o.Vehicle, track)
             {
                 IsForDeparture = true,
+                MovesTrain = trainPart.MovesTrain(o.Vehicle),
                 IsDriverNote = !o.Vehicle.IsWagonSet,
                 Sessions = o.Sessions,
                 Settings = settings,
@@ -332,6 +360,7 @@ public static class ScheduledTrainPartExtensions
             callNotes.AddRange(own.Select(o => new ToTrackNote(o.Vehicle, track)
             {
                 IsForArrival = true,
+                MovesTrain = trainPart.MovesTrain(o.Vehicle),
                 IsDriverNote = !o.Vehicle.IsWagonSet,
                 Sessions = o.Sessions,
                 Settings = settings,
@@ -429,9 +458,9 @@ public static class ScheduledTrainPartExtensions
             var settings = trainPart.PlanSessionsSettings;
             var units = trainPart.Working(trainPart.WagonSets);
             if (options.FromLayover == TractionLayover.Stabling)
-                callNotes.AddRange(units.Select(u => new FromParkingNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units).Select(g => new FromParkingNote(g.Vehicle) { IsForDeparture = true, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             else if (options.FromLayover == TractionLayover.LiftedOff)
-                callNotes.AddRange(units.Select(u => new LiftOnNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units).Select(g => new LiftOnNote(g.Vehicle) { IsForDeparture = true, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             else if (options.HasCoupleNote)
                 callNotes.AddRange(units.Select(u => new CoupleNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
         }
@@ -448,9 +477,9 @@ public static class ScheduledTrainPartExtensions
             var settings = trainPart.PlanSessionsSettings;
             var units = trainPart.Working(trainPart.WagonSets);
             if (options.ToLayover == TractionLayover.Stabling)
-                callNotes.AddRange(units.Select(u => new ToParkingNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units).Select(g => new ToParkingNote(g.Vehicle) { IsForArrival = true, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             else if (options.ToLayover == TractionLayover.LiftedOff)
-                callNotes.AddRange(units.Select(u => new LiftOffNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
+                callNotes.AddRange(trainPart.Together(units).Select(g => new LiftOffNote(g.Vehicle) { IsForArrival = true, AlsoVehicles = g.Also, Sessions = g.Sessions, Settings = settings }));
             else if (options.HasUncoupleNote)
                 callNotes.AddRange(units.Select(u => new UncoupleNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
         }
@@ -517,10 +546,26 @@ public static class ScheduledTrainPartExtensions
         {
             get
             {
-                var units = trainPart.TractionUnits.ToList();
-                return units.Count == 0 || units.Any(unit => !unit.ChangesDirectionWithoutRunaround);
+                return trainPart.TractionRoles.NeedRunaround;
             }
         }
+
+        /// <summary>
+        /// The traction units working this part, each with the role its assignment gives it in the
+        /// schedule that holds the part.
+        /// </summary>
+        public IReadOnlyCollection<(ScheduledObject Vehicle, TractionRole Role)> TractionRoles =>
+            [.. trainPart.TractionUnits.Select(unit => (unit, trainPart.RoleOf(unit)))];
+
+        /// <summary>The traction units standing at the back of the train: one at each end, with the leading ones.</summary>
+        public IReadOnlyList<ScheduledObject> BackTractionUnits =>
+            [.. trainPart.TractionRoles.Where(u => u.Role == TractionRole.Back).Select(u => u.Vehicle)];
+
+        private TractionRole RoleOf(ScheduledObject vehicle) =>
+            vehicle.ScheduleAssignments
+                .Where(assignment => assignment.Schedule.Parts.Contains(trainPart))
+                .Select(assignment => assignment.Role)
+                .FirstOrDefault();
 
         /// <summary>
         /// The part written as the traction units working it followed by the times of its

@@ -211,6 +211,21 @@ public class OtherTrackTests
     }
 
     [TestMethod]
+    [DataRow(true, "Before departure, fetch the train from track 2.", "After arrival, shunt the train to track 2.")]
+    [DataRow(false, "Before departure, fetch locomotive 42 T44 from track 2.", "After arrival, shunt locomotive 42 T44 to track 2.")]
+    public void APushPullLocomotiveWithAWagonsetInTheScheduleMovesTheTrain(bool pushPull, string fetch, string put)
+    {
+        var (plan, part, loco) = Arrange();
+        loco.IsReversibleTrain = pushPull;
+        plan.AssignVehicle(part.Schedule!, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 6, null), Sessions.All);
+        part.FromTrack = TrackAt(plan, "G", "2");
+        part.ToTrack = TrackAt(plan, "Snu", "2");
+
+        Assert.AreEqual(fetch, DepartureNotes(plan, part).OfType<FromTrackNote>().Single(n => n.ScheduledObject == loco).ToText);
+        Assert.AreEqual(put, ArrivalNotes(plan, part).OfType<ToTrackNote>().Single(n => n.ScheduledObject == loco).ToText);
+    }
+
+    [TestMethod]
     public void TheDispatcherStillReadsWhichWagonsetGoesToWhichTrack()
     {
         // The dispatcher has no wagonset block to look the track up in.

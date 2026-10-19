@@ -73,6 +73,19 @@
                 <button class="toggle" @onclick="() => { _creatingNew = true; _error = null; }"><i class="fa-solid fa-plus"></i> @Translator("CreateNewVehicle")</button>
             }
 
+            @if (CanChooseRole)
+            {
+                <div class="field">
+                    <label title="@Translator("TractionRoleHelp")">@Translator("TractionRole")</label>
+                    <select value="@_role" @onchange="e => _role = Enum.TryParse<TractionRole>(e.Value?.ToString(), out var r) ? r : _role">
+                        @foreach (var role in Enum.GetValues<TractionRole>())
+                        {
+                            <option value="@role">@Translator("TractionRole" + role)</option>
+                        }
+                    </select>
+                </div>
+            }
+
             @if (_error is not null)
             {
                 <p class="error">@_error</p>
@@ -110,6 +123,14 @@
     private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private bool _creatingNew;
+    private TractionRole _role;
+
+    // Only a traction unit has a place in the train, and only beside another one.
+    private bool CanChooseRole =>
+        Schedule.Vehicles.Any(v => v.IsTraction) &&
+        (_creatingNew
+            ? Enum.TryParse<ScheduledObjectType>(_newType, out var type) && type != ScheduledObjectType.Wagonset
+            : Plan?.ScheduledObjects.FirstOrDefault(v => v.Id == _existingId)?.IsTraction == true);
     private int? _existingId;
     private string _newType = ScheduledObjectType.Locomotive.ToString();
     private string _newClass = "";
@@ -179,7 +200,7 @@
 
         // Take only the sessions the vehicle is still free for (all of them when it is unassigned).
         var sessions = vehicle.AssignedSessions.ComplementWithin(UseDays, MaxSessions);
-        plan.AssignVehicle(Schedule, vehicle, sessions);
+        plan.AssignVehicle(Schedule, vehicle, sessions, CanChooseRole ? _role : TractionRole.Front);
         ScheduleState.SaveAndNotify();
         await OnAssigned.InvokeAsync();
     }

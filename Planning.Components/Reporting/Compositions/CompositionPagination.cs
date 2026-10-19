@@ -235,10 +235,22 @@ public static class CompositionPaginator
         var composition = WrappedHeightMm(
             departure.Groups
                 .Select(group => (WidthMmOf(group, geometry), HeightMmOf(group, geometry)))
-                .Prepend((LocoWidthMmOf(departure, geometry), geometry.WagonHeightMm)),
+                .Prepend((LocoWidthMmOf(departure, geometry), geometry.WagonHeightMm))
+                .Concat(departure.BackLocos.Count == 0 ? [] : [(BackLocoWidthMmOf(departure, geometry), geometry.WagonHeightMm)]),
             geometry.CompositionWidthMm, geometry.GroupGapWidthMm, geometry.GroupGapHeightMm);
         return Math.Max(geometry.TextLineHeightMm, composition) + geometry.RowChromeHeightMm;
     }
+
+    /// <summary>
+    /// The width of the rectangle for the locomotives at the back of the train: their designations and the
+    /// train, side by side on one line.
+    /// </summary>
+    /// <param name="departure">The row.</param>
+    /// <param name="geometry">The page geometry to paginate against.</param>
+    public static double BackLocoWidthMmOf(CompositionDeparture departure, CompositionPageGeometry geometry) =>
+        Math.Min(geometry.CompositionWidthMm, geometry.LocoChromeWidthMm +
+            ((string.Join(" ", departure.BackLocos).Length + departure.TrainIdentity.Length) * geometry.WagonClassCharacterWidthMm) +
+            geometry.WagonTextGapMm);
 
     /// <summary>
     /// The width of the loco rectangle at the front of a row's train: the sessions, the train, its times here

@@ -799,6 +799,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle schedule {0}: {1} stands at the back of the train on {2}, but no locomotive leads it then..
+        /// </summary>
+        internal static string BackLocomotiveWithoutFront {
+            get {
+                return ResourceManager.GetString("BackLocomotiveWithoutFront", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle schedule {0}: the wagons are loaded at {1} but never unloaded..
         /// </summary>
         internal static string WagonSetNeverUnloaded {

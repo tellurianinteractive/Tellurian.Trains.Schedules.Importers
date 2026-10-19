@@ -711,7 +711,14 @@ table.grid thead th .sort-indicator {
         }
 
         /* A note on its own row starts at the station column — the Arr/Dep cell stays empty — so it
-           aligns with the station name above it rather than being indented by an arbitrary amount. */
+           aligns with the station name above it rather than being indented by an arbitrary amount.
+           The row is kept as short as the text allows — no vertical padding and a tight line height —
+           because a note belongs to the call above it and should not push the route apart. */
+        tr.note-row td {
+            padding-top: 0;
+            padding-bottom: 0;
+            line-height: 1.15;
+        }
 
         /* Every row reserves the rule, and only its colour says whether one is drawn. A rule falls on
            the LAST row of a group, so a call whose notes stack below it carries none — and with the

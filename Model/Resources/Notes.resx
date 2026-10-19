@@ -88,14 +88,14 @@
     <comment>{0}=traction unit</comment>
   </data>
   <data name="MoveTractionUnitToParking" xml:space="preserve">
-    <value>After arrival, drive {0} from arrival track to stabling.</value>
+    <value>After arrival, drive {0} to stabling.</value>
     <comment>{0}=traction unit</comment>
   </data>
   <data name="MoveWagonSetFromParkingToDepartureTrack" xml:space="preserve">
     <value>Before departure, move {0} from stabling to departure track.</value>
   </data>
   <data name="MoveWagonSetToParking" xml:space="preserve">
-    <value>After arrival, move {0} from arrival track to stabling.</value>
+    <value>After arrival, move {0} to stabling.</value>
   </data>
   <data name="LiftTractionUnitOnToDepartureTrack" xml:space="preserve">
     <value>Before departure, lift {0} on to the departure track.</value>
@@ -241,5 +241,43 @@
   <data name="ExchangeTransferringPassengers" xml:space="preserve">
     <value>Exchange transferring passengers here.</value>
     <comment>Arrival note at a station marked as a passenger interchange, where the passengers going on by another train are handed over</comment>
+  </data>
+  <data name="FetchTrainFromTrack" xml:space="preserve">
+    <value>Before departure, fetch the train from track {0}.</value>
+  </data>
+  <data name="FetchTrainFromTrackWithUsage" xml:space="preserve">
+    <value>Before departure, fetch the train from track {0} ({1}).</value>
+  </data>
+  <data name="FetchTrainFromUsage" xml:space="preserve">
+    <value>Before departure, fetch the train from {0}.</value>
+  </data>
+  <data name="ShuntTrainToTrack" xml:space="preserve">
+    <value>After arrival, shunt the train to track {0}.</value>
+  </data>
+  <data name="ShuntTrainToTrackWithUsage" xml:space="preserve">
+    <value>After arrival, shunt the train to track {0} ({1}).</value>
+  </data>
+  <data name="ShuntTrainToUsage" xml:space="preserve">
+    <value>After arrival, shunt the train to {0}.</value>
+  </data>
+  <data name="MoveTrainFromParkingToDepartureTrack" xml:space="preserve">
+    <value>Before departure, drive the train from stabling to departure track.</value>
+  </data>
+  <data name="MoveTrainToParking" xml:space="preserve">
+    <value>After arrival, drive the train to stabling.</value>
+  </data>
+  <data name="LiftTrainOnToDepartureTrack" xml:space="preserve">
+    <value>Before departure, lift the train on to the departure track.</value>
+  </data>
+  <data name="LiftTrainOffArrivalTrack" xml:space="preserve">
+    <value>After arrival, lift the train off the arrival track.</value>
+  </data>
+  <data name="ListAnd" xml:space="preserve">
+    <value>and</value>
+    <comment>The word joining the last two items of a list of vehicles: "A, B and C".</comment>
+  </data>
+  <data name="LocomotiveAtEachEnd" xml:space="preserve">
+    <value>The train departs with a loco at each end: {0} and {1}.</value>
+    <comment>{0}=locomotives at the head, {1}=locomotives at the other end</comment>
   </data>
 </root>

@@ -35,6 +35,12 @@ public sealed class CompositionDeparture
     public required IReadOnlyList<CompositionGroup> Groups { get; init; }
 
     /// <summary>
+    /// The designations of the locomotives standing at the back of the train, which has one at each end
+    /// with the loco rectangle at its front. Empty for a train hauled from one end.
+    /// </summary>
+    public IReadOnlyList<string> BackLocos { get; init; } = [];
+
+    /// <summary>
     /// The plain-text form of the sessions as the column shows them. Kept so the page-height estimate charges
     /// for exactly what is printed; the cell wraps rather than truncate.
     /// </summary>
@@ -189,6 +195,7 @@ public sealed class CompositionDeparture
                 Call = call,
                 Heading = orientation?.HeadingFrom(station, calls[i + 1].OperationLocation) ?? CompositionHeading.Leftwards,
                 Groups = ordered,
+                BackLocos = [.. plan?.BackTractionOf(train).Select(vehicle => vehicle.Designation) ?? []],
                 SessionsText = train.Sessions.ToText(settings),
             };
         }

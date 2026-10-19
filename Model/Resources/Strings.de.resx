@@ -399,4 +399,7 @@
   <data name="StandingVehiclesTooCloseInTimeToOtherStandingVehicles" xml:space="preserve">
     <value>{0} {1} liegt nur {4} Minuten von {2} {3} entfernt; erforderlich sind mindestens {5} Minuten.</value>
   </data>
+  <data name="BackLocomotiveWithoutFront" xml:space="preserve">
+    <value>Fahrzeugumlauf {0}: {1} steht {2} am Ende des Zuges, aber dann führt keine Lok den Zug.</value>
+  </data>
 </root>

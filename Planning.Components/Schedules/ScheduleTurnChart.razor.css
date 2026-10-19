@@ -134,6 +134,13 @@
         border-color: #d9a406 !important;
     }
 
+    /* Where a traction unit that is not the leading one stands in the train, shown after the vehicle id. */
+    .chip .role {
+        font-weight: 400;
+        font-size: 0.72rem;
+        font-style: italic;
+    }
+
     /* Sessions/days a partly-booked assignment covers, shown after the vehicle id on its chip. */
     .chip .sessions {
         font-weight: 400;

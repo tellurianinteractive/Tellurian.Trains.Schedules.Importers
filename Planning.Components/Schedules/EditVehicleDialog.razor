@@ -123,6 +123,18 @@
                     </div>
                 </div>
             }
+            @if (IsTractionType && Schedule.Vehicles.Count(v => v.IsTraction) > 1)
+            {
+                <div class="field">
+                    <label title="@Translator("TractionRoleHelp")">@Translator("TractionRole")</label>
+                    <select value="@_role" @onchange="e => _role = Enum.TryParse<TractionRole>(e.Value?.ToString(), out var r) ? r : _role">
+                        @foreach (var role in Enum.GetValues<TractionRole>())
+                        {
+                            <option value="@role">@Translator("TractionRole" + role)</option>
+                        }
+                    </select>
+                </div>
+            }
             <div class="field">
                 <label>@Translator(UseDays ? "Days" : "Sessions")</label>
                 <select value="@_sessionsKey" @onchange="OnSessionsChanged">
@@ -207,6 +219,7 @@
     private int _numberOfUnits = 1;
     private readonly List<Wagon> _wagons = [];
     private Sessions _sessions;
+    private TractionRole _role;
     private string _sessionsKey = "";
 
     private ScheduledObjectType Type =>
@@ -242,6 +255,7 @@
             IsCargo = w.IsCargo,
         }));
         _sessions = Assignment.Sessions;
+        _role = Assignment.Role;
         _sessionsKey = SessionsDisplay.Key(_sessions);
     }
 
@@ -321,6 +335,9 @@
             }
         }
         Assignment.Sessions = _sessions;
+        Assignment.Role = _role;
+        // A back locomotive is a cab at the far end, so the role can decide whether the train is run round.
+        Schedule.AlignArrivalTracks();
         ScheduleState.SaveAndNotify();
         await OnSaved.InvokeAsync();
     }

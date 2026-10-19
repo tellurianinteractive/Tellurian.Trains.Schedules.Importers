@@ -2912,4 +2912,19 @@
   <data name="OtherVehiclesDescription" xml:space="preserve">
     <value>Kjøretøy som må registreres, men som ikke inngår i driften: verken planlagte eller skiftelokomotiver. De skrives ut til eieren i rapporten Medbrakte kjøretøy.</value>
   </data>
+  <data name="TractionRole" xml:space="preserve">
+    <value>Plassering i toget</value>
+  </data>
+  <data name="TractionRoleHelp" xml:space="preserve">
+    <value>Hvor lokomotivet står i togene i denne omløpsplanen: Foran trekker toget, Bakerst står i den andre enden slik at toget har lokomotiv i begge ender, Forsterkning er koblet til det fremste lokomotivet.</value>
+  </data>
+  <data name="TractionRoleFront" xml:space="preserve">
+    <value>Foran</value>
+  </data>
+  <data name="TractionRoleBack" xml:space="preserve">
+    <value>Bakerst</value>
+  </data>
+  <data name="TractionRoleReinforcement" xml:space="preserve">
+    <value>Forsterkning</value>
+  </data>
 </root>

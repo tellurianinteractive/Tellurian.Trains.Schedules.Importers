@@ -399,4 +399,7 @@
   <data name="StandingVehiclesTooCloseInTimeToOtherStandingVehicles" xml:space="preserve">
     <value>{0} {1} is only {4} minutes from {2} {3}; at least {5} minutes are required.</value>
   </data>
+  <data name="BackLocomotiveWithoutFront" xml:space="preserve">
+    <value>Vehicle schedule {0}: {1} stands at the back of the train on {2}, but no locomotive leads it then.</value>
+  </data>
 </root>

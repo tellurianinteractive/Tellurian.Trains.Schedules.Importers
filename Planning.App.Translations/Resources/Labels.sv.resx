@@ -2912,4 +2912,19 @@
   <data name="OtherVehiclesDescription" xml:space="preserve">
     <value>Fordon som måste registreras men inte ingår i trafiken: varken tidtabellsatta eller växlingslok. De skrivs ut för sin ägare i rapporten Fordon och ägare.</value>
   </data>
+  <data name="TractionRole" xml:space="preserve">
+    <value>Placering i tåget</value>
+  </data>
+  <data name="TractionRoleHelp" xml:space="preserve">
+    <value>Var loket står i tågen i den här turnusen: Främre drar tåget, Bakre står i andra änden så att tåget har lok i båda ändar, Förstärkning är kopplat till det främre loket.</value>
+  </data>
+  <data name="TractionRoleFront" xml:space="preserve">
+    <value>Främre</value>
+  </data>
+  <data name="TractionRoleBack" xml:space="preserve">
+    <value>Bakre</value>
+  </data>
+  <data name="TractionRoleReinforcement" xml:space="preserve">
+    <value>Förstärkning</value>
+  </data>
 </root>

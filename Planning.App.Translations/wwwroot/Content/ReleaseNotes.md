@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.1.0
+
+### Changes
+
+- **A second locomotive on a train.** A locomotive can now be added to the schedule of the locomotive it works with, instead of getting a schedule of its own that repeats the same trains. Give it a **Position in train** when you add it, or when you edit it in the Schedules tab: **Front** leads the train, **Back** stands at the other end so the train has a locomotive at each end, and **Reinforcement** is coupled to the leading locomotive. A locomotive at the back means the train is not run round, and the departure gets a note saying that there is a locomotive at each end. The Train compositions report draws a second locomotive box at the far end of the train, and a warning is shown when a locomotive at the back has no locomotive leading the train on some sessions.
+
+- **Shorter notes for several locomotives or wagonsets.** Locomotives or wagonsets given the same instruction for the same sessions are named in one note ("drive SJ 04 Rc6 and SJ 05 Rc6 to stabling"), and the notes for driving to stabling no longer repeat the arrival track.
+
 ## Version 1.0.8
 
 ### Changes

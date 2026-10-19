@@ -47,6 +47,19 @@ public abstract record GeneratedNote : ICallNote
     public Sessions? Sessions { get; init; }
 
     /// <summary>
+    /// True where the vehicle the note names is a locomotive on a reversible (push/pull) train and the
+    /// schedule holds a wagonset: the two always move together, so the note speaks of "the train" rather
+    /// than the vehicle. Read by the notes that move a vehicle between tracks or to and from parking.
+    /// </summary>
+    public bool MovesTrain { get; init; }
+
+    /// <summary>
+    /// Further traction units given the same instruction for the same sessions, named in one note with
+    /// the vehicle the note carries rather than in a note each. Empty for a note about a single vehicle.
+    /// </summary>
+    public IReadOnlyList<ScheduledObject> AlsoVehicles { get; init; } = [];
+
+    /// <summary>
     /// How <see cref="Sessions"/> is written — as session numbers or as weekday names. Null where the
     /// note has no sessions to write, when nothing is prefixed.
     /// </summary>
@@ -85,6 +98,14 @@ public static class GeneratedNoteExtensions
         /// </summary>
         private NoteTemplate WordingOf => note switch
         {
+            FromParkingNote { MovesTrain: true } => new(NoteResources.MoveTrainFromParkingToDepartureTrack),
+            ToParkingNote { MovesTrain: true } => new(NoteResources.MoveTrainToParking),
+            LiftOnNote { MovesTrain: true } => new(NoteResources.LiftTrainOnToDepartureTrack),
+            LiftOffNote { MovesTrain: true } => new(NoteResources.LiftTrainOffArrivalTrack),
+            FromTrackNote(_, var track) { MovesTrain: true } => TrainTrackTemplate(track, NoteResources.FetchTrainFromTrack, NoteResources.FetchTrainFromTrackWithUsage, NoteResources.FetchTrainFromUsage),
+            ToTrackNote(_, var track) { MovesTrain: true } => TrainTrackTemplate(track, NoteResources.ShuntTrainToTrack, NoteResources.ShuntTrainToTrackWithUsage, NoteResources.ShuntTrainToUsage),
+            LocomotiveAtEachEndNote(var front, var back) =>
+                new(NoteResources.LocomotiveAtEachEnd, Vehicles(front[0], [.. front.Skip(1)]), Vehicles(back[0], [.. back.Skip(1)])),
             UseNote(var so) => new(NoteResources.Use, so),
             CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, so),
             CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, so, NoteArg.Plain(position)),
@@ -93,12 +114,12 @@ public static class GeneratedNoteExtensions
             UnloadWagonsNote(var so, null) => new(NoteResources.UnloadWagons, so),
             UnloadWagonsNote(var so, var returnTo) => new(NoteResources.UnloadWagonsAndReturn, so, returnTo),
             // Wagons are not driven; they are moved.
-            FromParkingNote(var so) when so.IsWagonSet => new(NoteResources.MoveWagonSetFromParkingToDepartureTrack, so),
-            ToParkingNote(var so) when so.IsWagonSet => new(NoteResources.MoveWagonSetToParking, so),
-            FromParkingNote(var so) => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, so),
-            ToParkingNote(var so) => new(NoteResources.MoveTractionUnitToParking, so),
-            LiftOnNote(var so) => new(NoteResources.LiftTractionUnitOnToDepartureTrack, so),
-            LiftOffNote(var so) => new(NoteResources.LiftTractionUnitOffArrivalTrack, so),
+            FromParkingNote(var so) { AlsoVehicles: var also } when so.IsWagonSet => new(NoteResources.MoveWagonSetFromParkingToDepartureTrack, Vehicles(so, also)),
+            ToParkingNote(var so) { AlsoVehicles: var also } when so.IsWagonSet => new(NoteResources.MoveWagonSetToParking, Vehicles(so, also)),
+            FromParkingNote(var so) { AlsoVehicles: var also } => new(NoteResources.MoveTractionUnitFromParkingToDepartureTrack, Vehicles(so, also)),
+            ToParkingNote(var so) { AlsoVehicles: var also } => new(NoteResources.MoveTractionUnitToParking, Vehicles(so, also)),
+            LiftOnNote(var so) { AlsoVehicles: var also } => new(NoteResources.LiftTractionUnitOnToDepartureTrack, Vehicles(so, also)),
+            LiftOffNote(var so) { AlsoVehicles: var also } => new(NoteResources.LiftTractionUnitOffArrivalTrack, Vehicles(so, also)),
             // The kind of vehicle leads the instruction — a driver reading "fetch wagon group 21" knows
             // what to look for on the track before finding the number. It is plain: the number beside it
             // is what identifies the vehicle and carries the emphasis.
@@ -219,6 +240,36 @@ public static class GeneratedNoteExtensions
     /// </summary>
     private static string When(Meet meet) =>
         meet.From == meet.To ? meet.From.HHMM() : $"{meet.From.HHMM()}-{meet.To.HHMM()}";
+
+    // One vehicle as itself, several as a list with each emphasised as a lone one would be.
+    private static object Vehicles(ScheduledObject first, IReadOnlyList<ScheduledObject> also)
+    {
+        if (also.Count == 0) return first;
+        ScheduledObject[] all = [first, .. also];
+        return NoteArg.Markup(
+            ListOf(all.Select(v => NoteArg.Emphasised(v).Text)),
+            ListOf(all.Select(v => NoteArg.Emphasised(v).Html)));
+
+        // "A, B and C" — the last word is the language's own.
+        static string ListOf(IEnumerable<string> items)
+        {
+            var list = items.ToList();
+            return list.Count == 1
+                ? list[0]
+                : $"{string.Join(", ", list[..^1])} {NoteResources.ListAnd} {list[^1]}";
+        }
+    }
+
+    // The same for a note about the whole train, which names no vehicle.
+    private static NoteTemplate TrainTrackTemplate(StationTrack track, string numbered, string numberedWithUsage, string usageOnly)
+    {
+        var number = track.Number.Trim();
+        var usage = track.Usage.Trim();
+        if (number.Length == 0 && usage.Length > 0) return new(usageOnly, usage);
+        return usage.Length > 0
+            ? new(numberedWithUsage, number, NoteArg.Plain(usage))
+            : new(numbered, number);
+    }
 
     // A track named in a note is given by its number, followed by its usage where it has one — "track 5
     // (loco shed)" — or by its usage alone where it has no number, since "track" then names nothing. The

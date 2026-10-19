@@ -227,7 +227,8 @@ public static class ScheduleEditingExtensions
             foreach (var vehicle in origin.Vehicles.ToList())
             {
                 var assignment = vehicle.ScheduleAssignments.FirstOrDefault(a => origin.Equals(a.Schedule));
-                plan.CreateAssignment(target, vehicle, sessions ?? assignment?.Sessions);
+                var copy = plan.CreateAssignment(target, vehicle, sessions ?? assignment?.Sessions);
+                if (copy.HasValue && assignment is not null) copy.Value.Role = assignment.Role;
             }
         }
 
@@ -362,10 +363,14 @@ public static class ScheduleEditingExtensions
         /// <param name="schedule">The schedule to assign the vehicle to.</param>
         /// <param name="vehicle">The vehicle to assign.</param>
         /// <param name="sessions">The sessions the assignment applies to; defaults to all sessions.</param>
+        /// <param name="role">Where a traction unit stands in the trains beside the others working them;
+        /// <see cref="TractionRole.Front"/> by default.</param>
         /// <returns>The created (or already-present) assignment.</returns>
-        public Maybe<ScheduleAssignment> AssignVehicle(Schedule schedule, ScheduledObject vehicle, Sessions? sessions = null)
+        public Maybe<ScheduleAssignment> AssignVehicle(Schedule schedule, ScheduledObject vehicle, Sessions? sessions = null, TractionRole role = TractionRole.Front)
         {
+            var isNew = !vehicle.ScheduleAssignments.Any(a => schedule.Equals(a.Schedule));
             var assignment = plan.CreateAssignment(schedule, vehicle, sessions);
+            if (assignment.HasValue && isNew) assignment.Value.Role = role;
             if (assignment.HasValue) schedule.AlignArrivalTracks();
             return assignment;
         }

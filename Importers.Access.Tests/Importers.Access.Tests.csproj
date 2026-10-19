@@ -4,7 +4,7 @@
     <RootNamespace>Tellurian.Trains.Schedules.Importers.Access.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Data.Odbc" Version="10.0.12" />
+    <PackageReference Include="System.Data.Odbc" Version="10.0.13" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Importers.Access\Importers.Access.csproj" />

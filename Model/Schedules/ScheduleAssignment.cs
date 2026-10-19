@@ -23,6 +23,12 @@ public class ScheduleAssignment
     public Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
+    /// Gets or sets where the vehicle stands in the trains of the schedule, where it is a traction unit
+    /// working them beside another one. <see cref="TractionRole.Front"/> unless said otherwise.
+    /// </summary>
+    public TractionRole Role { get; set; } = TractionRole.Front;
+
+    /// <summary>
     /// Gets or sets the foreign key to the vehicle. Required.
     /// </summary>
     public int ScheduledObjectId { get; set; }

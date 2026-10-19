@@ -394,11 +394,33 @@ public static class PlanExtensions
         {
             plan = plan.ValueOrException(nameof(plan));
             train = train.ValueOrException(nameof(train));
-            var traction = plan.ScheduledObjects
-                .Where(vehicle => vehicle.IsTraction && vehicle.Works(train))
-                .ToList();
-            return traction.Count == 0 || traction.Any(vehicle => !vehicle.ChangesDirectionWithoutRunaround);
+            IReadOnlyCollection<(ScheduledObject Vehicle, TractionRole Role)> traction =
+            [
+                .. plan.ScheduledObjects
+                    .Where(vehicle => vehicle.IsTraction && vehicle.Works(train))
+                    .Select(vehicle => (vehicle, vehicle.ScheduleAssignments
+                        .Where(assignment => (assignment.Schedule?.Parts ?? []).Any(part => part.Train.Equals(train)))
+                        .Select(assignment => assignment.Role)
+                        .FirstOrDefault()))
+            ];
+            return traction.NeedRunaround;
         }
+    }
+
+    extension(Plan plan)
+    {
+        /// <summary>
+        /// The traction units standing at the back of <paramref name="train"/>, so it has a locomotive at
+        /// each end: those assigned to a schedule holding one of its parts in the
+        /// <see cref="TractionRole.Back"/> role.
+        /// </summary>
+        /// <param name="train">The train to ask about.</param>
+        public IReadOnlyList<ScheduledObject> BackTractionOf(Train train) =>
+        [
+            .. plan.ScheduledObjects.Where(vehicle => vehicle.IsTraction && vehicle.ScheduleAssignments.Any(assignment =>
+                assignment.Role == TractionRole.Back &&
+                (assignment.Schedule?.Parts ?? []).Any(part => part.Train.Equals(train))))
+        ];
     }
 
     extension(ScheduledObject vehicle)
