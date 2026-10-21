@@ -10,7 +10,7 @@
 
 ### Changes
 
-- **Add a call at the start of a train.** In the Trains tab you can now add a call at the beginning of a train as well as at the end, with **Add first call**. For both buttons you pick the location from a list beside it. Only locations that keep the route whole are offered.
+- **Add a call at the start of a train.** In the Trains tab you can now add a call at the beginning of a train as well as at the end, with **Add first call**. For both buttons you pick the location from a list beside it.
 
 ## Version 1.2.1
 
