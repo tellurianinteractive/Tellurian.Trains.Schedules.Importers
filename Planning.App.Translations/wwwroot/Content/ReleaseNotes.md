@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.2.1
+
+### Changes
+
+- **Traction units in the Trains tab.** The Traction column no longer lists units that work a train of another company with the same number. Train numbers are only unique within a company.
+
 ## Version 1.2.0
 
 ### Changes

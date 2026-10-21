@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 3.4.1
+
+### Fixes
+
+- **A train is no longer mistaken for another company's train with the same number.** `Train.Equals` compared the companies only when both were resolved; while a plan was being read, two trains with no resolved company were taken as the same company, so equality fell to the number alone. It now falls back to `CompanyId`. This also affected `Plan.Works`, which listed traction units working a train of another company with the same number.
+
 ## Version 3.4.0
 
 ### New Features
