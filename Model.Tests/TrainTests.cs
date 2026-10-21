@@ -27,6 +27,16 @@ public class TrainTests
     }
 
     [TestMethod]
+    public void SameNumberInDifferentCompaniesIsNotEqualEvenWhenCompaniesAreUnresolved()
+    {
+        var one = new Train(1, Category, 1234, "") { CompanyId = 1 };
+        var another = new Train(2, Category, 1234, "") { CompanyId = 2 };
+        var same = new Train(3, Category, 1234, "") { CompanyId = 1 };
+        Assert.IsFalse(one.Equals(another));
+        Assert.IsTrue(one.Equals(same));
+    }
+
+    [TestMethod]
     public void AddsFirstTimetableCall()
     {
         var station = TestDataFactory.CreateStation1();

@@ -479,6 +479,22 @@ public class ShuntingTaskTests
     }
 
     [TestMethod]
+    public void TwoTasksMeetingExactlyAtOneStationChainIntoOneWorking()
+    {
+        var (timetable, _, station) = Arrange();
+        var morning = AddTask(timetable, station, Time.FromHourAndMinute(5, 0), Time.FromHourAndMinute(13, 0));
+        var evening = AddTask(timetable, station, Time.FromHourAndMinute(13, 0), Time.FromHourAndMinute(21, 0));
+        var plan = Plan.Create("Test", timetable);
+        var schedule = plan.CreateSchedule();
+
+        Assert.IsTrue(schedule.Append(morning.AsTrainPart).HasValue);
+        Assert.Contains(evening, plan.CandidateTrainsFor(schedule));
+        var second = schedule.Append(evening.AsTrainPart);
+
+        Assert.IsTrue(second.HasValue, second.Message);
+    }
+
+    [TestMethod]
     public void ADutyPlacesATaskByWhenItsWorkStartsAndEnds()
     {
         var (plan, part) = LocolessWorking();

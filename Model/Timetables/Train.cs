@@ -208,8 +208,15 @@ public class Train : IEquatable<Train>
     /// <inheritdoc/>
     public bool Equals(Train? other) =>
         other is not null &&
-        (Company?.Equals(other.Company) ?? other.Company is null) &&
+        SameCompany(other) &&
         Number == other.Number;
+
+    // Train numbers are unique only within a company. While a plan is being read the company may still be
+    // just a key, so two trains with no resolved company are told apart by CompanyId, never taken as equal.
+    private bool SameCompany(Train other) =>
+        Company is not null && other.Company is not null
+            ? Company.Equals(other.Company)
+            : CompanyId == other.CompanyId;
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Train other && Equals(other);
