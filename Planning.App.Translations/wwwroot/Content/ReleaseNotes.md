@@ -4,7 +4,7 @@
 
 ### Changes
 
-- **Traction units in the Trains tab.** The Traction column no longer lists units that work a train of another company with the same number. Train numbers are only unique within a company.
+- **Traction units in the Trains tab.** The Vehicles column no longer lists units that work a train of another company with the same number. Train numbers are only unique within a company.
 
 ## Version 1.2.0
 

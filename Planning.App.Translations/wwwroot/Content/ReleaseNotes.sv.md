@@ -1,5 +1,37 @@
 # Versionsnyheter
 
+## Version 1.2.1
+
+### Ändringar
+
+- **Dragfordon i fliken Tåg.** Kolumnen Fordon visar inte längre fordon som kör ett tåg från ett annat bolag med samma nummer. Tågnummer är bara entydiga inom ett bolag.
+
+## Version 1.2.0
+
+### Ändringar
+
+- **Tågklareringslista per riktning.** En bemannad station har en ny inställning i fliken Driftplatser, **Tågklareringslista per riktning?**. När den är ikryssad delas stationens tågklareringslista i en lista för varje riktning, vilket är praktiskt på en trafikerad station. Ett tåg anmäls in på listan för den riktning det kommer från och anmäls ut på listan för den riktning det går mot, så ett genomgående tåg står på båda listorna, ankomsten på den ena och avgången på den andra. Varje lista visar riktningen i rubriken och bara grannstationerna med telefonnummer på sin egen sida. De redigerbara klareringsdokumenten delas på samma sätt, ett dokument per riktning.
+
+- **Fordon som lyfts på vid avgång.** I rapporten Fordon och ägare visas ett fordon som lyfts på spåret strax före avgång nu stående på ett bord i stället för på ett spår.
+
+- **Antal enheter.** Ett fordon räknas alltid som minst en enhet, även i planer som sparats tidigare utan.
+
+## Version 1.1.2
+
+### Ändringar
+
+- **Fordon som går vid andra tider.** Ett lok eller vagnsätt som redan kör något i alla köromgångar erbjuds nu när du tilldelar ett fordon till ett omlopp som går vid andra tider. Tidigare var det dolt, så ett lok kunde inte läggas till som främre lok i ett pendeltåg medan det också körde ett nattåg för sig. Ett fordon döljs bara när allt det redan kör överlappar omloppet i tid, och det tar bara de köromgångar där det är ledigt.
+
+- **Dragfordon i tågets uppehåll.** Ett tågs uppehåll visar de lok och tågsätt som kör det, med de köromgångar de kör det i när det inte är alla tågets.
+
+## Version 1.1.0
+
+### Ändringar
+
+- **Ett andra lok på ett tåg.** Ett lok kan nu läggas till i omloppet för det lok det kör tillsammans med, i stället för att få ett eget omlopp som upprepar samma tåg. Ange en **Placering i tåget** när du lägger till det, eller när du redigerar det i fliken Omlopp: **Främre** leder tåget, **Bakre** står i andra änden så att tåget har ett lok i varje ände, och **Förstärkning** kopplas till det ledande loket. Ett lok längst bak betyder att tåget inte rundgår, och avgången får en notering om att det finns ett lok i varje ände. Rapporten Tågsammansättningar ritar en extra lokruta i tågets bortre ände, och en varning visas när ett lok längst bak i några köromgångar inte har något lok längst fram.
+
+- **Kortare noteringar för flera lok eller vagnsätt.** Lok eller vagnsätt som får samma besked i samma köromgångar nämns i en notering ("kör SJ 04 Rc6 och SJ 05 Rc6 till uppställning"), och noteringarna om körning till uppställning upprepar inte längre ankomstspåret.
+
 ## Version 1.0.8
 
 ### Ändringar

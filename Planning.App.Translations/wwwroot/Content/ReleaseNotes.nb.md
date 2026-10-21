@@ -1,5 +1,37 @@
 # Versjonsnyheter
 
+## Versjon 1.2.1
+
+### Endringer
+
+- **Trekkraftenheter i fanen Tog.** Kolonnen Kjøretøy viser ikke lenger enheter som kjører et tog fra et annet selskap med samme nummer. Tognumre er bare entydige innenfor et selskap.
+
+## Versjon 1.2.0
+
+### Endringer
+
+- **Togekspederingsliste per retning.** En betjent stasjon har en ny innstilling i fanen Driftssteder, **Togekspederingsliste per retning?**. Når den er avkrysset, deles stasjonens togekspederingsliste i én liste for hver retning, noe som er hendig på en travel stasjon. Et tog meldes inn på listen for retningen det kommer fra, og meldes ut på listen for retningen det kjører mot, så et gjennomkjørende tog står på begge lister, ankomsten på den ene og avgangen på den andre. Hver liste viser retningen i overskriften og bare nabostasjonene med telefonnumre på sin egen side. De redigerbare ekspederingsdokumentene deles på samme måte, ett dokument per retning.
+
+- **Kjøretøy som løftes på ved avgang.** I rapporten Medbrakte kjøretøy vises et kjøretøy som løftes på sporet rett før avgang nå stående på et bord i stedet for på et spor.
+
+- **Antall enheter.** Et kjøretøy teller alltid som minst én enhet, også i planer lagret tidligere uten.
+
+## Versjon 1.1.2
+
+### Endringer
+
+- **Kjøretøy som går til andre tider.** Et lok eller vognsett som allerede kjører noe i alle kjøresesjoner, tilbys nå når du tildeler et kjøretøy til et omløp som går til andre tider. Tidligere var det skjult, slik at et lok ikke kunne legges til som fremste lok i et skyve-trekk-tog mens det også kjørte et nattog for seg selv. Et kjøretøy skjules bare når alt det allerede kjører overlapper omløpet i tid, og det tar bare de kjøresesjonene der det er ledig.
+
+- **Trekkraftenheter i togets stopp.** Et togs stopp viser lokene og togsettene som kjører det, med kjøresesjonene de kjører det i når det ikke er alle togets.
+
+## Versjon 1.1.0
+
+### Endringer
+
+- **Et ekstra lok på et tog.** Et lok kan nå legges til omløpet til loket det kjører sammen med, i stedet for å få et eget omløp som gjentar de samme togene. Angi en **Plassering i toget** når du legger det til, eller når du redigerer det i fanen Omløp: **Foran** fører toget, **Bakerst** står i den andre enden slik at toget har et lok i hver ende, og **Forsterkning** kobles til det fremste loket. Et lok bakerst betyr at toget ikke går omløp, og avgangen får et notat om at det er et lok i hver ende. Rapporten Togsammensetninger tegner en ekstra lokboks i togets fjerne ende, og en advarsel vises når et lok bakerst i noen kjøresesjoner ikke har noe lok foran toget.
+
+- **Kortere notater for flere lok eller vognsett.** Lok eller vognsett som får samme beskjed i de samme kjøresesjonene, nevnes i ett notat («kjør SJ 04 Rc6 og SJ 05 Rc6 til henstilling»), og notatene om kjøring til henstilling gjentar ikke lenger ankomstsporet.
+
 ## Versjon 1.0.8
 
 ### Endringer

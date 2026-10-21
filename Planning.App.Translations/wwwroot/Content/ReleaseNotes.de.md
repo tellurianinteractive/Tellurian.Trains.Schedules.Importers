@@ -1,5 +1,37 @@
 # Versionshinweise
 
+## Version 1.2.1
+
+### Änderungen
+
+- **Triebfahrzeuge im Reiter Züge.** Die Spalte Fahrzeuge führt keine Fahrzeuge mehr auf, die einen Zug einer anderen Gesellschaft mit derselben Nummer fahren. Zugnummern sind nur innerhalb einer Gesellschaft eindeutig.
+
+## Version 1.2.0
+
+### Änderungen
+
+- **Zugmeldeliste pro Richtung.** Ein besetzter Bahnhof hat im Reiter Betriebsstellen eine neue Einstellung, **Zugmeldeliste pro Richtung?**. Ist sie angekreuzt, wird die Zugmeldeliste des Bahnhofs in je eine Liste pro Richtung geteilt, was in einem verkehrsreichen Bahnhof praktischer ist. Ein Zug wird auf der Liste der Richtung angenommen, aus der er kommt, und auf der Liste der Richtung abgemeldet, in die er fährt; ein durchfahrender Zug steht also auf beiden Listen, die Ankunft auf der einen und die Abfahrt auf der anderen. Jede Liste zeigt die Richtung in der Überschrift und nur die Nachbarbahnhöfe mit ihren Telefonnummern auf ihrer eigenen Seite. Die bearbeitbaren Meldedokumente werden ebenso geteilt, ein Dokument pro Richtung.
+
+- **Bei der Abfahrt aufgesetzte Fahrzeuge.** Im Bericht Mitgebrachte Fahrzeuge wird ein Fahrzeug, das kurz vor der Abfahrt aufs Gleis gesetzt wird, jetzt auf einem Tisch stehend statt auf einem Gleis gezeigt.
+
+- **Anzahl der Einheiten.** Ein Fahrzeug zählt immer als mindestens eine Einheit, auch in früher gespeicherten Plänen ohne Angabe.
+
+## Version 1.1.2
+
+### Änderungen
+
+- **Fahrzeuge, die zu anderen Zeiten fahren.** Eine Lokomotive oder Wagengruppe, die bereits in jeder Fahrrunde etwas fährt, wird jetzt angeboten, wenn Sie ein Fahrzeug einem Umlauf zuweisen, der zu anderen Zeiten fährt. Früher war sie ausgeblendet, sodass eine Lokomotive nicht als vordere Lokomotive eines Wendezugs hinzugefügt werden konnte, solange sie auch einen eigenen Nachtzug fuhr. Ein Fahrzeug wird nur ausgeblendet, wenn alles, was es bereits fährt, den Umlauf zeitlich überschneidet, und es übernimmt nur die Fahrrunden, in denen es frei ist.
+
+- **Triebfahrzeuge in den Halten des Zuges.** Die Halte eines Zuges zeigen die Lokomotiven und Triebzüge, die ihn fahren, mit den Fahrrunden, in denen sie ihn fahren, wenn das nicht alle des Zuges sind.
+
+## Version 1.1.0
+
+### Änderungen
+
+- **Eine zweite Lokomotive im Zug.** Eine Lokomotive kann jetzt dem Umlauf der Lokomotive hinzugefügt werden, mit der sie fährt, statt einen eigenen Umlauf zu bekommen, der dieselben Züge wiederholt. Geben Sie beim Hinzufügen oder beim Bearbeiten im Reiter Umläufe eine **Position im Zug** an: **Vorn** führt den Zug, **Hinten** steht am anderen Ende, sodass der Zug an jedem Ende eine Lokomotive hat, und **Verstärkung** wird an die führende Lokomotive gekuppelt. Eine Lokomotive hinten bedeutet, dass der Zug nicht umsetzt, und die Abfahrt erhält einen Hinweis, dass an jedem Ende eine Lokomotive steht. Der Bericht Zugbildungen zeichnet am fernen Ende des Zuges ein zweites Lokomotivkästchen, und eine Warnung erscheint, wenn eine Lokomotive hinten in einigen Fahrrunden keine führende Lokomotive hat.
+
+- **Kürzere Hinweise für mehrere Lokomotiven oder Wagengruppen.** Lokomotiven oder Wagengruppen mit derselben Anweisung in denselben Fahrrunden werden in einem Hinweis genannt („SJ 04 Rc6 und SJ 05 Rc6 zum Abstellen fahren“), und die Hinweise zum Fahren ins Abstellen wiederholen das Ankunftsgleis nicht mehr.
+
 ## Version 1.0.8
 
 ### Änderungen

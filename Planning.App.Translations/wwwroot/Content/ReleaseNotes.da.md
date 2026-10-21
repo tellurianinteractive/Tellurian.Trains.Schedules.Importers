@@ -1,5 +1,37 @@
 # Versionsnyheder
 
+## Version 1.2.1
+
+### Ændringer
+
+- **Trækkraftenheder i fanen Tog.** Kolonnen Køretøjer viser ikke længere enheder, der kører et tog fra et andet selskab med samme nummer. Tognumre er kun entydige inden for et selskab.
+
+## Version 1.2.0
+
+### Ændringer
+
+- **Togekspeditionsliste pr. retning.** En bemandet station har en ny indstilling i fanen Driftssteder, **Togekspeditionsliste pr. retning?**. Når den er afkrydset, opdeles stationens togekspeditionsliste i én liste for hver retning, hvilket er bekvemt på en travl station. Et tog meldes ind på listen for den retning, det kommer fra, og meldes ud på listen for den retning, det kører mod, så et gennemkørende tog står på begge lister, ankomsten på den ene og afgangen på den anden. Hver liste viser retningen i overskriften og kun de nabostationer med telefonnumre, der ligger på dens egen side. De redigerbare ekspeditionsdokumenter opdeles på samme måde, ét dokument pr. retning.
+
+- **Køretøjer, der løftes på ved afgang.** I rapporten Medbragte køretøjer vises et køretøj, der løftes på sporet lige før afgang, nu stående på et bord i stedet for på et spor.
+
+- **Antal enheder.** Et køretøj tæller altid som mindst én enhed, også i planer gemt tidligere uden.
+
+## Version 1.1.2
+
+### Ændringer
+
+- **Køretøjer, der kører på andre tidspunkter.** Et lokomotiv eller vognsæt, der allerede kører noget i alle køresessioner, tilbydes nu, når du tildeler et køretøj til et omløb, der kører på andre tidspunkter. Tidligere var det skjult, så et lokomotiv ikke kunne tilføjes som forreste lokomotiv i et skub-træk-tog, mens det også kørte et natttog for sig selv. Et køretøj skjules kun, når alt det allerede kører overlapper omløbet i tid, og det tager kun de køresessioner, hvor det er ledigt.
+
+- **Trækkraftenheder i togets stop.** Et togs stop viser de lokomotiver og togsæt, der kører det, med de køresessioner de kører det i, når det ikke er alle togets.
+
+## Version 1.1.0
+
+### Ændringer
+
+- **Et ekstra lokomotiv på et tog.** Et lokomotiv kan nu føjes til omløbet for det lokomotiv, det kører sammen med, i stedet for at få et eget omløb, der gentager de samme tog. Angiv en **Placering i toget**, når du tilføjer det, eller når du redigerer det i fanen Omløb: **Forrest** fører toget, **Bagest** står i den anden ende, så toget har et lokomotiv i hver ende, og **Forstærkning** kobles til det forreste lokomotiv. Et lokomotiv bagest betyder, at toget ikke omløbes, og afgangen får en note om, at der er et lokomotiv i hver ende. Rapporten Togsammensætninger tegner en ekstra lokomotivboks i togets fjerne ende, og der vises en advarsel, når et lokomotiv bagest i nogle køresessioner ikke har noget lokomotiv foran toget.
+
+- **Kortere noter for flere lokomotiver eller vognsæt.** Lokomotiver eller vognsæt, der får samme besked i de samme køresessioner, nævnes i én note ("kør SJ 04 Rc6 og SJ 05 Rc6 til henstilling"), og noterne om kørsel til henstilling gentager ikke længere ankomstsporet.
+
 ## Version 1.0.8
 
 ### Ændringer
