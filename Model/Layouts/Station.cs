@@ -44,6 +44,14 @@ public class Station : OperationLocation
     public Timetables.StartLabelPrinting StartLabels { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the station's dispatch list is divided into one list per direction — the
+    /// lines that lead away from the station (see <c>Layout.DirectionsAt</c>) — instead of one list for
+    /// the whole station. Only meaningful at a station with a dispatcher, and has no effect where the
+    /// station has fewer than two directions.
+    /// </summary>
+    public bool SplitDispatchByDirection { get; set; }
+
+    /// <summary>
     /// Gets or sets whether passengers change trains here. Only in force while the layout is worked with
     /// passenger tickets (<see cref="Settings.GeneralSettings.UsePassengerTickets"/>): the mark is kept
     /// either way, and <c>OperationLocation.ExchangesTransferringPassengers</c> is what says whether it

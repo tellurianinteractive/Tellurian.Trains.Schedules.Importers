@@ -37,9 +37,10 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public string? ExternalId { get; set; }
 
     /// <summary>
-    /// Gets or sets the number of units that make up this vehicle (for multiple-unit trainsets).
+    /// Gets or sets the number of units that make up this vehicle (for multiple-unit trainsets). A vehicle is
+    /// at least one unit: one is the default, and a stored 0 (older data) reads as 1.
     /// </summary>
-    public int NumberOfUnits { get { return Units.Count != 0 ? Units.Count : field; } set; }
+    public int NumberOfUnits { get { return Units.Count != 0 ? Units.Count : Math.Max(1, field); } set; } = 1;
 
     /// <summary>
     /// Gets or sets an optional remark about this vehicle.

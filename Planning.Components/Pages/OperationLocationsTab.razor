@@ -215,6 +215,12 @@ else
                                 <HelpLabel For="StartLabels" />
                                 <StartLabelPrintingChoice @bind-Value="station.StartLabels" @bind-Value:after="OnEdited" />
                             </div>
+                            @* A dispatcher can be handed one list per direction instead of one for the whole
+                               station. Offered at a manned station, which is where there is a dispatcher. *@
+                            <div class="field">
+                                <HelpLabel For="SplitDispatchByDirection" />
+                                <input type="checkbox" @bind="station.SplitDispatchByDirection" @bind:after="OnEdited" />
+                            </div>
                         }
                         @* What decides whether a train part arriving here may ask for its locomotive to
                            be turned (see the schedule's part editor). *@
@@ -526,6 +532,11 @@ else
                         <dd>@YesNo(infoStation.IsShadow)</dd>
                         <dt>@Translator("IsManned")</dt>
                         <dd>@YesNo(infoStation.IsManned)</dd>
+                        @if (infoStation.IsManned)
+                        {
+                            <dt>@Translator("SplitDispatchByDirection")</dt>
+                            <dd>@YesNo(infoStation.SplitDispatchByDirection)</dd>
+                        }
                         <dt>@Translator("HasTurntable")</dt>
                         <dd>@YesNo(infoStation.HasTurntable)</dd>
                         @if (UsePassengerTickets)

@@ -643,6 +643,12 @@
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Whether the station is operated by a dispatcher rather than self-operated.</value>
   </data>
+  <data name="SplitDispatchByDirection" xml:space="preserve">
+    <value>Dispatch list per direction?</value>
+  </data>
+  <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
+    <value>Divides the station's dispatch list into one list for each direction. A train is cleared in on the list of the direction it comes from and cleared out on the list of the direction it goes to, so a train running through appears on both. Each list shows only the neighbours, and their phone numbers, on its own side.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Turntable?</value>
   </data>
@@ -2556,6 +2562,9 @@
   </data>
   <data name="NotInOperation" xml:space="preserve">
     <value>Not in operation</value>
+  </data>
+  <data name="OnTable" xml:space="preserve">
+    <value>Table</value>
   </data>
   <data name="WithoutOwnerOnly" xml:space="preserve">
     <value>Only those without an owner?</value>

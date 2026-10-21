@@ -36,6 +36,12 @@ public sealed record DispatchList(
     public IReadOnlyList<OperationLocation> RemoteLocations { get; init; } = [];
 
     /// <summary>
+    /// Where the list's direction leads — the neighbours beyond it, "Avesta, Fors" — or <c>null</c> for a
+    /// list that covers the whole station. See <see cref="CreateAll"/>.
+    /// </summary>
+    public string? Direction { get; init; }
+
+    /// <summary>
     /// The list's heading: the station, followed by each location it dispatches remotely that has rows
     /// in the list — "Alpha + Bravo".
     /// </summary>
@@ -96,6 +102,99 @@ public sealed record DispatchList(
             .ToList();
 
         return new DispatchList(station, rows, neighbours) { RemoteLocations = remoteLocations };
+    }
+
+    /// <summary>
+    /// The lists a station hands out: one for the whole station, or — where the station is set to divide
+    /// its dispatch by direction and has more than one — one per direction.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A row goes to the list of the direction it is cleared to or from. An arrival belongs to the
+    /// direction the train came from and a departure to the direction it goes to, so a train running
+    /// through is cleared in on one list and out on the other. It is one row only where it comes and goes
+    /// the same way. A call at a location the station dispatches from afar belongs to the direction that
+    /// location lies in.
+    /// </para>
+    /// <para>
+    /// A shunting task has no direction and is on the first list, and so is a clearance to or from
+    /// somewhere the network does not connect to the station.
+    /// </para>
+    /// </remarks>
+    /// <param name="station">The station to build the lists for.</param>
+    /// <param name="trains">The timetable's trains.</param>
+    /// <param name="settings">How sessions are rendered inside notes.</param>
+    /// <param name="plan">See <see cref="Create"/>.</param>
+    public static IReadOnlyList<DispatchList> CreateAll(
+        OperationLocation station, IEnumerable<Train> trains, SessionsSettings settings, Plan? plan = null)
+    {
+        var whole = Create(station, trains, settings, plan);
+        if (station is not Station { SplitDispatchByDirection: true } dispatcher || station.Layout is not { } layout)
+            return [whole];
+        var directions = layout.DirectionsAt(station);
+        if (directions.Count < 2) return [whole];
+
+        int SideOf(OperationLocation? location)
+        {
+            if (location is null) return 0;
+            var side = directions.ToList().FindIndex(direction => direction.Reach.Contains(location));
+            return Math.Max(side, 0);
+        }
+
+        var rows = directions.Select(_ => new List<DispatchRow>()).ToList();
+        foreach (var row in whole.Rows)
+        {
+            if (row.IsRemote)
+            {
+                rows[SideOf(row.Call.OperationLocation)].Add(row);
+                continue;
+            }
+
+            var calls = row.Call.Train.CallsInRunOrder;
+            var index = -1;
+            for (var i = 0; i < calls.Count; i++) if (calls[i] == row.Call) index = i;
+            var before = index > 0 ? calls[index - 1].OperationLocation : null;
+            var after = index >= 0 && index < calls.Count - 1 ? calls[index + 1].OperationLocation : null;
+
+            switch (row.Kind)
+            {
+                case DispatchRowKind.Arrival:
+                    rows[SideOf(before ?? after)].Add(row);
+                    break;
+                case DispatchRowKind.Departure:
+                    rows[SideOf(after ?? before)].Add(row);
+                    break;
+                case DispatchRowKind.PassThrough when SideOf(before) != SideOf(after):
+                    var (arrival, departure) = row.SplitPassThrough();
+                    rows[SideOf(before)].Add(arrival);
+                    rows[SideOf(after)].Add(departure);
+                    break;
+                case DispatchRowKind.PassThrough:
+                    rows[SideOf(before)].Add(row);
+                    break;
+                default:
+                    rows[0].Add(row);
+                    break;
+            }
+        }
+
+        var neighbours = layout.DispatchNeighboursOf(dispatcher);
+        return
+        [
+            .. directions.Select((direction, side) =>
+            {
+                var beyond = neighbours.Where(neighbour => SideOf(neighbour) == side).ToList();
+                var names = beyond.Count > 0 ? beyond.Select(neighbour => neighbour.Name) : direction.Adjacent.Select(location => location.Name);
+                return whole with
+                {
+                    Rows = rows[side],
+                    Neighbours = [.. beyond.Where(neighbour => neighbour.PhoneNumber.HasValue)
+                        .Select(neighbour => new DispatchNeighbour(neighbour.Name, neighbour.PhoneNumber!.Value))],
+                    RemoteLocations = [.. whole.RemoteLocations.Where(location => rows[side].Any(row => row.IsRemote && row.Call.OperationLocation.Equals(location)))],
+                    Direction = string.Join(", ", names),
+                };
+            }),
+        ];
     }
 
     private static bool IsNextToCallAt(StationCall call, OperationLocation station)

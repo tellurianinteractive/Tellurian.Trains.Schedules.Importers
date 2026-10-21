@@ -101,6 +101,21 @@ public class VehicleContributorsReportTests
     private static string[] Classes(VehicleContributorsGroup group) => [.. group.Lines.Select(line => line.Vehicle.Class)];
 
     [TestMethod]
+    public void A_wagonset_lifted_on_before_departure_is_set_up_on_the_table_not_on_its_track()
+    {
+        var plan = CreatePlan();
+        var wagons = AssignedVehicle(plan, ScheduledObjectType.Wagonset, "SJ", 15, plan.Timetable!.Trains.First(t => t.Number == 1003), null);
+        var tracked = AssignedVehicle(plan, ScheduledObjectType.Wagonset, "SJ", 16, plan.Timetable!.Trains.First(t => t.Number == 1002), null);
+        plan.Schedules.Single(s => s.Vehicles.Contains(wagons)).Parts.Single().WagonSetOptions = new WagonSetOptions { FromLayover = TractionLayover.LiftedOff };
+        English["OnTable"] = "Table";
+
+        var lines = Groups(plan, VehicleContributorsGrouping.OperationLocation).SelectMany(group => group.Lines).ToList();
+
+        Assert.AreEqual("Table", Cells.TextOf(lines.First(l => l.Vehicle == wagons), VehicleContributorsColumn.Track));
+        Assert.AreEqual("1", Cells.TextOf(lines.First(l => l.Vehicle == tracked), VehicleContributorsColumn.Track));
+    }
+
+    [TestMethod]
     public void A_station_lists_the_vehicles_set_up_there_by_track_then_departure()
     {
         var groups = Groups(CreatePlan(), VehicleContributorsGrouping.OperationLocation);

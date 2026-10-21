@@ -20,6 +20,14 @@ public sealed record VehicleStart(int FirstPosition, ScheduledTrainPart FirstPar
     /// <summary>The track the vehicle is to stand on.</summary>
     public StationTrack Track => From.Track;
 
+    /// <summary>
+    /// Whether the vehicle is to be put on a table rather than on <see cref="Track"/>: its first part departs
+    /// with the vehicle lifted on from there, so whoever sets up the train lifts it onto the track just before
+    /// departure. Not so where the part fetches the vehicle from another track, which says where it stands.
+    /// </summary>
+    public bool StartsOnTable =>
+        FirstPart.DepartureLayover == TractionLayover.LiftedOff && FirstPart.OtherFromTrack is null;
+
     /// <summary>The departure of the vehicle's first train part.</summary>
     public Time Departure => From.Departure;
 }

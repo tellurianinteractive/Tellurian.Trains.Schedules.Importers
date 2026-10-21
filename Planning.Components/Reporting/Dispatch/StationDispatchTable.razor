@@ -24,6 +24,10 @@
     <header class="heading">
         <h2>
             <span class="name">@Page.List.Title</span>
+            @if (Page.List.Direction is { Length: > 0 } direction)
+            {
+                <span class="direction">→ @direction</span>
+            }
             @if (Interval is { } interval)
             {
                 <span class="interval">@interval</span>

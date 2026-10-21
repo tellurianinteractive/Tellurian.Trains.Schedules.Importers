@@ -64,7 +64,7 @@
             else
             {
                 <div class="export-row">
-                    <span class="fmt">ODT<span class="ext">@(DispatchStationCount == 1 ? ".odt" : ".zip")</span></span>
+                    <span class="fmt">ODT<span class="ext">@(DispatchFileCount == 1 ? ".odt" : ".zip")</span></span>
                     <button class="dest" disabled="@_busy" @onclick="SaveDispatchListsToDisk">@Translator("ToDisk")</button>
                 </div>
             }
@@ -101,6 +101,12 @@
         ScheduleState.Layout is { } layout ? [.. layout.Dispatchers] : [];
 
     private int DispatchStationCount => DispatchStations.Count;
+
+    // One document per station, or per direction at a station divided by direction.
+    private int DispatchFileCount => DispatchStations.Sum(station =>
+        station is { SplitDispatchByDirection: true, Layout: { } layout }
+            ? Math.Max(1, layout.DirectionsAt(station).Count)
+            : 1);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -226,9 +232,11 @@
                     ? station.ReportCulture(layout, LanguageService.IsSupported)
                     : CultureInfo.CurrentUICulture;
                 using var scope = ReportCulture.Use(culture);
-                var list = DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
-                cultures[list] = culture;
-                lists.Add(list);
+                foreach (var list in DispatchList.CreateAll(station, timetable.Trains, settings, ScheduleState.Schedule))
+                {
+                    cultures[list] = culture;
+                    lists.Add(list);
+                }
             }
 
             // Set in the layout's report font, like every other report — the recipient can still

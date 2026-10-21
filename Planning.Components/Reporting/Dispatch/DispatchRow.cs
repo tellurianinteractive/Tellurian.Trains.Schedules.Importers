@@ -159,6 +159,31 @@ public sealed class DispatchRow
     private static string? NameOf(StationCall? call) => call?.OperationLocation.Name;
 
     /// <summary>
+    /// Divides a pass-through into its two clearances: the arrival, notes for arriving only, and the
+    /// departure, notes for departing only. They are the same moment but are given to different neighbours
+    /// when the train runs on to a different direction than it came from, so a list divided by direction
+    /// cannot hold the one row both ways. Neither is the train's only row any more.
+    /// </summary>
+    /// <returns>The arrival row and the departure row.</returns>
+    public (DispatchRow Arrival, DispatchRow Departure) SplitPassThrough() =>
+        (CopyAs(DispatchRowKind.Arrival, note => note.IsForArrival),
+         CopyAs(DispatchRowKind.Departure, note => note.IsForDeparture));
+
+    private DispatchRow CopyAs(DispatchRowKind kind, Func<ICallNote, bool> keepNote) => new()
+    {
+        Call = Call,
+        Kind = kind,
+        Time = Time,
+        Sessions = Sessions,
+        SessionsText = SessionsText,
+        IsSoleRow = false,
+        IsOutsideFirstSession = IsOutsideFirstSession,
+        IsRemote = IsRemote,
+        OccupiesTrack = OccupiesTrack,
+        Notes = [.. Notes.Where(keepNote)],
+    };
+
+    /// <summary>
     /// Builds the rows one train contributes to one station's dispatch list.
     /// </summary>
     /// <remarks>

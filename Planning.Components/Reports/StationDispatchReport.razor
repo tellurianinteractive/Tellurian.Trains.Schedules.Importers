@@ -86,11 +86,13 @@ else
         {
             var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
-            var list = DispatchList.Create(station, timetable.Trains, settings, ScheduleState.Schedule);
-            _cultures[list] = culture;
-            lists.Add(list);
-            foreach (var note in list.Rows.SelectMany(row => row.PrintingNotes))
-                words.UnionWith(NoteTextMeasure.WordsOf(note.ToText));
+            foreach (var list in DispatchList.CreateAll(station, timetable.Trains, settings, ScheduleState.Schedule))
+            {
+                _cultures[list] = culture;
+                lists.Add(list);
+                foreach (var note in list.Rows.SelectMany(row => row.PrintingNotes))
+                    words.UnionWith(NoteTextMeasure.WordsOf(note.ToText));
+            }
         }
 
         var geometry = DispatchPageGeometry.A4Landscape with { NoteMeasure = await MeasureAsync(words) };

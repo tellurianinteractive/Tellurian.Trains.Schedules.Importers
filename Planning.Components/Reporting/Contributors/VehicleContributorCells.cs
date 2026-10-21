@@ -46,7 +46,13 @@ public sealed class VehicleContributorCells(Translator translator, SessionsSetti
             ? SessionsFormatting.PositionTextOf(start.FirstPosition, settings, useShortDayName: false)
             : string.Empty,
         VehicleContributorsColumn.Station => line.Location?.Name ?? string.Empty,
-        VehicleContributorsColumn.Track => line.Start?.Track.Number ?? string.Empty,
+        // A vehicle lifted on just before departure is not set up on the track but on a table beside the layout.
+        VehicleContributorsColumn.Track => line.Start switch
+        {
+            { StartsOnTable: true } => translator("OnTable"),
+            { } start => start.Track.Number,
+            _ => string.Empty,
+        },
         VehicleContributorsColumn.Departure => line.Start?.Departure.HHMM() ?? string.Empty,
         VehicleContributorsColumn.Type => line.Other is { } other ? translator(other.Type.ToString()) : TypeOf(line.Vehicle!),
         // The designation as the Schedules tab names the turnus, e.g. "DSB 01 ME": the operator's signature,

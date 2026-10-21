@@ -357,6 +357,46 @@ public static class LayoutOperationLocationExtensions
         }
 
         /// <summary>
+        /// The ways out of <paramref name="location"/>: the track stretches leading away from it, grouped by
+        /// what lies beyond. Two neighbours are on the same side when one can be reached from the other
+        /// without passing through <paramref name="location"/>, so a station on a line has two directions
+        /// and a junction station three. A location on a loop, or at the end of a line, has one.
+        /// </summary>
+        /// <remarks>
+        /// Track stretches are followed either way round: the direction a train runs is not what separates
+        /// the sides, the position of the location in the network is.
+        /// </remarks>
+        /// <param name="location">The location whose directions are wanted.</param>
+        public IReadOnlyList<LocationDirection> DirectionsAt(OperationLocation? location)
+        {
+            if (layout is null || location is null) return [];
+
+            var directions = new List<LocationDirection>();
+            var seen = new HashSet<OperationLocation> { location };
+            foreach (var first in layout.NeighboursOf(location))
+            {
+                if (seen.Contains(first)) continue;
+
+                var reach = new HashSet<OperationLocation>();
+                var adjacent = new List<OperationLocation>();
+                var queue = new Queue<OperationLocation>();
+                queue.Enqueue(first);
+                seen.Add(first);
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    reach.Add(current);
+                    foreach (var next in layout.NeighboursOf(current))
+                        if (seen.Add(next)) queue.Enqueue(next);
+                }
+                // A neighbour already reached through another is on that side, not a side of its own.
+                adjacent.AddRange(layout.NeighboursOf(location).Where(reach.Contains));
+                directions.Add(new LocationDirection(adjacent, reach));
+            }
+            return directions;
+        }
+
+        /// <summary>
         /// Clears every track route naming <paramref name="location"/> (see
         /// <see cref="StationTrack.PreviousLocationId"/>), so no track is left reserved for trains to or
         /// from somewhere the layout no longer has. Call it when a location is removed. Returns

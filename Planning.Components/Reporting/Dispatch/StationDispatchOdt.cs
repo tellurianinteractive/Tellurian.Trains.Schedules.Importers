@@ -110,6 +110,8 @@ public static class StationDispatchOdt
         var name = station.Signature.HasValue && station.Signature != station.Name
             ? $"{station.Signature} {station.Name}"
             : station.Name;
+        // A station divided by direction hands out one document per direction, which need names of their own.
+        if (list.Direction is { Length: > 0 } direction) name = $"{name} - {direction}";
         return OdtPackage.SafeFileName(name, "station") + OdtPackage.FileExtension;
     }
 
@@ -212,6 +214,11 @@ public static class StationDispatchOdt
         var header = new StringBuilder();
         header.Append($"""        <text:p text:style-name="{Style.Heading}">""");
         header.Append(OdtXml.Span(Style.StationName, list.Title));
+        if (list.Direction is { Length: > 0 } direction)
+        {
+            header.Append("""<text:s text:c="2"/>""");
+            header.Append(OdtXml.Span(Style.Neighbours, $"→ {direction}"));
+        }
         if (list.Neighbours.Count > 0)
         {
             header.Append("""<text:s text:c="3"/>""");

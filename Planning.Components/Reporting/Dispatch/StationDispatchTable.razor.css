@@ -47,6 +47,12 @@
 
             /* A wider gap than the one between name and interval, which is what separates the two halves
                of the line: what this sheet is, and who to ring about it. */
+            /* Which way a divided list looks, set beside the station at the same size as the numbers so the
+               heading stays on one line; the neighbours' numbers that follow are the ones on that side. */
+            .direction {
+                font-size: 0.5em;
+            }
+
             .neighbours {
                 margin-left: 3mm;
                 font-size: 0.5em;

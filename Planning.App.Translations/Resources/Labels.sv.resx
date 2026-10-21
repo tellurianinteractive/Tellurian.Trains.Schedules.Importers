@@ -1092,6 +1092,12 @@
   <data name="IsMannedHelp" xml:space="preserve">
     <value>Om driftplatsen sköts av en tågklarerare i stället för att vara självbetjänad.</value>
   </data>
+  <data name="SplitDispatchByDirection" xml:space="preserve">
+    <value>Tågklareringslista per riktning?</value>
+  </data>
+  <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
+    <value>Delar stationens tågklareringslista i en lista för varje riktning. Ett tåg klareras in på listan för den riktning det kommer från och klareras ut på listan för den riktning det ska till, så ett tåg som kör förbi syns på båda. Varje lista visar bara grannarna, och deras telefonnummer, på sin egen sida.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Har vändskiva?</value>
   </data>
@@ -2542,6 +2548,9 @@
   </data>
   <data name="NotInOperation" xml:space="preserve">
     <value>Inte i trafik</value>
+  </data>
+  <data name="OnTable" xml:space="preserve">
+    <value>Bord</value>
   </data>
   <data name="WithoutOwnerOnly" xml:space="preserve">
     <value>Bara de utan ägare?</value>

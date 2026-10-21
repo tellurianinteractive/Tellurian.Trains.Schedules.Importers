@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 1.2.0
+
+### Changes
+
+- **Dispatch list per direction.** A manned station has a new setting on the Operation locations tab, **Dispatch list per direction?**. When it is ticked, the station's dispatch list is divided into one list for each direction, which is handier at a busy station. A train is cleared in on the list of the direction it comes from and cleared out on the list of the direction it goes to, so a train running through appears on both lists, its arrival on one and its departure on the other. Each list shows the direction in its heading and only the neighbouring stations, with their phone numbers, on its own side. The editable dispatch documents are divided in the same way, one document per direction.
+
+- **Vehicles lifted on at departure.** In the Vehicle contributors report, a vehicle that is lifted on to the track just before it departs is now shown as standing on a table instead of on a track.
+
+- **Number of units.** A vehicle always counts as at least one unit, also in plans saved earlier with none.
+
 ## Version 1.1.2
 
 ### Changes
