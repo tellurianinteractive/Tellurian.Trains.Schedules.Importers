@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.2.3
+
+### Ändringar
+
+- **Lägg till uppehåll vid tågets ändar.** I fliken Tåg står **Lägg till första uppehåll** nu ovanför uppehållen, och driftplatslistan bredvid varje lägg till-knapp erbjuder änduppehållets egen driftplats och alla driftplatser intill den, på båda sidor, även den tåget kom från eller går till. Ett uppehåll som bryter rutten anmäls som en konflikt på tåget.
+
 ## Version 1.2.2
 
 ### Ändringar

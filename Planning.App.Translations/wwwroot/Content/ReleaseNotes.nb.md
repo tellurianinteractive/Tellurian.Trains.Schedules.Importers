@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.2.3
+
+### Endringer
+
+- **Legg til stopp ved togets ender.** I fanen Tog står **Legg til første stopp** nå over stoppene, og lokasjonslisten ved siden av hver legg til-knapp tilbyr sluttstoppets egen lokasjon og alle lokasjoner ved siden av den, på begge sider, også den toget kom fra eller kjører til. Et stopp som bryter ruten, meldes som en konflikt på toget.
+
 ## Versjon 1.2.2
 
 ### Endringer

@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.2.3
+
+### Ændringer
+
+- **Tilføj stop ved togets ender.** I fanen Tog står **Tilføj første stop** nu over stoppene, og lokationslisten ved siden af hver tilføj-knap tilbyder slutstoppets egen lokation og alle lokationer ved siden af den, på begge sider, også den toget kom fra eller kører til. Et stop, der bryder ruten, meldes som en konflikt på toget.
+
 ## Version 1.2.2
 
 ### Ændringer

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.2.3
+
+### Changes
+
+- **Add calls beside the end of a train.** In the Trains tab, the **Add first call** controls now sit above the calls, and the location list beside each add button offers the end call's own location and every location next to it, on either side, including the one the train came from or goes to. A call that breaks the route is reported as a conflict on the train.
+
 ## Version 1.2.2
 
 ### Changes

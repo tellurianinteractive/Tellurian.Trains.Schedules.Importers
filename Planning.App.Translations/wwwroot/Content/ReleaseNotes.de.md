@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.2.3
+
+### Änderungen
+
+- **Halte an den Zugenden hinzufügen.** Im Tab Züge steht **Ersten Halt hinzufügen** jetzt über den Halten, und die Ortsliste neben jeder Hinzufügen-Schaltfläche bietet den Ort des Endhalts selbst und alle benachbarten Orte auf beiden Seiten an, auch den, aus dem der Zug kam oder in den er fährt. Ein Halt, der die Strecke unterbricht, wird als Konflikt am Zug gemeldet.
+
 ## Version 1.2.2
 
 ### Änderungen

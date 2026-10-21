@@ -445,6 +445,18 @@ else
     // ---- Calls sub-table ------------------------------------------------------------------------
 
     private RenderFragment CallsTable(Train train) => @<div class="sub">
+        @* A call is added at either end of the run, at a location the planner picks from the ones beside
+           that end. The first-call controls sit above the table and the last-call controls below it, and
+           with no calls yet both ends are the same place, so only one is offered. *@
+        <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
+            @if (train.Calls.Count > 0)
+            {
+                <ListBoxView Items="@(PreviousCallLocations(train).ToListItems())"
+                             Value="@SelectedLocation(train, PreviousCallLocations(train), _previousChoice)?.Id"
+                             ValueChanged="id => _previousChoice[train.Id] = id" />
+                <button class="small" disabled="@(!CanAddCallFirst(train))" @onclick="() => AddCallFirst(train)">@Translator("AddCallFirst")</button>
+            }
+        </span>
         <table class="sub-grid">
             <thead>
                 <tr>
@@ -541,17 +553,6 @@ else
                 }
             </tbody>
         </table>
-        @* A call is added at either end of the run, at a location the planner picks from the ones that keep
-           the route whole. With no calls yet both ends are the same place, so only one is offered. *@
-        <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
-            @if (train.Calls.Count > 0)
-            {
-                <ListBoxView Items="@(PreviousCallLocations(train).ToListItems())"
-                             Value="@SelectedLocation(train, PreviousCallLocations(train), _previousChoice)?.Id"
-                             ValueChanged="id => _previousChoice[train.Id] = id" />
-                <button class="small" disabled="@(!CanAddCallFirst(train))" @onclick="() => AddCallFirst(train)">@Translator("AddCallFirst")</button>
-            }
-        </span>
         <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
             <ListBoxView Items="@(NextCallLocations(train).ToListItems())"
                          Value="@SelectedLocation(train, NextCallLocations(train), _nextChoice)?.Id"
@@ -571,7 +572,7 @@ else
         !train.IsShuntingTask && PreviousCallLocations(train).Any();
 
     private IReadOnlyList<OperationLocation> PreviousCallLocations(Train train) =>
-        Layout is { } layout ? train.LocationChoicesForPreviousCall(layout) : [];
+        CallLocationsBeside(train.CallsInRunOrder.FirstOrDefault()?.OperationLocation);
 
     // A shunting task is work at one place, so its one call is all it may ever have: a second would make
     // it a route, which is a travelling train and not a task (see the model's CheckShuntingTaskCalls).
@@ -581,7 +582,17 @@ else
     // The locations a call added at the end of this train's run may be at. Empty means there is nowhere
     // to add one — a layout with no track anywhere, or a train that has run out of onward locations.
     private IReadOnlyList<OperationLocation> NextCallLocations(Train train) =>
-        Layout is { } layout ? train.LocationChoicesForNextCall(layout) : [];
+        CallLocationsBeside(train.CallsInRunOrder.LastOrDefault()?.OperationLocation);
+
+    // A call added at either end may be at the end call's own location (a change of track) or at any
+    // location a track stretch joins to it, on either side and including the one the train came from or
+    // goes to. With no calls yet every location with a track is offered.
+    private IReadOnlyList<OperationLocation> CallLocationsBeside(OperationLocation? end)
+    {
+        if (Layout is not { } layout) return [];
+        IEnumerable<OperationLocation> offered = end is null ? layout.OperationLocations : [end, .. layout.NeighboursOf(end)];
+        return [.. offered.Where(l => l.Tracks.Count > 0).Distinct().OrderBy(l => l.Name, StringComparer.CurrentCulture)];
+    }
 
     // Moving a call to another location puts it on that location's first track; the planner picks another
     // from the track list beside it if the first is not the one wanted. A location with no track is never
