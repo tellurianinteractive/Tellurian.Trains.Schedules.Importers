@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.2.2
+
+### Änderungen
+
+- **Halt am Zuganfang hinzufügen.** Im Tab Züge kannst du jetzt auch am Anfang eines Zuges einen Halt hinzufügen, nicht nur am Ende, mit **Ersten Halt hinzufügen**. Bei beiden Schaltflächen wählst du den Ort aus einer Liste daneben. Angeboten werden nur Orte, die die Strecke durchgehend halten.
+
 ## Version 1.2.1
 
 ### Änderungen

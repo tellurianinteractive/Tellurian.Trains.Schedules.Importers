@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.2.2
+
+### Endringer
+
+- **Legg til stopp først på et tog.** I fanen Tog kan du nå legge til et stopp først på et tog og ikke bare til slutt, med **Legg til første stopp**. For begge knappene velger du lokasjonen fra en liste ved siden av. Det tilbys bare lokasjoner som holder ruten hel.
+
 ## Versjon 1.2.1
 
 ### Endringer

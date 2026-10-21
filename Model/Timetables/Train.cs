@@ -715,7 +715,19 @@ public static class TrainExtensions
         {
             train = train.ValueOrException(nameof(train));
             call = call.ValueOrException(nameof(call));
-            return Join(train, call, atEnd: false);
+            return Join(train, call, CallPlacement.ByTime);
+        }
+
+        /// <summary>
+        /// Adds a station call to the train as the first of its route, whatever its times are.
+        /// </summary>
+        /// <param name="call">The station call to add.</param>
+        /// <returns>The added station call.</returns>
+        public StationCall AddFirst(StationCall call)
+        {
+            train = train.ValueOrException(nameof(train));
+            call = call.ValueOrException(nameof(call));
+            return Join(train, call, CallPlacement.First);
         }
 
         /// <summary>
@@ -727,14 +739,17 @@ public static class TrainExtensions
         {
             train = train.ValueOrException(nameof(train));
             call = call.ValueOrException(nameof(call));
-            return Join(train, call, atEnd: true);
+            return Join(train, call, CallPlacement.Last);
         }
 
     }
 
-    // Puts the call into the train's route: at the end when asked, otherwise where its times place it among
-    // the calls the train already runs. It keeps that place whatever its times become (StationCall.Sequence).
-    private static StationCall Join(Train train, StationCall call, bool atEnd)
+    private enum CallPlacement { ByTime, First, Last }
+
+    // Puts the call into the train's route: at the start or the end when asked, otherwise where its times
+    // place it among the calls the train already runs. It keeps that place whatever its times become
+    // (StationCall.Sequence).
+    private static StationCall Join(Train train, StationCall call, CallPlacement placement)
     {
         if (train.Calls.Contains(call)) return call;
         call.SetTrain(train);
@@ -746,7 +761,12 @@ public static class TrainExtensions
 
         train.NumberCalls();
         var ordered = train.CallsInRunOrder;
-        var position = atEnd ? ordered.Count : ordered.TakeWhile(c => c.SortTime <= call.SortTime).Count();
+        var position = placement switch
+        {
+            CallPlacement.First => 0,
+            CallPlacement.Last => ordered.Count,
+            _ => ordered.TakeWhile(c => c.SortTime <= call.SortTime).Count()
+        };
         train.Calls.Add(call);
         Renumber([.. ordered.Take(position), call, .. ordered.Skip(position)]);
         // The train owns the call; keep the per-track call index in step as the call joins the train.

@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 3.5.0
+
+### New features
+
+- **Calls can be added at the start of a train.** `Train.AddFirst(StationCall)` puts a call first in the run, and `LocationChoicesForPreviousCall(Layout)` offers the locations that keep the route whole there, mirroring `AddLast` and `LocationChoicesForNextCall`.
+
 ## Version 3.4.1
 
 ### Fixes

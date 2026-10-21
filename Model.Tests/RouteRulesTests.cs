@@ -172,6 +172,28 @@ public class RouteRulesTests
     }
 
     [TestMethod]
+    public void ACallAddedAtTheStartRunsOnToTheFirstOne()
+    {
+        var train = CreateTrain(A, B, C);
+
+        var choices = Names(train.LocationChoicesForPreviousCall(Layout));
+
+        CollectionAssert.Contains(choices, A.Name, "A track change at A is a start that keeps the route whole.");
+        CollectionAssert.DoesNotContain(choices, B.Name, "B is where the train goes next; starting there would send it out and straight back.");
+    }
+
+    [TestMethod]
+    public void ACallAddedFirstBecomesTheOrigin()
+    {
+        var train = CreateTrain(A, B, C);
+        var call = new StationCall(99, A.Tracks.First(), Time.Zero, Time.Zero);
+
+        train.AddFirst(call);
+
+        Assert.AreSame(call, train.CallsInRunOrder[0]);
+    }
+
+    [TestMethod]
     public void ALocationWithNoTrackIsNotOffered()
     {
         var trackless = Layout.Add(new Station(7, "Falköping", "F"));

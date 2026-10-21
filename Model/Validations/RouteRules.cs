@@ -70,6 +70,22 @@ public static class RouteRules
                 after: null, beyondAfter: null,
                 current: null);
         }
+
+        /// <summary>
+        /// The operating locations a call added at the start of the run may be at, in name order: the
+        /// mirror of <see cref="LocationChoicesForNextCall"/>. Every location with a track when the train
+        /// has no calls yet.
+        /// </summary>
+        /// <param name="layout">The layout to choose from.</param>
+        public IReadOnlyList<OperationLocation> LocationChoicesForPreviousCall(Layout layout)
+        {
+            if (train is null || layout is null) return [];
+            var calls = train.CallsInRunOrder;
+            return Choices(layout,
+                before: null, beyondBefore: null,
+                after: LocationAt(calls, 0), beyondAfter: LocationAt(calls, 1),
+                current: null);
+        }
     }
 
     private static IReadOnlyList<OperationLocation> Choices(

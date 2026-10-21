@@ -1504,6 +1504,9 @@
   <data name="AddCall" xml:space="preserve">
     <value>Tilføj stop</value>
   </data>
+  <data name="AddCallFirst" xml:space="preserve">
+    <value>Tilføj første stop</value>
+  </data>
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Kan ikke slette: kun det første og det sidste stop kan slettes. Et tog har et stop ved hvert driftssted langs ruten.</value>
   </data>

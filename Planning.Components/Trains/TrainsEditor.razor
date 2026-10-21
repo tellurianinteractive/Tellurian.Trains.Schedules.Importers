@@ -541,10 +541,37 @@ else
                 }
             </tbody>
         </table>
+        @* A call is added at either end of the run, at a location the planner picks from the ones that keep
+           the route whole. With no calls yet both ends are the same place, so only one is offered. *@
         <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
+            @if (train.Calls.Count > 0)
+            {
+                <ListBoxView Items="@(PreviousCallLocations(train).ToListItems())"
+                             Value="@SelectedLocation(train, PreviousCallLocations(train), _previousChoice)?.Id"
+                             ValueChanged="id => _previousChoice[train.Id] = id" />
+                <button class="small" disabled="@(!CanAddCallFirst(train))" @onclick="() => AddCallFirst(train)">@Translator("AddCallFirst")</button>
+            }
+        </span>
+        <span class="add-call" title="@(train.IsShuntingTask && train.Calls.Count > 0 ? Translator("ShuntingTaskHasOneCall") : null)">
+            <ListBoxView Items="@(NextCallLocations(train).ToListItems())"
+                         Value="@SelectedLocation(train, NextCallLocations(train), _nextChoice)?.Id"
+                         ValueChanged="id => _nextChoice[train.Id] = id" />
             <button class="small" disabled="@(!CanAddCall(train))" @onclick="() => AddCall(train)">@Translator("AddCall")</button>
         </span>
     </div>;
+
+    // The location picked beside each add button, per train; the first of the offered ones until picked.
+    private readonly Dictionary<int, int?> _previousChoice = [];
+    private readonly Dictionary<int, int?> _nextChoice = [];
+
+    private static OperationLocation? SelectedLocation(Train train, IReadOnlyList<OperationLocation> offered, Dictionary<int, int?> choices) =>
+        offered.FirstOrDefault(l => choices.TryGetValue(train.Id, out var id) && l.Id == id) ?? offered.FirstOrDefault();
+
+    private bool CanAddCallFirst(Train train) =>
+        !train.IsShuntingTask && PreviousCallLocations(train).Any();
+
+    private IReadOnlyList<OperationLocation> PreviousCallLocations(Train train) =>
+        Layout is { } layout ? train.LocationChoicesForPreviousCall(layout) : [];
 
     // A shunting task is work at one place, so its one call is all it may ever have: a second would make
     // it a route, which is a travelling train and not a task (see the model's CheckShuntingTaskCalls).
@@ -659,13 +686,28 @@ else
     private void AddCall(Train train)
     {
         if (!CanAddCall(train)) return;
-        if (NextCallLocations(train).FirstOrDefault() is not { } location) return;
+        var offered = NextCallLocations(train);
+        if (SelectedLocation(train, offered, _nextChoice) is not { } location) return;
         var previous = train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
         var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
         if (location.PreferredTrack(previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
         train.AddLast(call);
+        Save();
+    }
+
+    // The mirror of AddCall: the new call goes first in the run, so the train starts there and carries on
+    // to what was its first call, which decides the track. Its times are those of that first arrival.
+    private void AddCallFirst(Train train)
+    {
+        if (!CanAddCallFirst(train)) return;
+        if (SelectedLocation(train, PreviousCallLocations(train), _previousChoice) is not { } location) return;
+        var next = train.CallsInRunOrder.FirstOrDefault()?.OperationLocation;
+        var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
+        if (location.PreferredTrack(null, next, preference) is not { } track) return;
+        var start = train.Calls.Count > 0 ? train.Calls.Min(c => c.Arrival) : Time.Zero;
+        train.AddFirst(new StationCall(NextCallId(), track, start, start));
         Save();
     }
 

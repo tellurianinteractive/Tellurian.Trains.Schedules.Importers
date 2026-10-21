@@ -1504,6 +1504,9 @@
   <data name="AddCall" xml:space="preserve">
     <value>Halt hinzufügen</value>
   </data>
+  <data name="AddCallFirst" xml:space="preserve">
+    <value>Ersten Halt hinzufügen</value>
+  </data>
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Löschen nicht möglich: Nur der erste und der letzte Halt können gelöscht werden. Ein Zug hat an jeder Betriebsstelle entlang seines Laufwegs einen Halt.</value>
   </data>

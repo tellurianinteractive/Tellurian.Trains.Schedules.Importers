@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.2.2
+
+### Ändringar
+
+- **Lägg till uppehåll först på ett tåg.** I fliken Tåg kan du nu lägga till ett uppehåll först på ett tåg och inte bara sist, med **Lägg till första uppehåll**. För båda knapparna väljer du driftplatsen i en lista bredvid. Det erbjuds bara driftplatser som håller rutten hel.
+
 ## Version 1.2.1
 
 ### Ändringar

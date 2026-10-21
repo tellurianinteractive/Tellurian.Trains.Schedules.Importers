@@ -1504,6 +1504,9 @@
   <data name="AddCall" xml:space="preserve">
     <value>Lägg till uppehåll</value>
   </data>
+  <data name="AddCallFirst" xml:space="preserve">
+    <value>Lägg till första uppehåll</value>
+  </data>
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Kan inte ta bort: bara det första och det sista uppehållet kan tas bort. Ett tåg har ett uppehåll vid varje driftplats längs sin väg.</value>
   </data>

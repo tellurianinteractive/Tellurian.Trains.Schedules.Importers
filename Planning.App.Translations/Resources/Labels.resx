@@ -1515,6 +1515,9 @@
   <data name="AddCall" xml:space="preserve">
     <value>Add call</value>
   </data>
+  <data name="AddCallFirst" xml:space="preserve">
+    <value>Add first call</value>
+  </data>
   <data name="CallNotAtTrainEnd" xml:space="preserve">
     <value>Cannot delete: only the first and the last call can be deleted. A train has a call at every operation location along its route.</value>
   </data>

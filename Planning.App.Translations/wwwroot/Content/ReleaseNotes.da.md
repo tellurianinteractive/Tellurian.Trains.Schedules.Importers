@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.2.2
+
+### Ændringer
+
+- **Tilføj et stop i begyndelsen af et tog.** I fanen Tog kan du nu tilføje et stop i begyndelsen af et tog og ikke kun i slutningen, med **Tilføj første stop**. Ved begge knapper vælger du lokationen på en liste ved siden af. Der tilbydes kun lokationer, som holder ruten hel.
+
 ## Version 1.2.1
 
 ### Ændringer
