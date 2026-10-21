@@ -143,16 +143,19 @@
     // Start straight in create mode when there is no existing vehicle to choose.
     protected override void OnInitialized() => _creatingNew = AvailableVehicles.Count == 0;
 
-    // Real vehicles (not cargo flows) not already on this schedule and not already booked for every
-    // session of the operating period, ordered by identity. A partly-booked vehicle stays selectable and
-    // its free sessions are shown; assigning it takes exactly those free sessions.
+    // Real vehicles (not cargo flows) not already on this schedule and with a session of the operating period
+    // on which they are not already working something at the same time as this schedule, ordered by identity.
+    // A vehicle booked on every session stays selectable when its other work runs at other times. A
+    // partly-booked vehicle's free sessions are shown; assigning it takes exactly those free sessions.
     private IReadOnlyList<ScheduledObject> AvailableVehicles =>
         Plan is null ? [] :
         [.. Plan.ScheduledObjects
             .Where(v => v.HasTurnusCard
                         && !Schedule.Vehicles.Contains(v)
-                        && !v.AssignedSessions.CoversAllWithin(UseDays, MaxSessions))
+                        && !FreeSessions(v).ComplementWithin(UseDays, MaxSessions).CoversAllWithin(UseDays, MaxSessions))
             .OrderBy(v => v.Designation, StringComparer.CurrentCulture)];
+
+    private Sessions FreeSessions(ScheduledObject vehicle) => vehicle.FreeSessionsFor(Schedule, UseDays, MaxSessions);
 
     private IEnumerable<Company> Companies =>
         (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
@@ -199,7 +202,7 @@
         if (vehicle is null) return;
 
         // Take only the sessions the vehicle is still free for (all of them when it is unassigned).
-        var sessions = vehicle.AssignedSessions.ComplementWithin(UseDays, MaxSessions);
+        var sessions = FreeSessions(vehicle);
         plan.AssignVehicle(Schedule, vehicle, sessions, CanChooseRole ? _role : TractionRole.Front);
         ScheduleState.SaveAndNotify();
         await OnAssigned.InvokeAsync();
@@ -212,7 +215,7 @@
     {
         var name = $"{vehicle.Designation} ({Translator(vehicle.ObjectType.ToString())})";
         if (!vehicle.ScheduleAssignments.Any()) return name;
-        var free = vehicle.AssignedSessions.ComplementWithin(UseDays, MaxSessions);
+        var free = FreeSessions(vehicle);
         // Part of an <option> label, so the text form rather than circles.
         return $"{name} — {Translator("Free")}: {free.ToText(SessionSettings)}";
     }

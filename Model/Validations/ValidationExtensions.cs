@@ -169,7 +169,7 @@ public static class ValidationExtensions
                         var sessions1 = a1.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
                         var sessions2 = a2.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
 
-                        if (sessions1.Overlaps(sessions2) && SchedulesOverlapInTime(a1.Schedule, a2.Schedule))
+                        if (sessions1.Overlaps(sessions2) && a1.Schedule.OverlapsInTime(a2.Schedule))
                         {
                             var message = Message.Information(general.UseDays ? Strings.VehicleIsDoubleBookedOnDays : Strings.VehicleIsDoubleBooked, vehicle.Designation,
                                 SessionsText(sessions1, general), SessionsText(sessions2, general));
@@ -177,22 +177,6 @@ public static class ValidationExtensions
                         }
                     }
                 }
-            }
-
-            // Two schedules overlap in time when any part of one is worked at the same clock time as any
-            // part of the other. Each part is taken over its WorkingSpan — running time plus the
-            // preparation and finishing-up time at the train's ends — as everywhere else overlap is
-            // judged.
-            static bool SchedulesOverlapInTime(Schedule s1, Schedule s2)
-            {
-                var spans2 = s2.Parts.Select(p => p.WorkingSpan).ToArray();
-                foreach (var p1 in s1.Parts)
-                {
-                    var span1 = p1.WorkingSpan;
-                    foreach (var span2 in spans2)
-                        if (span1.OverlapsInTime(span2)) return true;
-                }
-                return false;
             }
         }
 

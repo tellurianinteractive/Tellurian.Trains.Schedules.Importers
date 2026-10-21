@@ -433,6 +433,19 @@ public static class PlanExtensions
         public bool Works(Train train) =>
             vehicle.ScheduleAssignments.Any(assignment =>
                 (assignment.Schedule?.Parts ?? []).Any(part => part.Train.Equals(train)));
+
+        /// <summary>
+        /// The sessions or days this vehicle works <paramref name="train"/> on: those the train runs that the
+        /// vehicle is assigned for, through the schedules holding one of its parts. Null where that is every
+        /// one of them, and saying so would only repeat the train; a value with no sessions at all where the
+        /// vehicle is assigned, but never when the train runs.
+        /// </summary>
+        /// <param name="train">The train to ask about.</param>
+        public Sessions? SessionsWorking(Train train) =>
+            vehicle.ScheduleAssignments
+                .Where(assignment => (assignment.Schedule?.Parts ?? []).Any(part => part.Train.Equals(train)))
+                .Aggregate(Sessions.FromBitPattern(0), (all, assignment) => all.Or(assignment.Sessions))
+                .SharedPartOf(train.Sessions);
     }
 
 

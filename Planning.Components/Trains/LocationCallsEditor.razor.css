@@ -20,6 +20,14 @@
         }
     }
 
+    .traction {
+        white-space: nowrap;
+
+        .unit + .unit {
+            margin-left: 0.75rem;
+        }
+    }
+
     .empty {
         color: #667;
         font-style: italic;

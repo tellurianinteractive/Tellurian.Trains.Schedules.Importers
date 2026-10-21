@@ -451,6 +451,24 @@ public static class ScheduledObjectExtensions
             scheduledObject.ScheduleAssignments.Select(a => a.Sessions).Aggregate(new Sessions(), (acc, s) => acc.Or(s));
 
         /// <summary>
+        /// Gets the sessions/days of the operating period on which this vehicle can take the given schedule
+        /// without being in two places at once: those not already worked by an assignment to another
+        /// schedule that overlaps it in clock time. A vehicle may work a morning and an afternoon turn on
+        /// the same day, so a vehicle booked on every session can still be free for a schedule that runs at
+        /// another time. Against a schedule with no parts yet nothing can be said to overlap, so every
+        /// other assignment counts.
+        /// </summary>
+        public Sessions FreeSessionsFor(Schedule schedule, bool useDays, int maxSessions)
+        {
+            var busy = scheduledObject.ScheduleAssignments
+                .Where(a => !schedule.Equals(a.Schedule))
+                .Where(a => schedule.Parts.Count == 0 || (a.Schedule?.OverlapsInTime(schedule) ?? false))
+                .Select(a => a.Sessions)
+                .Aggregate(new Sessions(), (acc, s) => acc.Or(s));
+            return busy.ComplementWithin(useDays, maxSessions);
+        }
+
+        /// <summary>
         /// True when the operating company and the number identify this scheduled object, so that it takes
         /// part in the identity-uniqueness rule (see <c>ValidateVehicleIdentities</c>). A cargo flow is left
         /// out: it is a group of freight wagons directed by waybills, carrying a synthesised identifier

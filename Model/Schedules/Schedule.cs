@@ -163,6 +163,18 @@ public static class ScheduleExtensions
                 .Aggregate(new Sessions(), (union, s) => union.Or(s));
 
         /// <summary>
+        /// True when any part of this schedule is worked at the same clock time as any part of the other,
+        /// so one vehicle could not work both on the same session. Each part is taken over its
+        /// <c>WorkingSpan</c> — running time plus the preparation and finishing-up time at the train's
+        /// ends — as everywhere else overlap is judged.
+        /// </summary>
+        public bool OverlapsInTime(Schedule other)
+        {
+            var spans = other.Parts.Select(p => p.WorkingSpan).ToArray();
+            return schedule.Parts.Any(p => spans.Any(span => p.WorkingSpan.OverlapsInTime(span)));
+        }
+
+        /// <summary>
         /// Adds a train part to the schedule without continuity or overlap checks.
         /// </summary>
         /// <remarks>

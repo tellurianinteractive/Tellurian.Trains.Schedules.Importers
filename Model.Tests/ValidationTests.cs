@@ -784,6 +784,30 @@ public class ValidationTests
         Assert.HasCount(1, errors);
     }
 
+    [TestMethod]
+    public void VehicleBookedOnEverySessionIsFreeForASchedulePlacedAtAnotherTime()
+    {
+        var (plan, _) = VehicleOnTwoForwardSchedules(secondTrainStartHour: 14);
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null);
+        plan.AssignVehicle(plan.Schedules.First(), loco, Sessions.All);
+
+        var free = loco.FreeSessionsFor(plan.Schedules.Last(), useDays: false, maxSessions: 6);
+
+        Assert.IsFalse(free.ComplementWithin(false, 6).CoversAllWithin(false, 6), "Nothing overlaps in time, so sessions are free.");
+    }
+
+    [TestMethod]
+    public void VehicleBookedOnEverySessionIsNotFreeForASimultaneousSchedule()
+    {
+        var (plan, _) = VehicleOnTwoForwardSchedules(secondTrainStartHour: 12);
+        var loco = plan.CreateVehicle(ScheduledObjectType.Locomotive, "L", 2, null);
+        plan.AssignVehicle(plan.Schedules.First(), loco, Sessions.All);
+
+        var free = loco.FreeSessionsFor(plan.Schedules.Last(), useDays: false, maxSessions: 6);
+
+        Assert.IsTrue(free.ComplementWithin(false, 6).CoversAllWithin(false, 6), "Both run at 12:00, so no session is free.");
+    }
+
     // Both schedules run at 12:00-12:55, so only the sessions decide whether the loco is double-booked.
     private static (Plan plan, ScheduledObject loco) VehicleOnTwoSimultaneousSchedules(Sessions first, Sessions second)
     {

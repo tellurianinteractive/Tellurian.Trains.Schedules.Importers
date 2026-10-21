@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.1.2
+
+### Changes
+
+- **Vehicles that work at other times.** A locomotive or wagonset that is already working something on every session is now offered when you assign a vehicle to a schedule that runs at other times. Previously it was hidden, so a locomotive could not be added as the front locomotive of a push/pull train while it also worked a night train of its own. A vehicle is hidden only when everything it already works overlaps the schedule in time, and it takes just the sessions on which it is free.
+
+- **Traction units in the train calls.** The calls of a train show the locomotives and trainsets that work it, with the sessions they work it on where that is not all of the train's.
+
 ## Version 1.1.0
 
 ### Changes

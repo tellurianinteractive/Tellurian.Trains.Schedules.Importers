@@ -1,4 +1,5 @@
 @using Tellurian.Trains.Schedules.Model.Layouts
+@using Tellurian.Trains.Schedules.Model.Schedules
 @using Tellurian.Trains.Schedules.Model.Timetables
 @using Tellurian.Trains.Schedules.Model.Validations
 @inject ScheduleStateService ScheduleState
@@ -51,6 +52,7 @@ else
                             <th>@Translator("Departure")</th>
                             <th>@Translator("To")</th>
                             <th>@Translator("Track")</th>
+                            <th>@Translator("TractionUnits")</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,6 +87,20 @@ else
                                 <td>@next?.Signature</td>
                                 <td>
                                     <ListBoxView Items="tracks" Value="call.TrackId" ValueChanged="id => SetTrack(call, id)" />
+                                </td>
+                                @* Display only: the traction units working the train, each with the sessions it
+                                   works it on where that is not all the train's. *@
+                                <td class="traction">
+                                    @foreach (var (vehicle, sessions) in TractionOf(train))
+                                    {
+                                        <span class="unit">
+                                            @vehicle.Designation
+                                            @if (sessions is { } some)
+                                            {
+                                                <SessionsView Sessions="some" Settings="SessionSettings" />
+                                            }
+                                        </span>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -169,6 +185,15 @@ else
             index > 0 ? ordered[index - 1].OperationLocation : null,
             index < ordered.Count - 1 ? ordered[index + 1].OperationLocation : null);
     }
+
+    // The traction units (locomotives and trainsets) the plan's schedules assign to the train, with the
+    // sessions each works it on; none of them for a unit assigned but never when the train runs.
+    private IReadOnlyList<(ScheduledObject Vehicle, Sessions? Sessions)> TractionOf(Train train) =>
+        [.. (ScheduleState.Schedule?.ScheduledObjects ?? [])
+            .Where(vehicle => vehicle.IsTraction && vehicle.Works(train))
+            .Select(vehicle => (Vehicle: vehicle, Sessions: vehicle.SessionsWorking(train)))
+            .Where(worked => worked.Sessions is not { } some || some.Numbers.Length > 0)
+            .OrderBy(worked => worked.Vehicle.Designation, StringComparer.CurrentCulture)];
 
     // What the train does here: starts, ends, stops on the way or runs through. A shunting task is work at
     // this one place and none of those.
