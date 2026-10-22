@@ -11,6 +11,16 @@ public sealed class ValidationSettings
     public bool ValidateStationTracks { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether track stretch conflicts are validated.</summary>
     public bool ValidateStretches { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether a double track stretch counts as two single tracks, one for
+    /// each direction, rather than as two tracks any train may use.
+    /// </summary>
+    /// <remarks>
+    /// Off by default: two trains then conflict on double track only when a third is added to the two
+    /// tracks. On, trains running the same way must keep apart, each section holding one train per
+    /// direction. It applies to the stretch validation, so it needs <see cref="ValidateStretches"/>.
+    /// </remarks>
+    public bool TreatDoubleTrackAsTwoSingleTracks { get; set; }
     /// <summary>Gets or sets a value indicating whether train speeds between calls are validated.</summary>
     public bool ValidateTrainSpeed { get; set; } = true;
     /// <summary>

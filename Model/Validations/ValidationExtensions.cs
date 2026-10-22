@@ -58,7 +58,7 @@ public static class ValidationExtensions
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
-            if (options.ValidateStretches) result.AddRange(timetable.GetStretchConflicts());
+            if (options.ValidateStretches) result.AddRange(timetable.GetStretchConflicts(options.TreatDoubleTrackAsTwoSingleTracks));
             if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
             return result;
         }

@@ -97,6 +97,10 @@ else
                                 }
                                 <span class="name">@GroupName(group)</span>
                                 <span class="count">(@group.Trains.Count)</span>
+                                @if (NumberRange(group) is { Length: > 0 } numberRange)
+                                {
+                                    <span class="count">@numberRange</span>
+                                }
                             </td>
                         </tr>
                         @if (groupExpanded)
@@ -300,6 +304,16 @@ else
     }
 
     private string GroupName(TrainGroup group) => group.Category?.Name ?? Translator("NoCategory");
+
+    // "P 101–148": the category prefix and the lowest and highest train number in the group.
+    private static string NumberRange(TrainGroup group)
+    {
+        if (group.Trains.Count == 0) return string.Empty;
+        var min = group.Trains.Min(t => t.Number);
+        var max = group.Trains.Max(t => t.Number);
+        var range = min == max ? $"{min}" : $"{min}–{max}";
+        return $"{group.Category?.Prefix} {range}".Trim();
+    }
 
     // ---- Row keys -------------------------------------------------------------------------------
 
@@ -704,7 +718,7 @@ else
         if (location.PreferredTrack(previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
-        train.AddLast(call);
+        if (Plan is { } plan) plan.AddLastCall(train, call); else train.AddLast(call);
         Save();
     }
 
@@ -718,7 +732,8 @@ else
         var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
         if (location.PreferredTrack(null, next, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Min(c => c.Arrival) : Time.Zero;
-        train.AddFirst(new StationCall(NextCallId(), track, start, start));
+        var call = new StationCall(NextCallId(), track, start, start);
+        if (Plan is { } plan) plan.AddFirstCall(train, call); else train.AddFirst(call);
         Save();
     }
 

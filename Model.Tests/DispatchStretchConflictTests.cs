@@ -184,6 +184,38 @@ public class DispatchStretchConflictTests
         Assert.IsEmpty(StretchConflicts(line));
     }
 
+    private static readonly ValidationSettings TwoSingleTracks = new() { TreatDoubleTrackAsTwoSingleTracks = true };
+
+    private static List<ValidationError> StretchConflicts(Line line, ValidationSettings settings) =>
+        [.. line.Plan.GetValidationErrors(settings).Where(e => e.ErrorType == ValidationErrorType.TrackStretchConflict)];
+
+    [TestMethod]
+    public void TrainsInTheSameDirectionCanShareDoubleTrack()
+    {
+        var line = NewLine(Unmanned, middleTracks: 2, tracksCount: 2);
+        FollowThroughMiddle(line);
+
+        Assert.IsEmpty(StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void TrainsInTheSameDirectionMustKeepApartWhenDoubleTrackIsTwoSingleTracks()
+    {
+        var line = NewLine(Unmanned, middleTracks: 2, tracksCount: 2);
+        FollowThroughMiddle(line);
+
+        Assert.HasCount(1, StretchConflicts(line, TwoSingleTracks));
+    }
+
+    [TestMethod]
+    public void OpposingTrainsCanStillPassWhenDoubleTrackIsTwoSingleTracks()
+    {
+        var line = NewLine(Unmanned, middleTracks: 2, tracksCount: 2);
+        MeetAtMiddle(line);
+
+        Assert.IsEmpty(StretchConflicts(line, TwoSingleTracks));
+    }
+
     [TestMethod]
     public void TrackStretchesAreJudgedOneByOneWithoutDispatchStretches()
     {

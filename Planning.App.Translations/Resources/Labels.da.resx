@@ -477,6 +477,9 @@
   <data name="ValidateStretches" xml:space="preserve">
     <value>Validér strækninger?</value>
   </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracks" xml:space="preserve">
+    <value>Behandl dobbeltspor som to enkeltspor?</value>
+  </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validér toghastighed?</value>
   </data>
@@ -2872,6 +2875,9 @@
   </data>
   <data name="ValidateStretchesHelp" xml:space="preserve">
     <value>Rapporterer tog, der er i konflikt på en strækning mellem stationer, for eksempel ved et møde på enkeltspor.</value>
+  </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracksHelp" xml:space="preserve">
+    <value>Tæller hver retning på et dobbeltspor som et eget enkeltspor, så tog, der kører i samme retning, også skal holde afstand, ikke kun tog, der mødes. Kræver strækningsvalidering.</value>
   </data>
   <data name="ValidateTrainSpeedHelp" xml:space="preserve">
     <value>Rapporterer et tog, hvis hastighed mellem to standsninger er under minimum eller over maksimum, som er sat under Tærskelværdier.</value>

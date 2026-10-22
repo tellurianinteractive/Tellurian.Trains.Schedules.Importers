@@ -12,7 +12,8 @@ namespace Tellurian.Trains.Schedules.Model.Validations;
 /// <para>
 /// A dispatch stretch is divided into <em>control sections</em> by its control points (see
 /// <c>IsControlPoint</c>): the signal controlled locations inside it, such as block posts and crossing
-/// loops. A section holds as many trains at once as it has tracks, whatever their direction. Unmanned
+/// loops. A section holds as many trains at once as it has tracks, whatever their direction (or, where double
+/// track counts as two single tracks, as many in each direction as half its tracks). Unmanned
 /// locations nobody controls do not divide anything. A location worked from a manned station — a
 /// controlled junction, unmanned station or industrial area — is not inside a dispatch stretch at all,
 /// but at its end (see <c>IsDispatchEndpoint</c>).
@@ -40,19 +41,19 @@ internal static class DispatchStretchValidation
 {
     extension(Timetable timetable)
     {
-        internal IEnumerable<ValidationError> GetStretchConflicts()
+        internal IEnumerable<ValidationError> GetStretchConflicts(bool doubleTrackAsTwoSingleTracks = false)
         {
             var layout = timetable.Layout;
             var dispatchStretches = layout.DispatchStretches.Where(d => d.Stretches.Count > 0).ToList();
             var covered = dispatchStretches.SelectMany(d => d.Stretches).ToHashSet();
             var result = new List<ValidationError>();
             result.AddRange(layout.TrackStretches.Where(s => !covered.Contains(s)).SelectMany(s => s.GetConflictingTrains()).Distinct());
-            result.AddRange(GetDispatchStretchConflicts(dispatchStretches, timetable.Trains));
+            result.AddRange(GetDispatchStretchConflicts(dispatchStretches, timetable.Trains, doubleTrackAsTwoSingleTracks));
             return result;
         }
     }
 
-    private static List<ValidationError> GetDispatchStretchConflicts(IEnumerable<DispatchStretch> dispatchStretches, IEnumerable<Train> trains)
+    private static List<ValidationError> GetDispatchStretchConflicts(IEnumerable<DispatchStretch> dispatchStretches, IEnumerable<Train> trains, bool doubleTrackAsTwoSingleTracks)
     {
         // Sections and zones are keyed by the track stretches they span, so one shared between dispatch
         // stretches (the line up to a controlled junction) is judged once, with all trains using it.
@@ -77,7 +78,7 @@ internal static class DispatchStretchValidation
 
         var result = new List<ValidationError>();
         var reported = new HashSet<(Visit, Visit)>();
-        foreach (var section in sections.Values) result.AddRange(section.CapacityConflicts(reported));
+        foreach (var section in sections.Values) result.AddRange(section.CapacityConflicts(reported, doubleTrackAsTwoSingleTracks));
         foreach (var zone in zones.Values) result.AddRange(zone.OpposingConflicts(reported));
         return result;
     }
@@ -277,10 +278,22 @@ internal static class DispatchStretchValidation
         /// More trains in the section at once, on one common session, than it has tracks. Concurrency
         /// only rises when a train enters, so testing every entering instant catches every peak.
         /// </summary>
-        public IEnumerable<ValidationError> CapacityConflicts(HashSet<(Visit, Visit)> reported)
+        public IEnumerable<ValidationError> CapacityConflicts(HashSet<(Visit, Visit)> reported, bool doubleTrackAsTwoSingleTracks)
         {
             var occupancies = Occupancies.OrderBy(o => o.Start.Value).ToArray();
-            if (occupancies.Select(o => o.Visit).Distinct().Count() <= Capacity) yield break;
+            if (!doubleTrackAsTwoSingleTracks || Capacity < 2)
+                return CapacityConflicts(occupancies, Capacity, reported);
+
+            // Each direction keeps to its own tracks, so trains must keep apart from those going the same
+            // way. A train standing where it turns back blocks both.
+            var perDirection = Math.Max(1, Capacity / 2);
+            return new[] { 1, -1 }.SelectMany(direction => CapacityConflicts(
+                occupancies.Where(o => o.Direction == direction || o.Direction == 0).ToArray(), perDirection, reported));
+        }
+
+        private static IEnumerable<ValidationError> CapacityConflicts(Occupancy[] occupancies, int capacity, HashSet<(Visit, Visit)> reported)
+        {
+            if (occupancies.Select(o => o.Visit).Distinct().Count() <= capacity) yield break;
 
             var onSession = new List<Occupancy>();
             var seen = new HashSet<Visit>();
@@ -294,7 +307,7 @@ internal static class DispatchStretchValidation
                     seen.Clear();
                     foreach (var o in occupancies)
                         if (o.IsActiveAt(instant, session) && seen.Add(o.Visit)) onSession.Add(o);
-                    if (onSession.Count <= Capacity) continue;
+                    if (onSession.Count <= capacity) continue;
 
                     // Report the earliest other train in the section with the one that tips it over.
                     var other = onSession.FirstOrDefault(o => o.Visit.Train.Number != entering.Visit.Train.Number);

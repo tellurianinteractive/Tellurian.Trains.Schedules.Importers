@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.2.4
+
+### Endringer
+
+- **Tognumre i kategorioverskriftene.** I fanen Tog viser hver kategorioverskrift nå også kategoriens prefiks og det laveste og høyeste tognummeret i den, for eksempel *P 101–148*, slik at det blir lettere å finne et bestemt tognummer.
+- **Dobbeltspor som to enkeltspor.** En ny innstilling i fanen Innstillinger, **Behandle dobbeltspor som to enkeltspor?**, gjør at også tog som kjører samme vei på et dobbeltspor holder avstand, slik at hver strekning rommer ett tog per retning. Den er av som standard og krever strekningsvalidering.
+
 ## Versjon 1.2.3
 
 ### Endringer

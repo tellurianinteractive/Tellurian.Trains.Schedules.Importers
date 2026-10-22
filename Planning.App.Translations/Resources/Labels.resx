@@ -477,6 +477,9 @@
   <data name="ValidateStretches" xml:space="preserve">
     <value>Validate stretches?</value>
   </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracks" xml:space="preserve">
+    <value>Treat double tracks as two single tracks?</value>
+  </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validate train speed?</value>
   </data>
@@ -2886,6 +2889,9 @@
   </data>
   <data name="ValidateStretchesHelp" xml:space="preserve">
     <value>Reports trains that conflict on a track stretch between stations, for example meeting on a single track.</value>
+  </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracksHelp" xml:space="preserve">
+    <value>Counts each direction of a double track as a single track of its own, so trains running the same way must keep apart too, not only trains meeting. Needs stretch validation.</value>
   </data>
   <data name="ValidateTrainSpeedHelp" xml:space="preserve">
     <value>Reports a train whose speed between two calls is below the minimum or above the maximum set under Thresholds.</value>

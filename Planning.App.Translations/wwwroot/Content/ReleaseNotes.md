@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.2.4
+
+### Changes
+
+- **Train numbers in the category headings.** In the Trains tab, each category heading now also shows the category prefix and the lowest and highest train number in it, for example *P 101–148*, which makes it easier to find a specific train number.
+- **Double tracks as two single tracks.** A new setting in the Settings tab, **Treat double tracks as two single tracks?**, makes trains running the same way on a double track keep apart as well, each section holding one train per direction. It is off by default and needs stretch validation.
+
 ## Version 1.2.3
 
 ### Changes

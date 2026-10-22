@@ -27,6 +27,39 @@ public class PlanUpdateTimingsTests
         (int)(Call(train, toSignature).Arrival.Value - Call(train, fromSignature).Departure.Value).TotalMinutes;
 
     [TestMethod]
+    public void ACallAddedLastIsTimedLikeTheRestOfTheTrain()
+    {
+        var plan = SimplePlan();
+        var reference = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start)!;
+        var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "E"), Start)!;
+        var before = train.Calls.Select(c => (c.Arrival, c.Departure)).ToList();
+
+        var added = plan.AddLastCall(train, new StationCall(9999, Call(reference, "Hm").Track, Start, Start));
+
+        Assert.AreEqual(LegMinutes(reference, "E", "Hm"), LegMinutes(train, "E", "Hm"));
+        Assert.IsTrue(added.Departure > added.Arrival, "The new last call stops for the standard dwell.");
+        CollectionAssert.AreEqual(before, train.Calls.Where(c => c.Id != 9999).Select(c => (c.Arrival, c.Departure)).ToList(),
+            "The calls the train already had keep their times.");
+    }
+
+    [TestMethod]
+    public void ACallAddedFirstIsTimedLikeTheRestOfTheTrain()
+    {
+        var plan = SimplePlan();
+        var reference = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start)!;
+        var train = plan.Create(Passenger, Location(plan, "Lu"), Location(plan, "Hm"), Start.AddMinutes(60))!;
+        var oldFirst = train.CallsInRunOrder[0];
+        var oldFirstTimes = (oldFirst.Arrival, oldFirst.Departure);
+
+        var added = plan.AddFirstCall(train, new StationCall(9999, Call(reference, "M2").Track, Start, Start));
+
+        Assert.AreSame(added, train.CallsInRunOrder[0]);
+        Assert.AreEqual(LegMinutes(reference, "M2", "Lu"), LegMinutes(train, "M2", "Lu"));
+        Assert.IsTrue(added.Departure > added.Arrival, "The new first call is made ready for the standard dwell.");
+        Assert.AreEqual(oldFirstTimes, (oldFirst.Arrival, oldFirst.Departure), "The old first call keeps its times.");
+    }
+
+    [TestMethod]
     public void KeepsTheOriginDepartureFixed()
     {
         var plan = SimplePlan();

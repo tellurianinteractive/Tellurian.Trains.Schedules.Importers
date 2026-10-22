@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.2.4
+
+### Änderungen
+
+- **Zugnummern in den Kategorieüberschriften.** Im Tab Züge zeigt jede Kategorieüberschrift jetzt auch das Präfix der Kategorie sowie die niedrigste und höchste Zugnummer darin, zum Beispiel *P 101–148*. So lässt sich eine bestimmte Zugnummer leichter finden.
+- **Zweigleisige Strecken als zwei eingleisige.** Eine neue Einstellung im Tab Einstellungen, **Zweigleisige Strecken als zwei eingleisige behandeln?**, sorgt dafür, dass auch Züge, die auf einer zweigleisigen Strecke in dieselbe Richtung fahren, Abstand halten; jeder Abschnitt nimmt dann einen Zug je Richtung auf. Sie ist standardmäßig aus und setzt die Streckenprüfung voraus.
+
 ## Version 1.2.3
 
 ### Änderungen

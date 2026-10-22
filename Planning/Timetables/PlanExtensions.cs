@@ -982,6 +982,64 @@ public static class PlanExtensions
         }
 
         /// <summary>
+        /// Adds <paramref name="call"/> as the last call of <paramref name="train"/> and times it as the rest
+        /// of the train is timed, leaving every other call's times as they are.
+        /// </summary>
+        /// <remarks>
+        /// The call arrives after the run time of the stretch from the call before it
+        /// (<see cref="TrainExtensions.ScheduledLegMinutes"/>, with the stand-still allowance at both ends)
+        /// and stays for the standard stop dwell. Where no stretch joins the two locations, or the result
+        /// would fall outside the plan's operating window, it takes the previous call's departure for both
+        /// times, and the planner sets them.
+        /// </remarks>
+        public StationCall AddLastCall(Train train, StationCall call)
+        {
+            ArgumentNullException.ThrowIfNull(train);
+            ArgumentNullException.ThrowIfNull(call);
+            var previous = train.CallsInRunOrder.LastOrDefault();
+            train.AddLast(call);
+            Model.Validations.StopRules.ApplyStopRules(plan);
+            if (previous is null || plan.StretchBetween(previous.OperationLocation, call.OperationLocation) is not { } stretch) return call;
+
+            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var arrival = previous.Departure.AddMinutes(train.ScheduledLegMinutes(stretch, settings, previous.IsStop, standsAtEnd: true));
+            var departure = arrival.AddMinutes(plan.DwellMinutes(call.OperationLocation, false));
+            if (!plan.OperatingWindowContains(train.DriverStartTime, departure)) return call;
+            call.Arrival = arrival;
+            call.Departure = departure;
+            return call;
+        }
+
+        /// <summary>
+        /// Adds <paramref name="call"/> as the first call of <paramref name="train"/> and times it as the
+        /// rest of the train is timed, leaving every other call's times as they are.
+        /// </summary>
+        /// <remarks>
+        /// The mirror of <see cref="AddLastCall"/>: the call departs early enough to arrive at what was the
+        /// first call at the time that call already has, after the run time of the stretch between them, and
+        /// arrives the standard stop dwell before it departs. Where no stretch joins the two locations, or
+        /// the result would fall outside the plan's operating window, it takes the old first arrival for
+        /// both times, and the planner sets them.
+        /// </remarks>
+        public StationCall AddFirstCall(Train train, StationCall call)
+        {
+            ArgumentNullException.ThrowIfNull(train);
+            ArgumentNullException.ThrowIfNull(call);
+            var next = train.CallsInRunOrder.FirstOrDefault();
+            train.AddFirst(call);
+            Model.Validations.StopRules.ApplyStopRules(plan);
+            if (next is null || plan.StretchBetween(call.OperationLocation, next.OperationLocation) is not { } stretch) return call;
+
+            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var departure = next.Arrival.AddMinutes(-train.ScheduledLegMinutes(stretch, settings, standsAtStart: true, next.IsStop));
+            var arrival = departure.AddMinutes(-plan.DwellMinutes(call.OperationLocation, false));
+            if (!plan.OperatingWindowContains(arrival, train.DriverEndTime)) return call;
+            call.Arrival = arrival;
+            call.Departure = departure;
+            return call;
+        }
+
+        /// <summary>
         /// Recomputes every call's arrival and departure times of <paramref name="train"/> from its current
         /// stop pattern (the <see cref="StationCall.IsStop"/> flags), keeping the origin's departure fixed.
         /// Use this after changing which stations a train stops at so the run and dwell times follow the new

@@ -384,6 +384,10 @@ else
                     <HelpLabel For="ValidateStretches" />
                     <input type="checkbox" @bind="v.ValidateStretches" @bind:after="OnEdited" />
                 </div>
+                <div class="field sub-option">
+                    <HelpLabel For="TreatDoubleTrackAsTwoSingleTracks" />
+                    <input type="checkbox" @bind="v.TreatDoubleTrackAsTwoSingleTracks" @bind:after="OnEdited" disabled="@(!v.ValidateStretches)" />
+                </div>
                 <div class="field">
                     <HelpLabel For="ValidateTrainSpeed" />
                     <input type="checkbox" @bind="v.ValidateTrainSpeed" @bind:after="OnEdited" />

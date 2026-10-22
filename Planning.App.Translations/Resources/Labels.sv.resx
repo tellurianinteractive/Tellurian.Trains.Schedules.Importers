@@ -477,6 +477,9 @@
   <data name="ValidateStretches" xml:space="preserve">
     <value>Validera sträckor?</value>
   </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracks" xml:space="preserve">
+    <value>Behandla dubbelspår som två enkelspår?</value>
+  </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Validera tåghastighet?</value>
   </data>
@@ -2872,6 +2875,9 @@
   </data>
   <data name="ValidateStretchesHelp" xml:space="preserve">
     <value>Rapporterar tåg som är i konflikt på en sträcka mellan stationer, till exempel vid ett möte på enkelspår.</value>
+  </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracksHelp" xml:space="preserve">
+    <value>Räknar varje riktning på ett dubbelspår som ett eget enkelspår, så att tåg som går åt samma håll också måste hålla avstånd, inte bara tåg som möts. Kräver sträckvalidering.</value>
   </data>
   <data name="ValidateTrainSpeedHelp" xml:space="preserve">
     <value>Rapporterar ett tåg vars hastighet mellan två uppehåll är under minimum eller över maximum som anges under Tröskelvärden.</value>

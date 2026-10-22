@@ -477,6 +477,9 @@
   <data name="ValidateStretches" xml:space="preserve">
     <value>Strecken prüfen?</value>
   </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracks" xml:space="preserve">
+    <value>Zweigleisige Strecken als zwei eingleisige behandeln?</value>
+  </data>
   <data name="ValidateTrainSpeed" xml:space="preserve">
     <value>Zuggeschwindigkeit prüfen?</value>
   </data>
@@ -2872,6 +2875,9 @@
   </data>
   <data name="ValidateStretchesHelp" xml:space="preserve">
     <value>Meldet Züge, die auf einer Strecke zwischen Bahnhöfen in Konflikt geraten, zum Beispiel bei einer Begegnung auf einem eingleisigen Abschnitt.</value>
+  </data>
+  <data name="TreatDoubleTrackAsTwoSingleTracksHelp" xml:space="preserve">
+    <value>Zählt jede Richtung einer zweigleisigen Strecke als eigenes eingleisiges Gleis, sodass auch Züge in gleicher Richtung Abstand halten müssen, nicht nur sich begegnende Züge. Setzt die Streckenprüfung voraus.</value>
   </data>
   <data name="ValidateTrainSpeedHelp" xml:space="preserve">
     <value>Meldet einen Zug, dessen Geschwindigkeit zwischen zwei Halten unter dem Minimum oder über dem Maximum liegt, die unter Schwellenwerte eingestellt sind.</value>

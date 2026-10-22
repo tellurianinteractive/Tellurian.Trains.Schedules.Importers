@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.2.4
+
+### Ändringar
+
+- **Tågnummer i kategorirubrikerna.** I fliken Tåg visar varje kategorirubrik nu också kategorins prefix samt det lägsta och högsta tågnumret i den, till exempel *P 101–148*, så att det blir lättare att hitta ett visst tågnummer.
+- **Dubbelspår som två enkelspår.** En ny inställning i fliken Inställningar, **Behandla dubbelspår som två enkelspår?**, gör att även tåg som kör samma håll på ett dubbelspår håller avstånd, så att varje sträcka rymmer ett tåg per riktning. Den är avstängd som standard och kräver sträckvalidering.
+
 ## Version 1.2.3
 
 ### Ändringar
