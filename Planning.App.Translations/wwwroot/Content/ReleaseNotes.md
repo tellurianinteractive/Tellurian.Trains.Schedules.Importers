@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.1
+
+### Changes
+
+- **Train clearance and loco runaround set the least time a train stands.** The **Train clearance** and **Loco runaround** times are real time and are now entered as one number: below 10 it is minutes and from 10 it is seconds, and the unit is shown after the field. 1 is one minute and 90 is ninety seconds. The time is converted to fast-clock time by the fast-clock speed. It is the shortest time a train may stand to be cleared at a manned station, or to run the loco round, and it is not added to the minimum stop: the longest of them applies. A new setting, **Validate required stop times?**, reports a train that stops for a shorter time. Lengthen the stop, or lower the time required, to clear the warning.
+
 ## Version 1.3.0
 
 ### Changes
@@ -11,8 +17,6 @@
 - **Tracks and vehicles have lengths.** Give a vehicle a **Length** in the vehicle dialog (for a wagonset, the whole rake) and a track a **Length** in the Operation locations tab. Trains standing on a track with a length are then checked by their lengths instead of counting as a double booking: those that fit together may share the track, and a warning is shown when they are too long together. A second warning is shown when a train or wagonset cannot leave because another stands in its way — the one that came in last at an end has to leave first, whether that is a train or a wagonset put on a siding. A new **Entered from one end only?** setting on a track is for stub tracks and sidings. A train with no vehicle of known length counts as its maximum length in metres, if it has one; anything without a length is checked as before.
 
 - **A vehicle fetched from another track starts there.** In the Vehicle contributors report and the Vehicle owners tab, a locomotive, trainset or wagonset whose first train part fetches it from another track is now listed on that track, where it is to be set up before the start, instead of on the departure track.
-
-- **Train clearance and loco runaround set the least time a train stands.** The **Train clearance** and **Loco runaround** times are real time and are now entered as one number: below 10 it is minutes and from 10 it is seconds, and the unit is shown after the field. 1 is one minute and 90 is ninety seconds. The time is converted to fast-clock time by the fast-clock speed. It is the shortest time a train may stand to be cleared at a manned station, or to run the loco round, and it is not added to the minimum stop: the longest of them applies. A new setting, **Validate required stop times?**, reports a train that stops for a shorter time. Lengthen the stop, or lower the time required, to clear the warning.
 
 ### Fixes
 

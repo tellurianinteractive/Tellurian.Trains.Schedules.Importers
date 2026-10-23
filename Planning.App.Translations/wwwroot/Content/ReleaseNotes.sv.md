@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.1
+
+### Ändringar
+
+- **Tågklarering och rundgång för lok sätter kortaste uppehållet.** Tiderna **Tågklarering** och **Rundgång lok** är verklig tid och anges nu som ett tal: under 10 är det minuter och från 10 är det sekunder, och enheten visas efter fältet. 1 är en minut och 90 är nittio sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet. Den är det kortaste uppehåll ett tåg får ha för att klareras på en bemannad station, eller för att köra loket runt, och läggs inte till minsta uppehåll: den längsta av dem gäller. En ny inställning, **Validera nödvändiga uppehållstider?**, rapporterar ett tåg som har kortare uppehåll. Förläng uppehållet, eller sänk den nödvändiga tiden, för att få bort varningen.
+
 ## Version 1.3.0
 
 ### Ändringar
@@ -11,8 +17,6 @@
 - **Spår och fordon har längder.** Ange en **Längd** för ett fordon i fordonsdialogen (för ett vagnsätt hela vagnsättet) och för ett spår i fliken Driftplatser. Tåg som står på ett spår med längd kontrolleras då efter sina längder i stället för att räknas som dubbelbokning: de som ryms tillsammans får dela spåret, och en varning visas när de är för långa tillsammans. En andra varning visas när ett tåg eller vagnsätt inte kan lämna spåret för att ett annat står i vägen — det som kom in sist i en ände måste ut först, vare sig det är ett tåg eller ett vagnsätt som ställts på ett stickspår. En ny inställning **Endast från ena änden?** på ett spår är till för stickspår. Ett tåg utan fordon med känd längd räknas med sin största längd i meter, om den är angiven; allt utan längd kontrolleras som förut.
 
 - **Ett fordon som hämtas från ett annat spår startar där.** I rapporten Fordon och ägare och i fliken Fordonsägare listas ett lok, tågset eller vagnsätt vars första tågavsnitt hämtar det från ett annat spår nu på det spåret, där det ska ställas upp före start, i stället för på avgångsspåret.
-
-- **Tågklarering och rundgång för lok sätter kortaste uppehållet.** Tiderna **Tågklarering** och **Rundgång lok** är verklig tid och anges nu som ett tal: under 10 är det minuter och från 10 är det sekunder, och enheten visas efter fältet. 1 är en minut och 90 är nittio sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet. Den är det kortaste uppehåll ett tåg får ha för att klareras på en bemannad station, eller för att köra loket runt, och läggs inte till minsta uppehåll: den längsta av dem gäller. En ny inställning, **Validera nödvändiga uppehållstider?**, rapporterar ett tåg som har kortare uppehåll. Förläng uppehållet, eller sänk den nödvändiga tiden, för att få bort varningen.
 
 ### Rättelser
 

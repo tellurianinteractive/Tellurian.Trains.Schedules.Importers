@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.1
+
+### Änderungen
+
+- **Zugfreigabe und Lokumlauf bestimmen den kürzesten Halt.** Die Zeiten **Zugfreigabe** und **Lok umsetzen** sind echte Zeit und werden jetzt als eine Zahl eingegeben: unter 10 sind es Minuten, ab 10 Sekunden, und die Einheit steht hinter dem Feld. 1 ist eine Minute und 90 sind neunzig Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet. Sie ist der kürzeste Halt, den ein Zug haben darf, um an einer besetzten Station freigegeben zu werden oder um die Lok umzusetzen, und wird nicht zum Mindesthalt addiert: es gilt die längste. Eine neue Einstellung, **Erforderliche Haltezeiten prüfen?**, meldet einen Zug mit kürzerem Halt. Verlängern Sie den Halt oder senken Sie die erforderliche Zeit, um die Warnung zu beheben.
+
 ## Version 1.3.0
 
 ### Änderungen
@@ -11,8 +17,6 @@
 - **Gleise und Fahrzeuge haben Längen.** Geben Sie einem Fahrzeug im Fahrzeugdialog eine **Länge** (bei einer Wagengruppe die ganze Gruppe) und einem Gleis im Reiter Betriebsstellen eine **Länge** an. Züge auf einem Gleis mit Länge werden dann nach ihren Längen geprüft, statt als Doppelbelegung zu gelten: Was zusammen Platz hat, darf das Gleis teilen, und eine Warnung erscheint, wenn es zusammen zu lang ist. Eine zweite Warnung erscheint, wenn ein Zug oder eine Wagengruppe nicht ausfahren kann, weil ein anderer im Weg steht — was an einem Ende zuletzt eingefahren ist, muss zuerst hinaus, ob Zug oder auf ein Stumpfgleis gestellte Wagengruppe. Die neue Einstellung **Nur von einem Ende befahrbar?** an einem Gleis ist für Stumpfgleise. Ein Zug ohne Fahrzeuge bekannter Länge zählt mit seiner größten Länge in Metern, falls angegeben; alles ohne Länge wird wie bisher geprüft.
 
 - **Ein von einem anderen Gleis geholtes Fahrzeug startet dort.** Im Bericht Mitgebrachte Fahrzeuge und im Reiter Fahrzeugbesitzer wird eine Lok, ein Triebzug oder eine Wagengruppe, deren erster Zugabschnitt sie von einem anderen Gleis holt, jetzt auf diesem Gleis geführt, wo sie vor dem Start aufzustellen ist, statt auf dem Abfahrtsgleis.
-
-- **Zugfreigabe und Lokumlauf bestimmen den kürzesten Halt.** Die Zeiten **Zugfreigabe** und **Lok umsetzen** sind echte Zeit und werden jetzt als eine Zahl eingegeben: unter 10 sind es Minuten, ab 10 Sekunden, und die Einheit steht hinter dem Feld. 1 ist eine Minute und 90 sind neunzig Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet. Sie ist der kürzeste Halt, den ein Zug haben darf, um an einer besetzten Station freigegeben zu werden oder um die Lok umzusetzen, und wird nicht zum Mindesthalt addiert: es gilt die längste. Eine neue Einstellung, **Erforderliche Haltezeiten prüfen?**, meldet einen Zug mit kürzerem Halt. Verlängern Sie den Halt oder senken Sie die erforderliche Zeit, um die Warnung zu beheben.
 
 ### Korrekturen
 

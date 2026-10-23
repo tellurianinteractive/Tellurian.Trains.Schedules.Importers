@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.1
+
+### Ændringer
+
+- **Togklarering og lokomotivomløb sætter det korteste ophold.** Tiderne **Togklarering** og **Lokomotivomløb** er reel tid og angives nu som ét tal: under 10 er det minutter, og fra 10 er det sekunder, og enheden vises efter feltet. 1 er ét minut, og 90 er halvfems sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed. Den er det korteste ophold, et tog må have for at blive klareret på en bemandet station, eller for at køre lokomotivet rundt, og lægges ikke oven i det mindste ophold: den længste af dem gælder. En ny indstilling, **Validér nødvendige opholdstider?**, rapporterer et tog med kortere ophold. Forlæng opholdet, eller sænk den krævede tid, for at fjerne advarslen.
+
 ## Version 1.3.0
 
 ### Ændringer
@@ -11,8 +17,6 @@
 - **Spor og køretøjer har længder.** Angiv en **Længde** for et køretøj i køretøjsdialogen (for et vognsæt hele sættet) og for et spor i fanen Driftssteder. Tog, der holder på et spor med længde, kontrolleres så efter deres længder i stedet for at tælle som dobbeltbooking: dem, der kan være der samtidig, må dele sporet, og der vises en advarsel, når de er for lange tilsammen. En anden advarsel vises, når et tog eller vognsæt ikke kan forlade sporet, fordi et andet holder i vejen — det, der kom ind sidst i en ende, skal ud først, hvad enten det er et tog eller et vognsæt sat på et sidespor. En ny indstilling **Kun fra den ene ende?** på et spor er til blindspor. Et tog uden køretøjer med kendt længde regnes med sin største længde i meter, hvis den er angivet; alt uden længde kontrolleres som før.
 
 - **Et køretøj, der hentes fra et andet spor, starter dér.** I rapporten Medbragte køretøjer og i fanen Køretøjsejere vises et lokomotiv, togsæt eller vognsæt, hvis første togafsnit henter det fra et andet spor, nu på det spor, hvor det skal stilles op før start, i stedet for på afgangssporet.
-
-- **Togklarering og lokomotivomløb sætter det korteste ophold.** Tiderne **Togklarering** og **Lokomotivomløb** er reel tid og angives nu som ét tal: under 10 er det minutter, og fra 10 er det sekunder, og enheden vises efter feltet. 1 er ét minut, og 90 er halvfems sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed. Den er det korteste ophold, et tog må have for at blive klareret på en bemandet station, eller for at køre lokomotivet rundt, og lægges ikke oven i det mindste ophold: den længste af dem gælder. En ny indstilling, **Validér nødvendige opholdstider?**, rapporterer et tog med kortere ophold. Forlæng opholdet, eller sænk den krævede tid, for at fjerne advarslen.
 
 ### Rettelser
 
