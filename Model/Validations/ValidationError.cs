@@ -255,6 +255,43 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a track-too-short error: the occupants standing on the track together are longer than the
+    /// track (rule L5).
+    /// </summary>
+    internal static ValidationError StationTrackTooShort(
+        StationTrack track,
+        IReadOnlyList<TrackStanding> occupants,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StationTrackTooShort,
+            FromTrack = track,
+            ToTrack = track,
+            FromTime = occupants.Min(o => o.From),
+            ToTime = occupants.Max(o => o.To),
+            Trains = [.. occupants.Select(o => o.Train).Distinct()],
+            Message = message
+        };
+
+    /// <summary>
+    /// Creates a blocked-vehicle error: <paramref name="blocked"/> cannot leave the track while
+    /// <paramref name="blocker"/> stands in its way (rule L5).
+    /// </summary>
+    internal static ValidationError StationTrackBlocked(
+        StationTrack track,
+        TrackStanding blocked,
+        TrackStanding blocker,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StationTrackBlocked,
+            FromTrack = track,
+            ToTrack = track,
+            FromTime = Time.Min(blocked.From, blocker.From),
+            ToTime = Time.Max(blocked.To, blocker.To),
+            Trains = [.. new[] { blocked.Train, blocker.Train }.Distinct()],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates a station track conflict error between a train's call and vehicles standing on the track
     /// (see <see cref="TrackHold"/>). Keyed to the schedule whose vehicles stand there, which is where it
     /// is put right (by moving them to another track or time); the trains are still carried for context.
@@ -730,6 +767,28 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a reversible-train error: a train said to be reversible (<see cref="Train.IsReversible"/>) is
+    /// worked by a traction unit that cannot change direction without a locomotive runaround (rule S9).
+    /// </summary>
+    public static ValidationError ReversibleTrainNeedsRunaround(
+        Train train,
+        Message message)
+    {
+        var calls = train.CallsInRunOrder;
+        var (first, last) = (calls.First(), calls.Last());
+        return new()
+        {
+            ErrorType = ValidationErrorType.ReversibleTrainNeedsRunaround,
+            FromTrack = first.Track,
+            ToTrack = last.Track,
+            FromTime = first.Departure,
+            ToTime = last.Arrival,
+            Trains = [train],
+            Message = message
+        };
+    }
+
+    /// <summary>
     /// Creates a loading mismatch error: a cargo wagonset is unloaded without being loaded first, loaded
     /// while it is still loaded, or left loaded at the end of its schedule.
     /// </summary>
@@ -1043,6 +1102,9 @@ public enum ValidationErrorType
     /// <summary>A locomotive stands at the back of a schedule's trains on sessions where nothing leads them.</summary>
     BackLocomotiveWithoutFront,
 
+    /// <summary>A train said to be reversible is worked by a traction unit that must be run round to change direction.</summary>
+    ReversibleTrainNeedsRunaround,
+
     /// <summary>A train has no traction unit on some of the sessions it runs.</summary>
     TrainMissingTraction,
 
@@ -1084,6 +1146,12 @@ public enum ValidationErrorType
     /// <summary>A train's call takes a station track while the vehicles of a schedule stand on it
     /// between their trains. Put right in the schedule, so marked there and not on the trains.</summary>
     StationTrackHeldByVehicles,
+
+    /// <summary>The vehicles standing on a station track at the same time are longer together than the track (rule L5).</summary>
+    StationTrackTooShort,
+
+    /// <summary>A vehicle standing on a station track cannot leave while another stands in its way (rule L5).</summary>
+    StationTrackBlocked,
 }
 
 /// <summary>

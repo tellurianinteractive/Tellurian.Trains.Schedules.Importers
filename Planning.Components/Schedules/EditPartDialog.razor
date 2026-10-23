@@ -114,12 +114,16 @@
             }
             <div class="field">
                 <label title="@Translator("RunaroundLocoHelp")">@Translator("RunaroundLoco")</label>
-                <input type="checkbox" checked="@_runaroundLoco"
-                       @onchange="e => _runaroundLoco = e.Value as bool? ?? false" />
+                <select value="@_runaround"
+                        @onchange="e => _runaround = Enum.TryParse<RunaroundMode>(e.Value?.ToString(), out var mode) ? mode : RunaroundMode.Automatic">
+                    <option value="@RunaroundMode.Automatic">@Translator("RunaroundAutomatic")</option>
+                    <option value="@RunaroundMode.Never">@Translator("RunaroundNever")</option>
+                    <option value="@RunaroundMode.Always">@Translator("RunaroundAlways")</option>
+                </select>
             </div>
             @* Said rather than silently unticked: what the planner asked for is kept, in case the
                traction working the part changes to one that does have to be run round. *@
-            @if ((_runaroundLoco || _turnLoco) && !Part.NeedsRunaround)
+            @if ((_runaround == RunaroundMode.Always || _turnLoco) && !Part.NeedsRunaround)
             {
                 <p class="hint">@Translator("RunaroundLocoNotNeeded")</p>
             }
@@ -197,7 +201,7 @@
     private int _from;
     private int _to;
     private bool _turnLoco;
-    private bool _runaroundLoco;
+    private RunaroundMode _runaround;
     private bool _loadWagons;
     private bool _unloadWagons;
     private TractionLayover _fromLayover;
@@ -273,7 +277,7 @@
         if (_from >= calls.Count - 1) _from = calls.Count - 2;
         if (_to <= _from || _to >= calls.Count) _to = _from + 1;
         _turnLoco = Part.TractionOptions?.TurnLoco ?? false;
-        _runaroundLoco = Part.TractionOptions?.RunaroundLoco ?? false;
+        _runaround = Part.TractionOptions?.Runaround ?? RunaroundMode.Automatic;
         _fromLayover = Part.DepartureLayover;
         _toLayover = Part.ArrivalLayover;
         _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
@@ -383,11 +387,11 @@
         if (!ShowTractionOptions) return;
         if (Part.TractionOptions is null)
         {
-            if (!_turnLoco && !_runaroundLoco) return;
+            if (!_turnLoco && _runaround == RunaroundMode.Automatic) return;
             Part.TractionOptions = new TractionOptions { DisplayUseNote = false };
         }
         Part.TractionOptions.TurnLoco = _turnLoco;
-        Part.TractionOptions.RunaroundLoco = _runaroundLoco;
+        Part.TractionOptions.Runaround = _runaround;
     }
 
     // Records the other tracks the vehicles are fetched from and put on. As for the layovers below, only a

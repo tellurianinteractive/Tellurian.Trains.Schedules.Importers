@@ -30,6 +30,7 @@ public static class ValidationExtensions
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionCoverage());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateWagonSetLoading());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateTractionRoles());
+            if (options.ValidateSchedules) result.AddRange(plan.ValidateReversibleTrains());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleClosure());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleDoubleBooking());
             if (options.ValidateSchedules) result.AddRange(plan.ValidateVehicleIdentities());
@@ -486,6 +487,28 @@ public static class ValidationExtensions
                         schedule.Number, vehicle.Designation, SessionsText(SessionsExtensions.FromPeriodNumbers(without, general.UseDays), general));
                     errors.Add(ValidationError.BackLocomotiveWithoutFront(schedule, message));
                 }
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Validates that a train said to be reversible (<see cref="Train.IsReversible"/>) is not worked by a
+        /// traction unit that has to be run round to change direction (rule S9). The planner's word about the
+        /// train stands only until a vehicle works it, so a plain locomotive on such a train means one of the
+        /// two is wrong. A train no traction unit works yet is left alone, and so is a train that is not said
+        /// to be reversible whatever works it: the units then decide, and sparing a runaround is no mistake.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateReversibleTrains()
+        {
+            var errors = new List<ValidationError>();
+            foreach (var train in plan.Timetable.Trains.Where(t => t.IsReversible && t.Calls.Count > 0))
+            {
+                var traction = plan.ScheduledObjects.Where(v => v.IsTraction && v.Works(train)).ToList();
+                if (traction.Count == 0 || !plan.NeedsLocoRunaround(train)) continue;
+
+                var needing = traction.Where(v => !v.ChangesDirectionWithoutRunaround).Select(v => v.Designation).Distinct();
+                var message = Message.Warning(Strings.ReversibleTrainNeedsRunaround, train, string.Join(", ", needing));
+                errors.Add(ValidationError.ReversibleTrainNeedsRunaround(train, message));
             }
             return errors;
         }
@@ -1254,10 +1277,12 @@ public static class ValidationExtensions
             return result;
         }
 
-        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage = 0)
+        internal List<(StationCall one, StationCall other)> GetConflictsWithRemaning(IEnumerable<StationCall> remaining, IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage = 0, HashSet<object>? measured = null)
         {
             var result = new List<(StationCall, StationCall)>();
             var mine = stationCall.TrackOccupancy;
+            // Two calls that both have a length may share the track, which rule L5 judges instead.
+            var myLengthIsKnown = measured?.Contains(stationCall) == true;
             // A shunting task with no traction unit takes no track, so its track and times are ignored.
             var occupies = stationCall.OccupiesTrack(vehicleSchedules);
             var conflictingWithMe = remaining.Where(r =>
@@ -1265,13 +1290,14 @@ public static class ValidationExtensions
                 r.Track.Equals(stationCall.Track) &&
                 r.OccupiesTrack(vehicleSchedules) &&
                 !r.Train!.Equals(stationCall.Train) &&
+                !(myLengthIsKnown && measured!.Contains(r)) &&
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
                 // A span a day apart is the same time on the clock, but then on the session a day later.
                 r.TrackOccupancy.ConflictsInTime(r.Train!.Sessions, mine, stationCall.Train!.Sessions, minMinutesBetweenTrackUsage) &&
                 !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
-            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage));
+            if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage, measured));
             return result;
         }
 
@@ -1301,7 +1327,19 @@ public static class ValidationExtensions
         public IEnumerable<ValidationError> GetValidationErrors(IEnumerable<Schedule> vehicleSchedules, bool extendOccupancyByVehicleStay = false, int minMinutesBetweenTrackUsage = 0)
         {
             if (stationTrack is null) return [];
-            var errors = stationTrack.GetConflicts(vehicleSchedules, minMinutesBetweenTrackUsage).Select(c =>
+            var schedules = vehicleSchedules as IReadOnlyCollection<Schedule> ?? [.. vehicleSchedules];
+            IReadOnlyList<TrackHold> holds = extendOccupancyByVehicleStay
+                ? [.. schedules.TrackHolds.Where(h => h.Track.Equals(stationTrack))]
+                : [];
+            // Occupants that have a length, on a track that has one, are judged by their lengths and the order
+            // they can leave in (rule L5) rather than by plain double booking: they may share the track.
+            var standings = TrackStandings.On(stationTrack, schedules, holds);
+            var measured = new HashSet<object>(ReferenceEqualityComparer.Instance);
+            foreach (var standing in standings.Where(s => s.IsMeasured))
+                measured.Add((object?)standing.Call ?? standing.Hold!);
+            var capacity = TrackCapacityRules.GetCapacityErrors(stationTrack, standings, schedules);
+
+            var errors = stationTrack.GetConflicts(schedules, minMinutesBetweenTrackUsage, measured).Select(c =>
             {
                 // The call that takes the track first is named first, so the two spans in the message read
                 // in time order and the overlap between them is easy to see.
@@ -1317,18 +1355,17 @@ public static class ValidationExtensions
                     : Message.Information(Strings.CallAtStationTooCloseInTimeToOtherCall, first.Train!, firstSpan, second.Train!, secondSpan, free, minMinutesBetweenTrackUsage);
                 return ValidationError.StationTrackConflict(stationTrack, first, second, message);
             });
-            return extendOccupancyByVehicleStay
-                ? errors.Concat(stationTrack.GetHoldConflicts(vehicleSchedules, minMinutesBetweenTrackUsage))
-                : errors;
+            return (extendOccupancyByVehicleStay
+                ? errors.Concat(stationTrack.GetHoldConflicts(schedules, minMinutesBetweenTrackUsage, holds, measured))
+                : errors).Concat(capacity);
         }
 
         // The calls of other schedules that take a track while the vehicles of a schedule stand on it, and
         // other vehicles standing there at the same time. Vehicles that stay on it together (a locomotive
         // and the wagons it brought) are no conflict; vehicles of one schedule that work different
         // sessions are, as one of them stands idle where the other works.
-        private IEnumerable<ValidationError> GetHoldConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage)
+        private IEnumerable<ValidationError> GetHoldConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage, IReadOnlyList<TrackHold> holds, HashSet<object> measured)
         {
-            var holds = vehicleSchedules.TrackHolds.Where(h => h.Track.Equals(stationTrack)).ToList();
             if (holds.Count == 0) return [];
             var result = new List<ValidationError>();
             foreach (var hold in holds)
@@ -1336,6 +1373,8 @@ public static class ValidationExtensions
                 foreach (var call in stationTrack.Calls)
                 {
                     if (call.Train is not { } train || !call.OccupiesTrack(vehicleSchedules)) continue;
+                    // Both with a length: they may share the track, which rule L5 judges.
+                    if (measured.Contains(call) && measured.Contains(hold)) continue;
                     // A call of the vehicles' own schedule is theirs, unless they stand idle while others work it.
                     var callSessions = train.Sessions;
                     if (hold.Schedule.Parts.Any(p => p.ContainsCall(call)))
@@ -1364,6 +1403,7 @@ public static class ValidationExtensions
                 {
                     var (a, b) = (holds[i], holds[j]);
                     if (a.IsOfSameVehiclesAs(b) || a.SharesTrainWith(b)) continue;
+                    if (measured.Contains(a) && measured.Contains(b)) continue;
                     if (!a.Span.ConflictsInTime(a.Sessions, b.Span, b.Sessions, minMinutesBetweenTrackUsage)) continue;
 
                     var (first, second) = a.From <= b.From ? (a, b) : (b, a);
@@ -1380,10 +1420,10 @@ public static class ValidationExtensions
             return result;
         }
 
-        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage)
+        private IEnumerable<(StationCall one, StationCall another)> GetConflicts(IEnumerable<Schedule> vehicleSchedules, int minMinutesBetweenTrackUsage, HashSet<object>? measured = null)
         {
             if (stationTrack.Calls.Count < 2) return [];
-            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage);
+            var result = GetConflictsWithRemaning(stationTrack.Calls.First(), stationTrack.Calls.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage, measured);
             return result.Distinct();
         }
 

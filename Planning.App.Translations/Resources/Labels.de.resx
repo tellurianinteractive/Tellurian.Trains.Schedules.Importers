@@ -1983,7 +1983,7 @@
     <comment>{0}=station name</comment>
   </data>
   <data name="RunaroundLoco" xml:space="preserve">
-    <value>Lok umsetzen?</value>
+    <value>Lok umsetzen</value>
   </data>
   <data name="CallTurnLoco" xml:space="preserve">
     <value>Drehen</value>
@@ -1992,7 +1992,16 @@
     <value>Umsetzen</value>
   </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
-    <value>Die Lok wird nach der Ankunft ans andere Zugende umgesetzt, damit der Zug in die Richtung abfahren kann, aus der er gekommen ist. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+    <value>Ob die Lok nach der Ankunft ans andere Zugende umgesetzt wird, damit der Zug in die Richtung abfahren kann, aus der er gekommen ist. Standardmäßig ergibt sich das aus dem Streckenverlauf: Umsetzen, wo der Zug in Gegenrichtung abfährt. Mit Nie oder Immer lässt sich das ändern. Wird als Ankunftsvermerk für Lokführer und Fahrdienstleiter gedruckt.</value>
+  </data>
+  <data name="RunaroundAutomatic" xml:space="preserve">
+    <value>Nach Streckenverlauf</value>
+  </data>
+  <data name="RunaroundNever" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="RunaroundAlways" xml:space="preserve">
+    <value>Immer</value>
   </data>
   <data name="CallPushWagons" xml:space="preserve">
     <value>Schieben</value>
@@ -2944,5 +2953,14 @@
   </data>
   <data name="TractionRoleReinforcement" xml:space="preserve">
     <value>Verstärkung</value>
+  </data>
+  <data name="IsStub" xml:space="preserve">
+    <value>Nur von einem Ende befahrbar?</value>
+  </data>
+  <data name="IsStubHelp" xml:space="preserve">
+    <value>Ein Stumpfgleis: alle Fahrzeuge fahren am selben Ende ein und aus, daher muss das zuletzt eingefahrene zuerst ausfahren. Ausgeschaltet lassen bei einem Gleis, das von beiden Enden befahren werden kann; das Ende ergibt sich dann daraus, woher jeder Zug kommt und wohin er weiterfährt.</value>
+  </data>
+  <data name="VehicleLengthHelp" xml:space="preserve">
+    <value>Länge des Fahrzeugs in Metern, wenn es auf einem Gleis steht – bei einer Wagengruppe die ganze Gruppe. Dient zur Prüfung, ob alles, was zusammen auf einem Gleis steht, Platz hat und es in der richtigen Reihenfolge verlassen kann. Leer lassen, wenn die Länge nicht bekannt ist.</value>
   </data>
 </root>

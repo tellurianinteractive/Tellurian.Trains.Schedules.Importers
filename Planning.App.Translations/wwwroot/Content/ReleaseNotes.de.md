@@ -1,5 +1,21 @@
 # Versionshinweise
 
+## Version 1.3.0
+
+### Änderungen
+
+- **Das Umsetzen ergibt sich aus dem Streckenverlauf.** Die Einstellung **Lok umsetzen** bei einem Zugabschnitt und bei einem Halt lautet nun **Nach Streckenverlauf**, **Nie** oder **Immer**. Standardmäßig erhält der Lokführer den Vermerk, die Lok umzusetzen, wo der Zug in die Gegenrichtung der Ankunft abfährt — innerhalb eines Zuges oder in den nächsten Zug, den dieselbe Lok fährt —, es sei denn, das Triebfahrzeug kann wenden, wie es steht (ein Triebzug oder ein Wendezug). Wählen Sie **Nie**, wo kein Umsetzen nötig ist, oder **Immer**, um ein Umsetzen zu verlangen, das der Streckenverlauf nicht erfordert. Ein früher angehaktes Umsetzen bleibt als **Immer** erhalten. **Zeiten aktualisieren** folgt derselben Wahl, wenn es Zeit für das Umsetzen einplant.
+
+- **Beim Anlegen angeben, dass ein Zug ein Wendezug ist.** Eine neue Einstellung **Wendezug?** im Dialog „Zug hinzufügen“ und im Reiter „Züge“ besagt, dass der Zug von beiden Enden gefahren werden kann (ein Triebzug oder ein Wendezug). Ein solcher Zug erhält beim Fahrtrichtungswechsel keine Zeit für das Umsetzen der Lok und keinen Umsetzvermerk, auch bevor ihm ein Fahrzeug zugewiesen ist. Sobald ein Fahrzeug den Zug fährt, entscheidet das Fahrzeug. Rückzüge und Kopien übernehmen die Einstellung. Ein als Wendezug angegebener Zug, den ein Fahrzeug fährt, das umgesetzt werden muss, erhält eine Warnung.
+
+- **Gleise und Fahrzeuge haben Längen.** Geben Sie einem Fahrzeug im Fahrzeugdialog eine **Länge** (bei einer Wagengruppe die ganze Gruppe) und einem Gleis im Reiter Betriebsstellen eine **Länge** an. Züge auf einem Gleis mit Länge werden dann nach ihren Längen geprüft, statt als Doppelbelegung zu gelten: Was zusammen Platz hat, darf das Gleis teilen, und eine Warnung erscheint, wenn es zusammen zu lang ist. Eine zweite Warnung erscheint, wenn ein Zug oder eine Wagengruppe nicht ausfahren kann, weil ein anderer im Weg steht — was an einem Ende zuletzt eingefahren ist, muss zuerst hinaus, ob Zug oder auf ein Stumpfgleis gestellte Wagengruppe. Die neue Einstellung **Nur von einem Ende befahrbar?** an einem Gleis ist für Stumpfgleise. Ein Zug ohne Fahrzeuge bekannter Länge zählt mit seiner größten Länge in Metern, falls angegeben; alles ohne Länge wird wie bisher geprüft.
+
+- **Ein von einem anderen Gleis geholtes Fahrzeug startet dort.** Im Bericht Mitgebrachte Fahrzeuge und im Reiter Fahrzeugbesitzer wird eine Lok, ein Triebzug oder eine Wagengruppe, deren erster Zugabschnitt sie von einem anderen Gleis holt, jetzt auf diesem Gleis geführt, wo sie vor dem Start aufzustellen ist, statt auf dem Abfahrtsgleis.
+
+### Korrekturen
+
+- **Halte nach Mitternacht werden in der Reihenfolge der Uhrzeit aufgeführt.** Im Reiter Züge werden die Halte an einer Betriebsstelle jetzt nach der Uhrzeit sortiert, sodass ein Halt um 00:30 bei einem Zug über Mitternacht bei den frühen Morgenhalten steht statt nach denen vom späten Abend.
+
 ## Version 1.2.5
 
 ### Korrekturen

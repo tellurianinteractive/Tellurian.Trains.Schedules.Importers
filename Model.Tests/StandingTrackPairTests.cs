@@ -60,6 +60,20 @@ public class StandingTrackPairTests
     }
 
     [TestMethod]
+    public void AVehicleFetchedBeforeItsFirstPartStartsOnTheTrackItIsFetchedFrom()
+    {
+        var (plan, schedule, parts) = Arrange(2);
+        var departureTrack = parts[0].From.Track;
+        var vehicle = plan.RollingStock.Single();
+
+        Assert.AreEqual(departureTrack, vehicle.Start(useDays: false, maxSessions: 1)!.Track);
+
+        schedule.SetDepartureTrack(parts[0], SnuTrack(plan, "3"));
+
+        Assert.AreEqual(SnuTrack(plan, "3"), vehicle.Start(useDays: false, maxSessions: 1)!.Track);
+    }
+
+    [TestMethod]
     public void FetchingTheVehiclesFromATrackHasThePreviousPartPutThemOnIt()
     {
         var (plan, schedule, parts) = Arrange(1, 2);

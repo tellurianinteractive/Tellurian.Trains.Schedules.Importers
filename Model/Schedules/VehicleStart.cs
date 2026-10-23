@@ -17,8 +17,11 @@ public sealed record VehicleStart(int FirstPosition, ScheduledTrainPart FirstPar
     /// <summary>The location the vehicle starts at.</summary>
     public OperationLocation Location => From.OperationLocation;
 
-    /// <summary>The track the vehicle is to stand on.</summary>
-    public StationTrack Track => From.Track;
+    /// <summary>
+    /// The track the vehicle is to stand on: the track its first part fetches it from where there is one, since it
+    /// is fetched to the departure track before the part starts; otherwise the departure track itself.
+    /// </summary>
+    public StationTrack Track => FirstPart.OtherFromTrack ?? From.Track;
 
     /// <summary>
     /// Whether the vehicle is to be put on a table rather than on <see cref="Track"/>: its first part departs

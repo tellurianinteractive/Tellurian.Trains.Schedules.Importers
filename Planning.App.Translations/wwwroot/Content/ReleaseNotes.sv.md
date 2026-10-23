@@ -1,5 +1,21 @@
 # Versionsnyheter
 
+## Version 1.3.0
+
+### Ändringar
+
+- **Rundgång avgörs utifrån färdvägen.** Inställningen **Gör rundgång** på ett tågavsnitt och på ett uppehåll är nu **Utifrån färdvägen**, **Aldrig** eller **Alltid**. Som standard får lokföraren en anmärkning om att köra loket runt där tåget avgår åt motsatt håll mot det det kom ifrån — inom ett tåg eller över till nästa tåg som samma lok kör — om inte loket kan vända som det står (ett tågset eller ett vändbart tåg). Välj **Aldrig** där ingen rundgång behövs, eller **Alltid** för att begära en rundgång som färdvägen inte kräver. En rundgång du tidigare hade kryssat i behålls som **Alltid**. **Uppdatera tider** följer samma val när tid avsätts för rundgången.
+
+- **Ange att ett tåg är ett vändtåg när du skapar det.** En ny inställning **Vändtåg?** i dialogen Lägg till tåg och i fliken Tåg anger att tåget kan köras från båda ändar (ett tågset eller ett pendeltåg). Ett sådant tåg får ingen tid för lokets rundgång där det byter riktning och ingen rundgångsanmärkning, redan innan något fordon har tilldelats. När ett fordon kör tåget är det fordonet som avgör. Returtåg och kopior ärver inställningen. Ett tåg som är angivet som vändtåg men körs av ett fordon som måste köras runt får en varning.
+
+- **Spår och fordon har längder.** Ange en **Längd** för ett fordon i fordonsdialogen (för ett vagnsätt hela vagnsättet) och för ett spår i fliken Driftplatser. Tåg som står på ett spår med längd kontrolleras då efter sina längder i stället för att räknas som dubbelbokning: de som ryms tillsammans får dela spåret, och en varning visas när de är för långa tillsammans. En andra varning visas när ett tåg eller vagnsätt inte kan lämna spåret för att ett annat står i vägen — det som kom in sist i en ände måste ut först, vare sig det är ett tåg eller ett vagnsätt som ställts på ett stickspår. En ny inställning **Endast från ena änden?** på ett spår är till för stickspår. Ett tåg utan fordon med känd längd räknas med sin största längd i meter, om den är angiven; allt utan längd kontrolleras som förut.
+
+- **Ett fordon som hämtas från ett annat spår startar där.** I rapporten Fordon och ägare och i fliken Fordonsägare listas ett lok, tågset eller vagnsätt vars första tågavsnitt hämtar det från ett annat spår nu på det spåret, där det ska ställas upp före start, i stället för på avgångsspåret.
+
+### Rättelser
+
+- **Uppehåll efter midnatt listas i tidsordning.** I fliken Tåg sorteras uppehållen på en driftplats nu efter klockslag, så att ett uppehåll klockan 00:30 på ett tåg som går över midnatt listas bland uppehållen på tidiga morgonen i stället för efter dem på sena kvällen.
+
 ## Version 1.2.5
 
 ### Rättelser

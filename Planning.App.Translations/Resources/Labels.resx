@@ -1999,7 +1999,7 @@
     <comment>{0}=station name</comment>
   </data>
   <data name="RunaroundLoco" xml:space="preserve">
-    <value>Runaround loco?</value>
+    <value>Runaround loco</value>
   </data>
   <data name="CallTurnLoco" xml:space="preserve">
     <value>Turn</value>
@@ -2008,7 +2008,16 @@
     <value>Runaround</value>
   </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
-    <value>The locomotive is run round to the other end of the train after it arrives, so the train can leave the way it came. Printed as an arrival note for the loco driver and the dispatcher.</value>
+    <value>Whether the locomotive is run round to the other end of the train after it arrives, so the train can leave the way it came. By default this is worked out from the route: a runaround wherever the train leaves in the opposite direction. Choose Never or Always to override. Printed as an arrival note for the loco driver and the dispatcher.</value>
+  </data>
+  <data name="RunaroundAutomatic" xml:space="preserve">
+    <value>From the route</value>
+  </data>
+  <data name="RunaroundNever" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="RunaroundAlways" xml:space="preserve">
+    <value>Always</value>
   </data>
   <data name="CallPushWagons" xml:space="preserve">
     <value>Push</value>
@@ -2958,5 +2967,14 @@
   </data>
   <data name="TractionRoleReinforcement" xml:space="preserve">
     <value>Reinforcement</value>
+  </data>
+  <data name="IsStub" xml:space="preserve">
+    <value>Entered from one end only?</value>
+  </data>
+  <data name="IsStubHelp" xml:space="preserve">
+    <value>A stub or siding: every vehicle goes in and out at the same end, so the last one in has to be the first one out. Leave off for a track that can be entered from both ends, where the end is told by where each train comes from and goes on to.</value>
+  </data>
+  <data name="VehicleLengthHelp" xml:space="preserve">
+    <value>The length in metres of the vehicle as it stands on a track — for a wagonset, the whole rake. Used to check that what stands on a track together fits, and can leave it in order. Leave empty if it is not known.</value>
   </data>
 </root>

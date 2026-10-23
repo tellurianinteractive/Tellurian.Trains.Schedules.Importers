@@ -1,5 +1,21 @@
 # Versionsnyheder
 
+## Version 1.3.0
+
+### Ændringer
+
+- **Omløb afgøres ud fra ruten.** Indstillingen **Omløb** på et togafsnit og på et stop er nu **Ud fra ruten**, **Aldrig** eller **Altid**. Som standard får lokomotivføreren besked om at køre lokomotivet om, hvor toget afgår i modsat retning af den, det kom fra — inden for et tog eller over i det næste tog, som samme lokomotiv kører — medmindre lokomotivet kan vende, som det står (et togsæt eller et vendbart tog). Vælg **Aldrig**, hvor der ikke skal omløb til, eller **Altid** for at bede om et omløb, som ruten ikke kræver. Et omløb, du tidligere havde afkrydset, bevares som **Altid**. **Opdater tider** følger samme valg, når der afsættes tid til omløbet.
+
+- **Angiv, at et tog er et vendetog, når du opretter det.** En ny indstilling **Vendetog?** i dialogen Tilføj tog og i fanen Tog angiver, at toget kan køres fra begge ender (et togsæt eller et vendetog). Et sådant tog får ingen tid til lokomotivets omløb, hvor det skifter retning, og ingen omløbsbemærkning, selv før et køretøj er tildelt. Når et køretøj kører toget, er det køretøjet, der afgør. Returtog og kopier arver indstillingen. Et tog, der er angivet som vendetog, men køres af et køretøj, der skal køres om, får en advarsel.
+
+- **Spor og køretøjer har længder.** Angiv en **Længde** for et køretøj i køretøjsdialogen (for et vognsæt hele sættet) og for et spor i fanen Driftssteder. Tog, der holder på et spor med længde, kontrolleres så efter deres længder i stedet for at tælle som dobbeltbooking: dem, der kan være der samtidig, må dele sporet, og der vises en advarsel, når de er for lange tilsammen. En anden advarsel vises, når et tog eller vognsæt ikke kan forlade sporet, fordi et andet holder i vejen — det, der kom ind sidst i en ende, skal ud først, hvad enten det er et tog eller et vognsæt sat på et sidespor. En ny indstilling **Kun fra den ene ende?** på et spor er til blindspor. Et tog uden køretøjer med kendt længde regnes med sin største længde i meter, hvis den er angivet; alt uden længde kontrolleres som før.
+
+- **Et køretøj, der hentes fra et andet spor, starter dér.** I rapporten Medbragte køretøjer og i fanen Køretøjsejere vises et lokomotiv, togsæt eller vognsæt, hvis første togafsnit henter det fra et andet spor, nu på det spor, hvor det skal stilles op før start, i stedet for på afgangssporet.
+
+### Rettelser
+
+- **Stop efter midnat vises i tidsorden.** I fanen Tog sorteres stoppene på et driftssted nu efter klokkeslæt, så et stop kl. 00:30 på et tog, der kører over midnat, vises blandt stoppene tidligt om morgenen i stedet for efter dem sent om aftenen.
+
 ## Version 1.2.5
 
 ### Rettelser

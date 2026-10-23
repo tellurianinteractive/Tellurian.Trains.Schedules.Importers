@@ -402,4 +402,13 @@
   <data name="BackLocomotiveWithoutFront" xml:space="preserve">
     <value>Fahrzeugumlauf {0}: {1} steht {2} am Ende des Zuges, aber dann führt keine Lok den Zug.</value>
   </data>
+  <data name="ReversibleTrainNeedsRunaround" xml:space="preserve">
+    <value>Zug {0} ist als Wendezug angegeben, aber {1} kann die Fahrtrichtung nicht ohne Umsetzen der Lok wechseln.</value>
+  </data>
+  <data name="StationTrackTooShortForStandingVehicles" xml:space="preserve">
+    <value>Gleis {1} bei {0} ist {2} m lang, aber {3} stehen dort gleichzeitig {4}: insgesamt {5} m.</value>
+  </data>
+  <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
+    <value>Bei {0} Gleis {1} kann {2} um {3} nicht ausfahren, weil {4} bis {5} im Weg steht.</value>
+  </data>
 </root>

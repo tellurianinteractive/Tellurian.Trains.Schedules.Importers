@@ -403,7 +403,8 @@ public static class PlanExtensions
                         .Select(assignment => assignment.Role)
                         .FirstOrDefault()))
             ];
-            return traction.NeedRunaround;
+            // No unit works the train yet: what the planner said of the train itself stands.
+            return traction.Count == 0 ? !train.IsReversible : traction.NeedRunaround;
         }
     }
 

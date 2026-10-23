@@ -1983,7 +1983,7 @@
     <comment>{0}=station name</comment>
   </data>
   <data name="RunaroundLoco" xml:space="preserve">
-    <value>Gör rundgång?</value>
+    <value>Gör rundgång</value>
   </data>
   <data name="CallTurnLoco" xml:space="preserve">
     <value>Vänd</value>
@@ -1992,7 +1992,16 @@
     <value>Rundgång</value>
   </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
-    <value>Loket körs runt till andra änden av tåget efter ankomsten, så att tåget kan avgå åt det håll det kom ifrån. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+    <value>Om loket körs runt till andra änden av tåget efter ankomsten, så att tåget kan avgå åt det håll det kom ifrån. Som standard avgörs det utifrån färdvägen: rundgång där tåget avgår åt motsatt håll. Välj Aldrig eller Alltid för att ändra det. Skrivs ut som ankomstanmärkning för lokförare och tågklarerare.</value>
+  </data>
+  <data name="RunaroundAutomatic" xml:space="preserve">
+    <value>Utifrån färdvägen</value>
+  </data>
+  <data name="RunaroundNever" xml:space="preserve">
+    <value>Aldrig</value>
+  </data>
+  <data name="RunaroundAlways" xml:space="preserve">
+    <value>Alltid</value>
   </data>
   <data name="CallPushWagons" xml:space="preserve">
     <value>Skjut</value>
@@ -2944,5 +2953,14 @@
   </data>
   <data name="TractionRoleReinforcement" xml:space="preserve">
     <value>Förstärkning</value>
+  </data>
+  <data name="IsStub" xml:space="preserve">
+    <value>Endast från ena änden?</value>
+  </data>
+  <data name="IsStubHelp" xml:space="preserve">
+    <value>Ett stickspår: alla fordon kör in och ut i samma ände, så det som kom in sist måste ut först. Lämna avstängt för ett spår som kan nås från båda ändarna, där ändan avgörs av varifrån varje tåg kommer och vart det går.</value>
+  </data>
+  <data name="VehicleLengthHelp" xml:space="preserve">
+    <value>Fordonets längd i meter där det står på ett spår – för ett vagnsätt hela vagnsättet. Används för att kontrollera att det som står tillsammans på ett spår ryms och kan lämna det i rätt ordning. Lämna tomt om längden inte är känd.</value>
   </data>
 </root>

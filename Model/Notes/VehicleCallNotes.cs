@@ -105,28 +105,50 @@ public static class VehicleCallNoteExtensions
 
         /// <summary>
         /// Adds what the call itself asks for — <see cref="StationCall.TurnLoco"/> and
-        /// <see cref="StationCall.RunaroundLoco"/> — to the turning notes already derived from the parts
+        /// <see cref="StationCall.Runaround"/> — to the turning notes already derived from the parts
         /// ending here, as the one note the two together give.
         /// </summary>
         /// <remarks>
-        /// Unlike the part's flags, the call's are not tied to where a schedule part ends, so they work
+        /// Unlike the part's options, the call's are not tied to where a schedule part ends, so they work
         /// anywhere in the train. They are dropped where every traction unit working the train reverses
         /// as it stands (a trainset, a push-pull train): there is then nothing to turn round or run round.
+        /// <para>
+        /// A runaround is worked out from the route unless the call says otherwise: at a stop where the
+        /// train leaves in the opposite direction to the one it arrived from, and no part of a schedule with
+        /// traction ends — where one does, it decides for itself, since the traction may be exchanged
+        /// there. <see cref="RunaroundMode.Never"/> takes the runaround away, a part's included.
+        /// </para>
         /// </remarks>
         internal List<ICallNote> WithTurningAsked(Plan plan, List<ICallNote> notes)
         {
-            if (!(call.TurnLoco || call.RunaroundLoco) || call.Train is not { } train) return notes;
-            if (!plan.NeedsLocoRunaround(train)) return notes;
+            if (call.Train is not { } train || !plan.NeedsLocoRunaround(train)) return notes;
+
+            var fromParts = notes.Any(n => n is CirculateNote or TurnAndCirculateNote);
+            var circulate = call.Runaround switch
+            {
+                RunaroundMode.Always => true,
+                RunaroundMode.Never => false,
+                _ => fromParts || (call.IsStop && call.ReversesDirection(plan) && !call.EndsAPartWorkedByTraction(plan)),
+            };
+            if (!call.TurnLoco && circulate == fromParts) return notes;
 
             var turn = call.TurnLoco || notes.Any(n => n is TurnNote or TurnAndCirculateNote);
-            var circulate = call.RunaroundLoco || notes.Any(n => n is CirculateNote or TurnAndCirculateNote);
-            GeneratedNote merged = (turn, circulate) switch
+            GeneratedNote? merged = (turn, circulate) switch
             {
                 (true, true) => new TurnAndCirculateNote { IsForArrival = true },
                 (true, false) => new TurnNote { IsForArrival = true },
-                _ => new CirculateNote { IsForArrival = true },
+                (false, true) => new CirculateNote { IsForArrival = true },
+                _ => null,
             };
-            return [.. notes.Where(n => n is not (TurnNote or CirculateNote or TurnAndCirculateNote)), merged];
+            var rest = notes.Where(n => n is not (TurnNote or CirculateNote or TurnAndCirculateNote));
+            return merged is null ? [.. rest] : [.. rest, merged];
         }
+
+        // Whether a part of a schedule that has traction ends at this very call, by reference.
+        private bool EndsAPartWorkedByTraction(Plan plan) =>
+            plan.Schedules
+                .Where(schedule => schedule.Vehicles.Any(vehicle => vehicle.IsTraction))
+                .SelectMany(schedule => schedule.Parts)
+                .Any(part => ReferenceEquals(part.To, call));
     }
 }

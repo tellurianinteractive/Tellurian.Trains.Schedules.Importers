@@ -340,10 +340,12 @@ public static class PlanExtensions
         /// <param name="number">The train number to assign. When <c>null</c>, the default number for the category and the
         /// train's starting direction is used (see <c>SuggestTrainNumber</c>): the next free number of the parity that
         /// matches the first leg's direction — odd downwards, even upwards.</param>
+        /// <param name="reversible">Whether the train can be driven from either end (see <see cref="Train.IsReversible"/>). When
+        /// it can, a reversal on the route is given no time for a locomotive runaround.</param>
         /// <returns>The created train, already added to the timetable, or <c>null</c> when no train could be built
         /// (origin equals destination, no path exists, or a location on the path has no track) or the finished
         /// train does not fit the plan's operating window (see <c>FitsWithinOperatingWindow</c>).</returns>
-        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
+        public Train? Create(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null, bool reversible = false)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
@@ -362,7 +364,7 @@ public static class PlanExtensions
             var directionChanges = path.DirectionChanges.ToHashSet();
 
             var trainNumber = number ?? plan.Timetable.NextTrainNumber(category, IsDownward(path));
-            var train = new Train(plan.NextTrainId, category, trainNumber) { Sessions = Sessions.All, MaxSpeed = maxSpeed };
+            var train = new Train(plan.NextTrainId, category, trainNumber) { Sessions = Sessions.All, MaxSpeed = maxSpeed, IsReversible = reversible };
             plan.Timetable.Add(train);
 
             var nextCallId = plan.NextCallId;
@@ -400,7 +402,7 @@ public static class PlanExtensions
                     }
                     else if (StopsAt(location))
                     {
-                        departure = arrival.AddMinutes(plan.DwellMinutes(location, directionChanges.Contains(location)));
+                        departure = arrival.AddMinutes(plan.DwellMinutes(location, directionChanges.Contains(location) && !reversible));
                         (isArrival, isDeparture) = (true, true);
                     }
                     else
@@ -551,15 +553,16 @@ public static class PlanExtensions
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the first train; the rest follow as same-parity clones (see <c>Clone</c>).
         /// When <c>null</c>, the first train takes the default number for its category and direction (see <c>Create</c>).</param>
+        /// <param name="reversible">Whether the trains can be driven from either end (see <c>Create</c>).</param>
         /// <returns>The created trains in departure order, already added to the timetable; empty when none could be built.</returns>
-        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateRepeating(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null, bool reversible = false)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
             ArgumentNullException.ThrowIfNull(to);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
 
-            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not { } first)
+            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number, reversible) is not { } first)
                 return [];
 
             return [first, .. plan.CloneMany(first, endTime, intervalMinutes)];
@@ -600,7 +603,7 @@ public static class PlanExtensions
             var departure = departureTime ?? calls[^1].Arrival.AddMinutes(finishing + preparation);
 
             return plan.Create(category, calls[^1].OperationLocation, calls[0].OperationLocation,
-                departure, preparationMinutes, finishingMinutes, train.MaxSpeed, number);
+                departure, preparationMinutes, finishingMinutes, train.MaxSpeed, number, train.IsReversible);
         }
 
         /// <summary>
@@ -619,15 +622,16 @@ public static class PlanExtensions
         /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the outbound train; the return takes the default for the opposite direction. When <c>null</c>, both take their direction's default (see <c>Create</c>).</param>
+        /// <param name="reversible">Whether the trains can be driven from either end (see <c>Create</c>).</param>
         /// <returns>The outbound train followed by its return, both already added to the timetable; empty when
         /// either of them could not be built.</returns>
-        public IReadOnlyList<Train> CreateWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null, bool reversible = false)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
             ArgumentNullException.ThrowIfNull(to);
 
-            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not { } outbound)
+            if (plan.Create(category, from, to, startTime, preparationMinutes, finishingMinutes, maxSpeed, number, reversible) is not { } outbound)
                 return [];
 
             if (plan.CreateReturn(outbound, returnTime, preparationMinutes, finishingMinutes) is not { } back)
@@ -665,15 +669,16 @@ public static class PlanExtensions
         /// Must be non-negative. When <c>null</c>, the category's <see cref="TrainCategory.DefaultFinishingMinutes"/> is used.</param>
         /// <param name="maxSpeed">The trains' maximum scale speed in km/h; when <c>null</c>, the category's <see cref="TrainCategory.DefaultSpeed"/> is used.</param>
         /// <param name="number">The number for the first outbound train; the rest follow as same-parity clones (see <c>Clone</c>).</param>
+        /// <param name="reversible">Whether the trains can be driven from either end (see <c>Create</c>).</param>
         /// <returns>The created trains, already added to the timetable; empty when none could be built.</returns>
-        public IReadOnlyList<Train> CreateRepeatingWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null)
+        public IReadOnlyList<Train> CreateRepeatingWithReturn(TrainCategory category, OperationLocation from, OperationLocation to, Time startTime, Time endTime, int intervalMinutes, Time? returnTime = null, int? preparationMinutes = null, int? finishingMinutes = null, int? maxSpeed = null, int? number = null, bool reversible = false)
         {
             ArgumentNullException.ThrowIfNull(category);
             ArgumentNullException.ThrowIfNull(from);
             ArgumentNullException.ThrowIfNull(to);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(intervalMinutes);
 
-            if (plan.CreateWithReturn(category, from, to, startTime, returnTime, preparationMinutes, finishingMinutes, maxSpeed, number) is not [var outbound, var back])
+            if (plan.CreateWithReturn(category, from, to, startTime, returnTime, preparationMinutes, finishingMinutes, maxSpeed, number, reversible) is not [var outbound, var back])
                 return [];
 
             return
@@ -924,6 +929,7 @@ public static class PlanExtensions
                 Length = train.Length,
                 Remark = train.Remark,
                 ShowContinuesAs = train.ShowContinuesAs,
+                IsReversible = train.IsReversible,
             };
             plan.Timetable.Add(clone);
 
@@ -1111,7 +1117,7 @@ public static class PlanExtensions
                 if (call.IsStop)
                 {
                     var existingDwell = (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
-                    departures[i] = arrivals[i].AddMinutes(Dwell(call, reverses[i], existingDwell));
+                    departures[i] = arrivals[i].AddMinutes(Dwell(call, reverses[i], RunsRound(call, reverses[i]), existingDwell));
                 }
                 else
                 {
@@ -1140,12 +1146,22 @@ public static class PlanExtensions
             // runaround allowance was computed here rather than asked for, so it follows what the train now
             // needs, and a train given a trainset or a reversible train stops there no longer than anywhere
             // else. A longer stand at a reversal was the planner's doing and is kept like any other.
-            int Dwell(StationCall call, bool reverses, int existingDwell)
+            int Dwell(StationCall call, bool reverses, bool runsRound, int existingDwell)
             {
-                var standard = plan.DwellMinutes(call.OperationLocation, reverses && needsRunaround);
-                if (!reverses) return existingDwell > 0 ? existingDwell : standard;
+                var standard = plan.DwellMinutes(call.OperationLocation, runsRound);
+                if (!reverses && !runsRound) return existingDwell > 0 ? existingDwell : standard;
                 return existingDwell > plan.DwellMinutes(call.OperationLocation, true) ? existingDwell : standard;
             }
+
+            // Whether the loco is run round at the call: where the train reverses, unless the call says never,
+            // and where the call says always — the same decision the arrival note is given from (see
+            // VehicleNotes). Not at all where the traction needs no runaround.
+            bool RunsRound(StationCall call, bool reverses) => needsRunaround && call.Runaround switch
+            {
+                RunaroundMode.Always => true,
+                RunaroundMode.Never => false,
+                _ => reverses,
+            };
         }
 
         // Fast-clock dwell: at least the minimum stop; where the loco has to be run round to the other end

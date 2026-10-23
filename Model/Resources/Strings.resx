@@ -402,4 +402,13 @@
   <data name="BackLocomotiveWithoutFront" xml:space="preserve">
     <value>Vehicle schedule {0}: {1} stands at the back of the train on {2}, but no locomotive leads it then.</value>
   </data>
+  <data name="ReversibleTrainNeedsRunaround" xml:space="preserve">
+    <value>Train {0} is said to be reversible, but {1} cannot change direction without a locomotive runaround.</value>
+  </data>
+  <data name="StationTrackTooShortForStandingVehicles" xml:space="preserve">
+    <value>Track {1} at {0} is {2} m long, but {3} stand on it together at {4}: {5} m in all.</value>
+  </data>
+  <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
+    <value>At {0} track {1}, {2} cannot leave at {3} because {4} stands in the way until {5}.</value>
+  </data>
 </root>

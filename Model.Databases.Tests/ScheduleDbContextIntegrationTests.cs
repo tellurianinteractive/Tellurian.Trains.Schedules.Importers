@@ -178,7 +178,7 @@ public class ScheduleDbContextIntegrationTests
 
         var part = train.AsTrainPart(0, 1);
         part.Id = 1;
-        part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true, RunaroundLoco = true };
+        part.TractionOptions = new TractionOptions { HasCoupleNote = true, NumberOfUnits = 2, TurnLoco = true, Runaround = RunaroundMode.Always };
         part.WagonSetOptions = new WagonSetOptions { OrderInTrain = 3 };
         part.CargoOnlyOptions = new CargoOnlyOptions { CargoName = "Coal", HasCoupleNote = true };
         part.FromTrack = siding;
@@ -201,7 +201,7 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsNotNull(loaded.TractionOptions, "TractionOptions");
         Assert.AreEqual(2, loaded.TractionOptions!.NumberOfUnits);
         Assert.IsTrue(loaded.TractionOptions.TurnLoco);
-        Assert.IsTrue(loaded.TractionOptions.RunaroundLoco);
+        Assert.AreEqual(RunaroundMode.Always, loaded.TractionOptions.Runaround);
         Assert.IsTrue(loaded.TractionOptions.HasCoupleNote);
 
         Assert.IsNotNull(loaded.WagonSetOptions, "NonTractionOptions");

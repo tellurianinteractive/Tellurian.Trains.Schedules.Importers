@@ -402,4 +402,13 @@
   <data name="BackLocomotiveWithoutFront" xml:space="preserve">
     <value>Kjøretøyomløp {0}: {1} står bakerst i toget {2}, men ingen lokomotiv trekker toget da.</value>
   </data>
+  <data name="ReversibleTrainNeedsRunaround" xml:space="preserve">
+    <value>Tog {0} er oppgitt som vendetog, men {1} kan ikke bytte retning uten omløp.</value>
+  </data>
+  <data name="StationTrackTooShortForStandingVehicles" xml:space="preserve">
+    <value>Spor {1} ved {0} er {2} m langt, men {3} står der samtidig {4}: {5} m til sammen.</value>
+  </data>
+  <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
+    <value>Ved {0} spor {1} kan ikke {2} forlate sporet {3} fordi {4} står i veien til {5}.</value>
+  </data>
 </root>

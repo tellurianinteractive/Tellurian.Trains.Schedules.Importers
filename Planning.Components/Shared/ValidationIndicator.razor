@@ -118,6 +118,8 @@
         _ => error.ErrorType switch
         {
             ValidationErrorType.StationTrackConflict or
+            ValidationErrorType.StationTrackTooShort or
+            ValidationErrorType.StationTrackBlocked or
             ValidationErrorType.TrackStretchConflict or
             ValidationErrorType.TrainSpeedTooSlow or
             ValidationErrorType.TrainSpeedTooFast => "graphical-timetable",

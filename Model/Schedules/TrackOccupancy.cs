@@ -75,6 +75,34 @@ public static class TrackOccupancyExtensions
     public static bool ConflictsInTime(this (Time From, Time To) span, Sessions sessions, (Time From, Time To) other, Sessions otherSessions, int minMinutesBetween) =>
         DayShifts.Any(d => RunTogether(sessions, otherSessions, d) && span.ConflictsInTime(other.Shifted(d), minMinutesBetween));
 
+    /// <summary>
+    /// The number of days the other span has to be moved for the two to be on the track together, when
+    /// they are (see <see cref="ConflictsInTime(ValueTuple{Time, Time}, Sessions, ValueTuple{Time, Time}, Sessions, int)"/>
+    /// with no required gap); <c>null</c> when they are not. Lets a caller tell which of two spans comes
+    /// first once a time past midnight has been put on the day it belongs to.
+    /// </summary>
+    internal static int? OverlapDayShift(this (Time From, Time To) span, Sessions sessions, (Time From, Time To) other, Sessions otherSessions) =>
+        DayShifts.Where(d => RunTogether(sessions, otherSessions, d) && span.ConflictsInTime(other.Shifted(d), 0)).Select(d => (int?)d).FirstOrDefault();
+
+    /// <summary>
+    /// The location a train comes from to this call (<paramref name="before"/>) or goes on to from it,
+    /// read in run order; <c>null</c> where the train begins or ends its run here, or the neighbouring
+    /// call is at the same location. It tells which end of a track a train enters or leaves by: trains
+    /// from the same neighbour come in at the same end.
+    /// </summary>
+    internal static int? NeighbourLocation(this StationCall call, bool before)
+    {
+        if (call.Train is not { } train) return null;
+        var calls = train.CallsInRunOrder;
+        var index = -1;
+        for (var i = 0; i < calls.Count; i++)
+            if (ReferenceEquals(calls[i], call)) { index = i; break; }
+        var neighbour = before ? index - 1 : index + 1;
+        if (index < 0 || neighbour < 0 || neighbour >= calls.Count) return null;
+        var location = calls[neighbour].OperationLocation;
+        return location.Equals(call.OperationLocation) ? null : location.Id;
+    }
+
     private static (Time From, Time To) Shifted(this (Time From, Time To) span, int days) => (span.From.AddDays(days), span.To.AddDays(days));
 
     /// <summary>The day shifts worth trying: a train spans less than a day, so only the neighbouring days can meet.</summary>

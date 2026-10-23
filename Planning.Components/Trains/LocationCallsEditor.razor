@@ -160,15 +160,18 @@ else
         if (Location is { } location) _ = UiPrefs.SetTrainsLocationAsync(location.Signature);
     }
 
-    // Every call at the location, in the order the trains come to it. Read from the trains, which own their
-    // calls, rather than from the tracks' index of them.
+    // Every call at the location, in the order the trains come to it by time of day, ignoring the day offset
+    // of times past midnight. Read from the trains, which own their calls, rather than from the tracks' index
+    // of them.
     private IReadOnlyList<StationCall> CallsAt(OperationLocation location) =>
         [.. (Timetable?.Trains ?? [])
             .SelectMany(t => t.Calls)
             .Where(c => c.OperationLocation.Id == location.Id)
-            .OrderBy(c => c.Arrival)
-            .ThenBy(c => c.Departure)
+            .OrderBy(c => TimeOfDay(c.Arrival))
+            .ThenBy(c => TimeOfDay(c.Departure))
             .ThenBy(c => c.Train.Number)];
+
+    private static TimeSpan TimeOfDay(Time time) => TimeSpan.FromTicks(time.Value.Ticks % TimeSpan.TicksPerDay);
 
     // Where the train comes from and goes on to: the calls either side of this one in the order it runs
     // them. Null at the end it starts or finishes at.

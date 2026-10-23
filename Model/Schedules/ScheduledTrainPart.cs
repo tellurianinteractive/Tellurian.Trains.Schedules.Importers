@@ -277,10 +277,12 @@ public static class ScheduledTrainPartExtensions
         private void AddTractionUnitArrivalNotes(List<ICallNote> callNotes)
         {
             var options = trainPart.TractionOptions;
-            if (options is null) return;
+            // A part with no options of its own can still be told to run round, because that is worked out
+            // from the route — but only if the schedule it belongs to has traction to run round.
+            if (options is null && trainPart.Schedule?.Vehicles.Any(v => v.IsTraction) != true) return;
             // Putting the units on their other track takes them off the train, so that note says all these
             // would: there is nothing left to uncouple, to drive to stabling or to lift off.
-            if (trainPart.OtherToTrack is null) trainPart.AddTractionUnitLeavingNotes(options, callNotes);
+            if (options is not null && trainPart.OtherToTrack is null) trainPart.AddTractionUnitLeavingNotes(options, callNotes);
             // Not part of the chain above: uncoupling is what a circulating loco does first, so a part
             // asking for both wants both notes, in that order. One note whatever the consist — the whole
             // of it turns or circulates together.
@@ -438,15 +440,26 @@ public static class ScheduledTrainPartExtensions
         /// the train, goes to the turntable and comes back on the other end — and stating them separately
         /// reads as two independent movements.
         /// </remarks>
-        private GeneratedNote? TurningNote(TractionOptions options) =>
+        private GeneratedNote? TurningNote(TractionOptions? options)
+        {
             // Nothing is said where the traction changes direction without runaround (a trainset, a push-pull train).
-            (options.TurnLoco && trainPart.NeedsRunaround, options.RunaroundLoco && trainPart.NeedsRunaround) switch
+            var needed = trainPart.NeedsRunaround;
+            var turn = options?.TurnLoco == true && needed;
+            // Run round where the route leaves the opposite way, unless the planner says otherwise.
+            var circulate = needed && (options?.Runaround ?? RunaroundMode.Automatic) switch
+            {
+                RunaroundMode.Always => true,
+                RunaroundMode.Never => false,
+                _ => trainPart.ReversesAtEnd,
+            };
+            return (turn, circulate) switch
             {
                 (true, true) => new TurnAndCirculateNote { IsForArrival = true },
                 (true, false) => new TurnNote { IsForArrival = true },
                 (false, true) => new CirculateNote { IsForArrival = true },
                 _ => null,
             };
+        }
 
         private void AddWagonSetDepartureNotes(List<ICallNote> callNotes)
         {
@@ -535,8 +548,9 @@ public static class ScheduledTrainPartExtensions
         /// — the locomotive being run round to the other end of the train. It does not where every
         /// traction unit working the part changes direction without runaround: a trainset, or a locomotive working a
         /// reversible train (see <c>ScheduledObject.ChangesDirectionWithoutRunaround</c>). A part whose traction
-        /// cannot be resolved — one not yet worked by any vehicle, above all — is taken to need it, so
-        /// what the planner asked for stands until the vehicles say otherwise.
+        /// cannot be resolved — one not yet worked by any vehicle, above all — is taken to need it, unless
+        /// the train is said to be reversible (<see cref="Train.IsReversible"/>), so what the planner said
+        /// stands until the vehicles say otherwise.
         /// </summary>
         /// <remarks>
         /// The part-scope counterpart of <c>Plan.NeedsLocoRunaround</c>, which answers the same question
@@ -546,7 +560,8 @@ public static class ScheduledTrainPartExtensions
         {
             get
             {
-                return trainPart.TractionRoles.NeedRunaround;
+                var roles = trainPart.TractionRoles;
+                return roles.Count == 0 ? !trainPart.Train.IsReversible : roles.NeedRunaround;
             }
         }
 

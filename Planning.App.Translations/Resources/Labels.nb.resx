@@ -1983,7 +1983,7 @@
     <comment>{0}=station name</comment>
   </data>
   <data name="RunaroundLoco" xml:space="preserve">
-    <value>Omløp lok?</value>
+    <value>Omløp lok</value>
   </data>
   <data name="CallTurnLoco" xml:space="preserve">
     <value>Snu</value>
@@ -1992,7 +1992,16 @@
     <value>Omløp</value>
   </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
-    <value>Loket kjøres om til den andre enden av toget etter ankomsten, slik at toget kan avgå den veien det kom fra. Skrives ut som ankomstmerknad for lokfører og togekspeditør.</value>
+    <value>Om loket kjøres om til den andre enden av toget etter ankomsten, slik at toget kan avgå den veien det kom fra. Som standard avgjøres det ut fra ruten: omløp der toget avgår i motsatt retning. Velg Aldri eller Alltid for å endre det. Skrives ut som ankomstmerknad for lokfører og togekspeditør.</value>
+  </data>
+  <data name="RunaroundAutomatic" xml:space="preserve">
+    <value>Ut fra ruten</value>
+  </data>
+  <data name="RunaroundNever" xml:space="preserve">
+    <value>Aldri</value>
+  </data>
+  <data name="RunaroundAlways" xml:space="preserve">
+    <value>Alltid</value>
   </data>
   <data name="CallPushWagons" xml:space="preserve">
     <value>Skyv</value>
@@ -2944,5 +2953,14 @@
   </data>
   <data name="TractionRoleReinforcement" xml:space="preserve">
     <value>Forsterkning</value>
+  </data>
+  <data name="IsStub" xml:space="preserve">
+    <value>Kun fra én ende?</value>
+  </data>
+  <data name="IsStubHelp" xml:space="preserve">
+    <value>Et blindspor: alle kjøretøy kjører inn og ut i samme ende, så det som kom inn sist må ut først. La den stå av for et spor som kan nås fra begge ender, der enden avgjøres av hvor hvert tog kommer fra og hvor det går videre.</value>
+  </data>
+  <data name="VehicleLengthHelp" xml:space="preserve">
+    <value>Kjøretøyets lengde i meter der det står på et spor – for et vognsett hele settet. Brukes til å kontrollere at det som står sammen på et spor får plass og kan forlate det i riktig rekkefølge. La feltet stå tomt hvis lengden ikke er kjent.</value>
   </data>
 </root>

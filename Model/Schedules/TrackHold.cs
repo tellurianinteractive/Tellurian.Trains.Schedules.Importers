@@ -18,6 +18,19 @@ public sealed record TrackHold(StationTrack Track, Time From, Time To, Sessions 
     public Train? DepartingTrain { get; init; }
 
     /// <summary>
+    /// The location the vehicles come from when they go onto the track, which tells the end of the track
+    /// they enter by; <c>null</c> where that is not known (see <c>NeighbourLocation</c>).
+    /// </summary>
+    public int? EntryEnd { get; init; }
+
+    /// <summary>
+    /// The location the vehicles go on to when they leave the track, which tells the end of the track they
+    /// leave by; <c>null</c> where that is not known. Vehicles put on, or fetched from, a track other than
+    /// their train's are taken out the way they went in.
+    /// </summary>
+    public int? ExitEnd { get; init; }
+
+    /// <summary>
     /// Whether the vehicles of the two holds arrive or depart in a common train. They then stand on the
     /// track together by design, and are no double booking of it.
     /// </summary>
@@ -220,7 +233,7 @@ public static class TrackHoldExtensions
             TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
             first.To.AddDays(1) > last.From)
         {
-            last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain };
+            last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain, ExitEnd = first.ExitEnd };
             first = null;
         }
         Add(holds, first);
@@ -302,8 +315,15 @@ public static class TrackHoldExtensions
         var from = track.Equals(arriving.To.Track) ? arriving.To.Departure : arriving.To.Arrival;
         // Up to where the next train's own window begins if the vehicles go with it from this very track;
         // otherwise they are fetched, and are on the track until the train departs.
-        var to = leaving.OtherFromTrack is null && track.Equals(leaving.From.Track) ? leaving.From.Arrival : leaving.From.Departure;
-        return new TrackHold(track, from, to, sessions, schedule, arriving.Train) { DepartingTrain = leaving.Train };
+        var withTrain = leaving.OtherFromTrack is null && track.Equals(leaving.From.Track);
+        var to = withTrain ? leaving.From.Arrival : leaving.From.Departure;
+        var entry = arriving.To.NeighbourLocation(before: true);
+        return new TrackHold(track, from, to, sessions, schedule, arriving.Train)
+        {
+            DepartingTrain = leaving.Train,
+            EntryEnd = entry,
+            ExitEnd = withTrain ? leaving.From.NeighbourLocation(before: false) : entry,
+        };
     }
 
     private static TrackHold? LastHold(Schedule schedule, ScheduledTrainPart last)
@@ -311,7 +331,8 @@ public static class TrackHoldExtensions
         if (last.ArrivalLayover != TractionLayover.None) return null;
         var track = last.OtherToTrack ?? last.To.Track;
         var from = track.Equals(last.To.Track) ? last.To.Departure : last.To.Arrival;
-        return new TrackHold(track, from, EndOfDay(from), last.Train.Sessions, schedule, last.Train);
+        var entry = last.To.NeighbourLocation(before: true);
+        return new TrackHold(track, from, EndOfDay(from), last.Train.Sessions, schedule, last.Train) { EntryEnd = entry };
     }
 
     private static TrackHold? FirstHold(Schedule schedule, ScheduledTrainPart first)
@@ -319,7 +340,13 @@ public static class TrackHoldExtensions
         if (first.DepartureLayover != TractionLayover.None) return null;
         var track = first.OtherFromTrack ?? first.From.Track;
         var to = track.Equals(first.From.Track) ? first.From.Arrival : first.From.Departure;
-        return new TrackHold(track, StartOfDay(to), to, first.Train.Sessions, schedule, first.Train) { DepartingTrain = first.Train };
+        var exit = first.From.NeighbourLocation(before: false);
+        return new TrackHold(track, StartOfDay(to), to, first.Train.Sessions, schedule, first.Train)
+        {
+            DepartingTrain = first.Train,
+            ExitEnd = exit,
+            EntryEnd = track.Equals(first.From.Track) ? null : exit,
+        };
     }
 
     // The day a time is stored on: times past midnight are on the day after.

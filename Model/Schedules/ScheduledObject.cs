@@ -43,6 +43,13 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public int NumberOfUnits { get { return Units.Count != 0 ? Units.Count : Math.Max(1, field); } set; } = 1;
 
     /// <summary>
+    /// Gets or sets the length in metres, to one decimal, of this vehicle as it stands on a track: a
+    /// locomotive's own length, a wagonset's whole rake. Zero where it is not given, which keeps the vehicle
+    /// out of the track capacity checks (rule L5).
+    /// </summary>
+    public double Length { get; set; }
+
+    /// <summary>
     /// Gets or sets an optional remark about this vehicle.
     /// </summary>
     public string? Remark { get; set; }

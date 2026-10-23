@@ -510,6 +510,7 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             entity.Ignore(e => e.OperationLocation);
             entity.Ignore(e => e.IsStop);
             entity.Ignore(e => e.SortTime);
+            entity.Ignore(e => e.RunaroundLoco); // only there to read plans saved before Runaround
         });
     }
 
@@ -685,7 +686,11 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
         // their own table sharing the train part primary key (an absent row means the option is null).
         modelBuilder.Entity<ScheduledTrainPart>(entity =>
         {
-            entity.OwnsOne(e => e.TractionOptions, o => o.ToTable("TractionOptions"));
+            entity.OwnsOne(e => e.TractionOptions, o =>
+            {
+                o.ToTable("TractionOptions");
+                o.Ignore(t => t.RunaroundLoco); // only there to read plans saved before Runaround
+            });
 
             entity.OwnsOne(e => e.WagonSetOptions, o => o.ToTable("NonTractionOptions"));
 

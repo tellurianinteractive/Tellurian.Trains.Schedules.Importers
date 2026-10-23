@@ -150,6 +150,10 @@
                 </select>
             </div>
             <div class="field">
+                <label title="@Translator("VehicleLengthHelp")">@Translator("Length")</label>
+                <input type="number" step="0.1" min="0" value="@_length?.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)" @onchange="e => _length = ParseLength(e)" />
+            </div>
+            <div class="field">
                 <label>@Translator("Remark")</label>
                 <input type="text" value="@_remark" @onchange="e => _remark = e.Value?.ToString() ?? string.Empty" />
             </div>
@@ -208,6 +212,8 @@
     private string _type = ScheduledObjectType.Locomotive.ToString();
     private string _externalId = "";
     private string _remark = "";
+    // Metres to one decimal; null while the field is empty, which is a vehicle with no length.
+    private double? _length;
     private string _class = "";
     // Null while the field is empty or holds something that is not a number, which keeps the Save button
     // disabled and lets the field show what was typed rather than an old value.
@@ -238,6 +244,7 @@
         _type = Vehicle.ObjectType.ToString();
         _externalId = Vehicle.ExternalId ?? "";
         _remark = Vehicle.Remark ?? "";
+        _length = Vehicle.Length > 0 ? Vehicle.Length : null;
         _class = Vehicle.Class;
         _number = Vehicle.Number;
         _companyId = Vehicle.CompanyId;
@@ -315,6 +322,13 @@
         }
     }
 
+    // A length is metres to one decimal and never negative: the number input allows a finer value and a
+    // typed-in minus, so it is put right where it is entered. Nothing usable reads as no length.
+    private static double? ParseLength(ChangeEventArgs e) =>
+        double.TryParse(e.Value?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var metres) && metres > 0
+            ? Math.Round(metres, 1, MidpointRounding.AwayFromZero)
+            : null;
+
     private async Task Save()
     {
         if (Plan is not { } plan || !CanSave || _number is not { } number) return;
@@ -322,6 +336,7 @@
         var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
         plan.UpdateVehicle(Vehicle, type, _externalId, _class, number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
+        Vehicle.Length = _length ?? 0;
         Vehicle.WagonSetKind = type.IsWagonSet ? _wagonSetKind : WagonSetKind.Unspecified;
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)

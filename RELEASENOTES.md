@@ -1,5 +1,20 @@
 # Release Notes
 
+## Version 3.7.0
+
+### Breaking changes
+
+- **The runaround is worked out from the route.** `TractionOptions.RunaroundLoco` and `StationCall.RunaroundLoco` (yes or no) are replaced by **`Runaround`**, a new **`RunaroundMode`** (`Automatic` by default, `Never`, `Always`). A circulate note is now given wherever the traction leaves in the opposite direction to the one it arrived from — at a stop inside a train, or where the next part of the same schedule, even of another train, sets off the way the traction came (new **`RunaroundDetection`**: `StationCall.ReversesDirection(plan)` and `ScheduledTrainPart.ReversesAtEnd`) — unless the traction needs no runaround (`NeedsRunaround`) or goes to stabling or is lifted off. `Never` takes a detected runaround away and `Always` asks for one the route does not call for; the call's choice wins over the part's. A part with no `TractionOptions` now gets the note too, when its schedule has traction. `Plan.UpdateTimings` allows the runaround time by the same decision. A saved `"RunaroundLoco": true` is still read, as `Always`; it is never written back, and `ScheduleDbContext` ignores the property.
+### New features
+
+- **A train can be said to be reversible.** New **`Train.IsReversible`** (`false` by default): the train can be driven from either end, so no locomotive is run round where it changes direction. It is what is known of the train before any vehicle works it: `Plan.NeedsLocoRunaround` and `ScheduledTrainPart.NeedsRunaround` go by it while no traction unit does, and the units decide once one does. `Create`, `CreateRepeating`, `CreateWithReturn` and `CreateRepeatingWithReturn` take a trailing `reversible` argument that is carried into the train and spares its reversals the runaround time; `CreateReturn` and `Clone` copy it. New rule **S9**, validation warning **`ReversibleTrainNeedsRunaround`** (train scope, under `ValidateSchedules`), reports a train said to be reversible that is worked by traction needing a runaround (`Plan.ValidateReversibleTrains`).
+
+- **Track capacity and departure order (rule L5).** New **`ScheduledObject.Length`** (metres) and **`StationTrack.IsStub`** (a track entered from one end only). On a track that has a length, calls and standing vehicles (`TrackHold`) that have one are judged by length instead of as a double booking (L2): new warnings **`StationTrackTooShort`** (those standing together are longer than the track) and **`StationTrackBlocked`** (one cannot leave while another stands between it and the end it leaves by). A call's length is the sum of the lengths of the vehicles working it, else `Train.Length.Meters`; calls and vehicles without one are judged by L2 as before. The two ends of a track are told apart by the neighbouring location the train comes from or goes on to (`TrackHold.EntryEnd` and `ExitEnd` for standing vehicles); a stub track has one end, so the last in is the first out.
+
+### Fixes
+
+- **A vehicle fetched from another track starts there.** `VehicleStart.Track` is now the track the first part fetches the vehicle from (`OtherFromTrack`) where there is one, else the departure track, so the Vehicle contributors report and Vehicle owners list where the vehicle is to be set up before the start.
+
 ## Version 3.6.0
 
 ### New features

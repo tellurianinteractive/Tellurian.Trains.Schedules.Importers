@@ -1,5 +1,21 @@
 # Versjonsnyheter
 
+## Versjon 1.3.0
+
+### Endringer
+
+- **Omløp avgjøres ut fra ruten.** Innstillingen **Omløp** på et togavsnitt og på et stopp er nå **Ut fra ruten**, **Aldri** eller **Alltid**. Som standard får lokføreren beskjed om å kjøre loket om der toget avgår i motsatt retning av den det kom fra — innenfor et tog eller over i neste tog som samme lok kjører — med mindre loket kan snu som det står (et togsett eller et vendbart tog). Velg **Aldri** der det ikke trengs omløp, eller **Alltid** for å be om et omløp som ruten ikke krever. Et omløp du tidligere hadde avkrysset, beholdes som **Alltid**. **Oppdater tider** følger samme valg når det settes av tid til omløpet.
+
+- **Si at et tog er et vendetog når du oppretter det.** En ny innstilling **Vendetog?** i dialogen Legg til tog og i fanen Tog sier at toget kan kjøres fra begge ender (et togsett eller et vendetog). Et slikt tog får ingen tid til lokets omløp der det bytter retning, og ingen omløpsmerknad, selv før et kjøretøy er tildelt. Når et kjøretøy kjører toget, er det kjøretøyet som avgjør. Returtog og kopier arver innstillingen. Et tog som er oppgitt som vendetog, men kjøres av et kjøretøy som må kjøres om, får en advarsel.
+
+- **Spor og kjøretøy har lengder.** Angi en **Lengde** for et kjøretøy i kjøretøydialogen (for et vognsett hele settet) og for et spor i fanen Driftssteder. Tog som står på et spor med lengde, kontrolleres da etter lengdene sine i stedet for å telle som dobbeltbooking: de som får plass sammen, kan dele sporet, og det vises en advarsel når de er for lange til sammen. En annen advarsel vises når et tog eller vognsett ikke kan forlate sporet fordi et annet står i veien — det som kom inn sist i en ende, må ut først, enten det er et tog eller et vognsett satt på et sidespor. En ny innstilling **Kun fra én ende?** på et spor er for blindspor. Et tog uten kjøretøy med kjent lengde regnes med største lengde i meter, hvis den er angitt; alt uten lengde kontrolleres som før.
+
+- **Et kjøretøy som hentes fra et annet spor, starter der.** I rapporten Medbrakte kjøretøy og i fanen Kjøretøyseiere vises et lokomotiv, togsett eller vognsett hvis første togavsnitt henter det fra et annet spor, nå på det sporet der det skal stilles opp før start, i stedet for på avgangssporet.
+
+### Rettelser
+
+- **Opphold etter midnatt vises i tidsrekkefølge.** I fanen Tog sorteres oppholdene på et driftssted nå etter klokkeslett, slik at et opphold kl. 00:30 på et tog som går over midnatt vises blant oppholdene tidlig om morgenen i stedet for etter dem sent på kvelden.
+
 ## Versjon 1.2.5
 
 ### Rettelser

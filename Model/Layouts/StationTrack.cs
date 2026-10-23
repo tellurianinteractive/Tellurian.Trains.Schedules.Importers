@@ -76,6 +76,14 @@ public sealed class StationTrack : IEquatable<StationTrack>
     public double Length { get; set; }
 
     /// <summary>
+    /// Gets or sets whether this track is entered from one end only, a stub or siding: every vehicle goes in
+    /// and out at the same end, so the last one in is the first that can leave. Left off, the two ends of the
+    /// track are told apart by where each train comes from and goes on to (see <c>TrackStanding</c>), and
+    /// vehicles can leave by the end they did not enter by.
+    /// </summary>
+    public bool IsStub { get; set; }
+
+    /// <summary>
     /// Gets or sets the length in metres, to one decimal, of the platform along this track; zero where
     /// the track has no platform. Only meaningful where the location exchanges passengers.
     /// </summary>

@@ -79,6 +79,11 @@
                 <label>@Translator("MaxSpeed") (km/h)</label>
                 <input type="number" class="num" min="1" value="@_speed" @onchange="e => _speed = ParseInt(e, _speed)" />
             </div>
+            @* Said here because no vehicle works the train yet, and the time at a reversal depends on it. *@
+            <div class="field">
+                <label title="@Translator("IsReversibleTrainHelp")">@Translator("IsReversibleTrain")</label>
+                <input type="checkbox" checked="@_reversible" @onchange="e => _reversible = e.Value as bool? ?? false" />
+            </div>
 
             <fieldset>
                 <legend>@Translator("ReturnTrain")</legend>
@@ -165,6 +170,7 @@
     private int _preparationMinutes = 10;
     private int _finishingMinutes = 10;
     private int _speed = 100;
+    private bool _reversible;
     private bool _repeat;
     private string _endTime = "";
     private int _interval = 60;
@@ -290,20 +296,20 @@
             if (_interval < 1) { _error = "InvalidMinutes"; return; }
 
             var trains = _return
-                ? plan.CreateRepeatingWithReturn(category, from, to, startTime, endTime, _interval, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number)
-                : plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed, _number);
+                ? plan.CreateRepeatingWithReturn(category, from, to, startTime, endTime, _interval, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number, _reversible)
+                : plan.CreateRepeating(category, from, to, startTime, endTime, _interval, _preparationMinutes, _finishingMinutes, _speed, _number, _reversible);
             if (trains.Count == 0) { _error = _return ? "CouldNotCreateTrainPair" : "NoPathBetweenStations"; return; }
             first = trains[0];
         }
         else if (_return)
         {
-            var trains = plan.CreateWithReturn(category, from, to, startTime, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number);
+            var trains = plan.CreateWithReturn(category, from, to, startTime, returnTime, _preparationMinutes, _finishingMinutes, _speed, _number, _reversible);
             if (trains.Count == 0) { _error = "CouldNotCreateTrainPair"; return; }
             first = trains[0];
         }
         else
         {
-            first = plan.Create(category, from, to, startTime, _preparationMinutes, _finishingMinutes, _speed, _number);
+            first = plan.Create(category, from, to, startTime, _preparationMinutes, _finishingMinutes, _speed, _number, _reversible);
             if (first is null) { _error = "NoPathBetweenStations"; return; }
         }
 

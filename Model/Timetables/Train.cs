@@ -140,6 +140,18 @@ public class Train : IEquatable<Train>
     public bool ShowContinuesAs { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the train can be driven from either end — a trainset, or a push/pull train — so
+    /// that no locomotive is ever run round where it changes direction. Leave <c>false</c> and a runaround
+    /// is taken to be needed there.
+    /// </summary>
+    /// <remarks>
+    /// It is what the planner knows about the train before any vehicle is assigned to it, and so what the
+    /// timings and the notes go by until then. Once a traction unit works the train, the units decide (see
+    /// <c>Plan.NeedsLocoRunaround</c>).
+    /// </remarks>
+    public bool IsReversible { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of station calls for this train.
     /// </summary>
     public IList<StationCall> Calls { get; set; }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// <summary>
 /// These option applies to motorised units, i.e. locomotives and trainsets.
@@ -33,22 +35,33 @@ public sealed class TractionOptions : TrainPartOptions
     /// If true, the traction unit should be turned on arrival, so it faces the other way. Only asked for
     /// where there is a turntable to turn it on (see <see cref="Layouts.Station.HasTurntable"/>).
     /// </summary>
-    /// <remarks>If both <see cref="TurnLoco"/> and <see cref="RunaroundLoco"/> apply, they give one note,
+    /// <remarks>If both <see cref="TurnLoco"/> and a runaround apply, they give one note,
     /// 'turn and circulate', rather than two.</remarks>
     public bool TurnLoco { get; set; }
 
     /// <summary>
-    /// If true, the traction unit should be run round to the other end of the train on arrival, so the
-    /// train can leave in the opposite direction to the one it arrived from.
+    /// Whether the traction unit is run round to the other end of the train on arrival, so the train can
+    /// leave in the opposite direction to the one it arrived from. Worked out from the route unless said.
     /// </summary>
     /// <remarks>
-    /// <para>Ignored where the traction working the part changes direction without runaround — a trainset, or a
+    /// <para>Never applies where the traction working the part changes direction without runaround — a trainset, or a
     /// locomotive working a reversible train — since there is then nothing to run round; see
     /// <c>ScheduledTrainPart.NeedsRunaround</c>.</para>
-    /// <para>If both <see cref="TurnLoco"/> and <see cref="RunaroundLoco"/> apply, they give one note,
+    /// <para>If both <see cref="TurnLoco"/> and a runaround apply, they give one note,
     /// 'turn and circulate', rather than two.</para>
     /// </remarks>
-    public bool RunaroundLoco { get; set; }
+    public RunaroundMode Runaround { get; set; }
+
+    /// <summary>
+    /// Only reads a plan saved when the runaround was a yes-or-no choice: a yes is now
+    /// <see cref="RunaroundMode.Always"/>. It reads as no, so it is never written back.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool RunaroundLoco
+    {
+        get => false;
+        set { if (value) Runaround = RunaroundMode.Always; }
+    }
 
     /// <summary>
     /// This traction unit is additional to the primary traction unit, pulling or pushing.

@@ -129,7 +129,22 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// Gets or sets whether the locomotive is run round to the other end of the train after it arrives
     /// here. Like <see cref="TurnLoco"/>, it holds for any call in the train.
     /// </summary>
-    public bool RunaroundLoco { get; set; }
+    /// <remarks>
+    /// By default it is worked out from the route (see <see cref="RunaroundMode.Automatic"/>); the planner
+    /// only says where that is wrong.
+    /// </remarks>
+    public RunaroundMode Runaround { get; set; }
+
+    /// <summary>
+    /// Only reads a plan saved when the runaround was a yes-or-no choice: a yes is now
+    /// <see cref="RunaroundMode.Always"/>. It reads as no, so it is never written back.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool RunaroundLoco
+    {
+        get => false;
+        set { if (value) Runaround = RunaroundMode.Always; }
+    }
 
     /// <summary>
     /// Gets or sets whether the wagons are pushed from here, for the rest of the train's run — often

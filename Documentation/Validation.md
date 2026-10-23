@@ -165,6 +165,39 @@ with a loco of its own occupies its track like any other call.
 on the track together, and `"Train {train1} {span1} is followed by train {train2} {span2} after only
 {free} minutes; at least {required} minutes are required."` where the required gap is what is missing.
 
+#### L5 — Track capacity and departure order ✅
+**Method**: `TrackCapacityRules.GetCapacityErrors(StationTrack, standings, schedules)`, run as part of
+`StationTrack.GetValidationErrors` under `ValidateStationTracks`.
+
+**Validates**: What stands on a track together fits it, and can leave it in the order planned. It applies
+to occupants that have a **length** on a track that has one (`StationTrack.Length`); anything else is
+still judged by plain double booking (L2), so a plan that records no lengths is checked as before.
+
+- **Occupants** (`TrackStanding`): a train's call, and — with `ExtendTrackOccupancyByVehicleStay` — the
+  vehicles standing between their trains (`TrackHold`), which is what covers a wagonset put on a siding.
+- **Length**: a call is the sum of `ScheduledObject.Length` of the vehicles working it; if none has one,
+  the train's metre limit (`Train.Length.Meters`). A hold is the sum of its vehicles' lengths.
+- **Too short** (`StationTrackTooShort`): when an occupant arrives, those on the track with it (same
+  sessions, overlapping in time) add up to more than the track. Reported once, at the arrival that tips
+  it over.
+- **Blocked** (`StationTrackBlocked`): vehicles stand in a row, and one that comes in by an end stands
+  nearer that end than those already there. For two occupants on the track together, the one that
+  arrived first is blocked when the later one came in by the end it leaves by and is still there when it
+  leaves; the later one is blocked when it leaves by the end it did not come in by while the first is
+  still there. So with two trains arriving from the same direction and both going back, the one that came
+  in last must leave first; and two trains from opposite ends can never pass each other.
+- **Ends**: told apart by the location the train comes from and goes on to (`NeighbourLocation`, in run
+  order). A stub track (`StationTrack.IsStub`) has one end, so the last in is always the first out. Where
+  an end is unknown — a train beginning or ending its run on the track — the order is not judged. For
+  standing vehicles put on, or fetched from, another track, the end is the one the arriving train came
+  in by (`TrackHold.EntryEnd` / `ExitEnd`).
+- **Together by design**: vehicles of one schedule, a locomotive fetching standing wagons, and calls
+  sharing a vehicle do not stand in each other's way.
+
+**Error**: `"Track {track} at {station} is {n} m long, but {occupants} stand on it together at {time}:
+{total} m in all."` and `"At {station} track {track}, {occupant} cannot leave at {time} because
+{blocker} stands in the way until {time}."`
+
 #### L3 — Stretch conflicts ✅
 **Method**: `Timetable.GetStretchConflicts()` (`DispatchStretchValidation`)
 
@@ -443,6 +476,12 @@ Coverage is judged **leg by leg, not by whether the train appears in some turnus
 
 **Error**: `"Vehicle schedule {number}: {vehicle} stands at the back of the train on {sessions}, but no locomotive leads it then."` (`BackLocomotiveWithoutFront`)
 
+#### S9 — Reversible train needs reversing traction ✅
+**Method**: `ValidateReversibleTrains(this Plan plan)`
+
+**Validates**: A train said to be reversible (`Train.IsReversible`) can be driven from either end, so no locomotive is run round where it changes direction. That is only what the planner knows before a vehicle works the train; once a traction unit does, the units decide (`Plan.NeedsLocoRunaround`). If they still need a runaround — a plain locomotive that is not on a reversible train, with no unit at the back — the train and its traction disagree, and the train is reported. A train no traction unit works yet is not reported, nor is a train **not** said to be reversible: sparing a runaround there is no mistake. Gated by `ValidateSchedules`; severity Warning; train scope, so it marks the train in the Trains tab.
+
+**Warning**: `"Train {train} is said to be reversible, but {vehicle} cannot change direction without a locomotive runaround."` (`ReversibleTrainNeedsRunaround`)
 ### Plan scope (P) — cross-object consistency
 
 #### P1 — Referential integrity ✅ (always enforced)

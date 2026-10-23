@@ -64,6 +64,7 @@ else
                         <th>@Translator("Wagons")</th>
                         <th>@Translator("LengthMeters")</th>
                         <th>@Translator("Vehicles")</th>
+                        <th title="@Translator("IsReversibleTrainHelp")">@Translator("IsReversibleTrain")</th>
                         <th>@Translator("ContinuesAs")</th>
                         <th class="actions"></th>
                     </tr>
@@ -169,6 +170,10 @@ else
                                     <td><input type="text" class="num3"
                                                value="@train.Length.Meters?.ToString("0.#", Culture)" @onchange="e => SetMeters(train, e)" /></td>
                                     <td class="vehicles">@VehiclesText(train)</td>
+                                    <td class="reversible">
+                                        <input type="checkbox" checked="@train.IsReversible"
+                                               title="@Translator("IsReversibleTrainHelp")" @onchange="e => SetIsReversible(train, e)" />
+                                    </td>
                                     <td class="continues">
                                         <input type="checkbox" checked="@train.ShowContinuesAs"
                                                title="@Translator("ShowContinuesAsHint")" @onchange="e => SetShowContinuesAs(train, e)" />
@@ -244,10 +249,10 @@ else
     private string ExternalIdWidth =>
         $"{Math.Clamp(Trains.Select(t => t.ExternalId.Length).DefaultIfEmpty(0).Max() + 2, 8, 32)}ch";
 
-    // The leading conflict column when the table shows one, the expander, the optional ExternalId, the ten
+    // The leading conflict column when the table shows one, the expander, the optional ExternalId, the eleven
     // train fields and the actions cell.
     private int ColumnCount(bool withConflicts) =>
-        (withConflicts ? 13 : 12) + (ShowExternalId ? 1 : 0);
+        (withConflicts ? 14 : 13) + (ShowExternalId ? 1 : 0);
 
     // The traction units (locomotives and trainsets) the plan's schedules assign to the train, so trains worked by the same unit can be
     // spotted by reading down the column. Empty while no schedule works the train.
@@ -450,6 +455,12 @@ else
         Save();
     }
 
+    private void SetIsReversible(Train train, ChangeEventArgs e)
+    {
+        train.IsReversible = e.Value is true;
+        Save();
+    }
+
     private void SetShowContinuesAs(Train train, ChangeEventArgs e)
     {
         train.ShowContinuesAs = e.Value is true;
@@ -537,7 +548,11 @@ else
                                    @onchange="e => SetTurnLoco(call, e)" />
                         </td>
                         <td>
-                            <input type="checkbox" checked="@call.RunaroundLoco" @onchange="e => SetRunaroundLoco(call, e)" />
+                            <select value="@call.Runaround" @onchange="e => SetRunaround(call, e)">
+                                <option value="@RunaroundMode.Automatic">@Translator("RunaroundAutomatic")</option>
+                                <option value="@RunaroundMode.Never">@Translator("RunaroundNever")</option>
+                                <option value="@RunaroundMode.Always">@Translator("RunaroundAlways")</option>
+                            </select>
                         </td>
                         @* Nothing departs from where the train's run ends, so pushing cannot be asked for
                            there — except where it was asked for and the call has since become the end. *@
@@ -674,9 +689,9 @@ else
         Save();
     }
 
-    private void SetRunaroundLoco(StationCall call, ChangeEventArgs e)
+    private void SetRunaround(StationCall call, ChangeEventArgs e)
     {
-        call.RunaroundLoco = e.Value is true;
+        call.Runaround = Enum.TryParse<RunaroundMode>(e.Value?.ToString(), out var mode) ? mode : RunaroundMode.Automatic;
         Save();
     }
 

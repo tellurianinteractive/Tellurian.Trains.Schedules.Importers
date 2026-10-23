@@ -106,6 +106,24 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Track {1} at {0} is {2} m long, but {3} stand on it together at {4}: {5} m in all..
+        /// </summary>
+        internal static string StationTrackTooShortForStandingVehicles {
+            get {
+                return ResourceManager.GetString("StationTrackTooShortForStandingVehicles", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to At {0} track {1}, {2} cannot leave at {3} because {4} stands in the way until {5}..
+        /// </summary>
+        internal static string StationTrackBlockedByStandingVehicles {
+            get {
+                return ResourceManager.GetString("StationTrackBlockedByStandingVehicles", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to {0} {1} overlaps in time with {2} {3}..
         /// </summary>
         internal static string StandingVehiclesOverlapInTimeWithOtherStandingVehicles {
@@ -804,6 +822,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         internal static string BackLocomotiveWithoutFront {
             get {
                 return ResourceManager.GetString("BackLocomotiveWithoutFront", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Train {0} is said to be reversible, but {1} cannot change direction without a locomotive runaround..
+        /// </summary>
+        internal static string ReversibleTrainNeedsRunaround {
+            get {
+                return ResourceManager.GetString("ReversibleTrainNeedsRunaround", resourceCulture);
             }
         }
 

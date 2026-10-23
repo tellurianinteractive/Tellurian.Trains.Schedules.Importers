@@ -1983,7 +1983,7 @@
     <comment>{0}=station name</comment>
   </data>
   <data name="RunaroundLoco" xml:space="preserve">
-    <value>Omløb lokomotiv?</value>
+    <value>Omløb lokomotiv</value>
   </data>
   <data name="CallTurnLoco" xml:space="preserve">
     <value>Drej</value>
@@ -1992,7 +1992,16 @@
     <value>Omløb</value>
   </data>
   <data name="RunaroundLocoHelp" xml:space="preserve">
-    <value>Lokomotivet køres om til den anden ende af toget efter ankomsten, så toget kan afgå den vej, det kom fra. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+    <value>Om lokomotivet køres om til den anden ende af toget efter ankomsten, så toget kan afgå den vej, det kom fra. Som standard afgøres det ud fra ruten: omløb, hvor toget afgår i modsat retning. Vælg Aldrig eller Altid for at ændre det. Udskrives som ankomstbemærkning for lokomotivfører og fjernstyringsleder.</value>
+  </data>
+  <data name="RunaroundAutomatic" xml:space="preserve">
+    <value>Ud fra ruten</value>
+  </data>
+  <data name="RunaroundNever" xml:space="preserve">
+    <value>Aldrig</value>
+  </data>
+  <data name="RunaroundAlways" xml:space="preserve">
+    <value>Altid</value>
   </data>
   <data name="CallPushWagons" xml:space="preserve">
     <value>Skub</value>
@@ -2944,5 +2953,14 @@
   </data>
   <data name="TractionRoleReinforcement" xml:space="preserve">
     <value>Forstærkning</value>
+  </data>
+  <data name="IsStub" xml:space="preserve">
+    <value>Kun fra den ene ende?</value>
+  </data>
+  <data name="IsStubHelp" xml:space="preserve">
+    <value>Et blindspor: alle køretøjer kører ind og ud i samme ende, så det, der kom ind sidst, skal ud først. Lad den være slået fra for et spor, der kan nås fra begge ender, hvor enden afgøres af, hvorfra hvert tog kommer, og hvorhen det kører.</value>
+  </data>
+  <data name="VehicleLengthHelp" xml:space="preserve">
+    <value>Køretøjets længde i meter, når det holder på et spor – for et vognsæt hele sættet. Bruges til at kontrollere, at det, der holder sammen på et spor, kan være der og kan forlade det i rigtig rækkefølge. Lad feltet stå tomt, hvis længden ikke er kendt.</value>
   </data>
 </root>

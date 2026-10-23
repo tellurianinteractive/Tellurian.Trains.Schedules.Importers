@@ -1,5 +1,21 @@
 ﻿# Release notes
 
+## Version 1.3.0
+
+### Changes
+
+- **Runaround is worked out from the route.** The **Runaround** setting on a train part and on a call is now **From the route**, **Never** or **Always**. By default the loco driver is told to run the loco round wherever the train leaves in the opposite direction to the one it arrived from — within a train, or into the next train the same locomotive works — unless the locomotive can reverse as it stands (a trainset, or a reversible train). Choose **Never** where no runaround is needed, or **Always** to ask for one the route does not call for. A runaround you had ticked before is kept as **Always**. **Update timings** follows the same choice when it allows time for the runaround.
+
+- **Say that a train is reversible when you create it.** A new **Reversible train?** setting in the Add train dialog and in the Trains tab says that the train can be driven from either end (a trainset, or a push/pull train). Such a train is given no time for a locomotive runaround where it changes direction, and no circulate note, even before a vehicle has been assigned to it. Once a vehicle works the train, the vehicle decides. Return trains and copies inherit the setting. A warning is shown on a train said to be reversible when a vehicle that has to be run round works it.
+
+- **Tracks and vehicles have lengths.** Give a vehicle a **Length** in the vehicle dialog (for a wagonset, the whole rake) and a track a **Length** in the Operation locations tab. Trains standing on a track with a length are then checked by their lengths instead of counting as a double booking: those that fit together may share the track, and a warning is shown when they are too long together. A second warning is shown when a train or wagonset cannot leave because another stands in its way — the one that came in last at an end has to leave first, whether that is a train or a wagonset put on a siding. A new **Entered from one end only?** setting on a track is for stub tracks and sidings. A train with no vehicle of known length counts as its maximum length in metres, if it has one; anything without a length is checked as before.
+
+- **A vehicle fetched from another track starts there.** In the Vehicle contributors report and the Vehicle owners tab, a locomotive, trainset or wagonset whose first train part fetches it from another track is now listed on that track, where it is to be set up before the start, instead of on the departure track.
+
+### Fixes
+
+- **Calls after midnight are listed in time-of-day order.** In the Trains tab, the calls at a location are now ordered by the time of day they happen, so a call at 00:30 on a train running past midnight is listed with the early-morning calls instead of after the late-evening ones.
+
 ## Version 1.2.5
 
 ### Fixes

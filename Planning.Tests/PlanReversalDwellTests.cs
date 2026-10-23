@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Model.Settings;
+using Tellurian.Trains.Schedules.Model.Validations;
 using Tellurian.Trains.Schedules.Planning.Timetables;
 
 namespace Tellurian.Trains.Schedules.Planning.Tests;
@@ -60,6 +62,120 @@ public class PlanReversalDwellTests
         Assert.IsNotNull(plan.UpdateTimings(train));
 
         Assert.AreEqual(RunaroundMinutes(plan), DwellMinutes(Reversal(train)));
+    }
+
+    private static Train CreateReversing(Plan plan, bool reversible)
+    {
+        var train = plan.Create(Freight,
+            plan.Layout.OperationLocations.First(l => l.Signature == "M"),
+            plan.Layout.OperationLocations.First(l => l.Signature == "Vö"), Start, reversible: reversible);
+        Assert.IsNotNull(train);
+        return train;
+    }
+
+    [TestMethod]
+    public void AReversibleTrainIsCreatedWithoutTheRunaroundAllowance()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+
+        var train = CreateReversing(plan, reversible: true);
+
+        Assert.IsTrue(train.IsReversible);
+        Assert.AreEqual(MinimumStopMinutes(plan), DwellMinutes(Reversal(train)));
+    }
+
+    [TestMethod]
+    public void ATrainNotSaidToBeReversibleIsCreatedWithTheRunaroundAllowance()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+
+        var train = CreateReversing(plan, reversible: false);
+
+        Assert.AreEqual(RunaroundMinutes(plan), DwellMinutes(Reversal(train)));
+    }
+
+    [TestMethod]
+    public void AReversibleTrainKeepsTheMinimumStopWhenItsTimingsAreUpdated()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: true);
+
+        Assert.IsNotNull(plan.UpdateTimings(train));
+
+        Assert.AreEqual(MinimumStopMinutes(plan), DwellMinutes(Reversal(train)));
+    }
+
+    [TestMethod]
+    public void AReversibleTrainsReturnAndCloneAreReversibleToo()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: true);
+
+        var back = plan.CreateReturn(train);
+        var clone = plan.Clone(train, 60);
+
+        Assert.IsTrue(back?.IsReversible);
+        Assert.IsTrue(clone?.IsReversible);
+    }
+
+    [TestMethod]
+    public void AssignedTractionDecidesOverWhatTheTrainWasSaidToBe()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: true);
+        Assign(plan, train, ScheduledObjectType.Locomotive);
+
+        Assert.IsNotNull(plan.UpdateTimings(train));
+
+        Assert.AreEqual(RunaroundMinutes(plan), DwellMinutes(Reversal(train)));
+    }
+
+    private static IEnumerable<ValidationError> ReversibleTrainWarnings(Plan plan) =>
+        plan.GetValidationErrors(new ValidationSettings()).Where(e => e.ErrorType == ValidationErrorType.ReversibleTrainNeedsRunaround);
+
+    [TestMethod]
+    public void AReversibleTrainWorkedByAPlainLocomotiveIsWarnedAbout()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: true);
+        Assign(plan, train, ScheduledObjectType.Locomotive);
+
+        var warning = ReversibleTrainWarnings(plan).Single();
+
+        Assert.AreEqual(Tellurian.Trains.Schedules.Model.Severity.Warning, warning.Message.Severity);
+        CollectionAssert.AreEqual(new[] { train }, warning.Trains.ToArray());
+        Assert.AreEqual(ValidationScope.Train, warning.Scope);
+    }
+
+    [TestMethod]
+    [DataRow(ScheduledObjectType.Trainset, false)]
+    [DataRow(ScheduledObjectType.Locomotive, true)]
+    public void AReversibleTrainWorkedByTractionThatReversesIsNotWarnedAbout(ScheduledObjectType type, bool reversibleLoco)
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: true);
+        Assign(plan, train, type, reversibleLoco);
+
+        Assert.IsFalse(ReversibleTrainWarnings(plan).Any());
+    }
+
+    [TestMethod]
+    public void AReversibleTrainNoVehicleWorksYetIsNotWarnedAbout()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        CreateReversing(plan, reversible: true);
+
+        Assert.IsFalse(ReversibleTrainWarnings(plan).Any());
+    }
+
+    [TestMethod]
+    public void ATrainNotSaidToBeReversibleIsNotWarnedAboutWhateverWorksIt()
+    {
+        var plan = TestLayoutFactory.CreatePlan();
+        var train = CreateReversing(plan, reversible: false);
+        Assign(plan, train, ScheduledObjectType.Locomotive);
+
+        Assert.IsFalse(ReversibleTrainWarnings(plan).Any());
     }
 
     [TestMethod]

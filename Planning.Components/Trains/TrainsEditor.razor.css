@@ -187,6 +187,7 @@
         white-space: nowrap;
     }
 
+    td.reversible,
     td.continues {
         text-align: center;
     }
