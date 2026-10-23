@@ -124,6 +124,26 @@ public static class TrackHoldExtensions
             plan.Layout.Settings.Validation.ExtendTrackOccupancyByVehicleStay ? plan.Schedules.TrackHolds : [];
     }
 
+    extension(TrackHold hold)
+    {
+        /// <summary>
+        /// Whether <paramref name="train"/> brings a traction unit that then takes these vehicles on: the
+        /// unit arrives in this train, and the next train of its schedule, leaving from the same station,
+        /// is the one that departs with the standing vehicles. The unit has to come to the track to fetch
+        /// them, so its call there is no double booking of it.
+        /// </summary>
+        /// <param name="train">The train whose call is tested against the hold.</param>
+        /// <param name="schedules">The schedules that assign vehicles to train parts.</param>
+        public bool IsCollectedBy(Train train, IEnumerable<Schedule> schedules) =>
+            !hold.IsIdle && hold.DepartingTrain is { } departing &&
+            schedules.Any(s => s.Vehicles.Any(v => v.IsTraction) && s.OrderedParts is var parts &&
+                Enumerable.Range(0, parts.Count - 1).Any(i =>
+                    parts[i].Train.Equals(train) &&
+                    parts[i + 1].Train.Equals(departing) &&
+                    parts[i].To.OperationLocation.Equals(hold.Track.Station) &&
+                    parts[i + 1].From.OperationLocation.Equals(hold.Track.Station)));
+    }
+
     extension(Schedule schedule)
     {
         /// <summary>Where the vehicles of this schedule stand between its trains.</summary>

@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.2.5
+
+### Korrekturen
+
+- **Eine Lok, die stehende Wagen abholt, ist kein Konflikt mehr.** Kommt eine Lok mit einem Zug an und fährt im nächsten Zug mit den auf dem Gleis stehenden Wagen ab, wird ihr eigener Halt dort nicht mehr als Überschneidung mit diesen Wagen gemeldet.
+
 ## Version 1.2.4
 
 ### Änderungen

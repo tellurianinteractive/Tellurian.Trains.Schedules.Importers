@@ -1343,6 +1343,8 @@ public static class ValidationExtensions
                         if (hold.OtherVehicleSessions is not { } others || !train.Sessions.Overlaps(others)) continue;
                         callSessions = train.Sessions.And(others);
                     }
+                    // A locomotive that arrives in one train and leaves in the next with the standing wagons has to come to them.
+                    if (hold.IsCollectedBy(train, vehicleSchedules)) continue;
                     if (!call.TrackOccupancy.ConflictsInTime(callSessions, hold.Span, hold.Sessions, minMinutesBetweenTrackUsage)) continue;
 
                     var callSpan = call.TrackOccupancySpanText();

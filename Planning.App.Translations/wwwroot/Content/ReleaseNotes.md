@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.2.5
+
+### Fixes
+
+- **A locomotive fetching standing wagons is no longer a conflict.** When a locomotive arrives in one train and leaves in the next one with the wagons standing on the track, its own call there is no longer reported as overlapping with those wagons.
+
 ## Version 1.2.4
 
 ### Changes

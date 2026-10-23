@@ -1,5 +1,15 @@
 # Release Notes
 
+## Version 3.6.0
+
+### New features
+
+- **Double track as two single tracks.** New **`ValidationSettings.TreatDoubleTrackAsTwoSingleTracks`** (off by default): trains running the same way on a double track stretch must keep apart, each section holding one train per direction. It applies to the stretch validation, so it needs `ValidateStretches`.
+
+### Fixes
+
+- **A locomotive fetching standing wagons is no longer a conflict.** A call of a train that brings a traction unit which then leaves with the train taking the standing vehicles on (`TrackHold.IsCollectedBy`) is no longer reported as overlapping with the track hold of those vehicles.
+
 ## Version 3.5.0
 
 ### New features

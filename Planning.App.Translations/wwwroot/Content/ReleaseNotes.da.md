@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.2.5
+
+### Rettelser
+
+- **Et lokomotiv, der henter holdende vogne, er ikke længere en konflikt.** Når et lokomotiv kommer i ét tog og kører videre i næste tog med de vogne, der holder på sporet, meldes dets eget stop dér ikke længere som overlappende med vognene.
+
 ## Version 1.2.4
 
 ### Ændringer

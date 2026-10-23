@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.2.5
+
+### Rättelser
+
+- **Ett lok som hämtar stående vagnar är inte längre en konflikt.** När ett lok kommer i ett tåg och lämnar i nästa tåg med de vagnar som står på spåret, anmäls dess eget uppehåll där inte längre som överlappande med vagnarna.
+
 ## Version 1.2.4
 
 ### Ändringar
