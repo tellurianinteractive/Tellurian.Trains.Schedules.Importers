@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.3.2
+
+### Änderungen
+
+- **Ein Stumpfgleis ist keine eigene Seite der Dispatcherliste mehr.** Bei einem Bahnhof, dessen Dispatching nach Richtung geteilt ist, gehört ein Stichgleis, an dessen anderem Ende niemand anzurufen ist, jetzt zu der Richtung, in die das Gleis am Bahnhof gleich verläuft, beide vom Bahnhof weg oder beide zu ihm hin. Auch ein Stichgleis, das der Bahnhof selbst disponiert, etwa ein Industriegebiet, zählt dazu. Seine Zeilen stehen auf dieser Seite, und hat es eine Telefonnummer, steht die Nummer dort neben den Nachbarn. Ein Stichgleis, das in beide Richtungen verläuft oder zu dem keine andere Richtung passt, behält seine eigene Seite.
+- **Der Bericht Mitgebrachte Fahrzeuge beginnt mit einer Übersicht.** Die Anordnungen nach Eigentümer und nach Betriebsstelle beginnen jetzt mit einer Übersichtsseite: eine Zeile für jeden Teilnehmer mit der Anzahl der Einheiten, die er mitbringt, Reserven eingeschlossen, oder für jede Betriebsstelle mit ihrem Eigentümer und der Anzahl der dort aufgestellten Einheiten, Reserven nicht mitgezählt. So findet jeder seine eigene Seite im Stapel. Einheiten, die niemand mitbringt, und Einheiten außer Betrieb bleiben weg. Die Liste nach DCC-Adresse braucht keine Übersicht und hat keine.
+
 ## Version 1.3.1
 
 ### Änderungen

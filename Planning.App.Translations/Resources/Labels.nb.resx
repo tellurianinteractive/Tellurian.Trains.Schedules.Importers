@@ -2975,4 +2975,16 @@
   <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
     <value>Melder et tog som står kortere på et opphold enn togklarering, eller der lokomotivet går rundt lokomotivomløp, krever. Rett det ved å forlenge oppholdet eller ved å senke den nødvendige tiden i innstillingene.</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Oppsummering</value>
+  </data>
+  <data name="SummaryOwnerHint" xml:space="preserve">
+    <value>Se detaljer på siden med navnet ditt.</value>
+  </data>
+  <data name="SummaryLocationHint" xml:space="preserve">
+    <value>Se detaljer på siden for stasjonen din om hvordan kjøretøyene først skal settes opp.</value>
+  </data>
+  <data name="SummaryItems" xml:space="preserve">
+    <value>Antall</value>
+  </data>
 </root>

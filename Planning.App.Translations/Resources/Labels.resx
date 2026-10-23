@@ -2989,4 +2989,16 @@
   <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
     <value>Reports a train that stands at a stop for a shorter time than train clearance, or where the loco is run round the loco runaround, requires. Put it right by lengthening the stop or by lowering the time required in the settings.</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="SummaryOwnerHint" xml:space="preserve">
+    <value>See details on the page with your name.</value>
+  </data>
+  <data name="SummaryLocationHint" xml:space="preserve">
+    <value>See details on the page for your station on how to initially set up vehicles.</value>
+  </data>
+  <data name="SummaryItems" xml:space="preserve">
+    <value>Items</value>
+  </data>
 </root>

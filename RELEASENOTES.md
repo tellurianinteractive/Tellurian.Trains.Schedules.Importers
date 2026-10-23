@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 3.9.0
+
+### New features
+
+- **Dispatch directions with spurs folded in.** New **`Layout.DispatchDirectionsAt(location)`** gives the directions of a location as a dispatcher sees them: a spur with no dispatcher beyond it, other than the location's own, is not a direction of its own but belongs with the direction whose track stretches run the same way at the location, both leading away from it or both leading to it. A spur whose stretches run both ways, or that no other direction matches, stays a direction. New **`LocationDirection.Spurs`** lists the locations folded into a direction. `DirectionsAt` is unchanged.
+
 ## Version 3.8.0
 
 ### New features

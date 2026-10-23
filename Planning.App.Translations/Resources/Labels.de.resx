@@ -2975,4 +2975,16 @@
   <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
     <value>Meldet einen Zug, der kürzer an einem Halt steht, als die Zugfreigabe oder, wo die Lok umgesetzt wird, das Umsetzen der Lok erfordert. Beheben Sie es, indem Sie den Halt verlängern oder die erforderliche Zeit in den Einstellungen senken.</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Zusammenfassung</value>
+  </data>
+  <data name="SummaryOwnerHint" xml:space="preserve">
+    <value>Details siehe Seite mit Ihrem Namen.</value>
+  </data>
+  <data name="SummaryLocationHint" xml:space="preserve">
+    <value>Details siehe Seite Ihres Bahnhofs dazu, wie die Fahrzeuge anfangs aufzustellen sind.</value>
+  </data>
+  <data name="SummaryItems" xml:space="preserve">
+    <value>Anzahl</value>
+  </data>
 </root>

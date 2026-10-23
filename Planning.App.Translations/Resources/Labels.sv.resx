@@ -2975,4 +2975,16 @@
   <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
     <value>Rapporterar ett tåg som står kortare tid på ett uppehåll än tågklarering, eller där loket körs runt rundgången, kräver. Åtgärda det genom att förlänga uppehållet eller genom att sänka den nödvändiga tiden i inställningarna.</value>
   </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Sammanfattning</value>
+  </data>
+  <data name="SummaryOwnerHint" xml:space="preserve">
+    <value>Se detaljer på sidan med ditt namn.</value>
+  </data>
+  <data name="SummaryLocationHint" xml:space="preserve">
+    <value>Se detaljer på sidan för din station om hur fordonen ska ställas upp från början.</value>
+  </data>
+  <data name="SummaryItems" xml:space="preserve">
+    <value>Antal</value>
+  </data>
 </root>

@@ -105,7 +105,7 @@
     // One document per station, or per direction at a station divided by direction.
     private int DispatchFileCount => DispatchStations.Sum(station =>
         station is { SplitDispatchByDirection: true, Layout: { } layout }
-            ? Math.Max(1, layout.DirectionsAt(station).Count)
+            ? Math.Max(1, layout.DispatchDirectionsAt(station).Count)
             : 1);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

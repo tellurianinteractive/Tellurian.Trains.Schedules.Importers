@@ -1,0 +1,83 @@
+/* The summary page of the Vehicle contributors report. The heading box is 17 mm plus 3 mm margin and the rows
+   6.3 mm, as on the pages of the report (VehicleContributorsPageGeometry), so the same geometry paginates it. */
+
+.summary-page {
+    .heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 6mm;
+        box-sizing: border-box;
+        height: 17mm;
+        margin-bottom: 3mm;
+        border-bottom: 1.5px solid #000;
+        overflow: hidden;
+
+        .title {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26pt;
+            line-height: 11mm;
+            white-space: nowrap;
+
+            .continued {
+                margin-left: 3mm;
+                font-size: 0.5em;
+                font-weight: 400;
+            }
+        }
+
+        .hint {
+            margin: 0 0 1mm;
+            font-size: 9pt;
+            line-height: 4mm;
+            font-style: italic;
+        }
+
+        .context {
+            display: flex;
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-bottom: 1mm;
+            font-size: 9pt;
+            line-height: 4.5mm;
+            white-space: nowrap;
+        }
+    }
+
+    table.summary {
+        border-collapse: collapse;
+        font-size: 10pt;
+
+        th,
+        td {
+            padding: 0.5mm 6mm 0.5mm 1mm;
+            border-bottom: 1px solid #999;
+            line-height: 5mm;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        th {
+            height: 6mm;
+            box-sizing: border-box;
+            border-bottom: 1.5px solid #000;
+            font-size: 8pt;
+            font-style: italic;
+            font-weight: 400;
+            line-height: 4mm;
+            vertical-align: bottom;
+        }
+
+        .items {
+            padding-right: 1mm;
+            text-align: right;
+        }
+    }
+}

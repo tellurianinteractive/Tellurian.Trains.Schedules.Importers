@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.3.2
+
+### Ändringar
+
+- **Ett stickspår är inte längre en egen sida i tågklarerarlistan.** På en station vars tågklarering är delad efter riktning hör ett spår utan någon att ringa i andra änden nu till den riktning där spåret går åt samma håll vid stationen, båda bort från den eller båda mot den. Ett spår som stationen själv tågklarerar, till exempel ett industriområde, räknas också. Dess rader står på den sidan, och har det ett telefonnummer står numret där bredvid grannarna. Ett spår som går åt båda hållen, eller som ingen annan riktning passar, behåller sin egen sida.
+- **Rapporten Fordon och ägare inleds med en sammanfattning.** Uppställningarna efter ägare och efter driftställe börjar nu med en sammanfattningssida: en rad för varje deltagare med antalet enheter som de tar med, reserver inräknade, eller för varje driftställe med dess ägare och antalet enheter som ställs upp där, reserver oräknade. Alla hittar sin egen sida i högen. Enheter som ingen tar med, och enheter som inte är i drift, utelämnas. Listan efter DCC-adress behöver ingen sammanfattning och har ingen.
+
 ## Version 1.3.1
 
 ### Ändringar

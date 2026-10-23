@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.3.2
+
+### Changes
+
+- **A dead-end spur is no longer a dispatch list page of its own.** At a station whose dispatch is divided by direction, a spur with nobody to ring at its far end now goes with the direction whose track runs the same way at the station, both leading away from it or both leading to it. A spur the station dispatches itself, such as an industrial area, counts too. Its rows are on that page, and if it has a telephone number the number is listed there beside the neighbours. A spur that runs both ways, or that no other direction matches, keeps its own page.
+- **The Vehicle contributors report opens with a summary.** The arrangements by owner and by operation location now start with a summary page: a row for each participant with the number of items they bring, spares included, or for each operation location with its owner and the number of items set up there, spares not counted. Everybody can find their own page in the pile. Items nobody brings, and items not in operation, are left out. The list by DCC address needs no summary and has none.
+
 ## Version 1.3.1
 
 ### Changes

@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.3.2
+
+### Endringer
+
+- **Et blindspor er ikke lenger en egen side på dispatcherlisten.** På en stasjon der dispatchingen er delt etter retning, hører et sidespor uten noen å ringe til i den andre enden nå til den retningen sporet går samme vei ved stasjonen, begge bort fra den eller begge mot den. Et sidespor stasjonen selv dispatcher, for eksempel et industriområde, regnes også med. Radene står på den siden, og har det et telefonnummer, står nummeret der ved siden av naboene. Et sidespor som går begge veier, eller som ingen annen retning passer til, beholder sin egen side.
+- **Rapporten Medbrakte kjøretøy åpner med en oversikt.** Oppstillingene etter eier og etter driftssted begynner nå med en oversiktsside: en rad for hver deltaker med antallet enheter vedkommende tar med, reserver medregnet, eller for hvert driftssted med eieren og antallet enheter som er stilt opp der, reserver ikke medregnet. Alle finner sin egen side i bunken. Enheter ingen tar med, og enheter som ikke er i drift, er utelatt. Listen etter DCC-adresse trenger ingen oversikt og har ingen.
+
 ## Versjon 1.3.1
 
 ### Endringer

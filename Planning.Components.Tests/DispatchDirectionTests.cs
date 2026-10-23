@@ -98,6 +98,59 @@ public class DispatchDirectionTests
         Assert.IsFalse(departure.IsSoleRow);
     }
 
+    // West -> Middle -> East, plus a spur Middle -> Siding that nobody dispatches.
+    private static Station CreateStationWithSpur(bool leadsAway)
+    {
+        var layout = new Layout { Name = "Test" };
+        var west = layout.Add(NewStation(1, West, "Mkd"));
+        var middle = (Station)layout.Add(NewStation(2, Middle, "Slk"));
+        var east = layout.Add(NewStation(3, East, "Stk"));
+        var siding = layout.Add(new IndustrialArea(4, "Siding", "Sid"));
+        layout.Add(new TrackStretch(1, west, middle, 10));
+        layout.Add(new TrackStretch(2, middle, east, 10));
+        layout.Add(leadsAway ? new TrackStretch(3, middle, siding, 5) : new TrackStretch(3, siding, middle, 5));
+        middle.SplitDispatchByDirection = true;
+        return middle;
+    }
+
+    [TestMethod]
+    public void ASpurLeadingAwayJoinsTheDirectionLeadingAway()
+    {
+        var middle = CreateStationWithSpur(leadsAway: true);
+
+        var directions = middle.Layout!.DispatchDirectionsAt(middle);
+
+        Assert.HasCount(2, directions);
+        Assert.IsTrue(directions.Single(d => d.Adjacent.Any(l => l.Name == East)).Adjacent.Any(l => l.Name == "Siding"));
+    }
+
+    [TestMethod]
+    public void ASpurLeadingToTheStationJoinsTheDirectionLeadingTo()
+    {
+        var middle = CreateStationWithSpur(leadsAway: false);
+
+        var directions = middle.Layout!.DispatchDirectionsAt(middle);
+
+        Assert.HasCount(2, directions);
+        Assert.IsTrue(directions.Single(d => d.Adjacent.Any(l => l.Name == West)).Adjacent.Any(l => l.Name == "Siding"));
+    }
+
+    [TestMethod]
+    public void ASpurTheStationDispatchesItselfJoinsTheDirectionAndIsListedWithItsNumber()
+    {
+        var middle = CreateStationWithSpur(leadsAway: true);
+        var siding = middle.Layout!.OperationLocations.Single(l => l.Name == "Siding");
+        siding.ControlledBy = middle;
+        siding.PhoneNumber = 42;
+
+        var lists = DispatchList.CreateAll(middle, new Timetable("Test", middle.Layout).Trains, Settings);
+
+        Assert.HasCount(2, lists);
+        var east = lists.Single(l => l.Direction!.Contains(East));
+        Assert.AreEqual("Siding", east.Neighbours.Single(n => n.PhoneNumber == 42).Name);
+        Assert.IsFalse(lists.Single(l => l != east).Neighbours.Any(n => n.PhoneNumber == 42));
+    }
+
     [TestMethod]
     public void AStationAtTheEndOfTheLineHasOneListHoweverItIsSet()
     {

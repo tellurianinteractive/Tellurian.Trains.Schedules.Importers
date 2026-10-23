@@ -397,6 +397,49 @@ public static class LayoutOperationLocationExtensions
         }
 
         /// <summary>
+        /// The directions of <paramref name="location"/> as a dispatcher sees them (see <c>DirectionsAt</c>):
+        /// a spur with nobody to ring at its far end — no dispatcher anywhere beyond — is not a direction of
+        /// its own but belongs with the direction whose track stretches run the same way at the location,
+        /// both leading away from it or both leading to it. A spur that cannot be placed that way, because
+        /// its stretches run both ways or no other direction runs the same way, stays a direction.
+        /// </summary>
+        /// <param name="location">The location whose dispatch directions are wanted.</param>
+        public IReadOnlyList<LocationDirection> DispatchDirectionsAt(OperationLocation? location)
+        {
+            var directions = layout.DirectionsAt(location);
+            if (layout is null || location is null || directions.Count < 2) return directions;
+            bool? LeadsAway(LocationDirection direction)
+            {
+                var stretches = layout.TrackStretches
+                    .Where(s => s.Start.Equals(location) ? direction.Adjacent.Contains(s.End) : s.End.Equals(location) && direction.Adjacent.Contains(s.Start))
+                    .ToList();
+                if (stretches.Count == 0) return null;
+                var away = stretches.Count(s => s.Start.Equals(location));
+                return away == stretches.Count ? true : away == 0 ? false : null;
+            }
+
+            // The location's own dispatcher does not count: a location it dispatches from afar is a dead end too.
+            bool IsSpur(LocationDirection direction) =>
+                !direction.Reach.Any(l => l.Dispatcher is { } dispatcher && !dispatcher.Equals(location));
+
+            var result = new List<LocationDirection>(directions);
+            foreach (var spur in directions.Where(IsSpur))
+            {
+                var flow = LeadsAway(spur);
+                var target = flow is null ? null : result.FirstOrDefault(d => !IsSpur(d) && LeadsAway(d) == flow);
+                if (target is null) continue;
+                result[result.IndexOf(target)] = new LocationDirection(
+                    [.. target.Adjacent, .. spur.Adjacent],
+                    new HashSet<OperationLocation>(target.Reach.Concat(spur.Reach)))
+                {
+                    Spurs = [.. target.Spurs, .. spur.Reach],
+                };
+                result.Remove(spur);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Clears every track route naming <paramref name="location"/> (see
         /// <see cref="StationTrack.PreviousLocationId"/>), so no track is left reserved for trains to or
         /// from somewhere the layout no longer has. Call it when a location is removed. Returns

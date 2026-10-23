@@ -50,6 +50,14 @@ else
        which is all a torn-off sheet needs to identify itself. *@
     UseReportCulture(DefaultCulture);
     <CascadingValue Value="DefaultCulture">
+        @* The arrangements by owner and by location open with a summary; the address list needs none. *@
+        @for (var i = 0; i < _summaryPages.Count; i++)
+        {
+            <A4LPage Margin="10">
+                <VehicleContributorsSummaryPage Rows="_summaryPages[i]" ByLocation="_grouping == VehicleContributorsGrouping.OperationLocation"
+                                                IsContinued="i > 0" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+            </A4LPage>
+        }
         @foreach (var page in _pages)
         {
             <A4LPage Margin="10">
@@ -80,6 +88,7 @@ else
     public string? By { get; set; }
 
     private IReadOnlyList<VehicleContributorsPage>? _pages;
+    private IReadOnlyList<IReadOnlyList<VehicleContributorsSummaryRow>> _summaryPages = [];
     private bool _hasRollingStock;
     private VehicleContributorsGrouping _grouping;
     private VehicleContributorCells? _cells;
@@ -117,6 +126,9 @@ else
         _cells = new VehicleContributorCells(Translator, settings);
         var groups = VehicleContributorsList.Create(plan, _grouping, settings);
         _pages = VehicleContributorsPaginator.BuildPages(groups, Geometry);
+        _summaryPages = VehicleContributorsSummary.Has(_grouping)
+            ? VehicleContributorsSummary.BuildPages(VehicleContributorsSummary.Create(groups), Geometry)
+            : [];
     }
 
     private static string HrefOf(string value) => $"{Route}?by={value}";

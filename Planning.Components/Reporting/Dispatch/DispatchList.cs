@@ -131,7 +131,7 @@ public sealed record DispatchList(
         var whole = Create(station, trains, settings, plan);
         if (station is not Station { SplitDispatchByDirection: true } dispatcher || station.Layout is not { } layout)
             return [whole];
-        var directions = layout.DirectionsAt(station);
+        var directions = layout.DispatchDirectionsAt(station);
         if (directions.Count < 2) return [whole];
 
         int SideOf(OperationLocation? location)
@@ -188,7 +188,10 @@ public sealed record DispatchList(
                 return whole with
                 {
                     Rows = rows[side],
-                    Neighbours = [.. beyond.Where(neighbour => neighbour.PhoneNumber.HasValue)
+                    // A spur folded into the direction is rung like a neighbour when it has a number.
+                    Neighbours = [.. beyond.Cast<OperationLocation>()
+                        .Concat(direction.Spurs.OrderBy(spur => spur.Name, StringComparer.CurrentCulture))
+                        .Where(neighbour => neighbour.PhoneNumber.HasValue)
                         .Select(neighbour => new DispatchNeighbour(neighbour.Name, neighbour.PhoneNumber!.Value))],
                     RemoteLocations = [.. whole.RemoteLocations.Where(location => rows[side].Any(row => row.IsRemote && row.Call.OperationLocation.Equals(location)))],
                     Direction = string.Join(", ", names),

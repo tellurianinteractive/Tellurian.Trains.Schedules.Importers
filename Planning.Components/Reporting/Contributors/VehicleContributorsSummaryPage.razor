@@ -1,0 +1,82 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors
+
+@using System.Globalization
+
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* The first page of the Vehicle contributors report: a row per participant or operation location with its number
+   of items, and a pointer to the page that has the details. Laid out as the other pages are, so that the same
+   page geometry holds. *@
+
+<div class="summary-page">
+    <header class="heading">
+        <div class="title">
+            <h1>
+                @Translator("Summary")
+                @if (IsContinued)
+                {
+                    <span class="continued">(@Translator("Continued"))</span>
+                }
+            </h1>
+            <p class="hint">@Translator(ByLocation ? "SummaryLocationHint" : "SummaryOwnerHint")</p>
+        </div>
+        <div class="context">
+            <span>@Translator("VehicleContributors") · @Translator(ByLocation ? "ByOperationLocation" : "ByOwner")</span>
+            <span>@ContextLine</span>
+        </div>
+    </header>
+
+    <table class="summary">
+        <thead>
+            <tr>
+                <th>@Translator(ByLocation ? "Station" : "Owner")</th>
+                @if (ByLocation)
+                {
+                    <th>@Translator("Owner")</th>
+                }
+                <th class="items">@Translator("SummaryItems")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Rows)
+            {
+                <tr>
+                    <td>@row.Name</td>
+                    @if (ByLocation)
+                    {
+                        <td>@row.Owner</td>
+                    }
+                    <td class="items">@row.Items.ToString(CultureInfo.CurrentCulture)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    /// <summary>The rows on this page.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<VehicleContributorsSummaryRow> Rows { get; set; } = default!;
+
+    /// <summary>Whether the summary is by operation location rather than by owner.</summary>
+    [Parameter] public bool ByLocation { get; set; }
+
+    /// <summary>Whether an earlier page already printed the start of the summary.</summary>
+    [Parameter] public bool IsContinued { get; set; }
+
+    /// <summary>The name of the layout the plan is for.</summary>
+    [Parameter] public string? LayoutName { get; set; }
+
+    /// <summary>The day the report was printed.</summary>
+    [Parameter] public DateOnly PrintDate { get; set; }
+
+    private string ContextLine
+    {
+        get
+        {
+            var printed = string.Format(CultureInfo.CurrentCulture, Translator("PrintedAt"), PrintDate.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture));
+            return LayoutName is { Length: > 0 } name ? $"{name} · {printed}" : printed;
+        }
+    }
+}
