@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.3
+
+### Fejlrettelser
+
+- **Rapporten Medbragte køretøj åbner igen.** Efter at oversigtssiden blev tilføjet, kunne opstillingerne efter ejer og efter driftssted ikke vises og gav en fejl. De åbner nu med oversigten som tænkt.
+
 ## Version 1.3.2
 
 ### Ændringer

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.3
+
+### Fixes
+
+- **The Vehicle contributors report opens again.** Since the summary page was added, the arrangements by owner and by operation location failed to display and raised an error. They now open with the summary as intended.
+
 ## Version 1.3.2
 
 ### Changes

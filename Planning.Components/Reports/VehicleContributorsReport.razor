@@ -51,11 +51,14 @@ else
     UseReportCulture(DefaultCulture);
     <CascadingValue Value="DefaultCulture">
         @* The arrangements by owner and by location open with a summary; the address list needs none. *@
+        @* The page and its position are copied out of the loop: the child content runs after the loop has moved on. *@
         @for (var i = 0; i < _summaryPages.Count; i++)
         {
+            var rows = _summaryPages[i];
+            var isContinued = i > 0;
             <A4LPage Margin="10">
-                <VehicleContributorsSummaryPage Rows="_summaryPages[i]" ByLocation="_grouping == VehicleContributorsGrouping.OperationLocation"
-                                                IsContinued="i > 0" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
+                <VehicleContributorsSummaryPage Rows="rows" ByLocation="_grouping == VehicleContributorsGrouping.OperationLocation"
+                                                IsContinued="isContinued" LayoutName="@ScheduleState.Layout?.Name" PrintDate="_printDate" />
             </A4LPage>
         }
         @foreach (var page in _pages)

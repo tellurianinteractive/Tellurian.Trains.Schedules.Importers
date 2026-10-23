@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.3
+
+### Fehlerbehebungen
+
+- **Der Bericht Mitgebrachte Fahrzeuge öffnet sich wieder.** Seit die Übersichtsseite hinzugefügt wurde, wurden die Anordnungen nach Eigentümer und nach Betriebsstelle nicht angezeigt und lösten einen Fehler aus. Sie beginnen jetzt wie vorgesehen mit der Übersicht.
+
 ## Version 1.3.2
 
 ### Änderungen

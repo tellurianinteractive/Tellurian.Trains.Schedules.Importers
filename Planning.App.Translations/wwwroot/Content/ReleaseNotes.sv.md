@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.3
+
+### Rättelser
+
+- **Rapporten Fordon och ägare öppnas igen.** Sedan sammanfattningssidan lades till visades inte uppställningarna efter ägare och efter driftställe, utan gav ett fel. De öppnas nu med sammanfattningen som avsett.
+
 ## Version 1.3.2
 
 ### Ändringar
