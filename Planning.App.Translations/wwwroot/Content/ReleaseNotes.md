@@ -12,6 +12,8 @@
 
 - **A vehicle fetched from another track starts there.** In the Vehicle contributors report and the Vehicle owners tab, a locomotive, trainset or wagonset whose first train part fetches it from another track is now listed on that track, where it is to be set up before the start, instead of on the departure track.
 
+- **Train clearance and loco runaround set the least time a train stands.** The **Train clearance** and **Loco runaround** times are real time and are now entered as one number: below 10 it is minutes and from 10 it is seconds, and the unit is shown after the field. 1 is one minute and 90 is ninety seconds. The time is converted to fast-clock time by the fast-clock speed. It is the shortest time a train may stand to be cleared at a manned station, or to run the loco round, and it is not added to the minimum stop: the longest of them applies. A new setting, **Validate required stop times?**, reports a train that stops for a shorter time. Lengthen the stop, or lower the time required, to clear the warning.
+
 ### Fixes
 
 - **Calls after midnight are listed in time-of-day order.** In the Trains tab, the calls at a location are now ordered by the time of day they happen, so a call at 00:30 on a train running past midnight is listed with the early-morning calls instead of after the late-evening ones.

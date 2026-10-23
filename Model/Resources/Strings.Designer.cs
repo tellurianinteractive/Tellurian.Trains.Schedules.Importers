@@ -745,6 +745,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Train {0} stops at {1} {2} for {3} fast-clock min, but needs at least {4} fast-clock min there for train clearance or loco runaround..
+        /// </summary>
+        internal static string TrainStopsShorterThanRequired {
+            get {
+                return ResourceManager.GetString("TrainStopsShorterThanRequired", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Train {0} arrives or departs at {1} {2} on track {3}, but that track is not scheduled..
         /// </summary>
         internal static string TrainStopsAtUnscheduledTrack {

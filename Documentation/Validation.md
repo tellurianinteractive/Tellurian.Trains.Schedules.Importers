@@ -61,6 +61,7 @@ public sealed record ValidationError
 | `VehicleNotClosed` | A traction unit's circulation does not close over the period |
 | `VehicleIdentityDuplicated` | Two vehicles share an identity — external id, or operator and number — on a common session |
 | `StopOutsideStopPattern` | A train stops on its way at a location its category's stop pattern does not name |
+| `StopShorterThanRequired` | A train stands at a stop for a shorter time than train clearance or the loco runaround requires |
 | `StopAtUnscheduledTrack` | A train arrives at or departs from a track that is not scheduled |
 | `LockKeyIgnored` | An operation location carries a lock key the manning on one side or the other has left meaningless |
 
@@ -80,6 +81,7 @@ public sealed class ValidationSettings
     public bool ValidatePassengerExchange { get; set; } = true;
     public bool ValidateStopPatterns { get; set; } = true;
     public bool ValidateScheduledTracks { get; set; } = true;
+    public bool ValidateRequiredStopTimes { get; set; } = true;
     public bool ValidateTrainNumbers { get; set; } = true;
     public bool ValidateSchedules { get; set; } = true;
     public bool ValidateLocomotiveCoverage { get; set; } = true;
@@ -399,6 +401,32 @@ not scheduled."` (`StopAtUnscheduledTrack`)
 Nothing is put right automatically, because the planner may have meant either: move the call to a
 scheduled track on the **Trains** tab, or tick the track's **Scheduled?** box on the **Operation
 locations** tab.
+
+#### T10 — Required stop times ✅
+**Method**: `CheckRequiredStopTimes(this Train me, Plan plan)`
+
+**Validates**: A train stands at each stop on its way at least as long as the stop requires, in fast-clock
+minutes. That is the longest of the **minimum stop**, the **train clearance** at a manned station and, where
+the loco is run round at the call, the **loco runaround** (`TimeAndSpeedSettings.RequiredStopMinutes`). They
+are not added together: the clearance and the runaround only raise the minimum stop where they are longer.
+The same figure gives a stop its length when a train is built or its timings updated, so a train made by the
+app never raises this rule until its times are edited. Gated by `ValidateRequiredStopTimes`.
+
+**Reading the times**: the clearance and runaround times are real time, entered as one number. Below 10 it
+is minutes and from 10 it is seconds, so `1` is one minute and `90` is ninety seconds
+(`StationTimings.RealDurationOf`). The time is converted by the fast-clock speed and rounded up to a whole
+minute (`FastClockMinutesOf`): at speed 5, `1` is 5 minutes and `30` is 3. The runaround is counted where
+the timings count it: at a call where the route reverses, if the traction cannot reverse as it stands, unless
+the call says *Never*, and wherever it says *Always*. A station's own time wins over the layout's.
+
+**Not a fault**: the train's first and last call, which have their preparation and finishing times; a call the
+train merely passes; a shunting task.
+
+**Warning**: `"Train {train} stops at {location} {time} for {n} fast-clock min, but needs at least {m}
+fast-clock min there for train clearance or loco runaround."` (`StopShorterThanRequired`)
+
+Nothing is put right automatically. Lengthen the stop on the **Trains** tab, or lower the time required: the
+clearance or runaround in the **Settings** tab or on the **Operation locations** tab.
 
 ### Schedule scope (S) — vehicle schedule / turnus
 

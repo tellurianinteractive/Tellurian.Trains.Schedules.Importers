@@ -191,9 +191,9 @@
             var defaults = Layout.Settings.TimeAndSpeed.StationTimings;
             yield return ("MinimumStopMinutes", Minutes(location.Timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes));
             if (location.HasLocoRunaroundTime)
-                yield return ("LocoRunaroundRealMinutes", Minutes(location.Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes));
+                yield return ("LocoRunaroundRealMinutes", RealTimeUnit.Text(Translator, location.Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes, Culture));
             if (location.HasTrainClearanceTime)
-                yield return ("TrainClearanceRealMinutes", Minutes(location.Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes));
+                yield return ("TrainClearanceRealMinutes", RealTimeUnit.Text(Translator, location.Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes, Culture));
         }
     }
 

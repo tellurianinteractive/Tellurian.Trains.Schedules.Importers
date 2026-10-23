@@ -55,6 +55,7 @@ public static class ValidationExtensions
             if (options.ValidateRouteContinuity) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRouteContinuity()));
             if (options.ValidatePassengerExchange) result.AddRange(timetable.Trains.SelectMany(t => t.CheckPassengerExchange()));
             if (options.ValidateStopPatterns) result.AddRange(timetable.Trains.SelectMany(t => t.CheckStopPattern()));
+            if (options.ValidateRequiredStopTimes) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRequiredStopTimes(plan)));
             if (options.ValidateScheduledTracks) result.AddRange(timetable.Trains.SelectMany(t => t.CheckScheduledTracks()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
             if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
@@ -1063,6 +1064,48 @@ public static class ValidationExtensions
                 var message = Message.Warning(Strings.TrainStopsOutsideCategoryStopPattern,
                     train, call.OperationLocation, call.Arrival.HHMM(), category);
                 result.Add(ValidationError.StopOutsideStopPattern(call, message));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Checks that the train stands long enough at each stop on its way to be cleared for departure and,
+        /// where the loco is run round, to run it round: at least the time the stop requires (see
+        /// <see cref="RequiredStopTimes"/>).
+        /// </summary>
+        /// <remarks>
+        /// Only the stops between the ends are looked at; the ends have their preparation and finishing
+        /// times. The runaround is counted where the timings count it: where the call is a reversal that
+        /// the traction cannot make as it stands, unless the call says never, and wherever it says always.
+        /// Which to put right is the planner's to choose, by lengthening the stop or by lowering the time
+        /// it requires, so nothing is changed here.
+        /// </remarks>
+        /// <param name="plan">The plan whose settings give the times required.</param>
+        /// <returns>The validation errors found.</returns>
+        public IEnumerable<ValidationError> CheckRequiredStopTimes(Plan plan)
+        {
+            if (train.IsShuntingTask) return [];
+            var calls = train.CallsInRunOrder;
+            if (calls.Count < 3) return [];
+            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var needsRunaround = plan.NeedsLocoRunaround(train);
+            var result = new List<ValidationError>();
+            for (var i = 1; i < calls.Count - 1; i++)
+            {
+                var call = calls[i];
+                if (!call.IsStop) continue;
+                var runsRound = needsRunaround && call.Runaround switch
+                {
+                    RunaroundMode.Always => true,
+                    RunaroundMode.Never => false,
+                    _ => call.ReversesDirection(plan),
+                };
+                var required = settings.RequiredStopMinutes(call.OperationLocation, runsRound);
+                var stop = (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
+                if (stop >= required) continue;
+                var message = Message.Warning(Strings.TrainStopsShorterThanRequired,
+                    train, call.OperationLocation, call.Arrival.HHMM(), stop, required);
+                result.Add(ValidationError.StopShorterThanRequired(call, message));
             }
             return result;
         }

@@ -12,6 +12,8 @@
 
 - **Ett fordon som hämtas från ett annat spår startar där.** I rapporten Fordon och ägare och i fliken Fordonsägare listas ett lok, tågset eller vagnsätt vars första tågavsnitt hämtar det från ett annat spår nu på det spåret, där det ska ställas upp före start, i stället för på avgångsspåret.
 
+- **Tågklarering och rundgång för lok sätter kortaste uppehållet.** Tiderna **Tågklarering** och **Rundgång lok** är verklig tid och anges nu som ett tal: under 10 är det minuter och från 10 är det sekunder, och enheten visas efter fältet. 1 är en minut och 90 är nittio sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet. Den är det kortaste uppehåll ett tåg får ha för att klareras på en bemannad station, eller för att köra loket runt, och läggs inte till minsta uppehåll: den längsta av dem gäller. En ny inställning, **Validera nödvändiga uppehållstider?**, rapporterar ett tåg som har kortare uppehåll. Förläng uppehållet, eller sänk den nödvändiga tiden, för att få bort varningen.
+
 ### Rättelser
 
 - **Uppehåll efter midnatt listas i tidsordning.** I fliken Tåg sorteras uppehållen på en driftplats nu efter klockslag, så att ett uppehåll klockan 00:30 på ett tåg som går över midnatt listas bland uppehållen på tidiga morgonen i stället för efter dem på sena kvällen.

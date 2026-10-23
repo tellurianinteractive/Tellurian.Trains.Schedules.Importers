@@ -1,4 +1,5 @@
-﻿using Tellurian.Trains.Schedules.Planning.Layouts;
+using Tellurian.Trains.Schedules.Model.Settings;
+using Tellurian.Trains.Schedules.Planning.Layouts;
 
 namespace Tellurian.Trains.Schedules.Planning.Timetables;
 
@@ -1164,16 +1165,11 @@ public static class PlanExtensions
             };
         }
 
-        // Fast-clock dwell: at least the minimum stop; where the loco has to be run round to the other end
-        // of the train, at least the loco runaround (a real duration converted to fast-clock minutes).
-        private int DwellMinutes(OperationLocation location, bool needsRunaround)
-        {
-            var settings = plan.Layout.Settings.TimeAndSpeed;
-            var minimumStop = location.Timings.MinimumStopMinutes ?? settings.StationTimings.MinimumStopMinutes ?? 3;
-            if (!needsRunaround) return minimumStop;
-            var runaroundReal = location.Timings.LocoRunaroundRealMinutes ?? settings.StationTimings.LocoRunaroundRealMinutes ?? 5;
-            return Math.Max(minimumStop, runaroundReal * settings.FastClockSpeed);
-        }
+        // Fast-clock dwell: the least time a train must stand, which is the longest of the minimum stop, the
+        // train clearance at a manned station and, where the loco has to be run round to the other end of the
+        // train, the loco runaround (see RequiredStopTimes). They are not added together.
+        private int DwellMinutes(OperationLocation location, bool needsRunaround) =>
+            plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, needsRunaround);
 
         // The single track stretch joining two locations, in either orientation; null when none exists.
         internal TrackStretch? StretchBetween(OperationLocation a, OperationLocation b) =>

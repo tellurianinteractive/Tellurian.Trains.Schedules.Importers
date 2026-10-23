@@ -411,4 +411,7 @@
   <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
     <value>At {0} track {1}, {2} cannot leave at {3} because {4} stands in the way until {5}.</value>
   </data>
+  <data name="TrainStopsShorterThanRequired" xml:space="preserve">
+    <value>Train {0} stops at {1} {2} for {3} fast-clock min, but needs at least {4} fast-clock min there for train clearance or loco runaround.</value>
+  </data>
 </root>

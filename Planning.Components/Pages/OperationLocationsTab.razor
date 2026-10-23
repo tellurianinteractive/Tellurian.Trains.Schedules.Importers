@@ -369,14 +369,20 @@ else
                     {
                         <div class="field">
                             <HelpLabel For="LocoRunaroundRealMinutes" />
-                            <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                            <div class="control">
+                                <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                                <span>@RealTimeUnit.Of(Translator, Editing.Timings.LocoRunaroundRealMinutes)</span>
+                            </div>
                         </div>
                     }
                     @if (Editing.HasTrainClearanceTime)
                     {
                         <div class="field">
                             <HelpLabel For="TrainClearanceRealMinutes" />
-                            <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                            <div class="control">
+                                <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                                <span>@RealTimeUnit.Of(Translator, Editing.Timings.TrainClearanceRealMinutes)</span>
+                            </div>
                         </div>
                     }
                 </div>
@@ -602,12 +608,12 @@ else
                     @if (_selected.HasLocoRunaroundTime)
                     {
                         <dt>@Translator("LocoRunaroundRealMinutes")</dt>
-                        <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes)</dd>
+                        <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes, withUnit: true)</dd>
                     }
                     @if (_selected.HasTrainClearanceTime)
                     {
                         <dt>@Translator("TrainClearanceRealMinutes")</dt>
-                        <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes)</dd>
+                        <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes, withUnit: true)</dd>
                     }
                 </dl>
 
@@ -763,7 +769,8 @@ else
         shunter.TractionType is TractionType.Undefined or TractionType.None
             ? shunter.Designation
             : $"{shunter.Designation} ({Translator(shunter.TractionType.ToString())})";
-    private string Inherited(int? value) => value?.ToString(Culture) ?? "—";
+    private string Inherited(int? value, bool withUnit = false) =>
+        withUnit ? RealTimeUnit.Text(Translator, value, Culture) : value?.ToString(Culture) ?? "—";
 
     // Same Markdig call the editor's preview and the printed reports use, so the three agree.
     private static MarkupString Rendered(string markdown) => new(Markdig.Markdown.ToHtml(markdown));

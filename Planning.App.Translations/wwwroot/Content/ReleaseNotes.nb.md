@@ -12,6 +12,8 @@
 
 - **Et kjøretøy som hentes fra et annet spor, starter der.** I rapporten Medbrakte kjøretøy og i fanen Kjøretøyseiere vises et lokomotiv, togsett eller vognsett hvis første togavsnitt henter det fra et annet spor, nå på det sporet der det skal stilles opp før start, i stedet for på avgangssporet.
 
+- **Togklarering og lokomotivomløp setter det korteste oppholdet.** Tidene **Togklarering** og **Lokomotivomløp** er reell tid og angis nå som ett tall: under 10 er det minutter, og fra 10 er det sekunder, og enheten vises etter feltet. 1 er ett minutt, og 90 er nitti sekunder. Tiden regnes om til hurtigklokketid med hurtigklokkens hastighet. Den er det korteste oppholdet et tog kan ha for å bli klarert på en bemannet stasjon, eller for å gå rundt med lokomotivet, og legges ikke oppå minste opphold: den lengste av dem gjelder. En ny innstilling, **Valider nødvendige oppholdstider?**, melder et tog med kortere opphold. Forleng oppholdet, eller senk den nødvendige tiden, for å fjerne advarselen.
+
 ### Rettelser
 
 - **Opphold etter midnatt vises i tidsrekkefølge.** I fanen Tog sorteres oppholdene på et driftssted nå etter klokkeslett, slik at et opphold kl. 00:30 på et tog som går over midnatt vises blant oppholdene tidlig om morgenen i stedet for etter dem sent på kvelden.

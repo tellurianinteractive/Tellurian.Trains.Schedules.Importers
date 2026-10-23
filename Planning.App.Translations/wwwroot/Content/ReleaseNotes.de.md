@@ -12,6 +12,8 @@
 
 - **Ein von einem anderen Gleis geholtes Fahrzeug startet dort.** Im Bericht Mitgebrachte Fahrzeuge und im Reiter Fahrzeugbesitzer wird eine Lok, ein Triebzug oder eine Wagengruppe, deren erster Zugabschnitt sie von einem anderen Gleis holt, jetzt auf diesem Gleis geführt, wo sie vor dem Start aufzustellen ist, statt auf dem Abfahrtsgleis.
 
+- **Zugfreigabe und Lokumlauf bestimmen den kürzesten Halt.** Die Zeiten **Zugfreigabe** und **Lok umsetzen** sind echte Zeit und werden jetzt als eine Zahl eingegeben: unter 10 sind es Minuten, ab 10 Sekunden, und die Einheit steht hinter dem Feld. 1 ist eine Minute und 90 sind neunzig Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet. Sie ist der kürzeste Halt, den ein Zug haben darf, um an einer besetzten Station freigegeben zu werden oder um die Lok umzusetzen, und wird nicht zum Mindesthalt addiert: es gilt die längste. Eine neue Einstellung, **Erforderliche Haltezeiten prüfen?**, meldet einen Zug mit kürzerem Halt. Verlängern Sie den Halt oder senken Sie die erforderliche Zeit, um die Warnung zu beheben.
+
 ### Korrekturen
 
 - **Halte nach Mitternacht werden in der Reihenfolge der Uhrzeit aufgeführt.** Im Reiter Züge werden die Halte an einer Betriebsstelle jetzt nach der Uhrzeit sortiert, sodass ein Halt um 00:30 bei einem Zug über Mitternacht bei den frühen Morgenhalten steht statt nach denen vom späten Abend.

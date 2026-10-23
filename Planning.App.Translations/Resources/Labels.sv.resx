@@ -460,10 +460,10 @@
     <value>Minsta uppehåll (snabbklocksmin)</value>
   </data>
   <data name="LocoRunaround" xml:space="preserve">
-    <value>Rundgång lok (verkliga min)</value>
+    <value>Rundgång lok</value>
   </data>
   <data name="TrainClearance" xml:space="preserve">
-    <value>Tågklarering (verkliga min)</value>
+    <value>Tågklarering</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
     <value>Validera stationsuppehåll?</value>
@@ -1132,13 +1132,13 @@
     <value>Plattformslängd (meter)</value>
   </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
-    <value>Verkliga minuter som tillåts för ett lok att göra rundgång till tågets motsatta ände.</value>
+    <value>Hur lång tid ett lok behöver för att göra rundgång till tågets andra ände, i verklig tid. Ett värde under 10 är minuter och 10 eller mer är sekunder: 2 betyder två verkliga minuter och 90 betyder nittio verkliga sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet och är det kortaste uppehåll ett tåg där loket körs runt får ha på stationen. Den läggs inte till minsta uppehåll; den längsta av de två gäller.</value>
   </data>
   <data name="LocoRunaroundRealMinutes" xml:space="preserve">
-    <value>Lokrundgång (verkliga min)</value>
+    <value>Rundgång lok</value>
   </data>
   <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
-    <value>Verklig tid för ett lok att göra rundgång runt sitt tåg, i verkliga minuter.</value>
+    <value>Hur lång tid ett lok behöver för att göra rundgång till tågets andra ände, i verklig tid. Ett värde under 10 är minuter och 10 eller mer är sekunder: 2 betyder två verkliga minuter och 90 betyder nittio verkliga sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet och är det kortaste uppehåll ett tåg där loket körs runt får ha på stationen. Den läggs inte till minsta uppehåll; den längsta av de två gäller.</value>
   </data>
   <data name="MinimumStopHelp" xml:space="preserve">
     <value>Den kortaste tid, i snabbklocksminuter, ett tåg måste stanna på en station innan det får avgå.</value>
@@ -1246,13 +1246,13 @@
     <value>Spår</value>
   </data>
   <data name="TrainClearanceHelp" xml:space="preserve">
-    <value>Verkliga minuter ett tåg upptar ett stationsspår innan spåret räknas som ledigt igen.</value>
+    <value>Hur lång tid det tar att klarera ett tåg för avgång från en bemannad station, i verklig tid. Ett värde under 10 är minuter och 10 eller mer är sekunder: 1 betyder en verklig minut och 30 betyder trettio verkliga sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet och är det kortaste uppehåll ett tåg får ha för att hinna klareras. Den läggs inte till minsta uppehåll; den längsta av de två gäller. Ett kortare uppehåll rapporteras om nödvändiga uppehållstider valideras.</value>
   </data>
   <data name="TrainClearanceRealMinutes" xml:space="preserve">
-    <value>Tågklarering (verkliga min)</value>
+    <value>Tågklarering</value>
   </data>
   <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
-    <value>Verklig tid för tågklarering via telefon, i verkliga minuter.</value>
+    <value>Hur lång tid det tar att klarera ett tåg för avgång från en bemannad station, i verklig tid. Ett värde under 10 är minuter och 10 eller mer är sekunder: 1 betyder en verklig minut och 30 betyder trettio verkliga sekunder. Tiden räknas om till snabbklocktid med snabbklockans hastighet och är det kortaste uppehåll ett tåg får ha för att hinna klareras. Den läggs inte till minsta uppehåll; den längsta av de två gäller. Ett kortare uppehåll rapporteras om nödvändiga uppehållstider valideras.</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Typ</value>
@@ -2962,5 +2962,17 @@
   </data>
   <data name="VehicleLengthHelp" xml:space="preserve">
     <value>Fordonets längd i meter där det står på ett spår – för ett vagnsätt hela vagnsättet. Används för att kontrollera att det som står tillsammans på ett spår ryms och kan lämna det i rätt ordning. Lämna tomt om längden inte är känd.</value>
+  </data>
+  <data name="RealMinutesUnit" xml:space="preserve">
+    <value>verkliga min</value>
+  </data>
+  <data name="RealSecondsUnit" xml:space="preserve">
+    <value>verkliga sek</value>
+  </data>
+  <data name="ValidateRequiredStopTimes" xml:space="preserve">
+    <value>Validera nödvändiga uppehållstider?</value>
+  </data>
+  <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
+    <value>Rapporterar ett tåg som står kortare tid på ett uppehåll än tågklarering, eller där loket körs runt rundgången, kräver. Åtgärda det genom att förlänga uppehållet eller genom att sänka den nödvändiga tiden i inställningarna.</value>
   </data>
 </root>

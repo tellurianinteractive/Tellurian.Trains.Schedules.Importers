@@ -411,4 +411,7 @@
   <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
     <value>Vid {0} spår {1} kan {2} inte lämna spåret {3} eftersom {4} står i vägen till {5}.</value>
   </data>
+  <data name="TrainStopsShorterThanRequired" xml:space="preserve">
+    <value>Tåg {0} gör uppehåll vid {1} {2} i {3} snabbklocksmin, men behöver minst {4} snabbklocksmin där för tågklarering eller lokrundgång.</value>
+  </data>
 </root>

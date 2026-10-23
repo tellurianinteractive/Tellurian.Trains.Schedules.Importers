@@ -460,10 +460,10 @@
     <value>Minimum stop (fast-clock min)</value>
   </data>
   <data name="LocoRunaround" xml:space="preserve">
-    <value>Loco runaround (real min)</value>
+    <value>Loco runaround</value>
   </data>
   <data name="TrainClearance" xml:space="preserve">
-    <value>Train clearance (real min)</value>
+    <value>Train clearance</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
     <value>Validate station calls?</value>
@@ -716,16 +716,16 @@
     <value>Minimum time a train stops at this manned station, in fast-clock minutes.</value>
   </data>
   <data name="LocoRunaroundRealMinutes" xml:space="preserve">
-    <value>Loco runaround (real min)</value>
+    <value>Loco runaround</value>
   </data>
   <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
-    <value>Real time for a locomotive to run around its train, in real minutes.</value>
+    <value>How long a locomotive needs to run round its train to the opposite end, in real time. A value below 10 is minutes and 10 or more is seconds: 2 means two real minutes and 90 means ninety real seconds. It is converted to fast-clock time by the fast-clock speed and is the shortest time a train that is run round may stand at the station. It is not added to the minimum stop; the longer of the two applies.</value>
   </data>
   <data name="TrainClearanceRealMinutes" xml:space="preserve">
-    <value>Train clearance (real min)</value>
+    <value>Train clearance</value>
   </data>
   <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
-    <value>Real time for telephone dispatch clearance, in real minutes.</value>
+    <value>How long it takes to clear a train for departure at a manned station, in real time. A value below 10 is minutes and 10 or more is seconds: 1 means one real minute and 30 means thirty real seconds. It is converted to fast-clock time by the fast-clock speed and is the shortest time a train may stand at the station to be cleared. It is not added to the minimum stop; the longer of the two applies. A shorter stop is reported if required stop times are validated.</value>
   </data>
   <data name="Tracks" xml:space="preserve">
     <value>Tracks</value>
@@ -982,10 +982,10 @@
     <value>The shortest time, in fast-clock minutes, a train must remain at a station before it may depart.</value>
   </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
-    <value>Real minutes allowed for a locomotive to run round its train to the opposite end.</value>
+    <value>How long a locomotive needs to run round its train to the opposite end, in real time. A value below 10 is minutes and 10 or more is seconds: 2 means two real minutes and 90 means ninety real seconds. It is converted to fast-clock time by the fast-clock speed and is the shortest time a train that is run round may stand at the station. It is not added to the minimum stop; the longer of the two applies.</value>
   </data>
   <data name="TrainClearanceHelp" xml:space="preserve">
-    <value>Real minutes a train occupies a station track before that track counts as free again.</value>
+    <value>How long it takes to clear a train for departure at a manned station, in real time. A value below 10 is minutes and 10 or more is seconds: 1 means one real minute and 30 means thirty real seconds. It is converted to fast-clock time by the fast-clock speed and is the shortest time a train may stand at the station to be cleared. It is not added to the minimum stop; the longer of the two applies. A shorter stop is reported if required stop times are validated.</value>
   </data>
   <data name="Theme" xml:space="preserve">
     <value>Theme</value>
@@ -2976,5 +2976,17 @@
   </data>
   <data name="VehicleLengthHelp" xml:space="preserve">
     <value>The length in metres of the vehicle as it stands on a track — for a wagonset, the whole rake. Used to check that what stands on a track together fits, and can leave it in order. Leave empty if it is not known.</value>
+  </data>
+  <data name="RealMinutesUnit" xml:space="preserve">
+    <value>real min</value>
+  </data>
+  <data name="RealSecondsUnit" xml:space="preserve">
+    <value>real sec</value>
+  </data>
+  <data name="ValidateRequiredStopTimes" xml:space="preserve">
+    <value>Validate required stop times?</value>
+  </data>
+  <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
+    <value>Reports a train that stands at a stop for a shorter time than train clearance, or where the loco is run round the loco runaround, requires. Put it right by lengthening the stop or by lowering the time required in the settings.</value>
   </data>
 </root>

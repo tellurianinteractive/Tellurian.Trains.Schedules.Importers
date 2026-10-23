@@ -411,4 +411,7 @@
   <data name="StationTrackBlockedByStandingVehicles" xml:space="preserve">
     <value>Ved {0} spor {1} kan ikke {2} forlate sporet {3} fordi {4} står i veien til {5}.</value>
   </data>
+  <data name="TrainStopsShorterThanRequired" xml:space="preserve">
+    <value>Tog {0} stopper ved {1} {2} i {3} hurtigklokke-min, men trenger minst {4} hurtigklokke-min der til togklarering eller lokomotivomløp.</value>
+  </data>
 </root>

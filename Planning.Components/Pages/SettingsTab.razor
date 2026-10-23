@@ -358,11 +358,17 @@ else
                 </div>
                 <div class="field">
                     <HelpLabel For="LocoRunaround" />
-                    <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                    <div class="control">
+                        <input type="number" min="0" @bind="ts.StationTimings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                        <span>@RealTimeUnit.Of(Translator, ts.StationTimings.LocoRunaroundRealMinutes)</span>
+                    </div>
                 </div>
                 <div class="field">
                     <HelpLabel For="TrainClearance" />
-                    <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                    <div class="control">
+                        <input type="number" min="0" @bind="ts.StationTimings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                        <span>@RealTimeUnit.Of(Translator, ts.StationTimings.TrainClearanceRealMinutes)</span>
+                    </div>
                 </div>
             }
             else if (_section == SettingsSection.Validation)
@@ -399,6 +405,10 @@ else
                 <div class="field">
                     <HelpLabel For="ValidatePassengerExchange" />
                     <input type="checkbox" @bind="v.ValidatePassengerExchange" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="ValidateRequiredStopTimes" />
+                    <input type="checkbox" @bind="v.ValidateRequiredStopTimes" @bind:after="OnEdited" />
                 </div>
                 <div class="field">
                     <HelpLabel For="ValidateStopPatterns" />

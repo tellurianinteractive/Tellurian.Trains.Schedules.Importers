@@ -35,6 +35,8 @@ public class XplnDataImporterTests
         ValidateStretches = true,
         ValidateTrainSpeed = true,
         ValidateTrainNumbers = true,
+        // XPLN never enforced stop times; the newest rules are not applied to the import.
+        ValidateRequiredStopTimes = false,
     };
 
 

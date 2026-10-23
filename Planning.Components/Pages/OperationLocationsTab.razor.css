@@ -197,6 +197,12 @@
         max-width: 100%;
     }
 
+    .field > .control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     .field input.num {
         width: 7rem;
     }

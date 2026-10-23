@@ -460,10 +460,10 @@
     <value>Mindste ophold (hurtigur-min)</value>
   </data>
   <data name="LocoRunaround" xml:space="preserve">
-    <value>Lokomotivomløb (reelle min)</value>
+    <value>Lokomotivomløb</value>
   </data>
   <data name="TrainClearance" xml:space="preserve">
-    <value>Togklarering (reelle min)</value>
+    <value>Togklarering</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
     <value>Validér stationsophold?</value>
@@ -1132,13 +1132,13 @@
     <value>Perronlængde (meter)</value>
   </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
-    <value>Reelle minutter tilladt for et lokomotiv at køre rundt til togets modsatte ende.</value>
+    <value>Hvor lang tid et lokomotiv skal bruge for at køre rundt om sit tog til den modsatte ende, i reel tid. En værdi under 10 er minutter, og 10 eller mere er sekunder: 2 betyder to reelle minutter, og 90 betyder halvfems reelle sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed og er det korteste ophold, et tog, der køres rundt, må have på stationen. Den lægges ikke oven i det mindste ophold; den længste af de to gælder.</value>
   </data>
   <data name="LocoRunaroundRealMinutes" xml:space="preserve">
-    <value>Lokomotivrundgang (reelle min)</value>
+    <value>Lokomotivomløb</value>
   </data>
   <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
-    <value>Reel tid for et lokomotiv at køre rundt om sit tog, i reelle minutter.</value>
+    <value>Hvor lang tid et lokomotiv skal bruge for at køre rundt om sit tog til den modsatte ende, i reel tid. En værdi under 10 er minutter, og 10 eller mere er sekunder: 2 betyder to reelle minutter, og 90 betyder halvfems reelle sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed og er det korteste ophold, et tog, der køres rundt, må have på stationen. Den lægges ikke oven i det mindste ophold; den længste af de to gælder.</value>
   </data>
   <data name="MinimumStopHelp" xml:space="preserve">
     <value>Den korteste tid, i hurtigursminutter, et tog skal blive på en station, før det må afgå.</value>
@@ -1246,13 +1246,13 @@
     <value>Spor</value>
   </data>
   <data name="TrainClearanceHelp" xml:space="preserve">
-    <value>Reelle minutter et tog optager et stationsspor, før sporet tæller som ledigt igen.</value>
+    <value>Hvor lang tid det tager at klarere et tog til afgang fra en bemandet station, i reel tid. En værdi under 10 er minutter, og 10 eller mere er sekunder: 1 betyder ét reelt minut, og 30 betyder tredive reelle sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed og er det korteste ophold, et tog må have for at blive klareret. Den lægges ikke oven i det mindste ophold; den længste af de to gælder. Et kortere ophold rapporteres, hvis nødvendige opholdstider valideres.</value>
   </data>
   <data name="TrainClearanceRealMinutes" xml:space="preserve">
-    <value>Togklarering (reelle min)</value>
+    <value>Togklarering</value>
   </data>
   <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
-    <value>Reel tid for togklarering via telefon, i reelle minutter.</value>
+    <value>Hvor lang tid det tager at klarere et tog til afgang fra en bemandet station, i reel tid. En værdi under 10 er minutter, og 10 eller mere er sekunder: 1 betyder ét reelt minut, og 30 betyder tredive reelle sekunder. Tiden omregnes til hurtigur-tid med hurtigurets hastighed og er det korteste ophold, et tog må have for at blive klareret. Den lægges ikke oven i det mindste ophold; den længste af de to gælder. Et kortere ophold rapporteres, hvis nødvendige opholdstider valideres.</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>
@@ -2962,5 +2962,17 @@
   </data>
   <data name="VehicleLengthHelp" xml:space="preserve">
     <value>Køretøjets længde i meter, når det holder på et spor – for et vognsæt hele sættet. Bruges til at kontrollere, at det, der holder sammen på et spor, kan være der og kan forlade det i rigtig rækkefølge. Lad feltet stå tomt, hvis længden ikke er kendt.</value>
+  </data>
+  <data name="RealMinutesUnit" xml:space="preserve">
+    <value>reelle min</value>
+  </data>
+  <data name="RealSecondsUnit" xml:space="preserve">
+    <value>reelle sek</value>
+  </data>
+  <data name="ValidateRequiredStopTimes" xml:space="preserve">
+    <value>Validér nødvendige opholdstider?</value>
+  </data>
+  <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
+    <value>Rapporterer et tog, der holder i kortere tid end togklarering, eller hvor lokomotivet køres rundt lokomotivomløb, kræver. Ret det ved at forlænge opholdet eller ved at sænke den krævede tid i indstillingerne.</value>
   </data>
 </root>

@@ -511,6 +511,23 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates a stop-time error: a train stands at a stop for a shorter time than the stop requires, for
+    /// train clearance or for running the loco round.
+    /// </summary>
+    public static ValidationError StopShorterThanRequired(
+        StationCall call,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.StopShorterThanRequired,
+            FromTrack = call.Track,
+            ToTrack = call.Track,
+            FromTime = call.Arrival,
+            ToTime = call.Departure,
+            Trains = [call.Train!],
+            Message = message
+        };
+
+    /// <summary>
     /// Creates an unscheduled-track error: a train arrives at or departs from a track that is not
     /// scheduled (rule T9).
     /// </summary>
@@ -1136,6 +1153,9 @@ public enum ValidationErrorType
 
     /// <summary>A train stops on its way at a location its category's stop pattern does not name.</summary>
     StopOutsideStopPattern,
+
+    /// <summary>A train stands at a stop for a shorter time than train clearance or the loco runaround requires.</summary>
+    StopShorterThanRequired,
 
     /// <summary>A train arrives at or departs from a track that is not scheduled.</summary>
     StopAtUnscheduledTrack,

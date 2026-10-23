@@ -39,7 +39,7 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         await Expect(Property(munkerod, "Manned?")).ToHaveTextAsync("Yes");
         await Expect(Property(munkerod, "Owner")).ToHaveTextAsync("Anna");
         await Expect(Property(munkerod, "Minimum stop (fast-clock min)")).ToHaveTextAsync("4");
-        await Expect(Property(munkerod, "Loco runaround (real min)")).ToHaveTextAsync("5");
+        await Expect(Property(munkerod, "Loco runaround")).ToHaveTextAsync("5 real min");
         await Expect(munkerod.Locator(".regions .region")).ToHaveCountAsync(1);
         await Expect(munkerod.Locator(".instructions-body h2")).ToHaveTextAsync("Shunting");
         await Expect(munkerod.Locator(".tracks td.number")).ToHaveTextAsync(["1", "2", "3"]);
@@ -49,7 +49,7 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         // so no such line is printed.
         await Expect(Property(munkerod, "Lock key held at")).ToHaveCountAsync(0);
         await Expect(Property(munkerod, "Cargo served from")).ToHaveCountAsync(0);
-        await Expect(Property(munkerod, "Train clearance (real min)")).ToHaveTextAsync("1");
+        await Expect(Property(munkerod, "Train clearance")).ToHaveTextAsync("1 real min");
 
         // The unmanned station: served and unlocked from Munkeröd, and the key named.
         var rubjerg = sheets.Nth(2);
@@ -57,8 +57,8 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         await Expect(Property(rubjerg, "Lock key held at")).ToHaveTextAsync("Munkeröd (Mkd)");
         await Expect(Property(rubjerg, "Lock key name")).ToHaveTextAsync("Key R");
         // A station still has the tracks to run a loco around, but nobody on duty to clear a train.
-        await Expect(Property(rubjerg, "Loco runaround (real min)")).ToHaveTextAsync("5");
-        await Expect(Property(rubjerg, "Train clearance (real min)")).ToHaveCountAsync(0);
+        await Expect(Property(rubjerg, "Loco runaround")).ToHaveTextAsync("5 real min");
+        await Expect(Property(rubjerg, "Train clearance")).ToHaveCountAsync(0);
 
         // The signal controlled location: none of the exchange properties it can never have.
         var bro = sheets.Nth(0);
@@ -66,8 +66,8 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         await Expect(Property(bro, "Passengers?")).ToHaveCountAsync(0);
         await Expect(Property(bro, "Manned?")).ToHaveCountAsync(0);
         await Expect(Property(bro, "Controlled from")).ToHaveTextAsync("Munkeröd (Mkd)");
-        await Expect(Property(bro, "Loco runaround (real min)")).ToHaveCountAsync(0);
-        await Expect(Property(bro, "Train clearance (real min)")).ToHaveCountAsync(0);
+        await Expect(Property(bro, "Loco runaround")).ToHaveCountAsync(0);
+        await Expect(Property(bro, "Train clearance")).ToHaveCountAsync(0);
 
         // Nothing wider than the sheet it is on.
         var wide = await Page.EvaluateAsync<int>(

@@ -460,10 +460,10 @@
     <value>Mindeststopp (Schnelluhr-Min)</value>
   </data>
   <data name="LocoRunaround" xml:space="preserve">
-    <value>Lokumlauf (reale Min)</value>
+    <value>Lok umsetzen</value>
   </data>
   <data name="TrainClearance" xml:space="preserve">
-    <value>Zugfreigabe (reale Min)</value>
+    <value>Zugfreigabe</value>
   </data>
   <data name="ValidateStationCalls" xml:space="preserve">
     <value>Stationshalte prüfen?</value>
@@ -1132,13 +1132,13 @@
     <value>Bahnsteiglänge (Meter)</value>
   </data>
   <data name="LocoRunaroundHelp" xml:space="preserve">
-    <value>Echte Minuten, die einer Lok zum Umsetzen ans andere Zugende zugestanden werden.</value>
+    <value>Wie lange eine Lok braucht, um an das andere Zugende umzusetzen, in echter Zeit. Ein Wert unter 10 sind Minuten, ab 10 Sekunden: 2 bedeutet zwei echte Minuten und 90 bedeutet neunzig echte Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet und ist der kürzeste Halt, den ein Zug mit umgesetzter Lok an der Station haben darf. Sie wird nicht zum Mindesthalt addiert; es gilt die längere der beiden Zeiten.</value>
   </data>
   <data name="LocoRunaroundRealMinutes" xml:space="preserve">
-    <value>Lok umsetzen (echte Min.)</value>
+    <value>Lok umsetzen</value>
   </data>
   <data name="LocoRunaroundRealMinutesHelp" xml:space="preserve">
-    <value>Echte Zeit für das Umsetzen einer Lok um ihren Zug, in echten Minuten.</value>
+    <value>Wie lange eine Lok braucht, um an das andere Zugende umzusetzen, in echter Zeit. Ein Wert unter 10 sind Minuten, ab 10 Sekunden: 2 bedeutet zwei echte Minuten und 90 bedeutet neunzig echte Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet und ist der kürzeste Halt, den ein Zug mit umgesetzter Lok an der Station haben darf. Sie wird nicht zum Mindesthalt addiert; es gilt die längere der beiden Zeiten.</value>
   </data>
   <data name="MinimumStopHelp" xml:space="preserve">
     <value>Die kürzeste Zeit in Schnelluhr-Minuten, die ein Zug an einer Station bleiben muss, bevor er abfahren darf.</value>
@@ -1246,13 +1246,13 @@
     <value>Gleise</value>
   </data>
   <data name="TrainClearanceHelp" xml:space="preserve">
-    <value>Echte Minuten, die ein Zug ein Stationsgleis belegt, bevor das Gleis wieder als frei gilt.</value>
+    <value>Wie lange die Freigabe eines Zuges zur Abfahrt an einer besetzten Station dauert, in echter Zeit. Ein Wert unter 10 sind Minuten, ab 10 Sekunden: 1 bedeutet eine echte Minute und 30 bedeutet dreißig echte Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet und ist der kürzeste Halt, den ein Zug haben darf, um freigegeben zu werden. Sie wird nicht zum Mindesthalt addiert; es gilt die längere der beiden Zeiten. Ein kürzerer Halt wird gemeldet, wenn erforderliche Haltezeiten geprüft werden.</value>
   </data>
   <data name="TrainClearanceRealMinutes" xml:space="preserve">
-    <value>Zugfreigabe (echte Min.)</value>
+    <value>Zugfreigabe</value>
   </data>
   <data name="TrainClearanceRealMinutesHelp" xml:space="preserve">
-    <value>Echte Zeit für die telefonische Zugfreigabe, in echten Minuten.</value>
+    <value>Wie lange die Freigabe eines Zuges zur Abfahrt an einer besetzten Station dauert, in echter Zeit. Ein Wert unter 10 sind Minuten, ab 10 Sekunden: 1 bedeutet eine echte Minute und 30 bedeutet dreißig echte Sekunden. Die Zeit wird mit der Geschwindigkeit der Schnelluhr in Schnelluhrzeit umgerechnet und ist der kürzeste Halt, den ein Zug haben darf, um freigegeben zu werden. Sie wird nicht zum Mindesthalt addiert; es gilt die längere der beiden Zeiten. Ein kürzerer Halt wird gemeldet, wenn erforderliche Haltezeiten geprüft werden.</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Typ</value>
@@ -2962,5 +2962,17 @@
   </data>
   <data name="VehicleLengthHelp" xml:space="preserve">
     <value>Länge des Fahrzeugs in Metern, wenn es auf einem Gleis steht – bei einer Wagengruppe die ganze Gruppe. Dient zur Prüfung, ob alles, was zusammen auf einem Gleis steht, Platz hat und es in der richtigen Reihenfolge verlassen kann. Leer lassen, wenn die Länge nicht bekannt ist.</value>
+  </data>
+  <data name="RealMinutesUnit" xml:space="preserve">
+    <value>echte Min</value>
+  </data>
+  <data name="RealSecondsUnit" xml:space="preserve">
+    <value>echte Sek</value>
+  </data>
+  <data name="ValidateRequiredStopTimes" xml:space="preserve">
+    <value>Erforderliche Haltezeiten prüfen?</value>
+  </data>
+  <data name="ValidateRequiredStopTimesHelp" xml:space="preserve">
+    <value>Meldet einen Zug, der kürzer an einem Halt steht, als die Zugfreigabe oder, wo die Lok umgesetzt wird, das Umsetzen der Lok erfordert. Beheben Sie es, indem Sie den Halt verlängern oder die erforderliche Zeit in den Einstellungen senken.</value>
   </data>
 </root>

@@ -46,6 +46,13 @@ public sealed class ValidationSettings
     /// only scheduled tracks (rule T9). Shunting tasks are not checked.
     /// </summary>
     public bool ValidateScheduledTracks { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's stops between its ends are validated against the
+    /// time they require: the train clearance at a manned station and, where the loco is run round, the loco
+    /// runaround, in fast-clock time. A shorter stop is put right by lengthening it or by lowering the time
+    /// required.
+    /// </summary>
+    public bool ValidateRequiredStopTimes { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
     public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>
