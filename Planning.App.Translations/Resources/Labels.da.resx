@@ -3002,4 +3002,13 @@
   <data name="SummaryNumbersMissing" xml:space="preserve">
     <value>Lokomotiv-, togsæt- og/eller rangerlokomotivnumre mangler</value>
   </data>
+  <data name="VehicleAllocationReport" xml:space="preserve">
+    <value>Køretøjsfordeling</value>
+  </data>
+  <data name="NoVehicleAllocation" xml:space="preserve">
+    <value>Intet køretøj er tildelt et tog.</value>
+  </data>
+  <data name="NoCompany" xml:space="preserve">
+    <value>Intet selskab</value>
+  </data>
 </root>

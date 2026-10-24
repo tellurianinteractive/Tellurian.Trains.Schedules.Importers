@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.3.6
+
+### Endringer
+
+- **En rapport om kjøretøyfordeling viser hvem som kjører hva og når.** En ny rapport under **Rapporter** gir hvert kjøretøy en linje på en tidsskala, under en overskrift for selskapet. Hvert togavsnitt kjøretøyet kjører, er en boks i togets farge med togets nummer og minuttene det går og ankommer, og forberedelses- og avslutningstiden rundt den er grå. Første kolonne navngir kjøretøyet slik fanen Omløp gjør. Tidsskalaen, driftsvinduet og delingen ved pausetidspunktet følger utskriftsinnstillingene for den grafiske ruteplanen.
+
 ## Versjon 1.3.5
 
 ### Endringer

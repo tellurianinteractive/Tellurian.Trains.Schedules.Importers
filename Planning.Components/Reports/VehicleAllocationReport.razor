@@ -1,0 +1,173 @@
+@page "/vehicle-allocation-report"
+@layout PrintLayout
+
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Planning.Components.Reporting.Allocation
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* Which vehicle works which train part when, on a time scale.
+
+   A line for each vehicle (or, for a vehicle that works different trains on different sessions, for each set of
+   sessions), under a header for its company. A box for each train part it works: the running time is coloured as
+   the train's category and carries the train as the Trains tab names it, with the minutes it starts and ends at;
+   the preparation before a train and the finishing-up after it, which tie the vehicle up all the same, are grey.
+
+   The time axis is the graphical timetable's: its millimetres to the hour, its operating window and its break
+   time, which cuts the sheets in two the way it cuts the graphs. Printed A4 landscape, time along the sheet. *@
+
+@if (_report is null)
+{
+    <ReportBusy Name="VehicleAllocationReport" />
+}
+else if (_report.Pages.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoVehicleAllocation" />
+}
+else
+{
+    @* No page footer: the heading names the report and the span of time the sheet covers. *@
+    UseReportCulture(DefaultCulture);
+    <CascadingValue Value="DefaultCulture">
+        @foreach (var page in _report.Pages)
+        {
+            <A4LPage Margin="@MarginMm">@Sheet(page)</A4LPage>
+        }
+    </CascadingValue>
+}
+
+@code {
+    private VehicleAllocation? _report;
+
+    private static readonly AllocationGeometry Geometry = AllocationGeometry.A4;
+
+    private ReportCulture? DefaultCulture =>
+        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+
+    private static int MarginMm => (int)Geometry.Page.MarginMm;
+
+    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
+
+        using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
+        _report = ScheduleState.Schedule is { } plan && ScheduleState.Layout is { } layout
+            ? VehicleAllocation.Create(plan.ScheduledObjects, layout.Settings, Geometry)
+            : VehicleAllocation.Empty;
+    }
+
+    private RenderFragment Sheet(AllocationPage page) =>
+        @<div class="allocation" style="--label-width:@Mm(Geometry.LabelWidthMm); --hour:@Mm(HourMm)">
+            <h3>@Translator("VehicleAllocationReport") <span class="time-span">@TimeSpanText(page)</span></h3>
+            <div class="line axis">
+                <div class="label"></div>
+                <div class="plot">
+                    @foreach (var hour in Hours(page))
+                    {
+                        <span class="hour" style="left:@Mm(MmFrom(page, TimeSpan.FromHours(hour)))">@HourText(hour)</span>
+                    }
+                </div>
+            </div>
+            @foreach (var group in page.Groups)
+            {
+                @if (_report!.HasCompanies)
+                {
+                    <div class="company">@CompanyText(group.Company)</div>
+                }
+                @foreach (var row in group.Rows)
+                {
+                    <div class="line" style="height:@Mm(Geometry.RowHeightMm(row))">
+                        <div class="label">@Label(row)</div>
+                        <div class="plot" style="--offset:@Mm(HourOffsetMm(page))">
+                            @foreach (var lane in row.Lanes)
+                            {
+                                <div class="lane">
+                                    @foreach (var bar in lane.Where(bar => bar.WorkTo > page.From && bar.WorkFrom < page.To))
+                                    {
+                                        @Box(page, bar)
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>;
+
+    // The vehicle as the Schedules tab writes it: its designation with the wagons, where it stands in the train if
+    // that is not the front, and the sessions it is assigned for if that is not all of them.
+    private RenderFragment Label(AllocationRow row) =>
+        @<span class="chip" style="border-color:@row.Vehicle.BorderColor">
+            @row.Vehicle.DesignationWithWagons
+            @if (row.Role != TractionRole.Front)
+            {
+                <span class="role">@Translator("TractionRole" + row.Role)</span>
+            }
+            @if (!row.Sessions.CoversAllWithin(UseDays, MaxSessions))
+            {
+                <span class="sessions"><SessionsView Sessions="row.Sessions" Settings="SessionSettings" /></span>
+            }
+        </span>;
+
+    // The preparation and the finishing-up are grey and the run between them is the train's colour, in one box so the
+    // three always meet. The minutes are the ones the graph writes at a departure and an arrival.
+    private RenderFragment Box(AllocationPage page, AllocationBar bar) =>
+        @<div class="bar" style="left:@Mm(MmFrom(page, bar.WorkFrom)); width:@Mm(MmLong(bar.WorkFrom, bar.WorkTo))" title="@bar.Title">
+            @if (bar.RunFrom > bar.WorkFrom)
+            {
+                <span class="work" style="width:@Mm(MmLong(bar.WorkFrom, bar.RunFrom))"></span>
+            }
+            <span class="run" style="width:@Mm(MmLong(bar.RunFrom, bar.RunTo)); background:@bar.Color; color:@bar.TextColor">
+                <span class="minute">@bar.StartMinute</span>
+                <span class="identity">@bar.Identity</span>
+                <span class="minute">@bar.EndMinute</span>
+            </span>
+            @if (bar.WorkTo > bar.RunTo)
+            {
+                <span class="work" style="width:@Mm(MmLong(bar.RunTo, bar.WorkTo))"></span>
+            }
+        </div>;
+
+    private double HourMm => _report!.MillimetresPerMinute * 60;
+
+    private double MmFrom(AllocationPage page, TimeSpan time) => (time - page.From).TotalMinutes * _report!.MillimetresPerMinute;
+
+    private double MmLong(TimeSpan from, TimeSpan to) => (to - from).TotalMinutes * _report!.MillimetresPerMinute;
+
+    // The whole hours on a sheet, each with a line and a label.
+    private static IEnumerable<int> Hours(AllocationPage page)
+    {
+        for (var hour = (int)Math.Ceiling(page.From.TotalHours); hour <= (int)Math.Floor(page.To.TotalHours); hour++)
+            yield return hour;
+    }
+
+    // Where the first hour line stands, from which the rest follow at the hour spacing.
+    private double HourOffsetMm(AllocationPage page) => MmFrom(page, TimeSpan.FromHours(Math.Ceiling(page.From.TotalHours)));
+
+    private static string HourText(int hour) => $"{hour % 24:00}:00";
+
+    private string CompanyText(Company? company) =>
+        company is null ? Translator("NoCompany")
+        : string.IsNullOrWhiteSpace(company.Signature) ? company.Name : $"{company.Name} ({company.Signature})";
+
+    private static string Mm(double millimetres) => millimetres.ToString("0.##", CultureInfo.InvariantCulture) + "mm";
+
+    private string TimeSpanText(AllocationPage page)
+    {
+        var span = $"{Hhmm(page.From)}–{Hhmm(page.To)}";
+        return page.IsContinued ? $"{span}, {Translator("Continued")}" : span;
+    }
+
+    // Whole hours rather than TimeSpan's own "hh", which renders a time at or past midnight as 00:05.
+    private static string Hhmm(TimeSpan time) => $"{(int)time.TotalHours:00}:{time.Minutes:00}";
+}

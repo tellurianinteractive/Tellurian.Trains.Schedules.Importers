@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.6
+
+### Ändringar
+
+- **En rapport om fordonsfördelning visar vem som kör vad och när.** En ny rapport under **Rapporter** ger varje fordon en rad på en tidsskala, under en rubrik för dess företag. Varje tågavsnitt fordonet kör är en ruta i tågets färg med tågets nummer och de minuter det avgår och anländer, och förberedelse- och avslutningstiden runt den är grå. Första kolumnen benämner fordonet som fliken Omlopp gör. Tidsskalan, driftfönstret och delningen vid rasttiden följer den grafiska tidtabellens utskriftsinställningar.
+
 ## Version 1.3.5
 
 ### Ändringar

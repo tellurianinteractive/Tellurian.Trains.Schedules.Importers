@@ -3016,4 +3016,13 @@
   <data name="SummaryNumbersMissing" xml:space="preserve">
     <value>Missing locomotive, trainset and/or shunter numbers</value>
   </data>
+  <data name="VehicleAllocationReport" xml:space="preserve">
+    <value>Vehicle allocation</value>
+  </data>
+  <data name="NoVehicleAllocation" xml:space="preserve">
+    <value>No vehicle is assigned to a train.</value>
+  </data>
+  <data name="NoCompany" xml:space="preserve">
+    <value>No company</value>
+  </data>
 </root>

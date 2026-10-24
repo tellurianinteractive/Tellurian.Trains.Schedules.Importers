@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.6
+
+### Ændringer
+
+- **En rapport om køretøjsfordeling viser, hvem der kører hvad og hvornår.** En ny rapport under **Rapporter** giver hvert køretøj en linje på en tidsskala under en overskrift for dets selskab. Hvert togafsnit, køretøjet kører, er en kasse i togets farve med togets nummer og de minutter, det afgår og ankommer, og forberedelses- og afslutningstiden omkring den er grå. Første kolonne navngiver køretøjet som fanen Omløb. Tidsskalaen, driftsvinduet og delingen ved pausetidspunktet følger den grafiske køreplans udskriftsindstillinger.
+
 ## Version 1.3.5
 
 ### Ændringer

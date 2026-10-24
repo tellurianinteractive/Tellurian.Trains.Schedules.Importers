@@ -1,0 +1,164 @@
+/* A sheet of the vehicle allocation report.
+
+   The printed sheet is the artefact, so the geometry is in millimetres and applies on screen as well as on paper.
+   VehicleAllocationReport (the model) fits lines to sheets from AllocationGeometry, and the heights pinned here
+   are the ones it counts with: the heading 7 mm (HeadingHeightMm), the hour row 5 mm (AxisHeightMm), a company
+   header 6 mm (GroupHeaderHeightMm), and a line of 6 mm for each lane of boxes plus 1 mm (LaneHeightMm,
+   RowPaddingMm). The width of the label column is LabelWidthMm. Change one and change the other. */
+.allocation {
+    --label-width: 48mm;
+    --hour: 18mm;
+    --offset: 0mm;
+    font-size: 8pt;
+
+    h3 {
+        box-sizing: border-box;
+        height: 7mm;
+        margin: 0;
+        font-size: 10pt;
+        font-weight: bold;
+        line-height: 6mm;
+        white-space: nowrap;
+        overflow: hidden;
+
+        .time-span {
+            font-size: 9pt;
+            font-weight: normal;
+        }
+    }
+
+    .line {
+        display: flex;
+        box-sizing: border-box;
+        border-bottom: 0.2mm solid #ccc;
+
+        .label {
+            flex: 0 0 var(--label-width);
+            box-sizing: border-box;
+            width: var(--label-width);
+            padding: 0.5mm 1mm 0 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .plot {
+            position: relative;
+            flex: 1 1 auto;
+            overflow: hidden;
+            /* An hour line at every whole hour, the first at --offset from the left edge. */
+            background-image: linear-gradient(to right, #bbb 0.2mm, transparent 0.2mm);
+            background-size: var(--hour) 100%;
+            background-position: var(--offset) 0;
+        }
+
+        &.axis {
+            height: 5mm;
+            border-bottom: 0.3mm solid #000;
+
+            .plot {
+                background: none;
+            }
+
+            .hour {
+                position: absolute;
+                top: 0;
+                transform: translateX(-50%);
+                font-size: 8pt;
+                line-height: 5mm;
+            }
+        }
+    }
+
+    .company {
+        box-sizing: border-box;
+        height: 6mm;
+        padding: 1.5mm 0 0 0;
+        font-size: 9pt;
+        font-weight: bold;
+        line-height: 4mm;
+        border-bottom: 0.3mm solid #000;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    /* The vehicle as the Schedules tab shows it, without its buttons. */
+    .chip {
+        display: inline-block;
+        box-sizing: border-box;
+        max-width: 100%;
+        padding: 0.2mm 1.5mm;
+        border: 0.5mm solid #ddd;
+        border-radius: 3mm;
+        background: #eef3f8;
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+
+        .role {
+            font-weight: 400;
+            font-size: 7pt;
+            font-style: italic;
+        }
+
+        .sessions {
+            font-weight: 400;
+            font-size: 7pt;
+        }
+    }
+
+    .lane {
+        position: relative;
+        box-sizing: border-box;
+        height: 6mm;
+        padding-top: 0.5mm;
+    }
+
+    .bar {
+        position: absolute;
+        top: 0.5mm;
+        display: flex;
+        height: 5mm;
+
+        /* The preparation and the finishing-up. */
+        .work {
+            flex: none;
+            height: 100%;
+            background: #bdbdbd;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .run {
+            flex: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            height: 100%;
+            padding: 0 0.4mm;
+            overflow: hidden;
+            white-space: nowrap;
+            font-weight: 600;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+
+            /* The minutes keep their room; the train's name gives way when the box is short. */
+            .minute {
+                flex: none;
+                font-size: 6pt;
+                font-weight: 400;
+            }
+
+            .identity {
+                flex: 0 1 auto;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: clip;
+            }
+        }
+    }
+}

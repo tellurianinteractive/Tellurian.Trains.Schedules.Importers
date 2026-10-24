@@ -3002,4 +3002,13 @@
   <data name="SummaryNumbersMissing" xml:space="preserve">
     <value>Lok-, tågsätts- och/eller växelloksnummer saknas</value>
   </data>
+  <data name="VehicleAllocationReport" xml:space="preserve">
+    <value>Fordonsfördelning</value>
+  </data>
+  <data name="NoVehicleAllocation" xml:space="preserve">
+    <value>Inget fordon är tilldelat något tåg.</value>
+  </data>
+  <data name="NoCompany" xml:space="preserve">
+    <value>Inget företag</value>
+  </data>
 </root>

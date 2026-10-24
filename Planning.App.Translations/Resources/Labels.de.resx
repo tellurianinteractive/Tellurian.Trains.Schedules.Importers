@@ -3002,4 +3002,13 @@
   <data name="SummaryNumbersMissing" xml:space="preserve">
     <value>Lok-, Triebzug- und/oder Rangierlok-Nummern fehlen</value>
   </data>
+  <data name="VehicleAllocationReport" xml:space="preserve">
+    <value>Fahrzeugeinsatz</value>
+  </data>
+  <data name="NoVehicleAllocation" xml:space="preserve">
+    <value>Kein Fahrzeug ist einem Zug zugeteilt.</value>
+  </data>
+  <data name="NoCompany" xml:space="preserve">
+    <value>Keine Gesellschaft</value>
+  </data>
 </root>

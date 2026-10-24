@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.6
+
+### Änderungen
+
+- **Ein Bericht zum Fahrzeugeinsatz zeigt, wer wann was fährt.** Ein neuer Bericht unter **Berichte** gibt jedem Fahrzeug eine Zeile auf einer Zeitskala, unter einer Überschrift für seine Gesellschaft. Jeder Zugabschnitt, den das Fahrzeug fährt, ist ein Kasten in der Farbe des Zuges mit der Zugnummer und den Minuten von Abfahrt und Ankunft; die Vorbereitungs- und Abschlusszeit darum herum ist grau. Die erste Spalte benennt das Fahrzeug wie der Reiter Umläufe. Zeitskala, Betriebszeitraum und die Teilung zur Pausenzeit folgen den Druckeinstellungen des Bildfahrplans.
+
 ## Version 1.3.5
 
 ### Änderungen

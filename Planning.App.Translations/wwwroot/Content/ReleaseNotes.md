@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.6
+
+### Changes
+
+- **A Vehicle allocation report shows who works what, and when.** A new report under **Reports** gives each vehicle a line on a time scale, under a header for its company. Every train part the vehicle works is a box in the train's colour with the train's number and the minutes it departs and arrives, and the preparation and finishing-up time around it is grey. The first column names the vehicle as the Schedules tab does. The time scale, the operating window and the split at the break time follow the graphical timetable's print settings.
+
 ## Version 1.3.5
 
 ### Changes
