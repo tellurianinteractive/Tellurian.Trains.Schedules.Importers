@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.4
+
+### Changes
+
+- **The Vehicle contributors summary shows what is missing.** In the summary by owner, a new Comment column says in red when a participant has not provided all DCC addresses, and in plain text when locomotive, trainset or shunter numbers are missing.
+
 ## Version 1.3.3
 
 ### Fixes

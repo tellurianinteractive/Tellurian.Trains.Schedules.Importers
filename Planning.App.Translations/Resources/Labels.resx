@@ -3001,4 +3001,13 @@
   <data name="SummaryItems" xml:space="preserve">
     <value>Items</value>
   </data>
+  <data name="SummaryComment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="SummaryDccAddressesMissing" xml:space="preserve">
+    <value>Missing DCC addresses</value>
+  </data>
+  <data name="SummaryNumbersMissing" xml:space="preserve">
+    <value>Missing locomotive, trainset and/or shunter numbers</value>
+  </data>
 </root>

@@ -2987,4 +2987,13 @@
   <data name="SummaryItems" xml:space="preserve">
     <value>Anzahl</value>
   </data>
+  <data name="SummaryComment" xml:space="preserve">
+    <value>Kommentar</value>
+  </data>
+  <data name="SummaryDccAddressesMissing" xml:space="preserve">
+    <value>DCC-Adressen fehlen</value>
+  </data>
+  <data name="SummaryNumbersMissing" xml:space="preserve">
+    <value>Lok-, Triebzug- und/oder Rangierlok-Nummern fehlen</value>
+  </data>
 </root>

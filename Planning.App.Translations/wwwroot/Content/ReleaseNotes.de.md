@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.4
+
+### Änderungen
+
+- **Die Übersicht im Bericht Mitgebrachte Fahrzeuge zeigt, was fehlt.** In der Übersicht nach Eigentümer weist eine neue Spalte Kommentar in Rot darauf hin, wenn ein Teilnehmer nicht alle DCC-Adressen angegeben hat, und in normalem Text, wenn Nummern von Loks, Triebzügen oder Rangierloks fehlen.
+
 ## Version 1.3.3
 
 ### Fehlerbehebungen

@@ -2987,4 +2987,13 @@
   <data name="SummaryItems" xml:space="preserve">
     <value>Antall</value>
   </data>
+  <data name="SummaryComment" xml:space="preserve">
+    <value>Kommentar</value>
+  </data>
+  <data name="SummaryDccAddressesMissing" xml:space="preserve">
+    <value>DCC-adresser mangler</value>
+  </data>
+  <data name="SummaryNumbersMissing" xml:space="preserve">
+    <value>Lokomotiv-, togsett- og/eller skiftelokomotivnumre mangler</value>
+  </data>
 </root>

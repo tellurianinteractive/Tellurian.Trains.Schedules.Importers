@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.4
+
+### Ændringer
+
+- **Oversigten i rapporten Medbragte køretøjer viser, hvad der mangler.** I oversigten efter ejer siger en ny kolonne Kommentar med rødt, når en deltager ikke har oplyst alle DCC-adresser, og med almindelig tekst, når numre på lokomotiver, togsæt eller rangerlokomotiver mangler.
+
 ## Version 1.3.3
 
 ### Fejlrettelser

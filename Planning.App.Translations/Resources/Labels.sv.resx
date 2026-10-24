@@ -2987,4 +2987,13 @@
   <data name="SummaryItems" xml:space="preserve">
     <value>Antal</value>
   </data>
+  <data name="SummaryComment" xml:space="preserve">
+    <value>Kommentar</value>
+  </data>
+  <data name="SummaryDccAddressesMissing" xml:space="preserve">
+    <value>DCC-adresser saknas</value>
+  </data>
+  <data name="SummaryNumbersMissing" xml:space="preserve">
+    <value>Lok-, tågsätts- och/eller växelloksnummer saknas</value>
+  </data>
 </root>

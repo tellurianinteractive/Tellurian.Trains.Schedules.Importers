@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.4
+
+### Ändringar
+
+- **Sammanfattningen i rapporten Fordon och ägare visar vad som saknas.** I sammanfattningen efter ägare anger en ny kolumn Kommentar med rött när en deltagare inte har lämnat alla DCC-adresser, och med vanlig text när nummer på lok, tågsätt eller växellok saknas.
+
 ## Version 1.3.3
 
 ### Rättelser

@@ -37,6 +37,10 @@
                     <th>@Translator("Owner")</th>
                 }
                 <th class="items">@Translator("SummaryItems")</th>
+                @if (!ByLocation)
+                {
+                    <th>@Translator("SummaryComment")</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -49,6 +53,19 @@
                         <td>@row.Owner</td>
                     }
                     <td class="items">@row.Items.ToString(CultureInfo.CurrentCulture)</td>
+                    @if (!ByLocation)
+                    {
+                        <td>
+                            @if (row.DccAddressesMissing)
+                            {
+                                <span class="missing">@Translator("SummaryDccAddressesMissing")</span>
+                            }
+                            @if (row.NumbersMissing)
+                            {
+                                <span>@Translator("SummaryNumbersMissing")</span>
+                            }
+                        </td>
+                    }
                 </tr>
             }
         </tbody>

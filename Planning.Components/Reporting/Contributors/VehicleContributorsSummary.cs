@@ -4,7 +4,12 @@ namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Contributors;
 /// <param name="Name">The name of the participant or the operation location.</param>
 /// <param name="Owner">The owner of the operation location; <c>null</c> in the summary by owner.</param>
 /// <param name="Items">How many items the participant brings, or are set up at the location.</param>
-public sealed record VehicleContributorsSummaryRow(string Name, string? Owner, int Items);
+/// <param name="DccAddressesMissing">Whether the participant brings a traction unit without a usable DCC address;
+/// only ever set in the summary by owner.</param>
+/// <param name="NumbersMissing">Whether the participant brings a traction unit without a number; only ever set in
+/// the summary by owner.</param>
+public sealed record VehicleContributorsSummaryRow(
+    string Name, string? Owner, int Items, bool DccAddressesMissing = false, bool NumbersMissing = false);
 
 /// <summary>
 /// The first page of the Vehicle contributors report: who brings how much, or where how much is set up, so that
@@ -35,7 +40,9 @@ public static class VehicleContributorsSummary
             .OrderBy(row => row.Name, StringComparer.CurrentCulture)];
 
         static VehicleContributorsSummaryRow Row(VehicleContributorsGroup group) => group.Kind == VehicleContributorsGroupKind.Contributor
-            ? new(group.Name ?? string.Empty, null, group.Lines.Count)
+            ? new(group.Name ?? string.Empty, null, group.Lines.Count,
+                group.Lines.Any(line => line.IsDccAddressMissing),
+                group.Lines.Any(line => line.NeedsDccAddress && line.Contributor is { VehicleNumber: null }))
             : new(group.Name ?? string.Empty,
                 group.Lines.Select(line => line.Location?.Owner).FirstOrDefault(owner => !string.IsNullOrWhiteSpace(owner)),
                 group.Lines.Count(line => !line.IsSpare));

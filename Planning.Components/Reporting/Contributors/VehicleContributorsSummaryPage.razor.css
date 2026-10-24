@@ -79,5 +79,15 @@
             padding-right: 1mm;
             text-align: right;
         }
+
+        span + span {
+            margin-left: 4mm;
+        }
+
+        .missing {
+            color: #c00000;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
     }
 }
