@@ -31,6 +31,17 @@ public class InstructionsPaginationTests
     }
 
     [TestMethod]
+    public void SectionsWithoutBlankLinesAreSplitAtTheirHeadings()
+    {
+        var text = string.Join("\n", Enumerable.Range(1, 8).Select(i => $"## Section {i}\n{Paragraph("Body", 6)}"));
+
+        var pages = InstructionsPagination.BuildPages(text);
+
+        Assert.IsTrue(pages.Count(p => p.Kind == InstructionsPageKind.Content) > 1,
+            "One unbroken text must continue overleaf rather than be clipped at the foot.");
+    }
+
+    [TestMethod]
     public void ALongDocumentIsSplitAcrossSeveralContentPages()
     {
         var pages = InstructionsPagination.BuildPages(Paragraphs(60));

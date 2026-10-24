@@ -238,6 +238,7 @@ public static class InstructionsPagination
         if (string.IsNullOrWhiteSpace(markdown)) yield break;
         var paragraphs = markdown.Replace("\r\n", "\n", StringComparison.Ordinal)
             .Split("\n\n", StringSplitOptions.RemoveEmptyEntries)
+            .SelectMany(SplitAtHeadings)
             .Select(b => b.Trim())
             .Where(b => b.Length > 0)
             .ToList();
@@ -256,6 +257,33 @@ public static class InstructionsPagination
             // which case there is nothing overleaf for it to be separated from.
             yield return string.Join("\n\n", paragraphs.Skip(start).Take(i - start + 1));
         }
+    }
+
+    /// <summary>
+    /// Starts a new block at every heading line. Authors often write a whole section without a single
+    /// blank line, which markdown renders fine but would otherwise make the entire text one block taller
+    /// than a page — printed past the foot and clipped instead of continuing overleaf.
+    /// </summary>
+    private static IEnumerable<string> SplitAtHeadings(string paragraph)
+    {
+        var current = new List<string>();
+        var inFence = false;
+        foreach (var line in paragraph.Split('\n'))
+        {
+            var text = line.TrimStart();
+            if (text.StartsWith("```", StringComparison.Ordinal) || text.StartsWith("~~~", StringComparison.Ordinal))
+                inFence = !inFence;
+            var startsHeading = !inFence && text.StartsWith('#');
+            var previousIsHeading = current.Count > 0 && current[^1].TrimStart().StartsWith('#');
+            // A heading stays with the lines under it; only one that follows body text starts a new block.
+            if (startsHeading && current.Count > 0 && !previousIsHeading)
+            {
+                yield return string.Join('\n', current);
+                current = [];
+            }
+            current.Add(line);
+        }
+        if (current.Count > 0) yield return string.Join('\n', current);
     }
 
     /// <summary>Whether a paragraph is headings and nothing else.</summary>
