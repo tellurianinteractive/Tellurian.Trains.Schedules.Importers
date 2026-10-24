@@ -111,6 +111,8 @@ public static class GeneratedNoteExtensions
             CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, so, NoteArg.Plain(position)),
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
             LoadWagonsNote(var so) => new(NoteResources.LoadWagons, so),
+            UnloadAndLoadWagonsNote(var so, var isContainers) =>
+                new(isContainers ? NoteResources.UnloadAndLoadContainers : NoteResources.UnloadAndLoadWagons, so),
             UnloadWagonsNote(var so, null) => new(NoteResources.UnloadWagons, so),
             UnloadWagonsNote(var so, var returnTo) => new(NoteResources.UnloadWagonsAndReturn, so, returnTo),
             // Wagons are not driven; they are moved.

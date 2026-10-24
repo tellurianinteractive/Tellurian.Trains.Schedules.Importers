@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.5
+
+### Ändringar
+
+- **Lossning och lastning vid samma uppehåll ger en notering.** Där ett lastvagnsset både lossas och lastas på nytt där ett tågavsnitt slutar, står det nu i ankomstnoteringen att vagnarna ska lossas och lastas på nytt med annan last, i stället för två separata noteringar. En ny kryssruta **Är det containrar?** på tågavsnittet ändrar noteringen till att lossa containrar och lasta andra containrar.
+
 ## Version 1.3.4
 
 ### Ändringar

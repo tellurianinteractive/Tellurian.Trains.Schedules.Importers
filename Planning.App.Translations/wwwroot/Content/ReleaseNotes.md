@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.5
+
+### Changes
+
+- **Unloading and loading at the same call gives one note.** Where a cargo wagonset is both unloaded and loaded again where a train part ends, the arrival note now says to unload the wagons and load again with other cargo, instead of two separate notes. A new **Is containers?** checkbox on the train part changes the note to unloading containers and loading other containers.
+
 ## Version 1.3.4
 
 ### Changes

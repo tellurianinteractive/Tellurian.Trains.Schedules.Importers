@@ -506,6 +506,11 @@ public static class ScheduledTrainPartExtensions
             var settings = trainPart.PlanSessionsSettings;
             foreach (var (vehicle, sessions) in trainPart.Working(trainPart.WagonSets))
             {
+                if (options.UnloadWagons && options.LoadWagons)
+                {
+                    callNotes.Add(new UnloadAndLoadWagonsNote(vehicle, options.IsContainers) { IsForArrival = true, Sessions = sessions, Settings = settings });
+                    continue;
+                }
                 if (options.UnloadWagons)
                     callNotes.Add(new UnloadWagonsNote(vehicle, trainPart.LoadedAt) { IsForArrival = true, Sessions = sessions, Settings = settings });
                 if (options.LoadWagons)

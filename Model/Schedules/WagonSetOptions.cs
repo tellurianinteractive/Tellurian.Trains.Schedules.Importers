@@ -28,6 +28,12 @@ public sealed class WagonSetOptions : TrainPartOptions
     public bool UnloadWagons { get; set; }
 
     /// <summary>
+    /// If true, the cargo is containers. Only changes the wording of the note said where the wagons are
+    /// both unloaded and loaded again.
+    /// </summary>
+    public bool IsContainers { get; set; }
+
+    /// <summary>
     /// Where the wagonset comes from before departure: from stabling, lifted on to the track, or
     /// (<see cref="TractionLayover.None"/>) from a track of the station. Anything but none replaces the
     /// couple note with an instruction to bring the wagonset to the departure track.

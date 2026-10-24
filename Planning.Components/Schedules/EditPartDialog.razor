@@ -154,6 +154,11 @@
                 <input type="checkbox" checked="@_unloadWagons"
                        @onchange="e => _unloadWagons = e.Value as bool? ?? false" />
             </div>
+            <div class="field">
+                <label title="@Translator("IsContainersHelp")">@Translator("IsContainers")</label>
+                <input type="checkbox" checked="@_isContainers"
+                       @onchange="e => _isContainers = e.Value as bool? ?? false" />
+            </div>
         }
 
         @if (Preview is { } edit)
@@ -204,6 +209,7 @@
     private RunaroundMode _runaround;
     private bool _loadWagons;
     private bool _unloadWagons;
+    private bool _isContainers;
     private TractionLayover _fromLayover;
     private TractionLayover _toLayover;
     private int _orderInTrain;
@@ -283,6 +289,7 @@
         _orderInTrain = Part.WagonSetOptions?.OrderInTrain ?? 0;
         _loadWagons = Part.WagonSetOptions?.LoadWagons ?? false;
         _unloadWagons = Part.WagonSetOptions?.UnloadWagons ?? false;
+        _isContainers = Part.WagonSetOptions?.IsContainers ?? false;
         _fromTrack = Part.OtherFromTrack;
         _toTrack = Part.OtherToTrack;
     }
@@ -434,6 +441,7 @@
         {
             Part.WagonSetOptions.LoadWagons = _loadWagons;
             Part.WagonSetOptions.UnloadWagons = _unloadWagons;
+            Part.WagonSetOptions.IsContainers = _isContainers;
         }
     }
 

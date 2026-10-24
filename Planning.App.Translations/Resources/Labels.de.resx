@@ -2825,6 +2825,12 @@
   <data name="WagonSetKindCargo" xml:space="preserve">
     <value>Güterverkehr</value>
   </data>
+  <data name="IsContainers" xml:space="preserve">
+    <value>Sind es Container?</value>
+  </data>
+  <data name="IsContainersHelp" xml:space="preserve">
+    <value>Die Ladung besteht aus Containern. Werden die Wagen am selben Halt entladen und wieder beladen, nennt der Hinweis dann Container statt Ladung.</value>
+  </data>
   <data name="LoadWagons" xml:space="preserve">
     <value>Wagen beladen?</value>
   </data>

@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.5
+
+### Änderungen
+
+- **Entladen und Beladen am selben Halt ergibt einen Hinweis.** Wird eine Güterwagengruppe dort, wo ein Zugabschnitt endet, entladen und wieder beladen, steht im Ankunftshinweis nun, dass die Wagen entladen und mit anderer Ladung wieder beladen werden, statt zweier getrennter Hinweise. Ein neues Kontrollkästchen **Sind es Container?** am Zugabschnitt ändert den Hinweis auf das Entladen von Containern und das Beladen mit anderen Containern.
+
 ## Version 1.3.4
 
 ### Änderungen

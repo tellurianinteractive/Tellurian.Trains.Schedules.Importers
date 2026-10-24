@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.5
+
+### Ændringer
+
+- **Aflæsning og læsning ved samme stop giver én note.** Hvor et godsvognssæt både aflæsses og læsses igen, hvor et togafsnit slutter, står der nu i ankomstnoten, at vognene skal aflæsses og læsses igen med anden last, i stedet for to separate noter. Et nyt afkrydsningsfelt **Er det containere?** på togafsnittet ændrer noten til at aflæsse containere og læsse andre containere.
+
 ## Version 1.3.4
 
 ### Ændringer

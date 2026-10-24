@@ -2839,6 +2839,12 @@
   <data name="WagonSetKindCargo" xml:space="preserve">
     <value>Freight traffic</value>
   </data>
+  <data name="IsContainers" xml:space="preserve">
+    <value>Is containers?</value>
+  </data>
+  <data name="IsContainersHelp" xml:space="preserve">
+    <value>The cargo is containers. Where the wagons are both unloaded and loaded again, the note then says containers instead of cargo.</value>
+  </data>
   <data name="LoadWagons" xml:space="preserve">
     <value>Load wagons?</value>
   </data>

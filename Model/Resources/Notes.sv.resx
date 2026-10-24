@@ -73,6 +73,12 @@
   <data name="UnloadWagons" xml:space="preserve">
     <value>Lossa {0}.</value>
   </data>
+  <data name="UnloadAndLoadWagons" xml:space="preserve">
+    <value>Lossa {0} och lasta på nytt med annan last.</value>
+  </data>
+  <data name="UnloadAndLoadContainers" xml:space="preserve">
+    <value>Lossa containrar från {0} och lasta med andra containrar.</value>
+  </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
     <value>Lossa {0} och för tillbaka godset till {1}.</value>
   </data>

@@ -73,6 +73,12 @@
   <data name="UnloadWagons" xml:space="preserve">
     <value>Aflæs {0}.</value>
   </data>
+  <data name="UnloadAndLoadWagons" xml:space="preserve">
+    <value>Aflæs {0} og læs igen med anden last.</value>
+  </data>
+  <data name="UnloadAndLoadContainers" xml:space="preserve">
+    <value>Aflæs containere fra {0} og læs med andre containere.</value>
+  </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
     <value>Aflæs {0} og bring godset tilbage til {1}.</value>
   </data>

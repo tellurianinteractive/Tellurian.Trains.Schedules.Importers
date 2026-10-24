@@ -76,6 +76,12 @@
   <data name="UnloadWagons" xml:space="preserve">
     <value>Unload {0}.</value>
   </data>
+  <data name="UnloadAndLoadWagons" xml:space="preserve">
+    <value>Unload {0} and load again with other cargo.</value>
+  </data>
+  <data name="UnloadAndLoadContainers" xml:space="preserve">
+    <value>Unload containers from {0} and load with other containers.</value>
+  </data>
   <data name="UnloadWagonsAndReturn" xml:space="preserve">
     <value>Unload {0} and carry the goods back to {1}.</value>
   </data>

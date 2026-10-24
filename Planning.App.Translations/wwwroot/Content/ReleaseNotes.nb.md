@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.3.5
+
+### Endringer
+
+- **Lossing og lasting ved samme opphold gir ett notat.** Der et lastvognsett både losses og lastes på nytt der et togavsnitt slutter, står det nå i ankomstnotatet at vognene skal losses og lastes på nytt med annen last, i stedet for to separate notater. En ny avkrysningsboks **Er det containere?** på togavsnittet endrer notatet til å losse containere og laste andre containere.
+
 ## Versjon 1.3.4
 
 ### Endringer

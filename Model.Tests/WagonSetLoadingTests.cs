@@ -61,6 +61,33 @@ public class WagonSetLoadingTests
     }
 
     [TestMethod]
+    public void UnloadingAndLoadingAtTheSameCallGivesOneCombinedNote()
+    {
+        var (outward, _) = CreateWorking(load: true, unload: true);
+        outward.WagonSetOptions!.UnloadWagons = true;
+
+        var notes = outward.GeneratedArrivalNotes.ToList();
+
+        var note = notes.OfType<UnloadAndLoadWagonsNote>().Single();
+        Assert.IsFalse(notes.Any(n => n is LoadWagonsNote or UnloadWagonsNote));
+        Assert.IsFalse(note.IsContainers);
+    }
+
+    [TestMethod]
+    public void CombinedNoteSaysContainersWhenTheCargoIsContainers()
+    {
+        var (outward, _) = CreateWorking(load: true, unload: true);
+        outward.WagonSetOptions!.UnloadWagons = true;
+        outward.WagonSetOptions.IsContainers = true;
+
+        var containers = outward.GeneratedArrivalNotes.OfType<UnloadAndLoadWagonsNote>().Single();
+        var cargo = containers with { IsContainers = false };
+
+        Assert.IsTrue(containers.IsContainers);
+        Assert.AreNotEqual(cargo.ToText, containers.ToText);
+    }
+
+    [TestMethod]
     public void NothingTickedGivesNoLoadingNotes()
     {
         var (outward, returning) = CreateWorking(load: false, unload: false);

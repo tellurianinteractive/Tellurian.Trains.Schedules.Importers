@@ -2825,6 +2825,12 @@
   <data name="WagonSetKindCargo" xml:space="preserve">
     <value>Godstrafik</value>
   </data>
+  <data name="IsContainers" xml:space="preserve">
+    <value>Er det containere?</value>
+  </data>
+  <data name="IsContainersHelp" xml:space="preserve">
+    <value>Lasten er containere. Hvor vognene både aflæsses og læsses igen, står der så containere i noten i stedet for last.</value>
+  </data>
   <data name="LoadWagons" xml:space="preserve">
     <value>Læs vognene?</value>
   </data>

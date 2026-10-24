@@ -9,3 +9,10 @@ public sealed record LoadWagonsNote(ScheduledObject ScheduledObject) : Generated
 /// schedule. A different train may bring them back.
 /// </summary>
 public sealed record UnloadWagonsNote(ScheduledObject ScheduledObject, OperationLocation? ReturnTo) : GeneratedNote;
+
+/// <summary>
+/// Note saying that the wagons of a <see cref="ScheduledObject"/> are unloaded where the train arrives and
+/// loaded again with other cargo — or, for containers, with other containers. It replaces the separate
+/// unload and load notes.
+/// </summary>
+public sealed record UnloadAndLoadWagonsNote(ScheduledObject ScheduledObject, bool IsContainers) : GeneratedNote;
