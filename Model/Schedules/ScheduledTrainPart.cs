@@ -566,7 +566,10 @@ public static class ScheduledTrainPartExtensions
             get
             {
                 var roles = trainPart.TractionRoles;
-                return roles.Count == 0 ? !trainPart.Train.IsReversible : roles.NeedRunaround;
+                if (roles.Count == 0) return !trainPart.Train.IsReversible;
+                // A locomotive with no wagonset or cargo flow has no train to run round.
+                var carries = trainPart.ScheduledObjects.Any(so => so.IsWagonSet || so.IsCargoFlow);
+                return !roles.IsSingleLoco(carries) && roles.NeedRunaround;
             }
         }
 

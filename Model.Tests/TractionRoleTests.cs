@@ -39,6 +39,8 @@ public class TractionRoleTests
         second.IsReversibleTrain = secondPushPull;
         plan.AssignVehicle(schedule, first);
         plan.AssignVehicle(schedule, second, null, secondRole);
+        // Locomotives with no wagonset have no train to run round, so they work one.
+        plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null));
         return (plan, part, first, second);
     }
 

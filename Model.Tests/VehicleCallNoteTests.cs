@@ -25,7 +25,8 @@ public class VehicleCallNoteTests
     private static (Plan Plan, StationCall Arrival, StationCall Departure) Arrange(
         Action<TractionOptions> options,
         ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive,
-        bool isReversibleTrain = false)
+        bool isReversibleTrain = false,
+        bool carriesWagons = true)
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
@@ -43,6 +44,9 @@ public class VehicleCallNoteTests
         var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
         vehicle.IsReversibleTrain = isReversibleTrain;
         plan.AssignVehicle(schedule, vehicle, Sessions.All);
+        // A locomotive with no wagonset has no train to run round, so it works one.
+        if (carriesWagons && vehicleType == ScheduledObjectType.Locomotive)
+            plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null), Sessions.All);
 
         return (plan, part.To, part.From);
     }
@@ -155,7 +159,7 @@ public class VehicleCallNoteTests
     [TestMethod]
     public void PushingWagonsGivesADepartureNoteForDriverAndDispatcher()
     {
-        var (plan, _, departure) = Arrange(_ => { });
+        var (plan, _, departure) = Arrange(_ => { }, carriesWagons: false);
         departure.PushWagons = true;
 
         foreach (var notes in new[] { departure.DriverNotes(Sessions.All, Settings, plan), departure.StationNotes(Sessions.All, Settings, plan) })

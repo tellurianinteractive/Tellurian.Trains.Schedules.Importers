@@ -33,11 +33,20 @@ public static class TractionRoleExtensions
     extension(IReadOnlyCollection<(ScheduledObject Vehicle, TractionRole Role)> units)
     {
         /// <summary>
+        /// Whether the units are locomotives alone: no wagonset or cargo flow works with them, so there is
+        /// no train to run round and a reversal never costs a runaround.
+        /// </summary>
+        /// <param name="carriesVehicles">Whether any wagonset or cargo flow works with the units.</param>
+        public bool IsSingleLoco(bool carriesVehicles) =>
+            !carriesVehicles && units.Count > 0 && units.All(u => u.Vehicle.ObjectType == ScheduledObjectType.Locomotive);
+
+        /// <summary>
         /// Whether a reversal costs the locomotive its run round to the other end of the train. It does not
         /// where the working has a unit at the back, which is a cab at the far end; nor where every leading
         /// unit turns without a runaround; nor where the leading one cannot but a reinforcing unit at the
         /// same end can, the train then being push/pull all the same. A working with no traction is taken
-        /// to need it, so what the planner asked for stands until the units say otherwise.
+        /// to need it, so what the planner asked for stands until the units say otherwise. Single locos are
+        /// not decided here, since that needs to know what else works with them (see <see cref="IsSingleLoco"/>).
         /// </summary>
         public bool NeedRunaround
         {

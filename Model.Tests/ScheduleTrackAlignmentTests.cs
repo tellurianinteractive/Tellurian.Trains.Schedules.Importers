@@ -44,6 +44,9 @@ public class ScheduleTrackAlignmentTests
         var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
         vehicle.IsReversibleTrain = reversibleTrain;
         plan.AssignVehicle(schedule, vehicle);
+        // A locomotive with no wagonset has no train to run round, so it works one.
+        if (vehicleType == ScheduledObjectType.Locomotive)
+            plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null));
         return (plan, schedule);
     }
 
@@ -141,7 +144,7 @@ public class ScheduleTrackAlignmentTests
     {
         var (plan, schedule) = Arrange(ScheduledObjectType.Locomotive);
         _ = schedule.Append(Back(plan).AsTrainPart);
-        var locomotive = schedule.Vehicles.Single();
+        var locomotive = schedule.Vehicles.Single(v => v.IsTraction);
 
         plan.UpdateVehicle(locomotive, locomotive.ObjectType, locomotive.ExternalId, locomotive.Class, locomotive.Number,
             locomotive.Company, isReversibleTrain: true);
@@ -156,7 +159,7 @@ public class ScheduleTrackAlignmentTests
     {
         var (plan, schedule) = Arrange(ScheduledObjectType.Locomotive);
         _ = schedule.Append(Back(plan).AsTrainPart);
-        var locomotive = schedule.Vehicles.Single();
+        var locomotive = schedule.Vehicles.Single(v => v.IsTraction);
 
         plan.UpdateVehicle(locomotive, locomotive.ObjectType, locomotive.ExternalId, "T43", locomotive.Number, locomotive.Company);
 

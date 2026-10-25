@@ -424,7 +424,7 @@ public static class ValidationExtensions
                 var seenOperation = false;
                 foreach (var part in schedule.OrderedParts)
                 {
-                    if (part.WagonSetOptions is not { } options) continue;
+                    if (part.WagonSetOptions is not { } options || !(options.LoadWagons || options.UnloadWagons)) continue;
                     var place = part.To.OperationLocation;
                     if (options.UnloadWagons)
                     {

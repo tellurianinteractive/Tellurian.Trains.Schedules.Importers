@@ -31,7 +31,8 @@ public class VehicleNoteSessionsTests
     private static (Plan Plan, ScheduledTrainPart Part, ScheduledObject Vehicle) Arrange(
         ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive,
         Sessions? trainRuns = null,
-        Sessions? vehicleAssigned = null)
+        Sessions? vehicleAssigned = null,
+        bool carriesWagons = true)
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
@@ -48,6 +49,9 @@ public class VehicleNoteSessionsTests
 
         var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
         plan.AssignVehicle(schedule, vehicle, vehicleAssigned ?? Sessions.All);
+        // A locomotive with no wagonset has no train to run round, so it works one.
+        if (carriesWagons && vehicleType == ScheduledObjectType.Locomotive)
+            plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null), Sessions.All);
         return (plan, part, vehicle);
     }
 
@@ -252,7 +256,7 @@ public class VehicleNoteSessionsTests
         // A locomotive and the wagonset it hauls give two parts over the same two calls, and a part is
         // equal to any part over those calls — so both resolve to both vehicles. Each vehicle's note is
         // built twice and must collapse, sessions and formatting included.
-        var (plan, part, _) = Arrange(ScheduledObjectType.Locomotive, vehicleAssigned: Sessions.FromSessionNumbers(1, 3));
+        var (plan, part, _) = Arrange(ScheduledObjectType.Locomotive, vehicleAssigned: Sessions.FromSessionNumbers(1, 3), carriesWagons: false);
         var wagons = plan.CreateSchedule();
         var wagonPart = wagons.Append(Forward(plan).AsTrainPart).Value;
         wagonPart.WagonSetOptions = new WagonSetOptions();

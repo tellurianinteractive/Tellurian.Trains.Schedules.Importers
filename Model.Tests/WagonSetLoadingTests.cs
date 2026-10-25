@@ -132,6 +132,18 @@ public class WagonSetLoadingTests
         Assert.IsEmpty(Mismatches(outward));
     }
 
+    [TestMethod]
+    public void UnloadingAndLoadingAtTheSameCallAfterAPartWithoutLoadingIsNotReported()
+    {
+        // The first part neither loads nor unloads; the next two both unload and load. Through the
+        // schedule's repeat the first unloading is of the wagons loaded at the end of the previous session.
+        var (outward, returning) = CreateWorking(load: true, unload: true);
+        outward.WagonSetOptions = new WagonSetOptions { HasCoupleNote = false, HasUncoupleNote = false };
+        returning.WagonSetOptions!.LoadWagons = true;
+
+        Assert.IsEmpty(Mismatches(outward));
+    }
+
     private static List<ValidationError> Mismatches(ScheduledTrainPart part) =>
         [.. part.Schedule!.Plan.GetValidationErrors(new ValidationSettings())
             .Where(e => e.ErrorType == ValidationErrorType.WagonSetLoadingMismatch)];

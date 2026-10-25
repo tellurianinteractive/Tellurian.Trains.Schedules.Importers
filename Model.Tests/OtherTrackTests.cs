@@ -29,7 +29,8 @@ public class OtherTrackTests
     private static (Plan Plan, ScheduledTrainPart Part, ScheduledObject Vehicle) Arrange(
         ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive,
         Sessions? trainRuns = null,
-        Sessions? vehicleAssigned = null)
+        Sessions? vehicleAssigned = null,
+        bool carriesWagons = true)
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
@@ -46,6 +47,9 @@ public class OtherTrackTests
 
         var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
         plan.AssignVehicle(schedule, vehicle, vehicleAssigned ?? Sessions.All);
+        // A locomotive with no wagonset has no train to run round, so it works one.
+        if (carriesWagons && vehicleType == ScheduledObjectType.Locomotive)
+            plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null), Sessions.All);
         return (plan, part, vehicle);
     }
 
@@ -67,7 +71,7 @@ public class OtherTrackTests
     [TestMethod]
     public void AVehicleOnAnotherTrackIsFetchedFromItBeforeDeparture()
     {
-        var (plan, part, vehicle) = Arrange();
+        var (plan, part, vehicle) = Arrange(carriesWagons: false);
         part.FromTrack = TrackAt(plan, "G", "1");
 
         var note = DepartureNotes(plan, part).OfType<FromTrackNote>().Single();
@@ -81,7 +85,7 @@ public class OtherTrackTests
     [TestMethod]
     public void AVehicleIsPutOnAnotherTrackAfterArrival()
     {
-        var (plan, part, vehicle) = Arrange();
+        var (plan, part, vehicle) = Arrange(carriesWagons: false);
         part.ToTrack = TrackAt(plan, "Snu", "2");
 
         var note = ArrivalNotes(plan, part).OfType<ToTrackNote>().Single();

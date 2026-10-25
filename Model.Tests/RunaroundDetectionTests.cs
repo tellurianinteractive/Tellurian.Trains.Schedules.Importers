@@ -22,7 +22,7 @@ public class RunaroundDetectionTests
     // One locomotive (or trainset) working a train out and the train back, which leaves the terminus the
     // way it came. Returns the call where the first train ends.
     private static (Plan Plan, ScheduledTrainPart Out, ScheduledTrainPart Back) Shuttle(
-        ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive, bool isReversibleTrain = false)
+        ScheduledObjectType vehicleType = ScheduledObjectType.Locomotive, bool isReversibleTrain = false, bool carriesWagons = true)
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
@@ -36,6 +36,9 @@ public class RunaroundDetectionTests
         var vehicle = plan.CreateVehicle(vehicleType, "T44", 42, null);
         vehicle.IsReversibleTrain = isReversibleTrain;
         plan.AssignVehicle(schedule, vehicle, Sessions.All);
+        // A locomotive with no wagonset has no train to run round, so it works one.
+        if (carriesWagons && vehicleType == ScheduledObjectType.Locomotive)
+            plan.AssignVehicle(schedule, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 99, null), Sessions.All);
         return (plan, schedule.OrderedParts[0], schedule.OrderedParts[1]);
     }
 
@@ -48,6 +51,16 @@ public class RunaroundDetectionTests
         var (plan, outward, _) = Shuttle();
 
         Assert.ContainsSingle(Notes(plan, outward.To).OfType<CirculateNote>());
+    }
+
+    [TestMethod]
+    public void ALocomotiveWithNoWagonsetIsASingleLocoAndNeverRunsRound()
+    {
+        var (plan, outward, _) = Shuttle(carriesWagons: false);
+
+        Assert.IsFalse(outward.NeedsRunaround);
+        Assert.IsFalse(plan.NeedsLocoRunaround(outward.Train));
+        Assert.IsEmpty(Notes(plan, outward.To).OfType<CirculateNote>());
     }
 
     [TestMethod]
