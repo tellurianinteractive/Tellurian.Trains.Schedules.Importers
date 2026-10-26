@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 1.3.7
+
+### Ændringer
+
+- **Ens noter siges én gang.** Noter, der lyder ens bortset fra de sessioner, de gælder for, er nu én note for disse sessioner samlet, og angiver ingen sessioner, hvor de tilsammen dækker alle de sessioner, toget kører.
+- **Møder i samme sessioner deler én kvalificering.** I en note om krydsning eller overhaling opregnes de møder, der sker i de samme sessioner, sammen med sessionerne angivet én gang efter dem, og grupperne adskilles med semikolon.
+- **Et vognsæt, der følger et push/pull-tog, behøver ingen egen note.** Hvor et push/pull-lokomotiv i samme omløb flytter toget til eller fra et andet spor, udelades noterne om at hente eller rangere vognsættet, da noten om toget allerede siger det. Vognsættet beholder sine noter for de sessioner, lokomotivet ikke kører.
+
 ## Version 1.3.6
 
 ### Ændringer

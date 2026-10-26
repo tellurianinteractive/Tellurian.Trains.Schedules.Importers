@@ -206,16 +206,30 @@ public static class GeneratedNoteExtensions
     /// </remarks>
     private static NoteArg MeetList(IReadOnlyList<Meet> meets, SessionsSettings? settings)
     {
-        var items = meets.Select(meet =>
-        {
-            var item = new NoteTemplate(NoteResources.TrainMeetAtTime, meet.Other, NoteArg.Plain(When(meet)));
-            if (meet.Sessions is not { } qualifier || settings is null) return NoteArg.Markup(item.ToText, item.ToHtml);
-            var sessions = new NoteTemplate(NoteResources.InSessions, NoteArg.Markup(qualifier.ToText(settings), qualifier.ToHtml(settings)));
-            return NoteArg.Markup($"{item.ToText} {sessions.ToText}", $"{item.ToHtml} {sessions.ToHtml}");
-        }).ToList();
+        // Meets on the same sessions share one qualifier, said once after the last of them: "T1 12:00,
+        // T2 12:05 in sessions 1,3". The meets on every session the reader's duty runs come first, then
+        // each qualifier in the order its first meet comes. Where a qualifier is shared, the groups are
+        // told apart by a semicolon, so the qualifier cannot be read as belonging to the last meet only.
+        var groups = meets
+            .GroupBy(meet => settings is null ? null : meet.Sessions?.Flags)
+            .OrderBy(group => group.Key is null ? 0 : 1)
+            .Select(group => (Qualifier: group.First().Sessions, Meets: group.ToList()))
+            .ToList();
+        var separator = groups.Any(group => group.Meets.Count > 1) ? "; " : ", ";
         return NoteArg.Markup(
-            string.Join(", ", items.Select(item => item.Text)),
-            string.Join(", ", items.Select(item => item.Html)));
+            string.Join(separator, groups.Select(group => Group(group.Qualifier, group.Meets, settings, html: false))),
+            string.Join(separator, groups.Select(group => Group(group.Qualifier, group.Meets, settings, html: true))));
+    }
+
+    // The meets of one group, followed by the sessions they share where there are such.
+    private static string Group(Sessions? qualifier, List<Meet> meets, SessionsSettings? settings, bool html)
+    {
+        string Render(NoteTemplate template) => html ? template.ToHtml : template.ToText;
+        var list = string.Join(", ", meets.Select(meet =>
+            Render(new NoteTemplate(NoteResources.TrainMeetAtTime, meet.Other, NoteArg.Plain(When(meet))))));
+        if (qualifier is not { } sessions || settings is null) return list;
+        var inSessions = new NoteTemplate(NoteResources.InSessions, NoteArg.Markup(sessions.ToText(settings), sessions.ToHtml(settings)));
+        return $"{list} {Render(inSessions)}";
     }
 
     /// <summary>

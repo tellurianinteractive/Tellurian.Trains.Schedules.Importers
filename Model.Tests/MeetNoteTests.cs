@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Tellurian.Trains.Schedules.Model.Tests;
 
 /// <summary>
@@ -211,6 +213,37 @@ public class MeetNoteTests
         var unqualified = call.MeetNotes(Sessions.FromSessionNumbers(1, 3, 5), Settings)
             .OfType<CrossingNote>().Single();
         Assert.IsNull(unqualified.Meets.Single().Sessions);
+    }
+
+    [TestMethod]
+    public void MeetsOnTheSameSessionsShareOneQualifier()
+    {
+        var (ui, current) = (CultureInfo.CurrentUICulture, CultureInfo.CurrentCulture);
+        CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+        try { MeetsOnTheSameSessionsShareOneQualifierCore(); }
+        finally { (CultureInfo.CurrentUICulture, CultureInfo.CurrentCulture) = (ui, current); }
+    }
+
+    private static void MeetsOnTheSameSessionsShareOneQualifierCore()
+    {
+        var timetable = CreateTimetable();
+        var forward = TestDataFactory.CreateTrainInForwardDirection(Category, 1, Time.FromHourAndMinute(12, 00));
+        var odd = Sessions.FromSessionNumbers(1, 3, 5);
+        var everyDay = TestDataFactory.CreateTrainInOppositeDirection(Category, 2, Time.FromHourAndMinute(12, 00));
+        var oddA = TestDataFactory.CreateTrainInOppositeDirection(Category, 3, Time.FromHourAndMinute(12, 00));
+        var oddB = TestDataFactory.CreateTrainInOppositeDirection(Category, 4, Time.FromHourAndMinute(12, 00));
+        oddA.Sessions = odd;
+        oddB.Sessions = odd;
+        foreach (var train in new[] { forward, everyDay, oddA, oddB }) timetable.Add(train);
+
+        var text = CallAtYtterby(forward).MeetNotes(Sessions.All, Settings).OfType<CrossingNote>().Single().ToText;
+
+        var qualifier = $"in sessions {odd.ToText(Settings)}";
+        Assert.AreEqual(1, text.Split(qualifier).Length - 1, "The shared qualifier is said once.");
+        Assert.Contains($"; ", text);
+        Assert.EndsWith(qualifier, text);
+        Assert.IsLessThan(text.IndexOf(oddA.ToString(), StringComparison.Ordinal), text.IndexOf(everyDay.ToString(), StringComparison.Ordinal),
+            "The meets on every session come before the qualified ones.");
     }
 
     [TestMethod]

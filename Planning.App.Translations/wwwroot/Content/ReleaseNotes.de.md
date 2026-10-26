@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 1.3.7
+
+### Änderungen
+
+- **Gleichlautende Hinweise werden einmal genannt.** Hinweise, die sich nur in den Sessions unterscheiden, für die sie gelten, sind nun ein Hinweis für diese Sessions zusammen und nennen keine Sessions, wenn sie zusammen alle Sessions abdecken, an denen der Zug verkehrt.
+- **Begegnungen in denselben Sessions teilen sich eine Angabe.** In einem Hinweis zu Kreuzung oder Überholung werden die Begegnungen, die in denselben Sessions stattfinden, zusammen aufgeführt, mit den Sessions einmal danach, und die Gruppen werden durch ein Semikolon getrennt.
+- **Eine Wagengruppe, die mit einem Wendezug fährt, braucht keinen eigenen Hinweis.** Bewegt eine Wendezug-Lok im selben Umlauf den Zug auf ein anderes Gleis oder von dort weg, entfallen die Hinweise zum Holen oder Rangieren der Wagengruppe, da der Hinweis zum Zug es bereits sagt. In Sessions, an denen die Lok nicht fährt, behält die Wagengruppe ihre Hinweise.
+
 ## Version 1.3.6
 
 ### Änderungen

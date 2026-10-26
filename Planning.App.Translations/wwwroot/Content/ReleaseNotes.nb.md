@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 1.3.7
+
+### Endringer
+
+- **Like notater sies én gang.** Notater som lyder likt, bortsett fra øktene de gjelder for, er nå ett notat for disse øktene samlet, og oppgir ingen økter der de til sammen dekker alle øktene toget går.
+- **Møter i de samme øktene deler én kvalifisering.** I et notat om kryssing eller forbikjøring listes møtene som skjer i de samme øktene sammen, med øktene oppgitt én gang etter dem, og gruppene skilles med semikolon.
+- **Et vognsett som følger et push/pull-tog, trenger ikke eget notat.** Der et push/pull-lokomotiv i samme omløp flytter toget til eller fra et annet spor, utelates notatene om å hente eller rangere vognsettet, siden notatet om toget allerede sier det. Vognsettet beholder notatene sine for øktene lokomotivet ikke kjører.
+
 ## Versjon 1.3.6
 
 ### Endringer

@@ -30,6 +30,20 @@ public static class VehicleCallNoteExtensions
         return -1;
     }
 
+    // Notes that read the same but for the sessions they hold on — "Mon-Wed: fetch the train from
+    // track 18" and "Thu-Sun: fetch the train from track 18" — are one note for the sessions of both,
+    // and say nothing of sessions where those together are every one the train runs. The first of
+    // them keeps its place.
+    private static IEnumerable<ICallNote> SaidOncePerWording(IEnumerable<ICallNote> notes, Sessions trainRuns) =>
+        notes
+            .GroupBy(note => note is GeneratedNote generated
+                ? (object)((generated with { Sessions = null }).ToText, generated.IsDriverNote, generated.IsStationNote,
+                    generated.IsShuntingNote, generated.IsForArrival, generated.IsForDeparture, generated.DisplayOrder)
+                : note)
+            .Select(group => group.First() is GeneratedNote first && group.Count() > 1
+                ? first with { Sessions = group.Cast<GeneratedNote>().Select(note => note.Sessions).SharedPartOf(trainRuns) }
+                : group.First());
+
     extension(StationCall call)
     {
         /// <summary>
@@ -67,7 +81,7 @@ public static class VehicleCallNoteExtensions
             if (call.Train is not { } train) return notes.Distinct();
             return
             [
-                .. notes.Where(note => note is not ShuntWagonsNote).Distinct(),
+                .. SaidOncePerWording(notes.Where(note => note is not ShuntWagonsNote).Distinct(), train.Sessions),
                 .. ShuntWagonsNote.SaidOnce(notes.OfType<ShuntWagonsNote>(), train.Sessions),
             ];
         }

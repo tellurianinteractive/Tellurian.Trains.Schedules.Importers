@@ -331,11 +331,25 @@ public static class ScheduledTrainPartExtensions
             vehicle is { ObjectType: ScheduledObjectType.Locomotive, IsReversibleTrain: true }
             && trainPart.Schedule is { } schedule && schedule.Vehicles.Any(v => v.IsWagonSet);
 
+        // Where a push/pull locomotive of the schedule moves the train, the wagonset goes with it, and
+        // "shunt the train to track 18" leaves nothing for a note about the wagonset to add. The wagonset
+        // keeps its note on any session no such locomotive covers, so nothing is left unsaid.
+        private IEnumerable<(ScheduledObject Vehicle, Sessions? Sessions)> WithoutWagonsetsMovedWithTrain(
+            IEnumerable<(ScheduledObject Vehicle, Sessions? Sessions)> own)
+        {
+            var all = own.ToList();
+            var runs = trainPart.Train.Sessions;
+            var moved = all
+                .Where(o => trainPart.MovesTrain(o.Vehicle))
+                .Aggregate(Sessions.FromBitPattern(0), (together, o) => together.Or(o.Sessions ?? runs));
+            return all.Where(o => !(o.Vehicle.IsWagonSet && moved.Includes(o.Sessions ?? runs)));
+        }
+
         private void AddFromOtherTrackNotes(List<ICallNote> callNotes)
         {
             if (trainPart.OtherFromTrack is not { } track) return;
             var settings = trainPart.PlanSessionsSettings;
-            var own = trainPart.OwnVehicleSessions.ToList();
+            var own = trainPart.WithoutWagonsetsMovedWithTrain(trainPart.OwnVehicleSessions).ToList();
             callNotes.AddRange(own.Select(o => new FromTrackNote(o.Vehicle, track)
             {
                 IsForDeparture = true,
@@ -358,7 +372,7 @@ public static class ScheduledTrainPartExtensions
         {
             if (trainPart.OtherToTrack is not { } track) return;
             var settings = trainPart.PlanSessionsSettings;
-            var own = trainPart.OwnVehicleSessions.ToList();
+            var own = trainPart.WithoutWagonsetsMovedWithTrain(trainPart.OwnVehicleSessions).ToList();
             callNotes.AddRange(own.Select(o => new ToTrackNote(o.Vehicle, track)
             {
                 IsForArrival = true,

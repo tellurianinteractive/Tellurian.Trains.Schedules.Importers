@@ -288,6 +288,42 @@ public class OtherTrackTests
     }
 
     [TestMethod]
+    public void AWagonsetMovedWithAPushPullTrainNeedsNoNoteOfItsOwn()
+    {
+        var (plan, part, loco) = Arrange();
+        loco.IsReversibleTrain = true;
+        part.FromTrack = TrackAt(plan, "G", "2");
+        part.ToTrack = TrackAt(plan, "Snu", "2");
+
+        var notes = DepartureNotes(plan, part).Concat(ArrivalNotes(plan, part))
+            .Concat(part.From.StationNotes(Sessions.All, Settings, plan))
+            .Concat(part.To.StationNotes(Sessions.All, Settings, plan)).ToList();
+
+        Assert.IsTrue(notes.OfType<FromTrackNote>().All(n => n.ScheduledObject == loco), "Only the train is fetched.");
+        Assert.IsTrue(notes.OfType<ToTrackNote>().All(n => n.ScheduledObject == loco), "Only the train is shunted.");
+        Assert.IsEmpty(notes.OfType<ShuntWagonsNote>());
+    }
+
+    [TestMethod]
+    public void IdenticalNotesForDifferentSessionsAreOneNoteForThemTogether()
+    {
+        // Two push-pull locomotives take turns, each moving the train from the same track. The two notes
+        // read the same, so they are one note — and with the sessions together spanning every one the
+        // train runs, one that says nothing of sessions.
+        var (plan, part, loco) = Arrange(vehicleAssigned: Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13));
+        loco.IsReversibleTrain = true;
+        var other = plan.CreateVehicle(ScheduledObjectType.Locomotive, "T44", 43, null);
+        other.IsReversibleTrain = true;
+        plan.AssignVehicle(part.Schedule!, other, Sessions.FromSessionNumbers(2, 4, 6, 8, 10, 12, 14));
+        part.FromTrack = TrackAt(plan, "G", "2");
+
+        var note = DepartureNotes(plan, part).OfType<FromTrackNote>().Single();
+
+        Assert.IsNull(note.Sessions);
+        Assert.AreEqual("Before departure, fetch the train from track 2.", note.ToText);
+    }
+
+    [TestMethod]
     public void WagonsShuntedOnSomeOfTheTrainsSessionsNameThoseSessions()
     {
         var (plan, part, _) = Arrange(ScheduledObjectType.Wagonset, vehicleAssigned: Sessions.FromSessionNumbers(1, 3, 5));
