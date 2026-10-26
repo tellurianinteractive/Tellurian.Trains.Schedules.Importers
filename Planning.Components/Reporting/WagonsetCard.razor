@@ -10,10 +10,10 @@
 {
     var wagons = Item.Wagons.OrderBy(w => w.Position).ToList();
     <div class="wagonsetcard">
-        <div class="bar" style="background: @VehicleColors.Of(Item.ObjectType, Item.WagonSetKind);"></div>
         <div class="content">
             <div class="type">@Translator(nameof(ScheduledObjectType.Wagonset))</div>
             <div class="identity">@Identity</div>
+            <div class="rule" style="background: @VehicleColors.Of(Item.ObjectType, Item.WagonSetKind);"></div>
             @if (Item.Company is { Name.Length: > 0 } company)
             {
                 <div class="line">@company.Name</div>

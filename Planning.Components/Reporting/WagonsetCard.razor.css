@@ -10,17 +10,9 @@
     box-sizing: border-box;
     border: 1px solid gainsboro;
     overflow: hidden;
-    display: flex;
-
-    /* Colour-coded like the cross line on the turnus card; forced so it survives "no background graphics". */
-    .bar {
-        flex: 0 0 4mm;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-    }
 
     .content {
-        width: 79mm;
+        width: 83mm;
         height: 100%;
         box-sizing: border-box;
         padding: 4mm;
@@ -38,6 +30,17 @@
         font-size: 18pt;
         line-height: 21pt;
         font-weight: 700;
+    }
+
+    /* Colour-coded like the cross line on the turnus card. It sits inside the content padding rather than at the
+       card edge, which a printer cannot reach; forced so it survives "no background graphics". */
+    .rule {
+        height: 1.5mm;
+        margin: 1mm 0 2mm;
+        border: 1px solid gainsboro;
+        box-sizing: border-box;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
 
     .line {

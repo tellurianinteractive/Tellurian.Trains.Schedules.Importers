@@ -4,7 +4,7 @@
 
 ### Änderungen
 
-- **Farbkodierte Wagengruppen- und Umlaufkarten.** Die diagonale Linie auf der Umlaufkarte ist jetzt hellgrün für Personenwagengruppen, hellblau für Güterwagengruppen und hellorange für Triebzüge. Die Wagengruppenkarte hat einen Balken in derselben Farbe an der linken Seite und druckt jetzt die Bemerkung der Wagengruppe, auch wenn sie nur die externe ID wiederholt.
+- **Farbkodierte Wagengruppen- und Umlaufkarten.** Die diagonale Linie auf der Umlaufkarte ist jetzt hellgrün für Personenwagengruppen, hellblau für Güterwagengruppen und hellorange für Triebzüge. Die Wagengruppenkarte hat unter dem Namen der Wagengruppe eine Linie in derselben Farbe und druckt jetzt die Bemerkung der Wagengruppe, auch wenn sie nur die externe ID wiederholt.
 
 ## Version 1.4.0
 
