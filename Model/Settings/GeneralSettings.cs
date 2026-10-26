@@ -95,6 +95,13 @@ public sealed class GeneralSettings
     public bool UsePassengerTickets { get; set; }
 
     /// <summary>
+    /// How many passenger trains stopping at a station one printed ticket stands for (1–99). The tickets
+    /// report prints each station as many tickets as <c>stopping trains / TrainsPerTicket</c>, rounded up,
+    /// so a busy station sells more than a quiet one without every stop needing a ticket. Default is 4.
+    /// </summary>
+    public int TrainsPerTicket { get; set; } = 4;
+
+    /// <summary>
     /// When <c>true</c>, reports print each item in its own local language — a driver duty in its
     /// company's language, a turnus card in its vehicle's company's language, a station's dispatch list
     /// in its country's language — rather than in the layout's default language. An item without a

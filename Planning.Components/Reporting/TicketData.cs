@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting;
@@ -67,13 +67,17 @@ public static class TicketDataExtensions
     extension(Timetable timetable)
     {
         /// <summary>
-        /// Projects the timetable into the return tickets that can be sold at the meeting: one from every
-        /// location that exchanges passengers to every other such location.
+        /// Projects the timetable into the return tickets that can be sold at the meeting: each location
+        /// that exchanges passengers gets one ticket for every <see cref="GeneralSettings.TrainsPerTicket"/>
+        /// passenger trains that stop there, each to a randomly picked other such location.
         /// </summary>
         /// <remarks>
-        /// A journey and its reverse are both produced, because they are not the same ticket: each is sold
-        /// at its own origin, by that location's own operator. Tickets come out ordered by selling location
-        /// and then by destination, so a printed run stays in blocks a station can be handed.
+        /// A ticket is always out and home again (A-B-A), so a station is never handed a ticket to a
+        /// destination it cannot be sold to. The destinations are dealt from a shuffled list that is
+        /// refilled when it runs out, so they spread evenly rather than clumping, and the shuffle is
+        /// seeded by the selling location, so the same plan always prints the same tickets. Tickets come
+        /// out ordered by selling location and then by destination, so a printed run stays in blocks a
+        /// station can be handed.
         /// </remarks>
         public IReadOnlyList<TicketData> ToPassengerTickets()
         {
@@ -85,12 +89,15 @@ public static class TicketDataExtensions
             if (locations.Count < 2) return [];
 
             var sellers = SellingCompanies(timetable);
+            var stopping = PassengerTrainsStopping(timetable);
             var general = timetable.Layout.Settings.General;
 
             return
             [
-                .. locations.SelectMany(origin => locations
-                    .Where(destination => destination.Id != origin.Id)
+                .. locations.SelectMany(origin => RandomDestinations(
+                        locations.Where(destination => destination.Id != origin.Id).ToList(),
+                        TicketsToSell(stopping.GetValueOrDefault(origin.Id), general.TrainsPerTicket), origin.Id)
+                    .OrderBy(destination => destination.Name, StringComparer.CurrentCulture)
                     .Select(destination => new TicketData
                     {
                         Origin = origin.Name,
@@ -102,6 +109,36 @@ public static class TicketDataExtensions
             ];
         }
     }
+
+    // Rounded up, so a station any passenger train stops at sells at least one.
+    private static int TicketsToSell(int stoppingTrains, int trainsPerTicket) =>
+        (stoppingTrains + Math.Max(trainsPerTicket, 1) - 1) / Math.Max(trainsPerTicket, 1);
+
+    private static List<OperationLocation> RandomDestinations(List<OperationLocation> candidates, int count, int seed)
+    {
+        var random = new Random(seed);
+        var chosen = new List<OperationLocation>(count);
+        while (chosen.Count < count)
+        {
+            var round = candidates.OrderBy(_ => random.Next()).Take(count - chosen.Count);
+            chosen.AddRange(round);
+        }
+        return chosen;
+    }
+
+    /// <summary>
+    /// How many passenger trains stop at each location, keyed by <see cref="OperationLocation.Id"/>. A
+    /// train counts once however many of its calls stop there.
+    /// </summary>
+    private static Dictionary<int, int> PassengerTrainsStopping(Timetable timetable) =>
+        timetable.Trains
+            .Where(train => train.IsPassenger)
+            .SelectMany(train => train.Calls
+                .Where(call => call.IsStop)
+                .Select(call => call.OperationLocation.Id)
+                .Distinct())
+            .GroupBy(id => id)
+            .ToDictionary(atLocation => atLocation.Key, atLocation => atLocation.Count());
 
     /// <summary>
     /// The company selling at each location, keyed by <see cref="OperationLocation.Id"/>: the passenger

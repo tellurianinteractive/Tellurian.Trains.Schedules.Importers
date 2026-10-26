@@ -185,6 +185,17 @@ public class RunaroundDetectionTests
     }
 
     [TestMethod]
+    public void AReversalOnACallMarkedAsPassThroughStillGivesACirculateNote()
+    {
+        var (plan, reversal) = OutAndBack();
+        reversal.IsArrival = false;
+        reversal.IsDeparture = false;
+
+        Assert.IsFalse(reversal.IsStop);
+        Assert.ContainsSingle(Notes(plan, reversal).OfType<CirculateNote>());
+    }
+
+    [TestMethod]
     public void NeverOnAReversalInsideATrainTakesTheNoteAway()
     {
         var (plan, reversal) = OutAndBack();

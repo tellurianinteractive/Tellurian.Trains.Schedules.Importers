@@ -2663,6 +2663,12 @@
   <data name="UsePassengerTicketsHelp" xml:space="preserve">
     <value>Om träffen körs med resandebiljetter: en resande köper en biljett där resan börjar och reser med den. När detta är aktiverat kan du markera de stationer där resande byter tåg, och dessa omstigningar visas sedan i förartjänsterna och i de allmänna instruktionerna.</value>
   </data>
+  <data name="TrainsPerTicket" xml:space="preserve">
+    <value>Tåg per biljett</value>
+  </data>
+  <data name="TrainsPerTicketHelp" xml:space="preserve">
+    <value>Hur många persontåg som stannar vid en station som en tryckt biljett motsvarar. Biljettrapporten skriver ut en biljett per så många tåg för varje station, uppräknat, var och en till en slumpmässigt vald destination. Ett lägre tal ger fler biljetter.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Omstigningsstation?</value>
   </data>

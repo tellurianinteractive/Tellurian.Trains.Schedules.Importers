@@ -2663,6 +2663,12 @@
   <data name="UsePassengerTicketsHelp" xml:space="preserve">
     <value>Ob das Treffen mit Fahrkarten betrieben wird: Ein Reisender kauft eine Fahrkarte dort, wo die Reise beginnt, und fährt damit. Ist dies gesetzt, können Sie die Bahnhöfe markieren, an denen Reisende umsteigen, und diese Umsteigebahnhöfe erscheinen dann in den Lokführerdiensten und in den allgemeinen Anweisungen.</value>
   </data>
+  <data name="TrainsPerTicket" xml:space="preserve">
+    <value>Züge je Fahrkarte</value>
+  </data>
+  <data name="TrainsPerTicketHelp" xml:space="preserve">
+    <value>Für wie viele am Bahnhof haltende Reisezüge eine gedruckte Fahrkarte steht. Der Fahrkartenbericht druckt für jeden Bahnhof je so viele Züge eine Fahrkarte, aufgerundet, jeweils zu einem zufällig gewählten Ziel. Eine kleinere Zahl ergibt mehr Fahrkarten.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Umsteigebahnhof?</value>
   </data>

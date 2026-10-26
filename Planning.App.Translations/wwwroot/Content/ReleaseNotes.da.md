@@ -1,5 +1,12 @@
 # Versionsnyheder
 
+## Version 1.3.11
+
+### Ændringer
+
+- **Færre passagerbilletter.** Billetrapporten udskriver nu billetter i forhold til antallet af persontog, der standser på hver station, hver til en tilfældigt valgt destination, i stedet for én til hver anden station. Den nye indstilling ”Tog pr. billet” (Indstillinger, Passagerer; standard 4) angiver, hvor mange standsende tog en billet svarer til. Returbillet­terne går stadig frem og tilbage.
+- **Omløbsnote, også hvor standsningen ikke er markeret.** Et tog, der vender på et sted, får nu sin omløbsnote og tiden til den, selv når kaldet dér er markeret som gennemkørsel. Et tog kan ikke vende uden at holde stille, så ruten afgør, ikke markeringerne Ank/Afg.
+
 ## Version 1.3.10
 
 ### Ændringer

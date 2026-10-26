@@ -2663,6 +2663,12 @@
   <data name="UsePassengerTicketsHelp" xml:space="preserve">
     <value>Om træffet køres med passagerbilletter: en passager køber en billet, hvor rejsen begynder, og rejser på den. Når dette er slået til, kan du markere de stationer, hvor passagerer skifter tog, og disse omstigninger vises derefter i førertjenesterne og i de generelle instruktioner.</value>
   </data>
+  <data name="TrainsPerTicket" xml:space="preserve">
+    <value>Tog pr. billet</value>
+  </data>
+  <data name="TrainsPerTicketHelp" xml:space="preserve">
+    <value>Hvor mange persontog, der standser på en station, en trykt billet svarer til. Billetrapporten udskriver en billet for hvert så mange tog for hver station, rundet op, hver til en tilfældigt valgt destination. Et lavere tal giver flere billetter.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Omstigningsstation?</value>
   </data>

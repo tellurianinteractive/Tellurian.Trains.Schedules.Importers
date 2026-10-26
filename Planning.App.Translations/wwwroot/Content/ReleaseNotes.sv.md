@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.3.11
+
+### Ändringar
+
+- **Färre persontågsbiljetter.** Biljettrapporten skriver nu ut biljetter i proportion till antalet persontåg som stannar vid varje station, var och en till en slumpmässigt vald destination, i stället för en till varje annan station. Den nya inställningen ”Tåg per biljett” (Inställningar, Resande; standard 4) anger hur många stannande tåg en biljett motsvarar. Returbiljetterna går fortfarande fram och tillbaka.
+- **Notering om rundgång även där stoppet inte är markerat.** Ett tåg som vänder vid en plats får nu sin notering om rundgång och tiden för den även när anropet där är markerat som genomfart. Ett tåg kan inte vända utan att stå still, så sträckan avgör, inte markeringarna Ank/Avg.
+
 ## Version 1.3.10
 
 ### Ändringar

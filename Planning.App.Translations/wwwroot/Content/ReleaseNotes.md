@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.3.11
+
+### Changes
+
+- **Fewer passenger tickets.** The passenger tickets report now prints tickets in proportion to the passenger trains that stop at each station, each to a randomly chosen destination, instead of one to every other station. The new setting "Trains per ticket" (Settings, Passengers; default 4) says how many stopping trains one ticket stands for. Return tickets are still there and back again.
+- **Runaround note where the stop is not marked.** A train that reverses at a location now gets its runaround note and time even when the call there is marked as a pass-through. A train cannot reverse without standing, so the route decides, not the Arr/Dep marks.
+
 ## Version 1.3.10
 
 ### Changes

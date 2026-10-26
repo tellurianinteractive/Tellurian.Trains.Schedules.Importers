@@ -1,4 +1,4 @@
-@page "/settings"
+﻿@page "/settings"
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Settings
 @using Tellurian.Trains.Schedules.Model.Timetables
@@ -121,6 +121,10 @@ else
                 <div class="field">
                     <HelpLabel For="UsePassengerTickets" />
                     <input type="checkbox" @bind="g.UsePassengerTickets" @bind:after="OnEdited" />
+                </div>
+                <div class="field">
+                    <HelpLabel For="TrainsPerTicket" />
+                    <input type="number" min="1" max="99" @bind="g.TrainsPerTicket" @bind:after="OnEdited" />
                 </div>
 
                 <div class="group-heading">@Translator("LocoDrivers")</div>

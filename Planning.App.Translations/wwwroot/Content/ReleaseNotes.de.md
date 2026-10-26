@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.3.11
+
+### Änderungen
+
+- **Weniger Fahrkarten.** Der Fahrkartenbericht druckt jetzt Fahrkarten im Verhältnis zur Zahl der Reisezüge, die an jedem Bahnhof halten, jeweils zu einem zufällig gewählten Ziel, statt eine zu jedem anderen Bahnhof. Die neue Einstellung „Züge je Fahrkarte“ (Einstellungen, Reisende; Standard 4) gibt an, für wie viele haltende Züge eine Fahrkarte steht. Hin- und Rückfahrt bleiben auf einer Fahrkarte.
+- **Umsetzhinweis auch dort, wo der Halt nicht markiert ist.** Ein Zug, der an einem Ort die Richtung wechselt, erhält jetzt seinen Hinweis zum Umsetzen und die Zeit dafür, auch wenn der Aufenthalt dort als Durchfahrt markiert ist. Ein Zug kann nicht wenden, ohne zu stehen; deshalb entscheidet die Strecke, nicht die Markierung Ank/Abf.
+
 ## Version 1.3.10
 
 ### Änderungen

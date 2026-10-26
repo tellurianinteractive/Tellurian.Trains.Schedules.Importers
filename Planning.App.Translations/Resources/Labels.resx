@@ -2677,6 +2677,12 @@
   <data name="UsePassengerTicketsHelp" xml:space="preserve">
     <value>Whether the meeting is worked with passenger tickets: a passenger buys a ticket where the journey starts and travels on it. With this set you can mark the stations where passengers change trains, and those interchanges then show up in the driver duties and in the general instructions.</value>
   </data>
+  <data name="TrainsPerTicket" xml:space="preserve">
+    <value>Trains per ticket</value>
+  </data>
+  <data name="TrainsPerTicketHelp" xml:space="preserve">
+    <value>How many passenger trains stopping at a station one printed ticket stands for. The passenger tickets report prints each station one ticket for every this many trains, rounded up, each to a randomly chosen destination. A lower number prints more tickets.</value>
+  </data>
   <data name="IsPassengerInterchange" xml:space="preserve">
     <value>Passenger interchange?</value>
   </data>

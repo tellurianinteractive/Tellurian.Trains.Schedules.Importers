@@ -4,9 +4,9 @@ using Tellurian.Trains.Schedules.Planning.Components.Reporting;
 namespace Tellurian.Trains.Schedules.Planning.Components.Tests;
 
 /// <summary>
-/// Covers which passenger tickets a timetable yields and who is printed as selling them: a ticket exists
-/// between every pair of locations that exchanges passengers, in both directions, and its seller is the
-/// passenger operator departing most often from where it is sold.
+/// Covers which passenger tickets a timetable yields and who is printed as selling them: a location sells
+/// as many tickets as passenger trains stop there, each to another location that exchanges passengers,
+/// and its seller is the passenger operator departing most often from where it is sold.
 /// </summary>
 [TestClass]
 public class PassengerTicketTests
@@ -29,22 +29,58 @@ public class PassengerTicketTests
     private int _nextCallId;
 
     [TestMethod]
-    public void TicketsRunBothWaysBetweenEveryPairOfLocationsThatTakesPassengers()
+    public void TicketsAreSoldOnlyBetweenLocationsThatTakePassengers()
     {
         var timetable = CreateTimetable();
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
 
         var tickets = timetable.ToPassengerTickets();
 
         CollectionAssert.AreEquivalent(
             new[] { $"{Alvesta}-{Nassjo}", $"{Nassjo}-{Alvesta}" },
             tickets.Select(ticket => $"{ticket.Origin}-{ticket.Destination}").ToArray(),
-            "Both directions are sold, each at its own origin, and nothing is sold to or from a location that takes no passengers.");
+            "Each location sells one ticket per stopping train, home from where it was bought, and nothing is sold to or from a location that takes no passengers.");
+    }
+
+    [TestMethod]
+    public void TheNumberOfTicketsFollowsThePassengerTrainsStopping()
+    {
+        var timetable = CreateTimetable();
+        timetable.Layout.Settings.General.TrainsPerTicket = 1;
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
+        AddTrain(timetable, 2, Passenger, Sj, Alvesta, Nassjo, 10);
+        AddTrain(timetable, 5001, Freight, GreenCargo, Alvesta, Nassjo, 9);
+
+        var tickets = timetable.ToPassengerTickets();
+
+        Assert.AreEqual(2, tickets.Count(ticket => ticket.Origin == Alvesta));
+        Assert.AreEqual(2, tickets.Count(ticket => ticket.Origin == Nassjo));
+    }
+
+    [TestMethod]
+    public void SeveralTrainsShareOneTicketAndAPartlyFilledGroupStillGetsOne()
+    {
+        var timetable = CreateTimetable();
+        timetable.Layout.Settings.General.TrainsPerTicket = 2;
+        for (var number = 1; number <= 3; number++) AddTrain(timetable, number, Passenger, Sj, Alvesta, Nassjo, 7 + number);
+
+        Assert.AreEqual(2, timetable.ToPassengerTickets().Count(ticket => ticket.Origin == Alvesta));
+    }
+
+    [TestMethod]
+    public void TheSamePlanAlwaysPrintsTheSameTickets()
+    {
+        var timetable = CreateTimetable();
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
+
+        CollectionAssert.AreEqual(timetable.ToPassengerTickets().ToList(), timetable.ToPassengerTickets().ToList());
     }
 
     [TestMethod]
     public void NoTicketsWhereOnlyOneLocationTakesPassengers()
     {
         var timetable = CreateTimetable();
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
         LocationNamed(timetable, Nassjo).HasPassengerExchange = false;
 
         Assert.AreEqual(0, timetable.ToPassengerTickets().Count,
@@ -92,10 +128,11 @@ public class PassengerTicketTests
     {
         var timetable = CreateTimetable();
         AddTrain(timetable, 5001, Freight, GreenCargo, Alvesta, Nassjo, 9);
+        AddTrain(timetable, 1, Passenger, null, Nassjo, Alvesta, 10);
 
         var ticket = TicketFrom(timetable, Alvesta);
 
-        Assert.IsNull(ticket.SoldBy, "No passenger train departs Alvesta, so no company sells there.");
+        Assert.IsNull(ticket.SoldBy, "No passenger train with a company departs Alvesta, so no company sells there.");
         Assert.AreEqual("SoldAt", ticket.SoldByText(Translator));
     }
 
@@ -112,6 +149,7 @@ public class PassengerTicketTests
     public void ValidityIsTheMeetingDays()
     {
         var timetable = CreateTimetable();
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
         var general = timetable.Layout.Settings.General;
         general.ValidFrom = new DateOnly(2026, 8, 14);
         general.ValidTo = new DateOnly(2026, 8, 16);
@@ -126,6 +164,7 @@ public class PassengerTicketTests
     public void ValidityIsOmittedWhenNoMeetingIsBooked()
     {
         var timetable = CreateTimetable();
+        AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
 
         Assert.AreEqual("", TicketFrom(timetable, Alvesta).Validity(Translator),
             "A layout without meeting dates prints no validity line rather than a placeholder date.");
@@ -162,7 +201,7 @@ public class PassengerTicketTests
     }
 
     // A train running non-stop from one location to another, departing on the hour.
-    private void AddTrain(Timetable timetable, int number, TrainCategory category, Company company, string from, string to, int departureHour)
+    private void AddTrain(Timetable timetable, int number, TrainCategory category, Company? company, string from, string to, int departureHour)
     {
         var train = new Train(number, category, number) { Company = company };
         var departure = Time.FromHourAndMinute(departureHour, 0);

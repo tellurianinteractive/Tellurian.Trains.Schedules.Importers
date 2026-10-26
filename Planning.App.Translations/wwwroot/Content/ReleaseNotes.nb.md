@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.3.11
+
+### Endringer
+
+- **Færre passasjerbilletter.** Billettrapporten skriver nå ut billetter i forhold til antall persontog som stopper på hver stasjon, hver til en tilfeldig valgt destinasjon, i stedet for én til hver annen stasjon. Den nye innstillingen ”Tog per billett” (Innstillinger, Passasjerer; standard 4) angir hvor mange stoppende tog én billett tilsvarer. Returbillettene går fortsatt frem og tilbake.
+- **Omløpsnotat også der stoppet ikke er markert.** Et tog som snur på et sted, får nå omløpsnotatet sitt og tiden til det, selv når anropet der er markert som gjennomkjøring. Et tog kan ikke snu uten å stå stille, så ruten avgjør, ikke merkingen Ank/Avg.
+
 ## Versjon 1.3.10
 
 ### Endringer

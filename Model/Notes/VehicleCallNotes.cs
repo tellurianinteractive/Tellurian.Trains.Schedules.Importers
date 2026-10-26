@@ -127,10 +127,11 @@ public static class VehicleCallNoteExtensions
         /// anywhere in the train. They are dropped where every traction unit working the train reverses
         /// as it stands (a trainset, a push-pull train): there is then nothing to turn round or run round.
         /// <para>
-        /// A runaround is worked out from the route unless the call says otherwise: at a stop where the
-        /// train leaves in the opposite direction to the one it arrived from, and no part of a schedule with
+        /// A runaround is worked out from the route unless the call says otherwise: where the train
+        /// leaves in the opposite direction to the one it arrived from, and no part of a schedule with
         /// traction ends — where one does, it decides for itself, since the traction may be exchanged
-        /// there. <see cref="RunaroundMode.Never"/> takes the runaround away, a part's included.
+        /// there. Whether the call is flagged as a stop does not matter: a train cannot reverse without
+        /// standing, so a reversal on a call marked as a pass-through is still a runaround. <see cref="RunaroundMode.Never"/> takes the runaround away, a part's included.
         /// </para>
         /// </remarks>
         internal List<ICallNote> WithTurningAsked(Plan plan, List<ICallNote> notes)
@@ -142,7 +143,7 @@ public static class VehicleCallNoteExtensions
             {
                 RunaroundMode.Always => true,
                 RunaroundMode.Never => false,
-                _ => fromParts || (call.IsStop && call.ReversesDirection(plan) && !call.EndsAPartWorkedByTraction(plan)),
+                _ => fromParts || (call.ReversesDirection(plan) && !call.EndsAPartWorkedByTraction(plan)),
             };
             if (!call.TurnLoco && circulate == fromParts) return notes;
 
