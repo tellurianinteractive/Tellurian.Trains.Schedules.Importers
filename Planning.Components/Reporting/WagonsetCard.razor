@@ -5,7 +5,7 @@
 
 @* One wagonset card: an A6 landscape card (148 x 105 mm), four to an A4 landscape sheet. Only the left part is
    written on; the right 65 mm is left empty for the vehicle's turnus card, which is laid over it. The wagons
-   are listed one under another in rake order, in two columns when there are too many for one. *@
+   are drawn as boxes, three across, in rake order. *@
 @if (Item is not null)
 {
     var wagons = Item.Wagons.OrderBy(w => w.Position).ToList();
@@ -34,31 +34,25 @@
             {
                 <div class="line remark">@remark</div>
             }
-            @if (wagons.Count > 0)
-            {
-                <div class="wagons @(wagons.Count > ColumnBreak ? "two-columns" : null)">
+            @* One box per wagon, three across, in rake order: along the row and then down. A wagon with no
+               listed data still gets a box carrying the wagonset's class, so the card shows what the
+               wagonset is made up of. *@
+            <div class="rake">
+                @if (wagons.Count > 0)
+                {
                     @foreach (var wagon in wagons)
                     {
-                        <div class="wagon">
-                            <span class="pos">@wagon.Position</span>
-                            <span class="class">@wagon.Class</span>
-                            <span class="number">@wagon.Number</span>
-                            <span class="kind">@(wagon.IsPassenger ? "P" : null)@(wagon.IsCargo ? "G" : null)</span>
-                        </div>
+                        <div class="wagon-box">@wagon.Class @wagon.Number</div>
                     }
-                </div>
-            }
-            else
-            {
-                @* No wagons listed: draw one rectangle per wagon, each carrying the wagonset's class, so the
-                   card still shows what the wagonset is made up of. *@
-                <div class="rake @(Item.NumberOfUnits > BoxColumnBreak ? "two-columns" : null)">
+                }
+                else
+                {
                     @for (var i = 0; i < Item.NumberOfUnits; i++)
                     {
                         <div class="wagon-box">@Item.Class</div>
                     }
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 }
@@ -66,12 +60,6 @@
 @code {
     /// <summary>The wagonset to print the card for. Nothing is rendered without one.</summary>
     [Parameter] public ScheduledObject? Item { get; set; }
-
-    // More wagons than this will not fit one under another within the card's height.
-    private const int ColumnBreak = 14;
-
-    // The same for the boxes drawn for a wagonset that lists no wagons, which take more height each.
-    private const int BoxColumnBreak = 10;
 
     // As the turnus card names the vehicle, so the two cards that go together read alike.
     private string Identity =>

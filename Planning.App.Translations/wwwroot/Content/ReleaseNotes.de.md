@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.12
+
+### Änderungen
+
+- **Die Wagengruppenkarten zeigen jeden Wagen als Kasten.** Die Wagen werden als Kästen gezeichnet, drei nebeneinander, jeder ein Drittel der Breite, in der die Karte beschrieben wird, in Wagenreihung. Auch Wagen mit angegebenen Daten bekommen einen Kasten, mit Klasse und Nummer nur durch ein Leerzeichen getrennt; der Typbuchstabe (P oder G) und die Positionsnummer entfallen.
+
 ## Version 1.3.11
 
 ### Änderungen

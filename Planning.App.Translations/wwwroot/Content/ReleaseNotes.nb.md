@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.3.12
+
+### Endringer
+
+- **Vognsettkortene viser hver vogn som en boks.** Vognene tegnes som bokser, tre ved siden av hverandre, hver en tredjedel av bredden kortet skrives på, i togets rekkefølge. Vogner med oppgitte opplysninger får også en boks, med klasse og nummer bare ett mellomrom fra hverandre; typebokstaven (P eller G) og posisjonsnummeret utelates.
+
 ## Versjon 1.3.11
 
 ### Endringer

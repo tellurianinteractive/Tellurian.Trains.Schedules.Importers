@@ -41,65 +41,23 @@
         font-style: italic;
     }
 
-    /* One box per wagon, one under another like the listed wagons. */
+    /* One box per wagon, three across so each is a third of the width the card is written on. */
     .rake {
         margin-top: 3mm;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1mm;
 
         .wagon-box {
             height: 5mm;
-            margin-bottom: 1mm;
             box-sizing: border-box;
             border: 0.4mm solid black;
             border-radius: 1mm;
-            font-size: 9pt;
+            font-size: 8pt;
             line-height: 4.2mm;
             text-align: center;
             overflow: hidden;
             white-space: nowrap;
-            break-inside: avoid;
-        }
-
-        /* Too many wagons for one column: filled down the first column and then the second. */
-        &.two-columns {
-            column-count: 2;
-            column-gap: 4mm;
-        }
-    }
-
-    .wagons {
-        margin-top: 2mm;
-        font-size: 9pt;
-        line-height: 11pt;
-
-        .wagon {
-            display: flex;
-            gap: 2mm;
-            break-inside: avoid;
-        }
-
-        .pos {
-            flex: 0 0 5mm;
-            text-align: right;
-            color: dimgray;
-        }
-
-        .class {
-            flex: 0 0 12mm;
-        }
-
-        .number {
-            flex: 1 1 auto;
-            white-space: nowrap;
-        }
-
-        .kind {
-            color: dimgray;
-        }
-
-        /* Too many wagons for one column: filled down the first column and then the second. */
-        &.two-columns {
-            column-count: 2;
-            column-gap: 4mm;
         }
     }
 }

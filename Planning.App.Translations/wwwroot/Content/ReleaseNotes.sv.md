@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.12
+
+### Ändringar
+
+- **Vagnssätskorten visar varje vagn som en ruta.** Vagnarna ritas som rutor, tre i bredd, var och en en tredjedel av den bredd kortet skrivs på, i tågordning. Vagnar med angivna uppgifter får också en ruta, med klass och nummer bara ett mellanslag från varandra; typbokstaven (P eller G) och positionsnumret utelämnas.
+
 ## Version 1.3.11
 
 ### Ändringar

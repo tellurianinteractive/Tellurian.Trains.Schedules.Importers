@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.12
+
+### Changes
+
+- **Wagonset cards show every wagon as a box.** The wagons are drawn as boxes, three across, each a third of the width the card is written on, in rake order. Wagons with listed data get a box too, with class and number only a space apart; the type letter (P or G) and the position number are left out.
+
 ## Version 1.3.11
 
 ### Changes
