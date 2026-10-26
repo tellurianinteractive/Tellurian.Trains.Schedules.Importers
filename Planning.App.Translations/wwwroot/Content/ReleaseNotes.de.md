@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.10
+
+### Änderungen
+
+- **Eine Lok mit einem Frachtfluss setzt um.** Ein Zug mit einem Frachtfluss gilt jetzt als Zug mit Wagen, auch wenn ihm keine Wagengruppe zugewiesen ist. Eine Lok, die mit ihm die Richtung wechseln muss, erhält daher ihren Hinweis zum Umsetzen und die Zeit dafür. Früher galt eine solche Lok als Lokfahrt ohne Wagen.
+
 ## Version 1.3.9
 
 ### Neu

@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.10
+
+### Ændringer
+
+- **Et lokomotiv med en godsstrøm kører om.** Et tog med en godsstrøm regnes nu for at have vogne med, også når intet vognsæt er tildelt det, så et lokomotiv, der skal vende med det, får sin omløbsnote og tiden til det. Før blev et sådant lokomotiv anset for at køre alene.
+
 ## Version 1.3.9
 
 ### Nyt

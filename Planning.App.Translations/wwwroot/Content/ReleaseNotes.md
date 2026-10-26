@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.10
+
+### Changes
+
+- **A locomotive hauling a cargo flow runs round.** A train with a cargo flow now counts as carrying wagons even when no wagonset has been assigned to it, so a locomotive that has to reverse with it gets its runaround note and the time for it. Before, such a locomotive was taken to be running light.
+
 ## Version 1.3.9
 
 ### New

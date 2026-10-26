@@ -64,6 +64,18 @@ public class RunaroundDetectionTests
     }
 
     [TestMethod]
+    public void ALocomotiveOnATrainWithACargoFlowRunsRoundEvenWithNoWagonsetAssigned()
+    {
+        var (plan, outward, _) = Shuttle(carriesWagons: false);
+        var options = plan.Timetable.Add(new CargoFlowOptions());
+        _ = outward.Train.CreateCargoFlow(1, outward.From, outward.To, options);
+
+        Assert.IsTrue(outward.NeedsRunaround);
+        Assert.IsTrue(plan.NeedsLocoRunaround(outward.Train));
+        Assert.ContainsSingle(Notes(plan, outward.To).OfType<CirculateNote>());
+    }
+
+    [TestMethod]
     public void ACirculationIsNotMadeWhereTheTrainEndsAndNothingFollows()
     {
         var (plan, outward, _) = Shuttle();

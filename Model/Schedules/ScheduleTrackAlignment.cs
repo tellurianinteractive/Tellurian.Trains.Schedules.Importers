@@ -51,7 +51,8 @@ public static class ScheduleTrackAlignmentExtensions
                     .. schedule.Vehicles.Where(vehicle => vehicle.IsTraction)
                         .Select(vehicle => (vehicle, vehicle.ScheduleAssignments.First(a => schedule.Equals(a.Schedule)).Role))
                 ];
-                var carries = schedule.Vehicles.Any(vehicle => vehicle.IsWagonSet || vehicle.IsCargoFlow);
+                var carries = schedule.Parts.Any(part => part.Train.CargoFlows.Count > 0)
+                    || schedule.Vehicles.Any(vehicle => vehicle.IsWagonSet || vehicle.IsCargoFlow);
                 return traction.Count > 0 && (traction.IsSingleLoco(carries) || !traction.NeedRunaround);
             }
         }

@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.10
+
+### Ändringar
+
+- **Ett lok med ett godsflöde gör rundgång.** Ett tåg med ett godsflöde räknas nu som att ha vagnar med, även när inget vagnsätt har tilldelats det, så ett lok som måste vända med det får sin notering om rundgång och tiden för den. Tidigare räknades ett sådant lok som att köra ensamt.
+
 ## Version 1.3.9
 
 ### Nytt

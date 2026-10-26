@@ -405,8 +405,10 @@ public static class PlanExtensions
             ];
             // No unit works the train yet: what the planner said of the train itself stands.
             if (traction.Count == 0) return !train.IsReversible;
-            // A locomotive with no wagonset or cargo flow has no train to run round.
-            var carries = plan.ScheduledObjects.Any(vehicle => (vehicle.IsWagonSet || vehicle.IsCargoFlow) && vehicle.Works(train));
+            // A locomotive with no wagonset or cargo flow has no train to run round. A cargo flow on the
+            // train itself means wagons even where no wagonset or cargo-flow vehicle is assigned to it.
+            var carries = train.CargoFlows.Count > 0
+                || plan.ScheduledObjects.Any(vehicle => (vehicle.IsWagonSet || vehicle.IsCargoFlow) && vehicle.Works(train));
             return !traction.IsSingleLoco(carries) && traction.NeedRunaround;
         }
     }
