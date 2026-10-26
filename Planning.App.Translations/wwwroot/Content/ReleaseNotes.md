@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.4.2
+
+### Fixes
+
+- **Driver duties report: trains whose calls were added out of order.** A train extended backwards, with its first calls added last, was printed as if the driver did not work it: every row was struck out and its notes were left out. The timetable now follows the order the train runs.
+- **Driver duties report: trains with the same number in different companies.** The traction units of every train with the same number were listed on all of them. A train is now told apart by its company, taken from its train category when it has none of its own.
+
 ## Version 1.4.1
 
 ### Changes

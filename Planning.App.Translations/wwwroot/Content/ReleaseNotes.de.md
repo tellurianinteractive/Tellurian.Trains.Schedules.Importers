@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.4.2
+
+### Korrekturen
+
+- **Bericht Lokführerdienste: Züge mit falsch geordneten Halten.** Ein nach hinten verlängerter Zug, dessen erste Halte zuletzt hinzugefügt wurden, wurde so gedruckt, als führe der Lokführer ihn nicht: Alle Zeilen waren durchgestrichen, und seine Bemerkungen fehlten. Der Fahrplan folgt jetzt der Reihenfolge, in der der Zug fährt.
+- **Bericht Lokführerdienste: Züge mit gleicher Nummer in verschiedenen Unternehmen.** Die Triebfahrzeuge aller Züge mit derselben Nummer wurden bei allen aufgeführt. Ein Zug wird jetzt an seinem Unternehmen erkannt, das von der Zuggattung übernommen wird, wenn er kein eigenes hat.
+
 ## Version 1.4.1
 
 ### Änderungen

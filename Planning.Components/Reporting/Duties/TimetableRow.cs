@@ -161,7 +161,7 @@ public sealed class TimetableRow
         // plan is passed in; a part detached from every plan still prints, it simply has no vehicle
         // instructions to give.
         plan ??= trainPart.Schedule?.Plan;
-        var calls = trainPart.Train.Calls.ToList();
+        var calls = trainPart.Train.CallsInRunOrder.ToList();
         // By reference: StationCall equality is by value, and a train can hold two equal-valued calls.
         var fromIndex = calls.FindIndex(c => ReferenceEquals(c, trainPart.From));
         var toIndex = calls.FindIndex(c => ReferenceEquals(c, trainPart.To));

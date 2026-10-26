@@ -223,18 +223,23 @@ public class Train : IEquatable<Train>
         SameCompany(other) &&
         Number == other.Number;
 
-    // Train numbers are unique only within a company. While a plan is being read the company may still be
-    // just a key, so two trains with no resolved company are told apart by CompanyId, never taken as equal.
+    // Train numbers are unique only within a company, and a train usually has no company of its own but
+    // inherits its category's (see EffectiveCompany), so it is that company that tells "X 116" of one
+    // operator from "IC 116" of another. While a plan is being read the company or category may still be
+    // just a key, so two trains with no resolved company are told apart by CompanyId and CategoryId,
+    // never taken as equal.
     private bool SameCompany(Train other) =>
-        Company is not null && other.Company is not null
-            ? Company.Equals(other.Company)
-            : CompanyId == other.CompanyId;
+        this.EffectiveCompany is { } company && other.EffectiveCompany is { } otherCompany
+            ? company.Equals(otherCompany)
+            : CompanyId == other.CompanyId && (CompanyId is not null || CategoryId == other.CategoryId);
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Train other && Equals(other);
 
+    // Number alone: the company a train answers to can change under it as the plan is resolved, and a
+    // hash that moved would lose the train from every dictionary and set it was added to.
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(CompanyId, Number);
+    public override int GetHashCode() => Number.GetHashCode();
 
     /// <inheritdoc/>
     public override string ToString() =>

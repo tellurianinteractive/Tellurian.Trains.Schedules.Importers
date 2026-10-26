@@ -67,6 +67,19 @@ public class TrainTests
     }
 
     [TestMethod]
+    public void SameNumberInCategoriesOfDifferentCompaniesIsNotEqual()
+    {
+        var sj = new TrainCategory { Id = 1, Prefix = "X", Name = "X", Company = new Company(1, "Statens Järnvägar", "SJ") };
+        var dsb = new TrainCategory { Id = 2, Prefix = "IC", Name = "IC", Company = new Company(2, "DSB", "DSB") };
+        var express = new Train(1, sj, 116, "");
+        var intercity = new Train(2, dsb, 116, "");
+        var another = new Train(3, sj, 116, "");
+
+        Assert.AreNotEqual(express, intercity);
+        Assert.AreEqual(express, another);
+    }
+
+    [TestMethod]
     public void EffectiveCompanyInheritsFromCategoryWhenTrainHasNone()
     {
         var categoryCompany = new Company(1, "Statens Järnvägar", "SJ");

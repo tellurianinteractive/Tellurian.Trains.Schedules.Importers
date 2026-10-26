@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.4.2
+
+### Rättelser
+
+- **Rapporten Förartjänster: tåg med uppehåll tillagda i fel ordning.** Ett tåg som förlängts bakåt, så att de första uppehållen lades till sist, skrevs ut som om lokföraren inte körde det: alla rader var överstrukna och anmärkningarna saknades. Tidtabellen följer nu den ordning tåget kör i.
+- **Rapporten Förartjänster: tåg med samma nummer i olika bolag.** Dragkraften för alla tåg med samma nummer visades på dem alla. Ett tåg känns nu igen på sitt bolag, som hämtas från tågkategorin när det inte har något eget.
+
 ## Version 1.4.1
 
 ### Ändringar

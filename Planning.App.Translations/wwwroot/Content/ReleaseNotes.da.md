@@ -1,5 +1,12 @@
 # Versionsnyheder
 
+## Version 1.4.2
+
+### Rettelser
+
+- **Rapporten Førertjenester: tog med kald tilføjet i forkert rækkefølge.** Et tog, der var forlænget bagud, så dets første kald blev tilføjet sidst, blev udskrevet, som om lokføreren ikke kørte det: alle rækker var streget over, og dets bemærkninger manglede. Køreplanen følger nu den rækkefølge, toget kører i.
+- **Rapporten Førertjenester: tog med samme nummer i forskellige selskaber.** Trækkraften for alle tog med samme nummer blev vist på dem alle. Et tog kendes nu på sit selskab, som tages fra togkategorien, når det ikke har et eget.
+
 ## Version 1.4.1
 
 ### Ændringer

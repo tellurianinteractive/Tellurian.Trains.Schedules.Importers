@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.4.2
+
+### Rettelser
+
+- **Rapporten Førertjenester: tog med stopp lagt til i feil rekkefølge.** Et tog som var forlenget bakover, slik at de første stoppene ble lagt til sist, ble skrevet ut som om lokføreren ikke kjørte det: alle rader var overstrøket, og bemerkningene manglet. Rutetabellen følger nå rekkefølgen toget kjører i.
+- **Rapporten Førertjenester: tog med samme nummer i ulike selskaper.** Trekkraften til alle tog med samme nummer ble vist på dem alle. Et tog kjennes nå igjen på selskapet sitt, som hentes fra togkategorien når det ikke har noe eget.
+
 ## Versjon 1.4.1
 
 ### Endringer

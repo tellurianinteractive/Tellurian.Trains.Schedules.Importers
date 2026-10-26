@@ -58,6 +58,38 @@ public class TimetableRowTests
         TimetableRow.Build(train.AsTrainPart(1, 2), Sessions.All, Settings);
 
     [TestMethod]
+    public void ACallAddedLastButRunFirstDoesNotTurnThePartBackwards()
+    {
+        // A train extended backwards: its first call is stored after the others, so Calls is not in run
+        // order. The whole-train part must still be entirely the driver's.
+        var layout = new Layout { Name = "Test" };
+        var first = layout.Add(NewStation(1, "Munkeröd", "Mkd"));
+        var middle = layout.Add(NewStation(2, "Slokärr", "Slk"));
+        var last = layout.Add(NewStation(3, "Stilkøbing", "Stk"));
+        layout.Add(new TrackStretch(1, first, middle, 10));
+        layout.Add(new TrackStretch(2, middle, last, 10));
+        var timetable = new Timetable("Test", layout);
+        var train = new Train(1, 1234);
+        var start = Time.FromHourAndMinute(12, 00);
+        var middleCall = train.Add(new StationCall(2, middle["1"], start.AddMinutes(10), start.AddMinutes(12)));
+        var lastCall = train.Add(new StationCall(3, last["1"], start.AddMinutes(30), start.AddMinutes(50)));
+        var firstCall = train.Add(new StationCall(1, first["1"], start.AddMinutes(-60), start));
+        firstCall.Sequence = 1;
+        middleCall.Sequence = 2;
+        lastCall.Sequence = 3;
+        middleCall.IsArrival = true;
+        middleCall.IsDeparture = true;
+        lastCall.IsArrival = true;
+        timetable.Add(train);
+
+        var rows = TimetableRow.Build(new ScheduledTrainPart(firstCall, lastCall), Sessions.All, Settings);
+
+        Assert.HasCount(4, rows);
+        Assert.AreEqual("Munkeröd", rows[0].StationName);
+        Assert.IsTrue(rows.All(r => r.IsInPart), "Every row of the whole train is the driver's.");
+    }
+
+    [TestMethod]
     public void AHalfTheDriverDoesNotWorkIsShownButMarked()
     {
         var rows = RowsForMiddleLeg(CreateTrain(3));
