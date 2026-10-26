@@ -44,7 +44,7 @@ public class TurnusDataKeyTests
     [TestMethod]
     [DataRow(Days.Monday | Days.Wednesday | Days.Friday, "Mo,We,Fr")]
     [DataRow(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday, "Mo-Fr")]
-    [DataRow(Days.Saturday, "Sa")]
+    [DataRow(Days.Saturday, "Saturday")]
     public void OperatingPeriodTranslatesEveryDayName(Days days, string expected)
     {
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-GB");

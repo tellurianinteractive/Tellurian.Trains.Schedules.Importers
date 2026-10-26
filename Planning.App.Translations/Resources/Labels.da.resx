@@ -300,6 +300,27 @@
   <data name="SundayShort" xml:space="preserve">
     <value>S</value>
   </data>
+  <data name="Monday" xml:space="preserve">
+    <value>Mandag</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Tirsdag</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>Onsdag</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Torsdag</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>Fredag</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Lørdag</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Søndag</value>
+  </data>
   <data name="SettingsNoSchedule" xml:space="preserve">
     <value>Ingen køreplan indlæst. Importér en fil under fanen Importér for at redigere indstillingerne.</value>
   </data>

@@ -7,6 +7,7 @@
 - **Identical notes are said once.** Notes that read the same except for the sessions they hold on are now one note for those sessions together, and name no sessions where together they cover every one the train runs.
 - **Meets on the same sessions share one qualifier.** In a crossing or overtaking note, the meets that happen on the same sessions are listed together with the sessions said once after them, and the groups are separated by a semicolon.
 - **A wagonset that goes with a push/pull train needs no note of its own.** Where a push/pull locomotive in the same schedule moves the train to or from another track, the notes to fetch or shunt the wagonset are left out, since the note about the train already says it. The wagonset keeps its notes on any session the locomotive does not work.
+- **A turnus card for a single day names it in full.** Where a card is for one day only, it now reads "Saturday" instead of "Sa". Several days are still abbreviated.
 
 ## Version 1.3.6
 

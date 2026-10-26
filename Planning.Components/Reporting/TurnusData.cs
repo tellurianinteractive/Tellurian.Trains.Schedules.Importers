@@ -86,13 +86,15 @@ public static class TurnusDataExtensions
 
         /// <summary>
         /// The sessions/days qualifying this card, as short weekday names (e.g. <c>Mo-Fr</c>) or session numbers
-        /// (e.g. <c>1-5</c>) per the layout. Empty when the card covers the whole operating period, so nothing
-        /// needs qualifying.
+        /// (e.g. <c>1-5</c>) per the layout. A single day stands alone and is named in full (<c>Saturday</c>),
+        /// as there is room for it and nothing beside it to abbreviate for. Empty when the card covers the
+        /// whole operating period, so nothing needs qualifying.
         /// </summary>
         public string OperatingPeriod(Translator translator)
         {
             if (data.Sessions.CoversAllWithin(data.UseDays, data.MaxSessions)) return string.Empty;
             if (!data.UseDays) return data.Sessions.SessionsNumbers;
+            if (data.Sessions.DayCount == 1) return translator(data.Sessions.FullDayNamesResourceKey(data.StartDay));
             var key = data.Sessions.ShortDayNamesResourceKey(data.StartDay);
             var keys = key.Split(['-', ','], StringSplitOptions.TrimEntries);
             if (keys.Length > 1)

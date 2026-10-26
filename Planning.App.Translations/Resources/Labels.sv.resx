@@ -300,6 +300,27 @@
   <data name="SundayShort" xml:space="preserve">
     <value>S</value>
   </data>
+  <data name="Monday" xml:space="preserve">
+    <value>Måndag</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Tisdag</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>Onsdag</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Torsdag</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>Fredag</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Lördag</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Söndag</value>
+  </data>
   <data name="SettingsNoSchedule" xml:space="preserve">
     <value>Ingen tidtabell laddad. Importera en fil på fliken Importera för att redigera dess inställningar.</value>
   </data>
