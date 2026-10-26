@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.8
+
+### Ændringer
+
+- **Et togsæt får ingen note om at koble til eller fra.** Et togsæt er selve toget, så der er intet at koble det til eller fra. Lokomotiver beholder deres noter.
+
 ## Version 1.3.7
 
 ### Ændringer

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.8
+
+### Changes
+
+- **A trainset gets no couple or uncouple note.** A trainset is the train itself, so there is nothing to couple it to or uncouple it from. Locomotives keep their notes.
+
 ## Version 1.3.7
 
 ### Changes

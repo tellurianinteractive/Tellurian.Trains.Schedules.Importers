@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.8
+
+### Ändringar
+
+- **Ett tågset får ingen notering om att koppla till eller från.** Ett tågset är själva tåget, så det finns inget att koppla det till eller från. Lok behåller sina noteringar.
+
 ## Version 1.3.7
 
 ### Ändringar

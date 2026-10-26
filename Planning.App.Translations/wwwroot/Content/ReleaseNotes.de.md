@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.8
+
+### Änderungen
+
+- **Ein Triebzug erhält keinen Hinweis zum An- oder Abkuppeln.** Ein Triebzug ist der Zug selbst, es gibt also nichts, woran oder wovon er gekuppelt werden könnte. Loks behalten ihre Hinweise.
+
 ## Version 1.3.7
 
 ### Änderungen

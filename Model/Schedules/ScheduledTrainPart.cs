@@ -264,7 +264,9 @@ public static class ScheduledTrainPartExtensions
             }
             else if (options.HasCoupleNote)
             {
+                // A trainset is the train itself, so there is nothing to couple it to.
                 callNotes.AddRange(units
+                    .Where(u => u.Vehicle.ObjectType != ScheduledObjectType.Trainset)
                     .Select(u => new CoupleNote(u.Vehicle) { IsForDeparture = true, Sessions = u.Sessions, Settings = settings }));
             }
             else if (options.DisplayUseNote)
@@ -314,7 +316,9 @@ public static class ScheduledTrainPartExtensions
             }
             else if (options.HasUncoupleNote)
             {
+                // A trainset is the train itself, so there is nothing to uncouple it from.
                 callNotes.AddRange(units
+                    .Where(u => u.Vehicle.ObjectType != ScheduledObjectType.Trainset)
                     .Select(u => new UncoupleNote(u.Vehicle) { IsForArrival = true, Sessions = u.Sessions, Settings = settings }));
             }
         }
