@@ -7,7 +7,7 @@
 - **Likadana noteringar sägs en gång.** Noteringar som lyder lika utom för de pass de gäller blir nu en notering för de passen tillsammans, och anger inga pass där de tillsammans täcker alla pass tåget går.
 - **Möten på samma pass delar en kvalificering.** I en notering om möte eller förbigång listas de möten som sker på samma pass tillsammans, med passen angivna en gång efter dem, och grupperna skiljs åt med semikolon.
 - **Ett vagnsset som följer ett push/pull-tåg behöver ingen egen notering.** Där ett push/pull-lok i samma omlopp flyttar tåget till eller från ett annat spår utelämnas noteringarna om att hämta eller växla vagnssetet, eftersom noteringen om tåget redan säger det. Vagnssetet behåller sina noteringar för de pass loket inte kör.
-- **Ett omloppskort för en enda dag benämner den i klartext.** Där ett kort gäller en enda dag står det nu "Lördag" i stället för "Lö". Flera dagar förkortas fortfarande.
+- **Ett omloppskort för en enda dag benämner den i klartext.** Där ett kort gäller en enda dag står det nu "Lördag" i stället för "L". Flera dagar förkortas fortfarande.
 
 ## Version 1.3.6
 
