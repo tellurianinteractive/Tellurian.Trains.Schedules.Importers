@@ -1,0 +1,82 @@
+@using System.Globalization
+@inject Translator Translator
+
+@{ UseReportCulture(); }
+
+@* One wagonset card: an A6 landscape card (148 x 105 mm), four to an A4 landscape sheet. Only the left part is
+   written on; the right 65 mm is left empty for the vehicle's turnus card, which is laid over it. The wagons
+   are listed one under another in rake order, in two columns when there are too many for one. *@
+@if (Item is not null)
+{
+    var wagons = Item.Wagons.OrderBy(w => w.Position).ToList();
+    <div class="wagonsetcard">
+        <div class="content">
+            <div class="type">@Translator(nameof(ScheduledObjectType.Wagonset))</div>
+            <div class="identity">@Identity</div>
+            @if (Item.Company is { Name.Length: > 0 } company)
+            {
+                <div class="line">@company.Name</div>
+            }
+            @if (Item.Class.HasValue)
+            {
+                <div class="line">@Translator("Class"): <strong>@Item.Class</strong></div>
+            }
+            @if (Item.WagonSetKind != WagonSetKind.Unspecified)
+            {
+                <div class="line">@Translator("WagonSetKind"): <strong>@Translator("WagonSetKind" + Item.WagonSetKind)</strong></div>
+            }
+            <div class="line">@Translator("NumberOfWagons"): <strong>@Item.NumberOfUnits</strong></div>
+            @if (Item.Length > 0)
+            {
+                <div class="line">@Translator("Length"): <strong>@Item.Length.ToString("0.#", CultureInfo.CurrentCulture)</strong></div>
+            }
+            @if (Item.DisplayRemark is { Length: > 0 } remark)
+            {
+                <div class="line remark">@remark</div>
+            }
+            @if (wagons.Count > 0)
+            {
+                <div class="wagons @(wagons.Count > ColumnBreak ? "two-columns" : null)">
+                    @foreach (var wagon in wagons)
+                    {
+                        <div class="wagon">
+                            <span class="pos">@wagon.Position</span>
+                            <span class="class">@wagon.Class</span>
+                            <span class="number">@wagon.Number</span>
+                            <span class="kind">@(wagon.IsPassenger ? "P" : null)@(wagon.IsCargo ? "G" : null)</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                @* No wagons listed: draw one rectangle per wagon, each carrying the wagonset's class, so the
+                   card still shows what the wagonset is made up of. *@
+                <div class="rake @(Item.NumberOfUnits > BoxColumnBreak ? "two-columns" : null)">
+                    @for (var i = 0; i < Item.NumberOfUnits; i++)
+                    {
+                        <div class="wagon-box">@Item.Class</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>The wagonset to print the card for. Nothing is rendered without one.</summary>
+    [Parameter] public ScheduledObject? Item { get; set; }
+
+    // More wagons than this will not fit one under another within the card's height.
+    private const int ColumnBreak = 14;
+
+    // The same for the boxes drawn for a wagonset that lists no wagons, which take more height each.
+    private const int BoxColumnBreak = 10;
+
+    // As the turnus card names the vehicle, so the two cards that go together read alike.
+    private string Identity =>
+        Item is null ? string.Empty
+        : Item.HasExternalId ? Item.ExternalId!
+        : Item.Number > 0 ? $"{Item.Company?.Signature} {Item.Number:D2}".Trim()
+        : Item.Company?.Signature ?? string.Empty;
+}

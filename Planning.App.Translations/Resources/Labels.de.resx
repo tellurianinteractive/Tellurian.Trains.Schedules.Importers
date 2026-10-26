@@ -3032,4 +3032,16 @@
   <data name="NoCompany" xml:space="preserve">
     <value>Keine Gesellschaft</value>
   </data>
+  <data name="WagonsetCards" xml:space="preserve">
+    <value>Wagengruppenkarten</value>
+  </data>
+  <data name="PrintWagonsetCard" xml:space="preserve">
+    <value>Wagengruppenkarte drucken?</value>
+  </data>
+  <data name="PrintWagonsetCardHelp" xml:space="preserve">
+    <value>Eine Wagengruppenkarte für diese Wagengruppe drucken: eine A6-Karte mit Kennung und Wagen, die zu ihrer Umlaufkarte gehört.</value>
+  </data>
+  <data name="NoWagonsetCards" xml:space="preserve">
+    <value>Keine Wagengruppenkarten zu drucken: Haken bei Wagengruppenkarte drucken? an einer Wagengruppe setzen.</value>
+  </data>
 </root>

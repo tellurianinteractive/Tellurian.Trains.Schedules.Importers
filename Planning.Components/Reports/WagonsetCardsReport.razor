@@ -1,0 +1,71 @@
+@page "/wagonset-cards-report"
+@layout PrintLayout
+
+@using System.Globalization
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The wagonset cards: an A6 landscape card (148 x 105 mm) for each wagonset marked to have one, four to an A4
+   landscape sheet, 2 across and 2 down. Only the left part of a card is written on; the right 65 mm is left
+   empty for the turnus card. The sheet is printed without a margin. Each card is printed in the language of the
+   wagonset's operator, as the turnus cards are. *@
+
+@if (_cards is null)
+{
+    <ReportBusy Name="WagonsetCards" />
+}
+else if (_cards.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoWagonsetCards" />
+}
+else
+{
+    @foreach (var cardsOnPage in _cards.ItemsPerPage(4))
+    {
+        <A4LPage Margin="0">
+            <div class="pagebreak">
+                @foreach (var (wagonset, culture) in cardsOnPage)
+                {
+                    UseReportCulture(culture);
+                    <CascadingValue Value="culture">
+                        <WagonsetCard Item="wagonset" />
+                    </CascadingValue>
+                }
+            </div>
+        </A4LPage>
+    }
+}
+
+@code {
+    private IReadOnlyList<(ScheduledObject Wagonset, ReportCulture Culture)>? _cards;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
+        if (ScheduleState.Layout is not { } layout || ScheduleState.Schedule is not { } plan)
+        {
+            _cards = [];
+            return;
+        }
+
+        _cards =
+        [
+            .. plan.ScheduledObjects
+                .Where(vehicle => vehicle.IsWagonSet && vehicle.PrintWagonsetCard)
+                .OrderBy(vehicle => vehicle.Company?.Signature, StringComparer.CurrentCulture)
+                .ThenBy(vehicle => vehicle.Number)
+                .Select(vehicle => (vehicle, new ReportCulture(OperatorCulture(layout, vehicle))))
+        ];
+    }
+
+    // The language of the wagonset's company, else of the operators of the trains it works when they agree.
+    private static CultureInfo OperatorCulture(Layout layout, ScheduledObject vehicle) =>
+        layout.ReportCultureOf(
+            vehicle.Company,
+            vehicle.ScheduleAssignments.SelectMany(a => a.Schedule?.Parts ?? []).Select(p => p.Train.EffectiveCompany),
+            LanguageService.IsSupported);
+}

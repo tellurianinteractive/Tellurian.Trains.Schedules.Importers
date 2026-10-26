@@ -61,6 +61,12 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     public WagonSetKind WagonSetKind { get; set; }
 
     /// <summary>
+    /// Gets or sets whether a wagonset card is printed for this vehicle (see the Wagonset cards report): a card
+    /// with its identity, kind and wagons, to go with its turnus card. Only meaningful for a wagonset.
+    /// </summary>
+    public bool PrintWagonsetCard { get; set; }
+
+    /// <summary>
     /// Gets or sets the type of this vehicle.
     /// </summary>
     public ScheduledObjectType ObjectType

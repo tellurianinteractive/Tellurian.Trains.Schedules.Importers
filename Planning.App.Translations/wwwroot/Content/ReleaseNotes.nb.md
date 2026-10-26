@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.3.9
+
+### Nytt
+
+- **Vognsettkort.** En ny rapport, Vognsettkort, skriver ut et A6-kort for hvert vognsett som er merket med Skriv ut vognsettkort? i kjøretøydialogen: identiteten, arten og vognene, til å følge omløpskortet. Fire kort går på ett A4-ark i liggende format, og hvert kort skrives ut på språket til vognsettets operatør.
+
 ## Versjon 1.3.8
 
 ### Endringer

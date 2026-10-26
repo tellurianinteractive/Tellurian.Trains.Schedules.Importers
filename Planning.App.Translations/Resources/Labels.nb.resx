@@ -3032,4 +3032,16 @@
   <data name="NoCompany" xml:space="preserve">
     <value>Ingen selskap</value>
   </data>
+  <data name="WagonsetCards" xml:space="preserve">
+    <value>Vognsettkort</value>
+  </data>
+  <data name="PrintWagonsetCard" xml:space="preserve">
+    <value>Skriv ut vognsettkort?</value>
+  </data>
+  <data name="PrintWagonsetCardHelp" xml:space="preserve">
+    <value>Skriv ut et vognsettkort for dette vognsettet: et A6-kort med identitet og vogner, som hører sammen med omløpskortet.</value>
+  </data>
+  <data name="NoWagonsetCards" xml:space="preserve">
+    <value>Ingen vognsettkort å skrive ut: kryss av for Skriv ut vognsettkort? på et vognsett.</value>
+  </data>
 </root>

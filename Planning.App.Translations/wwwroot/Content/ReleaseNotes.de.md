@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.3.9
+
+### Neu
+
+- **Wagengruppenkarten.** Ein neuer Bericht, Wagengruppenkarten, druckt für jede Wagengruppe, die im Fahrzeugdialog mit Wagengruppenkarte drucken? markiert ist, eine A6-Karte: ihre Kennung, Art und Wagen, passend zu ihrer Umlaufkarte. Vier Karten passen auf ein A4-Blatt im Querformat, und jede Karte wird in der Sprache des Betreibers der Wagengruppe gedruckt.
+
 ## Version 1.3.8
 
 ### Änderungen

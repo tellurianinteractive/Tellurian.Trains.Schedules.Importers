@@ -92,6 +92,11 @@
                         }
                     </select>
                 </div>
+                <div class="field">
+                    <label title="@Translator("PrintWagonsetCardHelp")">@Translator("PrintWagonsetCard")</label>
+                    <input type="checkbox" checked="@_printWagonsetCard"
+                           @onchange="e => _printWagonsetCard = e.Value as bool? ?? false" />
+                </div>
             }
             @if (IsWagonsetType)
             {
@@ -222,6 +227,7 @@
     private TractionType _tractionType = TractionType.Undefined;
     private bool _isReversibleTrain;
     private WagonSetKind _wagonSetKind;
+    private bool _printWagonsetCard;
     private int _numberOfUnits = 1;
     private readonly List<Wagon> _wagons = [];
     private Sessions _sessions;
@@ -251,6 +257,7 @@
         _tractionType = Vehicle.TractionType == TractionType.None ? TractionType.Undefined : Vehicle.TractionType;
         _isReversibleTrain = Vehicle.IsReversibleTrain;
         _wagonSetKind = Vehicle.WagonSetKind;
+        _printWagonsetCard = Vehicle.PrintWagonsetCard;
         _numberOfUnits = Math.Max(1, Vehicle.NumberOfUnits);
         // Stage clones so the dialog can be cancelled without touching the vehicle's rake.
         _wagons.AddRange(Vehicle.Units.OfType<Wagon>().OrderBy(w => w.Position).Select(w => new Wagon
@@ -338,6 +345,7 @@
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
         Vehicle.Length = _length ?? 0;
         Vehicle.WagonSetKind = type.IsWagonSet ? _wagonSetKind : WagonSetKind.Unspecified;
+        Vehicle.PrintWagonsetCard = type.IsWagonSet && _printWagonsetCard;
         // Apply the staged wagon rake (UpdateVehicle already cleared it for a non-wagonset).
         if (type.IsWagonSet)
         {

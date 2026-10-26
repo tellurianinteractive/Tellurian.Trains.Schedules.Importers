@@ -3046,4 +3046,16 @@
   <data name="NoCompany" xml:space="preserve">
     <value>No company</value>
   </data>
+  <data name="WagonsetCards" xml:space="preserve">
+    <value>Wagonset cards</value>
+  </data>
+  <data name="PrintWagonsetCard" xml:space="preserve">
+    <value>Print wagonset card?</value>
+  </data>
+  <data name="PrintWagonsetCardHelp" xml:space="preserve">
+    <value>Print a wagonset card for this wagonset: an A6 card with its identity and wagons, to go with its turnus card.</value>
+  </data>
+  <data name="NoWagonsetCards" xml:space="preserve">
+    <value>No wagonset cards to print: tick Print wagonset card? on a wagonset.</value>
+  </data>
 </root>

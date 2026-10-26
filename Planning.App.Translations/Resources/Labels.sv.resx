@@ -3032,4 +3032,16 @@
   <data name="NoCompany" xml:space="preserve">
     <value>Inget företag</value>
   </data>
+  <data name="WagonsetCards" xml:space="preserve">
+    <value>Vagnsättskort</value>
+  </data>
+  <data name="PrintWagonsetCard" xml:space="preserve">
+    <value>Skriv ut vagnsättskort?</value>
+  </data>
+  <data name="PrintWagonsetCardHelp" xml:space="preserve">
+    <value>Skriv ut ett vagnsättskort för detta vagnsätt: ett A6-kort med identitet och vagnar, som hör ihop med omloppskortet.</value>
+  </data>
+  <data name="NoWagonsetCards" xml:space="preserve">
+    <value>Inga vagnsättskort att skriva ut: kryssa i Skriv ut vagnsättskort? på ett vagnsätt.</value>
+  </data>
 </root>

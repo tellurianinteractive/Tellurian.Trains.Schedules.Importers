@@ -1,0 +1,105 @@
+/* A wagonset card is A6 landscape, 148 x 105 mm, so an A4 landscape sheet holds 2 across and 2 down = 4 cards
+   (2 x 148 = 296 mm of the 297 mm width, 2 x 105 = 210 mm of the height). It is printed without a page margin.
+   The right 65 mm are left empty for the turnus card, so the writing keeps to the left 83 mm. The card is a
+   flex item in .pagebreak and its size is physical — it is cut out — so it must never be squeezed to make a
+   row fit; overflow the row instead. */
+.wagonsetcard {
+    flex-shrink: 0;
+    width: 148mm;
+    height: 105mm;
+    box-sizing: border-box;
+    border: 1px solid gainsboro;
+    overflow: hidden;
+
+    .content {
+        width: 83mm;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 4mm;
+        font-size: 10pt;
+        line-height: 12pt;
+        overflow: hidden;
+    }
+
+    .type {
+        font-size: 10pt;
+        font-style: italic;
+    }
+
+    .identity {
+        font-size: 18pt;
+        line-height: 21pt;
+        font-weight: 700;
+    }
+
+    .line {
+        font-size: 10pt;
+        line-height: 12pt;
+    }
+
+    .remark {
+        font-style: italic;
+    }
+
+    /* One box per wagon, one under another like the listed wagons. */
+    .rake {
+        margin-top: 3mm;
+
+        .wagon-box {
+            height: 5mm;
+            margin-bottom: 1mm;
+            box-sizing: border-box;
+            border: 0.4mm solid black;
+            border-radius: 1mm;
+            font-size: 9pt;
+            line-height: 4.2mm;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            break-inside: avoid;
+        }
+
+        /* Too many wagons for one column: filled down the first column and then the second. */
+        &.two-columns {
+            column-count: 2;
+            column-gap: 4mm;
+        }
+    }
+
+    .wagons {
+        margin-top: 2mm;
+        font-size: 9pt;
+        line-height: 11pt;
+
+        .wagon {
+            display: flex;
+            gap: 2mm;
+            break-inside: avoid;
+        }
+
+        .pos {
+            flex: 0 0 5mm;
+            text-align: right;
+            color: dimgray;
+        }
+
+        .class {
+            flex: 0 0 12mm;
+        }
+
+        .number {
+            flex: 1 1 auto;
+            white-space: nowrap;
+        }
+
+        .kind {
+            color: dimgray;
+        }
+
+        /* Too many wagons for one column: filled down the first column and then the second. */
+        &.two-columns {
+            column-count: 2;
+            column-gap: 4mm;
+        }
+    }
+}

@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.3.9
+
+### Nytt
+
+- **Vagnsättskort.** En ny rapport, Vagnsättskort, skriver ut ett A6-kort för varje vagnsätt som är markerat med Skriv ut vagnsättskort? i fordonsdialogen: dess identitet, art och vagnar, att följa dess omloppskort. Fyra kort ryms på ett A4-ark i liggande format, och varje kort skrivs ut på vagnsättets operatörs språk.
+
 ## Version 1.3.8
 
 ### Ändringar

@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.3.9
+
+### New
+
+- **Wagonset cards.** A new report, Wagonset cards, prints an A6 card for each wagonset marked with Print wagonset card? in its vehicle dialog: its identity, kind and wagons, to go with its turnus card. Four cards fit on an A4 landscape sheet, and each is printed in the language of the wagonset's operator.
+
 ## Version 1.3.8
 
 ### Changes

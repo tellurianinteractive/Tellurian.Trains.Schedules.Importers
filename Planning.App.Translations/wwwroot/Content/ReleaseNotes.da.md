@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.3.9
+
+### Nyt
+
+- **Vognsætkort.** En ny rapport, Vognsætkort, udskriver et A6-kort for hvert vognsæt, der er markeret med Udskriv vognsætkort? i sin køretøjsdialog: dets identitet, art og vogne, til at følge dets omløbskort. Fire kort er der plads til på et A4-ark i liggende format, og hvert kort udskrives på vognsættets operatørs sprog.
+
 ## Version 1.3.8
 
 ### Ændringer
