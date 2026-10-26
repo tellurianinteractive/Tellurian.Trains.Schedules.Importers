@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 3.11.0
+
+### New features
+
+- **Staffing and shifts at manned stations.** New **`Station.StaffPosts`** lists the people staffing a station, each a **`StaffPost`** whose **`Roles`** is a **`StaffRoles`** flag set (`Dispatcher`, `SwitchgearOperator`, `YardManager`, `Shuntman`, `Trainee`); `StaffPost.Fills(role)` and `Set(role, fills)` read and change it, and `StaffRolesExtensions.All` and `SoleOperator` give the roles in order and those of a station manned by one person. New **`Station.ShiftCount`** (1–3, default 1) divides a long session into shifts, with the same staff in every shift. **`Station.ParticipantsNeeded`** is the staff posts times the shifts, and 0 while the station is not manned (the posts are kept); **`Layout.ParticipantsNeeded`** adds up the stations. The staffing is saved in plans and is not part of the `ScheduleDbContext` model. Saved plans without it read as no staff and one shift.
+- **Where the shifts fall.** New **`GeneralSettings.SessionStart`**, **`SessionSpan`** and **`ShiftTimes(shiftCount)`**: the first shift starts at the first session start time (when the layout runs over midnight and states one), otherwise at the start of the operating window, and the shifts divide the session equally on whole five minutes. A session runs to the end of the operating window, or for a whole day when the layout runs over midnight.
+
 ## Version 3.10.0
 
 ### New features
