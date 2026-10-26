@@ -1,5 +1,16 @@
 # Release Notes
 
+## Version 3.10.0
+
+### New features
+
+- **Trains per ticket.** New **`GeneralSettings.TrainsPerTicket`** (1–99, default 4): how many passenger trains stopping at a station one printed ticket stands for. Saved plans without it read as 4.
+
+### Changes
+
+- **A reversal gets its runaround whether or not the call is marked as a stop.** The runaround note derived from the route (`StationCall.ReversesDirection(plan)`) no longer requires `StationCall.IsStop`. A train cannot reverse without standing, so a reversal on a call with neither `IsArrival` nor `IsDeparture` set is still told to circulate (unless `RunaroundMode.Never`, or the traction needs no runaround).
+- **A cargo flow counts as carrying wagons.** `Plan.NeedsLocoRunaround`, `ScheduledTrainPart.NeedsRunaround` and `Schedule.IsWorkedWithoutRunaround` count the train's own cargo flows, so a locomotive working a train with a cargo flow but no assigned wagonset is no longer taken to be a lone loco.
+
 ## Version 3.9.0
 
 ### New features
