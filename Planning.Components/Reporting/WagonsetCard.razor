@@ -10,6 +10,7 @@
 {
     var wagons = Item.Wagons.OrderBy(w => w.Position).ToList();
     <div class="wagonsetcard">
+        <div class="bar" style="background: @VehicleColors.Of(Item.ObjectType, Item.WagonSetKind);"></div>
         <div class="content">
             <div class="type">@Translator(nameof(ScheduledObjectType.Wagonset))</div>
             <div class="identity">@Identity</div>
@@ -30,7 +31,7 @@
             {
                 <div class="line">@Translator("Length"): <strong>@Item.Length.ToString("0.#", CultureInfo.CurrentCulture)</strong></div>
             }
-            @if (Item.DisplayRemark is { Length: > 0 } remark)
+            @if (Item.Remark?.Trim() is { Length: > 0 } remark)
             {
                 <div class="line remark">@remark</div>
             }

@@ -11,6 +11,7 @@ public record TurnusData
     /// <summary>The vehicle's unique id, used as a last-resort card identity when it has neither a turnus number nor an external id.</summary>
     public int Id { get; init; }
     public ScheduledObjectType ScheduledObjectType { get; init; }
+    public WagonSetKind WagonSetKind { get; init; }
     public string Company { get; init; } = string.Empty;
 
     /// <summary>The company the vehicle belongs to, which decides the card's language when reports use local languages.</summary>
@@ -56,13 +57,7 @@ public static class TurnusDataExtensions
 
         public string ClassOrContentLabel(Translator translator) =>
             data.ScheduledObjectType == ScheduledObjectType.Cargo ? translator("Content") : translator("Class");
-        public string CrossLineColor => data.ScheduledObjectType switch
-        {
-            ScheduledObjectType.Locomotive or ScheduledObjectType.Trainset => "#ffc0cb",
-            ScheduledObjectType.Wagonset => "#66ff99",
-            ScheduledObjectType.CargoFlow or ScheduledObjectType.Cargo => "#ffff99",
-            _ => "#cccccc"
-        };
+        public string CrossLineColor => VehicleColors.Of(data.ScheduledObjectType, data.WagonSetKind);
 
         /// <summary>
         /// Full card identity: <see cref="Key"/> plus the operating sessions. The sessions are always part of
@@ -128,6 +123,7 @@ public static class TurnusDataExtensions
                         FirstStartPart = scheduledObject.Start(useDays, maxSessions, firstSessionStart)?.FirstPart,
                         Id = scheduledObject.Id,
                         ScheduledObjectType = scheduledObject.ObjectType,
+                        WagonSetKind = scheduledObject.WagonSetKind,
                         Company = scheduledObject.Company?.Signature ?? string.Empty,
                         VehicleCompany = scheduledObject.Company,
                         Class = scheduledObject.Class,
@@ -230,4 +226,18 @@ public static class TurnusDataExtensions
             return result;
         }
     }
+}
+
+/// <summary>The colour that marks a kind of vehicle on its printed cards: the turnus card's cross line and the wagonset card's bar.</summary>
+public static class VehicleColors
+{
+    public static string Of(ScheduledObjectType type, WagonSetKind wagonSetKind) => type switch
+    {
+        ScheduledObjectType.Locomotive => "#ffc0cb",
+        ScheduledObjectType.Trainset => "#ffd699",
+        ScheduledObjectType.Wagonset when wagonSetKind == WagonSetKind.Cargo => "#99ccff",
+        ScheduledObjectType.Wagonset => "#66ff99",
+        ScheduledObjectType.CargoFlow or ScheduledObjectType.Cargo => "#ffff99",
+        _ => "#cccccc"
+    };
 }

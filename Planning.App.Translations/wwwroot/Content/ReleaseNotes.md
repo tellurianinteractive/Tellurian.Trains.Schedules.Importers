@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.4.1
+
+### Changes
+
+- **Colour-coded wagonset and turnus cards.** The diagonal line on the turnus card is now light green for passenger wagonsets, light blue for cargo wagonsets and light orange for trainsets. The wagonset card has a bar of the same colour down its left side, and it now prints the wagonset's remark even when it only repeats the external id.
+
 ## Version 1.4.0
 
 ### New

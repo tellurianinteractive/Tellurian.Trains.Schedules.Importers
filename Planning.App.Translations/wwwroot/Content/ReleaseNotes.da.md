@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.4.1
+
+### Ændringer
+
+- **Farvekodede vognsæt- og turnuskort.** Den diagonale streg på turnuskortet er nu lysegrøn for passagervognsæt, lyseblå for godsvognsæt og lyseorange for togsæt. Vognsætkortet har en bjælke i samme farve langs venstre side og udskriver nu vognsættets bemærkning, også når den blot gentager det eksterne id.
+
 ## Version 1.4.0
 
 ### Nyt

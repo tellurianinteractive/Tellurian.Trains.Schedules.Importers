@@ -10,9 +10,17 @@
     box-sizing: border-box;
     border: 1px solid gainsboro;
     overflow: hidden;
+    display: flex;
+
+    /* Colour-coded like the cross line on the turnus card; forced so it survives "no background graphics". */
+    .bar {
+        flex: 0 0 4mm;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
 
     .content {
-        width: 83mm;
+        width: 79mm;
         height: 100%;
         box-sizing: border-box;
         padding: 4mm;

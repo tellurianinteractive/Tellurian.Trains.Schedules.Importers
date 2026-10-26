@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.4.1
+
+### Ändringar
+
+- **Färgkodade vagnssäts- och turnuskort.** Den diagonala linjen på turnuskortet är nu ljusgrön för persontågsvagnssätt, ljusblå för godsvagnssätt och ljusorange för tågsätt. Vagnssätskortet har ett fält i samma färg längs vänstra sidan och skriver nu ut vagnssätets anmärkning, även när den bara upprepar det externa id:t.
+
 ## Version 1.4.0
 
 ### Nytt

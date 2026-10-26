@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.4.1
+
+### Endringer
+
+- **Fargekodede vognsett- og turnuskort.** Den diagonale streken på turnuskortet er nå lysegrønn for persontogvognsett, lyseblå for godsvognsett og lyseoransje for togsett. Vognsettkortet har en stolpe i samme farge langs venstre side og skriver nå ut bemerkningen til vognsettet, også når den bare gjentar den eksterne id-en.
+
 ## Versjon 1.4.0
 
 ### Nytt
