@@ -3050,4 +3050,49 @@
   <data name="NoWagonsetCards" xml:space="preserve">
     <value>Keine Wagengruppenkarten zu drucken: Haken bei Wagengruppenkarte drucken? an einer Wagengruppe setzen.</value>
   </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>Besetzung</value>
+  </data>
+  <data name="ShiftCount" xml:space="preserve">
+    <value>Anzahl der Schichten</value>
+  </data>
+  <data name="ShiftCountHelp" xml:space="preserve">
+    <value>In wie viele Schichten eine lange Session am Bahnhof aufgeteilt wird (1–3). In jeder Schicht wird dasselbe Personal gebraucht, daher zählt jede Schicht das gesamte Personal erneut als Teilnehmer.</value>
+  </data>
+  <data name="StaffMember" xml:space="preserve">
+    <value>Mitarbeiter</value>
+  </data>
+  <data name="AddStaffMember" xml:space="preserve">
+    <value>Mitarbeiter hinzufügen</value>
+  </data>
+  <data name="StaffRoleDispatcher" xml:space="preserve">
+    <value>Fahrdienstleiter</value>
+  </data>
+  <data name="StaffRoleDispatcherHelp" xml:space="preserve">
+    <value>Lässt Züge von und zu den Nachbarbahnhöfen fahren.</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperator" xml:space="preserve">
+    <value>Stellwerker</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperatorHelp" xml:space="preserve">
+    <value>Steuert die Fahrstraßen innerhalb des Bahnhofs.</value>
+  </data>
+  <data name="StaffRoleYardManager" xml:space="preserve">
+    <value>Rangierleiter</value>
+  </data>
+  <data name="StaffRoleYardManagerHelp" xml:space="preserve">
+    <value>Sorgt dafür, dass Triebfahrzeuge, Wagengruppen und Güterwagen im richtigen Zug sind.</value>
+  </data>
+  <data name="StaffRoleShuntman" xml:space="preserve">
+    <value>Rangierer</value>
+  </data>
+  <data name="StaffRoleShuntmanHelp" xml:space="preserve">
+    <value>Bedient die Rangierlokomotiven im Rangierbahnhof.</value>
+  </data>
+  <data name="StaffRoleTrainee" xml:space="preserve">
+    <value>Auszubildender</value>
+  </data>
+  <data name="StaffRoleTraineeHelp" xml:space="preserve">
+    <value>Ist dabei, um den Betrieb am Bahnhof kennenzulernen.</value>
+  </data>
 </root>

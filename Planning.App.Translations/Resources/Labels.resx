@@ -3064,4 +3064,49 @@
   <data name="NoWagonsetCards" xml:space="preserve">
     <value>No wagonset cards to print: tick Print wagonset card? on a wagonset.</value>
   </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>Staffing</value>
+  </data>
+  <data name="ShiftCount" xml:space="preserve">
+    <value>Number of shifts</value>
+  </data>
+  <data name="ShiftCountHelp" xml:space="preserve">
+    <value>How many shifts a long session is divided into at this station (1–3). The same staff are needed for every shift, so each shift counts the whole staff again as participants.</value>
+  </data>
+  <data name="StaffMember" xml:space="preserve">
+    <value>Staff member</value>
+  </data>
+  <data name="AddStaffMember" xml:space="preserve">
+    <value>Add staff member</value>
+  </data>
+  <data name="StaffRoleDispatcher" xml:space="preserve">
+    <value>Dispatcher</value>
+  </data>
+  <data name="StaffRoleDispatcherHelp" xml:space="preserve">
+    <value>Clears trains to and from the neighbouring stations.</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperator" xml:space="preserve">
+    <value>Switchgear operator</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperatorHelp" xml:space="preserve">
+    <value>Controls the routes within the station.</value>
+  </data>
+  <data name="StaffRoleYardManager" xml:space="preserve">
+    <value>Yard manager</value>
+  </data>
+  <data name="StaffRoleYardManagerHelp" xml:space="preserve">
+    <value>Sees to it that traction units, wagonsets and cargo wagons are on the right train.</value>
+  </data>
+  <data name="StaffRoleShuntman" xml:space="preserve">
+    <value>Shuntman</value>
+  </data>
+  <data name="StaffRoleShuntmanHelp" xml:space="preserve">
+    <value>Operates the shunter locomotives in the shunting yard.</value>
+  </data>
+  <data name="StaffRoleTrainee" xml:space="preserve">
+    <value>Trainee</value>
+  </data>
+  <data name="StaffRoleTraineeHelp" xml:space="preserve">
+    <value>Is there to learn about operations at the station.</value>
+  </data>
 </root>

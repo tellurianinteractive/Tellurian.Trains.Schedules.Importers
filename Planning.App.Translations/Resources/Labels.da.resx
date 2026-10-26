@@ -3050,4 +3050,49 @@
   <data name="NoWagonsetCards" xml:space="preserve">
     <value>Ingen vognsætkort at udskrive: sæt kryds ved Udskriv vognsætkort? på et vognsæt.</value>
   </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>Bemanding</value>
+  </data>
+  <data name="ShiftCount" xml:space="preserve">
+    <value>Antal hold</value>
+  </data>
+  <data name="ShiftCountHelp" xml:space="preserve">
+    <value>Hvor mange hold en lang session deles i på stationen (1–3). Det samme personale skal bruges på hvert hold, så hvert hold tæller hele personalet med som deltagere igen.</value>
+  </data>
+  <data name="StaffMember" xml:space="preserve">
+    <value>Medarbejder</value>
+  </data>
+  <data name="AddStaffMember" xml:space="preserve">
+    <value>Tilføj medarbejder</value>
+  </data>
+  <data name="StaffRoleDispatcher" xml:space="preserve">
+    <value>Togleder</value>
+  </data>
+  <data name="StaffRoleDispatcherHelp" xml:space="preserve">
+    <value>Klarerer tog til og fra nabostationerne.</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperator" xml:space="preserve">
+    <value>Stillværksbetjent</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperatorHelp" xml:space="preserve">
+    <value>Styrer togvejene inden for stationen.</value>
+  </data>
+  <data name="StaffRoleYardManager" xml:space="preserve">
+    <value>Pladsansvarlig</value>
+  </data>
+  <data name="StaffRoleYardManagerHelp" xml:space="preserve">
+    <value>Sørger for, at køretøjer, vognsæt og godsvogne sidder på det rigtige tog.</value>
+  </data>
+  <data name="StaffRoleShuntman" xml:space="preserve">
+    <value>Rangerer</value>
+  </data>
+  <data name="StaffRoleShuntmanHelp" xml:space="preserve">
+    <value>Kører rangerlokomotiver på rangerterrænet.</value>
+  </data>
+  <data name="StaffRoleTrainee" xml:space="preserve">
+    <value>Elev</value>
+  </data>
+  <data name="StaffRoleTraineeHelp" xml:space="preserve">
+    <value>Er der for at lære, hvordan driften på stationen foregår.</value>
+  </data>
 </root>

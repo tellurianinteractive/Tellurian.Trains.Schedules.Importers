@@ -3050,4 +3050,49 @@
   <data name="NoWagonsetCards" xml:space="preserve">
     <value>Inga vagnsättskort att skriva ut: kryssa i Skriv ut vagnsättskort? på ett vagnsätt.</value>
   </data>
+  <data name="Staffing" xml:space="preserve">
+    <value>Bemanning</value>
+  </data>
+  <data name="ShiftCount" xml:space="preserve">
+    <value>Antal skift</value>
+  </data>
+  <data name="ShiftCountHelp" xml:space="preserve">
+    <value>Hur många skift en lång session delas upp i vid stationen (1–3). Samma personal behövs under varje skift, så varje skift räknar hela personalen som deltagare igen.</value>
+  </data>
+  <data name="StaffMember" xml:space="preserve">
+    <value>Personal</value>
+  </data>
+  <data name="AddStaffMember" xml:space="preserve">
+    <value>Lägg till personal</value>
+  </data>
+  <data name="StaffRoleDispatcher" xml:space="preserve">
+    <value>Tågklarerare</value>
+  </data>
+  <data name="StaffRoleDispatcherHelp" xml:space="preserve">
+    <value>Klarerar tåg till och från grannstationerna.</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperator" xml:space="preserve">
+    <value>Ställverksoperatör</value>
+  </data>
+  <data name="StaffRoleSwitchgearOperatorHelp" xml:space="preserve">
+    <value>Styr tågvägarna inom stationen.</value>
+  </data>
+  <data name="StaffRoleYardManager" xml:space="preserve">
+    <value>Bangårdsansvarig</value>
+  </data>
+  <data name="StaffRoleYardManagerHelp" xml:space="preserve">
+    <value>Ser till att fordon, vagnsätt och godsvagnar sitter på rätt tåg.</value>
+  </data>
+  <data name="StaffRoleShuntman" xml:space="preserve">
+    <value>Växlare</value>
+  </data>
+  <data name="StaffRoleShuntmanHelp" xml:space="preserve">
+    <value>Kör växellok på växlingsbangården.</value>
+  </data>
+  <data name="StaffRoleTrainee" xml:space="preserve">
+    <value>Elev</value>
+  </data>
+  <data name="StaffRoleTraineeHelp" xml:space="preserve">
+    <value>Är där för att lära sig hur verksamheten på stationen går till.</value>
+  </data>
 </root>

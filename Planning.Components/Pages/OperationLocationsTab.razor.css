@@ -237,6 +237,26 @@
         max-width: 60rem;
     }
 
+    .staffing .staff-post {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem 1rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .staffing .staff-name {
+        min-width: 8rem;
+        font-weight: 600;
+    }
+
+    .staffing .role-choice {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: pointer;
+    }
+
     .regions {
         display: flex;
         flex-wrap: wrap;

@@ -29,6 +29,19 @@ public class Station : OperationLocation
     public bool IsManned { get; set; }
 
     /// <summary>
+    /// The people staffing the station, each with the roles they fill. Only in force while the station
+    /// is <see cref="IsManned"/>: the posts are kept either way, so unmanning a station and manning it
+    /// again does not lose them (see <c>StationExtensions.ParticipantsNeeded</c>).
+    /// </summary>
+    public IList<StaffPost> StaffPosts { get; set; } = [];
+
+    /// <summary>
+    /// How many shifts a long session is divided into at this station (1–3). The same people are
+    /// needed for every shift, so each shift needs the whole of <see cref="StaffPosts"/> again.
+    /// </summary>
+    public int ShiftCount { get; set; } = 1;
+
+    /// <summary>
     /// Gets or sets whether the station has a turntable. A locomotive that cannot be driven equally well
     /// in both directions — a steam locomotive above all — can only be turned where there is one, so this
     /// is what decides whether a train part may ask for a turn on arrival
@@ -126,6 +139,13 @@ public static class StationExtensions
     extension(Station station)
     {
         /// <summary>
+        /// The number of participants needed to operate the station: one for each staff post in each
+        /// shift, and none while the station is not manned.
+        /// </summary>
+        public int ParticipantsNeeded =>
+            station.IsManned ? station.StaffPosts.Count * Math.Clamp(station.ShiftCount, 1, 3) : 0;
+
+        /// <summary>
         /// Adds a <see cref="Region"/> if not already present.
         /// </summary>
         /// <param name="region"></param>
@@ -137,3 +157,15 @@ public static class StationExtensions
     }
 }
 
+
+/// <summary>
+/// Provides extension members for the staffing of a <see cref="Layout"/>.
+/// </summary>
+public static class LayoutStaffingExtensions
+{
+    extension(Layout layout)
+    {
+        /// <summary>The number of participants needed to operate every station of the layout.</summary>
+        public int ParticipantsNeeded => layout.OperationLocations.OfType<Station>().Sum(station => station.ParticipantsNeeded);
+    }
+}

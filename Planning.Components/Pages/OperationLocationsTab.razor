@@ -339,6 +339,41 @@ else
                     }
                 }
 
+                @* Who staffs the station, so that the participants needed to operate the layout can be
+                   counted and the tasks on offer presented. Only a manned station has anyone on duty. The
+                   posts are kept while the station is unmanned, so manning it again brings them back. Each
+                   post is one participant, filling one or several roles; the same posts are needed for
+                   every shift. *@
+                @if (Editing is Station { IsManned: true } staffed)
+                {
+                    <h3>@Translator("Staffing")</h3>
+                    <div class="section staffing">
+                        <div class="field">
+                            <HelpLabel For="ShiftCount" />
+                            <input type="number" class="num" min="1" max="3" @bind="staffed.ShiftCount" @bind:after="OnEdited" />
+                        </div>
+                        @foreach (var (post, index) in staffed.StaffPosts.Select((post, index) => (post, index)))
+                        {
+                            <div class="staff-post" @key="post">
+                                <span class="staff-name">@Translator("StaffMember") @(index + 1)</span>
+                                @foreach (var role in StaffRolesExtensions.All)
+                                {
+                                    <label class="role-choice" title="@Translator($"StaffRole{role}Help")">
+                                        <input type="checkbox" checked="@post.Fills(role)"
+                                               @onchange="e => SetStaffRole(post, role, (bool)e.Value!)" />
+                                        @Translator($"StaffRole{role}")
+                                    </label>
+                                }
+                                <button class="danger small" @onclick="() => RemoveStaffPost(staffed, post)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                            </div>
+                        }
+                        <div class="field">
+                            <button @onclick="() => AddStaffPost(staffed)"><i class="fa-solid fa-plus"></i> @Translator("AddStaffMember")</button>
+                        </div>
+                        <p class="hint">@Translator("Participants"): <strong>@staffed.ParticipantsNeeded</strong></p>
+                    </div>
+                }
+
                 @* How this location is worked at this meeting. What the location is in itself — its
                    track plan, how it is operated in general — comes from whoever owns it, so it is
                    not what this field is for; the help text says so.
@@ -544,6 +579,11 @@ else
                         {
                             <dt>@Translator("SplitDispatchByDirection")</dt>
                             <dd>@YesNo(infoStation.SplitDispatchByDirection)</dd>
+                            @if (infoStation.ParticipantsNeeded > 0)
+                            {
+                                <dt>@Translator("Participants")</dt>
+                                <dd>@infoStation.ParticipantsNeeded</dd>
+                            }
                         }
                         <dt>@Translator("HasTurntable")</dt>
                         <dd>@YesNo(infoStation.HasTurntable)</dd>
@@ -844,6 +884,25 @@ else
 
     // Existing locations are edited live and persisted on each change; a new one is held detached
     // until Save validates and adds it.
+    // A new post starts with the roles of a station manned by one person, the usual case.
+    private void AddStaffPost(Station station)
+    {
+        station.StaffPosts.Add(new StaffPost { Roles = StaffRolesExtensions.SoleOperator });
+        OnEdited();
+    }
+
+    private void RemoveStaffPost(Station station, StaffPost post)
+    {
+        station.StaffPosts.Remove(post);
+        OnEdited();
+    }
+
+    private void SetStaffRole(StaffPost post, StaffRoles role, bool fills)
+    {
+        post.Set(role, fills);
+        OnEdited();
+    }
+
     private void OnEdited()
     {
         _error = null;

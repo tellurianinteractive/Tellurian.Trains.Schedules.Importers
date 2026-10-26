@@ -311,6 +311,9 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // RegionIds is how that association is written to a plan (see PlanJson); the join table
             // holds it here, so mapping it as well would store it twice.
             entity.Ignore(e => e.RegionIds);
+
+            // The staffing is kept in plans only.
+            entity.Ignore(e => e.StaffPosts);
         });
         modelBuilder.Entity<SignalControlledLocation>();
         modelBuilder.Entity<OtherLocation>();
