@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 3.11.1
+
+### Fixes
+
+- **Trains with the same number in different companies are no longer equal.** `Train.Equals` compared the train's own company, which is empty on a train that takes its company from its category, so `X 116` of one operator and `IC 116` of another were taken for the same train. It now compares the effective company (`EffectiveCompany`); while a plan is still being read and the company or category is only a key, trains are told apart by `CompanyId` and `CategoryId`. `Train.GetHashCode` now uses the number alone, since the company can change as a plan is resolved.
+
 ## Version 3.11.0
 
 ### New features
