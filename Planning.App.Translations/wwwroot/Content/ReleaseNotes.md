@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.4.0
+
+### New
+
+- **Staffing at manned stations.** A manned station can now list its staff, each member filling one or several roles: dispatcher, switchgear operator, yard manager, shuntman and trainee. A long session can be divided into up to three shifts, with the same staff for every shift. Each staff member in each shift counts as one participant. The section is on the Operation locations tab and shows only while the station is manned.
+- **Work schema report.** A new report in the Reports menu prints a sheet for each staffed station, in the language of its country: a table for each staff member with a row for each session or day and a column for each shift, the first shift starting at the first session start. The station owner is written in for the first dispatcher's first shift of the first session.
+
 ## Version 1.3.12
 
 ### Changes

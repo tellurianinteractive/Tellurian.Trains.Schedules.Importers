@@ -1,5 +1,12 @@
 # Versionsnyheder
 
+## Version 1.4.0
+
+### Nyt
+
+- **Bemanding af bemandede stationer.** En bemandet station kan nu angive sit personale, hvor hver person har en eller flere roller: togleder, stillværksbetjent, rangerleder, rangerer og elev. En lang session kan deles i op til tre hold med det samme personale på hvert hold. Hver person på hvert hold tæller som én deltager. Afsnittet findes under fanen Driftssteder og vises kun, når stationen er bemandet.
+- **Rapporten Arbejdsplan.** En ny rapport i rapportmenuen udskriver et ark for hver bemandet station på sprogene i dens land: en tabel for hver person med en række for hver session eller dag og en kolonne for hvert hold, hvor første hold begynder, når første session begynder. Stationens ejer skrives ind på toglederens første hold i første session.
+
 ## Version 1.3.12
 
 ### Ændringer

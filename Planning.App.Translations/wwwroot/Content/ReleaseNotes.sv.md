@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.4.0
+
+### Nytt
+
+- **Bemanning av bemannade stationer.** En bemannad station kan nu ange sin personal, där varje person har en eller flera roller: tågklarerare, ställverksoperatör, rangerledare, växlare och elev. En lång session kan delas upp i upp till tre skift, med samma personal under varje skift. Varje person i varje skift räknas som en deltagare. Avsnittet finns på fliken Driftplatser och visas bara när stationen är bemannad.
+- **Rapporten Arbetsschema.** En ny rapport i rapportmenyn skriver ut ett blad för varje bemannad station, på språket i dess land: en tabell för varje person med en rad för varje session eller dag och en kolumn för varje skift, där första skiftet börjar när första sessionen börjar. Stationens ägare skrivs in på tågklarerarens första skift under första sessionen.
+
 ## Version 1.3.12
 
 ### Ändringar

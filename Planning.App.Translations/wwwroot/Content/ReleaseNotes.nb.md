@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.4.0
+
+### Nytt
+
+- **Bemanning av bemannede stasjoner.** En bemannet stasjon kan nå oppgi personalet sitt, der hver person har en eller flere roller: togleder, stillverksoperatør, rangerleder, skifter og elev. En lang økt kan deles opp i opptil tre skift, med samme personale på hvert skift. Hver person på hvert skift teller som én deltaker. Avsnittet ligger på fanen Driftssteder og vises bare når stasjonen er bemannet.
+- **Rapporten Arbeidsplan.** En ny rapport i rapportmenyen skriver ut et ark for hver bemannet stasjon, på språket i landet den ligger i: en tabell for hver person med en rad for hver økt eller dag og en kolonne for hvert skift, der første skift begynner når første økt begynner. Stasjonens eier skrives inn på togleders første skift i første økt.
+
 ## Versjon 1.3.12
 
 ### Endringer

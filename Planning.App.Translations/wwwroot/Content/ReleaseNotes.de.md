@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.4.0
+
+### Neu
+
+- **Besetzung besetzter Bahnhöfe.** Ein besetzter Bahnhof kann jetzt sein Personal angeben, wobei jeder Mitarbeiter eine oder mehrere Rollen hat: Fahrdienstleiter, Stellwerker, Rangierleiter, Rangierer und Auszubildender. Eine lange Session kann in bis zu drei Schichten aufgeteilt werden, mit demselben Personal in jeder Schicht. Jeder Mitarbeiter in jeder Schicht zählt als ein Teilnehmer. Der Abschnitt befindet sich auf der Registerkarte Betriebsstellen und wird nur angezeigt, solange der Bahnhof besetzt ist.
+- **Bericht Dienstplan.** Ein neuer Bericht im Berichtsmenü druckt für jeden besetzten Bahnhof ein Blatt in der Sprache seines Landes: eine Tabelle für jeden Mitarbeiter mit einer Zeile für jede Session oder jeden Tag und einer Spalte für jede Schicht, wobei die erste Schicht mit der ersten Session beginnt. Der Eigentümer des Bahnhofs wird in die erste Schicht der ersten Session des ersten Fahrdienstleiters eingetragen.
+
 ## Version 1.3.12
 
 ### Änderungen
