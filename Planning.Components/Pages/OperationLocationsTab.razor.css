@@ -237,7 +237,19 @@
         max-width: 60rem;
     }
 
+    /* The section is a two-column grid of label and control; a staff member takes the whole row, or the
+       next one would be placed beside it instead of below. */
+    .staffing {
+        max-width: none;
+    }
+
+    .staffing > .staff-post,
+    .staffing > .hint {
+        grid-column: 1 / span 2;
+    }
+
     .staffing .staff-post {
+        padding: 0.3rem 0.6rem;
         display: flex;
         flex-wrap: wrap;
         align-items: center;

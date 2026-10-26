@@ -3095,4 +3095,13 @@
   <data name="StaffRoleTraineeHelp" xml:space="preserve">
     <value>Ist dabei, um den Betrieb am Bahnhof kennenzulernen.</value>
   </data>
+  <data name="WorkSchema" xml:space="preserve">
+    <value>Dienstplan</value>
+  </data>
+  <data name="NoWorkSchema" xml:space="preserve">
+    <value>Kein Dienstplan zu drucken: Kein besetzter Bahnhof hat Personal.</value>
+  </data>
+  <data name="Shift" xml:space="preserve">
+    <value>Schicht</value>
+  </data>
 </root>

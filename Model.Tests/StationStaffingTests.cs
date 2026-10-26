@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
 
@@ -85,5 +86,75 @@ public class StationStaffingTests
         CollectionAssert.AreEqual(
             new[] { StaffRolesExtensions.SoleOperator, StaffRoles.Trainee },
             restored.StaffPosts.Select(post => post.Roles).ToArray());
+    }
+}
+
+/// <summary>Covers where the shifts of a session fall.</summary>
+[TestClass]
+public class ShiftTimesTests
+{
+    private static GeneralSettings Settings(int startHour, int endHour) => new()
+    {
+        StartTime = TimeSpan.FromHours(startHour),
+        EndTime = TimeSpan.FromHours(endHour),
+    };
+
+    [TestMethod]
+    public void OneShiftIsTheWholeOperatingWindow()
+    {
+        var shifts = Settings(10, 18).ShiftTimes(1);
+
+        CollectionAssert.AreEqual(new[] { (TimeSpan.FromHours(10), TimeSpan.FromHours(18)) }, shifts.ToArray());
+    }
+
+    [TestMethod]
+    public void ShiftsAreEqualAndFollowOnFromEachOther()
+    {
+        var shifts = Settings(10, 19).ShiftTimes(3);
+
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                (TimeSpan.FromHours(10), TimeSpan.FromHours(13)),
+                (TimeSpan.FromHours(13), TimeSpan.FromHours(16)),
+                (TimeSpan.FromHours(16), TimeSpan.FromHours(19)),
+            },
+            shifts.ToArray());
+    }
+
+    [TestMethod]
+    public void BoundariesFallOnWholeFiveMinutes()
+    {
+        var shifts = Settings(10, 18).ShiftTimes(3);
+
+        Assert.AreEqual(TimeSpan.FromMinutes(10 * 60 + 160), shifts[0].End, "8 h / 3 = 2 h 40 min.");
+        Assert.AreEqual(TimeSpan.FromHours(18), shifts[2].End);
+    }
+
+    [TestMethod]
+    public void RunningOverMidnightStartsAtTheFirstSessionAndLastsADay()
+    {
+        var settings = new GeneralSettings { RunsOverMidnight = true, FirstSessionStartTime = TimeSpan.FromHours(10) };
+
+        var shifts = settings.ShiftTimes(2);
+
+        Assert.AreEqual(TimeSpan.FromHours(10), shifts[0].Start);
+        Assert.AreEqual(TimeSpan.FromHours(22), shifts[0].End);
+        Assert.AreEqual(TimeSpan.FromHours(34), shifts[1].End);
+    }
+
+    [TestMethod]
+    public void WithoutAFirstSessionStartTheWindowStartsTheFirstShift()
+    {
+        var settings = new GeneralSettings { RunsOverMidnight = true, StartTime = TimeSpan.Zero };
+
+        Assert.AreEqual(TimeSpan.Zero, settings.ShiftTimes(1)[0].Start);
+    }
+
+    [TestMethod]
+    public void TheNumberOfShiftsIsKeptBetweenOneAndThree()
+    {
+        Assert.HasCount(1, Settings(10, 18).ShiftTimes(0));
+        Assert.HasCount(3, Settings(10, 18).ShiftTimes(7));
     }
 }

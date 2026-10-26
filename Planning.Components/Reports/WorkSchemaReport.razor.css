@@ -1,0 +1,65 @@
+/* A sheet of the work schema. The heights are the ones WorkSchemaReport counts with: the station heading 9 mm,
+   a staff member's heading 6 mm, the column headings 7 mm, a row 7 mm for each session or day, and 4 mm
+   between staff members. Change one and change the other. */
+.workschema {
+    font-size: 10pt;
+
+    h3 {
+        box-sizing: border-box;
+        height: 9mm;
+        margin: 0;
+        font-size: 14pt;
+        line-height: 9mm;
+        white-space: nowrap;
+        overflow: hidden;
+
+        .subtitle {
+            font-size: 10pt;
+            font-weight: normal;
+        }
+    }
+
+    .post {
+        height: auto;
+        margin-bottom: 4mm;
+        break-inside: avoid;
+    }
+
+    h4 {
+        box-sizing: border-box;
+        height: 6mm;
+        margin: 0;
+        font-size: 10pt;
+        line-height: 6mm;
+
+        .roles {
+            font-weight: normal;
+        }
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    th,
+    td {
+        box-sizing: border-box;
+        height: 7mm;
+        padding: 0 2mm;
+        border: 0.3mm solid black;
+        font-weight: normal;
+        text-align: left;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    thead th {
+        font-weight: bold;
+    }
+
+    .day {
+        width: 28mm;
+    }
+}

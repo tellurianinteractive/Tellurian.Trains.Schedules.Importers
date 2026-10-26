@@ -3078,7 +3078,7 @@
     <value>Styrer togvejene inden for stationen.</value>
   </data>
   <data name="StaffRoleYardManager" xml:space="preserve">
-    <value>Pladsansvarlig</value>
+    <value>Rangerleder</value>
   </data>
   <data name="StaffRoleYardManagerHelp" xml:space="preserve">
     <value>Sørger for, at køretøjer, vognsæt og godsvogne sidder på det rigtige tog.</value>
@@ -3094,5 +3094,14 @@
   </data>
   <data name="StaffRoleTraineeHelp" xml:space="preserve">
     <value>Er der for at lære, hvordan driften på stationen foregår.</value>
+  </data>
+  <data name="WorkSchema" xml:space="preserve">
+    <value>Arbejdsplan</value>
+  </data>
+  <data name="NoWorkSchema" xml:space="preserve">
+    <value>Ingen arbejdsplan at udskrive: ingen bemandet station har personale.</value>
+  </data>
+  <data name="Shift" xml:space="preserve">
+    <value>Hold</value>
   </data>
 </root>

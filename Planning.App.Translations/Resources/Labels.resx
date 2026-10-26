@@ -3109,4 +3109,13 @@
   <data name="StaffRoleTraineeHelp" xml:space="preserve">
     <value>Is there to learn about operations at the station.</value>
   </data>
+  <data name="WorkSchema" xml:space="preserve">
+    <value>Work schema</value>
+  </data>
+  <data name="NoWorkSchema" xml:space="preserve">
+    <value>No work schema to print: no manned station has any staff.</value>
+  </data>
+  <data name="Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
 </root>

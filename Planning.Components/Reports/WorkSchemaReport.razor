@@ -1,0 +1,131 @@
+@page "/work-schema-report"
+@layout PrintLayout
+
+@inject Translator Translator
+@inject ScheduleStateService ScheduleState
+
+@* The work schema: for each manned station that has staff, an A4 landscape sheet to write names on. Each
+   staff member has a heading with their roles and a table with a row for each session or day and a column
+   for each shift, the first shift starting where the first session does. A station with more staff than a
+   sheet holds goes on to the next, headed by the station again. Each station is printed in the language of its
+   country, as its dispatch list is. The owner of the station is written in for the first staff member who is
+   a dispatcher, on the first shift of the first session, which is usually theirs to work. *@
+
+@if (_sheets is null)
+{
+    <ReportBusy Name="WorkSchema" />
+}
+else if (_sheets.Count == 0)
+{
+    <DisplayedMessage ResourceKey="NoWorkSchema" />
+}
+else
+{
+    @foreach (var sheet in _sheets)
+    {
+        UseReportCulture(sheet.Culture);
+        <CascadingValue Value="sheet.Culture">
+            <A4LPage Margin="@MarginMm">
+                <div class="workschema">
+                    <h3>@sheet.Station.Name (@sheet.Station.Signature) <span class="subtitle">@Translator("WorkSchema")</span></h3>
+                    @foreach (var (post, number) in sheet.Posts)
+                    {
+                        <div class="post">
+                            <h4>@Translator("StaffMember") @number <span class="roles">@RolesText(post)</span></h4>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="day">@Translator(Settings.UseDaysInsteadOfSessionNumbers ? "Days" : "Sessions")</th>
+                                        @for (var i = 0; i < sheet.Station.Shifts; i++)
+                                        {
+                                            <th>@ShiftHeading(sheet.Station, i)</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var position in _positions)
+                                    {
+                                        <tr>
+                                            <th class="day">@SessionsFormatting.PositionHeadingOf(position, Settings, useShortDayName: false)</th>
+                                            @for (var i = 0; i < sheet.Station.Shifts; i++)
+                                            {
+                                                <td>@(IsOwnersShift(sheet, post, position, i) ? sheet.Station.Owner : null)</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </A4LPage>
+        </CascadingValue>
+    }
+}
+
+@code {
+    // The page, less its margin: 190 mm of height, of which the title and the page footer take 18 mm. A staff
+    // member takes a heading (6 mm), the column headings (7 mm), a row of 7 mm for each session and a gap of
+    // 4 mm; the same figures are pinned in WorkSchemaReport.razor.css.
+    private const int MarginMm = 10;
+    private const int PageHeightMm = 190 - 18;
+    private const int RowMm = 7;
+
+    private sealed record Sheet(StationOfSheet Station, ReportCulture Culture, IReadOnlyList<(StaffPost Post, int Number)> Posts);
+    private sealed record StationOfSheet(string Name, string Signature, int Shifts, string? Owner, StaffPost? OwnersPost);
+
+    private IReadOnlyList<Sheet>? _sheets;
+    private IReadOnlyList<int> _positions = [];
+
+    private SessionsSettings Settings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The report uses PrintLayout, so MainLayout's restore never runs; ensure the plan is loaded
+        // (idempotent) so opening the report directly still works.
+        await ScheduleState.InitializeAsync();
+        await ReportBusy.PaintAsync();
+        if (ScheduleState.Layout is not { } layout)
+        {
+            _sheets = [];
+            return;
+        }
+
+        _positions = SessionsFormatting.PositionsOf(Settings);
+        var postsPerSheet = Math.Max(1, PageHeightMm / (17 + RowMm * _positions.Count));
+        _sheets =
+        [
+            .. layout.OperationLocations.OfType<Station>()
+                .Where(station => station.IsManned && station.StaffPosts.Count > 0)
+                .OrderBy(station => station.Name, StringComparer.CurrentCulture)
+                .SelectMany(station => station.StaffPosts
+                    .Select((post, index) => (post, index + 1))
+                    .Chunk(postsPerSheet)
+                    .Select(posts => new Sheet(new(station.Name, station.Signature, Math.Clamp(station.ShiftCount, 1, 3), station.Owner,
+                            station.StaffPosts.FirstOrDefault(post => post.Fills(StaffRoles.Dispatcher))),
+                        new(station.ReportCulture(layout, LanguageService.IsSupported)), posts)))
+        ];
+    }
+
+    // The owner of a station usually works the first shift of the first session, as its dispatcher. Where
+    // several staff members are dispatchers it is the first of them; where none is, nobody is named.
+    private bool IsOwnersShift(Sheet sheet, StaffPost post, int position, int shift) =>
+        ReferenceEquals(post, sheet.Station.OwnersPost) && shift == 0 && position == _positions[0];
+
+    private IReadOnlyList<(TimeSpan Start, TimeSpan End)> ShiftsOf(StationOfSheet station) =>
+        ScheduleState.Layout!.Settings.General.ShiftTimes(station.Shifts);
+
+    private string ShiftHeading(StationOfSheet station, int index)
+    {
+        var shifts = ShiftsOf(station);
+        var (start, end) = shifts[index];
+        var times = $"{TimeText(start)}–{TimeText(end)}";
+        return shifts.Count > 1 ? $"{Translator("Shift")} {index + 1}: {times}" : times;
+    }
+
+    private static string TimeText(TimeSpan time) => $"{(int)time.TotalHours % 24:00}:{time.Minutes:00}";
+
+    private string RolesText(StaffPost post) =>
+        string.Join(" + ", StaffRolesExtensions.All.Where(role => post.Fills(role)).Select(role => Translator($"StaffRole{role}")));
+}

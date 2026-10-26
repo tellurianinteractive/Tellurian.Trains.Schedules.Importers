@@ -3078,7 +3078,7 @@
     <value>Styr tågvägarna inom stationen.</value>
   </data>
   <data name="StaffRoleYardManager" xml:space="preserve">
-    <value>Bangårdsansvarig</value>
+    <value>Rangerledare</value>
   </data>
   <data name="StaffRoleYardManagerHelp" xml:space="preserve">
     <value>Ser till att fordon, vagnsätt och godsvagnar sitter på rätt tåg.</value>
@@ -3094,5 +3094,14 @@
   </data>
   <data name="StaffRoleTraineeHelp" xml:space="preserve">
     <value>Är där för att lära sig hur verksamheten på stationen går till.</value>
+  </data>
+  <data name="WorkSchema" xml:space="preserve">
+    <value>Arbetsschema</value>
+  </data>
+  <data name="NoWorkSchema" xml:space="preserve">
+    <value>Inget arbetsschema att skriva ut: ingen bemannad station har någon personal.</value>
+  </data>
+  <data name="Shift" xml:space="preserve">
+    <value>Skift</value>
   </data>
 </root>
