@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+## Version 1.4.3
+
+### Changes
+
+- **Wagonset card: first day or session and start station.** The card now says when and where the wagonset is to stand before the meeting, as the turnus card does.
+- **Couple notes carry the vehicle's remark.** A note telling a train to couple a vehicle now also prints the vehicle's remark after its name.
+
+### Fixes
+
+- **Turnus card: start underlined on one card only.** A vehicle working several day combinations had its start time underlined on every card holding that part. It is now underlined only on the card of the day the vehicle actually starts on.
+
 ## Version 1.4.2
 
 ### Fixes

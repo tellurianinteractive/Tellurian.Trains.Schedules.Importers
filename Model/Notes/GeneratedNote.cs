@@ -107,8 +107,8 @@ public static class GeneratedNoteExtensions
             LocomotiveAtEachEndNote(var front, var back) =>
                 new(NoteResources.LocomotiveAtEachEnd, Vehicles(front[0], [.. front.Skip(1)]), Vehicles(back[0], [.. back.Skip(1)])),
             UseNote(var so) => new(NoteResources.Use, so),
-            CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, so),
-            CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, so, NoteArg.Plain(position)),
+            CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, WithRemark(so)),
+            CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, WithRemark(so), NoteArg.Plain(position)),
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),
             LoadWagonsNote(var so) => new(NoteResources.LoadWagons, so),
             UnloadAndLoadWagonsNote(var so, var isContainers) =>
@@ -256,6 +256,17 @@ public static class GeneratedNoteExtensions
     /// </summary>
     private static string When(Meet meet) =>
         meet.From == meet.To ? meet.From.HHMM() : $"{meet.From.HHMM()}-{meet.To.HHMM()}";
+
+    // A vehicle as itself, followed by its remark in italics where it has one. The remark is free text
+    // typed by the owner, so it is not translated and stands after the name rather than in the wording.
+    private static NoteArg WithRemark(ScheduledObject so)
+    {
+        var vehicle = NoteArg.Emphasised(so);
+        var remark = so.DisplayRemark;
+        return remark.Length == 0
+            ? vehicle
+            : NoteArg.Markup($"{vehicle.Text} {remark}", $"{vehicle.Html} <i>{WebUtility.HtmlEncode(remark)}</i>");
+    }
 
     // One vehicle as itself, several as a list with each emphasised as a lone one would be.
     private static object Vehicles(ScheduledObject first, IReadOnlyList<ScheduledObject> also)

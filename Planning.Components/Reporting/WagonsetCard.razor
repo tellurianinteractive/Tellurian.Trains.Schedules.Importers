@@ -1,5 +1,6 @@
 @using System.Globalization
 @inject Translator Translator
+@inject ScheduleStateService ScheduleState
 
 @{ UseReportCulture(); }
 
@@ -31,6 +32,12 @@
             {
                 <div class="line">@Translator("Length"): <strong>@Item.Length.ToString("0.#", CultureInfo.CurrentCulture)</strong></div>
             }
+            @* Where the wagonset is to stand before the meeting: the same start the turnus card underlines. *@
+            @if (Start is { } start)
+            {
+                <div class="line">@Translator(SessionSettings.UseDaysInsteadOfSessionNumbers ? "FirstDay" : "FirstSession"): <strong>@SessionsFormatting.PositionHeadingOf(start.FirstPosition, SessionSettings, false)</strong></div>
+                <div class="line">@Translator("Station"): <strong>@start.Location.Name</strong></div>
+            }
             @if (Item.Remark?.Trim() is { Length: > 0 } remark)
             {
                 <div class="line remark">@remark</div>
@@ -61,6 +68,13 @@
 @code {
     /// <summary>The wagonset to print the card for. Nothing is rendered without one.</summary>
     [Parameter] public ScheduledObject? Item { get; set; }
+
+    private SessionsSettings SessionSettings =>
+        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+
+    private VehicleStart? Start =>
+        Item?.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions,
+            ScheduleState.Layout?.Settings.General.FirstSessionStart ?? TimeSpan.Zero);
 
     // As the turnus card names the vehicle, so the two cards that go together read alike.
     private string Identity =>

@@ -1,5 +1,16 @@
 # Versionsnyheder
 
+## Version 1.4.3
+
+### Ændringer
+
+- **Vognsætkort: første dag eller session og startstation.** Kortet viser nu, hvornår og hvor vognsættet skal stå før træffet, som turnuskortet gør.
+- **Tilkoblingsnoter har køretøjets bemærkning med.** En note om, at et tog skal koble et køretøj til, udskriver nu også køretøjets bemærkning efter navnet.
+
+### Rettelser
+
+- **Turnuskort: start understreget på ét kort.** Et køretøj, der kører flere dagskombinationer, fik starttiden understreget på alle kort med den del. Den understreges nu kun på kortet for den dag, køretøjet faktisk starter.
+
 ## Version 1.4.2
 
 ### Rettelser

@@ -1,5 +1,16 @@
 # Versionsnyheter
 
+## Version 1.4.3
+
+### Ändringar
+
+- **Vagnssätskort: första dag eller session och startstation.** Kortet visar nu när och var vagnssätet ska stå före träffen, som turnuskortet gör.
+- **Ankopplingsnoter har fordonets anmärkning med.** En not om att ett tåg ska koppla till ett fordon skriver nu även ut fordonets anmärkning efter namnet.
+
+### Rättelser
+
+- **Turnuskort: start understruken på ett kort.** Ett fordon som kör flera dagskombinationer fick starttiden understruken på alla kort med den delen. Den understryks nu bara på kortet för den dag fordonet faktiskt startar.
+
 ## Version 1.4.2
 
 ### Rättelser

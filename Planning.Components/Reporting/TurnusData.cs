@@ -120,7 +120,10 @@ public static class TurnusDataExtensions
                 .SelectMany(scheduledObject => scheduledObject.SessionCombinations(useDays, maxSessions)
                     .Select(combination => new TurnusData
                     {
-                        FirstStartPart = scheduledObject.Start(useDays, maxSessions, firstSessionStart)?.FirstPart,
+                        // The same part can be worked on several combinations; only the card of the session/day
+                        // the vehicle actually starts on holds the start.
+                        FirstStartPart = scheduledObject.Start(useDays, maxSessions, firstSessionStart) is { } start
+                            && combination.Sessions.Overlaps(Sessions.FromSessionNumbers(start.FirstPosition)) ? start.FirstPart : null,
                         Id = scheduledObject.Id,
                         ScheduledObjectType = scheduledObject.ObjectType,
                         WagonSetKind = scheduledObject.WagonSetKind,

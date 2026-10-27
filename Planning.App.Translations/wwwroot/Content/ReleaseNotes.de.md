@@ -1,5 +1,16 @@
 # Versionshinweise
 
+## Version 1.4.3
+
+### Änderungen
+
+- **Wagengruppenkarte: erster Tag oder erste Session und Startbahnhof.** Die Karte zeigt jetzt, wann und wo die Wagengruppe vor dem Treffen stehen soll, wie die Umlaufkarte.
+- **Ankuppelhinweise enthalten die Bemerkung des Fahrzeugs.** Ein Hinweis, dass ein Zug ein Fahrzeug ankuppeln soll, druckt jetzt auch die Bemerkung des Fahrzeugs hinter dem Namen.
+
+### Korrekturen
+
+- **Umlaufkarte: Start nur auf einer Karte unterstrichen.** Bei einem Fahrzeug mit mehreren Tageskombinationen wurde die Startzeit auf jeder Karte mit diesem Zugabschnitt unterstrichen. Sie wird jetzt nur auf der Karte des Tages unterstrichen, an dem das Fahrzeug tatsächlich startet.
+
 ## Version 1.4.2
 
 ### Korrekturen
