@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.4.5
+
+### Endringer
+
+- **Stasjonens avgangsliste: bemerkning på vognsett.** Bemerkningen til et vognsett vises nå på radene for alle tog som fører det, som "I toget: …", både ved ankomst og avgang. Før ble den bare vist der vognsettet ble koblet til. Den utelates der toget går som en fast enhet, med et togsett eller et skyve-/trekktog.
+
 ## Versjon 1.4.4
 
 ### Endringer

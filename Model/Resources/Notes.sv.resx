@@ -266,4 +266,7 @@
   <data name="LocomotiveAtEachEnd" xml:space="preserve">
     <value>Tåget avgår med lok i båda ändar: {0} och {1}.</value>
   </data>
+  <data name="WagonsetRemark" xml:space="preserve">
+    <value>I tåget: {0}.</value>
+  </data>
 </root>

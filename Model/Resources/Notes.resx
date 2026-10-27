@@ -286,4 +286,8 @@
     <value>The train departs with a loco at each end: {0} and {1}.</value>
     <comment>{0}=locomotives at the head, {1}=locomotives at the other end</comment>
   </data>
+  <data name="WagonsetRemark" xml:space="preserve">
+    <value>In the train: {0}.</value>
+    <comment>{0}=wagonset with its remark</comment>
+  </data>
 </root>

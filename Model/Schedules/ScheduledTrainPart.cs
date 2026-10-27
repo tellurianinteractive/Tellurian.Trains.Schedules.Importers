@@ -444,6 +444,33 @@ public static class ScheduledTrainPartExtensions
             bool HoldsThisPart(Schedule schedule) => schedule.Parts.Contains(trainPart);
         }
 
+        /// <summary>
+        /// The notes naming the wagonsets this part carries that have a remark, for the station to read at
+        /// any call the train makes during the part, on arrival and on departure alike: a wagonset that simply runs
+        /// with its train has no coupling or uncoupling to be told about, and its remark would otherwise never reach
+        /// the station. A wagonset without a remark has nothing to add and gets no note, and neither has one that
+        /// runs as a fixed unit with its traction — a trainset or a push/pull train (see
+        /// <c>ScheduledObject.ChangesDirectionWithoutRunaround</c>) — which is never uncoupled at a station.
+        /// </summary>
+        internal IEnumerable<ICallNote> WagonsetRemarkNotes =>
+            trainPart.IsFixedUnit ? [] :
+            trainPart.Working(trainPart.WagonSets)
+                .Where(worked => worked.Vehicle.DisplayRemark.Length > 0)
+                .Select(worked => new WagonsetRemarkNote(worked.Vehicle)
+                {
+                    IsDriverNote = false,
+                    IsForArrival = true,
+                    IsForDeparture = true,
+                    DisplayOrder = 850,
+                    Sessions = worked.Sessions,
+                    Settings = trainPart.PlanSessionsSettings,
+                });
+
+        // Whether every traction unit working this part runs as a fixed unit with its train. A part no traction
+        // unit works is not one: its wagonsets are then handled on their own.
+        private bool IsFixedUnit =>
+            trainPart.TractionUnits.ToList() is { Count: > 0 } units && units.All(unit => unit.ChangesDirectionWithoutRunaround);
+
         // How sessions and days are written in this plan, for the notes that name some of them.
         private SessionsSettings? PlanSessionsSettings =>
             trainPart.Schedule?.Plan?.Layout.Settings.General.SessionSettings();

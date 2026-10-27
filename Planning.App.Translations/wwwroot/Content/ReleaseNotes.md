@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.4.5
+
+### Changes
+
+- **Station dispatch list: wagonset remarks.** A wagonset's remark is now shown on the rows of every train that carries it, as "In the train: …", on arrival and on departure alike. Before, it was shown only where the wagonset was coupled. It is left out where the train runs as a fixed unit, with a trainset or a push/pull locomotive.
+
 ## Version 1.4.4
 
 ### Changes

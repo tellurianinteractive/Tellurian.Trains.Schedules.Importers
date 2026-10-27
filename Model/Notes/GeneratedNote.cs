@@ -107,6 +107,7 @@ public static class GeneratedNoteExtensions
             LocomotiveAtEachEndNote(var front, var back) =>
                 new(NoteResources.LocomotiveAtEachEnd, Vehicles(front[0], [.. front.Skip(1)]), Vehicles(back[0], [.. back.Skip(1)])),
             UseNote(var so) => new(NoteResources.Use, so),
+            WagonsetRemarkNote(var so) => new(NoteResources.WagonsetRemark, WithRemark(so)),
             CoupleNote(var so, 0) => new(NoteResources.CoupleToTrain, WithRemark(so)),
             CoupleNote(var so, var position) => new(NoteResources.CoupleToTrainInPosition, WithRemark(so), NoteArg.Plain(position)),
             UncoupleNote(var so) => new(NoteResources.UncoupleFromTrain, so),

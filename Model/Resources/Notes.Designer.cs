@@ -655,6 +655,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to In the train: {0}..
+        /// </summary>
+        internal static string WagonsetRemark {
+            get {
+                return ResourceManager.GetString("WagonsetRemark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wagons × {0}.
         /// </summary>
         internal static string Wagons {

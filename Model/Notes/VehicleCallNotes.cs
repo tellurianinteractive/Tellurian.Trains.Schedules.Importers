@@ -77,6 +77,7 @@ public static class VehicleCallNoteExtensions
                 if (ReferenceEquals(part.To, call)) notes.AddRange(part.GeneratedArrivalNotes);
                 if (ReferenceEquals(part.From, call)) notes.AddRange(part.GeneratedDepartureNotes);
             }
+            notes.AddRange(call.WagonsetRemarkNotes(plan));
             notes = call.WithTurningAsked(plan, notes);
             if (call.Train is not { } train) return notes.Distinct();
             return
@@ -84,6 +85,21 @@ public static class VehicleCallNoteExtensions
                 .. SaidOncePerWording(notes.Where(note => note is not ShuntWagonsNote).Distinct(), train.Sessions),
                 .. ShuntWagonsNote.SaidOnce(notes.OfType<ShuntWagonsNote>(), train.Sessions),
             ];
+        }
+
+        /// <summary>
+        /// The remarks of the wagonsets the train carries through this call: those of every part of a schedule that
+        /// begins, ends or runs on past it, so the station sees them whether the wagonsets arrive, leave or merely
+        /// stand in the train. Positions are by <c>CallsInRunOrder</c>, never by <c>Train.Calls</c>.
+        /// </summary>
+        private IEnumerable<ICallNote> WagonsetRemarkNotes(Plan plan)
+        {
+            if (call.Train is not { } train) return [];
+            var here = RunPosition(train, call);
+            return plan.Schedules.SelectMany(schedule => schedule.Parts)
+                .Where(part => ReferenceEquals(part.From.Train, train)
+                    && RunPosition(train, part.From) <= here && here <= RunPosition(train, part.To))
+                .SelectMany(part => part.WagonsetRemarkNotes);
         }
 
         /// <summary>
