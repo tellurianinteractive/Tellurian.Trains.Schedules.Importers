@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 1.4.4
+
+### Changes
+
+- **Graphical timetable print: clearer lines.** Station track lines and the time grid now print at 0.2 mm, and train lines at 0.3 mm. The track lines were almost invisible on paper before.
+
+### Fixes
+
+- **Operation locations report: track table too wide.** The track table of a station with many columns could run past the margin of its sheet. The columns are now closer together.
+
 ## Version 1.4.3
 
 ### Changes

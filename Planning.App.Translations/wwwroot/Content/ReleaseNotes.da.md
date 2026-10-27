@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 1.4.4
+
+### Ændringer
+
+- **Udskrift af grafisk køreplan: tydeligere linjer.** Stationernes sporlinjer og tidsnettet udskrives nu med 0,2 mm, og toglinjerne med 0,3 mm. Sporlinjerne var næsten usynlige på papir før.
+
+### Rettelser
+
+- **Rapporten Driftssteder: sportabellen for bred.** Sportabellen for en station med mange kolonner kunne gå ud over arkets margen. Kolonnerne står nu tættere.
+
 ## Version 1.4.3
 
 ### Ændringer

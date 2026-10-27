@@ -70,13 +70,16 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         await Expect(Property(bro, "Train clearance")).ToHaveCountAsync(0);
 
         // Nothing wider than the sheet it is on.
-        var wide = await Page.EvaluateAsync<int>(
+        var wide = await Page.EvaluateAsync<string[]>(
             """
-            () => [...document.querySelectorAll('.location-sheet')].filter(sheet =>
-                [...sheet.querySelectorAll('table, dl, .instructions-body')].some(part =>
-                    part.getBoundingClientRect().right > sheet.getBoundingClientRect().right - parseFloat(getComputedStyle(sheet).paddingRight) + 0.5)).length
+            () => [...document.querySelectorAll('.location-sheet')].flatMap(sheet => {
+                const limit = sheet.getBoundingClientRect().right - parseFloat(getComputedStyle(sheet).paddingRight) + 0.5;
+                return [...sheet.querySelectorAll('table, dl, .instructions-body')]
+                    .filter(part => part.getBoundingClientRect().right > limit)
+                    .map(part => `${sheet.querySelector('h1')?.textContent.trim()} ${part.tagName}.${part.className} by ${(part.getBoundingClientRect().right - limit).toFixed(1)} px`);
+            })
             """);
-        Assert.AreEqual(0, wide, "A sheet has something wider than its margins.");
+        Assert.AreEqual(0, wide.Length, $"A sheet has something wider than its margins: {string.Join(", ", wide)}");
 
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("operation-locations.png"), FullPage = true });
     }

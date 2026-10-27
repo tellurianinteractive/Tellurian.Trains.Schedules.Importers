@@ -80,6 +80,10 @@ public record GraphSettings
     /// <summary>Stroke width of a train line, in drawing units.</summary>
     public int TrainStrokeWidth { get; set; } = 2;
 
+    /// <summary>Stroke width of a station track line and of the time grid, in drawing units. A printed graph
+    /// sets it explicitly, as a drawing unit there is far finer than the one pixel the default stands for.</summary>
+    public int TrackStrokeWidth { get; set; } = 1;
+
     /// <summary>Gap in drawing units between an axis label and the axis it labels, and the inset of the station
     /// signature from the edge of the sheet.</summary>
     public int LabelGap { get; set; } = 5;

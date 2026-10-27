@@ -28,7 +28,8 @@ public class PlanReversalDwellTests
         return (plan, train);
     }
 
-    // Puts the whole train into a new schedule and books the given vehicle to work it.
+    // Puts the whole train into a new schedule and books the given vehicle to work it. A locomotive is given a
+    // wagonset to haul: one with nothing behind it has no train to run round.
     private static ScheduledObject Assign(Plan plan, Train train, ScheduledObjectType type, bool isReversibleTrain = false)
     {
         var schedule = plan.CreateSchedule();
@@ -36,7 +37,14 @@ public class PlanReversalDwellTests
         var vehicle = plan.CreateVehicle(type, "Test", 1, company: null);
         vehicle.IsReversibleTrain = isReversibleTrain;
         Assert.IsTrue(plan.AssignVehicle(schedule, vehicle).HasValue);
+        if (type == ScheduledObjectType.Locomotive) AssignWagonset(plan, schedule);
         return vehicle;
+    }
+
+    private static void AssignWagonset(Plan plan, Schedule schedule)
+    {
+        var wagons = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Wagons", 1, company: null);
+        Assert.IsTrue(plan.AssignVehicle(schedule, wagons).HasValue);
     }
 
     private static StationCall Reversal(Train train) =>
@@ -253,6 +261,7 @@ public class PlanReversalDwellTests
         var ordinary = plan.CreateVehicle(ScheduledObjectType.Locomotive, "Test", 2, company: null);
         Assert.IsTrue(plan.AssignVehicle(schedule, reversible).HasValue);
         Assert.IsTrue(plan.AssignVehicle(schedule, ordinary).HasValue);
+        AssignWagonset(plan, schedule);
 
         Assert.IsNotNull(plan.UpdateTimings(train));
 

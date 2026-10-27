@@ -190,6 +190,9 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
             // Country.Id (a plain int), so no separate table or foreign keys are needed.
             entity.OwnsMany(e => e.Countries, b => b.ToJson());
 
+            // The topology schematic's node positions: plain coordinates per location, kept as JSON too.
+            entity.OwnsMany(e => e.TopologyPositions, b => b.ToJson());
+
             entity.HasMany(e => e.Companies)
                   .WithOne(e => e.Layout)
                   .HasForeignKey(e => e.LayoutId)
@@ -292,6 +295,10 @@ public class ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : Db
 
             // Per-station timing overrides: structured data worth real columns (owned, not JSON).
             entity.OwnsOne(e => e.Timings);
+
+            // The lock key is kept in plans only, like the staffing; left to convention EF takes it for an
+            // entity and cannot tell which side of its one-to-one with HeldAt holds the foreign key.
+            entity.Ignore(e => e.LockKey);
 
             // TPH discriminator for OperationLocation hierarchy
             entity.HasDiscriminator<string>("LocationType")

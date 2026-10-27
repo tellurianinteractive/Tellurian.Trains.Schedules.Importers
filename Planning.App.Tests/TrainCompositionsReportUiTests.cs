@@ -99,8 +99,8 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         await Expect(freight.Locator(".cargo").First.Locator(".destination").Last.Locator(".region"))
             .ToHaveCSSAsync("background-color", "rgb(204, 0, 0)");
         await Expect(destination.Locator(".region")).ToHaveCountAsync(0, new() { Timeout = 2000 });
-        // And the most that may be brought to that destination, after the place it belongs to.
-        await Expect(destination.Locator(".wagons")).ToHaveTextAsync("5");
+        // And the most that may be brought to the rectangle, said once, after its last destination.
+        await Expect(freight.Locator(".cargo").First.Locator(".destination").Last.Locator(".wagons")).ToHaveTextAsync("5");
         await Expect(freight.Locator(".cargo").Nth(1).Locator(".destination")).ToHaveTextAsync("Rubjerg and beyond");
         await Expect(freight.Locator(".cargo").Nth(2).Locator(".destination")).ToHaveTextAsync("all destinations");
         // Each rectangle is as wide as what it holds, so the one with the longest destination is the widest.
@@ -180,6 +180,8 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         var plan = PlanFactory.CreatePlan("Train compositions", "en");
         var timetable = plan.Timetable!;
         var layout = timetable.Layout;
+        // The report follows the start label settings, which print nothing by default.
+        foreach (var category in timetable.TrainCategories) category.StartLabels = StartLabelPrinting.All;
         var munkerod = (Station)layout.Add(NewStation(1, "Munkeröd", "Mkd", manned: true, "1", "2"));
         var rubjerg = (Station)layout.Add(NewStation(2, "Rubjerg", "Rbj", manned: false, "1"));
         var stilkobing = (Station)layout.Add(NewStation(3, "Stilkøbing", "Stk", manned: true, "1"));
@@ -251,7 +253,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
 
     private static OperationLocation NewStation(int id, string name, string signature, bool manned, params string[] tracks)
     {
-        var station = new Station(id, name, signature) { IsManned = manned };
+        var station = new Station(id, name, signature) { IsManned = manned, StartLabels = StartLabelPrinting.All };
         for (var i = 0; i < tracks.Length; i++)
             station.Add(new StationTrack(id * 10 + i, tracks[i]) { DisplayOrder = i + 1 });
         return station;

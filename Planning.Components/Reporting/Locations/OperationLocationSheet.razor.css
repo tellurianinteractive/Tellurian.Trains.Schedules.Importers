@@ -91,7 +91,7 @@
         border-collapse: collapse;
 
         th, td {
-            padding: 1mm 2.5mm;
+            padding: 1mm 1.5mm;
             border-bottom: 0.5px solid #ccc;
             vertical-align: top;
             text-align: left;

@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 1.4.4
+
+### Ändringar
+
+- **Utskrift av grafisk tidtabell: tydligare linjer.** Stationernas spårlinjer och tidsrutnätet skrivs nu ut med 0,2 mm, och tåglinjerna med 0,3 mm. Spårlinjerna var nästan osynliga på papper tidigare.
+
+### Rättelser
+
+- **Rapporten Driftplatser: spårtabellen för bred.** Spårtabellen för en station med många kolumner kunde gå utanför arkets marginal. Kolumnerna står nu tätare.
+
 ## Version 1.4.3
 
 ### Ändringar

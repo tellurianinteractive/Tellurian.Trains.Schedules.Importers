@@ -35,7 +35,7 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
         await Expect(headings.Nth(2)).ToHaveTextAsync("Stenungsund");
         await Expect(headings.Nth(3)).ToHaveTextAsync("Not in operation");
         await Expect(Page.Locator(".contributors-page").First.Locator("th")).ToHaveTextAsync(
-            ["First session", "Track", "Departure", "Type", "Turnus", "Count", "Owner", "Role", "DCC", "Note"]);
+            ["First session", "Track", "Departure", "Type", "Turnus", "Vehicle number", "Count", "Owner", "Role", "DCC", "Note"]);
         // Bert's spare of the first locomotive on a row of its own right below Anna's, shaded grey as a spare.
         var munkerod = Page.Locator(".contributors-page").First.Locator("tbody tr");
         await Expect(munkerod.Nth(0).Locator("td.role")).ToHaveTextAsync("Primary");
@@ -46,20 +46,20 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
         await AssertNoPageOverflowsAsync();
 
         // By owner: what nobody has booked first; Anna brings all thirty locomotives; Bert the wagonset he sets up
-        // himself before his spare.
+        // himself after his spare, which stands at Munkeröd: the lines go by first session, then station.
         await Page.Locator(".report-options a", new() { HasText = "By owner" }).ClickAsync();
         await Expect(headings.Nth(0)).ToHaveTextAsync("Not yet booked");
         await Expect(headings.Nth(1)).ToHaveTextAsync("Anna Berg");
         await Expect(headings.Nth(2)).ToHaveTextAsync(Continued("Anna Berg"));
         await Expect(headings.Nth(3)).ToHaveTextAsync("Bert Andersson");
         var bert = Page.Locator(".contributors-page").Nth(3).Locator("tbody tr");
-        await Expect(bert.Locator("td.role")).ToHaveTextAsync(["Primary", "Spare"]);
-        // The wagonset takes no address; the spare locomotive's is still to be provided, which is missing, in red.
-        await Expect(bert.Locator("td.dcc-address")).ToHaveTextAsync(["", "Missing"]);
-        await Expect(bert.Last.Locator("td.dcc-address")).ToHaveCSSAsync("color", "rgb(192, 0, 0)");
-        await Expect(bert.Last.Locator("td.station")).ToHaveTextAsync("Munkeröd");
+        await Expect(bert.Locator("td.role")).ToHaveTextAsync(["Spare", "Primary"]);
+        // The wagonset takes no address; the spare locomotive's is still to be provided, shown as "Specify!", in red.
+        await Expect(bert.Locator("td.dcc-address")).ToHaveTextAsync(["Specify!", ""]);
+        await Expect(bert.First.Locator("td.dcc-address")).ToHaveCSSAsync("color", "rgb(192, 0, 0)");
+        await Expect(bert.First.Locator("td.station")).ToHaveTextAsync("Munkeröd");
         // A spare is shaded grey; a locomotive in operation on every session stays white.
-        await Expect(bert.Last).ToHaveCSSAsync("background-color", "rgb(227, 227, 227)");
+        await Expect(bert.First).ToHaveCSSAsync("background-color", "rgb(227, 227, 227)");
         await Expect(Page.Locator(".contributors-page").Nth(1).Locator("tbody tr").First).ToHaveCSSAsync("background-color", "rgb(255, 255, 255)");
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("vehicle-contributors-by-owner.png"), FullPage = true });
         await AssertNoPageOverflowsAsync();
@@ -69,7 +69,7 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
         await Expect(headings.First).ToHaveTextAsync("DCC addresses");
         var addresses = await Page.Locator("table.contributors td.dcc-address").AllInnerTextsAsync();
         Assert.AreEqual("1", addresses[0]);
-        Assert.AreEqual("Missing", addresses[LocomotiveCount]);
+        Assert.AreEqual("Specify!", addresses[LocomotiveCount]);
         // Only what a DCC address applies to: thirty locomotives and Bert's spare, and no wagonset.
         Assert.AreEqual(LocomotiveCount + 1, addresses.Count);
         await Expect(Page.Locator("table.contributors td.type", new() { HasText = "Wagonset" })).ToHaveCountAsync(0);
@@ -122,7 +122,9 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
                 const style = getComputedStyle(page);
                 const bottom = box.bottom - parseFloat(style.paddingBottom);
                 const right = box.right - parseFloat(style.paddingRight);
-                const table = page.querySelector('table.contributors').getBoundingClientRect();
+                // The summary page has a table of its own to check, not the list's.
+                const table = (page.querySelector('table.contributors') ?? page.querySelector('table'))?.getBoundingClientRect();
+                if (!table) return [];
                 return [
                     ...(table.bottom > bottom + 0.5 ? [`page ${index + 1} at the foot by ${(table.bottom - bottom).toFixed(1)} px`] : []),
                     ...(table.right > right + 0.5 ? [`page ${index + 1} at the side by ${(table.right - right).toFixed(1)} px`] : []),

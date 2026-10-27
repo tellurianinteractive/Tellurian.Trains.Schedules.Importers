@@ -50,7 +50,8 @@ public static class GraphPrintScale
     private const double StationNameBaselineMm = 2.5;
     private const double EndMarginMm = 2.0;
     private const double LabelLiftMm = 0.4;
-    private const double TrainStrokeWidthMm = 0.25;
+    private const double TrainStrokeWidthMm = 0.3;
+    private const double TrackStrokeWidthMm = 0.2;
 
     /// <summary>Converts millimetres to printed drawing units.</summary>
     public static int Units(double millimetres) => (int)Math.Round(millimetres * UnitsPerMillimetre);
@@ -105,6 +106,7 @@ public static class GraphPrintScale
                 UnitsPerPoint = UnitsPerPoint,
                 LabelLift = Units(LabelLiftMm),
                 TrainStrokeWidth = Units(TrainStrokeWidthMm),
+                TrackStrokeWidth = Units(TrackStrokeWidthMm),
                 LabelGap = Units(LabelGapMm),
                 KmLabelGap = Units(KmLabelGapMm),
                 TrackNumberGap = Units(TrackNumberGapMm),

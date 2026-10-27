@@ -36,7 +36,7 @@ else
                     <text class="@Current.AxisDirection.OrientationCss("hour")" x="@hourOffset.X" y="@hourOffset.Y">@((int)time.TotalHours)</text>
                 </text>
                 var timeLine = Current.TimeLine(time);
-                <line class="timeline" x1="@timeLine.Start.X" y1="@timeLine.Start.Y" x2="@timeLine.End.X" y2="@timeLine.End.Y"></line>
+                <line class="timeline" stroke-width="@TrackStrokeWidth" x1="@timeLine.Start.X" y1="@timeLine.Start.Y" x2="@timeLine.End.X" y2="@timeLine.End.Y"></line>
             }
 
             @* Draw stations *@
@@ -61,7 +61,7 @@ else
                         <text class="@Current.AxisDirection.OrientationCss("number")" x="@trackNumber.X" y="@trackNumber.Y">@track.Number</text>
                     </text>
                     var trackLine = Current.TrackLine(s, t);
-                    <line stroke="@TrackStroke(track)" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
+                    <line stroke="@TrackStroke(track)" stroke-width="@TrackStrokeWidth" x1="@trackLine.Start.X" y1="@trackLine.Start.Y" x2="@trackLine.End.X" y2="@trackLine.End.Y"></line>
                 }
             }
 
@@ -258,6 +258,7 @@ else
             return string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{width * 4} {width * 3}");
         }
     }
+    string TrackStrokeWidth => Current!.GraphSettings.TrackStrokeWidth.ToString(System.Globalization.CultureInfo.InvariantCulture);
     string TrainStrokeWidth => Current!.GraphSettings.TrainStrokeWidth.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     // Perpendicular lift of a train identity label off its line, via <textPath> dy, so the digits sit just

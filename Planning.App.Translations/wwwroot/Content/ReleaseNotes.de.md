@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 1.4.4
+
+### Änderungen
+
+- **Druck des Bildfahrplans: deutlichere Linien.** Die Gleislinien der Bahnhöfe und das Zeitraster werden jetzt mit 0,2 mm gedruckt, die Zuglinien mit 0,3 mm. Die Gleislinien waren auf Papier bisher kaum zu sehen.
+
+### Korrekturen
+
+- **Bericht Betriebsstellen: Gleistabelle zu breit.** Die Gleistabelle eines Bahnhofs mit vielen Spalten konnte über den Rand des Blattes hinausragen. Die Spalten stehen jetzt enger beieinander.
+
 ## Version 1.4.3
 
 ### Änderungen

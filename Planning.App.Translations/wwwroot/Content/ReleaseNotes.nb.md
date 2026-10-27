@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 1.4.4
+
+### Endringer
+
+- **Utskrift av grafisk rutetabell: tydeligere linjer.** Sporlinjene på stasjonene og tidsrutenettet skrives nå ut med 0,2 mm, og toglinjene med 0,3 mm. Sporlinjene var nesten usynlige på papir før.
+
+### Rettelser
+
+- **Rapporten Driftssteder: sportabellen for bred.** Sportabellen for en stasjon med mange kolonner kunne gå utenfor margen på arket. Kolonnene står nå tettere.
+
 ## Versjon 1.4.3
 
 ### Endringer
