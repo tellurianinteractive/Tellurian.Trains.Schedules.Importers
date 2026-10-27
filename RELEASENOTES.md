@@ -1,5 +1,19 @@
 # Release Notes
 
+## Version 3.12.0
+
+### New features
+
+- **Wagonset remarks for the station.** New **`WagonsetRemarkNote`**, a station-only generated note ("In the train: ..." with the wagonset's remark in italics), is given by `StationCall.VehicleNotes` at every call a train makes while a wagonset with a remark works it: on arrival and departure alike, and on pass-through rows. A wagonset that simply runs with its train has no coupling to be told about, so its remark never reached the station. The note carries the sessions the wagonset is assigned for, and is left out where every traction unit working the part runs as a fixed unit with its train (`ScheduledObject.ChangesDirectionWithoutRunaround`: a trainset or a push/pull locomotive) and where the wagonset has no remark of its own to print (`DisplayRemark`). It is not a driver note. New `Notes` resource `WagonsetRemark` in English, Danish, German, Norwegian and Swedish.
+
+### Changes
+
+- **The couple note carries the vehicle's remark.** `CoupleNote` now prints the vehicle's `DisplayRemark` after its name, in italics, in both the text and the markup form.
+
+### Fixes
+
+- **`ScheduleDbContext` builds its model again.** EF Core could not tell which side of the one-to-one between `OperationLocation.LockKey` and `LockKey.HeldAt` holds the foreign key, and `Layout.TopologyPositions` was a type without a key, so the model failed to validate. `LockKey` is now ignored, like the staffing: it is saved in plans only. `TopologyPositions` is stored as a JSON column, as `Countries` is.
+
 ## Version 3.11.1
 
 ### Fixes

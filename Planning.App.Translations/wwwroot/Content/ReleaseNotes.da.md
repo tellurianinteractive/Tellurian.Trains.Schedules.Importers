@@ -4,7 +4,7 @@
 
 ### Ændringer
 
-- **Stationens afgangsliste: vognsættets bemærkning.** Et vognsæts bemærkning vises nu på rækkerne for alle tog, der medfører det, som "I toget: …", både ved ankomst og afgang. Før blev den kun vist, hvor vognsættet blev koblet til. Den udelades, hvor toget kører som en fast enhed, med et togsæt eller et skubbetog.
+- **Stationens afgangsliste: vognsættets bemærkning.** Et vognsæts bemærkning vises nu på rækkerne for alle tog, der medfører det, som "I toget: …", både ved ankomst og afgang. Før blev den kun vist, hvor vognsættet blev koblet til. Den udelades, hvor toget kører som en fast enhed, med et togsæt eller et vendetog.
 
 ## Version 1.4.4
 

@@ -4,7 +4,7 @@
 
 ### Ändringar
 
-- **Stationens avgångslista: anmärkning på vagnssätt.** Ett vagnssätts anmärkning visas nu på raderna för alla tåg som för det, som "I tåget: …", både vid ankomst och avgång. Tidigare visades den bara där vagnssättet kopplades till. Den utelämnas där tåget går som en fast enhet, med ett tågsätt eller ett pendeltåg med lok i vardera änden.
+- **Stationens avgångslista: anmärkning på vagnssätt.** Ett vagnssätts anmärkning visas nu på raderna för alla tåg som för det, som "I tåget: …", både vid ankomst och avgång. Tidigare visades den bara där vagnssättet kopplades till. Den utelämnas där tåget går som en fast enhet, med ett tågsätt eller ett vändtåg.
 
 ## Version 1.4.4
 

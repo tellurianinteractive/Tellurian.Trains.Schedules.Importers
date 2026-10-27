@@ -4,7 +4,7 @@
 
 ### Änderungen
 
-- **Abfahrtsliste des Bahnhofs: Bemerkung der Wagengruppe.** Die Bemerkung einer Wagengruppe wird jetzt in den Zeilen aller Züge angezeigt, die sie mitführen, als "Im Zug: …", bei der Ankunft wie bei der Abfahrt. Bisher erschien sie nur dort, wo die Wagengruppe angekuppelt wurde. Sie entfällt, wenn der Zug als feste Einheit fährt, mit einem Triebzug oder einer Wendezuglok.
+- **Abfahrtsliste des Bahnhofs: Bemerkung der Wagengruppe.** Die Bemerkung einer Wagengruppe wird jetzt in den Zeilen aller Züge angezeigt, die sie mitführen, als "Im Zug: …", bei der Ankunft wie bei der Abfahrt. Bisher erschien sie nur dort, wo die Wagengruppe angekuppelt wurde. Sie entfällt, wenn der Zug als feste Einheit fährt, mit einem Triebzug oder einem Wendezug.
 
 ## Version 1.4.4
 
