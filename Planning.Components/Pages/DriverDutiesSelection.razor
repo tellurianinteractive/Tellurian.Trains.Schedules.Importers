@@ -1,0 +1,120 @@
+@page "/driver-duties"
+@using Tellurian.Trains.Schedules.Model.Duties
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+@inject NavigationManager Navigation
+
+@* Chooses which driver duties the Driver duties report prints, then opens it with the matching ?duties=
+   filter. The report stays a pure print layout: it only knows identities, so a train picked here is
+   resolved to the duties working it before the report is opened. *@
+
+@if (ScheduleState.Schedule is not { } plan || plan.DriverDuties.Count == 0)
+{
+    <p>@Translator("NoDriverDuties")</p>
+}
+else
+{
+    <div class="duties-selection">
+        <p class="hint">@Translator("DriverDutiesSelectionIntro")</p>
+
+        <label class="choice">
+            <input type="radio" name="scope" checked="@(!_selectedOnly)" @onchange="() => _selectedOnly = false" />
+            @Translator("PrintAllDuties")
+        </label>
+        <label class="choice">
+            <input type="radio" name="scope" checked="@_selectedOnly" @onchange="() => _selectedOnly = true" />
+            @Translator("PrintSelectedDuties")
+        </label>
+
+        @if (_selectedOnly)
+        {
+            <div class="pickers">
+                <fieldset>
+                    <legend>@Translator("DutiesByNumber")</legend>
+                    <label class="entry">
+                        @Translator("DutyNumbersEntry")
+                        <input type="text" @bind="_typedIdentities" @bind:event="oninput" />
+                    </label>
+                    <ul class="checklist">
+                        @foreach (var duty in plan.DriverDutiesInPrintOrder)
+                        {
+                            <li @key="duty">
+                                <label>
+                                    <input type="checkbox" checked="@_identities.Contains(duty.Identity)"
+                                           @onchange="e => Toggle(_identities, duty.Identity, (bool)e.Value!)" />
+                                    @duty.Identity
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                </fieldset>
+
+                <fieldset>
+                    <legend>@Translator("DutiesByTrain")</legend>
+                    <ul class="checklist">
+                        @foreach (var train in WorkedTrains(plan))
+                        {
+                            <li @key="train">
+                                <label>
+                                    <input type="checkbox" checked="@_trains.Contains(train)"
+                                           @onchange="e => Toggle(_trains, train, (bool)e.Value!)" />
+                                    @train.IdentityWithCompany
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                </fieldset>
+            </div>
+
+            <p class="count">@Translator("DutiesToPrint"): @Picked(plan).Count</p>
+        }
+
+        <div class="toolbar">
+            <button class="primary" disabled="@(_selectedOnly && Picked(plan).Count == 0)" @onclick="() => Print(plan)">
+                @Translator("Print")
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _selectedOnly;
+    private string? _typedIdentities;
+    private readonly HashSet<string> _identities = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<Train> _trains = [];
+
+    protected override async Task OnInitializedAsync() => await ScheduleState.InitializeAsync();
+
+    private static void Toggle<T>(HashSet<T> set, T item, bool on)
+    {
+        if (on) set.Add(item); else set.Remove(item);
+    }
+
+    // Only trains a duty actually works are worth offering; choosing any other would select nothing.
+    private static IReadOnlyList<Train> WorkedTrains(Plan plan) =>
+    [
+        .. plan.DriverDuties
+            .SelectMany(d => d.Parts)
+            .Select(p => p.Train)
+            .Distinct()
+            .OrderBy(t => t.IdentityWithCompany, StringComparer.CurrentCulture)
+    ];
+
+    // Identities come from the ticked duties and from the typed list; the trains add the duties working them.
+    private IEnumerable<string> Identities =>
+        _identities.Concat((_typedIdentities ?? "")
+            .Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
+    private IReadOnlyList<DriverDuty> Picked(Plan plan) => plan.DriverDutiesSelected(Identities, _trains);
+
+    private void Print(Plan plan)
+    {
+        if (!_selectedOnly)
+        {
+            Navigation.NavigateTo("driver-duties-report");
+            return;
+        }
+        var identities = Picked(plan).Select(d => Uri.EscapeDataString(d.Identity));
+        Navigation.NavigateTo($"driver-duties-report?duties={string.Join(',', identities)}");
+    }
+}

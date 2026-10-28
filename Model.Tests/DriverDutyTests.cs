@@ -418,6 +418,46 @@ public class DriverDutyTests
     }
 
     [TestMethod]
+    public void DutiesWorkingATrainAreThoseHoldingOneOfItsParts()
+    {
+        var plan = CreatePlan();
+        var forwardPart = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var returnPart = AddLocoWorking(plan, Return(plan).AsTrainPart, locoNumber: 2);
+        var first = plan.CreateDriverDuty();
+        first.Identity = "1";
+        first.Add(forwardPart);
+        var second = plan.CreateDriverDuty();
+        second.Identity = "2";
+        second.Add(returnPart);
+
+        var duties = plan.DriverDutiesWorking(Return(plan));
+
+        Assert.HasCount(1, duties);
+        Assert.AreEqual(second, duties.Single());
+    }
+
+    [TestMethod]
+    public void SelectionIsTheUnionOfIdentitiesAndTrainsInPrintOrder()
+    {
+        var plan = CreatePlan();
+        var forwardPart = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var returnPart = AddLocoWorking(plan, Return(plan).AsTrainPart, locoNumber: 2);
+        var ten = plan.CreateDriverDuty();
+        ten.Identity = "10";
+        ten.Add(forwardPart);
+        var two = plan.CreateDriverDuty();
+        two.Identity = "2";
+        two.Add(returnPart);
+        var pinned = plan.CreateDriverDuty();
+        pinned.Identity = "L1";
+
+        var selected = plan.DriverDutiesSelected(["l1", "10", "99"], [Forward(plan)]);
+
+        Assert.AreEqual("10,L1", string.Join(",", selected.Select(d => d.Identity)),
+            "The duty picked twice appears once; unknown identities are ignored; order is print order.");
+    }
+
+    [TestMethod]
     public void TwoPinnedDutiesSharingAnIdentityAreReported()
     {
         var plan = CreatePlan();

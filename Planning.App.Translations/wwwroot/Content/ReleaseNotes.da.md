@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 1.4.6
+
+### Ændringer
+
+- **Førertjenester: vælg, hvad der skal udskrives.** Menupunktet Førertjenester under Rapporter åbner nu en side, hvor du vælger, hvilke tjenester der skal udskrives: alle (standard) eller et udvalg efter tjenestenummer, efter tog (selskab og nummer) eller begge dele. Tjenesterne udskrives stadig i nummerorden.
+
+### Rettelser
+
+- **Noter om at hente og sætte på spor: vognsættets bemærkning, ingen modsigelse.** Noten om at hente et vognsæt fra, eller sætte det på, et andet spor indeholder nu vognsættets bemærkning. Noten "I toget: …" udelades, hvor den note allerede nævner vognsættet, så de to ikke længere modsiger hinanden.
+
 ## Version 1.4.5
 
 ### Ændringer

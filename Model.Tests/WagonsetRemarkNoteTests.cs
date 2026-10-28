@@ -73,6 +73,23 @@ public class WagonsetRemarkNoteTests
     }
 
     [TestMethod]
+    public void AWagonsetFetchedFromAnotherTrackIsToldByThatNoteAloneWithItsRemark()
+    {
+        var (plan, train) = Arrange("Flisvagnar");
+        var part = plan.Schedules.Single().Parts.Single();
+        part.WagonSetOptions = new WagonSetOptions();
+        part.FromTrack = plan.Layout.OperationLocations.Single(l => l.Signature == "G")["1"];
+        var first = train.CallsInRunOrder[0];
+
+        var notes = first.StationNotes(train.Sessions, Settings, plan).ToList();
+
+        Assert.IsEmpty(notes.OfType<WagonsetRemarkNote>(), "The wagonset is not 'in the train' while it is fetched from a track.");
+        StringAssert.Contains(notes.OfType<FromTrackNote>().Single().ToText, "Flisvagnar");
+        Assert.ContainsSingle(train.CallsInRunOrder[1].StationNotes(train.Sessions, Settings, plan).OfType<WagonsetRemarkNote>(),
+            "At the calls after the first the wagonset is in the train, and its remark is still told.");
+    }
+
+    [TestMethod]
     [DataRow(ScheduledObjectType.Trainset, false, false)]
     [DataRow(ScheduledObjectType.Locomotive, true, false)]
     [DataRow(ScheduledObjectType.Locomotive, false, true)]

@@ -30,6 +30,24 @@ public static class VehicleCallNoteExtensions
         return -1;
     }
 
+    // A wagonset fetched from or put on another track is named, with its remark, by that note, so a separate
+    // "in the train" remark beside it would say the same twice — and read as a contradiction, the wagonset being
+    // in the train and on the track at once. The remark note stays for any session the track note leaves out.
+    private static List<ICallNote> WithoutRemarksToldByTrackNotes(List<ICallNote> notes, Sessions trainRuns)
+    {
+        var told = notes.OfType<GeneratedNote>().Where(note => note is FromTrackNote or ToTrackNote).ToList();
+        return [.. notes.Where(note => note is not WagonsetRemarkNote remark
+            || !told.Any(track => remark.ScheduledObject.Equals(VehicleOf(track))
+                && (track.Sessions ?? trainRuns).Includes(remark.Sessions ?? trainRuns)))];
+
+        static ScheduledObject? VehicleOf(GeneratedNote note) => note switch
+        {
+            FromTrackNote(var vehicle, _) => vehicle,
+            ToTrackNote(var vehicle, _) => vehicle,
+            _ => null,
+        };
+    }
+
     // Notes that read the same but for the sessions they hold on — "Mon-Wed: fetch the train from
     // track 18" and "Thu-Sun: fetch the train from track 18" — are one note for the sessions of both,
     // and say nothing of sessions where those together are every one the train runs. The first of
@@ -79,6 +97,7 @@ public static class VehicleCallNoteExtensions
             }
             notes.AddRange(call.WagonsetRemarkNotes(plan));
             notes = call.WithTurningAsked(plan, notes);
+            if (call.Train is { } running) notes = WithoutRemarksToldByTrackNotes(notes, running.Sessions);
             if (call.Train is not { } train) return notes.Distinct();
             return
             [

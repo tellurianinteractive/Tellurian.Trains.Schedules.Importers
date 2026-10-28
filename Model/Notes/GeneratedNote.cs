@@ -308,9 +308,11 @@ public static class GeneratedNoteExtensions
         var kind = NoteArg.Plain(ClassNames.InSentenceFor(so));
         var number = track.Number.Trim();
         var usage = track.Usage.Trim();
-        if (number.Length == 0 && usage.Length > 0) return new(usageOnly, kind, so, usage);
+        // The remark follows the name, as for a coupled vehicle, so the note alone says what is to be fetched.
+        var vehicle = WithRemark(so);
+        if (number.Length == 0 && usage.Length > 0) return new(usageOnly, kind, vehicle, usage);
         return usage.Length > 0
-            ? new(numberedWithUsage, kind, so, number, NoteArg.Plain(usage))
-            : new(numbered, kind, so, number);
+            ? new(numberedWithUsage, kind, vehicle, number, NoteArg.Plain(usage))
+            : new(numbered, kind, vehicle, number);
     }
 }

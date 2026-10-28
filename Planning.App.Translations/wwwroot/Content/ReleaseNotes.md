@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 1.4.6
+
+### Changes
+
+- **Driver duties: choose what to print.** The Driver duties item in the Reports menu now opens a page where you choose which duties to print: all of them (the default), or a selection by duty number, by train (company and number), or both. The duties still print in duty-number order.
+
+### Fixes
+
+- **Fetch and put notes: wagonset remark, no contradiction.** The note to fetch a wagonset from, or put it on, another track now includes the wagonset's remark. The "In the train: …" note is left out where that note already names the wagonset, so the two no longer contradict each other.
+
 ## Version 1.4.5
 
 ### Changes

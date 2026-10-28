@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 1.4.6
+
+### Änderungen
+
+- **Lokführerdienste: Auswahl der zu druckenden Dienste.** Der Menüpunkt Lokführerdienste unter Berichte öffnet jetzt eine Seite, auf der Sie wählen, welche Dienste gedruckt werden: alle (Voreinstellung) oder eine Auswahl nach Dienstnummer, nach Zug (Gesellschaft und Nummer) oder beides. Die Dienste werden weiterhin in der Reihenfolge der Dienstnummern gedruckt.
+
+### Korrekturen
+
+- **Hinweise zum Holen und Abstellen: Bemerkung der Wagengruppe, kein Widerspruch.** Der Hinweis, eine Wagengruppe von einem anderen Gleis zu holen oder auf ein anderes Gleis abzustellen, enthält jetzt die Bemerkung der Wagengruppe. Der Hinweis "Im Zug: …" entfällt, wo dieser Hinweis die Wagengruppe bereits nennt, sodass sich beide nicht mehr widersprechen.
+
 ## Version 1.4.5
 
 ### Änderungen

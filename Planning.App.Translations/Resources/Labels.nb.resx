@@ -3104,4 +3104,28 @@
   <data name="Shift" xml:space="preserve">
     <value>Skift</value>
   </data>
+  <data name="DriverDutiesSelectionIntro" xml:space="preserve">
+    <value>Velg hvilke lokførertjenester som skal skrives ut. Uansett hvordan de velges, skrives tjenestene ut i nummerrekkefølge.</value>
+  </data>
+  <data name="PrintAllDuties" xml:space="preserve">
+    <value>Alle tjenester</value>
+  </data>
+  <data name="PrintSelectedDuties" xml:space="preserve">
+    <value>Utvalgte tjenester</value>
+  </data>
+  <data name="DutiesByNumber" xml:space="preserve">
+    <value>Etter tjenestenummer</value>
+  </data>
+  <data name="DutyNumbersEntry" xml:space="preserve">
+    <value>Tjenestenumre, atskilt med komma</value>
+  </data>
+  <data name="DutiesByTrain" xml:space="preserve">
+    <value>Etter tog (selskap og nummer)</value>
+  </data>
+  <data name="DutiesToPrint" xml:space="preserve">
+    <value>Tjenester som skrives ut</value>
+  </data>
+  <data name="NoDriverDuties" xml:space="preserve">
+    <value>Det finnes ingen lokførertjenester å skrive ut.</value>
+  </data>
 </root>

@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 1.4.6
+
+### Ändringar
+
+- **Förartjänster: välj vad som ska skrivas ut.** Menyvalet Förartjänster under Rapporter öppnar nu en sida där du väljer vilka tjänster som ska skrivas ut: alla (förvalt), eller ett urval efter tjänstenummer, efter tåg (bolag och nummer) eller båda. Tjänsterna skrivs fortfarande ut i nummerordning.
+
+### Rättelser
+
+- **Anmärkningar om att hämta och växla in: vagnssättets anmärkning, ingen motsägelse.** Anmärkningen om att hämta ett vagnssätt från, eller växla in det till, ett annat spår innehåller nu vagnssättets anmärkning. Anmärkningen "I tåget: …" utelämnas där den anmärkningen redan nämner vagnssättet, så att de två inte längre motsäger varandra.
+
 ## Version 1.4.5
 
 ### Ändringar

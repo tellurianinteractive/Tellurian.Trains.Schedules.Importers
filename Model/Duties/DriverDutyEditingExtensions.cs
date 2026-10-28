@@ -92,6 +92,32 @@ public static class DriverDutyEditingExtensions
         ];
 
         /// <summary>
+        /// The duties that work any part of the given train, in print order. A train is told apart by its
+        /// company as well as its number, so two operators' trains with the same number are not mixed up.
+        /// </summary>
+        public IReadOnlyList<DriverDuty> DriverDutiesWorking(Train train)
+        {
+            train = train.ValueOrException(nameof(train));
+            return [.. plan.DriverDutiesInPrintOrder.Where(d => d.Parts.Any(p => p.Train.Equals(train)))];
+        }
+
+        /// <summary>
+        /// The duties picked either by identity or by working one of the given trains, in print order — the
+        /// union of the two, never a duty twice. Identities are matched as strings, ignoring case, since a
+        /// pinned duty may carry a non-numeric one; an identity that matches no duty is ignored.
+        /// </summary>
+        public IReadOnlyList<DriverDuty> DriverDutiesSelected(IEnumerable<string> identities, IEnumerable<Train> trains)
+        {
+            var wanted = identities.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var picked = trains.ToList();
+            return
+            [
+                .. plan.DriverDutiesInPrintOrder.Where(d =>
+                    wanted.Contains(d.Identity) || picked.Any(t => d.Parts.Any(p => p.Train.Equals(t))))
+            ];
+        }
+
+        /// <summary>
         /// Gets the train parts that can be added to the given duty: the parts a driver works (see
         /// <c>DrivenParts</c>) that do not overlap in time with the duty's parts, are not already in
         /// it, and are not worked by another duty on a session this duty also runs. For a non-empty duty

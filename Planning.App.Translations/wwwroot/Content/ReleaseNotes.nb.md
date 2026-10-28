@@ -1,5 +1,15 @@
 # Versjonsnyheter
 
+## Versjon 1.4.6
+
+### Endringer
+
+- **Førertjenester: velg hva som skal skrives ut.** Menypunktet Førertjenester under Rapporter åpner nå en side der du velger hvilke tjenester som skal skrives ut: alle (standard), eller et utvalg etter tjenestenummer, etter tog (selskap og nummer) eller begge deler. Tjenestene skrives fortsatt ut i nummerrekkefølge.
+
+### Rettelser
+
+- **Merknader om å hente og sette på spor: vognsettets bemerkning, ingen motsigelse.** Merknaden om å hente et vognsett fra, eller sette det på, et annet spor inneholder nå vognsettets bemerkning. Merknaden "I toget: …" utelates der denne merknaden allerede nevner vognsettet, slik at de to ikke lenger motsier hverandre.
+
 ## Versjon 1.4.5
 
 ### Endringer

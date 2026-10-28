@@ -3104,4 +3104,28 @@
   <data name="Shift" xml:space="preserve">
     <value>Schicht</value>
   </data>
+  <data name="DriverDutiesSelectionIntro" xml:space="preserve">
+    <value>Wählen Sie, welche Lokführerdienste gedruckt werden. Unabhängig von der Auswahl werden die Dienste in der Reihenfolge der Dienstnummern gedruckt.</value>
+  </data>
+  <data name="PrintAllDuties" xml:space="preserve">
+    <value>Alle Dienste</value>
+  </data>
+  <data name="PrintSelectedDuties" xml:space="preserve">
+    <value>Ausgewählte Dienste</value>
+  </data>
+  <data name="DutiesByNumber" xml:space="preserve">
+    <value>Nach Dienstnummer</value>
+  </data>
+  <data name="DutyNumbersEntry" xml:space="preserve">
+    <value>Dienstnummern, durch Kommas getrennt</value>
+  </data>
+  <data name="DutiesByTrain" xml:space="preserve">
+    <value>Nach Zug (Gesellschaft und Nummer)</value>
+  </data>
+  <data name="DutiesToPrint" xml:space="preserve">
+    <value>Zu druckende Dienste</value>
+  </data>
+  <data name="NoDriverDuties" xml:space="preserve">
+    <value>Es gibt keine Lokführerdienste zu drucken.</value>
+  </data>
 </root>

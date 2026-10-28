@@ -3118,4 +3118,28 @@
   <data name="Shift" xml:space="preserve">
     <value>Shift</value>
   </data>
+  <data name="DriverDutiesSelectionIntro" xml:space="preserve">
+    <value>Choose which driver duties to print. Whichever way they are chosen, the duties are printed in duty-number order.</value>
+  </data>
+  <data name="PrintAllDuties" xml:space="preserve">
+    <value>All duties</value>
+  </data>
+  <data name="PrintSelectedDuties" xml:space="preserve">
+    <value>Selected duties</value>
+  </data>
+  <data name="DutiesByNumber" xml:space="preserve">
+    <value>By duty number</value>
+  </data>
+  <data name="DutyNumbersEntry" xml:space="preserve">
+    <value>Duty numbers, separated by commas</value>
+  </data>
+  <data name="DutiesByTrain" xml:space="preserve">
+    <value>By train (company and number)</value>
+  </data>
+  <data name="DutiesToPrint" xml:space="preserve">
+    <value>Duties to print</value>
+  </data>
+  <data name="NoDriverDuties" xml:space="preserve">
+    <value>There are no driver duties to print.</value>
+  </data>
 </root>
