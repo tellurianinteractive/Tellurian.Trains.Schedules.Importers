@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.4.7
+
+### Fixes
+
+- **Turnus card and vehicle start: train part after midnight.** A train part running past midnight was placed on the day before, so a locomotive or trainset could start at the after-midnight time on the wrong day (for example Monday 00:31), and its turnus card listed 00:31 after 04:07 under the wrong days (M-O instead of Ti-O). The part now belongs to the day it actually runs, the cards show the days correctly, and the parts of a day are in clock order, so 00:31 comes before 04:07.
+
 ## Version 1.4.6
 
 ### Changes

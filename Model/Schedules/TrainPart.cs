@@ -163,6 +163,18 @@ public static class TrainPartExtensions
             trainPart.Train.IsShuntingTask ? trainPart.From.Arrival : trainPart.From.Departure;
 
         /// <summary>
+        /// How many days after the session/day it is entered under the part is worked from: 1 for a part
+        /// starting after midnight (a start time such as <c>1.00:31</c>), otherwise 0.
+        /// </summary>
+        public int StartDays => trainPart.StartTime.Value.Days;
+
+        /// <summary>
+        /// The time of day the part is worked from, without the day (<c>1.00:31</c> gives 00:31), for ordering
+        /// the parts of one session/day by the clock.
+        /// </summary>
+        public TimeSpan StartClock => trainPart.StartTime.Value - TimeSpan.FromDays(trainPart.StartDays);
+
+        /// <summary>
         /// The time this part's working ends: a travelling train's arrival at its to-call, and a shunting
         /// task's departure from its single call, which is when the work ends. The counterpart of
         /// <c>StartTime</c>.

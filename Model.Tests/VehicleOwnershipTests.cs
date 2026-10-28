@@ -340,6 +340,56 @@ public class VehicleOwnershipTests
     }
 
     [TestMethod]
+    public void AVehicleWorkingAPartPastMidnightOnTheFirstSessionStartsOnTheNextSession()
+    {
+        var plan = CreatePlan();
+        foreach (var call in Forward(plan).Calls)
+        {
+            call.Arrival = Time.FromTimeSpan(call.Arrival.Value + TimeSpan.FromDays(1));
+            call.Departure = Time.FromTimeSpan(call.Departure.Value + TimeSpan.FromDays(1));
+        }
+        var night = plan.CreateSchedule();
+        night.Append(Forward(plan).AsTrainPart);
+        var day = plan.CreateSchedule();
+        day.Append(Return(plan).AsTrainPart);
+        var loco = Loco(plan);
+        plan.AssignVehicle(night, loco, Sessions.FromSessionNumbers(1));
+        plan.AssignVehicle(day, loco, Sessions.FromSessionNumbers(2));
+
+        var start = loco.Start(useDays: false, maxSessions: 6, TimeSpan.FromHours(5));
+
+        Assert.IsNotNull(start);
+        Assert.AreEqual(2, start.FirstPosition, "Past midnight on session 1 is session 2.");
+        Assert.AreEqual(Forward(plan), start.FirstPart.Train, "12:00 on session 2 departs before the 13:00.");
+    }
+
+    [TestMethod]
+    public void APartPastMidnightIsOnTheCardOfTheNextSessionAndComesFirstThere()
+    {
+        var plan = CreatePlan();
+        foreach (var call in Forward(plan).Calls)
+        {
+            call.Arrival = Time.FromTimeSpan(call.Arrival.Value + TimeSpan.FromDays(1));
+            call.Departure = Time.FromTimeSpan(call.Departure.Value + TimeSpan.FromDays(1));
+        }
+        var night = plan.CreateSchedule();
+        night.Append(Forward(plan).AsTrainPart);
+        var day = plan.CreateSchedule();
+        day.Append(Return(plan).AsTrainPart);
+        var loco = Loco(plan);
+        plan.AssignVehicle(night, loco, Sessions.FromSessionNumbers(1, 2));
+        plan.AssignVehicle(day, loco, Sessions.FromSessionNumbers(1, 2, 3));
+
+        var combinations = loco.SessionCombinations(useDays: false, maxSessions: 3);
+
+        Assert.AreEqual(2, combinations.Count, "Sessions 2 and 3 work the same two parts.");
+        Assert.AreEqual(Return(plan), combinations[0].Parts.Single().Train, "Session 1 holds only the 13:00 part.");
+        Assert.AreEqual(Sessions.FromSessionNumbers(2, 3), combinations[1].Sessions);
+        CollectionAssert.AreEqual(new[] { Forward(plan), Return(plan) }, combinations[1].Parts.Select(p => p.Train).ToList(),
+            "The 12:00 from the night before comes before the 13:00.");
+    }
+
+    [TestMethod]
     public void TheFirstSessionStartTimeCountsOnlyWhenRunningOverMidnight()
     {
         var general = new GeneralSettings { FirstSessionStartTime = TimeSpan.FromHours(6) };

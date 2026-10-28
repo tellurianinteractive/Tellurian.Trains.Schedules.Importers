@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.4.7
+
+### Rättelser
+
+- **Turnuskort och fordonets start: tågavsnitt efter midnatt.** Ett tågavsnitt som gick efter midnatt placerades på dagen före, så ett lok eller tågset kunde starta på tiden efter midnatt på fel dag (till exempel måndag 00:31), och dess turnuskort visade 00:31 efter 04:07 under fel dagar (M-O i stället för Ti-O). Avsnittet hör nu till den dag det faktiskt går, korten visar dagarna rätt, och dagens avsnitt står i klockordning, så 00:31 kommer före 04:07.
+
 ## Version 1.4.6
 
 ### Ändringar

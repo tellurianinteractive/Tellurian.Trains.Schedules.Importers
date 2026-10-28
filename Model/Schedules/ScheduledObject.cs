@@ -534,10 +534,12 @@ public static class ScheduledObjectExtensions
             var groups = new List<SessionCombinationBuilder>();
             for (var number = 1; number <= periodMax; number++)
             {
+                // A part past midnight is worked on the day after the one it is entered under, so it is
+                // gathered from there; one falling after the last session/day is not worked at all.
                 var parts = scheduledObject.ScheduleAssignments
-                    .Where(a => a.Sessions.Includes(number))
-                    .SelectMany(a => a.Schedule?.Parts ?? [])
-                    .Where(p => p.Train.Sessions.Includes(number))
+                    .SelectMany(a => (a.Schedule?.Parts ?? [])
+                        .Where(p => number - p.StartDays is var entered && entered >= 1
+                            && a.Sessions.Includes(entered) && p.Train.Sessions.Includes(entered)))
                     .ToHashSet();
                 if (parts.Count == 0) continue;
                 var group = groups.FirstOrDefault(g => g.Parts.SetEquals(parts));
@@ -546,7 +548,7 @@ public static class ScheduledObjectExtensions
             }
             return [.. groups.Select(g => new SessionCombination(
                 SessionsExtensions.FromPeriodNumbers(g.Numbers, useDays),
-                [.. g.Parts.OrderBy(p => p.Departure?.Value)]))];
+                [.. g.Parts.OrderBy(p => p.StartClock)]))];
         }
     }
 

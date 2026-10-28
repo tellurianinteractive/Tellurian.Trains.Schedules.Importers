@@ -154,7 +154,7 @@ public static class TurnusDataExtensions
                     TrainParts = [.. group
                             .SelectMany(row => row.TrainParts)
                             .Distinct()
-                            .OrderBy(part => part.Departure?.Value)],
+                            .OrderBy(part => part.StartClock)],
                 })
                 .ToList();
 

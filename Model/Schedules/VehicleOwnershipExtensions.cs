@@ -53,6 +53,11 @@ public static class VehicleOwnershipExtensions
         /// that session/day are not worked from the meeting's start, so the vehicle starts at its first part
         /// from then on — later on the first session/day, or else on the next one it works. A vehicle working
         /// nothing from then on starts at its first part all the same.
+        /// <para>
+        /// A part running past midnight (a time on the next day, such as <c>1.00:31</c>) is worked on the
+        /// next session/day (see <c>SessionCombinations</c>), so that is the position it starts on. Of the
+        /// parts on the earliest position, the one that departs first starts the vehicle.
+        /// </para>
         /// </remarks>
         /// <param name="useDays">Whether the operating period is counted in days rather than sessions.</param>
         /// <param name="maxSessions">The number of sessions or days in the operating period.</param>
@@ -70,6 +75,7 @@ public static class VehicleOwnershipExtensions
                     .Where(combination => combination.Sessions.Includes(number))
                     .SelectMany(combination => combination.Parts)
                     .Where(part => number > 1 || part.StartTime.Value >= firstSessionStart)
+                    .OrderBy(part => part.StartClock)
                     .Take(1)
                     .Select(part => new VehicleStart(number, part, isEverySession)))
                 .FirstOrDefault()

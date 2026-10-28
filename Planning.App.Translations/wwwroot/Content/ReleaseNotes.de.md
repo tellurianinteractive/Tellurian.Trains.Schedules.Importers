@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.4.7
+
+### Korrekturen
+
+- **Umlaufkarte und Start des Fahrzeugs: Zugabschnitt nach Mitternacht.** Ein Zugabschnitt nach Mitternacht wurde auf den Vortag gelegt, sodass eine Lokomotive oder ein Triebzug zur Uhrzeit nach Mitternacht am falschen Tag starten konnte (zum Beispiel Montag 00:31) und die Umlaufkarte 00:31 nach 04:07 unter den falschen Tagen zeigte (Mo-Mi statt Di-Mi). Der Abschnitt gehört jetzt zu dem Tag, an dem er tatsächlich fährt, die Karten zeigen die Tage richtig, und die Abschnitte eines Tages stehen in Uhrzeitreihenfolge, sodass 00:31 vor 04:07 kommt.
+
 ## Version 1.4.6
 
 ### Änderungen

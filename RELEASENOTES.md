@@ -12,6 +12,7 @@
 
 ### Fixes
 
+- **A part past midnight belongs to the next session or day.** A part whose time lies on the next day (such as `1.00:31`) was counted as work on the session it is entered under, so `ScheduledObject.Start` could start a vehicle at an after-midnight time on the wrong day, and `SessionCombinations` (the turnus cards) gave it the wrong days and listed it after the early-morning parts. Such a part now counts for the following session/day (one falling after the last is not worked), and the parts of a session/day are ordered by the clock (`TrainPart.StartClock`, with `StartDays`).
 - **`ScheduleDbContext` builds its model again.** EF Core could not tell which side of the one-to-one between `OperationLocation.LockKey` and `LockKey.HeldAt` holds the foreign key, and `Layout.TopologyPositions` was a type without a key, so the model failed to validate. `LockKey` is now ignored, like the staffing: it is saved in plans only. `TopologyPositions` is stored as a JSON column, as `Countries` is.
 
 ## Version 3.11.1

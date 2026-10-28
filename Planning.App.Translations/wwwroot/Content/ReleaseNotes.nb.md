@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.4.7
+
+### Rettelser
+
+- **Omløpskort og kjøretøyets start: togstrekning etter midnatt.** En togstrekning som gikk etter midnatt, ble plassert på dagen før, slik at et lokomotiv eller togsett kunne starte på tidspunktet etter midnatt på feil dag (for eksempel mandag 00:31), og omløpskortet viste 00:31 etter 04:07 under feil dager (M-O i stedet for Ti-O). Strekningen hører nå til dagen den faktisk går, kortene viser dagene riktig, og dagens strekninger står i klokkerekkefølge, slik at 00:31 kommer før 04:07.
+
 ## Versjon 1.4.6
 
 ### Endringer
