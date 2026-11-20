@@ -1,5 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <IsAotCompatible>true</IsAotCompatible>
     <AssemblyName>Tellurian.Trains.Schedules.Model</AssemblyName>
     <RootNamespace>Tellurian.Trains.Schedules.Model</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>

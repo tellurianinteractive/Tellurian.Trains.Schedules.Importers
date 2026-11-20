@@ -42,11 +42,13 @@ public sealed class Schedule : IEquatable<Schedule>
     /// <summary>
     /// Gets or sets the foreign key to the owning schedule. Required.
     /// </summary>
+    [JsonIgnore]
     public int PlanId { get; set; }
 
     /// <summary>
     /// Gets or sets the schedule this vehicle schedule belongs to.
     /// </summary>
+    [JsonIgnore]
     public Plan Plan { get; set; } = default!;
 
     /// <summary>

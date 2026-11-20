@@ -51,6 +51,7 @@ public sealed class StationTrack : LayoutPart, IEquatable<StationTrack>
     public int DisplayOrder { get; set; }
 
     /// <summary>Trains are planned to use the track.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool IsScheduled { get; set; } = true;
 
     /// <summary>A main track, as opposed to a siding.</summary>

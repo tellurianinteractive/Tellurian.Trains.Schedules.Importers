@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
@@ -38,14 +39,69 @@ public class Module : LayoutPart
     /// <summary>The standard the module is built to, which also tells its scale; null when not stated.</summary>
     public ModuleStandard? Standard { get; set; }
 
-    /// <summary>The operation location that the module is; null for a module of plain line.</summary>
-    public OperationLocation? OperationLocation { get; set; }
+    /// <summary>
+    /// The operation location that the module is; null for a module of plain line. How it is written depends on where
+    /// the module is: on its own, as in a module file, the location is nested in the module
+    /// (<see cref="NestedOperationLocation"/>); placed in a layout, where every location is written once in
+    /// <see cref="Layout.OperationLocations"/>, the module refers to it by id (<see cref="OperationLocationId"/>).
+    /// </summary>
+    [JsonIgnore]
+    public OperationLocation? OperationLocation
+    {
+        get;
+        set { field = value; _operationLocationId = null; }
+    }
+
+    /// <summary>Whether the module is placed in a layout, as a <see cref="LayoutModule"/>'s module; decides how it is written.</summary>
+    internal bool IsPlaced { get; set; }
 
     /// <summary>
-    /// The tracks of the module: the tracks of plain line, or those of its operation location. In a layout, a module
-    /// that is an operation location has the very same tracks as <see cref="OperationLocation.Tracks"/>.
+    /// The location as written in a module on its own: nested, with its tracks. Null, and so not written, in a layout.
+    /// Read, the location's tracks become the module's (<see cref="Tracks"/>).
     /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("operationLocation")]
+    internal OperationLocation? NestedOperationLocation
+    {
+        get => IsPlaced ? null : OperationLocation;
+        set
+        {
+            OperationLocation = value;
+            if (value is not null) Tracks = value.Tracks;
+        }
+    }
+
+    /// <summary>
+    /// The id of <see cref="OperationLocation"/>, as written in a layout; the id read until <c>layout.RestoreReferences()</c>
+    /// has found the location. Null, and so not written, for a module on its own.
+    /// </summary>
+    [JsonInclude]
+    internal int? OperationLocationId
+    {
+        get => IsPlaced ? OperationLocation?.Id ?? _operationLocationId : null;
+        set => _operationLocationId = value;
+    }
+    private int? _operationLocationId;
+
+    /// <summary>
+    /// The tracks of the module: the tracks of plain line, or those of its operation location, the very same list as
+    /// <see cref="OperationLocation.Tracks"/>. They are written where they are owned: with the location when the module
+    /// is one, else on the module (<see cref="OwnTracks"/>).
+    /// </summary>
+    [JsonIgnore]
     public IList<StationTrack> Tracks { get; set; } = [];
+
+    /// <summary>
+    /// The tracks as written on the module: its own, for a module of plain line; null, and so not written, for a module
+    /// that is an operation location, whose tracks are written with the location.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("tracks")]
+    internal IList<StationTrack>? OwnTracks
+    {
+        get => OperationLocation is null && _operationLocationId is null ? Tracks : null;
+        set { if (value is not null) Tracks = value; }
+    }
 
     /// <summary>
     /// A copy with copies of the module's operation location and tracks. When the tracks are those of the location,
@@ -54,6 +110,7 @@ public class Module : LayoutPart
     public override Module Copy()
     {
         var copy = (Module)base.Copy();
+        copy.IsPlaced = false; // placed again when a layout module takes it
         copy.OperationLocation = OperationLocation?.Copy();
         copy.Tracks = OperationLocation is not null && ReferenceEquals(Tracks, OperationLocation.Tracks)
             ? copy.OperationLocation!.Tracks

@@ -29,16 +29,19 @@ public abstract class CallNote : IEquatable<CallNote>, ICallNote
     /// <summary>
     /// Controls in what order the cann note should be displayed.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int DisplayOrder { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this note is for the driver.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool IsDriverNote { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether this note is for station staff.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool IsStationNote { get; set; } = true;
 
     /// <summary>
@@ -59,11 +62,13 @@ public abstract class CallNote : IEquatable<CallNote>, ICallNote
     /// <summary>
     /// Gets or sets the foreign key to the station call.
     /// </summary>
+    [JsonIgnore]
     public int StationCallId { get; set; }
 
     /// <summary>
     /// Gets or sets the station call this note belongs to.
     /// </summary>
+    [JsonIgnore]
     public StationCall StationCall { get; set; } = default!;
 
     /// <inheritdoc/>

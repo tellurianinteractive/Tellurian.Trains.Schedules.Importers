@@ -43,6 +43,7 @@ public class DriverDuty : IEquatable<DriverDuty>
     /// <summary>
     /// Gets or sets the sessions during which this duty is active.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
@@ -70,12 +71,53 @@ public class DriverDuty : IEquatable<DriverDuty>
     /// carries no value, so deserialisation leaves the <c>1</c> in place — the truth for almost every
     /// duty. Neither constructor assigns the property, so nothing resets it to zero.
     /// </remarks>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int StaffCount { get; set; } = 1;
 
     /// <summary>
     /// Gets or sets the collection of train parts in this duty.
     /// </summary>
-    public ICollection<ScheduledTrainPart> Parts { get; set; }
+    [JsonIgnore]
+    public ICollection<ScheduledTrainPart> Parts
+    {
+        get;
+        set { field = value; _partIds = null; _ownedParts = null; }
+    }
+
+    /// <summary>
+    /// The ids of <see cref="Parts"/>, in order, the form they are written in; the ids read until the parts are found.
+    /// Null, and so not written, when there are none.
+    /// </summary>
+    [JsonInclude]
+    internal IList<int>? PartIds
+    {
+        get => Parts is { Count: > 0 } ? [.. Parts.Select(p => p.Id)] : _partIds;
+        set => _partIds = value;
+    }
+    private IList<int>? _partIds;
+
+    /// <summary>
+    /// The parts written inside the duty: those of <see cref="Parts"/> that belong to no vehicle schedule and that no
+    /// earlier duty of the plan already holds (see <see cref="PlanReferences"/>). Every other part is written by its
+    /// schedule, or by the first duty that holds it, and referred to by id. When read, the parts wait here until the
+    /// plan's references are restored.
+    /// </summary>
+    [JsonInclude]
+    [JsonPropertyName("parts")]
+    internal List<ScheduledTrainPart>? OwnedParts
+    {
+        get => _ownedParts ?? PlanReferences.OwnedParts(this);
+        set => _ownedParts = value;
+    }
+    private List<ScheduledTrainPart>? _ownedParts;
+
+    /// <summary>Takes the parts read inside the duty, once, for the plan's references to be restored.</summary>
+    internal List<ScheduledTrainPart>? TakeOwnedParts()
+    {
+        var parts = _ownedParts;
+        _ownedParts = null;
+        return parts;
+    }
 
     /// <summary>
     /// Gets or sets the collection of notes for this duty.
@@ -107,16 +149,19 @@ public class DriverDuty : IEquatable<DriverDuty>
     /// alone; the company itself is stored once, in the layout's company catalogue. Setting no company
     /// clears the key too, so the duty is not given the old one back the next time the plan is read.
     /// </summary>
+    [JsonIgnore]
     public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>
     /// Gets or sets the foreign key to the owning schedule.
     /// </summary>
+    [JsonIgnore]
     public int PlanId { get; set; }
 
     /// <summary>
     /// Gets or sets the schedule this duty belongs to.
     /// </summary>
+    [JsonIgnore]
     public Plan Plan { get; set; } = default!;
 
     /// <inheritdoc/>

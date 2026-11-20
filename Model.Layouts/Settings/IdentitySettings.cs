@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
@@ -13,14 +14,17 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 public sealed class IdentitySettings
 {
     /// <summary>The operating theme of the layout. Default is <see cref="Theme.European"/>.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public Theme Theme { get; set; } = Theme.European;
 
     /// <summary>The <see cref="Scale.Id"/> of the layout's modelling scale. Default is <c>3</c> (H0).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int ScaleId { get; set; } = 3;
 
     /// <summary>
     /// The <see cref="Country.Id"/> of the layout's default country, used as the default language
     /// and culture for layout content. Default is <c>1</c> (Sweden, sv-SE).
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int DefaultCountryId { get; set; } = 1;
 }

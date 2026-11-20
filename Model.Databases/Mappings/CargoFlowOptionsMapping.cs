@@ -24,7 +24,8 @@ internal static class CargoFlowOptionsMapping
                     origin.Property<int>("Id").ValueGeneratedOnAdd();
                     origin.HasKey("Id");
                     origin.Property<int>(ListPositions.Column);
-                    origin.HasOne(x => x.Location).WithMany().OnDelete(DeleteBehavior.Restrict);
+                    origin.Property<int?>("LocationId").UsePropertyAccessMode(PropertyAccessMode.Property);
+                    origin.HasOne(x => x.Location).WithMany().HasForeignKey("LocationId").IsRequired().OnDelete(DeleteBehavior.Restrict);
                 });
 
                 entity.OwnsMany(c => c.Destinations, destination =>
@@ -33,7 +34,8 @@ internal static class CargoFlowOptionsMapping
                     destination.Property<int>("Id").ValueGeneratedOnAdd();
                     destination.HasKey("Id");
                     destination.Property<int>(ListPositions.Column);
-                    destination.HasOne(x => x.Location).WithMany().OnDelete(DeleteBehavior.Restrict);
+                    destination.Property<int?>("LocationId").UsePropertyAccessMode(PropertyAccessMode.Property);
+                    destination.HasOne(x => x.Location).WithMany().HasForeignKey("LocationId").IsRequired().OnDelete(DeleteBehavior.Restrict);
                     // The renderings are extension properties, so EF never discovers them and there is
                     // nothing here to ignore.
                 });

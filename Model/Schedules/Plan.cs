@@ -65,6 +65,7 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
     /// <summary>
     /// Gets or sets the foreign key to the associated timetable.
     /// </summary>
+    [JsonIgnore]
     public int TimetableId { get; set; }
 
     /// <summary>

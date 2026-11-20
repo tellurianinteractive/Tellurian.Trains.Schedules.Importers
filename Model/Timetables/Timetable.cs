@@ -13,6 +13,7 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     /// <summary>
     /// Gets or sets the foreign key to the associated layout.
     /// </summary>
+    [JsonIgnore]
     public int LayoutId { get; set; }
 
     /// <summary>

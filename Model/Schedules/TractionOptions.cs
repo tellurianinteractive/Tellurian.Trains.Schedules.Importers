@@ -9,11 +9,13 @@ public sealed class TractionOptions : TrainPartOptions
     /// <summary>
     /// Number of traction uints, e.g. locomotives in consist.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int NumberOfUnits { get; set; } = 1;
     /// <summary>
     /// If true, should present a note to drivers/stations to use this specific traction unit.
     /// Applies to departures.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool DisplayUseNote { get; set; } = true;
 
     /// <summary>

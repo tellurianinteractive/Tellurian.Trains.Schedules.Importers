@@ -58,6 +58,7 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <summary>
     /// Gets or sets the departure station call.
     /// </summary>
+    [JsonIgnore]
     public StationCall From { get; set; }
 
     /// <summary>
@@ -68,6 +69,7 @@ public abstract class TrainPart : IEquatable<TrainPart>
     /// <summary>
     /// Gets or sets the arrival station call.
     /// </summary>
+    [JsonIgnore]
     public StationCall To { get; set; }
 
     /// <summary>

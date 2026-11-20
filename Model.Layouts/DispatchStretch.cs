@@ -35,14 +35,59 @@ public sealed class DispatchStretch
     /// <summary>The identity of the dispatch stretch within the layout.</summary>
     public int Id { get; set; }
 
-    /// <summary>The endpoint at one end.</summary>
-    public OperationLocation From { get; set; }
+    /// <summary>The endpoint at one end. Written by its id, <see cref="FromId"/>.</summary>
+    [JsonIgnore]
+    public OperationLocation From
+    {
+        get;
+        set { field = value; _fromId = null; }
+    }
 
-    /// <summary>The endpoint at the other end.</summary>
-    public OperationLocation To { get; set; }
+    /// <summary>The id of <see cref="From"/>, the form it is written in; the id read until the location is found.</summary>
+    [JsonInclude]
+    internal int? FromId
+    {
+        get => From?.Id ?? _fromId;
+        set => _fromId = value;
+    }
+    private int? _fromId;
 
-    /// <summary>The track stretches between the endpoints, in order.</summary>
-    public ICollection<TrackStretch> Stretches { get; set; }
+    /// <summary>The endpoint at the other end. Written by its id, <see cref="ToId"/>.</summary>
+    [JsonIgnore]
+    public OperationLocation To
+    {
+        get;
+        set { field = value; _toId = null; }
+    }
+
+    /// <summary>The id of <see cref="To"/>, the form it is written in; the id read until the location is found.</summary>
+    [JsonInclude]
+    internal int? ToId
+    {
+        get => To?.Id ?? _toId;
+        set => _toId = value;
+    }
+    private int? _toId;
+
+    /// <summary>The track stretches between the endpoints, in order. Written by their ids, <see cref="StretchIds"/>.</summary>
+    [JsonIgnore]
+    public ICollection<TrackStretch> Stretches
+    {
+        get;
+        set { field = value; _stretchIds = null; }
+    }
+
+    /// <summary>
+    /// The ids of <see cref="Stretches"/>, in order, the form they are written in; the ids read until the stretches are
+    /// found. Null, and so not written, when there are none.
+    /// </summary>
+    [JsonInclude]
+    internal IList<int>? StretchIds
+    {
+        get => Stretches is { Count: > 0 } ? [.. Stretches.Select(s => s.Id)] : _stretchIds;
+        set => _stretchIds = value;
+    }
+    private IList<int>? _stretchIds;
 
     /// <summary>The locations between the endpoints, in order.</summary>
     [JsonIgnore]

@@ -41,7 +41,7 @@ public static class HallPlanFile
         OperationLocationJson.Normalise(block);
         try
         {
-            var layout = block.Deserialize<Layout>(Layout.JsonSerializerOptions) ?? throw new InvalidDataException("The layout block is empty.");
+            var layout = block.Deserialize(LayoutJsonContext.Default.Layout) ?? throw new InvalidDataException("The layout block is empty.");
             layout.RestoreReferences();
             return layout;
         }

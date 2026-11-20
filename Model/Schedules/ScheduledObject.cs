@@ -130,16 +130,19 @@ public class ScheduledObject : IEquatable<ScheduledObject>, ITranslatable
     /// alone; the company itself is stored once, in the layout's company catalogue. Setting no company
     /// clears the key too, so the vehicle is not given the old one back the next time the plan is read.
     /// </summary>
+    [JsonIgnore]
     public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>
     /// Gets or sets the foreign key to the owning schedule. Required.
     /// </summary>
+    [JsonIgnore]
     public int PlanId { get; set; }
 
     /// <summary>
     /// Gets or sets the schedule this vehicle belongs to.
     /// </summary>
+    [JsonIgnore]
     public Plan Plan { get; set; } = default!;
 
     /// <summary>

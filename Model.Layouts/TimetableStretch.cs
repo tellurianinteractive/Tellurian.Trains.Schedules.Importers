@@ -43,8 +43,25 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     /// <summary>The colour of the route in schematics, as a CSS hex colour.</summary>
     public string Color { get; set; } = "#000000";
 
-    /// <summary>The track stretches of the route, in order.</summary>
-    public ICollection<TrackStretch> Stretches { get; set; }
+    /// <summary>The track stretches of the route, in order. Written by their ids, <see cref="StretchIds"/>.</summary>
+    [JsonIgnore]
+    public ICollection<TrackStretch> Stretches
+    {
+        get;
+        set { field = value; _stretchIds = null; }
+    }
+
+    /// <summary>
+    /// The ids of <see cref="Stretches"/>, in order, the form they are written in; the ids read until the stretches are
+    /// found. Null, and so not written, when there are none.
+    /// </summary>
+    [JsonInclude]
+    internal IList<int>? StretchIds
+    {
+        get => Stretches is { Count: > 0 } ? [.. Stretches.Select(s => s.Id)] : _stretchIds;
+        set => _stretchIds = value;
+    }
+    private IList<int>? _stretchIds;
 
     /// <summary>The locations of the route, in order.</summary>
     [JsonIgnore]

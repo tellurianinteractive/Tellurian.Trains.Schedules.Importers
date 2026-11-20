@@ -12,8 +12,15 @@ public sealed class LayoutModule : LayoutPart
     /// <summary>The identity of the module within the layout, which stretches refer to. Given once and never changed.</summary>
     public int Id { get; set; }
 
-    /// <summary>The module itself. When it is updated from its source, what it is is copied onto it and what is decided stays.</summary>
-    public required Module Module { get; set; }
+    /// <summary>
+    /// The module itself. When it is updated from its source, what it is is copied onto it and what is decided stays.
+    /// Set here, the module is placed in a layout, which decides how it is written (<see cref="Module.IsPlaced"/>).
+    /// </summary>
+    public required Module Module
+    {
+        get;
+        set { field = value; if (value is not null) value.IsPlaced = true; }
+    }
 
     /// <summary>The id of the module drawing, when the module comes from one.</summary>
     public Guid? SourceId { get; set; }

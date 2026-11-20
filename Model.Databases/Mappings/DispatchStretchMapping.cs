@@ -13,12 +13,20 @@ internal static class DispatchStretchMapping
                 entity.Property<int>(ListPositions.Column);
                 entity.HasKey(e => e.Id);
 
+                // The ends by their ids, the internal FromId and ToId the JSON writes too. Read and written through the
+                // properties, whose getters give the location's id, never through their backing fields.
+                entity.Property<int?>("FromId").UsePropertyAccessMode(PropertyAccessMode.Property);
+                entity.Property<int?>("ToId").UsePropertyAccessMode(PropertyAccessMode.Property);
                 entity.HasOne(e => e.From)
                       .WithMany()
+                      .HasForeignKey("FromId")
+                      .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.To)
                       .WithMany()
+                      .HasForeignKey("ToId")
+                      .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
 
                 // IntermediateLocations is a computed view over Stretches, not stored data.

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Components;
 using System.Net;
 using NoteResources = Tellurian.Trains.Schedules.Model.Resources.Notes;
 
@@ -9,12 +10,38 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// </summary>
 public class Destination
 {
+    /// <summary>Creates an empty destination; <see cref="Location"/> must be set.</summary>
+    public Destination() { }
+
+    /// <summary>For JSON: the location is read as its id and found when the plan's references are restored.</summary>
+    [JsonConstructor]
+    [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+    internal Destination(int? locationId)
+    {
+        Location = default!;
+        LocationId = locationId;
+    }
+
     /// <summary>
     /// The operation location that is the destination. Any location exchanging cargo qualifies
     /// (see <see cref="OperationLocation.HasCargoExchange"/>), not only a <see cref="Layouts.Station"/> —
     /// an <see cref="IndustrialArea"/> is a destination for freight wagons as much as a station is.
     /// </summary>
-    public required OperationLocation Location { get; set; }
+    [JsonIgnore]
+    public required OperationLocation Location
+    {
+        get;
+        set { field = value; _locationId = null; }
+    }
+
+    /// <summary>The id of <see cref="Location"/>, the form it is written in; the id read until the location is found.</summary>
+    [JsonInclude]
+    internal int? LocationId
+    {
+        get => Location?.Id ?? _locationId;
+        set => _locationId = value;
+    }
+    private int? _locationId;
 
     /// <summary>
     /// The destinations position in train.

@@ -1,4 +1,5 @@
-﻿namespace Tellurian.Trains.Schedules.Model.Settings;
+﻿using System.Text.Json.Serialization;
+namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
 /// User preferences controlling how the graphical timetable is drawn, for both on-screen viewing and printing.
@@ -12,9 +13,11 @@ public sealed class GraphicTimetableSettings
     public bool ShowArrivalMinutes { get; set; }
 
     /// <summary>Whether departure minute labels are shown at station calls. Default is <c>true</c>.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ShowDepartureMinutes { get; set; } = true;
 
     /// <summary>Pixels per minute along the time axis. Default is 2.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int MinuteSpacing { get; set; } = 2;
 
     /// <summary>
@@ -22,6 +25,7 @@ public sealed class GraphicTimetableSettings
     /// distance extent (its height for a horizontal time axis); stations are spaced in proportion
     /// to their real <c>TrackStretch.Distance</c>. Default is 3.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int KilometerSpacing { get; set; } = 3;
 
     /// <summary>
@@ -30,9 +34,11 @@ public sealed class GraphicTimetableSettings
     /// Ensures labels on train lines between close locations have room, and keeps a location with many tracks
     /// clear of the next one's tracks. Default is 100.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int StationSpacing { get; set; } = 100;
 
     /// <summary>Pixel spacing between individual tracks at a station. Default is 8.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TrackSpacing { get; set; } = 8;
 
     /// <summary>Whether the train category prefix is shown before the train number. Default is <c>false</c>.</summary>
@@ -46,6 +52,7 @@ public sealed class GraphicTimetableSettings
 
     /// <summary>Font size in points of the train identity labels drawn along the train lines. Also feeds the
     /// label-thinning overlap estimate, so a larger size drops more crossing labels. Default is 8.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TrainLabelFontSize { get; set; } = 8;
 
     /// <summary>
@@ -54,12 +61,14 @@ public sealed class GraphicTimetableSettings
     /// sheets, and the number of pages follows from the scale rather than the other way round. Default is 18,
     /// which puts a 14-hour operating window on a single A4 sheet.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double PrintHourSpacingMm { get; set; } = 18;
 
     /// <summary>
     /// Millimetres of paper per kilometre along the printed distance axis, floored by
     /// <see cref="PrintStationSpacingMm"/>. Default is 1.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double PrintKilometerSpacingMm { get; set; } = 1;
 
     /// <summary>
@@ -69,9 +78,11 @@ public sealed class GraphicTimetableSettings
     /// sheet has only this reduced, never <see cref="PrintKilometerSpacingMm"/>, so real distances stay
     /// comparable between sheets. Default is 20.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double PrintStationSpacingMm { get; set; } = 20;
 
     /// <summary>Millimetres between individual tracks at a station when printed. Default is 2.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double PrintTrackSpacingMm { get; set; } = 2;
 
     /// <summary>

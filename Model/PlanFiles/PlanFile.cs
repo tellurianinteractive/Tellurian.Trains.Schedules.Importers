@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Text.Json.Nodes;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
@@ -34,8 +35,9 @@ public static class PlanFile
     // Schema version 0 was written with ReferenceHandler.Preserve and nests far; it is parsed before it is migrated.
     private const int MaxDepth = 256;
 
-    private static readonly JsonSerializerOptions Options = PlanJson.CreateOptions();
-    private static readonly JsonSerializerOptions IndentedOptions = PlanJson.CreateOptions(writeIndented: true);
+    // Source-generated metadata for the plan (PlanJson): no reflection, so it works trimmed and compiled ahead of time.
+    private static readonly JsonTypeInfo<Plan> PlanType = (JsonTypeInfo<Plan>)PlanJson.CreateOptions().GetTypeInfo(typeof(Plan));
+    private static readonly JsonTypeInfo<Plan> IndentedPlanType = (JsonTypeInfo<Plan>)PlanJson.CreateOptions(writeIndented: true).GetTypeInfo(typeof(Plan));
 
     /// <summary>The version of the model that writes, as recorded in the envelope.</summary>
     public static string AppVersion { get; } = VersionOf(typeof(Plan).Assembly);
@@ -54,7 +56,7 @@ public static class PlanFile
             writer.WriteNumber(SchemaVersionProperty, CurrentSchemaVersion);
             writer.WriteString(AppVersionProperty, AppVersion);
             writer.WritePropertyName(PlanProperty);
-            JsonSerializer.Serialize(writer, plan, writeIndented ? IndentedOptions : Options);
+            JsonSerializer.Serialize(writer, plan, writeIndented ? IndentedPlanType : PlanType);
             writer.WriteEndObject();
         }
         return Encoding.UTF8.GetString(stream.ToArray());
@@ -98,7 +100,7 @@ public static class PlanFile
         content = PlanFileMigrations.Upgrade(content, version, CurrentSchemaVersion, PlanFileMigrations.All);
         try
         {
-            return content.Deserialize<Plan>(Options) ?? throw new PlanFileException(PlanFileError.NotAPlan, "The file holds no plan.");
+            return content.Deserialize(PlanType) ?? throw new PlanFileException(PlanFileError.NotAPlan, "The file holds no plan.");
         }
         catch (JsonException ex)
         {

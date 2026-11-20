@@ -27,11 +27,13 @@ public sealed class
     /// <summary>
     /// Gets or sets the foreign key to the vehicle schedule. Optional.
     /// </summary>
+    [JsonIgnore]
     public int? ScheduleId { get; set; }
 
     /// <summary>
     /// Gets or sets the vehicle schedule this train part is assigned to.
     /// </summary>
+    [JsonIgnore]
     public Schedule? Schedule { get; set; }
 
     /// <summary>
@@ -61,7 +63,21 @@ public sealed class
     /// Only a track of the location the part departs from means anything; see <c>OtherFromTrack</c>,
     /// which is what reads it.
     /// </remarks>
-    public StationTrack? FromTrack { get; set; }
+    [JsonIgnore]
+    public StationTrack? FromTrack
+    {
+        get;
+        set { field = value; _fromTrackId = null; }
+    }
+
+    /// <summary>The id of <see cref="FromTrack"/>, the form it is written in; the id read until the track is found.</summary>
+    [JsonInclude]
+    internal int? FromTrackId
+    {
+        get => FromTrack?.Id ?? _fromTrackId;
+        set => _fromTrackId = value;
+    }
+    private int? _fromTrackId;
 
     /// <summary>
     /// The track the vehicles working this part are put on after it arrives, where that is another track
@@ -71,7 +87,21 @@ public sealed class
     /// Only a track of the location the part arrives at means anything; see <c>OtherToTrack</c>, which
     /// is what reads it.
     /// </remarks>
-    public StationTrack? ToTrack { get; set; }
+    [JsonIgnore]
+    public StationTrack? ToTrack
+    {
+        get;
+        set { field = value; _toTrackId = null; }
+    }
+
+    /// <summary>The id of <see cref="ToTrack"/>, the form it is written in; the id read until the track is found.</summary>
+    [JsonInclude]
+    internal int? ToTrackId
+    {
+        get => ToTrack?.Id ?? _toTrackId;
+        set => _toTrackId = value;
+    }
+    private int? _toTrackId;
 }
 
 /// <summary>

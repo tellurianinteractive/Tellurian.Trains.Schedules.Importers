@@ -83,6 +83,7 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     public bool IsDistanceEntered { get; set; }
 
     /// <summary>The number of tracks of the line.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TracksCount { get; set; } = 1;
 
     /// <summary>The maximum speed on the stretch, km/h.</summary>
@@ -98,6 +99,7 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     public bool IsTimeEntered { get; set; }
 
     /// <summary>The line has overhead electrification, so electric traction can run on it.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool IsElectrified { get; set; } = true;
 
     /// <summary>

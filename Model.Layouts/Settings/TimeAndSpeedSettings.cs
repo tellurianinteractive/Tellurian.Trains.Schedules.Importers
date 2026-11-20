@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
@@ -7,6 +8,7 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 public sealed class TimeAndSpeedSettings
 {
     /// <summary>Expected fast-clock speed as an integer multiplier of real time. Default is 5.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int FastClockSpeed { get; set; } = 5;
 
     /// <summary>Slow speed mapping point (e.g. yard movements). Default is 60 km/h to 0.15 m/s.</summary>
@@ -26,6 +28,7 @@ public sealed class TimeAndSpeedSettings
     /// shown in timetable reports and graphs. Default is 1, so displayed kilometres equal the
     /// stored metre value, matching distances entered before this factor existed.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double DistanceFactor { get; set; } = 1;
 
     /// <summary>

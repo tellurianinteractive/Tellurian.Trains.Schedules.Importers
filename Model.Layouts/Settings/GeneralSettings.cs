@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
@@ -9,6 +10,7 @@ public sealed class GeneralSettings
     public bool UseDays { get; set; }
 
     /// <summary>The weekday of the first session when <see cref="UseDays"/> is enabled. Default is <see cref="DayOfWeek.Monday"/>.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public DayOfWeek StartDay { get; set; } = DayOfWeek.Monday;
 
     /// <summary>
@@ -17,6 +19,7 @@ public sealed class GeneralSettings
     /// when the week starts on Sunday). Only the display is affected — a train's stored sessions are never
     /// touched, so raising this again brings the hidden sessions back. Default is 14 (no capping).
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int MaxSessions { get; set; } = 14;
 
     /// <summary>
@@ -33,9 +36,11 @@ public sealed class GeneralSettings
     public DateOnly? ValidTo { get; set; }
 
     /// <summary>Fast-clock start hour of operation, used as the graphical timetable's time-axis start. Default is 06:00.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public TimeSpan StartTime { get; set; } = TimeSpan.FromHours(6);
 
     /// <summary>Fast-clock end hour of operation, used as the graphical timetable's time-axis end. Default is 20:00.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public TimeSpan EndTime { get; set; } = TimeSpan.FromHours(20);
 
     /// <summary>
@@ -99,6 +104,7 @@ public sealed class GeneralSettings
     /// report prints each station as many tickets as <c>stopping trains / TrainsPerTicket</c>, rounded up,
     /// so a busy station sells more than a quiet one without every stop needing a ticket. Default is 4.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TrainsPerTicket { get; set; } = 4;
 
     /// <summary>

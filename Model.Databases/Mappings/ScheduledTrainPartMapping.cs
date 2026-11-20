@@ -30,6 +30,10 @@ internal static class ScheduledTrainPartMapping
 
                 // The other tracks the vehicles are fetched from and put on: optional references to tracks the
                 // layout owns, through shadow foreign keys. A track in use is not deleted (DeletionRules).
+                // The internal FromTrackId and ToTrackId the JSON writes too, through the properties, whose getters give the
+                // track's id, never through their backing fields.
+                entity.Property<int?>("FromTrackId").UsePropertyAccessMode(PropertyAccessMode.Property);
+                entity.Property<int?>("ToTrackId").UsePropertyAccessMode(PropertyAccessMode.Property);
                 entity.HasOne(e => e.FromTrack)
                       .WithMany()
                       .HasForeignKey("FromTrackId")

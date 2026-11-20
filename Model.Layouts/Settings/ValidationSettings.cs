@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Settings;
 
 /// <summary>
@@ -6,10 +7,13 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 public sealed class ValidationSettings
 {
     /// <summary>Gets or sets a value indicating whether station call timings are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStationCalls { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether station track usage is validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStationTracks { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether track stretch conflicts are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStretches { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether a double track stretch counts as two single tracks, one for
@@ -22,29 +26,35 @@ public sealed class ValidationSettings
     /// </remarks>
     public bool TreatDoubleTrackAsTwoSingleTracks { get; set; }
     /// <summary>Gets or sets a value indicating whether train speeds between calls are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateTrainSpeed { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether each train's route is validated for continuity, i.e. that
     /// every leg it runs is a track stretch of the layout.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateRouteContinuity { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether train numbers are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateTrainNumbers { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether a passenger train that stops to exchange passengers is
     /// validated for standing at a track with a platform (rule T6).
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidatePassengerExchange { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether each train's stops are validated against its category's
     /// stop pattern, i.e. that it stops on its way only where the pattern names (rule T8). A category
     /// with no pattern is not checked; see <c>StopPatternRules</c>.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStopPatterns { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether each train is validated for arriving at and departing from
     /// only scheduled tracks (rule T9). Shunting tasks are not checked.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateScheduledTracks { get; set; } = true;
     /// <summary>
     /// Gets or sets a value indicating whether each train's stops between its ends are validated against the
@@ -52,16 +62,22 @@ public sealed class ValidationSettings
     /// runaround, in fast-clock time. A shorter stop is put right by lengthening it or by lowering the time
     /// required.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateRequiredStopTimes { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateSchedules { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateLocomotiveCoverage { get; set; } = true;
     /// <summary>Gets or sets a value indicating whether driver duties are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateDriverDuties { get; set; } = true;
     /// <summary>Gets or sets the minimum allowed train speed, in metres per clock minute.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double MinTrainSpeedMetersPerClockMinute { get; set; } = 0.3;
     /// <summary>Gets or sets the maximum allowed train speed, in metres per clock minute.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public double MaxTrainSpeedMetersPerClockMinute { get; set; } = 10;
     /// <summary>
     /// Gets or sets the free time a station track needs between two occupancies, in fast-clock minutes.

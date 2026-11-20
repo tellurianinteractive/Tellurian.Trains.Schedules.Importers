@@ -22,8 +22,25 @@ public class CatalogueStorageTests
     {
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256,
+        Converters = { new WholeCountry() },
         TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { PlanVersion0Reader.Version0References } },
     };
+
+    // An earlier version wrote a country as a whole object; the model now writes it as its id.
+    private sealed class WholeCountry : JsonConverter<Country>
+    {
+        public override Country? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => throw new NotSupportedException();
+
+        public override void Write(Utf8JsonWriter writer, Country value, JsonSerializerOptions options)
+        {
+            writer.WriteStartObject();
+            writer.WriteNumber(nameof(Country.Id), value.Id);
+            writer.WriteString(nameof(Country.ResourceKey), value.ResourceKey);
+            writer.WriteString(nameof(Country.Languages), value.Languages);
+            writer.WriteString(nameof(Country.CountryCode), value.CountryCode);
+            writer.WriteEndObject();
+        }
+    }
 
     // The same, but writing a layout's regions the way an earlier version did: no station ids at all,
     // and the catalogue after the locations, so a region is defined under the first station using it
@@ -32,6 +49,7 @@ public class CatalogueStorageTests
     {
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256,
+        Converters = { new WholeCountry() },
         TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { PlanVersion0Reader.Version0References, WriteRegionsTheOldWay } },
     };
 

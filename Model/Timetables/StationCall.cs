@@ -62,16 +62,19 @@ public sealed class StationCall : IEquatable<StationCall>, IComparable<StationCa
     /// <summary>
     /// Gets or sets the station track where this call occurs.
     /// </summary>
+    [JsonIgnore]
     public StationTrack Track { get; set; }
 
     /// <summary>
     /// Gets or sets the foreign key to the train.
     /// </summary>
+    [JsonIgnore]
     public int TrainId { get; set; }
 
     /// <summary>
     /// Gets or sets the train making this station call.
     /// </summary>
+    [JsonIgnore]
     public Train Train { get; set; } = default!;
 
     /// <summary>

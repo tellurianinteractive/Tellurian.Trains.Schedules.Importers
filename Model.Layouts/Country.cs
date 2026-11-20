@@ -14,6 +14,7 @@
 /// language for the country; a company may override it to a later one in the list.</param>
 /// <param name="CountryCode">The two-letter ISO 3166-1 alpha-2 country code, for example <c>CH</c>.
 /// The culture used for a report is composed as <c>{language}-{CountryCode}</c> (for example <c>de-CH</c>).</param>
+[System.Text.Json.Serialization.JsonConverter(typeof(CountryByIdConverter))]
 public record Country(int Id, string ResourceKey, string Languages, string CountryCode);
 
 

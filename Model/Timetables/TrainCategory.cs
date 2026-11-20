@@ -150,6 +150,7 @@ public record TrainCategory
     /// catalogue. Setting no company clears the key too, so the category is not given the old one back
     /// the next time the plan is read.
     /// </summary>
+    [JsonIgnore]
     public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>

@@ -41,7 +41,7 @@ public sealed class SchemaVersion4MigrationTests
     }
 
     [TestMethod]
-    public void AFlagThatIsTrueFromTheStartIsWrittenOnlyWhenFalse()
+    public void AValueIsLeftOutOnlyWhenItIsTheDefaultOfItsType()
     {
         var plan = PlanFile.Read(Version3Plan);
         var location = plan.Layout.OperationLocations.Single();
@@ -51,10 +51,11 @@ public sealed class SchemaVersion4MigrationTests
         var written = Location(PlanFile.Write(plan));
         var tracks = written["tracks"]!.AsArray().Select(t => t!.AsObject()).ToList();
 
-        Assert.IsFalse(tracks[0].ContainsKey("isScheduled"), "true, its default, is left out");
-        Assert.IsFalse(tracks[1]["isScheduled"]!.GetValue<bool>(), "false is written");
+        Assert.IsTrue(tracks[0]["isScheduled"]!.GetValue<bool>(), "a flag that starts as true is always written");
+        Assert.IsFalse(tracks[1]["isScheduled"]!.GetValue<bool>(), "and written when false");
+        Assert.IsFalse(tracks[1].ContainsKey("isMain"), "a flag that is false, the default of its type, is left out");
         Assert.IsTrue(written["hideMeets"]!.GetValue<bool>(), "a flag set away from its default is written");
-        Assert.IsFalse(written.ContainsKey("instructions"), "an empty text is left out");
+        Assert.AreEqual(string.Empty, written["instructions"]!.GetValue<string>(), "an empty text is no null, so it is written");
 
         var read = PlanFile.Read(PlanFile.Write(plan)).Layout.OperationLocations.Single();
         Assert.IsTrue(read.Tracks[0].IsScheduled);

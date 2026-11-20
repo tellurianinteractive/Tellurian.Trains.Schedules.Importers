@@ -95,9 +95,11 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
     public virtual bool IsChangingTrainDirectionPossible { get; set; }
 
     /// <summary>Passengers board and alight here: tickets can be issued from and to this location.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public virtual bool HasPassengerExchange { get; set; } = true;
 
     /// <summary>Cargo wagons are exchanged here.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public virtual bool HasCargoExchange { get; set; } = true;
 
     /// <summary>The line ends here.</summary>
@@ -117,19 +119,51 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
 
     /// <summary>
     /// The station whose shunting yard works this location's local freight, or <c>null</c> when nothing serves it.
-    /// Only where cargo is exchanged. A shunting yard is derived from this relation, not declared. Not written by the
-    /// contract: another location is referred to by id where a layout is written.
+    /// Only where cargo is exchanged. A shunting yard is derived from this relation, not declared. Written by its id,
+    /// <see cref="CargoServedFromId"/>.
     /// </summary>
     [JsonIgnore]
-    public Station? CargoServedFrom { get; set; }
+    public Station? CargoServedFrom
+    {
+        get;
+        set { field = value; _cargoServedFromId = null; }
+    }
+
+    /// <summary>
+    /// The id of <see cref="CargoServedFrom"/>, the form it is written in: the station's id while there is one, else the
+    /// id read, until <c>layout.RestoreReferences()</c> has found the station.
+    /// </summary>
+    [JsonInclude]
+    internal int? CargoServedFromId
+    {
+        get => CargoServedFrom?.Id ?? _cargoServedFromId;
+        set => _cargoServedFromId = value;
+    }
+    private int? _cargoServedFromId;
 
     /// <summary>
     /// The manned station whose dispatcher works this location's signals and switches from afar, or <c>null</c>.
-    /// Only a signal controlled location, an unmanned station or an industrial area can be controlled. Not written by
-    /// the contract: another location is referred to by id where a layout is written.
+    /// Only a signal controlled location, an unmanned station or an industrial area can be controlled. Written by its
+    /// id, <see cref="ControlledById"/>.
     /// </summary>
     [JsonIgnore]
-    public Station? ControlledBy { get; set; }
+    public Station? ControlledBy
+    {
+        get;
+        set { field = value; _controlledById = null; }
+    }
+
+    /// <summary>
+    /// The id of <see cref="ControlledBy"/>, the form it is written in: the station's id while there is one, else the id
+    /// read, until <c>layout.RestoreReferences()</c> has found the station.
+    /// </summary>
+    [JsonInclude]
+    internal int? ControlledById
+    {
+        get => ControlledBy?.Id ?? _controlledById;
+        set => _controlledById = value;
+    }
+    private int? _controlledById;
 
     /// <summary>The key a train needs to unlock the switches here, or <c>null</c> when none is needed.</summary>
     public LockKey? LockKey { get; set; }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -31,31 +32,32 @@ internal static class PlanVersion0Reader
     }
 
     /// <summary>
-    /// Adds back what version 0 wrote as objects and the shared model doesn't write: the stations a location refers to,
-    /// the station a lock key is held at, and a station's regions. For the readers and writers of version 0 in the tests.
+    /// Makes a type's metadata read and write what version 0 had: the file-only id properties of later versions, which are
+    /// internal, are taken out, so that their names don't clash with what version 0 wrote; and every public property that
+    /// the model now marks <c>[JsonIgnore]</c> and that can be set is put back, since version 0 wrote them all: parents,
+    /// and the objects that later versions write by their id. For the readers and writers of version 0 in the tests.
     /// </summary>
     internal static void Version0References(JsonTypeInfo typeInfo)
     {
         if (typeInfo.Kind != JsonTypeInfoKind.Object) return;
-        if (typeof(OperationLocation).IsAssignableFrom(typeInfo.Type))
+        // Version 0 refers by $ref, which can't be given to a constructor's parameters: a type that later versions read
+        // through a constructor taking an id is created with its public parameterless one instead.
+        if (typeInfo.Type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Any(c => c.GetParameters().Length > 0 && c.GetCustomAttribute<JsonConstructorAttribute>() is not null) &&
+            typeInfo.Type.GetConstructor(Type.EmptyTypes) is { } parameterless)
+            typeInfo.CreateObject = () => parameterless.Invoke(null);
+        for (var i = typeInfo.Properties.Count - 1; i >= 0; i--)
+            if (typeInfo.Properties[i].AttributeProvider is PropertyInfo { GetMethod.IsPublic: false }) typeInfo.Properties.RemoveAt(i);
+        foreach (var member in typeInfo.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            Add<OperationLocation, Station?>(typeInfo, nameof(OperationLocation.CargoServedFrom), l => l.CargoServedFrom, (l, s) => l.CargoServedFrom = s);
-            Add<OperationLocation, Station?>(typeInfo, nameof(OperationLocation.ControlledBy), l => l.ControlledBy, (l, s) => l.ControlledBy = s);
+            if (member.GetIndexParameters().Length > 0 || member.SetMethod is not { IsPublic: true } || member.GetMethod is not { IsPublic: true }) continue;
+            if (member.GetCustomAttribute<JsonIgnoreAttribute>(inherit: true) is not { Condition: JsonIgnoreCondition.Always }) continue;
+            // A property the model marks [JsonIgnore] is still listed, ignored; it is replaced.
+            if (typeInfo.Properties.FirstOrDefault(p => p.Name == member.Name) is { } ignored) typeInfo.Properties.Remove(ignored);
+            var property = typeInfo.CreateJsonPropertyInfo(member.PropertyType, member.Name);
+            property.Get = member.GetValue;
+            property.Set = member.SetValue;
+            typeInfo.Properties.Add(property);
         }
-        if (typeInfo.Type == typeof(Station))
-            Add<Station, IList<Region>>(typeInfo, nameof(Station.Regions), s => s.Regions, (s, r) => s.Regions = r ?? []);
-        if (typeInfo.Type == typeof(LockKey))
-            Add<LockKey, Station>(typeInfo, nameof(LockKey.HeldAt), k => k.HeldAt, (k, s) => k.HeldAt = s);
-    }
-
-    private static void Add<TOwner, TValue>(JsonTypeInfo typeInfo, string name, Func<TOwner, TValue> get, Action<TOwner, TValue> set)
-    {
-        // A property the model marks [JsonIgnore] is still listed, ignored; it is replaced.
-        if (typeInfo.Properties.FirstOrDefault(p => p.Name == name) is { } ignored) typeInfo.Properties.Remove(ignored);
-        var property = typeInfo.CreateJsonPropertyInfo(typeof(TValue), name);
-        property.Get = owner => get((TOwner)owner);
-        property.Set = (owner, value) => set((TOwner)owner, (TValue)value!);
-        typeInfo.Properties.Add(property);
     }
 
     private static void Version0Names(JsonTypeInfo typeInfo)

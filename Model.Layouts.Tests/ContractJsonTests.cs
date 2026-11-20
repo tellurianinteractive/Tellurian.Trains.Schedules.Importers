@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tests;
@@ -93,34 +94,54 @@ public class ContractJsonTests
     [TestMethod]
     public void ALayoutWithItsModulesRoundTrips()
     {
+        var tellby = new Station(1, "Tellby", "Tby") { IsManned = true };
         var layout = new Layout
         {
             SourceId = Guid.NewGuid(),
             SourceRevision = 7,
+            OperationLocations = { tellby },
             Modules =
             {
                 new()
                 {
                     Id = 1,
-                    Module = new()
-                    {
-                        Name = "Tellby", Prefix = "SF", Number = 12, HasFremoDesignation = true, ModuleOwners = "Stefan, Module Club",
-                        OperationLocation = new Station(1, "Tellby", "Tby") { IsManned = true },
-                    },
+                    Module = new() { Name = "Tellby", Prefix = "SF", Number = 12, HasFremoDesignation = true, ModuleOwners = "Stefan, Module Club", OperationLocation = tellby },
                 },
                 new() { Id = 2, Module = new() { Name = "Curve", PackageLabel = "Box 1", Tracks = { new StationTrack(2, "1") } } },
             },
         };
 
-        var read = JsonSerializer.Deserialize<Layout>(JsonSerializer.Serialize(layout, Options), Options)!;
+        var json = JsonSerializer.Serialize(layout, Options);
+        var read = JsonSerializer.Deserialize<Layout>(json, Options)!;
+        read.RestoreReferences();
         var modules = read.Modules.ToList();
 
         Assert.AreEqual(layout.SourceId, read.SourceId);
         Assert.AreEqual(7, read.SourceRevision);
+        Assert.AreEqual(1, JsonNode.Parse(json)!["modules"]![0]!["module"]!["operationLocationId"]!.GetValue<int>(), "in a layout a module refers to its location by id");
         Assert.AreEqual("SF 0012 Tellby", modules[0].Module.DisplayName);
+        Assert.AreSame(read.OperationLocations.Single(), modules[0].Module.OperationLocation);
         Assert.IsTrue(((Station)modules[0].Module.OperationLocation!).IsManned);
         Assert.AreEqual("Box 1", modules[1].Module.PackageLabel);
         Assert.IsNull(modules[1].Module.OperationLocation);
+        Assert.AreEqual("1", modules[1].Module.Tracks.Single().Designation, "a plain-line module keeps its own tracks");
+    }
+
+    [TestMethod]
+    public void AModuleOnItsOwnHasItsLocationNestedWithTheTracks()
+    {
+        var tellby = new Station(1, "Tellby", "Tby") { IsManned = true };
+        tellby.Tracks.Add(new StationTrack(1, "1"));
+        var module = new Module { Name = "Tellby", Prefix = "SF", Number = 12, OperationLocation = tellby, Tracks = tellby.Tracks };
+
+        var json = JsonNode.Parse(JsonSerializer.Serialize(module, Options))!.AsObject();
+        var read = JsonSerializer.Deserialize<Module>(json.ToJsonString(), Options)!;
+
+        Assert.IsNull(json["operationLocationId"], "on its own a module nests its location");
+        Assert.IsNull(json["tracks"], "the tracks are written with the location that owns them");
+        Assert.AreEqual("1", json["operationLocation"]!["tracks"]![0]!["designation"]!.GetValue<string>());
+        Assert.IsTrue(((Station)read.OperationLocation!).IsManned);
+        Assert.AreSame(read.OperationLocation.Tracks, read.Tracks, "the module's tracks are its location's");
     }
 
     [TestMethod]
