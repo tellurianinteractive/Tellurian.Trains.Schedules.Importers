@@ -44,7 +44,7 @@ public class HallPlanImportTests
         var file = new JsonObject
         {
             ["format"] = HallPlanFile.Format,
-            ["kind"] = HallPlanFile.Kind,
+            ["kind"] = HallPlanFile.Kind, ["schemaVersion"] = 2,
             ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
         };
         return HallPlanFile.ReadLayout(file.ToJsonString());

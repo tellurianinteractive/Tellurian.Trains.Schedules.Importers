@@ -71,7 +71,7 @@ public sealed class PlanFileTests
     [TestMethod]
     public void TheStepsRunInOrderFromTheVersionOfThePlan()
     {
-        IReadOnlyList<PlanFileMigration> steps =
+        IReadOnlyList<Files.FileMigration> steps =
         [
             new(1, content => Append(content, "1")),
             new(0, content => Append(content, "0")),

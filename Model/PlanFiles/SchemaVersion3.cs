@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Files;
 using System.Text.Json.Nodes;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
@@ -17,7 +18,7 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 public static class SchemaVersion3
 {
     /// <summary>The step from schema version 2.</summary>
-    public static PlanFileMigration Migration { get; } = new(2, Migrate);
+    public static FileMigration Migration { get; } = new(2, Migrate);
 
     /// <summary>The platform length given, in metres: the planner's <c>StationTrack.DefaultPlatformLength</c> when version 3 was made.</summary>
     private const double PlatformLength = 1;

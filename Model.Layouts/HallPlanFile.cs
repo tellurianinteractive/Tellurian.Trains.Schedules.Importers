@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Tellurian.Trains.Schedules.Model.Files;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
@@ -18,6 +19,23 @@ public static class HallPlanFile
 
     /// <summary>The name of the layout block in the content of a hall plan file.</summary>
     public const string LayoutProperty = "layout";
+
+    /// <summary>The newest schema version of a hall plan file whose layout block this version reads.</summary>
+    public const int NewestSchemaVersion = 2;
+
+    /// <summary>
+    /// What a hall plan file is, for its envelope (<see cref="FileEnvelope"/>). Only the layout block is read here, so no
+    /// migrations: an older file has no block, and a newer one than <see cref="NewestSchemaVersion"/> is refused.
+    /// </summary>
+    public static FileKind FileKind { get; } = new()
+    {
+        Name = "hall plan",
+        Format = Format,
+        Kind = Kind,
+        ContentProperty = "content",
+        CurrentSchemaVersion = NewestSchemaVersion,
+        LowestSchemaVersion = 1,
+    };
 
     /// <summary>
     /// The layout of the hall plan file <paramref name="json"/>, with its references resolved
@@ -87,13 +105,20 @@ public static class HallPlanFile
     private static JsonObject? LayoutBlock(JsonNode? root)
     {
         if (root is not JsonObject file) return null;
-        if (file["format"] is JsonValue format && format.TryGetValue<string>(out var name))
+        if (file.ContainsKey("format"))
         {
-            if (!string.Equals(name, Format, StringComparison.Ordinal))
-                throw new InvalidDataException($"The file is not a Module Draw file: its format is '{name}'.");
-            if (file["kind"] is JsonValue kind && kind.TryGetValue<string>(out var kindName) && !string.Equals(kindName, Kind, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException($"The file is a {kindName} file, not a hall plan.");
-            return file["content"]?[LayoutProperty] as JsonObject;
+            FileHeader header;
+            try
+            {
+                header = FileEnvelope.ReadHeader(FileKind, file);
+            }
+            catch (FileFormatException ex)
+            {
+                throw new InvalidDataException(ex.Message, ex);
+            }
+            if (header.SchemaVersion > NewestSchemaVersion)
+                throw new InvalidDataException($"The hall plan was saved by a newer version of Module Draw (schema version {header.SchemaVersion}); this version reads up to schema version {NewestSchemaVersion}.");
+            return file[FileKind.ContentProperty]?[LayoutProperty] as JsonObject;
         }
         return file.ContainsKey("operationLocations") || file.ContainsKey("modules") ? file : null;
     }

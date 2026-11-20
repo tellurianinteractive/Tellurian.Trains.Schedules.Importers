@@ -174,6 +174,7 @@ public sealed class LayoutChangesUiTests : PlaywrightTestBase
         {
             ["format"] = Model.Layouts.HallPlanFile.Format,
             ["kind"] = Model.Layouts.HallPlanFile.Kind,
+            ["schemaVersion"] = Model.Layouts.HallPlanFile.NewestSchemaVersion,
             ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
         };
         return Encoding.UTF8.GetBytes(file.ToJsonString());

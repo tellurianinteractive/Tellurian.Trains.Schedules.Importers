@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Files;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -24,7 +25,7 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 public static class SchemaVersion1
 {
     /// <summary>The step from schema version 0.</summary>
-    public static PlanFileMigration Migration { get; } = new(0, content => new Migrator(content).Run());
+    public static FileMigration Migration { get; } = new(0, content => new Migrator(content).Run());
 
     private enum Kind { Value, Drop, Owned, OwnedList, Catalogue, Reference, ReferenceList, Enum, IdList, Countries, DutyParts }
 

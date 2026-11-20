@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Files;
 using System.Text.Json.Nodes;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
@@ -17,7 +18,7 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 public static class SchemaVersion2
 {
     /// <summary>The step from schema version 1.</summary>
-    public static PlanFileMigration Migration { get; } = new(1, Migrate);
+    public static FileMigration Migration { get; } = new(1, Migrate);
 
     // The planner's country catalogue as it was when version 2 was made: id to ISO 3166-1 alpha-2 code.
     private static readonly Dictionary<int, string> CountryCodes = new()

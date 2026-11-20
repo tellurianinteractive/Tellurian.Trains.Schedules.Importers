@@ -1,3 +1,4 @@
+using Tellurian.Trains.Schedules.Model.Files;
 using System.Text.Json.Nodes;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
@@ -18,7 +19,7 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 public static class SchemaVersion4
 {
     /// <summary>The step from schema version 3.</summary>
-    public static PlanFileMigration Migration { get; } = new(3, Migrate);
+    public static FileMigration Migration { get; } = new(3, Migrate);
 
     private static JsonNode Migrate(JsonNode content)
     {

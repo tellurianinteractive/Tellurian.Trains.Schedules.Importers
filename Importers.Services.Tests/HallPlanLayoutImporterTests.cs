@@ -26,7 +26,7 @@ public class HallPlanLayoutImporterTests
         var file = new JsonObject
         {
             ["format"] = HallPlanFile.Format,
-            ["kind"] = HallPlanFile.Kind,
+            ["kind"] = HallPlanFile.Kind, ["schemaVersion"] = 2,
             ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
         };
         var bytes = Encoding.UTF8.GetBytes(file.ToJsonString());
@@ -58,7 +58,7 @@ public class HallPlanLayoutImporterTests
     [TestMethod]
     public async Task AHallPlanWithoutLayoutFailsWithAMessage()
     {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("""{ "format": "tellurian-drawing", "kind": "HallPlan", "content": { } }"""));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("""{ "format": "tellurian-drawing", "kind": "HallPlan", "schemaVersion": 1, "content": { } }"""));
 
         var result = await Importer.ImportAsync(stream, "old.json", TestContext.CancellationToken);
 

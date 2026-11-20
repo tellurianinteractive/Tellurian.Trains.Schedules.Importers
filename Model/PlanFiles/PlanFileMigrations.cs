@@ -1,31 +1,29 @@
 using System.Text.Json.Nodes;
+using Tellurian.Trains.Schedules.Model.Files;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 
 /// <summary>
-/// The chain of migrations of the plan file (<c>Documentation/ModelHarmonisation.md</c>, section 5). A plan of an
-/// older schema version goes through every step from its own version up to <see cref="PlanFile.CurrentSchemaVersion"/>.
+/// The chain of migrations that brings the content of a plan file from the schema version it was written in to the
+/// current one, one step per version. The steps are the plan's; the chain is the suite's (<see cref="FileEnvelope"/>).
 /// </summary>
 public static class PlanFileMigrations
 {
-    /// <summary>Every step, one per schema version it reads.</summary>
-    public static IReadOnlyList<PlanFileMigration> All { get; } = [SchemaVersion1.Migration, SchemaVersion2.Migration, SchemaVersion3.Migration, SchemaVersion4.Migration];
+    /// <summary>Every step, in order: from version 0 to 1, from 1 to 2, and so on.</summary>
+    public static IReadOnlyList<FileMigration> All { get; } = [SchemaVersion1.Migration, SchemaVersion2.Migration, SchemaVersion3.Migration, SchemaVersion4.Migration];
 
-    /// <summary>
-    /// <paramref name="content"/> brought from <paramref name="fromVersion"/> to <paramref name="toVersion"/> by
-    /// <paramref name="migrations"/>, one step at a time.
-    /// </summary>
-    /// <exception cref="PlanFileException">A step of the chain is missing.</exception>
-    public static JsonNode Upgrade(JsonNode content, int fromVersion, int toVersion, IReadOnlyList<PlanFileMigration> migrations)
+    /// <summary>Brings <paramref name="content"/> from <paramref name="fromVersion"/> to <paramref name="toVersion"/> with <paramref name="migrations"/>.</summary>
+    /// <exception cref="PlanFileException">A step is missing.</exception>
+    public static JsonNode Upgrade(JsonNode content, int fromVersion, int toVersion, IReadOnlyList<FileMigration> migrations)
     {
-        ArgumentNullException.ThrowIfNull(content);
         ArgumentNullException.ThrowIfNull(migrations);
-        for (var version = fromVersion; version < toVersion; version++)
+        try
         {
-            var step = migrations.FirstOrDefault(m => m.FromVersion == version)
-                ?? throw new PlanFileException(PlanFileError.MigrationMissing, $"There is no migration of a plan from schema version {version}.");
-            content = step.Migrate(content);
+            return FileEnvelope.Upgrade(PlanFile.Kind with { Migrations = migrations }, content, fromVersion, toVersion);
         }
-        return content;
+        catch (FileFormatException ex)
+        {
+            throw PlanFile.ToPlanFileException(ex);
+        }
     }
 }

@@ -98,8 +98,8 @@ public class LayoutBlockTests
     public void AnotherFileOrNoLayoutBlockIsRefused()
     {
         Assert.ThrowsExactly<InvalidDataException>(() => HallPlanFile.ReadLayout("""{ "format": "tellurian-plan", "schemaVersion": 2, "plan": {} }"""));
-        Assert.ThrowsExactly<InvalidDataException>(() => HallPlanFile.ReadLayout("""{ "format": "tellurian-drawing", "kind": "Module", "content": {} }"""));
-        var missing = Assert.ThrowsExactly<InvalidDataException>(() => HallPlanFile.ReadLayout("""{ "format": "tellurian-drawing", "kind": "HallPlan", "content": { "name": "Club" } }"""));
+        Assert.ThrowsExactly<InvalidDataException>(() => HallPlanFile.ReadLayout("""{ "format": "tellurian-drawing", "kind": "Module", "schemaVersion": 2, "content": {} }"""));
+        var missing = Assert.ThrowsExactly<InvalidDataException>(() => HallPlanFile.ReadLayout("""{ "format": "tellurian-drawing", "kind": "HallPlan", "schemaVersion": 2, "content": { "name": "Club" } }"""));
         StringAssert.Contains(missing.Message, "no layout block");
     }
 }

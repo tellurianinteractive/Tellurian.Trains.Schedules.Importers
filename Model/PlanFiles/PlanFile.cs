@@ -1,8 +1,9 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.Json.Nodes;
+using Tellurian.Trains.Schedules.Model.Files;
 
 namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 
@@ -17,7 +18,8 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 /// { "format": "tellurian-plan", "schemaVersion": 2, "appVersion": "3.12.0", "plan": { ... } }
 /// </code>
 /// A plan written before the envelope existed is the plan object alone, and is read as schema version 0.
-/// A plan of a newer schema version than <see cref="CurrentSchemaVersion"/> is refused rather than read in part.
+/// A plan of a newer schema version than <see cref="CurrentSchemaVersion"/> is refused rather than read in part. The
+/// envelope and the chain of migrations are the suite's, shared with every other kind of file (<see cref="FileEnvelope"/>).
 /// </remarks>
 public static class PlanFile
 {
@@ -27,13 +29,16 @@ public static class PlanFile
     /// <summary>The schema version this version writes, and the newest it reads.</summary>
     public const int CurrentSchemaVersion = 4;
 
-    private const string FormatProperty = "format";
-    private const string SchemaVersionProperty = "schemaVersion";
-    private const string AppVersionProperty = "appVersion";
-    private const string PlanProperty = "plan";
-
-    // Schema version 0 was written with ReferenceHandler.Preserve and nests far; it is parsed before it is migrated.
-    private const int MaxDepth = 256;
+    /// <summary>What a plan file is: its envelope, its schema versions and its migrations (<see cref="FileEnvelope"/>).</summary>
+    public static FileKind Kind { get; } = new()
+    {
+        Name = "plan",
+        Format = Format,
+        ContentProperty = "plan",
+        CurrentSchemaVersion = CurrentSchemaVersion,
+        ReadsWithoutEnvelope = true,
+        Migrations = PlanFileMigrations.All,
+    };
 
     // Source-generated metadata for the plan (PlanJson): no reflection, so it works trimmed and compiled ahead of time.
     private static readonly JsonTypeInfo<Plan> PlanType = (JsonTypeInfo<Plan>)PlanJson.CreateOptions().GetTypeInfo(typeof(Plan));
@@ -48,18 +53,8 @@ public static class PlanFile
     public static string Write(Plan plan, bool writeIndented = false)
     {
         ArgumentNullException.ThrowIfNull(plan);
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = writeIndented, MaxDepth = MaxDepth }))
-        {
-            writer.WriteStartObject();
-            writer.WriteString(FormatProperty, Format);
-            writer.WriteNumber(SchemaVersionProperty, CurrentSchemaVersion);
-            writer.WriteString(AppVersionProperty, AppVersion);
-            writer.WritePropertyName(PlanProperty);
-            JsonSerializer.Serialize(writer, plan, writeIndented ? IndentedPlanType : PlanType);
-            writer.WriteEndObject();
-        }
-        return Encoding.UTF8.GetString(stream.ToArray());
+        var type = writeIndented ? IndentedPlanType : PlanType;
+        return FileEnvelope.Write(Kind, AppVersion, writer => JsonSerializer.Serialize(writer, plan, type), writeIndented);
     }
 
     /// <summary>The plan in <paramref name="json"/>, a plan file of any schema version up to <see cref="CurrentSchemaVersion"/>.</summary>
@@ -70,11 +65,11 @@ public static class PlanFile
         JsonNode? root;
         try
         {
-            root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions { MaxDepth = MaxDepth });
+            root = FileEnvelope.Parse(json);
         }
-        catch (JsonException ex)
+        catch (FileFormatException ex)
         {
-            throw new PlanFileException(PlanFileError.NotAPlan, $"The file is not valid JSON: {ex.Message}", ex);
+            throw ToPlanFileException(ex);
         }
         return Read(root);
     }
@@ -90,14 +85,38 @@ public static class PlanFile
 
     /// <summary>The schema version of the plan file <paramref name="root"/>: what its envelope says, and 0 without one.</summary>
     /// <exception cref="PlanFileException">The envelope is of another format, or its version isn't a number.</exception>
-    public static int SchemaVersionOf(JsonNode? root) => Open(root).Version;
+    public static int SchemaVersionOf(JsonNode? root)
+    {
+        try
+        {
+            return FileEnvelope.ReadHeader(Kind, root).SchemaVersion;
+        }
+        catch (FileFormatException ex)
+        {
+            throw ToPlanFileException(ex);
+        }
+    }
+
+    /// <summary>The plan file's own exception for <paramref name="exception"/> of the shared file mechanism.</summary>
+    internal static PlanFileException ToPlanFileException(FileFormatException exception) =>
+        new(exception.Error switch
+        {
+            NewerVersion => PlanFileError.NewerVersion,
+            MigrationMissing => PlanFileError.MigrationMissing,
+            InvalidJson or NotThisFormat or WrongKind or InvalidContent => PlanFileError.NotAPlan,
+        }, exception.Message, exception);
 
     private static Plan Read(JsonNode? root)
     {
-        var (version, content) = Open(root);
-        if (version > CurrentSchemaVersion)
-            throw new PlanFileException(PlanFileError.NewerVersion, $"The plan was saved by a newer version of the app (schema version {version}); this version reads up to schema version {CurrentSchemaVersion}.");
-        content = PlanFileMigrations.Upgrade(content, version, CurrentSchemaVersion, PlanFileMigrations.All);
+        JsonNode content;
+        try
+        {
+            content = FileEnvelope.ReadContent(Kind, root);
+        }
+        catch (FileFormatException ex)
+        {
+            throw ToPlanFileException(ex);
+        }
         try
         {
             return content.Deserialize(PlanType) ?? throw new PlanFileException(PlanFileError.NotAPlan, "The file holds no plan.");
@@ -106,19 +125,6 @@ public static class PlanFile
         {
             throw new PlanFileException(PlanFileError.NotAPlan, $"The plan can't be read: {ex.Message}", ex);
         }
-    }
-
-    private static (int Version, JsonNode Content) Open(JsonNode? root)
-    {
-        if (root is not JsonObject envelope) throw new PlanFileException(PlanFileError.NotAPlan, "The file holds no plan.");
-        if (!envelope.TryGetPropertyValue(FormatProperty, out var format)) return (0, envelope);
-        if (format?.GetValueKind() != JsonValueKind.String || format.GetValue<string>() != Format)
-            throw new PlanFileException(PlanFileError.NotAPlan, $"The file is not a plan: its format is {format?.ToJsonString() ?? "null"}.");
-        if (envelope[SchemaVersionProperty] is not JsonValue versionValue || !versionValue.TryGetValue<int>(out var version) || version < 0)
-            throw new PlanFileException(PlanFileError.NotAPlan, "The plan file has no valid schema version.");
-        if (envelope[PlanProperty] is not JsonObject content)
-            throw new PlanFileException(PlanFileError.NotAPlan, "The plan file holds no plan.");
-        return (version, content);
     }
 
     private static string VersionOf(Assembly assembly)
