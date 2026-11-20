@@ -13,7 +13,9 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// <remarks>
 /// The shape is said by attributes on the types, read by source-generated metadata (<see cref="LayoutJsonContext"/>):
 /// an object referred to by id is <c>[JsonIgnore]</c>, and beside it an id property gives the object's id, or holds the id
-/// read until the object is found. No reflection is used, so it works trimmed and compiled ahead of time.
+/// read until the object is found. No reflection is used, so it works trimmed and compiled ahead of time. The properties
+/// that shape the file are public, some hidden from IntelliSense, so that another app's own source-generated serialiser
+/// writes the contract's types the same way.
 /// </remarks>
 public static class LayoutSerialization
 {

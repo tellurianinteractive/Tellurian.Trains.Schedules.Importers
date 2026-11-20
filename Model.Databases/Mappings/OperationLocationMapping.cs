@@ -23,16 +23,20 @@ internal static class OperationLocationMapping
 
                 // The shunting yard whose local freight covers this location. Restrict rather than cascade:
                 // deleting a shunting yard must not take the stations it served with it.
+                // By its id, the CargoServedFromId the JSON writes too, read through the property (its getter gives the
+                // station's id), never its backing field.
+                entity.Property(e => e.CargoServedFromId).UsePropertyAccessMode(PropertyAccessMode.Property);
                 entity.HasOne(e => e.CargoServedFrom)
                       .WithMany()
-                      .HasForeignKey("CargoServedFromStationId")
+                      .HasForeignKey(e => e.CargoServedFromId)
                       .OnDelete(DeleteBehavior.Restrict)
                       .IsRequired(false);
 
                 // The manned station working this location from afar. Restrict, like CargoServedFrom.
+                entity.Property(e => e.ControlledById).UsePropertyAccessMode(PropertyAccessMode.Property);
                 entity.HasOne(e => e.ControlledBy)
                       .WithMany()
-                      .HasForeignKey("ControlledByStationId")
+                      .HasForeignKey(e => e.ControlledById)
                       .OnDelete(DeleteBehavior.Restrict)
                       .IsRequired(false);
 

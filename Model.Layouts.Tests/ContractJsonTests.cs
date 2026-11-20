@@ -144,6 +144,23 @@ public class ContractJsonTests
         Assert.AreSame(read.OperationLocation.Tracks, read.Tracks, "the module's tracks are its location's");
     }
 
+    [DataTestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public void TracksWrittenOnTheModuleBecomeItsLocationsWhenTheLocationHasNone(bool locationFirst)
+    {
+        var location = """ "operationLocation": { "kind": "Station", "id": 0, "name": "Tellby", "signature": "Tby", "tracks": [] } """;
+        var tracks = """ "tracks": [ { "id": 1, "designation": "1" }, { "id": 2, "designation": "2" } ] """;
+        var json = $$"""{ "name": "Tellby", {{(locationFirst ? location + "," + tracks : tracks + "," + location)}} }""";
+
+        var module = JsonSerializer.Deserialize<Module>(json, Options)!;
+        var written = JsonNode.Parse(JsonSerializer.Serialize(module, Options))!;
+
+        Assert.HasCount(2, module.OperationLocation!.Tracks);
+        Assert.AreSame(module.OperationLocation.Tracks, module.Tracks);
+        Assert.HasCount(2, written["operationLocation"]!["tracks"]!.AsArray(), "written again, the tracks are with the location");
+    }
+
     [TestMethod]
     public void AStretchIsWrittenWithTheIdsOfItsEnds()
     {

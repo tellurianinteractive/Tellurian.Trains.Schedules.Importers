@@ -29,6 +29,8 @@ internal static class TimetableStretchMapping
                           });
 
                 entity.Ignore(e => e.Stations);
+                // The stretches are the join table; StretchIds is how a file writes them.
+                entity.Ignore(e => e.StretchIds);
             });
     }
 }

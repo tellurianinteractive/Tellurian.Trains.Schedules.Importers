@@ -8,9 +8,9 @@ public enum Theme
     /// <summary>
     /// The layout and timetables have an Americal theme.
     /// </summary>
-    American,
+    American = 0,
     /// <summary>
     /// The layout and timetables have an European theme.
     /// </summary>
-    European
+    European = 1,
 }

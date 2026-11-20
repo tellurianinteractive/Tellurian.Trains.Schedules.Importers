@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Timetables;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
@@ -66,9 +67,9 @@ public sealed class Station : OperationLocation
     /// <see cref="RegionIds"/> as written: null, and so not written, for a station that stands for no region, which is
     /// every station but the few shadow yards.
     /// </summary>
-    [JsonInclude]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [JsonPropertyName("regionIds")]
-    internal IList<int>? WrittenRegionIds
+    public IList<int>? WrittenRegionIds
     {
         get => Regions.Count > 0 ? RegionIds : UnresolvedRegionIds.Count > 0 ? UnresolvedRegionIds : null;
         set => UnresolvedRegionIds = value ?? [];

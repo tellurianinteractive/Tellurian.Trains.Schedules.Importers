@@ -15,22 +15,24 @@ internal static class DispatchStretchMapping
 
                 // The ends by their ids, the internal FromId and ToId the JSON writes too. Read and written through the
                 // properties, whose getters give the location's id, never through their backing fields.
-                entity.Property<int?>("FromId").UsePropertyAccessMode(PropertyAccessMode.Property);
-                entity.Property<int?>("ToId").UsePropertyAccessMode(PropertyAccessMode.Property);
+                entity.Property(e => e.FromId).UsePropertyAccessMode(PropertyAccessMode.Property);
+                entity.Property(e => e.ToId).UsePropertyAccessMode(PropertyAccessMode.Property);
                 entity.HasOne(e => e.From)
                       .WithMany()
-                      .HasForeignKey("FromId")
+                      .HasForeignKey(e => e.FromId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.To)
                       .WithMany()
-                      .HasForeignKey("ToId")
+                      .HasForeignKey(e => e.ToId)
                       .IsRequired()
                       .OnDelete(DeleteBehavior.Restrict);
 
                 // IntermediateLocations is a computed view over Stretches, not stored data.
                 entity.Ignore(e => e.IntermediateLocations);
+                // The stretches are the join table; StretchIds is how a file writes them.
+                entity.Ignore(e => e.StretchIds);
 
                 // The ordered track stretches the dispatch stretch comprises; the track stretches
                 // themselves belong to the layout, so this is a reference-only many-to-many.

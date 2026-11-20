@@ -26,6 +26,7 @@ internal static class StationMapping
                 // RegionIds is how that association is written to a plan (see PlanJson); the join table
                 // holds it here, so mapping it as well would store it twice.
                 entity.Ignore(e => e.RegionIds);
+                entity.Ignore(e => e.WrittenRegionIds);
 
                 // The staffing: a short list of posts, each a set of roles, read and written with the station.
                 entity.OwnsMany(e => e.StaffPosts, posts =>

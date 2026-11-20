@@ -6,8 +6,8 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 public enum TimeAxisOrientation
 {
     /// <summary>Time runs horizontally (left to right); stations are stacked vertically.</summary>
-    Horizontal,
+    Horizontal = 0,
 
     /// <summary>Time runs vertically (top to bottom); stations are spread horizontally.</summary>
-    Vertical
+    Vertical = 1,
 }

@@ -133,8 +133,7 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
     /// The id of <see cref="CargoServedFrom"/>, the form it is written in: the station's id while there is one, else the
     /// id read, until <c>layout.RestoreReferences()</c> has found the station.
     /// </summary>
-    [JsonInclude]
-    internal int? CargoServedFromId
+    public int? CargoServedFromId
     {
         get => CargoServedFrom?.Id ?? _cargoServedFromId;
         set => _cargoServedFromId = value;
@@ -157,8 +156,7 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
     /// The id of <see cref="ControlledBy"/>, the form it is written in: the station's id while there is one, else the id
     /// read, until <c>layout.RestoreReferences()</c> has found the station.
     /// </summary>
-    [JsonInclude]
-    internal int? ControlledById
+    public int? ControlledById
     {
         get => ControlledBy?.Id ?? _controlledById;
         set => _controlledById = value;

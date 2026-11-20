@@ -55,8 +55,7 @@ public sealed class TimetableStretch : IEquatable<TimetableStretch>
     /// The ids of <see cref="Stretches"/>, in order, the form they are written in; the ids read until the stretches are
     /// found. Null, and so not written, when there are none.
     /// </summary>
-    [JsonInclude]
-    internal IList<int>? StretchIds
+    public IList<int>? StretchIds
     {
         get => Stretches is { Count: > 0 } ? [.. Stretches.Select(s => s.Id)] : _stretchIds;
         set => _stretchIds = value;

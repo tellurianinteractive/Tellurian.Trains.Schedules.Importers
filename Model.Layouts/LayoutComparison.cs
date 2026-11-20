@@ -4,53 +4,53 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 public enum LayoutChangeKind
 {
     /// <summary>The distance or the number of tracks of a stretch between the same two locations is different.</summary>
-    StretchChanged,
+    StretchChanged = 0,
 
     /// <summary>What a location is, not what is decided for it, is different: name, signature, exchange, turntable…</summary>
-    LocationChanged,
+    LocationChanged = 1,
 
     /// <summary>The location is of another kind.</summary>
-    KindChanged,
+    KindChanged = 2,
 
     /// <summary>A location has a track it didn't have.</summary>
-    TrackAdded,
+    TrackAdded = 3,
 
     /// <summary>What a track is, its length, platform, main or stub, is different.</summary>
-    TrackChanged,
+    TrackChanged = 4,
 
     /// <summary>A location no longer has a track.</summary>
-    TrackRemoved,
+    TrackRemoved = 5,
 
     /// <summary>A location is new on a stretch between two locations that were neighbours: the stretch is split.</summary>
-    LocationInserted,
+    LocationInserted = 6,
 
     /// <summary>A location between two others is gone, and they are neighbours: its two stretches become one.</summary>
-    LocationRemoved,
+    LocationRemoved = 7,
 
     /// <summary>A location is new elsewhere than on a stretch, e.g. at the end of a new branch.</summary>
-    LocationAdded,
+    LocationAdded = 8,
 
     /// <summary>A location is gone, and its neighbours are not joined instead.</summary>
-    LocationDropped,
+    LocationDropped = 9,
 
     /// <summary>A stretch between two locations that weren't neighbours.</summary>
-    StretchAdded,
+    StretchAdded = 10,
 
     /// <summary>A stretch between two locations that are no longer neighbours.</summary>
-    StretchRemoved,
+    StretchRemoved = 11,
 }
 
 /// <summary>How a <see cref="LayoutChange"/> can be taken into a layout that has a timetable.</summary>
 public enum LayoutChangeHandling
 {
     /// <summary>It changes nothing the timetable depends on but distances and times, and is applied at once (<see cref="LayoutUpdate.ApplyAutomatic"/>).</summary>
-    Automatic,
+    Automatic = 0,
 
     /// <summary>It changes the timetable in a known way, e.g. calls are moved or removed; applied after the planner has agreed.</summary>
-    Confirm,
+    Confirm = 1,
 
     /// <summary>The order of the locations doesn't hold any more; it can't be applied to the timetable as it is.</summary>
-    Manual,
+    Manual = 2,
 }
 
 /// <summary>
@@ -226,9 +226,10 @@ public sealed class LayoutComparison
         return result;
     }
 
+    // By the Module Registry's station id when both have one, else by an entry of the same system with the same content;
+    // never by raw text, so a reordered or extended entry still matches.
     private static bool SharesExternalReference(OperationLocation a, OperationLocation b) =>
-        a.ExternalReferences is { Count: > 0 } mine && b.ExternalReferences is { Count: > 0 } theirs &&
-        mine.Any(r => theirs.TryGetValue(r.Key, out var other) && r.Value.GetRawText() == other.GetRawText());
+        ExternalReferences.ReferToTheSame(a.ExternalReferences, b.ExternalReferences, ExternalReferences.StationId);
 
     private static void CompareLocation(OperationLocation location, OperationLocation source, List<LayoutChange> changes)
     {

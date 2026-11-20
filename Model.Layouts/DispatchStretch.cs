@@ -44,8 +44,7 @@ public sealed class DispatchStretch
     }
 
     /// <summary>The id of <see cref="From"/>, the form it is written in; the id read until the location is found.</summary>
-    [JsonInclude]
-    internal int? FromId
+    public int? FromId
     {
         get => From?.Id ?? _fromId;
         set => _fromId = value;
@@ -61,8 +60,7 @@ public sealed class DispatchStretch
     }
 
     /// <summary>The id of <see cref="To"/>, the form it is written in; the id read until the location is found.</summary>
-    [JsonInclude]
-    internal int? ToId
+    public int? ToId
     {
         get => To?.Id ?? _toId;
         set => _toId = value;
@@ -81,8 +79,7 @@ public sealed class DispatchStretch
     /// The ids of <see cref="Stretches"/>, in order, the form they are written in; the ids read until the stretches are
     /// found. Null, and so not written, when there are none.
     /// </summary>
-    [JsonInclude]
-    internal IList<int>? StretchIds
+    public IList<int>? StretchIds
     {
         get => Stretches is { Count: > 0 } ? [.. Stretches.Select(s => s.Id)] : _stretchIds;
         set => _stretchIds = value;

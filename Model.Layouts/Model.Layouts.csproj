@@ -4,8 +4,6 @@
     <RootNamespace>Tellurian.Trains.Schedules.Model.Layouts</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
     <Title>$(AssemblyName)</Title>
-    <!-- The contract has a version of its own: it changes far more seldom than the planner. -->
-    <Version>0.3.5</Version>
     <Description>The shared model of a model railway layout: operation locations, their tracks and the stretches between them. Used by the planner, the Module Registry, Module Draw and Dispatch. No dependencies.</Description>
     <PackageTags>model-trains layouts FREMO operation-locations</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

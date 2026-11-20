@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json.Serialization;
 
@@ -59,15 +60,18 @@ public class Module : LayoutPart
     /// The location as written in a module on its own: nested, with its tracks. Null, and so not written, in a layout.
     /// Read, the location's tracks become the module's (<see cref="Tracks"/>).
     /// </summary>
-    [JsonInclude]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [JsonPropertyName("operationLocation")]
-    internal OperationLocation? NestedOperationLocation
+    public OperationLocation? NestedOperationLocation
     {
         get => IsPlaced ? null : OperationLocation;
         set
         {
             OperationLocation = value;
-            if (value is not null) Tracks = value.Tracks;
+            if (value is null) return;
+            // A file that wrote the tracks on the module and none in the location: they are the location's.
+            if (value.Tracks.Count == 0 && Tracks.Count > 0) value.Tracks = Tracks;
+            Tracks = value.Tracks;
         }
     }
 
@@ -75,8 +79,7 @@ public class Module : LayoutPart
     /// The id of <see cref="OperationLocation"/>, as written in a layout; the id read until <c>layout.RestoreReferences()</c>
     /// has found the location. Null, and so not written, for a module on its own.
     /// </summary>
-    [JsonInclude]
-    internal int? OperationLocationId
+    public int? OperationLocationId
     {
         get => IsPlaced ? OperationLocation?.Id ?? _operationLocationId : null;
         set => _operationLocationId = value;
@@ -95,12 +98,22 @@ public class Module : LayoutPart
     /// The tracks as written on the module: its own, for a module of plain line; null, and so not written, for a module
     /// that is an operation location, whose tracks are written with the location.
     /// </summary>
-    [JsonInclude]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [JsonPropertyName("tracks")]
-    internal IList<StationTrack>? OwnTracks
+    public IList<StationTrack>? OwnTracks
     {
         get => OperationLocation is null && _operationLocationId is null ? Tracks : null;
-        set { if (value is not null) Tracks = value; }
+        set
+        {
+            if (value is null) return;
+            // A file that wrote the tracks on the module and none in the location: they are the location's.
+            if (OperationLocation is { } location)
+            {
+                if (location.Tracks.Count == 0) location.Tracks = value;
+                Tracks = location.Tracks;
+            }
+            else Tracks = value;
+        }
     }
 
     /// <summary>

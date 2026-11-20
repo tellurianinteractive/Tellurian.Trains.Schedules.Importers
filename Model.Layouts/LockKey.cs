@@ -23,8 +23,7 @@ public sealed class LockKey
     /// The id of <see cref="HeldAt"/>, the form it is written in: the station's id while there is one, else the id read,
     /// until <c>layout.RestoreReferences()</c> has found the station.
     /// </summary>
-    [JsonInclude]
-    internal int? HeldAtId
+    public int? HeldAtId
     {
         get => HeldAt?.Id ?? _heldAtId;
         set => _heldAtId = value;
