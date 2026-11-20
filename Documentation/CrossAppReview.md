@@ -44,12 +44,26 @@ The owner plans to extend the Registry's API so that **Module Draw's catalogue c
 2. **All of Module Draw's files are read and written here**: module, end profile, hall, hall plan and catalogue, with one envelope and one migration mechanism for every file of the suite, plan files included. Module Draw only calls it.
 3. **The dispatch state goes in the plan's database.** One database per operated plan holds the layout, the timetable and the dispatch state together; Dispatch adds its tables to the database the planner exports.
 4. **An additional train is a Timetables `Train`**, with its calls, marked as created during dispatch; a cancellation is dispatch state on an existing train. The planner can read them back.
+5. **A hall plan is a `Layout` plus where it stands in a hall.** The layout holds the modules with their drawings, the lines, joints, locations and stretches, and travels into the plan file and the database; the hall plan adds the hall, the anchors, public areas, walking paths and acknowledgements (`LayoutsLayerSurvey.md` 2.8). Module Draw's own type named `Layout` goes.
+6. **JSON default values are handled with attributes only**: `WhenWritingDefault`, and `[JsonIgnore(Condition = Never)]` on each property whose initial value isn't `default(T)`, with a test that every such property has it. Files grow a little (`LayoutsLayerSurvey.md` 4.4, option A).
+7. **The Dispatch server creates the operating database** from a plan file (`PlanFile`, then `DatabaseExportService`). The planned conversion service in the Module Registry is not needed for this.
+8. **A plan can be corrected during a meeting.** A corrected plan replaces the plan in the operating database and the operation is carried over (`ReplacePlanAsync`); trains and calls created in dispatch get ids from a reserved range (from 1,000,000) so the planner's ids never collide with them (`DispatchingLayerSurvey.md` 4.3, 4.5).
 
+9. **Running times are worked out per module.** The time over a stretch is the sum over the modules of its route, each module's length at that module's speed limit; a module without a speed limit is run at the train's speed. A running time therefore belongs to a train on a stretch, not to the stretch alone. Where the modules between two operation locations are missing, the planner's scenario of today is kept: the stretch's distance and speed are entered by the planner (`IsDistanceEntered`, and a new `IsSpeedEntered`), and the running time is distance over that speed, limited by the train's speed as today.
 Still open, to be settled as the survey goes:
 
 - **Names of the layers in code.** Today `Model.Layouts` and `Model`; whether `Model` becomes `Model.Timetables` beside a new `Model.Dispatching` (a breaking rename, so in 4.0.0 if at all).
 - **The same layout data changed in two places.** The planner changes some data on the layout's items, and Module Draw can issue a newer hall plan; what wins when both changed the same thing (`ModelHarmonisation.md`, decision 3, still open).
 - **Who owns the catalogue's ids.** With the catalogue fetched from the Registry, whether standards, scales and end profiles are identified by Registry ids or by ids of their own here.
+
+### The surveys, 2026-11-20
+
+Two read-only surveys work out what the layers need, each with an order of work and questions for the owner:
+
+- `LayoutsLayerSurvey.md`: what the Layouts layer needs for Module Draw to work with it alone (geometry, end profiles, modules, halls, hall plans, catalogue, files, source-generated JSON, querying the physical layout).
+- `DispatchingLayerSurvey.md`: what a new Dispatching layer contains, and what Layouts, Timetables and the database add for Tellurian Dispatch (operation, operating sessions, train runs and sections, the log, the state machines, the dispatch tables).
+
+Both put **source-generated JSON** and **one shared envelope and migration mechanism** first: they are needed by every later step and remove the warnings the build already gives.
 
 ### How this bears on the recommendations in section 6
 
