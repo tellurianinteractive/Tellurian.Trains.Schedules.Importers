@@ -736,6 +736,30 @@ public static class TrainExtensions
         }
 
         /// <summary>
+        /// Adds a station call to the train right after <paramref name="previous"/> in its route, whatever its times
+        /// are: a location inserted on a stretch the train runs gets its call between the two it ran between.
+        /// </summary>
+        /// <param name="call">The station call to add.</param>
+        /// <param name="previous">The call of the train it is to follow.</param>
+        /// <returns>The added station call.</returns>
+        public StationCall AddAfter(StationCall call, StationCall previous)
+        {
+            train = train.ValueOrException(nameof(train));
+            call = call.ValueOrException(nameof(call));
+            previous = previous.ValueOrException(nameof(previous));
+            if (train.Calls.Contains(call)) return call;
+            call.SetTrain(train);
+            train.NumberCalls();
+            var ordered = train.CallsInRunOrder;
+            var position = ordered.ToList().FindIndex(c => ReferenceEquals(c, previous)) + 1;
+            if (position == 0) throw new ArgumentException($"{previous} is not a call of {train}.", nameof(previous));
+            train.Calls.Add(call);
+            Renumber([.. ordered.Take(position), call, .. ordered.Skip(position)]);
+            call.Track.Add(call);
+            return call;
+        }
+
+        /// <summary>
         /// Adds a station call to the train as the first of its route, whatever its times are.
         /// </summary>
         /// <param name="call">The station call to add.</param>

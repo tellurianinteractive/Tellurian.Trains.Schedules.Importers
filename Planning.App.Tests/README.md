@@ -11,7 +11,7 @@ CI (which runs Model / Interfaces / Xpln tests on Linux without browsers).
 After the project has been built once, install the Chromium binary Playwright drives:
 
 ```powershell
-pwsh bin/Debug/net10.0/playwright.ps1 install chromium
+pwsh bin/Debug/net11.0/playwright.ps1 install chromium
 ```
 
 (If `pwsh` is unavailable, use the cross-platform script the same way, or
@@ -40,4 +40,4 @@ $env:PLANNING_APP_BASEURL = "http://localhost:5097"
 - An operation location's lock key: offered only where a key can be needed, held by a manned station,
   named once a station holds it, and kept through the save.
 
-Screenshots are written to `bin/Debug/net10.0/screenshots/`.
+Screenshots are written to `bin/Debug/net11.0/screenshots/`.

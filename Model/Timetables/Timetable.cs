@@ -95,18 +95,19 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     /// looked at through a stale one.
     /// </summary>
     /// <remarks>
-    /// <see cref="Layouts.StationTrack.Calls"/> is derived from <see cref="Train.Calls"/> and is no
+    /// <c>StationTrack.Calls</c> is derived from <see cref="Train.Calls"/> and is no
     /// longer written to the document (see <c>PlanJson</c>), so it has to be built after every read —
     /// and a document written by an earlier version may carry an index holding calls of trains that
     /// are no longer in the timetable. Doing it here means no reading path can forget.
     /// </remarks>
     void IJsonOnDeserialized.OnDeserialized()
     {
+        // A plan file refers by id (see PlanReferences): first the objects, then what is built from them.
+        PlanReferences.RestoreReferences(this);
         this.RebuildStationCalls();
         this.PlaceTimesAfterMidnight();
         this.ResolveCatalogueReferences();
         this.RebuildTrainCategories();
-        Layout.EnsurePlatforms();
     }
 
     /// <inheritdoc/>
@@ -201,7 +202,7 @@ public static class TimetableExtensions
     }
 
     /// <summary>
-    /// Rebuilds the per-track call index (<see cref="StationTrack.Calls"/>) from the single source of
+    /// Rebuilds the per-track call index (<c>StationTrack.Calls</c>) from the single source of
     /// truth, <see cref="Train.Calls"/>: every track's call collection is cleared and then repopulated
     /// from the calls of the timetable's trains. A call whose train is not in <see cref="Timetable.Trains"/>
     /// — an orphan left by an earlier import or a persisted plan — is thereby dropped and can never surface

@@ -1,0 +1,171 @@
+@namespace Tellurian.Trains.Schedules.Planning.Components.Imports
+@using System.Globalization
+@using Tellurian.Trains.Schedules.Model.Layouts
+@implements IDisposable
+@inject LayoutRevisionState RevisionState
+@inject ScheduleStateService ScheduleState
+@inject Translator Translator
+
+@* What is left of loading a newer revision of the plan's layout: the changes the planner reviews and applies one by
+   one, and those that change the order of the locations and can't be applied. After each change applied, the list is
+   worked out again (LayoutRevisionState). *@
+@if (RevisionState.Update is { } update)
+{
+    <section class="layout-changes">
+        <h3>@string.Format(Culture, Translator("LayoutChangesFrom"), Translator(RevisionState.SourceKey), ScheduleState.Schedule!.Layout.SourceRevision)</h3>
+
+        @if (update.ToConfirm.Count == 0 && update.Manual.Count == 0)
+        {
+            <p>@Translator("LayoutChangesAllApplied")</p>
+        }
+
+        @if (update.ToConfirm.Count > 0)
+        {
+            <h4>@Translator("LayoutChangesToConfirm")</h4>
+            <p class="hint">@Translator("LayoutChangesToConfirmHint")</p>
+            <table class="changes">
+                <tbody>
+                    @foreach (var change in update.ToConfirm)
+                    {
+                        <tr>
+                            <td>@Describe(change)</td>
+                            <td><button @onclick="() => Review(change)">@Translator("LayoutChangeReview")</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (update.Manual.Count > 0)
+        {
+            <h4>@Translator("LayoutChangesManual")</h4>
+            <p class="hint">@Translator("LayoutChangesManualHint")</p>
+            <ul>
+                @foreach (var change in update.Manual)
+                {
+                    <li>@Describe(change)</li>
+                }
+            </ul>
+        }
+
+        <div class="actions">
+            <button @onclick="RevisionState.Close">@Translator("Close")</button>
+        </div>
+    </section>
+}
+
+@if (_reviewing is { } preview)
+{
+    @if (preview.Deletion is { } deletion)
+    {
+        <LocationDeletionConfirm Preview="deletion" OnConfirm="Apply" OnCancel="CloseReview" />
+    }
+    else
+    {
+        <ConfirmDialog OnCancel="CloseReview">
+            <div class="layout-change-review">
+                <strong>@Describe(preview.Change)</strong>
+
+                @if (!preview.IsAllowed)
+                {
+                    <p>@string.Format(Culture, Translator("LayoutChangeNoOtherTrack"), preview.Change.Location!.Name)</p>
+                    <div class="actions">
+                        <button @onclick="CloseReview">@Translator("Close")</button>
+                    </div>
+                }
+                else
+                {
+                    @switch (preview.Change.Kind)
+                    {
+                        case LayoutChangeKind.TrackRemoved when preview.MovedCalls.Count > 0:
+                            <p>@Translator("LayoutChangeCallsMoved")</p>
+                            <ul>
+                                @foreach (var moved in preview.MovedCalls.OrderBy(m => m.Call.Arrival))
+                                {
+                                    <li>@string.Format(Culture, Translator("LayoutChangeCallMoved"), moved.Call.Train, moved.Call.Arrival, moved.To.Number)</li>
+                                }
+                            </ul>
+                            break;
+                        case LayoutChangeKind.KindChanged when preview.TrainsNoLongerStopping.Count > 0:
+                            <p>@string.Format(Culture, Translator("LayoutChangeTrainsNoLongerStopping"), preview.Change.Location!.Name)</p>
+                            <ul>
+                                @foreach (var train in preview.TrainsNoLongerStopping.OrderBy(t => t.Number))
+                                {
+                                    <li>@train</li>
+                                }
+                            </ul>
+                            break;
+                        case LayoutChangeKind.LocationInserted when preview.PassingTrains.Count > 0:
+                            <p>@string.Format(Culture, Translator("LayoutChangeTrainsPassing"), preview.Change.SourceLocation!.Name)</p>
+                            <ul>
+                                @foreach (var train in preview.PassingTrains.OrderBy(t => t.Number))
+                                {
+                                    <li>@train</li>
+                                }
+                            </ul>
+                            break;
+                        default:
+                            <p>@Translator("LayoutChangeNoTrainsAffected")</p>
+                            break;
+                    }
+                    <div class="actions">
+                        <button class="primary" @onclick="Apply">@Translator("LayoutChangeApply")</button>
+                        <button @onclick="CloseReview">@Translator("Cancel")</button>
+                    </div>
+                }
+            </div>
+        </ConfirmDialog>
+    }
+}
+
+@code {
+    private LayoutChangePreview? _reviewing;
+
+    private static CultureInfo Culture => CultureInfo.CurrentCulture;
+
+    protected override void OnInitialized() => RevisionState.OnChanged += OnRevisionChanged;
+
+    public void Dispose() => RevisionState.OnChanged -= OnRevisionChanged;
+
+    private void OnRevisionChanged() => InvokeAsync(StateHasChanged);
+
+    private void Review(LayoutChange change) => _reviewing = RevisionState.Preview(change);
+
+    private void CloseReview() => _reviewing = null;
+
+    private void Apply()
+    {
+        if (_reviewing is { } preview) RevisionState.Apply(preview.Change);
+        _reviewing = null;
+    }
+
+    // One line for a change, in the planner's terms: the location by name, a stretch by its two ends.
+    private string Describe(LayoutChange change)
+    {
+        var location = (change.Location ?? change.SourceLocation)?.Name;
+        var stretch = change.Stretch ?? change.SourceStretch;
+        return change.Kind switch
+        {
+            LayoutChangeKind.TrackRemoved => Format("LayoutChangeTrackRemoved", location, change.Track?.Number),
+            LayoutChangeKind.KindChanged => Format("LayoutChangeKindChanged", location, Translator(KindKey(change.SourceLocation!.Kind))),
+            LayoutChangeKind.LocationRemoved => Format("LayoutChangeLocationRemoved", location),
+            LayoutChangeKind.LocationInserted => Format("LayoutChangeLocationInserted", change.SourceLocation?.Name, stretch?.Start.Name, stretch?.End.Name),
+            LayoutChangeKind.LocationAdded => Format("LayoutChangeLocationAdded", location),
+            LayoutChangeKind.LocationDropped => Format("LayoutChangeLocationDropped", location),
+            LayoutChangeKind.StretchAdded => Format("LayoutChangeStretchAdded", stretch?.Start.Name, stretch?.End.Name),
+            LayoutChangeKind.StretchRemoved => Format("LayoutChangeStretchRemoved", stretch?.Start.Name, stretch?.End.Name),
+            _ => change.Kind.ToString(),
+        };
+    }
+
+    private string Format(string key, params object?[] args) => string.Format(Culture, Translator(key), args);
+
+    // The labels the location form shows the kinds by.
+    private static string KindKey(OperationLocationKind kind) => kind switch
+    {
+        OperationLocationKind.SignalControlled => "SignalControlledLocation",
+        OperationLocationKind.IndustrialArea => "IndustrialArea",
+        OperationLocationKind.Other => "OtherLocation",
+        _ => "Station",
+    };
+}

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using System.Text.Json;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.PlanFiles;
 
 namespace Tellurian.Trains.Schedules.Planning.Components.Services;
 
@@ -16,11 +16,6 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
 {
     private const string ScheduleStorageKey = "planning.schedule.v2";
     private const string SelectedStretchesStorageKey = "planning.schedule.selectedStretches.v2";
-
-    /// <summary>
-    /// JSON options matching the schedule importer/exporter, see <see cref="PlanJson"/>.
-    /// </summary>
-    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions();
 
     public event Action? OnChanged;
 
@@ -128,7 +123,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         sync.OnMessage += OnRemoteScheduleChanged;
         await sync.SubscribeAsync();
 
-        var plan = await storage.GetAsync<Plan>(ScheduleStorageKey, JsonOptions);
+        var plan = await ReadStoredPlanAsync();
         if (plan is null) return;
 
         _schedule = plan;
@@ -233,7 +228,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
             if (_schedule is null)
                 await storage.RemoveAsync(ScheduleStorageKey);
             else
-                await storage.SetAsync(ScheduleStorageKey, _schedule, JsonOptions);
+                await storage.SetStringAsync(ScheduleStorageKey, PlanFile.Write(_schedule));
             await sync.PostAsync(ScheduleStorageKey);
             SetSaveError(null);
         }
@@ -261,7 +256,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         if (key != ScheduleStorageKey) return;
         try
         {
-            var plan = await storage.GetAsync<Plan>(ScheduleStorageKey, JsonOptions);
+            var plan = await ReadStoredPlanAsync();
             _schedule = plan;
             Reconcile(_schedule);
             NotifyChanged();
@@ -269,6 +264,26 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to apply a cross-window schedule update.");
+        }
+    }
+
+    /// <summary>
+    /// The plan kept in browser storage, brought up to the current schema version by <see cref="PlanFile"/>, or
+    /// <c>null</c> when none is kept or it can't be read. A plan that can't be read is left in storage untouched,
+    /// so a newer version of the app can still read it.
+    /// </summary>
+    private async Task<Plan?> ReadStoredPlanAsync()
+    {
+        var json = await storage.GetStringAsync(ScheduleStorageKey);
+        if (string.IsNullOrEmpty(json)) return null;
+        try
+        {
+            return PlanFile.Read(json);
+        }
+        catch (PlanFileException ex)
+        {
+            logger.LogError(ex, "The plan in browser storage can't be read: {Error}", ex.Error);
+            return null;
         }
     }
 

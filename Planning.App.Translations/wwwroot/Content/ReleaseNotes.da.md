@@ -1,5 +1,20 @@
 # Versionsnyheder
 
+## Version 1.5.0
+
+### Brydende ændringer
+
+- **Et nyt filformat for planer.** Planer gemmes nu i et nyt og mere kompakt format: omkring en tredjedel af den størrelse, de havde før, logoerne fraregnet. Planer gemt af tidligere versioner læses som før og konverteres undervejs, men en plan gemt af denne version kan ikke åbnes af en tidligere.
+
+### Nye funktioner
+
+- **En plan ud fra en hal-plan.** På fanen **Importér** bliver en hal-plan fra Modultegneren, eller en bane skrevet af et andet program i samme form, til en ny plan med hal-planens driftssteder, spor og strækninger. Hver strækning får en køretid ud fra sin længde og hastighed. Køreplansstrækningerne laver du selv.
+- **En nyere version af hal-planen.** Når den åbne plan er lavet ud fra en hal-plan, og du åbner en anden version af den, vælger du, om den åbne plan skal opdateres, eller om der skal laves en ny plan, med en advarsel når filen er den ældre version. Ved opdatering tages nye længder og køretider med det samme, undtagen hvor du selv har indtastet dem. Ændringer, der flytter eller tilføjer togenes ophold (et spor fjernet, et driftssted af en anden type, et fjernet eller indsat mellem to andre), vises under **Skal bekræftes**: **Gennemse** viser, hvad ændringen gør ved togene, og **Udfør** udfører den. Ændringer, der ændrer driftsstedernes rækkefølge, vises, så de kan laves i hånden.
+
+### Ændringer
+
+- **To spor med samme betegnelse er en konflikt.** Et driftssted med to eller flere spor med samme betegnelse vises under **Konflikter** og fører til fanen **Driftssteder**. Planen kan stadig gemmes.
+
 ## Version 1.4.7
 
 ### Rettelser

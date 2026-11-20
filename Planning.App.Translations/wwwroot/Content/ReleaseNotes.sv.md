@@ -1,5 +1,20 @@
 # Versionsnyheter
 
+## Version 1.5.0
+
+### Brytande ändringar
+
+- **Ett nytt filformat för planer.** Planer sparas nu i ett nytt och mer kompakt format: ungefär en tredjedel av den storlek de hade förut, logotyperna oräknade. Planer som sparats av tidigare versioner läses som förut och konverteras på vägen, men en plan som sparats av den här versionen kan inte öppnas av en tidigare.
+
+### Nya funktioner
+
+- **En plan från en hallplan.** På fliken **Importera** blir en hallplan från Modulritaren, eller en bana som ett annat program skrivit i samma form, en ny plan med hallplanens driftplatser, spår och sträckor. Varje sträcka får en gångtid utifrån sin längd och hastighet. Tidtabellssträckorna gör du själv.
+- **En nyare version av hallplanen.** När den öppna planen gjorts från en hallplan och du öppnar en annan version av den väljer du om den öppna planen ska uppdateras eller om en ny plan ska göras, med en varning när filen är den äldre versionen. Vid uppdatering tas nya längder och gångtider direkt, utom där du själv har angett dem. Ändringar som flyttar eller lägger till tågens uppehåll (ett spår borttaget, en driftplats av en annan typ, en borttagen eller infogad mellan två andra) visas under **Att bekräfta**: **Granska** visar vad ändringen gör med tågen, och **Gör ändringen** genomför den. Ändringar som ändrar driftplatsernas ordning visas, så att de kan göras för hand.
+
+### Ändringar
+
+- **Två spår med samma beteckning är en konflikt.** En driftplats med två eller fler spår med samma beteckning visas under **Konflikter** och leder till fliken **Driftplatser**. Planen kan fortfarande sparas.
+
 ## Version 1.4.7
 
 ### Rättelser

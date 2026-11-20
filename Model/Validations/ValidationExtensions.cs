@@ -22,6 +22,7 @@ public static class ValidationExtensions
             var result = new List<ValidationError>();
             result.AddRange(plan.GetTimetableValidationErrors(options));
             result.AddRange(plan.ValidateLockKeys());
+            result.AddRange(plan.ValidateTrackDesignations());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateLayoverPairs()));
@@ -90,6 +91,33 @@ public static class ValidationExtensions
                 };
                 if (message is null) continue;
                 yield return ValidationError.LockKeyIgnored(Message.Warning(message, location, holder));
+            }
+        }
+
+        /// <summary>
+        /// Validates that the tracks of each operation location have designations of their own, the rule of the shared
+        /// model (<see cref="OperationLocationRules.Validate(IEnumerable{StationTrack})"/>). One error for each
+        /// designation that is repeated, carrying the first track that repeats it.
+        /// </summary>
+        /// <remarks>
+        /// Always run, like <see cref="ValidateLockKeys"/>: two tracks that can't be told apart on a timetable or a
+        /// dispatch list are a fault in the layout however the plan is being validated. A plan with them can still be
+        /// saved, to a file or a database.
+        /// </remarks>
+        internal IEnumerable<ValidationError> ValidateTrackDesignations()
+        {
+            foreach (var location in plan.Layout.OperationLocations)
+            {
+                var repeated = OperationLocationRules.Validate(location.Tracks)
+                    .Where(p => p.Code == LocationProblemCode.TrackDesignationNotUnique)
+                    .Select(p => p.TrackDesignation!);
+                foreach (var designation in repeated)
+                {
+                    var track = location.Tracks
+                        .Where(t => string.Equals(t.Designation?.Trim(), designation, StringComparison.OrdinalIgnoreCase))
+                        .Skip(1).First();
+                    yield return ValidationError.TrackDesignationNotUnique(track, Message.Warning(Strings.TrackDesignationNotUnique, location, designation));
+                }
             }
         }
 

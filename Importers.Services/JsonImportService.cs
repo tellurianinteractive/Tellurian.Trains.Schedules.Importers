@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using Tellurian.Trains.Schedules.Importers.Interfaces;
+﻿using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model;
+using Tellurian.Trains.Schedules.Model.PlanFiles;
 
 namespace Tellurian.Trains.Schedules.Importers.Services;
 
@@ -11,8 +11,6 @@ namespace Tellurian.Trains.Schedules.Importers.Services;
 public class JsonImportService(FileInfo source) : IImportService
 {
     private readonly FileInfo _source = source;
-
-    private static readonly JsonSerializerOptions JsonOptions = PlanJson.CreateOptions();
 
     /// <summary>
     /// Imports a schedule from a JSON file asynchronously.
@@ -31,12 +29,7 @@ public class JsonImportService(FileInfo source) : IImportService
             }
 
             await using var stream = _source.OpenRead();
-            var schedule = await JsonSerializer.DeserializeAsync<Plan>(stream, JsonOptions);
-
-            if (schedule is null)
-            {
-                return ImportResult<Plan>.Failure(Message.System("Failed to deserialize JSON: result was null"));
-            }
+            var schedule = await PlanFile.ReadAsync(stream);
 
             if (!string.IsNullOrEmpty(name) && schedule.Name != name)
             {
@@ -46,9 +39,9 @@ public class JsonImportService(FileInfo source) : IImportService
 
             return ImportResult<Plan>.Success(schedule);
         }
-        catch (JsonException ex)
+        catch (PlanFileException ex)
         {
-            return ImportResult<Plan>.Failure(Message.System($"JSON deserialization error: {ex.Message}"));
+            return ImportResult<Plan>.Failure(Message.System(ex.Message));
         }
         catch (Exception ex)
         {

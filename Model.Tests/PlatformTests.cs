@@ -96,8 +96,9 @@ public class PlatformTests
     }
 
     [TestMethod]
-    public void APlanWrittenWithoutPlatformsReadsBackWithThem()
+    public void APlanWrittenWithoutPlatformsReadsBackWithoutThem()
     {
+        // Platforms are given to older plans by the plan file's migration to schema version 3, not on reading.
         var layout = new Layout { Id = 1, Name = "Test" };
         layout.Add(StationWithTracks(1, "Alpha", "A", 2));
         var plan = Plan.Create("Plan", new Timetable("TT", layout) { Id = 1 });
@@ -108,7 +109,7 @@ public class PlatformTests
         Assert.IsNotNull(restored);
         var tracks = restored.Timetable.Layout.StationTracks().ToList();
         Assert.HasCount(2, tracks);
-        Assert.IsTrue(tracks.All(track => track.HasPassengerExchange));
+        Assert.IsTrue(tracks.All(track => track.PlatformLength == 0));
     }
 
     [TestMethod]

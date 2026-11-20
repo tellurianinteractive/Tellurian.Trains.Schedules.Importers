@@ -55,7 +55,7 @@ else
                             @Translator("Delete")
                         </button>
                     </TemplateColumn>
-                    <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<OperationLocation>.ByAscending(o => o.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
+                    <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<OperationLocation>.ByAscending(o => o.CountryCode)">@CountryName(context.CountryId)</TemplateColumn>
                     <TemplateColumn Title='@Translator("Type")'>@Translator(TypeKey(context))</TemplateColumn>
                     <TemplateColumn Title='@Translator("Regions")'>
                         @if (context is Station { Regions.Count: > 0 } regionStation)

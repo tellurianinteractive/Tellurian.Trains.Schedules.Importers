@@ -174,7 +174,7 @@ public sealed class VehicleContributorsReportUiTests : PlaywrightTestBase
         plan.AddContributor(goods, bert, null);
         plan.CreateVehicle(ScheduledObjectType.Wagonset, "B", LocomotiveCount + 2, null).NumberOfUnits = 3;
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 
     private static ScheduledObject Assigned(Plan plan, ScheduledObjectType type, string @class, int number, Train train)

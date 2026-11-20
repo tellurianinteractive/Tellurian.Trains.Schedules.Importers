@@ -3142,4 +3142,94 @@
   <data name="NoDriverDuties" xml:space="preserve">
     <value>There are no driver duties to print.</value>
   </data>
+  <data name="LayoutImportedAsNewPlan" xml:space="preserve">
+    <value>{0}: new layout made with {1} operation locations and {2} track stretches.</value>
+  </data>
+  <data name="LayoutRevisionLoaded" xml:space="preserve">
+    <value>{0}, revision {1}: {2} changes applied, {3} to confirm, {4} that change the order of the locations and must be made by hand.</value>
+  </data>
+  <data name="LayoutRevisionUnchanged" xml:space="preserve">
+    <value>{0}, revision {1}: no changes.</value>
+  </data>
+  <data name="ModuleDrawHallPlan" xml:space="preserve">
+    <value>Hall plan from Module Draw</value>
+  </data>
+  <data name="LayoutChangesFrom" xml:space="preserve">
+    <value>Changes from {0}, revision {1}</value>
+  </data>
+  <data name="LayoutChangesAllApplied" xml:space="preserve">
+    <value>All changes are applied.</value>
+  </data>
+  <data name="LayoutChangesToConfirm" xml:space="preserve">
+    <value>To confirm</value>
+  </data>
+  <data name="LayoutChangesToConfirmHint" xml:space="preserve">
+    <value>These changes move or remove train calls. Review each one before it is applied.</value>
+  </data>
+  <data name="LayoutChangesManual" xml:space="preserve">
+    <value>Can't be applied</value>
+  </data>
+  <data name="LayoutChangesManualHint" xml:space="preserve">
+    <value>These changes alter the order of the operation locations, which the trains can't follow. Make them by hand in the plan.</value>
+  </data>
+  <data name="LayoutChangeReview" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="LayoutChangeApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="LayoutChangeNoOtherTrack" xml:space="preserve">
+    <value>'{0}' has no other track for the calls on this one.</value>
+  </data>
+  <data name="LayoutChangeCallsMoved" xml:space="preserve">
+    <value>These calls move to another track:</value>
+  </data>
+  <data name="LayoutChangeCallMoved" xml:space="preserve">
+    <value>{0} at {1}: to track {2}</value>
+  </data>
+  <data name="LayoutChangeTrainsNoLongerStopping" xml:space="preserve">
+    <value>These trains will no longer stop at '{0}':</value>
+  </data>
+  <data name="LayoutChangeTrainsPassing" xml:space="preserve">
+    <value>These trains will get a call passing '{0}':</value>
+  </data>
+  <data name="LayoutChangeNoTrainsAffected" xml:space="preserve">
+    <value>No trains are affected.</value>
+  </data>
+  <data name="LayoutChangeTrackRemoved" xml:space="preserve">
+    <value>{0}: track {1} is removed</value>
+  </data>
+  <data name="LayoutChangeKindChanged" xml:space="preserve">
+    <value>{0}: new type – {1}</value>
+  </data>
+  <data name="LayoutChangeLocationRemoved" xml:space="preserve">
+    <value>{0} is removed, and its neighbours are joined</value>
+  </data>
+  <data name="LayoutChangeLocationInserted" xml:space="preserve">
+    <value>{0} is inserted between {1} and {2}</value>
+  </data>
+  <data name="LayoutChangeLocationAdded" xml:space="preserve">
+    <value>{0} is added</value>
+  </data>
+  <data name="LayoutChangeLocationDropped" xml:space="preserve">
+    <value>{0} is removed</value>
+  </data>
+  <data name="LayoutChangeStretchAdded" xml:space="preserve">
+    <value>A track stretch {0}–{1} is added</value>
+  </data>
+  <data name="LayoutChangeStretchRemoved" xml:space="preserve">
+    <value>The track stretch {0}–{1} is removed</value>
+  </data>
+  <data name="LayoutRevisionChoice" xml:space="preserve">
+    <value>The file is revision {3} of the layout the open plan '{1}' was made from; the plan has revision {2}. Update the open plan with it, or make a new plan from it?</value>
+  </data>
+  <data name="LayoutRevisionOlder" xml:space="preserve">
+    <value>The file is an older revision than the one the plan has.</value>
+  </data>
+  <data name="LayoutRevisionUpdatePlan" xml:space="preserve">
+    <value>Update the open plan</value>
+  </data>
+  <data name="LayoutRevisionNewPlan" xml:space="preserve">
+    <value>Make a new plan</value>
+  </data>
 </root>

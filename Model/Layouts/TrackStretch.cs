@@ -6,167 +6,20 @@ using Tellurian.Trains.Schedules.Model.Resources;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Represents a railway track section connecting two stations.
-/// </summary>
-public class TrackStretch : IEquatable<TrackStretch>
-{
-    // Private parameterless constructor for EF Core and JSON deserialization
-    [JsonConstructor]
-    private TrackStretch()
-    {
-        Start = default!;
-        End = default!;
-        Layout = default!;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="TrackStretch"/> with the specified values and default speed/time.
-    /// </summary>
-    /// <param name="id">The unique identifier for the track stretch.</param>
-    /// <param name="start">The starting station.</param>
-    /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in metres.</param>
-    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance) : this(id, start, end, distance, 1, 100, (int)Math.Round(distance, 0)) { }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="TrackStretch"/> with the specified values and default speed/time.
-    /// </summary>
-    /// <param name="id">The unique identifier for the track stretch.</param>
-    /// <param name="start">The starting station.</param>
-    /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in metres.</param>
-    /// <param name="tracksCount">The number of tracks in the stretch.</param>
-    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance, int tracksCount) : this(id, start, end, distance, tracksCount, 100, (int)Math.Round(distance, 0)) { }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="TrackStretch"/> with all specified values.
-    /// </summary>
-    /// <param name="id">The unique identifier for the track stretch.</param>
-    /// <param name="start">The starting station.</param>
-    /// <param name="end">The ending station.</param>
-    /// <param name="distance">The distance in metres.</param>
-    /// <param name="tracksCount">The number of tracks in the stretch.</param>
-    /// <param name="speed">The maximum speed in km/h.</param>
-    /// <param name="time">The travel time in minutes.</param>
-    public TrackStretch(int id, OperationLocation start, OperationLocation end, double distance, int tracksCount, int speed, int time)
-    {
-        Id = id;
-        Start = start.ValueOrException(nameof(start));
-        End = end.ValueOrException(nameof(end));
-        StartId = start.Id;
-        EndId = end.Id;
-        (!Start.Layout.Equals(end.Layout)).IfTrueThrows(nameof(end), $"Both {start} and {end} must be in the same layout.");
-        Distance = distance;
-        TracksCount = tracksCount;
-        Speed = speed;
-        Time = time;
-        Layout = Start.Layout;
-        LayoutId = Layout.Id;
-    }
-
-    /// <summary>
-    /// Gets or sets the unique identifier for this track stretch.
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the foreign key to the starting station.
-    /// </summary>
-    public int StartId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the starting station.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 2)]
-    public OperationLocation Start { get; set; }
-
-    /// <summary>
-    /// Gets or sets the foreign key to the ending station.
-    /// </summary>
-    public int EndId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the ending station.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 3)]
-    public OperationLocation End { get; set; }
-
-    /// <summary>
-    /// Gets or sets the distance of this stretch in metres. Timetable reports and graphs convert
-    /// this to a displayed kilometre figure via the layout's <c>TimeAndSpeedSettings.DistanceFactor</c>.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 4)]
-    public double Distance { get; set; }
-
-    /// <summary>
-    /// Gets or sets the number of tracks in this stretch.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 4)]
-    public int TracksCount { get; set; }
-
-    /// <summary>
-    /// Gets or sets the maximum speed on this stretch in km/h.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 5)]
-    public int Speed { get; set; }
-
-    /// <summary>
-    /// Gets or sets the travel time for this stretch in minutes.
-    /// </summary>
-    [DataMember(IsRequired = true, Order = 6)]
-    public int Time { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether this stretch has overhead electrification, allowing electric traction units to run.
-    /// When false, the stretch is unelectrified and requires steam, diesel, or dual-mode traction.
-    /// </summary>
-    public bool IsElectrified { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets the foreign key to the layout.
-    /// </summary>
-    public int LayoutId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the layout this track stretch belongs to.
-    /// </summary>
-    public Layout Layout { get; set; }
-
-    /// <summary>
-    /// Gets all train passings on this track stretch. Derived from the trains calling at both ends, so
-    /// it is computed on demand and never stored.
-    /// </summary>
-    [JsonIgnore]
-    public IEnumerable<StretchPassing> Passings => [.. this.GetStretchPassings()];
-
-    /// <inheritdoc/>
-    public bool Equals(TrackStretch? other) => other != null && Start.Equals(other.Start) && End.Equals(other.End);
-
-    /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is TrackStretch other && Equals(other);
-
-    /// <inheritdoc/>
-    public override int GetHashCode() => Start.GetHashCode() ^ End.GetHashCode();
-
-    /// <inheritdoc/>
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, Strings.StretchToString, Start, End);
-}
-
-/// <summary>
 /// Provides extension methods for <see cref="TrackStretch"/>.
 /// </summary>
 public static class TrackStretchExtensions
 {
-    /// <summary>
-    /// Reverses the direction of the track stretch, so that it runs from its end station to its
-    /// start station. All other properties are unaffected.
-    /// </summary>
-    /// <param name="me">The track stretch.</param>
-    public static void Reverse(this TrackStretch me)
+    extension(TrackStretch stretch)
     {
-        ArgumentNullException.ThrowIfNull(me);
-        (me.Start, me.End) = (me.End, me.Start);
-        (me.StartId, me.EndId) = (me.EndId, me.StartId);
+        /// <summary>
+        /// All train passings on this track stretch. Derived from the trains calling at both ends, so it is
+        /// computed on demand and never stored.
+        /// </summary>
+        public IEnumerable<StretchPassing> Passings => [.. stretch.GetStretchPassings()];
+
+        /// <summary>The stretch in the current language, e.g. "Tellby to Ytterby".</summary>
+        public string Description => string.Format(CultureInfo.CurrentCulture, Strings.StretchToString, stretch.Start, stretch.End);
     }
 
     /// <summary>

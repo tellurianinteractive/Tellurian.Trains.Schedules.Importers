@@ -4,106 +4,6 @@ using Tellurian.Trains.Schedules.Model.Resources;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Represents a railway track layout containing stations, companies, and track stretches.
-/// </summary>
-/// <remarks>
-/// A layout defines the physical infrastructure of a railway network, including
-/// all stations, track connections between them, and the companies operating on the layout.
-/// </remarks>
-public sealed class Layout : IEquatable<Layout>
-{
-    /// <summary>
-    /// Gets or sets the unique identifier for this layout.
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name of this layout.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the configurable settings for this layout, grouped by purpose.
-    /// </summary>
-    public LayoutSettings Settings { get; set; } = new();
-
-    /// <summary>
-    /// Gets or sets the catalogue of countries saved with this layout. A <see cref="Company"/>,
-    /// <see cref="Region"/> and the layout's default country all reference an entry here by its
-    /// <see cref="Country.Id"/>, so a saved layout is self-contained. Seeded from the static
-    /// <c>Country.Countries</c> catalogue, filtered by the layout's theme.
-    /// </summary>
-    public ICollection<Country> Countries { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of companies operating on this layout.
-    /// </summary>
-    public ICollection<Company> Companies { get; set; }
-
-    /// <summary>
-    /// Gets or sets the catalogue of regions (domestic regions and foreign countries) available on
-    /// this layout for cargo flow routing. A <see cref="Station"/>'s <see cref="Station.Regions"/>
-    /// references a subset of these. Declared before <see cref="OperationLocations"/>, so a region is
-    /// written here — the catalogue it belongs to — rather than under the first station using it.
-    /// </summary>
-    public ICollection<Region> Regions { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of stations (operation locations) on this layout.
-    /// </summary>
-    public ICollection<OperationLocation> OperationLocations { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of track stretches connecting stations.
-    /// </summary>
-    public ICollection<TrackStretch> TrackStretches { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of timetable stretches for scheduling purposes.
-    /// </summary>
-    public ICollection<TimetableStretch> TimetableStretches { get; set; }
-
-    /// <summary>
-    /// Gets or sets the collection of <see cref="DispatchStretch"/>.
-    /// </summary>
-    public ICollection<DispatchStretch> DispatchStretches { get; set; }
-
-    /// <summary>
-    /// Gets or sets where the planner has put operation locations in the topology diagram. Only the
-    /// locations that have been moved are here; the rest are placed automatically. See
-    /// <see cref="TopologyPosition"/>.
-    /// </summary>
-    public ICollection<TopologyPosition> TopologyPositions { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="Layout"/> with empty collections.
-    /// </summary>
-    public Layout()
-    {
-        Countries = [];
-        Companies = [];
-        Regions = [];
-        OperationLocations = [];
-        TrackStretches = [];
-        TimetableStretches = [];
-        DispatchStretches = [];
-        TopologyPositions = [];
-    }
-
-    /// <inheritdoc/>
-    public bool Equals(Layout? other) => other is not null && Id == other.Id;
-
-    /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is Layout other && Equals(other);
-
-    /// <inheritdoc/>
-    public override int GetHashCode() => Id.GetHashCode();
-
-    /// <inheritdoc/>
-    public override string ToString() => Name;
-}
-
-/// <summary>
 /// Provides extension methods for managing companies within a <see cref="Layout"/>.
 /// </summary>
 public static class LayoutCompanyExtensions
@@ -178,7 +78,7 @@ public static class LayoutCountryExtensions
 
         /// <summary>
         /// Ensures the countries the layout actually uses are present in <see cref="Layout.Countries"/>:
-        /// the default country and any country referenced by a company or region. The catalogue is a
+        /// the default country and any country referenced by a company, region or location. The catalogue is a
         /// curated set (the user adds more on the Countries tab), so this only fills in references — it
         /// does not bulk-seed the whole theme. Idempotent. Returns <c>true</c> when an entry was added.
         /// </summary>
@@ -193,6 +93,7 @@ public static class LayoutCountryExtensions
             AddIfMissing(layout.Settings.Identity.DefaultCountryId);
             foreach (var company in layout.Companies) AddIfMissing(company.CountryId);
             foreach (var region in layout.Regions) AddIfMissing(region.CountryId);
+            foreach (var location in layout.OperationLocations) AddIfMissing(location.CountryId);
             return layout.Countries.Count != before;
         }
     }
@@ -317,7 +218,8 @@ public static class LayoutOperationLocationExtensions
         /// Makes sure every location that exchanges passengers has somewhere to exchange them: where not
         /// one of its tracks has a platform, all of them are given
         /// <see cref="StationTrack.DefaultPlatformLength"/>. Returns <c>true</c> when something changed.
-        /// Idempotent. Call this whenever a plan is read or imported, before it is displayed.
+        /// Idempotent. Call this for a plan imported from a source without platforms, such as XPLN; a plan file of
+        /// schema version 3 or later and a hall plan say which tracks have a platform, and are left as they are.
         /// </summary>
         /// <remarks>
         /// Platform lengths came after the plans that have none, and every track of a passenger location
@@ -876,24 +778,6 @@ public static class LayoutDispatchStretchExtensions
 }
 
 /// <summary>
-/// The concrete kind of an <see cref="OperationLocation"/>, used when changing a location's type.
-/// </summary>
-public enum OperationLocationKind
-{
-    /// <summary>A <see cref="Station"/>.</summary>
-    Station,
-
-    /// <summary>A <see cref="SignalControlledLocation"/>.</summary>
-    SignalControlled,
-
-    /// <summary>An <see cref="IndustrialArea"/>.</summary>
-    IndustrialArea,
-
-    /// <summary>An <see cref="OtherLocation"/>.</summary>
-    Other,
-}
-
-/// <summary>
 /// Extensions for changing the type of an existing <see cref="OperationLocation"/>.
 /// </summary>
 public static class LayoutOperationLocationConversionExtensions
@@ -946,7 +830,6 @@ public static class LayoutOperationLocationConversionExtensions
             // Carry over the shared base state and re-home the tracks (StationCall.Station follows Track.Station).
             replacement.CountryId = existing.CountryId;
             replacement.Owner = existing.Owner;
-            replacement.IsSignal = existing.IsSignal;
             replacement.HideMeets = existing.HideMeets;
             replacement.HidePassings = existing.HidePassings;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;

@@ -96,9 +96,8 @@ public class RebuildTrainCategoriesTests
         var json = JsonSerializer.Serialize(plan, LegacyOptions);
         Assert.Contains("\"Name\":\"FreightTrain\"", json.Replace(" ", "", StringComparison.Ordinal), StringComparison.Ordinal);
 
-        var restored = JsonSerializer.Deserialize<Plan>(json, Options);
+        var restored = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(json);
 
-        Assert.IsNotNull(restored);
         var categories = restored.Timetable.TrainCategories;
         Assert.HasCount(2, categories, "Both categories the trains use are in the restored catalogue.");
         CollectionAssert.AreEquivalent(

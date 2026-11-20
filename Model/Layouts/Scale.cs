@@ -1,21 +1,6 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Represents a model railway scale.
-/// </summary>
-/// <param name="Id">A stable unique identifier, used as the reference key from a layout. Once
-/// assigned it must never be reused for a different scale (only append new ones).</param>
-/// <param name="Name">The common scale name, for example <c>H0</c> or <c>N</c>.</param>
-/// <param name="Denominator">The scale ratio denominator (1:<paramref name="Denominator"/>).</param>
-/// <param name="Gauge">The standard-gauge track width in millimetres.</param>
-/// <param name="Remark">An optional discriminator shown in the user interface, for example the
-/// standard (<c>NEM</c> or <c>NMRA</c>) that distinguishes scales sharing a name but differing in ratio.</param>
-/// <remarks>
-/// The available scales are provided by <c>ScalesService</c> in <c>Importers.Services</c>.
-/// </remarks>
-public record Scale(int Id, string Name, int Denominator, double Gauge, string Remark = "");
-
-/// <summary>
 /// </summary>
 public static class ScaleExtensions
 {
@@ -30,13 +15,13 @@ public static class ScaleExtensions
         /// </summary>
         public static IEnumerable<Scale> Scales =>
         [
-            new(1, "N", 160, 9.0),
-            new(2, "TT", 120, 12.0),
-            new(3, "H0", 87, 16.5),
-            new(4, "00", 76, 16.5),
-            new(5, "0", 45, 32.0, "NEM"),
-            new(6, "I", 32, 45.0),
-            new(101, "0", 48, 32.0, "NMRA"),
+            new() { Id = 1, ShortName = "N", Denominator = 160, Gauge = 9.0 },
+            new() { Id = 2, ShortName = "TT", Denominator = 120, Gauge = 12.0 },
+            new() { Id = 3, ShortName = "H0", Denominator = 87, Gauge = 16.5 },
+            new() { Id = 4, ShortName = "00", Denominator = 76, Gauge = 16.5 },
+            new() { Id = 5, ShortName = "0", Denominator = 45, Gauge = 32.0, Remark = "NEM" },
+            new() { Id = 6, ShortName = "I", Denominator = 32, Gauge = 45.0 },
+            new() { Id = 101, ShortName = "0", Denominator = 48, Gauge = 32.0, Remark = "NMRA" },
         ];
 
         /// <summary>

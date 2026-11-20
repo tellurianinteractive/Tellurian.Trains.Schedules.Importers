@@ -3128,4 +3128,94 @@
   <data name="NoDriverDuties" xml:space="preserve">
     <value>Det finnes ingen lokførertjenester å skrive ut.</value>
   </data>
+  <data name="LayoutImportedAsNewPlan" xml:space="preserve">
+    <value>{0}: nytt baneanlegg opprettet med {1} driftssteder og {2} banestrekninger.</value>
+  </data>
+  <data name="LayoutRevisionLoaded" xml:space="preserve">
+    <value>{0}, revisjon {1}: {2} endringer utført, {3} må bekreftes, {4} endrer rekkefølgen på driftsstedene og må gjøres manuelt.</value>
+  </data>
+  <data name="LayoutRevisionUnchanged" xml:space="preserve">
+    <value>{0}, revisjon {1}: ingen endringer.</value>
+  </data>
+  <data name="ModuleDrawHallPlan" xml:space="preserve">
+    <value>Hallplan fra Modultegneren</value>
+  </data>
+  <data name="LayoutChangesFrom" xml:space="preserve">
+    <value>Endringer fra {0}, revisjon {1}</value>
+  </data>
+  <data name="LayoutChangesAllApplied" xml:space="preserve">
+    <value>Alle endringer er utført.</value>
+  </data>
+  <data name="LayoutChangesToConfirm" xml:space="preserve">
+    <value>Må bekreftes</value>
+  </data>
+  <data name="LayoutChangesToConfirmHint" xml:space="preserve">
+    <value>Disse endringene flytter eller fjerner stopp. Gå gjennom hver av dem før den utføres.</value>
+  </data>
+  <data name="LayoutChangesManual" xml:space="preserve">
+    <value>Kan ikke utføres</value>
+  </data>
+  <data name="LayoutChangesManualHint" xml:space="preserve">
+    <value>Disse endringene endrer rekkefølgen på driftsstedene, som togene ikke kan følge. Gjør dem manuelt i planen.</value>
+  </data>
+  <data name="LayoutChangeReview" xml:space="preserve">
+    <value>Gå gjennom</value>
+  </data>
+  <data name="LayoutChangeApply" xml:space="preserve">
+    <value>Utfør</value>
+  </data>
+  <data name="LayoutChangeNoOtherTrack" xml:space="preserve">
+    <value>'{0}' har ikke noe annet spor for stoppene på dette.</value>
+  </data>
+  <data name="LayoutChangeCallsMoved" xml:space="preserve">
+    <value>Disse stoppene flyttes til et annet spor:</value>
+  </data>
+  <data name="LayoutChangeCallMoved" xml:space="preserve">
+    <value>{0} kl. {1}: til spor {2}</value>
+  </data>
+  <data name="LayoutChangeTrainsNoLongerStopping" xml:space="preserve">
+    <value>Disse togene stopper ikke lenger på '{0}':</value>
+  </data>
+  <data name="LayoutChangeTrainsPassing" xml:space="preserve">
+    <value>Disse togene får et stopp for passering av '{0}':</value>
+  </data>
+  <data name="LayoutChangeNoTrainsAffected" xml:space="preserve">
+    <value>Ingen tog berøres.</value>
+  </data>
+  <data name="LayoutChangeTrackRemoved" xml:space="preserve">
+    <value>{0}: spor {1} fjernes</value>
+  </data>
+  <data name="LayoutChangeKindChanged" xml:space="preserve">
+    <value>{0}: ny type – {1}</value>
+  </data>
+  <data name="LayoutChangeLocationRemoved" xml:space="preserve">
+    <value>{0} fjernes, og naboene kobles sammen</value>
+  </data>
+  <data name="LayoutChangeLocationInserted" xml:space="preserve">
+    <value>{0} settes inn mellom {1} og {2}</value>
+  </data>
+  <data name="LayoutChangeLocationAdded" xml:space="preserve">
+    <value>{0} legges til</value>
+  </data>
+  <data name="LayoutChangeLocationDropped" xml:space="preserve">
+    <value>{0} fjernes</value>
+  </data>
+  <data name="LayoutChangeStretchAdded" xml:space="preserve">
+    <value>En banestrekning {0}–{1} legges til</value>
+  </data>
+  <data name="LayoutChangeStretchRemoved" xml:space="preserve">
+    <value>Banestrekningen {0}–{1} fjernes</value>
+  </data>
+  <data name="LayoutRevisionChoice" xml:space="preserve">
+    <value>Filen er revisjon {3} av baneanlegget som den åpne planen '{1}' ble laget fra; planen har revisjon {2}. Vil du oppdatere den åpne planen med den, eller lage en ny plan av den?</value>
+  </data>
+  <data name="LayoutRevisionOlder" xml:space="preserve">
+    <value>Filen er en eldre revisjon enn den planen har.</value>
+  </data>
+  <data name="LayoutRevisionUpdatePlan" xml:space="preserve">
+    <value>Oppdater den åpne planen</value>
+  </data>
+  <data name="LayoutRevisionNewPlan" xml:space="preserve">
+    <value>Lag en ny plan</value>
+  </data>
 </root>

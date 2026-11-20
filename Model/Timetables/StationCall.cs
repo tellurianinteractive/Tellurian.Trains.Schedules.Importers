@@ -338,8 +338,10 @@ public static class StationCallExtensions
         /// already on that track.
         /// </summary>
         /// <remarks>
-        /// The per-track index of calls is the track's own (see <c>Timetable.RebuildStationCalls</c>), so
-        /// the call is taken off the track it leaves and put on the one it moves to.
+        /// A call lives in its train (<see cref="Train.Calls"/>). The calls on a track are only derived from
+        /// that, as an index outside the track (the extension property <c>StationTrack.Calls</c>, rebuilt by
+        /// <c>Timetable.RebuildStationCalls</c>), so the call is taken off the index of the track it leaves and
+        /// put on that of the one it moves to. This is the one place a call changes track.
         /// </remarks>
         public bool MoveTo(StationTrack track)
         {

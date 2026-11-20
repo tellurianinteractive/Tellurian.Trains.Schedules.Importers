@@ -111,9 +111,7 @@ public class DriverDutyPartTests
     {
         // The report reads the plan restored from browser storage, not the one just built in memory.
         var fixture = CreateFixture();
-        var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve, MaxDepth = 256 };
-        var json = JsonSerializer.Serialize(fixture.Plan, options);
-        var restored = JsonSerializer.Deserialize<Plan>(json, options)!;
+        var restored = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(fixture.Plan));
 
         var duty = restored.DriverDuties.Single();
         var part = new DriverDutyPart

@@ -54,12 +54,13 @@ public class TrainCategoryContentTests
 
         static TrainContent Read(bool isPassenger, bool isFreight)
         {
-            var json = $$"""
-                {"Id":1,"Name":"Test","IsPassenger":{{(isPassenger ? "true" : "false")}},"IsFreight":{{(isFreight ? "true" : "false")}}}
-                """;
-            var category = JsonSerializer.Deserialize<TrainCategory>(json, PlanJson.CreateOptions());
-            Assert.IsNotNull(category);
-            return category.Content;
+            // A plan of schema version 0 with the category alone; the migration to version 1 reads the booleans.
+            var flags = $"\"IsPassenger\":{(isPassenger ? "true" : "false")},\"IsFreight\":{(isFreight ? "true" : "false")}";
+            var json = """
+                {"$id":"1","Name":"Plan","Timetable":{"$id":"2","Layout":{"$id":"3","Name":"Plan"},"TrainCategories":{"$id":"4","$values":[
+                {"$id":"5","Id":1,"Name":"Test",FLAGS}]}}}
+                """.Replace("FLAGS", flags, StringComparison.Ordinal);
+            return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(json).Timetable.TrainCategories.Single().Content;
         }
     }
 
@@ -68,8 +69,8 @@ public class TrainCategoryContentTests
     {
         var json = JsonSerializer.Serialize(Category(TrainContent.Cargo), PlanJson.CreateOptions());
 
-        Assert.Contains("\"Content\"", json);
-        Assert.DoesNotContain("\"IsPassenger\"", json);
-        Assert.DoesNotContain("\"IsFreight\"", json);
+        Assert.Contains("\"content\":\"Cargo\"", json);
+        Assert.DoesNotContain("\"isPassenger\"", json, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("\"isFreight\"", json, StringComparison.OrdinalIgnoreCase);
     }
 }

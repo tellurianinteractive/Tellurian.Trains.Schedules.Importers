@@ -134,7 +134,6 @@ public record TrainCategory
     /// the location in hand and ask only whether it is named.
     /// </para>
     /// </remarks>
-    [JsonConverter(typeof(Schedules.IdListConverter))]
     public IList<int> StopLocationIds { get; set; } = [];
 
     /// <summary>

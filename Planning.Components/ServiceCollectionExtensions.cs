@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Tellurian.Localization;
 using Tellurian.Localization.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
+using Tellurian.Trains.Schedules.Importers.Services;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 using Tellurian.Trains.Schedules.Planning.App.Translations.Resources;
 using Tellurian.Trains.Schedules.Planning.Components.Docking;
@@ -48,6 +51,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICompaniesService, CompaniesService>();
         services.AddScoped<ITrainCategoriesService, TrainCategoriesService>();
         services.AddScoped<ScheduleImportService>();
+        services.AddScoped<LayoutRevisionState>();
+        services.AddLayoutImporter<HallPlanLayoutImporter>();
         services.AddScoped<ScheduleExportService>();
         services.AddScoped<ModuleRegistryUploadService>();
         services.AddScoped<HelpContentService>();
@@ -64,6 +69,18 @@ public static class ServiceCollectionExtensions
         services.AddScoped<TranslationService>();
         services.AddResxStringLocalizers();
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers an importer of layouts made elsewhere, offered on the Import tab beside the others: the first registered
+    /// importer that recognises a file reads it. Importers hold no state, so one instance serves every user. Adding the
+    /// same importer twice registers it once.
+    /// </summary>
+    /// <typeparam name="TImporter">The importer.</typeparam>
+    public static IServiceCollection AddLayoutImporter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TImporter>(this IServiceCollection services) where TImporter : class, ILayoutImporter
+    {
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ILayoutImporter, TImporter>());
         return services;
     }
 }

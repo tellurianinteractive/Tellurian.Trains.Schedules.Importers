@@ -148,15 +148,13 @@ public class Plan : IEquatable<Plan>, IJsonOnSerializing, IJsonOnDeserialized
     /// leaves a plan in, and the state every plan saved before the catalogues were kept was read in —
     /// reconciling on the way out means no path can save a plan that has not been put right first.
     /// </remarks>
-    void IJsonOnSerializing.OnSerializing()
-    {
-        Timetable?.RebuildTrainCategories();
-        Timetable?.Layout?.RebuildRegions();
-        this.RebuildCompanies();
-    }
+    void IJsonOnSerializing.OnSerializing() => this.PrepareForWriting();
 
     void IJsonOnDeserialized.OnDeserialized()
     {
+        // The vehicles, schedules and duties refer by id to calls, tracks and each other (see PlanReferences);
+        // the timetable has resolved its own already.
+        PlanReferences.RestoreReferences(this);
         this.RebuildCompanies();
         this.ResolveCatalogueReferences();
         // Only here can the stop flags the train parts depend on be put right: the parts the vehicle
@@ -260,11 +258,24 @@ public static class PlanExtensions
         }
 
         /// <summary>
+        /// Brings the catalogues in line with what the plan uses and every id it is referred to by in line with the
+        /// object it stands for, and gives every track, call and train part an id of its own. Done before a plan is
+        /// written, to a file or a database (where a plan's ids are the keys).
+        /// </summary>
+        public void PrepareForWriting()
+        {
+            plan = plan.ValueOrException(nameof(plan));
+            plan.Timetable?.RebuildTrainCategories();
+            plan.Timetable?.Layout?.RebuildRegions();
+            plan.RebuildCompanies();
+            PlanReferences.SynchroniseIds(plan);
+        }
+
+        /// <summary>
         /// Brings a whole plan into a consistent state, before anything validates, displays or saves it:
         /// the name is taken from the layout, the per-track call index is rebuilt from the trains, the
         /// catalogue references are put back, the category and company catalogues are reconciled with
-        /// what the plan actually uses, every location that exchanges passengers is given somewhere to
-        /// exchange them (see <c>Layout.EnsurePlatforms</c>), the stop flags the train parts depend on
+        /// what the plan actually uses, the stop flags the train parts depend on
         /// are set (see <see cref="Validations.StopRules"/>), every category that has no stop pattern is
         /// given the one its trains already run (see <see cref="Validations.StopPatternRules"/>), and
         /// every note is given the half of its call it is shown at (see
@@ -291,7 +302,6 @@ public static class PlanExtensions
                 timetable.ResolveCatalogueReferences();
                 timetable.RebuildTrainCategories();
                 timetable.Layout.RebuildRegions();
-                timetable.Layout.EnsurePlatforms();
             }
             plan.RebuildCompanies();
             plan.ResolveCatalogueReferences();

@@ -19,7 +19,7 @@ $root = Split-Path $PSScriptRoot -Parent
 $appProject = Join-Path $root "Planning.App"
 $serverProject = Join-Path $root "tools/AppServer"
 $testProject = Join-Path $root "Planning.App.Tests/Planning.App.Tests.csproj"
-$publishDir = Join-Path $root "Planning.App/bin/$Configuration/net10.0/publish"
+$publishDir = Join-Path $root "Planning.App/bin/$Configuration/net11.0/publish"
 $wwwroot = Join-Path $publishDir "wwwroot"
 $baseUrl = "http://localhost:$Port"
 

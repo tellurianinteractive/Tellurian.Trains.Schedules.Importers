@@ -218,6 +218,9 @@
             _editing.StartId = start.Id;
             _editing.End = end;
             _editing.EndId = end.Id;
+            // A value the planner changes is theirs: a newer hall plan doesn't overwrite it (LayoutUpdate).
+            if (_editing.Distance != _distance) _editing.IsDistanceEntered = true;
+            if (_editing.Time != _time) _editing.IsTimeEntered = true;
             _editing.Distance = _distance;
             _editing.TracksCount = _tracks;
             _editing.Speed = _speed;

@@ -1,5 +1,20 @@
 # Versjonsnyheter
 
+## Version 1.5.0
+
+### Brytende endringer
+
+- **Et nytt filformat for planer.** Planer lagres nå i et nytt og mer kompakt format: omtrent en tredjedel av størrelsen de hadde før, logoene unntatt. Planer lagret av tidligere versjoner leses som før og konverteres underveis, men en plan lagret av denne versjonen kan ikke åpnes av en tidligere.
+
+### Nye funksjoner
+
+- **En plan fra en hallplan.** På fanen **Importer** blir en hallplan fra Modultegneren, eller en bane skrevet av et annet program i samme form, til en ny plan med hallplanens driftssteder, spor og strekninger. Hver strekning får en kjøretid ut fra lengden og hastigheten. Ruteplanstrekningene lager du selv.
+- **En nyere versjon av hallplanen.** Når den åpne planen er laget fra en hallplan og du åpner en annen versjon av den, velger du om den åpne planen skal oppdateres eller om det skal lages en ny plan, med en advarsel når filen er den eldre versjonen. Ved oppdatering tas nye lengder og kjøretider med en gang, unntatt der du selv har lagt dem inn. Endringer som flytter eller legger til togenes opphold (et spor fjernet, et driftssted av en annen type, et fjernet eller satt inn mellom to andre) vises under **Må bekreftes**: **Gå gjennom** viser hva endringen gjør med togene, og **Utfør** utfører den. Endringer som endrer rekkefølgen på driftsstedene vises, slik at de kan gjøres for hånd.
+
+### Endringer
+
+- **To spor med samme betegnelse er en konflikt.** Et driftssted med to eller flere spor med samme betegnelse vises under **Konflikter** og fører til fanen **Driftssteder**. Planen kan fortsatt lagres.
+
 ## Versjon 1.4.7
 
 ### Rettelser

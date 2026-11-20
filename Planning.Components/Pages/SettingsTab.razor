@@ -630,8 +630,8 @@ else
 
     private static string ScaleLabel(Scale scale) =>
         string.IsNullOrEmpty(scale.Remark)
-            ? $"{scale.Name} (1:{scale.Denominator})"
-            : $"{scale.Name} (1:{scale.Denominator}, {scale.Remark})";
+            ? $"{scale.ShortName} (1:{scale.Denominator})"
+            : $"{scale.ShortName} (1:{scale.Denominator}, {scale.Remark})";
 
     // Sort by the name as shown in the current UI language (one entry per country).
     private IEnumerable<Country> CountryChoices =>

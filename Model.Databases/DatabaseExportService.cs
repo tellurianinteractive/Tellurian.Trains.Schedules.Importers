@@ -16,74 +16,32 @@ public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) 
     private readonly DbContextOptions<ScheduleDbContext> _options = options;
 
     /// <summary>
-    /// Asynchronously exports the specified schedule to a database supported by Entity Framework Core.
+    /// Exports <paramref name="schedule"/> to the database, which holds one plan: whatever it held is replaced.
     /// </summary>
-    /// <param name="schedule">The schedule to export. Cannot be null.</param>
-    /// <returns>A task that represents the asynchronous export operation. The task result contains an <see
-    /// cref="ExportResult{Schedule}"/> object with details about the export, including the exported schedule and any
-    /// error messages.</returns>
+    /// <remarks>
+    /// A plan's ids are local to it and are the keys in the database, so a database can't hold two plans. Before
+    /// saving, the plan is prepared as for writing to a file (<see cref="Plan"/>'s <c>PrepareForWriting</c>): every
+    /// track, call and train part is given an id of its own, and the references by id are brought in line.
+    /// </remarks>
+    /// <param name="schedule">The plan to export.</param>
+    /// <returns>The result of the export, with the exported plan or the error.</returns>
     public async Task<ExportResult<Plan>> ExportScheduleAsync(Plan schedule)
     {
         ArgumentNullException.ThrowIfNull(schedule);
 
         try
         {
+            schedule.PrepareForWriting();
             await using var context = new ScheduleDbContext(_options);
-            await context.Database.EnsureCreatedAsync();
-
-            ClearStretchesToAvoidConstraintIssues(schedule);
-            await SaveTrainCategoriesAsync(context, schedule);
-            await SaveScheduleAsync(context, schedule);
-
+            await context.Database.EnsureDeletedAsync().ConfigureAwait(false);
+            await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+            context.Plans.Add(schedule);
+            await context.SaveChangesAsync().ConfigureAwait(false);
             return ExportResult<Plan>.Success(schedule);
         }
         catch (DbUpdateException ex)
         {
             return ExportResult<Plan>.Failure(ex.InnerException?.Message ?? ex.Message);
         }
-    }
-
-    private static void ClearStretchesToAvoidConstraintIssues(Plan schedule)
-    {
-        schedule.Timetable.Layout.TrackStretches.Clear();
-        schedule.Timetable.Layout.TimetableStretches.Clear();
-    }
-
-    private static async Task SaveTrainCategoriesAsync(ScheduleDbContext context, Plan schedule)
-    {
-        var categories = schedule.Timetable.Trains
-            .Where(t => t.Category is not null)
-            .Select(t => t.Category!)
-            .DistinctBy(c => c.Id)
-            .ToList();
-
-        foreach (var category in categories)
-        {
-            var existing = await context.TrainCategories.FindAsync(category.Id);
-            if (existing is null)
-            {
-                context.TrainCategories.Add(category);
-            }
-        }
-
-        if (categories.Count > 0)
-        {
-            await context.SaveChangesAsync();
-        }
-    }
-
-    private static async Task SaveScheduleAsync(ScheduleDbContext context, Plan schedule)
-    {
-        var existingSchedule = await context.Plans
-            .FirstOrDefaultAsync(s => s.Name == schedule.Name);
-
-        if (existingSchedule is not null)
-        {
-            context.Plans.Remove(existingSchedule);
-            await context.SaveChangesAsync();
-        }
-
-        context.Plans.Add(schedule);
-        await context.SaveChangesAsync();
     }
 }

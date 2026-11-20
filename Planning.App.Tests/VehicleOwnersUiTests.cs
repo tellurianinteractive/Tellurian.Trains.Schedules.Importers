@@ -66,7 +66,7 @@ public sealed class VehicleOwnersUiTests : PlaywrightTestBase
         await Expect(owner).ToContainTextAsync("Owner to provide");
         await Expect(loco).ToContainTextAsync("Anna Berg");
 
-        await WaitForStoredPlanAsync("\"DccAddress\":0");
+        await WaitForStoredPlanAsync("\"dccAddress\":0");
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("vehicle-owners.png"), FullPage = true });
     }
 
@@ -151,7 +151,7 @@ public sealed class VehicleOwnersUiTests : PlaywrightTestBase
         plan.FindOrAddParticipant("Bert Andersson");
         if (withOwner) plan.AddContributor(wagons, anna, null);
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 
     private static OperationLocation NewStation(int id, string name, string signature)

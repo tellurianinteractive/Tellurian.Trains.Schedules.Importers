@@ -5,41 +5,6 @@ using Tellurian.Utilities.Web;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Describes a destination outside the layout — a domestic region or a foreign country —
-/// used for cargo flow routing. A <see cref="Station"/> (normally a shadow shunting yard) can be
-/// associated with zero, one, or several regions.
-/// </summary>
-public class Region
-{
-    /// <summary>
-    /// Gets or sets the unique identifier for this region.
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the region name, written in the layout's default language. Required.
-    /// </summary>
-    public required string Name { get; set; }
-
-    /// <summary>
-    /// Gets or sets the <see cref="Country.Id"/> of the country this region belongs to. A new region
-    /// defaults to the layout's default country (see <c>IdentitySettings.DefaultCountryId</c>); a region
-    /// representing a foreign destination is set to that country instead.
-    /// </summary>
-    public int? CountryId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the background colour used when rendering this region in notes, as a CSS colour
-    /// string. The text colour is auto-contrasted from it (see DM-4.5.4). Chosen from the
-    /// region <c>Palette</c>.
-    /// </summary>
-    public string BackgroundColor { get; set; } = "#ffff00";
-
-    /// <inheritdoc/>
-    public override string ToString() => Name;
-}
-
-/// <summary>
 /// Provides the standard region palette and the localised default regions for a layout.
 /// </summary>
 public static class RegionExtensions

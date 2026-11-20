@@ -120,9 +120,8 @@ public class PlanSettingsPersistenceTests
         // written by that version — reading it must still give back the whole plan.
         var json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "TestData", "Plan.0.3.2.json"));
 
-        var plan = JsonSerializer.Deserialize<Plan>(json, PlanJson.CreateOptions());
+        var plan = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(json);
 
-        Assert.IsNotNull(plan);
         Assert.AreEqual(3, plan.Layout.OperationLocations.Count, "operation locations");
         Assert.AreEqual(2, plan.Layout.TrackStretches.Count, "track stretches");
         Assert.AreEqual(2, plan.Layout.TimetableStretches.First().Stretches.Count, "timetable stretch route");
@@ -150,7 +149,7 @@ public class PlanSettingsPersistenceTests
         var json = JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
         var restored = JsonSerializer.Deserialize<Plan>(json, PlanJson.CreateOptions());
 
-        Assert.AreEqual(plan.Timetable.Trains.Count, Regex.Matches(json, "\"Calls\"").Count, "only a train writes a Calls collection");
+        Assert.AreEqual(plan.Timetable.Trains.Count, Regex.Matches(json, "\"calls\"").Count, "only a train writes a Calls collection");
         Assert.IsNotNull(restored);
         Assert.AreEqual(2, restored.Timetable.Trains.Single().Calls.Count, "calls");
         Assert.AreEqual(2, restored.Layout.StationTracks().Sum(t => t.Calls.Count), "per-track call index");

@@ -1,29 +1,6 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Where the planner has put an operation location in the layout's topology diagram, in the diagram's
-/// own coordinates. A location the planner has not moved has no entry here and is placed automatically.
-/// </summary>
-/// <remarks>
-/// A layout with cycles — a triangle, a balloon loop, two lines meeting at both ends — cannot be drawn
-/// well by any rule that reads the track alone, and the planner knows what the railway looks like. So
-/// the diagram is only a starting point: every location may be dragged where it belongs, and what is
-/// stored here is the answer. The coordinates are the diagram's, not the screen's, so a saved position
-/// survives the diagram being shown at a different size or on paper.
-/// </remarks>
-public sealed class TopologyPosition
-{
-    /// <summary>Gets or sets the <see cref="OperationLocation.Id"/> the position belongs to.</summary>
-    public int LocationId { get; set; }
-
-    /// <summary>Gets or sets the horizontal coordinate, in diagram units.</summary>
-    public double X { get; set; }
-
-    /// <summary>Gets or sets the vertical coordinate, in diagram units.</summary>
-    public double Y { get; set; }
-}
-
-/// <summary>
 /// Provides extension methods for the topology positions saved with a <see cref="Layout"/>.
 /// </summary>
 public static class LayoutTopologyExtensions

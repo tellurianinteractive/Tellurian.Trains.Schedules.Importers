@@ -71,23 +71,28 @@ public class JsonExportServiceIntegrationTests
         var jsonContent = await File.ReadAllTextAsync(jsonFile.FullName);
         var jsonOptions = new JsonDocumentOptions { MaxDepth = 256 };
         using var document = JsonDocument.Parse(jsonContent, jsonOptions);
-        var root = document.RootElement;
+        var envelope = document.RootElement;
+
+        // Verify the envelope of the plan file
+        Assert.AreEqual("tellurian-plan", envelope.GetProperty("format").GetString());
+        Assert.IsTrue(envelope.TryGetProperty("schemaVersion", out _), "JSON missing 'schemaVersion' property");
+        Assert.IsTrue(envelope.TryGetProperty("plan", out var root), "JSON missing 'plan' property");
 
         // Verify schedule name is present
-        Assert.IsTrue(root.TryGetProperty("Name", out var nameElement), "JSON missing 'Name' property");
+        Assert.IsTrue(root.TryGetProperty("name", out var nameElement), "JSON missing 'name' property");
         Assert.AreEqual(scheduleName, nameElement.GetString());
 
         // Verify timetable is present
-        Assert.IsTrue(root.TryGetProperty("Timetable", out _), "JSON missing 'Timetable' property");
+        Assert.IsTrue(root.TryGetProperty("timetable", out _), "JSON missing 'timetable' property");
 
         // Verify vehicles is present
-        Assert.IsTrue(root.TryGetProperty("ScheduledObjects", out _), "JSON missing 'ScheduledObjects' property");
+        Assert.IsTrue(root.TryGetProperty("scheduledObjects", out _), "JSON missing 'scheduledObjects' property");
 
         // Verify vehicle schedules is present
-        Assert.IsTrue(root.TryGetProperty("Schedules", out _), "JSON missing 'Schedules' property");
+        Assert.IsTrue(root.TryGetProperty("schedules", out _), "JSON missing 'schedules' property");
 
         // Verify driver duties is present
-        Assert.IsTrue(root.TryGetProperty("DriverDuties", out _), "JSON missing 'DriverDuties' property");
+        Assert.IsTrue(root.TryGetProperty("driverDuties", out _), "JSON missing 'driverDuties' property");
 
         Console.WriteLine($"JSON file validated successfully");
     }
