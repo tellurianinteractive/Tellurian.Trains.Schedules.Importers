@@ -46,11 +46,28 @@ public class Module : LayoutPart
     /// (<see cref="NestedOperationLocation"/>); placed in a layout, where every location is written once in
     /// <see cref="Layout.OperationLocations"/>, the module refers to it by id (<see cref="OperationLocationId"/>).
     /// </summary>
+    /// <remarks>
+    /// The module's <see cref="Tracks"/> stay one list with the location's: a location without tracks given to a module
+    /// with tracks takes the module's; a location with tracks brings its own; a module whose location is removed keeps
+    /// the location's tracks as its own.
+    /// </remarks>
     [JsonIgnore]
     public OperationLocation? OperationLocation
     {
         get;
-        set { field = value; _operationLocationId = null; }
+        set
+        {
+            var tracks = Tracks;
+            field = value;
+            _operationLocationId = null;
+            if (value is null) _ownTracks = tracks;
+            else
+            {
+                if (value.Tracks.Count == 0 && tracks.Count > 0) value.Tracks = tracks;
+                foreach (var track in value.Tracks) track.Station = value;
+                _ownTracks = [];
+            }
+        }
     }
 
     /// <summary>Whether the module is placed in a layout, as a <see cref="LayoutModule"/>'s module; decides how it is written.</summary>
@@ -65,14 +82,7 @@ public class Module : LayoutPart
     public OperationLocation? NestedOperationLocation
     {
         get => IsPlaced ? null : OperationLocation;
-        set
-        {
-            OperationLocation = value;
-            if (value is null) return;
-            // A file that wrote the tracks on the module and none in the location: they are the location's.
-            if (value.Tracks.Count == 0 && Tracks.Count > 0) value.Tracks = Tracks;
-            Tracks = value.Tracks;
-        }
+        set => OperationLocation = value; // a file that wrote the tracks on the module and none in the location: they become the location's
     }
 
     /// <summary>
@@ -89,10 +99,25 @@ public class Module : LayoutPart
     /// <summary>
     /// The tracks of the module: the tracks of plain line, or those of its operation location, the very same list as
     /// <see cref="OperationLocation.Tracks"/>. They are written where they are owned: with the location when the module
-    /// is one, else on the module (<see cref="OwnTracks"/>).
+    /// is one, else on the module (<see cref="OwnTracks"/>). Setting them on a module that is an operation location sets
+    /// the location's.
     /// </summary>
     [JsonIgnore]
-    public IList<StationTrack> Tracks { get; set; } = [];
+    public IList<StationTrack> Tracks
+    {
+        get => OperationLocation?.Tracks ?? _ownTracks;
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            if (OperationLocation is { } location)
+            {
+                location.Tracks = value;
+                foreach (var track in value) track.Station = location;
+            }
+            else _ownTracks = value;
+        }
+    }
+    private IList<StationTrack> _ownTracks = [];
 
     /// <summary>
     /// The tracks as written on the module: its own, for a module of plain line; null, and so not written, for a module
@@ -107,27 +132,21 @@ public class Module : LayoutPart
         {
             if (value is null) return;
             // A file that wrote the tracks on the module and none in the location: they are the location's.
-            if (OperationLocation is { } location)
-            {
-                if (location.Tracks.Count == 0) location.Tracks = value;
-                Tracks = location.Tracks;
-            }
-            else Tracks = value;
+            if (OperationLocation is { Tracks.Count: > 0 }) return;
+            Tracks = value;
         }
     }
 
     /// <summary>
-    /// A copy with copies of the module's operation location and tracks. When the tracks are those of the location,
-    /// the copy's are those of the copied location too. The standard is referred to, not copied.
+    /// A copy with copies of the module's operation location and tracks; the tracks of a location module are those of
+    /// the copied location. The standard is referred to, not copied.
     /// </summary>
     public override Module Copy()
     {
         var copy = (Module)base.Copy();
         copy.IsPlaced = false; // placed again when a layout module takes it
+        copy._ownTracks = [.. _ownTracks.Select(track => track.Copy())];
         copy.OperationLocation = OperationLocation?.Copy();
-        copy.Tracks = OperationLocation is not null && ReferenceEquals(Tracks, OperationLocation.Tracks)
-            ? copy.OperationLocation!.Tracks
-            : [.. Tracks.Select(track => track.Copy())];
         return copy;
     }
 

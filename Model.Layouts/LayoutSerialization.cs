@@ -85,7 +85,6 @@ public static class LayoutSerialization
         {
             if (module.OperationLocation is not null || module.OperationLocationId is not int id || locations.GetValueOrDefault(id) is not { } location) continue;
             module.OperationLocation = location;
-            module.Tracks = location.Tracks;
         }
     }
 }

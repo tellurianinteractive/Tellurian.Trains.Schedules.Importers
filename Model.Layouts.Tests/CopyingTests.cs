@@ -57,11 +57,11 @@ public class CopyingTests
     [TestMethod]
     public void AModuleIsCopiedWithItsLocationAndTracks()
     {
-        var module = new Module { Name = "Tellby", OperationLocation = Tellby(), Tracks = { new StationTrack(9, "9") } };
+        var module = new Module { Name = "Tellby", OperationLocation = Tellby() };
 
         var copy = module.With(m => m.Tracks.Single().Designation = "10");
 
-        Assert.AreEqual("9", module.Tracks.Single().Designation);
+        Assert.AreEqual("1", module.Tracks.Single().Designation);
         Assert.AreNotSame(module.OperationLocation, copy.OperationLocation);
         Assert.AreEqual("Tellby", copy.OperationLocation!.Name);
     }
@@ -75,6 +75,55 @@ public class CopyingTests
         var copy = module.Copy();
 
         Assert.AreSame(copy.OperationLocation!.Tracks, copy.Tracks);
+    }
+
+    [TestMethod]
+    public void TracksSetOnALocationModuleAreTheLocations()
+    {
+        var module = new Module { Name = "Tellby", OperationLocation = Tellby() };
+
+        var copy = module.With(m => m.Tracks = [new StationTrack(2, "2")]);
+
+        Assert.AreSame(copy.OperationLocation!.Tracks, copy.Tracks);
+        Assert.AreEqual("2", copy.OperationLocation.Tracks.Single().Designation);
+        Assert.AreSame(copy.OperationLocation, copy.Tracks.Single().Station);
+        Assert.AreEqual("1", module.Tracks.Single().Designation);
+    }
+
+    [TestMethod]
+    public void ALocationWithoutTracksTakesTheModulesTracks()
+    {
+        var module = new Module { Name = "Tellby", Tracks = [new StationTrack(1, "1"), new StationTrack(2, "2")] };
+        var tracks = module.Tracks;
+
+        var location = new Station(0, "Tellby", "Tby");
+        module.OperationLocation = location;
+
+        Assert.AreSame(tracks, location.Tracks);
+        Assert.AreSame(tracks, module.Tracks);
+        Assert.IsTrue(tracks.All(t => t.Station == location));
+    }
+
+    [TestMethod]
+    public void ALocationWithTracksBringsItsOwn()
+    {
+        var module = new Module { Name = "Tellby", Tracks = [new StationTrack(5, "5")] };
+
+        module.OperationLocation = Tellby();
+
+        Assert.AreEqual("1", module.Tracks.Single().Designation);
+    }
+
+    [TestMethod]
+    public void AModuleWhoseLocationIsRemovedKeepsItsTracks()
+    {
+        var module = new Module { Name = "Tellby", OperationLocation = Tellby() };
+        var tracks = module.Tracks;
+
+        module.OperationLocation = null;
+
+        Assert.AreSame(tracks, module.Tracks);
+        Assert.AreSame(tracks, module.OwnTracks);
     }
 
     [TestMethod]
