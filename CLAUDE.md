@@ -39,6 +39,7 @@ This repository holds the complete model of the Tellurian Trains suite, in three
 ```
 Importers.Interfaces/  → Contracts: IImportService, ILayoutImporter, IExportService, ImportResult<T>
     ↓
+Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies. Moved from Module Draw 2026-11-21
 Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module
     ↓
 Model/                 → Planning model: Plan, Timetable, Train, schedules, duties; plan files (PlanFiles/)

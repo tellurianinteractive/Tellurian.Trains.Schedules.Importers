@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Model.Geometry</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model.Geometry</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>Pure 2D geometry for model railway drawings: points, vectors, angles, poses, transforms, line and arc segments, paths, distances and shape comparison. Millimetres and degrees. No domain knowledge and no dependencies.</Description>
+    <PackageTags>model-trains geometry 2d</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

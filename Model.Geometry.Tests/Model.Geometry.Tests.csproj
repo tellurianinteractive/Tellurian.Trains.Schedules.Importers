@@ -1,0 +1,9 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Model.Geometry.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model.Geometry.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model.Geometry\Model.Geometry.csproj" />
+  </ItemGroup>
+</Project>

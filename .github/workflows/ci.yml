@@ -116,6 +116,12 @@ jobs:
       - name: Make test executables runnable
         run: find . -type f -path '*/bin/Release/net11.0/*' -name '*.Tests' -exec chmod +x {} +
 
+      - name: Test Model.Geometry
+        run: dotnet test Model.Geometry.Tests/Model.Geometry.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test Model.Layouts
+        run: dotnet test Model.Layouts.Tests/Model.Layouts.Tests.csproj --configuration Release --no-build --verbosity normal
+
       - name: Test Model
         run: dotnet test Model.Tests/Model.Tests.csproj --configuration Release --no-build --verbosity normal
 
