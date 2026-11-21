@@ -27,6 +27,10 @@ public static class DrawingMigrations
     private const string Width = "width";
     private const string Standards = "standards";
     private const string EndProfiles = "endProfiles";
+    private const string Id = "id";
+    private const string Obstacles = "obstacles";
+    private const string Doors = "doors";
+    private const string NoGoZones = "noGoZones";
 
     /// <summary>Whether the step to the current schema version also runs on files of that version: true until version 2 is released.</summary>
     public const bool IsDraftUpgraded = true;
@@ -71,10 +75,24 @@ public static class DrawingMigrations
         Each(catalogue, EndProfiles, EndProfileToVersion2);
     }
 
+    /// <summary>
+    /// Brings a hall, in its own file or embedded in a hall plan, from schema version 1 to 2: its obstacles, doors and
+    /// no-go zones get whole numbers as ids, unique among their kind in the hall, in place of GUIDs (decision 10). Ids
+    /// that are whole numbers already are kept; the others are numbered on from the highest, in the order of the list.
+    /// </summary>
+    /// <returns>The new id of each obstacle by its earlier id, for a hall plan that refers to obstacles.</returns>
+    public static IReadOnlyDictionary<string, int> HallToVersion2(JsonNode? hall)
+    {
+        NumberIds(hall, Doors);
+        NumberIds(hall, NoGoZones);
+        return NumberIds(hall, Obstacles);
+    }
+
     private static IReadOnlyList<FileMigration> StepsOf(DrawingFileKind kind) => kind switch
     {
         DrawingFileKind.EndProfile => [new(1, content => { EndProfileToVersion2(content); return content; })],
         DrawingFileKind.Catalogue => [new(1, content => { CatalogueToVersion2(content); return content; })],
+        DrawingFileKind.Hall => [new(1, content => { HallToVersion2(content); return content; })],
         _ => throw new NotSupportedException($"The {DrawingFileFormat.Name(kind)} file is still read by Module Draw."),
     };
 
@@ -82,6 +100,27 @@ public static class DrawingMigrations
     {
         if (node is JsonObject drawing && drawing.Remove(RegistryId, out var id) && id is JsonValue)
             RegistryEntry(drawing)[name] ??= id;
+    }
+
+    /// <summary>
+    /// Gives the objects in the array <paramref name="name"/> of <paramref name="node"/> whole-number ids: a positive
+    /// whole number not used before in the list is kept, anything else is replaced by the next number.
+    /// </summary>
+    /// <returns>The new id of each object by its earlier id, as text.</returns>
+    private static Dictionary<string, int> NumberIds(JsonNode? node, string name)
+    {
+        var renumbered = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if ((node as JsonObject)?[name] is not JsonArray list) return renumbered;
+        var items = list.OfType<JsonObject>().ToList();
+        var used = new HashSet<int>();
+        var kept = items.Where(item => item[Id] is JsonValue value && value.TryGetValue<int>(out var id) && id > 0 && used.Add(id)).ToHashSet();
+        var next = used.Count == 0 ? 1 : used.Max() + 1;
+        foreach (var item in items.Where(i => !kept.Contains(i)))
+        {
+            if (item[Id] is JsonValue earlier && earlier.TryGetValue<string>(out var text)) renumbered.TryAdd(text, next);
+            item[Id] = next++;
+        }
+        return renumbered;
     }
 
     /// <summary>Applies <paramref name="migrate"/> to every object in the array <paramref name="name"/> of <paramref name="node"/>.</summary>

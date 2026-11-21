@@ -5,3 +5,4 @@ global using Tellurian.Trains.Schedules.Model.Timetables;
 global using Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 global using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
 global using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
+global using Tellurian.Trains.Schedules.Model.Layouts.Halls;

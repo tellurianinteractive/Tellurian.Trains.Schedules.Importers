@@ -49,8 +49,8 @@ Model/                 → Planning model: Plan, Timetable, Train, schedules, du
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
 ├─ Importers.Services/ → Shared import services (JSON/CSV data files)
 ├─ Exporters.Services/ → Plan file writing: PlanJsonExporter, JsonExportService
-├─ Importers.Drawing/  → Reads Module Draw's drawing files (EndProfileImporter so far), with the migrations
-├─ Exporters.Drawing/  → Writes Module Draw's drawing files (EndProfileExporter so far), counting up revisions
+├─ Importers.Drawing/  → Reads Module Draw's drawing files (end profiles, catalogues, halls so far), with the migrations
+├─ Exporters.Drawing/  → Writes Module Draw's drawing files (end profiles, catalogues, halls so far), counting up revisions
 ├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```

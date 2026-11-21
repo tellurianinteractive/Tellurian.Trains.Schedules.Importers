@@ -82,6 +82,29 @@ public sealed record PathDrawing : ExtensibleRecord
     /// <summary>The path as points, with arcs approximated within <paramref name="chordTolerance"/>, mm.</summary>
     public Polyline Tessellate(double chordTolerance = Tolerance.Chord) => ToPath().Tessellate(chordTolerance);
 
+    /// <summary>
+    /// The centre, size and rotation if the path is a closed rectangle of four straight steps, e.g. a rectangular
+    /// pillar or hall: the width runs along the first step, turned <paramref name="rotation"/> from the X axis, and the
+    /// depth along the last step back to the start.
+    /// </summary>
+    public bool TryGetRectangle(out Point center, out double width, out double depth, out Angle rotation)
+    {
+        center = default;
+        width = depth = 0;
+        rotation = default;
+        if (!IsClosed || Steps.Count != 4 || Steps.Any(s => s is not LineStep)) return false;
+        var corners = ToPath().Segments.Select(s => s.Start).ToList();
+        Vector along = corners[1] - corners[0], across = corners[3] - corners[0];
+        if (along.Length < Tolerance.Length || across.Length < Tolerance.Length) return false;
+        // A rectangle: the opposite corner closes the parallelogram and the sides are perpendicular.
+        if (!corners[2].IsCloseTo(corners[0] + along + across, Tolerance.Length) || Math.Abs(along.Normalized.Dot(across.Normalized)) > Tolerance.Length) return false;
+        center = Point.Lerp(corners[0], corners[2], 0.5);
+        width = along.Length;
+        depth = across.Length;
+        rotation = along.Direction;
+        return true;
+    }
+
     /// <summary>The same path mirrored about the centre line; only for comparing end profiles.</summary>
     public PathDrawing MirroredX() => From(Mirror.AboutCentreLine(ToPath()));
 }
