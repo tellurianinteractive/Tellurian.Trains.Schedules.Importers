@@ -83,6 +83,12 @@ public sealed record Message : IEquatable<Message>
     /// </summary>
     public Severity Severity { get; }
 
+    /// <summary>
+    /// A stable code for what the message says, e.g. <c>NewerVersion</c>, for an app that shows its own translated text
+    /// in place of <see cref="Text"/>; null when the message has none. It doesn't take part in equality.
+    /// </summary>
+    public string? Code { get; init; }
+
     /// <inheritdoc/>
     public override string ToString() =>
         Severity == Severity.None ? Text :

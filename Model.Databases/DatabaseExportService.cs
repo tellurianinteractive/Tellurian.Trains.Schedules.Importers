@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Tellurian.Trains.Schedules.Importers.Interfaces;
+using Tellurian.Trains.Schedules.Exporters.Interfaces;
 
 namespace Tellurian.Trains.Schedules.Model.Databases;
 
@@ -41,7 +41,7 @@ public class DatabaseExportService(DbContextOptions<ScheduleDbContext> options) 
         }
         catch (DbUpdateException ex)
         {
-            return ExportResult<Plan>.Failure(ex.InnerException?.Message ?? ex.Message);
+            return ExportResult<Plan>.Failure(Message.Error(ex.InnerException?.Message ?? ex.Message) with { Code = "WriteFailed" });
         }
     }
 }

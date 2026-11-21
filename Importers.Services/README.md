@@ -26,22 +26,7 @@ if (result.IsSuccess)
 }
 ```
 
-### JsonExportService
-
-Exports schedules to JSON files with reference preservation:
-
-```csharp
-var destination = new FileInfo("schedule.json");
-var exporter = new JsonExportService(destination);
-
-var result = await exporter.ExportScheduleAsync(schedule);
-if (result.IsSuccess)
-{
-    Console.WriteLine($"Exported to {destination.FullName}");
-}
-```
-
-The JSON format uses `ReferenceHandler.Preserve` to handle circular references in the object graph.
+Writing plan files (`JsonExportService`, `PlanJsonExporter`) is in `Tellurian.Trains.Schedules.Exporters.Services`.
 
 ### CompaniesFromJsonService
 

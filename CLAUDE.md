@@ -37,7 +37,8 @@ Note: Access.Tests and Model.Databases.Tests are excluded from CI (require Windo
 This repository holds the complete model of the Tellurian Trains suite, in three layers: **Layouts** (`Model.Layouts`, what Module Draw makes), **Timetables** (`Model`, what the planner adds) and **Dispatching** (what Dispatch adds; not here yet). Module Draw, the Timetable Planner and Tellurian Dispatch use these models and add only app-specific functionality and user interface; the Module Registry keeps its own model and is extended later from the gaps. JSON import/export must use source-generated serialisation (`JsonSerializerContext`, `[JsonSerializable]`, `[JsonPolymorphic]`/`[JsonDerivedType]`), never reflection, for AOT. All reading and writing of data in every format (importers, and exporters still to be added) and all serialisation code belong here, so files, databases and API calls share one implementation. When an app needs something the model lacks, extend the model here instead of adding types or mapping code in the app. Background: `Documentation/CrossAppReview.md` (section 0 and the cross-app findings), `Documentation/ModelHarmonisation.md` (decisions and progress), `Documentation/OperationLocations.md`.
 
 ```
-Importers.Interfaces/  → Contracts: IImportService, ILayoutImporter, IExportService, ImportResult<T>
+Importers.Interfaces/  → Reading contracts: IImporter<T> (ILayoutImporter is IImporter<Layout>), IImportService, ImportResult<T>
+Exporters.Interfaces/  → Writing contracts: IExporter<T>, ExportOptions, IExportService, ExportResult<T> (reading and writing are separate packages, CrossAppReview decision 18)
     ↓
 Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies. Moved from Module Draw 2026-11-21
 Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module
@@ -47,6 +48,7 @@ Model/                 → Planning model: Plan, Timetable, Train, schedules, du
 ├─ Importers.Xpln/     → XPLN ODS/XLSX importer (published to NuGet)
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
 ├─ Importers.Services/ → Shared import services (JSON/CSV data files)
+├─ Exporters.Services/ → Plan file writing: PlanJsonExporter, JsonExportService
 ├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```

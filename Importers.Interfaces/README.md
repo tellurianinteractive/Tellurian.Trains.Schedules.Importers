@@ -1,6 +1,6 @@
 # Tellurian.Trains.Schedules.Importers.Interfaces
 
-Contracts for schedule import/export services and supporting data services.
+Contracts for reading the Tellurian Trains models, and supporting data services. Writing is in `Tellurian.Trains.Schedules.Exporters.Interfaces`.
 
 ## Installation
 
@@ -21,16 +21,24 @@ public interface IImportService
 }
 ```
 
-### IExportService
+### IImporter&lt;T&gt;
 
-Interface for exporting schedules to external formats:
+Reads one kind of item from a stream: a layout, a Module Draw drawing, a catalogue. An app registers the importers it
+uses; `importers.For(fileName, content)` picks the first that recognises a file, and `ReadableFileExtensions()` lists
+what they read. An importer never throws because of what a file contains; a failure is a failed `ImportResult<T>`
+whose messages may carry a `Code` for the app to translate.
 
 ```csharp
-public interface IExportService
+public interface IImporter<T>
 {
-    Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule);
+    string ResourceKey { get; }
+    IReadOnlyList<string> FileExtensions { get; }
+    bool CanImport(string fileName, ReadOnlySpan<byte> content);   // quick, never throws
+    Task<ImportResult<T>> ImportAsync(Stream stream, string fileName, CancellationToken cancellationToken = default);
 }
 ```
+
+`ILayoutImporter` is the case for a `Layout`: `public interface ILayoutImporter : IImporter<Layout>;`.
 
 ### ICompaniesService
 
@@ -86,22 +94,7 @@ else
 }
 ```
 
-### ExportResult&lt;T&gt;
-
-A simpler result type for export operations:
-
-```csharp
-// Successful export
-var result = ExportResult<Schedule>.Success(schedule);
-
-// Failed export
-var result = ExportResult<Schedule>.Failure("Export failed", "Reason...");
-
-if (result.IsSuccess)
-{
-    // Export succeeded
-}
-```
+`ExportResult<T>` and `IExportService` are in `Tellurian.Trains.Schedules.Exporters.Interfaces`.
 
 ## Implementing a Custom Importer
 

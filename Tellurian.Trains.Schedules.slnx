@@ -13,6 +13,9 @@
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
   </Folder>
+  <Project Path="Exporters.Interfaces/Exporters.Interfaces.csproj" />
+  <Project Path="Exporters.Services.Tests/Exporters.Services.Tests.csproj" />
+  <Project Path="Exporters.Services/Exporters.Services.csproj" />
   <Project Path="Importers.Access.Tests/Importers.Access.Tests.csproj" />
   <Project Path="Importers.Access/Importers.Access.csproj" />
   <Project Path="Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj" />
