@@ -15,13 +15,13 @@ public static class ScaleExtensions
         /// </summary>
         public static IEnumerable<Scale> Scales =>
         [
-            new() { Id = 1, ShortName = "N", Denominator = 160, Gauge = 9.0 },
-            new() { Id = 2, ShortName = "TT", Denominator = 120, Gauge = 12.0 },
-            new() { Id = 3, ShortName = "H0", Denominator = 87, Gauge = 16.5 },
-            new() { Id = 4, ShortName = "00", Denominator = 76, Gauge = 16.5 },
-            new() { Id = 5, ShortName = "0", Denominator = 45, Gauge = 32.0, Remark = "NEM" },
-            new() { Id = 6, ShortName = "I", Denominator = 32, Gauge = 45.0 },
-            new() { Id = 101, ShortName = "0", Denominator = 48, Gauge = 32.0, Remark = "NMRA" },
+            new() { Id = 1, ShortName = "N", Denominator = 160 },
+            new() { Id = 2, ShortName = "TT", Denominator = 120 },
+            new() { Id = 3, ShortName = "H0", Denominator = 87 },
+            new() { Id = 4, ShortName = "00", Denominator = 76 },
+            new() { Id = 5, ShortName = "0", Denominator = 45, Remark = "NEM" },
+            new() { Id = 6, ShortName = "I", Denominator = 32 },
+            new() { Id = 101, ShortName = "0", Denominator = 48, Remark = "NMRA" },
         ];
 
         /// <summary>

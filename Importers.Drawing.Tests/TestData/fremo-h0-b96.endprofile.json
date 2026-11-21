@@ -242,7 +242,9 @@
     "tracks": [
       {
         "offset": 0,
-        "gauge": 16.5,
+        "gauges": [
+          16.5
+        ],
         "railSystem": "TwoRail"
       }
     ],

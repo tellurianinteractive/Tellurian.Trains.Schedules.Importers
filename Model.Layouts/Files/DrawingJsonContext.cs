@@ -29,5 +29,6 @@ namespace Tellurian.Trains.Schedules.Model.Files;
         typeof(PoseJsonConverter),
     ])]
 [JsonSerializable(typeof(EndProfile))]
+[JsonSerializable(typeof(Tellurian.Trains.Schedules.Model.Layouts.Catalogues.DrawingCatalogue))]
 [JsonSerializable(typeof(IReadOnlyList<DrawingRevision>))]
 public sealed partial class DrawingJsonContext : JsonSerializerContext;

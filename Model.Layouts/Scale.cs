@@ -1,22 +1,19 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// A model scale, e.g. "H0". It is referred to by its short name; the Module Registry defines the scales and has an id
-/// for each.
+/// A model scale, e.g. "H0" at 1:87. A scale is a ratio only: the gauges belong to the standard
+/// (<see cref="ModuleStandard.Gauges"/>), so H0 and H0m are one scale (decision 11 of <c>CrossAppReview.md</c>).
 /// </summary>
 public sealed class Scale : LayoutPart, IEquatable<Scale>
 {
-    /// <summary>The Module Registry's id of the scale; null when it isn't taken from there.</summary>
+    /// <summary>The id of the scale in the suite's list of scales, e.g. 3 for H0; null when not taken from there.</summary>
     public int? Id { get; set; }
 
     /// <summary>What the scale is called, e.g. "H0". It is what identifies the scale to a reader.</summary>
     public required string ShortName { get; set; }
 
-    /// <summary>What one unit of the model is of the real thing, e.g. 87 for 1:87; null when not stated.</summary>
-    public int? Denominator { get; set; }
-
-    /// <summary>The normal gauge in millimetres, e.g. 16.5; null when not stated.</summary>
-    public double? Gauge { get; set; }
+    /// <summary>What one unit of the model is of the real thing, e.g. 87 for 1:87 or 43.5 for 1:43.5; null when not stated.</summary>
+    public decimal? Denominator { get; set; }
 
     /// <summary>What tells two scales of the same name apart, e.g. "NMRA"; null when nothing is needed.</summary>
     public string? Remark { get; set; }
