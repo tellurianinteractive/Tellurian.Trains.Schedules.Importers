@@ -10,6 +10,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// </summary>
 public class Module : LayoutPart
 {
+    /// <summary>
+    /// The identity of the module drawing, the same in every file it is written to; null for a module made without a
+    /// drawing, as by the planner. Written first.
+    /// </summary>
+    [JsonPropertyOrder(FirstInFile)]
+    public Guid? Id { get; set; }
+
     /// <summary>The name the owner has given the module, e.g. "Tellby" or "Curve 30°".</summary>
     public required string Name { get; set; }
 
@@ -137,9 +144,98 @@ public class Module : LayoutPart
         }
     }
 
+    /// <summary>The id of the module's standard in the catalogue (<see cref="ModuleStandard.Id"/>); <see cref="Standard"/> names it for readers without the catalogue.</summary>
+    public Guid? StandardId { get; set; }
+
+    /// <summary>The add-ons of the standard that the module meets.</summary>
+    public List<CatalogueReference> AddOns { get; set; } = [];
+
+    /// <summary>The first year of the period the module depicts.</summary>
+    public int? RepresentsFromYear { get; set; }
+
+    /// <summary>The last year of the period the module depicts.</summary>
+    public int? RepresentsUptoYear { get; set; }
+
+    /// <summary>The number of through tracks as entered; compared with the drawing.</summary>
+    public int? NumberOfThroughTracks { get; set; }
+
+    /// <summary>The module has normal-gauge track. Always written, since it is true unless said otherwise.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool HasNormalGauge { get; set; } = true;
+
+    /// <summary>The module has narrow-gauge track.</summary>
+    public bool HasNarrowGauge { get; set; }
+
+    /// <summary>The operator passes under the module to reach the inside of the layout.</summary>
+    public bool IsDuckunder { get; set; }
+
+    /// <summary>The module is a turntable.</summary>
+    public bool IsTurntable { get; set; }
+
+    /// <summary>The line ends on the module.</summary>
+    public bool IsEndOfLine { get; set; }
+
     /// <summary>
-    /// A copy with copies of the module's operation location and tracks; the tracks of a location module are those of
-    /// the copied location. The standard is referred to, not copied.
+    /// The module turns an asymmetric end profile over (German <i>Endewender</i>, Registry flag): an asymmetric
+    /// feature, such as the high side of FREMO-H0-B96, is on one side of the track at one end and on the other side at
+    /// the other end.
+    /// </summary>
+    public bool IsEndProfileSwitcher { get; set; }
+
+    /// <summary>The module has a signal.</summary>
+    public bool IsSignalModule { get; set; }
+
+    /// <summary>The module can be shown on its own.</summary>
+    public bool IsStandAlone { get; set; }
+
+    /// <summary>The Module Registry's code for how far the module works.</summary>
+    public int? FunctionalState { get; set; }
+
+    /// <summary>The Module Registry's code for how far the landscape is finished.</summary>
+    public int? LandscapeState { get; set; }
+
+    /// <summary>A note for the reader.</summary>
+    public string? Note { get; set; }
+
+    /// <summary>Counted up each time the module is saved as a new revision.</summary>
+    public int Revision { get; set; }
+
+    /// <summary>Who saved the drawing, and the last date each of them did, newest first.</summary>
+    public List<DrawingRevision> RevisionLog { get; set; } = [];
+
+    /// <summary>What other systems keep about the module, with one entry per system; read and written back unchanged.</summary>
+    public Dictionary<string, System.Text.Json.JsonElement>? ExternalReferences { get; set; }
+
+    /// <summary>
+    /// The geometry of the module, with its track elements; empty for a module without a drawing, as made by the
+    /// planner. Never null, so code that draws needn't ask; it is written as <c>drawing</c> only when it isn't empty
+    /// (<see cref="WrittenDrawing"/>).
+    /// </summary>
+    [JsonIgnore]
+    public ModuleDrawing Drawing
+    {
+        get => _drawing ??= new();
+        set => _drawing = value ?? throw new ArgumentNullException(nameof(value));
+    }
+    private ModuleDrawing? _drawing;
+
+    /// <summary>Whether the module has a drawing: one that isn't empty.</summary>
+    [JsonIgnore]
+    public bool HasDrawing => _drawing is { IsEmpty: false };
+
+    /// <summary>The drawing as written: null, and so not written, when it is empty. Written last, being the largest part.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [JsonPropertyName("drawing")]
+    [JsonPropertyOrder(LastInFile)]
+    public ModuleDrawing? WrittenDrawing
+    {
+        get => HasDrawing ? _drawing : null;
+        set => _drawing = value;
+    }
+
+    /// <summary>
+    /// A copy with copies of the module's operation location, tracks, drawing and lists; the tracks of a location
+    /// module are those of the copied location. The standard is referred to, not copied.
     /// </summary>
     public override Module Copy()
     {
@@ -147,8 +243,15 @@ public class Module : LayoutPart
         copy.IsPlaced = false; // placed again when a layout module takes it
         copy._ownTracks = [.. _ownTracks.Select(track => track.Copy())];
         copy.OperationLocation = OperationLocation?.Copy();
+        copy.AddOns = [.. AddOns];
+        copy.RevisionLog = [.. RevisionLog];
+        copy.ExternalReferences = ExternalReferences is null ? null : new(ExternalReferences);
+        copy._drawing = _drawing?.Copy();
         return copy;
     }
+
+    private const int FirstInFile = -1;
+    private const int LastInFile = 1;
 
     /// <inheritdoc/>
     public override string ToString() => this.DisplayName;

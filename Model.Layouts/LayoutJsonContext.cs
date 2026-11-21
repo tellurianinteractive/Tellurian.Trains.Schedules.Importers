@@ -19,7 +19,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
     UseStringEnumConverter = true,
     AllowOutOfOrderMetadataProperties = true,
-    IgnoreReadOnlyProperties = true)]
+    IgnoreReadOnlyProperties = true,
+    Converters =
+    [
+        typeof(Drawings.PointJsonConverter),
+        typeof(Drawings.AngleJsonConverter),
+        typeof(Drawings.PoseJsonConverter),
+    ])]
 [JsonSerializable(typeof(Layout))]
 [JsonSerializable(typeof(OperationLocation))]
 [JsonSerializable(typeof(ICollection<LayoutModule>))]

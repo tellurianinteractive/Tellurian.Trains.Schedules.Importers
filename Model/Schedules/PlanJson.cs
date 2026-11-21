@@ -38,6 +38,12 @@ public static class PlanJson
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
     UseStringEnumConverter = true,
     AllowOutOfOrderMetadataProperties = true,
-    IgnoreReadOnlyProperties = true)]
+    IgnoreReadOnlyProperties = true,
+    Converters =
+    [
+        typeof(Tellurian.Trains.Schedules.Model.Layouts.Drawings.PointJsonConverter),
+        typeof(Tellurian.Trains.Schedules.Model.Layouts.Drawings.AngleJsonConverter),
+        typeof(Tellurian.Trains.Schedules.Model.Layouts.Drawings.PoseJsonConverter),
+    ])]
 [JsonSerializable(typeof(Plan))]
 internal sealed partial class PlanJsonContext : JsonSerializerContext;

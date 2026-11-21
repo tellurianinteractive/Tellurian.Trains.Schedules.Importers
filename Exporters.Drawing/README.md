@@ -12,8 +12,9 @@ dotnet add package Tellurian.Trains.Schedules.Exporters.Drawing
 | `EndProfileExporter` | `.endprofile.json` | 4.0.9 |
 | `CatalogueExporter` | `.catalogue.json` | 4.0.18 |
 | `HallExporter` | `.hall.json` | 4.0.19 |
+| `ModuleExporter` | `.module.json` | 4.0.22 |
 
-Modules and hall plans follow as their types move from Module Draw.
+Hall plans follow as their types move from Module Draw.
 
 Each exporter is an `IExporter<T>` (item and stream in, `ExportResult<T>` out) and also has a synchronous
 `Write(item, options)` that returns the text. `ExportOptions` says the app's version for the envelope and whether the

@@ -6,3 +6,8 @@ global using Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 global using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
 global using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 global using Tellurian.Trains.Schedules.Model.Layouts.Halls;
+global using Tellurian.Trains.Schedules.Model.Layouts.Modules;
+global using Tellurian.Trains.Schedules.Model.Layouts.Tracks;
+global using Tellurian.Trains.Schedules.Model.Layouts.Measures;
+global using Tellurian.Trains.Schedules.Model.Layouts.AutoDraw;
+global using Tellurian.Trains.Schedules.Model.Files;

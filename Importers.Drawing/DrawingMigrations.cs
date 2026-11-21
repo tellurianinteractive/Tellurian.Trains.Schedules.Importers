@@ -88,8 +88,25 @@ public static class DrawingMigrations
         return NumberIds(hall, Obstacles);
     }
 
+    /// <summary>
+    /// Brings a module, in its own file or embedded in a hall plan, from schema version 1 to 2 (<see cref="ModuleVersion2"/>):
+    /// one drawing in place of variants, a list of tracks that the track elements refer to, the shared model's name,
+    /// owners and standard, the Registry's ids in the external references, and no theme.
+    /// </summary>
+    public static void ModuleToVersion2(JsonNode? module) => ModuleVersion2.Module(module);
+
+    /// <summary>Brings the content of a module file from schema version 1 to 2: its module and end profiles; the measures, derived again at every save, are removed.</summary>
+    public static void ModuleFileToVersion2(JsonNode? content)
+    {
+        ModuleToVersion2((content as JsonObject)?["module"]);
+        Each(content, EndProfiles, EndProfileToVersion2);
+        // Measures were a list per variant. They are written for receivers and derived again at every save.
+        if (content is JsonObject file && file["measures"] is JsonArray) file.Remove("measures");
+    }
+
     private static IReadOnlyList<FileMigration> StepsOf(DrawingFileKind kind) => kind switch
     {
+        DrawingFileKind.Module => [new(1, content => { ModuleFileToVersion2(content); return content; })],
         DrawingFileKind.EndProfile => [new(1, content => { EndProfileToVersion2(content); return content; })],
         DrawingFileKind.Catalogue => [new(1, content => { CatalogueToVersion2(content); return content; })],
         DrawingFileKind.Hall => [new(1, content => { HallToVersion2(content); return content; })],
