@@ -122,6 +122,12 @@ jobs:
       - name: Test Model.Layouts
         run: dotnet test Model.Layouts.Tests/Model.Layouts.Tests.csproj --configuration Release --no-build --verbosity normal
 
+      - name: Test Importers.Drawing
+        run: dotnet test Importers.Drawing.Tests/Importers.Drawing.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test Exporters.Drawing
+        run: dotnet test Exporters.Drawing.Tests/Exporters.Drawing.Tests.csproj --configuration Release --no-build --verbosity normal
+
       - name: Test Exporters.Services
         run: dotnet test Exporters.Services.Tests/Exporters.Services.Tests.csproj --configuration Release --no-build --verbosity normal
 
@@ -183,6 +189,7 @@ jobs:
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Interfaces.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Services.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Model.Databases.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Drawing.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Xpln.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Exporters.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
 
@@ -195,5 +202,7 @@ jobs:
           echo "- Tellurian.Trains.Schedules.Importers.Services" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Model.Databases" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Importers.Xpln" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Importers.Drawing" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Exporters.Interfaces" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Exporters.Drawing" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Exporters.Services" >> $GITHUB_STEP_SUMMARY

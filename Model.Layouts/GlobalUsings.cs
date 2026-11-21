@@ -2,3 +2,6 @@
 global using Tellurian.Trains.Schedules.Model.Layouts;
 global using Tellurian.Trains.Schedules.Model.Settings;
 global using Tellurian.Trains.Schedules.Model.Timetables;
+global using Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
+global using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
+global using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;

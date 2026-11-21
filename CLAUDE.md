@@ -41,7 +41,7 @@ Importers.Interfaces/  → Reading contracts: IImporter<T> (ILayoutImporter is I
 Exporters.Interfaces/  → Writing contracts: IExporter<T>, ExportOptions, IExportService, ExportResult<T> (reading and writing are separate packages, CrossAppReview decision 18)
     ↓
 Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies. Moved from Module Draw 2026-11-21
-Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module
+Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module; the drawing types moving from Module Draw (EndProfiles/, Drawings/ values, Files/ drawing file format and DrawingJsonContext)
     ↓
 Model/                 → Planning model: Plan, Timetable, Train, schedules, duties; plan files (PlanFiles/)
     ↓
@@ -49,6 +49,8 @@ Model/                 → Planning model: Plan, Timetable, Train, schedules, du
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
 ├─ Importers.Services/ → Shared import services (JSON/CSV data files)
 ├─ Exporters.Services/ → Plan file writing: PlanJsonExporter, JsonExportService
+├─ Importers.Drawing/  → Reads Module Draw's drawing files (EndProfileImporter so far), with the migrations
+├─ Exporters.Drawing/  → Writes Module Draw's drawing files (EndProfileExporter so far), counting up revisions
 ├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```

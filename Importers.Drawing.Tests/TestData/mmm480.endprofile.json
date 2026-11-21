@@ -1,0 +1,101 @@
+{
+  "format": "tellurian-drawing",
+  "kind": "EndProfile",
+  "schemaVersion": 2,
+  "appVersion": "0.9.1",
+  "content": {
+    "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d03",
+    "designation": "MMM480",
+    "scale": "H0",
+    "standards": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b02",
+        "name": "MMM-2R"
+      }
+    ],
+    "outline": {
+      "start": {
+        "x": -240,
+        "y": -120
+      },
+      "steps": [
+        {
+          "type": "line",
+          "end": {
+            "x": 240,
+            "y": -120
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 240,
+            "y": -40
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -240,
+            "y": -40
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -240,
+            "y": -120
+          }
+        }
+      ],
+      "isClosed": true
+    },
+    "groundLine": {
+      "start": {
+        "x": -240,
+        "y": -40
+      },
+      "steps": [
+        {
+          "type": "line",
+          "end": {
+            "x": 240,
+            "y": -40
+          }
+        }
+      ],
+      "isClosed": false
+    },
+    "tracks": [
+      {
+        "offset": 0,
+        "gauge": 16.5,
+        "railSystem": "TwoRail"
+      }
+    ],
+    "screwHoles": [
+      {
+        "center": {
+          "x": -200,
+          "y": -80
+        },
+        "diameter": 8
+      },
+      {
+        "center": {
+          "x": 200,
+          "y": -80
+        },
+        "diameter": 8
+      }
+    ],
+    "dowels": [],
+    "screwHolePattern": "MMM",
+    "source": {
+      "title": "MMM: MMM-2R end profile 480. Provisional values, to be drawn from the published MMM PDF.",
+      "revision": "provisional"
+    },
+    "revision": 0,
+    "revisionLog": []
+  }
+}

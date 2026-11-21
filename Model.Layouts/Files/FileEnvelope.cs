@@ -53,7 +53,7 @@ public static class FileEnvelope
         var (header, content) = Open(kind, root);
         if (header.SchemaVersion > kind.CurrentSchemaVersion)
             throw new FileFormatException(new NewerVersion(header.SchemaVersion, kind.CurrentSchemaVersion),
-                $"The {kind.Name} was saved by a newer version of the app (schema version {header.SchemaVersion}); this version reads up to schema version {kind.CurrentSchemaVersion}.");
+                $"The {kind.Name} was saved by a newer version of the app (schema version {header.SchemaVersion}); this version reads up to schema version {kind.CurrentSchemaVersion}. Update the app to open it.");
         return Upgrade(kind, content, header.SchemaVersion, kind.CurrentSchemaVersion);
     }
 

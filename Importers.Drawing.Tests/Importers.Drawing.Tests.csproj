@@ -1,0 +1,12 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Importers.Drawing.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Importers.Drawing.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Importers.Drawing\Importers.Drawing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestData\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

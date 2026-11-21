@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Importers.Drawing</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Importers.Drawing</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>Reads Module Draw's drawing files (end profiles; modules, catalogues, halls and hall plans to follow), of any schema version up to the current one, as IImporter&lt;T&gt;s. Holds the migrations. Writing is in Exporters.Drawing.</Description>
+    <PackageTags>model-trains FREMO module drawing import</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="11.0.100">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
+    <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

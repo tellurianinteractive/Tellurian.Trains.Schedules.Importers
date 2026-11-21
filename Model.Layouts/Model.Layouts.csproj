@@ -4,11 +4,14 @@
     <RootNamespace>Tellurian.Trains.Schedules.Model.Layouts</RootNamespace>
     <PackageId>$(AssemblyName)</PackageId>
     <Title>$(AssemblyName)</Title>
-    <Description>The shared model of a model railway layout: operation locations, their tracks and the stretches between them. Used by the planner, the Module Registry, Module Draw and Dispatch. No dependencies.</Description>
+    <Description>The shared model of a model railway layout: operation locations, their tracks and the stretches between them. Used by the planner, the Module Registry, Module Draw and Dispatch. It builds on Tellurian.Trains.Schedules.Model.Geometry, and on nothing outside this repository.</Description>
     <PackageTags>model-trains layouts FREMO operation-locations</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model.Geometry\Model.Geometry.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="True" PackagePath="\" />
   </ItemGroup>
