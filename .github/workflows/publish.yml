@@ -181,7 +181,7 @@ jobs:
       - name: Pack
         run: dotnet pack --configuration Release --no-build --output ./nupkgs
 
-      # Requires a Trusted Publishing policy on nuget.org for this repository and ci.yml. The user is the policy
+      # Requires a Trusted Publishing policy on nuget.org for this repository, publish.yml and the environment nuget. The user is the policy
       # owner's nuget.org profile name (not the email address); it isn't a secret.
       - name: NuGet login (OIDC → temporary API key)
         id: login

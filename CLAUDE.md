@@ -86,7 +86,7 @@ Test projects use MSTest.Sdk with Microsoft.Testing.Platform runner (parallel ex
 
 ## CI/CD
 
-Single workflow (`.github/workflows/ci.yml`) with three jobs:
+Single workflow (`.github/workflows/publish.yml`, named after the nuget.org Trusted Publishing policy) with three jobs:
 
 1. **build** - Always runs: checkout, restore, build, upload artifacts
 2. **test** - Always runs after build: runs Model.Tests, Importers.Interfaces.Tests, Importers.Xpln.Tests
