@@ -48,21 +48,21 @@
             <ul>
                 @foreach (var stretch in Preview.RemovedStretches)
                 {
-                    <li>@string.Format(Culture, Translator("LocationDeletionStretchRemoved"), stretch)</li>
+                    <li>@string.Format(Culture, Translator("LocationDeletionStretchRemoved"), stretch.Description)</li>
                 }
                 @if (Preview.Replacement is { } replacement)
                 {
                     @if (Preview.IsReplacementNew)
                     {
                         <li>
-                            @string.Format(Culture, Translator("LocationDeletionStretchAdded"), replacement)
+                            @string.Format(Culture, Translator("LocationDeletionStretchAdded"), replacement.Description)
                             (@Translator("DistanceMeters") @replacement.Distance.ToString(Culture),
                             @Translator("TimeMinutes") @replacement.Time.ToString(Culture))
                         </li>
                     }
                     else
                     {
-                        <li>@string.Format(Culture, Translator("LocationDeletionStretchReused"), replacement)</li>
+                        <li>@string.Format(Culture, Translator("LocationDeletionStretchReused"), replacement.Description)</li>
                     }
                 }
             </ul>

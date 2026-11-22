@@ -20,6 +20,7 @@ public class ScheduleAssignment
     /// <summary>
     /// Gets or sets the sessions during which this assignment is active.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
@@ -31,11 +32,13 @@ public class ScheduleAssignment
     /// <summary>
     /// Gets or sets the foreign key to the vehicle. Required.
     /// </summary>
+    [JsonIgnore]
     public int ScheduledObjectId { get; set; }
 
     /// <summary>
     /// Gets or sets the vehicle being assigned.
     /// </summary>
+    [JsonIgnore]
     public ScheduledObject ScheduledObject { get; set; } = default!;
 
     /// <summary>
@@ -46,6 +49,7 @@ public class ScheduleAssignment
     /// <summary>
     /// Gets or sets the vehicle schedule this vehicle is assigned to.
     /// </summary>
+    [JsonIgnore]
     public Schedule Schedule { get; set; } = default!;
 
     [JsonConstructor]

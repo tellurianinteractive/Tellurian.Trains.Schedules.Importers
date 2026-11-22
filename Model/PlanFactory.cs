@@ -44,6 +44,27 @@ public static class PlanFactory
         return Plan.Create(name, timetable);
     }
 
+    /// <summary>
+    /// Creates a new plan from the layout of a hall plan (<see cref="Layouts.HallPlanFile.ReadLayout"/>): a plan with
+    /// the defaults of <see cref="CreatePlan(string, int, string)"/>, named after the hall plan, with its locations,
+    /// tracks, stretches and modules. Each stretch gets a running time from its distance and speed. The default country
+    /// is the one most of the locations are in, else the one of <paramref name="language"/>. The hall plan's layout is
+    /// taken over, not copied; don't use it afterwards.
+    /// </summary>
+    /// <param name="hallPlan">The layout read from the hall plan.</param>
+    /// <param name="language">The two-letter language code used to localise the seeded regions and train categories,
+    /// and to pick the default country when no location has one.</param>
+    /// <param name="name">The name of the plan, when the hall plan has none.</param>
+    public static Plan CreatePlan(Layout hallPlan, string language, string? name = null)
+    {
+        ArgumentNullException.ThrowIfNull(hallPlan);
+        var planName = hallPlan.Name is { Length: > 0 } hallPlanName ? hallPlanName : name ?? string.Empty;
+        var countryId = Layouts.HallPlanImport.MostCommonCountryId(hallPlan) ?? Country.ByLanguage(language).Id;
+        var plan = CreatePlan(planName, countryId, language);
+        Layouts.HallPlanImport.TakeInto(plan.Layout, hallPlan);
+        return plan;
+    }
+
     // New-layout setting defaults. Values not set here keep their class-level defaults (Theme=European,
     // Scale=H0, StartTime=06:00, clock speed 5, speed points, validations on, etc.).
     private static void ApplyDefaultSettings(Layout layout, int defaultCountryId)

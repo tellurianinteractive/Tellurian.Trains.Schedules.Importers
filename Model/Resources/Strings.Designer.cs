@@ -277,6 +277,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operation location {0} has more than one track {1}..
+        /// </summary>
+        internal static string TrackDesignationNotUnique {
+            get {
+                return ResourceManager.GetString("TrackDesignationNotUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation location {0} is manned, so the lock key held at {1} is ignored..
         /// </summary>
         internal static string LockKeyIgnoredAtMannedLocation {

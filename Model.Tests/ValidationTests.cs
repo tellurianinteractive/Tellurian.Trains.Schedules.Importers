@@ -1538,6 +1538,32 @@ public class ValidationTests
         Assert.IsEmpty(LockKeyErrors(plan));
     }
 
+    [TestMethod]
+    public void TwoTracksWithTheSameDesignationAreAConflict()
+    {
+        var timetable = NewTimetable();
+        var station = timetable.Layout.OperationLocations.OfType<Station>().First();
+        var designation = station.Tracks[0].Designation;
+        var duplicate = new StationTrack(station.Tracks.Max(t => t.Id) + 1000, $" {designation.ToLowerInvariant()} ");
+        station.Add(duplicate);
+        var plan = Plan.Create("Test", timetable);
+
+        var errors = plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.TrackDesignationNotUnique).ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreSame(duplicate, errors[0].FromTrack);
+        Assert.AreEqual(ValidationScope.Layout, errors[0].Scope);
+        Assert.IsFalse(errors[0].IsShownOnTrains);
+    }
+
+    [TestMethod]
+    public void TracksWithDesignationsOfTheirOwnAreNoConflict()
+    {
+        var plan = Plan.Create("Test", NewTimetable());
+
+        Assert.IsFalse(plan.GetValidationErrors(Settings).Any(e => e.ErrorType == ValidationErrorType.TrackDesignationNotUnique));
+    }
+
     private static IReadOnlyList<ValidationError> LockKeyErrors(Plan plan) =>
         [.. plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.LockKeyIgnored)];
 

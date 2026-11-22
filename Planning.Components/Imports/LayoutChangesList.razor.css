@@ -1,0 +1,97 @@
+.layout-changes {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+
+    h3 {
+        margin: 0 0 0.4rem;
+        font-size: 1.05rem;
+    }
+
+    h4 {
+        margin: 0.75rem 0 0.2rem;
+        font-size: 0.95rem;
+    }
+
+    p {
+        margin: 0.25rem 0;
+    }
+
+    .hint {
+        color: #555;
+    }
+
+    /* Sized to its content, never stretched to the page. */
+    table.changes {
+        border-collapse: collapse;
+
+        td {
+            padding: 0.2rem 0.75rem 0.2rem 0;
+            white-space: nowrap;
+            border-bottom: 1px solid #eee;
+        }
+    }
+
+    ul {
+        margin: 0;
+        padding-left: 1.4rem;
+    }
+
+    .actions {
+        margin-top: 0.75rem;
+    }
+
+    button {
+        padding: 0.2rem 0.7rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+}
+
+.layout-change-review {
+    flex: 1 1 100%;
+
+    p {
+        margin: 0.5rem 0 0.25rem;
+    }
+
+    ul {
+        margin: 0;
+        padding-left: 1.4rem;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    button {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    button:hover {
+        background: #ececec;
+    }
+
+    button.primary {
+        background: var(--primary, #1a3a5c);
+        border-color: var(--primary, #1a3a5c);
+        color: var(--primary-text, #fff);
+    }
+}

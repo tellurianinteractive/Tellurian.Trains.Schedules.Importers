@@ -1,185 +1,39 @@
-using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
-
-/// <summary>
-/// Represents a track at a station where trains can stop or pass.
-/// </summary>
-public sealed class StationTrack : IEquatable<StationTrack>
-{
-    /// <summary>
-    /// The platform length in metres given to the tracks of a location that exchanges passengers but has
-    /// no platform recorded anywhere — a plan written before platforms existed. See
-    /// <c>Layout.EnsurePlatforms</c>.
-    /// </summary>
-    public const double DefaultPlatformLength = 1;
-
-    // Private parameterless constructor for EF Core and JSON deserialization
-    [JsonConstructor]
-    private StationTrack()
-    {
-        Number = string.Empty;
-        Calls = [];
-    }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="StationTrack"/> with the specified id and number.
-    /// </summary>
-    /// <param name="id">The unique identifier for the track.</param>
-    /// <param name="number">The track number or designation.</param>
-    public StationTrack(int id, string number) : this(id, number, true, true) { }
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="StationTrack"/> with the specified values.
-    /// </summary>
-    /// <param name="id">The unique identifier for the track.</param>
-    /// <param name="number">The track number or designation.</param>
-    /// <param name="isMain">Whether this is a main track.</param>
-    /// <param name="isScheduled">Whether this track is included in scheduling.</param>
-    public StationTrack(int id, string number, bool isMain, bool isScheduled)
-    {
-        Id = id;
-        Number = number;
-        IsMain = isMain;
-        IsScheduled = isScheduled;
-        Calls = [];
-    }
-
-    /// <summary>
-    /// Gets or sets the unique identifier for this track.
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the track number or designation.
-    /// </summary>
-    public string Number { get; set; }
-
-    /// <summary>
-    /// Gets or sets the display order of this track relative to other tracks at the same station.
-    /// </summary>
-    public int DisplayOrder { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether this track is included in scheduling.
-    /// </summary>
-    public bool IsScheduled { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether this is a main track.
-    /// </summary>
-    public bool IsMain { get; set; }
-
-    /// <summary>
-    /// Gets or sets the length of this track in meters.
-    /// </summary>
-    public double Length { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether this track is entered from one end only, a stub or siding: every vehicle goes in
-    /// and out at the same end, so the last one in is the first that can leave. Left off, the two ends of the
-    /// track are told apart by where each train comes from and goes on to (see <c>TrackStanding</c>), and
-    /// vehicles can leave by the end they did not enter by.
-    /// </summary>
-    public bool IsStub { get; set; }
-
-    /// <summary>
-    /// Gets or sets the length in metres, to one decimal, of the platform along this track; zero where
-    /// the track has no platform. Only meaningful where the location exchanges passengers.
-    /// </summary>
-    /// <remarks>
-    /// Passengers can be exchanged only at a track with a platform (see <c>HasPassengerExchange</c>), so
-    /// this is what decides which of a location's tracks a passenger train is put on. A passenger train
-    /// may still stand on a track without one — it just exchanges nothing there, as when it meets another
-    /// train at a location that exchanges no passengers at all.
-    /// </remarks>
-    public double PlatformLength { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether a train standing on this track can be locked in: kept there, switches
-    /// locked, so that other trains may pass or meet it on the line. A train is locked in when the
-    /// location is controlled from a manned station, or when it has collected the location's lock key
-    /// on the way (see <c>StationCall.IsLockedIn</c>). How that is done in operation is outside the plan.
-    /// </summary>
-    public bool IsLockable { get; set; }
-
-    /// <summary>
-    /// Gets or sets the usage description for this track.
-    /// </summary>
-    public string Usage { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the <see cref="OperationLocation.Id"/> of the location a train comes from for this
-    /// to be its track, or <c>null</c> where the track says nothing about where a train comes from.
-    /// </summary>
-    /// <remarks>
-    /// This and <see cref="NextLocationId"/> are how the planner says which way through the location a
-    /// track is for — the down track of a double line, say, or the platform road a branch train uses.
-    /// They only mean anything where the location has more than one track to choose between, which is
-    /// why they are offered nowhere else. See <c>OperationLocation.PreferredTrack</c>, which is what
-    /// reads them.
-    /// </remarks>
-    public int? PreviousLocationId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the <see cref="OperationLocation.Id"/> of the location a train goes on to for this
-    /// to be its track, or <c>null</c> where the track says nothing about where a train goes on to.
-    /// See <see cref="PreviousLocationId"/>.
-    /// </summary>
-    public int? NextLocationId { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether the track's route counts the other way round as well: a track for trains
-    /// from A to B is then equally the track for trains from B to A. Leave it off where the two
-    /// directions have a track each, as on a double line.
-    /// </summary>
-    public bool AppliesInBothDirections { get; set; }
-
-    /// <summary>
-    /// Gets or sets the foreign key to the station.
-    /// </summary>
-    public int StationId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the station this track belongs to.
-    /// </summary>
-    public OperationLocation Station { get; set; } = default!;
-
-    /// <summary>
-    /// Gets or sets the collection of station calls on this track.
-    /// </summary>
-    public ICollection<StationCall> Calls { get; set; }
-
-    /// <inheritdoc/>
-    public bool Equals(StationTrack? other) => Number.Equals(other?.Number, StringComparison.OrdinalIgnoreCase) && Station.Equals(other?.Station);
-
-    /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is StationTrack other && Equals(other);
-
-    /// <inheritdoc/>
-    public override int GetHashCode() => Number.GetHashCode(StringComparison.OrdinalIgnoreCase);
-
-    /// <inheritdoc/>
-    public override string ToString() => Number;
-
-    /// <summary>
-    /// Gets an example station track for testing purposes.
-    /// </summary>
-    public static StationTrack Example { get { return new StationTrack(1, "1") { Station = OperationLocation.Example }; } }
-}
 
 /// <summary>
 /// Provides extension methods for <see cref="StationTrack"/>.
 /// </summary>
 public static class StationTrackExtensions
 {
+    // The calls on each track: an index into Train.Calls, rebuilt from the trains whenever a timetable is read
+    // (TimetableExtensions.RebuildStationCalls). The track is the shared model's, which knows nothing of calls.
+    private static readonly ConditionalWeakTable<StationTrack, List<StationCall>> CallIndex = new();
+
+    extension(StationTrack)
+    {
+        /// <summary>An example station track for testing purposes.</summary>
+        public static StationTrack Example => new(1, "1") { Station = OperationLocation.Example };
+    }
+
     extension(StationTrack track)
     {
         /// <summary>
-        /// Whether this track has a platform alongside it, which is what
-        /// <see cref="StationTrack.PlatformLength"/> being greater than zero says.
+        /// The station calls on this track: derived, never a source. A call lives in its train (<see cref="Train.Calls"/>,
+        /// the aggregate); this is an index of them by track, kept outside the track, which is a type of the shared
+        /// model and knows nothing of trains. It is rebuilt from the trains when a timetable is read
+        /// (<c>RebuildStationCalls</c>) and kept in step where a call joins a train (<c>Train.Add</c>), changes track
+        /// (<c>StationCall.MoveTo</c>) or is deleted. Never written to a file, and never changed to change a call.
         /// </summary>
-        public bool HasPlatform => track.PlatformLength > 0;
+        public ICollection<StationCall> Calls => CallIndex.GetOrCreateValue(track);
+
+        /// <summary>The planner's name of <see cref="StationTrack.Designation"/>: what the track is called, e.g. "1".</summary>
+        public string Number
+        {
+            get => track.Designation;
+            set => track.Designation = value;
+        }
 
         /// <summary>
         /// Whether passengers can be exchanged at this track: the location exchanges passengers at all

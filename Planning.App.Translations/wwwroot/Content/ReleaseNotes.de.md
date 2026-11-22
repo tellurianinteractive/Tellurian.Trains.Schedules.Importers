@@ -1,5 +1,20 @@
 # Versionshinweise
 
+## Version 1.5.0
+
+### Grundlegende Änderungen
+
+- **Ein neues Dateiformat für Pläne.** Pläne werden jetzt in einem neuen, kompakteren Format gespeichert: etwa ein Drittel der bisherigen Größe, ohne die Logos. Pläne früherer Versionen werden wie bisher gelesen und dabei umgewandelt, aber ein Plan, der mit dieser Version gespeichert wurde, kann von einer früheren nicht geöffnet werden.
+
+### Neue Funktionen
+
+- **Ein Plan aus einem Hallenplan.** Im Reiter **Import** wird ein Hallenplan aus dem Modulzeichner, oder eine Anlage, die ein anderes Programm in derselben Form geschrieben hat, zu einem neuen Plan mit den Betriebsstellen, Gleisen und Strecken des Hallenplans. Jede Strecke erhält eine Fahrzeit aus ihrer Länge und Geschwindigkeit. Die Fahrplanstrecken legen Sie selbst an.
+- **Eine neuere Revision des Hallenplans.** Wurde der geöffnete Plan aus einem Hallenplan erstellt und öffnen Sie eine andere Revision davon, wählen Sie, ob der geöffnete Plan aktualisiert oder ein neuer Plan erstellt wird, mit einer Warnung, wenn die Datei die ältere Revision ist. Beim Aktualisieren werden neue Längen und Fahrzeiten sofort übernommen, außer wo Sie eigene eingegeben haben. Änderungen, die Halte von Zügen verschieben oder hinzufügen (ein entferntes Gleis, eine Betriebsstelle anderer Art, eine zwischen zwei anderen entfernte oder eingefügte), stehen unter **Zu bestätigen**: **Prüfen** zeigt, was die Änderung mit den Zügen macht, und **Übernehmen** führt sie aus. Änderungen, die die Reihenfolge der Betriebsstellen ändern, werden aufgeführt, um sie von Hand vorzunehmen.
+
+### Änderungen
+
+- **Zwei Gleise mit derselben Bezeichnung sind ein Konflikt.** Eine Betriebsstelle mit zwei oder mehr Gleisen derselben Bezeichnung steht unter **Konflikte** und führt zum Reiter **Betriebsstellen**. Der Plan kann weiterhin gespeichert werden.
+
 ## Version 1.4.7
 
 ### Korrekturen

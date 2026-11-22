@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}.</value>
   </data>
+  <data name="TrackDesignationNotUnique" xml:space="preserve">
+    <value>Operation location {0} has more than one track {1}.</value>
+  </data>
   <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
     <value>Operation location {0} is manned, so the lock key held at {1} is ignored.</value>
   </data>

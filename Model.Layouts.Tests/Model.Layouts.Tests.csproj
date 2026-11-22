@@ -1,0 +1,9 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Model.Layouts.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model.Layouts.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />
+  </ItemGroup>
+</Project>

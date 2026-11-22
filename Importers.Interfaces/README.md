@@ -1,6 +1,6 @@
 # Tellurian.Trains.Schedules.Importers.Interfaces
 
-Contracts for schedule import/export services and supporting data services.
+Contracts for reading the Tellurian Trains models, and supporting data services. Writing is in `Tellurian.Trains.Schedules.Exporters.Interfaces`.
 
 ## Installation
 
@@ -21,16 +21,24 @@ public interface IImportService
 }
 ```
 
-### IExportService
+### IImporter&lt;T&gt;
 
-Interface for exporting schedules to external formats:
+Reads one kind of item from a stream: a layout, a Module Draw drawing, a catalogue. An app registers the importers it
+uses; `importers.For(fileName, content)` picks the first that recognises a file, and `ReadableFileExtensions()` lists
+what they read. An importer never throws because of what a file contains; a failure is a failed `ImportResult<T>`
+whose messages may carry a `Code` for the app to translate.
 
 ```csharp
-public interface IExportService
+public interface IImporter<T>
 {
-    Task<ExportResult<Schedule>> ExportScheduleAsync(Schedule schedule);
+    string ResourceKey { get; }
+    IReadOnlyList<string> FileExtensions { get; }
+    bool CanImport(string fileName, ReadOnlySpan<byte> content);   // quick, never throws
+    Task<ImportResult<T>> ImportAsync(Stream stream, string fileName, CancellationToken cancellationToken = default);
 }
 ```
+
+`ILayoutImporter` is the case for a `Layout`: `public interface ILayoutImporter : IImporter<Layout>;`.
 
 ### ICompaniesService
 
@@ -86,22 +94,7 @@ else
 }
 ```
 
-### ExportResult&lt;T&gt;
-
-A simpler result type for export operations:
-
-```csharp
-// Successful export
-var result = ExportResult<Schedule>.Success(schedule);
-
-// Failed export
-var result = ExportResult<Schedule>.Failure("Export failed", "Reason...");
-
-if (result.IsSuccess)
-{
-    // Export succeeded
-}
-```
+`ExportResult<T>` and `IExportService` are in `Tellurian.Trains.Schedules.Exporters.Interfaces`.
 
 ## Implementing a Custom Importer
 
@@ -132,6 +125,44 @@ public class MyImporter : IImportService
     }
 }
 ```
+
+## Implementing a layout importer
+
+A layout made by another tool is taken into the planner through `ILayoutImporter`. It reads a `Layout` only; the
+planner makes a new plan of it (`PlanFactory.CreatePlan(layout, language)`), or, when the open plan was made from the
+same source (the same `Layout.SourceId`), takes it in as a newer revision (`plan.UpdateFromHallPlan(layout)`): distances
+and times at once, other changes for the planner to confirm.
+
+```csharp
+public sealed class MyLayoutImporter : ILayoutImporter
+{
+    // A label of the app, added in every language of the app together with the importer.
+    public string ResourceKey => "MyLayoutTool";
+    public IReadOnlyList<string> FileExtensions { get; } = [".mylayout"];
+
+    // Quick, and never throws: several formats may share an extension.
+    public bool CanImport(string fileName, ReadOnlySpan<byte> content) => content.StartsWith("MYLAYOUT"u8);
+
+    public async Task<ImportResult<Layout>> ImportAsync(Stream stream, string fileName, CancellationToken cancellationToken = default)
+    {
+        var layout = new Layout { Name = "...", SourceId = /* the same for every revision */, SourceRevision = 1 };
+        // ... locations with their tracks, stretches between them; set each location's Layout, each track's Station.
+        return ImportResult<Layout>.Success(layout);
+    }
+}
+```
+
+Register it in the app, beside the built-in Module Draw importer, and add its `ResourceKey` to the app's labels in
+every language; the Import tab then accepts its files:
+
+```csharp
+services.AddLayoutImporter<MyLayoutImporter>();
+```
+
+For a revision to be compared with the layout already in a plan, keep `SourceId` the same from one revision to the
+next, raise `SourceRevision`, and keep the ids (or external references) of locations that stay. Instead of writing an
+importer, a tool can also write the layout block of a hall plan, a `Layout` in the JSON of
+`Layout.JsonSerializerOptions`, on its own in a `.json` file: the built-in importer reads it.
 
 ## JSON Serialization
 

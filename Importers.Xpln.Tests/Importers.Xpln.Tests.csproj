@@ -9,10 +9,9 @@
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.9.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.9.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.13" />
-    <PackageReference Include="System.Data.Odbc" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="11.0.0" />
+    <PackageReference Include="System.Data.Odbc" Version="11.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Importers.Access\Importers.Access.csproj" />
@@ -28,12 +27,12 @@
     <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.5.1" />
+    <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.5.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="MSTest.TestAdapter" Version="4.5.1" />
+    <PackageReference Update="MSTest.TestAdapter" Version="4.5.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="MSTest.TestFramework" Version="4.5.1" />
+    <PackageReference Update="MSTest.TestFramework" Version="4.5.2" />
   </ItemGroup>
 </Project>

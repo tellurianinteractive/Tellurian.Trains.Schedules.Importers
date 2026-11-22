@@ -126,7 +126,7 @@ public class StopPatternTests
 
         Assert.IsNotNull(restored);
         CollectionAssert.AreEqual(expected, CategoryOf(restored).StopLocationIds.ToArray());
-        Assert.Contains("\"StopLocationIds\":[", json, StringComparison.Ordinal);
+        Assert.Contains("\"stopLocationIds\":[", json, StringComparison.Ordinal);
     }
 
     [TestMethod]

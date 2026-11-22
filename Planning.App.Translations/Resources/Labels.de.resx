@@ -3128,4 +3128,94 @@
   <data name="NoDriverDuties" xml:space="preserve">
     <value>Es gibt keine Lokführerdienste zu drucken.</value>
   </data>
+  <data name="LayoutImportedAsNewPlan" xml:space="preserve">
+    <value>{0}: neue Anlage mit {1} Betriebsstellen und {2} Streckenabschnitten angelegt.</value>
+  </data>
+  <data name="LayoutRevisionLoaded" xml:space="preserve">
+    <value>{0}, Revision {1}: {2} Änderungen übernommen, {3} zu bestätigen, {4} ändern die Reihenfolge der Betriebsstellen und müssen von Hand vorgenommen werden.</value>
+  </data>
+  <data name="LayoutRevisionUnchanged" xml:space="preserve">
+    <value>{0}, Revision {1}: keine Änderungen.</value>
+  </data>
+  <data name="ModuleDrawHallPlan" xml:space="preserve">
+    <value>Hallenplan aus dem Modulzeichner</value>
+  </data>
+  <data name="LayoutChangesFrom" xml:space="preserve">
+    <value>Änderungen aus {0}, Revision {1}</value>
+  </data>
+  <data name="LayoutChangesAllApplied" xml:space="preserve">
+    <value>Alle Änderungen sind übernommen.</value>
+  </data>
+  <data name="LayoutChangesToConfirm" xml:space="preserve">
+    <value>Zu bestätigen</value>
+  </data>
+  <data name="LayoutChangesToConfirmHint" xml:space="preserve">
+    <value>Diese Änderungen verschieben oder entfernen Halte. Prüfen Sie jede, bevor sie übernommen wird.</value>
+  </data>
+  <data name="LayoutChangesManual" xml:space="preserve">
+    <value>Nicht übernehmbar</value>
+  </data>
+  <data name="LayoutChangesManualHint" xml:space="preserve">
+    <value>Diese Änderungen ändern die Reihenfolge der Betriebsstellen, der die Züge nicht folgen können. Nehmen Sie sie im Plan von Hand vor.</value>
+  </data>
+  <data name="LayoutChangeReview" xml:space="preserve">
+    <value>Prüfen</value>
+  </data>
+  <data name="LayoutChangeApply" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="LayoutChangeNoOtherTrack" xml:space="preserve">
+    <value>'{0}' hat kein anderes Gleis für die Halte auf diesem.</value>
+  </data>
+  <data name="LayoutChangeCallsMoved" xml:space="preserve">
+    <value>Diese Halte kommen auf ein anderes Gleis:</value>
+  </data>
+  <data name="LayoutChangeCallMoved" xml:space="preserve">
+    <value>{0} um {1}: auf Gleis {2}</value>
+  </data>
+  <data name="LayoutChangeTrainsNoLongerStopping" xml:space="preserve">
+    <value>Diese Züge halten nicht mehr in '{0}':</value>
+  </data>
+  <data name="LayoutChangeTrainsPassing" xml:space="preserve">
+    <value>Diese Züge erhalten einen Durchfahrtshalt in '{0}':</value>
+  </data>
+  <data name="LayoutChangeNoTrainsAffected" xml:space="preserve">
+    <value>Keine Züge sind betroffen.</value>
+  </data>
+  <data name="LayoutChangeTrackRemoved" xml:space="preserve">
+    <value>{0}: Gleis {1} entfällt</value>
+  </data>
+  <data name="LayoutChangeKindChanged" xml:space="preserve">
+    <value>{0}: neue Art – {1}</value>
+  </data>
+  <data name="LayoutChangeLocationRemoved" xml:space="preserve">
+    <value>{0} entfällt, und ihre Nachbarn werden verbunden</value>
+  </data>
+  <data name="LayoutChangeLocationInserted" xml:space="preserve">
+    <value>{0} wird zwischen {1} und {2} eingefügt</value>
+  </data>
+  <data name="LayoutChangeLocationAdded" xml:space="preserve">
+    <value>{0} kommt hinzu</value>
+  </data>
+  <data name="LayoutChangeLocationDropped" xml:space="preserve">
+    <value>{0} entfällt</value>
+  </data>
+  <data name="LayoutChangeStretchAdded" xml:space="preserve">
+    <value>Ein Streckenabschnitt {0}–{1} kommt hinzu</value>
+  </data>
+  <data name="LayoutChangeStretchRemoved" xml:space="preserve">
+    <value>Der Streckenabschnitt {0}–{1} entfällt</value>
+  </data>
+  <data name="LayoutRevisionChoice" xml:space="preserve">
+    <value>Die Datei ist Revision {3} der Anlage, aus der der geöffnete Plan '{1}' erstellt wurde; der Plan hat Revision {2}. Den geöffneten Plan damit aktualisieren oder daraus einen neuen Plan erstellen?</value>
+  </data>
+  <data name="LayoutRevisionOlder" xml:space="preserve">
+    <value>Die Datei ist eine ältere Revision als die des Plans.</value>
+  </data>
+  <data name="LayoutRevisionUpdatePlan" xml:space="preserve">
+    <value>Geöffneten Plan aktualisieren</value>
+  </data>
+  <data name="LayoutRevisionNewPlan" xml:space="preserve">
+    <value>Neuen Plan erstellen</value>
+  </data>
 </root>

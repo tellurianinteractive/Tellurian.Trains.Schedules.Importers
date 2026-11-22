@@ -233,7 +233,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
             wagonset.AddWagon(@class, number, isPassenger: true);
         plan.AssignVehicle(schedule, wagonset);
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 
     private static Train AddTrain(

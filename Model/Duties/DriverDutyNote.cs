@@ -33,11 +33,13 @@ public class DriverDutyNote : IEquatable<DriverDutyNote>
     /// <summary>
     /// Gets or sets the foreign key to the driver duty.
     /// </summary>
+    [JsonIgnore]
     public int DriverDutyId { get; set; }
 
     /// <summary>
     /// Gets or sets the driver duty this note belongs to.
     /// </summary>
+    [JsonIgnore]
     public DriverDuty DriverDuty { get; set; } = default!;
 
     /// <inheritdoc/>

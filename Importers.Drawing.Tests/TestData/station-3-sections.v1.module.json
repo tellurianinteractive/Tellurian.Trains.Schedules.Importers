@@ -1,0 +1,724 @@
+{
+  "format": "tellurian-drawing",
+  "kind": "module",
+  "schemaVersion": 1,
+  "appVersion": "0.5.0",
+  "content": {
+    "module": {
+      "id": "033db44a-9c42-43ba-ab34-ddba072ee75a",
+      "name": "Station",
+      "standard": {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+        "name": "FREMO/H0-RE"
+      },
+      "scale": "H0",
+      "addOns": [],
+      "owners": [],
+      "numberOfThroughTracks": 1,
+      "hasNormalGauge": true,
+      "hasNarrowGauge": false,
+      "isDuckunder": false,
+      "isTurntable": false,
+      "isEndOfLine": false,
+      "isEndProfileSwitcher": false,
+      "isSignalModule": false,
+      "isStandAlone": false,
+      "revision": 0,
+      "revisionLog": [],
+      "variants": [
+        {
+          "id": "eb7e6524-eba2-4e65-afd3-28a08129b4af",
+          "name": "",
+          "isDefault": true,
+          "exits": [
+            {
+              "label": "W",
+              "direction": "west",
+              "endProfile": {
+                "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+                "name": "FREMO-H0-B96"
+              },
+              "orientation": "normal",
+              "railTopOffset": 0,
+              "pose": {
+                "x": 0,
+                "y": 0,
+                "heading": 180
+              },
+              "isPositionProvisional": false
+            },
+            {
+              "label": "E",
+              "direction": "east",
+              "endProfile": {
+                "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+                "name": "FREMO-H0-B96"
+              },
+              "orientation": "mirrored",
+              "railTopOffset": 0,
+              "pose": {
+                "x": 3000,
+                "y": 0,
+                "heading": 0
+              },
+              "isPositionProvisional": false
+            }
+          ],
+          "mainPath": {
+            "start": {
+              "x": 0,
+              "y": 0
+            },
+            "steps": [
+              {
+                "type": "line",
+                "end": {
+                  "x": 3000,
+                  "y": 0
+                }
+              }
+            ],
+            "isClosed": false
+          },
+          "sides": [
+            {
+              "fromExit": "W",
+              "toExit": "E",
+              "mode": "auto",
+              "path": {
+                "start": {
+                  "x": 0,
+                  "y": -250.0000000000001
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": -250.0000000000001
+                    }
+                  }
+                ],
+                "isClosed": false
+              }
+            },
+            {
+              "fromExit": "E",
+              "toExit": "W",
+              "mode": "auto",
+              "path": {
+                "start": {
+                  "x": 3000,
+                  "y": 250.0000000000001
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2900,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 99.99999999999979,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 0,
+                      "y": 250.0000000000001
+                    }
+                  }
+                ],
+                "isClosed": false
+              }
+            }
+          ],
+          "sections": [
+            {
+              "label": "1",
+              "outline": {
+                "start": {
+                  "x": 0,
+                  "y": -250.0000000000001
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 1000,
+                      "y": -250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 1000,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 99.99999999999979,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 0,
+                      "y": 250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 0,
+                      "y": -250.0000000000001
+                    }
+                  }
+                ],
+                "isClosed": true
+              }
+            },
+            {
+              "label": "2",
+              "outline": {
+                "start": {
+                  "x": 1000,
+                  "y": -250.0000000000001
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2000,
+                      "y": -250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2000,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 1000,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 1000,
+                      "y": -250.0000000000001
+                    }
+                  }
+                ],
+                "isClosed": true
+              }
+            },
+            {
+              "label": "3",
+              "outline": {
+                "start": {
+                  "x": 2000,
+                  "y": -250.0000000000001
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": -250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": 250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2900,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2000,
+                      "y": 349.9999999999999
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 2000,
+                      "y": -250.0000000000001
+                    }
+                  }
+                ],
+                "isClosed": true
+              }
+            }
+          ],
+          "internalJoints": [
+            {
+              "firstSection": "1",
+              "secondSection": "2",
+              "start": {
+                "x": 1000,
+                "y": -250.0000000000001
+              },
+              "end": {
+                "x": 1000,
+                "y": 349.9999999999999
+              }
+            },
+            {
+              "firstSection": "2",
+              "secondSection": "3",
+              "start": {
+                "x": 2000,
+                "y": -250.0000000000001
+              },
+              "end": {
+                "x": 2000,
+                "y": 349.9999999999999
+              }
+            }
+          ],
+          "tracks": [
+            {
+              "type": "flex",
+              "path": {
+                "start": {
+                  "x": 0,
+                  "y": 0
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": 0
+                    }
+                  }
+                ],
+                "isClosed": false
+              },
+              "id": "415b3b78-6f66-40b8-aad7-2b38a4d221b6",
+              "isMainTrack": true,
+              "isNarrowGauge": false,
+              "isGenerated": true
+            }
+          ],
+          "operatorSpaces": [
+            {
+              "attachment": {
+                "sideIndex": 0,
+                "from": 0
+              },
+              "depth": 800,
+              "area": {
+                "start": {
+                  "x": 0,
+                  "y": -1050
+                },
+                "steps": [
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": -1050
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 3000,
+                      "y": -250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 0,
+                      "y": -250.0000000000001
+                    }
+                  },
+                  {
+                    "type": "line",
+                    "end": {
+                      "x": 0,
+                      "y": -1050
+                    }
+                  }
+                ],
+                "isClosed": true
+              }
+            }
+          ],
+          "publicSides": [],
+          "duckUnderAreas": [],
+          "labels": [],
+          "registryMeasures": {
+            "straight": 3000,
+            "width": 600,
+            "numberOfSections": 3
+          },
+          "autoDraw": {
+            "generatorVersion": "1.1",
+            "parameters": {
+              "name": "Station",
+              "owners": [],
+              "standard": "FREMO/H0-RE",
+              "straight": 3000,
+              "width": 600,
+              "numberOfThroughTracks": 1,
+              "numberOfSections": 3,
+              "exits": [
+                {
+                  "label": "W",
+                  "direction": "west",
+                  "endProfile": "FREMO-H0-B96"
+                },
+                {
+                  "label": "E",
+                  "direction": "east",
+                  "endProfile": "FREMO-H0-B96"
+                }
+              ],
+              "isEndOfLine": false,
+              "isDuckunder": false,
+              "isTurntable": false,
+              "isEndProfileSwitcher": false,
+              "isOperationPlace": true,
+              "curveDirection": "left",
+              "straightPosition": "before",
+              "wideningSide": "left",
+              "taperAngle": 45
+            }
+          }
+        }
+      ]
+    },
+    "endProfiles": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+        "designation": "FREMO-H0-B96",
+        "shortName": "B96",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+            "name": "FREMO/H0-RE"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -250,
+            "y": -195
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -195
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 250.00000000000023,
+                "y": 46.55332147444176
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": 18.9734982539195
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": -27.065777620219407
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -58
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -195
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -250,
+            "y": -58
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 73.55769887408297,
+                "y": -9
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": 27.065777620219407
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": -18.9734982539195
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -180,
+              "y": -145
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 180,
+              "y": -145
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": -180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 0,
+              "y": -65
+            },
+            "diameter": 12
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "FREMO-H0",
+        "source": {
+          "title": "FREMO H0-B96 dimensioned drawing, high and low profile (track at 195 / 104 mm above the plate bottom).",
+          "url": "https://github.com/tellurianinteractive/Tellurian.Trains.Drawing/blob/master/end-profiles/FREMO%20H0%20B96.png",
+          "revision": "drawing-2026-11-14"
+        },
+        "revision": 0,
+        "revisionLog": []
+      }
+    ],
+    "measures": [
+      {
+        "variantId": "eb7e6524-eba2-4e65-afd3-28a08129b4af",
+        "measures": {
+          "length": 3000,
+          "straight": 3000,
+          "angle": 0,
+          "width": 600,
+          "trackLength": 3000,
+          "numberOfSections": 3
+        }
+      }
+    ]
+  }
+}

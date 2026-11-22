@@ -1,0 +1,9 @@
+<Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Exporters.Services.Tests</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Exporters.Services.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Exporters.Services\Exporters.Services.csproj" />
+  </ItemGroup>
+</Project>

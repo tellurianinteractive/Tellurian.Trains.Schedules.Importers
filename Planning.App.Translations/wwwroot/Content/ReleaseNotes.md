@@ -1,5 +1,20 @@
 ﻿# Release notes
 
+## Version 1.5.0
+
+### Breaking changes
+
+- **A new plan file format.** Plans are now saved in a new, more compact format: about a third of the size they had before, without the logos. Plans saved by earlier versions are read as before and converted on the way, but a plan saved by this version can't be opened by an earlier one.
+
+### New features
+
+- **A plan from a hall plan.** On the **Import** tab, a hall plan from Module Draw, or a layout written by another tool in the same form, becomes a new plan with the hall plan's operation locations, tracks and stretches. Each stretch gets a running time from its distance and speed. Timetable stretches are left to you to make.
+- **A newer revision of the hall plan.** When the open plan was made from a hall plan and you open another revision of it, you choose whether to update the open plan or to make a new plan from it, with a warning when the file is the older revision. When updating, new distances and running times are taken at once, except where you have entered your own. Changes that move or add train calls (a track removed, an operation location of another type, one removed or inserted between two others) are listed under **To confirm**: **Review** shows what the change does to the trains, and **Apply** makes it. Changes that alter the order of the operation locations are listed to be made by hand.
+
+### Changes
+
+- **Two tracks with the same designation are a conflict.** An operation location with two or more tracks of the same designation is listed under **Conflicts**, and leads to the **Operation locations** tab. The plan can still be saved.
+
 ## Version 1.4.7
 
 ### Fixes

@@ -127,6 +127,6 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         layout.Add(new TrackStretch(1, bro, munkerod, 10));
         layout.Add(new TrackStretch(2, munkerod, rubjerg, 10));
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 }

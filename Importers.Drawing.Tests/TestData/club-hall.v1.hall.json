@@ -1,0 +1,236 @@
+{
+  "format": "tellurian-drawing",
+  "kind": "hall",
+  "schemaVersion": 1,
+  "appVersion": "0.6.0",
+  "content": {
+    "id": "94f0c58a-70bf-4d38-910c-8d07b99a5116",
+    "name": "Club hall",
+    "address": "Station Road 1",
+    "outline": {
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "steps": [
+        {
+          "type": "line",
+          "end": {
+            "x": 12000,
+            "y": 0
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 12000,
+            "y": 8000
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 0,
+            "y": 8000
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      ],
+      "isClosed": true
+    },
+    "minimumAisleWidth": 1200,
+    "obstacles": [
+      {
+        "id": "d063d654-209f-4551-8b3f-0edbc07c567d",
+        "kind": "pillar",
+        "area": {
+          "start": {
+            "x": 4200,
+            "y": 4000
+          },
+          "steps": [
+            {
+              "type": "arc",
+              "center": {
+                "x": 4000,
+                "y": 4000
+              },
+              "sweep": 180
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 4000,
+                "y": 4000
+              },
+              "sweep": 180
+            }
+          ],
+          "isClosed": true
+        },
+        "label": "P1"
+      },
+      {
+        "id": "19b735b5-0ad9-4afa-aaac-4284f87ff337",
+        "kind": "pillar",
+        "area": {
+          "start": {
+            "x": 7919.81588733227,
+            "y": 3719.695686662355
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 8209.593635218991,
+                "y": 3797.3414001931114
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 8080.18411266773,
+                "y": 4280.304313337645
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 7790.40636478101,
+                "y": 4202.6585998068895
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 7919.81588733227,
+                "y": 3719.695686662355
+              }
+            }
+          ],
+          "isClosed": true
+        }
+      },
+      {
+        "id": "6bc1efa9-356f-451f-b92a-c2aa36bf2a3a",
+        "kind": "furniture",
+        "area": {
+          "start": {
+            "x": 10000,
+            "y": 6500
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 12000,
+                "y": 6500
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 12000,
+                "y": 7500
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 10000,
+                "y": 7500
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 10000,
+                "y": 6500
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "label": "Stage"
+      }
+    ],
+    "doors": [
+      {
+        "id": "3b023a1f-ef9a-4de4-9248-b586db19628d",
+        "kind": "door",
+        "position": {
+          "x": 1500,
+          "y": 0,
+          "heading": 90
+        },
+        "width": 1000,
+        "keepFreeDepth": 1000,
+        "label": "Entrance",
+        "isModuleEntrance": true
+      },
+      {
+        "id": "5cec67d2-51d1-4beb-a284-9d71af8e4dc3",
+        "kind": "emergencyExit",
+        "position": {
+          "x": 12000,
+          "y": 4000,
+          "heading": 180
+        },
+        "width": 1200,
+        "keepFreeDepth": 1500,
+        "isModuleEntrance": false
+      }
+    ],
+    "noGoZones": [
+      {
+        "id": "4d880031-277e-48d8-a8ec-cee1d2ec19f7",
+        "area": {
+          "start": {
+            "x": 5600,
+            "y": 7600
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 6400,
+                "y": 7600
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 6400,
+                "y": 8000
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 5600,
+                "y": 8000
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 5600,
+                "y": 7600
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "reason": "Fire hose cabinet"
+      }
+    ],
+    "revision": 0,
+    "revisionLog": []
+  }
+}

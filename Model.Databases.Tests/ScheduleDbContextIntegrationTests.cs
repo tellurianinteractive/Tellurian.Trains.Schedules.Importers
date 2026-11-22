@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+using Tellurian.Trains.Schedules.Exporters.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Xpln;
 using Tellurian.Trains.Schedules.Importers.Xpln.DataSetProviders;
@@ -285,11 +286,6 @@ public class ScheduleDbContextIntegrationTests
         // Mirrors Planning.App ScheduleStateService: serialise the whole imported Plan with the same
         // options the browser store uses, then restore it, and confirm an edited graphical setting
         // survives (and that the full real graph serialises without throwing).
-        var options = new System.Text.Json.JsonSerializerOptions
-        {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
-            MaxDepth = 256
-        };
         var odsFile = new FileInfo(Path.Combine("Test data", "Barmstedt2022.ods"));
         using var importer = new XplnDataImporter(odsFile, DataSetProvider, CompaniesService, TrainCategoriesService, Logger);
         var schedule = (await importer.ImportScheduleAsync("Barmstedt2022")).Item;
@@ -297,8 +293,7 @@ public class ScheduleDbContextIntegrationTests
 
         schedule.Timetable.Layout.Settings.GraphicTimetable.KilometerSpacing = 99;
 
-        var json = System.Text.Json.JsonSerializer.Serialize(schedule, options);
-        var restored = System.Text.Json.JsonSerializer.Deserialize<Plan>(json, options);
+        var restored = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(schedule));
 
         Assert.IsNotNull(restored);
         Assert.AreEqual(99, restored.Timetable.Layout.Settings.GraphicTimetable.KilometerSpacing);
@@ -310,11 +305,6 @@ public class ScheduleDbContextIntegrationTests
         // Decides whether empty-Texts notes come from the round-trip itself (a live bug) or only from
         // legacy data: import a real plan with notes, round-trip the whole graph, and confirm a note's
         // text survives. If this passes, the round-trip is sound and empty Texts is pre-existing data.
-        var options = new System.Text.Json.JsonSerializerOptions
-        {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
-            MaxDepth = 256
-        };
         var odsFile = new FileInfo(Path.Combine("Test data", "Barmstedt2022.ods"));
         using var importer = new XplnDataImporter(odsFile, DataSetProvider, CompaniesService, TrainCategoriesService, Logger);
         var schedule = (await importer.ImportScheduleAsync("Barmstedt2022")).Item;
@@ -326,8 +316,7 @@ public class ScheduleDbContextIntegrationTests
         Assert.IsNotNull(noteBefore, "Expected at least one non-empty note in the imported plan.");
         var expected = noteBefore.ToText;
 
-        var restored = System.Text.Json.JsonSerializer.Deserialize<Plan>(
-            System.Text.Json.JsonSerializer.Serialize(schedule, options), options);
+        var restored = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(schedule));
 
         var matching = restored!.Timetable.Trains
             .SelectMany(t => t.Calls).SelectMany(c => c.Notes)

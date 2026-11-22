@@ -62,8 +62,8 @@ It is a way to store work in progress or to read data created by any
 other application that can write data in the correct format.
 
 ### Database Importer
-Imports and validates data from a relational database that is compatible with 
-the database schema defined. The database importer uses **Entity Framework Core**
+Reads a plan back from a database written by the database exporter.
+The database importer uses **Entity Framework Core**
 that is supported by almost all common database brands.
 
 ### Access Importer
@@ -76,8 +76,8 @@ It is currently experimental and incomplete.
 Writes the complete schedule to a `JSON` file. 
 
 ### Database Exporter
-Writes the complete schedule to a relational database of choice. 
-Creates the necessary database schema if it not exists or is complete.
+Writes the complete plan to a relational database of choice, which holds one plan:
+the database is created anew on each export.
 Uses **Entity Framework Core** that is supported by almost all common database brands.
 
 ## Validation

@@ -93,7 +93,7 @@ public sealed class ReportLanguageUiTests : PlaywrightTestBase
         timetable.Add(train);
         plan.Reconcile();
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 
     private static OperationLocation NewStation(int id, string name, string signature)

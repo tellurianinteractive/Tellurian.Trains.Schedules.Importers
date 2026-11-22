@@ -68,7 +68,7 @@ public sealed class CallNoteUiTests : PlaywrightTestBase
         // Read back from the stored plan, so what is checked is what was written and not what was typed.
         // The app saves on a debounce, so the reload waits for both the text and the half it was given
         // to have reached the store.
-        await WaitForStoredPlanAsync("Wait for the branch train", "\"IsForArrival\":true");
+        await WaitForStoredPlanAsync("Wait for the branch train", "\"isForArrival\":true");
         await Page.GotoAsync("/trains", Idle);
         await ExpandTheTrainAsync();
         var stored = Page.Locator("table.sub-grid tbody tr").Nth(1).Locator("td.note");
@@ -149,7 +149,7 @@ public sealed class CallNoteUiTests : PlaywrightTestBase
         timetable.Add(train);
         plan.Reconcile();
 
-        return JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
+        return Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(plan);
     }
 
     private static OperationLocation NewStation(int id, string name, string signature)

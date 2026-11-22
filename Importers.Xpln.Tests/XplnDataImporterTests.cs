@@ -428,10 +428,12 @@ public class XplnDataImporterTests
                 Assert.HasCount(expectedCargoFlows, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.CargoFlow), "Cargo flows");
                 Assert.HasCount(expectedDuties, result.Item.DriverDuties, "Duties");
 
-                // Validated as the app validates it: an imported plan is brought into a consistent state
-                // before anything looks at it (the app does this when the plan is handed to
-                // ScheduleState). Without it the plan is judged half-built — XPLN records no platforms,
-                // for one, so every passenger stop would be reported as having nowhere to exchange (T6).
+                // Validated as the app validates it: XPLN records no platforms, so the app's import gives
+                // every track of a passenger location one (ScheduleImportService); without it every
+                // passenger stop would be reported as having nowhere to exchange (T6). The plan is then
+                // brought into a consistent state before anything looks at it (the app does this when
+                // the plan is handed to ScheduleState).
+                result.Item.Layout.EnsurePlatforms();
                 result.Item.Reconcile();
                 var validationErrors = result.Item.GetValidationErrors(ValidationSettings);
                 WriteLines(result.Messages.ToStrings().Concat(validationErrors.ToStrings()), file);

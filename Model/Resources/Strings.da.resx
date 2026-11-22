@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tog {0} har ingen tjeneste på køresessioner {1} for afsnittet fra {2} {3} til {4} {5}.</value>
   </data>
+  <data name="TrackDesignationNotUnique" xml:space="preserve">
+    <value>Driftsstedet {0} har mere end ét spor {1}.</value>
+  </data>
   <data name="LockKeyIgnoredAtMannedLocation" xml:space="preserve">
     <value>Driftsstedet {0} er bemandet, så nøglen, der opbevares på {1}, ignoreres.</value>
   </data>

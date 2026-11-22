@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tellurian.Trains.Schedules is a .NET 10.0 solution for validating and importing railway schedule data into an object model. It reads data from XPLN spreadsheets (ODS/XLSX) and Microsoft Access databases, with optional Entity Framework Core support for persistence.
+Tellurian.Trains.Schedules is a .NET 11.0 solution for validating and importing railway schedule data into an object model. It reads data from XPLN spreadsheets (ODS/XLSX) and Microsoft Access databases, with optional Entity Framework Core support for persistence.
 
 ## Build Commands
 
@@ -32,14 +32,25 @@ Note: Access.Tests and Model.Databases.Tests are excluded from CI (require Windo
 
 ## Architecture
 
+### Role in the suite (owner's decision 2026-11-20)
+
+This repository holds the complete model of the Tellurian Trains suite, in three layers: **Layouts** (`Model.Layouts`, what Module Draw makes), **Timetables** (`Model`, what the planner adds) and **Dispatching** (what Dispatch adds; not here yet). Module Draw, the Timetable Planner and Tellurian Dispatch use these models and add only app-specific functionality and user interface; the Module Registry keeps its own model and is extended later from the gaps. JSON import/export must use source-generated serialisation (`JsonSerializerContext`, `[JsonSerializable]`, `[JsonPolymorphic]`/`[JsonDerivedType]`), never reflection, for AOT. All reading and writing of data in every format (importers, and exporters still to be added) and all serialisation code belong here, so files, databases and API calls share one implementation. When an app needs something the model lacks, extend the model here instead of adding types or mapping code in the app. Background: `Documentation/CrossAppReview.md` (section 0 and the cross-app findings), `Documentation/ModelHarmonisation.md` (decisions and progress), `Documentation/OperationLocations.md`.
+
 ```
-Importers.Interfaces/  → Contracts: IImportService, ImportResult<T>
+Importers.Interfaces/  → Reading contracts: IImporter<T> (ILayoutImporter is IImporter<Layout>), IImportService, ImportResult<T>
+Exporters.Interfaces/  → Writing contracts: IExporter<T>, ExportOptions, IExportService, ExportResult<T> (reading and writing are separate packages, CrossAppReview decision 18)
     ↓
-Model/                 → Domain model: Schedule, Timetable, Train, Layout, Station, etc.
+Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies. Moved from Module Draw 2026-11-21
+Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module; the drawing types moving from Module Draw (EndProfiles/, Catalogues/, Halls/, Modules/, Tracks/, Measures/, AutoDraw/, Drawings/ values, Files/ drawing file format, ModuleFileContent and DrawingJsonContext)
+    ↓
+Model/                 → Planning model: Plan, Timetable, Train, schedules, duties; plan files (PlanFiles/)
     ↓
 ├─ Importers.Xpln/     → XPLN ODS/XLSX importer (published to NuGet)
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
 ├─ Importers.Services/ → Shared import services (JSON/CSV data files)
+├─ Exporters.Services/ → Plan file writing: PlanJsonExporter, JsonExportService
+├─ Importers.Drawing/  → Reads Module Draw's drawing files (end profiles, catalogues, halls, modules so far), with the migrations
+├─ Exporters.Drawing/  → Writes Module Draw's drawing files (end profiles, catalogues, halls, modules so far), counting up revisions
 ├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```

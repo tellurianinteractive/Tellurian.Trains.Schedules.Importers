@@ -104,7 +104,8 @@ public sealed record ValidationError
     /// </summary>
     public static ValidationScope ScopeOf(ValidationErrorType errorType) => errorType switch
     {
-        ValidationErrorType.LockKeyIgnored => ValidationScope.Layout,
+        ValidationErrorType.LockKeyIgnored or
+        ValidationErrorType.TrackDesignationNotUnique => ValidationScope.Layout,
 
         ValidationErrorType.VehicleDoubleBooked or
         ValidationErrorType.VehicleNotClosed or
@@ -1017,6 +1018,23 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>
+    /// Creates an error for a designation that two or more tracks of one operation location share. It carries the
+    /// second of them as its track, the one to rename or remove, and no time and no train.
+    /// </summary>
+    public static ValidationError TrackDesignationNotUnique(
+        StationTrack track,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.TrackDesignationNotUnique,
+            FromTrack = track,
+            ToTrack = track,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.FirstPart?.From.Track;
 
@@ -1150,6 +1168,9 @@ public enum ValidationErrorType
     /// <summary>An operation location carries a lock key that the manning on one side or the other has
     /// left meaningless, so it is ignored.</summary>
     LockKeyIgnored,
+
+    /// <summary>An operation location has two or more tracks with the same designation.</summary>
+    TrackDesignationNotUnique,
 
     /// <summary>A train stops on its way at a location its category's stop pattern does not name.</summary>
     StopOutsideStopPattern,

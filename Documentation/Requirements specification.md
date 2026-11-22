@@ -1834,7 +1834,7 @@ and outlines implementation approaches.
 
 | Component           | Technology                   | Notes                                                                      |
 | --------------------- | ------------------------------ | ---------------------------------------------------------------------------- |
-| Language            | C# / .NET                    | Current codebase targets .NET 10.0                                         |
+| Language            | C# / .NET                    | Current codebase targets .NET 11.0 (C# 15)                                 |
 | GUI framework       | Blazor                       | WebAssembly for local, Server for collaborative                            |
 | Domain model        | Plain C# classes             | No framework dependencies in the model layer                               |
 | Persistence         | JSON + Entity Framework Core | JSON for file-based local storage; EF Core for database-backed scenarios   |

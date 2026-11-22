@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Exporters.Interfaces</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Exporters.Interfaces</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>Contracts for writing the Tellurian Trains models: IExporter&lt;T&gt; (one format, to a stream), IExportService (a whole plan to a destination), ExportOptions and ExportResult&lt;T&gt;. The counterpart of Importers.Interfaces.</Description>
+    <PackageTags>model-trains export</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="11.0.100">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model\Model.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

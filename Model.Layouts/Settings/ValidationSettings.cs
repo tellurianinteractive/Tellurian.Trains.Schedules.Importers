@@ -1,0 +1,112 @@
+using System.Text.Json.Serialization;
+namespace Tellurian.Trains.Schedules.Model.Settings;
+
+/// <summary>
+/// Configures which validations are run and the thresholds they use when validating a schedule.
+/// </summary>
+public sealed class ValidationSettings
+{
+    /// <summary>Gets or sets a value indicating whether station call timings are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateStationCalls { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether station track usage is validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateStationTracks { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether track stretch conflicts are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateStretches { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether a double track stretch counts as two single tracks, one for
+    /// each direction, rather than as two tracks any train may use.
+    /// </summary>
+    /// <remarks>
+    /// Off by default: two trains then conflict on double track only when a third is added to the two
+    /// tracks. On, trains running the same way must keep apart, each section holding one train per
+    /// direction. It applies to the stretch validation, so it needs <see cref="ValidateStretches"/>.
+    /// </remarks>
+    public bool TreatDoubleTrackAsTwoSingleTracks { get; set; }
+    /// <summary>Gets or sets a value indicating whether train speeds between calls are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateTrainSpeed { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's route is validated for continuity, i.e. that
+    /// every leg it runs is a track stretch of the layout.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateRouteContinuity { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether train numbers are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateTrainNumbers { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether a passenger train that stops to exchange passengers is
+    /// validated for standing at a track with a platform (rule T6).
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidatePassengerExchange { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's stops are validated against its category's
+    /// stop pattern, i.e. that it stops on its way only where the pattern names (rule T8). A category
+    /// with no pattern is not checked; see <c>StopPatternRules</c>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateStopPatterns { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train is validated for arriving at and departing from
+    /// only scheduled tracks (rule T9). Shunting tasks are not checked.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateScheduledTracks { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether each train's stops between its ends are validated against the
+    /// time they require: the train clearance at a manned station and, where the loco is run round, the loco
+    /// runaround, in fast-clock time. A shorter stop is put right by lengthening it or by lowering the time
+    /// required.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateRequiredStopTimes { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether vehicle schedules are validated for overlaps and double bookings.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateSchedules { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether locomotive coverage (gaps and overlaps) is validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateLocomotiveCoverage { get; set; } = true;
+    /// <summary>Gets or sets a value indicating whether driver duties are validated.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public bool ValidateDriverDuties { get; set; } = true;
+    /// <summary>Gets or sets the minimum allowed train speed, in metres per clock minute.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public double MinTrainSpeedMetersPerClockMinute { get; set; } = 0.3;
+    /// <summary>Gets or sets the maximum allowed train speed, in metres per clock minute.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public double MaxTrainSpeedMetersPerClockMinute { get; set; } = 10;
+    /// <summary>
+    /// Gets or sets the free time a station track needs between two occupancies, in fast-clock minutes.
+    /// </summary>
+    /// <remarks>
+    /// Zero, the default, is the plain double-booking rule: two trains conflict only where they are on
+    /// the track at the same time, and one arriving exactly as another leaves is a handover. Above zero
+    /// the track must also stand free for that many minutes in between, so a plan that turns a track
+    /// round faster than the station can work it is reported. Exactly the stated number of minutes is
+    /// enough; one minute less is a conflict.
+    /// </remarks>
+    public int MinMinutesBetweenTrackUsage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the vehicles (traction units and wagonsets) standing
+    /// between their trains count as occupying tracks, on top of what the trains themselves occupy. See
+    /// <c>TrackHold</c>.
+    /// </summary>
+    /// <remarks>
+    /// Off by default, because it is only sound where the plan actually records parking. A unit that
+    /// arrives with one train and leaves with the next does stand on the track for the whole time
+    /// between — unless it is booked to or from parking, which is what says it went elsewhere. A plan
+    /// that never sets those flags cannot distinguish "stayed here" from "nothing was recorded", and
+    /// reading the silence as "stayed" makes every locomotive hold its arrival track for hours: on an
+    /// imported XPLN plan that turns roughly forty genuine track conflicts into five hundred.
+    /// <para>
+    /// Turn it on for plans where parking is modelled deliberately; the conflicts it then adds are real
+    /// ones the trains' own times cannot show.
+    /// </para>
+    /// </remarks>
+    public bool ExtendTrackOccupancyByVehicleStay { get; set; }
+}

@@ -61,11 +61,13 @@ public class Train : IEquatable<Train>
     /// <summary>
     /// Gets or sets the unique identifier for this train.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // required, so always written
     public required int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the train number.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // required, so always written
     public required int Number { get; set; }
 
     /// <summary>
@@ -95,6 +97,7 @@ public class Train : IEquatable<Train>
     /// alone; the company itself is stored once, in the layout's company catalogue. Setting no company
     /// clears the key too, so the train is not given the old one back the next time the plan is read.
     /// </summary>
+    [JsonIgnore]
     public Company? Company { get => field; set { field = value; if (value is null) CompanyId = null; } }
 
     /// <summary>
@@ -108,6 +111,7 @@ public class Train : IEquatable<Train>
     /// the category itself is stored once, in the timetable's category catalogue. Setting no category
     /// clears the key too, so the train is not given the old one back the next time the plan is read.
     /// </summary>
+    [JsonIgnore]
     public TrainCategory? Category { get => field; set { field = value; if (value is null) CategoryId = null; } }
 
     /// <summary>
@@ -119,16 +123,19 @@ public class Train : IEquatable<Train>
     /// <summary>
     /// Gets or sets the sessions during which this train operates.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)] // required, so always written
     public required Sessions Sessions { get; set; } = Sessions.All;
 
     /// <summary>
     /// Gets or sets the foreign key to the timetable. Required.
     /// </summary>
+    [JsonIgnore]
     public int TimetableId { get; set; }
 
     /// <summary>
     /// Gets or sets the timetable this train belongs to.
     /// </summary>
+    [JsonIgnore]
     public Timetable Timetable { get; set; }
 
     /// <summary>
@@ -733,6 +740,30 @@ public static class TrainExtensions
             train = train.ValueOrException(nameof(train));
             call = call.ValueOrException(nameof(call));
             return Join(train, call, CallPlacement.ByTime);
+        }
+
+        /// <summary>
+        /// Adds a station call to the train right after <paramref name="previous"/> in its route, whatever its times
+        /// are: a location inserted on a stretch the train runs gets its call between the two it ran between.
+        /// </summary>
+        /// <param name="call">The station call to add.</param>
+        /// <param name="previous">The call of the train it is to follow.</param>
+        /// <returns>The added station call.</returns>
+        public StationCall AddAfter(StationCall call, StationCall previous)
+        {
+            train = train.ValueOrException(nameof(train));
+            call = call.ValueOrException(nameof(call));
+            previous = previous.ValueOrException(nameof(previous));
+            if (train.Calls.Contains(call)) return call;
+            call.SetTrain(train);
+            train.NumberCalls();
+            var ordered = train.CallsInRunOrder;
+            var position = ordered.ToList().FindIndex(c => ReferenceEquals(c, previous)) + 1;
+            if (position == 0) throw new ArgumentException($"{previous} is not a call of {train}.", nameof(previous));
+            train.Calls.Add(call);
+            Renumber([.. ordered.Take(position), call, .. ordered.Skip(position)]);
+            call.Track.Add(call);
+            return call;
         }
 
         /// <summary>

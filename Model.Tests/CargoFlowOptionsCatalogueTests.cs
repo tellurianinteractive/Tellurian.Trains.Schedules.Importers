@@ -117,7 +117,7 @@ public class CargoFlowOptionsCatalogueTests
         var json = JsonSerializer.Serialize(
             new Destination { Location = new IndustrialArea(1, "Sockerbruket", "Skb") }, Options);
 
-        Assert.Contains("\"Location\":", json, StringComparison.Ordinal);
-        Assert.DoesNotContain("\"Station\":", json, StringComparison.Ordinal);
+        Assert.Contains("\"locationId\":1", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"station\":", json, StringComparison.OrdinalIgnoreCase);
     }
 }

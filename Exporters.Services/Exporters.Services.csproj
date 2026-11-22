@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Exporters.Services</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Exporters.Services</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>Writes plans as plan files (JSON): PlanJsonExporter (IExporter&lt;Plan&gt;) and JsonExportService (IExportService to a file).</Description>
+    <PackageTags>model-trains scheduling export json</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="11.0.100">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Exporters.Interfaces\Exporters.Interfaces.csproj" />
+    <ProjectReference Include="..\Model\Model.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

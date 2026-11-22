@@ -28,6 +28,7 @@ public sealed class CargoFlowTrainPart : TrainPart
     /// Gets or sets the position of this cargo flow within the train (1 = front). Several cargo flows on
     /// the same train may share a position.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int PositionInTrain { get; set; } = 1;
 
     /// <summary>
@@ -50,11 +51,13 @@ public sealed class CargoFlowTrainPart : TrainPart
     /// <summary>
     /// If true, a note tells staff to couple the wagons to the train at the from-call.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool HasCoupleNote { get; set; } = true;
 
     /// <summary>
     /// If true, a note tells staff to uncouple the wagons from the train at the to-call.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool HasUncoupleNote { get; set; } = true;
 
     /// <summary>
@@ -66,6 +69,7 @@ public sealed class CargoFlowTrainPart : TrainPart
     /// Gets or sets the reusable cargo flow description this flow uses (a catalogue entry on the
     /// timetable). Editing the description affects every cargo flow that references it.
     /// </summary>
+    [JsonIgnore]
     public CargoFlowOptions CargoFlowOptions { get; set; } = default!;
 
     /// <summary>

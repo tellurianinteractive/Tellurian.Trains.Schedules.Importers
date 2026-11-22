@@ -1,30 +1,6 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// The key that unlocks the switches at an unmanned operation location, and the manned station where it
-/// is kept between uses.
-/// </summary>
-/// <remarks>
-/// Nobody is on duty at an unmanned location to work its switches, so they are padlocked and the key is
-/// held at a manned station along the way. A train that has work there must collect the key before it
-/// leaves that station and hand it back the next time it calls there — which is what the two lock key
-/// notes tell the loco driver (see <c>StationCall.LockKeyNotes</c>).
-/// </remarks>
-public sealed class LockKey
-{
-    /// <summary>
-    /// Gets or sets what the key is called, so the loco driver can ask for the right one where a station
-    /// holds several. Optional; the notes read without it when it is not given.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the manned station where the key is kept.
-    /// </summary>
-    public Station HeldAt { get; set; } = default!;
-}
-
-/// <summary>
 /// Why the <see cref="LockKey"/> a location carries is not in force.
 /// </summary>
 /// <remarks>

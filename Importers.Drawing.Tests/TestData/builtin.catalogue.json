@@ -1,0 +1,1061 @@
+{
+  "format": "tellurian-drawing",
+  "kind": "catalogue",
+  "schemaVersion": 2,
+  "appVersion": "0.1.0",
+  "content": {
+    "version": "0.3-provisional",
+    "scales": [
+      {
+        "shortName": "H0",
+        "denominator": 87
+      },
+      {
+        "shortName": "N",
+        "denominator": 160
+      }
+    ],
+    "standards": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+        "shortName": "FREMO/H0-RE",
+        "scale": "H0",
+        "railSystem": "twoRail",
+        "normalGauge": 16.5,
+        "railTopHeight": 1300,
+        "minimumClearance": 0,
+        "operatorSpaceDepth": 800,
+        "trackColor": "#1f5fbf",
+        "defaultSingleTrackEndProfileId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+        "defaultDoubleTrackEndProfileId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d02",
+        "source": {
+          "title": "FREMO module standard H0-RE"
+        }
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b02",
+        "shortName": "MMM-2R",
+        "countries": [ "SE" ],
+        "scale": "H0",
+        "railSystem": "twoRail",
+        "normalGauge": 16.5,
+        "railTopHeight": 1300,
+        "minimumClearance": 0,
+        "operatorSpaceDepth": 800,
+        "trackColor": "#1f5fbf",
+        "defaultSingleTrackEndProfileId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d03",
+        "source": {
+          "title": "M\u00E4larModulM\u00F6te module standard MMM-2R"
+        }
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b03",
+        "shortName": "MMM-3R",
+        "countries": [ "SE" ],
+        "scale": "H0",
+        "railSystem": "threeRail",
+        "normalGauge": 16.5,
+        "railTopHeight": 1300,
+        "minimumClearance": 0,
+        "operatorSpaceDepth": 800,
+        "trackColor": "#1f5fbf",
+        "defaultSingleTrackEndProfileId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d04",
+        "source": {
+          "title": "M\u00E4larModulM\u00F6te module standard MMM-3R"
+        }
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b04",
+        "shortName": "FREMO/N-RE",
+        "scale": "N",
+        "railSystem": "twoRail",
+        "normalGauge": 9,
+        "railTopHeight": 1300,
+        "minimumClearance": 0,
+        "operatorSpaceDepth": 800,
+        "trackColor": "#1f5fbf",
+        "defaultSingleTrackEndProfileId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d05",
+        "source": {
+          "title": "FREMO module standard N-RE"
+        }
+      }
+    ],
+    "addOns": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4c01",
+        "shortName": "MMM-Summer",
+        "baseStandardId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b02",
+        "description": "Summer landscape on MMM-2R modules (Registry: SSM)."
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4c02",
+        "shortName": "MMM-Modern",
+        "baseStandardId": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b02",
+        "description": "Modern-era requirements on MMM-2R modules."
+      }
+    ],
+    "endProfiles": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+        "designation": "FREMO-H0-B96",
+        "shortName": "B96",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+            "name": "FREMO/H0-RE"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -250,
+            "y": -195
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -195
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 250.00000000000023,
+                "y": 46.55332147444176
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": 18.9734982539195
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": -27.065777620219407
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -58
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -195
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -250,
+            "y": -58
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 73.55769887408297,
+                "y": -9
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": 27.065777620219407
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": -18.9734982539195
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -180,
+              "y": -145
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 180,
+              "y": -145
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": -180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 0,
+              "y": -65
+            },
+            "diameter": 12
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "FREMO-H0",
+        "source": {
+          "title": "FREMO H0-B96 dimensioned drawing, high and low profile (track at 195 / 104 mm above the plate bottom).",
+          "url": "https://github.com/tellurianinteractive/Tellurian.Trains.Drawing/blob/master/end-profiles/FREMO%20H0%20B96.png",
+          "revision": "drawing-2026-11-14"
+        },
+        "revision": 0
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d06",
+        "designation": "FREMO-H0-B96f",
+        "shortName": "B96f",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+            "name": "FREMO/H0-RE"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -250,
+            "y": -104
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -104
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 250.00000000000023,
+                "y": 46.55332147444176
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": 18.9734982539195
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": -27.065777620219407
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -58
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -104
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -250,
+            "y": -58
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": -61,
+                "y": -30
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 20,
+                "y": 0
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 24,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 35,
+                "y": -4
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 45,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 55,
+                "y": -14
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 60,
+                "y": -9
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 73.55769887408297,
+                "y": -9
+              }
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 73.55769887408297,
+                "y": 1
+              },
+              "sweep": 27.065777620219407
+            },
+            {
+              "type": "arc",
+              "center": {
+                "x": 327,
+                "y": -495
+              },
+              "sweep": -18.9734982539195
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 180,
+              "y": -79
+            },
+            "diameter": 12
+          },
+          {
+            "center": {
+              "x": 0,
+              "y": -65
+            },
+            "diameter": 12
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "FREMO-H0",
+        "source": {
+          "title": "FREMO H0-B96 dimensioned drawing, high and low profile (track at 195 / 104 mm above the plate bottom).",
+          "url": "https://github.com/tellurianinteractive/Tellurian.Trains.Drawing/blob/master/end-profiles/FREMO%20H0%20B96.png",
+          "revision": "drawing-2026-11-14"
+        },
+        "revision": 0
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d02",
+        "designation": "FREMO-H0-2E96",
+        "shortName": "2E96",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+            "name": "FREMO/H0-RE"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -250,
+            "y": -140
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -140
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -250,
+                "y": -140
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -250,
+            "y": -40
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 250,
+                "y": -40
+              }
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": -25,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          },
+          {
+            "offset": 25,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -150,
+              "y": -70
+            },
+            "diameter": 8
+          },
+          {
+            "center": {
+              "x": 150,
+              "y": -70
+            },
+            "diameter": 8
+          },
+          {
+            "center": {
+              "x": -150,
+              "y": -110
+            },
+            "diameter": 8
+          },
+          {
+            "center": {
+              "x": 150,
+              "y": -110
+            },
+            "diameter": 8
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "FREMO-H0",
+        "source": {
+          "title": "FREMO: H0 double-track end profile 2E96. Provisional values, to be drawn from the published FREMO PDF.",
+          "revision": "provisional"
+        },
+        "revision": 0
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d03",
+        "designation": "MMM480",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b02",
+            "name": "MMM-2R"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -240,
+            "y": -120
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -120
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -240,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -240,
+                "y": -120
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -240,
+            "y": -40
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -40
+              }
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 16.5,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -200,
+              "y": -80
+            },
+            "diameter": 8
+          },
+          {
+            "center": {
+              "x": 200,
+              "y": -80
+            },
+            "diameter": 8
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "MMM",
+        "source": {
+          "title": "MMM: MMM-2R end profile 480. Provisional values, to be drawn from the published MMM PDF.",
+          "revision": "provisional"
+        },
+        "revision": 0
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d04",
+        "designation": "MMM480-3R",
+        "scale": "H0",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b03",
+            "name": "MMM-3R"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -240,
+            "y": -120
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -120
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -240,
+                "y": -40
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -240,
+                "y": -120
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -240,
+            "y": -40
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 240,
+                "y": -40
+              }
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 16.5,
+            "railSystem": "threeRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -200,
+              "y": -80
+            },
+            "diameter": 8
+          },
+          {
+            "center": {
+              "x": 200,
+              "y": -80
+            },
+            "diameter": 8
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "MMM",
+        "source": {
+          "title": "MMM: MMM-3R end profile 480. Provisional values, to be drawn from the published MMM PDF.",
+          "revision": "provisional"
+        },
+        "revision": 0
+      },
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d05",
+        "designation": "FREMO-N-RE",
+        "scale": "N",
+        "standards": [
+          {
+            "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b04",
+            "name": "FREMO/N-RE"
+          }
+        ],
+        "outline": {
+          "start": {
+            "x": -150,
+            "y": -80
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 150,
+                "y": -80
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": 150,
+                "y": -20
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -150,
+                "y": -20
+              }
+            },
+            {
+              "type": "line",
+              "end": {
+                "x": -150,
+                "y": -80
+              }
+            }
+          ],
+          "isClosed": true
+        },
+        "groundLine": {
+          "start": {
+            "x": -150,
+            "y": -20
+          },
+          "steps": [
+            {
+              "type": "line",
+              "end": {
+                "x": 150,
+                "y": -20
+              }
+            }
+          ],
+          "isClosed": false
+        },
+        "tracks": [
+          {
+            "offset": 0,
+            "gauge": 9,
+            "railSystem": "twoRail"
+          }
+        ],
+        "screwHoles": [
+          {
+            "center": {
+              "x": -100,
+              "y": -50
+            },
+            "diameter": 6
+          },
+          {
+            "center": {
+              "x": 100,
+              "y": -50
+            },
+            "diameter": 6
+          }
+        ],
+        "dowels": [],
+        "screwHolePattern": "FREMO-N",
+        "source": {
+          "title": "FREMO: N-RE end profile. Provisional values, to be drawn from the published FREMO PDF.",
+          "revision": "provisional"
+        },
+        "revision": 0
+      }
+    ],
+    "overrides": []
+  }
+}

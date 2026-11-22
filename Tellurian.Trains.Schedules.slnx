@@ -13,14 +13,25 @@
     <File Path="README.md" />
     <File Path="RELEASENOTES.md" />
   </Folder>
+  <Project Path="Exporters.Drawing.Tests/Exporters.Drawing.Tests.csproj" />
+  <Project Path="Exporters.Drawing/Exporters.Drawing.csproj" />
+  <Project Path="Exporters.Interfaces/Exporters.Interfaces.csproj" />
+  <Project Path="Exporters.Services.Tests/Exporters.Services.Tests.csproj" />
+  <Project Path="Exporters.Services/Exporters.Services.csproj" />
   <Project Path="Importers.Access.Tests/Importers.Access.Tests.csproj" />
   <Project Path="Importers.Access/Importers.Access.csproj" />
+  <Project Path="Importers.Drawing.Tests/Importers.Drawing.Tests.csproj" />
+  <Project Path="Importers.Drawing/Importers.Drawing.csproj" />
   <Project Path="Importers.Interfaces.Tests/Importers.Interfaces.Tests.csproj" />
   <Project Path="Importers.Interfaces/Importers.Interfaces.csproj" />
   <Project Path="Importers.Services.Tests/Importers.Services.Tests.csproj" Id="3e51dea4-740e-461b-8f5c-c1e40a97b658" />
   <Project Path="Importers.Services/Importers.Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
   <Project Path="Importers.Xpln.Tests/Importers.Xpln.Tests.csproj" />
   <Project Path="Importers.Xpln/Importers.Xpln.csproj" />
+  <Project Path="Model.Geometry.Tests/Model.Geometry.Tests.csproj" />
+  <Project Path="Model.Geometry/Model.Geometry.csproj" />
+  <Project Path="Model.Layouts.Tests/Model.Layouts.Tests.csproj" />
+  <Project Path="Model.Layouts/Model.Layouts.csproj" />
   <Project Path="Model.Databases.Tests/Model.Databases.Tests.csproj" />
   <Project Path="Model.Databases/Model.Databases.csproj" />
   <Project Path="Model.Tests/Model.Tests.csproj" />

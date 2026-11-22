@@ -8,16 +8,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="11.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
 		<ProjectReference Include="..\Model\Model.csproj" />
 		<ProjectReference Include="..\Importers.Services\Importers.Services.csproj" />
+		<ProjectReference Include="..\Exporters.Services\Exporters.Services.csproj" />
 		<ProjectReference Include="..\Importers.Xpln\Importers.Xpln.csproj" />
 	</ItemGroup>
 
@@ -26,7 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.AzureDevOpsReport" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,7 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.CrashDump" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.CrashDump" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -42,34 +42,34 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.HangDump" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.HangDump" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.HotReload" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.HotReload" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.Retry" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.Retry" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.5.1" />
+	  <PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="MSTest.TestAdapter" Version="4.5.1" />
+	  <PackageReference Update="MSTest.TestAdapter" Version="4.5.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="MSTest.TestFramework" Version="4.5.1" />
+	  <PackageReference Update="MSTest.TestFramework" Version="4.5.2" />
 	</ItemGroup>
 </Project>

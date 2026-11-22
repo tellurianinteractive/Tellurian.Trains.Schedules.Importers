@@ -1,13 +1,16 @@
 @page "/import"
+@using System.Globalization
 @using Tellurian.Trains.Schedules.Importers.Interfaces
+@using Tellurian.Trains.Schedules.Model.Layouts
 @inject ScheduleImportService ImportService
 @inject ScheduleStateService ScheduleState
+@inject LayoutRevisionState RevisionState
 @inject Translator Translator
 
 
 <div class="import-row">
     <span class="import-label">@Translator("OpenSchedule")</span>
-    <InputFile OnChange="OnFileSelected" accept=".json,.ods,.xlsx" />
+    <InputFile OnChange="OnFileSelected" accept="@string.Join(",", ImportService.FileExtensions)" />
     @if (_isImporting)
     {
         <span class="status-importing">@Translator("Importing")</span>
@@ -39,10 +42,33 @@
     </details>
 }
 
+<LayoutChangesList />
+
+@if (_revision is { } revision)
+{
+    @* The file is a revision of the layout the open plan was made from: updating the plan or making a new one is the
+       planner's choice, made before anything is changed. *@
+    <ConfirmDialog OnCancel="CancelRevision">
+        <div class="revision-choice">
+            <p>@string.Format(CultureInfo.CurrentCulture, Translator("LayoutRevisionChoice"), Translator(revision.Importer.ResourceKey), ScheduleState.Schedule?.Name, ScheduleState.Schedule?.Layout.SourceRevision, revision.Layout.SourceRevision)</p>
+            @if (revision.Layout.SourceRevision < ScheduleState.Schedule?.Layout.SourceRevision)
+            {
+                <p class="warning">@Translator("LayoutRevisionOlder")</p>
+            }
+            <div class="actions">
+                <button class="primary" @onclick="UpdateWithRevision">@Translator("LayoutRevisionUpdatePlan")</button>
+                <button @onclick="NewPlanFromRevision">@Translator("LayoutRevisionNewPlan")</button>
+                <button @onclick="CancelRevision">@Translator("Cancel")</button>
+            </div>
+        </div>
+    </ConfirmDialog>
+}
+
 @code {
     private bool _isImporting;
     private List<Message> _messages = [];
     private bool _hasErrors;
+    private PendingRevision? _revision;
 
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -59,6 +85,12 @@
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
             ms.Position = 0;
+
+            if (ImportService.LayoutImporterFor(file.Name, ms.GetBuffer().AsSpan(0, (int)ms.Length)) is { } importer)
+            {
+                await ImportLayout(importer, ms, file.Name);
+                return;
+            }
 
             var result = file.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
                 ? await ImportService.ImportFromJsonAsync(ms, file.Name)
@@ -82,4 +114,57 @@
             _isImporting = false;
         }
     }
+
+    // A layout made elsewhere becomes a new plan, unless it is a revision of the layout the open plan was made from:
+    // then the planner chooses. The changes a planner must confirm are listed below (LayoutChangesList).
+    private async Task ImportLayout(ILayoutImporter importer, Stream stream, string fileName)
+    {
+        var read = await ImportService.ReadLayoutAsync(importer, stream, fileName);
+        _messages = [.. read.Messages];
+        _hasErrors = read.IsFailure;
+        if (read.IsFailure) return;
+
+        var layout = read.Item;
+        if (ScheduleState.Schedule is { } current && current.IsMadeFrom(layout)) _revision = new(importer, layout);
+        else TakeAsNewPlan(importer, layout);
+    }
+
+    private void UpdateWithRevision()
+    {
+        if (_revision is not { } revision || ScheduleState.Schedule is not { } current) return;
+        _revision = null;
+        var import = ScheduleImportService.Update(revision.Importer, revision.Layout, current);
+        var update = import.Update!;
+        var source = Translator(revision.Importer.ResourceKey);
+        var revisionNumber = current.Layout.SourceRevision;
+        _messages.Add(update.IsUnchanged
+            ? Message.Information(Translator("LayoutRevisionUnchanged"), source, revisionNumber)
+            : Message.Information(Translator("LayoutRevisionLoaded"), source, revisionNumber, update.Applied.Count, update.ToConfirm.Count, update.Manual.Count));
+        ScheduleState.SaveAndNotify();
+        if (update.ToConfirm.Count > 0 || update.Manual.Count > 0)
+            RevisionState.Start(current, revision.Layout, revision.Importer.ResourceKey, update);
+        else
+            RevisionState.Close();
+    }
+
+    private void NewPlanFromRevision()
+    {
+        if (_revision is not { } revision) return;
+        _revision = null;
+        TakeAsNewPlan(revision.Importer, revision.Layout);
+    }
+
+    private void CancelRevision() => _revision = null;
+
+    private void TakeAsNewPlan(ILayoutImporter importer, Layout layout)
+    {
+        var language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var import = ScheduleImportService.NewPlan(importer, layout, language, Translator("NewLayoutName"));
+        var created = import.Plan.Layout;
+        _messages.Add(Message.Information(Translator("LayoutImportedAsNewPlan"), Translator(importer.ResourceKey), created.OperationLocations.Count, created.TrackStretches.Count));
+        ScheduleState.Schedule = import.Plan;
+    }
+
+    // A layout read, waiting for the planner to choose between updating the open plan and making a new one.
+    private sealed record PendingRevision(ILayoutImporter Importer, Layout Layout);
 }

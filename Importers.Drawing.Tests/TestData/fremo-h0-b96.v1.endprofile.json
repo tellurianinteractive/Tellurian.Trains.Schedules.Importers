@@ -1,0 +1,296 @@
+{
+  "format": "tellurian-drawing",
+  "kind": "endProfile",
+  "schemaVersion": 1,
+  "appVersion": "0.5.0",
+  "content": {
+    "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4d01",
+    "designation": "FREMO-H0-B96",
+    "shortName": "B96",
+    "scale": "H0",
+    "standards": [
+      {
+        "id": "5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01",
+        "name": "FREMO/H0-RE"
+      }
+    ],
+    "outline": {
+      "start": {
+        "x": -250,
+        "y": -195
+      },
+      "steps": [
+        {
+          "type": "line",
+          "end": {
+            "x": 250,
+            "y": -195
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 250.00000000000023,
+            "y": 46.55332147444176
+          }
+        },
+        {
+          "type": "arc",
+          "center": {
+            "x": 327,
+            "y": -495
+          },
+          "sweep": 18.9734982539195
+        },
+        {
+          "type": "arc",
+          "center": {
+            "x": 73.55769887408297,
+            "y": 1
+          },
+          "sweep": -27.065777620219407
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 60,
+            "y": -9
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 55,
+            "y": -14
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 45,
+            "y": -14
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 35,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 24,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 20,
+            "y": 0
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -20,
+            "y": 0
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -24,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -35,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -61,
+            "y": -30
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -250,
+            "y": -58
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -250,
+            "y": -195
+          }
+        }
+      ],
+      "isClosed": true
+    },
+    "groundLine": {
+      "start": {
+        "x": -250,
+        "y": -58
+      },
+      "steps": [
+        {
+          "type": "line",
+          "end": {
+            "x": -61,
+            "y": -30
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -35,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -24,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": -20,
+            "y": 0
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 20,
+            "y": 0
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 24,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 35,
+            "y": -4
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 45,
+            "y": -14
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 55,
+            "y": -14
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 60,
+            "y": -9
+          }
+        },
+        {
+          "type": "line",
+          "end": {
+            "x": 73.55769887408297,
+            "y": -9
+          }
+        },
+        {
+          "type": "arc",
+          "center": {
+            "x": 73.55769887408297,
+            "y": 1
+          },
+          "sweep": 27.065777620219407
+        },
+        {
+          "type": "arc",
+          "center": {
+            "x": 327,
+            "y": -495
+          },
+          "sweep": -18.9734982539195
+        }
+      ],
+      "isClosed": false
+    },
+    "tracks": [
+      {
+        "offset": 0,
+        "gauge": 16.5,
+        "railSystem": "twoRail"
+      }
+    ],
+    "screwHoles": [
+      {
+        "center": {
+          "x": -180,
+          "y": -145
+        },
+        "diameter": 12
+      },
+      {
+        "center": {
+          "x": 180,
+          "y": -145
+        },
+        "diameter": 12
+      },
+      {
+        "center": {
+          "x": -180,
+          "y": -79
+        },
+        "diameter": 12
+      },
+      {
+        "center": {
+          "x": 180,
+          "y": -79
+        },
+        "diameter": 12
+      },
+      {
+        "center": {
+          "x": 0,
+          "y": -65
+        },
+        "diameter": 12
+      }
+    ],
+    "dowels": [],
+    "screwHolePattern": "FREMO-H0",
+    "source": {
+      "title": "FREMO H0-B96 dimensioned drawing, high and low profile (track at 195 / 104 mm above the plate bottom).",
+      "url": "https://github.com/tellurianinteractive/Tellurian.Trains.Drawing/blob/master/end-profiles/FREMO%20H0%20B96.png",
+      "revision": "drawing-2026-11-14"
+    },
+    "revision": 0,
+    "revisionLog": []
+  }
+}
