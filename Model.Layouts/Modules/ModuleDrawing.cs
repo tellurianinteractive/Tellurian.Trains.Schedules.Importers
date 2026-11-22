@@ -9,7 +9,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
 /// X pointing into the module from it (ModuleDrawing §2). A module has one drawing: a module that can be set up
 /// in several ways is several modules, each with a file of its own. Only the Module Registry knows that they belong together.
 /// </summary>
-public sealed class ModuleDrawing : LayoutPart
+public sealed class ModuleDrawing : LayoutPart, IJsonOnSerializing, IJsonOnDeserialized
 {
     /// <summary>The exits, in order; the first one defines the origin of the module coordinates.</summary>
     public List<ModuleExit> Exits { get; set; } = [];
@@ -31,17 +31,6 @@ public sealed class ModuleDrawing : LayoutPart
     /// </summary>
     public List<TrackElement> TrackElements { get; set; } = [];
 
-    /// <summary>
-    /// The ids of the module's tracks whose length the user has entered. The length of every other track follows the
-    /// drawing (<see cref="StationTrackMeasurement"/>).
-    /// </summary>
-    public List<int> TracksWithEnteredLength { get; set; } = [];
-
-    /// <summary>
-    /// The ids of the module's tracks for which the user has chosen whether they are stubs. For every other track it
-    /// follows the drawing (<see cref="StationTrackMeasurement"/>).
-    /// </summary>
-    public List<int> TracksWithEnteredStub { get; set; } = [];
     /// <summary>The areas next to the module where operators stand (MD-17).</summary>
     public List<OperatorSpace> OperatorSpaces { get; set; } = [];
     /// <summary>The sides, or parts of sides, meant to face the public (MD-18).</summary>
@@ -70,11 +59,64 @@ public sealed class ModuleDrawing : LayoutPart
     /// <summary>The exit with <paramref name="label"/>; null when there is none.</summary>
     public ModuleExit? Exit(string label) => Exits.FirstOrDefault(e => e.Label == label);
 
+    /// <summary>The exit at <paramref name="place"/>; null when there is none.</summary>
+    public ModuleExit? Exit(ExitPlace place)
+    {
+        ArgumentNullException.ThrowIfNull(place);
+        return place.In(this);
+    }
+
+    /// <summary>The lowest positive number that no track element of the drawing has as its id.</summary>
+    public int FreeTrackElementId()
+    {
+        var used = TrackElements.Select(e => e.Id).ToHashSet();
+        var id = 1;
+        while (used.Contains(id)) id++;
+        return id;
+    }
+
+    /// <summary>
+    /// Gives every track element that has no id (0), or the id of an element before it, the lowest number that no
+    /// element has, in the order of the list. Elements with ids of their own keep them.
+    /// </summary>
+    public void NumberTrackElements()
+    {
+        var seen = new HashSet<int>();
+        foreach (var element in TrackElements.Where(e => e.Id < 1 || !seen.Add(e.Id)).ToList())
+        {
+            element.Id = FreeTrackElementId();
+            seen.Add(element.Id);
+        }
+    }
+
+    /// <summary>Track elements without an id get one before they are written, so a file never has an element without one.</summary>
+    void IJsonOnSerializing.OnSerializing() => NumberTrackElements();
+
+    /// <summary>Track elements read without an id, or with the id of an element before them, get one.</summary>
+    void IJsonOnDeserialized.OnDeserialized() => NumberTrackElements();
+
+    /// <summary>
+    /// Makes the change <paramref name="changeExits"/> to the exits and keeps every side at the exits it was at: an
+    /// exit whose direction changes, or that moves in the list, has another side and number (<see cref="ExitPlace"/>)
+    /// afterwards. An exit is found again as itself or by its label; a side at an exit that is gone keeps its place.
+    /// </summary>
+    public void ChangeExits(Action<List<ModuleExit>> changeExits)
+    {
+        ArgumentNullException.ThrowIfNull(changeExits);
+        var ends = Sides.Select(side => (side, From: side.FromExit.In(this), To: side.ToExit.In(this))).ToList();
+        changeExits(Exits);
+        foreach (var (side, from, to) in ends)
+        {
+            if (from is not null && ExitPlace.Of(this, from) is { } fromPlace) side.FromExit = fromPlace;
+            if (to is not null && ExitPlace.Of(this, to) is { } toPlace) side.ToExit = toPlace;
+        }
+    }
+
     /// <summary>Whether nothing is drawn: no exits, sides, sections, track elements, areas, labels or measures.</summary>
     [JsonIgnore]
     public bool IsEmpty =>
         Exits.Count == 0 && MainPath is null && Sides.Count == 0 && Sections.Count == 0 && InternalJoints.Count == 0
-        && TrackElements.Count == 0 && TracksWithEnteredLength.Count == 0 && TracksWithEnteredStub.Count == 0
+        && TrackElements.Count == 0
         && OperatorSpaces.Count == 0 && PublicSides.Count == 0 && DuckUnderAreas.Count == 0 && Labels.Count == 0
         && RegistryMeasures is null && AutoDraw is null && ExtensionData is null;
 
@@ -87,8 +129,6 @@ public sealed class ModuleDrawing : LayoutPart
         copy.Sections = [.. Sections.Select(s => s.Copy())];
         copy.InternalJoints = [.. InternalJoints.Select(j => j.Copy())];
         copy.TrackElements = [.. TrackElements.Select(t => t.Copy())];
-        copy.TracksWithEnteredLength = [.. TracksWithEnteredLength];
-        copy.TracksWithEnteredStub = [.. TracksWithEnteredStub];
         copy.OperatorSpaces = [.. OperatorSpaces];
         copy.PublicSides = [.. PublicSides];
         copy.DuckUnderAreas = [.. DuckUnderAreas];

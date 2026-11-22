@@ -64,10 +64,22 @@ public sealed class StationTrack : LayoutPart, IEquatable<StationTrack>
     public double Length { get; set; }
 
     /// <summary>
+    /// The <see cref="Length"/> was entered by the user and is kept; otherwise it follows the module's drawing, when it
+    /// has one (<c>StationTrackMeasurement</c>).
+    /// </summary>
+    public bool IsLengthEntered { get; set; }
+
+    /// <summary>
     /// The track is entered from one end only, a stub or siding: every vehicle goes in and out at the same end, so the
     /// last one in is the first that can leave.
     /// </summary>
     public bool IsStub { get; set; }
+
+    /// <summary>
+    /// Whether the track is a stub (<see cref="IsStub"/>) was chosen by the user and is kept; otherwise it follows the
+    /// module's drawing, when it has one (<c>StationTrackMeasurement</c>).
+    /// </summary>
+    public bool IsStubEntered { get; set; }
 
     /// <summary>
     /// The length in metres of the platform along the track; zero where it has none. Passengers are exchanged only at a

@@ -22,9 +22,6 @@ public sealed class LayoutModule : LayoutPart
         set { field = value; if (value is not null) value.IsPlaced = true; }
     }
 
-    /// <summary>The id of the module drawing, when the module comes from one.</summary>
-    public Guid? SourceId { get; set; }
-
     /// <summary>
     /// What other systems keep about the module, with one entry per system, copied unchanged from its source, e.g. the
     /// Module Registry's module id. An import uses it to find the same module again.

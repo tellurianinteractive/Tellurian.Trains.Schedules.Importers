@@ -149,11 +149,12 @@ public static class ModuleStandardExtensions
     extension(ModuleStandard standard)
     {
         /// <summary>
-        /// The standard as named in a module or a layout: a new standard with only its short name and the short name of
-        /// its scale. The full entry is the catalogue's.
+        /// The standard as named in a module or a layout: a new standard with only its id in the catalogue, its short
+        /// name and the short name of its scale. The full entry is the catalogue's.
         /// </summary>
         public ModuleStandard NameOnly => new()
         {
+            Id = standard.Id,
             ShortName = standard.ShortName,
             Scale = standard.Scale is null ? null : new Scale { ShortName = standard.Scale.ShortName },
         };

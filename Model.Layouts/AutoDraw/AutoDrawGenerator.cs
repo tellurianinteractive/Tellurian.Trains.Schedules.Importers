@@ -167,14 +167,17 @@ internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCa
         if (extras.Count > 0) return Junction(standard, main, firstExit, secondExit, first, second, extras, internalJoints);
 
         var (right, left) = SideProfiles(main, first.PlateWidth / 2, second.PlateWidth / 2, Math.Max(first.PlateWidth, second.PlateWidth), isEndOfLine: false);
+        ModuleExit[] ends = [firstExit, secondExit];
+        var atFirst = ExitPlace.Of(ends, firstExit)!;
+        var atSecond = ExitPlace.Of(ends, secondExit)!;
         var drawing = new ModuleDrawing
         {
-            Exits = [firstExit, secondExit],
+            Exits = [.. ends],
             MainPath = PathDrawing.From(main),
             Sides =
             [
-                new() { FromExit = first.Label, ToExit = second.Label, Path = PathDrawing.From(SideBuilder.Build(main, right, 0, length)) },
-                new() { FromExit = second.Label, ToExit = first.Label, Path = PathDrawing.From(SideBuilder.Build(main, left, 0, length).Reversed()) },
+                new() { FromExit = atFirst, ToExit = atSecond, Path = PathDrawing.From(SideBuilder.Build(main, right, 0, length)) },
+                new() { FromExit = atSecond, ToExit = atFirst, Path = PathDrawing.From(SideBuilder.Build(main, left, 0, length).Reversed()) },
             ],
             TrackElements = [.. ThroughTracks(standard, main, firstExit, first.Profile, secondExit, second.Profile)],
         };
@@ -198,7 +201,7 @@ internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCa
         {
             Exits = [exit],
             MainPath = PathDrawing.From(main),
-            Sides = [new() { FromExit = only.Label, ToExit = only.Label, Path = PathDrawing.From(side) }],
+            Sides = [new() { FromExit = ExitPlace.Of([exit], exit)!, ToExit = ExitPlace.Of([exit], exit)!, Path = PathDrawing.From(side) }],
             TrackElements = isLoop ? [] : [.. TerminusTracks(standard, main, exit, only.Profile)],
         };
         return Finish(standard, main, drawing, right, left, internalJoints, rightSide.Length);
@@ -219,7 +222,7 @@ internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCa
         var sides = ordered.Select((exit, i) =>
         {
             var next = ordered[(i + 1) % ordered.Count];
-            return new ModuleSide { FromExit = exit.Label, ToExit = next.Label, Path = PathDrawing.Polyline([plates[exit.Label].RightCorner, plates[next.Label].LeftCorner]) };
+            return new ModuleSide { FromExit = ExitPlace.Of(ordered, exit)!, ToExit = ExitPlace.Of(ordered, next)!, Path = PathDrawing.Polyline([plates[exit.Label].RightCorner, plates[next.Label].LeftCorner]) };
         }).ToList();
 
         Note(AutoDrawNoteCode.JunctionNeedsCompletion, $"Junction: the exits {string.Join(", ", extras.Select(e => e.Label))} are placed provisionally; place them and draw the track work by hand.", AutoDrawStatus.NeedsManualCompletion);
@@ -450,7 +453,6 @@ internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCa
         Prefix = _p.Prefix,
         ModuleOwners = _p.ModuleOwners,
         ConfigurationLabel = _p.ConfigurationLabel,
-        StandardId = standard.Id ?? Guid.Empty,
         Standard = standard.NameOnly,
         AddOns = [.. addOns],
         NumberOfThroughTracks = _p.NumberOfThroughTracks,
@@ -466,7 +468,7 @@ internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCa
                 Length = _p.Length,
                 Width = _p.Width,
                 NumberOfSections = _p.NumberOfSections,
-            }; edited.AutoDraw = new() { GeneratorVersion = ModuleAutoDraw.GeneratorVersion, Parameters = _p }; }),
+            }; edited.AutoDraw = new() { GeneratorVersion = ModuleAutoDraw.GeneratorVersion, Parameters = _p }; edited.NumberTrackElements(); }),
     });
 
     /// <summary>The list of tracks of the generated tracks, with their lengths (spec MD-8).</summary>

@@ -44,9 +44,10 @@ public static class ExitDirections
         if (left is null || right is null) return drawing;
         var inferred = drawing.Exits.Select(e => e.Direction == ExitSide.Undefined ? Infer(e.Pose, left.Pose.Position, right.Pose.Position) : e.Direction).ToList();
         if (inferred.SequenceEqual(drawing.Exits.Select(e => e.Direction))) return drawing;
-        return drawing.With(copy =>
+        // The sides refer to the exits by side and number, which change with the directions.
+        return drawing.With(copy => copy.ChangeExits(exits =>
         {
-            for (var i = 0; i < copy.Exits.Count; i++) copy.Exits[i].Direction = inferred[i];
-        });
+            for (var i = 0; i < exits.Count; i++) exits[i].Direction = inferred[i];
+        }));
     }
 }

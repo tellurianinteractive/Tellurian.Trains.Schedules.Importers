@@ -20,9 +20,16 @@ public sealed record ExitPlace(ExitSide Side, int Number = 1) : ExtensibleRecord
     public static ExitPlace? Of(ModuleDrawing drawing, ModuleExit exit)
     {
         ArgumentNullException.ThrowIfNull(drawing);
+        return Of(drawing.Exits, exit);
+    }
+
+    /// <summary>The place of <paramref name="exit"/> among <paramref name="exits"/>, in their order; null when it isn't one of them.</summary>
+    public static ExitPlace? Of(IEnumerable<ModuleExit> exits, ModuleExit exit)
+    {
+        ArgumentNullException.ThrowIfNull(exits);
         ArgumentNullException.ThrowIfNull(exit);
         // The exit itself, or the one with its label (labels are unique in a drawing), e.g. when it comes from a copy.
-        var side = drawing.Exits.Where(e => e.Direction == exit.Direction).ToList();
+        var side = exits.Where(e => e.Direction == exit.Direction).ToList();
         var index = side.FindIndex(e => ReferenceEquals(e, exit));
         var number = (index >= 0 ? index : side.FindIndex(e => e.Label == exit.Label)) + 1;
         return number > 0 ? new(exit.Direction, number) : null;

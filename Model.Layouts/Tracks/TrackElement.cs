@@ -18,8 +18,11 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 [JsonDerivedType(typeof(BufferStop), "bufferStop")]
 public abstract class TrackElement : LayoutPart
 {
-    /// <summary>The identity of the element, unique within the drawing (a GUID today; an <c>int</c> is planned, survey 2.5).</summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    /// <summary>
+    /// The identity of the element, a positive number unique within the drawing; 0 until it is given one
+    /// (<see cref="ModuleDrawing.NumberTrackElements"/>).
+    /// </summary>
+    public int Id { get; set; }
 
     /// <summary>
     /// The id of the track of the module's list that the element is part of (spec MD-8); null for an element that is

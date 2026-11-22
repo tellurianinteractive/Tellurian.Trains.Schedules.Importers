@@ -28,7 +28,7 @@ public enum StationTrackProblemCode
 }
 
 /// <summary>A problem with the track <paramref name="TrackId"/> or the track element <paramref name="ElementId"/>.</summary>
-public sealed record StationTrackProblem(StationTrackProblemCode Code, int? TrackId = null, Guid? ElementId = null);
+public sealed record StationTrackProblem(StationTrackProblemCode Code, int? TrackId = null, int? ElementId = null);
 
 /// <summary>
 /// Checks a module's list of tracks against its drawing (spec MD-8). A turnout, crossing or double slip is shared by

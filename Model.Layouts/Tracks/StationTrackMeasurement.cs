@@ -58,7 +58,7 @@ public static class StationTrackMeasurement
 
     /// <summary>
     /// The module with the length and the stub mark of every track as the drawing gives them, except those the user
-    /// has entered (<see cref="ModuleDrawing.TracksWithEnteredLength"/>, <see cref="ModuleDrawing.TracksWithEnteredStub"/>).
+    /// has entered (<see cref="StationTrack.IsLengthEntered"/>, <see cref="StationTrack.IsStubEntered"/>).
     /// Lengths are written in metres, to the millimetre. Unchanged when nothing differs.
     /// </summary>
     public static Module WithMeasuredTracks(this Module module, double? foulingDistance, Func<Guid, EndProfile?> endProfiles)
@@ -69,8 +69,8 @@ public static class StationTrackMeasurement
         var drawing = module.Drawing;
         var network = new TrackNetwork(drawing);
         var measured = module.Tracks.Select(track => (track,
-            Length: drawing.TracksWithEnteredLength.Contains(track.Id) ? track.Length : Metres(UsableLength(network, track.Id, foulingDistance)),
-            IsStub: drawing.TracksWithEnteredStub.Contains(track.Id) ? track.IsStub : IsStub(network, drawing, track.Id, endProfiles))).ToList();
+            Length: track.IsLengthEntered ? track.Length : Metres(UsableLength(network, track.Id, foulingDistance)),
+            IsStub: track.IsStubEntered ? track.IsStub : IsStub(network, drawing, track.Id, endProfiles))).ToList();
         // The tracks compare by designation, so whether measuring changed anything is told by what it measures.
         if (measured.All(m => m.track.Length == m.Length && m.track.IsStub == m.IsStub)) return module;
         return module.With(m => m.Tracks = [.. measured.Select(x => x.track.With(t =>

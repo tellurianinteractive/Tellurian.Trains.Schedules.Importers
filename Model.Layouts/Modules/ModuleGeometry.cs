@@ -49,8 +49,8 @@ public static class ModuleGeometry
         for (var i = 0; i < drawing.Sides.Count; i++)
         {
             var side = drawing.Sides[i];
-            var from = Plate(plates, side.FromExit);
-            var to = Plate(plates, side.ToExit);
+            var from = Plate(drawing, plates, side.FromExit);
+            var to = Plate(drawing, plates, side.ToExit);
             CheckCorner(sides[i].Start, from.RightCorner, $"Side {i} doesn't start at the right corner of exit {side.FromExit}.");
             CheckCorner(sides[i].End, to.LeftCorner, $"Side {i} doesn't end at the left corner of exit {side.ToExit}.");
 
@@ -68,8 +68,8 @@ public static class ModuleGeometry
             e => e.Label,
             e => EndPlate(e, endProfiles(e.EndProfile.Id) ?? throw new KeyNotFoundException($"End profile {e.EndProfile.Name} ({e.EndProfile.Id}) of exit {e.Label} isn't available.")));
 
-    private static EndPlate Plate(IReadOnlyDictionary<string, EndPlate> plates, string exitLabel) =>
-        plates.TryGetValue(exitLabel, out var plate) ? plate : throw new InvalidOperationException($"A side refers to the unknown exit {exitLabel}.");
+    private static EndPlate Plate(ModuleDrawing drawing, IReadOnlyDictionary<string, EndPlate> plates, ExitPlace place) =>
+        drawing.Exit(place) is { } exit && plates.TryGetValue(exit.Label, out var plate) ? plate : throw new InvalidOperationException($"A side refers to the exit {place}, which the module doesn't have.");
 
     private static void CheckCorner(Point actual, Point expected, string message)
     {

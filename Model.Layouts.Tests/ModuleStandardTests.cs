@@ -48,14 +48,14 @@ public class ModuleStandardTests
     }
 
     [TestMethod]
-    public void NameOnlyKeepsTheShortNameAndTheScaleName()
+    public void NameOnlyKeepsTheIdTheShortNameAndTheScaleName()
     {
         var full = FremoH0.With(s => { s.Gauges = [new(16.5, "H0", 1435), new(12, "H0m", 1000)]; s.RailTopHeight = 1300; s.Countries = ["SE"]; });
 
         var named = full.NameOnly;
 
         Assert.AreEqual(("FREMO H0-RE", "H0"), (named.ShortName, named.Scale!.ShortName));
-        Assert.IsNull(named.Id);
+        Assert.AreEqual(full.Id, named.Id);
         Assert.IsNull(named.Gauges);
         Assert.IsNull(named.Scale.Denominator);
         Assert.AreEqual(16.5, full.NormalGauge);

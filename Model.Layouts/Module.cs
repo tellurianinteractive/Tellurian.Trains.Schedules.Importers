@@ -144,9 +144,6 @@ public class Module : LayoutPart
         }
     }
 
-    /// <summary>The id of the module's standard in the catalogue (<see cref="ModuleStandard.Id"/>); <see cref="Standard"/> names it for readers without the catalogue.</summary>
-    public Guid? StandardId { get; set; }
-
     /// <summary>The add-ons of the standard that the module meets.</summary>
     public List<CatalogueReference> AddOns { get; set; } = [];
 
@@ -158,6 +155,12 @@ public class Module : LayoutPart
 
     /// <summary>The number of through tracks as entered; compared with the drawing.</summary>
     public int? NumberOfThroughTracks { get; set; }
+
+    /// <summary>
+    /// The highest speed allowed on the module, km/h of the prototype, as set by the owner and never worked out; null
+    /// when the module sets no limit. The same unit as <see cref="TrackStretch.Speed"/> and <see cref="StationTrack.SpeedLimit"/>.
+    /// </summary>
+    public int? SpeedLimit { get; set; }
 
     /// <summary>The module has normal-gauge track. Always written, since it is true unless said otherwise.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]

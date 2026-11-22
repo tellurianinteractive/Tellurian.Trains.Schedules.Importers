@@ -26,11 +26,11 @@ public static class StationTrackList
         var drawing = module.Drawing;
         var elements = drawing.TrackElements.Where(e => e is not BufferStop).ToList();
         if (module.OperationLocation is null || module.Tracks.Count > 0 || elements.Count == 0 || drawing.TrackElements.Any(e => !e.IsGenerated || e.StationTrackId is not null)) return module;
-        var tracks = elements.Select((element, index) => (element.Id, Track: GeneratedTrack(index + 1))).ToDictionary(t => t.Id, t => t.Track);
+        var tracks = elements.Select((element, index) => (element, Track: GeneratedTrack(index + 1))).ToDictionary(t => t.element, t => t.Track); // by reference: ids may not be given yet
         return module.With(m =>
         {
             m.Tracks = [.. tracks.Values];
-            m.Drawing = drawing.With(edited => edited.TrackElements = [.. drawing.TrackElements.Select(e => tracks.TryGetValue(e.Id, out var track) ? e.With(edited => edited.StationTrackId = track.Id) : e)]);
+            m.Drawing = drawing.With(edited => edited.TrackElements = [.. drawing.TrackElements.Select(e => tracks.TryGetValue(e, out var track) ? e.With(edited => edited.StationTrackId = track.Id) : e)]);
         });
     }
 
