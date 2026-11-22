@@ -17,7 +17,9 @@ Version 0.3 targets .NET 11 (C# 15): the operation locations are a closed class 
 | `StationTrack` | A track, as train planning sees it: designation, lengths in metres, direction, main, stub, scheduled, lockable, usage, and the route through its location |
 | `TrackDirection` | Both, LeftToRight, RightToLeft: as seen from the viewing side of the module |
 | `OperationLocationRules` | The rules between properties, as checks with a code per broken rule; what a kind can have at all is its type |
-| `Layout` | The locations and stretches of a layout, its catalogues (countries, companies, regions), its settings and, when derived from a hall plan, its modules |
+| `Layout` | The locations and stretches of a layout, its catalogues (countries, companies, regions), its settings and, when made in a hall plan, its modules, the lines that order them, the joints, and the end profiles, standards and overrides they need |
+| `Line`, `LineEntry`, `Joint`, `ExitReference` | Modules joined end to end, turned or not; a line without `StartAt` is a main line, and with its branches one connected group (`layout.GroupOf`). A joint holds only what the planner decided. `layout.Place(module)` places a copy with ids of the layout's: the module, its location and its tracks, each track keeping its drawing's id as `SourceId` |
+| `HallPlan` (`Halls`) | A layout and where it stands in a hall: the hall, one `Anchor` per main line, accepted standards, settings, public areas, walking paths and acknowledgements |
 | `TrackStretch`, `TimetableStretch`, `DispatchStretch` | The line between neighbouring locations, a route shown as one graphical timetable, and the line between two dispatch endpoints |
 | `Module`, `LayoutModule` | What a module is called and who owns it, and a module as placed in a layout, also the plain-line ones |
 | `ModuleStandard`, `Scale` | The standard a module is built to, with its catalogue GUID (the Module Registry's id is an external reference), and its scale, from the suite's list of scales (`Scale.Scales`) |

@@ -14,8 +14,7 @@ dotnet add package Tellurian.Trains.Schedules.Importers.Drawing
 | `CatalogueImporter` | `.catalogue.json` (and `.tdcatalogue`) | 4.0.18 |
 | `HallImporter` | `.hall.json` (and `.tdhall`) | 4.0.19 |
 | `ModuleImporter` | `.module.json` (and `.tdmodule`) | 4.0.22 |
-
-Hall plans follow as their types move from Module Draw.
+| `HallPlanImporter` | `.hallplan.json`, schema version 2 only: no released Module Draw made earlier hall plans | 4.0.26 |
 
 Each importer is an `IImporter<T>` (stream in, `ImportResult<T>` out) and also has a synchronous `Import(string json)`
 for text already in memory, such as a draft in browser storage. An importer never throws because of what a file

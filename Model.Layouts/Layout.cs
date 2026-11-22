@@ -4,8 +4,9 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// A layout: its operation locations and the stretches between them, and what is decided for it as a whole. When it is
-/// derived from a hall plan, it also has the modules of the hall plan, also the plain-line ones, so that no reader
-/// needs geometry. Ids are numbers that are unique within the layout for their kind of thing.
+/// made in a hall plan, it also has the modules of the hall plan, also the plain-line ones, the lines that order them,
+/// the planner's joints, and the end profiles, standards and overrides that the modules need, so that it is complete
+/// without the hall. Ids are numbers that are unique within the layout for their kind of thing.
 /// </summary>
 public sealed class Layout : LayoutPart, IEquatable<Layout>
 {
@@ -21,6 +22,11 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
         DispatchStretches = [];
         TopologyPositions = [];
         Modules = [];
+        Lines = [];
+        Joints = [];
+        EndProfiles = [];
+        Standards = [];
+        Overrides = [];
     }
 
     /// <summary>The identity of the layout.</summary>
@@ -56,10 +62,10 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
     /// <summary>Where each location is drawn in the topology schematic.</summary>
     public ICollection<TopologyPosition> TopologyPositions { get; set; }
 
-    /// <summary>The id of the hall plan the layout was derived from; null for a layout entered from scratch.</summary>
+    /// <summary>The id of the hall plan the layout was made in; null for a layout entered from scratch.</summary>
     public Guid? SourceId { get; set; }
 
-    /// <summary>The revision of the hall plan the layout was derived from, so a reader can tell what it has loaded.</summary>
+    /// <summary>The revision of the hall plan the layout was made in, so a reader can tell what it has loaded.</summary>
     public int SourceRevision { get; set; }
 
     /// <summary>
@@ -69,10 +75,34 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
     public ModuleStandard? PreferredStandard { get; set; }
 
     /// <summary>
-    /// Every module of the hall plan the layout was derived from, also the plain-line ones; empty for a layout entered
+    /// Every module of the hall plan the layout was made in, also the plain-line ones; empty for a layout entered
     /// from scratch.
     /// </summary>
     public ICollection<LayoutModule> Modules { get; set; }
+
+    /// <summary>
+    /// The lines that order the <see cref="Modules"/>, end to end (HP-3). A line without <see cref="Line.StartAt"/> is a
+    /// main line; it and the branches from it are one connected group. Empty for a layout entered from scratch.
+    /// </summary>
+    public ICollection<Line> Lines { get; set; }
+
+    /// <summary>The joints the planner has decided something for (HP-11); the other joints follow the rules.</summary>
+    public ICollection<Joint> Joints { get; set; }
+
+    /// <summary>Every end profile that the <see cref="Modules"/> use, each once.</summary>
+    public ICollection<EndProfile> EndProfiles { get; set; }
+
+    /// <summary>
+    /// The standards of the layout and of its modules, each once, with all their properties: rail-top height, fouling
+    /// distance, clearance. A module's own <see cref="Module.Standard"/> may name its standard only.
+    /// </summary>
+    public ICollection<ModuleStandard> Standards { get; set; }
+
+    /// <summary>The compatibility overrides that apply to pairs of the <see cref="EndProfiles"/>.</summary>
+    public ICollection<EndProfileCompatibilityOverride> Overrides { get; set; }
+
+    /// <summary>The tolerances that decide whether two module ends fit; null for <see cref="FitTolerances.Default"/>.</summary>
+    public FitTolerances? FitTolerances { get; set; }
 
     /// <inheritdoc/>
     public bool Equals(Layout? other) => other is not null && Id == other.Id;

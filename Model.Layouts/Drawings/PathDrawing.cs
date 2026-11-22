@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Drawings;
@@ -10,6 +11,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Drawings;
 public sealed record PathDrawing : ExtensibleRecord
 {
     /// <summary>Where the first step starts.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Point Start { get; init; }
     /// <summary>The steps in order, each starting where the previous one ends.</summary>
     public required IReadOnlyList<PathStep> Steps { get; init; }

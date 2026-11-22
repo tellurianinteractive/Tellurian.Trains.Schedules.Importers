@@ -104,7 +104,10 @@ public static class LayoutUpdate
         if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
     }
 
-    /// <summary>The hall plan's identity, revision, preferred standard and modules; a module that is a location of the current layout refers to it.</summary>
+    /// <summary>
+    /// The hall plan's identity, revision, preferred standard, modules, lines, joints, end profiles, standards and overrides;
+    /// a module that is a location of the current layout refers to it.
+    /// </summary>
     private static void TakeHallPlan(LayoutComparison comparison)
     {
         var layout = comparison.Current;
@@ -124,6 +127,7 @@ public static class LayoutUpdate
             }
             return copy;
         })];
+        layout.TakeLinesFrom(source);
     }
 
     private static int FreeTrackId(Layout layout, int wanted)

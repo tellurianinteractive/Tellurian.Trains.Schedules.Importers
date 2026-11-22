@@ -13,8 +13,7 @@ dotnet add package Tellurian.Trains.Schedules.Exporters.Drawing
 | `CatalogueExporter` | `.catalogue.json` | 4.0.18 |
 | `HallExporter` | `.hall.json` | 4.0.19 |
 | `ModuleExporter` | `.module.json` | 4.0.22 |
-
-Hall plans follow as their types move from Module Draw.
+| `HallPlanExporter` | `.hallplan.json`, with the layout as `content.layout` in its own form, as `HallPlanFile.ReadLayout` reads it | 4.0.26 |
 
 Each exporter is an `IExporter<T>` (item and stream in, `ExportResult<T>` out) and also has a synchronous
 `Write(item, options)` that returns the text. `ExportOptions` says the app's version for the envelope and whether the

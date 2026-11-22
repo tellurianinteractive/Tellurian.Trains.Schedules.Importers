@@ -11,10 +11,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class DoubleSlip : TrackElement
 {
     /// <summary>The middle of the double slip, where the tracks cross, with the heading of the first track; module coordinates.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Center { get; set; }
     /// <summary>Length of each of the two straight tracks, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Length { get; set; }
     /// <summary>Angle of the second track relative to the first, degrees (counter-clockwise positive).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Angle { get; set; }
 
     /// <summary>Radius of the slip routes, mm, calculated from <see cref="Length"/> and <see cref="Angle"/>; not stored.</summary>

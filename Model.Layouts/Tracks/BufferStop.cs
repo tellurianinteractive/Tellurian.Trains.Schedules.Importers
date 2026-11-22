@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
@@ -9,6 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class BufferStop : TrackElement
 {
     /// <summary>The connection point at the track end, in module coordinates; the heading points from the stop back along the track.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Pose { get; set; }
 
     /// <inheritdoc/>

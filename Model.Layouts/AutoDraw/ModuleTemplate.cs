@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Layouts.Modules;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.AutoDraw;
@@ -15,6 +16,7 @@ public sealed record ModuleTemplate
     public const string SecondExit = "B";
 
     /// <summary>Which template: straight, curve, or straight + curve.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required ModuleTemplateKind Kind { get; init; }
 
     /// <summary>The module's name; may be empty when it has a FREMO number (<see cref="Modules.ModuleValidation"/>).</summary>

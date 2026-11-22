@@ -5,9 +5,10 @@ using Tellurian.Trains.Schedules.Model.Files;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Reads the layout block of a hall plan file written by Module Draw. Only that block is a public contract of the file
-/// (<c>Documentation/OperationLocations.md</c>, section 4.6): the locations, tracks and stretches worked out from the
-/// hall plan, so that no reader needs its geometry. The rest of the file is Module Draw's own.
+/// Reads the layout of a hall plan file, <c>content.layout</c>: the modules, lines and joints, and the locations, tracks
+/// and stretches, which is what the planner takes from a hall plan. The whole hall plan (<see cref="Halls.HallPlan"/>)
+/// is read by <c>HallPlanImporter</c> and written by <c>HallPlanExporter</c>, which writes the layout in the form read
+/// here.
 /// </summary>
 public static class HallPlanFile
 {

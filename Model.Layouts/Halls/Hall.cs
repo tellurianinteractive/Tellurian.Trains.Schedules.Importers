@@ -17,6 +17,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Halls;
 public sealed class Hall : LayoutPart
 {
     /// <summary>The identity of the hall, the same in every file it is written to.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid Id { get; set; }
 
     /// <summary>What the hall is called.</summary>

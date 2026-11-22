@@ -35,6 +35,9 @@ public class HallPlanImportTests
         layout.TrackStretches.Add(new TrackStretch(2, ytterby, stenungsund, secondDistance) { Speed = 80, Layout = layout });
         layout.Modules.Add(new LayoutModule { Id = 1, Module = new Module { Name = "Tellby", OperationLocation = tellby, Tracks = tellby.Tracks } });
         layout.Modules.Add(new LayoutModule { Id = 2, Module = new Module { Name = "Curve", Tracks = { new StationTrack(41, "1") } } });
+        layout.Lines.Add(new Line { Id = 1, Entries = [new() { ModuleId = 1 }, new() { ModuleId = 2, IsTurned = true }] });
+        layout.Joints.Add(new Joint { First = new(1, ExitSide.Right), Second = new(2, ExitSide.Right), NumberOfClamps = 4 });
+        layout.FitTolerances = new() { Joint = 1 };
         return layout;
     }
 
@@ -118,6 +121,32 @@ public class HallPlanImportTests
         Assert.AreEqual(HallPlanId, read.Layout.SourceId);
         Assert.HasCount(2, read.Layout.Modules);
         Assert.AreSame(read.Layout.OperationLocations.First().Tracks, read.Layout.Modules.First().Module.Tracks);
+    }
+
+    [TestMethod]
+    public void ANewPlanKeepsTheLinesAndJointsOfTheHallPlanThroughThePlanFile()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(HallPlanLayout()), "en");
+
+        var read = PlanFile.Read(PlanFile.Write(plan)).Layout;
+
+        Assert.IsTrue(read.Lines.Single().Entries[1].IsTurned);
+        Assert.AreEqual(4, read.Joints.Single().NumberOfClamps);
+        Assert.AreEqual(1, read.EffectiveFitTolerances.Joint);
+    }
+
+    [TestMethod]
+    public void ANewerRevisionTakesTheLinesAndJoints()
+    {
+        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
+        var newer = HallPlanLayout(revision: 2);
+        newer.Lines.Single().Entries[1].IsTurned = false;
+        newer.Joints.Clear();
+
+        plan.UpdateFromHallPlan(ReadFromFile(newer));
+
+        Assert.IsFalse(plan.Layout.Lines.Single().Entries[1].IsTurned);
+        Assert.IsEmpty(plan.Layout.Joints);
     }
 
     [TestMethod]

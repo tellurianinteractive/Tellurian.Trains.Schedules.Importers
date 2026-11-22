@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
@@ -9,10 +10,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class Crossing : TrackElement
 {
     /// <summary>The middle of the crossing, where the tracks cross, with the heading of the first track; module coordinates.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Center { get; set; }
     /// <summary>Length of each of the two straight tracks, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Length { get; set; }
     /// <summary>Angle of the second track relative to the first, degrees (counter-clockwise positive).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Angle { get; set; }
 
     /// <inheritdoc/>

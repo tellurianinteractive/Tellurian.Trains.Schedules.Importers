@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
@@ -15,9 +16,11 @@ public sealed class InternalJoint : LayoutPart
     public required string SecondSection { get; set; }
 
     /// <summary>One end of the section line, at the outline.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Point Start { get; set; }
 
     /// <summary>The other end of the section line, at the outline.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Point End { get; set; }
 
     /// <summary>

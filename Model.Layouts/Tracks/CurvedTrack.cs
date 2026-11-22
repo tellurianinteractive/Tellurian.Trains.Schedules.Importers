@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
@@ -6,10 +7,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class CurvedTrack : TrackElement
 {
     /// <summary>Start of the track, in module coordinates, heading into the curve.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Start { get; set; }
     /// <summary>Radius of the curve centre line, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Radius { get; set; }
     /// <summary>How far the curve turns, degrees; positive turns left (counter-clockwise), negative right.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Angle { get; set; }
 
     /// <inheritdoc/>

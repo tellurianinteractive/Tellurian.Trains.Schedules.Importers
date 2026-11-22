@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 public sealed class EndProfileTrack : LayoutPart
 {
     /// <summary>The lateral position of the track centre, positive to the right.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Offset { get; set; }
 
     /// <summary>

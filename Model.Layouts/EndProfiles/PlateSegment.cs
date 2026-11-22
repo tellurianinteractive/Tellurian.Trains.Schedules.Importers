@@ -10,6 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 public sealed record PlateSegment : ExtensibleRecord
 {
     /// <summary>Whether the segment is a line, an arc or a fillet.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required PlateSegmentKind Kind { get; init; }
 
     /// <summary>The end point of a line or arc; a fillet's end is worked out.</summary>

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
 
 namespace Tellurian.Trains.Schedules.Model.Files;
@@ -9,6 +10,7 @@ public sealed record DrawingRevision : ExtensibleRecord
     public required string Name { get; init; }
 
     /// <summary>The last date this person saved the drawing.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required DateOnly Date { get; init; }
 
     /// <summary>

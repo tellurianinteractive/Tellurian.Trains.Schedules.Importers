@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
@@ -10,6 +11,7 @@ public sealed record ModuleLabel : ExtensibleRecord
     /// <summary>The text shown, if any.</summary>
     public string? Text { get; init; }
     /// <summary>Position in module coordinates; the heading is the text direction.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Pose { get; init; }
 
     /// <summary>For markers with an extent, such as a platform edge, mm.</summary>

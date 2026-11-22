@@ -110,7 +110,10 @@ public static class DrawingMigrations
         DrawingFileKind.EndProfile => [new(1, content => { EndProfileToVersion2(content); return content; })],
         DrawingFileKind.Catalogue => [new(1, content => { CatalogueToVersion2(content); return content; })],
         DrawingFileKind.Hall => [new(1, content => { HallToVersion2(content); return content; })],
-        _ => throw new NotSupportedException($"The {DrawingFileFormat.Name(kind)} file is still read by Module Draw."),
+        // No version of Module Draw has let anyone make a hall plan before the shape of version 2 (owner's decision
+        // 2026-11-22): earlier hall plan files are refused as having no migration.
+        DrawingFileKind.HallPlan => [],
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown file kind."),
     };
 
     private static void MoveRegistryId(JsonNode? node, string name)

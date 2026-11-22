@@ -17,6 +17,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 public sealed class EndProfile : LayoutPart
 {
     /// <summary>The identity of the end profile, the same in every file it is written to.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid Id { get; set; }
 
     /// <summary>The designation, e.g. "FREMO-H0-B96" or "MMM480" (Registry <c>ModuleEndProfile.Designation</c>).</summary>

@@ -40,7 +40,8 @@ public static class HallPlanImport
     /// <summary>
     /// Moves what <paramref name="hallPlan"/> has into <paramref name="layout"/>, a new layout with the planner's
     /// defaults: the locations with their tracks, the stretches with a running time worked out from distance and speed,
-    /// any timetable and dispatch stretches and companies, the modules, and the hall plan's identity and scale.
+    /// any timetable and dispatch stretches and companies, the modules with their lines and joints and the end profiles and
+    /// standards they need, and the hall plan's identity and scale.
     /// </summary>
     internal static void TakeInto(Layout layout, Layout hallPlan)
     {
@@ -56,6 +57,7 @@ public static class HallPlanImport
         foreach (var stretch in hallPlan.DispatchStretches) layout.DispatchStretches.Add(stretch);
         foreach (var company in hallPlan.Companies) layout.Add(company);
         layout.Modules = [.. hallPlan.Modules];
+        layout.TakeLinesFrom(hallPlan);
         layout.SourceId = hallPlan.SourceId;
         layout.SourceRevision = hallPlan.SourceRevision;
         layout.PreferredStandard = hallPlan.PreferredStandard;
