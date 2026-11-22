@@ -181,9 +181,17 @@ jobs:
       - name: Pack
         run: dotnet pack --configuration Release --no-build --output ./nupkgs
 
+      # Requires a Trusted Publishing policy on nuget.org for this repository and ci.yml. The user is the policy
+      # owner's nuget.org profile name (not the email address); it isn't a secret.
+      - name: NuGet login (OIDC → temporary API key)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: tellurian
+
       - name: Publish to NuGet.org
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Model.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           dotnet nuget push "./nupkgs/Tellurian.Trains.Schedules.Importers.Interfaces.*.nupkg" --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
