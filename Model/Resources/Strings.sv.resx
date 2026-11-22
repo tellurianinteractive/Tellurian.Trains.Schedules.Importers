@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tåg {0} saknar körande tjänst på köromgångar {1} för avsnittet från {2} {3} till {4} {5}.</value>
   </data>
+  <data name="TrackStretchSpeedMissing" xml:space="preserve">
+    <value>Bansträckan {0}–{1} har ingen hastighet; tågen kör med sin egen hastighet, högst {2} km/h.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Driftplatsen {0} har fler än ett spår {1}.</value>
   </data>

@@ -86,7 +86,11 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TracksCount { get; set; } = 1;
 
-    /// <summary>The maximum speed on the stretch, km/h.</summary>
+    /// <summary>
+    /// The maximum speed on the stretch, km/h; 0 when not given, as for a stretch worked out from a hall plan. A
+    /// stretch without a speed is a warning in the planner, and trains run on it at their own speed
+    /// (<see cref="TrackStretchFacts.LimitingSpeed"/>).
+    /// </summary>
     public int Speed { get; set; }
 
     /// <summary>The travel time on the stretch, minutes.</summary>
@@ -140,8 +144,20 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
 /// <summary>What can be done with a <see cref="TrackStretch"/> itself.</summary>
 public static class TrackStretchFacts
 {
+    /// <summary>
+    /// The speed, km/h, taken for a stretch whose <see cref="TrackStretch.Speed"/> is not given: high, so that the
+    /// trains' own speeds are what limit them.
+    /// </summary>
+    public const int AssumedSpeed = 200;
+
     extension(TrackStretch stretch)
     {
+        /// <summary>Whether the stretch has a speed; 0 means it isn't given.</summary>
+        public bool HasSpeed => stretch.Speed > 0;
+
+        /// <summary>The speed that limits trains on the stretch: its own, or <see cref="AssumedSpeed"/> when not given.</summary>
+        public int LimitingSpeed => stretch.HasSpeed ? stretch.Speed : AssumedSpeed;
+
         /// <summary>Turns the stretch round, so that it runs from its end to its start. Nothing else changes.</summary>
         public void Reverse()
         {
@@ -163,7 +179,7 @@ public static class TrackStretchTiming
     {
         ArgumentNullException.ThrowIfNull(stretch);
         ArgumentNullException.ThrowIfNull(settings);
-        var realSpeed = settings.RealSpeedMetersPerSecond(stretch.Speed);
+        var realSpeed = settings.RealSpeedMetersPerSecond(stretch.LimitingSpeed);
         if (realSpeed <= 0) return stretch.Time;
         var minutes = stretch.Distance / realSpeed / 60.0 * settings.FastClockSpeed;
         return Math.Max(1, (int)Math.Round(minutes, MidpointRounding.AwayFromZero));
