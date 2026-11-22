@@ -189,7 +189,7 @@ public sealed class LineStretchesTests
         var result = layout.StretchesFromLines();
 
         CollectionAssert.AreEqual(new[] { x.Id }, result.Stretches.Single().ModuleIds.ToArray());
-        Assert.AreEqual(LineProblemCode.StretchesInParallel, result.Problems.Single().Code);
+        CollectionAssert.Contains(result.Problems.Select(p => p.Code).ToList(), LineProblemCode.StretchesInParallel);
     }
 
     [TestMethod]

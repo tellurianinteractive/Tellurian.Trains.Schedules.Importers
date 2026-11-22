@@ -28,7 +28,7 @@ public static class StationTrackMeasurement
     /// <summary>How closely a fouling point is found along the track, mm.</summary>
     public const double FoulingPointPrecision = 0.01;
 
-    private const double MillimetresPerMetre = 1000;
+    internal const double MillimetresPerMetre = 1000;
 
     /// <summary>
     /// The centre distance at which trains on two tracks pass each other freely, mm: the standard's own value, or else

@@ -32,4 +32,16 @@ public enum LineProblemCode
     /// stretch is known by its two locations.
     /// </summary>
     StretchesInParallel = 7,
+
+    /// <summary>A track of an exit's end profile has no track element ending where it meets the joint.</summary>
+    TrackMissingAtExit = 8,
+
+    /// <summary>A track of one exit has no track at the matching offset of the exit it is joined to.</summary>
+    TracksDontMeetAtJoint = 9,
+
+    /// <summary>No drawn track crosses the location's centre, so no route along the tracks can start or end there.</summary>
+    NoTrackAtCentre = 10,
+
+    /// <summary>The tracks are drawn, but there is no way along them from one location's centre to the next.</summary>
+    NoTrackPath = 11,
 }

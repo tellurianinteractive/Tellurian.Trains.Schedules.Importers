@@ -89,7 +89,7 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     /// <summary>
     /// The maximum speed on the stretch, km/h; 0 when not given, as for a stretch worked out from a hall plan. A
     /// stretch without a speed is a warning in the planner, and trains run on it at their own speed
-    /// (<see cref="TrackStretchFacts.LimitingSpeed"/>).
+    /// (<c>stretch.LimitingSpeed</c>).
     /// </summary>
     public int Speed { get; set; }
 

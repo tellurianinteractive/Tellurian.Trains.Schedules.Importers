@@ -33,8 +33,21 @@ public sealed record LineStretch
     public double? MainPathDistance { get; init; }
 
     /// <summary>
+    /// The shortest route along the drawn tracks from centre to centre (survey 3.3 step 2, 3.4); null when a module of
+    /// the stretch has no track elements, or the tracks give no route, which is then a problem.
+    /// </summary>
+    public TrackRoute? Route { get; init; }
+
+    /// <summary>
+    /// The measured distance, metres: along the <see cref="Route"/>, else along the main paths; null when neither can be
+    /// told.
+    /// </summary>
+    public double? Distance => Route?.Distance ?? MainPathDistance;
+
+    /// <summary>
     /// The speed, km/h: the modules' speed limits, each weighted by the module's length along the stretch, the location
-    /// modules from their centre to the exit; null when no module has a limit.
+    /// modules from their centre to the exit; along the <see cref="Route"/> when there is one, else along the main paths.
+    /// Null when no module has a limit.
     /// </summary>
     public int? Speed { get; init; }
 

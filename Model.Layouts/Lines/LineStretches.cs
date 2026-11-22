@@ -13,7 +13,7 @@ public static class LineStretches
     {
         /// <summary>
         /// The stretches between neighbouring locations that the lines give: which plain-line modules, the sides the
-        /// locations are left from, the number of tracks, and the distance along the main paths where it can be told.
+        /// locations are left from, the number of tracks, the shortest route along the drawn tracks, the measured distance and the speed.
         /// Each runs in the direction of its line. Nothing in the layout is changed.
         /// </summary>
         public LineStretchesResult StretchesFromLines() => new LineWalker(layout).Walk();
@@ -37,7 +37,7 @@ public static class LineStretches
                 var stretch = layout.FindTrackStretch(found.Start, found.End);
                 if (stretch is null)
                 {
-                    stretch = new TrackStretch(nextId++, found.Start, found.End, found.MainPathDistance ?? 0, found.TracksCount ?? 1) { Speed = 0 };
+                    stretch = new TrackStretch(nextId++, found.Start, found.End, found.Distance ?? 0, found.TracksCount ?? 1) { Speed = 0 };
                     layout.TrackStretches.Add(stretch);
                 }
                 var isReversed = stretch.Start.Id != found.Start.Id;
@@ -46,7 +46,7 @@ public static class LineStretches
                 stretch.ModuleIds = isReversed ? [.. found.ModuleIds.Reverse()] : [.. found.ModuleIds];
                 if (found.TracksCount is int tracks) stretch.TracksCount = tracks;
                 if (!stretch.HasSpeed && found.Speed is int speed) stretch.Speed = speed;
-                if (!stretch.IsDistanceEntered && found.MainPathDistance is double distance) stretch.Distance = distance;
+                if (!stretch.IsDistanceEntered && found.Distance is double distance) stretch.Distance = distance;
                 if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
             }
             return result;
@@ -94,6 +94,20 @@ public static class LineStretches
             return layout.TrackStretches.FirstOrDefault(s =>
                 (s.Start.Id == a.Id && s.End.Id == b.Id) || (s.Start.Id == b.Id && s.End.Id == a.Id));
         }
+    }
+
+    extension(TrackStretch stretch)
+    {
+        /// <summary>
+        /// The distance in metres that the lines and drawings of its layout give (<see cref="LineStretch.Distance"/>,
+        /// survey 3.5): derived, never stored, so it can't be out of step with the drawings. Null when the layout has no
+        /// lines through the stretch's locations, or not the drawings to measure it. Works the whole layout out on each
+        /// call; for many stretches, use <c>layout.StretchesFromLines()</c> once.
+        /// </summary>
+        public double? MeasuredDistance =>
+            stretch.Layout?.StretchesFromLines().Stretches
+                .FirstOrDefault(s => (s.Start.Id == stretch.StartId && s.End.Id == stretch.EndId) || (s.Start.Id == stretch.EndId && s.End.Id == stretch.StartId))
+                ?.Distance;
     }
 
     /// <summary>The next id after the highest of <paramref name="ids"/>, from 1.</summary>
