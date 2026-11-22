@@ -52,7 +52,7 @@ public static class ModuleRedraw
     /// The module with <paramref name="profile"/> at exit <paramref name="exitLabel"/>, redrawn; null if it can't be
     /// redrawn or doesn't have that exit. The exit's plate gets the orientation the drawing gives it; the others keep theirs.
     /// </summary>
-    public static ModuleFileContent? WithEndProfile(ModuleFileContent content, string exitLabel, EndProfile profile, DrawingCatalogue catalogue)
+    public static ModuleFileContent? WithEndProfile(ModuleFileContent content, string exitLabel, EndProfile profile, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(content);
         ArgumentNullException.ThrowIfNull(profile);
@@ -66,7 +66,7 @@ public static class ModuleRedraw
     }
 
     /// <summary>The module with its curve turning the other way, redrawn; null if it can't be redrawn or has no curve.</summary>
-    public static ModuleFileContent? WithCurveFlipped(ModuleFileContent content, DrawingCatalogue catalogue)
+    public static ModuleFileContent? WithCurveFlipped(ModuleFileContent content, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(content);
         ArgumentNullException.ThrowIfNull(catalogue);
@@ -105,7 +105,7 @@ public static class ModuleRedraw
     private static ProfileOrientation Flipped(ProfileOrientation orientation) =>
         orientation == ProfileOrientation.Normal ? ProfileOrientation.Mirrored : ProfileOrientation.Normal;
 
-    private static ModuleFileContent? Redraw(ModuleFileContent content, AutoDrawParameters parameters, DrawingCatalogue catalogue, bool mirrored, Func<string, bool> keepOrientation)
+    private static ModuleFileContent? Redraw(ModuleFileContent content, AutoDrawParameters parameters, Catalogue catalogue, bool mirrored, Func<string, bool> keepOrientation)
     {
         var old = content.Module.Drawing;
         if (ModuleAutoDraw.Create(parameters with { ModuleId = content.Module.Id }, catalogue).Module is not { } drawn) return null;

@@ -85,5 +85,5 @@ public sealed record ModuleTemplate
     }
 
     /// <summary>Draws the module from this template with <paramref name="catalogue"/>.</summary>
-    public AutoDrawResult Create(DrawingCatalogue catalogue) => ModuleAutoDraw.Create(ToParameters(), catalogue);
+    public AutoDrawResult Create(Catalogue catalogue) => ModuleAutoDraw.Create(ToParameters(), catalogue);
 }

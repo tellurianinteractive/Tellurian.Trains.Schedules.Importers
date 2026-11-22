@@ -59,7 +59,7 @@ public static class HallPlanImport
         layout.SourceId = hallPlan.SourceId;
         layout.SourceRevision = hallPlan.SourceRevision;
         layout.PreferredStandard = hallPlan.PreferredStandard;
-        if (hallPlan.PreferredStandard?.Scale?.Id is int scaleId) layout.Settings.Identity.ScaleId = scaleId;
+        if (Scale.Known(hallPlan.PreferredStandard?.Scale)?.Id is int scaleId) layout.Settings.Identity.ScaleId = scaleId;
         layout.EnsureCountries();
     }
 

@@ -27,7 +27,7 @@ public static class PlanFile
     public const string Format = "tellurian-plan";
 
     /// <summary>The schema version this version writes, and the newest it reads.</summary>
-    public const int CurrentSchemaVersion = 4;
+    public const int CurrentSchemaVersion = 5;
 
     /// <summary>What a plan file is: its envelope, its schema versions and its migrations (<see cref="FileEnvelope"/>).</summary>
     public static FileKind Kind { get; } = new()

@@ -9,7 +9,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 public static class CatalogueValidation
 {
     /// <summary>Validates a standard: short name, scale, gauges, lengths, track colour, default end profiles and countries.</summary>
-    public static IReadOnlyList<CatalogueProblem> Validate(ModuleStandard standard, DrawingCatalogue catalogue)
+    public static IReadOnlyList<CatalogueProblem> Validate(ModuleStandard standard, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(standard);
         ArgumentNullException.ThrowIfNull(catalogue);
@@ -45,7 +45,7 @@ public static class CatalogueValidation
     }
 
     /// <summary>Validates an add-on: a short name unique among the add-ons of its base standard, and a known base standard.</summary>
-    public static IReadOnlyList<CatalogueProblem> Validate(StandardAddOn addOn, DrawingCatalogue catalogue)
+    public static IReadOnlyList<CatalogueProblem> Validate(StandardAddOn addOn, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(addOn);
         ArgumentNullException.ThrowIfNull(catalogue);
@@ -58,7 +58,7 @@ public static class CatalogueValidation
     }
 
     /// <summary>Validates an override; <paramref name="replacing"/> is the override it replaces when edited, if any.</summary>
-    public static IReadOnlyList<CatalogueProblem> Validate(EndProfileCompatibilityOverride entry, DrawingCatalogue catalogue, EndProfileCompatibilityOverride? replacing = null)
+    public static IReadOnlyList<CatalogueProblem> Validate(EndProfileCompatibilityOverride entry, Catalogue catalogue, EndProfileCompatibilityOverride? replacing = null)
     {
         ArgumentNullException.ThrowIfNull(entry);
         ArgumentNullException.ThrowIfNull(catalogue);
@@ -80,7 +80,7 @@ public static class CatalogueValidation
     /// they are saved, but can become invalid later, for example when an end profile they refer to is deleted
     /// or an imported entry takes a short name.
     /// </summary>
-    public static IReadOnlyList<CatalogueEntryProblem> ValidateUserEntries(DrawingCatalogue user, DrawingCatalogue catalogue)
+    public static IReadOnlyList<CatalogueEntryProblem> ValidateUserEntries(Catalogue user, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(catalogue);

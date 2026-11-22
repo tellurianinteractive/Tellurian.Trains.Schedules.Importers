@@ -20,7 +20,7 @@ Version 0.3 targets .NET 11 (C# 15): the operation locations are a closed class 
 | `Layout` | The locations and stretches of a layout, its catalogues (countries, companies, regions), its settings and, when derived from a hall plan, its modules |
 | `TrackStretch`, `TimetableStretch`, `DispatchStretch` | The line between neighbouring locations, a route shown as one graphical timetable, and the line between two dispatch endpoints |
 | `Module`, `LayoutModule` | What a module is called and who owns it, and a module as placed in a layout, also the plain-line ones |
-| `ModuleStandard`, `Scale` | The standard a module is built to and its scale, by short name, with the Module Registry's id beside it |
+| `ModuleStandard`, `Scale` | The standard a module is built to, with its catalogue GUID (the Module Registry's id is an external reference), and its scale, from the suite's list of scales (`Scale.Scales`) |
 
 The types are mutable classes. An app that keeps earlier states of what it edits, such as Module Draw with its undo,
 copies them: `Copy()` gives a deep copy of what an object owns, and `x.With(c => c.Name = "Tellby")` a copy with a
