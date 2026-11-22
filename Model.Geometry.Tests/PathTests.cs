@@ -150,4 +150,44 @@ public sealed class PathTests
         var path = new PathBuilder(Pose.Origin).Straight(-Tolerance.Length / 2).Straight(100).Build();
         Assert.HasCount(1, path.Segments);
     }
+
+    [TestMethod]
+    public void TheTurningOfAPathIsTheSumOfItsArcs()
+    {
+        var path = new PathBuilder(Pose.Origin).Straight(500).Curve(1000, -30).Straight(200).Curve(500, -15).Build();
+
+        Assert.AreEqual(45, path.Turning, Precision);
+        Assert.IsTrue(path.TurnsOneWay);
+        Assert.AreEqual(0, path.TurningAt(500), Precision);
+        Assert.AreEqual(15, path.TurningAt(500 + 1000 * Math.PI / 12), Precision);
+        Assert.AreEqual(30, path.TurningAt(500 + 1000 * Math.PI / 6 + 100), Precision, "A straight between arcs takes up no turning.");
+        Assert.AreEqual(45, path.TurningAt(10_000), Precision);
+    }
+
+    [TestMethod]
+    public void AnAngleOfTurningIsFoundOnTheArcs()
+    {
+        var path = new PathBuilder(Pose.Origin).Straight(500).Curve(1000, 30).Straight(200).Build();
+        var arc = 1000 * Math.PI / 6;
+
+        Assert.AreEqual(500, path.DistanceAtTurning(0)!.Value, Precision, "0° is where the curve starts.");
+        Assert.AreEqual(500 + arc / 2, path.DistanceAtTurning(15)!.Value, Precision);
+        Assert.AreEqual(500 + arc, path.DistanceAtTurning(30)!.Value, Precision, "The whole turn is where the curve ends.");
+        Assert.AreEqual(500 + arc, path.DistanceAtTurning(90)!.Value, Precision);
+        Assert.AreEqual(15, path.TurningAt(path.DistanceAtTurning(15)!.Value), Precision);
+    }
+
+    [TestMethod]
+    public void AStraightPathHasNoAngleOfTurning()
+    {
+        var path = new PathBuilder(Pose.Origin).Straight(1000).Build();
+
+        Assert.IsNull(path.DistanceAtTurning(10));
+        Assert.IsFalse(path.TurnsOneWay);
+        Assert.AreEqual(0, path.Turning);
+    }
+
+    [TestMethod]
+    public void AnSCurveTurnsBothWays() =>
+        Assert.IsFalse(new PathBuilder(Pose.Origin).Curve(1000, 15).Curve(1000, -15).Build().TurnsOneWay);
 }

@@ -92,6 +92,59 @@ public static class ModuleSections
         return Across(outline, mainPath, main.PoseAt(Math.Clamp(distance, 0, main.Length)).Position);
     }
 
+    /// <summary>
+    /// The joint across the module where the main path has turned <paramref name="degrees"/> from the start of its curve
+    /// (<see cref="SegmentPath.DistanceAtTurning"/>). On a curve the joint is radial, so the angle is the same measured at
+    /// the track or at either edge. Null when the main path doesn't turn one way only (<see cref="IsCurve"/>).
+    /// </summary>
+    public static InternalJoint? AcrossAtAngle(SegmentPath outline, PathDrawing mainPath, double degrees) =>
+        DistanceAtAngle(mainPath, degrees) is { } distance ? AcrossAt(outline, mainPath, distance) : null;
+
+    /// <summary>
+    /// The distance along the main path where it has turned <paramref name="degrees"/> from the start of its curve; null
+    /// when it doesn't turn one way only (<see cref="IsCurve"/>).
+    /// </summary>
+    public static double? DistanceAtAngle(PathDrawing mainPath, double degrees)
+    {
+        ArgumentNullException.ThrowIfNull(mainPath);
+        var main = mainPath.ToPath();
+        return main.TurnsOneWay ? main.DistanceAtTurning(degrees) : null;
+    }
+
+    /// <summary>Whether the module is a curve: its main path turns, and only one way. Then a joint can be placed by its angle.</summary>
+    public static bool IsCurve(PathDrawing? mainPath) => mainPath?.ToPath().TurnsOneWay == true;
+
+    /// <summary>
+    /// Where a joint is on a curve: how far the main path has turned, in degrees from the start of the curve, where the
+    /// joint crosses it. Null when the module isn't a curve (<see cref="IsCurve"/>).
+    /// </summary>
+    public static double? AngleAlongTrack(InternalJoint joint, PathDrawing mainPath)
+    {
+        ArgumentNullException.ThrowIfNull(joint);
+        ArgumentNullException.ThrowIfNull(mainPath);
+        var main = mainPath.ToPath();
+        return main.TurnsOneWay ? main.TurningAt(DistanceAlongTrack(joint, mainPath)) : null;
+    }
+
+    /// <summary>
+    /// The straight joints that divide the module into <paramref name="count"/> sections of the same length along the
+    /// main path, at right angles to it: on a curve also the same angle, and the same length along either edge. None
+    /// for one section; null when <paramref name="count"/> is less than one or a joint can't be drawn across the module.
+    /// </summary>
+    public static IReadOnlyList<InternalJoint>? EqualSections(SegmentPath outline, PathDrawing mainPath, int count)
+    {
+        ArgumentNullException.ThrowIfNull(mainPath);
+        if (count < 1) return null;
+        var length = mainPath.ToPath().Length;
+        var joints = new List<InternalJoint>();
+        for (var k = 1; k < count; k++)
+        {
+            if (AcrossAt(outline, mainPath, length * k / count) is not { } joint) return null;
+            joints.Add(joint);
+        }
+        return joints;
+    }
+
     /// <summary>Where a joint is along the track: the distance along the main path to where its first part crosses it.</summary>
     public static double DistanceAlongTrack(InternalJoint joint, PathDrawing mainPath)
     {

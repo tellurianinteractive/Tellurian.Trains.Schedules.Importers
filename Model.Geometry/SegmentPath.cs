@@ -63,6 +63,65 @@ public sealed class SegmentPath
     }
 
     /// <summary>
+    /// How far the path turns over its whole length, in degrees: the sum of the turns of its arcs, each counted whichever
+    /// way it turns. 0 for a path of straight lines only.
+    /// </summary>
+    public double Turning => Segments.OfType<ArcSegment>().Sum(arc => Math.Abs(arc.SweepDegrees));
+
+    /// <summary>Whether the path turns, and only one way: it has arcs, and they all turn left or all turn right.</summary>
+    public bool TurnsOneWay
+    {
+        get
+        {
+            var arcs = Segments.OfType<ArcSegment>().Where(arc => Math.Abs(arc.SweepDegrees) >= Tolerance.Angle).ToList();
+            return arcs.Count > 0 && (arcs.All(arc => arc.IsCounterClockwise) || arcs.All(arc => !arc.IsCounterClockwise));
+        }
+    }
+
+    /// <summary>
+    /// How far the path has turned at <paramref name="distance"/> from the start, clamped to the path, in degrees, with
+    /// each arc counted whichever way it turns (<see cref="Turning"/>).
+    /// </summary>
+    public double TurningAt(double distance)
+    {
+        var remaining = Math.Max(0, distance);
+        var turned = 0.0;
+        foreach (var segment in Segments)
+        {
+            var sweep = segment is ArcSegment arc ? Math.Abs(arc.SweepDegrees) : 0;
+            if (remaining <= segment.Length) return turned + (segment.Length > 0 ? sweep * remaining / segment.Length : 0);
+            turned += sweep;
+            remaining -= segment.Length;
+        }
+        return turned;
+    }
+
+    /// <summary>
+    /// Where the path has turned <paramref name="degrees"/>, as a distance from the start: on its arcs, the straight
+    /// lines before, between and after them taking up no turning. 0° is the start of the first arc and
+    /// <see cref="Turning"/> the end of the last; a value beyond is clamped. Null for a path without arcs.
+    /// </summary>
+    public double? DistanceAtTurning(double degrees)
+    {
+        var arcs = Segments.Select((segment, index) => (segment, index)).Where(s => s.segment is ArcSegment { SweepDegrees: not 0 }).ToList();
+        if (arcs.Count == 0) return null;
+        var remaining = Math.Clamp(degrees, 0, Turning);
+        var start = 0.0;
+        for (var i = 0; i < Segments.Count; i++)
+        {
+            var segment = Segments[i];
+            if (segment is ArcSegment { SweepDegrees: not 0 } arc)
+            {
+                var sweep = Math.Abs(arc.SweepDegrees);
+                if (remaining <= sweep || i == arcs[^1].index) return start + segment.Length * Math.Min(remaining, sweep) / sweep;
+                remaining -= sweep;
+            }
+            start += segment.Length;
+        }
+        return start;
+    }
+
+    /// <summary>
     /// The open path from <paramref name="from"/> to <paramref name="to"/> along this one, with both clamped to the path
     /// (0 to <see cref="Length"/>). Parts of segments shorter than <see cref="Tolerance.Length"/> are left out.
     /// </summary>
