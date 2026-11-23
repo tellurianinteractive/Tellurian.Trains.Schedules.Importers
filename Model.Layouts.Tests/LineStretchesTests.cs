@@ -285,6 +285,27 @@ public sealed class LineStretchesTests
         CollectionAssert.AreEqual(new[] { "Bby", "Dby" }, suggestions[1].Stations.Select(s => s.Name).ToArray());
     }
 
+    [TestMethod]
+    public void ALoopDividedAtAStationGivesTwoTimetableStretchesEndingThere()
+    {
+        var layout = new Layout();
+        var (a, p1, b, p2, c, p3, d, p4) = (Place(layout, Station("Aby")), Place(layout, Plain("p1")), Place(layout, Station("Bby")), Place(layout, Plain("p2")),
+            Place(layout, Station("Cby")), Place(layout, Plain("p3")), Place(layout, Station("Dby")), Place(layout, Plain("p4")));
+        layout.Add(new Line { Name = "Loop", Entries = [Entry(a), Entry(p1), Entry(b), Entry(p2), Entry(c), Entry(p3), Entry(d), Entry(p4)], EndAt = new(a.Id, ExitSide.Left) });
+        layout.UpdateTrackStretchesFromLines();
+        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, layout.TrackStretches.Select(s => s.ToString()).ToArray(), "round the loop");
+
+        // The planner turns the second half, so both halves end at Cby.
+        foreach (var stretch in layout.TrackStretches.Where(s => s.ToString() is "Cby–Dby" or "Dby–Aby")) stretch.Reverse();
+        layout.UpdateTrackStretchesFromLines();
+        var suggestions = layout.SuggestedTimetableStretches();
+
+        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Dby–Cby", "Aby–Dby" }, layout.TrackStretches.Select(s => s.ToString()).ToArray(), "the turned stretches keep their direction");
+        Assert.HasCount(2, suggestions);
+        CollectionAssert.AreEqual(new[] { "Aby", "Bby", "Cby" }, suggestions[0].Stations.Select(s => s.Name).ToArray());
+        CollectionAssert.AreEqual(new[] { "Aby", "Dby", "Cby" }, suggestions[1].Stations.Select(s => s.Name).ToArray());
+    }
+
     private static LayoutModule Place(Layout layout, Module module) => layout.Place(module);
 
     private static Module Limited(Module module, int? speedLimit)
