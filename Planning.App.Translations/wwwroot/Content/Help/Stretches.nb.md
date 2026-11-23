@@ -23,7 +23,7 @@ er modulenes hastighetsgrenser, hver vektet etter lengden på sin modul. Kolonne
 lengden målt i hallplanen. En lengde, hastighet eller tid du endrer, er din og beholdes når en nyere
 versjon av hallplanen leses inn; **Bruk målt** og **Bruk modulenes hastighet** får strekningen til å
 følge hallplanen igjen. En banestrekning uten hastighet gir en advarsel; togene kjører der med sin
-egen hastighet, høyst 200 km/t.
+egen hastighet, høyst 200 km/t. En slik strekning kan snus ved at driftsstedene bytter plass, men ikke flyttes til andre: modulenes rekkefølge endres i hallplanen, i Modultegneren.
 
 ### Togledelsesstrekninger
 

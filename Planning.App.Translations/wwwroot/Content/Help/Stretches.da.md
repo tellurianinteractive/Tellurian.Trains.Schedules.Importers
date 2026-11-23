@@ -23,7 +23,7 @@ hastigheden er modulernes hastighedsgrænser, hver vægtet efter sit moduls læn
 **Målt (m)** viser længden målt i hal-planen. En længde, hastighed eller tid, du ændrer, er din og
 bevares, når en nyere version af hal-planen indlæses; **Brug målt** og **Brug modulernes hastighed**
 får strækningen til at følge hal-planen igen. En banestrækning uden hastighed giver en advarsel;
-togene kører der med deres egen hastighed, højst 200 km/t.
+togene kører der med deres egen hastighed, højst 200 km/t. En sådan strækning kan vendes ved at bytte dens driftssteder, men ikke flyttes til andre: modulernes rækkefølge ændres i hal-planen, i Modultegneren.
 
 ### Togledelsesstrækninger
 

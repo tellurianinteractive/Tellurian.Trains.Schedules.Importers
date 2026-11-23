@@ -3245,4 +3245,7 @@
   <data name="NoSuggestedTimetableStretches" xml:space="preserve">
     <value>Hallplanens linjer ger inga tidtabellssträckor.</value>
   </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>Sträckan följer hallplanens moduler: dess driftplatser kan bara byta plats.</value>
+  </data>
 </root>

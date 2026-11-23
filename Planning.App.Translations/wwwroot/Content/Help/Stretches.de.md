@@ -25,7 +25,7 @@ Hallenplan gemessene Länge. Eine Länge, Geschwindigkeit oder Zeit, die Sie än
 bleibt erhalten, wenn eine neuere Revision des Hallenplans geladen wird; **Gemessenen Wert verwenden**
 und **Geschwindigkeit der Module verwenden** lassen den Abschnitt wieder dem Hallenplan folgen. Ein
 Streckenabschnitt ohne Geschwindigkeit ergibt eine Warnung; Züge fahren dort mit ihrer eigenen
-Geschwindigkeit, höchstens 200 km/h.
+Geschwindigkeit, höchstens 200 km/h. Ein solcher Abschnitt kann umgedreht werden, indem seine Betriebsstellen vertauscht werden, aber nicht auf andere verlegt: die Reihenfolge der Module wird im Hallenplan geändert, im Modulzeichner.
 
 ### Zugleitabschnitte
 

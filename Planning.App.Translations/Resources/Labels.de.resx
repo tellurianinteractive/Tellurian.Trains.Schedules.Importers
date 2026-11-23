@@ -3245,4 +3245,7 @@
   <data name="NoSuggestedTimetableStretches" xml:space="preserve">
     <value>Die Linien des Hallenplans ergeben keine Fahrplanabschnitte.</value>
   </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>Dieser Abschnitt folgt den Modulen des Hallenplans: seine Betriebsstellen können nur vertauscht werden.</value>
+  </data>
 </root>

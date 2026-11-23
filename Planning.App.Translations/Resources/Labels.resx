@@ -3259,4 +3259,7 @@
   <data name="NoSuggestedTimetableStretches" xml:space="preserve">
     <value>The hall plan's lines give no timetable stretches.</value>
   </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>This stretch follows the hall plan's modules: its operation locations can only be swapped.</value>
+  </data>
 </root>

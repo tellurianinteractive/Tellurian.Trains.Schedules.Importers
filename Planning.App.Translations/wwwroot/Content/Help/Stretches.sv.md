@@ -23,7 +23,7 @@ från linjerna: längden är modulernas längder från mitten av en driftplats t
 visar längden uppmätt i hallplanen. En längd, hastighet eller tid som du ändrar är din och behålls när
 en nyare version av hallplanen läses in; **Använd uppmätt** och **Använd modulernas hastighet** gör att
 sträckan följer hallplanen igen. En bansträcka utan hastighet ger en varning; tågen kör där med sin
-egen hastighet, högst 200 km/h.
+egen hastighet, högst 200 km/h. En sådan sträcka kan vändas genom att driftplatserna byter plats, men inte flyttas till andra: modulernas ordning ändras i hallplanen, i Modulritaren.
 
 ### Trafikledningssträckor
 

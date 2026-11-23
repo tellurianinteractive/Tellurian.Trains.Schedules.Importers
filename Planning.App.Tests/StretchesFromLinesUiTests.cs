@@ -40,7 +40,18 @@ public sealed class StretchesFromLinesUiTests : PlaywrightTestBase
         await Expect(form).ToContainTextAsync("Measured in the hall plan: 3.0 m");
         await Expect(form).ToContainTextAsync("From the modules: 70 km/h");
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("stretch-edit-from-lines.png"), FullPage = true });
-        await form.Locator("button", new() { HasText = "Cancel" }).ClickAsync();
+
+        // The order of the modules is the hall plan's: the stretch can be turned round, not moved.
+        var to = form.Locator("select").Nth(1);
+        await to.SelectOptionAsync(new SelectOptionValue { Label = "Kode (Kd)" });
+        await form.Locator("button", new() { HasText = "Save" }).ClickAsync();
+        await Expect(form).ToContainTextAsync("This stretch follows the hall plan's modules: its operation locations can only be swapped.");
+        await form.Locator("select").Nth(0).SelectOptionAsync(new SelectOptionValue { Label = "Ytterby (Yb)" });
+        await to.SelectOptionAsync(new SelectOptionValue { Label = "Tellby (Tby)" });
+        await form.Locator("button", new() { HasText = "Save" }).ClickAsync();
+        var turned = grid.Locator("tbody tr").Filter(new() { HasText = "Tellby" });
+        await Expect(turned.Locator("td").Nth(1)).ToHaveTextAsync("Ytterby");
+        await Expect(turned.Locator("td").Nth(2)).ToHaveTextAsync("Tellby");
 
         await Page.Locator(".sub-tab", new() { HasText = "Timetable stretches" }).ClickAsync();
         var timetableEditor = Page.Locator(".stretch-editor");
@@ -50,8 +61,11 @@ public sealed class StretchesFromLinesUiTests : PlaywrightTestBase
         await Expect(dialog).ToContainTextAsync("Main line");
         await Page.ScreenshotAsync(new PageScreenshotOptions { Path = ScreenshotPath("suggested-timetable-stretches.png"), FullPage = true });
         await dialog.Locator("button", new() { HasText = "Add" }).ClickAsync();
-        await Expect(timetableEditor.Locator("table.grid tbody tr")).ToHaveCountAsync(1);
-        await Expect(timetableEditor.Locator("table.grid tbody tr")).ToContainTextAsync("Main line");
+        // With Tellby – Ytterby turned, the line gives one timetable stretch each way from Ytterby.
+        var rows = timetableEditor.Locator("table.grid tbody tr");
+        await Expect(rows).ToHaveCountAsync(2);
+        await Expect(rows.Filter(new() { HasText = "Yb → Tby" })).ToHaveCountAsync(1);
+        await Expect(rows.Filter(new() { HasText = "Yb → Kd" })).ToHaveCountAsync(1);
     }
 
     /// <summary>

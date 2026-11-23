@@ -3245,4 +3245,7 @@
   <data name="NoSuggestedTimetableStretches" xml:space="preserve">
     <value>Hal-planens linjer giver ingen køreplansstrækninger.</value>
   </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>Strækningen følger hal-planens moduler: dens driftssteder kan kun bytte plads.</value>
+  </data>
 </root>

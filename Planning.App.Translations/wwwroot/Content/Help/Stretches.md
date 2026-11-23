@@ -23,7 +23,7 @@ next, and the speed is the modules' speed limits, each weighted by its module's 
 **Measured (m)** column shows the distance measured in the hall plan. A distance, speed or time you
 change is yours and is kept when a newer revision of the hall plan is loaded; **Use measured** and
 **Use the modules' speed** make the stretch follow the hall plan again. A track stretch without a
-speed gives a warning; trains run on it at their own speed, at most 200 km/h.
+speed gives a warning; trains run on it at their own speed, at most 200 km/h. Such a stretch can be turned round by swapping its operation locations, but not moved to others: the order of the modules is changed in the hall plan, in Module Draw.
 
 ### Dispatch stretches
 
