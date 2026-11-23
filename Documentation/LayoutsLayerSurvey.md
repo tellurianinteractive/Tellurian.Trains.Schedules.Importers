@@ -456,12 +456,12 @@ Proposed, as built later:
 | | Proposal |
 |---|---|
 | Type | `TrafficSide { NotGiven = 0, LeftHand = 1, RightHand = 2 }` in `Model.Layouts` |
-| Where (owner's design 2026-11-23) | Nothing is set on the stretch: its side is worked out. **`Layout`** has a default traffic side (a layout setting). **`Country`** has the country's traffic side, which overrides the layout's for the locations in that country (Sweden left-hand, Denmark and Norway right-hand, the owner's facts; the others not given until confirmed). An **operation location can be marked as a transition point**, where one side meets the other, as Lekby was |
+| Where (owner's design 2026-11-23) | Nothing is set on the stretch: its side is worked out. **`Layout`** has a default traffic side (a layout setting). **`Country`** has the country's traffic side, which overrides the layout's for the locations in that country (the owner's rule: right-hand unless known to be left-hand on double track. Left-hand: Sweden (the owner's fact), the United Kingdom, France, Switzerland, Italy, Belgium. Right-hand: Denmark and Norway (the owner's facts), and all others in the list). An **operation location can be marked as a transition point**, where one side meets the other, as Lekby was |
 | Deduced | A location's side is its country's, else the layout's. Along a line, between two neighbouring stations, the stretches before a transition point take the first station's side and those after it the second's; a stretch next to a transition point takes the side of its other end, and between two transition points the layout's. **Warning (owner's rule 2026-11-23):** two neighbouring stations with different sides and no transition point at either of them or at a location between them; the side of the stretches between is then not known |
 | Which track is which | Worked out, not stored: at each exit the end profile gives every line track's offset, so the track graph knows which track lies on a train's left and which on its right in each direction |
 | Train paths | A path check for a train: at each call a route from the arrival track to the departure track, where no route is a conflict; on a double-track stretch, the track on the traffic side, where the other track is a warning (decided). Both are validation messages in the planner |
 
-Nothing of this is built yet; it follows the planner's use of the engine (step 10).
+Nothing of this is built yet; it is built with the train path checks, after the planner's use of the engine (step 10).
 
 ## 4. Files
 
