@@ -1,7 +1,7 @@
 {
   "format": "tellurian-drawing",
   "kind": "Hall",
-  "schemaVersion": 2,
+  "schemaVersion": 1,
   "appVersion": "0.9.1",
   "content": {
     "id": "abc3306e-8141-4c2a-9101-083874c0b046",
