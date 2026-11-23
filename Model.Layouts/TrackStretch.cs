@@ -93,6 +93,12 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     /// </summary>
     public int Speed { get; set; }
 
+    /// <summary>
+    /// The speed was entered by the planner and is kept when the layout is updated from its hall plan; otherwise the
+    /// speed follows the modules of the stretch (<see cref="LineStretch.Speed"/>).
+    /// </summary>
+    public bool IsSpeedEntered { get; set; }
+
     /// <summary>The travel time on the stretch, minutes.</summary>
     public int Time { get; set; }
 

@@ -41,6 +41,28 @@ public class HallPlanImportTests
         return layout;
     }
 
+    private static readonly Guid LinedHallPlanId = Guid.Parse("30000000-0000-0000-0000-000000000004");
+
+    /// <summary>
+    /// A hall plan whose stretch is worked out from its line: Tellby, a plain-line module and Ytterby, the stations
+    /// 2000 mm long, no stretches of its own.
+    /// </summary>
+    private static Layout LinedHallPlan(int revision = 1, int speedLimit = 70, double plainLength = 1000)
+    {
+        var layout = new Layout { Name = "Lined", SourceId = LinedHallPlanId, SourceRevision = revision };
+        var tellby = layout.Place(Drawn(new Module { Name = "Tellby", OperationLocation = new Station(0, "Tellby", "Tby") }, 2000));
+        var plain = layout.Place(Drawn(new Module { Name = "Plain", SpeedLimit = speedLimit }, plainLength));
+        var ytterby = layout.Place(Drawn(new Module { Name = "Ytterby", OperationLocation = new Station(0, "Ytterby", "Yb") }, 2000));
+        layout.Add(new Line { Entries = [new() { ModuleId = tellby.Id }, new() { ModuleId = plain.Id }, new() { ModuleId = ytterby.Id }] });
+        return layout;
+    }
+
+    private static Module Drawn(Module module, double length)
+    {
+        module.Drawing.MainPath = Model.Layouts.Drawings.PathDrawing.Polyline([new(0, 0), new(length, 0)]);
+        return module;
+    }
+
     /// <summary>The layout as it comes out of a hall plan file: written as Module Draw does and read back.</summary>
     private static Layout ReadFromFile(Layout layout)
     {
@@ -83,6 +105,45 @@ public class HallPlanImportTests
             Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
         }
         Assert.IsGreaterThan(plan.Layout.TrackStretches.First().Time, plan.Layout.TrackStretches.Last().Time, "the longer stretch takes longer");
+    }
+
+    [TestMethod]
+    public void ANewPlanWorksOutItsTrackStretchesFromTheLines()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");
+
+        var stretch = plan.Layout.TrackStretches.Single();
+        Assert.AreEqual("Tellby–Ytterby", stretch.ToString());
+        Assert.AreEqual(3.0, stretch.Distance, 0.0005, "1 m from Tellby's middle, 1 m of plain line, 1 m to Ytterby's middle");
+        Assert.AreEqual(70, stretch.Speed, "the only module with a speed limit");
+        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
+        Assert.HasCount(1, stretch.ModuleIds);
+        Assert.IsFalse(stretch.IsDistanceEntered || stretch.IsSpeedEntered || stretch.IsTimeEntered);
+    }
+
+    [TestMethod]
+    public void AReloadTakesTheNewDistanceAndKeepsAnEnteredSpeed()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");
+        var stretch = plan.Layout.TrackStretches.Single();
+        stretch.Speed = 50;
+        stretch.IsSpeedEntered = true;
+
+        plan.UpdateFromHallPlan(ReadFromFile(LinedHallPlan(revision: 2, speedLimit: 90, plainLength: 2000)));
+
+        Assert.AreEqual(4.0, stretch.Distance, 0.0005);
+        Assert.AreEqual(50, stretch.Speed, "the planner's speed");
+        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
+    }
+
+    [TestMethod]
+    public void AReloadTakesTheModulesSpeedWhenNoneWasEntered()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");
+
+        plan.UpdateFromHallPlan(ReadFromFile(LinedHallPlan(revision: 2, speedLimit: 90)));
+
+        Assert.AreEqual(90, plan.Layout.TrackStretches.Single().Speed);
     }
 
     [TestMethod]

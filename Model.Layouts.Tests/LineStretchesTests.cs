@@ -218,7 +218,7 @@ public sealed class LineStretchesTests
         var q = Place(layout, Drawn(Plain("q"), 1000, SingleTrack));
         var c = Place(layout, Drawn(Station("Cby"), 2000, SingleTrack));
         layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b), Entry(q), Entry(c)] });
-        var entered = new TrackStretch(5, Location(c), Location(b), 12, 2) { IsDistanceEntered = true, IsTimeEntered = true, Time = 7, Speed = 80 };
+        var entered = new TrackStretch(5, Location(c), Location(b), 12, 2) { IsDistanceEntered = true, IsTimeEntered = true, Time = 7, Speed = 80, IsSpeedEntered = true };
         layout.TrackStretches.Add(entered);
 
         layout.UpdateTrackStretchesFromLines();
@@ -235,10 +235,26 @@ public sealed class LineStretchesTests
         Assert.AreEqual(6, added.Id);
         Assert.IsFalse(added.HasSpeed, "no module has a speed limit");
         Assert.AreEqual(TrackStretchFacts.AssumedSpeed, added.LimitingSpeed);
-        Assert.AreEqual(80, entered.Speed, "an existing stretch keeps its speed");
+        Assert.AreEqual(80, entered.Speed, "an entered speed is kept");
         Assert.AreSame(Location(a), added.Start);
         Assert.AreEqual(3.0, added.Distance, Precision);
         CollectionAssert.AreEqual(new[] { p.Id }, added.ModuleIds.ToArray());
+    }
+
+    [TestMethod]
+    public void ASpeedNotEnteredFollowsTheModules()
+    {
+        var layout = new Layout();
+        var a = Place(layout, Station("Aby"));
+        var p = Place(layout, Limited(Plain("p"), 60));
+        var b = Place(layout, Station("Bby"));
+        layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
+        var stretch = new TrackStretch(1, Location(a), Location(b), 10) { Speed = 80 };
+        layout.TrackStretches.Add(stretch);
+
+        layout.UpdateTrackStretchesFromLines();
+
+        Assert.AreEqual(60, stretch.Speed);
     }
 
     [TestMethod]

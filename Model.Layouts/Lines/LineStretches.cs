@@ -23,8 +23,8 @@ public static class LineStretches
         /// the same two locations, in either direction, is updated and keeps its direction: its sides, modules and
         /// number of tracks always, its distance unless <see cref="TrackStretch.IsDistanceEntered"/>, and its time from
         /// distance and speed unless <see cref="TrackStretch.IsTimeEntered"/>. Others are added with the next free ids. The speed is the one worked out from the
-        /// modules (<see cref="LineStretch.Speed"/>), for a stretch that is added or has none; when no module has a
-        /// limit, the stretch has no speed, which the planner warns of.
+        /// modules (<see cref="LineStretch.Speed"/>) unless <see cref="TrackStretch.IsSpeedEntered"/>; when no module has
+        /// a limit, the stretch has no speed, which the planner warns of.
         /// Stretches that the lines don't give are left as they are.
         /// </summary>
         /// <returns>What the lines gave, with the problems found.</returns>
@@ -45,7 +45,7 @@ public static class LineStretches
                 stretch.EndSide = isReversed ? found.StartSide : found.EndSide;
                 stretch.ModuleIds = isReversed ? [.. found.ModuleIds.Reverse()] : [.. found.ModuleIds];
                 if (found.TracksCount is int tracks) stretch.TracksCount = tracks;
-                if (!stretch.HasSpeed && found.Speed is int speed) stretch.Speed = speed;
+                if (!stretch.IsSpeedEntered) stretch.Speed = found.Speed ?? 0;
                 if (!stretch.IsDistanceEntered && found.Distance is double distance) stretch.Distance = distance;
                 if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
             }
