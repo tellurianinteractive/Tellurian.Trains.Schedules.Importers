@@ -26,28 +26,29 @@ public sealed record LineStretch
     public int? TracksCount { get; init; }
 
     /// <summary>
-    /// The distance in metres from centre to centre along the main paths of the modules (survey 3.2, the fallback);
-    /// null when a module has no main path, a location leaves across its main path (up or down) or spans more than one
+    /// The distance in metres from centre to centre along the main paths of the modules: each module's average length,
+    /// on a double-track curve the mean of its tracks (survey 3.4, the owner's choice); null when a module has no main path, a location leaves across its main path (up or down) or spans more than one
     /// module.
     /// </summary>
     public double? MainPathDistance { get; init; }
 
     /// <summary>
-    /// The shortest route along the drawn tracks from centre to centre (survey 3.3 step 2, 3.4); null when a module of
-    /// the stretch has no track elements, or the tracks give no route, which is then a problem.
+    /// The shortest route along the drawn tracks from centre to centre (survey 3.3 step 2): the track topology, which
+    /// shows whether trains can run between the locations at all. Null when a module of the stretch has no track
+    /// elements, or the tracks give no route, which is then a problem.
     /// </summary>
     public TrackRoute? Route { get; init; }
 
     /// <summary>
-    /// The measured distance, metres: along the <see cref="Route"/>, else along the main paths; null when neither can be
-    /// told.
+    /// The measured distance, metres: along the main paths, the modules' average lengths (<see cref="MainPathDistance"/>),
+    /// else along the <see cref="Route"/>; null when neither can be told.
     /// </summary>
-    public double? Distance => Route?.Distance ?? MainPathDistance;
+    public double? Distance => MainPathDistance ?? Route?.Distance;
 
     /// <summary>
     /// The speed, km/h: the modules' speed limits, each weighted by the module's length along the stretch, the location
-    /// modules from their centre to the exit; along the <see cref="Route"/> when there is one, else along the main paths.
-    /// Null when no module has a limit.
+    /// modules from their centre to the exit; along the main paths, else along the <see cref="Route"/>. Null when no module
+    /// has a limit.
     /// </summary>
     public int? Speed { get; init; }
 

@@ -113,7 +113,9 @@ internal sealed class LineWalker
         var route = _tracks.Route(stretch.Start, startModule, stretch.End, endModule, stretch.ModuleIds);
         var parts = MainPathParts(stretch, startModule, endModule);
         var mainPathDistance = parts.All(p => p.Length.HasValue) ? parts.Sum(p => p.Length!.Value) / StationTrackMeasurement.MillimetresPerMetre : (double?)null;
-        var weights = route is null ? parts : [.. route.LengthPerModule.Select(m => new Part(_joins.Modules[m.ModuleId], m.Length))];
+        var weights = parts.All(p => p.Length.HasValue) || route is null
+            ? parts
+            : [.. route.LengthPerModule.Select(m => new Part(_joins.Modules[m.ModuleId], m.Length))];
         return stretch with { Route = route, MainPathDistance = mainPathDistance, Speed = Speed(weights) };
     }
 

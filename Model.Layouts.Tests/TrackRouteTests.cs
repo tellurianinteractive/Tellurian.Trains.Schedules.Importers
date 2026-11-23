@@ -40,7 +40,7 @@ public sealed class TrackRouteTests
     }
 
     [TestMethod]
-    public void OnADoubleTrackCurveTheShortestRouteTakesTheInnerTrack()
+    public void OnADoubleTrackCurveTheRouteTakesTheInnerTrackAndTheDistanceIsTheAverage()
     {
         const double radius = 2000;
         const double angle = 30;
@@ -53,9 +53,11 @@ public sealed class TrackRouteTests
         var stretch = layout.StretchesFromLines().Stretches.Single();
 
         var inner = (radius - Gap) * angle * Math.PI / 180;
-        Assert.AreEqual((2000 + inner) / 1000, stretch.Distance!.Value, Precision);
-        Assert.AreEqual(radius - Gap, stretch.Route!.SmallestRadius!.Value, Precision);
-        Assert.AreEqual(75, stretch.Speed, "weighted by the lengths along the route: (100 × 1000 + 50 × inner) / (1000 + inner)");
+        var average = radius * angle * Math.PI / 180;
+        Assert.AreEqual((2000 + inner) / 1000, stretch.Route!.Distance, Precision, "the shortest way along the tracks");
+        Assert.AreEqual(radius - Gap, stretch.Route.SmallestRadius!.Value, Precision);
+        Assert.AreEqual((2000 + average) / 1000, stretch.Distance!.Value, Precision, "the module's average length: its main path");
+        Assert.AreEqual(74, stretch.Speed, "weighted by the average lengths: (100 × 1000 + 50 × average) / (1000 + average)");
     }
 
     [TestMethod]
