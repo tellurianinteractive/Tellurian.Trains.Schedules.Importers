@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
@@ -14,17 +15,21 @@ public sealed record EndProfileTemplateParameters
     /// <summary>The module standards the end profile belongs to.</summary>
     public IReadOnlyList<CatalogueReference> Standards { get; init; } = [];
     /// <summary>The width of the plate, centred on the centre line, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double PlateWidth { get; init; }
 
     /// <summary>Y of the top edge of the plate; normally negative (below rail top).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double PlateTop { get; init; }
 
     /// <summary>Y of the bottom edge of the plate.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double PlateBottom { get; init; }
 
     /// <summary>The tracks' lateral offsets from the centre line, positive to the right; one centred track by default.</summary>
     public IReadOnlyList<double> TrackOffsets { get; init; } = [0];
     /// <summary>The gauge of every track, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Gauge { get; init; }
     /// <summary>The rail system of every track.</summary>
     public RailSystem RailSystem { get; init; }

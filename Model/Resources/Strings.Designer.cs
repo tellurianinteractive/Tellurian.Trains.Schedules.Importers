@@ -277,6 +277,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Track stretch {0}–{1} has no speed; trains run at their own speed, at most {2} km/h..
+        /// </summary>
+        internal static string TrackStretchSpeedMissing {
+            get {
+                return ResourceManager.GetString("TrackStretchSpeedMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation location {0} has more than one track {1}..
         /// </summary>
         internal static string TrackDesignationNotUnique {

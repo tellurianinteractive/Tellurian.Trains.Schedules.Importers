@@ -1,5 +1,33 @@
 # Release Notes
 
+## Version 4.0.27
+
+Module Draw's catalogue and hall plans in the shared model, and the layout engine: lines and joints in the layout, stretches worked out from them, routes along the drawn tracks, and the placement of a hall plan. Drawing file schema version 2 is complete.
+
+### Breaking changes
+
+- **`DrawingCatalogue` is `Catalogue`.** `Catalogue.Merge(current, imported)` takes an import into the current catalogue: an entry with a known GUID replaces the current one, a new one is added; scales are matched by short name and ratio.
+- **The suite's list of scales is in `Model.Layouts`** (`Scale.Scales`, `Scale.ById`; `Scale.Known` finds a scale written without an id by short name and ratio). Scales keep their `int` ids, and `ScaleId` stays.
+- **Plan schema 5.** A standard's Registry number (the preferred standard, a module's standard) moves to its external reference; a GUID id is kept. Older plans are migrated when read.
+- **The hall plan is a layout in a hall.** `HallPlan` (namespace `Model.Layouts.Halls`) is the contract's `Layout`, the hall, one `Anchor` per main line, settings, and public areas, walking paths and acknowledgements with `int` ids. Hall plan files of an earlier shape are refused, not migrated.
+- **Modules in a layout are referred to by `LayoutModule.Id`**, given by `layout.Place(module)`, in lines, joints, anchors and acknowledgements.
+- **A track stretch's `Speed` 0 means not given** (`stretch.HasSpeed`): trains run on it at their own speed, at most `TrackStretchFacts.AssumedSpeed` (200 km/h, `stretch.LimitingSpeed`), and its running time is worked out at that speed.
+- **Version 2 drawing files are read as they are.** Version 2 files that development builds wrote in earlier shapes are no longer brought to today's shape.
+
+### New features
+
+- **Lines and joints in the layout.** `Layout` has `Lines`, `Joints`, `EndProfiles`, `Standards`, `Overrides` and `FitTolerances`; `Line`, `LineEntry`, `Joint` and `ExitReference` refer to modules by their id in the layout. `layout.Place(module)` gives the module, its location and its tracks ids of the layout's, and each track keeps its drawing's id as `StationTrack.SourceId` (new). The planner takes the lines and joints with the modules, and the database stores them.
+- **Hall plan files read and written here.** `HallPlanImporter` and `HallPlanExporter`; the layout is written as `content.layout` with the layout's options, stamped with the hall plan's id and revision.
+- **Stretches from the lines.** `layout.StretchesFromLines()` walks a layout's lines from every location, through the plain-line modules, to the next location, and returns each stretch (`LineStretch`: the locations, the exits and sides they are left from, the plain-line modules in order, the fewest tracks at any joint, the distance along the main paths from centre to centre, and the line it runs with), with the problems that stopped others (`LineProblem`, `LineProblemCode`). `layout.UpdateTrackStretchesFromLines()` brings the track stretches in line with them, keeping a distance or time the planner entered; the speed is the modules' speed limits weighted by each module's length along the stretch (`LineStretch.Speed`), unless the planner entered it (`TrackStretch.IsSpeedEntered`, new). New warning `ValidationErrorType.TrackStretchSpeedMissing` (layout scope, always run), with the `Strings` resource in English, Danish, German, Norwegian and Swedish. `layout.SuggestedTimetableStretches()` suggests one timetable stretch per line, a branch starting at the location it leaves from, and one of its own for track stretches turned against their line, without adding them.
+- **Routes along the drawn tracks.** Each stretch has its shortest route from centre to centre (`LineStretch.Route`, `TrackRoute`, `TrackRoutePiece`: module, track element, route, station track, length, smallest radius), found across the joints by end-profile offset and never turning back at a track end. `LineStretch.Distance` is the sum of the modules' average lengths (their main paths), else the route's length, and `stretch.MeasuredDistance` derives a track stretch's distance from it.
+- **Hall plan placement.** `hallPlan.Placement()` places every module from its group's anchor along the lines, measures the closure gap of each loop or rejoining line against the hall plan's tolerances (`ClosureCheck`), and checks every joint (`layout.JointChecks()`, `JointCheck`: fit, join method and clamps, rail-top height step with the leg adjustments), with the problems found (`HallPlanPlacement`, `ModulePlacement`).
+- **The planner works out track stretches from a hall plan.** `HallPlanImport.WorkOutTrackStretches` runs when a hall plan is read as a new plan and on a reload of a newer revision, where a changed speed is applied with the distance unless entered.
+
+### Changes
+
+- Required values that are the default of their type, such as a path starting at the origin, are now always written in layouts and plan files, so they read back.
+- A hall plan import sets `ScaleId` from the standard's scale even when the scale has no id.
+
 ## Version 4.0.24
 
 The planner's model moves onto the shared layout model, `Tellurian.Trains.Schedules.Model.Layouts`, used by the planner, the Module Registry, Module Draw and Dispatch (`Documentation/ModelHarmonisation.md`), and Module Draw's model, geometry and file format move into it (`Documentation/LayoutsLayerSurvey.md`). Targets .NET 11. All packages of the repository now have the same version.

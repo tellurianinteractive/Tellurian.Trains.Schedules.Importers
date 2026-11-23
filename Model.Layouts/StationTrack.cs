@@ -44,6 +44,13 @@ public sealed class StationTrack : LayoutPart, IEquatable<StationTrack>
     /// </summary>
     public int Id { get; set; }
 
+    /// <summary>
+    /// The track's <see cref="Id"/> in the module drawing it comes from, for a track of a module placed in a layout,
+    /// where it has an id of the layout's (<c>layout.Place(module)</c>); null in a module file and for a track entered in
+    /// the planner. A newer drawing of the module is matched to the placed copy by it.
+    /// </summary>
+    public int? SourceId { get; set; }
+
     /// <summary>What the track is called, e.g. "1" or "2a". Unique within its location, without regard to case.</summary>
     public string Designation { get; set; }
 

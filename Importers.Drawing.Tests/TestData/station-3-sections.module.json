@@ -1,7 +1,7 @@
 {
   "format": "tellurian-drawing",
   "kind": "Module",
-  "schemaVersion": 2,
+  "schemaVersion": 1,
   "appVersion": "0.9.1",
   "content": {
     "module": {

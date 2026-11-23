@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Train {0} has no driver duty on sessions {1} for the part from {2} {3} to {4} {5}.</value>
   </data>
+  <data name="TrackStretchSpeedMissing" xml:space="preserve">
+    <value>Track stretch {0}–{1} has no speed; trains run at their own speed, at most {2} km/h.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Operation location {0} has more than one track {1}.</value>
   </data>

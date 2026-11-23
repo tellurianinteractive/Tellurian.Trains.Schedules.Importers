@@ -24,7 +24,7 @@ public static class ModuleAutoDraw
 
     /// <summary>Draws a module from <paramref name="parameters"/>, with end profiles and standards from <paramref name="catalogue"/>.</summary>
     /// <returns>The drawn module, if any, its status and notes about assumptions and problems.</returns>
-    public static AutoDrawResult Create(AutoDrawParameters parameters, DrawingCatalogue catalogue)
+    public static AutoDrawResult Create(AutoDrawParameters parameters, Catalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(parameters);
         ArgumentNullException.ThrowIfNull(catalogue);

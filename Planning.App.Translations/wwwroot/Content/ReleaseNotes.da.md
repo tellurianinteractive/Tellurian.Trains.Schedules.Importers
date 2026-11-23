@@ -8,12 +8,14 @@
 
 ### Nye funktioner
 
-- **En plan ud fra en hal-plan.** På fanen **Importér** bliver en hal-plan fra Modultegneren, eller en bane skrevet af et andet program i samme form, til en ny plan med hal-planens driftssteder, spor og strækninger. Hver strækning får en køretid ud fra sin længde og hastighed. Køreplansstrækningerne laver du selv.
+- **En plan ud fra en hal-plan.** På fanen **Importér** bliver en hal-plan fra Modultegneren, eller en bane skrevet af et andet program i samme form, til en ny plan med hal-planens driftssteder, spor og strækninger. Hver strækning får en køretid ud fra sin længde og hastighed. Når hal-planens moduler er sat sammen i linjer, findes banestrækningerne ud fra dem: hvilke moduler, antal spor, længden fra midten af ét driftssted til det næste efter modulernes længder, og hastigheden efter modulernes hastighedsgrænser, hver vægtet efter sit moduls længde. Køreplansstrækningerne laver du selv, eller **Foreslå fra linjerne** på fanen **Køreplansstrækninger** foreslår én for hver linje, som du kan tilføje eller lade være.
 - **En nyere version af hal-planen.** Når den åbne plan er lavet ud fra en hal-plan, og du åbner en anden version af den, vælger du, om den åbne plan skal opdateres, eller om der skal laves en ny plan, med en advarsel når filen er den ældre version. Ved opdatering tages nye længder og køretider med det samme, undtagen hvor du selv har indtastet dem. Ændringer, der flytter eller tilføjer togenes ophold (et spor fjernet, et driftssted af en anden type, et fjernet eller indsat mellem to andre), vises under **Skal bekræftes**: **Gennemse** viser, hvad ændringen gør ved togene, og **Udfør** udfører den. Ændringer, der ændrer driftsstedernes rækkefølge, vises, så de kan laves i hånden.
+- **Målt længde og modulernes hastighed.** For en plan lavet ud fra en hal-plan viser fanen **Banestrækninger** den længde, der er målt i hal-planen, ved siden af strækningens egen. Når du redigerer en strækning, får **Brug målt** og **Brug modulernes hastighed** den til at følge hal-planen igen. En længde, hastighed eller tid, du selv indtaster, bevares, når en nyere version indlæses. En sådan strækning kan vendes ved at bytte dens driftssteder, men ikke flyttes til andre: modulernes rækkefølge ændres i hal-planen, i Modultegneren.
 
 ### Ændringer
 
 - **To spor med samme betegnelse er en konflikt.** Et driftssted med to eller flere spor med samme betegnelse vises under **Konflikter** og fører til fanen **Driftssteder**. Planen kan stadig gemmes.
+- **En banestrækning uden hastighed giver en advarsel.** Den vises under **Konflikter** som en advarsel og fører til fanen **Strækninger**. Togene kører der med deres egen hastighed, højst 200 km/t.
 
 ## Version 1.4.7
 

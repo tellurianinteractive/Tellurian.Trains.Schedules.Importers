@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
@@ -6,9 +7,11 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
 public sealed record JointFitResult
 {
     /// <summary>The final fit, after any override.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required JointFit Fit { get; init; }
 
     /// <summary>The fit the rules gave, before any override.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required JointFit RuleFit { get; init; }
 
     /// <summary>What differs between the two ends.</summary>

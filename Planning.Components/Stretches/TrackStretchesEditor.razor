@@ -26,6 +26,12 @@
                 <PropertyColumn Property="s => s.Start.Name" Title='@Translator("From")' Sortable="true" />
                 <PropertyColumn Property="s => s.End.Name" Title='@Translator("To")' Sortable="true" />
                 <PropertyColumn Property="s => s.Distance" Title='@Translator("DistanceMeters")' Sortable="true" Align="Align.Right" />
+                @if (_fromLines.Count > 0)
+                {
+                    <TemplateColumn Title='@Translator("MeasuredMeters")' Align="Align.Right">
+                        @MeasuredText(context)
+                    </TemplateColumn>
+                }
                 <PropertyColumn Property="s => s.TracksCount" Title='@Translator("Tracks")' Sortable="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.Speed" Title='@Translator("SpeedKmh")' Sortable="true" Align="Align.Right" />
                 <PropertyColumn Property="s => s.Time" Title='@Translator("TimeMinutes")' Sortable="true" Align="Align.Right" />
@@ -81,7 +87,16 @@
                 </div>
                 <div class="field">
                     <label>@Translator("DistanceMeters")</label>
-                    <input type="number" min="0" step="0.1" @bind="_distance" @bind:culture="Invariant" />
+                    <div class="with-hint">
+                        <input type="number" min="0" step="0.1" @bind="_distance" @bind:culture="Invariant" />
+                        @if (FromLines(_startId, _endId)?.Distance is double measured)
+                        {
+                            <small class="hint">
+                                @string.Format(Translator("MeasuredDistanceHint"), measured.ToString("0.0", CultureInfo.CurrentCulture))
+                                <button type="button" @onclick="() => UseMeasured(measured)">@Translator("UseMeasured")</button>
+                            </small>
+                        }
+                    </div>
                 </div>
                 <div class="field">
                     <label>@Translator("Tracks")</label>
@@ -89,7 +104,23 @@
                 </div>
                 <div class="field">
                     <label>@Translator("SpeedKmh")</label>
-                    <input type="number" min="0" @bind="_speed" />
+                    <div class="with-hint">
+                        <input type="number" min="0" @bind="_speed" />
+                        @if (FromLines(_startId, _endId) is { } fromLines)
+                        {
+                            <small class="hint">
+                                @if (fromLines.Speed is int modulesSpeed)
+                                {
+                                    @string.Format(Translator("ModulesSpeedHint"), modulesSpeed)
+                                    <button type="button" @onclick="() => UseModulesSpeed(modulesSpeed)">@Translator("UseModulesSpeed")</button>
+                                }
+                                else
+                                {
+                                    @Translator("ModulesSpeedMissingHint")
+                                }
+                            </small>
+                        }
+                    </div>
                 </div>
                 <div class="field">
                     <label>@Translator("TimeMinutes")</label>
@@ -141,9 +172,47 @@
     private bool _isElectrified = true;
     private string _startName = "", _endName = "";
 
-    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
+    // The stretches the hall plan's lines give, by their two locations, for the measured distance and the modules'
+    // speed; empty for a layout entered from scratch. Worked out again whenever the plan changes.
+    private Dictionary<(int, int), LineStretch> _fromLines = [];
+    private bool _useMeasured, _useModulesSpeed;
 
-    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+    protected override void OnInitialized()
+    {
+        ScheduleState.OnChanged += OnStateChanged;
+        WorkOutFromLines();
+    }
+
+    private void OnStateChanged()
+    {
+        WorkOutFromLines();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void WorkOutFromLines() =>
+        _fromLines = Layout is { Lines.Count: > 0 } layout
+            ? layout.StretchesFromLines().Stretches.GroupBy(s => Pair(s.Start.Id, s.End.Id)).ToDictionary(g => g.Key, g => g.First())
+            : [];
+
+    private static (int, int) Pair(int a, int b) => (Math.Min(a, b), Math.Max(a, b));
+
+    private LineStretch? FromLines(int startId, int endId) => _fromLines.GetValueOrDefault(Pair(startId, endId));
+
+    private string MeasuredText(TrackStretch stretch) =>
+        FromLines(stretch.Start.Id, stretch.End.Id)?.Distance is double measured ? measured.ToString("0.0", CultureInfo.CurrentCulture) : "";
+
+    // Taking the hall plan's figure makes it follow the hall plan again, rather than being the planner's.
+    private void UseMeasured(double measured)
+    {
+        _distance = Math.Round(measured, 1);
+        _useMeasured = true;
+    }
+
+    private void UseModulesSpeed(int speed)
+    {
+        _speed = speed;
+        _useModulesSpeed = true;
+    }
 
     // A track stretch is referenced when a timetable stretch is built from it; deleting it would break that route.
     private bool IsReferenced(TrackStretch stretch) =>
@@ -161,6 +230,7 @@
         _speed = 100;
         _time = 0;
         _isElectrified = true;
+        _useMeasured = _useModulesSpeed = false;
         _mode = Mode.Edit;
     }
 
@@ -178,6 +248,7 @@
         _speed = stretch.Speed;
         _time = stretch.Time;
         _isElectrified = stretch.IsElectrified;
+        _useMeasured = _useModulesSpeed = false;
         _mode = Mode.Edit;
     }
 
@@ -195,6 +266,13 @@
         if (_startId == _endId)
         {
             _error = Translator("TrackStretchSameEndpoints");
+            return;
+        }
+        // The order of the modules is the hall plan's (Module Draw): a stretch that follows them can be turned round,
+        // but not moved to other locations.
+        if (_editing is not null && FromLines(_editing.StartId, _editing.EndId) is not null && Pair(_startId, _endId) != Pair(_editing.StartId, _editing.EndId))
+        {
+            _error = Translator("TrackStretchFollowsModules");
             return;
         }
         var start = Layout.OperationLocations.Single(l => l.Id == _startId);
@@ -220,7 +298,14 @@
             _editing.EndId = end.Id;
             // A value the planner changes is theirs: a newer hall plan doesn't overwrite it (LayoutUpdate).
             if (_editing.Distance != _distance) _editing.IsDistanceEntered = true;
+            if (_editing.Speed != _speed) _editing.IsSpeedEntered = true;
             if (_editing.Time != _time) _editing.IsTimeEntered = true;
+            if (_useMeasured && FromLines(_startId, _endId)?.Distance is double measured && _distance == Math.Round(measured, 1))
+            {
+                _editing.IsDistanceEntered = false;
+                _distance = measured;
+            }
+            if (_useModulesSpeed && _speed == FromLines(_startId, _endId)?.Speed) _editing.IsSpeedEntered = false;
             _editing.Distance = _distance;
             _editing.TracksCount = _tracks;
             _editing.Speed = _speed;

@@ -12,7 +12,8 @@ namespace Tellurian.Trains.Schedules.Exporters.Drawing.Tests;
 [TestClass]
 public sealed class ModuleTests
 {
-    private const string Current = "station-3-sections.module.json";
+    /// <summary>A module as a development build of version 2 wrote it, in a shape between versions 1 and 2, marked as version 1.</summary>
+    private const string Draft = "station-3-sections.module.json";
     private const string Version1 = "station-3-sections.v1.module.json";
     private static readonly ModuleExporter Exporter = new();
 
@@ -28,7 +29,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void AModuleFileIsReadWithItsDrawingLocationAndEndProfiles()
     {
-        var content = Read(TestFile(Current));
+        var content = Read(TestFile(Draft));
         var module = content.Module;
 
         Assert.IsNotNull(module.Id);
@@ -75,7 +76,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void TrackElementsAreReadAsTheirKinds()
     {
-        var elements = Read(TestFile(Current)).Module.Drawing.TrackElements;
+        var elements = Read(TestFile(Draft)).Module.Drawing.TrackElements;
 
         Assert.IsNotEmpty(elements);
         Assert.IsTrue(elements.All(e => e is StraightTrack or CurvedTrack or FlexTrack or Turnout or Crossing or DoubleSlip or BufferStop));
@@ -84,7 +85,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void ARevisionCountsUpTheModulesRevision()
     {
-        var content = Read(TestFile(Current));
+        var content = Read(TestFile(Draft));
         var revision = content.Module.Revision;
 
         var revised = Exporter.Revise(content, new ExportOptions(IsRevision: true, RevisedBy: "Stefan", Date: new DateOnly(2026, 11, 21)));
@@ -107,7 +108,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void ACopyOwnsItsDrawing()
     {
-        var module = Read(TestFile(Current)).Module;
+        var module = Read(TestFile(Draft)).Module;
 
         var copy = module.With(m => m.Drawing.Exits[0].Label = "Changed");
 
@@ -118,7 +119,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void SidesReferToTheirExitsBySideAndNumber()
     {
-        var drawing = Read(TestFile(Current)).Module.Drawing;
+        var drawing = Read(TestFile(Draft)).Module.Drawing;
 
         Assert.AreEqual((ExitPlace.Left, ExitPlace.Right), (drawing.Sides[0].FromExit, drawing.Sides[0].ToExit));
         Assert.AreEqual((ExitPlace.Right, ExitPlace.Left), (drawing.Sides[1].FromExit, drawing.Sides[1].ToExit));
@@ -130,7 +131,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void ASideAtAnExitThatIsNotThereGetsAPlaceNoExitHas()
     {
-        var file = JsonNode.Parse(TestFile(Current))!.AsObject();
+        var file = JsonNode.Parse(TestFile(Draft))!.AsObject();
         file["content"]!["module"]!["drawing"]!["sides"]![0]!["toExit"] = "No such exit";
 
         var side = Read(file.ToJsonString()).Module.Drawing.Sides[0];
@@ -141,7 +142,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void TrackElementsAreNumberedFromOne()
     {
-        var elements = Read(TestFile(Current)).Module.Drawing.TrackElements;
+        var elements = Read(TestFile(Draft)).Module.Drawing.TrackElements;
 
         CollectionAssert.AreEqual(Enumerable.Range(1, elements.Count).ToArray(), elements.Select(e => e.Id).ToArray());
     }
@@ -149,7 +150,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void EnteredLengthsAndStubsAreFlagsOnTheTracks()
     {
-        var file = JsonNode.Parse(TestFile(Current))!.AsObject();
+        var file = JsonNode.Parse(TestFile(Draft))!.AsObject();
         var module = file["content"]!["module"]!;
         const int first = 1, second = 2;
         module["operationLocation"]!["tracks"] = new JsonArray(
@@ -168,7 +169,7 @@ public sealed class ModuleTests
     [TestMethod]
     public void TheStandardIdBesideTheStandardBecomesItsId()
     {
-        var file = JsonNode.Parse(TestFile(Current))!.AsObject();
+        var file = JsonNode.Parse(TestFile(Draft))!.AsObject();
         var id = (string)file["content"]!["module"]!["standardId"]!;
 
         var module = Read(file.ToJsonString()).Module;
@@ -183,20 +184,20 @@ public sealed class ModuleTests
     [TestMethod]
     public void TheSpeedLimitIsReadAndWritten()
     {
-        var content = Read(TestFile(Current));
+        var content = Read(TestFile(Draft));
         content.Module.SpeedLimit = 40;
 
         var read = Read(Exporter.Write(content, ExportOptions.Default));
 
         Assert.AreEqual(40, read.Module.SpeedLimit);
-        Assert.IsNull(Read(TestFile(Current)).Module.SpeedLimit, "No limit unless the owner sets one.");
+        Assert.IsNull(Read(TestFile(Draft)).Module.SpeedLimit, "No limit unless the owner sets one.");
     }
 
     [TestMethod]
     public void OnlyModuleFilesCanBeImported()
     {
         var importer = new ModuleImporter();
-        Assert.IsTrue(importer.CanImport("x.json", System.Text.Encoding.UTF8.GetBytes(TestFile(Current))));
+        Assert.IsTrue(importer.CanImport("x.json", System.Text.Encoding.UTF8.GetBytes(TestFile(Draft))));
         Assert.IsFalse(importer.CanImport("x.json", """{ "format": "tellurian-drawing", "kind": "Hall" }"""u8));
     }
 }

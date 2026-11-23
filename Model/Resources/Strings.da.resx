@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Tog {0} har ingen tjeneste på køresessioner {1} for afsnittet fra {2} {3} til {4} {5}.</value>
   </data>
+  <data name="TrackStretchSpeedMissing" xml:space="preserve">
+    <value>Banestrækningen {0}–{1} har ingen hastighed; togene kører med deres egen hastighed, højst {2} km/t.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Driftsstedet {0} har mere end ét spor {1}.</value>
   </data>

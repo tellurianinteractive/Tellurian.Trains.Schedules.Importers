@@ -9,9 +9,10 @@ public static class LayoutUpdate
 {
     /// <summary>
     /// Applies every <see cref="LayoutChangeHandling.Automatic"/> change of <paramref name="comparison"/> to its current
-    /// layout, and takes the hall plan's identity, revision and modules. A stretch takes the newer distance unless the
-    /// planner has entered its own (<see cref="TrackStretch.IsDistanceEntered"/>), and then a running time worked out
-    /// from it unless the planner has entered the time (<see cref="TrackStretch.IsTimeEntered"/>).
+    /// layout, and takes the hall plan's identity, revision and modules. A stretch takes the newer distance and speed
+    /// unless the planner has entered its own (<see cref="TrackStretch.IsDistanceEntered"/>,
+    /// <see cref="TrackStretch.IsSpeedEntered"/>), and then a running time worked out from them unless the planner has
+    /// entered the time (<see cref="TrackStretch.IsTimeEntered"/>).
     /// </summary>
     /// <returns>The changes applied.</returns>
     public static IReadOnlyList<LayoutChange> ApplyAutomatic(LayoutComparison comparison)
@@ -99,12 +100,24 @@ public static class LayoutUpdate
         stretch.StartSide = isTurned ? source.EndSide : source.StartSide;
         stretch.EndSide = isTurned ? source.StartSide : source.EndSide;
         stretch.ModuleIds = isTurned ? [.. source.ModuleIds.Reverse()] : [.. source.ModuleIds];
-        if (stretch.IsDistanceEntered || Math.Abs(stretch.Distance - source.Distance) < 0.0005) return;
-        stretch.Distance = source.Distance;
-        if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
+        var isChanged = false;
+        if (!stretch.IsDistanceEntered && Math.Abs(stretch.Distance - source.Distance) >= 0.0005)
+        {
+            stretch.Distance = source.Distance;
+            isChanged = true;
+        }
+        if (!stretch.IsSpeedEntered && stretch.Speed != source.Speed)
+        {
+            stretch.Speed = source.Speed;
+            isChanged = true;
+        }
+        if (isChanged && !stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
     }
 
-    /// <summary>The hall plan's identity, revision, preferred standard and modules; a module that is a location of the current layout refers to it.</summary>
+    /// <summary>
+    /// The hall plan's identity, revision, preferred standard, modules, lines, joints, end profiles, standards and overrides;
+    /// a module that is a location of the current layout refers to it.
+    /// </summary>
     private static void TakeHallPlan(LayoutComparison comparison)
     {
         var layout = comparison.Current;
@@ -124,6 +137,7 @@ public static class LayoutUpdate
             }
             return copy;
         })];
+        layout.TakeLinesFrom(source);
     }
 
     private static int FreeTrackId(Layout layout, int wanted)

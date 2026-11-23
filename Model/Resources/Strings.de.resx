@@ -354,6 +354,9 @@
   <data name="TrainPartHasNoDriverDuty" xml:space="preserve">
     <value>Zug {0} hat keinen Dienst in den Fahrrunden {1} für den Abschnitt von {2} {3} bis {4} {5}.</value>
   </data>
+  <data name="TrackStretchSpeedMissing" xml:space="preserve">
+    <value>Der Streckenabschnitt {0}–{1} hat keine Geschwindigkeit; die Züge fahren mit ihrer eigenen Geschwindigkeit, höchstens {2} km/h.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Die Betriebsstelle {0} hat mehr als ein Gleis {1}.</value>
   </data>

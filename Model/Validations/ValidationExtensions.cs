@@ -23,6 +23,7 @@ public static class ValidationExtensions
             result.AddRange(plan.GetTimetableValidationErrors(options));
             result.AddRange(plan.ValidateLockKeys());
             result.AddRange(plan.ValidateTrackDesignations());
+            result.AddRange(plan.ValidateTrackStretchSpeeds());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateLayoverPairs()));
@@ -120,6 +121,17 @@ public static class ValidationExtensions
                 }
             }
         }
+
+        /// <summary>
+        /// Warns of each track stretch without a speed, as one worked out from a hall plan is until the planner gives
+        /// it one (<c>ModelHarmonisation.md</c> decision 15). Trains run on it at their own speed meanwhile, with
+        /// <see cref="TrackStretchFacts.AssumedSpeed"/> as its limit.
+        /// </summary>
+        /// <remarks>Always run, like <see cref="ValidateTrackDesignations"/>: it is a gap in the layout.</remarks>
+        internal IEnumerable<ValidationError> ValidateTrackStretchSpeeds() =>
+            plan.Layout.TrackStretches
+                .Where(s => !s.HasSpeed)
+                .Select(s => ValidationError.TrackStretchSpeedMissing(Message.Warning(Strings.TrackStretchSpeedMissing, s.Start, s.End, TrackStretchFacts.AssumedSpeed)));
 
         /// <summary>
         /// Validates that no train is assigned two traction units over the same stretch of its run

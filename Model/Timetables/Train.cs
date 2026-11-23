@@ -581,14 +581,16 @@ public static class TrainExtensions
         /// <summary>
         /// Gets the effective scale speed (km/h) for this train on a track stretch:
         /// the lower of the train speed (its <see cref="Train.MaxSpeed"/>, or its category's
-        /// <see cref="TrainCategory.DefaultSpeed"/> when unset) and the stretch's maximum speed.
+        /// <see cref="TrainCategory.DefaultSpeed"/> when unset) and the stretch's maximum speed, or
+        /// <see cref="TrackStretchFacts.AssumedSpeed"/> where the stretch has none.
         /// </summary>
         /// <param name="stretch">The track stretch the train runs on.</param>
         /// <returns>The effective scale speed in km/h.</returns>
         public int EffectiveScaleSpeed(TrackStretch stretch)
         {
-            var trainSpeed = train.MaxSpeed ?? train.Category?.DefaultSpeed ?? stretch.Speed;
-            return Math.Min(trainSpeed, stretch.Speed);
+            var stretchSpeed = stretch.LimitingSpeed;
+            var trainSpeed = train.MaxSpeed ?? train.Category?.DefaultSpeed ?? stretchSpeed;
+            return Math.Min(trainSpeed, stretchSpeed);
         }
 
         /// <summary>

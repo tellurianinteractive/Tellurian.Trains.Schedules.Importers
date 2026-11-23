@@ -17,6 +17,14 @@ de sträckor som inte stämmer – åtgärda det genom att redigera en av dem s�
 En bansträcka som ingår i en tidtabellssträcka kan inte tas bort förrän den har tagits bort från
 den tidtabellssträckan.
 
+I en plan som gjorts från en hallplan, där modulerna är sammanfogade i linjer, görs bansträckorna
+från linjerna: längden är modulernas längder från mitten av en driftplats till nästa, och hastigheten
+är modulernas hastighetsgränser, var och en vägd efter sin moduls längd. Kolumnen **Uppmätt (m)**
+visar längden uppmätt i hallplanen. En längd, hastighet eller tid som du ändrar är din och behålls när
+en nyare version av hallplanen läses in; **Använd uppmätt** och **Använd modulernas hastighet** gör att
+sträckan följer hallplanen igen. En bansträcka utan hastighet ger en varning; tågen kör där med sin
+egen hastighet, högst 200 km/h. En sådan sträcka kan vändas genom att driftplatserna byter plats, men inte flyttas till andra: modulernas ordning ändras i hallplanen, i Modulritaren.
+
 ### Trafikledningssträckor
 
 En **trafikledningssträcka** går mellan två platser där tåg klareras – en **bemannad** station, en
@@ -59,6 +67,11 @@ väljer bland på fliken **Grafisk tidtabell**, och var och en blir en graf.
 För att bygga en ger du den ett nummer (och en valfri beskrivning) och lägger sedan till bansträckor i dess sträckning
 en i taget. Bara bansträckor som fortsätter där sträckningen för tillfället slutar erbjuds, så
 sträckningen förblir sammanhängande. Redigeraren visar de stationer och det totala avstånd som blir resultatet.
+
+I en plan som gjorts från en hallplan föreslår **Föreslå från linjerna** en tidtabellssträcka för var
+och en av hallplanens linjer, där en grenlinje börjar vid den driftplats den utgår från. Inget läggs
+till förrän du väljer **Lägg till**: tidtabellssträckor kan överlappa, och en lång linje delas ofta i
+kortare, så du kan också göra dem själv.
 
 ### Rekommenderad arbetsordning
 

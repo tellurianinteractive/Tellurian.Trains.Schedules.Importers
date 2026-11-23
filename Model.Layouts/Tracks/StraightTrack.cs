@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
@@ -6,8 +7,10 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class StraightTrack : TrackElement
 {
     /// <summary>Start of the track, in module coordinates, heading along the track.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Start { get; set; }
     /// <summary>Length of the track, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Length { get; set; }
 
     /// <inheritdoc/>

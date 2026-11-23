@@ -17,6 +17,14 @@ de strækninger, der er uenige – ret det ved at redigere en af dem, så alle l
 En banestrækning, der indgår i en køreplansstrækning, kan ikke slettes, før den er fjernet fra
 den køreplansstrækning.
 
+I en plan lavet ud fra en hal-plan, hvor modulerne er sat sammen i linjer, laves banestrækningerne
+ud fra linjerne: længden er modulernes længder fra midten af ét driftssted til det næste, og
+hastigheden er modulernes hastighedsgrænser, hver vægtet efter sit moduls længde. Kolonnen
+**Målt (m)** viser længden målt i hal-planen. En længde, hastighed eller tid, du ændrer, er din og
+bevares, når en nyere version af hal-planen indlæses; **Brug målt** og **Brug modulernes hastighed**
+får strækningen til at følge hal-planen igen. En banestrækning uden hastighed giver en advarsel;
+togene kører der med deres egen hastighed, højst 200 km/t. En sådan strækning kan vendes ved at bytte dens driftssteder, men ikke flyttes til andre: modulernes rækkefølge ændres i hal-planen, i Modultegneren.
+
 ### Togledelsesstrækninger
 
 En **togledelsesstrækning** løber mellem to steder, hvor tog gives fri – en **bemandet** station, en
@@ -59,6 +67,11 @@ vælger imellem på fanen **Grafisk køreplan**, og hver bliver til én graf.
 For at opbygge en giver du den et nummer (og en valgfri beskrivelse) og tilføjer derefter banestrækninger til dens rute
 én ad gangen. Kun banestrækninger, der fortsætter, hvor ruten for øjeblikket slutter, tilbydes, så
 ruten altid forbliver sammenhængende. Editoren viser de resulterende stationer og den samlede afstand.
+
+I en plan lavet ud fra en hal-plan foreslår **Foreslå fra linjerne** én køreplansstrækning for hver
+af hal-planens linjer, hvor en sidelinje begynder ved det driftssted, den udgår fra. Intet tilføjes,
+før du vælger **Tilføj**: køreplansstrækninger kan overlappe, og en lang linje deles ofte i kortere,
+så du kan også lave dem selv.
 
 ### Anbefalet arbejdsrækkefølge
 

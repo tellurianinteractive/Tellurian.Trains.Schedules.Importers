@@ -8,12 +8,14 @@
 
 ### Nya funktioner
 
-- **En plan från en hallplan.** På fliken **Importera** blir en hallplan från Modulritaren, eller en bana som ett annat program skrivit i samma form, en ny plan med hallplanens driftplatser, spår och sträckor. Varje sträcka får en gångtid utifrån sin längd och hastighet. Tidtabellssträckorna gör du själv.
+- **En plan från en hallplan.** På fliken **Importera** blir en hallplan från Modulritaren, eller en bana som ett annat program skrivit i samma form, en ny plan med hallplanens driftplatser, spår och sträckor. Varje sträcka får en gångtid utifrån sin längd och hastighet. När hallplanens moduler är sammanfogade i linjer räknas bansträckorna fram ur dem: vilka moduler, antal spår, längden från mitten av en driftplats till nästa efter modulernas längder, och hastigheten efter modulernas hastighetsgränser, var och en vägd efter sin moduls längd. Tidtabellssträckorna gör du själv, eller så föreslår **Föreslå från linjerna** på fliken **Tidtabellssträckor** en för varje linje, som du lägger till eller låter bli.
 - **En nyare version av hallplanen.** När den öppna planen gjorts från en hallplan och du öppnar en annan version av den väljer du om den öppna planen ska uppdateras eller om en ny plan ska göras, med en varning när filen är den äldre versionen. Vid uppdatering tas nya längder och gångtider direkt, utom där du själv har angett dem. Ändringar som flyttar eller lägger till tågens uppehåll (ett spår borttaget, en driftplats av en annan typ, en borttagen eller infogad mellan två andra) visas under **Att bekräfta**: **Granska** visar vad ändringen gör med tågen, och **Gör ändringen** genomför den. Ändringar som ändrar driftplatsernas ordning visas, så att de kan göras för hand.
+- **Uppmätt längd och modulernas hastighet.** För en plan som gjorts från en hallplan visar fliken **Bansträckor** längden uppmätt i hallplanen bredvid sträckans egen. När du redigerar en sträcka gör **Använd uppmätt** och **Använd modulernas hastighet** att den följer hallplanen igen. En längd, hastighet eller tid som du själv anger behålls när en nyare version läses in. En sådan sträcka kan vändas genom att driftplatserna byter plats, men inte flyttas till andra: modulernas ordning ändras i hallplanen, i Modulritaren.
 
 ### Ändringar
 
 - **Två spår med samma beteckning är en konflikt.** En driftplats med två eller fler spår med samma beteckning visas under **Konflikter** och leder till fliken **Driftplatser**. Planen kan fortfarande sparas.
+- **En bansträcka utan hastighet ger en varning.** Den visas under **Konflikter** som en varning och leder till fliken **Sträckor**. Tågen kör där med sin egen hastighet, högst 200 km/h.
 
 ## Version 1.4.7
 

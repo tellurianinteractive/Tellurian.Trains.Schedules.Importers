@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
@@ -12,20 +13,25 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 public sealed class Turnout : TrackElement
 {
     /// <summary>The points of the turnout, in module coordinates, heading into the turnout.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Start { get; set; }
     /// <summary>Which routes the turnout has.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required TurnoutKind Kind { get; set; }
 
     /// <summary>Length of the straight route, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Length { get; set; }
 
     /// <summary>Radius of the diverging route, or of the outer route of a curved turnout, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Radius { get; set; }
 
     /// <summary>
     /// Angle of the diverging route (degrees, positive). For a wye, the angle between its two routes;
     /// for a curved turnout, the angle of the outer route.
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Angle { get; set; }
 
     /// <summary>Radius of the inner route of a curved turnout, mm; required for curved turnouts, otherwise unused.</summary>

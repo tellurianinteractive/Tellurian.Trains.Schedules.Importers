@@ -5,7 +5,7 @@ using Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 namespace Tellurian.Trains.Schedules.Model.Layouts.AutoDraw;
 
 /// <summary>One run of <see cref="ModuleAutoDraw.Create"/>.</summary>
-internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, DrawingCatalogue catalogue)
+internal sealed class AutoDrawGenerator(AutoDrawParameters parameters, Catalogue catalogue)
 {
     private const string SummerSuffix = "/SSM";
     private const string SummerBaseStandard = "MMM-2R";

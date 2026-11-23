@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Halls;
@@ -15,9 +16,11 @@ public sealed class Door : LayoutPart
     public DoorKind Kind { get; set; }
 
     /// <summary>The centre of the opening on the wall, heading into the hall.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Position { get; set; }
 
     /// <summary>The width of the opening, mm.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double Width { get; set; }
 
     /// <summary>How far into the hall the zone in front of the door must be kept free, mm.</summary>

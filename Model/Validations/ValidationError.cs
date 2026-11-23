@@ -105,7 +105,8 @@ public sealed record ValidationError
     public static ValidationScope ScopeOf(ValidationErrorType errorType) => errorType switch
     {
         ValidationErrorType.LockKeyIgnored or
-        ValidationErrorType.TrackDesignationNotUnique => ValidationScope.Layout,
+        ValidationErrorType.TrackDesignationNotUnique or
+        ValidationErrorType.TrackStretchSpeedMissing => ValidationScope.Layout,
 
         ValidationErrorType.VehicleDoubleBooked or
         ValidationErrorType.VehicleNotClosed or
@@ -1035,6 +1036,19 @@ public sealed record ValidationError
             Message = message
         };
 
+    /// <summary>Creates a warning for a track stretch without a speed. It carries no track, no time and no train.</summary>
+    public static ValidationError TrackStretchSpeedMissing(
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.TrackStretchSpeedMissing,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Message = message
+        };
+
     private static StationTrack? GetFirstTrack(Schedule schedule) =>
         schedule.FirstPart?.From.Track;
 
@@ -1193,6 +1207,9 @@ public enum ValidationErrorType
 
     /// <summary>A vehicle standing on a station track cannot leave while another stands in its way (rule L5).</summary>
     StationTrackBlocked,
+
+    /// <summary>A track stretch has no speed, as when it is worked out from a hall plan; trains run on it at their own speed.</summary>
+    TrackStretchSpeedMissing,
 }
 
 /// <summary>

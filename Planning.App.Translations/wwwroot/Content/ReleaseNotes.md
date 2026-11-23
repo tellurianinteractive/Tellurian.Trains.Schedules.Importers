@@ -8,12 +8,14 @@
 
 ### New features
 
-- **A plan from a hall plan.** On the **Import** tab, a hall plan from Module Draw, or a layout written by another tool in the same form, becomes a new plan with the hall plan's operation locations, tracks and stretches. Each stretch gets a running time from its distance and speed. Timetable stretches are left to you to make.
+- **A plan from a hall plan.** On the **Import** tab, a hall plan from Module Draw, or a layout written by another tool in the same form, becomes a new plan with the hall plan's operation locations, tracks and stretches. Each stretch gets a running time from its distance and speed. When the hall plan's modules are joined in lines, the track stretches are worked out from them: which modules, the number of tracks, the distance from the middle of one operation location to the next by the modules' lengths, and the speed from the modules' speed limits, each weighted by its module's length. Timetable stretches are yours to make, or **Suggest from lines** on the **Timetable stretches** tab proposes one for each line, for you to add or not.
 - **A newer revision of the hall plan.** When the open plan was made from a hall plan and you open another revision of it, you choose whether to update the open plan or to make a new plan from it, with a warning when the file is the older revision. When updating, new distances and running times are taken at once, except where you have entered your own. Changes that move or add train calls (a track removed, an operation location of another type, one removed or inserted between two others) are listed under **To confirm**: **Review** shows what the change does to the trains, and **Apply** makes it. Changes that alter the order of the operation locations are listed to be made by hand.
+- **Measured distance and the modules' speed.** For a plan made from a hall plan, the **Track stretches** tab shows the distance measured in the hall plan beside each stretch's own. When you edit a stretch, **Use measured** and **Use the modules' speed** make it follow the hall plan again. A distance, speed or time you enter yourself is kept when a newer revision is loaded. Such a stretch can be turned round by swapping its operation locations, but not moved to others: the order of the modules is changed in the hall plan, in Module Draw.
 
 ### Changes
 
 - **Two tracks with the same designation are a conflict.** An operation location with two or more tracks of the same designation is listed under **Conflicts**, and leads to the **Operation locations** tab. The plan can still be saved.
+- **A track stretch without a speed is a warning.** It is listed under **Conflicts** as a warning, and leads to the **Stretches** tab. Trains run on it at their own speed, at most 200 km/h.
 
 ## Version 1.4.7
 

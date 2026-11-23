@@ -3218,4 +3218,34 @@
   <data name="LayoutRevisionNewPlan" xml:space="preserve">
     <value>Lag en ny plan</value>
   </data>
+  <data name="MeasuredMeters" xml:space="preserve">
+    <value>Målt (m)</value>
+  </data>
+  <data name="MeasuredDistanceHint" xml:space="preserve">
+    <value>Målt i hallplanen: {0} m</value>
+  </data>
+  <data name="UseMeasured" xml:space="preserve">
+    <value>Bruk målt</value>
+  </data>
+  <data name="ModulesSpeedHint" xml:space="preserve">
+    <value>Fra modulene: {0} km/t</value>
+  </data>
+  <data name="ModulesSpeedMissingHint" xml:space="preserve">
+    <value>Ingen modul har noen hastighetsgrense</value>
+  </data>
+  <data name="UseModulesSpeed" xml:space="preserve">
+    <value>Bruk modulenes hastighet</value>
+  </data>
+  <data name="SuggestFromLines" xml:space="preserve">
+    <value>Foreslå fra linjene</value>
+  </data>
+  <data name="SuggestedTimetableStretches" xml:space="preserve">
+    <value>Ruteplanstrekninger fra hallplanens linjer:</value>
+  </data>
+  <data name="NoSuggestedTimetableStretches" xml:space="preserve">
+    <value>Hallplanens linjer gir ingen ruteplanstrekninger.</value>
+  </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>Strekningen følger hallplanens moduler: driftsstedene kan bare bytte plass.</value>
+  </data>
 </root>

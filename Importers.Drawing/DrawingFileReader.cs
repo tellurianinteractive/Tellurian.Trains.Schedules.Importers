@@ -67,8 +67,6 @@ public static class DrawingFileReader
             var root = FileEnvelope.Parse(json);
             var header = Header(root);
             var content = FileEnvelope.ReadContent(fileKind, root);
-            if (DrawingMigrations.IsDraftUpgraded && header.SchemaVersion == fileKind.CurrentSchemaVersion)
-                content = FileEnvelope.Upgrade(fileKind, content, fileKind.CurrentSchemaVersion - 1, fileKind.CurrentSchemaVersion);
             // Operation locations of earlier files: the kind first and named as in the code, as the shared model reads it.
             OperationLocationJson.Normalise(content);
             var item = content.Deserialize(typeInfo);

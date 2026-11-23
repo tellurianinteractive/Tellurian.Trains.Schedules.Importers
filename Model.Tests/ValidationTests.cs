@@ -1564,6 +1564,30 @@ public class ValidationTests
         Assert.IsFalse(plan.GetValidationErrors(Settings).Any(e => e.ErrorType == ValidationErrorType.TrackDesignationNotUnique));
     }
 
+    [TestMethod]
+    public void ATrackStretchWithoutASpeedIsAWarning()
+    {
+        var timetable = NewTimetable();
+        var stretch = timetable.Layout.TrackStretches.First();
+        stretch.Speed = 0;
+        var plan = Plan.Create("Test", timetable);
+
+        var errors = plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.TrackStretchSpeedMissing).ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.AreEqual(Severity.Warning, errors[0].Message.Severity);
+        Assert.AreEqual(ValidationScope.Layout, errors[0].Scope);
+        StringAssert.Contains(errors[0].Message.Text, stretch.Start.ToString());
+    }
+
+    [TestMethod]
+    public void TrackStretchesWithASpeedAreNoWarning()
+    {
+        var plan = Plan.Create("Test", NewTimetable());
+
+        Assert.IsFalse(plan.GetValidationErrors(Settings).Any(e => e.ErrorType == ValidationErrorType.TrackStretchSpeedMissing));
+    }
+
     private static IReadOnlyList<ValidationError> LockKeyErrors(Plan plan) =>
         [.. plan.GetValidationErrors(Settings).Where(e => e.ErrorType == ValidationErrorType.LockKeyIgnored)];
 

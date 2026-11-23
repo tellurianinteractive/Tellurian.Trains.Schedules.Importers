@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Tellurian.Trains.Schedules.Model.Geometry;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
@@ -30,6 +31,7 @@ public sealed class ModuleExit : LayoutPart
     public double RailTopOffset { get; set; }
 
     /// <summary>The centre of the end plate on its joint face, heading out of the module.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Pose Pose { get; set; }
 
     /// <summary>True while a provisionally placed junction exit hasn't been positioned by the user (ModuleDrawing §8.5).</summary>

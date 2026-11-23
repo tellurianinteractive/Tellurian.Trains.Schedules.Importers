@@ -3218,4 +3218,34 @@
   <data name="LayoutRevisionNewPlan" xml:space="preserve">
     <value>Neuen Plan erstellen</value>
   </data>
+  <data name="MeasuredMeters" xml:space="preserve">
+    <value>Gemessen (m)</value>
+  </data>
+  <data name="MeasuredDistanceHint" xml:space="preserve">
+    <value>Im Hallenplan gemessen: {0} m</value>
+  </data>
+  <data name="UseMeasured" xml:space="preserve">
+    <value>Gemessenen Wert verwenden</value>
+  </data>
+  <data name="ModulesSpeedHint" xml:space="preserve">
+    <value>Aus den Modulen: {0} km/h</value>
+  </data>
+  <data name="ModulesSpeedMissingHint" xml:space="preserve">
+    <value>Kein Modul hat eine Geschwindigkeitsbegrenzung</value>
+  </data>
+  <data name="UseModulesSpeed" xml:space="preserve">
+    <value>Geschwindigkeit der Module verwenden</value>
+  </data>
+  <data name="SuggestFromLines" xml:space="preserve">
+    <value>Aus den Linien vorschlagen</value>
+  </data>
+  <data name="SuggestedTimetableStretches" xml:space="preserve">
+    <value>Fahrplanabschnitte aus den Linien des Hallenplans:</value>
+  </data>
+  <data name="NoSuggestedTimetableStretches" xml:space="preserve">
+    <value>Die Linien des Hallenplans ergeben keine Fahrplanabschnitte.</value>
+  </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>Dieser Abschnitt folgt den Modulen des Hallenplans: seine Betriebsstellen können nur vertauscht werden.</value>
+  </data>
 </root>

@@ -36,11 +36,18 @@ internal static class LayoutMapping
 
                 entity.Property(e => e.ExtensionData).HasJsonProperties();
 
-                // The hall plan's modules and its standard: what the layout was made from, read and written as a whole
-                // and never queried, so kept as JSON in the contract's own form (Layout.JsonSerializerOptions). A module
-                // refers to its location by id there; ReadPlanAsync restores it with layout.RestoreReferences().
+                // The hall plan's modules, lines, joints and standards, and the end profiles and overrides they need:
+                // what the layout was made from, read and written as a whole and never queried, so kept as JSON in the
+                // contract's own form (Layout.JsonSerializerOptions). A module refers to its location by id there;
+                // ReadPlanAsync restores it with layout.RestoreReferences().
                 entity.Property(e => e.Modules).HasContractJson();
                 entity.Property(e => e.PreferredStandard).HasContractJson();
+                entity.Property(e => e.Lines).HasContractJson();
+                entity.Property(e => e.Joints).HasContractJson();
+                entity.Property(e => e.EndProfiles).HasContractJson();
+                entity.Property(e => e.Standards).HasContractJson();
+                entity.Property(e => e.Overrides).HasContractJson();
+                entity.Property(e => e.FitTolerances).HasContractJson();
 
                 // The region catalogue belongs to the layout (1:N). Region has no Layout navigation,
                 // so the foreign key is a shadow property.

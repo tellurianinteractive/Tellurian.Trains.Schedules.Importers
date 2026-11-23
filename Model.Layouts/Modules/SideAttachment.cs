@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Modules;
 public sealed record SideAttachment : ExtensibleRecord
 {
     /// <summary>Index into <see cref="ModuleDrawing.Sides"/>.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required int SideIndex { get; init; }
 
     /// <summary>Start of the attached part, mm along the side from its start.</summary>

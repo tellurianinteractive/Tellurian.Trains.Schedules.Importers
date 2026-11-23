@@ -154,6 +154,7 @@ public sealed class LayoutComparison
             var properties = new List<string>();
             if (!Same(stretch.Distance, sourceStretch.Distance)) properties.Add(nameof(TrackStretch.Distance));
             if (stretch.TracksCount != sourceStretch.TracksCount) properties.Add(nameof(TrackStretch.TracksCount));
+            if (stretch.Speed != sourceStretch.Speed) properties.Add(nameof(TrackStretch.Speed));
             if (properties.Count > 0)
                 changes.Add(new(LayoutChangeKind.StretchChanged, LayoutChangeHandling.Automatic) { Stretch = stretch, SourceStretch = sourceStretch, Properties = properties });
         }

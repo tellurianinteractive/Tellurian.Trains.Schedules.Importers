@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 
 /// <summary>
@@ -7,12 +9,14 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 public sealed class StandardAddOn : LayoutPart
 {
     /// <summary>The identity of the add-on, the same in every file.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid Id { get; set; }
 
     /// <summary>What the add-on is called, e.g. "MMM-Summer".</summary>
     public required string ShortName { get; set; }
 
     /// <summary>The standard the add-on adds to.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid BaseStandardId { get; set; }
 
     /// <summary>What the add-on requires, for the reader.</summary>

@@ -39,6 +39,25 @@ public sealed class JsonDefaultValueTests
         Assert.IsEmpty(lost, $"Set to the default of their type and read back as their initial value, so they need [JsonIgnore(Condition = JsonIgnoreCondition.Never)]:\n{string.Join("\n", lost)}");
     }
 
+    /// <summary>
+    /// A required value (C# <c>required</c>) must be in the JSON, also when it is the default of its type, e.g. a path
+    /// starting at the origin; left out, the object can't be read back.
+    /// </summary>
+    [TestMethod]
+    public void EveryRequiredValueIsWrittenAlsoWhenItIsTheDefaultOfItsType()
+    {
+        var missing = new List<string>();
+        foreach (var typeInfo in TypesOfThePlan())
+        {
+            var required = typeInfo.Properties.Where(p => p.IsRequired && p.Get is not null && p.PropertyType.IsValueType && Nullable.GetUnderlyingType(p.PropertyType) is null).ToList();
+            if (required.Count == 0 || typeInfo.Type.IsAbstract) continue;
+            var owner = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeInfo.Type);
+            var written = System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(owner, typeInfo))!.AsObject();
+            missing.AddRange(required.Where(p => !written.ContainsKey(p.Name)).Select(p => $"{typeInfo.Type.Name}.{p.Name}"));
+        }
+        Assert.IsEmpty(missing, $"Required, and left out when they are the default of their type, so they need [JsonIgnore(Condition = JsonIgnoreCondition.Never)]:\n{string.Join("\n", missing)}");
+    }
+
     /// <summary>Every object type written in a plan, found from <see cref="Plan"/> through properties, collections and derived types.</summary>
     private static IEnumerable<JsonTypeInfo> TypesOfThePlan()
     {

@@ -44,4 +44,23 @@ public class SpeedMappingTests
         Assert.AreEqual(80, fastTrain.EffectiveScaleSpeed(stretch), "Train MaxSpeed below the stretch limit wins.");
         Assert.AreEqual(100, defaultTrain.EffectiveScaleSpeed(stretch), "Category default (120) is capped by the stretch limit (100).");
     }
+
+    [TestMethod]
+    public void OnAStretchWithoutASpeedTrainsRunAtTheirOwnSpeed()
+    {
+        TestDataFactory.Init();
+        var stretch = TestDataFactory.Layout().TrackStretches.First();
+        stretch.Speed = 0;
+
+        var category = new TrainCategory { Id = 1, Name = "Express", DefaultSpeed = 160 };
+        var train = new Train(1, category, 1) { Category = category };
+        var uncategorised = new Train(2, category, 2) { Category = null };
+
+        Assert.AreEqual(160, train.EffectiveScaleSpeed(stretch));
+        Assert.AreEqual(TrackStretchFacts.AssumedSpeed, uncategorised.EffectiveScaleSpeed(stretch));
+        var settings = new TimeAndSpeedSettings();
+        var atAssumedSpeed = stretch.Copy();
+        atAssumedSpeed.Speed = TrackStretchFacts.AssumedSpeed;
+        Assert.AreEqual(TrackStretchTiming.RunningMinutes(atAssumedSpeed, settings), TrackStretchTiming.RunningMinutes(stretch, settings));
+    }
 }

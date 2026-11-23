@@ -13,7 +13,7 @@ public sealed class CatalogueTests
 {
     private static string BuiltIn => File.ReadAllText(Path.Combine("TestData", "builtin.catalogue.json"));
 
-    private static DrawingCatalogue Read(string json)
+    private static Catalogue Read(string json)
     {
         var result = new CatalogueImporter().Import(json);
         Assert.IsTrue(result.IsSuccess, string.Join(", ", result.Messages.Select(m => m.Text)));
@@ -65,9 +65,9 @@ public sealed class CatalogueTests
     {
         var served = Read(BuiltIn);
         var fremo = served.FindStandard("FREMO/H0-RE")!;
-        var user = DrawingCatalogue.Empty.With(fremo.With(s => s.RailTopHeight = 1250));
+        var user = Catalogue.Empty.With(fremo.With(s => s.RailTopHeight = 1250));
 
-        var merged = DrawingCatalogue.Merge(served, user);
+        var merged = Catalogue.Merge(served, user);
 
         Assert.AreEqual(1250, merged.FindStandard(fremo.Id!.Value)!.RailTopHeight);
         Assert.HasCount(served.Standards.Count, merged.Standards);
@@ -87,10 +87,10 @@ public sealed class CatalogueTests
     [TestMethod]
     public void StandardsWithoutAnIdDontReplaceEachOther()
     {
-        var served = DrawingCatalogue.Empty.With(new ModuleStandard { ShortName = "Served" });
-        var user = DrawingCatalogue.Empty.With(new ModuleStandard { ShortName = "Mine" }).With(new ModuleStandard { ShortName = "Also mine" });
+        var served = Catalogue.Empty.With(new ModuleStandard { ShortName = "Served" });
+        var user = Catalogue.Empty.With(new ModuleStandard { ShortName = "Mine" }).With(new ModuleStandard { ShortName = "Also mine" });
 
-        var merged = DrawingCatalogue.Merge(served, user);
+        var merged = Catalogue.Merge(served, user);
 
         CollectionAssert.AreEquivalent(new[] { "Served", "Mine", "Also mine" }, merged.Standards.Select(s => s.ShortName).ToArray());
     }

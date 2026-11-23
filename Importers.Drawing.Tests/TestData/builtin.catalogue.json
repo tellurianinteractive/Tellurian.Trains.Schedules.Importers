@@ -1,7 +1,7 @@
 {
   "format": "tellurian-drawing",
   "kind": "catalogue",
-  "schemaVersion": 2,
+  "schemaVersion": 1,
   "appVersion": "0.1.0",
   "content": {
     "version": "0.3-provisional",

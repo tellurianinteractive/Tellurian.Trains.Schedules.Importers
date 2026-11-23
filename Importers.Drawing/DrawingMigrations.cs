@@ -11,8 +11,6 @@ namespace Tellurian.Trains.Schedules.Importers.Drawing;
 /// </summary>
 /// <remarks>
 /// Every step is idempotent: it finds the earlier shape by its properties and leaves content of today's shape as it is.
-/// Until schema version 2 is released, the last step is also run on files of the current version, which development
-/// builds wrote in earlier shapes (<see cref="IsDraftUpgraded"/>).
 /// </remarks>
 public static class DrawingMigrations
 {
@@ -31,9 +29,6 @@ public static class DrawingMigrations
     private const string Obstacles = "obstacles";
     private const string Doors = "doors";
     private const string NoGoZones = "noGoZones";
-
-    /// <summary>Whether the step to the current schema version also runs on files of that version: true until version 2 is released.</summary>
-    public const bool IsDraftUpgraded = true;
 
     /// <summary>The file kind of <paramref name="kind"/> with its migrations, for <see cref="FileEnvelope"/>.</summary>
     public static FileKind FileKind(DrawingFileKind kind) => DrawingFileFormat.FileKind(kind) with { Migrations = StepsOf(kind) };
@@ -110,7 +105,10 @@ public static class DrawingMigrations
         DrawingFileKind.EndProfile => [new(1, content => { EndProfileToVersion2(content); return content; })],
         DrawingFileKind.Catalogue => [new(1, content => { CatalogueToVersion2(content); return content; })],
         DrawingFileKind.Hall => [new(1, content => { HallToVersion2(content); return content; })],
-        _ => throw new NotSupportedException($"The {DrawingFileFormat.Name(kind)} file is still read by Module Draw."),
+        // No version of Module Draw has let anyone make a hall plan before the shape of version 2 (owner's decision
+        // 2026-11-22): earlier hall plan files are refused as having no migration.
+        DrawingFileKind.HallPlan => [],
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown file kind."),
     };
 
     private static void MoveRegistryId(JsonNode? node, string name)

@@ -3232,4 +3232,34 @@
   <data name="LayoutRevisionNewPlan" xml:space="preserve">
     <value>Make a new plan</value>
   </data>
+  <data name="MeasuredMeters" xml:space="preserve">
+    <value>Measured (m)</value>
+  </data>
+  <data name="MeasuredDistanceHint" xml:space="preserve">
+    <value>Measured in the hall plan: {0} m</value>
+  </data>
+  <data name="UseMeasured" xml:space="preserve">
+    <value>Use measured</value>
+  </data>
+  <data name="ModulesSpeedHint" xml:space="preserve">
+    <value>From the modules: {0} km/h</value>
+  </data>
+  <data name="ModulesSpeedMissingHint" xml:space="preserve">
+    <value>No module has a speed limit</value>
+  </data>
+  <data name="UseModulesSpeed" xml:space="preserve">
+    <value>Use the modules' speed</value>
+  </data>
+  <data name="SuggestFromLines" xml:space="preserve">
+    <value>Suggest from lines</value>
+  </data>
+  <data name="SuggestedTimetableStretches" xml:space="preserve">
+    <value>Timetable stretches from the hall plan's lines:</value>
+  </data>
+  <data name="NoSuggestedTimetableStretches" xml:space="preserve">
+    <value>The hall plan's lines give no timetable stretches.</value>
+  </data>
+  <data name="TrackStretchFollowsModules" xml:space="preserve">
+    <value>This stretch follows the hall plan's modules: its operation locations can only be swapped.</value>
+  </data>
 </root>

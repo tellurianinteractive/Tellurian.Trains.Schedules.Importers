@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 
@@ -8,10 +10,13 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
 public sealed record EndProfileCompatibilityOverride : ExtensibleRecord
 {
     /// <summary>The id of one end profile of the pair.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid FirstEndProfileId { get; init; }
     /// <summary>The id of the other end profile of the pair.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required Guid SecondEndProfileId { get; init; }
     /// <summary>The fit that replaces the rule result.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required JointFit Fit { get; init; }
     /// <summary>Why the override exists, if noted.</summary>
     public string? Note { get; init; }
