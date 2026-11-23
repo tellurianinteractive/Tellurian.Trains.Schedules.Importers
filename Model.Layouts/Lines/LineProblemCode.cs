@@ -44,4 +44,19 @@ public enum LineProblemCode
 
     /// <summary>The tracks are drawn, but there is no way along them from one location's centre to the next.</summary>
     NoTrackPath = 11,
+
+    /// <summary>A module in a hall plan's lines can't be placed: its group has no anchor, or nothing joins it to the anchor.</summary>
+    ModuleNotPlaced = 12,
+
+    /// <summary>A joint names an exit that the module's drawing doesn't draw, so the next module can't be placed against it.</summary>
+    ExitNotDrawn = 13,
+
+    /// <summary>A loop or rejoining line doesn't close within the hall plan's joint gap and angle (VA-5).</summary>
+    ClosureGapTooLarge = 14,
+
+    /// <summary>The rail tops at a joint differ by more than the hall plan's height tolerance (VA-10).</summary>
+    HeightStepTooLarge = 15,
+
+    /// <summary>The two ends of a joint are incompatible: their track geometry differs (HP-11).</summary>
+    JointDoesNotFit = 16,
 }

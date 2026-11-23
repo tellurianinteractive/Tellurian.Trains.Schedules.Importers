@@ -26,6 +26,9 @@ internal sealed class LineJoins
     /// <summary>Every joint, once from each of its two exits.</summary>
     public IEnumerable<KeyValuePair<ExitReference, LineJoin>> All => _joins;
 
+    /// <summary>Every joint once, seen from the exit the line runs from.</summary>
+    public IEnumerable<KeyValuePair<ExitReference, LineJoin>> Forward => _joins.Where(j => j.Value.IsForward);
+
     public bool TryGet(ExitReference exit, [MaybeNullWhen(false)] out LineJoin join) => _joins.TryGetValue(exit, out join);
 
     public bool IsJoined(ExitReference exit) => _joins.ContainsKey(exit);
@@ -46,10 +49,10 @@ internal sealed class LineJoins
         if (line.StartAt is { } start) AddJoin(start, ExitReference.To(entries[0].ModuleId, entries[0].Entry), line.Id, 0);
         for (var i = 1; i < entries.Count; i++)
             AddJoin(ExitReference.To(entries[i - 1].ModuleId, entries[i - 1].Exit), ExitReference.To(entries[i].ModuleId, entries[i].Entry), line.Id, i);
-        if (line.EndAt is { } end) AddJoin(ExitReference.To(entries[^1].ModuleId, entries[^1].Exit), end, line.Id, entries.Count);
+        if (line.EndAt is { } end) AddJoin(ExitReference.To(entries[^1].ModuleId, entries[^1].Exit), end, line.Id, entries.Count, isClosing: true);
     }
 
-    private void AddJoin(ExitReference from, ExitReference to, int lineId, int position)
+    private void AddJoin(ExitReference from, ExitReference to, int lineId, int position, bool isClosing = false)
     {
         if (!IsValid(from) | !IsValid(to)) return;
         if (_joins.ContainsKey(from) || _joins.ContainsKey(to))
@@ -58,8 +61,8 @@ internal sealed class LineJoins
             _log.Report(new(LineProblemCode.ExitJoinedTwice, twice.ModuleId, twice.Place));
             return;
         }
-        _joins[from] = new(to, lineId, position, true);
-        _joins[to] = new(from, lineId, position, false);
+        _joins[from] = new(to, lineId, position, true, isClosing);
+        _joins[to] = new(from, lineId, position, false, isClosing);
     }
 
     private bool IsValid(ExitReference exit)
