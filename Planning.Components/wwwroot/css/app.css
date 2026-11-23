@@ -1047,6 +1047,20 @@ code {
         white-space: nowrap;
     }
 
+    /* An input with a hint below it, e.g. the distance measured in the hall plan, kept in one cell of the grid. */
+    .form-grid .with-hint {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .form-grid .hint {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #555;
+    }
+
     .form-grid input[type="text"] {
         width: 22rem;
         max-width: 100%;

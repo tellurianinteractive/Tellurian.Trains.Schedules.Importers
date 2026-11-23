@@ -3218,4 +3218,31 @@
   <data name="LayoutRevisionNewPlan" xml:space="preserve">
     <value>Gör en ny plan</value>
   </data>
+  <data name="MeasuredMeters" xml:space="preserve">
+    <value>Uppmätt (m)</value>
+  </data>
+  <data name="MeasuredDistanceHint" xml:space="preserve">
+    <value>Uppmätt i hallplanen: {0} m</value>
+  </data>
+  <data name="UseMeasured" xml:space="preserve">
+    <value>Använd uppmätt</value>
+  </data>
+  <data name="ModulesSpeedHint" xml:space="preserve">
+    <value>Från modulerna: {0} km/h</value>
+  </data>
+  <data name="ModulesSpeedMissingHint" xml:space="preserve">
+    <value>Ingen modul har någon hastighetsgräns</value>
+  </data>
+  <data name="UseModulesSpeed" xml:space="preserve">
+    <value>Använd modulernas hastighet</value>
+  </data>
+  <data name="SuggestFromLines" xml:space="preserve">
+    <value>Föreslå från linjerna</value>
+  </data>
+  <data name="SuggestedTimetableStretches" xml:space="preserve">
+    <value>Tidtabellssträckor från hallplanens linjer:</value>
+  </data>
+  <data name="NoSuggestedTimetableStretches" xml:space="preserve">
+    <value>Hallplanens linjer ger inga tidtabellssträckor.</value>
+  </data>
 </root>

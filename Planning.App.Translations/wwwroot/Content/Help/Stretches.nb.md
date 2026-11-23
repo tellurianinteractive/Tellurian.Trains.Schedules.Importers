@@ -17,6 +17,14 @@ strekningene som er uenige – rett det ved å redigere én av dem slik at alle 
 En banestrekning som inngår i en ruteplanstrekning, kan ikke slettes før den er fjernet fra
 den ruteplanstrekningen.
 
+I en plan laget fra en hallplan, der modulene er satt sammen i linjer, lages banestrekningene ut
+fra linjene: lengden er modulenes lengder fra midten av ett driftssted til det neste, og hastigheten
+er modulenes hastighetsgrenser, hver vektet etter lengden på sin modul. Kolonnen **Målt (m)** viser
+lengden målt i hallplanen. En lengde, hastighet eller tid du endrer, er din og beholdes når en nyere
+versjon av hallplanen leses inn; **Bruk målt** og **Bruk modulenes hastighet** får strekningen til å
+følge hallplanen igjen. En banestrekning uten hastighet gir en advarsel; togene kjører der med sin
+egen hastighet, høyst 200 km/t.
+
 ### Togledelsesstrekninger
 
 En **togledelsesstrekning** går mellom to steder der tog klareres – en **bemannet** stasjon, en
@@ -59,6 +67,11 @@ velger blant på fanen **Grafisk ruteplan**, og hver blir én graf.
 For å bygge én gir du den et nummer (og en valgfri beskrivelse) og legger deretter til banestrekninger i traséen
 én om gangen. Bare banestrekninger som fortsetter der traséen for øyeblikket slutter, tilbys, slik at
 traséen alltid forblir sammenhengende. Editoren viser de resulterende stasjonene og den samlede avstanden.
+
+I en plan laget fra en hallplan foreslår **Foreslå fra linjene** én ruteplanstrekning for hver av
+hallplanens linjer, der en sidelinje begynner ved driftsstedet den går ut fra. Ingenting legges til
+før du velger **Legg til**: ruteplanstrekninger kan overlappe, og en lang linje deles ofte i kortere,
+så du kan også lage dem selv.
 
 ### Anbefalt arbeidsrekkefølge
 

@@ -17,6 +17,16 @@ die Abschnitte auf, die nicht übereinstimmen – beheben Sie das, indem Sie ein
 Ein Streckenabschnitt, der Teil eines Fahrplanabschnitts ist, kann erst gelöscht werden, wenn er aus diesem
 Fahrplanabschnitt entfernt wurde.
 
+In einem Plan aus einem Hallenplan, dessen Module in Linien verbunden sind, werden die
+Streckenabschnitte aus den Linien gebildet: die Länge ist die der Module von der Mitte einer
+Betriebsstelle bis zur nächsten, und die Geschwindigkeit sind die Geschwindigkeitsbegrenzungen der
+Module, jede nach der Länge ihres Moduls gewichtet. Die Spalte **Gemessen (m)** zeigt die im
+Hallenplan gemessene Länge. Eine Länge, Geschwindigkeit oder Zeit, die Sie ändern, gehört Ihnen und
+bleibt erhalten, wenn eine neuere Revision des Hallenplans geladen wird; **Gemessenen Wert verwenden**
+und **Geschwindigkeit der Module verwenden** lassen den Abschnitt wieder dem Hallenplan folgen. Ein
+Streckenabschnitt ohne Geschwindigkeit ergibt eine Warnung; Züge fahren dort mit ihrer eigenen
+Geschwindigkeit, höchstens 200 km/h.
+
 ### Zugleitabschnitte
 
 Ein **Zugleitabschnitt** verläuft zwischen zwei Stellen, an denen Züge abgefertigt werden – einem **besetzten** Bahnhof, einem
@@ -59,6 +69,12 @@ im Reiter **Bildfahrplan** auswählen, und jeder wird zu einer Grafik.
 Zum Aufbau geben Sie ihm eine Nummer (und eine optionale Beschreibung) und fügen dann seinem Laufweg Streckenabschnitte
 einzeln hinzu. Angeboten werden nur Streckenabschnitte, die dort fortsetzen, wo der Laufweg gerade endet, sodass
 der Laufweg stets zusammenhängend bleibt. Der Editor zeigt die entstehenden Bahnhöfe und die Gesamtentfernung.
+
+In einem Plan aus einem Hallenplan schlägt **Aus den Linien vorschlagen** für jede Linie des
+Hallenplans einen Fahrplanabschnitt vor, wobei eine Zweiglinie an der Betriebsstelle beginnt, von der
+sie abzweigt. Nichts wird hinzugefügt, bevor Sie **Hinzufügen** wählen: Fahrplanabschnitte können sich
+überschneiden, und eine lange Linie wird oft in kürzere geteilt, deshalb können Sie sie auch selbst
+anlegen.
 
 ### Empfohlene Arbeitsreihenfolge
 

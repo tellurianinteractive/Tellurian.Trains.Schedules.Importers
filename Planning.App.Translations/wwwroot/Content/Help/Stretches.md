@@ -17,6 +17,14 @@ the stretches that disagree — fix them by editing one so they all run the same
 A track stretch that is part of a timetable stretch cannot be deleted until it is removed from that
 timetable stretch.
 
+In a plan made from a hall plan whose modules are joined in lines, the track stretches are made from
+the lines: the distance is the modules' lengths from the middle of one operation location to the
+next, and the speed is the modules' speed limits, each weighted by its module's length. The
+**Measured (m)** column shows the distance measured in the hall plan. A distance, speed or time you
+change is yours and is kept when a newer revision of the hall plan is loaded; **Use measured** and
+**Use the modules' speed** make the stretch follow the hall plan again. A track stretch without a
+speed gives a warning; trains run on it at their own speed, at most 200 km/h.
+
 ### Dispatch stretches
 
 A **dispatch stretch** runs between two places where trains are cleared — a **manned** station, a
@@ -59,6 +67,11 @@ pick from on the **Graphical timetable** tab, and each becomes one graph.
 To build one, give it a number (and an optional description), then add track stretches to its route
 one at a time. Only track stretches that continue from where the route currently ends are offered, so
 the route always stays connected. The editor shows the resulting stations and total distance.
+
+In a plan made from a hall plan, **Suggest from lines** proposes one timetable stretch for each of the
+hall plan's lines, a branch starting at the operation location it leaves from. Nothing is added until
+you choose **Add**: timetable stretches may overlap, and a long line is often divided into shorter
+ones, so you can also make them yourself.
 
 ### Recommended work order
 
