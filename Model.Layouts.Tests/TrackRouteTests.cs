@@ -104,6 +104,40 @@ public sealed class TrackRouteTests
     }
 
     [TestMethod]
+    public void ARouteRunsThroughATurnoutIntoItsPoints()
+    {
+        var layout = Layout();
+        var a = Straight(layout, Station("Aby"), 2000, SingleTrack);
+        var p = WithTurnout(layout, Plain("p"), throughThePoints: true);
+        var b = Straight(layout, Station("Bby"), 2000, SingleTrack);
+        layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
+
+        var result = layout.StretchesFromLines();
+
+        Assert.IsEmpty(result.Problems);
+        var route = result.Stretches.Single().Route!;
+        Assert.AreEqual(3.0, route.Distance, Precision);
+        var turnout = route.Pieces.Single(x => x.ModuleId == p.Id && x.TrackElementId == TurnoutId);
+        Assert.AreEqual(1, turnout.RouteNumber, "the straight route");
+        Assert.AreEqual(TurnoutLength, turnout.Length, Precision);
+    }
+
+    [TestMethod]
+    public void ARouteDoesntReverseAtATurnoutsPoints()
+    {
+        var layout = Layout();
+        var a = Straight(layout, Station("Aby"), 2000, SingleTrack);
+        var p = WithTurnout(layout, Plain("p"), throughThePoints: false);
+        var b = Straight(layout, Station("Bby"), 2000, SingleTrack);
+        layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
+
+        var result = layout.StretchesFromLines();
+
+        Assert.IsNull(result.Stretches.Single().Route, "the tracks are connected, but only by reversing at the points");
+        Assert.AreEqual(new LineProblem(LineProblemCode.NoTrackPath, a.Id), result.Problems.Single());
+    }
+
+    [TestMethod]
     public void AStretchsMeasuredDistanceIsDerivedAndTheEnteredOneKept()
     {
         var layout = Layout();
@@ -181,6 +215,48 @@ public sealed class TrackRouteTests
     /// A single-track module of 1000 mm whose track turns back on itself twice: from the left exit to the middle, back
     /// up to the left, and across to the right exit. Every way through it reverses at a track end.
     /// </summary>
+    private const int TurnoutId = 3;
+    private const double TurnoutLength = 300;
+
+    /// <summary>
+    /// A single-track module of 1000 mm with a left turnout whose points are at x = 800, its routes running back towards
+    /// the left exit: the left exit's track meets the end of the straight route. With <paramref name="throughThePoints"/>,
+    /// a track runs on from the points to the right exit. Without it, the only way to the right exit is to reverse at the
+    /// points onto the diverging route, which curves round and leads there.
+    /// </summary>
+    private static LayoutModule WithTurnout(Layout layout, Module module, bool throughThePoints)
+    {
+        const double length = 1000;
+        const double points = 800;
+        var turnout = new Turnout { Id = TurnoutId, Start = new(new(points, 0), Angle.Half), Kind = TurnoutKind.Left, Length = TurnoutLength, Radius = 600, Angle = 12 };
+        var elements = new List<TrackElement>
+        {
+            new StraightTrack { Id = 1, Start = Pose.Origin, Length = 200 },
+            new StraightTrack { Id = 2, Start = new(new(200, 0), Angle.Zero), Length = points - TurnoutLength - 200 },
+            turnout,
+        };
+        Pose rightExit;
+        if (throughThePoints)
+        {
+            elements.Add(new StraightTrack { Id = 4, Start = new(new(points, 0), Angle.Zero), Length = length - points });
+            rightExit = new(new(length, 0), Angle.Zero);
+        }
+        else
+        {
+            var round = new CurvedTrack { Id = 4, Start = turnout.Routes()[1].EndPose, Radius = 150, Angle = 168 };
+            var turned = round.Routes()[0].EndPose;
+            elements.Add(round);
+            elements.Add(new StraightTrack { Id = 5, Start = turned, Length = length - turned.Position.X });
+            rightExit = new(new(length, turned.Position.Y), Angle.Zero);
+        }
+        var reference = new CatalogueReference(SingleTrack.Id, SingleTrack.Designation);
+        module.Drawing.MainPath = PathDrawing.From(new PathBuilder(Pose.Origin).Straight(length).Build());
+        module.Drawing.Exits.Add(new() { Label = "L", Direction = ExitSide.Left, EndProfile = reference, Pose = new(Point.Origin, Angle.Half) });
+        module.Drawing.Exits.Add(new() { Label = "R", Direction = ExitSide.Right, EndProfile = reference, Pose = rightExit });
+        module.Drawing.TrackElements.AddRange(elements);
+        return layout.Place(module);
+    }
+
     private static LayoutModule Kinked(Layout layout, Module module)
     {
         const double length = 1000;
