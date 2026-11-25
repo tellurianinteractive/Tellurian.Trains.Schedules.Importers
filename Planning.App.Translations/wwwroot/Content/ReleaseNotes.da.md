@@ -16,6 +16,7 @@
 
 - **To spor med samme betegnelse er en konflikt.** Et driftssted med to eller flere spor med samme betegnelse vises under **Konflikter** og fører til fanen **Driftssteder**. Planen kan stadig gemmes.
 - **En banestrækning uden hastighed giver en advarsel.** Den vises under **Konflikter** som en advarsel og fører til fanen **Strækninger**. Togene kører der med deres egen hastighed, højst 200 km/t.
+- **Ekspeditionslister: første session gråtones også efter lokførerens tjeneste.** Første sessions afkrydsningsfelt er nu også gråtonet for et tog, hvis lokførers tjeneste begynder før første session, da lokføreren endnu ikke er i tjeneste.
 
 ## Version 1.4.7
 

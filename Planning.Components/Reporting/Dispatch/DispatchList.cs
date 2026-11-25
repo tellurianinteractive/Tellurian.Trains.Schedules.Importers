@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Model.Dispatching;
+
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch;
 
 /// <summary>
@@ -69,24 +71,10 @@ public sealed record DispatchList(
         var dispatched = layout is not null && station is Station dispatcher
             ? layout.LocationsDispatchedBy(dispatcher)
             : [station];
-
-        var trainList = trains.ToList();
-        var rows = dispatched
-            .SelectMany(location => trainList
-                .SelectMany(train => DispatchRow.Build(train, location, settings, plan, isRemote: !location.Equals(station)))
-                // A remote call straight next to the train's call at the station is already covered by the
-                // rows there: the dispatcher sets that route when clearing the train in or out. A call
-                // elsewhere in the run — a train from the station that comes back through the junction
-                // after turning, or one that never calls at the station at all — has no such row.
-                .Where(row => !row.IsRemote || !IsNextToCallAt(row.Call, station)))
-            // Time first, because the list is worked through in time order. The tie-breaks only make the
-            // order of simultaneous clearances stable from one print to the next: arrivals before
-            // departures, since a train pulling in has to be cleared in before the platform is given away.
-            .OrderBy(row => row.TimeOfDay)
-            .ThenBy(row => row.Kind is DispatchRowKind.Arrival or DispatchRowKind.ShuntingTask ? 0 : 1)
-            .ThenBy(row => row.TrainIdentity, StringComparer.CurrentCulture)
+        // The clearances, their order and which remote calls are left out are the model's rules (Clearances).
+        var rows = station.Clearances(trains, settings, plan)
+            .Select(clearance => DispatchRow.FromClearance(clearance, settings, plan))
             .ToList();
-
         // Only the ones that can be rung: see DispatchNeighbour for why a number is not optional here.
         var neighbours = layout is not null && station is Station endpoint
             ? layout.DispatchNeighboursOf(endpoint)
@@ -198,14 +186,5 @@ public sealed record DispatchList(
                 };
             }),
         ];
-    }
-
-    private static bool IsNextToCallAt(StationCall call, OperationLocation station)
-    {
-        var calls = call.Train.CallsInRunOrder;
-        var index = -1;
-        for (var i = 0; i < calls.Count; i++) if (calls[i] == call) index = i;
-        return (index > 0 && calls[index - 1].OperationLocation.Equals(station)) ||
-               (index >= 0 && index < calls.Count - 1 && calls[index + 1].OperationLocation.Equals(station));
     }
 }

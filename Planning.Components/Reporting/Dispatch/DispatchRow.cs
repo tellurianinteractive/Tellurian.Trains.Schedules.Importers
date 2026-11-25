@@ -1,3 +1,5 @@
+using Tellurian.Trains.Schedules.Model.Dispatching;
+
 namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Dispatch;
 
 /// <summary>Which clearance a dispatch-list row stands for.</summary>
@@ -184,26 +186,15 @@ public sealed class DispatchRow
     };
 
     /// <summary>
-    /// Builds the rows one train contributes to one station's dispatch list.
+    /// Builds the rows one train contributes to one station's dispatch list: one per clearance
+    /// (see <c>ClearancesAt</c> in the model, which holds the rules).
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// How many rows a call produces is decided by the <em>times</em>, not by whether the train stops:
-    /// what the list schedules is the dispatcher's clearances, and a train standing at the platform needs
-    /// two of those whether or not anyone gets on. A call whose arrival equals its departure is a single
-    /// moment and gets one row; the train's first call has no arrival to clear and its last no departure.
-    /// </para>
-    /// <para>
-    /// Trains running past are included, and deliberately regardless of the location's <c>HidePassings</c>
-    /// setting: that flag suppresses passings where they are noise, but a dispatcher clears every train
-    /// through their station, so on this list a missing one is a train nobody is expecting.
-    /// </para>
-    /// </remarks>
     /// <param name="train">The train to take calls from.</param>
     /// <param name="station">The station the list is for.</param>
     /// <param name="settings">How sessions are rendered inside notes.</param>
-    /// <param name="plan">The plan whose vehicle schedules say what is done with the vehicles here.
-    /// Omit it and the rows carry no vehicle instructions.</param>
+    /// <param name="plan">The plan whose vehicle schedules say what is done with the vehicles here, and whose
+    /// driver duties decide which trains run in the first session. Omit it and the rows carry no vehicle
+    /// instructions.</param>
     /// <param name="isRemote">Whether <paramref name="station"/> is worked from afar by the dispatcher
     /// the list is for; see <see cref="IsRemote"/>.</param>
     public static IEnumerable<DispatchRow> Build(
@@ -211,84 +202,44 @@ public sealed class DispatchRow
     {
         train = train.ValueOrException(nameof(train));
         station = station.ValueOrException(nameof(station));
+        return train.ClearancesAt(station, settings, plan, isRemote).Select(clearance => FromClearance(clearance, settings, plan));
+    }
 
-        var calls = train.CallsInRunOrder;
-        for (var i = 0; i < calls.Count; i++)
+    /// <summary>
+    /// The row for one clearance, with the notes and track that go with it.
+    /// </summary>
+    /// <param name="clearance">The clearance the row stands for.</param>
+    /// <param name="settings">How sessions are rendered inside notes.</param>
+    /// <param name="plan">See <see cref="Build"/>.</param>
+    public static DispatchRow FromClearance(Clearance clearance, SessionsSettings settings, Plan? plan = null)
+    {
+        var call = clearance.Call;
+        // The reader is the station, present at every session; what needs qualifying is when a meet
+        // does not happen on all the sessions this train runs, so the train's own sessions are the
+        // context — the row states one train's working.
+        var notes = call.StationNotes(call.Train.Sessions, settings, plan);
+        var kind = clearance.Kind switch
         {
-            var call = calls[i];
-            if (!call.OperationLocation.Equals(station)) continue;
-
-            // The reader is the station, present at every session; what needs qualifying is when a meet
-            // does not happen on all the sessions this train runs, so the train's own sessions are the
-            // context — the row states one train's working.
-            var notes = call.StationNotes(train.Sessions, settings, plan);
-
-            var occupiesTrack = plan is null || call.OccupiesTrack(plan.Schedules);
-
-            if (call == train.ShuntingCall)
-            {
-                // A task is one span of work, not a movement: one row, at the time the work starts, with
-                // every note — the times themselves are in its shunting-task note, since the call is both
-                // origin and destination and so leaves both time columns blank.
-                yield return Row(call, DispatchRowKind.ShuntingTask, call.Arrival, notes, settings, sole: true, isRemote, occupiesTrack);
-                continue;
-            }
-            if (i == 0)
-            {
-                yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, settings, sole: true, isRemote, occupiesTrack);
-                continue;
-            }
-            if (i == calls.Count - 1)
-            {
-                yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, settings, sole: true, isRemote, occupiesTrack);
-                continue;
-            }
-            if (call.Arrival.Equals(call.Departure))
-            {
-                // One row cannot hold the arrival/departure split, so both halves' notes appear on it.
-                // Without this a note classified for the missing half would be silently dropped — most
-                // damagingly for the notes that only ever occur on a train running past.
-                yield return Row(call, DispatchRowKind.PassThrough, call.Departure, notes, settings, sole: true, isRemote, occupiesTrack);
-                continue;
-            }
-
-            yield return Row(call, DispatchRowKind.Arrival, call.Arrival, notes, settings, sole: false, isRemote, occupiesTrack);
-            yield return Row(call, DispatchRowKind.Departure, call.Departure, notes, settings, sole: false, isRemote, occupiesTrack);
-        }
-    }
-
-    // The meeting's first session begins after the operating window does: what lies before that moment
-    // was never worked on the first session. A train that began before it, or a clearance after midnight
-    // (reached on the first session only by the period wrapping round), is greyed there.
-    private static bool IsBeforeFirstSessionStart(StationCall call, Time time)
-    {
-        var firstSessionStart = call.OperationLocation.Layout?.Settings.General.FirstSessionStart ?? TimeSpan.Zero;
-        if (firstSessionStart <= TimeSpan.Zero) return false;
-        if (time.Value.Days > 0) return true;
-        var first = call.Train.CallsInRunOrder.FirstOrDefault();
-        return first is not null && first.Arrival.Value.Days == 0 && first.Arrival.Value < firstSessionStart;
-    }
-
-    private static DispatchRow Row(
-        StationCall call, DispatchRowKind kind, Time time, IReadOnlyList<ICallNote> notes,
-        SessionsSettings settings, bool sole, bool isRemote, bool occupiesTrack)
-    {
-        // Past midnight the train is on the next session or day, so the row is for those instead.
-        var sessions = call.Train.Sessions.ShiftedWithinPeriod(
-            time.Value.Days, settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions);
+            ClearanceKind.Arrival => DispatchRowKind.Arrival,
+            ClearanceKind.Departure => DispatchRowKind.Departure,
+            ClearanceKind.PassThrough => DispatchRowKind.PassThrough,
+            _ => DispatchRowKind.ShuntingTask,
+        };
         return new()
         {
-            IsOutsideFirstSession = IsBeforeFirstSessionStart(call, time),
-            IsRemote = isRemote,
-            OccupiesTrack = occupiesTrack,
+            IsOutsideFirstSession = clearance.IsOutsideFirstSession,
+            IsRemote = clearance.IsRemote,
+            OccupiesTrack = plan is null || call.OccupiesTrack(plan.Schedules),
             Call = call,
             Kind = kind,
-            Time = time,
-            Sessions = sessions,
+            Time = clearance.Time,
+            Sessions = clearance.Sessions,
             // Without the on-demand marker: that is stated as a note, and saying it in both places
             // would spend four lines of a narrow column repeating what the notes already say.
-            SessionsText = sessions.WithoutOnDemand.ToText(settings),
-            IsSoleRow = sole,
+            SessionsText = clearance.Sessions.WithoutOnDemand.ToText(settings),
+            IsSoleRow = clearance.IsSole,
+            // A pass-through or shunting task is one row that cannot hold the arrival/departure split, so both
+            // halves' notes appear on it: without this a note classified for the missing half would be dropped.
             Notes = kind switch
             {
                 DispatchRowKind.Arrival => [.. notes.Where(note => note.IsForArrival)],
