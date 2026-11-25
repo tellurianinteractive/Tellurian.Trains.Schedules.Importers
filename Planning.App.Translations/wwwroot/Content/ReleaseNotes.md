@@ -16,6 +16,7 @@
 
 - **Two tracks with the same designation are a conflict.** An operation location with two or more tracks of the same designation is listed under **Conflicts**, and leads to the **Operation locations** tab. The plan can still be saved.
 - **A track stretch without a speed is a warning.** It is listed under **Conflicts** as a warning, and leads to the **Stretches** tab. Trains run on it at their own speed, at most 200 km/h.
+- **Dispatch lists: the first session is greyed after the loco driver's duty too.** The first session's tick box is now also greyed for a train whose loco driver's duty begins before the first session does, since the loco driver is not on duty yet.
 
 ## Version 1.4.7
 

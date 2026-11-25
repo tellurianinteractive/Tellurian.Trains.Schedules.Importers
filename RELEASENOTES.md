@@ -1,5 +1,19 @@
 # Release Notes
 
+## Version 4.0.28
+
+The rules of a station's dispatch list move into the model, in a new `Model.Dispatching` namespace, for Dispatch and the planner to share.
+
+### New features
+
+- **Clearances.** `train.ClearancesAt(location, settings, plan, isRemote)` gives the clearances a train needs at a location in run order (`Clearance`, `ClearanceKind`: arrival, departure, pass-through or shunting task, with the time, the sessions shifted past midnight, and whether it is the call's only clearance, remote, or outside the first session). `station.Clearances(trains, settings, plan)` gives every clearance the dispatcher at a station gives over the operating day, in time order, including the locations they work from afar.
+- **Dispatch legs.** `train.DispatchLegs` divides a train's run into the parts cleared as one (`DispatchLeg`), with the dispatch stretch, the dispatchers at each end, and who has to agree (`DispatchLegKind`).
+- **The first session.** `plan.TrainsStartingBeforeFirstSession`, `plan.StartsBeforeFirstSession(train)` and `plan.SessionNumbersOf(train)`: when the meeting begins later than the operating window, a train does not run in the first session or day if it, or its driver duty, starts before then.
+
+### Changes
+
+- A clearance is outside the first session also when the train's driver duty starts before the first session begins.
+
 ## Version 4.0.27
 
 Module Draw's catalogue and hall plans in the shared model, and the layout engine: lines and joints in the layout, stretches worked out from them, routes along the drawn tracks, and the placement of a hall plan. Drawing file schema version 2 is complete.

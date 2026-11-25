@@ -16,6 +16,7 @@
 
 - **Två spår med samma beteckning är en konflikt.** En driftplats med två eller fler spår med samma beteckning visas under **Konflikter** och leder till fliken **Driftplatser**. Planen kan fortfarande sparas.
 - **En bansträcka utan hastighet ger en varning.** Den visas under **Konflikter** som en varning och leder till fliken **Sträckor**. Tågen kör där med sin egen hastighet, högst 200 km/h.
+- **Klarerarlistor: första passet gråas även efter lokförarens tjänst.** Kryssrutan för första passet är nu också gråad för ett tåg vars lokförartjänst börjar före första passet, eftersom lokföraren ännu inte är i tjänst.
 
 ## Version 1.4.7
 

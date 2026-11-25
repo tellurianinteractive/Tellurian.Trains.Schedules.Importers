@@ -16,6 +16,7 @@
 
 - **Zwei Gleise mit derselben Bezeichnung sind ein Konflikt.** Eine Betriebsstelle mit zwei oder mehr Gleisen derselben Bezeichnung steht unter **Konflikte** und führt zum Reiter **Betriebsstellen**. Der Plan kann weiterhin gespeichert werden.
 - **Ein Streckenabschnitt ohne Geschwindigkeit ergibt eine Warnung.** Er steht unter **Konflikte** als Warnung und führt zum Reiter **Strecken**. Züge fahren dort mit ihrer eigenen Geschwindigkeit, höchstens 200 km/h.
+- **Zugmeldelisten: die erste Sitzung wird auch nach dem Dienst des Lokführers ausgegraut.** Das Kästchen der ersten Sitzung ist jetzt auch bei einem Zug ausgegraut, dessen Lokführerdienst vor der ersten Sitzung beginnt, da der Lokführer dann noch nicht im Dienst ist.
 
 ## Version 1.4.7
 
