@@ -286,6 +286,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} ({1}) and {2} ({3}) both have the signature {4} and operate in overlapping periods..
+        /// </summary>
+        internal static string CompanyPeriodsOverlap {
+            get {
+                return ResourceManager.GetString("CompanyPeriodsOverlap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operation location {0} has more than one track {1}..
         /// </summary>
         internal static string TrackDesignationNotUnique {

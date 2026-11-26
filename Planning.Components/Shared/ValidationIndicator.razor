@@ -115,6 +115,7 @@
         ValidationScope.Schedule or ValidationScope.Vehicle => "schedules",
         ValidationScope.Duty => "duties",
         ValidationScope.Layout when error.ErrorType == ValidationErrorType.TrackStretchSpeedMissing => "stretches",
+        ValidationScope.Layout when error.ErrorType == ValidationErrorType.CompanyPeriodsOverlap => "companies",
         ValidationScope.Layout => "operation-locations",
         _ => error.ErrorType switch
         {

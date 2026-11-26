@@ -1,5 +1,20 @@
 # Versionsnyheder
 
+## Version 1.5.1
+
+### Nye funktioner
+
+- **Selskaber med samme signatur.** På fanen **Selskaber** kan flere selskaber nu have samme signatur, for eksempel ét for hver periode med sit eget logo. Kun et selskab med både samme navn og samme signatur afvises, fordi det allerede findes.
+- **Driftsperiode.** Et selskab kan få de år, det er i drift, **I drift fra år** og **I drift til år**, begge valgfrie. Perioden vises i listen over selskaber.
+
+### Ændringer
+
+- **Overlappende perioder er en konflikt.** To selskaber med samme signatur, der er i drift i samme år, vises under **Konflikter** som en advarsel, der fører til fanen **Selskaber**, hvor perioden er markeret. Et selskab uden år overlapper alle andre med samme signatur.
+
+### Rettelser
+
+- **Kontrol af planen med et tomt omløb.** Kontrollen af planen fejler ikke længere, når et lokomotivs omløb endnu ikke har nogen togafsnit.
+
 ## Version 1.5.0
 
 ### Brydende ændringer

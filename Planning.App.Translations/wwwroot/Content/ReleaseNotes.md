@@ -1,5 +1,20 @@
 ﻿# Release notes
 
+## Version 1.5.1
+
+### New features
+
+- **Companies with the same signature.** On the **Companies** tab, several companies may now have the same signature, for example one for each period with a logo of its own. Only a company with both the same name and the same signature is refused as already there.
+- **Operating period.** A company can be given the years it operates, **Operates from year** and **Operates to year**, both optional. The period is shown in the companies list.
+
+### Changes
+
+- **Overlapping periods are a conflict.** Two companies with the same signature that operate in the same year are listed under **Conflicts** as a warning, which leads to the **Companies** tab, where the period is marked. A company without years overlaps every other with its signature.
+
+### Fixes
+
+- **Checking the plan with an empty schedule.** Checking the plan no longer fails when a locomotive's schedule has no train parts yet.
+
 ## Version 1.5.0
 
 ### Breaking changes

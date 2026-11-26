@@ -150,7 +150,7 @@ public static class TrackHoldExtensions
         public bool IsCollectedBy(Train train, IEnumerable<Schedule> schedules) =>
             !hold.IsIdle && hold.DepartingTrain is { } departing &&
             schedules.Any(s => s.Vehicles.Any(v => v.IsTraction) && s.OrderedParts is var parts &&
-                Enumerable.Range(0, parts.Count - 1).Any(i =>
+                Enumerable.Range(0, Math.Max(parts.Count - 1, 0)).Any(i =>
                     parts[i].Train.Equals(train) &&
                     parts[i + 1].Train.Equals(departing) &&
                     parts[i].To.OperationLocation.Equals(hold.Track.Station) &&

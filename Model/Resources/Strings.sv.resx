@@ -357,6 +357,9 @@
   <data name="TrackStretchSpeedMissing" xml:space="preserve">
     <value>Bansträckan {0}–{1} har ingen hastighet; tågen kör med sin egen hastighet, högst {2} km/h.</value>
   </data>
+  <data name="CompanyPeriodsOverlap" xml:space="preserve">
+    <value>{0} ({1}) och {2} ({3}) har båda signaturen {4} och verkar under överlappande perioder.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Driftplatsen {0} har fler än ett spår {1}.</value>
   </data>

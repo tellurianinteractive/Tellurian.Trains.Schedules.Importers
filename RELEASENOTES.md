@@ -1,5 +1,22 @@
 # Release Notes
 
+## Version 4.1.0
+
+Companies may share a signature, e.g. one per period with a logo of its own.
+
+### Breaking changes
+
+- **A company is identified by its `Id`, not its signature.** `Company.Equals` and `GetHashCode` use the id; a company not yet given an id (0) is only equal to itself. `Layout.Add` adds a company with a signature already in the layout, and `layout.Company(signature)` returns the one with the lowest id instead of throwing when there are several.
+
+### New features
+
+- **Operating period.** `Company.OperatesFromYear` and `OperatesToYear` (optional, inclusive), `company.OperatesInSamePeriodAs(other)` and `OperatingPeriodText` (e.g. "1988–2008"). Stored in the plan file and the database: a database written by an earlier version must be written again.
+- **Overlapping company periods are a conflict.** New `ValidationErrorType.CompanyPeriodsOverlap` (layout scope, always run), once for each pair of companies that share a signature and operate in a common year; a missing year leaves the period open at that end. `ValidationError.Company` and `OtherCompany` carry the two. New `Strings` resource `CompanyPeriodsOverlap` in English, Danish, German, Norwegian and Swedish.
+
+### Fixes
+
+- Validating a plan no longer fails when a traction schedule has no train parts yet.
+
 ## Version 4.0.28
 
 The rules of a station's dispatch list move into the model, in a new `Model.Dispatching` namespace, for Dispatch and the planner to share.

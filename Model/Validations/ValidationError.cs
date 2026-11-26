@@ -77,6 +77,15 @@ public sealed record ValidationError
     public ScheduledObject? Vehicle { get; init; }
 
     /// <summary>
+    /// The company this error is attributed to, for <see cref="ValidationErrorType.CompanyPeriodsOverlap"/>:
+    /// the later of two companies sharing a signature in overlapping periods. Null for other errors.
+    /// </summary>
+    public Company? Company { get; init; }
+
+    /// <summary>The other company of a <see cref="ValidationErrorType.CompanyPeriodsOverlap"/>, or null.</summary>
+    public Company? OtherCompany { get; init; }
+
+    /// <summary>
     /// The driver duty this error is attributed to, for <see cref="ValidationScope.Duty"/> errors
     /// (a part double-assigned across duties, or parts overlapping within a duty). Lets the Duties tab
     /// mark the exact duty. Null for non-duty errors.
@@ -106,7 +115,8 @@ public sealed record ValidationError
     {
         ValidationErrorType.LockKeyIgnored or
         ValidationErrorType.TrackDesignationNotUnique or
-        ValidationErrorType.TrackStretchSpeedMissing => ValidationScope.Layout,
+        ValidationErrorType.TrackStretchSpeedMissing or
+        ValidationErrorType.CompanyPeriodsOverlap => ValidationScope.Layout,
 
         ValidationErrorType.VehicleDoubleBooked or
         ValidationErrorType.VehicleNotClosed or
@@ -1020,6 +1030,26 @@ public sealed record ValidationError
         };
 
     /// <summary>
+    /// Creates an error for two companies that share a signature and operate in overlapping periods. It carries
+    /// both companies and no track, time or train.
+    /// </summary>
+    public static ValidationError CompanyPeriodsOverlap(
+        Company company,
+        Company other,
+        Message message) => new()
+        {
+            ErrorType = ValidationErrorType.CompanyPeriodsOverlap,
+            FromTrack = null,
+            ToTrack = null,
+            FromTime = null,
+            ToTime = null,
+            Trains = [],
+            Company = company,
+            OtherCompany = other,
+            Message = message
+        };
+
+    /// <summary>
     /// Creates an error for a designation that two or more tracks of one operation location share. It carries the
     /// second of them as its track, the one to rename or remove, and no time and no train.
     /// </summary>
@@ -1210,6 +1240,9 @@ public enum ValidationErrorType
 
     /// <summary>A track stretch has no speed, as when it is worked out from a hall plan; trains run on it at their own speed.</summary>
     TrackStretchSpeedMissing,
+
+    /// <summary>Two companies share a signature and operate in overlapping periods.</summary>
+    CompanyPeriodsOverlap,
 }
 
 /// <summary>
@@ -1235,6 +1268,7 @@ public enum ValidationScope
     Duty,
 
     /// <summary>A problem with the layout itself, not with anything running on it: a lock key the
-    /// manning has left meaningless. Resolved on the Operation Locations tab.</summary>
+    /// manning has left meaningless, a repeated track designation, a stretch without speed, or companies
+    /// sharing a signature in overlapping periods.</summary>
     Layout,
 }

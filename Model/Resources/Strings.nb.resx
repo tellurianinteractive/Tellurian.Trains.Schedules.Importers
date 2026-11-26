@@ -357,6 +357,9 @@
   <data name="TrackStretchSpeedMissing" xml:space="preserve">
     <value>Banestrekningen {0}–{1} har ingen hastighet; togene kjører med sin egen hastighet, høyst {2} km/t.</value>
   </data>
+  <data name="CompanyPeriodsOverlap" xml:space="preserve">
+    <value>{0} ({1}) og {2} ({3}) har begge signaturen {4} og opererer i overlappende perioder.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Driftsstedet {0} har mer enn ett spor {1}.</value>
   </data>

@@ -23,6 +23,7 @@ public static class ValidationExtensions
             result.AddRange(plan.GetTimetableValidationErrors(options));
             result.AddRange(plan.ValidateLockKeys());
             result.AddRange(plan.ValidateTrackDesignations());
+            result.AddRange(plan.ValidateCompanyPeriods());
             result.AddRange(plan.ValidateTrackStretchSpeeds());
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateOverlappingParts()));
             if (options.ValidateSchedules) result.AddRange(plan.Schedules.SelectMany(l => l.ValidateContiguity()));
@@ -105,6 +106,36 @@ public static class ValidationExtensions
         /// dispatch list are a fault in the layout however the plan is being validated. A plan with them can still be
         /// saved, to a file or a database.
         /// </remarks>
+        /// <summary>
+        /// Companies may share a signature, e.g. one per period with a logo of its own, but not in the same
+        /// year: then nothing tells which of them a train or vehicle of that time belongs to. Each pair that
+        /// overlaps is reported once, against the company that comes later in the layout.
+        /// </summary>
+        internal IEnumerable<ValidationError> ValidateCompanyPeriods()
+        {
+            var bySignature = plan.Layout.Companies
+                .GroupBy(c => c.Signature.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+            foreach (var group in bySignature)
+            {
+                var companies = group.ToArray();
+                for (var i = 1; i < companies.Length; i++)
+                {
+                    for (var j = 0; j < i; j++)
+                    {
+                        var (company, other) = (companies[i], companies[j]);
+                        if (!company.OperatesInSamePeriodAs(other)) continue;
+                        var message = Message.Warning(Strings.CompanyPeriodsOverlap,
+                            company.Name, PeriodText(company), other.Name, PeriodText(other), company.Signature);
+                        yield return ValidationError.CompanyPeriodsOverlap(company, other, message);
+                    }
+                }
+            }
+
+            static string PeriodText(Company company) =>
+                company.OperatingPeriodText is { Length: > 0 } text ? text : "–";
+        }
+
         internal IEnumerable<ValidationError> ValidateTrackDesignations()
         {
             foreach (var location in plan.Layout.OperationLocations)

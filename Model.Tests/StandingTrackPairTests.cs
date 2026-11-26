@@ -162,4 +162,21 @@ public class StandingTrackPairTests
         Assert.IsNull(parts[1].FromTrack);
         Assert.IsEmpty(Mismatches(plan));
     }
+
+    // A traction schedule without train parts yet must not break the test of whether a locomotive comes
+    // to fetch standing vehicles (it threw while the whole plan was validated).
+    [TestMethod]
+    public void ATractionScheduleWithoutPartsCollectsNoStandingVehicles()
+    {
+        var (plan, schedule, parts) = Arrange(1, 2);
+        var empty = plan.CreateSchedule();
+        plan.AssignVehicle(empty, plan.CreateVehicle(ScheduledObjectType.Locomotive, "T43", 43, null), Sessions.All);
+        var hold = new TrackHold(SnuTrack(plan, "1"), Time.FromHourAndMinute(12, 55), Time.FromHourAndMinute(13, 00), Sessions.All, schedule, parts[0].Train)
+        {
+            DepartingTrain = parts[1].Train,
+        };
+
+        Assert.IsFalse(hold.IsCollectedBy(parts[0].Train, [empty]));
+        _ = plan.GetValidationErrors(Validation).ToList();
+    }
 }

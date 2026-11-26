@@ -900,8 +900,8 @@
   <data name="CompanySignatureRequired" xml:space="preserve">
     <value>The signature is required.</value>
   </data>
-  <data name="CompanySignatureInUse" xml:space="preserve">
-    <value>A company with this signature already exists.</value>
+  <data name="CompanyNameAndSignatureInUse" xml:space="preserve">
+    <value>A company with this name and signature already exists.</value>
   </data>
   <data name="NotFound" xml:space="preserve">
     <value>Not found</value>
@@ -2274,6 +2274,18 @@
   </data>
   <data name="ServesLocations" xml:space="preserve">
     <value>Serves locations</value>
+  </data>
+  <data name="OperatingPeriod" xml:space="preserve">
+    <value>Operating period</value>
+  </data>
+  <data name="OperatesFromYear" xml:space="preserve">
+    <value>Operates from year</value>
+  </data>
+  <data name="OperatesToYear" xml:space="preserve">
+    <value>Operates to year</value>
+  </data>
+  <data name="OperatingPeriodReversed" xml:space="preserve">
+    <value>The first year must not be after the last year.</value>
   </data>
   <data name="CompanyLogo" xml:space="preserve">
     <value>Logo</value>

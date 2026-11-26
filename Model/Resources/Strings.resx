@@ -357,6 +357,9 @@
   <data name="TrackStretchSpeedMissing" xml:space="preserve">
     <value>Track stretch {0}–{1} has no speed; trains run at their own speed, at most {2} km/h.</value>
   </data>
+  <data name="CompanyPeriodsOverlap" xml:space="preserve">
+    <value>{0} ({1}) and {2} ({3}) both have the signature {4} and operate in overlapping periods.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Operation location {0} has more than one track {1}.</value>
   </data>

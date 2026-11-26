@@ -17,6 +17,9 @@ internal static class CompanyMapping
                 entity.Property(e => e.CountryId);
                 // A data URI, capped in the editor at roughly 64 KB encoded.
                 entity.Property(e => e.Logo);
+                entity.Property(e => e.OperatesFromYear);
+                entity.Property(e => e.OperatesToYear);
+                entity.Ignore(e => e.OperatingPeriodText);
 
                 entity.HasIndex(e => new { e.LayoutId, e.Signature }); // Not unique: the database holds any plan a plan file can; the model reports duplicates.
             });

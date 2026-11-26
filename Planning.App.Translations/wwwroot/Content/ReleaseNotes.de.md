@@ -1,5 +1,20 @@
 # Versionshinweise
 
+## Version 1.5.1
+
+### Neue Funktionen
+
+- **Gesellschaften mit demselben Kürzel.** Auf dem Reiter **Gesellschaften** können jetzt mehrere Gesellschaften dasselbe Kürzel haben, zum Beispiel eine für jeden Zeitraum mit eigenem Logo. Nur eine Gesellschaft mit demselben Namen und demselben Kürzel wird als bereits vorhanden abgewiesen.
+- **Betriebszeitraum.** Einer Gesellschaft können die Jahre gegeben werden, in denen sie tätig ist, **Tätig ab Jahr** und **Tätig bis Jahr**, beide optional. Der Zeitraum wird in der Liste der Gesellschaften angezeigt.
+
+### Änderungen
+
+- **Überlappende Zeiträume sind ein Konflikt.** Zwei Gesellschaften mit demselben Kürzel, die im selben Jahr tätig sind, werden unter **Konflikte** als Warnung aufgeführt, die zum Reiter **Gesellschaften** führt, wo der Zeitraum markiert ist. Eine Gesellschaft ohne Jahre überlappt alle anderen mit ihrem Kürzel.
+
+### Korrekturen
+
+- **Prüfung des Plans mit leerem Umlauf.** Die Prüfung des Plans schlägt nicht mehr fehl, wenn der Umlauf einer Lokomotive noch keine Zugabschnitte hat.
+
 ## Version 1.5.0
 
 ### Grundlegende Änderungen

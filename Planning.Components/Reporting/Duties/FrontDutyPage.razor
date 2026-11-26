@@ -82,7 +82,7 @@
                     @* The label stays for signatures: bare letter groups like "DB, SJ" need naming as
                        operators, where a logo does not. *@
                     <span class="label">@Translator("Operator"):</span>
-                    <strong>@string.Join(", ", Companies.Select(c => c.Signature))</strong>
+                    <strong>@string.Join(", ", Companies.Select(c => c.Signature).Distinct(StringComparer.OrdinalIgnoreCase))</strong>
                 }
             </p>
         }

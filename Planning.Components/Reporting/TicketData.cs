@@ -164,5 +164,6 @@ public static class TicketDataExtensions
                     // A tie is broken by signature, so the same plan always prints the same seller
                     // rather than whichever company the enumeration happened to reach first.
                     .ThenBy(byCompany => byCompany.Key.Signature, StringComparer.CurrentCulture)
+                    .ThenBy(byCompany => byCompany.Key.Id)
                     .First().Key);
 }

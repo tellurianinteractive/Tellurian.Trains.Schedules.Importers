@@ -357,6 +357,9 @@
   <data name="TrackStretchSpeedMissing" xml:space="preserve">
     <value>Der Streckenabschnitt {0}–{1} hat keine Geschwindigkeit; die Züge fahren mit ihrer eigenen Geschwindigkeit, höchstens {2} km/h.</value>
   </data>
+  <data name="CompanyPeriodsOverlap" xml:space="preserve">
+    <value>{0} ({1}) und {2} ({3}) haben beide das Kürzel {4} und sind in überlappenden Zeiträumen tätig.</value>
+  </data>
   <data name="TrackDesignationNotUnique" xml:space="preserve">
     <value>Die Betriebsstelle {0} hat mehr als ein Gleis {1}.</value>
   </data>

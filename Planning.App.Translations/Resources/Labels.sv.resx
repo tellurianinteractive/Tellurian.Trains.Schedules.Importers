@@ -849,8 +849,8 @@
   <data name="CompanySignatureRequired" xml:space="preserve">
     <value>Signaturen krävs.</value>
   </data>
-  <data name="CompanySignatureInUse" xml:space="preserve">
-    <value>Ett företag med denna signatur finns redan.</value>
+  <data name="CompanyNameAndSignatureInUse" xml:space="preserve">
+    <value>Ett företag med detta namn och denna signatur finns redan.</value>
   </data>
   <data name="Country" xml:space="preserve">
     <value>Land</value>
@@ -2260,6 +2260,18 @@
   </data>
   <data name="ServesLocations" xml:space="preserve">
     <value>Betjänar platser</value>
+  </data>
+  <data name="OperatingPeriod" xml:space="preserve">
+    <value>Verksamhetsperiod</value>
+  </data>
+  <data name="OperatesFromYear" xml:space="preserve">
+    <value>Verksam från år</value>
+  </data>
+  <data name="OperatesToYear" xml:space="preserve">
+    <value>Verksam till år</value>
+  </data>
+  <data name="OperatingPeriodReversed" xml:space="preserve">
+    <value>Första året får inte vara efter sista året.</value>
   </data>
   <data name="CompanyLogo" xml:space="preserve">
     <value>Logotyp</value>

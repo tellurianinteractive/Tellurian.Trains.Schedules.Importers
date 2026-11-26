@@ -201,3 +201,12 @@
         font-size: 0.85rem;
     }
 }
+
+.companies-editor ::deep td.period .conflict {
+    color: #b36b00;
+    margin-left: 0.35rem;
+}
+
+.companies-editor input.year {
+    width: 6rem;
+}

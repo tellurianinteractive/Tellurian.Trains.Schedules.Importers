@@ -26,11 +26,13 @@ public static class LayoutCompanyExtensions
         public bool HasCompany(string signature) => layout?.Companies.Any(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)) ?? false;
 
         /// <summary>
-        /// Finds a company by its signature.
-        /// </summary>        /// <param name="signature">The company signature to find.</param>
+        /// Finds a company by its signature. Several companies may share a signature (e.g. for different
+        /// periods); then the one with the lowest <see cref="Layouts.Company.Id"/> is returned.
+        /// </summary>
+        /// <param name="signature">The company signature to find.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the company if found.</returns>
         public Maybe<Company> Company(string signature) =>
-            new(layout?.Companies.SingleOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
+            new(layout?.Companies.OrderBy(c => c.Id).FirstOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
                 $"Company with signature '{signature}' not found.");
 
         /// <summary>

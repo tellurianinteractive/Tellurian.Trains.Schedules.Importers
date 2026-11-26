@@ -849,8 +849,8 @@
   <data name="CompanySignatureRequired" xml:space="preserve">
     <value>Das Kürzel ist erforderlich.</value>
   </data>
-  <data name="CompanySignatureInUse" xml:space="preserve">
-    <value>Ein Unternehmen mit diesem Kürzel existiert bereits.</value>
+  <data name="CompanyNameAndSignatureInUse" xml:space="preserve">
+    <value>Ein Unternehmen mit diesem Namen und Kürzel existiert bereits.</value>
   </data>
   <data name="Country" xml:space="preserve">
     <value>Land</value>
@@ -2260,6 +2260,18 @@
   </data>
   <data name="ServesLocations" xml:space="preserve">
     <value>Bedient Orte</value>
+  </data>
+  <data name="OperatingPeriod" xml:space="preserve">
+    <value>Betriebszeitraum</value>
+  </data>
+  <data name="OperatesFromYear" xml:space="preserve">
+    <value>Tätig ab Jahr</value>
+  </data>
+  <data name="OperatesToYear" xml:space="preserve">
+    <value>Tätig bis Jahr</value>
+  </data>
+  <data name="OperatingPeriodReversed" xml:space="preserve">
+    <value>Das erste Jahr darf nicht nach dem letzten Jahr liegen.</value>
   </data>
   <data name="CompanyLogo" xml:space="preserve">
     <value>Logo</value>

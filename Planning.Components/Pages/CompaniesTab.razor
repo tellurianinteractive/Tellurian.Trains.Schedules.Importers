@@ -9,6 +9,7 @@
 @inject ScheduleStateService ScheduleState
 @inject Translator Translator
 @inject ICompaniesService CompaniesCatalogue
+@inject ValidationStateService ValidationState
 @implements IDisposable
 
 @if (Layout is null)
@@ -33,9 +34,19 @@ else
             }
             else
             {
-                <QuickGrid Items="Companies" Class="grid" Theme="tellurian">
+                <QuickGrid Items="Companies" ItemKey="c => c.Id" Class="grid" Theme="tellurian">
                     <PropertyColumn Property="c => c.Name" Title='@Translator("Name")' Sortable="true" />
                     <PropertyColumn Property="c => c.Signature" Title='@Translator("Signature")' Sortable="true" />
+                    @* Companies may share a signature, one per period; a period overlapping another of the
+                       same signature is marked here, where it is put right. *@
+                    <TemplateColumn Title='@Translator("OperatingPeriod")' Class="period"
+                                    SortBy="GridSort<Company>.ByAscending(c => c.OperatesFromYear ?? int.MinValue).ThenAscending(c => c.OperatesToYear ?? int.MaxValue)">
+                        @context.OperatingPeriodText
+                        @if (PeriodConflict(context) is { } conflict)
+                        {
+                            <i class="fa-solid fa-triangle-exclamation conflict" title="@conflict"></i>
+                        }
+                    </TemplateColumn>
                     <TemplateColumn Title='@Translator("Country")' SortBy="GridSort<Company>.ByAscending(c => c.CountryId)">@CountryName(context.CountryId)</TemplateColumn>
                     @* A front page shows logos only when every company on it has one, so "which
                        companies have a logo" is a question the planner needs answered at a glance. *@
@@ -81,6 +92,22 @@ else
                         <label>@Translator("Signature")</label>
                         <input type="text" @bind="Editing.Signature" @bind:after="OnEdited" />
                     </div>
+                    <div class="field">
+                        <label>@Translator("OperatesFromYear")</label>
+                        <input type="number" class="year" min="1800" max="2200" @bind="Editing.OperatesFromYear" @bind:after="OnEdited" />
+                    </div>
+                    <div class="field">
+                        <label>@Translator("OperatesToYear")</label>
+                        <input type="number" class="year" min="1800" max="2200" @bind="Editing.OperatesToYear" @bind:after="OnEdited" />
+                    </div>
+                    @if (Editing.OperatesFromYear > Editing.OperatesToYear)
+                    {
+                        <p class="error">@Translator("OperatingPeriodReversed")</p>
+                    }
+                    else if (!_isNew && PeriodConflict(Editing) is { } editingConflict)
+                    {
+                        <p class="error">@editingConflict</p>
+                    }
                     <div class="field">
                         <label>@Translator("Country")</label>
                         <ListBoxView Items="@(CountryChoices.ToListItems(Translator))" Placeholder="—"
@@ -140,8 +167,8 @@ else
                             <li>
                                 <label>
                                     <input type="checkbox"
-                                           checked="@_selected.Contains(candidate.Signature)"
-                                           @onchange="e => ToggleCandidate(candidate.Signature, e)" />
+                                           checked="@_selected.Contains(candidate)"
+                                           @onchange="e => ToggleCandidate(candidate, e)" />
                                     <span>@candidate.Name</span>
                                     <span class="sig">(@candidate.Signature)</span>
                                     <span class="ctry">@CountryName(candidate.CountryId)</span>
@@ -178,11 +205,12 @@ else
     // The operating-company catalogue, loaded once and cached for the session.
     private IReadOnlyList<Company>? _catalogue;
     private List<Company>? _candidates;
-    private readonly HashSet<string> _selected = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<Company> _selected = [];
 
     protected override void OnInitialized()
     {
         ScheduleState.OnChanged += OnStateChanged;
+        ValidationState.OnValidationChanged += OnStateChanged;
         // Make sure the countries this layout references are in its catalogue (older/imported layouts
         // may not have them yet); only persist when something was actually added.
         if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
@@ -193,8 +221,16 @@ else
     public void Dispose()
     {
         ScheduleState.OnChanged -= OnStateChanged;
+        ValidationState.OnValidationChanged -= OnStateChanged;
         ScheduleState.FlushPendingSave();
     }
+
+    // The message of an overlap with another company of the same signature that this company takes part in, or null.
+    private string? PeriodConflict(Company company) =>
+        ValidationState.Errors
+            .FirstOrDefault(e => e.ErrorType == ValidationErrorType.CompanyPeriodsOverlap
+                && (ReferenceEquals(e.Company, company) || ReferenceEquals(e.OtherCompany, company)))
+            ?.Message.Text;
 
     // The company's country, shown in the current UI language; "—" when not set.
     private string CountryName(int? countryId) =>
@@ -240,20 +276,27 @@ else
         _catalogue ??= [.. await CompaniesCatalogue.GetAllCompaiesAsync()];
         var layoutCountryIds = Layout!.Countries.Select(c => c.Id).ToHashSet();
         _candidates = [.. _catalogue
-            .Where(c => c.CountryId is int id && layoutCountryIds.Contains(id) && !Layout!.HasCompany(c.Signature))
+            .Where(c => c.CountryId is int id && layoutCountryIds.Contains(id) && !HasSameCompany(c))
             .OrderBy(c => c.Name, StringComparer.CurrentCulture)];
     }
 
-    private void ToggleCandidate(string signature, ChangeEventArgs e)
+    private void ToggleCandidate(Company candidate, ChangeEventArgs e)
     {
-        if (e.Value is true) _selected.Add(signature);
-        else _selected.Remove(signature);
+        if (e.Value is true) _selected.Add(candidate);
+        else _selected.Remove(candidate);
     }
+
+    // Several companies may share a signature (e.g. one per period, each with its own logo), so only
+    // a company with both the same name and the same signature counts as already in the layout.
+    private bool HasSameCompany(Company company) =>
+        Layout!.Companies.Any(c => !ReferenceEquals(c, company)
+            && c.Signature.Equals(company.Signature, StringComparison.OrdinalIgnoreCase)
+            && c.Name.Trim().Equals(company.Name.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
     private void AddSelectedCandidates()
     {
         if (_candidates is null) return;
-        foreach (var candidate in _candidates.Where(c => _selected.Contains(c.Signature)))
+        foreach (var candidate in _candidates.Where(_selected.Contains))
             Layout!.Add(new Company(NextId(), candidate.Name, candidate.Signature, candidate.CountryId));
         ScheduleState.SaveAndNotify();
         BackToList();
@@ -333,9 +376,14 @@ else
             _error = Translator("CompanySignatureRequired");
             return;
         }
-        if (Layout!.HasCompany(Editing.Signature))
+        if (Editing.OperatesFromYear > Editing.OperatesToYear)
         {
-            _error = Translator("CompanySignatureInUse");
+            _error = Translator("OperatingPeriodReversed");
+            return;
+        }
+        if (HasSameCompany(Editing))
+        {
+            _error = Translator("CompanyNameAndSignatureInUse");
             return;
         }
         Layout!.Add(Editing);

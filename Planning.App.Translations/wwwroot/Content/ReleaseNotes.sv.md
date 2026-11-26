@@ -1,5 +1,20 @@
 # Versionsnyheter
 
+## Version 1.5.1
+
+### Nya funktioner
+
+- **Företag med samma signatur.** På fliken **Företag** kan flera företag nu ha samma signatur, till exempel ett för varje period med en egen logotyp. Bara ett företag med både samma namn och samma signatur avvisas för att det redan finns.
+- **Verksamhetsperiod.** Ett företag kan få de år det är verksamt, **Verksam från år** och **Verksam till år**, båda valfria. Perioden visas i listan över företag.
+
+### Ändringar
+
+- **Överlappande perioder är en konflikt.** Två företag med samma signatur som är verksamma samma år visas under **Konflikter** som en varning som leder till fliken **Företag**, där perioden är markerad. Ett företag utan år överlappar alla andra med samma signatur.
+
+### Rättelser
+
+- **Kontroll av planen med ett tomt omlopp.** Kontrollen av planen misslyckas inte längre när ett loks omlopp ännu inte har några tågavsnitt.
+
 ## Version 1.5.0
 
 ### Brytande ändringar
