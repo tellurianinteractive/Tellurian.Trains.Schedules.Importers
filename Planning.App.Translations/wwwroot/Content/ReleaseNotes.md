@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.6.0
+
+### New features
+
+- **Shadow yards can be left out of the track check.** Under *Settings*, *Validation*, the new option **Exclude shadow yards?** leaves the tracks of shadow yards out of the station track check: two trains on the same track at the same time, vehicles standing there and track lengths. The tracks of all other stations are still checked. It is off by default.
+
 ## Version 1.5.3
 
 ### Fixes

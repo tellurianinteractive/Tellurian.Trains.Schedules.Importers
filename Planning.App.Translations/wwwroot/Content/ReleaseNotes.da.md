@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.6.0
+
+### Nye funktioner
+
+- **Skyggebanegårde kan udelades af sporkontrollen.** Under *Indstillinger*, *Validering* udelader den nye indstilling **Udelad skyggebanegårde?** skyggebanegårdenes spor fra kontrollen af stationsspor: to tog på samme spor på samme tid, køretøjer, der holder der, og sporlængder. Alle andre stationers spor kontrolleres stadig. Den er slået fra som standard.
+
 ## Version 1.5.3
 
 ### Rettelser

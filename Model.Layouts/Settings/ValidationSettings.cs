@@ -12,6 +12,16 @@ public sealed class ValidationSettings
     /// <summary>Gets or sets a value indicating whether station track usage is validated.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStationTracks { get; set; } = true;
+    /// <summary>
+    /// Gets or sets a value indicating whether the tracks of shadow yards are left out of the station track
+    /// validation: their occupancy conflicts, the vehicles standing on them and their capacity.
+    /// </summary>
+    /// <remarks>
+    /// Off by default. A shadow yard stands for the world beyond the layout, and many plans don't keep its
+    /// tracks apart, so its conflicts are often not worth putting right. It applies to the station track
+    /// validation, so it needs <see cref="ValidateStationTracks"/>.
+    /// </remarks>
+    public bool ExcludeShadowYardsFromStationTracks { get; set; }
     /// <summary>Gets or sets a value indicating whether track stretch conflicts are validated.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public bool ValidateStretches { get; set; } = true;

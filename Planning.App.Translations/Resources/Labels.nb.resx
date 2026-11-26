@@ -492,6 +492,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Valider stasjonsspor?</value>
   </data>
+  <data name="ExcludeShadowYardsFromStationTracks" xml:space="preserve">
+    <value>Utelat skyggestasjoner?</value>
+  </data>
   <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
     <value>Kjøretøy opptar sporet mens de står?</value>
   </data>
@@ -2947,6 +2950,9 @@
   </data>
   <data name="ValidateStationTracksHelp" xml:space="preserve">
     <value>Melder to tog på samme stasjonsspor samtidig, og tog som bruker et spor på nytt raskere enn minstetiden mellom to bruk som er satt under Terskelverdier.</value>
+  </data>
+  <data name="ExcludeShadowYardsFromStationTracksHelp" xml:space="preserve">
+    <value>Utelater sporene på skyggestasjoner fra valideringen av stasjonsspor: tog på samme spor samtidig, kjøretøy som står der, og sporlengder. Krever validering av stasjonsspor.</value>
   </data>
   <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
     <value>Regner et lokomotiv eller et vognsett som står mellom togene sine som opptatt spor, ikke bare togene selv. Slå det bare på når planen registrerer henstilling; ellers meldes mange falske konflikter. Krever validering av stasjonsspor.</value>

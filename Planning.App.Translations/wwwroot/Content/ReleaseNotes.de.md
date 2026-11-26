@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.6.0
+
+### Neue Funktionen
+
+- **Schattenbahnhöfe können bei der Gleisprüfung ausgelassen werden.** Unter *Einstellungen*, *Validierung* lässt die neue Einstellung **Schattenbahnhöfe auslassen?** die Gleise der Schattenbahnhöfe bei der Prüfung der Bahnhofsgleise aus: zwei Züge gleichzeitig auf demselben Gleis, dort stehende Fahrzeuge und Gleislängen. Die Gleise aller anderen Bahnhöfe werden weiterhin geprüft. Sie ist standardmäßig ausgeschaltet.
+
 ## Version 1.5.3
 
 ### Korrekturen

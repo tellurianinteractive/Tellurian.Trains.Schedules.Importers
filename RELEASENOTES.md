@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 4.2.0
+
+### New features
+
+- **Shadow yards can be left out of the station track validation.** The new `ValidationSettings.ExcludeShadowYardsFromStationTracks` (off by default) skips the tracks of stations with `IsShadow` in the station track validation (`ValidateStationTracks`): occupancy conflicts, `TrackHold` conflicts and track capacity. The tracks of all other stations are still validated.
+
 ## Version 4.1.2
 
 ### New features

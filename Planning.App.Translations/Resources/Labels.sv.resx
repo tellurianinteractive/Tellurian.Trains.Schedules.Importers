@@ -492,6 +492,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Validera stationsspår?</value>
   </data>
+  <data name="ExcludeShadowYardsFromStationTracks" xml:space="preserve">
+    <value>Undanta magasin?</value>
+  </data>
   <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
     <value>Fordon upptar spåret medan de står?</value>
   </data>
@@ -2947,6 +2950,9 @@
   </data>
   <data name="ValidateStationTracksHelp" xml:space="preserve">
     <value>Rapporterar två tåg på samma stationsspår samtidigt, och tåg som använder ett spår igen snabbare än den kortaste tiden mellan två användningar som anges under Tröskelvärden.</value>
+  </data>
+  <data name="ExcludeShadowYardsFromStationTracksHelp" xml:space="preserve">
+    <value>Undantar magasinens spår från valideringen av stationsspår: tåg på samma spår samtidigt, fordon som står där och spårlängder. Kräver validering av stationsspår.</value>
   </data>
   <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
     <value>Räknar ett lok eller en vagnssats som står mellan sina tåg som upptagande av spåret, inte bara tågen själva. Slå bara på det när planen registrerar uppställning; annars rapporteras många falska konflikter. Kräver validering av stationsspår.</value>

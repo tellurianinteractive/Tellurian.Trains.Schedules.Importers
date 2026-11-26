@@ -492,6 +492,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Validér stationsspor?</value>
   </data>
+  <data name="ExcludeShadowYardsFromStationTracks" xml:space="preserve">
+    <value>Udelad skyggebanegårde?</value>
+  </data>
   <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
     <value>Køretøjer optager sporet, mens de holder?</value>
   </data>
@@ -2947,6 +2950,9 @@
   </data>
   <data name="ValidateStationTracksHelp" xml:space="preserve">
     <value>Rapporterer to tog på samme stationsspor på samme tid samt tog, der bruger et spor igen hurtigere end den mindste tid mellem to brug, som er sat under Tærskelværdier.</value>
+  </data>
+  <data name="ExcludeShadowYardsFromStationTracksHelp" xml:space="preserve">
+    <value>Udelader skyggebanegårdenes spor fra valideringen af stationsspor: tog på samme spor på samme tid, køretøjer, der holder der, og sporlængder. Kræver validering af stationsspor.</value>
   </data>
   <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
     <value>Tæller et lokomotiv eller et vognsæt, der holder mellem sine tog, som optagende af sporet, ikke kun togene selv. Slå det kun til, når planen registrerer henstilling; ellers rapporteres mange falske konflikter. Kræver validering af stationsspor.</value>

@@ -387,6 +387,10 @@ else
                     <input type="checkbox" @bind="v.ValidateStationTracks" @bind:after="OnEdited" />
                 </div>
                 <div class="field sub-option">
+                    <HelpLabel For="ExcludeShadowYardsFromStationTracks" />
+                    <input type="checkbox" @bind="v.ExcludeShadowYardsFromStationTracks" @bind:after="OnEdited" disabled="@(!v.ValidateStationTracks)" />
+                </div>
+                <div class="field sub-option">
                     <HelpLabel For="ExtendTrackOccupancyByVehicleStay" />
                     <input type="checkbox" @bind="v.ExtendTrackOccupancyByVehicleStay" @bind:after="OnEdited" disabled="@(!v.ValidateStationTracks)" />
                 </div>

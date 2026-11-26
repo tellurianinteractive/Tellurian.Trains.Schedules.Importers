@@ -492,6 +492,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Stationsgleise prüfen?</value>
   </data>
+  <data name="ExcludeShadowYardsFromStationTracks" xml:space="preserve">
+    <value>Schattenbahnhöfe auslassen?</value>
+  </data>
   <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
     <value>Fahrzeuge belegen das Gleis, solange sie stehen?</value>
   </data>
@@ -2947,6 +2950,9 @@
   </data>
   <data name="ValidateStationTracksHelp" xml:space="preserve">
     <value>Meldet zwei Züge, die gleichzeitig auf demselben Bahnhofsgleis stehen, sowie Züge, die ein Gleis schneller wieder belegen als die unter Schwellenwerte eingestellte Mindestzeit zwischen zwei Belegungen.</value>
+  </data>
+  <data name="ExcludeShadowYardsFromStationTracksHelp" xml:space="preserve">
+    <value>Lässt die Gleise der Schattenbahnhöfe bei der Prüfung der Bahnhofsgleise aus: Züge gleichzeitig auf demselben Gleis, dort stehende Fahrzeuge und Gleislängen. Setzt die Prüfung der Bahnhofsgleise voraus.</value>
   </data>
   <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
     <value>Zählt eine Lokomotive oder Wagengarnitur, die zwischen ihren Zügen steht, als Belegung des Gleises, nicht nur die Züge selbst. Nur einschalten, wenn der Plan das Abstellen erfasst; sonst werden viele falsche Konflikte gemeldet. Setzt die Prüfung der Bahnhofsgleise voraus.</value>

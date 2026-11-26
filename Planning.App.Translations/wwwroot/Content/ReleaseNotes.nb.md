@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.6.0
+
+### Nye funksjoner
+
+- **Skyggestasjoner kan utelates fra sporkontrollen.** Under *Innstillinger*, *Validering* utelater den nye innstillingen **Utelat skyggestasjoner?** sporene på skyggestasjoner fra kontrollen av stasjonsspor: to tog på samme spor samtidig, kjøretøy som står der, og sporlengder. Sporene på alle andre stasjoner kontrolleres fortsatt. Den er slått av som standard.
+
 ## Versjon 1.5.3
 
 ### Rettelser

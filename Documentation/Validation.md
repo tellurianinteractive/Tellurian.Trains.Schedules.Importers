@@ -167,6 +167,10 @@ with a loco of its own occupies its track like any other call.
 on the track together, and `"Train {train1} {span1} is followed by train {train2} {span2} after only
 {free} minutes; at least {required} minutes are required."` where the required gap is what is missing.
 
+**Shadow yards**: With `ExcludeShadowYardsFromStationTracks` on (off by default), the tracks of shadow
+yards (`Station.IsShadow`) are left out of the whole station track validation: L2 occupancy, the
+`TrackHold` conflicts and L5 capacity. The tracks of all other stations are still validated.
+
 #### L5 — Track capacity and departure order ✅
 **Method**: `TrackCapacityRules.GetCapacityErrors(StationTrack, standings, schedules)`, run as part of
 `StationTrack.GetValidationErrors` under `ValidateStationTracks`.

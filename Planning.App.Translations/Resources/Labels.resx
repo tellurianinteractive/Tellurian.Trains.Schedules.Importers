@@ -492,6 +492,9 @@
   <data name="ValidateStationTracks" xml:space="preserve">
     <value>Validate station tracks?</value>
   </data>
+  <data name="ExcludeShadowYardsFromStationTracks" xml:space="preserve">
+    <value>Exclude shadow yards?</value>
+  </data>
   <data name="ExtendTrackOccupancyByVehicleStay" xml:space="preserve">
     <value>Vehicles occupy the track while standing?</value>
   </data>
@@ -2961,6 +2964,9 @@
   </data>
   <data name="ValidateStationTracksHelp" xml:space="preserve">
     <value>Reports two trains on the same station track at the same time, and trains that turn a track round faster than the minimum time between uses set under Thresholds.</value>
+  </data>
+  <data name="ExcludeShadowYardsFromStationTracksHelp" xml:space="preserve">
+    <value>Leaves the tracks of shadow yards out of the station track validation: trains on the same track at the same time, vehicles standing there and track lengths. Needs station track validation.</value>
   </data>
   <data name="ExtendTrackOccupancyByVehicleStayHelp" xml:space="preserve">
     <value>Counts a locomotive or wagon set standing between its trains as occupying the track, not just the trains themselves. Turn it on only when the plan records parking; otherwise it reports many false conflicts. Needs station track validation.</value>

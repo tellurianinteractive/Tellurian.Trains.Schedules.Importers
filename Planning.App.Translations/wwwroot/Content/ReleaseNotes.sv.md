@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.6.0
+
+### Nya funktioner
+
+- **Magasin kan undantas från spårkontrollen.** Under *Inställningar*, *Validering* undantar den nya inställningen **Undanta magasin?** magasinens spår från kontrollen av stationsspår: två tåg på samma spår samtidigt, fordon som står där och spårlängder. Alla andra stationers spår kontrolleras fortfarande. Den är avslagen som standard.
+
 ## Version 1.5.3
 
 ### Rättelser

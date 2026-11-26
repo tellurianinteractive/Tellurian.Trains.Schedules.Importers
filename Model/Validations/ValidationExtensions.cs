@@ -61,7 +61,7 @@ public static class ValidationExtensions
             if (options.ValidateRequiredStopTimes) result.AddRange(timetable.Trains.SelectMany(t => t.CheckRequiredStopTimes(plan)));
             if (options.ValidateScheduledTracks) result.AddRange(timetable.Trains.SelectMany(t => t.CheckScheduledTracks()));
             if (options.ValidateTrainNumbers) result.AddRange(timetable.ValidateTrainNumbers());
-            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
+            if (options.ValidateStationTracks) result.AddRange(timetable.Stations().Where(s => !(options.ExcludeShadowYardsFromStationTracks && s is Station { IsShadow: true })).SelectMany(s => s.Tracks).SelectMany(t => t.GetValidationErrors(plan.Schedules, options.ExtendTrackOccupancyByVehicleStay, options.MinMinutesBetweenTrackUsage)));
             if (options.ValidateStationCalls) result.AddRange(timetable.Stations().SelectMany(s => s.Calls()).SelectMany(c => c.GetValidationErrors()));
             if (options.ValidateStretches) result.AddRange(timetable.GetStretchConflicts(options.TreatDoubleTrackAsTwoSingleTracks));
             if (options.ValidateTrainSpeed) result.AddRange(timetable.CheckTrainSpeed(options.MinTrainSpeedMetersPerClockMinute, options.MaxTrainSpeedMetersPerClockMinute));
