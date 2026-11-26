@@ -75,6 +75,13 @@
         font-weight: 700;
     }
 
+    /* Where the train runs to, directly under its identity. */
+    .destination {
+        font-size: 12pt;
+        line-height: 14pt;
+        font-weight: 700;
+    }
+
     .departure {
         font-size: 26pt;
         line-height: 29pt;

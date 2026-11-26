@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 4.3.0
+
+### New features
+
+- **Category name on the station dispatch list.** The new `TrainCategory.ShowNameOnDispatchList` (off by default) puts a `TrainCategoryNote` with the category name first among `StationCall.StationNotes` at every call where the train stops (`IsStop`), before every other note whatever its display order. It is a station note only.
+- **Destination on start labels.** `StartLabel.Destination` is the location of the train's last call in run order.
+
 ## Version 4.2.0
 
 ### New features

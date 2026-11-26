@@ -1876,6 +1876,12 @@
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Ta bort fordon</value>
   </data>
+  <data name="ShowNameOnDispatchList" xml:space="preserve">
+    <value>Namn på tågklareringslistan?</value>
+  </data>
+  <data name="ShowNameOnDispatchListHelp" xml:space="preserve">
+    <value>Skriver kategorins namn som första anmärkning på tågklareringslistan, på de stationer där tåget stannar.</value>
+  </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Uteslut från automatisk schemaläggning?</value>
   </data>

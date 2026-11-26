@@ -105,6 +105,12 @@ public record TrainCategory
     public bool ExcludeFromAutomaticScheduling { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the category name is written on the station dispatch list, as the first note
+    /// of each row at a station where a train of this category stops. Defaults to <c>false</c>.
+    /// </summary>
+    public bool ShowNameOnDispatchList { get; set; }
+
+    /// <summary>
     /// Gets or sets which trains of this category get a start label. A station can narrow this further
     /// (see <see cref="Station.StartLabels"/>); the narrower of the two decides. None by default.
     /// </summary>

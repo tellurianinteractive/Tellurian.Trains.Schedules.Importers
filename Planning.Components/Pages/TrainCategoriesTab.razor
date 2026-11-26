@@ -145,6 +145,10 @@ else
                         <label>@Translator("ExcludeFromAutomaticScheduling")</label>
                         <input type="checkbox" @bind="Editing.ExcludeFromAutomaticScheduling" @bind:after="OnEdited" />
                     </div>
+                    <div class="field">
+                        <HelpLabel For="ShowNameOnDispatchList" />
+                        <input type="checkbox" @bind="Editing.ShowNameOnDispatchList" @bind:after="OnEdited" />
+                    </div>
                     @* Whether trains of this category get a start label; the station can narrow it further. *@
                     <div class="field">
                         <HelpLabel For="StartLabels" />

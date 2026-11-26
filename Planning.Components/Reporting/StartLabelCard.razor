@@ -8,7 +8,7 @@
    turned upside down, so that once folded it reads the right way up from the far side of the track.
 
    The markup is written once and rendered twice. Everything on the card is the train's own: the station
-   and track it starts from, its number, when it departs, the duty that drives it and the train its
+   and track it starts from, its number, where it runs to, when it departs, the duty that drives it and the train its
    traction unit arrived as, if it did. *@
 <div class="startlabel">
     @foreach (var upsideDown in new[] { true, false })
@@ -25,6 +25,11 @@
                 <div class="company">@company.Signature</div>
             }
             <div class="train">@Item?.Train.Identity</div>
+            @* A shunting task works where it starts, so it has nowhere to run to. *@
+            @if (Item?.Destination is { } destination && !destination.Equals(Item.Location))
+            {
+                <div class="destination">@destination.Name</div>
+            }
             <div class="departure">@Item?.Time.HHMM()</div>
             @if (Item is { Duties.Count: > 0 })
             {

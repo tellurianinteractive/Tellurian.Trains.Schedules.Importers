@@ -1876,6 +1876,12 @@
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Fjern køretøj</value>
   </data>
+  <data name="ShowNameOnDispatchList" xml:space="preserve">
+    <value>Navn på togekspeditionslisten?</value>
+  </data>
+  <data name="ShowNameOnDispatchListHelp" xml:space="preserve">
+    <value>Skriver kategoriens navn som første bemærkning på togekspeditionslisten, på de stationer hvor toget standser.</value>
+  </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Udeluk fra automatisk planlægning?</value>
   </data>

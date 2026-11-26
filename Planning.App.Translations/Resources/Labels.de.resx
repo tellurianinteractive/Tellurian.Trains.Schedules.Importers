@@ -1876,6 +1876,12 @@
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Fahrzeug entfernen</value>
   </data>
+  <data name="ShowNameOnDispatchList" xml:space="preserve">
+    <value>Name auf der Zugmeldeliste?</value>
+  </data>
+  <data name="ShowNameOnDispatchListHelp" xml:space="preserve">
+    <value>Schreibt den Namen der Kategorie als erste Bemerkung in die Zugmeldeliste, an den Bahnhöfen, an denen der Zug hält.</value>
+  </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Von automatischer Umlaufbildung ausschließen?</value>
   </data>

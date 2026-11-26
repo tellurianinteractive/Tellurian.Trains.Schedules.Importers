@@ -1,5 +1,12 @@
 ﻿# Release notes
 
+## Version 1.7.0
+
+### New features
+
+- **Train category on the station dispatch list.** A train category has the new option **Name on station dispatch list?**. When it is ticked, the category name is the first note on the station dispatch list at every station where a train of the category stops, not where it passes through.
+- **Destination on start labels.** A start label shows where the train runs to, directly under the train number.
+
 ## Version 1.6.0
 
 ### New features

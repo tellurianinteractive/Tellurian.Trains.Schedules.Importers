@@ -20,6 +20,9 @@ public sealed record StartLabel(Train Train, StationCall Departure, IReadOnlyLis
 
     /// <summary>The time the train departs.</summary>
     public Time Time => Departure.Departure;
+
+    /// <summary>The location the train runs to: its last call in run order; null for a train without calls.</summary>
+    public OperationLocation? Destination => Train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
 }
 
 /// <summary>

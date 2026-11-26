@@ -1,5 +1,12 @@
 # Versjonsnyheter
 
+## Versjon 1.7.0
+
+### Nye funksjoner
+
+- **Togkategori på togekspederingslisten.** En togkategori har den nye innstillingen **Navn på togekspederingslisten?**. Når den er krysset av, er kategoriens navn første merknad på togekspederingslisten på alle stasjoner der et tog i kategorien stopper, men ikke der det kjører gjennom.
+- **Bestemmelsessted på startlapper.** En startlapp viser hvor toget kjører til, rett under tognummeret.
+
 ## Versjon 1.6.0
 
 ### Nye funksjoner

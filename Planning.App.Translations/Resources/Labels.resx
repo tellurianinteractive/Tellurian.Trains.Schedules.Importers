@@ -1887,6 +1887,12 @@
   <data name="RemoveVehicle" xml:space="preserve">
     <value>Remove vehicle</value>
   </data>
+  <data name="ShowNameOnDispatchList" xml:space="preserve">
+    <value>Name on station dispatch list?</value>
+  </data>
+  <data name="ShowNameOnDispatchListHelp" xml:space="preserve">
+    <value>Writes the category name as the first note on the station dispatch list, at the stations where the train stops.</value>
+  </data>
   <data name="ExcludeFromAutomaticScheduling" xml:space="preserve">
     <value>Exclude from automatic scheduling?</value>
   </data>

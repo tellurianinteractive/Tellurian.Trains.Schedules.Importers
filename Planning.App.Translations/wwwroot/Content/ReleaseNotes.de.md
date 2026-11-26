@@ -1,5 +1,12 @@
 # Versionshinweise
 
+## Version 1.7.0
+
+### Neue Funktionen
+
+- **Zugkategorie in der Zugmeldeliste.** Eine Zugkategorie hat die neue Einstellung **Name auf der Zugmeldeliste?**. Ist sie angekreuzt, steht der Name der Kategorie als erste Bemerkung in der Zugmeldeliste an jedem Bahnhof, an dem ein Zug der Kategorie hält, nicht aber dort, wo er durchfährt.
+- **Zielbahnhof auf Startzetteln.** Ein Startzettel zeigt direkt unter der Zugnummer, wohin der Zug fährt.
+
 ## Version 1.6.0
 
 ### Neue Funktionen
@@ -329,9 +336,9 @@
 
 ### Änderungen
 
-- **Die Zuggattung auf Startzetteln.** Ein Startzettel nennt jetzt die Zuggattung über der Zugnummer, in einem Band in der eigenen Farbe der Gattung.
+- **Die Zugkategorie auf Startzetteln.** Ein Startzettel nennt jetzt die Zugkategorie über der Zugnummer, in einem Band in der eigenen Farbe der Kategorie.
 
-- **Weißer Text auf mehr Farben.** Text auf farbigem Hintergrund, etwa die Gattungsbänder, die Regionsmarkierungen und die Diagramme für Dienste und Umläufe, ist jetzt auch auf mittelhellen Farben wie Rosa weiß, nicht nur auf dunklen. Helle Farben wie Gelb und Orange behalten schwarzen Text.
+- **Weißer Text auf mehr Farben.** Text auf farbigem Hintergrund, etwa die Kategoriebänder, die Regionsmarkierungen und die Diagramme für Dienste und Umläufe, ist jetzt auch auf mittelhellen Farben wie Rosa weiß, nicht nur auf dunklen. Helle Farben wie Gelb und Orange behalten schwarzen Text.
 
 - **Überlappende abgestellte Fahrzeuge werden gemeldet.** Wenn *Fahrzeuge belegen das Gleis, solange sie stehen?* eingeschaltet ist, werden Fahrzeuge aus verschiedenen Umläufen, die gleichzeitig oder näher beieinander als die Mindestzeit zwischen Gleisbelegungen auf demselben Gleis stehen, jetzt als Informationsmeldung bei beiden Aufenthalten gemeldet. Fahrzeuge, die im selben Zug kommen oder gehen, werden nicht gemeldet, da sie absichtlich zusammen stehen.
 

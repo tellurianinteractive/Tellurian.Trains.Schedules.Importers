@@ -172,6 +172,8 @@ public static class GeneratedNoteExtensions
             // Reuses the wording the sessions value itself uses for the marker, so a reader meets the
             // same phrase whether it is stated in a column or as a note.
             OnDemandNote => new(DaysExtensions.DayResource("OnDemandOnly")),
+            // The name is the whole note; plain, as the category is the row's heading rather than a value in it.
+            TrainCategoryNote(var name) => new("{0}", NoteArg.Plain(name)),
             ShuntingTaskNote(var starts, var ends) => new(NoteResources.ShuntingTaskFromTo, starts.HHMM(), ends.HHMM()),
             CrossingNote(var meets) => new(NoteResources.Crosses, MeetList(meets, note.Settings)),
             OvertakesNote(var meets) => new(NoteResources.Overtakes, MeetList(meets, note.Settings)),

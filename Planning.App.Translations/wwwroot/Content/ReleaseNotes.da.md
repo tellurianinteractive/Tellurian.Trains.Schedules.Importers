@@ -1,5 +1,12 @@
 # Versionsnyheder
 
+## Version 1.7.0
+
+### Nye funktioner
+
+- **Togkategori på togekspeditionslisten.** En togkategori har den nye indstilling **Navn på togekspeditionslisten?**. Når den er markeret, er kategoriens navn første bemærkning på togekspeditionslisten på alle stationer, hvor et tog i kategorien standser, men ikke hvor det kører igennem.
+- **Bestemmelsessted på startsedler.** En startseddel viser, hvor toget kører til, lige under tognummeret.
+
 ## Version 1.6.0
 
 ### Nye funktioner

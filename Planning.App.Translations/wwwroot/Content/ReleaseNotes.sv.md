@@ -1,5 +1,12 @@
 # Versionsnyheter
 
+## Version 1.7.0
+
+### Nya funktioner
+
+- **Tågkategori på tågklareringslistan.** En tågkategori har den nya inställningen **Namn på tågklareringslistan?**. När den är ikryssad är kategorins namn första anmärkning på tågklareringslistan på alla stationer där ett tåg i kategorin stannar, men inte där det passerar.
+- **Destination på startlappar.** En startlapp visar vart tåget går, direkt under tågnumret.
+
 ## Version 1.6.0
 
 ### Nya funktioner

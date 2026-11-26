@@ -16,8 +16,9 @@ public static class StationCallNoteExtensions
     extension(StationCall call)
     {
         /// <summary>
-        /// The notes shown to the station's dispatcher at this call, sorted by
-        /// <see cref="ICallNote.DisplayOrder"/>.
+        /// The notes shown to the station's dispatcher at this call: the train's category name first, where
+        /// it stops here and its category asks for it (<see cref="TrainCategoryNotes"/>), then the others
+        /// sorted by <see cref="ICallNote.DisplayOrder"/>.
         /// </summary>
         /// <param name="readerSessions">The sessions the reader has this call in view for, used to decide
         /// whether a meet needs a session qualifier. On a station dispatch list that is the sessions of the
@@ -31,6 +32,7 @@ public static class StationCallNoteExtensions
             call = call.ValueOrException(nameof(call));
             return
             [
+                .. call.TrainCategoryNotes,
                 .. call.Notes
                     .Cast<ICallNote>()
                     .Concat(call.StopNotes)
@@ -43,6 +45,27 @@ public static class StationCallNoteExtensions
                     .Where(note => note.IsStationNote)
                     .OrderBy(note => note.DisplayOrder)
             ];
+        }
+
+        /// <summary>
+        /// The note naming the train's category, where the train stops at this call and its category has
+        /// <see cref="TrainCategory.ShowNameOnDispatchList"/> set.
+        /// </summary>
+        /// <remarks>
+        /// Put before every other note rather than sorted among them, since a manual note can carry any
+        /// display order: the category is what the station reads the rest of the row in the light of.
+        /// </remarks>
+        public IEnumerable<ICallNote> TrainCategoryNotes
+        {
+            get
+            {
+                call = call.ValueOrException(nameof(call));
+                if (!call.IsStop || call.Train?.Category is not { ShowNameOnDispatchList: true } category || string.IsNullOrWhiteSpace(category.Name)) yield break;
+                yield return new TrainCategoryNote(category.Name.Trim())
+                {
+                    IsDriverNote = false, IsForArrival = true, IsForDeparture = true, DisplayOrder = 0
+                };
+            }
         }
 
         /// <summary>
