@@ -106,6 +106,55 @@ public class DispatchStretchConflictTests
         Assert.IsEmpty(StretchConflicts(line), "Train 2 runs 25:10 on session 1, which is 01:10 on session 2, where train 1 does not run.");
     }
 
+    // Two trains meeting at an unmanned station, on the sessions given; the meet is a conflict on a common session.
+    private static Line MeetOn(Sessions first, Sessions second, bool useDays, int maxSessions)
+    {
+        var line = NewLine(Unmanned, middleTracks: 2);
+        line.Plan.Layout.Settings.General.UseDays = useDays;
+        line.Plan.Layout.Settings.General.MaxSessions = maxSessions;
+        MeetAtMiddle(line);
+        line.Plan.Timetable.Trains.Single(t => t.Number == 1).Sessions = first;
+        line.Plan.Timetable.Trains.Single(t => t.Number == 2).Sessions = second;
+        return line;
+    }
+
+    [TestMethod]
+    public void TrainsSharingOnlyASessionThePlanDoesNotHaveDoNotMeet()
+    {
+        var line = MeetOn(Sessions.FromSessionNumbers(1, 4), Sessions.FromSessionNumbers(2, 4), useDays: false, maxSessions: 3);
+
+        Assert.IsEmpty(StretchConflicts(line), "The plan has three sessions: there is no session 4 for them to meet on.");
+    }
+
+    [TestMethod]
+    public void TrainsSharingASessionThePlanHasMeet()
+    {
+        var line = MeetOn(Sessions.FromSessionNumbers(1, 4), Sessions.FromSessionNumbers(2, 4), useDays: false, maxSessions: 4);
+
+        Assert.HasCount(1, StretchConflicts(line));
+    }
+
+    [TestMethod]
+    public void BitsAboveAWeekOfDaysAreNoDays()
+    {
+        // As stored in a plan that ran sessions before it ran days: 9, 11 and 13 are no days of the week, nor the
+        // week's mirror (that would be 8, 10, 12 and 14), so the train runs Monday, Wednesday, Friday and Sunday only.
+        var line = MeetOn(Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13), Sessions.FromSessionNumbers(2, 9), useDays: true, maxSessions: 7);
+
+        Assert.IsEmpty(StretchConflicts(line), "The second train runs on Tuesday, when the first does not.");
+    }
+
+    [TestMethod]
+    public void ActualSessionsAreTheStoredOnesWithinThePeriod()
+    {
+        var line = MeetOn(Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13), Sessions.All, useDays: false, maxSessions: 3);
+        var first = line.Plan.Timetable.Trains.Single(t => t.Number == 1);
+        var second = line.Plan.Timetable.Trains.Single(t => t.Number == 2);
+
+        CollectionAssert.AreEqual(new byte[] { 1, 3 }, first.ActualSessions.Numbers);
+        CollectionAssert.AreEqual(new byte[] { 1, 2, 3 }, second.ActualSessions.Numbers);
+    }
+
     [TestMethod]
     public void TrainsCanMeetAtAControlledStationWithTwoTracks()
     {

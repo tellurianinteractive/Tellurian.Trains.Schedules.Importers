@@ -1,5 +1,13 @@
 ﻿# Release notes
 
+## Version 1.5.3
+
+### Fixes
+
+- **Conflicts within the session times.** Vehicles standing on a track before their first train or after their last now do so from the start of the session to its end, so a conflict says 07:00–13:00 instead of 00:00–13:00 when the session starts at 07:00. When the layout runs over midnight, the first session start is used.
+- **Only the plan's own sessions or days.** The checks ignore sessions or days the plan doesn't have, such as session 4 in a plan with three sessions, or days left over from before a plan used days. A loco driver's duty on the same days as its train is no longer reported as running on "None".
+- **Vehicles alternating between schedules.** Vehicles that work one schedule on some days and another on the other days are no longer reported as standing in their own way on a track overnight.
+
 ## Version 1.5.2
 
 ### New features

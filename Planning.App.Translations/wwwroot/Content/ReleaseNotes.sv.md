@@ -1,5 +1,13 @@
 # Versionsnyheter
 
+## Version 1.5.3
+
+### Rättelser
+
+- **Konflikter inom köromgångens tider.** Fordon som står på ett spår före sitt första tåg eller efter sitt sista står där nu från köromgångens början till dess slut, så att en konflikt säger 07:00–13:00 i stället för 00:00–13:00 när köromgången börjar 07:00. När banan körs över midnatt används starten för första köromgången.
+- **Bara planens egna köromgångar eller dagar.** Kontrollerna bortser från köromgångar eller dagar som planen inte har, som köromgång 4 i en plan med tre köromgångar, eller dagar kvar från innan planen använde dagar. En lokförartjänst på samma dagar som sitt tåg rapporteras inte längre som gående på "Inga kördagar".
+- **Fordon som växlar mellan omlopp.** Fordon som kör ett omlopp vissa dagar och ett annat de övriga dagarna rapporteras inte längre som stående i vägen för sig själva på ett spår över natten.
+
 ## Version 1.5.2
 
 ### Nya funktioner

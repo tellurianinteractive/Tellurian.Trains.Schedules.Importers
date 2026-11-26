@@ -215,6 +215,47 @@ public class DriverDutyTests
     }
 
     [TestMethod]
+    public void DutyOnTheSameDaysAsItsTrainIsNotReportedWhenTheLayoutRunsDays()
+    {
+        // As in a plan with a week of days: duty and train both have the session bits 1,3,...,13, of which
+        // only 1-7 are days of the week. The mirrored copy of the week is no day of its own.
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.UseDays = true;
+        plan.Layout.Settings.General.MaxSessions = 7;
+        var odd = Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13);
+        Forward(plan).Sessions = odd;
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var duty = plan.CreateDriverDuty();
+        duty.Sessions = odd;
+        duty.Add(part);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyRunsWhenTrainDoesNot);
+
+        Assert.IsEmpty(errors);
+    }
+
+    [TestMethod]
+    public void DutyRunningOnADayItsTrainDoesNotNamesThatDay()
+    {
+        var plan = CreatePlan();
+        plan.Layout.Settings.General.UseDays = true;
+        plan.Layout.Settings.General.MaxSessions = 7;
+        Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13);
+        var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
+        var duty = plan.CreateDriverDuty();
+        duty.Sessions = Sessions.FromSessionNumbers(1, 2);
+        duty.Add(part);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.DutyRunsWhenTrainDoesNot)
+            .ToList();
+
+        Assert.HasCount(1, errors);
+        Assert.DoesNotContain("None", errors[0].Message.Text);
+    }
+
+    [TestMethod]
     public void DutyRunningOnlyWhenItsTrainDoesIsNotReported()
     {
         var plan = CreatePlan();

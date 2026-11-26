@@ -188,14 +188,14 @@ public static class ValidationExtensions
                 .SelectMany(v => v.ScheduleAssignments)
                 .Where(a => a.Schedule is not null)
                 .GroupBy(a => a.Schedule)
-                .Select(g => (Schedule: g.Key, Sessions: g.Aggregate(new Sessions(), (union, a) => union.Or(a.Sessions))))
+                .Select(g => (Schedule: g.Key, Sessions: g.Aggregate(new Sessions(), (union, a) => union.Or(a.ActualSessions))))
                 .ToList();
 
             foreach (var train in plan.Timetable.Trains)
             {
                 // An on-demand train runs on no numbered session, so there is nothing to narrow the
                 // bookings by; theirs stand on their own.
-                var runsOnNumberedSessions = train.Sessions.Numbers.Length > 0;
+                var runsOnNumberedSessions = train.ActualSessions.Numbers.Length > 0;
 
                 // Every part of this train that traction is booked on, with the sessions it is hauled on:
                 // the booking narrowed to the sessions the train itself runs.
@@ -207,7 +207,7 @@ public static class ValidationExtensions
                 var hauledParts = tractionSchedules
                     .SelectMany(s => s.Schedule.Parts
                         .Where(p => p.Train.Id == train.Id)
-                        .Select(p => (Part: p, Sessions: (runsOnNumberedSessions ? s.Sessions.And(train.Sessions) : s.Sessions)
+                        .Select(p => (Part: p, Sessions: (runsOnNumberedSessions ? s.Sessions.And(train.ActualSessions) : s.Sessions)
                             .WithinPeriod(general.UseDays, general.MaxSessions))))
                     .OrderBy(x => x.Part.WorkingSpan.From)
                     .ToList();
@@ -239,8 +239,8 @@ public static class ValidationExtensions
                         var a1 = assignments[i];
                         var a2 = assignments[j];
                         // Sessions beyond the operating period never run, so they cannot collide.
-                        var sessions1 = a1.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
-                        var sessions2 = a2.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
+                        var sessions1 = a1.ActualSessions;
+                        var sessions2 = a2.ActualSessions;
 
                         if (sessions1.Overlaps(sessions2) && a1.Schedule.OverlapsInTime(a2.Schedule))
                         {
@@ -354,8 +354,7 @@ public static class ValidationExtensions
                 {
                     var d1 = duties[i];
                     var d2 = duties[j];
-                    if (!d1.Sessions.WithinPeriod(general.UseDays, general.MaxSessions)
-                        .Overlaps(d2.Sessions.WithinPeriod(general.UseDays, general.MaxSessions))) continue;
+                    if (!d1.ActualSessions.Overlaps(d2.ActualSessions)) continue;
                     foreach (var part in d1.Parts.Where(p => d2.Parts.Contains(p)))
                     {
                         var message = Message.Information(Strings.DutyPartIsDoubleAssigned, part, d1.Identity, d2.Identity);
@@ -367,13 +366,12 @@ public static class ValidationExtensions
             // A duty running on a session or day on which one of its trains does not.
             foreach (var duty in duties)
             {
-                var dutySessions = duty.Sessions.WithinPeriod(general.UseDays, general.MaxSessions);
+                // Only the sessions or days of the period: a day pattern also keeps a mirrored copy of the week,
+                // which is no day of its own and would be reported as running on none.
+                var dutySessions = duty.ActualSessions.NumbersWithin(general.SessionSettings());
                 foreach (var part in duty.Parts)
                 {
-                    var surplus = dutySessions.Numbers
-                        .Where(n => !part.Train.Sessions.Includes(n))
-                        .Select(n => (int)n)
-                        .ToList();
+                    var surplus = dutySessions.Where(n => !part.Train.ActualSessions.Includes(n)).ToList();
                     if (surplus.Count == 0) continue;
                     var surplusSessions = SessionsExtensions.FromPeriodNumbers(surplus, general.UseDays);
                     var message = Message.Information(general.UseDays ? Strings.DutyRunsWhenTrainDoesNotOnDays : Strings.DutyRunsWhenTrainDoesNot,
@@ -441,7 +439,7 @@ public static class ValidationExtensions
             {
                 foreach (var part in assignment.Schedule?.Parts ?? [])
                 {
-                    var sessions = assignment.Sessions.And(part.Train.Sessions);
+                    var sessions = assignment.Sessions.And(part.Train.ActualSessions);
                     drivenSessionsByPart[part] = drivenSessionsByPart.TryGetValue(part, out var existing)
                         ? existing.Or(sessions)
                         : sessions;
@@ -453,15 +451,15 @@ public static class ValidationExtensions
             foreach (var part in plan.Schedules.SelectMany(s => s.Parts).Where(p => p.Train.IsShuntingTask))
             {
                 drivenSessionsByPart[part] = drivenSessionsByPart.TryGetValue(part, out var existing)
-                    ? existing.Or(part.Train.Sessions)
-                    : part.Train.Sessions;
+                    ? existing.Or(part.Train.ActualSessions)
+                    : part.Train.ActualSessions;
             }
 
             foreach (var (part, tractionSessions) in drivenSessionsByPart)
             {
                 var dutySessions = duties
                     .Where(d => d.Parts.Contains(part))
-                    .Aggregate(new Sessions(), (acc, d) => acc.Or(d.Sessions));
+                    .Aggregate(new Sessions(), (acc, d) => acc.Or(d.ActualSessions));
 
                 var missing = new List<int>();
                 for (var number = 1; number <= periodMax; number++)
@@ -546,13 +544,12 @@ public static class ValidationExtensions
 
                 var front = traction
                     .Where(t => t.Assignment.Role == TractionRole.Front)
-                    .Aggregate(new Sessions(), (union, t) => union.Or(t.Assignment.Sessions))
+                    .Aggregate(new Sessions(), (union, t) => union.Or(t.Assignment.ActualSessions))
                     .WithinPeriod(general.UseDays, general.MaxSessions);
                 foreach (var (vehicle, assignment) in back)
                 {
-                    var without = assignment.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Numbers
+                    var without = assignment.ActualSessions.NumbersWithin(general.SessionSettings())
                         .Where(n => !front.Includes(n))
-                        .Select(n => (int)n)
                         .ToList();
                     if (without.Count == 0) continue;
                     var message = Message.Warning(Strings.BackLocomotiveWithoutFront,
@@ -619,7 +616,7 @@ public static class ValidationExtensions
             {
                 if (schedule.Parts.Count == 0) continue;
                 if (schedule.IsCargoFlow) continue;
-                if (schedule.Parts.All(p => p.Train.Sessions.IsOnDemand)) continue;
+                if (schedule.Parts.All(p => p.Train.ActualSessions.IsOnDemand)) continue;
                 if (schedule.Parts.All(p => p.Train.IsShuntingTask)) continue;
                 if (schedule.Vehicles.Any()) continue;
                 var message = Message.Information(Strings.VehicleScheduleHasNoVehicle, schedule.Number);
@@ -635,7 +632,7 @@ public static class ValidationExtensions
             foreach (var train in plan.Timetable.Trains)
             {
                 if (train.Calls.Count < 2) continue;
-                if (train.Sessions.IsOnDemand) continue;
+                if (train.ActualSessions.IsOnDemand) continue;
 
                 var calls = train.CallsInRunOrder;
                 var legCount = calls.Count - 1;
@@ -653,7 +650,7 @@ public static class ValidationExtensions
                         var from = IndexOfCall(calls, part.From);
                         var to = IndexOfCall(calls, part.To);
                         if (from < 0 || to < 0) continue;
-                        for (var leg = from; leg < to; leg++) hauled[leg] = hauled[leg].Or(assignment.Sessions);
+                        for (var leg = from; leg < to; leg++) hauled[leg] = hauled[leg].Or(assignment.ActualSessions);
                     }
                 }
 
@@ -666,7 +663,7 @@ public static class ValidationExtensions
                     // does not call that pair a gap in the route.
                     if (calls[leg].OperationLocation.Equals(calls[leg + 1].OperationLocation)) continue;
                     for (var number = 1; number <= periodMax; number++)
-                        if (train.Sessions.Includes(number) && !hauled[leg].Includes(number)) missingPerLeg[leg].Add(number);
+                        if (train.ActualSessions.Includes(number) && !hauled[leg].Includes(number)) missingPerLeg[leg].Add(number);
                 }
 
                 for (var leg = 0; leg < legCount;)
@@ -723,11 +720,11 @@ public static class ValidationExtensions
                 var worksScheduled = false;
                 for (var number = 1; number <= periodMax; number++)
                 {
-                    foreach (var assignment in vehicle.ScheduleAssignments.Where(a => a.Sessions.Includes(number)))
+                    foreach (var assignment in vehicle.ScheduleAssignments.Where(a => a.ActualSessions.Includes(number)))
                     {
                         foreach (var part in assignment.Schedule?.Parts ?? [])
                         {
-                            if (!part.Train.Sessions.Includes(number)) continue;
+                            if (!part.Train.ActualSessions.Includes(number)) continue;
                             worksScheduled = true;
                             var from = part.From.OperationLocation;
                             var to = part.To.OperationLocation;
@@ -779,9 +776,9 @@ public static class ValidationExtensions
                 for (var number = 1; number <= periodMax; number++)
                 {
                     var working = vehicle.ScheduleAssignments
-                        .Where(a => a.Schedule is not null && a.Sessions.Includes(number))
+                        .Where(a => a.Schedule is not null && a.ActualSessions.Includes(number))
                         .SelectMany(a => a.Schedule!.Parts
-                            .Where(p => p.Train.Sessions.Includes(number))
+                            .Where(p => p.Train.ActualSessions.Includes(number))
                             .Select(p => (Schedule: a.Schedule!, Part: p)))
                         .DistinctBy(x => x.Part, ReferenceEqualityComparer.Instance)
                         .OrderBy(x => x.Part.StartTime)
@@ -1005,7 +1002,7 @@ public static class ValidationExtensions
                     for (var j = i + 1; j < trains.Length; j++)
                     {
                         // Sessions beyond the operating period never run, so sharing only those is no clash.
-                        var overlap = trains[i].Sessions.And(trains[j].Sessions).WithinPeriod(general.UseDays, general.MaxSessions);
+                        var overlap = trains[i].ActualSessions.And(trains[j].ActualSessions);
                         if (!overlap.IsNone)
                         {
                             var message = Message.Information(general.UseDays ? Strings.TrainsShareNumberOnOverlappingDays : Strings.TrainsShareNumberOnOverlappingSessions, trains[i], trains[j], SessionsText(overlap, general));
@@ -1277,7 +1274,7 @@ public static class ValidationExtensions
                     // The sessions are stated only where they are a subset of the ones the train runs.
                     // Doubled whenever it runs — the ordinary case, where both bookings are for every
                     // session — there is no subset to point at, and naming them all would only be noise.
-                    var everySessionTheTrainRuns = shared.Numbers.SequenceEqual(train.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Numbers);
+                    var everySessionTheTrainRuns = shared.NumbersWithin(general.SessionSettings()).SequenceEqual(train.ActualSessions.NumbersWithin(general.SessionSettings()));
                     var message = everySessionTheTrainRuns
                         ? Message.Information(Strings.TrainHasLocomotiveCoverageOverlap,
                             train, part1.TractionWorkingSpanText, part2.TractionWorkingSpanText)
@@ -1408,7 +1405,7 @@ public static class ValidationExtensions
                 // Trains that never run on a common session are never there together, so they cannot
                 // contend for the track — the same rule the stretch capacity check already applies.
                 // A span a day apart is the same time on the clock, but then on the session a day later.
-                r.TrackOccupancy.ConflictsInTime(r.Train!.Sessions, mine, stationCall.Train!.Sessions, minMinutesBetweenTrackUsage) &&
+                r.TrackOccupancy.ConflictsInTime(r.Train!.ActualSessions, mine, stationCall.Train!.ActualSessions, minMinutesBetweenTrackUsage) &&
                 !vehicleSchedules.HasSameVehicle(r, stationCall)).ToList();
             result.AddRange(conflictingWithMe.Select(c => (stationCall, c)));
             if (remaining.Count() > 1) result.AddRange(remaining.First().GetConflictsWithRemaning(remaining.Skip(1), vehicleSchedules, minMinutesBetweenTrackUsage, measured));
@@ -1463,7 +1460,7 @@ public static class ValidationExtensions
                 // Two occupancies that do not overlap are only in conflict because the required free time
                 // between them is missing, and saying they overlap would then be plainly wrong: the times
                 // in the message do not, and the planner needs to be told how short the gap actually is.
-                var free = second.TrackOccupancy.FreeMinutesBetween(second.Train!.Sessions, first.TrackOccupancy, first.Train!.Sessions);
+                var free = second.TrackOccupancy.FreeMinutesBetween(second.Train!.ActualSessions, first.TrackOccupancy, first.Train!.ActualSessions);
                 var message = free < 0
                     ? Message.Information(Strings.CallAtStationOverlapsInTimeWithOtherCall, first.Train!, firstSpan, second.Train!, secondSpan)
                     : Message.Information(Strings.CallAtStationTooCloseInTimeToOtherCall, first.Train!, firstSpan, second.Train!, secondSpan, free, minMinutesBetweenTrackUsage);
@@ -1490,11 +1487,11 @@ public static class ValidationExtensions
                     // Both with a length: they may share the track, which rule L5 judges.
                     if (measured.Contains(call) && measured.Contains(hold)) continue;
                     // A call of the vehicles' own schedule is theirs, unless they stand idle while others work it.
-                    var callSessions = train.Sessions;
+                    var callSessions = train.ActualSessions;
                     if (hold.Schedule.Parts.Any(p => p.ContainsCall(call)))
                     {
-                        if (hold.OtherVehicleSessions is not { } others || !train.Sessions.Overlaps(others)) continue;
-                        callSessions = train.Sessions.And(others);
+                        if (hold.OtherVehicleSessions is not { } others || !train.ActualSessions.Overlaps(others)) continue;
+                        callSessions = train.ActualSessions.And(others);
                     }
                     // A locomotive that arrives in one train and leaves in the next with the standing wagons has to come to them.
                     if (hold.IsCollectedBy(train, vehicleSchedules)) continue;
@@ -1502,7 +1499,7 @@ public static class ValidationExtensions
 
                     var callSpan = call.TrackOccupancySpanText();
                     var holdSpan = string.Format(CultureInfo.CurrentCulture, Strings.CallAtStationTrackOccupiedDuringTimes, stationTrack.Station, stationTrack, hold.From.HHMM(), hold.To.HHMM());
-                    var free = hold.Span.FreeMinutesBetween(hold.Sessions, call.TrackOccupancy, train.Sessions);
+                    var free = hold.Span.FreeMinutesBetween(hold.Sessions, call.TrackOccupancy, train.ActualSessions);
                     var message = free < 0
                         ? Message.Information(Strings.CallAtStationOverlapsInTimeWithStandingVehicles, train, callSpan, hold.Vehicles, holdSpan)
                         : Message.Information(Strings.CallAtStationTooCloseInTimeToStandingVehicles, train, callSpan, hold.Vehicles, holdSpan, free, minMinutesBetweenTrackUsage);
@@ -1591,8 +1588,8 @@ public static class ValidationExtensions
 
                 for (var session = 1; session <= 14; session++)
                 {
-                    if (!entering.Train.Sessions.Includes(session)) continue;
-                    var onSession = active.Where(k => passings[k].Train.Sessions.Includes(session)).ToList();
+                    if (!entering.Train.ActualSessions.Includes(session)) continue;
+                    var onSession = active.Where(k => passings[k].Train.ActualSessions.Includes(session)).ToList();
                     if (onSession.Count <= tracks) continue;
 
                     // Over capacity on this session. Report the earliest-departing other train meeting the

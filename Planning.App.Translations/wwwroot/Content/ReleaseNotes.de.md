@@ -1,5 +1,13 @@
 # Versionshinweise
 
+## Version 1.5.3
+
+### Korrekturen
+
+- **Konflikte innerhalb der Zeiten der Fahrrunde.** Fahrzeuge, die vor ihrem ersten oder nach ihrem letzten Zug auf einem Gleis stehen, stehen dort jetzt vom Beginn der Fahrrunde bis zu ihrem Ende, sodass ein Konflikt 07:00–13:00 statt 00:00–13:00 nennt, wenn die Fahrrunde um 07:00 beginnt. Wenn die Anlage über Mitternacht fährt, gilt der Beginn der ersten Fahrrunde.
+- **Nur die eigenen Fahrrunden oder Tage des Plans.** Die Prüfungen übergehen Fahrrunden oder Tage, die der Plan nicht hat, etwa Fahrrunde 4 in einem Plan mit drei Fahrrunden oder Tage aus der Zeit, bevor der Plan Tage verwendete. Ein Lokführerdienst an denselben Tagen wie sein Zug wird nicht mehr als an „Keine Tage“ verkehrend gemeldet.
+- **Fahrzeuge, die zwischen Umläufen wechseln.** Fahrzeuge, die an einigen Tagen einen Umlauf und an den übrigen einen anderen fahren, werden nicht mehr gemeldet, als stünden sie sich über Nacht auf einem Gleis selbst im Weg.
+
 ## Version 1.5.2
 
 ### Neue Funktionen

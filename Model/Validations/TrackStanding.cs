@@ -78,7 +78,7 @@ internal static class TrackStandings
         foreach (var call in track.Calls)
         {
             if (call.Train is not { } train || !call.OccupiesTrack(schedules)) continue;
-            result.Add(new TrackStanding(track, call.Arrival, call.Departure, train.Sessions, call.StandingLength(schedules),
+            result.Add(new TrackStanding(track, call.Arrival, call.Departure, train.ActualSessions, call.StandingLength(schedules),
                 train, train, call, null, End(call.NeighbourLocation(before: true)), End(call.NeighbourLocation(before: false))));
         }
         foreach (var hold in holds)

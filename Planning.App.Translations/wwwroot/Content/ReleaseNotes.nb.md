@@ -1,5 +1,13 @@
 # Versjonsnyheter
 
+## Versjon 1.5.3
+
+### Rettelser
+
+- **Konflikter innenfor sesjonens tider.** Kjøretøy som står på et spor før sitt første tog eller etter sitt siste, står der nå fra sesjonens start til dens slutt, slik at en konflikt sier 07:00–13:00 i stedet for 00:00–13:00 når sesjonen starter kl. 07:00. Når banen kjører over midnatt, brukes starten på første sesjon.
+- **Bare planens egne sesjoner eller dager.** Kontrollene ser bort fra sesjoner eller dager planen ikke har, som sesjon 4 i en plan med tre sesjoner, eller dager igjen fra før planen brukte dager. En lokførertjeneste på de samme dagene som toget sitt meldes ikke lenger som gående på «Ingen kjøredager».
+- **Kjøretøy som veksler mellom omløp.** Kjøretøy som kjører ett omløp noen dager og et annet de øvrige dagene, meldes ikke lenger som stående i veien for seg selv på et spor over natten.
+
 ## Versjon 1.5.2
 
 ### Nye funksjoner
@@ -42,7 +50,7 @@
 
 - **To spor med samme betegnelse er en konflikt.** Et driftssted med to eller flere spor med samme betegnelse vises under **Konflikter** og fører til fanen **Driftssteder**. Planen kan fortsatt lagres.
 - **En banestrekning uten hastighet gir en advarsel.** Den vises under **Konflikter** som en advarsel og fører til fanen **Strekninger**. Togene kjører der med sin egen hastighet, høyst 200 km/t.
-- **Ekspedisjonslister: første økt gråtones også etter lokførerens tjeneste.** Avkrysningsboksen for første økt er nå også gråtonet for et tog der lokførerens tjeneste begynner før første økt, siden lokføreren ennå ikke er i tjeneste.
+- **Ekspedisjonslister: første sesjon gråtones også etter lokførerens tjeneste.** Avkrysningsboksen for første sesjon er nå også gråtonet for et tog der lokførerens tjeneste begynner før første sesjon, siden lokføreren ennå ikke er i tjeneste.
 
 ## Versjon 1.4.7
 
@@ -80,7 +88,7 @@
 
 ### Endringer
 
-- **Vognsettkort: første dag eller økt og startstasjon.** Kortet viser nå når og hvor vognsettet skal stå før treffet, som turnuskortet gjør.
+- **Vognsettkort: første dag eller sesjon og startstasjon.** Kortet viser nå når og hvor vognsettet skal stå før treffet, som turnuskortet gjør.
 - **Tilkoblingsnotater har med kjøretøyets bemerkning.** Et notat om at et tog skal koble til et kjøretøy skriver nå også ut kjøretøyets bemerkning etter navnet.
 
 ### Rettelser
@@ -104,8 +112,8 @@
 
 ### Nytt
 
-- **Bemanning av bemannede stasjoner.** En bemannet stasjon kan nå oppgi personalet sitt, der hver person har en eller flere roller: togleder, stillverksoperatør, rangerleder, skifter og elev. En lang økt kan deles opp i opptil tre skift, med samme personale på hvert skift. Hver person på hvert skift teller som én deltaker. Avsnittet ligger på fanen Driftssteder og vises bare når stasjonen er bemannet.
-- **Rapporten Arbeidsplan.** En ny rapport i rapportmenyen skriver ut et ark for hver bemannet stasjon, på språket i landet den ligger i: en tabell for hver person med en rad for hver økt eller dag og en kolonne for hvert skift, der første skift begynner når første økt begynner. Stasjonens eier skrives inn på togleders første skift i første økt.
+- **Bemanning av bemannede stasjoner.** En bemannet stasjon kan nå oppgi personalet sitt, der hver person har en eller flere roller: togleder, stillverksoperatør, rangerleder, skifter og elev. En lang sesjon kan deles opp i opptil tre skift, med samme personale på hvert skift. Hver person på hvert skift teller som én deltaker. Avsnittet ligger på fanen Driftssteder og vises bare når stasjonen er bemannet.
+- **Rapporten Arbeidsplan.** En ny rapport i rapportmenyen skriver ut et ark for hver bemannet stasjon, på språket i landet den ligger i: en tabell for hver person med en rad for hver sesjon eller dag og en kolonne for hvert skift, der første skift begynner når første sesjon begynner. Stasjonens eier skrives inn på togleders første skift i første sesjon.
 
 ## Versjon 1.3.12
 
@@ -142,9 +150,9 @@
 
 ### Endringer
 
-- **Like notater sies én gang.** Notater som lyder likt, bortsett fra øktene de gjelder for, er nå ett notat for disse øktene samlet, og oppgir ingen økter der de til sammen dekker alle øktene toget går.
-- **Møter i de samme øktene deler én kvalifisering.** I et notat om kryssing eller forbikjøring listes møtene som skjer i de samme øktene sammen, med øktene oppgitt én gang etter dem, og gruppene skilles med semikolon.
-- **Et vognsett som følger et push/pull-tog, trenger ikke eget notat.** Der et push/pull-lokomotiv i samme omløp flytter toget til eller fra et annet spor, utelates notatene om å hente eller rangere vognsettet, siden notatet om toget allerede sier det. Vognsettet beholder notatene sine for øktene lokomotivet ikke kjører.
+- **Like notater sies én gang.** Notater som lyder likt, bortsett fra sesjonene de gjelder for, er nå ett notat for disse sesjonene samlet, og oppgir ingen sesjoner der de til sammen dekker alle sesjonene toget går.
+- **Møter i de samme sesjonene deler én kvalifisering.** I et notat om kryssing eller forbikjøring listes møtene som skjer i de samme sesjonene sammen, med sesjonene oppgitt én gang etter dem, og gruppene skilles med semikolon.
+- **Et vognsett som følger et push/pull-tog, trenger ikke eget notat.** Der et push/pull-lokomotiv i samme omløp flytter toget til eller fra et annet spor, utelates notatene om å hente eller rangere vognsettet, siden notatet om toget allerede sier det. Vognsettet beholder notatene sine for sesjonene lokomotivet ikke kjører.
 - **Et omløpskort for én enkelt dag navngir den fullt ut.** Der et kort bare gjelder én dag, står det nå «Lørdag» i stedet for «L». Flere dager forkortes fortsatt.
 
 ## Versjon 1.3.6
@@ -354,7 +362,7 @@
 ### Feilrettinger
 
 - **Ekspedisjonslistene har nå alle tog som passerer et sted stasjonen styrer.** En stasjon som styrer en ubemannet sporforgrening, for eksempel Steinsnes med Triangeln, manglet togene der som også stopper på selve stasjonen, for eksempel godstog som snur i Tveiten og passerer Triangeln to ganger. Alle passeringer vises nå, i begge retninger.
-- **Første økt er gråtonet for ekspedisjoner som ikke kan nås i den.** På ekspedisjonslistene er avkrysningsboksen for første økt gråtonet når treffet starter senere enn driftsdøgnet, og toget begynte tidligere eller ekspedisjonen ligger etter midnatt.
+- **Første sesjon er gråtonet for ekspedisjoner som ikke kan nås i den.** På ekspedisjonslistene er avkrysningsboksen for første sesjon gråtonet når treffet starter senere enn driftsdøgnet, og toget begynte tidligere eller ekspedisjonen ligger etter midnatt.
 - **Fyldigere sider i ekspedisjonslistene.** Merknader antas ikke lenger å være bredere enn de er, slik at færre rader får en ekstra linje og de utskrevne sidene utnyttes bedre.
 
 ## Versjon 0.9.14
@@ -485,9 +493,9 @@
 
 - **Tog som går etter midnatt slipper ikke lenger forbi konfliktvarslene.** Et tog som står på et spor
   eller er på strekningen mellom to stasjoner etter midnatt, har samme klokkeslett som et som er der
-  tidligere samme døgn, men varslene så dem ikke sammen. Nå gjør de det, med hensyn til øktene: et
-  tidspunkt etter midnatt hører til neste dag, så to tog som begge går øktene 1, 3 og 5, varsles ikke mot
-  hverandre for et tidspunkt som havner på øktene 2, 4 og 6.
+  tidligere samme døgn, men varslene så dem ikke sammen. Nå gjør de det, med hensyn til sesjonene: et
+  tidspunkt etter midnatt hører til neste dag, så to tog som begge går sesjonene 1, 3 og 5, varsles ikke mot
+  hverandre for et tidspunkt som havner på sesjonene 2, 4 og 6.
 
 ## Versjon 0.8.6
 
@@ -788,7 +796,7 @@
   Det et oppdrag derimot trenger, er noen til å utføre det, så det tilbys nå på fanen **Tjenester** som
   et hvilket som helst annet togavsnitt, med eller uten eget lok — skrevet med stasjonen én gang og
   tidene arbeidet går mellom, siden det ikke kjører noen steder. Et oppdrag ingen tjeneste dekker, listes
-  under **Konflikter** for de øktene det blir stående ubemannet, ved siden av avsnittene et lok trekker.
+  under **Konflikter** for de sesjonene det blir stående ubemannet, ved siden av avsnittene et lok trekker.
 
   I et trykt tjenestehefte har oppdragssiden overskriften **Skifteoppdrag** med signaturen til operatøren,
   ikke et tognummer ingen bruker, og der et tog har ruteplanen sin, har et oppdrag sin egen blokk:
@@ -1421,14 +1429,14 @@
 ### Endringer
 
 - En ny rapport, **Førertjenester**, skriver ut ett A5-hefte per tjeneste. Forsiden viser tjenestens
-  nummer, hvilke økter eller dager den kjøres, dens start- og sluttid og -stasjoner, en vanskelighetsgrad,
+  nummer, hvilke sesjoner eller dager den kjøres, dens start- og sluttid og -stasjoner, en vanskelighetsgrad,
   bemanningsbehov og eventuelle tjenestemerknader; hvert togavsnitt får så sin egen side med hvilke
   trekkraftenheter som skal brukes, hvilke vognsett som skal tas med, til hvilke destinasjoner godsvogner
   skal tas med, samt ruteplanen, hver i sin egen blokk.
 - En ny rapport, **Generelle instruksjoner**, er et eget hefte med treffets program og instruksjonene som
   gjelder for anlegget gjennom hele treffet — kjøreinstruksjoner, signalgiving, radio- og telefonbruk, hva
   man gjør ved forsinkelser og hvem man spør — og det deles ut én gang til alle. Det innledes med treffets
-  navn og datoer, så programmet hver deltaker trenger å vite før den første økten, så instruksjonene over
+  navn og datoer, så programmet hver deltaker trenger å vite før den første sesjonen, så instruksjonene over
   så mange sider som de trenger, brutt mellom avsnitt og aldri med en overskrift igjen alene.
 - Siste side i begge heftene viser anleggets sporplan og tabellen over skiftestasjoner, slik at også de som
   aldri holder et tjenestehefte — først og fremst stasjonspersonalet — får en oversikt over anlegget.
@@ -1439,7 +1447,7 @@
   de trenger to eller tre personer — for eksempel en lokfører og en konduktør — og kan festes til et **fast
   nummer** som automatisk omnummerering lar være urørt.
 - Planen kontrolleres nå også slik at hvert togavsnitt med lokomotiv eller togsett tildelt har en
-  førertjeneste som dekker det i hver økt det kjøres. En tjeneste med fast nummer må ha et nummer, og ingen
+  førertjeneste som dekker det i hver sesjon det kjøres. En tjeneste med fast nummer må ha et nummer, og ingen
   to slike kan få samme nummer.
 - Selskaper kan nå ha en opplastet **logo**, vist i rapporter i stedet for tekstsignaturen.
 - Stasjoner kan nå merkes som den **skiftestasjonen** som betjener en annen stasjons lokalgods, og anlegget
@@ -1473,29 +1481,29 @@
 ### Endringer
 
 - En ny fane **Tjenester** lar deg planlegge førertjenester — arbeidet en lokfører utfører i løpet av en
-  økt, som en rekke av togavsnittene føreren kjører. Hver tjeneste er en rad: betegnelse, selskap og økter
+  sesjon, som en rekke av togavsnittene føreren kjører. Hver tjeneste er en rad: betegnelse, selskap og sesjoner
   til venstre, togavsnittene i kjørerekkefølge til høyre.
 - Legg til togavsnittene en fører kjører med **Legg til togavsnitt**. Listen viser trekkraftstrekningene en
   fører kan ta som det neste — de som ikke kolliderer i tid med tjenesten, og, når den har et togavsnitt,
   de som avgår ved eller etter at det ankommer. Togavsnittene trenger ikke starte på samme stasjon: føreren
   går rett og slett dit det neste starter.
-- Det samme togavsnittet kan kjøres av flere tjenester så lenge de kjører i forskjellige økter, så én
-  tjeneste kan dekke oddetallsøktene og en annen partallsøktene.
+- Det samme togavsnittet kan kjøres av flere tjenester så lenge de kjører i forskjellige sesjoner, så én
+  tjeneste kan dekke oddetallssesjonene og en annen partallssesjonene.
 - Der to togavsnitt for samme tog i en tjeneste kjøres av forskjellige trekkraftenheter, viser fanen en
   merknad ved stasjonen der trekkraftenheten byttes — du skriver den ikke inn for hånd.
 - Tjenester importert fra XPLN deler nå togavsnittene som er definert i kjøretøyenes turnuser, så hvert
   togavsnitt viser trekkraftenheten som kjører det.
-- Planen kontrolleres slik at intet togavsnitt kjøres av to tjenester i samme økt og ingen tjeneste har
+- Planen kontrolleres slik at intet togavsnitt kjøres av to tjenester i samme sesjon og ingen tjeneste har
   togavsnitt som overlapper i tid. Kontrollen kan slås av under **Innstillinger › Validering**.
 
 ## Versjon 0.2.2
 
 ### Feilrettinger
 
-- To tog som aldri kjører i samme driftsøkt, rapporteres ikke lenger som et møte på en enkeltsporet
-  strekning. Et tog som kjører økt 1, 3, 5, og ett som kjører 2, 4, 6, er aldri ute samtidig.
+- To tog som aldri kjører i samme kjøresesjon, rapporteres ikke lenger som et møte på en enkeltsporet
+  strekning. Et tog som kjører sesjon 1, 3, 5, og ett som kjører 2, 4, 6, er aldri ute samtidig.
 - Konfliktkontrollen på dobbeltsporede og flersporede strekninger er nå presis: en strekning merkes bare
-  når det er flere tog på den samtidig enn den har spor, og bare tog som kjører i en felles økt telles med.
+  når det er flere tog på den samtidig enn den har spor, og bare tog som kjører i en felles sesjon telles med.
 
 ## Versjon 0.2.1
 
@@ -1514,7 +1522,7 @@
 
 - Navnet på planen du arbeider med, vises nå øverst i vinduet.
 - Den grafiske ruteplanen viser nå søyler for lokomotivførerbehovet, noe som gjør det lettere å se hvor
-  mange førere som trengs gjennom driftsøkten.
+  mange førere som trengs gjennom kjøresesjonen.
 - En ny **Topologi**-visning (under fanen **Strekninger**) viser et skjematisk diagram over ruteplanens
   strekninger og deres greiner.
 

@@ -3,7 +3,9 @@ namespace Tellurian.Trains.Schedules.Model.Schedules;
 /// <summary>
 /// A stretch of time during which the vehicles of a schedule stand on a station track without a train of
 /// theirs calling there: between the train that brought them and the next one that takes them on, or from
-/// the start of the day to their first train, or from their last train to the end of the day.
+/// the start of the session or day to their first train, or from their last train to its end. The session limits
+/// are the operating window, or, when the layout runs over midnight, the first session start and 24 hours on: what
+/// lies outside them is not operated, so no hold reaches outside them.
 /// </summary>
 /// <param name="Track">The track the vehicles stand on.</param>
 /// <param name="From">When they take the track.</param>
@@ -193,10 +195,9 @@ public static class TrackHoldExtensions
     private static List<VehicleGroup> VehicleGroups(Schedule schedule)
     {
         // Assignments may be written either as sessions or as days, so they are read within the operating period.
-        var general = schedule.Plan?.Layout.Settings.General;
         var assigned = (schedule.Plan?.ScheduledObjects ?? [])
             .SelectMany(v => v.ScheduleAssignments.Where(a => schedule.Equals(a.Schedule))
-                .Select(a => (Vehicle: v, Sessions: general is null ? a.Sessions : a.Sessions.WithinPeriod(general.UseDays, general.MaxSessions))))
+                .Select(a => (Vehicle: v, Sessions: a.ActualSessions)))
             .ToList();
         if (assigned.Count == 0) return [new VehicleGroup(null, [])];
         return [.. assigned
@@ -228,18 +229,23 @@ public static class TrackHoldExtensions
         var first = Mark(FirstHold(schedule, parts[0]));
         var last = Mark(LastHold(schedule, parts[^1]));
         // The vehicles that end the day on the track their first train leaves from the next day stand
-        // there once, through the night, rather than at the end of one day and at the start of another.
+        // there once, through the night, rather than at the end of one day and at the start of another. Only
+        // on the evenings followed by a day the schedule runs, though: on the others the vehicles may go on
+        // with another schedule the next day, so the evening ends with the session and the morning is the
+        // other schedule's.
+        var (evening, overnight, morning) = (last, (TrackHold?)null, first);
         if (first is not null && last is not null && first.Track.Equals(last.Track) &&
-            TrackOccupancyExtensions.SharesSession(last.Sessions, first.Sessions, 1) &&
-            first.To.AddDays(1) > last.From)
+            first.To.AddDays(1) > last.From && Overnight(schedule, last.Sessions, first.Sessions) is { } nights)
         {
-            last = last with { To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain, ExitEnd = first.ExitEnd };
-            first = null;
+            overnight = last with { Sessions = nights.Evenings, To = first.To.AddDays(1), DepartingTrain = first.DepartingTrain, ExitEnd = first.ExitEnd };
+            evening = nights.OtherEvenings is { } otherEvenings ? last with { Sessions = otherEvenings } : null;
+            morning = nights.OtherMornings is { } otherMornings ? first with { Sessions = otherMornings } : null;
         }
-        Add(holds, first);
+        Add(holds, morning);
         for (var i = 0; i < parts.Count - 1; i++)
             Add(holds, Mark(HoldBetween(schedule, parts[i], parts[i + 1])));
-        Add(holds, last);
+        Add(holds, evening);
+        Add(holds, overnight);
 
         // Where the vehicles do not work the schedule they stay where it left them, all day.
         if (told && group.Sessions is { } working2 && (last ?? first) is { } resting)
@@ -259,8 +265,9 @@ public static class TrackHoldExtensions
                     others = new Sessions();
                 }
                 if (idle.IsNone) return holds;
-                var day = Time.FromDayHourMinute(0, 0, 0);
-                holds.Add(new TrackHold(resting.Track, day, day.AddDays(1), idle, schedule, resting.Train)
+                // All day is the whole session: from its start to its end.
+                var (sessionStart, sessionEnd) = SessionLimits(schedule);
+                holds.Add(new TrackHold(resting.Track, Time.FromTimeSpan(sessionStart), Time.FromTimeSpan(sessionEnd), idle, schedule, resting.Train)
                 {
                     IsIdle = true,
                     Group = group.Vehicles,
@@ -283,7 +290,7 @@ public static class TrackHoldExtensions
         if (general is null) return new Sessions();
         var bits = vehicles
             .Select(v => v.ScheduleAssignments.Where(a => !schedule.Equals(a.Schedule))
-                .Aggregate(0, (acc, a) => acc | a.Sessions.WithinPeriod(general.UseDays, general.MaxSessions).Flags))
+                .Aggregate(0, (acc, a) => acc | a.ActualSessions.Flags))
             .Aggregate(-1, (acc, b) => acc & b);
         return Sessions.FromBitPattern(bits);
     }
@@ -297,6 +304,34 @@ public static class TrackHoldExtensions
         return (bits & ((bits << 1) | (bits >> 1))) == bits;
     }
 
+    // Of the evenings the vehicles end on the track (the last hold's sessions), those followed by a morning they
+    // leave from it again (the first hold's sessions): the next day of a week wraps from the last day to the first,
+    // the last of numbered sessions has no next. Null when there is no such evening. The other evenings and
+    // mornings are returned too, or null where there are none.
+    private static (Sessions Evenings, Sessions? OtherEvenings, Sessions? OtherMornings)? Overnight(Schedule schedule, Sessions evenings, Sessions mornings)
+    {
+        if (schedule.Plan?.Layout.Settings.General is not { } general)
+            return TrackOccupancyExtensions.SharesSession(evenings, mornings, 1) ? (evenings, null, null) : null;
+        var settings = general.SessionSettings();
+        var period = settings.PeriodNumbers.Count;
+        int? Next(int n) => general.UseDays ? n % period + 1 : n < period ? n + 1 : null;
+
+        var evening = evenings.NumbersWithin(settings);
+        var morning = mornings.NumbersWithin(settings);
+        var nights = evening.Where(n => Next(n) is { } next && morning.Contains(next)).ToList();
+        if (nights.Count == 0) return null;
+        var continued = nights.Select(n => Next(n)!.Value).ToList();
+
+        Sessions? Of(IEnumerable<int> numbers, Sessions original)
+        {
+            var list = numbers.ToList();
+            if (list.Count == 0) return null;
+            var value = SessionsExtensions.FromPeriodNumbers(list, general.UseDays);
+            return Sessions.FromBitPattern(value.Flags | (original.Flags & CommonSessionPatterns.OnDemand));
+        }
+        return (Of(nights, evenings)!.Value, Of(evening.Except(nights), evenings), Of(morning.Except(continued), mornings));
+    }
+
     private static void Add(List<TrackHold> holds, TrackHold? hold)
     {
         if (hold is not null && hold.To > hold.From) holds.Add(hold);
@@ -307,8 +342,8 @@ public static class TrackHoldExtensions
         // A broken joint says nothing about where the vehicle stands.
         if (!arriving.To.OperationLocation.Equals(leaving.From.OperationLocation)) return null;
         // A vehicle can only link two trains that run on a common session.
-        if (!arriving.Train.Sessions.Overlaps(leaving.Train.Sessions)) return null;
-        var sessions = arriving.Train.Sessions.And(leaving.Train.Sessions);
+        if (!arriving.Train.ActualSessions.Overlaps(leaving.Train.ActualSessions)) return null;
+        var sessions = arriving.Train.ActualSessions.And(leaving.Train.ActualSessions);
         if (arriving.ArrivalLayover != TractionLayover.None || leaving.DepartureLayover != TractionLayover.None) return null;
 
         var track = arriving.OtherToTrack ?? arriving.To.Track;
@@ -332,7 +367,7 @@ public static class TrackHoldExtensions
         var track = last.OtherToTrack ?? last.To.Track;
         var from = track.Equals(last.To.Track) ? last.To.Departure : last.To.Arrival;
         var entry = last.To.NeighbourLocation(before: true);
-        return new TrackHold(track, from, EndOfDay(from), last.Train.Sessions, schedule, last.Train) { EntryEnd = entry };
+        return new TrackHold(track, from, EndOfSession(schedule, from), last.Train.ActualSessions, schedule, last.Train) { EntryEnd = entry };
     }
 
     private static TrackHold? FirstHold(Schedule schedule, ScheduledTrainPart first)
@@ -341,7 +376,9 @@ public static class TrackHoldExtensions
         var track = first.OtherFromTrack ?? first.From.Track;
         var to = track.Equals(first.From.Track) ? first.From.Arrival : first.From.Departure;
         var exit = first.From.NeighbourLocation(before: false);
-        return new TrackHold(track, StartOfDay(to), to, first.Train.Sessions, schedule, first.Train)
+        // A train leaving before the session starts gives an empty hold, which is dropped: what lies before the
+        // session is not operated. Round the clock, the vehicles' night on the track is the day's last hold instead.
+        return new TrackHold(track, StartOfSession(schedule, to), to, first.Train.ActualSessions, schedule, first.Train)
         {
             DepartingTrain = first.Train,
             ExitEnd = exit,
@@ -352,7 +389,37 @@ public static class TrackHoldExtensions
     // The day a time is stored on: times past midnight are on the day after.
     private static int DayOf(Time time) => (int)Math.Floor(time.Value.TotalDays);
 
-    private static Time StartOfDay(Time time) => Time.FromDayHourMinute(DayOf(time), 0, 0);
+    // The start of the session or day a time falls in. Round the clock it is the first session start, 24 hours
+    // apart, and a time before it on the stored day falls in the session that began the day before. Otherwise it is
+    // the start of the operating window on the time's day, which may lie after the time: such a hold is then empty
+    // and dropped, as nothing before the window is operated.
+    private static Time StartOfSession(Schedule schedule, Time time)
+    {
+        var (start, _) = SessionLimits(schedule);
+        var day = DayOf(time);
+        if (RunsRoundTheClock(schedule) && time.Value < TimeSpan.FromDays(day) + start) day--;
+        return Time.FromTimeSpan(TimeSpan.FromDays(Math.Max(day, 0)) + start);
+    }
 
-    private static Time EndOfDay(Time time) => Time.FromDayHourMinute(DayOf(time) + 1, 0, 0);
+    // The end of the session or day a time falls in: 24 hours after its start round the clock, otherwise the end of
+    // the operating window on the time's day. A hold that would end before it starts is empty and dropped.
+    private static Time EndOfSession(Schedule schedule, Time time)
+    {
+        var (start, end) = SessionLimits(schedule);
+        var day = DayOf(time);
+        if (RunsRoundTheClock(schedule) && time.Value < TimeSpan.FromDays(day) + start) day--;
+        return Time.FromTimeSpan(TimeSpan.FromDays(day) + end);
+    }
+
+    private static bool RunsRoundTheClock(Schedule schedule) =>
+        schedule.Plan?.Layout.Settings.General is not { } general || general.RunsOverMidnight;
+
+    // The start and end of a session or day, from the start of its day; the end may be on the day after. Without a
+    // plan to tell, the whole calendar day.
+    private static (TimeSpan Start, TimeSpan End) SessionLimits(Schedule schedule)
+    {
+        if (schedule.Plan?.Layout.Settings.General is not { } general) return (TimeSpan.Zero, TimeSpan.FromDays(1));
+        if (general.RunsOverMidnight) return (general.FirstSessionStart, general.FirstSessionStart + TimeSpan.FromDays(1));
+        return (general.StartTime, general.EndTime > general.StartTime ? general.EndTime : general.EndTime + TimeSpan.FromDays(1));
+    }
 }

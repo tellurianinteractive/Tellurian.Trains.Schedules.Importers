@@ -1,5 +1,13 @@
 # Versionsnyheder
 
+## Version 1.5.3
+
+### Rettelser
+
+- **Konflikter inden for sessionstiderne.** Køretøjer, der står på et spor før deres første tog eller efter deres sidste, står der nu fra sessionens start til dens slutning, så en konflikt siger 07:00–13:00 i stedet for 00:00–13:00, når sessionen starter kl. 07:00. Når banen kører over midnat, bruges starten på første session.
+- **Kun planens egne sessioner eller dage.** Kontrollerne ser bort fra sessioner eller dage, som planen ikke har, som session 4 i en plan med tre sessioner eller dage tilbage fra før planen brugte dage. En lokførertjeneste på de samme dage som dens tog meldes ikke længere som kørende på "Ingen køredage".
+- **Køretøjer, der skifter mellem omløb.** Køretøjer, der kører ét omløb nogle dage og et andet de øvrige dage, meldes ikke længere som stående i vejen for sig selv på et spor natten over.
+
 ## Version 1.5.2
 
 ### Nye funktioner

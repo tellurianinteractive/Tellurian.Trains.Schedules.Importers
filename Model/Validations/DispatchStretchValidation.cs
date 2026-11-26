@@ -241,7 +241,7 @@ internal static class DispatchStretchValidation
         // bits rather than on Time and Sessions values: it is the plan's size that decides how often they run.
         private readonly long _start = Start.Value.Ticks;
         private readonly long _end = End.Value.Ticks;
-        private readonly int _sessionBits = Visit.Train.Sessions.Flags & TrackOccupancyExtensions.SessionBits;
+        private readonly int _sessionBits = Visit.Train.ActualSessions.Flags & TrackOccupancyExtensions.SessionBits;
 
         public bool IsActiveAt(long instantTicks, int session)
         {
@@ -302,7 +302,7 @@ internal static class DispatchStretchValidation
                 var instant = entering.Start.Value.Ticks;
                 for (var session = 1; session <= 14; session++)
                 {
-                    if (!entering.Visit.Train.Sessions.Includes(session)) continue;
+                    if (!entering.Visit.Train.ActualSessions.Includes(session)) continue;
                     onSession.Clear();
                     seen.Clear();
                     foreach (var o in occupancies)

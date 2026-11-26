@@ -1,5 +1,19 @@
 # Release Notes
 
+## Version 4.1.2
+
+### New features
+
+- **The actual sessions of the plan.** `train.ActualSessions`, `duty.ActualSessions` and `assignment.ActualSessions` (on `ScheduleAssignment`) are the stored sessions narrowed to the plan's period, by the one rule `generalSettings.ActualSessions(sessions)`: only the sessions or days within the period, with a week of days mirrored so a day shift past midnight goes from the last day to the first. Bits outside the period, such as sessions above the number the plan has or a second half of a week left over from before the plan ran days, are no sessions of the plan. The validation rules compare `ActualSessions`.
+
+### Fixes
+
+- Validation no longer reports conflicts on sessions or days outside the plan's period.
+- `ValidationErrorType.DutyRunsWhenTrainDoesNot` is no longer reported, as running on none, for a duty and train on the same days in a plan of days.
+- Vehicles standing on a track before their first train, after their last, or idle all day, stand from the start of the session to its end (`StartTime` to `EndTime`, or `FirstSessionStartTime` and 24 hours on when the layout runs over midnight), not from midnight to midnight.
+- Vehicles stand overnight with a schedule only on the evenings followed by a day the schedule runs. Vehicles that alternate between two schedules day by day are no longer a track conflict with themselves.
+- The doubled-traction message names the days or sessions only when they are fewer than the train runs, also in a plan of days.
+
 ## Version 4.1.1
 
 ### New features

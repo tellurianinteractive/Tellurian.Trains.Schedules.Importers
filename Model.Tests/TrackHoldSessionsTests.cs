@@ -54,7 +54,8 @@ public class TrackHoldSessionsTests
         var idle = plan.Schedules.TrackHolds.Where(h => h.Track.Equals(track) && h.IsIdle).ToList();
 
         Assert.HasCount(2, idle);
-        Assert.IsTrue(idle.All(h => h.From == Time.FromDayHourMinute(0, 0, 0) && h.To == Time.FromDayHourMinute(1, 0, 0)));
+        var general = plan.Layout.Settings.General;
+        Assert.IsTrue(idle.All(h => h.From.Value == general.StartTime && h.To.Value == general.EndTime), "All day is the whole operating window.");
         Assert.IsTrue(idle.Any(h => h.Sessions.Overlaps(Even) && !h.Sessions.Overlaps(Odd)), "The odd-session wagonset stands idle on the even sessions.");
     }
 
