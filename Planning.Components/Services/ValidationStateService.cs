@@ -52,6 +52,15 @@ public sealed class ValidationStateService : IDisposable
     /// <summary>Whether the first validation pass is still waiting to run, so the error set is not yet real.</summary>
     public bool IsComputing { get; private set; }
 
+    /// <summary>
+    /// Why the last validation pass failed, or null when it ran to the end. A failed pass leaves
+    /// <see cref="Errors"/> empty: the conflicts are then unknown, not absent, and must be shown as such.
+    /// </summary>
+    public string? CheckFailure { get; private set; }
+
+    /// <summary>Whether the last validation pass failed, so the plan could not be checked.</summary>
+    public bool CouldNotCheck => CheckFailure is not null;
+
     /// <summary>The number of current validation errors.</summary>
     public int Count => Errors.Count;
 
@@ -106,7 +115,8 @@ public sealed class ValidationStateService : IDisposable
     }
 
     // Validation must never take the UI down: a throwing rule is logged and leaves an empty error set,
-    // exactly as the persistence path guards its fire-and-forget serialize.
+    // exactly as the persistence path guards its fire-and-forget serialize. The failure is kept, so the
+    // GUI says the plan could not be checked instead of showing a clean plan.
     private void Recompute()
     {
         _hasComputed = true;
@@ -115,11 +125,13 @@ public sealed class ValidationStateService : IDisposable
             _errors = _schedule.Schedule is { } plan && _schedule.Layout is { } layout
                 ? [.. plan.GetValidationErrors(layout.Settings.Validation)]
                 : [];
+            CheckFailure = null;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Validation of the schedule failed; clearing the error list.");
             _errors = [];
+            CheckFailure = ex.ToString();
         }
     }
 }

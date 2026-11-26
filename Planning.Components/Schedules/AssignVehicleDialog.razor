@@ -37,7 +37,7 @@
                             <option value="">@Translator("None")</option>
                             @foreach (var company in Companies)
                             {
-                                <option value="@company.Id">@company.Name</option>
+                                <option value="@company.Id">@company.ChoiceText</option>
                             }
                         </select>
                     </div>
@@ -158,7 +158,7 @@
     private Sessions FreeSessions(ScheduledObject vehicle) => vehicle.FreeSessionsFor(Schedule, UseDays, MaxSessions);
 
     private IEnumerable<Company> Companies =>
-        (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+        (Plan?.Layout?.Companies ?? []).InChoiceOrder;
 
     private bool CanAssign =>
         _creatingNew ? _newNumber is > 0 && ClaimedBy is null : _existingId is not null;

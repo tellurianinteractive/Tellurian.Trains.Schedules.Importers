@@ -1,5 +1,16 @@
 # Versionshinweise
 
+## Version 1.5.2
+
+### Neue Funktionen
+
+- **Fehlerberichte.** Wenn in der App ein Fehler auftritt, erscheint ein rotes (!) in der oberen Leiste. Es öffnet den Fehlerbericht mit den technischen Details: **E-Mail erstellen** öffnet eine neue Nachricht in Ihrem E-Mail-Programm, in der Sie den Empfänger selbst wählen, und **Kopieren** kopiert den Bericht für Webmail. Der Bericht bleibt erhalten, auch nachdem die App neu geladen wurde, bis Sie ihn **leeren**.
+
+### Änderungen
+
+- **Gesellschaften mit ihrem Betriebszeitraum.** Wo eine Gesellschaft gewählt wird, etwa für einen Zug, eine Zugkategorie, einen Dienst, eine Rangierlok oder ein Fahrzeug, zeigt die Liste den Betriebszeitraum jeder Gesellschaft nach ihrem Namen, sodass Gesellschaften mit demselben Kürzel unterschieden werden können. Die Zeiträume einer Gesellschaft stehen in zeitlicher Reihenfolge.
+- **Wenn der Plan nicht geprüft werden konnte.** Schlägt die Prüfung des Plans fehl, zeigt die Schaltfläche **Konflikte** ein Fragezeichen und sagt das, statt keine Konflikte anzuzeigen. Bisher sah eine fehlgeschlagene Prüfung wie ein Plan ohne Konflikte aus.
+
 ## Version 1.5.1
 
 ### Neue Funktionen

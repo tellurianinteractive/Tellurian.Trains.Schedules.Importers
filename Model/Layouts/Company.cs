@@ -32,11 +32,33 @@ public static class CompanyExtensions
                 : company.Name;
 
         /// <summary>
+        /// The text shown for the company where one is chosen from a list: the name, followed by the operating
+        /// period when one is given, e.g. <c>Statens Järnvägar (1988–2008)</c>. Companies may share a signature,
+        /// one per period, and the period is what tells them apart.
+        /// </summary>
+        public string ChoiceText =>
+            company.OperatingPeriodText is { Length: > 0 } period ? $"{company.Name} ({period})" : company.Name;
+
+        /// <summary>
         /// Creates a company from just a signature, using the signature as the name.
         /// </summary>
         /// <param name="signature">The signature to use.</param>
         /// <returns>A new company with the signature as both name and signature.</returns>
         public static Company FromSignature(string signature) =>
             new(0, signature, signature);
+    }
+
+    extension(IEnumerable<Company> companies)
+    {
+        /// <summary>
+        /// The companies in the order they are offered for choice: by name, then the same company's periods in
+        /// time order, a period without a first year first.
+        /// </summary>
+        public IEnumerable<Company> InChoiceOrder =>
+            companies
+                .OrderBy(c => c.Name, StringComparer.CurrentCulture)
+                .ThenBy(c => c.OperatesFromYear ?? int.MinValue)
+                .ThenBy(c => c.OperatesToYear ?? int.MaxValue)
+                .ThenBy(c => c.Id);
     }
 }

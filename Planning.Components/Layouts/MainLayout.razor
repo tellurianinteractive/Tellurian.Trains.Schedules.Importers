@@ -26,6 +26,7 @@
             <span>@(PlanName ?? Translator("NoActiveDocument"))</span>
         </div>
         <div class="top-bar-actions">
+            <ErrorReportIndicator />
             <SaveFailureIndicator />
             <ValidationIndicator />
             <LanguageSelector />

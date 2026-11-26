@@ -1959,6 +1959,30 @@
   <data name="NoConflicts" xml:space="preserve">
     <value>No conflicts</value>
   </data>
+  <data name="PlanNotChecked" xml:space="preserve">
+    <value>The plan could not be checked</value>
+  </data>
+  <data name="PlanNotCheckedExplanation" xml:space="preserve">
+    <value>A check failed, so the conflicts are unknown, not absent. Copy the details and report them together with the plan file.</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Errors to report</value>
+  </data>
+  <data name="ErrorReportExplanation" xml:space="preserve">
+    <value>The app ran into an error. Please report it: Create mail opens a new message in your mail program, where you choose the recipient. With web mail, use Copy and paste the report into a new message.</value>
+  </data>
+  <data name="CreateMail" xml:space="preserve">
+    <value>Create mail</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="ClearErrorReports" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ErrorReportShortened" xml:space="preserve">
+    <value>The report is too long for the mail, which only gets its start. Use Copy and paste the whole report into the mail instead.</value>
+  </data>
   <data name="ShowConflicts" xml:space="preserve">
     <value>Show conflicts</value>
   </data>

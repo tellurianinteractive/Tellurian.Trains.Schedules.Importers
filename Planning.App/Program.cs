@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Tellurian.Trains.Schedules.Planning.App;
 using Tellurian.Trains.Schedules.Planning.App.Translations;
 using Tellurian.Trains.Schedules.Planning.Components;
+using Tellurian.Trains.Schedules.Planning.Components.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -20,7 +21,17 @@ var appVersion = Assembly.GetExecutingAssembly()
 // Everything else lives in the Planning.Components library, shared with any other host.
 builder.Services.AddPlanningComponents(new AppInfoSettings { Version = appVersion });
 
+// Host-specific: errors are kept in this browser's localStorage so the user can report them, also after a
+// reload. Logged errors are caught by the logging provider; these two catch what no one logs.
+builder.Services.AddErrorReports();
+
 var host = builder.Build();
+
+var errorReports = host.Services.GetRequiredService<ErrorReports>();
+AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+    errorReports.Add("Unhandled exception", (e.ExceptionObject as Exception)?.Message ?? "", e.ExceptionObject as Exception);
+TaskScheduler.UnobservedTaskException += (_, e) =>
+    errorReports.Add("Unobserved task exception", e.Exception.GetBaseException().Message, e.Exception);
 
 // Apply the user's stored UI culture (set by the LanguageSelector) before the app runs.
 await host.Services.ApplyStoredUiCultureAsync();

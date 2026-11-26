@@ -1,0 +1,125 @@
+@using Tellurian.Trains.Schedules.Planning.Components.Services
+@inject ErrorReports Reports
+@inject AppInfoSettings AppInfo
+@inject Translator Translator
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@* Shown only when the app has run into an error. The report is the stack trace, for the user to send: as a
+   mail from their own mail program, to a recipient they choose (no address is given away here), or copied
+   for a web mail client. *@
+@if (Reports.Any)
+{
+    <div class="error-report">
+        <button class="header-btn indicator-btn" @onclick="Toggle" title="@Translator("ErrorReports")" aria-label="@Translator("ErrorReports")">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </button>
+
+        @if (_open)
+        {
+            <div class="panel-backdrop" @onclick="Close"></div>
+            <div class="panel" @onclick:stopPropagation>
+                <header class="panel-header">
+                    <h3>@Translator("ErrorReports")</h3>
+                    <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
+                </header>
+                <p>@Translator("ErrorReportExplanation")</p>
+                <div class="actions">
+                    <a class="action" href="@MailtoHref"><i class="fa-solid fa-envelope"></i> @Translator("CreateMail")</a>
+                    <button class="action" @onclick="CopyToClipboard">
+                        <i class="fa-solid @(_copied ? "fa-check" : "fa-copy")"></i> @Translator("Copy")
+                    </button>
+                    <button class="action clear" @onclick="Clear"><i class="fa-solid fa-trash-can"></i> @Translator("ClearErrorReports")</button>
+                </div>
+                @if (IsShortenedInMail)
+                {
+                    <p class="hint">@Translator("ErrorReportShortened")</p>
+                }
+                <pre class="details">@ReportText</pre>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    // Fixed and in English, so the reports are easy to find in the recipient's mailbox whatever language they
+    // were sent in.
+    private const string Subject = "Error report";
+
+    // Mail programs and the operating system cut off long mailto links, some at about 2,000 characters, so the
+    // body is shortened to fit, and the user is told to paste the whole report instead.
+    private const int MaxMailtoLength = 1900;
+
+    private bool _open;
+    private bool _copied;
+    private IJSObjectReference? _clipboard;
+
+    protected override void OnInitialized() => Reports.Changed += OnChanged;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _clipboard = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Tellurian.Trains.Schedules.Planning.Components/js/clipboard.js");
+    }
+
+    private string ReportText => Reports.ToText(Translator("AppName"), AppInfo.Version);
+
+    private string MailSubject => $"{Subject}: {Translator("AppName")} {AppInfo.Version}";
+
+    private bool IsShortenedInMail => Mailto(ReportText).Length > MaxMailtoLength;
+
+    private string MailtoHref
+    {
+        get
+        {
+            var body = ReportText;
+            var href = Mailto(body);
+            while (href.Length > MaxMailtoLength && body.Length > 0)
+            {
+                body = body[..Math.Max(0, body.Length - Math.Max(50, (href.Length - MaxMailtoLength) / 3))];
+                href = Mailto(body + Environment.NewLine + "…");
+            }
+            return href;
+        }
+    }
+
+    // No recipient: the user picks one in their mail program.
+    private string Mailto(string body) =>
+        $"mailto:?subject={Uri.EscapeDataString(MailSubject)}&body={Uri.EscapeDataString(body.ReplaceLineEndings("\r\n"))}";
+
+    private async Task CopyToClipboard()
+    {
+        if (_clipboard is null) return;
+        _copied = await _clipboard.InvokeAsync<bool>("copyText", $"{MailSubject}{Environment.NewLine}{Environment.NewLine}{ReportText}");
+    }
+
+    private void Clear()
+    {
+        _open = false;
+        Reports.Clear();
+    }
+
+    private void Toggle()
+    {
+        _open = !_open;
+        _copied = false;
+    }
+
+    private void Close()
+    {
+        _open = false;
+        _copied = false;
+    }
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public async ValueTask DisposeAsync()
+    {
+        Reports.Changed -= OnChanged;
+        if (_clipboard is not null)
+        {
+            try { await _clipboard.DisposeAsync(); }
+            catch (JSDisconnectedException) { /* already gone */ }
+        }
+    }
+}

@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 4.1.1
+
+### New features
+
+- **Companies in a list to choose from.** `company.ChoiceText` is the name followed by the operating period when one is given, e.g. "DSB (1988–2008)", so companies sharing a signature can be told apart. `companies.InChoiceOrder` orders them by name, then the same company's periods in time order.
+
 ## Version 4.1.0
 
 Companies may share a signature, e.g. one per period with a logo of its own.

@@ -89,12 +89,12 @@ public static class ListItemExtensions
 
     // ---- Company ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<Company> companies) =>
-        SortedByDescription(companies.Select(ToItem));
+        companies.InChoiceOrder.Select(ToItem);
 
     public static IEnumerable<ListboxItem> ToListItems<TKey>(this IEnumerable<Company> companies, Func<Company, TKey> sorting) =>
         companies.OrderBy(sorting).Select(ToItem);
 
-    private static ListboxItem ToItem(Company company) => new(company.Id.ToString(), company.Name);
+    private static ListboxItem ToItem(Company company) => new(company.Id.ToString(), company.ChoiceText);
 
     // ---- TrainCategory ----
     public static IEnumerable<ListboxItem> ToListItems(this IEnumerable<TrainCategory> categories) =>

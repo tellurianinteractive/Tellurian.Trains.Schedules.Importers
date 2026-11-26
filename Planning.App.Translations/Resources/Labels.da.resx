@@ -1948,6 +1948,30 @@
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
   </data>
+  <data name="PlanNotChecked" xml:space="preserve">
+    <value>Planen kunne ikke kontrolleres</value>
+  </data>
+  <data name="PlanNotCheckedExplanation" xml:space="preserve">
+    <value>En kontrol fejlede, så konflikterne er ukendte, ikke fraværende. Kopiér detaljerne og indberet dem sammen med planfilen.</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Fejl at indberette</value>
+  </data>
+  <data name="ErrorReportExplanation" xml:space="preserve">
+    <value>Appen løb ind i en fejl. Indberet den gerne: Opret mail åbner en ny besked i dit mailprogram, hvor du selv vælger modtageren. Med webmail bruger du Kopiér og indsætter rapporten i en ny besked.</value>
+  </data>
+  <data name="CreateMail" xml:space="preserve">
+    <value>Opret mail</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiér</value>
+  </data>
+  <data name="ClearErrorReports" xml:space="preserve">
+    <value>Ryd</value>
+  </data>
+  <data name="ErrorReportShortened" xml:space="preserve">
+    <value>Rapporten er for lang til mailen, som kun får begyndelsen. Brug Kopiér og indsæt hele rapporten i mailen i stedet.</value>
+  </data>
   <data name="ShowConflicts" xml:space="preserve">
     <value>Vis konflikter</value>
   </data>

@@ -25,6 +25,33 @@ public class CompanyPeriodTests
         new(id, $"DSB {from}-{to}", "DSB") { OperatesFromYear = from, OperatesToYear = to };
 
     [TestMethod]
+    [DataRow(1988, 2008, "DSB (1988–2008)")]
+    [DataRow(1988, null, "DSB (1988–)")]
+    [DataRow(null, 2008, "DSB (–2008)")]
+    [DataRow(1988, 1988, "DSB (1988)")]
+    [DataRow(null, null, "DSB")]
+    public void ChoiceTextNamesThePeriodWhenGiven(int? from, int? to, string expected)
+    {
+        var company = new Company(1, "DSB", "DSB") { OperatesFromYear = from, OperatesToYear = to };
+
+        Assert.AreEqual(expected, company.ChoiceText);
+    }
+
+    [TestMethod]
+    public void ChoiceOrderIsByNameThenPeriod()
+    {
+        Company[] companies =
+        [
+            new(1, "DSB", "DSB") { OperatesFromYear = 1988 },
+            new(2, "Banedanmark", "BDK"),
+            new(3, "DSB", "DSB") { OperatesFromYear = 1972, OperatesToYear = 1987 },
+            new(4, "DSB", "DSB"),
+        ];
+
+        CollectionAssert.AreEqual(new[] { 2, 4, 3, 1 }, companies.InChoiceOrder.Select(c => c.Id).ToArray());
+    }
+
+    [TestMethod]
     [DataRow(1972, 1987, 1988, 2008, false)]
     [DataRow(1972, 1988, 1988, 2008, true)]
     [DataRow(null, 1987, 1988, null, false)]

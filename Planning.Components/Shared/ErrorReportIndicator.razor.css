@@ -1,0 +1,134 @@
+.error-report {
+    position: relative;
+    display: inline-flex;
+
+    .indicator-btn {
+        /* Blend into the dark top bar rather than showing the browser's default button box, as the
+           validation indicator does; .header-btn lives in MainLayout's CSS scope and does not reach here. */
+        background: transparent;
+        border: none;
+        padding: 0.2rem 0.4rem;
+        cursor: pointer;
+        color: #ff6b5e;
+        font-size: 1.1rem;
+        line-height: 1;
+
+        &:hover {
+            color: #ff8a80;
+        }
+    }
+
+    .panel-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+    }
+
+    .panel {
+        position: absolute;
+        top: calc(100% + 0.4rem);
+        right: 0;
+        z-index: 1001;
+        width: min(36rem, 92vw);
+        max-height: 75vh;
+        overflow-y: auto;
+        background: #ffffff;
+        color: #1a1a1a;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 0.4rem;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25);
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+            h3 {
+                margin: 0;
+                font-size: 1rem;
+            }
+
+            .close {
+                border: none;
+                background: none;
+                cursor: pointer;
+                font-size: 1rem;
+                color: inherit;
+                padding: 0.15rem 0.35rem;
+                border-radius: 0.25rem;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.08);
+                }
+            }
+        }
+
+        p {
+            margin: 0;
+            padding: 0.6rem 0.75rem 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .hint {
+            color: #a85d00;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.6rem 0.75rem 0;
+
+            .action {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+                padding: 0.3rem 0.6rem;
+                border: 1px solid rgba(0, 0, 0, 0.25);
+                border-radius: 0.25rem;
+                background: #f4f4f4;
+                color: inherit;
+                font-size: 0.85rem;
+                text-decoration: none;
+                cursor: pointer;
+
+                &:hover {
+                    background: #e6e6e6;
+                }
+            }
+
+            .clear {
+                margin-left: auto;
+            }
+        }
+
+        .details {
+            margin: 0.6rem 0.75rem 0.75rem;
+            max-height: 20rem;
+            overflow: auto;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            white-space: pre;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0.25rem;
+        }
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .error-report .panel {
+        background: #232629;
+        color: #e6e6e6;
+        border-color: rgba(255, 255, 255, 0.15);
+
+        .panel-header { border-bottom-color: rgba(255, 255, 255, 0.12); }
+        .panel-header .close:hover { background: rgba(255, 255, 255, 0.12); }
+        .hint { color: #ffcc55; }
+        .actions .action { background: #2f3337; border-color: rgba(255, 255, 255, 0.2); }
+        .actions .action:hover { background: #3a3f44; }
+        .details { background: rgba(255, 255, 255, 0.08); }
+    }
+}

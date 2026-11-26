@@ -1948,6 +1948,30 @@
   <data name="NoConflicts" xml:space="preserve">
     <value>Keine Konflikte</value>
   </data>
+  <data name="PlanNotChecked" xml:space="preserve">
+    <value>Der Plan konnte nicht geprüft werden</value>
+  </data>
+  <data name="PlanNotCheckedExplanation" xml:space="preserve">
+    <value>Eine Prüfung ist fehlgeschlagen, daher sind die Konflikte unbekannt, nicht abwesend. Kopieren Sie die Details und melden Sie sie zusammen mit der Plandatei.</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Zu meldende Fehler</value>
+  </data>
+  <data name="ErrorReportExplanation" xml:space="preserve">
+    <value>In der App ist ein Fehler aufgetreten. Bitte melden Sie ihn: E-Mail erstellen öffnet eine neue Nachricht in Ihrem E-Mail-Programm, in der Sie den Empfänger selbst wählen. Bei Webmail verwenden Sie Kopieren und fügen den Bericht in eine neue Nachricht ein.</value>
+  </data>
+  <data name="CreateMail" xml:space="preserve">
+    <value>E-Mail erstellen</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="ClearErrorReports" xml:space="preserve">
+    <value>Leeren</value>
+  </data>
+  <data name="ErrorReportShortened" xml:space="preserve">
+    <value>Der Bericht ist zu lang für die E-Mail, die nur seinen Anfang erhält. Verwenden Sie stattdessen Kopieren und fügen Sie den ganzen Bericht in die E-Mail ein.</value>
+  </data>
   <data name="ShowConflicts" xml:space="preserve">
     <value>Konflikte anzeigen</value>
   </data>

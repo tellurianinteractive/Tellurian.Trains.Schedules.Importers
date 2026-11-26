@@ -119,9 +119,9 @@ else
                         <label>@Translator("Company")</label>
                         <select @bind="CategoryCompanyId" @bind:after="OnEdited">
                             <option value="">@Translator("None")</option>
-                            @foreach (var company in Layout!.Companies.OrderBy(c => c.Name, StringComparer.CurrentCulture))
+                            @foreach (var company in Layout!.Companies.InChoiceOrder)
                             {
-                                <option value="@company.Id">@company.Name</option>
+                                <option value="@company.Id">@company.ChoiceText</option>
                             }
                         </select>
                     </div>

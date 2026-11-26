@@ -6,7 +6,8 @@
 @implements IAsyncDisposable
 
 <div class="validation-indicator @SeverityCss">
-    <button class="header-btn indicator-btn" @onclick="Toggle" title="@Translator("Conflicts")">
+    <button class="header-btn indicator-btn" @onclick="Toggle"
+            title="@(Validation.CouldNotCheck ? Translator("PlanNotChecked") : Translator("Conflicts"))">
         <i class="fa-solid @IconCss"></i>
         @if (Validation.HasErrors)
         {
@@ -21,7 +22,7 @@
             <header class="panel-header">
                 <h3>@Translator("Conflicts")</h3>
                 <div class="header-actions">
-                    @if (Validation.HasErrors)
+                    @if (Validation.HasErrors || Validation.CouldNotCheck)
                     {
                         <button class="copy" @onclick="CopyToClipboard" title="@Translator("CopyToClipboard")">
                             <i class="fa-solid @(_copied ? "fa-check" : "fa-copy")"></i>
@@ -30,7 +31,16 @@
                     <button class="close" @onclick="Close" title="@Translator("Close")"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </header>
-            @if (!Validation.HasErrors)
+            @if (Validation.CouldNotCheck)
+            {
+                @* A failed check is not a clean plan: say so, and offer the details for reporting. *@
+                <div class="not-checked">
+                    <p><strong>@Translator("PlanNotChecked")</strong></p>
+                    <p>@Translator("PlanNotCheckedExplanation")</p>
+                    <pre class="details">@Validation.CheckFailure</pre>
+                </div>
+            }
+            else if (!Validation.HasErrors)
             {
                 <p class="empty">@Translator("NoConflicts")</p>
             }
@@ -64,14 +74,18 @@
     private async Task CopyToClipboard()
     {
         if (_clipboard is null) return;
-        var text = string.Join(Environment.NewLine, Ordered.Select(e => e.Message.Text));
+        var text = Validation.CheckFailure is { } failure
+            ? $"{Translator("PlanNotChecked")}{Environment.NewLine}{failure}"
+            : string.Join(Environment.NewLine, Ordered.Select(e => e.Message.Text));
         _copied = await _clipboard.InvokeAsync<bool>("copyText", text);
     }
 
     // Most severe first, so the worst problems are read first.
     private IEnumerable<ValidationError> Ordered => Validation.Errors.OrderByDescending(e => e.Severity);
 
-    private string IconCss => Validation.IsComputing ? "fa-spinner fa-spin" : Validation.MaxSeverity switch
+    private string IconCss => Validation.IsComputing ? "fa-spinner fa-spin"
+        : Validation.CouldNotCheck ? "fa-circle-question"
+        : Validation.MaxSeverity switch
     {
         Severity.Error or Severity.System => "fa-circle-exclamation",
         Severity.Warning => "fa-triangle-exclamation",
@@ -79,7 +93,7 @@
         _ => "fa-circle-check",
     };
 
-    private string SeverityCss => SeverityClass(Validation.MaxSeverity);
+    private string SeverityCss => Validation.CouldNotCheck ? "sev-error" : SeverityClass(Validation.MaxSeverity);
 
     private static string SeverityClass(Severity severity) => severity switch
     {

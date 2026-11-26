@@ -1,5 +1,16 @@
 # Versjonsnyheter
 
+## Versjon 1.5.2
+
+### Nye funksjoner
+
+- **Feilrapporter.** Når appen støter på en feil, vises et rødt (!) i topplinjen. Det åpner feilrapporten med de tekniske detaljene: **Opprett e-post** åpner en ny melding i e-postprogrammet ditt, der du selv velger mottaker, og **Kopier** kopierer rapporten til nettpost. Rapporten tas vare på, også etter at appen er lastet inn på nytt, til du **tømmer** den.
+
+### Endringer
+
+- **Selskaper med driftsperiode.** Der et selskap velges, som for et tog, en togkategori, en tjeneste, en skiftelok eller et kjøretøy, viser listen hvert selskaps driftsperiode etter navnet, slik at selskaper med samme signatur kan skilles fra hverandre. Et selskaps perioder vises i tidsrekkefølge.
+- **Når planen ikke kunne kontrolleres.** Hvis kontrollen av planen feiler, viser knappen **Konflikter** et spørsmålstegn og sier det, i stedet for å vise ingen konflikter. Tidligere så en mislykket kontroll ut som en plan uten konflikter.
+
 ## Versjon 1.5.1
 
 ### Nye funksjoner

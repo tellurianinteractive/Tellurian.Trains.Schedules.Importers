@@ -66,7 +66,7 @@
                     <option value="">@Translator("None")</option>
                     @foreach (var company in Companies)
                     {
-                        <option value="@company.Id">@company.Name</option>
+                        <option value="@company.Id">@company.ChoiceText</option>
                     }
                 </select>
             </div>
@@ -287,7 +287,7 @@
     }
 
     private IEnumerable<Company> Companies =>
-        (Plan?.Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+        (Plan?.Layout?.Companies ?? []).InChoiceOrder;
 
     private IEnumerable<Sessions> SessionsCatalogue =>
         ScheduleState.Timetable?.Sessions ?? [];

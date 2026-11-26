@@ -263,7 +263,7 @@ else
             .Order(StringComparer.CurrentCulture));
 
     private IEnumerable<Company> CompanyChoices =>
-        (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
+        (Layout?.Companies ?? []).InChoiceOrder;
 
     private IEnumerable<TrainCategory> CategoryChoices =>
         (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);

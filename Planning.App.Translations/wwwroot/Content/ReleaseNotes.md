@@ -1,5 +1,16 @@
 ﻿# Release notes
 
+## Version 1.5.2
+
+### New features
+
+- **Error reports.** When the app runs into an error, a red (!) appears in the top bar. It opens the error report with its technical details: **Create mail** opens a new message in your mail program, where you choose the recipient yourself, and **Copy** copies the report for web mail. The report is kept, also after the app has been reloaded, until you **Clear** it.
+
+### Changes
+
+- **Companies with their operating period.** Where a company is chosen, such as for a train, a train category, a duty, a shunter or a vehicle, the list shows each company's operating period after its name, so companies with the same signature can be told apart. A company's periods are listed in time order.
+- **When the plan could not be checked.** If checking the plan fails, the **Conflicts** button shows a question mark and says so, instead of showing no conflicts. Earlier, a failed check looked like a plan without conflicts.
+
 ## Version 1.5.1
 
 ### New features

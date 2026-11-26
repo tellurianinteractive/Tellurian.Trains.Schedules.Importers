@@ -1948,6 +1948,30 @@
   <data name="NoConflicts" xml:space="preserve">
     <value>Inga konflikter</value>
   </data>
+  <data name="PlanNotChecked" xml:space="preserve">
+    <value>Planen kunde inte kontrolleras</value>
+  </data>
+  <data name="PlanNotCheckedExplanation" xml:space="preserve">
+    <value>En kontroll misslyckades, så konflikterna är okända, inte frånvarande. Kopiera detaljerna och rapportera dem tillsammans med planfilen.</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Fel att rapportera</value>
+  </data>
+  <data name="ErrorReportExplanation" xml:space="preserve">
+    <value>Appen råkade ut för ett fel. Rapportera det gärna: Skapa e-post öppnar ett nytt meddelande i ditt e-postprogram, där du själv väljer mottagare. Med webbmejl använder du Kopiera och klistrar in rapporten i ett nytt meddelande.</value>
+  </data>
+  <data name="CreateMail" xml:space="preserve">
+    <value>Skapa e-post</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiera</value>
+  </data>
+  <data name="ClearErrorReports" xml:space="preserve">
+    <value>Rensa</value>
+  </data>
+  <data name="ErrorReportShortened" xml:space="preserve">
+    <value>Rapporten är för lång för e-posten, som bara får början. Använd Kopiera och klistra in hela rapporten i e-posten i stället.</value>
+  </data>
   <data name="ShowConflicts" xml:space="preserve">
     <value>Visa konflikter</value>
   </data>

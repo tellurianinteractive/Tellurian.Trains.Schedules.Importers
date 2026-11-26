@@ -1,5 +1,16 @@
 # Versionsnyheter
 
+## Version 1.5.2
+
+### Nya funktioner
+
+- **Felrapporter.** När appen råkar ut för ett fel visas ett rött (!) i övre listen. Det öppnar felrapporten med de tekniska detaljerna: **Skapa e-post** öppnar ett nytt meddelande i ditt e-postprogram, där du själv väljer mottagare, och **Kopiera** kopierar rapporten för webbmejl. Rapporten sparas, även efter att appen har laddats om, tills du **rensar** den.
+
+### Ändringar
+
+- **Företag med sin verksamhetsperiod.** Där ett företag väljs, som för ett tåg, en tågkategori, en tjänst, ett växellok eller ett fordon, visar listan varje företags verksamhetsperiod efter namnet, så att företag med samma signatur kan skiljas åt. Ett företags perioder visas i tidsordning.
+- **När planen inte kunde kontrolleras.** Om kontrollen av planen misslyckas visar knappen **Konflikter** ett frågetecken och säger det, i stället för att visa inga konflikter. Tidigare såg en misslyckad kontroll ut som en plan utan konflikter.
+
 ## Version 1.5.1
 
 ### Nya funktioner

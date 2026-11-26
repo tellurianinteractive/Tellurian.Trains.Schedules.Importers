@@ -1948,6 +1948,30 @@
   <data name="NoConflicts" xml:space="preserve">
     <value>Ingen konflikter</value>
   </data>
+  <data name="PlanNotChecked" xml:space="preserve">
+    <value>Planen kunne ikke kontrolleres</value>
+  </data>
+  <data name="PlanNotCheckedExplanation" xml:space="preserve">
+    <value>En kontroll feilet, så konfliktene er ukjente, ikke fraværende. Kopier detaljene og rapporter dem sammen med planfilen.</value>
+  </data>
+  <data name="ErrorReports" xml:space="preserve">
+    <value>Feil å rapportere</value>
+  </data>
+  <data name="ErrorReportExplanation" xml:space="preserve">
+    <value>Appen støtte på en feil. Rapporter den gjerne: Opprett e-post åpner en ny melding i e-postprogrammet ditt, der du selv velger mottaker. Med nettpost bruker du Kopier og limer rapporten inn i en ny melding.</value>
+  </data>
+  <data name="CreateMail" xml:space="preserve">
+    <value>Opprett e-post</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopier</value>
+  </data>
+  <data name="ClearErrorReports" xml:space="preserve">
+    <value>Tøm</value>
+  </data>
+  <data name="ErrorReportShortened" xml:space="preserve">
+    <value>Rapporten er for lang for e-posten, som bare får begynnelsen. Bruk Kopier og lim inn hele rapporten i e-posten i stedet.</value>
+  </data>
   <data name="ShowConflicts" xml:space="preserve">
     <value>Vis konflikter</value>
   </data>
