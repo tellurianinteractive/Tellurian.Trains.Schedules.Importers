@@ -50,7 +50,7 @@
 
 - **Två spår med samma beteckning är en konflikt.** En driftplats med två eller fler spår med samma beteckning visas under **Konflikter** och leder till fliken **Driftplatser**. Planen kan fortfarande sparas.
 - **En bansträcka utan hastighet ger en varning.** Den visas under **Konflikter** som en varning och leder till fliken **Sträckor**. Tågen kör där med sin egen hastighet, högst 200 km/h.
-- **Klarerarlistor: första passet gråas även efter lokförarens tjänst.** Kryssrutan för första passet är nu också gråad för ett tåg vars lokförartjänst börjar före första passet, eftersom lokföraren ännu inte är i tjänst.
+- **Klarerarlistor: första köromgången gråas även efter lokförarens tjänst.** Kryssrutan för första köromgången är nu också gråad för ett tåg vars lokförartjänst börjar före första köromgången, eftersom lokföraren ännu inte är i tjänst.
 
 ## Version 1.4.7
 
@@ -150,9 +150,9 @@
 
 ### Ändringar
 
-- **Likadana noteringar sägs en gång.** Noteringar som lyder lika utom för de pass de gäller blir nu en notering för de passen tillsammans, och anger inga pass där de tillsammans täcker alla pass tåget går.
-- **Möten på samma pass delar en kvalificering.** I en notering om möte eller förbigång listas de möten som sker på samma pass tillsammans, med passen angivna en gång efter dem, och grupperna skiljs åt med semikolon.
-- **Ett vagnsset som följer ett push/pull-tåg behöver ingen egen notering.** Där ett push/pull-lok i samma omlopp flyttar tåget till eller från ett annat spår utelämnas noteringarna om att hämta eller växla vagnssetet, eftersom noteringen om tåget redan säger det. Vagnssetet behåller sina noteringar för de pass loket inte kör.
+- **Likadana noteringar sägs en gång.** Noteringar som lyder lika utom för de köromgångar de gäller blir nu en notering för de köromgångarna tillsammans, och anger inga köromgångar där de tillsammans täcker alla köromgångar tåget går.
+- **Möten under samma köromgång delar en kvalificering.** I en notering om möte eller förbigång listas de möten som sker under samma köromgång tillsammans, med köromgångarna angivna en gång efter dem, och grupperna skiljs åt med semikolon.
+- **Ett vagnsset som följer ett push/pull-tåg behöver ingen egen notering.** Där ett push/pull-lok i samma omlopp flyttar tåget till eller från ett annat spår utelämnas noteringarna om att hämta eller växla vagnssetet, eftersom noteringen om tåget redan säger det. Vagnssetet behåller sina noteringar för de köromgångar loket inte kör.
 - **Ett omloppskort för en enda dag benämner den i klartext.** Där ett kort gäller en enda dag står det nu "Lördag" i stället för "L". Flera dagar förkortas fortfarande.
 
 ## Version 1.3.6
@@ -362,14 +362,14 @@
 ### Rättelser
 
 - **Tågklarerarlistorna har nu alla tåg som passerar en plats som stationen styr.** En station som styr en obemannad förgrening, till exempel Steinsnes med Triangeln, saknade de tåg där som också stannar på själva stationen, till exempel godståg som vänder i Tveiten och passerar Triangeln två gånger. Alla passager visas nu, i båda riktningarna.
-- **Första passet är gråat för klareringar som inte kan göras under det.** I tågklarerarlistorna är kryssrutan för första passet gråad när träffen börjar senare än driftdygnet och tåget började tidigare eller klareringen ligger efter midnatt.
+- **Första köromgången är gråad för klareringar som inte kan göras under den.** I tågklarerarlistorna är kryssrutan för första köromgången gråad när träffen börjar senare än driftdygnet och tåget började tidigare eller klareringen ligger efter midnatt.
 - **Fullare sidor i tågklarerarlistorna.** Anmärkningar antas inte längre vara bredare än de är, så färre rader får en extra rad och de utskrivna sidorna utnyttjas bättre.
 
 ## Version 0.9.14
 
 ### Rättelser
 
-- **En vagnsuppsättning som slutar dygnet lastad rapporteras inte längre.** När en godsvagnsuppsättning lastas av och sedan lastas igen senare i sin tur står den helt enkelt kvar lastad till nästa körpass, där den lastas av först. Tidigare rapporterades detta både som avlastning utan föregående lastning och som vagnar som lämnats lastade vid slutet. En vagnsuppsättning som aldrig lastas av, eller aldrig lastas innan den lastas av, rapporteras fortfarande.
+- **En vagnsuppsättning som slutar dygnet lastad rapporteras inte längre.** När en godsvagnsuppsättning lastas av och sedan lastas igen senare i sin tur står den helt enkelt kvar lastad till nästa köromgång, där den lastas av först. Tidigare rapporterades detta både som avlastning utan föregående lastning och som vagnar som lämnats lastade vid slutet. En vagnsuppsättning som aldrig lastas av, eller aldrig lastas innan den lastas av, rapporteras fortfarande.
 
 ## Version 0.9.13
 

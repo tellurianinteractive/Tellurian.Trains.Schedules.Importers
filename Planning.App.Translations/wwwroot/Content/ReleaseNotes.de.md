@@ -50,7 +50,7 @@
 
 - **Zwei Gleise mit derselben Bezeichnung sind ein Konflikt.** Eine Betriebsstelle mit zwei oder mehr Gleisen derselben Bezeichnung steht unter **Konflikte** und führt zum Reiter **Betriebsstellen**. Der Plan kann weiterhin gespeichert werden.
 - **Ein Streckenabschnitt ohne Geschwindigkeit ergibt eine Warnung.** Er steht unter **Konflikte** als Warnung und führt zum Reiter **Strecken**. Züge fahren dort mit ihrer eigenen Geschwindigkeit, höchstens 200 km/h.
-- **Zugmeldelisten: die erste Sitzung wird auch nach dem Dienst des Lokführers ausgegraut.** Das Kästchen der ersten Sitzung ist jetzt auch bei einem Zug ausgegraut, dessen Lokführerdienst vor der ersten Sitzung beginnt, da der Lokführer dann noch nicht im Dienst ist.
+- **Zugmeldelisten: die erste Fahrrunde wird auch nach dem Dienst des Lokführers ausgegraut.** Das Kästchen der ersten Fahrrunde ist jetzt auch bei einem Zug ausgegraut, dessen Lokführerdienst vor der ersten Fahrrunde beginnt, da der Lokführer dann noch nicht im Dienst ist.
 
 ## Version 1.4.7
 
@@ -362,7 +362,7 @@
 ### Fehlerbehebungen
 
 - **Zugmeldelisten enthalten jetzt alle Züge, die einen von der Station gesteuerten Ort passieren.** Eine Station, die eine unbesetzte Abzweigstelle steuert, etwa Steinsnes mit Triangeln, vermisste dort die Züge, die auch in der Station selbst halten, zum Beispiel Güterzüge, die in Tveiten wenden und Triangeln zweimal passieren. Jetzt werden alle Durchfahrten in beiden Richtungen aufgeführt.
-- **Die erste Sitzung ist bei Meldungen, die darin nicht bearbeitet werden können, ausgegraut.** In den Zugmeldelisten ist das Kästchen der ersten Sitzung ausgegraut, wenn das Treffen später beginnt als der Betriebstag und der Zug früher begann oder die Meldung nach Mitternacht liegt.
+- **Die erste Fahrrunde ist bei Meldungen, die darin nicht bearbeitet werden können, ausgegraut.** In den Zugmeldelisten ist das Kästchen der ersten Fahrrunde ausgegraut, wenn das Treffen später beginnt als der Betriebstag und der Zug früher begann oder die Meldung nach Mitternacht liegt.
 - **Vollere Seiten in den Zugmeldelisten.** Bemerkungen werden nicht mehr als breiter angenommen, als sie sind; dadurch bekommen weniger Zeilen eine zusätzliche Zeile, und die gedruckten Seiten werden besser gefüllt.
 
 ## Version 0.9.14
@@ -495,9 +495,9 @@
 - **Züge, die nach Mitternacht fahren, entgehen den Konfliktwarnungen nicht mehr.** Ein Zug, der nach
   Mitternacht auf einem Gleis steht oder auf der Strecke zwischen zwei Bahnhöfen ist, hat dieselbe Uhrzeit
   wie einer, der früher am selben Tag dort ist, doch die Warnungen sahen beide nicht zusammen. Jetzt tun
-  sie es und berücksichtigen dabei die Sitzungen: Eine Zeit nach Mitternacht gehört zum Folgetag, sodass
-  zwei Züge, die beide an den Sitzungen 1, 3 und 5 fahren, nicht gegeneinander gemeldet werden, wenn die
-  Zeit auf die Sitzungen 2, 4 und 6 fällt.
+  sie es und berücksichtigen dabei die Fahrrunden: Eine Zeit nach Mitternacht gehört zum Folgetag, sodass
+  zwei Züge, die beide an den Fahrrunden 1, 3 und 5 fahren, nicht gegeneinander gemeldet werden, wenn die
+  Zeit auf die Fahrrunden 2, 4 und 6 fällt.
 
 ## Version 0.8.6
 
@@ -534,14 +534,14 @@
 ### Änderungen
 
 - **Der Bericht Mitgebrachte Fahrzeuge ist danach geordnet, wofür jede Seite gebraucht wird.** **Nach
-  Eigentümer** geordnet, listet die Seite eines Teilnehmenden das Mitgebrachte nach der ersten Sitzung oder
+  Eigentümer** geordnet, listet die Seite eines Teilnehmenden das Mitgebrachte nach der ersten Fahrrunde oder
   dem ersten Tag, an dem es gebraucht wird, dann nach Bahnhof, Abfahrt und Gleis. **Nach Betriebsstelle**
   geordnet, listet die Seite eines Bahnhofs die Fahrzeuge nach Gleisnummer, Gleis 2 vor Gleis 10, und auf
   jedem Gleis nach Abfahrt.
 - **Die Farben der Zeilen sind einfacher.** Auf der Seite eines Eigentümers ist nur ein Fahrzeug hellgelb,
-  das in der ersten Sitzung oder am ersten Tag nicht gebraucht wird. Auf der Seite eines Bahnhofs ist ein
-  Fahrzeug, das nicht in allen Sitzungen oder an allen Tagen im Einsatz ist, hellgelb, wenn es in einer
-  ungeraden Sitzung oder an einem ungeraden Tag beginnt, und hellblau, wenn es in einer geraden beginnt.
+  das in der ersten Fahrrunde oder am ersten Tag nicht gebraucht wird. Auf der Seite eines Bahnhofs ist ein
+  Fahrzeug, das nicht in allen Fahrrunden oder an allen Tagen im Einsatz ist, hellgelb, wenn es in einer
+  ungeraden Fahrrunde oder an einem ungeraden Tag beginnt, und hellblau, wenn es in einer geraden beginnt.
   Reservefahrzeuge bleiben hellgrau.
 - **Lokomotiven und Triebzüge können eine Fahrzeugnummer erhalten.** Unter **Fahrzeugbesitzer**,
   **Rollendes Material**, kann jeder Eigentümer einer Lokomotive oder eines Triebzugs neben der DCC-Adresse
@@ -844,7 +844,7 @@
 - **Die Balken für Lokführer rechnen die Wartezeit in einem Dienst mit.** Die Balken über dem Bildfahrplan
   zählten einen Lokführer nur als benötigt, solange ein Zug oder eine Rangieraufgabe gefahren
   wurde. Ein Lokführer, dessen **Dienst** eine Lücke zwischen zwei Zügen hat, ist währenddessen trotzdem
-  gebunden, wartend oder auf dem Weg zum nächsten, deshalb zählt diese Zeit jetzt auch mit – an den Sitzungen,
+  gebunden, wartend oder auf dem Weg zum nächsten, deshalb zählt diese Zeit jetzt auch mit – an den Fahrrunden,
   an denen der Dienst gefahren wird. Ebenso ein selbst gesetzter Dienstbeginn vor dem ersten Zug des
   Dienstes oder ein Dienstende nach seinem letzten.
 
@@ -1525,7 +1525,7 @@
 ### Änderungen
 
 - Ein neuer Bericht, **Lokführerdienste**, druckt für jeden Dienst ein A5-Heft. Die Titelseite zeigt die
-  Dienstnummer, in welchen Sitzungen oder an welchen Tagen er läuft, seine Start- und Endzeit und
+  Dienstnummer, in welchen Fahrrunden oder an welchen Tagen er läuft, seine Start- und Endzeit und
   -bahnhöfe, einen Schwierigkeitsgrad, den Besetzungsbedarf und etwaige Diensthinweise; jeder Zugabschnitt
   erhält dann seine eigene Seite mit den zu verwendenden Triebfahrzeugen, den mitzuführenden
   Wagengruppen, den Zielen, zu denen Güterwagen mitgeführt werden, und dem Fahrplan, jeweils in einem
@@ -1534,7 +1534,7 @@
   den Anweisungen, die für die Anlage während des ganzen Treffens gelten — Fahranweisungen, Signalgebung,
   Funk- und Telefonverkehr, Verhalten bei Verspätung und wen man fragt — und wird einmal an alle
   ausgegeben. Es beginnt mit dem Namen des Treffens und seinen Daten, dann folgt das Programm, das jeder
-  Teilnehmer vor der ersten Sitzung wissen muss, dann die Anweisungen über so viele Seiten, wie sie
+  Teilnehmer vor der ersten Fahrrunde wissen muss, dann die Anweisungen über so viele Seiten, wie sie
   benötigen, umbrochen zwischen Absätzen und nie mit einer allein stehenden Überschrift.
 - Die letzte Seite beider Hefte zeigt den Gleisplan der Anlage und die Tabelle der Rangierbahnhöfe, damit
   auch diejenigen, die nie ein Dienstheft in der Hand halten — vor allem das Bahnhofspersonal —, einen
@@ -1547,7 +1547,7 @@
   Lokführer und einen Schaffner —, und können mit einer **festen Nummer** versehen werden, die die
   automatische Neunummerierung unverändert lässt.
 - Der Plan wird jetzt auch geprüft, damit jeder Zugabschnitt mit zugewiesener Lokomotive oder zugewiesenem
-  Triebzug in jeder Sitzung, in der er fährt, von einem Dienst abgedeckt ist. Ein Dienst mit fester Nummer
+  Triebzug in jeder Fahrrunde, in der er fährt, von einem Dienst abgedeckt ist. Ein Dienst mit fester Nummer
   muss eine Nummer haben, und keine zwei solchen Dienste dürfen dieselbe Nummer erhalten.
 - Unternehmen können jetzt ein hochgeladenes **Logo** haben, das in Berichten anstelle der Textsignatur
   angezeigt wird.
@@ -1586,22 +1586,22 @@
 ### Änderungen
 
 - Eine neue Registerkarte **Dienste** ermöglicht die Planung von Fahrerdiensten — die Arbeit, die ein
-  Triebfahrzeugführer während einer Sitzung verrichtet, als Folge der Zugabschnitte, die er fährt. Jeder
-  Dienst ist eine Zeile: links Bezeichnung, Unternehmen und Sitzungen, rechts die Zugabschnitte in
+  Triebfahrzeugführer während einer Fahrrunde verrichtet, als Folge der Zugabschnitte, die er fährt. Jeder
+  Dienst ist eine Zeile: links Bezeichnung, Unternehmen und Fahrrunden, rechts die Zugabschnitte in
   Fahrreihenfolge.
 - Fügen Sie die Zugabschnitte mit **Zugabschnitt hinzufügen** hinzu. Die Auswahl zeigt die
   Triebfahrzeugabschnitte, die ein Fahrer als Nächstes übernehmen könnte — solche, die zeitlich nicht mit
   dem Dienst kollidieren, und, sobald er einen Zugabschnitt hat, solche, die bei oder nach seiner Ankunft
   abfahren. Zugabschnitte müssen nicht an derselben Station beginnen: der Fahrer geht einfach dorthin, wo
   der nächste beginnt.
-- Derselbe Zugabschnitt kann von mehreren Diensten gefahren werden, solange sie an verschiedenen Sitzungen
-  laufen, sodass ein Dienst die ungeraden und ein anderer die geraden Sitzungen abdecken kann.
+- Derselbe Zugabschnitt kann von mehreren Diensten gefahren werden, solange sie an verschiedenen Fahrrunden
+  laufen, sodass ein Dienst die ungeraden und ein anderer die geraden Fahrrunden abdecken kann.
 - Wo zwei Zugabschnitte desselben Zuges in einem Dienst von verschiedenen Triebfahrzeugen gefahren werden,
   zeigt die Registerkarte einen Hinweis an der Station, an der das Triebfahrzeug gewechselt wird — Sie
   geben ihn nicht von Hand ein.
 - Aus XPLN importierte Dienste teilen sich nun die in den Fahrzeugumläufen definierten Zugabschnitte,
   sodass jeder Zugabschnitt das Triebfahrzeug zeigt, das ihn fährt.
-- Der Plan wird geprüft, damit kein Zugabschnitt von zwei Diensten in derselben Sitzung gefahren wird und
+- Der Plan wird geprüft, damit kein Zugabschnitt von zwei Diensten in derselben Fahrrunde gefahren wird und
   kein Dienst zeitlich überlappende Zugabschnitte hat. Die Prüfung lässt sich unter **Einstellungen ›
   Validierung** abschalten.
 
@@ -1609,12 +1609,12 @@
 
 ### Fehlerbehebungen
 
-- Zwei Züge, die nie in derselben Betriebssitzung fahren, werden nicht mehr als Begegnung auf einer
-  eingleisigen Strecke gemeldet. Ein Zug in den Sitzungen 1, 3, 5 und einer in 2, 4, 6 sind nie
+- Zwei Züge, die nie in derselben Fahrrunde fahren, werden nicht mehr als Begegnung auf einer
+  eingleisigen Strecke gemeldet. Ein Zug in den Fahrrunden 1, 3, 5 und einer in 2, 4, 6 sind nie
   gleichzeitig unterwegs.
 - Die Konfliktprüfung auf zweigleisigen und mehrgleisigen Strecken ist jetzt genau: Eine Strecke wird nur
   gemeldet, wenn sich mehr Züge gleichzeitig auf ihr befinden, als sie Gleise hat, und nur Züge gezählt
-  werden, die in einer gemeinsamen Sitzung fahren.
+  werden, die in einer gemeinsamen Fahrrunde fahren.
 
 ## Version 0.2.1
 
@@ -1633,7 +1633,7 @@
 
 - Der Name des Plans, an dem Sie gerade arbeiten, wird jetzt in der oberen Leiste angezeigt.
 - Der grafische Fahrplan zeigt jetzt Balken für den Lokführerbedarf, sodass sich leichter erkennen lässt,
-  wie viele Lokführer während der Betriebssitzung benötigt werden.
+  wie viele Lokführer während der Fahrrunde benötigt werden.
 - Eine neue Ansicht **Topologie** (unter der Registerkarte **Strecken**) zeigt ein schematisches Diagramm
   der Fahrplanstrecken und ihrer Abzweigungen.
 
