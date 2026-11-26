@@ -38,6 +38,13 @@ public sealed class ModuleStandard : LayoutPart, IEquatable<ModuleStandard>
     /// <summary>The scale of the standard; null when not stated.</summary>
     public Scale? Scale { get; set; }
 
+    /// <summary>
+    /// The id of the standard this standard extends, e.g. "MMM-2R" extends "MMM"; null when it extends none. An extension has the
+    /// end profiles of the standard it extends, directly or through others (<see cref="Catalogue.EndProfilesOf"/>). Its other
+    /// values are its own: a catalogue states them in full, also those that are the same as the extended standard's.
+    /// </summary>
+    public Guid? ExtendsStandardId { get; set; }
+
     /// <summary>The track system, e.g. "Code 75"; null when not stated.</summary>
     public string? TrackSystem { get; set; }
 

@@ -49,6 +49,20 @@ public sealed class CatalogueTests
     }
 
     [TestMethod]
+    public void TheExtendedStandardIsWrittenAndReadBack()
+    {
+        var catalogue = Read(BuiltIn);
+        var (extension, extended) = (catalogue.Standards[1], catalogue.Standards[0]);
+        catalogue = catalogue.With(extension.With(s => s.ExtendsStandardId = extended.Id));
+
+        var written = new CatalogueExporter().Write(catalogue, ExportOptions.Default);
+
+        Assert.AreEqual(extended.Id, Read(written).FindStandard(extension.Id!.Value)!.ExtendsStandardId);
+        Assert.Contains("\"extendsStandardId\"", written);
+        Assert.DoesNotContain("\"extendsStandardId\"", new CatalogueExporter().Write(Read(BuiltIn), ExportOptions.Default), "Not written when it extends none.");
+    }
+
+    [TestMethod]
     public void TheRegistryIdOfAStandardMovesToTheExternalReferences()
     {
         var file = JsonNode.Parse(BuiltIn)!.AsObject();

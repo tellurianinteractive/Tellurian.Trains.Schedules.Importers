@@ -52,8 +52,33 @@ public sealed record Catalogue : ExtensibleRecord
     public EndProfile? FindEndProfile(string designation, string scale) =>
         EndProfiles.FirstOrDefault(p => Same(p.Designation, designation) && Same(p.Scale, scale));
 
-    /// <summary>The end profiles that belong to the standard.</summary>
-    public IEnumerable<EndProfile> EndProfilesOf(Guid standardId) => EndProfiles.Where(p => p.Standards.Any(s => s.Id == standardId));
+    /// <summary>
+    /// The end profiles of the standard: those that belong to it, and those of the standards it extends, directly or through
+    /// others (<see cref="ModuleStandard.ExtendsStandardId"/>).
+    /// </summary>
+    public IEnumerable<EndProfile> EndProfilesOf(Guid standardId)
+    {
+        var standardIds = StandardAndExtendedIds(standardId);
+        return EndProfiles.Where(p => p.Standards.Any(s => standardIds.Contains(s.Id)));
+    }
+
+    /// <summary>
+    /// The standard and the standards it extends, nearest first (<see cref="ModuleStandard.ExtendsStandardId"/>). The chain ends at a
+    /// standard that extends none, one the catalogue doesn't have, or one already in the chain (a loop).
+    /// </summary>
+    public IEnumerable<ModuleStandard> StandardAndExtended(Guid standardId)
+    {
+        var visited = new HashSet<Guid>();
+        var standard = FindStandard(standardId);
+        while (standard?.Id is { } id && visited.Add(id))
+        {
+            yield return standard;
+            standard = standard.ExtendsStandardId is { } extendedId ? FindStandard(extendedId) : null;
+        }
+    }
+
+    /// <summary>The ids of <see cref="StandardAndExtended"/>; at least <paramref name="standardId"/>, also when the catalogue lacks it.</summary>
+    internal HashSet<Guid> StandardAndExtendedIds(Guid standardId) => [standardId, .. StandardAndExtended(standardId).Select(s => s.Id!.Value)];
 
     /// <summary>The catalogue with <paramref name="standard"/> added, or replacing the standard with the same id.</summary>
     public Catalogue With(ModuleStandard standard) => this with { Standards = [.. Standards.Where(s => standard.Id is null || s.Id != standard.Id), standard] };

@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 4.4.0
+
+### New features
+
+- **Standards that extend another.** The new `ModuleStandard.ExtendsStandardId` names the standard a standard extends, e.g. MMM-2R extends MMM. `Catalogue.EndProfilesOf` gives an extension the end profiles of the standards it extends, directly or through others, and `Catalogue.StandardAndExtended` gives the chain, nearest first. A standard's default end profile may be one of an extended standard. The Module Registry's catalogue sets it.
+
 ## Version 4.3.0
 
 ### New features

@@ -37,9 +37,13 @@ public static class CatalogueValidation
             if (value is <= 0) problems.Add(new(CatalogueProblemCode.NotPositive, property));
         }
 
+        // A default end profile is one of the standard's own or of a standard it extends, as the edited standard states it.
         void OfStandard(Guid? id, string property)
         {
-            if (id is { } profileId && catalogue.FindEndProfile(profileId)?.Standards.Any(s => s.Id == standard.Id) != true)
+            if (id is not { } profileId) return;
+            HashSet<Guid> standardIds = standard.ExtendsStandardId is { } extendedId ? catalogue.StandardAndExtendedIds(extendedId) : [];
+            if (standard.Id is { } ownId) standardIds.Add(ownId);
+            if (catalogue.FindEndProfile(profileId)?.Standards.Any(s => standardIds.Contains(s.Id)) != true)
                 problems.Add(new(CatalogueProblemCode.EndProfileNotOfStandard, property));
         }
     }
