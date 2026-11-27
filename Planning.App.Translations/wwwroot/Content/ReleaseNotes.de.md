@@ -1,5 +1,11 @@
 # Versionshinweise
 
+## Version 1.7.1
+
+### Korrekturen
+
+- **Fahrzeuge, die über mehrere Fahrrunden laufen.** Die Prüfung, ob sich der Umlauf eines Fahrzeugs schließt, verfolgt jetzt jedes Fahrzeug von Fahrrunde zu Fahrrunde: Jede Fahrrunde, in der es läuft, muss dort beginnen, wo es am Ende der vorigen abgestellt wurde. Ein Fahrzeug, das in jeder Fahrrunde dieselben Züge fährt, muss weiterhin jede Fahrrunde dort beenden, wo es sie begonnen hat. Ein Umlauf über mehrere Fahrrunden, etwa hin in einer Fahrrunde und zurück in der nächsten, wird nicht mehr gemeldet, weil er nicht zu seinem Anfang zurückkehrt, wenn die Zahl der Fahrrunden das nicht zulässt, zum Beispiel ein Umlauf über zwei Fahrrunden bei drei Fahrrunden. Eine Lücke innerhalb eines Umlaufplans wird nicht mehr doppelt gemeldet. Ein Bruch nennt jetzt die beiden Zugabschnitte, an denen das Fahrzeug nicht weiterfährt.
+
 ## Version 1.7.0
 
 ### Neue Funktionen

@@ -17,7 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Tellurian.Localization" Version="1.5.0" />
-    <PackageReference Include="Tellurian.Utilities" Version="1.3.3" />
+    <PackageReference Include="Tellurian.Utilities" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />

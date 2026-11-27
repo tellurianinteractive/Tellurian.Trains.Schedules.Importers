@@ -1,5 +1,11 @@
 ﻿# Release notes
 
+## Version 1.7.1
+
+### Fixes
+
+- **Vehicles working over several sessions.** The check that a vehicle's working closes now follows each vehicle from session to session: every session it works must start where it was left at the end of the session before. A vehicle that works the same trains every session must still end each session where it started. A working that spans several sessions, such as out on one session and back on the next, is no longer reported for not returning to its start when the number of sessions does not allow it, for example a two-session working in three sessions. A gap within one schedule is no longer reported twice. A break now names the two train parts where the vehicle does not continue.
+
 ## Version 1.7.0
 
 ### New features

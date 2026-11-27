@@ -1,5 +1,11 @@
 # Versionsnyheder
 
+## Version 1.7.1
+
+### Rettelser
+
+- **Køretøjer, der kører over flere køresessioner.** Kontrollen af, at et køretøjs omløb slutter, følger nu hvert køretøj fra køresession til køresession: hver køresession, det kører, skal starte, hvor det blev efterladt ved slutningen af den forrige. Et køretøj, der kører de samme tog i hver køresession, skal stadig slutte hver køresession, hvor det startede. Et omløb over flere køresessioner, for eksempel ud i én køresession og tilbage i den næste, meldes ikke længere for ikke at vende tilbage til sin start, når antallet af køresessioner ikke tillader det, for eksempel et omløb over to køresessioner i tre køresessioner. Et hul inden for én turnus meldes ikke længere to gange. Et brud nævner nu de to togafsnit, hvor køretøjet ikke fortsætter.
+
 ## Version 1.7.0
 
 ### Nye funktioner

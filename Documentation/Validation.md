@@ -473,9 +473,19 @@ clearance or runaround in the **Settings** tab or on the **Operation locations**
 #### S3 + S5 — Circulation closure (per vehicle) ✅
 **Method**: `ValidateVehicleClosure(this Plan plan)`
 
-**Validates**: Over the operating period a **vehicle's** movements must **balance at every station** — it departs each station as often as it arrives — so the layout's vehicle distribution repeats and the working can run again. This is flow conservation: movements are counted **per session worked** (`+1` where the unit departs, `−1` where it arrives), so running a leg on more sessions than its return is caught. A unit that works both a forward and a return leg closes even when the legs run on **different sessions** and even when they are **split across several schedules** — the rotation case (forward on some sessions, return on others; position carries over between sessions). Applies to **traction units, wagonsets and cargo-only units**, each of which turns on its own working. **Exempt**: cargo flows (freight directed by waybills, not a turning vehicle) and units whose only working is on demand. Gated by `ValidateSchedules`.
+**Validates**: Over the operating period a **vehicle** must be **continuous**: every part it works starts where the part it worked before left it, also **from one session to the next session it works** — it carries on from where it ended last session. The working is followed per vehicle, so the parts may lie in **different schedules** (the rotation case). Within a session only joints between parts of different schedules are checked; a gap inside one schedule is S2's to report.
 
-**Error**: `"Vehicle {vehicle} does not return to its start {start}; it ends at {end}."` (`VehicleNotClosed`) — `start` is the station it departs more often than it returns to, `end` the station it is left at.
+Whether it must also **end where it started** depends on the working:
+- A vehicle that works **the same parts on every session** it works must end each session where it started it.
+- A vehicle whose working **spans several sessions** (forward on some sessions, return on others; a three-session round trip) need not return to its start at the end of the period. When the number of sessions is not a multiple of the sessions the working spans — a two-session working in 3, 5, 7 … sessions, a three-session working in 2, 4, 5, 7 … sessions — it cannot. Where the period is a multiple of the span and the working repeats, continuity already brings it back to its start.
+
+Applies to **traction units, wagonsets and cargo-only units**, each of which turns on its own working. **Exempt**: cargo flows (freight directed by waybills, not a turning vehicle) and units whose only working is on demand. Each vehicle is reported once, at its first break. Gated by `ValidateSchedules`.
+
+**Errors** (`VehicleNotClosed`):
+- `"Vehicle {vehicle} is left at {location} after {trainPart}, but {trainPart}, which it works next, starts at {location}."` — a break in continuity, within a session or between sessions.
+- `"Vehicle {vehicle} does not return to its start {start}; it ends at {end}."` — a working the same on every session that does not end where it started.
+
+An earlier version balanced departures and arrivals over the whole period (flow conservation). That wrongly flagged multi-session workings in a period that is not a multiple of their span, and reported gaps inside one schedule a second time.
 
 This single per-unit rule replaces the earlier per-schedule S3 and per-session-combination S5 checks, which required each schedule (or each session combination) to return to its start **in isolation** and so wrongly flagged rotation schemes that close only across sessions or across several schedules.
 
@@ -666,10 +676,11 @@ S4, S5, P1, P3, P4. Partial: L1 (emergent from L2/L3), P2. Note L3
 counts trains in a control section **direction-agnostically** (one train per track, both directions
 together); direction only matters in a single-track meet-free zone.
 
-Closure (S3+S5) is judged **per vehicle** (traction units, wagonsets and cargo-only units) by
-flow conservation over the whole period, not per schedule or per session combination — so
-rotation schemes that close only across sessions or across several schedules are correctly
-allowed (see the S3+S5 section above). Cargo flows are exempt.
+Closure (S3+S5) is judged **per vehicle** (traction units, wagonsets and cargo-only units) as
+continuity from part to part and session to session, not per schedule or per session combination.
+Rotation schemes split across sessions or schedules are allowed, and a working that spans several
+sessions need not return to its start at the end of the period (see the S3+S5 section above).
+Cargo flows are exempt.
 
 1. **P2 (partial)** - every part scheduled; the same part not in two overlapping-session schedules is not fully checked
 2. **Vehicle model refactoring** - VehicleSchedule validation needs updating for new Vehicle/VehicleScheduleAssignment model

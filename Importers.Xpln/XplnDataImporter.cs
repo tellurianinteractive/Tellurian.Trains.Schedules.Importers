@@ -247,7 +247,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                 itemMessages.AddRange(ValidateRow(fields, sheetRow));
                 if (itemMessages.HasNoStoppingErrors())
                 {
-                    if (fields[Type].IsAnyOf("Station,Block"))
+                    if (fields[Type].IsAnyOf("Station", "Block"))
                     {
                         if (current is not null)
                         {

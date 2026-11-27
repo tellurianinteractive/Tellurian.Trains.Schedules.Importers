@@ -1,5 +1,11 @@
 # Versionsnyheter
 
+## Version 1.7.1
+
+### Rättelser
+
+- **Fordon som går över flera köromgångar.** Kontrollen av att ett fordons omlopp sluter sig följer nu varje fordon från köromgång till köromgång: varje köromgång det går måste börja där det lämnades i slutet av den föregående. Ett fordon som kör samma tåg i varje köromgång måste fortfarande avsluta varje köromgång där det började. Ett omlopp över flera köromgångar, till exempel ut i en köromgång och tillbaka i nästa, rapporteras inte längre för att det inte återvänder till sin start när antalet köromgångar inte tillåter det, till exempel ett omlopp över två köromgångar i tre köromgångar. En lucka inom en turnus rapporteras inte längre två gånger. Ett brott nämner nu de två tågavsnitt där fordonet inte fortsätter.
+
 ## Version 1.7.0
 
 ### Nya funktioner

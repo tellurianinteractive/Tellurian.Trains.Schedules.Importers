@@ -324,6 +324,9 @@
   <data name="TrainMissingTraction" xml:space="preserve">
     <value>Tåg {0} saknar dragfordon mellan {1} {2} och {3} {4} på köromgångar {5}.</value>
   </data>
+  <data name="VehicleDoesNotContinue" xml:space="preserve">
+    <value>Fordon {0} står kvar vid {1} efter {2}, men {3}, som det kör härnäst, börjar vid {4}.</value>
+  </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Fordon {0} återvänder inte till sin startplats {1}; det slutar vid {2}.</value>
   </data>

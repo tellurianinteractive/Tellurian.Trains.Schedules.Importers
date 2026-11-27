@@ -13,7 +13,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="System.Data.Odbc" Version="11.0.0" />
-		<PackageReference Include="Tellurian.Utilities" Version="1.3.3" />
+		<PackageReference Include="Tellurian.Utilities" Version="3.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Resources\Strings.Designer.cs">

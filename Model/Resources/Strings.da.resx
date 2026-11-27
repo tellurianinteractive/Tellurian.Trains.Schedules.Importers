@@ -324,6 +324,9 @@
   <data name="TrainMissingTraction" xml:space="preserve">
     <value>Tog {0} har ingen trækkraftenhed mellem {1} {2} og {3} {4} på køresessioner {5}.</value>
   </data>
+  <data name="VehicleDoesNotContinue" xml:space="preserve">
+    <value>Køretøj {0} står tilbage ved {1} efter {2}, men {3}, som det kører herefter, begynder ved {4}.</value>
+  </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Køretøj {0} vender ikke tilbage til sit udgangspunkt {1}; det slutter ved {2}.</value>
   </data>

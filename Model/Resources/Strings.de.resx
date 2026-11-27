@@ -324,6 +324,9 @@
   <data name="TrainMissingTraction" xml:space="preserve">
     <value>Zug {0} hat kein Triebfahrzeug zwischen {1} {2} und {3} {4} in den Fahrrunden {5}.</value>
   </data>
+  <data name="VehicleDoesNotContinue" xml:space="preserve">
+    <value>Fahrzeug {0} bleibt nach {2} in {1} stehen, aber {3}, den es danach fährt, beginnt in {4}.</value>
+  </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Fahrzeug {0} kehrt nicht zu seinem Ausgangspunkt {1} zurück; es endet bei {2}.</value>
   </data>

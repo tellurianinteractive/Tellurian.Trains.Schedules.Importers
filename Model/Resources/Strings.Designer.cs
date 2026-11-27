@@ -808,6 +808,15 @@ namespace Tellurian.Trains.Schedules.Model.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vehicle {0} is left at {1} after {2}, but {3}, which it works next, starts at {4}..
+        /// </summary>
+        internal static string VehicleDoesNotContinue {
+            get {
+                return ResourceManager.GetString("VehicleDoesNotContinue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vehicle {0} does not return to its start {1}; it ends at {2}..
         /// </summary>
         internal static string VehicleDoesNotReturnToStart {

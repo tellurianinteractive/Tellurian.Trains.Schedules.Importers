@@ -693,60 +693,81 @@ public static class ValidationExtensions
         }
 
         /// <summary>
-        /// Validates vehicle circulation closure (rules S3 + S5): over the whole operating period a
-        /// vehicle's movements must balance at every station — it must depart each station as often
-        /// as it arrives there — so the layout's vehicle distribution repeats and the working can run
-        /// again. Movements are counted per session worked, so a unit that runs a leg on more sessions than
-        /// it runs the return is caught. A unit that works both a forward and a return leg is closed and is
-        /// not reported, even when the legs run on different sessions and even when they are split across
-        /// several schedules (the rotation case). Applies to traction units, wagonsets and cargo-only units,
-        /// each of which turns on its own working. On-demand-only units and cargo flows (freight directed by
-        /// waybills, not a turning vehicle) are exempt.
+        /// Validates vehicle circulation (rules S3 + S5): over the operating period a vehicle must be
+        /// continuous. Each part it works starts where it was left by the part it worked before, also
+        /// from one session to the next session it works, so it carries on from where it ended last
+        /// session. A vehicle that works the same parts on every session it works must also end each
+        /// session where it started it. A vehicle whose working spans several sessions (the rotation case,
+        /// also when it is split across several schedules) need not return to its start at the end of the
+        /// period: when the number of sessions is not a multiple of the sessions the working spans, it
+        /// cannot. Applies to traction units, wagonsets and cargo-only units, each of which turns on its own
+        /// working. On-demand-only units and cargo flows (freight directed by waybills, not a turning
+        /// vehicle) are exempt.
         /// </summary>
+        /// <remarks>
+        /// Within a session, only joints between parts of different schedules are checked; a gap within
+        /// one schedule is rule S2's to report. Each vehicle is reported once, at its first break.
+        /// </remarks>
         internal IEnumerable<ValidationError> ValidateVehicleClosure()
         {
-            var general = plan.Layout.Settings.General;
-            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
             foreach (var vehicle in plan.ScheduledObjects)
             {
                 if (!(vehicle.IsTraction || vehicle.IsWagonSet || vehicle.IsCargoOnly)) continue;
 
-                // Flow conservation over every session worked: +1 where the unit departs, -1 where it
-                // arrives. A closed circulation nets to zero at every location.
-                var net = new Dictionary<OperationLocation, int>();
-                var departFrom = new Dictionary<OperationLocation, ScheduledTrainPart>();
-                var arriveAt = new Dictionary<OperationLocation, ScheduledTrainPart>();
-                var worksScheduled = false;
-                for (var number = 1; number <= periodMax; number++)
+                var workings = plan.WorkingsPerSession(vehicle);
+                if (workings.Count == 0) continue; // no regular working (e.g. on-demand only)
+
+                // A working that is the same on every session worked is followed once and must close on
+                // itself; one that differs between sessions is followed through the whole period.
+                var first = workings[0].Select(w => w.Part);
+                var sameEverySession = workings.All(w => w.Select(x => x.Part).SequenceEqual(first, ReferenceEqualityComparer.Instance));
+                if (sameEverySession) workings = [workings[0]];
+                var joints = new List<(Working Previous, Working Next, CirculationJoint Kind)>();
+                for (var i = 0; i < workings.Count; i++)
                 {
-                    foreach (var assignment in vehicle.ScheduleAssignments.Where(a => a.ActualSessions.Includes(number)))
-                    {
-                        foreach (var part in assignment.Schedule?.Parts ?? [])
-                        {
-                            if (!part.Train.ActualSessions.Includes(number)) continue;
-                            worksScheduled = true;
-                            var from = part.From.OperationLocation;
-                            var to = part.To.OperationLocation;
-                            net[from] = net.GetValueOrDefault(from) + 1;
-                            net[to] = net.GetValueOrDefault(to) - 1;
-                            departFrom.TryAdd(from, part);
-                            arriveAt.TryAdd(to, part);
-                        }
-                    }
+                    for (var j = 1; j < workings[i].Count; j++) joints.Add((workings[i][j - 1], workings[i][j], CirculationJoint.WithinSession));
+                    if (i < workings.Count - 1) joints.Add((workings[i][^1], workings[i + 1][0], CirculationJoint.BetweenSessions));
                 }
-                if (!worksScheduled) continue; // no regular working (e.g. on-demand only)
+                if (sameEverySession) joints.Add((workings[0][^1], workings[0][0], CirculationJoint.BackToStart));
 
-                var start = net.FirstOrDefault(kv => kv.Value > 0).Key; // departs more often than it returns
-                var end = net.FirstOrDefault(kv => kv.Value < 0).Key;   // arrives more often than it leaves
-                if (start is null && end is null) continue;             // balanced: the circulation closes
+                var index = joints.FindIndex(j =>
+                    (j.Kind != CirculationJoint.WithinSession || !ReferenceEquals(j.Previous.Schedule, j.Next.Schedule)) &&
+                    !j.Next.Part.From.OperationLocation.Equals(j.Previous.Part.To.OperationLocation));
+                if (index < 0) continue;
 
-                var fromPart = start is not null ? departFrom[start] : arriveAt[end!];
-                var toPart = end is not null ? arriveAt[end] : departFrom[start!];
-                var message = Message.Information(Strings.VehicleDoesNotReturnToStart, vehicle.Designation, (start ?? end)!, (end ?? start)!);
-                errors.Add(ValidationError.VehicleNotClosed(vehicle, fromPart, toPart, message));
+                var broken = joints[index];
+                var (previous, next) = (broken.Previous.Part, broken.Next.Part);
+                var message = broken.Kind == CirculationJoint.BackToStart
+                    ? Message.Information(Strings.VehicleDoesNotReturnToStart, vehicle.Designation, next.From.OperationLocation, previous.To.OperationLocation)
+                    : Message.Information(Strings.VehicleDoesNotContinue, vehicle.Designation, previous.To.OperationLocation, previous, next, next.From.OperationLocation);
+                errors.Add(ValidationError.VehicleNotClosed(vehicle, previous, next, message));
             }
             return errors;
+        }
+
+        /// <summary>
+        /// The vehicle's working on each session of the period it works, in session order: the parts it
+        /// works that session, with the schedule each belongs to, in the order it works them.
+        /// </summary>
+        private List<List<Working>> WorkingsPerSession(ScheduledObject vehicle)
+        {
+            var general = plan.Layout.Settings.General;
+            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
+            var workings = new List<List<Working>>();
+            for (var number = 1; number <= periodMax; number++)
+            {
+                var working = vehicle.ScheduleAssignments
+                    .Where(a => a.Schedule is not null && a.ActualSessions.Includes(number))
+                    .SelectMany(a => a.Schedule!.Parts
+                        .Where(p => p.Train.ActualSessions.Includes(number))
+                        .Select(p => new Working(a.Schedule!, p)))
+                    .DistinctBy(x => x.Part, ReferenceEqualityComparer.Instance)
+                    .OrderBy(x => x.Part.StartTime)
+                    .ToList();
+                if (working.Count > 0) workings.Add(working);
+            }
+            return workings;
         }
 
         /// <summary>
@@ -765,27 +786,11 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateLayoverPairsBetweenSessions()
         {
-            var general = plan.Layout.Settings.General;
-            var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
             var reported = new List<(ScheduledTrainPart Previous, ScheduledTrainPart Next)>();
             foreach (var vehicle in plan.ScheduledObjects.Where(v => v.IsTraction || v.IsWagonSet))
             {
-                // The unit's working on each session it works, in the order it works the parts.
-                var workings = new List<List<(Schedule Schedule, ScheduledTrainPart Part)>>();
-                for (var number = 1; number <= periodMax; number++)
-                {
-                    var working = vehicle.ScheduleAssignments
-                        .Where(a => a.Schedule is not null && a.ActualSessions.Includes(number))
-                        .SelectMany(a => a.Schedule!.Parts
-                            .Where(p => p.Train.ActualSessions.Includes(number))
-                            .Select(p => (Schedule: a.Schedule!, Part: p)))
-                        .DistinctBy(x => x.Part, ReferenceEqualityComparer.Instance)
-                        .OrderBy(x => x.Part.StartTime)
-                        .ToList();
-                    if (working.Count > 0) workings.Add(working);
-                }
-
+                var workings = plan.WorkingsPerSession(vehicle);
                 for (var i = 0; i < workings.Count; i++)
                 {
                     var (previousSchedule, previous) = workings[i][^1];
@@ -1631,6 +1636,20 @@ public static class ValidationExtensions
         general.UseDays
             ? sessions.DayNamesText(general.SessionSettings(useShortWeekdayNames: true))
             : sessions.SessionsNumbersWithin(useDays: false, general.MaxSessions);
+
+    /// <summary>A part a vehicle works on a session, with the schedule it works it in.</summary>
+    private readonly record struct Working(Schedule Schedule, ScheduledTrainPart Part);
+
+    /// <summary>Where in a vehicle's circulation two parts it works in turn meet.</summary>
+    private enum CirculationJoint
+    {
+        /// <summary>Two parts worked one after the other in the same session.</summary>
+        WithinSession,
+        /// <summary>The last part of a session and the first part of the next session the vehicle works.</summary>
+        BetweenSessions,
+        /// <summary>The last and first part of a working that is the same on every session worked.</summary>
+        BackToStart
+    }
 }
 
 /// <summary>

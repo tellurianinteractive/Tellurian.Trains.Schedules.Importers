@@ -1,5 +1,15 @@
 # Release Notes
 
+## Version 4.4.1
+
+### Fixes
+
+- **Vehicle circulation is checked as continuity from session to session (rules S3 + S5).** `ValidateVehicleClosure` no longer balances departures and arrivals over the whole period (flow conservation). It follows each vehicle part by part and session by session: every part starts where the part worked before left it, also between sessions and across schedules (the rotation case). A vehicle whose working is the same every session must still end each session where it started. A working that spans several sessions need not return to its start, since it cannot when the period is not a multiple of its span. Gaps within one schedule are left to S2 and are no longer reported twice. The new message `VehicleDoesNotContinue` names the two train parts at the break; each vehicle is reported once, at its first break.
+
+### Dependencies
+
+- Tellurian.Utilities 3.0.0 (from 1.3.3).
+
 ## Version 4.4.0
 
 ### New features

@@ -324,6 +324,9 @@
   <data name="TrainMissingTraction" xml:space="preserve">
     <value>Train {0} has no traction unit between {1} {2} and {3} {4} on sessions {5}.</value>
   </data>
+  <data name="VehicleDoesNotContinue" xml:space="preserve">
+    <value>Vehicle {0} is left at {1} after {2}, but {3}, which it works next, starts at {4}.</value>
+  </data>
   <data name="VehicleDoesNotReturnToStart" xml:space="preserve">
     <value>Vehicle {0} does not return to its start {1}; it ends at {2}.</value>
   </data>

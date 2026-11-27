@@ -582,27 +582,83 @@ public class ValidationTests
         Assert.IsEmpty(errors, "Three forward legs and three return legs balance over the period.");
     }
 
+    // A working over two sessions in a period of an odd number of sessions cannot end where it started:
+    // it carries on from where it ended last session, and that is enough.
     [TestMethod]
-    public void TractionUnitWithMoreForwardThanReturnLegsIsReported()
+    [DataRow(3)]
+    [DataRow(5)]
+    [DataRow(7)]
+    public void TwoSessionWorkingInAnOddPeriodNeedNotReturn(int sessions)
+    {
+        var plan = PlanWithForwardAndReturn();
+        plan.Layout.Settings.General.MaxSessions = sessions;
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->G
+        var odd = Sessions.FromSessionNumbers([.. Enumerable.Range(1, sessions).Where(n => n % 2 == 1)]);
+        var even = Sessions.FromSessionNumbers([.. Enumerable.Range(1, sessions).Where(n => n % 2 == 0)]);
+        var forwardSchedule = plan.CreateSchedule();
+        forwardSchedule.Add(forward.AsTrainPart);
+        var returnSchedule = plan.CreateSchedule();
+        returnSchedule.Add(@return.AsTrainPart);
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        plan.AssignVehicle(forwardSchedule, wagon, odd);
+        plan.AssignVehicle(returnSchedule, wagon, even);
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
+
+        Assert.IsEmpty(errors, "The wagonset continues from where it ended each session; it cannot return to its start.");
+    }
+
+    // A working over three sessions ends where it started only when the number of sessions is a multiple of three.
+    [TestMethod]
+    [DataRow(2)]
+    [DataRow(4)]
+    [DataRow(5)]
+    [DataRow(6)]
+    [DataRow(7)]
+    public void ThreeSessionWorkingNeedNotReturn(int sessions)
+    {
+        var plan = PlanWithForwardAndReturn();
+        plan.Layout.Settings.General.MaxSessions = sessions;
+        var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Yb->Snu
+        var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->G
+        ScheduledTrainPart[] legs = [forward.AsTrainPart(0, 1), forward.AsTrainPart(1, 2), @return.AsTrainPart];
+        var wagon = plan.CreateVehicle(ScheduledObjectType.Wagonset, "W", 1, null);
+        for (var leg = 0; leg < legs.Length; leg++)
+        {
+            var numbers = Enumerable.Range(1, sessions).Where(n => (n - 1) % 3 == leg).ToArray();
+            if (numbers.Length == 0) continue;
+            var schedule = plan.CreateSchedule();
+            schedule.Add(legs[leg]);
+            plan.AssignVehicle(schedule, wagon, Sessions.FromSessionNumbers(numbers));
+        }
+
+        var errors = plan.GetValidationErrors(Settings)
+            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
+
+        Assert.IsEmpty(errors);
+    }
+
+    [TestMethod]
+    public void VehicleThatDoesNotContinueFromWhereItEndedIsReported()
     {
         var plan = PlanWithForwardAndReturn();
         var forward = plan.Timetable.Trains.First(t => t.Number == 1);
         var @return = plan.Timetable.Trains.First(t => t.Number == 2);
-        forward.Sessions = Sessions.FromSessionNumbers(1, 3, 5, 7); // four forward legs
-        @return.Sessions = Sessions.FromSessionNumbers(2, 4, 6);    // only three return legs
-        var odd = plan.CreateSchedule();
-        odd.Add(forward.AsTrainPart);
-        var even = plan.CreateSchedule();
-        even.Add(@return.AsTrainPart);
+        var forwardSchedule = plan.CreateSchedule();
+        forwardSchedule.Add(forward.AsTrainPart);
+        var returnSchedule = plan.CreateSchedule();
+        returnSchedule.Add(@return.AsTrainPart);
         var vehicle = plan.CreateVehicle(ScheduledObjectType.Locomotive, "BR 218", 1, null);
-        plan.AssignVehicle(odd, vehicle, Sessions.FromSessionNumbers(1, 3, 5, 7));
-        plan.AssignVehicle(even, vehicle, Sessions.FromSessionNumbers(2, 4, 6));
+        plan.AssignVehicle(forwardSchedule, vehicle, Sessions.FromSessionNumbers(1, 3, 5)); // left at Snu after session 3...
+        plan.AssignVehicle(returnSchedule, vehicle, Sessions.FromSessionNumbers(2, 6));     // ...but starts session 5 at G
 
-        var errors = plan.GetValidationErrors(Settings)
-            .Where(e => e.ErrorType == ValidationErrorType.VehicleNotClosed)
-            .ToList();
+        var error = plan.GetValidationErrors(Settings)
+            .Single(e => e.ErrorType == ValidationErrorType.VehicleNotClosed);
 
-        Assert.HasCount(1, errors, "One more forward than return leg leaves the unit stranded once.");
+        StringAssert.Contains(error.Message.Text, "Stenungsund");
+        Assert.DoesNotContain("{", error.Message.Text, "Every placeholder in the message is filled in.");
     }
 
     // The reported case: two schedules (forward A>B and return B>A) with two locos, each loco assigned to

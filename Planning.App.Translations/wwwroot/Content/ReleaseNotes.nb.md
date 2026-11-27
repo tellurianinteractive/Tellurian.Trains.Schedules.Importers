@@ -1,5 +1,11 @@
 # Versjonsnyheter
 
+## Versjon 1.7.1
+
+### Rettelser
+
+- **Kjøretøy som går over flere kjøresesjoner.** Kontrollen av at et kjøretøys omløp slutter, følger nå hvert kjøretøy fra kjøresesjon til kjøresesjon: hver kjøresesjon det går, må starte der det ble satt igjen ved slutten av den forrige. Et kjøretøy som kjører de samme togene i hver kjøresesjon, må fortsatt avslutte hver kjøresesjon der det startet. Et omløp over flere kjøresesjoner, for eksempel ut i én kjøresesjon og tilbake i den neste, meldes ikke lenger for ikke å komme tilbake til starten når antallet kjøresesjoner ikke tillater det, for eksempel et omløp over to kjøresesjoner i tre kjøresesjoner. Et hull innenfor én turnus meldes ikke lenger to ganger. Et brudd nevner nå de to togavsnittene der kjøretøyet ikke fortsetter.
+
 ## Versjon 1.7.0
 
 ### Nye funksjoner
