@@ -1,15 +1,43 @@
-# Auto detect text files and normalise line endings to LF in the repo
+# Line endings: LF everywhere, in the repository and in the working tree, on every OS.
+# Local files and GitHub are byte-identical, so git never converts or warns.
+# See the tellurian-review skill, section "Repository hygiene".
 * text=auto eol=lf
 
-# Windows-specific files that must keep CRLF
-*.sln        text eol=crlf
-*.slnx       text eol=crlf
+# Windows command scripts need CRLF to run reliably in cmd.exe
+*.cmd text eol=crlf
+*.bat text eol=crlf
 
-# Binary files
-*.accdb      binary
-*.ods        binary
-*.xlsx       binary
-*.png        binary
-*.jpg        binary
-*.gif        binary
-*.ico        binary
+# Binary files: never touched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.dll binary
+*.exe binary
+*.pdb binary
+*.nupkg binary
+*.snk binary
+*.pfx binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.ods binary
+*.xlsx binary
+*.xls binary
+*.docx binary
+*.pptx binary
+*.accdb binary
+*.mdb binary
+*.dacpac binary
+*.bak binary
+*.mdf binary
+*.ldf binary
+*.db binary
+*.sqlite binary

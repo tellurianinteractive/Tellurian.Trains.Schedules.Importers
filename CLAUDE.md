@@ -98,3 +98,7 @@ Single workflow (`.github/workflows/publish.yml`, named after the nuget.org Trus
 - Implicit usings enabled
 - SourceLink GitHub integration for debugging
 - Local NuGet output configured to `C:\NuGets\`
+
+## Code Review
+
+Reviews and the definition of done follow the user-level `tellurian-review` skill, the strict baseline common to all Tellurian.Trains repos. Rules in this file add to it; where they contradict it, raise the conflict.
