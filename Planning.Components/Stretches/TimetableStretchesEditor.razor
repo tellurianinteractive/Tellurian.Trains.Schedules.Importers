@@ -8,7 +8,7 @@
     {
         <div class="toolbar">
             <button class="primary" @onclick="StartAdd" disabled="@(!HasTrackStretches)">@Translator("AddNew")</button>
-            @if (Layout?.Lines.Count > 0)
+            @if (Layout?.CanSuggestTimetableStretches == true)
             {
                 <button @onclick="Suggest" disabled="@(!HasTrackStretches)"><i class="fa-solid fa-wand-magic-sparkles"></i> @Translator("SuggestFromLines")</button>
             }

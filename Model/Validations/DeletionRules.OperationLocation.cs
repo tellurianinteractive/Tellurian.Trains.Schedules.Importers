@@ -63,6 +63,7 @@ public static partial class DeletionRules
             // A shunter works no train part, so nothing stops it going with the location it is stationed at.
             foreach (var shunter in preview.ShuntersRemoved) plan.TryDelete(shunter);
             layout.ForgetTopologyPositionOf(location);
+            layout.RemoveFromStretchLines(location);
             layout.OperationLocations.Remove(location);
             if (preview.RegeneratesDispatchStretches) layout.DispatchStretches = layout.CreateDispatchStretches();
             return new DeletionResult.Success(location);

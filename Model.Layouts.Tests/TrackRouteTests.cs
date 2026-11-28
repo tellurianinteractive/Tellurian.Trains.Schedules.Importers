@@ -140,7 +140,7 @@ public sealed class TrackRouteTests
     }
 
     [TestMethod]
-    public void AStretchsMeasuredDistanceIsDerivedAndTheEnteredOneKept()
+    public void AStretchKeepsTheMeasuredDistanceBesideTheEnteredOne()
     {
         var layout = Layout();
         var a = Straight(layout, Station("Aby"), 2000, SingleTrack);

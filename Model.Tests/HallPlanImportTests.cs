@@ -137,6 +137,39 @@ public class HallPlanImportTests
     }
 
     [TestMethod]
+    public void ANewPlanKeepsWhatWasMeasuredAndTheOrderAlongTheLineThroughThePlanFile()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");
+
+        var read = PlanFile.Read(PlanFile.Write(plan));
+
+        var stretch = read.Layout.TrackStretches.Single();
+        Assert.AreEqual(3.0, stretch.MeasuredDistance!.Value, 0.0005);
+        Assert.AreEqual(70, stretch.MeasuredSpeed);
+        var leg = read.Layout.StretchLines.Single().Legs.Single();
+        Assert.IsTrue(leg.Joins(stretch.StartId, stretch.EndId));
+        Assert.IsTrue(read.Layout.CanSuggestTimetableStretches);
+    }
+
+    [TestMethod]
+    public void AReloadTakesWhatWasMeasuredAlsoWhenTheValuesInUseWereEntered()
+    {
+        var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");
+        var stretch = plan.Layout.TrackStretches.Single();
+        stretch.Distance = 12;
+        stretch.IsDistanceEntered = true;
+        stretch.Speed = 50;
+        stretch.IsSpeedEntered = true;
+
+        plan.UpdateFromHallPlan(ReadFromFile(LinedHallPlan(revision: 2, speedLimit: 90, plainLength: 2000)));
+
+        Assert.AreEqual(12, stretch.Distance, 0.0005, "the planner's distance");
+        Assert.AreEqual(4.0, stretch.MeasuredDistance!.Value, 0.0005);
+        Assert.AreEqual(90, stretch.MeasuredSpeed);
+        Assert.IsTrue(plan.Layout.StretchLines.Single().Legs.Single().Joins(stretch.StartId, stretch.EndId));
+    }
+
+    [TestMethod]
     public void AReloadTakesTheModulesSpeedWhenNoneWasEntered()
     {
         var plan = PlanFactory.CreatePlan(ReadFromFile(LinedHallPlan()), "en");

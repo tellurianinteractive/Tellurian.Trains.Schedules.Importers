@@ -40,6 +40,8 @@ internal static class LayoutMapping
                 // what the layout was made from, read and written as a whole and never queried, so kept as JSON in the
                 // contract's own form (Layout.JsonSerializerOptions). A module refers to its location by id there;
                 // ReadPlanAsync restores it with layout.RestoreReferences().
+                // The order of the locations along each line, kept for suggesting timetable stretches: JSON too.
+                entity.Property(e => e.StretchLines).HasContractJson();
                 entity.Property(e => e.Modules).HasContractJson();
                 entity.Property(e => e.PreferredStandard).HasContractJson();
                 entity.Property(e => e.Lines).HasContractJson();

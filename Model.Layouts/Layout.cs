@@ -21,6 +21,7 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
         TimetableStretches = [];
         DispatchStretches = [];
         TopologyPositions = [];
+        StretchLines = [];
         Modules = [];
         Lines = [];
         Joints = [];
@@ -61,6 +62,12 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
 
     /// <summary>Where each location is drawn in the topology schematic.</summary>
     public ICollection<TopologyPosition> TopologyPositions { get; set; }
+
+    /// <summary>
+    /// The order of the locations along each line of the hall plan the layout was made in, worked out when it was read;
+    /// empty for a layout entered from scratch.
+    /// </summary>
+    public ICollection<StretchLine> StretchLines { get; set; }
 
     /// <summary>The id of the hall plan the layout was made in; null for a layout entered from scratch.</summary>
     public Guid? SourceId { get; set; }

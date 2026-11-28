@@ -10,7 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts.Tests;
 /// <summary>
 /// Stretches worked out from the lines (<c>LayoutsLayerSurvey.md</c> 3.3 step 1 and 3.6, <c>ModelHarmonisation.md</c>
 /// decision 15): which modules, sides, tracks and main-path distance; the update of the track stretches; the
-/// suggested timetable stretches.
+/// order of the locations along each line.
 /// </summary>
 [TestClass]
 public sealed class LineStretchesTests
@@ -258,7 +258,7 @@ public sealed class LineStretchesTests
     }
 
     [TestMethod]
-    public void TimetableStretchesAreSuggestedPerLineAndNotAdded()
+    public void EachLineKeepsTheOrderOfItsLocations()
     {
         var layout = new Layout();
         var a = Place(layout, Station("Aby"));
@@ -270,19 +270,15 @@ public sealed class LineStretchesTests
         var d = Place(layout, Station("Dby"));
         layout.Add(new Line { Name = "Main", Entries = [Entry(a), Entry(p), Entry(b), Entry(q), Entry(c)] });
         layout.Add(new Line { Name = "Branch", StartAt = new(b.Id, ExitSide.Down), Entries = [Entry(r), Entry(d)] });
-        layout.TimetableStretches.Add(new TimetableStretch(4, "3"));
+
         layout.UpdateTrackStretchesFromLines();
 
-        var suggestions = layout.SuggestedTimetableStretches();
-
-        Assert.HasCount(1, layout.TimetableStretches, "suggestions are not added");
-        Assert.HasCount(2, suggestions);
-        Assert.AreEqual(5, suggestions[0].Id);
-        Assert.AreEqual("4", suggestions[0].Number);
-        Assert.AreEqual("Main", suggestions[0].Description);
-        CollectionAssert.AreEqual(new[] { "Aby", "Bby", "Cby" }, suggestions[0].Stations.Select(s => s.Name).ToArray());
-        Assert.AreEqual("5", suggestions[1].Number);
-        CollectionAssert.AreEqual(new[] { "Bby", "Dby" }, suggestions[1].Stations.Select(s => s.Name).ToArray());
+        var lines = layout.StretchLines.ToList();
+        Assert.HasCount(2, lines);
+        Assert.AreEqual("Main", lines[0].Name);
+        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby" }, Legs(layout, lines[0]));
+        Assert.AreEqual("Branch", lines[1].Name);
+        CollectionAssert.AreEqual(new[] { "Bby–Dby" }, Legs(layout, lines[1]), "a branch starts at the location it leaves from");
     }
 
     [TestMethod]
@@ -298,13 +294,27 @@ public sealed class LineStretchesTests
         // The planner turns the second half, so both halves end at Cby.
         foreach (var stretch in layout.TrackStretches.Where(s => s.ToString() is "Cby–Dby" or "Dby–Aby")) stretch.Reverse();
         layout.UpdateTrackStretchesFromLines();
-        var suggestions = layout.SuggestedTimetableStretches();
 
         CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Dby–Cby", "Aby–Dby" }, layout.TrackStretches.Select(s => s.ToString()).ToArray(), "the turned stretches keep their direction");
-        Assert.HasCount(2, suggestions);
-        CollectionAssert.AreEqual(new[] { "Aby", "Bby", "Cby" }, suggestions[0].Stations.Select(s => s.Name).ToArray());
-        CollectionAssert.AreEqual(new[] { "Aby", "Dby", "Cby" }, suggestions[1].Stations.Select(s => s.Name).ToArray());
+        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, Legs(layout, layout.StretchLines.Single()), "the line keeps its own direction");
     }
+
+    [TestMethod]
+    public void AStretchKeepsWhatWasMeasured()
+    {
+        var layout = new Layout();
+        var (a, p, b) = (Place(layout, Station("Aby")), Place(layout, Limited(Plain("p"), 60)), Place(layout, Station("Bby")));
+        layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
+        layout.UpdateTrackStretchesFromLines();
+        var stretch = layout.TrackStretches.Single();
+        var found = layout.StretchesFromLines().Stretches.Single();
+
+        Assert.AreEqual(found.Distance, stretch.MeasuredDistance);
+        Assert.AreEqual(60, stretch.MeasuredSpeed);
+    }
+
+    private static string[] Legs(Layout layout, StretchLine line) =>
+        [.. line.Legs.Select(l => $"{layout.OperationLocations.Single(o => o.Id == l.StartId).Name}–{layout.OperationLocations.Single(o => o.Id == l.EndId).Name}")];
 
     private static LayoutModule Place(Layout layout, Module module) => layout.Place(module);
 

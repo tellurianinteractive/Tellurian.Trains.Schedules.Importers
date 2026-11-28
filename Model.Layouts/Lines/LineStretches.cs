@@ -1,11 +1,9 @@
-using System.Globalization;
-
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// The stretches that follow from the lines of a <see cref="Layout"/> (<c>LayoutsLayerSurvey.md</c> 3.3 and 3.6,
 /// <c>ModelHarmonisation.md</c> decision 15). Track stretches are worked out automatically when a hall plan is read;
-/// timetable stretches are only suggested, for the planner to take or not.
+/// timetable stretches are suggested by the planner from the <see cref="Layout.StretchLines"/> kept here.
 /// </summary>
 public static class LineStretches
 {
@@ -25,7 +23,9 @@ public static class LineStretches
         /// distance and speed unless <see cref="TrackStretch.IsTimeEntered"/>. Others are added with the next free ids. The speed is the one worked out from the
         /// modules (<see cref="LineStretch.Speed"/>) unless <see cref="TrackStretch.IsSpeedEntered"/>; when no module has
         /// a limit, the stretch has no speed, which the planner warns of.
-        /// Stretches that the lines don't give are left as they are.
+        /// Stretches that the lines don't give are left as they are. Every stretch the lines give keeps what they measured
+        /// (<see cref="TrackStretch.MeasuredDistance"/>, <see cref="TrackStretch.MeasuredSpeed"/>), and the layout keeps
+        /// the order of the locations along each line (<see cref="Layout.StretchLines"/>).
         /// </summary>
         /// <returns>What the lines gave, with the problems found.</returns>
         public LineStretchesResult UpdateTrackStretchesFromLines()
@@ -45,57 +45,14 @@ public static class LineStretches
                 stretch.EndSide = isReversed ? found.StartSide : found.EndSide;
                 stretch.ModuleIds = isReversed ? [.. found.ModuleIds.Reverse()] : [.. found.ModuleIds];
                 if (found.TracksCount is int tracks) stretch.TracksCount = tracks;
+                stretch.MeasuredDistance = found.Distance;
+                stretch.MeasuredSpeed = found.Speed;
                 if (!stretch.IsSpeedEntered) stretch.Speed = found.Speed ?? 0;
                 if (!stretch.IsDistanceEntered && found.Distance is double distance) stretch.Distance = distance;
                 if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
             }
+            layout.StretchLines = [.. StretchLinesOf(layout, result.Stretches)];
             return result;
-        }
-
-        /// <summary>
-        /// A timetable stretch for each line, branch included, of the <see cref="Layout.TrackStretches"/> along it in
-        /// order; a branch starts at the location it leaves from. They are not added: the planner chooses whether to,
-        /// since timetable stretches may overlap and a long line may be divided into several. A line is divided where a
-        /// track stretch is missing, and where the track stretches turn to run against the line: those that do are a
-        /// timetable stretch of their own, in their own direction. So a loop that the planner has divided at a station,
-        /// turning the stretches of one half to end there, gives two timetable stretches that both end at that station.
-        /// Numbers and ids follow those in use. Run <see cref="UpdateTrackStretchesFromLines"/> first.
-        /// </summary>
-        public IReadOnlyList<TimetableStretch> SuggestedTimetableStretches()
-        {
-            var found = layout.StretchesFromLines().Stretches;
-            var nextId = Next(layout.TimetableStretches.Select(s => s.Id));
-            var nextNumber = Next(layout.TimetableStretches.Select(s => int.TryParse(s.Number, CultureInfo.InvariantCulture, out var n) ? n : 0));
-            var suggestions = new List<TimetableStretch>();
-            foreach (var line in layout.Lines)
-            {
-                var run = new List<TrackStretch>();
-                var isRunForward = true;
-                foreach (var stretch in found.Where(s => s.LineId == line.Id).OrderBy(s => s.Position))
-                {
-                    if (layout.FindTrackStretch(stretch.Start, stretch.End) is not { } track)
-                    {
-                        Flush();
-                        continue;
-                    }
-                    var isForward = track.Start.Id == stretch.Start.Id;
-                    var continues = run.Count > 0 && isForward == isRunForward &&
-                        (isForward ? run[^1].End.Id == track.Start.Id : run[^1].Start.Id == track.End.Id);
-                    if (!continues) Flush();
-                    run.Add(track);
-                    isRunForward = isForward;
-                }
-                Flush();
-
-                void Flush()
-                {
-                    if (run.Count == 0) return;
-                    if (!isRunForward) run.Reverse();
-                    suggestions.Add(new TimetableStretch(nextId++, (nextNumber++).ToString(CultureInfo.InvariantCulture), line.Name ?? string.Empty) { Stretches = run });
-                    run = [];
-                }
-            }
-            return suggestions;
         }
 
         /// <summary>The track stretch between <paramref name="a"/> and <paramref name="b"/>, in either direction, if any.</summary>
@@ -108,19 +65,17 @@ public static class LineStretches
         }
     }
 
-    extension(TrackStretch stretch)
-    {
-        /// <summary>
-        /// The distance in metres that the lines and drawings of its layout give (<see cref="LineStretch.Distance"/>,
-        /// survey 3.5): derived, never stored, so it can't be out of step with the drawings. Null when the layout has no
-        /// lines through the stretch's locations, or not the drawings to measure it. Works the whole layout out on each
-        /// call; for many stretches, use <c>layout.StretchesFromLines()</c> once.
-        /// </summary>
-        public double? MeasuredDistance =>
-            stretch.Layout?.StretchesFromLines().Stretches
-                .FirstOrDefault(s => (s.Start.Id == stretch.StartId && s.End.Id == stretch.EndId) || (s.Start.Id == stretch.EndId && s.End.Id == stretch.StartId))
-                ?.Distance;
-    }
+    /// <summary>
+    /// The order of the locations along each line of <paramref name="layout"/>: the stretches the walk found on it, by
+    /// where on the line they start, in the line's direction.
+    /// </summary>
+    private static IEnumerable<StretchLine> StretchLinesOf(Layout layout, IReadOnlyList<LineStretch> found) =>
+        layout.Lines.Select(line => new StretchLine
+        {
+            Id = line.Id,
+            Name = line.Name,
+            Legs = [.. found.Where(s => s.LineId == line.Id).OrderBy(s => s.Position).Select(s => new LineLeg(s.Start.Id, s.End.Id))],
+        });
 
     /// <summary>The next id after the highest of <paramref name="ids"/>, from 1.</summary>
     private static int Next(IEnumerable<int> ids) => Math.Max(0, ids.DefaultIfEmpty(0).Max()) + 1;

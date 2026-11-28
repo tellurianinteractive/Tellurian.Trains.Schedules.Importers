@@ -26,7 +26,7 @@
                 <PropertyColumn Property="s => s.Start.Name" Title='@Translator("From")' Sortable="true" />
                 <PropertyColumn Property="s => s.End.Name" Title='@Translator("To")' Sortable="true" />
                 <PropertyColumn Property="s => s.Distance" Title='@Translator("DistanceMeters")' Sortable="true" Align="Align.Right" />
-                @if (_fromLines.Count > 0)
+                @if (HasLines)
                 {
                     <TemplateColumn Title='@Translator("MeasuredMeters")' Align="Align.Right">
                         @MeasuredText(context)
@@ -89,7 +89,7 @@
                     <label>@Translator("DistanceMeters")</label>
                     <div class="with-hint">
                         <input type="number" min="0" step="0.1" @bind="_distance" @bind:culture="Invariant" />
-                        @if (FromLines(_startId, _endId)?.Distance is double measured)
+                        @if (FromLines(_startId, _endId)?.MeasuredDistance is double measured)
                         {
                             <small class="hint">
                                 @string.Format(Translator("MeasuredDistanceHint"), measured.ToString("0.0", CultureInfo.CurrentCulture))
@@ -109,7 +109,7 @@
                         @if (FromLines(_startId, _endId) is { } fromLines)
                         {
                             <small class="hint">
-                                @if (fromLines.Speed is int modulesSpeed)
+                                @if (fromLines.MeasuredSpeed is int modulesSpeed)
                                 {
                                     @string.Format(Translator("ModulesSpeedHint"), modulesSpeed)
                                     <button type="button" @onclick="() => UseModulesSpeed(modulesSpeed)">@Translator("UseModulesSpeed")</button>
@@ -172,34 +172,26 @@
     private bool _isElectrified = true;
     private string _startName = "", _endName = "";
 
-    // The stretches the hall plan's lines give, by their two locations, for the measured distance and the modules'
-    // speed; empty for a layout entered from scratch. Worked out again whenever the plan changes.
-    private Dictionary<(int, int), LineStretch> _fromLines = [];
     private bool _useMeasured, _useModulesSpeed;
 
-    protected override void OnInitialized()
-    {
-        ScheduleState.OnChanged += OnStateChanged;
-        WorkOutFromLines();
-    }
+    protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
-    private void OnStateChanged()
-    {
-        WorkOutFromLines();
-        InvokeAsync(StateHasChanged);
-    }
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
-    private void WorkOutFromLines() =>
-        _fromLines = Layout is { Lines.Count: > 0 } layout
-            ? layout.StretchesFromLines().Stretches.GroupBy(s => Pair(s.Start.Id, s.End.Id)).ToDictionary(g => g.Key, g => g.First())
-            : [];
+    // Whether the layout was made from a hall plan with lines, so its stretches carry what the drawings measured.
+    private bool HasLines => Layout?.StretchLines.Count > 0;
 
     private static (int, int) Pair(int a, int b) => (Math.Min(a, b), Math.Max(a, b));
 
-    private LineStretch? FromLines(int startId, int endId) => _fromLines.GetValueOrDefault(Pair(startId, endId));
+    // The stretch between the two locations when a line of the hall plan runs between them, with what was measured
+    // when the hall plan was read; null for a stretch entered by hand.
+    private TrackStretch? FromLines(int startId, int endId) =>
+        Layout is { } layout && layout.StretchLines.Any(l => l.Legs.Any(leg => leg.Joins(startId, endId)))
+            ? layout.TrackStretches.FirstOrDefault(s => Pair(s.StartId, s.EndId) == Pair(startId, endId))
+            : null;
 
     private string MeasuredText(TrackStretch stretch) =>
-        FromLines(stretch.Start.Id, stretch.End.Id)?.Distance is double measured ? measured.ToString("0.0", CultureInfo.CurrentCulture) : "";
+        FromLines(stretch.Start.Id, stretch.End.Id)?.MeasuredDistance is double measured ? measured.ToString("0.0", CultureInfo.CurrentCulture) : "";
 
     // Taking the hall plan's figure makes it follow the hall plan again, rather than being the planner's.
     private void UseMeasured(double measured)
@@ -300,12 +292,12 @@
             if (_editing.Distance != _distance) _editing.IsDistanceEntered = true;
             if (_editing.Speed != _speed) _editing.IsSpeedEntered = true;
             if (_editing.Time != _time) _editing.IsTimeEntered = true;
-            if (_useMeasured && FromLines(_startId, _endId)?.Distance is double measured && _distance == Math.Round(measured, 1))
+            if (_useMeasured && FromLines(_startId, _endId)?.MeasuredDistance is double measured && _distance == Math.Round(measured, 1))
             {
                 _editing.IsDistanceEntered = false;
                 _distance = measured;
             }
-            if (_useModulesSpeed && _speed == FromLines(_startId, _endId)?.Speed) _editing.IsSpeedEntered = false;
+            if (_useModulesSpeed && _speed == FromLines(_startId, _endId)?.MeasuredSpeed) _editing.IsSpeedEntered = false;
             _editing.Distance = _distance;
             _editing.TracksCount = _tracks;
             _editing.Speed = _speed;

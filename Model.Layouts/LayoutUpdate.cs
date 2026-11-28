@@ -100,6 +100,8 @@ public static class LayoutUpdate
         stretch.StartSide = isTurned ? source.EndSide : source.StartSide;
         stretch.EndSide = isTurned ? source.StartSide : source.EndSide;
         stretch.ModuleIds = isTurned ? [.. source.ModuleIds.Reverse()] : [.. source.ModuleIds];
+        stretch.MeasuredDistance = source.MeasuredDistance;
+        stretch.MeasuredSpeed = source.MeasuredSpeed;
         var isChanged = false;
         if (!stretch.IsDistanceEntered && Math.Abs(stretch.Distance - source.Distance) >= 0.0005)
         {
@@ -138,6 +140,35 @@ public static class LayoutUpdate
             return copy;
         })];
         layout.TakeLinesFrom(source);
+        layout.StretchLines = [.. source.StretchLines.Select(line => Matched(line, bySource, source))];
+    }
+
+    /// <summary>
+    /// A copy of <paramref name="line"/> of the newer layout, with the ids of the current layout's locations. A location
+    /// of the newer layout that the current one doesn't have yet is passed by: the legs on either side of it become one,
+    /// as the current layout's stretch still runs past it. A leg to such a location at the end of the line is dropped.
+    /// </summary>
+    private static StretchLine Matched(StretchLine line, Dictionary<OperationLocation, OperationLocation> bySource, Layout source)
+    {
+        var locations = source.OperationLocations.GroupBy(l => l.Id).ToDictionary(g => g.Key, g => g.First());
+        int? Current(int sourceId) => locations.GetValueOrDefault(sourceId) is { } location && bySource.TryGetValue(location, out var current) ? current.Id : null;
+        var legs = new List<LineLeg>();
+        int? pendingStart = null;
+        var previousEnd = (int?)null;
+        foreach (var leg in line.Legs)
+        {
+            var start = Current(leg.StartId);
+            var end = Current(leg.EndId);
+            if (previousEnd != leg.StartId) pendingStart = null; // a gap in the line
+            if (start is int s) pendingStart = s;
+            if (end is int e)
+            {
+                if (pendingStart is int from && from != e) legs.Add(new(from, e));
+                pendingStart = e;
+            }
+            previousEnd = leg.EndId;
+        }
+        return new() { Id = line.Id, Name = line.Name, Legs = legs };
     }
 
     private static int FreeTrackId(Layout layout, int wanted)

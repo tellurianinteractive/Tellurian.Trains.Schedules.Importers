@@ -116,6 +116,8 @@ public static class LayoutChangeRules
         // The deletion makes a joining stretch of its own; it is the one between the same two neighbours.
         if (plan.Layout.StretchBetween(planned.Start, planned.End) is not { } joined || change.SourceStretch is not { } source) return;
         joined.Distance = source.Distance;
+        joined.MeasuredDistance = source.MeasuredDistance;
+        joined.MeasuredSpeed = source.MeasuredSpeed;
         joined.TracksCount = source.TracksCount;
         if (!joined.IsTimeEntered) joined.Time = TrackStretchTiming.RunningMinutes(joined, plan.Layout.Settings.TimeAndSpeed);
     }
@@ -158,7 +160,7 @@ public static class LayoutChangeRules
         }
         layout.OperationLocations.Add(location);
 
-        var (first, second) = Halves(change, from, to, split.Distance);
+        var (first, second) = Halves(change, from, split.Distance);
         var settings = layout.Settings.TimeAndSpeed;
         var after = new TrackStretch(Free(layout.TrackStretches.Select(s => s.Id), 0), location, to, second, split.TracksCount, split.Speed, split.Time)
         {
@@ -172,6 +174,9 @@ public static class LayoutChangeRules
         split.Distance = first;
         split.ModuleIds = [];
         after.ModuleIds = [];
+        var (firstSource, secondSource) = SourceHalves(change, from);
+        (split.MeasuredDistance, split.MeasuredSpeed) = (firstSource?.MeasuredDistance, firstSource?.MeasuredSpeed);
+        (after.MeasuredDistance, after.MeasuredSpeed) = (secondSource?.MeasuredDistance, secondSource?.MeasuredSpeed);
         if (split.IsTimeEntered)
         {
             split.Time = (int)Math.Round(wholeTime * first / (first + second), MidpointRounding.AwayFromZero);
@@ -184,6 +189,7 @@ public static class LayoutChangeRules
             after.Time = TrackStretchTiming.RunningMinutes(after, settings);
         }
         layout.Add(after);
+        layout.InsertIntoStretchLines(from, to, location);
 
         foreach (var route in layout.TimetableStretches.Where(r => r.Stretches.Contains(split)))
             route.Stretches = Rerouted(route, split, after, from);
@@ -205,15 +211,16 @@ public static class LayoutChangeRules
     }
 
     /// <summary>The distances on either side of the new location: the newer layout's, else the stretch's divided in the middle.</summary>
-    private static (double First, double Second) Halves(LayoutChange change, OperationLocation from, OperationLocation to, double whole)
+    private static (double First, double Second) Halves(LayoutChange change, OperationLocation from, double whole) =>
+        SourceHalves(change, from) is ({ } towardsFrom, { } towardsTo) ? (towardsFrom.Distance, towardsTo.Distance) : (whole / 2, whole / 2);
+
+    /// <summary>The newer layout's stretches on either side of the new location: the one towards <paramref name="from"/> first.</summary>
+    private static (TrackStretch? TowardsFrom, TrackStretch? TowardsTo) SourceHalves(LayoutChange change, OperationLocation from)
     {
-        if (change.Stretches.Count == 2)
-        {
-            var towardsFrom = change.Stretches.FirstOrDefault(s => s.Start.Signature == from.Signature || s.End.Signature == from.Signature);
-            var towardsTo = change.Stretches.FirstOrDefault(s => !ReferenceEquals(s, towardsFrom));
-            if (towardsFrom is not null && towardsTo is not null) return (towardsFrom.Distance, towardsTo.Distance);
-        }
-        return (whole / 2, whole / 2);
+        if (change.Stretches.Count != 2) return (null, null);
+        var towardsFrom = change.Stretches.FirstOrDefault(s => s.Start.Signature == from.Signature || s.End.Signature == from.Signature);
+        var towardsTo = change.Stretches.FirstOrDefault(s => !ReferenceEquals(s, towardsFrom));
+        return towardsFrom is null || towardsTo is null ? (null, null) : (towardsFrom, towardsTo);
     }
 
     /// <summary>The consecutive calls of <paramref name="train"/> that run from <paramref name="from"/> straight to <paramref name="to"/>, either way.</summary>

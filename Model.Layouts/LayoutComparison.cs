@@ -155,6 +155,8 @@ public sealed class LayoutComparison
             if (!Same(stretch.Distance, sourceStretch.Distance)) properties.Add(nameof(TrackStretch.Distance));
             if (stretch.TracksCount != sourceStretch.TracksCount) properties.Add(nameof(TrackStretch.TracksCount));
             if (stretch.Speed != sourceStretch.Speed) properties.Add(nameof(TrackStretch.Speed));
+            if (!Same(stretch.MeasuredDistance, sourceStretch.MeasuredDistance)) properties.Add(nameof(TrackStretch.MeasuredDistance));
+            if (stretch.MeasuredSpeed != sourceStretch.MeasuredSpeed) properties.Add(nameof(TrackStretch.MeasuredSpeed));
             if (properties.Count > 0)
                 changes.Add(new(LayoutChangeKind.StretchChanged, LayoutChangeHandling.Automatic) { Stretch = stretch, SourceStretch = sourceStretch, Properties = properties });
         }
@@ -314,4 +316,6 @@ public sealed class LayoutComparison
         ReferenceEquals(stretch.Start, location) ? stretch.End : stretch.Start;
 
     private static bool Same(double a, double b) => Math.Abs(a - b) < 0.0005;
+
+    private static bool Same(double? a, double? b) => a is double x && b is double y ? Same(x, y) : a is null && b is null;
 }

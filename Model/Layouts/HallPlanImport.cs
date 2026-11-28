@@ -59,6 +59,7 @@ public static class HallPlanImport
         foreach (var stretch in hallPlan.TimetableStretches) layout.Add(stretch);
         foreach (var stretch in hallPlan.DispatchStretches) layout.DispatchStretches.Add(stretch);
         foreach (var company in hallPlan.Companies) layout.Add(company);
+        layout.StretchLines = [.. hallPlan.StretchLines.Select(l => l.Copy())];
         layout.Modules = [.. hallPlan.Modules];
         layout.TakeLinesFrom(hallPlan);
         layout.SourceId = hallPlan.SourceId;

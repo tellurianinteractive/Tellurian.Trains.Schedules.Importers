@@ -82,6 +82,20 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
     /// </summary>
     public bool IsDistanceEntered { get; set; }
 
+    /// <summary>
+    /// The distance in metres that the hall plan's drawings gave when the layout was read from it
+    /// (<see cref="LineStretch.Distance"/>), kept beside <see cref="Distance"/> so the planner can show both without
+    /// the drawings. Null for a stretch entered by hand, or one the drawings could not measure.
+    /// </summary>
+    public double? MeasuredDistance { get; set; }
+
+    /// <summary>
+    /// The speed in km/h that the modules of the hall plan gave when the layout was read from it
+    /// (<see cref="LineStretch.Speed"/>), kept beside <see cref="Speed"/>. Null for a stretch entered by hand, or one
+    /// where no module has a speed limit.
+    /// </summary>
+    public int? MeasuredSpeed { get; set; }
+
     /// <summary>The number of tracks of the line.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public int TracksCount { get; set; } = 1;
