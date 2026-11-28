@@ -40,17 +40,19 @@ This repository holds the complete model of the Tellurian Trains suite, in three
 Importers.Interfaces/  → Reading contracts: IImporter<T> (ILayoutImporter is IImporter<Layout>), IImportService, ImportResult<T>
 Exporters.Interfaces/  → Writing contracts: IExporter<T>, ExportOptions, IExportService, ExportResult<T> (reading and writing are separate packages, CrossAppReview decision 18)
     ↓
-Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies. Moved from Module Draw 2026-11-21
-Model.Layouts/         → Shared layout contract: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch, Module; the drawing types moving from Module Draw (EndProfiles/, Catalogues/, Halls/, Modules/, Tracks/, Measures/, AutoDraw/, Drawings/ values, Files/ drawing file format, ModuleFileContent and DrawingJsonContext)
+Model.Files/           → The file envelope and the chain of migrations (FileEnvelope, FileKind, FileMigration, FileError); no dependencies
+Model.Geometry/        → Pure 2D geometry (points, poses, transforms, line/arc segments, paths, distances); millimetres and degrees; no domain knowledge, no dependencies
+Model.Layouts/         → The operating layout: Layout, OperationLocation (closed hierarchy), StationTrack, TrackStretch (with what was measured), StretchLine, LayoutModule (a module without its drawing), LayoutComparison/LayoutUpdate; no dependencies
     ↓
-Model/                 → Planning model: Plan, Timetable, Train, schedules, duties; plan files (PlanFiles/)
+Model.Drawings/        → The drawn layout (ModelSurfaceAnalysis.md 5): Module with ModuleDrawing, EndProfiles/, Catalogues/, Halls/ (HallPlan), Measures/, Modules/, Tracks/, Lines/, DrawnLayout (drawnLayout.ToLayout() gives the operating layout), ModuleRegistryData, Files/ (drawing file kinds, DrawingJsonContext); builds on Model.Layouts, Model.Geometry and Model.Files
+Model/                 → Planning model: Plan, Timetable (settings, companies, timetable/dispatch stretches, LocationPlanning and StationTrackRoute records by id), Train, schedules, duties; plan files (PlanFiles/); builds on Model.Layouts and Model.Files, never on the drawings
     ↓
 ├─ Importers.Xpln/     → XPLN ODS/XLSX importer (published to NuGet)
 ├─ Importers.Access/   → Microsoft Access importer (experimental, Windows-only)
-├─ Importers.Services/ → Shared import services (JSON/CSV data files)
+├─ Importers.Services/ → Shared import services (JSON/CSV data files, hall plans via Model.Drawings)
 ├─ Exporters.Services/ → Plan file writing: PlanJsonExporter, JsonExportService
-├─ Importers.Drawing/  → Reads Module Draw's drawing files (end profiles, catalogues, halls, modules so far), with the migrations
-├─ Exporters.Drawing/  → Writes Module Draw's drawing files (end profiles, catalogues, halls, modules so far), counting up revisions
+├─ Importers.Drawing/  → Reads Module Draw's drawing files (end profiles, catalogues, halls, modules, hall plans), with the migrations
+├─ Exporters.Drawing/  → Writes Module Draw's drawing files, counting up revisions
 ├─ Planning/           → Planning utilities for creating layouts and schedules
 └─ Model.Databases/    → Entity Framework Core support (ScheduleDbContext)
 ```

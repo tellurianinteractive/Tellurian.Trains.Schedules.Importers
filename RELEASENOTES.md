@@ -1,5 +1,29 @@
 # Release Notes
 
+## Version 5.0.0
+
+A new major version: the shared model is divided along the product chain (`Documentation/ModelSurfaceAnalysis.md`). Every Tellurian Trains app is to move to it.
+
+### Breaking changes
+
+- **`Model.Layouts` is the operating layout only, with no dependencies.** It holds the locations, tracks and stretches, and what a hall plan's drawings measured. Everything drawn moved to the new **`Model.Drawings`**: modules with their drawings, end profiles, catalogues, halls, hall plans, measures, track elements, lines, joints and the drawing file types (namespace `Model.Files` there is now `Model.Drawings.Files`). The file envelope and migrations are the new **`Model.Files`**. The sub-namespaces moved from `Model.Layouts.*` to `Model.Drawings.*`; the former `Drawings` folder (paths, document references, the geometry converters) is the `Model.Drawings` root namespace.
+- **The hall plan keeps the drawings; a plan keeps only the result.** `DrawnLayout` is the operating layout with the modules (`PlacedModule`, formerly `LayoutModule`), lines, joints, end profiles, standards, overrides and fit tolerances, and is a hall plan's `Layout`. `drawnLayout.ToLayout()` gives the planner's layout: stretches worked out from the lines, `TrackStretch.MeasuredDistance` and `MeasuredSpeed`, the order of the locations along each line (`Layout.StretchLines`), the modules without their drawings (`LayoutModule`), `Scale` and `StandardName`. `HallPlanFile.ReadLayout` returns that layout; `ReadDrawnLayout` returns the drawn one.
+- **The planner's own data moved to the `Timetable`.** `Settings` (the type is now `PlanSettings`), `Companies`, `TimetableStretches`, `DispatchStretches` and `TopologyPositions` are on the timetable. What the planner decides for a location (timings, phone number, instructions, hide flags, staff posts, shifts, start labels, split dispatch list, passenger interchange) is a `LocationPlanning` record, and which way a track is for a `StationTrackRoute` record, both kept by the timetable by id and read with `timetable.PlanningOf(location)` and `timetable.RouteOf(track)`. The extension members that worked on these follow them to the timetable (`timetable.Add(company)`, `timetable.DefaultReportCulture`, `timetable.ParticipantsNeeded(station)` and so on). `location.PreferredTrack` takes the timetable.
+- **Module:** `HasNormalGauge` and `HasNarrowGauge` are gone: the gauges and rail systems are read from the exits' end profiles (`drawing.Gauges(...)`, `drawing.RailSystems(...)`). `IsDuckunder` and `IsEndOfLine` are worked out from the drawing.
+- **Moved back to Module Draw:** auto-draw's generator (the `AutoDrawRecord` a drawing stores stays) and `SpatialIndex`.
+
+### New features
+
+- **`ModuleRegistryData`** states once what a module drawing shares with its row in the Module Registry: `ModuleRegistryData.From(content)` reads and derives it, `content.WithRegistryData(data)` writes back what goes both ways or from the Registry, and never the drawing's geometry.
+- **Signals at a location.** `Station.HasSignals` and `IndustrialArea.HasSignals`; `location.HasSignals` for any kind (always at a signal-controlled location, never at an other location).
+- **Timetable stretches are suggested from the stored lines** (`timetable.SuggestedTimetableStretches()`), without the drawings.
+
+### Files
+
+- Plan files are schema version 7. Version 6 drops the drawings from saved plans (each module keeps its title, owners, package and location); version 7 moves the planner's data into the timetable. What was measured on a stretch and the order along the lines come with the next update from the hall plan.
+- Module and hall plan files are schema version 3: the module's gauge, duck-under and end-of-line flags are no longer written.
+- The database keeps the module summaries, lines and scale as JSON on the layout, and the planner's data on the timetable; the drawings' columns are gone.
+
 ## Version 4.4.1
 
 ### Fixes

@@ -1,5 +1,15 @@
 # Versionshinweise
 
+## Version 1.8.0
+
+### Neue Funktionen
+
+- **Signale an einem Bahnhof oder einem Industriegebiet.** Das Formular einer Stelle hat die neue Einstellung **Hat Signale?**, die auch auf dem Blatt der Stelle steht. Eine signalgesteuerte Stelle hat immer Signale.
+
+### Änderungen
+
+- **Pläne aus einem Hallenplan sind viel kleiner.** Ein Plan behält, was er aus dem Hallenplan übernimmt, die Strecken mit ihrer gemessenen Länge und Geschwindigkeit, die Reihenfolge der Bahnhöfe entlang der Linien und die Liste der Module, aber nicht mehr die Zeichnungen. Ein Plan, der mit einer früheren Version gespeichert wurde, zeigt die gemessene Länge und schlägt Fahrplanabschnitte wieder vor, sobald der Hallenplan neu geladen wird.
+
 ## Version 1.7.1
 
 ### Korrekturen

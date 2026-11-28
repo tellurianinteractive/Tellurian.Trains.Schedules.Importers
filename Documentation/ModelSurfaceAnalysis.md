@@ -220,6 +220,14 @@ Module Draw writes them all, with default values, into every hall plan's layout 
 
 ## 7. Order of work
 
+**Progress (2026-11-28).** Steps 1–4 are done in this repository, for NuGet 5.0.0 (`RELEASENOTES.md`):
+
+- Step 1: `TrackStretch.MeasuredDistance`/`MeasuredSpeed` and `Layout.StretchLines` (the order along each line, as legs between neighbouring locations; named so, since a hall plan's layout block already has drawn `lines`); the editors read them; suggesting timetable stretches is the planner's (`timetable.SuggestedTimetableStretches()`).
+- Step 2: `DrawnLayout` is the hall plan's layout block, written as before; `drawnLayout.ToLayout()`; plan schema 6 drops the drawings.
+- Step 3: the planner's data is on the `Timetable` (settings type `PlanSettings`, since `Planning` already has a `TimetableSettings`); a location's and a track's decisions are `LocationPlanning` and `StationTrackRoute` records by id (a route keyed by location and track, since test data repeats track ids across locations); plan schema 7. `IsManned` stayed in `Model.Layouts`; `Instructions` and `PhoneNumber` moved (owner, 2026-11-28).
+- Step 4: `Model.Files` and `Model.Drawings` split out; auto-draw's generator and `SpatialIndex` removed (the stored `AutoDrawRecord` stays); `HasNormalGauge`/`HasNarrowGauge` gone and module and hall plan files schema 3 drop them with `isDuckunder` and `isEndOfLine`, now worked out from the drawing; `HasSignals` (section 3.3); `ModuleRegistryData` (section 4.3).
+- Not done: the `IsPlaced` trick of `Module` (section 5, point 3) stays, since a hall plan's modules still refer to their locations by id; nesting them would change the hall plan file. Steps 5–7 are for the apps.
+
 1. Store the measured distance and speed on `TrackStretch` and light lines on `Layout`, and switch the two planner editors to them. Move the suggesting of timetable stretches into the planner's `Model`, working on the light lines. The planner then no longer needs drawings after the import.
 2. Add `hallPlan.ToLayout()`, then move `Modules`, `Lines`, `Joints`, `EndProfiles`, `Standards`, `Overrides` and `FitTolerances` from `Layout` to `HallPlan`. Add a plan-file migration that drops them, and remove their database columns.
 3. Move the planner's settings and its own data from `Model.Layouts` to `Model` (5.1), with a plan-file migration.

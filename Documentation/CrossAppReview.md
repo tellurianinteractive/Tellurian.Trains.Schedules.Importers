@@ -73,6 +73,14 @@ Still open, to be settled as the survey goes:
 - **Replacing a catalogue item with an older one.** Proposed: replace when the imported revision is the same or higher, else ask.
 - **Names of the layers in code.** Today `Model.Layouts` and `Model`; whether `Model` becomes `Model.Timetables` beside a new `Model.Dispatching` (a breaking rename, so in 4.0.0 if at all).
 - **The same layout data changed in two places.** The planner changes some data on the layout's items, and Module Draw can issue a newer hall plan; what wins when both changed the same thing (`ModelHarmonisation.md`, decision 3, still open).
+### For the apps, 2026-11-28: moving to Schedules 5.0.0
+
+`ModelSurfaceAnalysis.md` steps 1–4 are done in this repository. What each app does next:
+
+- **Module Draw**: take `Model.Drawings` 5.0.0 (and with it `Model.Layouts`, `Model.Geometry`, `Model.Files`); the drawing types are in `Model.Drawings.*` namespaces and a hall plan's `Layout` is a `DrawnLayout`. Take back auto-draw's generator and `SpatialIndex` from 4.x. Module and hall plan files are schema 3: no gauge, duck-under or end-of-line flags on a module; `module.IsDuckunder` and `IsEndOfLine` follow from the drawing. Planner data is no longer on the layout block's classes; older hall plans' values are taken over by the planner on import. Add the dimension layer to `ModuleView`; change MD-20 so that the Registry does not auto-draw.
+- **Module Registry**: take the same version directly and through Module Draw's components. Map its module, station and track rows to `ModuleRegistryData` on upload (`ModuleRegistryData.From`) and download (`content.WithRegistryData`); set `Is2R`/`Is3R` from `RailSystems` and drop `HasNormalGauge`/`HasNarrowGauge`; `HasSignals` is new on a station. Show the module with measures.
+- **Timetable Planner** (this repository): done with 5.0.0.
+
 ### The surveys, 2026-11-20
 
 Two read-only surveys work out what the layers need, each with an order of work and questions for the owner:

@@ -1,5 +1,15 @@
 ﻿# Release notes
 
+## Version 1.8.0
+
+### New features
+
+- **Signals at a station or an industrial area.** The location form has the new option **Has signals?**, also shown on the location sheet. A signal-controlled location always has signals.
+
+### Changes
+
+- **Plans made from a hall plan are much smaller.** A plan keeps what it takes from the hall plan, the stretches with their measured distance and speed, the order of the stations along the lines and the list of modules, but no longer the drawings. A plan saved by an earlier version shows the measured distance and suggests timetable stretches again once the hall plan is loaded anew.
+
 ## Version 1.7.1
 
 ### Fixes

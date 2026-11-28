@@ -1,5 +1,15 @@
 # Versionsnyheter
 
+## Version 1.8.0
+
+### Nya funktioner
+
+- **Signaler på en station eller ett industriområde.** Formuläret för en plats har det nya alternativet **Har signaler?**, som också visas på platsens blad. En signalreglerad plats har alltid signaler.
+
+### Ändringar
+
+- **Planer gjorda från en hallplan är mycket mindre.** En plan behåller det den tar från hallplanen, sträckorna med uppmätt avstånd och hastighet, stationernas ordning längs linjerna och listan över moduler, men inte längre ritningarna. En plan sparad av en tidigare version visar det uppmätta avståndet och föreslår tidtabellssträckor igen när hallplanen läses in på nytt.
+
 ## Version 1.7.1
 
 ### Rättelser

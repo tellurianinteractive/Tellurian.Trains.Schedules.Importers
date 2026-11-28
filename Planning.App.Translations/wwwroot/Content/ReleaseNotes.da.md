@@ -1,5 +1,15 @@
 # Versionsnyheder
 
+## Version 1.8.0
+
+### Nye funktioner
+
+- **Signaler på en station eller et industriområde.** Formularen for et sted har den nye indstilling **Har signaler?**, som også vises på stedets ark. Et signalstyret sted har altid signaler.
+
+### Ændringer
+
+- **Planer lavet ud fra en hallplan er meget mindre.** En plan beholder det, den tager fra hallplanen, strækningerne med deres målte afstand og hastighed, stationernes rækkefølge langs linjerne og listen over moduler, men ikke længere tegningerne. En plan gemt af en tidligere version viser den målte afstand og foreslår køreplansstrækninger igen, når hallplanen indlæses på ny.
+
 ## Version 1.7.1
 
 ### Rettelser
