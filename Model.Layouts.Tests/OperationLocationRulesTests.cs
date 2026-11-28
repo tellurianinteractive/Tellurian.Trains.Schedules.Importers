@@ -115,12 +115,4 @@ public class OperationLocationRulesTests
         controller.IsManned = false;
         Assert.AreEqual(LocationProblemCode.ControlledByNotManned, OperationLocationRules.Validate(unmanned, layout).Single().Code);
     }
-
-    [TestMethod]
-    public void InstructionsAreForStationsAndIndustrialAreas()
-    {
-        var layout = new Layout();
-        Assert.IsEmpty(OperationLocationRules.Validate(new IndustrialArea(3, "Sockerbruket", "Skb") { Instructions = "Shunt on track 3." }, layout));
-        Assert.AreEqual(LocationProblemCode.InstructionsNotAllowed, OperationLocationRules.Validate(new SignalControlledLocation(2, "Kvarntorp", "Kvt") { Instructions = "Wait." }, layout).Single().Code);
-    }
 }

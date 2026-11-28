@@ -18,7 +18,7 @@ public class DispatchLegTests
 {
     private static readonly TrainCategory Category = new() { Id = 1, Name = "Goods", Prefix = "G" };
 
-    private static Layout NewLayout()
+    private static Timetable NewLayout()
     {
         var layout = new Layout { Name = "Test" };
         var a = layout.Add(new Station(1, "Alpha", "A") { IsManned = true });
@@ -38,29 +38,32 @@ public class DispatchLegTests
         layout.Add(new TrackStretch(5, u, e, 10));
         layout.Add(new TrackStretch(6, c, x, 10));
         layout.Add(new TrackStretch(7, u, y, 10));
-        layout.DispatchStretches = layout.CreateDispatchStretches();
-        return layout;
+        var timetable = new Timetable("Test", layout);
+        timetable.DispatchStretches = layout.CreateDispatchStretches();
+        return timetable;
     }
 
-    private static Train NewTrain(Layout layout, params string[] signatures)
+    private static Train NewTrain(Timetable timetable, params string[] signatures)
     {
         var train = new Train(1, Category, 101) { Category = Category };
         var time = Time.FromHourAndMinute(10, 0);
         var id = 1;
         foreach (var signature in signatures)
         {
-            var place = layout.OperationLocations.Single(l => l.Signature == signature);
+            var place = timetable.Layout.OperationLocations.Single(l => l.Signature == signature);
             _ = train.Add(new StationCall(id++, place["1"], time, time.AddMinutes(1)));
             time = time.AddMinutes(10);
         }
+        // The train is not added, so that each test can make several with the same number; it only needs its timetable.
+        train.Timetable = timetable;
         return train;
     }
 
     private static string Describe(DispatchLeg leg) =>
         $"{leg.From.OperationLocation.Signature}-{leg.To.OperationLocation.Signature} {leg.Kind} {leg.FromDispatcher?.Signature ?? "-"}/{leg.ToDispatcher?.Signature ?? "-"}";
 
-    private static string[] Legs(Layout layout, params string[] signatures) =>
-        [.. NewTrain(layout, signatures).DispatchLegs.Select(Describe)];
+    private static string[] Legs(Timetable timetable, params string[] signatures) =>
+        [.. NewTrain(timetable, signatures).DispatchLegs.Select(Describe)];
 
     [TestMethod]
     public void JunctionWorkedFromAStationSplitsTheLine()

@@ -86,8 +86,8 @@ public class TimetableStretchTests
     [TestMethod]
     public void TerminalStartHasZeroKilometreOffset()
     {
-        var (layout, a, b, c, _, _) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        var (timetable, a, b, c, _, _) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
 
         Assert.AreEqual(0.0, main.StartKilometer, "A terminal start counts from zero.");
         Assert.AreEqual(0.0, main.DisplayedDistanceToStation(a));
@@ -98,8 +98,8 @@ public class TimetableStretchTests
     [TestMethod]
     public void DivergingBranchCountsFromItsJunctionKilometre()
     {
-        var (layout, _, b, _, d, _) = BuildBranchingLayout();
-        var branch = layout.TimetableStretches.Single(s => s.Number == "branch");
+        var (timetable, _, b, _, d, _) = BuildBranchingLayout();
+        var branch = timetable.TimetableStretches.Single(s => s.Number == "branch");
 
         // The branch starts at B, which lies 10 km along the main line, so its km continue from there.
         Assert.AreEqual(10.0, branch.StartKilometer, "Offset is the junction's km on the main line.");
@@ -110,8 +110,8 @@ public class TimetableStretchTests
     [TestMethod]
     public void ChainedDivergenceAccumulatesTheOffset()
     {
-        var (layout, _, _, _, d, e) = BuildBranchingLayout();
-        var subBranch = layout.TimetableStretches.Single(s => s.Number == "subbranch");
+        var (timetable, _, _, _, d, e) = BuildBranchingLayout();
+        var subBranch = timetable.TimetableStretches.Single(s => s.Number == "subbranch");
 
         // subbranch starts at D (branch km 17), which itself starts at B (main km 10): the offsets accumulate.
         Assert.AreEqual(17.0, subBranch.StartKilometer);
@@ -121,9 +121,9 @@ public class TimetableStretchTests
     [TestMethod]
     public void DistanceFactorScalesDisplayedButNotRawDistance()
     {
-        var (layout, a, b, c, _, _) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
-        layout.Settings.TimeAndSpeed.DistanceFactor = 2.0;
+        var (timetable, a, b, c, _, _) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
+        timetable.Settings.TimeAndSpeed.DistanceFactor = 2.0;
 
         Assert.AreEqual(25.0, main.DistanceToStation(c), "Raw distance stays in metres, unscaled.");
         Assert.AreEqual(50.0, main.DisplayedDistanceToStation(c), "Displayed km is raw metres times the factor.");
@@ -133,11 +133,11 @@ public class TimetableStretchTests
     [TestMethod]
     public void DisplayedKilometreIsRoundedToAWholeNumber()
     {
-        var (layout, a, b, c, d, e) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
-        var branch = layout.TimetableStretches.Single(s => s.Number == "branch");
-        var subBranch = layout.TimetableStretches.Single(s => s.Number == "subbranch");
-        layout.Settings.TimeAndSpeed.DistanceFactor = 0.75;
+        var (timetable, a, b, c, d, e) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
+        var branch = timetable.TimetableStretches.Single(s => s.Number == "branch");
+        var subBranch = timetable.TimetableStretches.Single(s => s.Number == "subbranch");
+        timetable.Settings.TimeAndSpeed.DistanceFactor = 0.75;
 
         Assert.AreEqual(0.0, main.DisplayedDistanceToStation(a));
         Assert.AreEqual(8.0, main.DisplayedDistanceToStation(b), "7.5 km rounds upwards.");
@@ -154,8 +154,8 @@ public class TimetableStretchTests
     [TestMethod]
     public void ReverseTurnsEveryTrackStretchAroundAndReversesTheirOrder()
     {
-        var (layout, a, b, c, _, _) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        var (timetable, a, b, c, _, _) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
 
         Assert.IsTrue(main.CanReverse, "No other timetable stretch uses A-B or B-C.");
         main.Reverse();
@@ -170,8 +170,8 @@ public class TimetableStretchTests
     [TestMethod]
     public void ReverseIsRepeatableAndRestoresTheOriginalRoute()
     {
-        var (layout, a, b, c, _, _) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        var (timetable, a, b, c, _, _) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
 
         main.Reverse();
         main.Reverse();
@@ -182,12 +182,12 @@ public class TimetableStretchTests
     [TestMethod]
     public void StretchSharingATrackStretchWithAnotherCannotBeReversed()
     {
-        var (layout, a, b, _, _, _) = BuildBranchingLayout();
-        var main = layout.TimetableStretches.Single(s => s.Number == "main");
+        var (timetable, a, b, _, _, _) = BuildBranchingLayout();
+        var main = timetable.TimetableStretches.Single(s => s.Number == "main");
         // A second line reusing A-B, the first track stretch of the main line.
         var shared = new TimetableStretch(4, "shared");
-        shared.AddLast(layout.TrackStretches.Single(s => s.Start.Equals(a) && s.End.Equals(b)));
-        layout.TimetableStretches.Add(shared);
+        shared.AddLast(timetable.Layout.TrackStretches.Single(s => s.Start.Equals(a) && s.End.Equals(b)));
+        timetable.Add(shared);
 
         Assert.IsFalse(main.CanReverse, "A-B is used by another timetable stretch.");
         Assert.AreEqual(1, main.SharedStretches().Count, "Only A-B is shared.");
@@ -200,9 +200,9 @@ public class TimetableStretchTests
     [TestMethod]
     public void PrependsOnlyStretchEndingAtStart()
     {
-        var (layout, a, b, c, _, _) = BuildBranchingLayout();
-        var ab = layout.TrackStretches.Single(s => s.Id == 1);
-        var bc = layout.TrackStretches.Single(s => s.Id == 2);
+        var (timetable, a, b, c, _, _) = BuildBranchingLayout();
+        var ab = timetable.Layout.TrackStretches.Single(s => s.Id == 1);
+        var bc = timetable.Layout.TrackStretches.Single(s => s.Id == 2);
         var line = new TimetableStretch(9, "9");
         line.AddLast(bc);
 
@@ -216,7 +216,7 @@ public class TimetableStretchTests
     }
 
     // A main line A-B-C (terminal A), a branch B-D diverging at B, and a sub-branch D-E diverging at D.
-    private static (Layout Layout, Station A, Station B, Station C, Station D, Station E) BuildBranchingLayout()
+    private static (Timetable Timetable, Station A, Station B, Station C, Station D, Station E) BuildBranchingLayout()
     {
         var layout = new Layout { Name = "Branching" };
         Station Add(int id, string name, string signature)
@@ -245,8 +245,9 @@ public class TimetableStretchTests
         branch.AddLast(bd);
         var subBranch = new TimetableStretch(3, "subbranch");
         subBranch.AddLast(de);
-        foreach (var s in new[] { main, branch, subBranch }) layout.TimetableStretches.Add(s);
+        var timetable = new Timetable("Branching", layout);
+        foreach (var s in new[] { main, branch, subBranch }) timetable.Add(s);
 
-        return (layout, a, b, c, d, e);
+        return (timetable, a, b, c, d, e);
     }
 }

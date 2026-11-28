@@ -1,3 +1,4 @@
+@inject ScheduleStateService ScheduleState
 @{ UseReportCulture(); }
 @* One A5 page body of the general instructions booklet. Not an A5PPage wrapper: two of these sit side
    by side inside one A4 landscape sheet, which is what actually gets printed — the same arrangement,
@@ -30,6 +31,8 @@
 </div>
 
 @code {
+    private Timetable? Timetable => ScheduleState.Timetable;
+
     /// <summary>The page to render.</summary>
     [Parameter, EditorRequired] public InstructionsPage Page { get; set; } = default!;
 
@@ -49,6 +52,6 @@
     [Parameter] public DateOnly PrintDate { get; set; }
 
     private string LayoutName => Layout?.Name ?? "";
-    private DateOnly? ValidFrom => Layout?.Settings.General.ValidFrom;
-    private DateOnly? ValidTo => Layout?.Settings.General.ValidTo;
+    private DateOnly? ValidFrom => Timetable?.Settings.General.ValidFrom;
+    private DateOnly? ValidTo => Timetable?.Settings.General.ValidTo;
 }

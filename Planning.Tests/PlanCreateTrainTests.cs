@@ -14,7 +14,7 @@ public class PlanCreateTrainTests
     private static Plan SimplePlan()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        return new Plan("Test", new Timetable("Test", layout));
+        return new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
     }
 
     private static OperationLocation Location(Plan plan, string signature) =>
@@ -256,7 +256,7 @@ public class PlanCreateTrainTests
 
         Assert.IsNotNull(train);
         var reversal = train.Calls.Single(c => c.OperationLocation.Signature == "Mkd");
-        var settings = plan.Layout.Settings.TimeAndSpeed;
+        var settings = plan.Timetable.Settings.TimeAndSpeed;
         var runaroundFastMinutes = (settings.StationTimings.LocoRunaroundRealMinutes ?? 5) * settings.FastClockSpeed;
         Assert.AreEqual(runaroundFastMinutes, (int)(reversal.Departure.Value - reversal.Arrival.Value).TotalMinutes);
     }
@@ -383,8 +383,8 @@ public class PlanCreateTrainTests
     {
         var plan = SimplePlan();
         var lund = Location(plan, "Lu");
-        lund["3"].PreviousLocationId = Location(plan, "M2").Id;
-        lund["3"].NextLocationId = Location(plan, "E").Id;
+        plan.Timetable.EnsureRouteOf(lund["3"]).PreviousLocationId = Location(plan, "M2").Id;
+        plan.Timetable.EnsureRouteOf(lund["3"]).NextLocationId = Location(plan, "E").Id;
 
         var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
 
@@ -402,10 +402,10 @@ public class PlanCreateTrainTests
         var m2 = Location(plan, "M2");
         var hm = Location(plan, "Hm");
         var lund = Location(plan, "Lu");
-        lund["1"].PreviousLocationId = m2.Id;
-        lund["1"].NextLocationId = Location(plan, "E").Id;
-        lund["2"].PreviousLocationId = Location(plan, "E").Id;
-        lund["2"].NextLocationId = m2.Id;
+        plan.Timetable.EnsureRouteOf(lund["1"]).PreviousLocationId = m2.Id;
+        plan.Timetable.EnsureRouteOf(lund["1"]).NextLocationId = Location(plan, "E").Id;
+        plan.Timetable.EnsureRouteOf(lund["2"]).PreviousLocationId = Location(plan, "E").Id;
+        plan.Timetable.EnsureRouteOf(lund["2"]).NextLocationId = m2.Id;
 
         var upward = plan.Create(Passenger, m2, hm, Start);
         var downward = plan.Create(Passenger, hm, m2, Start);
@@ -423,9 +423,9 @@ public class PlanCreateTrainTests
         var m2 = Location(plan, "M2");
         var hm = Location(plan, "Hm");
         var lund = Location(plan, "Lu");
-        lund["3"].PreviousLocationId = m2.Id;
-        lund["3"].NextLocationId = Location(plan, "E").Id;
-        lund["3"].AppliesInBothDirections = true;
+        plan.Timetable.EnsureRouteOf(lund["3"]).PreviousLocationId = m2.Id;
+        plan.Timetable.EnsureRouteOf(lund["3"]).NextLocationId = Location(plan, "E").Id;
+        plan.Timetable.EnsureRouteOf(lund["3"]).AppliesInBothDirections = true;
 
         var upward = plan.Create(Passenger, m2, hm, Start);
         var downward = plan.Create(Passenger, hm, m2, Start);
@@ -442,8 +442,8 @@ public class PlanCreateTrainTests
         var plan = SimplePlan();
         var m2 = Location(plan, "M2");
         var lund = Location(plan, "Lu");
-        lund["1"].PreviousLocationId = m2.Id;
-        lund["1"].NextLocationId = Location(plan, "E").Id;
+        plan.Timetable.EnsureRouteOf(lund["1"]).PreviousLocationId = m2.Id;
+        plan.Timetable.EnsureRouteOf(lund["1"]).NextLocationId = Location(plan, "E").Id;
 
         var downward = plan.Create(Passenger, Location(plan, "Hm"), m2, Start);
 
@@ -460,8 +460,8 @@ public class PlanCreateTrainTests
         var lund = Location(plan, "Lu");
         foreach (var track in new[] { lund["2"], lund["3"] })
         {
-            track.PreviousLocationId = m2.Id;
-            track.NextLocationId = Location(plan, "E").Id;
+            plan.Timetable.EnsureRouteOf(track).PreviousLocationId = m2.Id;
+            plan.Timetable.EnsureRouteOf(track).NextLocationId = Location(plan, "E").Id;
         }
         lund["3"].PlatformLength = 4.5;
 
@@ -482,9 +482,9 @@ public class PlanCreateTrainTests
         var plan = SimplePlan();
         var m2 = Location(plan, "M2");
         // Track 4 is for trains between Kävlinge and Lund, track 3 for trains starting here for Lund.
-        m2["4"].PreviousLocationId = Location(plan, "Kä").Id;
-        m2["4"].NextLocationId = Location(plan, "Lu").Id;
-        m2["3"].NextLocationId = Location(plan, "Lu").Id;
+        plan.Timetable.EnsureRouteOf(m2["4"]).PreviousLocationId = Location(plan, "Kä").Id;
+        plan.Timetable.EnsureRouteOf(m2["4"]).NextLocationId = Location(plan, "Lu").Id;
+        plan.Timetable.EnsureRouteOf(m2["3"]).NextLocationId = Location(plan, "Lu").Id;
 
         var train = plan.Create(Passenger, m2, Location(plan, "Hm"), Start);
 

@@ -59,7 +59,7 @@ public static class StartLabelExtensions
             trains = trains.ValueOrException(nameof(trains));
             var firstTrains = plan.FirstTrainCalls();
             return [.. trains.Where(train =>
-                (train.Category?.StartLabels ?? StartLabelPrinting.None).Narrower(station.StartLabels) switch
+                (train.Category?.StartLabels ?? StartLabelPrinting.None).Narrower(plan.Timetable.PlanningOf(station).StartLabels) switch
                 {
                     StartLabelPrinting.All => true,
                     StartLabelPrinting.First => train.CallsInRunOrder.FirstOrDefault() is { } first && firstTrains.Contains(first),
@@ -70,9 +70,8 @@ public static class StartLabelExtensions
         // The first call of each train that is the first one a traction unit works.
         private HashSet<StationCall> FirstTrainCalls()
         {
-            var layout = plan.Layout;
-            var settings = layout.Settings.General.SessionSettings();
-            var firstSessionStart = layout.Settings.General.FirstSessionStart;
+            var settings = plan.Timetable.Settings.General.SessionSettings();
+            var firstSessionStart = plan.Timetable.Settings.General.FirstSessionStart;
             return plan.ScheduledObjects
                 .Where(vehicle => vehicle.IsPowered)
                 .Select(vehicle => vehicle.Start(settings.UseDaysInsteadOfSessionNumbers, settings.MaxNumberOfSessions, firstSessionStart))
@@ -113,7 +112,7 @@ public static class StartLabelExtensions
     // What the train's category and the station it starts at jointly allow.
     private static StartLabelPrinting Printing(StationCall call) =>
         (call.Train.Category?.StartLabels ?? StartLabelPrinting.None)
-            .Narrower(call.OperationLocation is Station station ? station.StartLabels : StartLabelPrinting.None);
+            .Narrower(call.OperationLocation is Station station && call.Train.Timetable is { } timetable ? timetable.PlanningOf(station).StartLabels : StartLabelPrinting.None);
 
     private static StartLabel LabelFor(Plan plan, StationCall call)
     {

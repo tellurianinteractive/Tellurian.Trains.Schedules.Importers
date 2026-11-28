@@ -46,22 +46,24 @@ public sealed class SchemaVersion4MigrationTests
         var plan = PlanFile.Read(Version3Plan);
         var location = plan.Layout.OperationLocations.Single();
         location.Tracks.Add(new StationTrack(12, "2", isMain: false, isScheduled: false));
-        location.HideMeets = true;
+        plan.Timetable.EnsurePlanningOf(location).HideMeets = true;
 
         var written = Location(PlanFile.Write(plan));
+        var planning = System.Text.Json.Nodes.JsonNode.Parse(PlanFile.Write(plan))!["plan"]!["timetable"]!["locationPlanning"]![0]!.AsObject();
         var tracks = written["tracks"]!.AsArray().Select(t => t!.AsObject()).ToList();
 
         Assert.IsTrue(tracks[0]["isScheduled"]!.GetValue<bool>(), "a flag that starts as true is always written");
         Assert.IsFalse(tracks[1]["isScheduled"]!.GetValue<bool>(), "and written when false");
         Assert.IsFalse(tracks[1].ContainsKey("isMain"), "a flag that is false, the default of its type, is left out");
-        Assert.IsTrue(written["hideMeets"]!.GetValue<bool>(), "a flag set away from its default is written");
-        Assert.AreEqual(string.Empty, written["instructions"]!.GetValue<string>(), "an empty text is no null, so it is written");
+        Assert.IsTrue(planning["hideMeets"]!.GetValue<bool>(), "a flag set away from its default is written");
+        Assert.AreEqual(string.Empty, planning["instructions"]!.GetValue<string>(), "an empty text is no null, so it is written");
 
-        var read = PlanFile.Read(PlanFile.Write(plan)).Layout.OperationLocations.Single();
+        var readPlan = PlanFile.Read(PlanFile.Write(plan));
+        var read = readPlan.Layout.OperationLocations.Single();
         Assert.IsTrue(read.Tracks[0].IsScheduled);
         Assert.IsFalse(read.Tracks[1].IsScheduled);
-        Assert.IsTrue(read.HideMeets);
-        Assert.AreEqual(string.Empty, read.Instructions);
+        Assert.IsTrue(readPlan.Timetable.PlanningOf(read).HideMeets);
+        Assert.AreEqual(string.Empty, readPlan.Timetable.PlanningOf(read).Instructions);
     }
 
     [TestMethod]

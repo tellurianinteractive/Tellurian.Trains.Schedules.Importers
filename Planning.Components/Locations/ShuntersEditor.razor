@@ -77,7 +77,7 @@
     private IReadOnlyList<ScheduledObject> Shunters => Plan.ShuntersAt(Location);
 
     private IEnumerable<Company> Companies =>
-        Plan.Layout.Companies.InChoiceOrder;
+        Plan.Timetable.Companies.InChoiceOrder;
 
     // All but None, which only a vehicle that is not powered has.
     private static IEnumerable<TractionType> TractionTypes =>
@@ -96,7 +96,7 @@
     private void SetCompany(ScheduledObject shunter, ChangeEventArgs e)
     {
         var company = int.TryParse(e.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)
-            ? Plan.Layout.Companies.FirstOrDefault(c => c.Id == id)
+            ? Plan.Timetable.Companies.FirstOrDefault(c => c.Id == id)
             : null;
         // The operator is kept even when the current number clashes with it, so the planner can step the number
         // on to a free one; the clash is reported until then.

@@ -338,7 +338,7 @@ public class SessionsTests
     [TestMethod]
     public void EnsureSessionsSeedsTheCatalogueWhenEmpty()
     {
-        var timetable = new Timetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
+        var timetable = TestDataFactory.NewTimetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
         Assert.IsEmpty(timetable.Sessions);
 
         var added = timetable.EnsureSessions();
@@ -350,7 +350,7 @@ public class SessionsTests
     [TestMethod]
     public void EnsureSessionsIsNoOpWhenCatalogueIsNotEmpty()
     {
-        var timetable = new Timetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
+        var timetable = TestDataFactory.NewTimetable("test", new Tellurian.Trains.Schedules.Model.Layouts.Layout());
         timetable.Sessions.Add(Sessions.FromSessionNumbers(1, 2, 3));
 
         var added = timetable.EnsureSessions();

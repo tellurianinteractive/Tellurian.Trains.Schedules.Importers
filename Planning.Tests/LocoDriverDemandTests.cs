@@ -26,7 +26,7 @@ public class LocoDriverDemandTests
         layout.Add(a);
         layout.Add(b);
         layout.Add(new TrackStretch(1, a, b, 10));
-        return (new Timetable("Test", layout), a, b);
+        return (TestLayoutFactory.NewTimetable("Test", layout), a, b);
     }
 
     // A train occupying a driver from `from` to `to`, running on the given sessions.

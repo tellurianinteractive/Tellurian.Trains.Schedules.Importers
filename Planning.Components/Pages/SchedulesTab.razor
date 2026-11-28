@@ -53,7 +53,7 @@ else
 
     // The turn-chart blocks format each train identity the same way the graphical timetable does
     // (category prefix, company signature, sessions/days), taken from the layout's settings.
-    private GraphSettings GraphSettings => ScheduleState.Layout?.Settings.ToGraphSettings() ?? GraphSettings.Default;
+    private GraphSettings GraphSettings => ScheduleState.Timetable?.Settings.ToGraphSettings() ?? GraphSettings.Default;
 
     private string? _buildMessage;
 

@@ -158,7 +158,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Givskud-Modern-2025");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var companies = result.Item.Layout.Companies.ToArray();
+        var companies = result.Item.Timetable.Companies.ToArray();
         Assert.IsNotEmpty(companies, "The layout should have operating companies.");
         Assert.AreEqual(companies.Length, companies.Select(c => c.Id).Distinct().Count(), "Every company should have a distinct id.");
     }
@@ -174,7 +174,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Barmstedt2022");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(2, stretches, "TimetableStretches");
 
         Assert.HasCount(7, stretches[0].Stretches, "First line track stretches");
@@ -204,10 +204,10 @@ public class XplnDataImporterTests
             .ToArray();
         Assert.HasCount(1, ingToWei, "The shared Ing–Wei section should be one track stretch.");
 
-        var linesOverIt = layout.TimetableStretches.Where(t => t.Stretches.Any(s => ReferenceEquals(s, ingToWei[0]))).ToArray();
+        var linesOverIt = result.Item.Timetable.TimetableStretches.Where(t => t.Stretches.Any(s => ReferenceEquals(s, ingToWei[0]))).ToArray();
         Assert.HasCount(2, linesOverIt, "Both lines should run over that same track stretch.");
 
-        foreach (var timetableStretch in layout.TimetableStretches)
+        foreach (var timetableStretch in result.Item.Timetable.TimetableStretches)
             foreach (var stretch in timetableStretch.Stretches)
                 Assert.IsTrue(layout.TrackStretches.Any(s => ReferenceEquals(s, stretch)),
                     $"Line {timetableStretch.Number} runs over {stretch}, which the layout does not hold.");
@@ -224,7 +224,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Värnamo2017");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(3, stretches, "TimetableStretches");
 
         Assert.AreEqual("GBG", stretches[0].Starts.Signature, ignoreCase: true);
@@ -245,7 +245,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Montan2023H0e");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(2, stretches, "TimetableStretches");
         Assert.AreEqual("HIT-S31-HLS-HMU-SBG", string.Join("-", stretches[0].Stations.Select(s => s.Signature)), ignoreCase: true);
         Assert.AreEqual("HIT-WHM", string.Join("-", stretches[1].Stations.Select(s => s.Signature)), ignoreCase: true);
@@ -261,7 +261,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Rotebro2015");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(3, stretches, "TimetableStretches");
         var line30 = stretches.Single(s => s.Number == "30");
         Assert.AreEqual("Brg-Bgs-Ccw", string.Join("-", line30.Stations.Select(s => s.Signature)), ignoreCase: true);
@@ -277,7 +277,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Givskud-Modern-2025");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(3, stretches, "TimetableStretches");
         Assert.AreEqual("Ing-Rot-Sa-Frw-Mkd", string.Join("-", stretches[0].Stations.Select(s => s.Signature)), ignoreCase: true);
         Assert.AreEqual("Frw-Pa-Muk-Grp-Vdp-Sti", string.Join("-", stretches[1].Stations.Select(s => s.Signature)), ignoreCase: true);
@@ -296,7 +296,7 @@ public class XplnDataImporterTests
         var result = await importer.ImportScheduleAsync("Givskud2021");
         Assert.IsTrue(result.IsSuccess, "Import should succeed.");
 
-        var stretches = result.Item.Timetable.Layout.TimetableStretches.ToArray();
+        var stretches = result.Item.Timetable.TimetableStretches.ToArray();
         Assert.HasCount(7, stretches, "TimetableStretches (must not fragment to one per link).");
         foreach (var s in stretches)
         {
@@ -421,7 +421,7 @@ public class XplnDataImporterTests
             {
                 var timetable = result.Item.Timetable;
                 Assert.HasCount(expectedTrackStretches, result.Item.Timetable.Layout.TrackStretches, "TrackStreches");
-                Assert.HasCount(expectedDispatchStretches, result.Item.Timetable.Layout.DispatchStretches, "DispatchStreches");
+                Assert.HasCount(expectedDispatchStretches, result.Item.Timetable.DispatchStretches, "DispatchStreches");
                 Assert.HasCount(expectedTrains, timetable.Trains, "Trains");
                 Assert.HasCount(expectedLocos, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Locomotive), "Locos");
                 Assert.HasCount(expectedWagonsets, result.Item.ScheduledObjects.Where(v => v.ObjectType == ScheduledObjectType.Wagonset), "Wagonsets");

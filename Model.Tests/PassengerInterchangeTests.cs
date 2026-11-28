@@ -28,38 +28,38 @@ public class PassengerInterchangeTests
     [TestMethod]
     public void AMarkedStationIsAnInterchangeOnlyWhileTicketsAreInUse()
     {
-        var (layout, interchange, _) = Layout();
+        var (timetable, interchange, _) = Layout();
 
-        Assert.IsTrue(interchange.ExchangesTransferringPassengers);
-        CollectionAssert.AreEqual(new[] { interchange }, layout.PassengerInterchanges.ToArray());
+        Assert.IsTrue(_timetable.ExchangesTransferringPassengers(interchange));
+        CollectionAssert.AreEqual(new[] { interchange }, timetable.PassengerInterchanges.ToArray());
 
-        layout.Settings.General.UsePassengerTickets = false;
+        timetable.Settings.General.UsePassengerTickets = false;
 
         // The mark is kept — the meeting may take the tickets up again — but nothing is derived from it.
-        Assert.IsTrue(interchange.IsPassengerInterchange, "The mark is ignored, not thrown away.");
-        Assert.IsFalse(interchange.ExchangesTransferringPassengers);
-        Assert.IsEmpty(layout.PassengerInterchanges);
+        Assert.IsTrue(timetable.PlanningOf(interchange).IsPassengerInterchange, "The mark is ignored, not thrown away.");
+        Assert.IsFalse(_timetable.ExchangesTransferringPassengers(interchange));
+        Assert.IsEmpty(timetable.PassengerInterchanges);
     }
 
     [TestMethod]
     public void AnUnmarkedStationIsNoInterchangeHoweverManyPassengersItTakes()
     {
-        var (layout, _, plain) = Layout();
+        var (timetable, _, plain) = Layout();
 
         Assert.IsTrue(plain.HasPassengerExchange);
-        Assert.IsFalse(plain.ExchangesTransferringPassengers);
-        Assert.DoesNotContain(plain, layout.PassengerInterchanges);
+        Assert.IsFalse(_timetable.ExchangesTransferringPassengers(plain));
+        Assert.DoesNotContain(plain, timetable.PassengerInterchanges);
     }
 
     [TestMethod]
     public void SomewhereNobodyBoardsOrAlightsIsNowhereToChangeTrains()
     {
-        var (layout, interchange, _) = Layout();
+        var (timetable, interchange, _) = Layout();
         interchange.HasPassengerExchange = false;
 
         Assert.IsFalse(interchange.CanBePassengerInterchange);
-        Assert.IsFalse(interchange.ExchangesTransferringPassengers);
-        Assert.IsEmpty(layout.PassengerInterchanges);
+        Assert.IsFalse(_timetable.ExchangesTransferringPassengers(interchange));
+        Assert.IsEmpty(timetable.PassengerInterchanges);
     }
 
     [TestMethod]
@@ -74,12 +74,14 @@ public class PassengerInterchangeTests
     }
 
     [TestMethod]
-    public void AStationNotYetOnALayoutSaysNothingAboutTickets()
+    public void AStationTheTimetableHasNotMarkedIsNoInterchange()
     {
-        var loose = new Station(99, "Lösa", "Lö") { IsPassengerInterchange = true };
+        var timetable = new Timetable("Test", new Layout { Name = "Test" });
+        timetable.Settings.General.UsePassengerTickets = true;
+        var loose = new Station(99, "Lösa", "Lö");
 
-        // The setting lives on the layout, so until there is one there is nothing to say it is in use.
-        Assert.IsFalse(loose.ExchangesTransferringPassengers);
+        // The mark is the timetable's, so a station it has decided nothing for is no interchange.
+        Assert.IsFalse(timetable.ExchangesTransferringPassengers(loose));
     }
 
     [TestMethod]
@@ -129,6 +131,7 @@ public class PassengerInterchangeTests
         var train = new Train(2, Freight, 5001) { Category = Freight };
         train.Add(Stop(1, plain, "08:00", "08:10"));
         train.Add(Stop(2, interchange, "08:30", "08:40"));
+        _timetable.Add(train);
 
         Assert.IsEmpty(train.Calls[1].PassengerInterchangeNotes);
     }
@@ -136,13 +139,13 @@ public class PassengerInterchangeTests
     [TestMethod]
     public void NoteIsGoneOnceTheMeetingDropsTheTickets()
     {
-        var (layout, interchange, plain) = Layout();
+        var (timetable, interchange, plain) = Layout();
         var train = PassengerTrain(
             Stop(1, plain, "08:00", "08:10"),
             Stop(2, interchange, "08:30", "08:40"));
         Assert.IsNotEmpty(train.Calls[1].PassengerInterchangeNotes, "In force while the tickets are used.");
 
-        layout.Settings.General.UsePassengerTickets = false;
+        timetable.Settings.General.UsePassengerTickets = false;
 
         Assert.IsEmpty(train.Calls[1].PassengerInterchangeNotes);
     }
@@ -160,16 +163,20 @@ public class PassengerInterchangeTests
         Assert.IsInstanceOfType<ExchangeTransferringPassengersNote>(notes.Single());
     }
 
-    // A layout worked with passenger tickets, one station marked as an interchange and one not.
-    private static (Layout Layout, Station Interchange, Station Plain) Layout()
+    // A timetable worked with passenger tickets, one station marked as an interchange and one not.
+    private (Timetable Timetable, Station Interchange, Station Plain) Layout()
     {
         var layout = new Layout { Name = "Test" };
-        layout.Settings.General.UsePassengerTickets = true;
+        _timetable = new Timetable("Test", layout);
+        _timetable.Settings.General.UsePassengerTickets = true;
         var plain = (Station)layout.Add(NewStation(1, "Alvesta", "Av"));
         var interchange = (Station)layout.Add(NewStation(2, "Nässjö", "Nä"));
-        interchange.IsPassengerInterchange = true;
-        return (layout, interchange, plain);
+        _timetable.EnsurePlanningOf(interchange).IsPassengerInterchange = true;
+        return (_timetable, interchange, plain);
     }
+
+    // The timetable of the layout the test made, which the trains are added to.
+    private Timetable _timetable = default!;
 
     private static Station NewStation(int id, string name, string signature)
     {
@@ -178,10 +185,11 @@ public class PassengerInterchangeTests
         return station;
     }
 
-    private static Train PassengerTrain(params StationCall[] calls)
+    private Train PassengerTrain(params StationCall[] calls)
     {
         var train = new Train(1, Passenger, 101) { Category = Passenger };
         foreach (var call in calls) train.Add(call);
+        _timetable.Add(train);
         return train;
     }
 

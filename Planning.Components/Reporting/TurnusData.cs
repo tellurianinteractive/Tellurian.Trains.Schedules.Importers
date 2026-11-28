@@ -71,8 +71,8 @@ public static class TurnusDataExtensions
         /// The culture to print the card in: the language of the vehicle's company, else of the operators of
         /// the trains it works when they agree, else the layout's default.
         /// </summary>
-        public CultureInfo ReportCulture(Layout layout, Func<string, bool> isAvailable) =>
-            layout.ReportCultureOf(data.VehicleCompany, data.TrainParts.Select(p => p.Train.EffectiveCompany), isAvailable);
+        public CultureInfo ReportCulture(Timetable timetable, Func<string, bool> isAvailable) =>
+            timetable.ReportCultureOf(data.VehicleCompany, data.TrainParts.Select(p => p.Train.EffectiveCompany), isAvailable);
 
         public string ObjectTypeName(Translator translator) => translator(data.ScheduledObjectType.ToString());
 

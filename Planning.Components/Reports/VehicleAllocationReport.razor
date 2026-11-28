@@ -43,15 +43,15 @@ else
     private static readonly AllocationGeometry Geometry = AllocationGeometry.A4;
 
     private ReportCulture? DefaultCulture =>
-        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+        ScheduleState.Timetable is { } timetable ? new(timetable.DefaultReportCulture) : null;
 
     private static int MarginMm => (int)Geometry.Page.MarginMm;
 
-    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
-    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
+    private bool UseDays => ScheduleState.Timetable?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Timetable?.Settings.General.MaxSessions ?? 14;
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,8 +61,8 @@ else
         await ReportBusy.PaintAsync();
 
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
-        _report = ScheduleState.Schedule is { } plan && ScheduleState.Layout is { } layout
-            ? VehicleAllocation.Create(plan.ScheduledObjects, layout.Settings, Geometry)
+        _report = ScheduleState.Schedule is { } plan && ScheduleState.Timetable is { } timetable
+            ? VehicleAllocation.Create(plan.ScheduledObjects, timetable.Settings, Geometry)
             : VehicleAllocation.Empty;
     }
 

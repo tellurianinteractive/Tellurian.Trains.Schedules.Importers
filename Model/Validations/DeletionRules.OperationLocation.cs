@@ -49,8 +49,8 @@ public static partial class DeletionRules
             var layout = plan.Layout;
             foreach (var change in preview.Trains) RemoveCallsAt(plan, location, change);
             ForgetOtherTracksAt(plan, location);
-            ReplaceStretches(layout, preview);
-            RepointTrackRoutes(layout, location, preview.Replacement);
+            ReplaceStretches(plan.Timetable, preview);
+            RepointTrackRoutes(plan.Timetable, location, preview.Replacement);
             foreach (var controlled in preview.NoLongerControlled) controlled.ControlledBy = null;
             foreach (var served in preview.NoLongerCargoServed) served.CargoServedFrom = null;
             foreach (var keyed in preview.LockKeysRemoved) keyed.LockKey = null;
@@ -62,10 +62,11 @@ public static partial class DeletionRules
             }
             // A shunter works no train part, so nothing stops it going with the location it is stationed at.
             foreach (var shunter in preview.ShuntersRemoved) plan.TryDelete(shunter);
-            layout.ForgetTopologyPositionOf(location);
+            plan.Timetable.ForgetTopologyPositionOf(location);
+            plan.Timetable.ForgetPlanningOf(location);
             layout.RemoveFromStretchLines(location);
             layout.OperationLocations.Remove(location);
-            if (preview.RegeneratesDispatchStretches) layout.DispatchStretches = layout.CreateDispatchStretches();
+            if (preview.RegeneratesDispatchStretches) plan.Timetable.DispatchStretches = layout.CreateDispatchStretches();
             return new DeletionResult.Success(location);
         }
     }
@@ -99,7 +100,7 @@ public static partial class DeletionRules
 
         var changedRoutes = new List<TimetableStretch>();
         var emptiedRoutes = new List<TimetableStretch>();
-        foreach (var route in layout.TimetableStretches.Where(t => t.Stretches.Any(s => Touches(s, location))))
+        foreach (var route in plan.Timetable.TimetableStretches.Where(t => t.Stretches.Any(s => Touches(s, location))))
         {
             var rerouted = Reroute(route, location, replacement);
             if (rerouted is null) blockers.Add(Reference.For(route));
@@ -117,7 +118,7 @@ public static partial class DeletionRules
             IsReplacementNew = replacement is not null && !layout.TrackStretches.Contains(replacement),
             ChangedTimetableStretches = changedRoutes,
             RemovedTimetableStretches = emptiedRoutes,
-            RegeneratesDispatchStretches = layout.DispatchStretches.Count > 0,
+            RegeneratesDispatchStretches = plan.Timetable.DispatchStretches.Count > 0,
             NoLongerControlled = [.. layout.OperationLocations.Where(o => !o.Equals(location) && location.Equals(o.ControlledBy))],
             NoLongerCargoServed = [.. layout.OperationLocations.Where(o => !o.Equals(location) && location.Equals(o.CargoServedFrom))],
             LockKeysRemoved = [.. layout.OperationLocations.Where(o => !o.Equals(location) && o.LockKey is { } key && location.Equals(key.HeldAt))],
@@ -247,33 +248,35 @@ public static partial class DeletionRules
         }
     }
 
-    private static void ReplaceStretches(Layout layout, LocationDeletionPreview preview)
+    private static void ReplaceStretches(Timetable timetable, LocationDeletionPreview preview)
     {
+        var layout = timetable.Layout;
         if (preview.Replacement is { } replacement && preview.IsReplacementNew) layout.Add(replacement);
         foreach (var route in preview.ChangedTimetableStretches)
             route.Stretches = Reroute(route, preview.Location, preview.Replacement)!;
-        foreach (var route in preview.RemovedTimetableStretches) layout.TimetableStretches.Remove(route);
+        foreach (var route in preview.RemovedTimetableStretches) timetable.TimetableStretches.Remove(route);
         foreach (var stretch in preview.RemovedStretches) layout.TrackStretches.Remove(stretch);
     }
 
     // A track at a neighbour reserved for trains to or from the location is, once the location is gone,
     // reserved for trains to or from the neighbour on the other side, which is where they now come from
     // or go to. Every other route naming the location is forgotten.
-    private static void RepointTrackRoutes(Layout layout, OperationLocation location, TrackStretch? replacement)
+    private static void RepointTrackRoutes(Timetable timetable, OperationLocation location, TrackStretch? replacement)
     {
         if (replacement is not null)
         {
             Repoint(replacement.Start, replacement.End);
             Repoint(replacement.End, replacement.Start);
         }
-        layout.ForgetTrackRoutesTo(location);
+        timetable.ForgetTrackRoutesTo(location);
 
         void Repoint(OperationLocation neighbour, OperationLocation beyond)
         {
             foreach (var track in neighbour.Tracks)
             {
-                if (track.PreviousLocationId == location.Id) track.PreviousLocationId = beyond.Id;
-                if (track.NextLocationId == location.Id) track.NextLocationId = beyond.Id;
+                if (timetable.StationTrackRoutes.FirstOrDefault(r => r.IsOf(track)) is not { } route) continue;
+                if (route.PreviousLocationId == location.Id) route.PreviousLocationId = beyond.Id;
+                if (route.NextLocationId == location.Id) route.NextLocationId = beyond.Id;
             }
         }
     }

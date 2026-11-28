@@ -37,8 +37,8 @@ public static class LineStretches
         /// <summary>
         /// Brings the layout's <see cref="Layout.TrackStretches"/> in line with <see cref="StretchesFromLines"/>. A stretch between
         /// the same two locations, in either direction, is updated and keeps its direction: its sides, modules and
-        /// number of tracks always, its distance unless <see cref="TrackStretch.IsDistanceEntered"/>, and its time from
-        /// distance and speed unless <see cref="TrackStretch.IsTimeEntered"/>. Others are added with the next free ids. The speed is the one worked out from the
+        /// number of tracks always, and its distance unless <see cref="TrackStretch.IsDistanceEntered"/>; the running time
+        /// is the planner's to work out. Others are added with the next free ids. The speed is the one worked out from the
         /// modules (<see cref="LineStretch.Speed"/>) unless <see cref="TrackStretch.IsSpeedEntered"/>; when no module has
         /// a limit, the stretch has no speed, which the planner warns of.
         /// Stretches that the lines don't give are left as they are. Every stretch the lines give keeps what they measured
@@ -68,7 +68,6 @@ public static class LineStretches
                 stretch.MeasuredSpeed = found.Speed;
                 if (!stretch.IsSpeedEntered) stretch.Speed = found.Speed ?? 0;
                 if (!stretch.IsDistanceEntered && found.Distance is double distance) stretch.Distance = distance;
-                if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
             }
             layout.StretchLines = [.. StretchLinesOf(drawn, result.Stretches)];
             return result;

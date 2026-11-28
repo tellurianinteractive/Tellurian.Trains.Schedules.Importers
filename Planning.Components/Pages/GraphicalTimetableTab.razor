@@ -124,7 +124,7 @@ else
     private string? _updateAllTimingsError;
 
     // The first/last-half selector is only meaningful when a break time is configured.
-    private bool HasBreak => ScheduleState.Layout?.Settings.General.BreakTime is not null;
+    private bool HasBreak => ScheduleState.Timetable?.Settings.General.BreakTime is not null;
 
     private static readonly (GraphHalf Half, string Key)[] Halves =
     [
@@ -201,7 +201,7 @@ else
     {
         if (ScheduleState.Timetable is { } timetable)
         {
-            _graphSettings = ScheduleState.Layout?.Settings.ToGraphSettings();
+            _graphSettings = ScheduleState.Timetable?.Settings.ToGraphSettings();
             // A break may have been cleared since it was last selected; fall back to the whole graph.
             if (!HasBreak) _half = GraphHalf.Whole;
             var holds = ScheduleState.Schedule?.MarkedTrackHolds ?? [];

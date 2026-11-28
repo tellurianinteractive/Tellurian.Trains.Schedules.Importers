@@ -25,7 +25,7 @@ public static class FirstSessionExtensions
         {
             get
             {
-                var firstSessionStart = plan.Timetable.Layout.Settings.General.FirstSessionStart;
+                var firstSessionStart = plan.Timetable.Settings.General.FirstSessionStart;
                 if (firstSessionStart <= TimeSpan.Zero) return new HashSet<Train>();
                 var firstSession = Sessions.FromSessionNumbers(1);
                 var inEarlyDuties = plan.DriverDuties
@@ -50,7 +50,7 @@ public static class FirstSessionExtensions
         /// <param name="train">A train of the plan's timetable.</param>
         public IReadOnlyList<int> SessionNumbersOf(Train train)
         {
-            var numbers = train.Sessions.NumbersWithin(plan.Timetable.Layout.Settings.General.SessionSettings());
+            var numbers = train.Sessions.NumbersWithin(plan.Timetable.Settings.General.SessionSettings());
             return plan.StartsBeforeFirstSession(train) ? [.. numbers.Where(number => number > 1)] : numbers;
         }
     }

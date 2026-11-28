@@ -17,7 +17,7 @@ public class RequiredStopTimeTests
     private static Plan CreatePlan(int stopMinutes, bool middleIsManned = true)
     {
         var layout = new Layout { Id = 1, Name = "Test" };
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.TrainCategories.Add(Passenger);
         var train = new Train(1, Passenger, 100) { Sessions = Sessions.All };
         var time = Time.FromHourAndMinute(8, 0);
@@ -40,7 +40,7 @@ public class RequiredStopTimeTests
         return new Plan("Test", timetable);
     }
 
-    private static StationTimings Timings(Plan plan) => plan.Layout.Settings.TimeAndSpeed.StationTimings;
+    private static StationTimings Timings(Plan plan) => plan.Timetable.Settings.TimeAndSpeed.StationTimings;
 
     private static StationCall MiddleCall(Plan plan) => plan.Timetable.Trains.Single().CallsInRunOrder[1];
 
@@ -90,10 +90,10 @@ public class RequiredStopTimeTests
         var location = MiddleCall(plan).OperationLocation;
 
         // Minimum stop 3, clearance 1 real minute at fast-clock speed 5.
-        Assert.AreEqual(5, plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, locoRunsRound: false));
+        Assert.AreEqual(5, plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(location, plan.Timetable.PlanningOf(location).Timings, locoRunsRound: false));
 
         Timings(plan).TrainClearanceRealMinutes = 30;
-        Assert.AreEqual(3, plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, false), "30 seconds is 3 fast minutes, no more than the minimum stop.");
+        Assert.AreEqual(3, plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(location, plan.Timetable.PlanningOf(location).Timings, false), "30 seconds is 3 fast minutes, no more than the minimum stop.");
     }
 
     [TestMethod]
@@ -101,7 +101,7 @@ public class RequiredStopTimeTests
     {
         var plan = CreatePlan(3, middleIsManned: false);
 
-        Assert.AreEqual(3, plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(MiddleCall(plan).OperationLocation, false));
+        Assert.AreEqual(3, plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(MiddleCall(plan).OperationLocation, plan.Timetable.PlanningOf(MiddleCall(plan).OperationLocation).Timings, false));
     }
 
     [TestMethod]
@@ -110,7 +110,7 @@ public class RequiredStopTimeTests
         var plan = CreatePlan(5);
         var location = MiddleCall(plan).OperationLocation;
 
-        Assert.AreEqual(25, plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, locoRunsRound: true));
+        Assert.AreEqual(25, plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(location, plan.Timetable.PlanningOf(location).Timings, locoRunsRound: true));
     }
 
     [TestMethod]
@@ -118,9 +118,9 @@ public class RequiredStopTimeTests
     {
         var plan = CreatePlan(5);
         var location = MiddleCall(plan).OperationLocation;
-        location.Timings.TrainClearanceRealMinutes = 2;
+        plan.Timetable.EnsurePlanningOf(location).Timings.TrainClearanceRealMinutes = 2;
 
-        Assert.AreEqual(10, plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, false));
+        Assert.AreEqual(10, plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(location, plan.Timetable.PlanningOf(location).Timings, false));
     }
 
     // ---- Reporting a stop that is too short -----------------------------------------------------

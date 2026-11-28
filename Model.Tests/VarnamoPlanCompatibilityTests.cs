@@ -27,14 +27,14 @@ public sealed class VarnamoPlanCompatibilityTests
 
         var layout = plan.Layout;
         Assert.AreEqual(4, layout.Countries.Count, "countries");
-        Assert.AreEqual(29, layout.Companies.Count, "companies");
+        Assert.AreEqual(29, plan.Timetable.Companies.Count, "companies");
         Assert.AreEqual(10, layout.Regions.Count, "regions");
         Assert.AreEqual(31, layout.OperationLocations.Count, "operation locations");
         Assert.AreEqual(128, layout.OperationLocations.Sum(location => location.Tracks.Count), "station tracks");
         Assert.AreEqual(30, layout.TrackStretches.Count, "track stretches");
-        Assert.AreEqual(9, layout.TimetableStretches.Count, "timetable stretches");
-        Assert.AreEqual(17, layout.DispatchStretches.Count, "dispatch stretches");
-        Assert.AreEqual(9, layout.TopologyPositions.Count, "topology positions");
+        Assert.AreEqual(9, plan.Timetable.TimetableStretches.Count, "timetable stretches");
+        Assert.AreEqual(17, plan.Timetable.DispatchStretches.Count, "dispatch stretches");
+        Assert.AreEqual(9, plan.Timetable.TopologyPositions.Count, "topology positions");
 
         var timetable = plan.Timetable;
         Assert.AreEqual(35, timetable.TrainCategories.Count, "train categories");
@@ -141,9 +141,9 @@ public sealed class VarnamoPlanCompatibilityTests
                     .Select(track => $"{track.Id}:{track.StationId}:{track.Number}:{track.Calls.Count}")),
                 Stretches: string.Join('|', layout.TrackStretches.OrderBy(stretch => stretch.Id)
                     .Select(stretch => $"{stretch.Id}:{stretch.Start.Id}-{stretch.End.Id}:{stretch.Distance}")),
-                DispatchStretches: layout.DispatchStretches.Sum(stretch => 1 + stretch.Stretches.Count),
-                TimetableStretches: layout.TimetableStretches.Sum(stretch => 1 + stretch.Stretches.Count),
-                Companies: layout.Companies.Count,
+                DispatchStretches: plan.Timetable.DispatchStretches.Sum(stretch => 1 + stretch.Stretches.Count),
+                TimetableStretches: plan.Timetable.TimetableStretches.Sum(stretch => 1 + stretch.Stretches.Count),
+                Companies: plan.Timetable.Companies.Count,
                 Regions: layout.Regions.Count,
                 TrainCategories: plan.Timetable.TrainCategories.Count,
                 Trains: string.Join('|', trains.OrderBy(train => train.Id)

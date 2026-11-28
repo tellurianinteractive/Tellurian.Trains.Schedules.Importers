@@ -44,7 +44,7 @@ public class PreparationAndFinishingTimeTests
     // The two runs never move at the same time, but the finishing-up and the preparation do overlap.
     private static Plan PlanWhereFinishingRunsIntoPreparation()
     {
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(ForwardTrain(1, Time.FromHourAndMinute(12, 00), finishingMinutes: 15));
         timetable.Add(ReturnTrain(2, Time.FromHourAndMinute(13, 05), preparationMinutes: 10));
         return Plan.Create("Test", timetable);

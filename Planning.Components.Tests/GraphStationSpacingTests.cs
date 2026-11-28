@@ -25,9 +25,9 @@ public class GraphStationSpacingTests
         layout.Add(stretch);
         var line = new TimetableStretch(1, "1");
         line.AddLast(stretch);
-        layout.Add(line);
 
         var timetable = new Timetable("Test", layout);
+        timetable.Add(line);
         var settings = GraphSettings.Default with { AxisDirection = TimeAxisDirection.Horisontal, KilometerSpacing = 3 };
         return new GraphSchedule(line, timetable, settings);
     }

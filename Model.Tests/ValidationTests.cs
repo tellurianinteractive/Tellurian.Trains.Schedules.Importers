@@ -12,7 +12,7 @@ public class ValidationTests
     private static Timetable NewTimetable()
     {
         TestDataFactory.Init();
-        return new Timetable("Test", TestDataFactory.Layout());
+        return TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
     }
 
     private static TrainCategory Category => new() { Id = 1, Name = "P", Prefix = "P" };
@@ -118,7 +118,7 @@ public class ValidationTests
     // NewTimetable() re-initialises the station instances, so the train must be built after it.
     private static Timetable NewTimetableWith(Train train)
     {
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(train);
         return timetable;
     }
@@ -591,7 +591,7 @@ public class ValidationTests
     public void TwoSessionWorkingInAnOddPeriodNeedNotReturn(int sessions)
     {
         var plan = PlanWithForwardAndReturn();
-        plan.Layout.Settings.General.MaxSessions = sessions;
+        plan.Timetable.Settings.General.MaxSessions = sessions;
         var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Snu
         var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->G
         var odd = Sessions.FromSessionNumbers([.. Enumerable.Range(1, sessions).Where(n => n % 2 == 1)]);
@@ -620,7 +620,7 @@ public class ValidationTests
     public void ThreeSessionWorkingNeedNotReturn(int sessions)
     {
         var plan = PlanWithForwardAndReturn();
-        plan.Layout.Settings.General.MaxSessions = sessions;
+        plan.Timetable.Settings.General.MaxSessions = sessions;
         var forward = plan.Timetable.Trains.First(t => t.Number == 1); // G->Yb->Snu
         var @return = plan.Timetable.Trains.First(t => t.Number == 2); // Snu->G
         ScheduledTrainPart[] legs = [forward.AsTrainPart(0, 1), forward.AsTrainPart(1, 2), @return.AsTrainPart];
@@ -881,7 +881,7 @@ public class ValidationTests
         var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
             Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13),
             Sessions.FromSessionNumbers(2, 4, 6, 9, 11, 13));
-        plan.Layout.Settings.General.MaxSessions = 6;
+        plan.Timetable.Settings.General.MaxSessions = 6;
 
         var errors = plan.GetValidationErrors(Settings)
             .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
@@ -895,7 +895,7 @@ public class ValidationTests
         var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
             Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13),
             Sessions.FromSessionNumbers(2, 4, 6, 9, 11, 13));
-        plan.Layout.Settings.General.MaxSessions = 14;
+        plan.Timetable.Settings.General.MaxSessions = 14;
 
         var errors = plan.GetValidationErrors(Settings)
             .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
@@ -909,7 +909,7 @@ public class ValidationTests
         var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
             Sessions.FromSessionNumbers(1, 3, 5, 9),
             Sessions.FromSessionNumbers(1, 4, 9, 11));
-        plan.Layout.Settings.General.MaxSessions = 6;
+        plan.Timetable.Settings.General.MaxSessions = 6;
 
         var error = plan.GetValidationErrors(Settings)
             .Single(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
@@ -927,8 +927,8 @@ public class ValidationTests
         var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
             Sessions.FromSessionNumbers(2, 4, 6).ComplementWithin(useDays: true, maxSessions: 6),
             Sessions.FromSessionNumbers().ComplementWithin(useDays: true, maxSessions: 6));
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 6;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 6;
         var culture = CultureInfo.CurrentUICulture;
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-GB");
         try
@@ -950,8 +950,8 @@ public class ValidationTests
         var (plan, loco) = VehicleOnTwoSimultaneousSchedules(
             Sessions.FromSessionNumbers(2, 4, 6).ComplementWithin(useDays: true, maxSessions: 6),
             Sessions.FromSessionNumbers(1, 3, 5).ComplementWithin(useDays: true, maxSessions: 6));
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 6;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 6;
 
         var errors = plan.GetValidationErrors(Settings)
             .Where(e => e.ErrorType == ValidationErrorType.VehicleDoubleBooked && e.Involves(loco));
@@ -1171,8 +1171,8 @@ public class ValidationTests
         layout.Add(stretch);
         var line = new TimetableStretch(1, "1");
         line.AddLast(stretch);
-        layout.Add(line);
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
+        timetable.Add(line);
         var gTrack = 1;
         var ybTrack = 1;
         foreach (var (number, departure, minutes, sessions) in specs)

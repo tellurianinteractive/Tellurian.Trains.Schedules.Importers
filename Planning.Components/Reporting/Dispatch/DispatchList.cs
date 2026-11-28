@@ -76,8 +76,9 @@ public sealed record DispatchList(
             .Select(clearance => DispatchRow.FromClearance(clearance, settings, plan))
             .ToList();
         // Only the ones that can be rung: see DispatchNeighbour for why a number is not optional here.
-        var neighbours = layout is not null && station is Station endpoint
-            ? layout.DispatchNeighboursOf(endpoint)
+        var neighbours = TimetableOf(plan, trains) is { } timetable && station is Station endpoint
+            ? timetable.DispatchNeighboursOf(endpoint)
+                .Select(neighbour => (neighbour.Name, timetable.PlanningOf(neighbour).PhoneNumber))
                 .Where(neighbour => neighbour.PhoneNumber.HasValue)
                 .Select(neighbour => new DispatchNeighbour(neighbour.Name, neighbour.PhoneNumber!.Value))
                 .ToList()
@@ -117,7 +118,7 @@ public sealed record DispatchList(
         OperationLocation station, IEnumerable<Train> trains, SessionsSettings settings, Plan? plan = null)
     {
         var whole = Create(station, trains, settings, plan);
-        if (station is not Station { SplitDispatchByDirection: true } dispatcher || station.Layout is not { } layout)
+        if (station is not Station dispatcher || TimetableOf(plan, trains) is not { } timetable || !timetable.PlanningOf(dispatcher).SplitDispatchByDirection || station.Layout is not { } layout)
             return [whole];
         var directions = layout.DispatchDirectionsAt(station);
         if (directions.Count < 2) return [whole];
@@ -166,7 +167,7 @@ public sealed record DispatchList(
             }
         }
 
-        var neighbours = layout.DispatchNeighboursOf(dispatcher);
+        var neighbours = timetable.DispatchNeighboursOf(dispatcher);
         return
         [
             .. directions.Select((direction, side) =>
@@ -179,6 +180,7 @@ public sealed record DispatchList(
                     // A spur folded into the direction is rung like a neighbour when it has a number.
                     Neighbours = [.. beyond.Cast<OperationLocation>()
                         .Concat(direction.Spurs.OrderBy(spur => spur.Name, StringComparer.CurrentCulture))
+                        .Select(neighbour => (neighbour.Name, timetable.PlanningOf(neighbour).PhoneNumber))
                         .Where(neighbour => neighbour.PhoneNumber.HasValue)
                         .Select(neighbour => new DispatchNeighbour(neighbour.Name, neighbour.PhoneNumber!.Value))],
                     RemoteLocations = [.. whole.RemoteLocations.Where(location => rows[side].Any(row => row.IsRemote && row.Call.OperationLocation.Equals(location)))],
@@ -187,4 +189,8 @@ public sealed record DispatchList(
             }),
         ];
     }
+
+    // The timetable the station's planning is kept in: the plan's, else that of the trains listed.
+    private static Timetable? TimetableOf(Plan? plan, IEnumerable<Train> trains) =>
+        plan?.Timetable ?? trains.Select(train => (Timetable?)train.Timetable).FirstOrDefault(timetable => timetable is not null);
 }

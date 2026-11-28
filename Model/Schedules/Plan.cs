@@ -230,9 +230,9 @@ public static class PlanExtensions
         public void RebuildCompanies()
         {
             plan = plan.ValueOrException(nameof(plan));
-            if (plan.Timetable?.Layout is not { } layout) return;
+            if (plan.Timetable is not { } timetable) return;
             Catalogue.Reconcile(
-                layout.Companies,
+                timetable.Companies,
                 plan.Timetable.TrainCategories.Select(c => c.Company)
                     .Concat(plan.Timetable.Trains.Select(t => t.Company))
                     .Concat(plan.ScheduledObjects.Select(v => v.Company))
@@ -251,7 +251,7 @@ public static class PlanExtensions
         public void ResolveCatalogueReferences()
         {
             plan = plan.ValueOrException(nameof(plan));
-            if (plan.Timetable?.Layout?.Companies is not { } companies) return;
+            if (plan.Timetable?.Companies is not { } companies) return;
             foreach (var vehicle in plan.ScheduledObjects)
                 vehicle.Company ??= companies.FirstOrDefault(c => c.Id == vehicle.CompanyId);
             foreach (var duty in plan.DriverDuties)

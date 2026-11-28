@@ -17,7 +17,7 @@ public class MeetNoteTests
     private static Timetable CreateTimetable()
     {
         TestDataFactory.Init();
-        return new Timetable("Test", TestDataFactory.Layout());
+        return TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
     }
 
     private static StationCall CallAtYtterby(Train train) =>
@@ -158,7 +158,7 @@ public class MeetNoteTests
         timetable.Add(forward);
         timetable.Add(opposite);
         var call = CallAtYtterby(forward);
-        call.OperationLocation.HideMeets = true;
+        timetable.EnsurePlanningOf(call.OperationLocation).HideMeets = true;
 
         // Where such events are routine, one flag silences both at once.
         Assert.IsEmpty(call.MeetNotes(Sessions.All, Settings));

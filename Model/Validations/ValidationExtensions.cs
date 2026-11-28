@@ -113,7 +113,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateCompanyPeriods()
         {
-            var bySignature = plan.Layout.Companies
+            var bySignature = plan.Timetable.Companies
                 .GroupBy(c => c.Signature.Trim(), StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1);
             foreach (var group in bySignature)
@@ -175,7 +175,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateLocomotiveCoverage()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var errors = new List<ValidationError>();
 
             // The workings traction is booked on, each with the sessions it is booked for: the union over
@@ -228,7 +228,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateVehicleDoubleBooking()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             foreach (var vehicle in plan.ScheduledObjects)
             {
                 var assignments = vehicle.ScheduleAssignments.ToArray();
@@ -276,7 +276,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateVehicleIdentities()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var duplicates = plan.ScheduledObjects
                 .Where(v => v.HasVehicleIdentity)
                 .GroupBy(v => v.Identity)
@@ -316,7 +316,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateDriverDuties()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var duties = plan.DriverDuties.ToArray();
 
             // A pinned identity renumbering cannot repair: empty, or shared with another pinned duty.
@@ -420,7 +420,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateDriverDutyCoverage()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
 
@@ -531,7 +531,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateTractionRoles()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var errors = new List<ValidationError>();
             foreach (var schedule in plan.Schedules)
             {
@@ -607,7 +607,7 @@ public static class ValidationExtensions
         /// </remarks>
         internal IEnumerable<ValidationError> ValidateTractionCoverage()
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var errors = new List<ValidationError>();
 
@@ -752,7 +752,7 @@ public static class ValidationExtensions
         /// </summary>
         private List<List<Working>> WorkingsPerSession(ScheduledObject vehicle)
         {
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var periodMax = Math.Clamp(general.MaxSessions, 1, general.UseDays ? 7 : 14);
             var workings = new List<List<Working>>();
             for (var number = 1; number <= periodMax; number++)
@@ -995,7 +995,7 @@ public static class ValidationExtensions
         /// </summary>
         internal IEnumerable<ValidationError> ValidateTrainNumbers()
         {
-            var general = timetable.Layout.Settings.General;
+            var general = timetable.Settings.General;
             var result = new List<ValidationError>();
             var duplicates = timetable.Trains
                 .GroupBy(t => (Company: t.EffectiveCompany?.Id, t.CategoryId, t.Number))
@@ -1160,7 +1160,7 @@ public static class ValidationExtensions
             if (train.IsShuntingTask) return [];
             var calls = train.CallsInRunOrder;
             if (calls.Count < 3) return [];
-            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var settings = plan.Timetable.Settings.TimeAndSpeed;
             var needsRunaround = plan.NeedsLocoRunaround(train);
             var result = new List<ValidationError>();
             for (var i = 1; i < calls.Count - 1; i++)
@@ -1173,7 +1173,7 @@ public static class ValidationExtensions
                     RunaroundMode.Never => false,
                     _ => call.ReversesDirection(plan),
                 };
-                var required = settings.RequiredStopMinutes(call.OperationLocation, runsRound);
+                var required = settings.RequiredStopMinutes(call.OperationLocation, plan.Timetable.PlanningOf(call.OperationLocation).Timings, runsRound);
                 var stop = (int)Math.Round((call.Departure.Value - call.Arrival.Value).TotalMinutes);
                 if (stop >= required) continue;
                 var message = Message.Warning(Strings.TrainStopsShorterThanRequired,

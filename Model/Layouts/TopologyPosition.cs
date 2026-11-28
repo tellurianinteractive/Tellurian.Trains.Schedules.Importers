@@ -1,56 +1,14 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
-/// <summary>
-/// Provides extension methods for the topology positions saved with a <see cref="Layout"/>.
-/// </summary>
-public static class LayoutTopologyExtensions
+/// <summary>Where a location is drawn in the topology schematic.</summary>
+public sealed class TopologyPosition
 {
-    extension(Layout layout)
-    {
-        /// <summary>
-        /// Where the planner has put <paramref name="location"/>, or <see langword="null"/> when it has
-        /// not been moved and is to be placed automatically.
-        /// </summary>
-        /// <param name="location">The location whose saved position is wanted.</param>
-        public TopologyPosition? TopologyPositionOf(OperationLocation? location) =>
-            location is null ? null : layout.TopologyPositions.FirstOrDefault(p => p.LocationId == location.Id);
+    /// <summary>The <see cref="OperationLocation.Id"/> of the location.</summary>
+    public int LocationId { get; set; }
 
-        /// <summary>
-        /// Records where the planner has put <paramref name="location"/>, replacing any position it had.
-        /// </summary>
-        /// <param name="location">The location that was moved.</param>
-        /// <param name="x">Its new horizontal coordinate, in diagram units.</param>
-        /// <param name="y">Its new vertical coordinate, in diagram units.</param>
-        public void SetTopologyPosition(OperationLocation location, double x, double y)
-        {
-            location = location.ValueOrException(nameof(location));
-            if (layout.TopologyPositionOf(location) is { } existing) (existing.X, existing.Y) = (x, y);
-            else layout.TopologyPositions.Add(new TopologyPosition { LocationId = location.Id, X = x, Y = y });
-        }
+    /// <summary>The horizontal position.</summary>
+    public double X { get; set; }
 
-        /// <summary>
-        /// Forgets the position of <paramref name="location"/>, so nothing is left placing a location the
-        /// layout no longer has. Call it when a location is removed. Returns <c>true</c> when there was a
-        /// position to forget.
-        /// </summary>
-        /// <param name="location">The location being removed.</param>
-        public bool ForgetTopologyPositionOf(OperationLocation? location) =>
-            layout.TopologyPositionOf(location) is { } position && layout.TopologyPositions.Remove(position);
-
-        /// <summary>
-        /// Forgets every position the planner has set, so the whole diagram is drawn automatically again.
-        /// Returns <c>true</c> when there was something to forget.
-        /// </summary>
-        public bool ClearTopologyPositions()
-        {
-            if (layout.TopologyPositions.Count == 0) return false;
-            layout.TopologyPositions.Clear();
-            return true;
-        }
-
-        /// <summary>
-        /// Whether the planner has moved anything in the topology diagram.
-        /// </summary>
-        public bool HasTopologyPositions => layout.TopologyPositions.Count > 0;
-    }
+    /// <summary>The vertical position.</summary>
+    public double Y { get; set; }
 }

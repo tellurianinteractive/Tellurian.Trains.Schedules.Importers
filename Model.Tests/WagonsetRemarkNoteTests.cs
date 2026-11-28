@@ -23,7 +23,7 @@ public class WagonsetRemarkNoteTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var train = TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00));
         timetable.Add(train);
         var plan = Plan.Create("Test", timetable);

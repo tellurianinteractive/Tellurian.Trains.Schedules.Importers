@@ -119,7 +119,7 @@ else
                         <label>@Translator("Company")</label>
                         <select @bind="CategoryCompanyId" @bind:after="OnEdited">
                             <option value="">@Translator("None")</option>
-                            @foreach (var company in Layout!.Companies.InChoiceOrder)
+                            @foreach (var company in Timetable!.Companies.InChoiceOrder)
                             {
                                 <option value="@company.Id">@company.ChoiceText</option>
                             }
@@ -235,7 +235,7 @@ else
     private int? CategoryCompanyId
     {
         get => Editing?.Company?.Id;
-        set => Editing!.Company = value is int id ? Layout!.Companies.FirstOrDefault(c => c.Id == id) : null;
+        set => Editing!.Company = value is int id ? Timetable!.Companies.FirstOrDefault(c => c.Id == id) : null;
     }
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;

@@ -66,12 +66,14 @@ else
     private readonly Dictionary<DutyPage, bool> _hasMoreParts = [];
 
     private LayoutModel? Layout => ScheduleState.Layout;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private string LayoutName => Layout?.Name ?? "";
-    private DateOnly? ValidFrom => Layout?.Settings.General.ValidFrom;
-    private DateOnly? ValidTo => Layout?.Settings.General.ValidTo;
+    private DateOnly? ValidFrom => Timetable?.Settings.General.ValidFrom;
+    private DateOnly? ValidTo => Timetable?.Settings.General.ValidTo;
 
     private SessionsSettings Settings =>
-        Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,7 +98,7 @@ else
         foreach (var duty in selected)
         {
             // Built in the duty's own language, since the pagination measures the notes' texts.
-            var culture = new ReportCulture(duty.ReportCulture(layout, LanguageService.IsSupported));
+            var culture = new ReportCulture(duty.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
             var pages = DutyPagination.BuildPages(duty, Settings);
             RecordContinuations(pages);

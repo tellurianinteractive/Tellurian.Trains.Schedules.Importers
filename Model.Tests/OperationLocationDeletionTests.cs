@@ -58,7 +58,7 @@ public class OperationLocationDeletionTests
     {
         Plan.TryDelete(Yb);
 
-        var route = Layout.TimetableStretches.Single();
+        var route = Plan.Timetable.TimetableStretches.Single();
         Assert.AreEqual(G, route.Starts);
         Assert.AreEqual(Snu, route.Ends);
         Assert.HasCount(1, route.Stretches);
@@ -75,7 +75,7 @@ public class OperationLocationDeletionTests
 
         Assert.IsFalse(preview.IsReplacementNew);
         Assert.AreSame(existing, Layout.TrackStretches.Single());
-        Assert.AreSame(existing, Layout.TimetableStretches.Single().Stretches.Single());
+        Assert.AreSame(existing, Plan.Timetable.TimetableStretches.Single().Stretches.Single());
     }
 
     [TestMethod]
@@ -109,7 +109,7 @@ public class OperationLocationDeletionTests
         Assert.IsFalse(newFirst.IsArrival);
         Assert.AreEqual(Time.FromHourAndMinute(12, 20), newFirst.Arrival, "The ten minutes of preparation move to the new origin.");
         Assert.AreEqual(Yb, Layout.TrackStretches.Single().Start, "A terminus has no neighbours to join, so its stretch just goes.");
-        Assert.AreEqual(Yb, Layout.TimetableStretches.Single().Starts);
+        Assert.AreEqual(Yb, Plan.Timetable.TimetableStretches.Single().Starts);
     }
 
     [TestMethod]
@@ -124,7 +124,7 @@ public class OperationLocationDeletionTests
         Assert.IsTrue(preview.Trains.All(t => t.IsDeleted));
         Assert.IsEmpty(Plan.Timetable.Trains);
         Assert.IsEmpty(Layout.TrackStretches);
-        Assert.IsEmpty(Layout.TimetableStretches, "A timetable stretch with no route left goes too.");
+        Assert.IsEmpty(Plan.Timetable.TimetableStretches, "A timetable stretch with no route left goes too.");
     }
 
     [TestMethod]
@@ -171,11 +171,11 @@ public class OperationLocationDeletionTests
     public void TrackRoutesAtTheNeighboursNowNameTheLocationBeyond()
     {
         var track = G["1"];
-        track.NextLocationId = Yb.Id;
+        Plan.Timetable.EnsureRouteOf(track).NextLocationId = Yb.Id;
 
         Plan.TryDelete(Yb);
 
-        Assert.AreEqual(Snu.Id, track.NextLocationId);
+        Assert.AreEqual(Snu.Id, Plan.Timetable.RouteOf(track).NextLocationId);
     }
 
     [TestMethod]
@@ -195,11 +195,11 @@ public class OperationLocationDeletionTests
     public void DispatchStretchesAreGeneratedAgain()
     {
         foreach (var station in Layout.OperationLocations.OfType<Station>()) station.IsManned = true;
-        Layout.DispatchStretches = Layout.CreateDispatchStretches();
+        Plan.Timetable.DispatchStretches = Layout.CreateDispatchStretches();
 
         Plan.TryDelete(Yb);
 
-        Assert.IsTrue(Layout.DispatchStretches.All(d => !d.From.Equals(Yb) && !d.To.Equals(Yb)));
-        Assert.IsTrue(Layout.DispatchStretches.Any(d => d.From.Equals(G) && d.To.Equals(Snu)));
+        Assert.IsTrue(Plan.Timetable.DispatchStretches.All(d => !d.From.Equals(Yb) && !d.To.Equals(Yb)));
+        Assert.IsTrue(Plan.Timetable.DispatchStretches.Any(d => d.From.Equals(G) && d.To.Equals(Snu)));
     }
 }

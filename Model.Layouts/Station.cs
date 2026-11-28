@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
-using Tellurian.Trains.Schedules.Model.Timetables;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
@@ -23,27 +22,8 @@ public sealed class Station : OperationLocation
     /// <summary>The station has its own staff in this layout; otherwise the loco drivers work it themselves.</summary>
     public bool IsManned { get; set; }
 
-    /// <summary>
-    /// The people staffing the station, each with the roles they fill. Only in force while the station is
-    /// <see cref="IsManned"/>; kept either way, so unmanning a station and manning it again does not lose them.
-    /// </summary>
-    public IList<StaffPost> StaffPosts { get; set; } = [];
-
-    /// <summary>How many shifts a long session is divided into at this station (1–3).</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public int ShiftCount { get; set; } = 1;
-
     /// <summary>The station has a turntable, so a locomotive can be turned here.</summary>
     public bool HasTurntable { get; set; }
-
-    /// <summary>Which trains starting at this station get a start label; a train's category can narrow it further.</summary>
-    public StartLabelPrinting StartLabels { get; set; }
-
-    /// <summary>The station's dispatch list is divided into one list per direction instead of one for the whole station.</summary>
-    public bool SplitDispatchByDirection { get; set; }
-
-    /// <summary>Passengers change trains here; in force only while the layout is worked with passenger tickets.</summary>
-    public bool IsPassengerInterchange { get; set; }
 
     /// <summary>
     /// The regions and countries represented by this station, mostly by a shadow station. Each is an entry of the

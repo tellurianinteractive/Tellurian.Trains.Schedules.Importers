@@ -17,9 +17,9 @@ public class PlanCallTimeEditTests
     private static Plan SimplePlan()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        var plan = new Plan("Test", new Timetable("Test", layout));
+        var plan = new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
         // The pushed times must have room to land in; the window is not what is under test here.
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
         return plan;
     }
 
@@ -180,12 +180,12 @@ public class PlanCallTimeEditTests
     {
         var plan = SimplePlan();
         // No extending here: the window is the constraint under test.
-        plan.Layout.Settings.General.AllowPlanTimeExtend = false;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = false;
         var train = MalmöToHässleholm(plan);
         var before = TimesOf(train);
         var edited = train.CallsInRunOrder[1];
         // Half an hour past the end of the operating window (20:00 by default).
-        var pastTheWindow = (int)(plan.Layout.Settings.General.EndTime - train.CallsInRunOrder[^1].Departure.Value).TotalMinutes + 30;
+        var pastTheWindow = (int)(plan.Timetable.Settings.General.EndTime - train.CallsInRunOrder[^1].Departure.Value).TotalMinutes + 30;
 
         var result = plan.SetDeparture(edited, edited.Departure.AddMinutes(pastTheWindow));
 
@@ -203,12 +203,12 @@ public class PlanCallTimeEditTests
     {
         var plan = SimplePlan();
         // No extending here: the window is the constraint under test.
-        plan.Layout.Settings.General.AllowPlanTimeExtend = false;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = false;
         var train = MalmöToHässleholm(plan);
         var before = TimesOf(train);
         var edited = train.CallsInRunOrder[^1];
         // Half an hour before the start of the operating window: the edit pulls the whole run before it back.
-        var beforeTheWindow = (int)(plan.Layout.Settings.General.StartTime - train.CallsInRunOrder[0].Arrival.Value).TotalMinutes - 30;
+        var beforeTheWindow = (int)(plan.Timetable.Settings.General.StartTime - train.CallsInRunOrder[0].Arrival.Value).TotalMinutes - 30;
 
         var result = plan.SetArrival(edited, edited.Arrival.AddMinutes(beforeTheWindow));
 
@@ -272,7 +272,7 @@ public class PlanCallTimeEditTests
     private static Plan OverMidnightPlan()
     {
         var plan = SimplePlan();
-        plan.Layout.Settings.General.RunsOverMidnight = true;
+        plan.Timetable.Settings.General.RunsOverMidnight = true;
         return plan;
     }
 

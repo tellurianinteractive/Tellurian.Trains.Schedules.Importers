@@ -29,8 +29,9 @@ public class DispatchStretchConflictTests
         for (var t = 1; t <= middleTracks; t++) m.Add(new StationTrack(20 + t, t.ToString()));
         layout.Add(new TrackStretch(1, a, m, 10, tracksCount));
         layout.Add(new TrackStretch(2, m, b, 10, tracksCount));
-        if (withDispatchStretches) layout.DispatchStretches = layout.CreateDispatchStretches();
-        return new Line(Plan.Create("Test", new Timetable("Test", layout)), a, m, b);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
+        if (withDispatchStretches) timetable.DispatchStretches = layout.CreateDispatchStretches();
+        return new Line(Plan.Create("Test", timetable), a, m, b);
     }
 
     private static Station Unmanned => new(2, "Middle", "M");
@@ -110,8 +111,8 @@ public class DispatchStretchConflictTests
     private static Line MeetOn(Sessions first, Sessions second, bool useDays, int maxSessions)
     {
         var line = NewLine(Unmanned, middleTracks: 2);
-        line.Plan.Layout.Settings.General.UseDays = useDays;
-        line.Plan.Layout.Settings.General.MaxSessions = maxSessions;
+        line.Plan.Timetable.Settings.General.UseDays = useDays;
+        line.Plan.Timetable.Settings.General.MaxSessions = maxSessions;
         MeetAtMiddle(line);
         line.Plan.Timetable.Trains.Single(t => t.Number == 1).Sessions = first;
         line.Plan.Timetable.Trains.Single(t => t.Number == 2).Sessions = second;

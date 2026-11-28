@@ -53,22 +53,22 @@ public static class SessionsPeriodExtensions
         /// The sessions or days of the plan the train runs on; see <see cref="SessionsPeriodExtensions"/>. The
         /// stored value as it is when the train belongs to no layout yet.
         /// </summary>
-        public Sessions ActualSessions => Actual(train.Layout ?? train.Timetable?.Layout, train.Sessions);
+        public Sessions ActualSessions => Actual(train.Timetable, train.Sessions);
     }
 
     extension(DriverDuty duty)
     {
         /// <summary>The sessions or days of the plan the duty is worked on; see <see cref="SessionsPeriodExtensions"/>.</summary>
-        public Sessions ActualSessions => Actual(duty.Plan?.Timetable?.Layout, duty.Sessions);
+        public Sessions ActualSessions => Actual(duty.Plan?.Timetable, duty.Sessions);
     }
 
     extension(ScheduleAssignment assignment)
     {
         /// <summary>The sessions or days of the plan the vehicle works the schedule; see <see cref="SessionsPeriodExtensions"/>.</summary>
         public Sessions ActualSessions =>
-            Actual((assignment.Schedule?.Plan ?? assignment.ScheduledObject?.Plan)?.Timetable?.Layout, assignment.Sessions);
+            Actual((assignment.Schedule?.Plan ?? assignment.ScheduledObject?.Plan)?.Timetable, assignment.Sessions);
     }
 
-    private static Sessions Actual(Layout? layout, Sessions sessions) =>
-        layout?.Settings?.General is { } general ? general.ActualSessions(sessions) : sessions;
+    private static Sessions Actual(Timetable? timetable, Sessions sessions) =>
+        timetable?.Settings?.General is { } general ? general.ActualSessions(sessions) : sessions;
 }

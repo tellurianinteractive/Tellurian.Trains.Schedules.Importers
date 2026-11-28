@@ -50,9 +50,6 @@ internal static class OperationLocationMapping
                 // refer to another location besides its owner.
                 entity.Property(e => e.LockKey).HasContractJson();
 
-                // Per-station timing overrides: structured data worth real columns (owned, not JSON).
-                entity.OwnsOne(e => e.Timings, timings => timings.Property(x => x.ExtensionData).HasJsonProperties());
-
                 // One table for the kinds of location; the column is the kind, with the values a plan file has in "kind".
                 entity.HasDiscriminator<string>("Kind")
                       .HasValue<Station>(nameof(OperationLocationKind.Station))

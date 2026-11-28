@@ -79,7 +79,7 @@ public sealed class ReportLanguageUiTests : PlaywrightTestBase
         var plan = PlanFactory.CreatePlan("Report languages", "sv");
         var timetable = plan.Timetable!;
         var layout = timetable.Layout;
-        layout.Settings.General.UseObjectLanguageInReports = useLocalLanguages;
+        timetable.Settings.General.UseObjectLanguageInReports = useLocalLanguages;
         var munkerod = (Station)layout.Add(NewStation(1, "Munkeröd", "Mkd"));
         var stilkobing = (Station)layout.Add(NewStation(2, "Stilkøbing", "Stk"));
         stilkobing.CountryId = Denmark;

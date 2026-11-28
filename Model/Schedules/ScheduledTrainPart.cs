@@ -503,7 +503,7 @@ public static class ScheduledTrainPartExtensions
 
         // How sessions and days are written in this plan, for the notes that name some of them.
         private SessionsSettings? PlanSessionsSettings =>
-            trainPart.Schedule?.Plan?.Layout.Settings.General.SessionSettings();
+            trainPart.Schedule?.Plan?.Timetable.Settings.General.SessionSettings();
 
         /// <summary>
         /// The one note for what has to be done with the traction after arrival so the train can leave the

@@ -181,7 +181,7 @@ public class DispatchRowTests
     public void ATrainRunningPastIsListedEvenWhereThePassingsAreHidden()
     {
         var timetable = CreateTimetable(0);
-        StationNamed(timetable, Middle).HidePassings = true;
+        timetable.EnsurePlanningOf(StationNamed(timetable, Middle)).HidePassings = true;
 
         // HidePassings suppresses passings where they are noise; here a missing one is a train nobody
         // at the station is expecting.
@@ -400,9 +400,9 @@ public class DispatchRowTests
         var origin = (Station)StationNamed(timetable, Origin);
         var middle = (Station)StationNamed(timetable, Middle);
         var terminus = (Station)StationNamed(timetable, Terminus);
-        origin.PhoneNumber = 15;
-        terminus.PhoneNumber = 16;
-        layout.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
+        timetable.EnsurePlanningOf(origin).PhoneNumber = 15;
+        timetable.EnsurePlanningOf(terminus).PhoneNumber = 16;
+        timetable.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
 
         var list = DispatchList.Create(middle, timetable.Trains, Settings);
 
@@ -421,9 +421,9 @@ public class DispatchRowTests
         var origin = (Station)StationNamed(timetable, Origin);
         var middle = (Station)StationNamed(timetable, Middle);
         var terminus = (Station)StationNamed(timetable, Terminus);
-        terminus.PhoneNumber = 16; // Munkeröd's is left unrecorded
-        layout.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
-        layout.DispatchStretches.Add(new DispatchStretch(2, middle, terminus));
+        timetable.EnsurePlanningOf(terminus).PhoneNumber = 16; // Munkeröd's is left unrecorded
+        timetable.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
+        timetable.DispatchStretches.Add(new DispatchStretch(2, middle, terminus));
 
         var list = DispatchList.Create(middle, timetable.Trains, Settings);
 

@@ -10,17 +10,17 @@ public sealed class TimetableStretchSuggestionTests
     [TestMethod]
     public void TimetableStretchesAreSuggestedPerLineAndNotAdded()
     {
-        var layout = Layout("Aby", "Bby", "Cby", "Dby");
-        Stretch(layout, "Aby", "Bby");
-        Stretch(layout, "Bby", "Cby");
-        Stretch(layout, "Bby", "Dby");
-        Line(layout, "Main", "Aby", "Bby", "Cby");
-        Line(layout, "Branch", "Bby", "Dby");
-        layout.TimetableStretches.Add(new TimetableStretch(4, "3"));
+        var timetable = Timetable("Aby", "Bby", "Cby", "Dby");
+        Stretch(timetable, "Aby", "Bby");
+        Stretch(timetable, "Bby", "Cby");
+        Stretch(timetable, "Bby", "Dby");
+        Line(timetable, "Main", "Aby", "Bby", "Cby");
+        Line(timetable, "Branch", "Bby", "Dby");
+        timetable.Add(new TimetableStretch(4, "3"));
 
-        var suggestions = layout.SuggestedTimetableStretches();
+        var suggestions = timetable.SuggestedTimetableStretches();
 
-        Assert.HasCount(1, layout.TimetableStretches, "suggestions are not added");
+        Assert.HasCount(1, timetable.TimetableStretches, "suggestions are not added");
         Assert.HasCount(2, suggestions);
         Assert.AreEqual(5, suggestions[0].Id);
         Assert.AreEqual("4", suggestions[0].Number);
@@ -33,14 +33,14 @@ public sealed class TimetableStretchSuggestionTests
     [TestMethod]
     public void ALoopDividedAtAStationGivesTwoTimetableStretchesEndingThere()
     {
-        var layout = Layout("Aby", "Bby", "Cby", "Dby");
-        Stretch(layout, "Aby", "Bby");
-        Stretch(layout, "Bby", "Cby");
-        Stretch(layout, "Dby", "Cby"); // turned by the planner, as is the next
-        Stretch(layout, "Aby", "Dby");
-        Line(layout, "Loop", "Aby", "Bby", "Cby", "Dby", "Aby");
+        var timetable = Timetable("Aby", "Bby", "Cby", "Dby");
+        Stretch(timetable, "Aby", "Bby");
+        Stretch(timetable, "Bby", "Cby");
+        Stretch(timetable, "Dby", "Cby"); // turned by the planner, as is the next
+        Stretch(timetable, "Aby", "Dby");
+        Line(timetable, "Loop", "Aby", "Bby", "Cby", "Dby", "Aby");
 
-        var suggestions = layout.SuggestedTimetableStretches();
+        var suggestions = timetable.SuggestedTimetableStretches();
 
         Assert.HasCount(2, suggestions);
         CollectionAssert.AreEqual(new[] { "Aby", "Bby", "Cby" }, Names(suggestions[0]));
@@ -50,12 +50,12 @@ public sealed class TimetableStretchSuggestionTests
     [TestMethod]
     public void ALineIsDividedWhereATrackStretchIsMissing()
     {
-        var layout = Layout("Aby", "Bby", "Cby", "Dby");
-        Stretch(layout, "Aby", "Bby");
-        Stretch(layout, "Cby", "Dby");
-        Line(layout, "Main", "Aby", "Bby", "Cby", "Dby");
+        var timetable = Timetable("Aby", "Bby", "Cby", "Dby");
+        Stretch(timetable, "Aby", "Bby");
+        Stretch(timetable, "Cby", "Dby");
+        Line(timetable, "Main", "Aby", "Bby", "Cby", "Dby");
 
-        var suggestions = layout.SuggestedTimetableStretches();
+        var suggestions = timetable.SuggestedTimetableStretches();
 
         Assert.HasCount(2, suggestions);
         CollectionAssert.AreEqual(new[] { "Aby", "Bby" }, Names(suggestions[0]));
@@ -65,49 +65,55 @@ public sealed class TimetableStretchSuggestionTests
     [TestMethod]
     public void ALayoutWithoutLinesSuggestsNothing()
     {
-        var layout = Layout("Aby", "Bby");
-        Stretch(layout, "Aby", "Bby");
+        var timetable = Timetable("Aby", "Bby");
+        Stretch(timetable, "Aby", "Bby");
 
-        Assert.IsFalse(layout.CanSuggestTimetableStretches);
-        Assert.IsEmpty(layout.SuggestedTimetableStretches());
+        Assert.IsFalse(timetable.CanSuggestTimetableStretches);
+        Assert.IsEmpty(timetable.SuggestedTimetableStretches());
     }
 
     [TestMethod]
     public void AnInsertedLocationSplitsTheLegAndARemovedOneJoinsThem()
     {
-        var layout = Layout("Aby", "Bby", "Cby");
-        Line(layout, "Main", "Aby", "Cby");
+        var timetable = Timetable("Aby", "Bby", "Cby");
+        Line(timetable, "Main", "Aby", "Cby");
+        var layout = timetable.Layout;
 
-        layout.InsertIntoStretchLines(At(layout, "Cby"), At(layout, "Aby"), At(layout, "Bby"));
-        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby" }, Legs(layout));
+        layout.InsertIntoStretchLines(At(timetable, "Cby"), At(timetable, "Aby"), At(timetable, "Bby"));
+        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby" }, Legs(timetable));
 
-        layout.RemoveFromStretchLines(At(layout, "Bby"));
-        CollectionAssert.AreEqual(new[] { "Aby–Cby" }, Legs(layout));
+        layout.RemoveFromStretchLines(At(timetable, "Bby"));
+        CollectionAssert.AreEqual(new[] { "Aby–Cby" }, Legs(timetable));
     }
 
-    private static Layout Layout(params string[] names)
+    private static Timetable Timetable(params string[] names)
     {
         var layout = new Layout();
         var id = 0;
         foreach (var name in names) layout.Add(new Station(++id, name, name[..1]));
-        return layout;
+        return new Timetable("Test", layout);
     }
 
-    private static OperationLocation At(Layout layout, string name) => layout.OperationLocations.Single(l => l.Name == name);
+    private static OperationLocation At(Timetable timetable, string name) => timetable.Layout.OperationLocations.Single(l => l.Name == name);
 
-    private static void Stretch(Layout layout, string start, string end) =>
-        layout.TrackStretches.Add(new TrackStretch(layout.TrackStretches.Count + 1, At(layout, start), At(layout, end), 10) { Layout = layout });
+    private static string NameOf(Timetable timetable, int id) => timetable.Layout.OperationLocations.Single(l => l.Id == id).Name;
 
-    private static void Line(Layout layout, string name, params string[] locations) =>
-        layout.StretchLines.Add(new StretchLine
+    private static void Stretch(Timetable timetable, string start, string end)
+    {
+        var layout = timetable.Layout;
+        layout.TrackStretches.Add(new TrackStretch(layout.TrackStretches.Count + 1, At(timetable, start), At(timetable, end), 10) { Layout = layout });
+    }
+
+    private static void Line(Timetable timetable, string name, params string[] locations) =>
+        timetable.Layout.StretchLines.Add(new StretchLine
         {
-            Id = layout.StretchLines.Count + 1,
+            Id = timetable.Layout.StretchLines.Count + 1,
             Name = name,
-            Legs = [.. locations.Zip(locations.Skip(1), (a, b) => new LineLeg(At(layout, a).Id, At(layout, b).Id))],
+            Legs = [.. locations.Zip(locations.Skip(1), (a, b) => new LineLeg(At(timetable, a).Id, At(timetable, b).Id))],
         });
 
     private static string[] Names(TimetableStretch stretch) => [.. stretch.Stations.Select(s => s.Name)];
 
-    private static string[] Legs(Layout layout) =>
-        [.. layout.StretchLines.Single().Legs.Select(l => $"{layout.OperationLocations.Single(o => o.Id == l.StartId).Name}–{layout.OperationLocations.Single(o => o.Id == l.EndId).Name}")];
+    private static string[] Legs(Timetable timetable) =>
+        [.. timetable.Layout.StretchLines.Single().Legs.Select(l => $"{NameOf(timetable, l.StartId)}–{NameOf(timetable, l.EndId)}")];
 }

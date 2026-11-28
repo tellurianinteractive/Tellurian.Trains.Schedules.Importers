@@ -11,10 +11,10 @@ public class FirstSessionTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
-        var general = timetable.Layout.Settings.General;
+        var general = timetable.Settings.General;
         general.MaxSessions = maxSessions;
         if (firstSessionStart is { } start)
         {
@@ -102,7 +102,7 @@ public class FirstSessionTests
     {
         var plan = CreatePlan(firstSessionStart: TimeSpan.FromHours(12.5));
         AddDutyWithBothTrains(plan);
-        var settings = plan.Timetable.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
         var origin = Return(plan).CallsInRunOrder[0].OperationLocation;
 
         var withDuties = Return(plan).ClearancesAt(origin, settings, plan).Single();

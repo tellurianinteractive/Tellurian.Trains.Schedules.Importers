@@ -21,7 +21,7 @@ internal static class CompanyMapping
                 entity.Property(e => e.OperatesToYear);
                 entity.Ignore(e => e.OperatingPeriodText);
 
-                entity.HasIndex(e => new { e.LayoutId, e.Signature }); // Not unique: the database holds any plan a plan file can; the model reports duplicates.
+                entity.HasIndex(e => new { e.TimetableId, e.Signature }); // Not unique: the database holds any plan a plan file can; the model reports duplicates.
             });
     }
 }

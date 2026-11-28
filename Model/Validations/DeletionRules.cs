@@ -37,7 +37,7 @@ public static partial class DeletionRules
         public DeletionResult TryDelete(Company company)
         {
             if (plan.MayDelete(company) is DeletionResult.Failure failure) return failure;
-            plan.Layout.Companies.Remove(company);
+            plan.Timetable.Companies.Remove(company);
             return new DeletionResult.Success(company);
         }
 
@@ -414,9 +414,9 @@ public static partial class DeletionRules
     {
         var layout = plan.Layout;
         var references = new List<Reference>();
-        if (layout.Settings.Identity.DefaultCountryId == country.Id)
+        if (plan.Timetable.Settings.Identity.DefaultCountryId == country.Id)
             references.Add(Reference.For(layout));
-        foreach (var company in layout.Companies.Where(c => c.CountryId == country.Id))
+        foreach (var company in plan.Timetable.Companies.Where(c => c.CountryId == country.Id))
             references.Add(Reference.For(company));
         // Region has no ToString override, so its display name is passed explicitly.
         foreach (var region in layout.Regions.Where(r => r.CountryId == country.Id))

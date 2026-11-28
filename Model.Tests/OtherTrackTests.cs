@@ -34,7 +34,7 @@ public class OtherTrackTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
         var plan = Plan.Create("Test", timetable);
@@ -256,8 +256,8 @@ public class OtherTrackTests
             ScheduledObjectType.Wagonset,
             trainRuns: Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday),
             vehicleAssigned: Sessions.FromDays(Days.Monday | Days.Wednesday | Days.Friday));
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         part.FromTrack = TrackAt(plan, "G", "1");
         part.ToTrack = TrackAt(plan, "Snu", "2");
 
@@ -328,7 +328,7 @@ public class OtherTrackTests
     {
         var (plan, part, _) = Arrange(ScheduledObjectType.Wagonset, vehicleAssigned: Sessions.FromSessionNumbers(1, 3, 5));
         part.FromTrack = TrackAt(plan, "G", "2");
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
         var sessions = Sessions.FromSessionNumbers(1, 3, 5);
 
         var note = DepartureNotes(plan, part).OfType<ShuntWagonsToDepartureTrackNote>().Single();
@@ -345,7 +345,7 @@ public class OtherTrackTests
         var (plan, part, _) = Arrange(ScheduledObjectType.Wagonset,
             vehicleAssigned: Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6, 7));
         part.FromTrack = TrackAt(plan, "G", "2");
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.MaxSessions = 7;
 
         var note = DepartureNotes(plan, part).OfType<ShuntWagonsToDepartureTrackNote>().Single();
 
@@ -381,7 +381,7 @@ public class OtherTrackTests
         otherPart.WagonSetOptions = new WagonSetOptions();
         otherPart.ToTrack = TrackAt(plan, "Snu", "2");
         plan.AssignVehicle(other, plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 12, null), Sessions.FromSessionNumbers(3));
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
 
         var note = ArrivalNotes(plan, part).OfType<ShuntWagonsToArrivalTrackNote>().Single();
 
@@ -448,7 +448,7 @@ public class OtherTrackTests
     {
         var (plan, part, vehicle) = Arrange(vehicleAssigned: Sessions.FromSessionNumbers(1, 3, 5));
         part.ToTrack = TrackAt(plan, "Snu", "2");
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
         var sessions = Sessions.FromSessionNumbers(1, 3, 5);
 
         var note = ArrivalNotes(plan, part).OfType<ToTrackNote>().Single();
@@ -468,7 +468,7 @@ public class OtherTrackTests
             trainRuns: Sessions.FromSessionNumbers(1, 3, 5, 7),
             vehicleAssigned: Sessions.FromSessionNumbers(1, 2, 3, 4));
         part.FromTrack = TrackAt(plan, "G", "1");
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
 
         var note = DepartureNotes(plan, part).OfType<FromTrackNote>().Single();
 
@@ -494,7 +494,7 @@ public class OtherTrackTests
         var second = plan.CreateVehicle(ScheduledObjectType.Locomotive, "T44", 43, null);
         plan.AssignVehicle(part.Schedule!, second, Sessions.FromSessionNumbers(2, 4, 6));
         part.FromTrack = TrackAt(plan, "G", "1");
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
 
         var notes = DepartureNotes(plan, part).OfType<FromTrackNote>().ToList();
 
@@ -509,10 +509,10 @@ public class OtherTrackTests
         var (plan, part, _) = Arrange(
             trainRuns: Sessions.FromDays(Days.Monday | Days.Tuesday | Days.Wednesday | Days.Thursday | Days.Friday),
             vehicleAssigned: Sessions.FromDays(Days.Monday | Days.Wednesday));
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         part.FromTrack = TrackAt(plan, "G", "1");
-        var settings = plan.Layout.Settings.General.SessionSettings();
+        var settings = plan.Timetable.Settings.General.SessionSettings();
 
         var note = DepartureNotes(plan, part).OfType<FromTrackNote>().Single();
 

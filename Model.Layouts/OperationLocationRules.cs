@@ -97,7 +97,7 @@ public static class OperationLocationRules
 
     /// <summary>
     /// The rules that what is decided for <paramref name="location"/> in <paramref name="layout"/> breaks: who controls
-    /// it, and its instructions.
+    /// it. The planner's own decisions, such as instructions, are checked by the planner.
     /// </summary>
     public static IReadOnlyList<LocationProblem> Validate(OperationLocation location, Layout layout)
     {
@@ -112,8 +112,6 @@ public static class OperationLocationRules
             else if (!controller.IsManned || ReferenceEquals(controller, location) || !layout.OperationLocations.Contains(controller))
                 problems.Add(new(LocationProblemCode.ControlledByNotManned, nameof(OperationLocation.ControlledBy)));
         }
-        if (!string.IsNullOrWhiteSpace(location.Instructions) && !CanHaveInstructions(kind))
-            problems.Add(new(LocationProblemCode.InstructionsNotAllowed, nameof(OperationLocation.Instructions)));
         return problems;
     }
     /// <summary>
@@ -133,9 +131,6 @@ public static class OperationLocationRules
         target.Signature = source.Signature;
         target.CountryCode = source.CountryCode;
         target.Owner = source.Owner;
-        target.PhoneNumber = source.PhoneNumber;
-        target.HideMeets = source.HideMeets;
-        target.HidePassings = source.HidePassings;
         target.IsChangingTrainDirectionPossible = source.IsChangingTrainDirectionPossible;
         target.HasPassengerExchange = source.HasPassengerExchange;
         target.HasCargoExchange = source.HasCargoExchange;
@@ -143,12 +138,10 @@ public static class OperationLocationRules
         target.IsHarbour = source.IsHarbour;
         target.IsKeyRequired = source.IsKeyRequired;
         target.Centre = source.Centre;
-        target.Timings = source.Timings;
         target.ExternalReferences = source.ExternalReferences;
         target.ExtensionData = source.ExtensionData;
         target.Layout = source.Layout;
         target.LayoutId = source.LayoutId;
-        if (CanHaveInstructions(kind)) target.Instructions = source.Instructions;
         if (CanBeControlled(kind)) target.ControlledBy = source.ControlledBy;
         if (CanHaveCargoExchange(kind))
         {
@@ -183,7 +176,6 @@ public static class OperationLocationRules
         Add(location.IsChangingTrainDirectionPossible, after.IsChangingTrainDirectionPossible, nameof(OperationLocation.IsChangingTrainDirectionPossible));
         Add(location is SignalControlledLocation { TrainsCanCross: true }, after is SignalControlledLocation { TrainsCanCross: true }, nameof(SignalControlledLocation.TrainsCanCross));
         Add(location.ControlledBy is not null, after.ControlledBy is not null, nameof(OperationLocation.ControlledBy));
-        Add(!string.IsNullOrWhiteSpace(location.Instructions), !string.IsNullOrWhiteSpace(after.Instructions), nameof(OperationLocation.Instructions));
         return cleared;
     }
 }

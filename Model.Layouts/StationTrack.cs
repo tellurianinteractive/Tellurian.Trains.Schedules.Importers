@@ -112,19 +112,6 @@ public sealed class StationTrack : LayoutPart, IEquatable<StationTrack>
     /// <summary>The speed limit on the track, km/h; null when it has none of its own.</summary>
     public int? SpeedLimit { get; set; }
 
-    /// <summary>
-    /// The <see cref="OperationLocation.Id"/> of the location a train comes from for this to be its track, or
-    /// <c>null</c> where the track says nothing about where a train comes from. With <see cref="NextLocationId"/>, it
-    /// says which way through the location the track is for.
-    /// </summary>
-    public int? PreviousLocationId { get; set; }
-
-    /// <summary>The <see cref="OperationLocation.Id"/> of the location a train goes on to for this to be its track; see <see cref="PreviousLocationId"/>.</summary>
-    public int? NextLocationId { get; set; }
-
-    /// <summary>The track's route counts the other way round as well: a track for trains from A to B is then equally the track for trains from B to A.</summary>
-    public bool AppliesInBothDirections { get; set; }
-
     /// <summary>The foreign key of the location the track belongs to. Not written: the location owns the track.</summary>
     [JsonIgnore]
     public int StationId { get; set; }

@@ -36,13 +36,13 @@ public class CompanyIdentityTests
     public void TheLayoutHoldsSeveralCompaniesWithTheSameSignature()
     {
         TestDataFactory.Init();
-        var layout = TestDataFactory.Layout();
-        var before = layout.Companies.Count;
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
+        var before = timetable.Companies.Count;
 
-        layout.Add(new Company(901, "DSB 1972-1987", "DSB"));
-        layout.Add(new Company(902, "DSB 1988-2008", "DSB"));
+        timetable.Add(new Company(901, "DSB 1972-1987", "DSB"));
+        timetable.Add(new Company(902, "DSB 1988-2008", "DSB"));
 
-        Assert.HasCount(before + 2, layout.Companies);
-        Assert.AreEqual(901, layout.Company("DSB").Value.Id, "The lowest id is found by signature.");
+        Assert.HasCount(before + 2, timetable.Companies);
+        Assert.AreEqual(901, timetable.Company("DSB").Value.Id, "The lowest id is found by signature.");
     }
 }

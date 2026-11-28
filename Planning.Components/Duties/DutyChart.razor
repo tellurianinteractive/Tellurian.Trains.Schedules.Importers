@@ -136,13 +136,13 @@ else
 
     private Plan? Plan => ScheduleState.Schedule;
 
-    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
-    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
-    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+    private bool UseDays => ScheduleState.Timetable?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Timetable?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Timetable?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
-    private GraphSettings Settings => ScheduleState.Layout?.Settings.ToGraphSettings() ?? GraphSettings.Default;
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+    private GraphSettings Settings => ScheduleState.Timetable?.Settings.ToGraphSettings() ?? GraphSettings.Default;
 
     private DriverDuty? _addPartTarget;
     private DriverDuty? _editTarget;

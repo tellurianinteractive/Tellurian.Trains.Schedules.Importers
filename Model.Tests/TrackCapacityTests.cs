@@ -185,7 +185,7 @@ public class TrackCapacityTests
     public void TheLengthOfATrainIsTheLengthOfItsVehicles()
     {
         var train = Via(100, Gothenburg, Gothenburg, At(10, 00), At(11, 00), 2);
-        var plan = Plan.Create("Test", new Timetable("Test", TestDataFactory.Layout()));
+        var plan = Plan.Create("Test", TestDataFactory.NewTimetable("Test", TestDataFactory.Layout()));
         var schedule = plan.CreateSchedule();
         _ = schedule.Append(train.AsTrainPart);
         var wagons = plan.CreateVehicle(ScheduledObjectType.Wagonset, "Gbs", 11, null);
@@ -199,7 +199,7 @@ public class TrackCapacityTests
     // Two wagonsets, each brought to Ytterby by one train and taken away by another, standing in between.
     private (Plan Plan, ScheduledObject First, ScheduledObject Second) StandingWagonsets(Time firstLeaves, Time secondLeaves)
     {
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var plan = Plan.Create("Test", timetable);
         ScheduledObject Wagonset(int number, Time arrives, Time leaves)
         {

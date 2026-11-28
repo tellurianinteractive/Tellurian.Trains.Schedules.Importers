@@ -58,10 +58,10 @@ else
         }
 
         foreach (var location in layout.OperationLocations)
-            _cultures[location] = new ReportCulture(location.ReportCulture(layout, LanguageService.IsSupported));
+            _cultures[location] = new ReportCulture(location.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported));
         // By name, as the sheets are looked up by name, in the layout's own language: å, ä and ö sort after z
         // in the Nordic languages and among the a's and o's elsewhere.
-        var byName = StringComparer.Create(layout.DefaultReportCulture, ignoreCase: true);
+        var byName = StringComparer.Create(ScheduleState.Timetable!.DefaultReportCulture, ignoreCase: true);
         _locations = [.. layout.OperationLocations.OrderBy(location => location.Name, byName)];
     }
 }

@@ -94,7 +94,7 @@ public static class SchemaVersion1
         },
         ["Layout"] = new()
         {
-            ["Settings"] = Owned("LayoutSettings"),
+            ["Settings"] = Owned("PlanSettings"),
             ["Countries"] = new(Kind.Countries),
             ["Companies"] = Catalogue("Company"),
             ["Regions"] = Catalogue("Region"),
@@ -103,7 +103,7 @@ public static class SchemaVersion1
             ["TimetableStretches"] = OwnedList("TimetableStretch"),
             ["DispatchStretches"] = OwnedList("DispatchStretch"),
         },
-        ["LayoutSettings"] = new()
+        ["PlanSettings"] = new()
         {
             ["Identity"] = Owned("IdentitySettings"),
             ["General"] = Owned("GeneralSettings"),

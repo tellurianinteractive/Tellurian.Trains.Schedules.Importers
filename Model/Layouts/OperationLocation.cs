@@ -103,21 +103,22 @@ public static class OperationLocationExtensions
         /// </summary>
         /// <remarks>
         /// The tracks are ranked best first: the scheduled ones; then those whose own route fits the
-        /// train's most closely (see <c>StationTrack.RouteMatch</c>); then those that give the train what
+        /// train's most closely (see <c>StationTrackRoute.Match</c>); then those that give the train what
         /// it asked for — a platform where it stops to exchange passengers, the main track where it does
         /// not — with the main track deciding between equals; and last by display order, so the choice is
         /// the one the planner sees first. Where every track is reserved for some other way through, the
         /// routes are set aside and the rest of the ranking decides: the train has to stand somewhere.
         /// </remarks>
+        /// <param name="timetable">The timetable that keeps the tracks' routes.</param>
         /// <param name="previous">The location the train comes from, or <c>null</c> where it starts here.</param>
         /// <param name="next">The location the train goes on to, or <c>null</c> where it ends here.</param>
         /// <param name="preference">What the train wants of the track it is put on.</param>
-        public StationTrack? PreferredTrack(OperationLocation? previous, OperationLocation? next, TrackPreference preference)
+        public StationTrack? PreferredTrack(Timetable timetable, OperationLocation? previous, OperationLocation? next, TrackPreference preference)
         {
             if (operationLocation is null || operationLocation.Tracks.Count == 0) return null;
 
             var candidates = operationLocation.Tracks
-                .Select(track => (track, fit: track.RouteMatch(previous?.Id, next?.Id)))
+                .Select(track => (track, fit: timetable.RouteOf(track).Match(previous?.Id, next?.Id)))
                 .Where(candidate => candidate.fit.HasValue)
                 .ToList();
             if (candidates.Count == 0)

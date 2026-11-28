@@ -30,8 +30,9 @@ public class TrainLabelThinningTests
             layout.Add(stretch);
             line.AddLast(stretch);
         }
-        layout.Add(line);
-        return (line, new Timetable("Test", layout));
+        var timetable = new Timetable("Test", layout);
+        timetable.Add(line);
+        return (line, timetable);
     }
 
     private static Train AddTrain(Timetable timetable, TimetableStretch line, int number, params Time[] times)

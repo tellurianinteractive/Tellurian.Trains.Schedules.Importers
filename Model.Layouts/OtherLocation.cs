@@ -17,7 +17,4 @@ public sealed class OtherLocation : OperationLocation
 
     /// <summary>Always false: a halt has no cargo customers.</summary>
     public override bool HasCargoExchange { get => false; set { } }
-
-    /// <summary>Always false.</summary>
-    public override bool HidePassings { get => false; set { } }
 }

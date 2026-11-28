@@ -13,9 +13,9 @@ public class VehicleAllocationReportTests
 {
     private static readonly TrainCategory Category = new() { Id = 1, Name = "Passenger", Prefix = "P", Suffix = "x", Color = "#112233" };
 
-    private static LayoutSettings Settings(TimeSpan? breakTime = null)
+    private static PlanSettings Settings(TimeSpan? breakTime = null)
     {
-        var settings = new LayoutSettings();
+        var settings = new PlanSettings();
         settings.General.StartTime = TimeSpan.FromHours(6);
         settings.General.EndTime = TimeSpan.FromHours(20);
         settings.General.BreakTime = breakTime;

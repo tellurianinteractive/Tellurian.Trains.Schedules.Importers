@@ -29,9 +29,9 @@ public class GraphWrappingTests
         layout.Add(stretch);
         var line = new TimetableStretch(1, "1");
         line.AddLast(stretch);
-        layout.Add(line);
 
         var timetable = new Timetable("Test", layout);
+        timetable.Add(line);
         if (departureFromA is { } dep && arrivalAtB is { } arr)
         {
             var category = new TrainCategory { Id = 1, Prefix = "G", Name = "G" };

@@ -75,18 +75,14 @@ public class ContractJsonTests
         OperationLocation tellby = new Station(1, "Tellby", "Tby")
         {
             IsManned = true,
-            Instructions = "Shunt on track 3 only.",
-            ShiftCount = 2,
-            StartLabels = Timetables.StartLabelPrinting.First,
+            HasTurntable = true,
             Tracks = { new StationTrack(1, "1") { IsMain = true, Usage = "Passenger", PlatformLength = 2.4 } },
         };
 
         var read = (Station)JsonSerializer.Deserialize<OperationLocation>(JsonSerializer.Serialize(tellby, Options), Options)!;
 
         Assert.IsTrue(read.IsManned);
-        Assert.AreEqual("Shunt on track 3 only.", read.Instructions);
-        Assert.AreEqual(2, read.ShiftCount);
-        Assert.AreEqual(Timetables.StartLabelPrinting.First, read.StartLabels);
+        Assert.IsTrue(read.HasTurntable);
         Assert.AreEqual("Passenger", read.Tracks.Single().Usage);
         Assert.AreEqual(2.4, read.Tracks.Single().PlatformLength);
     }

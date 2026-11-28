@@ -145,7 +145,7 @@ public sealed class VehicleAllocation
     /// <param name="vehicles">The plan's vehicles.</param>
     /// <param name="settings">The layout's settings.</param>
     /// <param name="geometry">The paper.</param>
-    public static VehicleAllocation Create(IEnumerable<ScheduledObject> vehicles, LayoutSettings settings, AllocationGeometry geometry)
+    public static VehicleAllocation Create(IEnumerable<ScheduledObject> vehicles, PlanSettings settings, AllocationGeometry geometry)
     {
         ArgumentNullException.ThrowIfNull(vehicles);
         ArgumentNullException.ThrowIfNull(settings);

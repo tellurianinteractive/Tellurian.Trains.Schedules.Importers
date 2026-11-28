@@ -52,6 +52,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
             return Task.FromResult(result);
         }
         var timetable = new Timetable(name, layout.Item);
+        ReadTimetableStretches(timetable);
         var importResult = ImportResult<Plan>.SuccessIfNoErrorMessagesOtherwiseFailure(Plan.Create(name, timetable), layout.Messages);
         LogMessages(importResult.Messages);
         return Task.FromResult(importResult);
@@ -65,7 +66,6 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
             ReadLayoutStations(layout);
             ReadStationTracks(layout);
             ReadTrackStretches(layout);
-            ReadTimetableStretches(layout);
             return ImportResult<Layout>.Success(layout);
         }
         return ImportResult<Layout>.Failure(Message.Error(string.Format(CultureInfo.CurrentCulture, Resources.Strings.TrackLayoutDoesNotExist, name)));
@@ -113,10 +113,10 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         GetData(command, layout, TrackStretches.RecordHandler);
     }
 
-    private void ReadTimetableStretches(Layout layout)
+    private void ReadTimetableStretches(Timetable timetable)
     {
-        using var command = TimetableStretches.CreateSelectCommand(layout.Name);
-        GetData(command, layout, TimetableStretches.RecordHandler);
+        using var command = TimetableStretches.CreateSelectCommand(timetable.Layout.Name);
+        GetData(command, timetable, TimetableStretches.RecordHandler);
     }
 
     private void GetTrains(Timetable timetable)
@@ -150,7 +150,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
     /// <returns>An import result indicating success or failure with appropriate messages.</returns>
     /// <remarks>
     /// Only new layouts can be saved; updating existing layouts is not supported.
-    /// The layout including stations, station tracks, track stretches, and timetable stretches will be persisted.
+    /// The layout including stations, station tracks and track stretches will be persisted.
     /// </remarks>
     public ImportResult<Layout> Save(Layout layout)
     {
@@ -165,7 +165,6 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         {
             foreach (var station in layout.OperationLocations) Stations.AddOrUpdateStation(layoutId.Value, station, CreateConnection());
             foreach (var stretch in layout.TrackStretches) TrackStretches.AddTrackStretches(layoutId.Value, stretch, CreateConnection());
-            foreach (var stretch in layout.TimetableStretches) TimetableStretches.AddTimetableStretches(layoutId.Value, stretch, CreateConnection());
             return ImportResult<Layout>.Success();
 
         }
@@ -191,6 +190,7 @@ public class AccessRepository(FileInfo databaseFile, ILogger<AccessRepository> l
         var layoutId = (int?)ExecuteScalar(CreateConnection(), command);
         if (layoutId.HasValue)
         {
+            foreach (var stretch in timetable.TimetableStretches) TimetableStretches.AddTimetableStretches(layoutId.Value, stretch, CreateConnection());
             foreach (var train in timetable.Trains) Trains.Add(layoutId.Value, train, this);
             return ImportResult<Timetable>.Success();
         }

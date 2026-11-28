@@ -1,5 +1,3 @@
-using Tellurian.Trains.Schedules.Model.Settings;
-
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
@@ -14,13 +12,9 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
     public Layout()
     {
         Countries = [];
-        Companies = [];
         Regions = [];
         OperationLocations = [];
         TrackStretches = [];
-        TimetableStretches = [];
-        DispatchStretches = [];
-        TopologyPositions = [];
         StretchLines = [];
         Modules = [];
     }
@@ -31,14 +25,8 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
     /// <summary>The name of the layout.</summary>
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>What is set for the layout as a whole.</summary>
-    public LayoutSettings Settings { get; set; } = new();
-
     /// <summary>The countries the layout uses, from the catalogue in the code.</summary>
     public ICollection<Country> Countries { get; set; }
-
-    /// <summary>The companies that operate trains and vehicles on the layout; each is stored here and referred to by id.</summary>
-    public ICollection<Company> Companies { get; set; }
 
     /// <summary>The regions stations can represent; each is stored here and referred to by id.</summary>
     public ICollection<Region> Regions { get; set; }
@@ -48,15 +36,6 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
 
     /// <summary>The stretches between neighbouring locations.</summary>
     public ICollection<TrackStretch> TrackStretches { get; set; }
-
-    /// <summary>The routes shown as one graphical timetable each.</summary>
-    public ICollection<TimetableStretch> TimetableStretches { get; set; }
-
-    /// <summary>The lines between the dispatch endpoints.</summary>
-    public ICollection<DispatchStretch> DispatchStretches { get; set; }
-
-    /// <summary>Where each location is drawn in the topology schematic.</summary>
-    public ICollection<TopologyPosition> TopologyPositions { get; set; }
 
     /// <summary>
     /// The order of the locations along each line of the hall plan the layout was made in, worked out when it was read;

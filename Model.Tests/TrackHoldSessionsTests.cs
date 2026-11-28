@@ -18,7 +18,7 @@ public class TrackHoldSessionsTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         var plan = Plan.Create("Test", timetable);
         var train = plan.Timetable.Trains.First(t => t.Number == 1);
@@ -54,7 +54,7 @@ public class TrackHoldSessionsTests
         var idle = plan.Schedules.TrackHolds.Where(h => h.Track.Equals(track) && h.IsIdle).ToList();
 
         Assert.HasCount(2, idle);
-        var general = plan.Layout.Settings.General;
+        var general = plan.Timetable.Settings.General;
         Assert.IsTrue(idle.All(h => h.From.Value == general.StartTime && h.To.Value == general.EndTime), "All day is the whole operating window.");
         Assert.IsTrue(idle.Any(h => h.Sessions.Overlaps(Even) && !h.Sessions.Overlaps(Odd)), "The odd-session wagonset stands idle on the even sessions.");
     }
@@ -103,7 +103,7 @@ public class TrackHoldSessionsTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         var plan = Plan.Create("Test", timetable);
         var train = plan.Timetable.Trains.First();

@@ -14,19 +14,22 @@ public class DispatchRemoteLocationTests
     private static (Timetable timetable, Station a, Station c) CreateJunction()
     {
         var layout = new Layout { Name = "Test" };
-        var a = (Station)layout.Add(new Station(1, "Alpha", "A") { IsManned = true, PhoneNumber = 11 });
+        var a = (Station)layout.Add(new Station(1, "Alpha", "A") { IsManned = true });
         var b = layout.Add(new SignalControlledLocation(2, "Bravo junction", "Bj"));
-        var c = (Station)layout.Add(new Station(3, "Charlie", "C") { IsManned = true, PhoneNumber = 13 });
-        var d = (Station)layout.Add(new Station(4, "Delta", "D") { IsManned = true, PhoneNumber = 14 });
+        var c = (Station)layout.Add(new Station(3, "Charlie", "C") { IsManned = true });
+        var d = (Station)layout.Add(new Station(4, "Delta", "D") { IsManned = true });
         foreach (var location in new[] { a, b, c, d }) location.Add(new StationTrack(location.Id * 10, "1"));
         b.ControlledBy = a;
         layout.Add(new TrackStretch(1, a, b, 10));
         layout.Add(new TrackStretch(2, b, c, 10));
         layout.Add(new TrackStretch(3, d, b, 10));
-        layout.DispatchStretches = layout.CreateDispatchStretches();
 
         // Delta to Charlie over the junction, never touching Alpha; and Alpha's own train to Charlie.
         var timetable = new Timetable("Test", layout);
+        timetable.DispatchStretches = layout.CreateDispatchStretches();
+        timetable.EnsurePlanningOf(a).PhoneNumber = 11;
+        timetable.EnsurePlanningOf(c).PhoneNumber = 13;
+        timetable.EnsurePlanningOf(d).PhoneNumber = 14;
         timetable.Add(Run(1, 101, Time.FromHourAndMinute(12, 00), d, b, c));
         timetable.Add(Run(2, 202, Time.FromHourAndMinute(12, 30), a, b, c));
         return (timetable, a, c);

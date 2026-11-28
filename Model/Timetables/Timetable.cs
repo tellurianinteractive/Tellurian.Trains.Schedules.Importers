@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Timetables;
 
@@ -30,6 +31,27 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
     /// Gets or sets the name of this timetable.
     /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>What is set for the timetable as a whole.</summary>
+    public PlanSettings Settings { get; set; } = new();
+
+    /// <summary>The companies that operate trains and vehicles; each is stored here and referred to by id.</summary>
+    public ICollection<Company> Companies { get; set; }
+
+    /// <summary>The routes shown as one graphical timetable each.</summary>
+    public ICollection<TimetableStretch> TimetableStretches { get; set; }
+
+    /// <summary>The lines between the dispatch endpoints.</summary>
+    public ICollection<DispatchStretch> DispatchStretches { get; set; }
+
+    /// <summary>Where each location is drawn in the topology schematic.</summary>
+    public ICollection<TopologyPosition> TopologyPositions { get; set; }
+
+    /// <summary>What the planner has decided for each location, by its id (<c>timetable.PlanningOf(location)</c>).</summary>
+    public ICollection<LocationPlanning> LocationPlanning { get; set; }
+
+    /// <summary>Which way through its location each station track is for, by the location's and the track's ids (<c>timetable.RouteOf(track)</c>).</summary>
+    public ICollection<StationTrackRoute> StationTrackRoutes { get; set; }
 
     /// <summary>
     /// Gets or sets the catalogue of train categories available in this timetable. A <see cref="Train"/>'s
@@ -73,6 +95,12 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
         TrainCategories = [];
         Sessions = [];
         CargoFlowOptions = [];
+        Companies = [];
+        TimetableStretches = [];
+        DispatchStretches = [];
+        TopologyPositions = [];
+        LocationPlanning = [];
+        StationTrackRoutes = [];
     }
 
     /// <summary>
@@ -89,6 +117,12 @@ public sealed class Timetable : IEquatable<Timetable>, IJsonOnDeserialized
         TrainCategories = [];
         Sessions = [];
         CargoFlowOptions = [];
+        Companies = [];
+        TimetableStretches = [];
+        DispatchStretches = [];
+        TopologyPositions = [];
+        LocationPlanning = [];
+        StationTrackRoutes = [];
     }
 
     /// <summary>
@@ -238,7 +272,7 @@ public static class TimetableExtensions
     public static void PlaceTimesAfterMidnight(this Timetable timetable)
     {
         timetable = timetable.ValueOrException(nameof(timetable));
-        if (timetable.Layout?.Settings?.General?.RunsOverMidnight != true) return;
+        if (timetable.Settings?.General?.RunsOverMidnight != true) return;
         foreach (var train in timetable.Trains) PlaceTimesAfterMidnight(train);
     }
 
@@ -296,7 +330,7 @@ public static class TimetableExtensions
         // The layout has its own — a station's regions — and is read before anything here needs it.
         timetable.Layout.ResolveCatalogueReferences();
         var categories = timetable.TrainCategories;
-        var companies = timetable.Layout.Companies;
+        var companies = timetable.Companies;
 
         foreach (var category in categories)
             category.Company ??= companies.FirstOrDefault(c => c.Id == category.CompanyId);

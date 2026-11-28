@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace Tellurian.Trains.Schedules.Model.Tests;
 
 /// <summary>
-/// Which way through a location a track is for (see <c>StationTrack.PreviousLocationId</c>), and how
+/// Which way through a location a track is for (see <c>StationTrackRoute.PreviousLocationId</c>), and how
 /// that decides the track a train is put on (see <c>OperationLocation.PreferredTrack</c>).
 /// </summary>
 [TestClass]
@@ -19,9 +19,9 @@ public class StationTrackRouteTests
     {
         var track = Track("1");
 
-        Assert.IsFalse(track.HasRoute);
-        Assert.AreEqual(0, track.RouteMatch(West, East));
-        Assert.AreEqual(0, track.RouteMatch(null, null));
+        Assert.IsFalse(track.IsGiven);
+        Assert.AreEqual(0, track.Match(West, East));
+        Assert.AreEqual(0, track.Match(null, null));
     }
 
     [TestMethod]
@@ -29,8 +29,8 @@ public class StationTrackRouteTests
     {
         var track = Track("1", previous: West, next: East);
 
-        Assert.IsTrue(track.RouteMatch(West, East) > track.RouteMatch(null, East));
-        Assert.IsTrue(track.RouteMatch(West, East) > Track("2").RouteMatch(West, East));
+        Assert.IsTrue(track.Match(West, East) > track.Match(null, East));
+        Assert.IsTrue(track.Match(West, East) > Track("2").Match(West, East));
     }
 
     [TestMethod]
@@ -38,7 +38,7 @@ public class StationTrackRouteTests
     {
         var track = Track("1", previous: West, next: East);
 
-        Assert.IsNull(track.RouteMatch(East, West));
+        Assert.IsNull(track.Match(East, West));
     }
 
     [TestMethod]
@@ -46,8 +46,8 @@ public class StationTrackRouteTests
     {
         var track = Track("1", previous: West, next: East, bothDirections: true);
 
-        Assert.AreEqual(track.RouteMatch(West, East), track.RouteMatch(East, West));
-        Assert.IsTrue(track.RouteMatch(East, West) > 0);
+        Assert.AreEqual(track.Match(West, East), track.Match(East, West));
+        Assert.IsTrue(track.Match(East, West) > 0);
     }
 
     [TestMethod]
@@ -55,7 +55,7 @@ public class StationTrackRouteTests
     {
         var track = Track("1", previous: West, next: East);
 
-        Assert.IsNull(track.RouteMatch(North, East));
+        Assert.IsNull(track.Match(North, East));
     }
 
     [TestMethod]
@@ -66,8 +66,8 @@ public class StationTrackRouteTests
 
         // A train starting here has no previous location to contradict the named one — but it does not
         // confirm it either, so the track that names only where the train goes on to fits it better.
-        Assert.IsNotNull(both.RouteMatch(null, East));
-        Assert.IsTrue(onward.RouteMatch(null, East) > both.RouteMatch(null, East));
+        Assert.IsNotNull(both.Match(null, East));
+        Assert.IsTrue(onward.Match(null, East) > both.Match(null, East));
     }
 
     [TestMethod]
@@ -75,9 +75,9 @@ public class StationTrackRouteTests
     {
         var track = Track("1", next: East);
 
-        Assert.AreEqual(track.RouteMatch(West, East), track.RouteMatch(North, East));
-        Assert.IsTrue(track.RouteMatch(North, East) > 0);
-        Assert.IsNull(track.RouteMatch(West, North));
+        Assert.AreEqual(track.Match(West, East), track.Match(North, East));
+        Assert.IsTrue(track.Match(North, East) > 0);
+        Assert.IsNull(track.Match(West, North));
     }
 
     [TestMethod]
@@ -88,8 +88,8 @@ public class StationTrackRouteTests
 
         // A train starting here is not the train from West the track is for, so the plain track is the
         // better place for it — but the named one is still allowed, nothing having been contradicted.
-        Assert.IsTrue(named.RouteMatch(null, East) < plain.RouteMatch(null, East));
-        Assert.IsNotNull(named.RouteMatch(null, East));
+        Assert.IsTrue(named.Match(null, East) < plain.Match(null, East));
+        Assert.IsNotNull(named.Match(null, East));
     }
 
     [TestMethod]
@@ -97,10 +97,10 @@ public class StationTrackRouteTests
     {
         var location = LocationWithTracks();
         location["1"].IsMain = true;
-        location["2"].PreviousLocationId = West;
-        location["2"].NextLocationId = East;
+        Routes.EnsureRouteOf(location["2"]).PreviousLocationId = West;
+        Routes.EnsureRouteOf(location["2"]).NextLocationId = East;
 
-        var track = location.PreferredTrack(Location(West), Location(East), TrackPreference.MainTrack);
+        var track = location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.MainTrack);
 
         Assert.AreEqual("2", track?.Number);
     }
@@ -109,13 +109,13 @@ public class StationTrackRouteTests
     public void EachDirectionOfADoubleLineTakesItsOwnTrack()
     {
         var location = LocationWithTracks();
-        location["1"].PreviousLocationId = West;
-        location["1"].NextLocationId = East;
-        location["2"].PreviousLocationId = East;
-        location["2"].NextLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).PreviousLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).NextLocationId = East;
+        Routes.EnsureRouteOf(location["2"]).PreviousLocationId = East;
+        Routes.EnsureRouteOf(location["2"]).NextLocationId = West;
 
-        Assert.AreEqual("1", location.PreferredTrack(Location(West), Location(East), TrackPreference.MainTrack)?.Number);
-        Assert.AreEqual("2", location.PreferredTrack(Location(East), Location(West), TrackPreference.MainTrack)?.Number);
+        Assert.AreEqual("1", location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.MainTrack)?.Number);
+        Assert.AreEqual("2", location.PreferredTrack(Routes, Location(East), Location(West), TrackPreference.MainTrack)?.Number);
     }
 
     [TestMethod]
@@ -124,12 +124,12 @@ public class StationTrackRouteTests
         var location = LocationWithTracks("1", "2", "3");
         foreach (var track in location.Tracks)
         {
-            track.PreviousLocationId = West;
-            track.NextLocationId = East;
+            Routes.EnsureRouteOf(track).PreviousLocationId = West;
+            Routes.EnsureRouteOf(track).NextLocationId = East;
         }
         location["3"].IsMain = true;
 
-        var chosen = location.PreferredTrack(Location(West), Location(East), TrackPreference.MainTrack);
+        var chosen = location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.MainTrack);
 
         Assert.AreEqual("3", chosen?.Number);
     }
@@ -140,13 +140,13 @@ public class StationTrackRouteTests
         var location = LocationWithTracks("1", "2", "3");
         foreach (var track in location.Tracks)
         {
-            track.PreviousLocationId = West;
-            track.NextLocationId = East;
+            Routes.EnsureRouteOf(track).PreviousLocationId = West;
+            Routes.EnsureRouteOf(track).NextLocationId = East;
         }
         location["1"].IsMain = true;
         location["3"].PlatformLength = 4.5;
 
-        var chosen = location.PreferredTrack(Location(West), Location(East), TrackPreference.Platform);
+        var chosen = location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.Platform);
 
         Assert.AreEqual("3", chosen?.Number);
     }
@@ -155,13 +155,13 @@ public class StationTrackRouteTests
     public void ATrainIsPutSomewhereEvenWhenEveryTrackIsReservedForAnotherWayThrough()
     {
         var location = LocationWithTracks();
-        location["1"].PreviousLocationId = East;
-        location["1"].NextLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).PreviousLocationId = East;
+        Routes.EnsureRouteOf(location["1"]).NextLocationId = West;
         location["1"].IsMain = true;
-        location["2"].PreviousLocationId = East;
-        location["2"].NextLocationId = West;
+        Routes.EnsureRouteOf(location["2"]).PreviousLocationId = East;
+        Routes.EnsureRouteOf(location["2"]).NextLocationId = West;
 
-        var chosen = location.PreferredTrack(Location(West), Location(North), TrackPreference.MainTrack);
+        var chosen = location.PreferredTrack(Routes, Location(West), Location(North), TrackPreference.MainTrack);
 
         Assert.AreEqual("1", chosen?.Number);
     }
@@ -171,10 +171,10 @@ public class StationTrackRouteTests
     {
         var location = LocationWithTracks();
         location["1"].IsScheduled = false;
-        location["1"].PreviousLocationId = West;
-        location["1"].NextLocationId = East;
+        Routes.EnsureRouteOf(location["1"]).PreviousLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).NextLocationId = East;
 
-        var chosen = location.PreferredTrack(Location(West), Location(East), TrackPreference.MainTrack);
+        var chosen = location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.MainTrack);
 
         Assert.AreEqual("2", chosen?.Number);
     }
@@ -184,7 +184,7 @@ public class StationTrackRouteTests
     {
         var location = new Station(10, "Empty", "Em");
 
-        Assert.IsNull(location.PreferredTrack(Location(West), Location(East), TrackPreference.MainTrack));
+        Assert.IsNull(location.PreferredTrack(Routes, Location(West), Location(East), TrackPreference.MainTrack));
     }
 
     [TestMethod]
@@ -193,15 +193,15 @@ public class StationTrackRouteTests
         var layout = new Layout { Id = 1, Name = "Test" };
         var west = layout.Add(Location(West));
         var location = layout.Add(LocationWithTracks());
-        location["1"].PreviousLocationId = West;
-        location["1"].NextLocationId = East;
-        location["1"].AppliesInBothDirections = true;
+        Routes.EnsureRouteOf(location["1"]).PreviousLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).NextLocationId = East;
+        Routes.EnsureRouteOf(location["1"]).AppliesInBothDirections = true;
 
-        Assert.IsTrue(layout.ForgetTrackRoutesTo(west));
-        Assert.IsNull(location["1"].PreviousLocationId);
-        Assert.AreEqual(East, location["1"].NextLocationId);
+        Assert.IsTrue(Routes.ForgetTrackRoutesTo(west));
+        Assert.IsNull(Routes.RouteOf(location["1"]).PreviousLocationId);
+        Assert.AreEqual(East, Routes.RouteOf(location["1"]).NextLocationId);
         // The other end still names a location, so the route — and the flag reversing it — remain.
-        Assert.IsTrue(location["1"].AppliesInBothDirections);
+        Assert.IsTrue(Routes.RouteOf(location["1"]).AppliesInBothDirections);
     }
 
     [TestMethod]
@@ -210,12 +210,12 @@ public class StationTrackRouteTests
         var layout = new Layout { Id = 1, Name = "Test" };
         var west = layout.Add(Location(West));
         var location = layout.Add(LocationWithTracks());
-        location["1"].PreviousLocationId = West;
-        location["1"].AppliesInBothDirections = true;
+        Routes.EnsureRouteOf(location["1"]).PreviousLocationId = West;
+        Routes.EnsureRouteOf(location["1"]).AppliesInBothDirections = true;
 
-        Assert.IsTrue(layout.ForgetTrackRoutesTo(west));
-        Assert.IsFalse(location["1"].HasRoute);
-        Assert.IsFalse(location["1"].AppliesInBothDirections);
+        Assert.IsTrue(Routes.ForgetTrackRoutesTo(west));
+        Assert.IsFalse(Routes.RouteOf(location["1"]).IsGiven);
+        Assert.IsFalse(Routes.RouteOf(location["1"]).AppliesInBothDirections);
     }
 
     [TestMethod]
@@ -240,28 +240,33 @@ public class StationTrackRouteTests
     {
         var layout = new Layout { Id = 1, Name = "Test" };
         var location = layout.Add(LocationWithTracks());
-        location["1"].PreviousLocationId = West;
-        location["1"].NextLocationId = East;
-        location["1"].AppliesInBothDirections = true;
-        var plan = Plan.Create("Plan", new Timetable("TT", layout) { Id = 1 });
+        var timetable = new Timetable("TT", layout) { Id = 1 };
+        timetable.EnsureRouteOf(location["1"]).PreviousLocationId = West;
+        timetable.EnsureRouteOf(location["1"]).NextLocationId = East;
+        timetable.EnsureRouteOf(location["1"]).AppliesInBothDirections = true;
+        var plan = Plan.Create("Plan", timetable);
         var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve, MaxDepth = 256 };
 
         var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, options), options);
 
         Assert.IsNotNull(restored);
-        var track = restored.Timetable.Layout.StationTracks().First(t => t.Number == "1");
-        Assert.AreEqual(West, track.PreviousLocationId);
-        Assert.AreEqual(East, track.NextLocationId);
-        Assert.IsTrue(track.AppliesInBothDirections);
+        var route = restored.Timetable.RouteOf(restored.Timetable.Layout.StationTracks().First(t => t.Number == "1"));
+        Assert.AreEqual(West, route.PreviousLocationId);
+        Assert.AreEqual(East, route.NextLocationId);
+        Assert.IsTrue(route.AppliesInBothDirections);
     }
 
-    private static StationTrack Track(string number, int? previous = null, int? next = null, bool bothDirections = false) =>
-        new(1, number)
+    // The routes of the tracks, which the timetable keeps by track id; a new one for each test.
+    private readonly Timetable Routes = new("Routes", new Layout());
+
+    // The route of a track; the number only tells the tracks of a test apart.
+    private static StationTrackRoute Track(string number, int? previous = null, int? next = null, bool bothDirections = false) =>
+        new()
         {
+            TrackId = int.Parse(number, System.Globalization.CultureInfo.InvariantCulture),
             PreviousLocationId = previous,
             NextLocationId = next,
             AppliesInBothDirections = bothDirections,
-            Station = LocationWithTracks(),
         };
 
     // A location whose tracks are all plain: scheduled, no main track, no platform and no route, so each

@@ -85,7 +85,7 @@ internal static class TestDataFactory
 
     public static Timetable CreateTimetable()
     {
-        var timetable = new Timetable("Test", Layout());
+        var timetable = NewTimetable("Test", Layout());
         timetable.Add(CreateTrain1());
         timetable.Add(CreateTrain2());
         return timetable;
@@ -99,7 +99,18 @@ internal static class TestDataFactory
         for (var i = 0; i < stations.Length - 1; i++) layout.Add(new TrackStretch(1, stations[i], stations[i + 1], 10));
         var stretch = new TimetableStretch(1, "1");
         foreach (var ts in layout.TrackStretches) stretch.AddLast(ts);
-        layout.Add(stretch);
+        PendingStretches.GetOrCreateValue(layout).Add(stretch);
         return layout;
+    }
+
+    // The timetable stretches made with a layout, until a timetable is made for it: they are the timetable's.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Layout, List<TimetableStretch>> PendingStretches = [];
+
+    /// <summary>A timetable for <paramref name="layout"/>, with the timetable stretches made with it here.</summary>
+    public static Timetable NewTimetable(string name, Layout layout)
+    {
+        var timetable = new Timetable(name, layout);
+        foreach (var stretch in PendingStretches.GetOrCreateValue(layout)) timetable.Add(stretch);
+        return timetable;
     }
 }

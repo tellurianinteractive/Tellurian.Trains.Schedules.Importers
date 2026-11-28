@@ -9,10 +9,10 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// </summary>
 public static class TimetableStretchSuggestions
 {
-    extension(Layout layout)
+    extension(Timetable timetable)
     {
         /// <summary>Whether the layout has lines to suggest timetable stretches from.</summary>
-        public bool CanSuggestTimetableStretches => layout.StretchLines.Any(l => l.Legs.Count > 0);
+        public bool CanSuggestTimetableStretches => timetable.Layout.StretchLines.Any(l => l.Legs.Count > 0);
 
         /// <summary>
         /// A timetable stretch for each line, branch included, of the <see cref="Layout.TrackStretches"/> along it in
@@ -25,8 +25,9 @@ public static class TimetableStretchSuggestions
         /// </summary>
         public IReadOnlyList<TimetableStretch> SuggestedTimetableStretches()
         {
-            var nextId = Next(layout.TimetableStretches.Select(s => s.Id));
-            var nextNumber = Next(layout.TimetableStretches.Select(s => int.TryParse(s.Number, CultureInfo.InvariantCulture, out var n) ? n : 0));
+            var layout = timetable.Layout;
+            var nextId = Next(timetable.TimetableStretches.Select(s => s.Id));
+            var nextNumber = Next(timetable.TimetableStretches.Select(s => int.TryParse(s.Number, CultureInfo.InvariantCulture, out var n) ? n : 0));
             var suggestions = new List<TimetableStretch>();
             foreach (var line in layout.StretchLines)
             {

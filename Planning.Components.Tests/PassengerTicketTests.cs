@@ -46,7 +46,7 @@ public class PassengerTicketTests
     public void TheNumberOfTicketsFollowsThePassengerTrainsStopping()
     {
         var timetable = CreateTimetable();
-        timetable.Layout.Settings.General.TrainsPerTicket = 1;
+        timetable.Settings.General.TrainsPerTicket = 1;
         AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
         AddTrain(timetable, 2, Passenger, Sj, Alvesta, Nassjo, 10);
         AddTrain(timetable, 5001, Freight, GreenCargo, Alvesta, Nassjo, 9);
@@ -61,7 +61,7 @@ public class PassengerTicketTests
     public void SeveralTrainsShareOneTicketAndAPartlyFilledGroupStillGetsOne()
     {
         var timetable = CreateTimetable();
-        timetable.Layout.Settings.General.TrainsPerTicket = 2;
+        timetable.Settings.General.TrainsPerTicket = 2;
         for (var number = 1; number <= 3; number++) AddTrain(timetable, number, Passenger, Sj, Alvesta, Nassjo, 7 + number);
 
         Assert.AreEqual(2, timetable.ToPassengerTickets().Count(ticket => ticket.Origin == Alvesta));
@@ -150,7 +150,7 @@ public class PassengerTicketTests
     {
         var timetable = CreateTimetable();
         AddTrain(timetable, 1, Passenger, Sj, Alvesta, Nassjo, 8);
-        var general = timetable.Layout.Settings.General;
+        var general = timetable.Settings.General;
         general.ValidFrom = new DateOnly(2026, 8, 14);
         general.ValidTo = new DateOnly(2026, 8, 16);
 
@@ -181,16 +181,17 @@ public class PassengerTicketTests
     private static Timetable CreateTimetable()
     {
         var layout = new Layout { Name = "Test" };
-        layout.Add(Sj);
-        layout.Add(Dsb);
-        layout.Add(GreenCargo);
         var alvesta = layout.Add(NewStation(1, Alvesta, "Av"));
         var nassjo = layout.Add(NewStation(2, Nassjo, "Nä"));
         var quarry = layout.Add(NewStation(3, Quarry, "Gt"));
         quarry.HasPassengerExchange = false;
         layout.Add(new TrackStretch(1, alvesta, nassjo, 10));
         layout.Add(new TrackStretch(2, nassjo, quarry, 10));
-        return new Timetable("Test", layout);
+        var timetable = new Timetable("Test", layout);
+        timetable.Add(Sj);
+        timetable.Add(Dsb);
+        timetable.Add(GreenCargo);
+        return timetable;
     }
 
     private static OperationLocation NewStation(int id, string name, string signature)

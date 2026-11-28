@@ -37,7 +37,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
     private List<Company> _operatingCompanies = [];
     private List<TrainCategory> _trainCategories = [];
     private DataSet? DataSet;
-    private Layout _currentLayout = default!;
+    private Timetable _currentTimetable = default!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XplnDataImporter"/> class with a stream input.
@@ -79,9 +79,9 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             _ = _operatingCompanies.TryGetFirstValue(oc => oc.Signature.EqualsCaseInsensitive(companySignature), out var company);
             if (company is not null)
             {
-                if (!_currentLayout.HasCompany(company))
+                if (!_currentTimetable.HasCompany(company))
                 {
-                    _currentLayout.Add(company);
+                    _currentTimetable.Add(company);
                 }
                 return company;
             }
@@ -90,7 +90,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             // keep their real (positive) ids. Mirrors how categories get NextCategoryId.
             var newCompany = new Company(NextCompanyId, companySignature, companySignature);
             _operatingCompanies.Add(newCompany);
-            _currentLayout?.Add(newCompany);
+            _currentTimetable?.Add(newCompany);
             return newCompany;
         }
         return null;
@@ -164,7 +164,6 @@ public sealed class XplnDataImporter : IImportService, IDisposable
             LogMessages(result.Messages);
             return result;
         }
-        _currentLayout = layoutResult.Item; // Store layout for company linking
         var timetableResult = GetTimetable(name, layoutResult.Item);
         if (timetableResult.IsFailure)
         {
@@ -174,12 +173,12 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         }
         // Initialise the layout's operating window from the imported timetable so the graphical
         // timetable axis and the Settings page reflect the real service span (the user can override it).
-        (layoutResult.Item.Settings.General.StartTime, layoutResult.Item.Settings.General.EndTime) =
+        (timetableResult.Item.Settings.General.StartTime, timetableResult.Item.Settings.General.EndTime) =
             timetableResult.Item.OperatingWindow();
 
         // An XPLN file carries no country, so apply the import setting: set the layout's default
         // country and its theme (the user can change them on the Settings page).
-        ApplyImportCountry(layoutResult.Item);
+        ApplyImportCountry(timetableResult.Item);
 
         var schedule = GetSchedule(name, timetableResult.Item);
         var ImportResult = schedule with { Name = name, Messages = [.. layoutResult.Messages, .. timetableResult.Messages, .. schedule.Messages] };
@@ -187,26 +186,28 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         return ImportResult;
     }
 
-    private void ApplyImportCountry(Layout layout)
+    private void ApplyImportCountry(Timetable timetable)
     {
         var country = Country.ByCountryCode(_options.CountryCode);
         if (country is null) return;
-        layout.Settings.Identity.DefaultCountryId = country.Id;
-        layout.Settings.Identity.Theme =
+        timetable.Settings.Identity.DefaultCountryId = country.Id;
+        timetable.Settings.Identity.Theme =
             Country.CountriesByTheme(Theme.American).Any(c => c.Id == country.Id) ? Theme.American : Theme.European;
         // Seed the layout's saved country catalogue from the now-known theme, so company/region
         // country references resolve against data that travels with the layout.
-        layout.EnsureCountries();
+        timetable.EnsureCountries();
     }
 
     private ImportResult<Layout> GetLayout(string name)
     {
         var result = new Layout { Name = name };
+        // The timetable is made with the layout: the routes give its timetable stretches and the trains its companies.
+        _currentTimetable = new Timetable(name, result);
         var messages = new List<Message>();
         var stations = AddStations(result, messages);
         if (stations.IsFailure) return stations;
         var routes = AddRoutes(result, messages);
-        result.DispatchStretches = result.CreateDispatchStretches();
+        _currentTimetable.DispatchStretches = result.CreateDispatchStretches();
         if (routes.IsFailure) return routes;
         return ImportResult<Layout>.Success(result, messages);
     }
@@ -404,14 +405,14 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         var routeNumber = fields[Route].HasValue ? fields[Route] : DefaultRoute;
                         if (fields[Route].IsEmpty)
                             itemMessages.Add(Message.Warning(Resources.Strings.RouteNumberIsMissingUsingDefault, sheetRow, routeNumber));
-                        if (!layout.HasTimetableStretch(routeNumber))
+                        if (!_currentTimetable.HasTimetableStretch(routeNumber))
                         {
                             currentStretch = new TimetableStretch(rowNumber, routeNumber);
-                            layout.Add(currentStretch);
+                            _currentTimetable.Add(currentStretch);
                         }
                         else
                         {
-                            var ts = layout.TimetableStretch(routeNumber);
+                            var ts = _currentTimetable.TimetableStretch(routeNumber);
                             if (ts.IsNone)
                                 itemMessages.Add(Message.Error(Resources.Strings.RouteNotFoundInLayout, sheetRow, routeNumber));
                             else
@@ -431,7 +432,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
                         {
                             stretchNumber++;
                             currentStretch = new TimetableStretch(rowNumber, stretchNumber.ToString(CultureInfo.CurrentCulture));
-                            layout.Add(currentStretch);
+                            _currentTimetable.Add(currentStretch);
                         }
                         previousEndStation = end.Value;
                     }
@@ -643,7 +644,7 @@ public sealed class XplnDataImporter : IImportService, IDisposable
         }
 
         messages.Add(Message.Information(string.Format(CultureInfo.CurrentCulture, Resources.Strings.ReadingWorksheet, WorkSheetNameAndObjects)));
-        var result = new Timetable(name, layout);
+        var result = _currentTimetable;
         var rowNumber = 1;
         var rowIndex = -1;
         var sheetRow = trains.SheetRowAt(0);

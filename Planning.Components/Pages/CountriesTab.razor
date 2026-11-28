@@ -57,7 +57,9 @@ else
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Layout? Layout => ScheduleState.Layout;
-    private int DefaultCountryId => Layout!.Settings.Identity.DefaultCountryId;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
+    private int DefaultCountryId => Timetable!.Settings.Identity.DefaultCountryId;
 
     private IQueryable<Country> Countries =>
         Layout!.Countries.OrderBy(c => Translator(c.ResourceKey), StringComparer.CurrentCulture).AsQueryable();
@@ -75,7 +77,7 @@ else
     protected override void OnInitialized()
     {
         ScheduleState.OnChanged += OnStateChanged;
-        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+        if (ScheduleState.Timetable is { } timetable && timetable.EnsureCountries()) ScheduleState.SaveAndNotify();
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);

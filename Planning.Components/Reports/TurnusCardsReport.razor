@@ -35,7 +35,7 @@ else
     private IEnumerable<(TurnusData Item, ReportCulture Culture)>? Items { get; set; }
 
     private ReportCulture? DefaultCulture =>
-        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+        ScheduleState.Timetable is { } timetable ? new(timetable.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,13 +43,13 @@ else
         // loaded (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
         await ReportBusy.PaintAsync();
-        var general = ScheduleState.Layout?.Settings.General;
+        var general = ScheduleState.Timetable?.Settings.General;
         var startDay = general?.StartDay ?? DayOfWeek.Monday;
         var useDays = general?.UseDays ?? false;
         var maxSessions = general?.MaxSessions ?? 14;
         var cards = ScheduleState.Schedule?.ScheduledObjects.ToTurnusData(useDays, maxSessions, startDay, general?.FirstSessionStart ?? TimeSpan.Zero) ?? [];
         Items = ScheduleState.Layout is { } layout
-            ? [.. cards.Select(card => (card, new ReportCulture(card.ReportCulture(layout, LanguageService.IsSupported))))]
+            ? [.. cards.Select(card => (card, new ReportCulture(card.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported))))]
             : [];
     }
 

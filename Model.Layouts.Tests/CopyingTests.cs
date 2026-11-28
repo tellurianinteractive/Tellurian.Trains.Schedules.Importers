@@ -8,10 +8,8 @@ public class CopyingTests
 {
     private static Station Tellby()
     {
-        var station = new Station(1, "Tellby", "Tby") { IsManned = true, HasTurntable = true, Instructions = "Shunt on track 3.", LockKey = new() { Name = "K" } };
+        var station = new Station(1, "Tellby", "Tby") { IsManned = true, HasTurntable = true, LockKey = new() { Name = "K" } };
         station.Tracks.Add(new StationTrack(1, "1") { Station = station, Usage = "Passenger" });
-        station.StaffPosts.Add(new() { Roles = StaffRoles.Dispatcher });
-        station.Timings.MinimumStopMinutes = 3;
         return station;
     }
 
@@ -34,13 +32,9 @@ public class CopyingTests
 
         var copy = (Station)original.Copy();
         copy.Tracks.Single().Usage = "Goods";
-        copy.StaffPosts.Single().Roles = StaffRoles.Shuntman;
-        copy.Timings.MinimumStopMinutes = 5;
         copy.LockKey!.Name = "L";
 
         Assert.AreEqual("Passenger", original.Tracks.Single().Usage);
-        Assert.AreEqual(StaffRoles.Dispatcher, original.StaffPosts.Single().Roles);
-        Assert.AreEqual(3, original.Timings.MinimumStopMinutes);
         Assert.AreEqual("K", original.LockKey!.Name);
         Assert.AreSame(copy, copy.Tracks.Single().Station, "a copied track belongs to the copied location");
     }
@@ -145,7 +139,6 @@ public class CopyingTests
         Assert.IsInstanceOfType<IndustrialArea>(area);
         Assert.AreEqual(1, area.Id);
         Assert.AreEqual("Tellby", area.Name);
-        Assert.AreEqual("Shunt on track 3.", area.Instructions);
         Assert.AreEqual("K", area.LockKey!.Name);
         Assert.IsTrue(area.HasCargoExchange);
         Assert.AreSame(area, area.Tracks.Single().Station, "the tracks move to the new location");
@@ -158,7 +151,7 @@ public class CopyingTests
         var station = Tellby();
 
         CollectionAssert.AreEquivalent(
-            new[] { nameof(Station.HasTurntable), nameof(Station.IsManned), nameof(OperationLocation.HasPassengerExchange), nameof(OperationLocation.HasCargoExchange), nameof(OperationLocation.Instructions) },
+            new[] { nameof(Station.HasTurntable), nameof(Station.IsManned), nameof(OperationLocation.HasPassengerExchange), nameof(OperationLocation.HasCargoExchange) },
             OperationLocationRules.ClearedBy(station, OperationLocationKind.SignalControlled).ToArray());
         Assert.IsEmpty(OperationLocationRules.ClearedBy(station, OperationLocationKind.Station));
     }

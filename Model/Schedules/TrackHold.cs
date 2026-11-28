@@ -136,7 +136,7 @@ public static class TrackHoldExtensions
         /// none otherwise.
         /// </summary>
         public IReadOnlyList<TrackHold> MarkedTrackHolds =>
-            plan.Layout.Settings.Validation.ExtendTrackOccupancyByVehicleStay ? plan.Schedules.TrackHolds : [];
+            plan.Timetable.Settings.Validation.ExtendTrackOccupancyByVehicleStay ? plan.Schedules.TrackHolds : [];
     }
 
     extension(TrackHold hold)
@@ -182,7 +182,7 @@ public static class TrackHoldExtensions
         /// </summary>
         internal Sessions IdleSessions(Sessions working)
         {
-            var general = schedule.Plan?.Layout.Settings.General;
+            var general = schedule.Plan?.Timetable.Settings.General;
             var free = general is null ? new Sessions() : working.ComplementWithin(general.UseDays, general.MaxSessions);
             return free.And(schedule.EffectiveSessions);
         }
@@ -259,7 +259,7 @@ public static class TrackHoldExtensions
                 // Vehicles that take over in blocks of consecutive sessions (1-3, then 4-6) are swapped: the
                 // ones leaving are implicitly taken off the tracks for the others to stand there. Only where
                 // they alternate (1,3,5 and 2,4,6) do the idle ones stay put, a day at a time.
-                if (!others.IsNone && groups.All(g => g.Sessions is not { } w || w.IsInBlocks(schedule.Plan?.Layout.Settings.General.MaxSessions ?? 14)))
+                if (!others.IsNone && groups.All(g => g.Sessions is not { } w || w.IsInBlocks(schedule.Plan?.Timetable.Settings.General.MaxSessions ?? 14)))
                 {
                     idle = Sessions.FromBitPattern(idle.Flags & ~others.Flags);
                     others = new Sessions();
@@ -286,7 +286,7 @@ public static class TrackHoldExtensions
     {
         if (vehicles.Count == 0) return new Sessions();
         // Assignments may be written either as sessions or as days, so compare them within the operating period.
-        var general = schedule.Plan?.Layout.Settings.General;
+        var general = schedule.Plan?.Timetable.Settings.General;
         if (general is null) return new Sessions();
         var bits = vehicles
             .Select(v => v.ScheduleAssignments.Where(a => !schedule.Equals(a.Schedule))
@@ -310,7 +310,7 @@ public static class TrackHoldExtensions
     // mornings are returned too, or null where there are none.
     private static (Sessions Evenings, Sessions? OtherEvenings, Sessions? OtherMornings)? Overnight(Schedule schedule, Sessions evenings, Sessions mornings)
     {
-        if (schedule.Plan?.Layout.Settings.General is not { } general)
+        if (schedule.Plan?.Timetable.Settings.General is not { } general)
             return TrackOccupancyExtensions.SharesSession(evenings, mornings, 1) ? (evenings, null, null) : null;
         var settings = general.SessionSettings();
         var period = settings.PeriodNumbers.Count;
@@ -412,13 +412,13 @@ public static class TrackHoldExtensions
     }
 
     private static bool RunsRoundTheClock(Schedule schedule) =>
-        schedule.Plan?.Layout.Settings.General is not { } general || general.RunsOverMidnight;
+        schedule.Plan?.Timetable.Settings.General is not { } general || general.RunsOverMidnight;
 
     // The start and end of a session or day, from the start of its day; the end may be on the day after. Without a
     // plan to tell, the whole calendar day.
     private static (TimeSpan Start, TimeSpan End) SessionLimits(Schedule schedule)
     {
-        if (schedule.Plan?.Layout.Settings.General is not { } general) return (TimeSpan.Zero, TimeSpan.FromDays(1));
+        if (schedule.Plan?.Timetable.Settings.General is not { } general) return (TimeSpan.Zero, TimeSpan.FromDays(1));
         if (general.RunsOverMidnight) return (general.FirstSessionStart, general.FirstSessionStart + TimeSpan.FromDays(1));
         return (general.StartTime, general.EndTime > general.StartTime ? general.EndTime : general.EndTime + TimeSpan.FromDays(1));
     }

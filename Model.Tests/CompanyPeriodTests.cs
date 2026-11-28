@@ -116,7 +116,7 @@ public class CompanyPeriodTests
 
         var restored = PlanFile.Read(PlanFile.Write(plan));
 
-        var companies = restored.Layout.Companies.Where(c => c.Signature == "DSB").OrderBy(c => c.Id).ToArray();
+        var companies = restored.Timetable.Companies.Where(c => c.Signature == "DSB").OrderBy(c => c.Id).ToArray();
         Assert.AreEqual(1972, companies[0].OperatesFromYear);
         Assert.IsNull(companies[0].OperatesToYear);
         Assert.IsNull(companies[1].OperatesFromYear);
@@ -126,8 +126,8 @@ public class CompanyPeriodTests
     private static Plan Arrange(params Company[] companies)
     {
         TestDataFactory.Init();
-        var plan = Plan.Create("Test", new Timetable("Test", TestDataFactory.Layout()));
-        foreach (var company in companies) plan.Layout.Add(company);
+        var plan = Plan.Create("Test", TestDataFactory.NewTimetable("Test", TestDataFactory.Layout()));
+        foreach (var company in companies) plan.Timetable.Add(company);
         return plan;
     }
 

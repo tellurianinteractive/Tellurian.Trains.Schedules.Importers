@@ -190,7 +190,7 @@ else
             .ThenBy(v => v.Id)];
 
     private VehicleStart? StartOf(ScheduledObject vehicle) =>
-        vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions, Plan.Layout.Settings.General.FirstSessionStart);
+        vehicle.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions, Plan.Timetable.Settings.General.FirstSessionStart);
 
     private static string VehicleRowKey(ScheduledObject vehicle) => $"vehicle-{vehicle.Id}";
 

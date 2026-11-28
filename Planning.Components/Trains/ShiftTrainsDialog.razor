@@ -142,7 +142,7 @@
     }
 
     protected override void OnInitialized() =>
-        _endTime = (Layout?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
+        _endTime = (Timetable?.Settings.General.EndTime ?? TimeSpan.FromHours(22)).ToString(@"hh\:mm", Culture);
 
     private void SetOpposite(ChangeEventArgs e)
     {

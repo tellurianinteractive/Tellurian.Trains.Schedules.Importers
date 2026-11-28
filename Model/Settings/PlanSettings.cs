@@ -3,7 +3,7 @@ namespace Tellurian.Trains.Schedules.Model.Settings;
 /// <summary>
 /// All configurable settings for a layout, grouped by purpose.
 /// </summary>
-public sealed class LayoutSettings
+public sealed class PlanSettings
 {
     /// <summary>Identity settings: the operating theme, the modelling scale and the default country.</summary>
     public IdentitySettings Identity { get; set; } = new();

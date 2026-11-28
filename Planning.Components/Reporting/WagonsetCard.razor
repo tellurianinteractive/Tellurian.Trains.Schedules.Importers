@@ -70,11 +70,11 @@
     [Parameter] public ScheduledObject? Item { get; set; }
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     private VehicleStart? Start =>
         Item?.Start(SessionSettings.UseDaysInsteadOfSessionNumbers, SessionSettings.MaxNumberOfSessions,
-            ScheduleState.Layout?.Settings.General.FirstSessionStart ?? TimeSpan.Zero);
+            ScheduleState.Timetable?.Settings.General.FirstSessionStart ?? TimeSpan.Zero);
 
     // As the turnus card names the vehicle, so the two cards that go together read alike.
     private string Identity =>

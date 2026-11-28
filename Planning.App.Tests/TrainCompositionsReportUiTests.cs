@@ -187,6 +187,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
         var stilkobing = (Station)layout.Add(NewStation(3, "Stilkøbing", "Stk", manned: true, "1"));
         stilkobing.Add(layout.Regions.First(region => region.BackgroundColor == "#CC0000"));
         var vig = (Station)layout.Add(NewStation(4, "Vig", "Vig", manned: false, "1"));
+        foreach (var station in new[] { munkerod, rubjerg, stilkobing, vig }) timetable.EnsurePlanningOf(station).StartLabels = StartLabelPrinting.All;
         vig.CargoServedFrom = stilkobing;
         layout.Add(new TrackStretch(1, munkerod, rubjerg, 10));
         layout.Add(new TrackStretch(2, rubjerg, stilkobing, 10));
@@ -253,7 +254,7 @@ public sealed class TrainCompositionsReportUiTests : PlaywrightTestBase
 
     private static OperationLocation NewStation(int id, string name, string signature, bool manned, params string[] tracks)
     {
-        var station = new Station(id, name, signature) { IsManned = manned, StartLabels = StartLabelPrinting.All };
+        var station = new Station(id, name, signature) { IsManned = manned };
         for (var i = 0; i < tracks.Length; i++)
             station.Add(new StationTrack(id * 10 + i, tracks[i]) { DisplayOrder = i + 1 });
         return station;

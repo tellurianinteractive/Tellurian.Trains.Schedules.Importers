@@ -79,7 +79,7 @@ public static class GraphPrintScale
     /// </summary>
     public static double DistanceAxisGutterVerticalMm => StationNameBaselineMm + SmallFontMm + KmLabelGapMm;
 
-    extension(LayoutSettings settings)
+    extension(PlanSettings settings)
     {
         /// <summary>
         /// Builds the print-scaled settings for a graphical timetable. Every user preference (orientation, which

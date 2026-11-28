@@ -13,7 +13,7 @@ public class ScheduleEditingTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
         return Plan.Create("Test", timetable);
@@ -666,7 +666,7 @@ public class ScheduleEditingTests
     public void ComplementaryScheduleContainsOnlyTrainsRunningBeyondTheEffectiveSessions()
     {
         var plan = CreatePlan();
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5); // limits the origin to 1-5
         Return(plan).Sessions = Sessions.All;                                 // also runs on 6-7
         var origin = plan.CreateSchedule();
@@ -687,7 +687,7 @@ public class ScheduleEditingTests
     public void ComplementaryScheduleCopiesReferencesToTheOriginalTrains()
     {
         var plan = CreatePlan();
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
         Return(plan).Sessions = Sessions.All;
         var origin = plan.CreateSchedule();
@@ -731,7 +731,7 @@ public class ScheduleEditingTests
     public void ComplementaryScheduleKeepsAbsoluteSessionNumbers()
     {
         var plan = CreatePlan();
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
         Return(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5, 6); // runs into session 6 only
         var origin = plan.CreateSchedule();
@@ -796,7 +796,7 @@ public class ScheduleEditingTests
     public void ComplementaryScheduleSharesTheOriginNumberAndVehicleOnTheLeftoverSessions()
     {
         var plan = CreatePlan();
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 2, 3, 4, 5);
         Return(plan).Sessions = Sessions.All;
         var origin = plan.CreateSchedule();

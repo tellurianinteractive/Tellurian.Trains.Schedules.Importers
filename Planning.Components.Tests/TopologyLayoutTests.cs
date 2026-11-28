@@ -38,14 +38,15 @@ public class TopologyLayoutTests
         "Vbv Vbr@2 Vbö@1",
     ];
 
-    // Builds a layout from one line per spec, each spec a space-separated run of station signatures.
+    // Builds a layout, with its timetable, from one line per spec, each spec a space-separated run of station signatures.
     // Stations of the same signature are shared between lines, which is what makes one line a branch of
     // another — and what closes a cycle where two lines meet at both ends. A signature may carry the
     // distance from the station before it as "Sig@2"; it is 10 when left out. It may also carry the number
     // of tracks on the section reaching it as "Sig@2:2"; it is single track when left out.
-    private static Layout CreateLayout(params string[] specs)
+    private static Timetable CreateTimetable(params string[] specs)
     {
         var layout = new Layout { Name = "Test" };
+        var timetable = new Timetable("Test", layout);
         var stations = new Dictionary<string, OperationLocation>();
         var stationId = 0;
         var trackId = 0;
@@ -84,9 +85,9 @@ public class TopologyLayoutTests
                 line.AddLast(layout.StretchBetween(from, to)
                     ?? layout.Add(new TrackStretch(++trackId, from, to, tokens[i].Distance, tokens[i].Tracks)));
             }
-            layout.Add(line);
+            timetable.Add(line);
         }
-        return layout;
+        return timetable;
     }
 
     // A deliberately generous estimate of the room a signature takes: the diagram reserves space from a
@@ -97,8 +98,8 @@ public class TopologyLayoutTests
     private static TopologyNode Node(TopologyDiagram diagram, string signature) =>
         diagram.Nodes.Single(n => n.Signature == signature);
 
-    private static OperationLocation Location(Layout layout, string signature) =>
-        layout.OperationLocations.Single(l => l.Signature == signature);
+    private static OperationLocation Location(Timetable timetable, string signature) =>
+        timetable.Layout.OperationLocations.Single(l => l.Signature == signature);
 
     // The section joining two locations, whichever way round the diagram happens to have drawn it.
     private static TopologySection Section(TopologyDiagram diagram, string from, string to)
@@ -117,13 +118,13 @@ public class TopologyLayoutTests
     {
         foreach (var specs in new[] { Kolding, Ralsbiten })
         {
-            var layout = CreateLayout(specs);
-            var diagram = TopologyDiagram.Build(layout);
+            var timetable = CreateTimetable(specs);
+            var diagram = TopologyDiagram.Build(timetable);
 
             var repeated = diagram.Nodes.GroupBy(n => n.Signature).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
             Assert.AreEqual(0, repeated.Count, $"Drawn more than once: {string.Join(", ", repeated)}.");
             CollectionAssert.AreEquivalent(
-                layout.OperationLocations.Select(l => l.Signature).ToArray(),
+                timetable.Layout.OperationLocations.Select(l => l.Signature).ToArray(),
                 diagram.Nodes.Select(n => n.Signature).ToArray(),
                 "Every location the track reaches must be drawn, and nothing else.");
         }
@@ -134,7 +135,7 @@ public class TopologyLayoutTests
     {
         // The three the old drawing repeated. Vb is reached by all three of Rälsbiten's main stretches,
         // Öbg by two of them, and Vbö by the main line and by the Västerborg triangle.
-        var diagram = TopologyDiagram.Build(CreateLayout(Ralsbiten));
+        var diagram = TopologyDiagram.Build(CreateTimetable(Ralsbiten));
 
         foreach (var signature in new[] { "Vb", "Öbg", "Vbö", "Thn", "Tkn", "Lgö" })
             Assert.AreEqual(1, diagram.Nodes.Count(n => n.Signature == signature), $"{signature} must be drawn once.");
@@ -143,11 +144,11 @@ public class TopologyLayoutTests
     [TestMethod]
     public void EveryPieceOfTrackIsDrawnExactlyOnce()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var diagram = TopologyDiagram.Build(layout);
+        var timetable = CreateTimetable(Ralsbiten);
+        var diagram = TopologyDiagram.Build(timetable);
 
-        Assert.AreEqual(20, layout.TrackStretches.Count, "The layout has twenty pieces of track.");
-        Assert.AreEqual(layout.TrackStretches.Count, diagram.Sections.Count,
+        Assert.AreEqual(20, timetable.Layout.TrackStretches.Count, "The layout has twenty pieces of track.");
+        Assert.AreEqual(timetable.Layout.TrackStretches.Count, diagram.Sections.Count,
             "Track two timetable stretches run over is one piece of the layout, and is drawn once.");
     }
 
@@ -156,7 +157,7 @@ public class TopologyLayoutTests
     {
         // The Västerborg triangle: three locations joined by three pieces of track, each drawn once. A
         // drawing that could only make trees would have to repeat a location to close it.
-        var diagram = TopologyDiagram.Build(CreateLayout(Ralsbiten));
+        var diagram = TopologyDiagram.Build(CreateTimetable(Ralsbiten));
 
         foreach (var (from, to) in new[] { ("Vbö", "Vbv"), ("Vbv", "Vbr"), ("Vbr", "Vbö") })
             Assert.IsNotNull(Section(diagram, from, to), $"{from}–{to} must join the two locations themselves.");
@@ -167,8 +168,8 @@ public class TopologyLayoutTests
     {
         // Lines 1 and 2 both run from Lek through Lsg to Lgö. That track belongs to the layout, not to
         // either of them, so it is drawn once and carries both colours for the renderer to lay over.
-        var layout = CreateLayout(Ralsbiten);
-        var diagram = TopologyDiagram.Build(layout);
+        var timetable = CreateTimetable(Ralsbiten);
+        var diagram = TopologyDiagram.Build(timetable);
 
         var shared = Section(diagram, "Lek", "Lsg");
         CollectionAssert.AreEqual(
@@ -184,11 +185,11 @@ public class TopologyLayoutTests
     {
         // A piece of the layout no timetable stretch covers is drawn without a colour, so the gap can be
         // seen rather than being invisible for want of one.
-        var layout = CreateLayout("A B C D");
-        var stray = layout.Add(new TrackStretch(99, Location(layout, "D"), layout.Add(new Station(99, "E", "E")), 5.0));
+        var timetable = CreateTimetable("A B C D");
+        var stray = timetable.Layout.Add(new TrackStretch(99, Location(timetable, "D"), timetable.Layout.Add(new Station(99, "E", "E")), 5.0));
         Assert.IsNotNull(stray);
 
-        var diagram = TopologyDiagram.Build(layout);
+        var diagram = TopologyDiagram.Build(timetable);
 
         Assert.AreEqual(1, diagram.Nodes.Count(n => n.Signature == "E"), "The location it reaches must be drawn.");
         Assert.IsTrue(Section(diagram, "D", "E").IsUncovered, "No timetable stretch runs over D–E.");
@@ -198,8 +199,8 @@ public class TopologyLayoutTests
     [TestMethod]
     public void DoubleTrackIsCarriedThroughToEveryPieceThatHasIt()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var diagram = TopologyDiagram.Build(layout);
+        var timetable = CreateTimetable(Ralsbiten);
+        var diagram = TopologyDiagram.Build(timetable);
 
         Assert.AreEqual(2, Section(diagram, "Lek", "Lsg").Tracks, "Lek–Lsg is double track.");
         Assert.AreEqual(2, Section(diagram, "Thn", "Vb").Tracks, "Thn–Vb is double track.");
@@ -210,8 +211,8 @@ public class TopologyLayoutTests
     [TestMethod]
     public void EveryPieceOfTrackRunsBetweenTheTwoLocationsItJoins()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var diagram = TopologyDiagram.Build(layout);
+        var timetable = CreateTimetable(Ralsbiten);
+        var diagram = TopologyDiagram.Build(timetable);
         var at = diagram.Nodes.ToDictionary(n => (Math.Round(n.X, 3), Math.Round(n.Y, 3)));
 
         foreach (var section in diagram.Sections)
@@ -228,7 +229,7 @@ public class TopologyLayoutTests
     {
         foreach (var specs in new[] { Kolding, Ralsbiten })
         {
-            var diagram = TopologyDiagram.Build(CreateLayout(specs));
+            var diagram = TopologyDiagram.Build(CreateTimetable(specs));
             foreach (var row in diagram.Nodes.GroupBy(n => Math.Round(n.Y, 3)))
             {
                 var ordered = row.OrderBy(n => n.X).ToList();
@@ -245,7 +246,7 @@ public class TopologyLayoutTests
     {
         // The first two locations are far too close for their signatures and must be pushed apart; the two
         // long hauls after them are well clear of the minimum and must keep their true proportions.
-        var diagram = TopologyDiagram.Build(CreateLayout("Aa Bb@0.5 Cc@20 Dd@40"));
+        var diagram = TopologyDiagram.Build(CreateTimetable("Aa Bb@0.5 Cc@20 Dd@40"));
 
         var x = new[] { "Aa", "Bb", "Cc", "Dd" }.Select(s => Node(diagram, s).X).ToList();
         Assert.IsTrue(x[1] - x[0] > 0.5 / 40.0 * (x[3] - x[2]), "Locations too close together are pushed apart.");
@@ -257,7 +258,7 @@ public class TopologyLayoutTests
     {
         foreach (var specs in new[] { Kolding, Ralsbiten })
         {
-            var diagram = TopologyDiagram.Build(CreateLayout(specs));
+            var diagram = TopologyDiagram.Build(CreateTimetable(specs));
             foreach (var node in diagram.Nodes)
                 foreach (var section in diagram.Sections)
                     Assert.IsFalse(Strikes(section, SignatureArea(node)),
@@ -271,12 +272,12 @@ public class TopologyLayoutTests
         // A location in the middle of a run drawn up and down the page has track over its circle and
         // track under it. Neither side is clear, and printing the signature on one of them anyway — which
         // is all a rule choosing only between over and under can do — strikes it through with the track.
-        var layout = CreateLayout("A B C");
-        layout.SetTopologyPosition(Location(layout, "A"), 200.0, TopologyDiagram.TopRow);
-        layout.SetTopologyPosition(Location(layout, "B"), 200.0, TopologyDiagram.TopRow + TopologyDiagram.SnapY);
-        layout.SetTopologyPosition(Location(layout, "C"), 200.0, TopologyDiagram.TopRow + (2 * TopologyDiagram.SnapY));
+        var timetable = CreateTimetable("A B C");
+        timetable.SetTopologyPosition(Location(timetable, "A"), 200.0, TopologyDiagram.TopRow);
+        timetable.SetTopologyPosition(Location(timetable, "B"), 200.0, TopologyDiagram.TopRow + TopologyDiagram.SnapY);
+        timetable.SetTopologyPosition(Location(timetable, "C"), 200.0, TopologyDiagram.TopRow + (2 * TopologyDiagram.SnapY));
 
-        var diagram = TopologyDiagram.Build(layout);
+        var diagram = TopologyDiagram.Build(timetable);
         var middle = Node(diagram, "B");
 
         Assert.IsTrue(middle.LabelSide is TopologyLabelSide.Left or TopologyLabelSide.Right,
@@ -290,7 +291,7 @@ public class TopologyLayoutTests
     public void ASignatureStaysOverItsCircleWhereNothingIsInTheWay()
     {
         // The house style, and it must not be given up for a rule that moves signatures about needlessly.
-        var diagram = TopologyDiagram.Build(CreateLayout("A B C D E"));
+        var diagram = TopologyDiagram.Build(CreateTimetable("A B C D E"));
 
         Assert.IsTrue(diagram.Nodes.All(n => n.LabelSide == TopologyLabelSide.Above),
             "A line drawn straight across the page leaves every signature over its circle.");
@@ -303,7 +304,7 @@ public class TopologyLayoutTests
         // Moving a signature off the track must not put it over a neighbour's instead.
         foreach (var specs in new[] { Kolding, Ralsbiten })
         {
-            var areas = TopologyDiagram.Build(CreateLayout(specs)).Nodes
+            var areas = TopologyDiagram.Build(CreateTimetable(specs)).Nodes
                 .Select(n => (n.Signature, Area: SignatureArea(n))).ToList();
             for (var i = 0; i < areas.Count; i++)
                 for (var j = i + 1; j < areas.Count; j++)
@@ -362,7 +363,7 @@ public class TopologyLayoutTests
     {
         foreach (var specs in new[] { Kolding, Ralsbiten })
         {
-            var diagram = TopologyDiagram.Build(CreateLayout(specs));
+            var diagram = TopologyDiagram.Build(CreateTimetable(specs));
             foreach (var node in diagram.Nodes)
             {
                 var area = SignatureArea(node);
@@ -380,9 +381,9 @@ public class TopologyLayoutTests
         // Framed against its own content there is nowhere above the topmost line to move a location to,
         // and since the frame is held still for the length of a drag, one dragged up there is carried
         // outside it and clipped away — it lands where it was dropped but cannot be seen going there.
-        var layout = CreateLayout(Ralsbiten);
-        var arrangeable = TopologyDiagram.Build(layout, withRoomToArrange: true);
-        var printed = TopologyDiagram.Build(layout);
+        var timetable = CreateTimetable(Ralsbiten);
+        var arrangeable = TopologyDiagram.Build(timetable, withRoomToArrange: true);
+        var printed = TopologyDiagram.Build(timetable);
 
         var topmost = arrangeable.Nodes.Min(n => n.Y);
         var bottommost = arrangeable.Nodes.Max(n => n.Y);
@@ -401,12 +402,12 @@ public class TopologyLayoutTests
     [TestMethod]
     public void ALocationMovedAboveTheTopmostLineIsInsideTheFrame()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var raised = Location(layout, "Vpn");
+        var timetable = CreateTimetable(Ralsbiten);
+        var raised = Location(timetable, "Vpn");
         var (x, y) = TopologyDiagram.Snap(300.0, TopologyDiagram.TopRow - TopologyDiagram.SnapY);
-        layout.SetTopologyPosition(raised, x, y);
+        timetable.SetTopologyPosition(raised, x, y);
 
-        var diagram = TopologyDiagram.Build(layout, withRoomToArrange: true);
+        var diagram = TopologyDiagram.Build(timetable, withRoomToArrange: true);
         var node = Node(diagram, "Vpn");
 
         Assert.AreEqual(TopologyDiagram.TopRow - TopologyDiagram.SnapY, node.Y, 0.001,
@@ -420,11 +421,11 @@ public class TopologyLayoutTests
     [TestMethod]
     public void AMovedLocationIsDrawnWhereItWasPutAndItsTrackFollows()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var moved = Location(layout, "Vbr");
-        layout.SetTopologyPosition(moved, 320.0, 256.0);
+        var timetable = CreateTimetable(Ralsbiten);
+        var moved = Location(timetable, "Vbr");
+        timetable.SetTopologyPosition(moved, 320.0, 256.0);
 
-        var diagram = TopologyDiagram.Build(layout);
+        var diagram = TopologyDiagram.Build(timetable);
         var node = Node(diagram, "Vbr");
 
         Assert.AreEqual(320.0, node.X, 0.001);
@@ -441,11 +442,11 @@ public class TopologyLayoutTests
     [TestMethod]
     public void MovingOneLocationLeavesTheRestWhereTheyWere()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var before = TopologyDiagram.Build(layout).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
+        var timetable = CreateTimetable(Ralsbiten);
+        var before = TopologyDiagram.Build(timetable).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
 
-        layout.SetTopologyPosition(Location(layout, "Mag"), 0.0, 400.0);
-        var after = TopologyDiagram.Build(layout).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
+        timetable.SetTopologyPosition(Location(timetable, "Mag"), 0.0, 400.0);
+        var after = TopologyDiagram.Build(timetable).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
 
         foreach (var (signature, at) in before.Where(b => b.Key != "Mag"))
         {
@@ -457,15 +458,15 @@ public class TopologyLayoutTests
     [TestMethod]
     public void ArrangingAutomaticallyForgetsEveryMove()
     {
-        var layout = CreateLayout(Ralsbiten);
-        var automatic = TopologyDiagram.Build(layout).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
+        var timetable = CreateTimetable(Ralsbiten);
+        var automatic = TopologyDiagram.Build(timetable).Nodes.ToDictionary(n => n.Signature, n => (n.X, n.Y));
 
-        layout.SetTopologyPosition(Location(layout, "Mag"), 0.0, 400.0);
-        Assert.IsTrue(layout.HasTopologyPositions);
-        Assert.IsTrue(layout.ClearTopologyPositions());
-        Assert.IsFalse(layout.HasTopologyPositions);
+        timetable.SetTopologyPosition(Location(timetable, "Mag"), 0.0, 400.0);
+        Assert.IsTrue(timetable.HasTopologyPositions);
+        Assert.IsTrue(timetable.ClearTopologyPositions());
+        Assert.IsFalse(timetable.HasTopologyPositions);
 
-        foreach (var node in TopologyDiagram.Build(layout).Nodes)
+        foreach (var node in TopologyDiagram.Build(timetable).Nodes)
         {
             Assert.AreEqual(automatic[node.Signature].X, node.X, 0.001, $"{node.Signature} must go back where it was.");
             Assert.AreEqual(automatic[node.Signature].Y, node.Y, 0.001);
@@ -489,7 +490,7 @@ public class TopologyLayoutTests
     [TestMethod]
     public void ALayoutWithNoTrackDrawsNothing()
     {
-        var diagram = TopologyDiagram.Build(new Layout { Name = "Empty" });
+        var diagram = TopologyDiagram.Build(new Timetable("Empty", new Layout { Name = "Empty" }));
 
         Assert.AreEqual(0, diagram.Nodes.Count);
         Assert.AreEqual(0, diagram.Sections.Count);
@@ -498,7 +499,7 @@ public class TopologyLayoutTests
     [TestMethod]
     public void ASingleLineIsDrawnOnOneRow()
     {
-        var diagram = TopologyDiagram.Build(CreateLayout("A B C"));
+        var diagram = TopologyDiagram.Build(CreateTimetable("A B C"));
 
         Assert.AreEqual(1, diagram.Nodes.Select(n => n.Y).Distinct().Count());
         Assert.AreEqual(2, diagram.Sections.Count);
@@ -508,7 +509,7 @@ public class TopologyLayoutTests
     public void BranchesThatDoNotOverlapShareARow()
     {
         // Two short branches leaving a long main line far apart: nothing forces them onto rows of their own.
-        var diagram = TopologyDiagram.Build(CreateLayout("A B C D E F G H I J", "B P", "H Q"));
+        var diagram = TopologyDiagram.Build(CreateTimetable("A B C D E F G H I J", "B P", "H Q"));
 
         Assert.AreEqual(2, diagram.Nodes.Select(n => Math.Round(n.Y, 3)).Distinct().Count(),
             "The main line and both branches should need two rows only.");
@@ -519,7 +520,7 @@ public class TopologyLayoutTests
     [TestMethod]
     public void BranchesThatOverlapAreDrawnOnRowsOfTheirOwn()
     {
-        var diagram = TopologyDiagram.Build(CreateLayout("A B C D E F G H I J", "B P Q R S T", "C X"));
+        var diagram = TopologyDiagram.Build(CreateTimetable("A B C D E F G H I J", "B P Q R S T", "C X"));
 
         Assert.AreEqual(3, diagram.Nodes.Select(n => Math.Round(n.Y, 3)).Distinct().Count());
         Assert.IsTrue(Node(diagram, "X").Y > Node(diagram, "A").Y, "Both branches are drawn below the main line.");

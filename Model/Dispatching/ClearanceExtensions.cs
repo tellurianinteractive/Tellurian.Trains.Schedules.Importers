@@ -67,7 +67,7 @@ public static class ClearanceExtensions
                     IsRemote = isRemote,
                     // What lies before the meeting begins was never worked on the first session, and a clearance
                     // after midnight is reached on the first session only by the period wrapping round.
-                    IsOutsideFirstSession = location.Layout?.Settings.General.FirstSessionStart > TimeSpan.Zero &&
+                    IsOutsideFirstSession = train.Timetable?.Settings.General.FirstSessionStart > TimeSpan.Zero &&
                         (time.Value.Days > 0 || startsBeforeFirstSession),
                 };
         }
@@ -117,7 +117,7 @@ public static class ClearanceExtensions
     private static bool StartsBeforeFirstSession(Train train, Plan? plan)
     {
         if (plan is not null) return plan.StartsBeforeFirstSession(train);
-        var firstSessionStart = train.CallsInRunOrder.FirstOrDefault()?.OperationLocation.Layout?.Settings.General.FirstSessionStart ?? TimeSpan.Zero;
+        var firstSessionStart = train.Timetable?.Settings.General.FirstSessionStart ?? TimeSpan.Zero;
         return firstSessionStart > TimeSpan.Zero && train.StartsBefore(firstSessionStart);
     }
 

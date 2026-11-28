@@ -115,10 +115,10 @@ else
     private Timetable? Timetable => ScheduleState.Timetable;
     private Layout? Layout => ScheduleState.Layout;
 
-    private bool UseDays => Layout?.Settings.General.UseDays ?? false;
+    private bool UseDays => Timetable?.Settings.General.UseDays ?? false;
 
     private SessionsSettings SessionSettings =>
-        Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     // Only a location with tracks can have a train calling at it.
     private IEnumerable<OperationLocation> LocationChoices =>

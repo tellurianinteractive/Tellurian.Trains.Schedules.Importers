@@ -212,7 +212,7 @@ public class ManualNoteTargetTests
             call.IsArrival = true;
             call.IsDeparture = true;
         }
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.Add(train);
         return new Plan("Test", timetable);
     }

@@ -35,7 +35,7 @@ public class TrackHoldCollectionTests
     private static (Plan Plan, StationTrack Track) Arrange(bool locoTakesTheWagonsTrain)
     {
         TestDataFactory.Init();
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var station = (Station)TestDataFactory.Stations.First();
         var track = station.Tracks.First();
         var other = station.Tracks.Last();

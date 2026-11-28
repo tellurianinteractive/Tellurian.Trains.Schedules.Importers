@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
@@ -33,7 +36,14 @@ public static class HallPlanImport
             ArgumentNullException.ThrowIfNull(hallPlan);
             var comparison = LayoutComparison.Compare(plan.Layout, hallPlan);
             var applied = LayoutUpdate.ApplyAutomatic(comparison);
-            plan.Layout.EnsureCountries();
+            foreach (var change in applied.Where(c => c.Kind == LayoutChangeKind.StretchChanged))
+            {
+                var stretch = change.Stretch!;
+                var isTaken = (!stretch.IsDistanceEntered && change.Properties.Contains(nameof(TrackStretch.Distance))) ||
+                    (!stretch.IsSpeedEntered && change.Properties.Contains(nameof(TrackStretch.Speed)));
+                if (isTaken && !stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, plan.Timetable.Settings.TimeAndSpeed);
+            }
+            plan.Timetable.EnsureCountries();
             return new(comparison, applied);
         }
     }
@@ -41,31 +51,84 @@ public static class HallPlanImport
     /// <summary>
     /// Moves what <paramref name="hallPlan"/> has into <paramref name="layout"/>, a new layout with the planner's
     /// defaults: the locations with their tracks, the stretches with a running time worked out from distance and speed,
-    /// any timetable and dispatch stretches and companies, the modules, the order of the locations along the lines, and
-    /// the hall plan's identity, scale and standard.
+    /// the modules, the order of the locations along the lines, and the hall plan's identity, scale and standard.
     /// </summary>
-    internal static void TakeInto(Layout layout, Layout hallPlan)
+    internal static void TakeInto(Timetable timetable, Layout hallPlan)
     {
-        foreach (var location in hallPlan.OperationLocations) layout.Add(location);
+        var layout = timetable.Layout;
+        foreach (var location in hallPlan.OperationLocations)
+        {
+            layout.Add(location);
+            TakePlanningFrom(timetable, location);
+        }
+        foreach (var name in TimetableData) layout.ExtensionData?.Remove(name);
         foreach (var stretch in hallPlan.TrackStretches)
         {
             stretch.Layout = layout;
             stretch.LayoutId = layout.Id;
-            if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
+            if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, timetable.Settings.TimeAndSpeed);
             layout.Add(stretch);
         }
-        foreach (var stretch in hallPlan.TimetableStretches) layout.Add(stretch);
-        foreach (var stretch in hallPlan.DispatchStretches) layout.DispatchStretches.Add(stretch);
-        foreach (var company in hallPlan.Companies) layout.Add(company);
         layout.StretchLines = [.. hallPlan.StretchLines.Select(l => l.Copy())];
         layout.Modules = [.. hallPlan.Modules.Select(m => m.Copy())];
         layout.SourceId = hallPlan.SourceId;
         layout.SourceRevision = hallPlan.SourceRevision;
         layout.Scale = hallPlan.Scale;
         layout.StandardName = hallPlan.StandardName;
-        if (Scale.Known(hallPlan.Scale)?.Id is int scaleId) layout.Settings.Identity.ScaleId = scaleId;
-        layout.EnsureCountries();
+        if (Scale.Known(hallPlan.Scale)?.Id is int scaleId) timetable.Settings.Identity.ScaleId = scaleId;
+        timetable.EnsureCountries();
     }
+
+    // What older hall plans wrote in their layout block that is now the timetable's (ModelSurfaceAnalysis.md 5.1):
+    // nothing a hall plan decides, so it is left out of the new plan.
+    private static readonly string[] TimetableData = ["settings", "companies", "timetableStretches", "dispatchStretches", "topologyPositions"];
+
+    private static readonly string[] LocationPlanningData =
+        ["timings", "phoneNumber", "instructions", "hideMeets", "hidePassings", "staffPosts", "shiftCount", "startLabels", "splitDispatchByDirection", "isPassengerInterchange"];
+
+    private static readonly string[] TrackRouteData = ["previousLocationId", "nextLocationId", "appliesInBothDirections"];
+
+    /// <summary>
+    /// Takes what an older hall plan wrote on <paramref name="location"/> and its tracks that is now the timetable's
+    /// (instructions entered in Module Draw, for one) out of their unknown properties into
+    /// <paramref name="timetable"/>, where it differs from the defaults.
+    /// </summary>
+    private static void TakePlanningFrom(Timetable timetable, OperationLocation location)
+    {
+        var options = PlanJson.CreateOptions();
+        if (Taken(location, LocationPlanningData, "locationId") is { } planningJson &&
+            planningJson.Deserialize<LocationPlanning>(options) is { } planning &&
+            !IsDefault(planning, new LocationPlanning { LocationId = location.Id }, options))
+        {
+            timetable.ForgetPlanningOf(location);
+            timetable.LocationPlanning.Add(planning);
+        }
+        foreach (var track in location.Tracks)
+        {
+            if (Taken(track, TrackRouteData, "trackId") is not { } routeJson || routeJson.Deserialize<StationTrackRoute>(options) is not { } route || !route.IsGiven) continue;
+            route.LocationId = location.Id;
+            timetable.ForgetRouteOf(track);
+            timetable.StationTrackRoutes.Add(route);
+        }
+    }
+
+    private static JsonObject? Taken(LayoutPart part, string[] names, string key)
+    {
+        if (part.ExtensionData is not { Count: > 0 } extra) return null;
+        JsonObject? taken = null;
+        foreach (var name in names)
+        {
+            if (!extra.Remove(name, out var value)) continue;
+            taken ??= [];
+            taken[name] = JsonNode.Parse(value.GetRawText());
+        }
+        if (taken is null) return null;
+        taken[key] = part switch { OperationLocation location => location.Id, StationTrack track => track.Id, _ => 0 };
+        return taken;
+    }
+
+    private static bool IsDefault<T>(T value, T defaults, JsonSerializerOptions options) =>
+        JsonSerializer.Serialize(value, options) == JsonSerializer.Serialize(defaults, options);
 
     /// <summary>The country most of the hall plan's locations are in, if any of them has one the planner knows.</summary>
     internal static int? MostCommonCountryId(Layout hallPlan) =>

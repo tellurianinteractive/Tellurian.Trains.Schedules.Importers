@@ -128,8 +128,8 @@ public static class MeetNoteExtensions
         public IEnumerable<ICallNote> MeetNotes(Sessions readerSessions, SessionsSettings settings)
         {
             call = call.ValueOrException(nameof(call));
-            if (call.OperationLocation.HideMeets) yield break;
             if (call.Train is not { } train) yield break;
+            if (train.Timetable?.PlanningOf(call.OperationLocation).HideMeets == true) yield break;
             if (call.IsTrainOriginOrTerminus) yield break;
 
             var direction = call.DirectionInto;

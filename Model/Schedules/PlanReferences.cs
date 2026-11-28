@@ -67,6 +67,23 @@ internal static class PlanReferences
         var tracks = layout.OperationLocations.SelectMany(l => l.Tracks).GroupBy(t => t.Id).ToDictionary(g => g.Key, g => g.First());
         var locations = layout.OperationLocations.ToDictionary(l => l.Id);
         var options = timetable.CargoFlowOptions.GroupBy(o => o.Id).ToDictionary(g => g.Key, g => g.First());
+        var stretches = layout.TrackStretches.GroupBy(s => s.Id).ToDictionary(g => g.Key, g => g.First());
+        foreach (var company in timetable.Companies)
+        {
+            company.Timetable = timetable;
+            company.TimetableId = timetable.Id;
+        }
+        foreach (var stretch in timetable.TimetableStretches)
+        {
+            stretch.Timetable = timetable;
+            if (stretch.Stretches.Count == 0 && stretch.StretchIds is { Count: > 0 } ids) stretch.Stretches = [.. ids.Select(stretches.GetValueOrDefault).OfType<TrackStretch>()];
+        }
+        foreach (var stretch in timetable.DispatchStretches)
+        {
+            if (stretch.From is null && stretch.FromId is int from && locations.GetValueOrDefault(from) is { } fromLocation) stretch.From = fromLocation;
+            if (stretch.To is null && stretch.ToId is int to && locations.GetValueOrDefault(to) is { } toLocation) stretch.To = toLocation;
+            if (stretch.Stretches.Count == 0 && stretch.StretchIds is { Count: > 0 } ids) stretch.Stretches = [.. ids.Select(stretches.GetValueOrDefault).OfType<TrackStretch>()];
+        }
         foreach (var option in timetable.CargoFlowOptions)
         {
             foreach (var origin in option.Origins) if (origin.Location is null && origin.LocationId is int id && locations.GetValueOrDefault(id) is { } location) origin.Location = location;

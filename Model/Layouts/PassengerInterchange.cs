@@ -20,44 +20,33 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// </remarks>
 public static class PassengerInterchangeExtensions
 {
-    extension(Layout layout)
+    extension(Timetable timetable)
     {
         /// <summary>
         /// The layout's passenger interchanges, in layout order. Empty where the meeting is not worked
         /// with passenger tickets, so a caller never has to ask the setting itself.
         /// </summary>
-        public IReadOnlyList<Station> PassengerInterchanges
-        {
-            get
-            {
-                layout = layout.ValueOrException(nameof(layout));
-                if (!layout.Settings.General.UsePassengerTickets) return [];
-                return
-                [
-                    .. layout.OperationLocations
-                        .OfType<Station>()
-                        .Where(station => station.IsPassengerInterchange && station.HasPassengerExchange)
-                ];
-            }
-        }
+        public IReadOnlyList<Station> PassengerInterchanges =>
+            !timetable.Settings.General.UsePassengerTickets ? [] :
+            [
+                .. timetable.Layout.OperationLocations
+                    .OfType<Station>()
+                    .Where(station => station.HasPassengerExchange && timetable.PlanningOf(station).IsPassengerInterchange)
+            ];
+
+        /// <summary>
+        /// Whether the passengers going on by another train are handed over at <paramref name="location"/>: the station is
+        /// marked a passenger interchange and the timetable is worked with passenger tickets. What every report and note
+        /// asks, so neither has to combine the two itself.
+        /// </summary>
+        public bool ExchangesTransferringPassengers(OperationLocation location) =>
+            location is Station { HasPassengerExchange: true } station &&
+            timetable.Settings.General.UsePassengerTickets &&
+            timetable.PlanningOf(station).IsPassengerInterchange;
     }
 
     extension(OperationLocation location)
     {
-        /// <summary>
-        /// Whether the passengers going on by another train are handed over here: the station is marked a
-        /// passenger interchange and its layout is worked with passenger tickets. What every report and
-        /// note asks, so neither has to combine the two itself.
-        /// </summary>
-        /// <remarks>
-        /// A location not yet joined to a layout answers <c>false</c>. The setting lives on the layout,
-        /// so until there is one there is nothing to say the tickets are in use.
-        /// </remarks>
-        public bool ExchangesTransferringPassengers =>
-            location is Station { IsPassengerInterchange: true, HasPassengerExchange: true } station &&
-            station.Layout is { } layout &&
-            layout.Settings.General.UsePassengerTickets;
-
         /// <summary>
         /// Whether this location may be marked a passenger interchange: a station, and one that exchanges
         /// passengers. Somewhere a passenger can neither board nor alight is not somewhere they can

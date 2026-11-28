@@ -81,13 +81,14 @@ public class OperationLocationTypeChangeTests
     public void ChangingTypeCarriesOverHideMeetsAndHidePassings()
     {
         var (layout, _, b, _) = LineABC();
-        b.HideMeets = true;
-        b.HidePassings = true;
+        var timetable = new Timetable("Test", layout);
+        timetable.EnsurePlanningOf(b).HideMeets = true;
+        timetable.EnsurePlanningOf(b).HidePassings = true;
 
         var replacement = layout.ChangeOperationLocationType(b, OperationLocationKind.SignalControlled);
 
-        Assert.IsTrue(replacement.HideMeets);
-        Assert.IsTrue(replacement.HidePassings);
+        Assert.IsTrue(timetable.PlanningOf(replacement).HideMeets, "what is decided for a location is kept by its id");
+        Assert.IsTrue(timetable.PlanningOf(replacement).HidePassings);
     }
 
     [TestMethod]

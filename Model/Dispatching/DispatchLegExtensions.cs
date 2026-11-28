@@ -35,7 +35,7 @@ public static class DispatchLegExtensions
             {
                 var calls = train.CallsInRunOrder;
                 if (calls.Count < 2) return [];
-                var stretches = calls[0].OperationLocation.Layout?.DispatchStretches.ToList() ?? [];
+                var stretches = train.Timetable?.DispatchStretches.ToList() ?? [];
 
                 var points = new SortedSet<int> { 0, calls.Count - 1 };
                 for (var i = 1; i < calls.Count - 1; i++)

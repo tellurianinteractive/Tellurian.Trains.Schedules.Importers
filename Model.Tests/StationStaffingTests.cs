@@ -1,4 +1,4 @@
-using System.Text.Json;
+using Tellurian.Trains.Schedules.Model.PlanFiles;
 using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Tests;
@@ -9,30 +9,35 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 [TestClass]
 public class StationStaffingTests
 {
-    private static Station Manned(int posts, int shifts = 1)
+    // A timetable for each test, which keeps what is decided for its stations.
+    private readonly Timetable Timetable = new("Test", new Layout { Name = "Test" });
+
+    private Station Manned(int posts, int shifts = 1, int id = 1)
     {
-        var station = new Station(1, "Alvesta", "Av") { IsManned = true, ShiftCount = shifts };
-        for (var i = 0; i < posts; i++) station.StaffPosts.Add(new StaffPost { Roles = StaffRolesExtensions.SoleOperator });
+        var station = (Station)Timetable.Layout.Add(new Station(id, $"Station {id}", $"S{id}") { IsManned = true });
+        var planning = Timetable.EnsurePlanningOf(station);
+        planning.ShiftCount = shifts;
+        for (var i = 0; i < posts; i++) planning.StaffPosts.Add(new StaffPost { Roles = StaffRolesExtensions.SoleOperator });
         return station;
     }
 
     [TestMethod]
     public void EachPostIsOneParticipant()
     {
-        Assert.AreEqual(3, Manned(3).ParticipantsNeeded);
+        Assert.AreEqual(3, Timetable.ParticipantsNeeded(Manned(3)));
     }
 
     [TestMethod]
     public void EveryShiftNeedsTheWholeStaffAgain()
     {
-        Assert.AreEqual(6, Manned(2, shifts: 3).ParticipantsNeeded);
+        Assert.AreEqual(6, Timetable.ParticipantsNeeded(Manned(2, shifts: 3)));
     }
 
     [TestMethod]
     public void ShiftsAreKeptBetweenOneAndThree()
     {
-        Assert.AreEqual(2, Manned(2, shifts: 0).ParticipantsNeeded);
-        Assert.AreEqual(6, Manned(2, shifts: 9).ParticipantsNeeded);
+        Assert.AreEqual(2, Timetable.ParticipantsNeeded(Manned(2, shifts: 0)));
+        Assert.AreEqual(6, Timetable.ParticipantsNeeded(Manned(2, shifts: 9, id: 2)));
     }
 
     [TestMethod]
@@ -41,24 +46,19 @@ public class StationStaffingTests
         var station = Manned(2);
         station.IsManned = false;
 
-        Assert.AreEqual(0, station.ParticipantsNeeded);
-        Assert.HasCount(2, station.StaffPosts);
+        Assert.AreEqual(0, Timetable.ParticipantsNeeded(station));
+        Assert.HasCount(2, Timetable.PlanningOf(station).StaffPosts);
         station.IsManned = true;
-        Assert.AreEqual(2, station.ParticipantsNeeded);
+        Assert.AreEqual(2, Timetable.ParticipantsNeeded(station));
     }
 
     [TestMethod]
     public void TheLayoutAddsUpItsStations()
     {
-        var layout = new Layout { Name = "Test" };
-        layout.Add(Manned(2, shifts: 2));
-        var other = Manned(1);
-        other.Id = 2;
-        other.Name = "Nässjö";
-        other.Signature = "Nä";
-        layout.Add(other);
+        Manned(2, shifts: 2);
+        Manned(1, id: 2);
 
-        Assert.AreEqual(5, layout.ParticipantsNeeded);
+        Assert.AreEqual(5, Timetable.ParticipantsNeeded());
     }
 
     [TestMethod]
@@ -76,16 +76,16 @@ public class StationStaffingTests
     [TestMethod]
     public void StaffingSurvivesSaving()
     {
-        var options = new JsonSerializerOptions { ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve, MaxDepth = 256 };
         var station = Manned(2, shifts: 2);
-        station.StaffPosts[1].Roles = StaffRoles.Trainee;
+        Timetable.PlanningOf(station).StaffPosts[1].Roles = StaffRoles.Trainee;
 
-        var restored = JsonSerializer.Deserialize<Station>(JsonSerializer.Serialize(station, options), options)!;
+        var restored = PlanFile.Read(PlanFile.Write(Plan.Create("Test", Timetable))).Timetable;
 
-        Assert.AreEqual(2, restored.ShiftCount);
+        var planning = restored.PlanningOf(restored.Layout.OperationLocations.Single());
+        Assert.AreEqual(2, planning.ShiftCount);
         CollectionAssert.AreEqual(
             new[] { StaffRolesExtensions.SoleOperator, StaffRoles.Trainee },
-            restored.StaffPosts.Select(post => post.Roles).ToArray());
+            planning.StaffPosts.Select(post => post.Roles).ToArray());
     }
 }
 

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Tellurian.Trains.Schedules.Model.Settings;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
@@ -75,21 +74,6 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
 
     /// <summary>The owner of the module, as a name. Optional.</summary>
     public string? Owner { get; set; }
-
-    /// <summary>The phone number of whoever operates the location. Optional.</summary>
-    public int? PhoneNumber { get; set; }
-
-    /// <summary>
-    /// Instructions, as markdown, for how the location is worked in this layout: which tracks are used for what, how
-    /// the shunting is arranged. Not the owner's general instructions for the module.
-    /// </summary>
-    public string Instructions { get; set; } = string.Empty;
-
-    /// <summary>Suppresses notes about trains crossing or overtaking at this location.</summary>
-    public bool HideMeets { get; set; }
-
-    /// <summary>Suppresses trains that don't stop at this location, in some reports.</summary>
-    public virtual bool HidePassings { get; set; }
 
     /// <summary>A train can change its direction of travel here, which typically requires a loco runaround.</summary>
     public virtual bool IsChangingTrainDirectionPossible { get; set; }
@@ -169,9 +153,6 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
     /// <summary>The tracks of the location.</summary>
     public IList<StationTrack> Tracks { get; set; }
 
-    /// <summary>The operational times of this location; a value that is null takes the layout's default.</summary>
-    public StationTimings Timings { get; set; } = new();
-
     /// <summary>
     /// What other systems keep about the location, with one entry per system, copied unchanged from its source, e.g.
     /// the Module Registry's station id. An import uses it to find the same location again.
@@ -192,8 +173,8 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
     };
 
     /// <summary>
-    /// A copy with copies of what the location owns: its tracks, which belong to the copy, its timings, its lock key and,
-    /// for a station, its staff posts and the list of its regions. The locations it refers to, its layout and its
+    /// A copy with copies of what the location owns: its tracks, which belong to the copy, its lock key and, for a
+    /// station, the list of its regions. The locations it refers to, its layout and its
     /// regions themselves are not copied.
     /// </summary>
     public override OperationLocation Copy()
@@ -205,12 +186,10 @@ public closed class OperationLocation : LayoutPart, IEquatable<OperationLocation
             copied.Station = copy;
             return copied;
         })];
-        copy.Timings = Timings.Copy();
         copy.LockKey = LockKey is null ? null : new() { Name = LockKey.Name, HeldAt = LockKey.HeldAt };
         copy.ExternalReferences = ExternalReferences is null ? null : new(ExternalReferences);
         if (copy is Station station)
         {
-            station.StaffPosts = [.. station.StaffPosts.Select(post => new StaffPost { Roles = post.Roles })];
             station.Regions = [.. station.Regions];
             station.UnresolvedRegionIds = [.. station.UnresolvedRegionIds];
         }

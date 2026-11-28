@@ -2,63 +2,96 @@ using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
-/// <summary>
-/// Provides extension methods for <see cref="Company"/>.
-/// </summary>
-public static class CompanyExtensions
+/// <summary>A railway company that operates trains and vehicles on the layout. Stored in <see cref="Timetables.Timetable.Companies"/> and referred to by id.</summary>
+public sealed class Company : IEquatable<Company>
 {
-    extension(Company company)
+    /// <summary>For JSON and EF Core.</summary>
+    [JsonConstructor]
+    private Company()
     {
-        /// <summary>
-        /// Gets a display name including the company name, signature, and country code (resolved
-        /// from <see cref="Company.CountryId"/> via the static catalogue; the code is omitted when
-        /// no country is set).
-        /// </summary>
-        public string DisplayName =>
-            Country.ById(company.CountryId ?? 0) is { } country
-                ? $"{company.Name} ({company.Signature}-{country.CountryCode})"
-                : $"{company.Name} ({company.Signature})";
-
-        /// <summary>
-        /// Builds the text shown for the company in a selection drop-down: the company name followed
-        /// by its country's name in the current language, for example <c>DB Cargo Germany</c>. The
-        /// country name is omitted when no country is set.
-        /// </summary>
-        /// <param name="translateCountry">Resolves a country's <see cref="Country.ResourceKey"/> to
-        /// its display name in the current language.</param>
-        public string DropdownText(Func<string, string> translateCountry) =>
-            Country.ById(company.CountryId ?? 0) is { } country
-                ? $"{company.Name} {translateCountry(country.ResourceKey)}"
-                : company.Name;
-
-        /// <summary>
-        /// The text shown for the company where one is chosen from a list: the name, followed by the operating
-        /// period when one is given, e.g. <c>Statens Järnvägar (1988–2008)</c>. Companies may share a signature,
-        /// one per period, and the period is what tells them apart.
-        /// </summary>
-        public string ChoiceText =>
-            company.OperatingPeriodText is { Length: > 0 } period ? $"{company.Name} ({period})" : company.Name;
-
-        /// <summary>
-        /// Creates a company from just a signature, using the signature as the name.
-        /// </summary>
-        /// <param name="signature">The signature to use.</param>
-        /// <returns>A new company with the signature as both name and signature.</returns>
-        public static Company FromSignature(string signature) =>
-            new(0, signature, signature);
+        Name = string.Empty;
+        Signature = string.Empty;
     }
 
-    extension(IEnumerable<Company> companies)
+    /// <summary>Creates a company.</summary>
+    public Company(int id, string name, string signature, int? countryId = null)
     {
-        /// <summary>
-        /// The companies in the order they are offered for choice: by name, then the same company's periods in
-        /// time order, a period without a first year first.
-        /// </summary>
-        public IEnumerable<Company> InChoiceOrder =>
-            companies
-                .OrderBy(c => c.Name, StringComparer.CurrentCulture)
-                .ThenBy(c => c.OperatesFromYear ?? int.MinValue)
-                .ThenBy(c => c.OperatesToYear ?? int.MaxValue)
-                .ThenBy(c => c.Id);
+        Id = id;
+        Name = name;
+        Signature = signature;
+        CountryId = countryId;
     }
+
+    /// <summary>The identity of the company within the layout.</summary>
+    public int Id { get; set; }
+
+    /// <summary>The full name, e.g. "Statens Järnvägar".</summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The short name, e.g. "SJ". Not unique: one company may appear several times with the same signature,
+    /// e.g. for different periods with different logos. <see cref="Id"/> identifies the company.
+    /// </summary>
+    public string Signature { get; set; }
+
+    /// <summary>The id of the company's country, or null.</summary>
+    public int? CountryId { get; set; }
+
+    /// <summary>The company's logo, as a data URL, or null.</summary>
+    public string? Logo { get; set; }
+
+    /// <summary>
+    /// The first year the company operates, or null when it has no known start. Together with
+    /// <see cref="OperatesToYear"/> it tells apart companies that share a <see cref="Signature"/>,
+    /// e.g. one per period with a logo of its own.
+    /// </summary>
+    public int? OperatesFromYear { get; set; }
+
+    /// <summary>The last year the company operates (inclusive), or null when it has no known end.</summary>
+    public int? OperatesToYear { get; set; }
+
+    /// <summary>
+    /// Whether this company and <paramref name="other"/> operate in at least one common year. A missing
+    /// year leaves the period open at that end, so a company without years overlaps every other.
+    /// </summary>
+    public bool OperatesInSamePeriodAs(Company other)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+        return (OperatesFromYear ?? int.MinValue) <= (other.OperatesToYear ?? int.MaxValue)
+            && (other.OperatesFromYear ?? int.MinValue) <= (OperatesToYear ?? int.MaxValue);
+    }
+
+    /// <summary>
+    /// The operating period as text, e.g. "1988–2008", "1988–" or "–2008", or empty when no years are given.
+    /// </summary>
+    [JsonIgnore]
+    public string OperatingPeriodText =>
+        OperatesFromYear is null && OperatesToYear is null ? string.Empty
+        : OperatesFromYear == OperatesToYear ? $"{OperatesFromYear}"
+        : $"{OperatesFromYear}–{OperatesToYear}";
+
+    /// <summary>The foreign key of the timetable. Not written: the timetable owns the company.</summary>
+    [JsonIgnore]
+    public int TimetableId { get; set; }
+
+    /// <summary>The timetable the company belongs to. Not written: the timetable owns the company.</summary>
+    [JsonIgnore]
+    public Timetables.Timetable Timetable { get; set; } = default!;
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Companies are the same when they have the same <see cref="Id"/>; signatures may repeat. A company
+    /// not yet given an id (0, before the database assigns one) is only the same as itself.
+    /// </remarks>
+    public bool Equals(Company? other) =>
+        other is not null && (ReferenceEquals(this, other) || Id != 0 && Id == other.Id);
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => obj is Company other && Equals(other);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => Id.GetHashCode();
+
+    /// <inheritdoc/>
+    public override string ToString() => $"{Name} ({Signature})";
 }

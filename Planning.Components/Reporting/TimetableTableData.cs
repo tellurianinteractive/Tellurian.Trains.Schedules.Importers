@@ -200,7 +200,7 @@ public sealed class TimetableTable
         {
             if (!ownerTable.TryGetValue(station, out var id))
             {
-                id = station.Layout.TimetableStretches
+                id = (stretch.Timetable?.TimetableStretches ?? [])
                     .Where(s => s.Id != stretch.Id && s.Stations.Contains(station))
                     .Select(s => (int?)s.Id).Min() ?? int.MaxValue;
                 ownerTable[station] = id;

@@ -3,14 +3,14 @@ using Tellurian.Trains.Schedules.Model.Settings;
 namespace Tellurian.Trains.Schedules.Planning.Components.Scheduling;
 
 /// <summary>
-/// Maps the persisted, layout-level <see cref="LayoutSettings"/> to the rendering-level
+/// Maps the persisted, layout-level <see cref="PlanSettings"/> to the rendering-level
 /// <see cref="GraphSettings"/> used by the graphical schedule. Derived layout values
 /// (axis label spacing, margins) are taken from <see cref="GraphSettings.Default"/>;
 /// only the user-controlled preferences and the operating time window are overridden.
 /// </summary>
 public static class GraphSettingsMapping
 {
-    extension(LayoutSettings settings)
+    extension(PlanSettings settings)
     {
         /// <summary>Builds a <see cref="GraphSettings"/> from these layout settings.</summary>
         public GraphSettings ToGraphSettings()

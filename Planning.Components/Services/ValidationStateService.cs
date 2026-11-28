@@ -122,8 +122,8 @@ public sealed class ValidationStateService : IDisposable
         _hasComputed = true;
         try
         {
-            _errors = _schedule.Schedule is { } plan && _schedule.Layout is { } layout
-                ? [.. plan.GetValidationErrors(layout.Settings.Validation)]
+            _errors = _schedule.Schedule is { } plan && _schedule.Timetable is { } timetable
+                ? [.. plan.GetValidationErrors(timetable.Settings.Validation)]
                 : [];
             CheckFailure = null;
         }

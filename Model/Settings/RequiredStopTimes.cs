@@ -24,14 +24,15 @@ public static class RequiredStopTimes
         /// </summary>
         /// <param name="location">The location the train stops at.</param>
         /// <param name="locoRunsRound">Whether the loco is run round to the other end of the train there.</param>
-        public int RequiredStopMinutes(OperationLocation location, bool locoRunsRound)
+        public int RequiredStopMinutes(OperationLocation location, StationTimings timings, bool locoRunsRound)
         {
+            ArgumentNullException.ThrowIfNull(timings);
             var defaults = settings.StationTimings;
-            var required = location.Timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes ?? 3;
+            var required = timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes ?? 3;
             if (location.HasTrainClearanceTime)
-                required = Math.Max(required, settings.FastClockMinutesOf(location.Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes ?? 1));
+                required = Math.Max(required, settings.FastClockMinutesOf(timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes ?? 1));
             if (locoRunsRound)
-                required = Math.Max(required, settings.FastClockMinutesOf(location.Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes ?? 5));
+                required = Math.Max(required, settings.FastClockMinutesOf(timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes ?? 5));
             return required;
         }
     }

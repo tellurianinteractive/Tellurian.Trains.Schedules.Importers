@@ -48,11 +48,6 @@ public static class LayoutSerialization
         ArgumentNullException.ThrowIfNull(layout);
         var locations = layout.OperationLocations.GroupBy(l => l.Id).ToDictionary(g => g.Key, g => g.First());
         var stretches = layout.TrackStretches.GroupBy(s => s.Id).ToDictionary(g => g.Key, g => g.First());
-        foreach (var company in layout.Companies)
-        {
-            company.Layout = layout;
-            company.LayoutId = layout.Id;
-        }
         foreach (var location in layout.OperationLocations)
         {
             location.Layout = layout;
@@ -72,14 +67,6 @@ public static class LayoutSerialization
             stretch.LayoutId = layout.Id;
             stretch.Start ??= locations.GetValueOrDefault(stretch.StartId)!;
             stretch.End ??= locations.GetValueOrDefault(stretch.EndId)!;
-        }
-        foreach (var stretch in layout.TimetableStretches)
-            if (stretch.Stretches.Count == 0 && stretch.StretchIds is { Count: > 0 } ids) stretch.Stretches = [.. ids.Select(stretches.GetValueOrDefault).OfType<TrackStretch>()];
-        foreach (var stretch in layout.DispatchStretches)
-        {
-            if (stretch.From is null && stretch.FromId is int from && locations.GetValueOrDefault(from) is { } fromLocation) stretch.From = fromLocation;
-            if (stretch.To is null && stretch.ToId is int to && locations.GetValueOrDefault(to) is { } toLocation) stretch.To = toLocation;
-            if (stretch.Stretches.Count == 0 && stretch.StretchIds is { Count: > 0 } ids) stretch.Stretches = [.. ids.Select(stretches.GetValueOrDefault).OfType<TrackStretch>()];
         }
     }
 }

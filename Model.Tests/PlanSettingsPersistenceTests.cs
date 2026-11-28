@@ -21,17 +21,17 @@ public class PlanSettingsPersistenceTests
     public void GraphicTimetableSettingsSurvivePlanRoundTrip()
     {
         var layout = new Layout { Id = 1, Name = "Test" };
-        layout.Settings.GraphicTimetable.KilometerSpacing = 99;
-        layout.Settings.GraphicTimetable.StationSpacing = 77;
         var timetable = new Timetable("TT", layout) { Id = 1 };
+        timetable.Settings.GraphicTimetable.KilometerSpacing = 99;
+        timetable.Settings.GraphicTimetable.StationSpacing = 77;
         var plan = Plan.Create("Plan", timetable);
 
         var json = JsonSerializer.Serialize(plan, Options);
         var restored = JsonSerializer.Deserialize<Plan>(json, Options);
 
         Assert.IsNotNull(restored);
-        Assert.AreEqual(99, restored.Timetable.Layout.Settings.GraphicTimetable.KilometerSpacing);
-        Assert.AreEqual(77, restored.Timetable.Layout.Settings.GraphicTimetable.StationSpacing);
+        Assert.AreEqual(99, restored.Timetable.Settings.GraphicTimetable.KilometerSpacing);
+        Assert.AreEqual(77, restored.Timetable.Settings.GraphicTimetable.StationSpacing);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class PlanSettingsPersistenceTests
     public void PlanWithEmptyTimetableStretchStillSerializes()
     {
         var plan = PlanWithTrain(out _);
-        plan.Layout.TimetableStretches.First().Stretches.Clear();
+        plan.Timetable.TimetableStretches.First().Stretches.Clear();
 
         Assert.IsNotNull(JsonSerializer.Serialize(plan, PlanJson.CreateOptions()));
     }
@@ -124,8 +124,8 @@ public class PlanSettingsPersistenceTests
 
         Assert.AreEqual(3, plan.Layout.OperationLocations.Count, "operation locations");
         Assert.AreEqual(2, plan.Layout.TrackStretches.Count, "track stretches");
-        Assert.AreEqual(2, plan.Layout.TimetableStretches.First().Stretches.Count, "timetable stretch route");
-        Assert.AreEqual(2, plan.Layout.DispatchStretches.Count, "dispatch stretches");
+        Assert.AreEqual(2, plan.Timetable.TimetableStretches.First().Stretches.Count, "timetable stretch route");
+        Assert.AreEqual(2, plan.Timetable.DispatchStretches.Count, "dispatch stretches");
         var train = plan.Timetable.Trains.Single();
         Assert.AreEqual(3, train.Calls.Count, "calls");
         // That version said what a category carried with two booleans; they are read into Content.
@@ -184,13 +184,13 @@ public class PlanSettingsPersistenceTests
         // every session.
         var plan = PlanWithTrain(out _);
         var moved = plan.Layout.OperationLocations.Last();
-        plan.Layout.SetTopologyPosition(moved, 320.0, 184.0);
+        plan.Timetable.SetTopologyPosition(moved, 320.0, 184.0);
 
         var json = JsonSerializer.Serialize(plan, PlanJson.CreateOptions());
         var restored = JsonSerializer.Deserialize<Plan>(json, PlanJson.CreateOptions());
 
         Assert.IsNotNull(restored);
-        var position = restored.Layout.TopologyPositionOf(restored.Layout.OperationLocations.Last());
+        var position = restored.Timetable.TopologyPositionOf(restored.Layout.OperationLocations.Last());
         Assert.IsNotNull(position);
         Assert.AreEqual(320.0, position.X);
         Assert.AreEqual(184.0, position.Y);
@@ -204,7 +204,7 @@ public class PlanSettingsPersistenceTests
         var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, PlanJson.CreateOptions()), PlanJson.CreateOptions());
 
         Assert.IsNotNull(restored);
-        Assert.IsFalse(restored.Layout.HasTopologyPositions);
+        Assert.IsFalse(restored.Timetable.HasTopologyPositions);
     }
 
     // A minimal plan of the shape the app creates: two stations joined by a track stretch, one
@@ -217,9 +217,9 @@ public class PlanSettingsPersistenceTests
         var stretch = layout.Add(new TrackStretch(1, from, to, 10, 1, 100, 5));
         var timetableStretch = new TimetableStretch(1, "1", "Alpha-Beta");
         timetableStretch.AddLast(stretch);
-        layout.Add(timetableStretch);
 
         var timetable = new Timetable("TT", layout) { Id = 1 };
+        timetable.Add(timetableStretch);
         train = new Train(1, 101);
         timetable.Add(train);
         train.Add(new StationCall(1, from.Tracks.First(), Time.FromHourAndMinute(7, 50), Time.FromHourAndMinute(8, 0)) { IsDeparture = true });

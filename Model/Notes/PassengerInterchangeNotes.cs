@@ -37,7 +37,7 @@ public static class PassengerInterchangeNoteExtensions
                 call = call.ValueOrException(nameof(call));
                 // IsPassenger is derived from the category, so it has to be asked rather than matched.
                 if (call.Train is not { } train || !train.IsPassenger) return [];
-                if (!call.IsStop || !call.OperationLocation.ExchangesTransferringPassengers) return [];
+                if (!call.IsStop || call.Train?.Timetable is not { } timetable || !timetable.ExchangesTransferringPassengers(call.OperationLocation)) return [];
                 return
                 [
                     new ExchangeTransferringPassengersNote

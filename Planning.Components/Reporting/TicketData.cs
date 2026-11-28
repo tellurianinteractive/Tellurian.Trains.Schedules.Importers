@@ -90,7 +90,7 @@ public static class TicketDataExtensions
 
             var sellers = SellingCompanies(timetable);
             var stopping = PassengerTrainsStopping(timetable);
-            var general = timetable.Layout.Settings.General;
+            var general = timetable.Settings.General;
 
             return
             [

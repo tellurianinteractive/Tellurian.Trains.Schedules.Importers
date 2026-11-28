@@ -85,10 +85,11 @@ public class ScheduleDbContextIntegrationTests
         await context.Database.OpenConnectionAsync(CancellationToken);
         await context.Database.EnsureCreatedAsync(CancellationToken);
 
-        // Act - Create and save a simple layout with a company and station
+        // Act - Create and save a simple layout with a station, and its timetable with a company
         var layout = new Layout { Id = 1, Name = "Test Layout" };
+        var timetable = new Timetable("Test Timetable", layout) { Id = 1 };
         var company = new Company(1, "Test Company", "TST", countryId: 4); // 4 = Germany
-        layout.Add(company);
+        timetable.Add(company);
 
         var station = new Station(1, "Test Station", "TS");
         layout.Add(station);
@@ -97,19 +98,20 @@ public class ScheduleDbContextIntegrationTests
         station.Add(track);
 
         context.Layouts.Add(layout);
+        context.Timetables.Add(timetable);
         await context.SaveChangesAsync(CancellationToken);
 
         // Assert - Query back
+        var savedTimetable = await context.Timetables.Include(t => t.Companies).FirstAsync(CancellationToken);
         var savedLayout = await context.Layouts
-            .Include(l => l.Companies)
             .Include(l => l.OperationLocations)
             .ThenInclude(s => s.Tracks)
             .FirstAsync(CancellationToken);
 
         Assert.AreEqual("Test Layout", savedLayout.Name);
-        Assert.AreEqual(1, savedLayout.Companies.Count);
-        Assert.AreEqual("Test Company", savedLayout.Companies.First().Name);
-        Assert.AreEqual(4, savedLayout.Companies.First().CountryId);
+        Assert.AreEqual(1, savedTimetable.Companies.Count);
+        Assert.AreEqual("Test Company", savedTimetable.Companies.First().Name);
+        Assert.AreEqual(4, savedTimetable.Companies.First().CountryId);
         Assert.AreEqual(1, savedLayout.OperationLocations.Count);
         Assert.AreEqual("Test Station", savedLayout.OperationLocations.First().Name);
         Assert.AreEqual(1, savedLayout.OperationLocations.First().Tracks.Count);
@@ -291,12 +293,12 @@ public class ScheduleDbContextIntegrationTests
         var schedule = (await importer.ImportScheduleAsync("Barmstedt2022")).Item;
         Assert.IsNotNull(schedule);
 
-        schedule.Timetable.Layout.Settings.GraphicTimetable.KilometerSpacing = 99;
+        schedule.Timetable.Settings.GraphicTimetable.KilometerSpacing = 99;
 
         var restored = Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Read(Tellurian.Trains.Schedules.Model.PlanFiles.PlanFile.Write(schedule));
 
         Assert.IsNotNull(restored);
-        Assert.AreEqual(99, restored.Timetable.Layout.Settings.GraphicTimetable.KilometerSpacing);
+        Assert.AreEqual(99, restored.Timetable.Settings.GraphicTimetable.KilometerSpacing);
     }
 
     [TestMethod]

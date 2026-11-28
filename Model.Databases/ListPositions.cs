@@ -34,13 +34,13 @@ internal static class ListPositions
 
     private static readonly IOrderedList[] Lists =
     [
-        Owned<Layout, Company>(l => l.Companies),
         Owned<Layout, Region>(l => l.Regions),
         Owned<Layout, OperationLocation>(l => l.OperationLocations),
         Owned<Layout, TrackStretch>(l => l.TrackStretches),
-        Owned<Layout, TimetableStretch>(l => l.TimetableStretches),
-        Owned<Layout, DispatchStretch>(l => l.DispatchStretches),
         Owned<OperationLocation, StationTrack>(l => l.Tracks),
+        Owned<Timetable, Company>(t => t.Companies),
+        Owned<Timetable, TimetableStretch>(t => t.TimetableStretches),
+        Owned<Timetable, DispatchStretch>(t => t.DispatchStretches),
         Owned<Timetable, TrainCategory>(t => t.TrainCategories),
         Owned<Timetable, CargoFlowOptions>(t => t.CargoFlowOptions),
         Owned<Timetable, Train>(t => t.Trains),

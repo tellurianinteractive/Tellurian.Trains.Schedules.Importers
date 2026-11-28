@@ -13,7 +13,7 @@ public class PlanCreateTrainStopPatternTests
 
     private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
 
-    private static Plan SimplePlan() => new("Test", new Timetable("Test", TestLayoutFactory.CreateSimpleLayout()));
+    private static Plan SimplePlan() => new("Test", TestLayoutFactory.NewTimetable("Test", TestLayoutFactory.CreateSimpleLayout()));
 
     private static OperationLocation Location(Plan plan, string signature) =>
         plan.Layout.OperationLocations.First(l => l.Signature == signature);

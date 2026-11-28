@@ -125,7 +125,7 @@ public class LayoutChangeRulesTests
         Assert.IsFalse(Layout.OperationLocations.Any(l => l.Signature == "Yb"));
         var stretch = Layout.TrackStretches.Single();
         Assert.AreEqual(18, stretch.Distance);
-        Assert.AreSame(stretch, Layout.TimetableStretches.Single().Stretches.Single());
+        Assert.AreSame(stretch, Plan.Timetable.TimetableStretches.Single().Stretches.Single());
         Assert.HasCount(2, StartingAt("G").Calls);
     }
 
@@ -146,7 +146,7 @@ public class LayoutChangeRulesTests
         Assert.IsTrue(x.Tracks.All(t => ReferenceEquals(t.Station, x)));
         Assert.AreEqual(4, Layout.TrackStretches.Single(s => s.Start.Signature == "G").Distance);
         Assert.AreEqual(6, Layout.TrackStretches.Single(s => s.Start.Signature == "X").Distance);
-        CollectionAssert.AreEqual(new[] { "G", "X", "Yb", "Snu" }, Layout.TimetableStretches.Single().Stations.Select(s => s.Signature).ToArray());
+        CollectionAssert.AreEqual(new[] { "G", "X", "Yb", "Snu" }, Plan.Timetable.TimetableStretches.Single().Stations.Select(s => s.Signature).ToArray());
 
         var outward = StartingAt("G").CallsInRunOrder;
         CollectionAssert.AreEqual(new[] { "G", "X", "Yb", "Snu" }, outward.Select(c => c.OperationLocation.Signature).ToArray());

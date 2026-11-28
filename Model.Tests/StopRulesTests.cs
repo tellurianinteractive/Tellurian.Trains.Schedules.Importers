@@ -37,7 +37,7 @@ public class StopRulesTests
 
     private static Plan CreatePlan(Layout layout, Train train)
     {
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.Add(train);
         return new Plan("Test", timetable);
     }

@@ -22,8 +22,8 @@ public class PlanFactoryTests
     {
         var plan = PlanFactory.CreatePlan("New", "sv");
         var layout = plan.Timetable.Layout;
-        Assert.AreEqual(Country.ByLanguage("sv").Id, layout.Settings.Identity.DefaultCountryId);
-        Assert.IsTrue(layout.Countries.Any(c => c.Id == layout.Settings.Identity.DefaultCountryId),
+        Assert.AreEqual(Country.ByLanguage("sv").Id, plan.Timetable.Settings.Identity.DefaultCountryId);
+        Assert.IsTrue(layout.Countries.Any(c => c.Id == plan.Timetable.Settings.Identity.DefaultCountryId),
             "The default country is added to the layout's country catalogue.");
     }
 
@@ -31,7 +31,7 @@ public class PlanFactoryTests
     public void CreatePlanAppliesNewLayoutSettingDefaults()
     {
         var plan = PlanFactory.CreatePlan("New", "en");
-        var settings = plan.Timetable.Layout.Settings;
+        var settings = plan.Timetable.Settings;
         Assert.AreEqual(TimeSpan.FromHours(18), settings.General.EndTime);
         Assert.AreEqual(2, settings.TimeAndSpeed.StationTimings.MinimumStopMinutes);
     }

@@ -23,8 +23,25 @@ public class CatalogueStorageTests
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256,
         Converters = { new WholeCountry() },
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { PlanVersion0Reader.Version0References } },
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { PlanVersion0Reader.Version0References, CompaniesOnTheLayout } },
     };
+
+    // An earlier version kept the companies on the layout; they are the timetable's since schema version 7.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Layout, ICollection<Company>> LegacyCompanies = [];
+
+    private static void CompaniesOnTheLayout(JsonTypeInfo typeInfo)
+    {
+        if (typeInfo.Type != typeof(Layout)) return;
+        var companies = typeInfo.CreateJsonPropertyInfo(typeof(ICollection<Company>), "Companies");
+        companies.Get = layout => LegacyCompanies.TryGetValue((Layout)layout, out var written) ? written : null;
+        typeInfo.Properties.Add(companies);
+    }
+
+    private static string LegacyJson(Plan plan)
+    {
+        LegacyCompanies.AddOrUpdate(plan.Layout, plan.Timetable.Companies);
+        return JsonSerializer.Serialize(plan, LegacyOptions);
+    }
 
     // An earlier version wrote a country as a whole object; the model now writes it as its id.
     private sealed class WholeCountry : JsonConverter<Country>
@@ -70,8 +87,8 @@ public class CatalogueStorageTests
         // Two companies with no id of their own, exactly as a plan carrying imported companies has them.
         danish = new Company(0, "Danske Statsbaner", "DSB", 3);
         german = new Company(0, "Deutsche Bahn", "DB", 4);
-        timetable.Layout.Companies.Add(danish);
-        timetable.Layout.Companies.Add(german);
+        timetable.Companies.Add(danish);
+        timetable.Companies.Add(german);
         var trains = timetable.Trains.ToArray();
         trains[0].Company = danish;
         trains[1].Company = german;
@@ -145,7 +162,7 @@ public class CatalogueStorageTests
         Assert.AreNotEqual(trains[0].Company!.Id, trains[1].Company!.Id,
             "Two companies are never left sharing one id, which a saved plan could not tell apart.");
         foreach (var train in trains)
-            Assert.IsTrue(restored.Timetable.Layout.Companies.Any(c => ReferenceEquals(c, train.Company)),
+            Assert.IsTrue(restored.Timetable.Companies.Any(c => ReferenceEquals(c, train.Company)),
                 "A restored train's company is the catalogue entry itself.");
     }
 
@@ -171,7 +188,7 @@ public class CatalogueStorageTests
     public void ACountryIsStoredAsItsIdAndReadBackFromTheCatalogueInTheCode()
     {
         var plan = CreatePlan(out _, out _);
-        plan.Layout.EnsureCountries();
+        plan.Timetable.EnsureCountries();
         var expected = plan.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray();
         Assert.IsNotEmpty(expected, "Precondition: the layout uses at least one country.");
 
@@ -192,10 +209,10 @@ public class CatalogueStorageTests
     public void APlanWrittenWithWholeCountriesAndCompaniesStillReads()
     {
         var plan = CreatePlan(out _, out _);
-        plan.Layout.EnsureCountries();
+        plan.Timetable.EnsureCountries();
         var expectedCountries = plan.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray();
 
-        var legacyJson = JsonSerializer.Serialize(plan, LegacyOptions);
+        var legacyJson = LegacyJson(plan);
         Assert.Contains("\"ResourceKey\":", legacyJson, StringComparison.Ordinal);
 
         var restored = PlanFile.Read(legacyJson);
@@ -216,11 +233,11 @@ public class CatalogueStorageTests
     public async Task APlanWrittenWithWholeCountriesStillReadsFromAStream()
     {
         var plan = CreatePlan(out _, out _);
-        plan.Layout.EnsureCountries();
+        plan.Timetable.EnsureCountries();
         var expectedCountries = plan.Layout.Countries.Select(c => c.Id).OrderBy(id => id).ToArray();
         Assert.IsNotEmpty(expectedCountries, "Precondition: the layout uses at least one country.");
 
-        using var legacyJson = new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(plan, LegacyOptions)));
+        using var legacyJson = new MemoryStream(Encoding.UTF8.GetBytes(LegacyJson(plan)));
 
         var restored = await PlanFile.ReadAsync(legacyJson);
 

@@ -9,25 +9,29 @@ namespace Tellurian.Trains.Schedules.Model.Tests;
 [TestClass]
 public class RemoteDispatchTests
 {
-    private sealed record Junction(Layout Layout, Station A, OperationLocation B, Station C, Station D);
+    private sealed record Junction(Timetable Timetable, Station A, OperationLocation B, Station C, Station D);
 
     private static Junction NewJunction(OperationLocation? junction = null, bool controlled = true, bool withBranch = true)
     {
         var layout = new Layout { Name = "Test" };
-        var a = (Station)layout.Add(new Station(1, "Alpha", "A") { IsManned = true, PhoneNumber = 11 });
+        var a = (Station)layout.Add(new Station(1, "Alpha", "A") { IsManned = true });
         var b = layout.Add(junction ?? new SignalControlledLocation(2, "Bravo junction", "Bj"));
-        var c = (Station)layout.Add(new Station(3, "Charlie", "C") { IsManned = true, PhoneNumber = 13 });
-        var d = (Station)layout.Add(new Station(4, "Delta", "D") { IsManned = true, PhoneNumber = 14 });
+        var c = (Station)layout.Add(new Station(3, "Charlie", "C") { IsManned = true });
+        var d = (Station)layout.Add(new Station(4, "Delta", "D") { IsManned = true });
         if (controlled) b.ControlledBy = a;
         layout.Add(new TrackStretch(1, a, b, 10));
         layout.Add(new TrackStretch(2, b, c, 10));
         if (withBranch) layout.Add(new TrackStretch(3, d, b, 10));
-        layout.DispatchStretches = layout.CreateDispatchStretches();
-        return new Junction(layout, a, b, c, d);
+        var timetable = new Timetable("Test", layout);
+        timetable.DispatchStretches = layout.CreateDispatchStretches();
+        timetable.EnsurePlanningOf(a).PhoneNumber = 11;
+        timetable.EnsurePlanningOf(c).PhoneNumber = 13;
+        timetable.EnsurePlanningOf(d).PhoneNumber = 14;
+        return new Junction(timetable, a, b, c, d);
     }
 
-    private static string[] Stretches(Layout layout) =>
-        [.. layout.DispatchStretches.Select(d => d.ToString()).Order()];
+    private static string[] Stretches(Timetable timetable) =>
+        [.. timetable.DispatchStretches.Select(d => d.ToString()).Order()];
 
     [TestMethod]
     public void AControlledJunctionIsADispatchEndpoint()
@@ -36,7 +40,7 @@ public class RemoteDispatchTests
 
         Assert.IsTrue(j.B.IsDispatchEndpoint);
         Assert.AreEqual(j.A, j.B.Dispatcher);
-        Assert.AreSequenceEqual(new[] { "Alpha-Bravo junction", "Bravo junction-Charlie", "Delta-Bravo junction" }, Stretches(j.Layout));
+        Assert.AreSequenceEqual(new[] { "Alpha-Bravo junction", "Bravo junction-Charlie", "Delta-Bravo junction" }, Stretches(j.Timetable));
     }
 
     [TestMethod]
@@ -47,7 +51,7 @@ public class RemoteDispatchTests
         Assert.IsTrue(j.B.IsBlockPost);
         Assert.IsFalse(j.B.IsDispatchEndpoint, "A block post has no route of its own to clear.");
         Assert.IsTrue(j.B.IsControlPoint);
-        Assert.AreSequenceEqual(new[] { "Alpha-Charlie" }, Stretches(j.Layout));
+        Assert.AreSequenceEqual(new[] { "Alpha-Charlie" }, Stretches(j.Timetable));
     }
 
     [TestMethod]
@@ -59,7 +63,7 @@ public class RemoteDispatchTests
         Assert.IsFalse(j.B.IsBlockPost);
         Assert.IsTrue(j.B.IsDispatchEndpoint);
         Assert.AreEqual(j.A, j.B.Dispatcher);
-        Assert.AreSequenceEqual(new[] { "Alpha-Bravo loop", "Bravo loop-Charlie" }, Stretches(j.Layout));
+        Assert.AreSequenceEqual(new[] { "Alpha-Bravo loop", "Bravo loop-Charlie" }, Stretches(j.Timetable));
     }
 
     [TestMethod]
@@ -112,7 +116,7 @@ public class RemoteDispatchTests
         var j = NewJunction(new Station(2, "Bravo", "Bj"), withBranch: false);
 
         Assert.IsTrue(j.B.IsDispatchEndpoint);
-        Assert.AreSequenceEqual(new[] { "Alpha-Bravo", "Bravo-Charlie" }, Stretches(j.Layout));
+        Assert.AreSequenceEqual(new[] { "Alpha-Bravo", "Bravo-Charlie" }, Stretches(j.Timetable));
     }
 
     [TestMethod]
@@ -129,24 +133,24 @@ public class RemoteDispatchTests
     {
         var j = NewJunction();
 
-        Assert.AreSequenceEqual(new[] { j.C, j.D }, j.Layout.DispatchNeighboursOf(j.A).ToArray());
-        Assert.AreSequenceEqual(new[] { j.A }, j.Layout.DispatchNeighboursOf(j.C).ToArray(), "Charlie rings Alpha about the junction.");
-        Assert.AreSequenceEqual(new[] { j.A }, j.Layout.DispatchNeighboursOf(j.D).ToArray());
+        Assert.AreSequenceEqual(new[] { j.C, j.D }, j.Timetable.DispatchNeighboursOf(j.A).ToArray());
+        Assert.AreSequenceEqual(new[] { j.A }, j.Timetable.DispatchNeighboursOf(j.C).ToArray(), "Charlie rings Alpha about the junction.");
+        Assert.AreSequenceEqual(new[] { j.A }, j.Timetable.DispatchNeighboursOf(j.D).ToArray());
     }
 
     [TestMethod]
     public void AJunctionEndpointAndItsControllerSurviveSaving()
     {
         var j = NewJunction();
-        var plan = Plan.Create("Test", new Timetable("Test", j.Layout));
+        var plan = Plan.Create("Test", j.Timetable);
 
         var restored = JsonSerializer.Deserialize<Plan>(JsonSerializer.Serialize(plan, PlanJson.CreateOptions()), PlanJson.CreateOptions())!;
         var junction = restored.Layout.OperationLocations.Single(l => l.Signature == "Bj");
 
         Assert.IsInstanceOfType<SignalControlledLocation>(junction);
         Assert.AreEqual("A", junction.ControlledBy?.Signature);
-        Assert.AreSequenceEqual(Stretches(j.Layout), Stretches(restored.Layout));
-        Assert.IsTrue(restored.Layout.DispatchStretches.Any(d => ReferenceEquals(d.From, junction) || ReferenceEquals(d.To, junction)),
+        Assert.AreSequenceEqual(Stretches(j.Timetable), Stretches(restored.Timetable));
+        Assert.IsTrue(restored.Timetable.DispatchStretches.Any(d => ReferenceEquals(d.From, junction) || ReferenceEquals(d.To, junction)),
             "The endpoints are the layout's own locations, not copies.");
     }
 
@@ -155,7 +159,7 @@ public class RemoteDispatchTests
     {
         var j = NewJunction();
 
-        Assert.AreSequenceEqual(new[] { j.A, j.B }, j.Layout.LocationsDispatchedBy(j.A).ToArray());
-        Assert.AreSequenceEqual(new[] { j.A, j.C, j.D }, j.Layout.Dispatchers.ToArray());
+        Assert.AreSequenceEqual(new[] { j.A, j.B }, j.Timetable.Layout.LocationsDispatchedBy(j.A).ToArray());
+        Assert.AreSequenceEqual(new[] { j.A, j.C, j.D }, j.Timetable.Layout.Dispatchers.ToArray());
     }
 }

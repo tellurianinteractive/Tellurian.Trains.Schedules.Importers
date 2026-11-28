@@ -1,6 +1,7 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Shared
 @using System.Globalization
 @inject IJSRuntime JS
+@inject ScheduleStateService ScheduleState
 @implements IAsyncDisposable
 
 @* The schematic of the layout's track, drawn from the pure TopologyDiagram.Build result.
@@ -63,6 +64,8 @@
 }
 
 @code {
+    private Timetable? Timetable => ScheduleState.Timetable;
+
     /// <summary>The layout to draw. Nothing is rendered when it has no track to show.</summary>
     [Parameter, EditorRequired] public Layout? Layout { get; set; }
 
@@ -113,9 +116,9 @@
     private string? _frozen;
 
     private TopologyDiagram? Diagram =>
-        Layout is null || (Layout.TrackStretches.Count == 0 && Layout.TimetableStretches.All(s => s.Stretches.Count == 0))
+        Layout is null || (Layout.TrackStretches.Count == 0 && Timetable!.TimetableStretches.All(s => s.Stretches.Count == 0))
             ? null
-            : TopologyDiagram.Build(Layout, withRoomToArrange: Editable);
+            : TopologyDiagram.Build(ScheduleState.Timetable!, withRoomToArrange: Editable);
 
     // The window the drawing is seen through. It is held still for the whole of a drag: recomputing it as
     // the location moves would rescale the drawing under the pointer, and the pointer would chase its own
@@ -178,7 +181,7 @@
         _by = (byX, byY);
         // Written straight into the layout so the whole diagram is redrawn from it and the track follows
         // the location as it moves. Only the drop is saved; a drag that is abandoned costs nothing.
-        Layout.SetTopologyPosition(_dragging, _from.X + byX, _from.Y + byY);
+        Timetable!.SetTopologyPosition(_dragging, _from.X + byX, _from.Y + byY);
         StateHasChanged();
     }
 
@@ -191,7 +194,7 @@
         if (byX != 0.0 || byY != 0.0) _by = (byX, byY);
 
         var (x, y) = TopologyDiagram.Snap(_from.X + _by.X, _from.Y + _by.Y);
-        Layout.SetTopologyPosition(location, x, y);
+        Timetable!.SetTopologyPosition(location, x, y);
 
         _dragging = null;
         _frozen = null;

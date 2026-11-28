@@ -47,11 +47,11 @@ internal static class TestLayoutFactory
         mainLine.AddLast(Stretch(layout, "M2", "Lu"));
         mainLine.AddLast(Stretch(layout, "Lu", "E"));
         mainLine.AddLast(Stretch(layout, "E", "Hm"));
-        layout.Add(mainLine);
+        Stretches(layout).Add(mainLine);
 
         var branch = new TimetableStretch(102, "S2", "Lund–Kävlinge");
         branch.AddLast(Stretch(layout, "Lu", "Kä"));
-        layout.Add(branch);
+        Stretches(layout).Add(branch);
 
         return layout;
     }
@@ -139,12 +139,12 @@ internal static class TestLayoutFactory
         huvudbanan.AddLast(Stretch(layout, "Djö", "Lek"));
         huvudbanan.AddLast(Stretch(layout, "Lek", "R"));
         huvudbanan.AddLast(Stretch(layout, "R", "M"));
-        layout.Add(huvudbanan);
+        Stretches(layout).Add(huvudbanan);
 
         var tosselillabanan = new TimetableStretch(2, "2", "Tosselilla–Munkeröd");
         tosselillabanan.AddLast(Stretch(layout, "Tsl", "Ryt"));
         tosselillabanan.AddLast(Stretch(layout, "Ryt", "Mkd"));
-        layout.Add(tosselillabanan);
+        Stretches(layout).Add(tosselillabanan);
 
         var kustBanan = new TimetableStretch(3, "3", "Munkeröd–Växjö");
         kustBanan.AddLast(Stretch(layout, "Mkd", "Kkö"));
@@ -153,20 +153,20 @@ internal static class TestLayoutFactory
         kustBanan.AddLast(Stretch(layout, "Gdn", "Mot"));
         kustBanan.AddLast(Stretch(layout, "Mot", "Lou"));
         kustBanan.AddLast(Stretch(layout, "Lou", "Vö"));
-        layout.Add(kustBanan);
+        Stretches(layout).Add(kustBanan);
 
         var norgebanan = new TimetableStretch(4, "4", "Bjørkåsen–Mohult");
         norgebanan.AddLast(Stretch(layout, "Bjå", "Ris"));
         norgebanan.AddLast(Stretch(layout, "Ris", "Fro"));
         norgebanan.AddLast(Stretch(layout, "Fro", "Gdn"));
         norgebanan.AddLast(Stretch(layout, "Gdn", "Mot"));
-        layout.Add(norgebanan);
+        Stretches(layout).Add(norgebanan);
 
         var steinsnesbanan = new TimetableStretch(5, "5", "Bjørkåsen–Steinsnes");
         steinsnesbanan.AddLast(Stretch(layout, "Bjå", "Ris"));
         steinsnesbanan.AddLast(Stretch(layout, "Ris", "Ømn"));
         steinsnesbanan.AddLast(Stretch(layout, "Ømn", "Sns"));
-        layout.Add(steinsnesbanan);
+        Stretches(layout).Add(steinsnesbanan);
 
         return layout;
     }
@@ -174,8 +174,24 @@ internal static class TestLayoutFactory
     public static Plan CreatePlan()
     {
         var layout = CreateLayout();
-        var timetable = new Timetable("Vinter 2026", layout);
+        var timetable = NewTimetable("Vinter 2026", layout);
         return new Plan("Test", timetable);
+    }
+
+    // The timetable stretches made with a layout, until a timetable is made for it: they are the timetable's.
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Layout, List<TimetableStretch>> PendingStretches = [];
+
+    private static List<TimetableStretch> Stretches(Layout layout) => PendingStretches.GetOrCreateValue(layout);
+
+    /// <summary>The timetable stretches made with <paramref name="layout"/>.</summary>
+    public static IReadOnlyList<TimetableStretch> TimetableStretchesOf(Layout layout) => Stretches(layout);
+
+    /// <summary>A timetable for <paramref name="layout"/>, with the timetable stretches made with it.</summary>
+    public static Timetable NewTimetable(string name, Layout layout)
+    {
+        var timetable = new Timetable(name, layout);
+        foreach (var stretch in Stretches(layout)) timetable.Add(stretch);
+        return timetable;
     }
 
     private static Station AddStation(Layout layout, int id, string name, string signature, string[] trackNumbers, bool canChangeDirection = false)

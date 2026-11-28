@@ -39,7 +39,9 @@ public sealed class PlanRoundTripTests
     public async Task APlanMadeFromAHallPlanKeepsWhatTheHallPlanGaveIt()
     {
         var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
-        plan.Layout.Settings.TimeAndSpeed.StationTimings.ExtensionData = new() { ["futureTiming"] = JsonElementOf("5") };
+        var staffed = plan.Layout.OperationLocations.Single(l => l.Signature == "Yb");
+        plan.Timetable.EnsurePlanningOf(staffed).StaffPosts.Add(new StaffPost { Roles = StaffRoles.Dispatcher | StaffRoles.Shuntman, ExtensionData = new() { ["shift"] = JsonElementOf("\"night\"") } });
+        plan.Timetable.Settings.TimeAndSpeed.StationTimings.ExtensionData = new() { ["futureTiming"] = JsonElementOf("5") };
         var expected = PlanFile.Write(plan, writeIndented: true);
 
         var loaded = await ExportAndImportAsync(plan, "HallPlan.db");
@@ -59,9 +61,10 @@ public sealed class PlanRoundTripTests
         Assert.AreEqual("4711", tellby.ExternalReferences?["registry"].GetString());
         Assert.AreEqual("kept", tellby.ExtensionData?["fromAnotherSystem"].GetString());
         CollectionAssert.AreEqual(new[] { 1, 2 }, layout.TrackStretches.First().ModuleIds.ToArray());
-        Assert.AreEqual(StaffRoles.Dispatcher | StaffRoles.Shuntman, ytterby.StaffPosts.Single().Roles);
-        Assert.AreEqual("night", ytterby.StaffPosts.Single().ExtensionData?["shift"].GetString(), "unknown properties inside a JSON column");
-        Assert.AreEqual(5, layout.Settings.TimeAndSpeed.StationTimings.ExtensionData?["futureTiming"].GetInt32(), "unknown properties inside the settings");
+        var staffing = loaded.Timetable.PlanningOf(ytterby).StaffPosts.Single();
+        Assert.AreEqual(StaffRoles.Dispatcher | StaffRoles.Shuntman, staffing.Roles);
+        Assert.AreEqual("night", staffing.ExtensionData?["shift"].GetString(), "unknown properties inside a JSON column");
+        Assert.AreEqual(5, loaded.Timetable.Settings.TimeAndSpeed.StationTimings.ExtensionData?["futureTiming"].GetInt32(), "unknown properties inside the settings");
     }
 
     private static Layout HallPlanLayout()
@@ -86,7 +89,6 @@ public sealed class PlanRoundTripTests
         tellby.Tracks.Add(new StationTrack(12, "2") { Station = tellby });
         var ytterby = new Station(2, "Ytterby", "Yb") { CountryCode = "NO", IsManned = true, Layout = layout };
         ytterby.Tracks.Add(new StationTrack(21, "1") { Station = ytterby, IsMain = true });
-        ytterby.StaffPosts.Add(new StaffPost { Roles = StaffRoles.Dispatcher | StaffRoles.Shuntman, ExtensionData = new() { ["shift"] = JsonElementOf("\"night\"") } });
         tellby.LockKey = new LockKey { Name = "A1", HeldAt = ytterby };
         layout.OperationLocations.Add(tellby);
         layout.OperationLocations.Add(ytterby);

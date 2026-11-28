@@ -43,7 +43,7 @@ public static class ReportCultureExtensions
         public CultureInfo PrimaryCulture => CultureOf(country.PrimaryLanguage, country.CountryCode);
     }
 
-    extension(Layout layout)
+    extension(Timetable timetable)
     {
         /// <summary>
         /// The layout's default language: the first language of its default country, or English when the
@@ -51,14 +51,14 @@ public static class ReportCultureExtensions
         /// used, and then still every item that has no local language of its own.
         /// </summary>
         public string DefaultLanguage =>
-            layout.DefaultCountry?.PrimaryLanguage is { Length: > 0 } language ? language : FallbackLanguage;
+            timetable.DefaultCountry?.PrimaryLanguage is { Length: > 0 } language ? language : FallbackLanguage;
 
         /// <summary>
         /// The culture reports are printed in by default: <c>DefaultLanguage</c> in the layout's
         /// default country.
         /// </summary>
         public CultureInfo DefaultReportCulture =>
-            CultureOf(layout.DefaultLanguage, layout.DefaultCountry?.CountryCode);
+            CultureOf(timetable.DefaultLanguage, timetable.DefaultCountry?.CountryCode);
 
         /// <summary>
         /// The culture to print an item in, given the company the item belongs to and the companies
@@ -75,11 +75,11 @@ public static class ReportCultureExtensions
         /// <param name="isAvailable">Whether reports can be printed in a two-letter language.</param>
         public CultureInfo ReportCultureOf(Company? company, IEnumerable<Company?> operators, Func<string, bool> isAvailable)
         {
-            if (!layout.Settings.General.UseObjectLanguageInReports) return layout.DefaultReportCulture;
-            if (layout.AvailableCountryOf(company, isAvailable) is { } own) return own.PrimaryCulture;
+            if (!timetable.Settings.General.UseObjectLanguageInReports) return timetable.DefaultReportCulture;
+            if (timetable.AvailableCountryOf(company, isAvailable) is { } own) return own.PrimaryCulture;
 
             var countries = operators
-                .Select(o => layout.CountryById(o?.CountryId))
+                .Select(o => timetable.Layout.CountryById(o?.CountryId))
                 .OfType<Country>()
                 .Where(c => c.PrimaryLanguage.HasValue)
                 .ToList();
@@ -87,7 +87,7 @@ public static class ReportCultureExtensions
                 && countries.All(c => c.PrimaryLanguage.Equals(first.PrimaryLanguage, StringComparison.OrdinalIgnoreCase))
                 && isAvailable(first.PrimaryLanguage)
                     ? first.PrimaryCulture
-                    : layout.DefaultReportCulture;
+                    : timetable.DefaultReportCulture;
         }
 
         /// <summary>
@@ -102,14 +102,14 @@ public static class ReportCultureExtensions
         /// <param name="language">A two-letter ISO language code.</param>
         public CultureInfo ReportCultureIn(string language)
         {
-            if (language.Equals(layout.DefaultLanguage, StringComparison.OrdinalIgnoreCase)) return layout.DefaultReportCulture;
-            return layout.Countries.FirstOrDefault(c => c.PrimaryLanguage.Equals(language, StringComparison.OrdinalIgnoreCase)) is { } country
+            if (language.Equals(timetable.DefaultLanguage, StringComparison.OrdinalIgnoreCase)) return timetable.DefaultReportCulture;
+            return timetable.Layout.Countries.FirstOrDefault(c => c.PrimaryLanguage.Equals(language, StringComparison.OrdinalIgnoreCase)) is { } country
                 ? country.PrimaryCulture
                 : CultureOf(language, null);
         }
 
         private Country? AvailableCountryOf(Company? company, Func<string, bool> isAvailable) =>
-            layout.CountryById(company?.CountryId) is { } country && isAvailable(country.PrimaryLanguage)
+            timetable.Layout.CountryById(company?.CountryId) is { } country && isAvailable(country.PrimaryLanguage)
                 ? country
                 : null;
     }
@@ -121,10 +121,10 @@ public static class ReportCultureExtensions
         /// else of the operators of its trains when they agree, else the layout's default. See
         /// <c>Layout.ReportCultureOf</c>.
         /// </summary>
-        /// <param name="layout">The layout the duty is worked on.</param>
+        /// <param name="timetable">The layout the duty is worked on.</param>
         /// <param name="isAvailable">Whether reports can be printed in a two-letter language.</param>
-        public CultureInfo ReportCulture(Layout layout, Func<string, bool> isAvailable) =>
-            layout.ReportCultureOf(duty.Company, duty.Parts.Select(p => p.Train.EffectiveCompany), isAvailable);
+        public CultureInfo ReportCulture(Timetable timetable, Func<string, bool> isAvailable) =>
+            timetable.ReportCultureOf(duty.Company, duty.Parts.Select(p => p.Train.EffectiveCompany), isAvailable);
     }
 
     extension(OperationLocation location)
@@ -134,14 +134,14 @@ public static class ReportCultureExtensions
         /// the layout's default. Always the default when
         /// <see cref="GeneralSettings.UseObjectLanguageInReports"/> is off.
         /// </summary>
-        /// <param name="layout">The layout the location belongs to.</param>
+        /// <param name="timetable">The timetable of the layout the location belongs to.</param>
         /// <param name="isAvailable">Whether reports can be printed in a two-letter language.</param>
-        public CultureInfo ReportCulture(Layout layout, Func<string, bool> isAvailable) =>
-            layout.Settings.General.UseObjectLanguageInReports
-                && layout.CountryById(location.CountryId) is { } country
+        public CultureInfo ReportCulture(Timetable timetable, Func<string, bool> isAvailable) =>
+            timetable.Settings.General.UseObjectLanguageInReports
+                && timetable.Layout.CountryById(location.CountryId) is { } country
                 && isAvailable(country.PrimaryLanguage)
                     ? country.PrimaryCulture
-                    : layout.DefaultReportCulture;
+                    : timetable.DefaultReportCulture;
     }
 
     private static CultureInfo CultureOf(string language, string? countryCode)

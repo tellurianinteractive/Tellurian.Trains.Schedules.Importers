@@ -78,7 +78,7 @@ else
     private IReadOnlyList<int> _positions = [];
 
     private SessionsSettings Settings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,7 +86,7 @@ else
         // (idempotent) so opening the report directly still works.
         await ScheduleState.InitializeAsync();
         await ReportBusy.PaintAsync();
-        if (ScheduleState.Layout is not { } layout)
+        if (ScheduleState.Layout is not { } layout || ScheduleState.Timetable is not { } timetable)
         {
             _sheets = [];
             return;
@@ -97,14 +97,14 @@ else
         _sheets =
         [
             .. layout.OperationLocations.OfType<Station>()
-                .Where(station => station.IsManned && station.StaffPosts.Count > 0)
+                .Where(station => station.IsManned && timetable.PlanningOf(station).StaffPosts.Count > 0)
                 .OrderBy(station => station.Name, StringComparer.CurrentCulture)
-                .SelectMany(station => station.StaffPosts
+                .SelectMany(station => timetable.PlanningOf(station).StaffPosts
                     .Select((post, index) => (post, index + 1))
                     .Chunk(postsPerSheet)
-                    .Select(posts => new Sheet(new(station.Name, station.Signature, Math.Clamp(station.ShiftCount, 1, 3), station.Owner,
-                            station.StaffPosts.FirstOrDefault(post => post.Fills(StaffRoles.Dispatcher))),
-                        new(station.ReportCulture(layout, LanguageService.IsSupported)), posts)))
+                    .Select(posts => new Sheet(new(station.Name, station.Signature, Math.Clamp(timetable.PlanningOf(station).ShiftCount, 1, 3), station.Owner,
+                            timetable.PlanningOf(station).StaffPosts.FirstOrDefault(post => post.Fills(StaffRoles.Dispatcher))),
+                        new(station.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported)), posts)))
         ];
     }
 
@@ -114,7 +114,7 @@ else
         ReferenceEquals(post, sheet.Station.OwnersPost) && shift == 0 && position == _positions[0];
 
     private IReadOnlyList<(TimeSpan Start, TimeSpan End)> ShiftsOf(StationOfSheet station) =>
-        ScheduleState.Layout!.Settings.General.ShiftTimes(station.Shifts);
+        ScheduleState.Timetable!.Settings.General.ShiftTimes(station.Shifts);
 
     private string ShiftHeading(StationOfSheet station, int index)
     {

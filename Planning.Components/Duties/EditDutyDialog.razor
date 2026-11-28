@@ -121,9 +121,9 @@
 
     private Plan? Plan => ScheduleState.Schedule;
 
-    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
-    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
-    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+    private bool UseDays => ScheduleState.Timetable?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Timetable?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Timetable?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private string _identity = "";
     private int? _companyId;
@@ -177,7 +177,7 @@
     }
 
     private IEnumerable<Company> Companies =>
-        (Plan?.Layout?.Companies ?? []).InChoiceOrder;
+        (Plan?.Timetable?.Companies ?? []).InChoiceOrder;
 
     private IEnumerable<Sessions> SessionsCatalogue =>
         ScheduleState.Timetable?.Sessions ?? [];
@@ -204,7 +204,7 @@
             return;
         }
         Duty.Identity = string.IsNullOrWhiteSpace(_identity) ? Duty.Id.ToString() : _identity.Trim();
-        var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
+        var company = _companyId is int id ? plan.Timetable.Companies.FirstOrDefault(c => c.Id == id) : null;
         Duty.Company = company;
         Duty.CompanyId = company?.Id;
         Duty.Sessions = _sessions;
@@ -224,7 +224,7 @@
     private Task Cancel() => OnClosed.InvokeAsync();
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
     private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);

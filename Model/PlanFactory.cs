@@ -33,11 +33,10 @@ public static class PlanFactory
     public static Plan CreatePlan(string name, int defaultCountryId, string language)
     {
         var layout = new Layout { Name = name };
-        ApplyDefaultSettings(layout, defaultCountryId);
+        var timetable = new Timetable(name, layout);
+        ApplyDefaultSettings(timetable, defaultCountryId);
         SeedCountries(layout, defaultCountryId);
         SeedRegions(layout, defaultCountryId);
-
-        var timetable = new Timetable(name, layout);
         SeedCategories(timetable, language);
         SeedSessions(timetable);
 
@@ -61,15 +60,15 @@ public static class PlanFactory
         var planName = hallPlan.Name is { Length: > 0 } hallPlanName ? hallPlanName : name ?? string.Empty;
         var countryId = Layouts.HallPlanImport.MostCommonCountryId(hallPlan) ?? Country.ByLanguage(language).Id;
         var plan = CreatePlan(planName, countryId, language);
-        Layouts.HallPlanImport.TakeInto(plan.Layout, hallPlan);
+        Layouts.HallPlanImport.TakeInto(plan.Timetable, hallPlan);
         return plan;
     }
 
     // New-layout setting defaults. Values not set here keep their class-level defaults (Theme=European,
     // Scale=H0, StartTime=06:00, clock speed 5, speed points, validations on, etc.).
-    private static void ApplyDefaultSettings(Layout layout, int defaultCountryId)
+    private static void ApplyDefaultSettings(Timetable timetable, int defaultCountryId)
     {
-        var settings = layout.Settings;
+        var settings = timetable.Settings;
         settings.Identity.DefaultCountryId = defaultCountryId;
 
         settings.General.EndTime = TimeSpan.FromHours(18);

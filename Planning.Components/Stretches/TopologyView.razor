@@ -10,14 +10,14 @@
 <div class="topology">
     <p class="hint">@Translator("TopologyHint")</p>
 
-    @if (Layout is null || (Layout.TrackStretches.Count == 0 && Layout.TimetableStretches.All(s => s.Stretches.Count == 0)))
+    @if (Layout is null || (Layout.TrackStretches.Count == 0 && Timetable!.TimetableStretches.All(s => s.Stretches.Count == 0)))
     {
         <p class="empty">@Translator("TopologyNoStretches")</p>
     }
     else
     {
         <div class="commands">
-            <button type="button" class="secondary" disabled="@(!Layout.HasTopologyPositions)"
+            <button type="button" class="secondary" disabled="@(!Timetable!.HasTopologyPositions)"
                     title="@Translator("TopologyArrangeAutomaticallyHint")" @onclick="ArrangeAutomatically">
                 @Translator("TopologyArrangeAutomatically")
             </button>
@@ -31,6 +31,7 @@
 @code {
     private Layout? Layout => ScheduleState.Layout;
 
+    private Timetable? Timetable => ScheduleState.Timetable;
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
@@ -40,7 +41,7 @@
 
     private void ArrangeAutomatically()
     {
-        if (Layout?.ClearTopologyPositions() == true) ScheduleState.SaveAndNotify();
+        if (Timetable?.ClearTopologyPositions() == true) ScheduleState.SaveAndNotify();
     }
 
     public void Dispose() => ScheduleState.OnChanged -= OnStateChanged;

@@ -16,7 +16,7 @@ public class TrainCategoryNoteTests
     {
         var category = new TrainCategory { Id = 1, Name = "Regional", Prefix = "R", Content = TrainContent.Passenger, ShowNameOnDispatchList = showName };
         var layout = new Layout { Id = 1, Name = "Test" };
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.TrainCategories.Add(category);
         var train = new Train(1, category, 100) { Category = category, Sessions = Sessions.All };
         var time = Time.FromHourAndMinute(8, 0);

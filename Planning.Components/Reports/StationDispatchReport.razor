@@ -60,7 +60,7 @@ else
     private readonly Dictionary<DispatchList, ReportCulture> _cultures = [];
 
     private SessionsSettings Settings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,7 +84,7 @@ else
         var words = new HashSet<string>();
         foreach (var station in Selected(layout))
         {
-            var culture = new ReportCulture(station.ReportCulture(layout, LanguageService.IsSupported));
+            var culture = new ReportCulture(station.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported));
             using var scope = ReportCulture.Use(culture.Culture);
             foreach (var list in DispatchList.CreateAll(station, timetable.Trains, settings, ScheduleState.Schedule))
             {
@@ -117,7 +117,7 @@ else
             var list = words.ToList();
             await using var module = await JS.InvokeAsync<IJSObjectReference>(
                 "import", "./_content/Tellurian.Trains.Schedules.Planning.Components/js/text-width.js");
-            var font = ReportFonts.CssFontFamily(ScheduleState.Layout?.Settings.General.ReportFontFamily);
+            var font = ReportFonts.CssFontFamily(ScheduleState.Timetable?.Settings.General.ReportFontFamily);
             var widths = await module.InvokeAsync<double[]>("measure", font, DispatchPageGeometry.FontSizePt, list);
             if (widths.Length != list.Count + 1) return null;
             return new NoteTextMeasure(

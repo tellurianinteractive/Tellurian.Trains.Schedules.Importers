@@ -22,7 +22,7 @@ public class WagonOrderingTests
         layout.Add(new TrackStretch(2, c, b, 10));
 
         var category = new TrainCategory { Id = 1, Name = "G", Prefix = "G" };
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestLayoutFactory.NewTimetable("Test", layout);
 
         // Train 1: A -> B (reverse) -> C
         var forward = new Train(1, category, 1) { Category = category };

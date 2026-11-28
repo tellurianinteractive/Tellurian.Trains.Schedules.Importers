@@ -8,7 +8,7 @@
     {
         <div class="toolbar">
             <button class="primary" @onclick="StartAdd" disabled="@(!HasTrackStretches)">@Translator("AddNew")</button>
-            @if (Layout?.CanSuggestTimetableStretches == true)
+            @if (Timetable?.CanSuggestTimetableStretches == true)
             {
                 <button @onclick="Suggest" disabled="@(!HasTrackStretches)"><i class="fa-solid fa-wand-magic-sparkles"></i> @Translator("SuggestFromLines")</button>
             }
@@ -201,9 +201,11 @@
     private enum Mode { List, Edit }
 
     private Layout? Layout => ScheduleState.Layout;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private bool HasTrackStretches => Layout?.TrackStretches.Count > 0;
     private IReadOnlyList<TimetableStretch> Stretches =>
-        Layout is null ? [] : [.. Layout.TimetableStretches.OrderBy(s => s.Number, NumberComparer)];
+        Layout is null ? [] : [.. Timetable!.TimetableStretches.OrderBy(s => s.Number, NumberComparer)];
 
     // Numeric-aware, so "2" sorts before "10".
     private static readonly StringComparer NumberComparer =
@@ -323,7 +325,7 @@
             _error = Translator("TimetableStretchNumberRequired");
             return;
         }
-        if (Layout.TimetableStretches.Any(t => !ReferenceEquals(t, _original) && t.Number.Equals(_number.Trim(), StringComparison.OrdinalIgnoreCase)))
+        if (Timetable!.TimetableStretches.Any(t => !ReferenceEquals(t, _original) && t.Number.Equals(_number.Trim(), StringComparison.OrdinalIgnoreCase)))
         {
             _error = Translator("TimetableStretchNumberDuplicate");
             return;
@@ -338,7 +340,7 @@
         target.Description = _description?.Trim() ?? "";
         target.Color = _editing.Color;
         target.Stretches = [.. _editing.Stretches];
-        if (_original is null) Layout.Add(target);
+        if (_original is null) Timetable!.Add(target);
         ScheduleState.SaveAndNotify();
         BackToList();
     }
@@ -349,16 +351,16 @@
     private void Suggest()
     {
         if (Layout is null) return;
-        var suggestions = Layout.SuggestedTimetableStretches();
+        var suggestions = Timetable!.SuggestedTimetableStretches();
         var palette = TimetableStretch.Palette;
-        for (var i = 0; i < suggestions.Count; i++) suggestions[i].Color = palette[(Layout.TimetableStretches.Count + i) % palette.Count];
+        for (var i = 0; i < suggestions.Count; i++) suggestions[i].Color = palette[(Timetable!.TimetableStretches.Count + i) % palette.Count];
         _suggestions = suggestions;
     }
 
     private void AddSuggestions()
     {
         if (Layout is null || _suggestions is null) return;
-        foreach (var suggestion in _suggestions) Layout.Add(suggestion);
+        foreach (var suggestion in _suggestions) Timetable!.Add(suggestion);
         _suggestions = null;
         ScheduleState.SaveAndNotify();
     }
@@ -379,13 +381,13 @@
     private void DeleteConfirmed()
     {
         if (_deleteTarget is null) return;
-        Layout!.TimetableStretches.Remove(_deleteTarget);
+        Timetable!.TimetableStretches.Remove(_deleteTarget);
         _deleteTarget = null;
         ScheduleState.SaveAndNotify();
     }
 
     private int NextId() =>
-        (Layout!.TimetableStretches.Count == 0 ? 0 : Layout.TimetableStretches.Max(t => t.Id)) + 1;
+        (Timetable!.TimetableStretches.Count == 0 ? 0 : Timetable!.TimetableStretches.Max(t => t.Id)) + 1;
 
     private static string RouteText(TimetableStretch s) =>
         s.Stretches.Count == 0 ? "" : $"{s.Starts.Signature} → {s.Ends.Signature}";

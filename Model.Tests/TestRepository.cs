@@ -35,7 +35,7 @@ namespace Tellurian.Trains.Models.Planning.Tests
         {
             var (item, messages) = GetLayout(name);
             if (item.IsNone) return (new Maybe<Timetable>("Layout does not exist."), messages);
-            var result = new Timetable(name, item.Value);
+            var result = TestDataFactory.NewTimetable(name, item.Value);
             result.AddTrain(TestDataFactory.CreateTrain1());
             result.AddTrain(TestDataFactory.CreateTrain2());
             return (new Maybe<Timetable>(result), messages);

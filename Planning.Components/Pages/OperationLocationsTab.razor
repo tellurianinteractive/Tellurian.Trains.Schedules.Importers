@@ -76,14 +76,14 @@ else
                        derived from the mark, and a column saying nothing only widens an already wide grid. *@
                     @if (UsePassengerTickets)
                     {
-                        <TemplateColumn Title='@Translator("IsPassengerInterchange")' Align="Align.Center">@if (context is Station { IsPassengerInterchange: true }) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
+                        <TemplateColumn Title='@Translator("IsPassengerInterchange")' Align="Align.Center">@if (context is Station && Timetable!.PlanningOf(context).IsPassengerInterchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     }
                     <TemplateColumn Title='@Translator("HasCargoExchange")' Align="Align.Center">@if (context.HasCargoExchange) { <i class="fa-solid fa-check"></i> }</TemplateColumn>
                     <TemplateColumn Title='@Translator("CargoServedFrom")'>@(context.CargoServedFrom?.Name ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("LockKey")'>@LockKeySummary(context)</TemplateColumn>
                     <TemplateColumn Title='@Translator("ControlledBy")'>@(context.CanBeControlled && context.ControlledBy is { } c ? c.Name : "")</TemplateColumn>
                     <PropertyColumn Property="o => o.Owner" Title='@Translator("Owner")' Sortable="true" />
-                    <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(context.PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
+                    <TemplateColumn Title='@Translator("PhoneNumber")' Align="Align.Right">@(Timetable!.PlanningOf(context).PhoneNumber?.ToString(Culture) ?? "")</TemplateColumn>
                     <TemplateColumn Title='@Translator("Tracks")' Align="Align.Right">@context.Tracks.Count</TemplateColumn>
                 </QuickGrid>
             }
@@ -138,7 +138,7 @@ else
                     </div>
                     <div class="field">
                         <HelpLabel For="PhoneNumber" />
-                        <input type="number" class="num" @bind="Editing.PhoneNumber" @bind:after="OnEdited" />
+                        <input type="number" class="num" @bind="Planning.PhoneNumber" @bind:after="OnEdited" />
                     </div>
 
                     @* Direction change is only configurable at a station or a signal-controlled location;
@@ -167,11 +167,11 @@ else
                        has to be worked with passenger tickets, and the location has to take passengers at
                        all. A mark already set is kept when either stops holding — see
                        PassengerInterchangeExtensions. *@
-                    @if (UsePassengerTickets && Editing is Station interchange && Editing.CanBePassengerInterchange)
+                    @if (UsePassengerTickets && Editing is Station && Editing.CanBePassengerInterchange)
                     {
                         <div class="field">
                             <HelpLabel For="IsPassengerInterchange" />
-                            <input type="checkbox" @bind="interchange.IsPassengerInterchange" @bind:after="OnEdited" />
+                            <input type="checkbox" @bind="Planning.IsPassengerInterchange" @bind:after="OnEdited" />
                         </div>
                     }
 
@@ -185,7 +185,7 @@ else
 
                     <div class="field">
                         <HelpLabel For="HideMeets" />
-                        <input type="checkbox" @bind="Editing.HideMeets" @bind:after="OnEdited" />
+                        <input type="checkbox" @bind="Planning.HideMeets" @bind:after="OnEdited" />
                     </div>
 
                     @* An other location always shows its passings; the model forces the flag off there. *@
@@ -193,7 +193,7 @@ else
                     {
                         <div class="field">
                             <HelpLabel For="HidePassings" />
-                            <input type="checkbox" @bind="Editing.HidePassings" @bind:after="OnEdited" />
+                            <input type="checkbox" @bind="Planning.HidePassings" @bind:after="OnEdited" />
                         </div>
                     }
 
@@ -213,13 +213,13 @@ else
                         {
                             <div class="field">
                                 <HelpLabel For="StartLabels" />
-                                <StartLabelPrintingChoice @bind-Value="station.StartLabels" @bind-Value:after="OnEdited" />
+                                <StartLabelPrintingChoice @bind-Value="Planning.StartLabels" @bind-Value:after="OnEdited" />
                             </div>
                             @* A dispatcher can be handed one list per direction instead of one for the whole
                                station. Offered at a manned station, which is where there is a dispatcher. *@
                             <div class="field">
                                 <HelpLabel For="SplitDispatchByDirection" />
-                                <input type="checkbox" @bind="station.SplitDispatchByDirection" @bind:after="OnEdited" />
+                                <input type="checkbox" @bind="Planning.SplitDispatchByDirection" @bind:after="OnEdited" />
                             </div>
                         }
                         @* What decides whether a train part arriving here may ask for its locomotive to
@@ -350,9 +350,9 @@ else
                     <div class="section staffing">
                         <div class="field">
                             <HelpLabel For="ShiftCount" />
-                            <input type="number" class="num" min="1" max="3" @bind="staffed.ShiftCount" @bind:after="OnEdited" />
+                            <input type="number" class="num" min="1" max="3" @bind="Planning.ShiftCount" @bind:after="OnEdited" />
                         </div>
-                        @foreach (var (post, index) in staffed.StaffPosts.Select((post, index) => (post, index)))
+                        @foreach (var (post, index) in Planning.StaffPosts.Select((post, index) => (post, index)))
                         {
                             <div class="staff-post" @key="post">
                                 <span class="staff-name">@Translator("StaffMember") @(index + 1)</span>
@@ -364,13 +364,13 @@ else
                                         @Translator($"StaffRole{role}")
                                     </label>
                                 }
-                                <button class="danger small" @onclick="() => RemoveStaffPost(staffed, post)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
+                                <button class="danger small" @onclick="() => RemoveStaffPost(post)"><i class="fa-solid fa-trash"></i> @Translator("Delete")</button>
                             </div>
                         }
                         <div class="field">
-                            <button @onclick="() => AddStaffPost(staffed)"><i class="fa-solid fa-plus"></i> @Translator("AddStaffMember")</button>
+                            <button @onclick="AddStaffPost"><i class="fa-solid fa-plus"></i> @Translator("AddStaffMember")</button>
                         </div>
-                        <p class="hint">@Translator("Participants"): <strong>@staffed.ParticipantsNeeded</strong></p>
+                        <p class="hint">@Translator("Participants"): <strong>@Timetable!.ParticipantsNeeded(staffed)</strong></p>
                     </div>
                 }
 
@@ -387,7 +387,7 @@ else
                         <HelpLabel For="LocationInstructions" />
                         <p class="hint">@Translator("LocationInstructionsHint")</p>
                         <MarkdownEditor Rows="10" PreviewClass="instructions-body"
-                                        @bind-Value="Editing.Instructions" @bind-Value:after="OnEdited" />
+                                        @bind-Value="Planning.Instructions" @bind-Value:after="OnEdited" />
                     </div>
                 }
 
@@ -396,7 +396,7 @@ else
                 <div class="section">
                     <div class="field">
                         <HelpLabel For="MinimumStopMinutes" />
-                        <input type="number" class="num" @bind="Editing.Timings.MinimumStopMinutes" @bind:after="OnEdited" />
+                        <input type="number" class="num" @bind="Planning.Timings.MinimumStopMinutes" @bind:after="OnEdited" />
                     </div>
                     @* A runaround needs a station's tracks, and a clearance a dispatcher on duty. Where a
                        time does not apply its field is hidden, and a value set earlier stays unused. *@
@@ -405,8 +405,8 @@ else
                         <div class="field">
                             <HelpLabel For="LocoRunaroundRealMinutes" />
                             <div class="control">
-                                <input type="number" class="num" @bind="Editing.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
-                                <span>@RealTimeUnit.Of(Translator, Editing.Timings.LocoRunaroundRealMinutes)</span>
+                                <input type="number" class="num" @bind="Planning.Timings.LocoRunaroundRealMinutes" @bind:after="OnEdited" />
+                                <span>@RealTimeUnit.Of(Translator, Planning.Timings.LocoRunaroundRealMinutes)</span>
                             </div>
                         </div>
                     }
@@ -415,8 +415,8 @@ else
                         <div class="field">
                             <HelpLabel For="TrainClearanceRealMinutes" />
                             <div class="control">
-                                <input type="number" class="num" @bind="Editing.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
-                                <span>@RealTimeUnit.Of(Translator, Editing.Timings.TrainClearanceRealMinutes)</span>
+                                <input type="number" class="num" @bind="Planning.Timings.TrainClearanceRealMinutes" @bind:after="OnEdited" />
+                                <span>@RealTimeUnit.Of(Translator, Planning.Timings.TrainClearanceRealMinutes)</span>
                             </div>
                         </div>
                     }
@@ -490,7 +490,7 @@ else
                                 @if (ShowTrackRoutes)
                                 {
                                     <td>
-                                        <select value="@t.PreviousLocationId" @onchange="e => SetTrackPreviousLocation(t, e)">
+                                        <select value="@Timetable!.RouteOf(t).PreviousLocationId" @onchange="e => SetTrackPreviousLocation(t, e)">
                                             <option value="">@Translator("NoneOption")</option>
                                             @foreach (var n in RouteLocationChoices(t))
                                             {
@@ -499,7 +499,7 @@ else
                                         </select>
                                     </td>
                                     <td>
-                                        <select value="@t.NextLocationId" @onchange="e => SetTrackNextLocation(t, e)">
+                                        <select value="@Timetable!.RouteOf(t).NextLocationId" @onchange="e => SetTrackNextLocation(t, e)">
                                             <option value="">@Translator("NoneOption")</option>
                                             @foreach (var n in RouteLocationChoices(t))
                                             {
@@ -510,8 +510,9 @@ else
                                     @* Nothing to reverse until the track names a location, so the box is
                                        shown disabled rather than left to be ticked to no effect. *@
                                     <td>
-                                        <input type="checkbox" disabled="@(!t.HasRoute)"
-                                               @bind="t.AppliesInBothDirections" @bind:after="OnEdited" />
+                                        <input type="checkbox" disabled="@(!Timetable!.RouteOf(t).IsGiven)"
+                                               checked="@Timetable!.RouteOf(t).AppliesInBothDirections"
+                                               @onchange="e => SetTrackBothWays(t, (bool)e.Value!)" />
                                     </td>
                                 }
                                 <td><input type="text" @bind="t.Usage" @bind:after="OnEdited" /></td>
@@ -558,7 +559,7 @@ else
                     <dt>@Translator("Owner")</dt>
                     <dd>@(string.IsNullOrWhiteSpace(_selected.Owner) ? "—" : _selected.Owner)</dd>
                     <dt>@Translator("PhoneNumber")</dt>
-                    <dd>@(_selected.PhoneNumber?.ToString(Culture) ?? "—")</dd>
+                    <dd>@(SelectedPlanning.PhoneNumber?.ToString(Culture) ?? "—")</dd>
                     <dt>@Translator("IsChangingTrainDirectionPossible")</dt>
                     <dd>@YesNo(_selected.IsChangingTrainDirectionPossible)</dd>
                     <dt>@Translator("HasPassengerExchange")</dt>
@@ -566,9 +567,9 @@ else
                     <dt>@Translator("HasCargoExchange")</dt>
                     <dd>@YesNo(_selected.HasCargoExchange)</dd>
                     <dt>@Translator("HideMeets")</dt>
-                    <dd>@YesNo(_selected.HideMeets)</dd>
+                    <dd>@YesNo(SelectedPlanning.HideMeets)</dd>
                     <dt>@Translator("HidePassings")</dt>
-                    <dd>@YesNo(_selected.HidePassings)</dd>
+                    <dd>@YesNo(SelectedPlanning.HidePassings)</dd>
                     @if (_selected is Station infoStation)
                     {
                         <dt>@Translator("IsShadow")</dt>
@@ -578,11 +579,11 @@ else
                         @if (infoStation.IsManned)
                         {
                             <dt>@Translator("SplitDispatchByDirection")</dt>
-                            <dd>@YesNo(infoStation.SplitDispatchByDirection)</dd>
-                            @if (infoStation.ParticipantsNeeded > 0)
+                            <dd>@YesNo(SelectedPlanning.SplitDispatchByDirection)</dd>
+                            @if (Timetable!.ParticipantsNeeded(infoStation) > 0)
                             {
                                 <dt>@Translator("Participants")</dt>
-                                <dd>@infoStation.ParticipantsNeeded</dd>
+                                <dd>@Timetable!.ParticipantsNeeded(infoStation)</dd>
                             }
                         }
                         <dt>@Translator("HasTurntable")</dt>
@@ -590,7 +591,7 @@ else
                         @if (UsePassengerTickets)
                         {
                             <dt>@Translator("IsPassengerInterchange")</dt>
-                            <dd>@YesNo(infoStation.IsPassengerInterchange)</dd>
+                            <dd>@YesNo(SelectedPlanning.IsPassengerInterchange)</dd>
                         }
                         <dt>@Translator("Regions")</dt>
                         <dd>
@@ -644,26 +645,26 @@ else
                         }
                     }
                     <dt>@Translator("MinimumStopMinutes")</dt>
-                    <dd>@Inherited(_selected.Timings.MinimumStopMinutes)</dd>
+                    <dd>@Inherited(SelectedPlanning.Timings.MinimumStopMinutes)</dd>
                     @if (_selected.HasLocoRunaroundTime)
                     {
                         <dt>@Translator("LocoRunaroundRealMinutes")</dt>
-                        <dd>@Inherited(_selected.Timings.LocoRunaroundRealMinutes, withUnit: true)</dd>
+                        <dd>@Inherited(SelectedPlanning.Timings.LocoRunaroundRealMinutes, withUnit: true)</dd>
                     }
                     @if (_selected.HasTrainClearanceTime)
                     {
                         <dt>@Translator("TrainClearanceRealMinutes")</dt>
-                        <dd>@Inherited(_selected.Timings.TrainClearanceRealMinutes, withUnit: true)</dd>
+                        <dd>@Inherited(SelectedPlanning.Timings.TrainClearanceRealMinutes, withUnit: true)</dd>
                     }
                 </dl>
 
                 @* Shown only where instructions apply and something is written; the rendered markdown
                    carries its own headings, so an empty block with nothing under it would only be
                    noise. *@
-                @if (_selected.HasInstructions && !string.IsNullOrWhiteSpace(_selected.Instructions))
+                @if (_selected.HasInstructions && !string.IsNullOrWhiteSpace(SelectedPlanning.Instructions))
                 {
                     <h3>@Translator("LocationInstructions")</h3>
-                    <div class="instructions-body">@Rendered(_selected.Instructions)</div>
+                    <div class="instructions-body">@Rendered(SelectedPlanning.Instructions)</div>
                 }
 
                 <h3>@Translator("Tracks")</h3>
@@ -686,7 +687,7 @@ else
                                 {
                                     <th>@Translator("PlatformLength")</th>
                                 }
-                                @if (_selected.Tracks.Any(t => t.HasRoute))
+                                @if (_selected.Tracks.Any(t => Timetable!.RouteOf(t).IsGiven))
                                 {
                                     <th>@Translator("TrackRoute")</th>
                                 }
@@ -711,7 +712,7 @@ else
                                     {
                                         <td>@(t.HasPlatform ? t.PlatformLength.ToString("0.0", Culture) : "—")</td>
                                     }
-                                    @if (_selected.Tracks.Any(track => track.HasRoute))
+                                    @if (_selected.Tracks.Any(track => Timetable!.RouteOf(track).IsGiven))
                                     {
                                         <td>@RouteSummary(t)</td>
                                     }
@@ -750,11 +751,13 @@ else
 
     private Layout? Layout => ScheduleState.Layout;
 
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private Plan? Plan => ScheduleState.Schedule;
 
     // Whether the meeting is worked with passenger tickets, which is what makes a passenger interchange
     // one. Everything about interchanges on this tab is offered only while it holds.
-    private bool UsePassengerTickets => Layout?.Settings.General.UsePassengerTickets ?? false;
+    private bool UsePassengerTickets => Timetable?.Settings.General.UsePassengerTickets ?? false;
     private IQueryable<OperationLocation> Locations =>
         (Layout?.OperationLocations ?? []).AsQueryable();
     private IEnumerable<Station> Stations =>
@@ -765,6 +768,13 @@ else
     private bool _isNew;
     private OperationLocation? Editing { get; set; }
     private OperationLocation? _selected;
+
+    // What the planner decides for the location being edited: the timetable's own record for an existing location,
+    // edited live; for a new one a record held with it until Save adds both.
+    private LocationPlanning Planning { get; set; } = new();
+
+    // What the planner has decided for the location shown in Info.
+    private LocationPlanning SelectedPlanning => _selected is null || Timetable is null ? new() : Timetable.PlanningOf(_selected);
     private LocationDeletionPreview? _deletion;
     private string? _error;
 
@@ -773,7 +783,7 @@ else
         ScheduleState.OnChanged += OnStateChanged;
         // Make sure the countries this layout references are in its catalogue (older/imported layouts
         // may not have them yet); only persist when something was actually added.
-        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+        if (ScheduleState.Timetable is { } timetable && timetable.EnsureCountries()) ScheduleState.SaveAndNotify();
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
@@ -834,8 +844,9 @@ else
         };
         created.Name = "";
         created.Signature = "";
-        created.CountryId = Layout!.Settings.Identity.DefaultCountryId;
+        created.CountryId = Timetable!.Settings.Identity.DefaultCountryId;
         Editing = created;
+        Planning = new LocationPlanning { LocationId = id };
         _isNew = true;
         _addingType = false;
         _mode = Mode.Edit;
@@ -844,6 +855,7 @@ else
     private void Edit(OperationLocation location)
     {
         Editing = location;
+        Planning = Timetable!.EnsurePlanningOf(location);
         _isNew = false;
         _error = null;
         _mode = Mode.Edit;
@@ -862,6 +874,16 @@ else
             _ => OperationLocationKind.Station
         };
         Editing = Layout.ChangeOperationLocationType(Editing, kind);
+        if (!_isNew)
+        {
+            Timetable!.ConformPlanningTo(Editing);
+            Planning = Timetable.EnsurePlanningOf(Editing);
+        }
+        else
+        {
+            if (!OperationLocationRules.CanHaveInstructions(Editing.Kind)) Planning.Instructions = string.Empty;
+            if (Editing is OtherLocation) Planning.HidePassings = false;
+        }
         _error = null;
         ScheduleState.SaveAndNotify();
     }
@@ -874,6 +896,9 @@ else
 
     private void BackToList()
     {
+        // A new location given up: the routes chosen for its tracks go with it.
+        if (_isNew && Editing is not null && Layout?.OperationLocations.Contains(Editing) != true)
+            foreach (var track in Editing.Tracks) Timetable?.ForgetRouteOf(track);
         _mode = Mode.List;
         Editing = null;
         _selected = null;
@@ -885,15 +910,15 @@ else
     // Existing locations are edited live and persisted on each change; a new one is held detached
     // until Save validates and adds it.
     // A new post starts with the roles of a station manned by one person, the usual case.
-    private void AddStaffPost(Station station)
+    private void AddStaffPost()
     {
-        station.StaffPosts.Add(new StaffPost { Roles = StaffRolesExtensions.SoleOperator });
+        Planning.StaffPosts.Add(new StaffPost { Roles = StaffRolesExtensions.SoleOperator });
         OnEdited();
     }
 
-    private void RemoveStaffPost(Station station, StaffPost post)
+    private void RemoveStaffPost(StaffPost post)
     {
-        station.StaffPosts.Remove(post);
+        Planning.StaffPosts.Remove(post);
         OnEdited();
     }
 
@@ -923,6 +948,7 @@ else
             return;
         }
         Layout.Add(Editing);
+        if (Timetable!.FindPlanningOf(Editing.Id) is null) Timetable.LocationPlanning.Add(Planning);
         ScheduleState.SaveAndNotify();
         BackToList();
     }
@@ -1000,7 +1026,8 @@ else
     private IReadOnlyList<OperationLocation> RouteLocationChoices(StationTrack track)
     {
         var neighbours = Neighbours;
-        var named = new[] { track.PreviousLocationId, track.NextLocationId }
+        var route = Timetable!.RouteOf(track);
+        var named = new[] { route.PreviousLocationId, route.NextLocationId }
             .Where(id => id.HasValue && neighbours.All(n => n.Id != id))
             .Select(id => Layout!.OperationLocations.FirstOrDefault(l => l.Id == id))
             .OfType<OperationLocation>();
@@ -1009,15 +1036,23 @@ else
 
     private void SetTrackPreviousLocation(StationTrack track, ChangeEventArgs e)
     {
-        track.PreviousLocationId = LocationId(e);
-        ClearBothDirectionsWithoutRoute(track);
+        var route = Timetable!.EnsureRouteOf(track);
+        route.PreviousLocationId = LocationId(e);
+        ClearBothDirectionsWithoutRoute(route);
         OnEdited();
     }
 
     private void SetTrackNextLocation(StationTrack track, ChangeEventArgs e)
     {
-        track.NextLocationId = LocationId(e);
-        ClearBothDirectionsWithoutRoute(track);
+        var route = Timetable!.EnsureRouteOf(track);
+        route.NextLocationId = LocationId(e);
+        ClearBothDirectionsWithoutRoute(route);
+        OnEdited();
+    }
+
+    private void SetTrackBothWays(StationTrack track, bool bothWays)
+    {
+        Timetable!.EnsureRouteOf(track).AppliesInBothDirections = bothWays;
         OnEdited();
     }
 
@@ -1026,16 +1061,16 @@ else
 
     // A track naming no location has no route to reverse, so the flag goes with the last location
     // cleared rather than lingering to take effect again when another is chosen.
-    private static void ClearBothDirectionsWithoutRoute(StationTrack track)
+    private static void ClearBothDirectionsWithoutRoute(StationTrackRoute route)
     {
-        if (!track.HasRoute) track.AppliesInBothDirections = false;
+        if (!route.IsGiven) route.AppliesInBothDirections = false;
     }
 
     // The route a track is for, as the planner reads it: "Yb → Sti", one end alone as "Yb →" or
     // "→ Sti", and "↔" where it counts both ways round.
     private string RouteSummary(StationTrack track) =>
-        track.HasRoute
-            ? $"{Signature(track.PreviousLocationId)} {(track.AppliesInBothDirections ? "↔" : "→")} {Signature(track.NextLocationId)}".Trim()
+        Timetable!.RouteOf(track) is { IsGiven: true } route
+            ? $"{Signature(route.PreviousLocationId)} {(route.AppliesInBothDirections ? "↔" : "→")} {Signature(route.NextLocationId)}".Trim()
             : "—";
 
     private string Signature(int? locationId) =>
@@ -1043,7 +1078,7 @@ else
 
     private void AddStandardRegions()
     {
-        foreach (var region in Region.DefaultsFor(Layout!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
+        foreach (var region in Region.DefaultsFor(Timetable!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
         ScheduleState.SaveAndNotify();
     }
 

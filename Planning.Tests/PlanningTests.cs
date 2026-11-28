@@ -23,7 +23,7 @@ public class PlanningTests
     public void SimpleLayoutHas2TimetableStretches()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        Assert.AreEqual(2, layout.TimetableStretches.Count);
+        Assert.AreEqual(2, TestLayoutFactory.TimetableStretchesOf(layout).Count);
     }
 
     // Full layout tests
@@ -67,6 +67,6 @@ public class PlanningTests
     public void LayoutHas5TimetableStretches()
     {
         var layout = TestLayoutFactory.CreateLayout();
-        Assert.AreEqual(5, layout.TimetableStretches.Count);
+        Assert.AreEqual(5, TestLayoutFactory.TimetableStretchesOf(layout).Count);
     }
 }

@@ -14,7 +14,7 @@
 @implements IDisposable
 
 
-@if (Layout is null || LayoutSettings is null)
+@if (Layout is null || PlanSettings is null)
 {
     <p>@Translator("SettingsNoSchedule")</p>
 }
@@ -37,8 +37,8 @@ else
         <div class="section @SectionClass">
             @if (_section == SettingsSection.General)
             {
-                var g = LayoutSettings.General;
-                var i = LayoutSettings.Identity;
+                var g = PlanSettings.General;
+                var i = PlanSettings.Identity;
                 <div class="field">
                     <HelpLabel For="LayoutName" />
                     <input type="text" @bind="LayoutName" @bind:after="OnEdited" />
@@ -167,7 +167,7 @@ else
             }
             else if (_section == SettingsSection.SessionDays)
             {
-                var g = LayoutSettings.General;
+                var g = PlanSettings.General;
                 <div class="field">
                     <HelpLabel For="UseDays" />
                     <input type="checkbox" @bind="g.UseDays" @bind:after="OnEdited" />
@@ -229,7 +229,7 @@ else
             }
             else if (_section == SettingsSection.GraphicTimetable)
             {
-                var gt = LayoutSettings.GraphicTimetable;
+                var gt = PlanSettings.GraphicTimetable;
                 @* What the graph shows comes first, because it applies to the docked view and the printed
                    report alike. Only the geometry differs between the two, and that is what the two blocks
                    below hold: the same kinds of spacing, in screen pixels on the left and paper millimetres
@@ -319,7 +319,7 @@ else
             }
             else if (_section == SettingsSection.TimeAndSpeed)
             {
-                var ts = LayoutSettings.TimeAndSpeed;
+                var ts = PlanSettings.TimeAndSpeed;
                 <div class="field">
                     <label>@Translator("FastClockSpeed")</label>
                     <input type="number" min="1" @bind="ts.FastClockSpeed" @bind:after="OnEdited" />
@@ -377,7 +377,7 @@ else
             }
             else if (_section == SettingsSection.Validation)
             {
-                var v = LayoutSettings.Validation;
+                var v = PlanSettings.Validation;
                 <div class="field">
                     <HelpLabel For="ValidateStationCalls" />
                     <input type="checkbox" @bind="v.ValidateStationCalls" @bind:after="OnEdited" />
@@ -459,7 +459,7 @@ else
             }
             else if (_section == SettingsSection.Integration)
             {
-                var i = LayoutSettings.Integration;
+                var i = PlanSettings.Integration;
                 <div class="field">
                     <label>@Translator("ModuleRegistryApiUrl")</label>
                     <input type="text" @bind="i.ModuleRegistryApiUrl" @bind:after="OnEdited" />
@@ -500,7 +500,7 @@ else
                     </p>
                     @* The passenger interchanges are printed nowhere unless the author places them, so
                        the tag is only worth offering where there are interchanges to print. *@
-                    @if (LayoutSettings.General.UsePassengerTickets)
+                    @if (PlanSettings.General.UsePassengerTickets)
                     {
                         <p class="hint">
                             @Translator("InterchangesPlaceholderHint")
@@ -549,7 +549,7 @@ else
     };
 
     private LayoutModel? Layout => ScheduleState.Layout;
-    private LayoutSettings? LayoutSettings => Layout?.Settings;
+    private PlanSettings? PlanSettings => ScheduleState.Timetable?.Settings;
     private Timetable? Timetable => ScheduleState.Timetable;
     // The general instructions belong to the plan, not to the layout settings.
     private Plan? Plan => ScheduleState.Schedule;
@@ -561,7 +561,7 @@ else
     private readonly HashSet<Days> _newDays = [];
 
     private SessionsSettings SessionSettings =>
-        LayoutSettings?.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
+        PlanSettings?.General.SessionSettings() ?? SessionsSettings.UseSessions(14);
 
     private void ToggleNewDay(Days day, ChangeEventArgs e)
     {
@@ -613,14 +613,14 @@ else
     // valid for the new theme (fall back to the first available one).
     private Theme LayoutTheme
     {
-        get => LayoutSettings?.Identity.Theme ?? Theme.European;
+        get => PlanSettings?.Identity.Theme ?? Theme.European;
         set
         {
-            if (LayoutSettings is null) return;
-            LayoutSettings.Identity.Theme = value;
+            if (PlanSettings is null) return;
+            PlanSettings.Identity.Theme = value;
             var available = Country.CountriesByTheme(value);
-            if (!available.Any(c => c.Id == LayoutSettings.Identity.DefaultCountryId))
-                LayoutSettings.Identity.DefaultCountryId = available.FirstOrDefault()?.Id ?? 0;
+            if (!available.Any(c => c.Id == PlanSettings.Identity.DefaultCountryId))
+                PlanSettings.Identity.DefaultCountryId = available.FirstOrDefault()?.Id ?? 0;
         }
     }
 
@@ -659,35 +659,35 @@ else
 
     private bool RunsOverMidnight
     {
-        get => LayoutSettings?.General.RunsOverMidnight ?? false;
+        get => PlanSettings?.General.RunsOverMidnight ?? false;
         set
         {
-            if (LayoutSettings is null) return;
-            LayoutSettings.General.RunsOverMidnight = value;
+            if (PlanSettings is null) return;
+            PlanSettings.General.RunsOverMidnight = value;
             if (value)
             {
-                LayoutSettings.General.StartTime = TimeSpan.Zero;
-                LayoutSettings.General.EndTime = EndOfDay;
+                PlanSettings.General.StartTime = TimeSpan.Zero;
+                PlanSettings.General.EndTime = EndOfDay;
             }
         }
     }
 
     private TimeOnly StartTime
     {
-        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.StartTime);
-        set { if (LayoutSettings is not null) LayoutSettings.General.StartTime = value.ToTimeSpan(); }
+        get => PlanSettings is null ? default : ToTimeOfDay(PlanSettings.General.StartTime);
+        set { if (PlanSettings is not null) PlanSettings.General.StartTime = value.ToTimeSpan(); }
     }
 
     private TimeOnly FirstSessionStartTime
     {
-        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.FirstSessionStartTime);
-        set { if (LayoutSettings is not null) LayoutSettings.General.FirstSessionStartTime = value.ToTimeSpan(); }
+        get => PlanSettings is null ? default : ToTimeOfDay(PlanSettings.General.FirstSessionStartTime);
+        set { if (PlanSettings is not null) PlanSettings.General.FirstSessionStartTime = value.ToTimeSpan(); }
     }
 
     private TimeOnly EndTime
     {
-        get => LayoutSettings is null ? default : ToTimeOfDay(LayoutSettings.General.EndTime);
-        set { if (LayoutSettings is not null) LayoutSettings.General.EndTime = value.ToTimeSpan(); }
+        get => PlanSettings is null ? default : ToTimeOfDay(PlanSettings.General.EndTime);
+        set { if (PlanSettings is not null) PlanSettings.General.EndTime = value.ToTimeSpan(); }
     }
 
     // The report font. Until the browser has been asked which families it has, every candidate is
@@ -696,8 +696,8 @@ else
 
     private string ReportFontFamily
     {
-        get => LayoutSettings?.General.ReportFontFamily ?? "";
-        set { if (LayoutSettings is not null) LayoutSettings.General.ReportFontFamily = value; }
+        get => PlanSettings?.General.ReportFontFamily ?? "";
+        set { if (PlanSettings is not null) PlanSettings.General.ReportFontFamily = value; }
     }
 
     // Grouped in catalogue order, so the railway faces lead and the serifs stay apart from the rest.
@@ -723,18 +723,18 @@ else
 
     private bool UseBreak
     {
-        get => LayoutSettings?.General.BreakTime is not null;
+        get => PlanSettings?.General.BreakTime is not null;
         set
         {
-            if (LayoutSettings is null) return;
-            LayoutSettings.General.BreakTime = value ? LayoutSettings.General.BreakTime ?? TimeSpan.FromHours(12) : null;
+            if (PlanSettings is null) return;
+            PlanSettings.General.BreakTime = value ? PlanSettings.General.BreakTime ?? TimeSpan.FromHours(12) : null;
         }
     }
 
     private TimeOnly? BreakTime
     {
-        get => LayoutSettings?.General.BreakTime is { } b ? ToTimeOfDay(b) : null;
-        set { if (LayoutSettings is not null) LayoutSettings.General.BreakTime = value?.ToTimeSpan(); }
+        get => PlanSettings?.General.BreakTime is { } b ? ToTimeOfDay(b) : null;
+        set { if (PlanSettings is not null) PlanSettings.General.BreakTime = value?.ToTimeSpan(); }
     }
 
     protected override void OnInitialized()

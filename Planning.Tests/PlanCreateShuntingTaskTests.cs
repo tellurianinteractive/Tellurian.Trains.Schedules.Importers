@@ -26,8 +26,8 @@ public class PlanCreateShuntingTaskTests
     private static Plan SimplePlan()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        var plan = new Plan("Test", new Timetable("Test", layout));
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        var plan = new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
         return plan;
     }
 
@@ -80,9 +80,9 @@ public class PlanCreateShuntingTaskTests
     public void ATaskOutsideTheOperatingWindowIsNotAdded()
     {
         var plan = SimplePlan();
-        plan.Layout.Settings.General.AllowPlanTimeExtend = false;
-        plan.Layout.Settings.General.StartTime = TimeSpan.FromHours(6);
-        plan.Layout.Settings.General.EndTime = TimeSpan.FromHours(22);
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = false;
+        plan.Timetable.Settings.General.StartTime = TimeSpan.FromHours(6);
+        plan.Timetable.Settings.General.EndTime = TimeSpan.FromHours(22);
 
         var task = plan.CreateShuntingTask(Shunting, Location(plan, "Lu"), Time.FromHourAndMinute(21, 45), 60);
 

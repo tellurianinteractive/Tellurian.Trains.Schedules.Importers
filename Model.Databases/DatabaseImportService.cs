@@ -44,14 +44,14 @@ public static class PlanReading
             var timetableId = plan.TimetableId;
             var layoutId = plan.Timetable.LayoutId;
 
-            await context.Companies.Where(c => c.LayoutId == layoutId).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.Regions.Where(r => EF.Property<int>(r, "LayoutId") == layoutId).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.OperationLocations.Where(l => l.LayoutId == layoutId).Include(l => l.Tracks).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.Stations.Where(s => s.LayoutId == layoutId).Include(s => s.Regions).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.TrackStretches.Where(s => s.LayoutId == layoutId).LoadAsync(cancellationToken).ConfigureAwait(false);
-            await context.TimetableStretches.Where(s => EF.Property<int>(s, "LayoutId") == layoutId).Include(s => s.Stretches).LoadAsync(cancellationToken).ConfigureAwait(false);
-            await context.DispatchStretches.Where(s => EF.Property<int>(s, "LayoutId") == layoutId).Include(s => s.Stretches).LoadAsync(cancellationToken).ConfigureAwait(false);
 
+            await context.Companies.Where(c => c.TimetableId == timetableId).LoadAsync(cancellationToken).ConfigureAwait(false);
+            await context.TimetableStretches.Where(s => EF.Property<int>(s, "TimetableId") == timetableId).Include(s => s.Stretches).LoadAsync(cancellationToken).ConfigureAwait(false);
+            await context.DispatchStretches.Where(s => EF.Property<int>(s, "TimetableId") == timetableId).Include(s => s.Stretches).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.TrainCategories.Where(c => EF.Property<int>(c, "TimetableId") == timetableId).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.Set<CargoFlowOptions>().Where(o => EF.Property<int>(o, "TimetableId") == timetableId).LoadAsync(cancellationToken).ConfigureAwait(false);
             await context.Trains.Where(t => t.TimetableId == timetableId).LoadAsync(cancellationToken).ConfigureAwait(false);

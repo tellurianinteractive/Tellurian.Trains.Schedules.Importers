@@ -11,7 +11,7 @@ namespace Tellurian.Trains.Schedules.Planning.Tests;
 [TestClass]
 public class PlanRunOrderTests
 {
-    private static Plan SimplePlan() => new("Test", new Timetable("Test", TestLayoutFactory.CreateSimpleLayout()));
+    private static Plan SimplePlan() => new("Test", TestLayoutFactory.NewTimetable("Test", TestLayoutFactory.CreateSimpleLayout()));
 
     private static TrainCategory Passenger => new() { Id = 1, Name = "Passenger", Prefix = "P", Content = TrainContent.Passenger, DefaultSpeed = 100 };
 
@@ -39,7 +39,7 @@ public class PlanRunOrderTests
     }
 
     private static TimetableStretch MainLine(Plan plan) =>
-        plan.Layout.TimetableStretches.First(s => s.Number == "S1");
+        plan.Timetable.TimetableStretches.First(s => s.Number == "S1");
 
     [TestMethod]
     public void TheGraphDirectionIsInferredFromTheOrderTheTrainRunsItsCalls()

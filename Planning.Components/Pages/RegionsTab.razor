@@ -109,6 +109,8 @@ else
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Layout? Layout => ScheduleState.Layout;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private IQueryable<Region> Regions => (Layout?.Regions ?? []).AsQueryable();
 
     private Mode _mode = Mode.List;
@@ -122,7 +124,7 @@ else
         ScheduleState.OnChanged += OnStateChanged;
         // Make sure the countries this layout references are in its catalogue (older/imported layouts
         // may not have them yet); only persist when something was actually added.
-        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+        if (ScheduleState.Timetable is { } timetable && timetable.EnsureCountries()) ScheduleState.SaveAndNotify();
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
@@ -157,7 +159,7 @@ else
 
     private void StartAdd()
     {
-        Editing = new Region { Id = NextId(), Name = "", CountryId = Layout!.Settings.Identity.DefaultCountryId };
+        Editing = new Region { Id = NextId(), Name = "", CountryId = Timetable!.Settings.Identity.DefaultCountryId };
         _isNew = true;
         _error = null;
         _mode = Mode.Edit;
@@ -209,7 +211,7 @@ else
 
     private void AddDefaults()
     {
-        foreach (var region in Region.DefaultsFor(Layout!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
+        foreach (var region in Region.DefaultsFor(Timetable!.Settings.Identity.DefaultCountryId)) Layout!.Add(region);
         ScheduleState.SaveAndNotify();
     }
 

@@ -6,7 +6,7 @@ public class OperatingWindowTests
     private static Timetable TimetableWithForwardTrainStartingAt(Time startTime)
     {
         TestDataFactory.Init();
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var category = new TrainCategory { Id = 1, Prefix = "G", Name = "G" };
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, startTime));
         return timetable;

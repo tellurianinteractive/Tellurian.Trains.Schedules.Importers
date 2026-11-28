@@ -12,7 +12,7 @@ public class TrainRenumberingTests
 
     private static (Timetable Timetable, Train[] Trains) TimetableWith(TrainCategory category, params int[] numbers)
     {
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var trains = numbers.Select((n, i) => timetable.Add(new Train(i + 1, category, n))).ToArray();
         return (timetable, trains);
     }
@@ -84,7 +84,7 @@ public class TrainRenumberingTests
     {
         var passenger = Category(100);
         var freight = new TrainCategory { Id = 2, Name = "G", Prefix = "G", StartNumber = 5000 };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var passengerTrain = timetable.Add(new Train(1, passenger, 1));
         var freightTrain = timetable.Add(new Train(2, freight, 5001));
 

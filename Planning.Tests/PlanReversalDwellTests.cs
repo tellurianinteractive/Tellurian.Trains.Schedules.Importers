@@ -55,12 +55,12 @@ public class PlanReversalDwellTests
 
     private static int RunaroundMinutes(Plan plan)
     {
-        var settings = plan.Layout.Settings.TimeAndSpeed;
+        var settings = plan.Timetable.Settings.TimeAndSpeed;
         return (settings.StationTimings.LocoRunaroundRealMinutes ?? 5) * settings.FastClockSpeed;
     }
 
     private static int MinimumStopMinutes(Plan plan) =>
-        plan.Layout.Settings.TimeAndSpeed.StationTimings.MinimumStopMinutes ?? 3;
+        plan.Timetable.Settings.TimeAndSpeed.StationTimings.MinimumStopMinutes ?? 3;
 
     [TestMethod]
     public void ATrainWithNoVehicleAssignedKeepsTheRunaroundAllowance()

@@ -151,6 +151,8 @@
     private static CultureInfo Invariant => CultureInfo.InvariantCulture;
 
     private Layout? Layout => ScheduleState.Layout;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private IReadOnlyList<OperationLocation> Locations =>
         Layout is null ? [] : [.. Layout.OperationLocations.OrderBy(l => l.Name, StringComparer.CurrentCulture)];
     // Defaults to import/entry order (Id ascending, set as the grid's default sort column); the user
@@ -208,7 +210,7 @@
 
     // A track stretch is referenced when a timetable stretch is built from it; deleting it would break that route.
     private bool IsReferenced(TrackStretch stretch) =>
-        Layout!.TimetableStretches.Any(t => t.Stretches.Contains(stretch));
+        Timetable!.TimetableStretches.Any(t => t.Stretches.Contains(stretch));
 
     private void StartAdd()
     {

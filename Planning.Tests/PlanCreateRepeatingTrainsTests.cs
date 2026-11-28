@@ -12,7 +12,7 @@ public class PlanCreateRepeatingTrainsTests
     private static Plan SimplePlan()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        return new Plan("Test", new Timetable("Test", layout));
+        return new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
     }
 
     private static OperationLocation Location(Plan plan, string signature) =>

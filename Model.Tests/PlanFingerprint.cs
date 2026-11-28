@@ -18,20 +18,23 @@ internal static class PlanFingerprint
         {
             ["locations"] = Join(layout.OperationLocations.OrderBy(l => l.Id), l =>
                 $"{l.Id}:{l.GetType().Name}:{l.Name}:{l.Signature}:{l.CountryId}:{l.CargoServedFrom?.Id}:{l.ControlledBy?.Id}:{l.LockKey?.Name}@{l.LockKey?.HeldAt?.Id}:" +
-                $"{l.HasPassengerExchange}:{l.HasCargoExchange}:{l.IsChangingTrainDirectionPossible}:{l.HideMeets}:{l.HidePassings}:{l.Instructions.Length}:" +
-                $"{l.Timings.MinimumStopMinutes}/{l.Timings.LocoRunaroundRealMinutes}/{l.Timings.TrainClearanceRealMinutes}:" +
-                (l is Station s ? $"{s.IsShadow}:{s.IsManned}:{s.HasTurntable}:{s.StartLabels}:{s.ShiftCount}:{string.Join('+', s.StaffPosts.Select(p => p.Roles))}:{string.Join('+', s.Regions.Select(r => r.Id))}" : "") +
+                $"{l.HasPassengerExchange}:{l.HasCargoExchange}:{l.IsChangingTrainDirectionPossible}:" +
+                (l is Station s ? $"{s.IsShadow}:{s.IsManned}:{s.HasTurntable}:{string.Join('+', s.Regions.Select(r => r.Id))}" : "") +
                 (l is SignalControlledLocation c ? $"{c.TrainsCanCross}" : "")),
             ["tracks"] = Join(layout.OperationLocations.SelectMany(l => l.Tracks).OrderBy(t => t.Id), t =>
-                $"{t.Id}:{t.Station.Id}:{t.Number}:{t.DisplayOrder}:{t.IsScheduled}:{t.IsMain}:{t.IsStub}:{t.Length}:{t.PlatformLength}:{t.IsLockable}:{t.Usage}:{t.PreviousLocationId}:{t.NextLocationId}:{t.AppliesInBothDirections}:{t.Calls.Count}"),
+                $"{t.Id}:{t.Station.Id}:{t.Number}:{t.DisplayOrder}:{t.IsScheduled}:{t.IsMain}:{t.IsStub}:{t.Length}:{t.PlatformLength}:{t.IsLockable}:{t.Usage}:{t.Calls.Count}"),
+            ["location planning"] = Join(timetable.LocationPlanning.OrderBy(p => p.LocationId), p =>
+                $"{p.LocationId}:{p.HideMeets}:{p.HidePassings}:{p.Instructions.Length}:{p.PhoneNumber}:{p.Timings.MinimumStopMinutes}/{p.Timings.LocoRunaroundRealMinutes}/{p.Timings.TrainClearanceRealMinutes}:" +
+                $"{p.StartLabels}:{p.ShiftCount}:{string.Join('+', p.StaffPosts.Select(post => post.Roles))}:{p.SplitDispatchByDirection}:{p.IsPassengerInterchange}"),
+            ["track routes"] = Join(timetable.StationTrackRoutes.OrderBy(r => r.TrackId), r => $"{r.TrackId}:{r.PreviousLocationId}:{r.NextLocationId}:{r.AppliesInBothDirections}"),
             ["stretches"] = Join(layout.TrackStretches.OrderBy(s => s.Id), s => $"{s.Id}:{s.Start.Id}-{s.End.Id}:{s.Distance}:{s.TracksCount}:{s.Speed}:{s.Time}:{s.IsElectrified}"),
-            ["timetable stretches"] = Join(layout.TimetableStretches.OrderBy(s => s.Id), s => $"{s.Id}:{s.Number}:{s.Description}:{s.Color}:{string.Join('+', s.Stretches.Select(t => t.Id))}"),
-            ["dispatch stretches"] = Join(layout.DispatchStretches.OrderBy(s => s.Id), s => $"{s.Id}:{s.From?.Id}-{s.To?.Id}:{string.Join('+', s.Stretches.Select(t => t.Id))}"),
-            ["topology"] = Join(layout.TopologyPositions.OrderBy(p => p.LocationId), p => $"{p.LocationId}:{p.X}:{p.Y}"),
+            ["timetable stretches"] = Join(timetable.TimetableStretches.OrderBy(s => s.Id), s => $"{s.Id}:{s.Number}:{s.Description}:{s.Color}:{string.Join('+', s.Stretches.Select(t => t.Id))}"),
+            ["dispatch stretches"] = Join(timetable.DispatchStretches.OrderBy(s => s.Id), s => $"{s.Id}:{s.From?.Id}-{s.To?.Id}:{string.Join('+', s.Stretches.Select(t => t.Id))}"),
+            ["topology"] = Join(timetable.TopologyPositions.OrderBy(p => p.LocationId), p => $"{p.LocationId}:{p.X}:{p.Y}"),
             ["countries"] = string.Join('|', layout.Countries.Select(c => c.Id)),
-            ["companies"] = Join(layout.Companies.OrderBy(c => c.Id), c => $"{c.Id}:{c.Name}:{c.Signature}:{c.CountryId}:{c.Logo?.Length}"),
+            ["companies"] = Join(timetable.Companies.OrderBy(c => c.Id), c => $"{c.Id}:{c.Name}:{c.Signature}:{c.CountryId}:{c.Logo?.Length}"),
             ["regions"] = Join(layout.Regions.OrderBy(r => r.Id), r => $"{r.Id}:{r.Name}:{r.CountryId}:{r.BackgroundColor}"),
-            ["settings"] = $"{layout.Settings.Identity.Theme}:{layout.Settings.General.StartDay}:{layout.Settings.GraphicTimetable.Orientation}:{layout.Settings.TimeAndSpeed.FastClockSpeed}:{layout.Settings.Validation.ValidateSchedules}",
+            ["settings"] = $"{timetable.Settings.Identity.Theme}:{timetable.Settings.General.StartDay}:{timetable.Settings.GraphicTimetable.Orientation}:{timetable.Settings.TimeAndSpeed.FastClockSpeed}:{timetable.Settings.Validation.ValidateSchedules}",
             ["categories"] = Join(timetable.TrainCategories.OrderBy(c => c.Id), c => $"{c.Id}:{c.Prefix}:{c.Name}:{c.Content}:{c.IsShunting}:{c.StartLabels}:{c.Company?.Id}:{string.Join('+', c.StopLocationIds)}"),
             ["trains"] = Join(timetable.Trains.OrderBy(t => t.Id), t =>
                 $"{t.Id}:{t.Number}:{t.Category?.Id}:{t.Company?.Id}:{t.Sessions}:{t.MaxSpeed}:{t.IsReversible}:{t.Length.Axles}/{t.Length.Wagons}/{t.Length.Meters}:" +

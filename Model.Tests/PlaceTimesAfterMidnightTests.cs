@@ -13,8 +13,8 @@ public class PlaceTimesAfterMidnightTests
     {
         TestDataFactory.Init();
         var layout = TestDataFactory.Layout();
-        layout.Settings.General.RunsOverMidnight = runsOverMidnight;
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
+        timetable.Settings.General.RunsOverMidnight = runsOverMidnight;
         var category = new TrainCategory { Id = 1, Prefix = "G", Name = "G" };
         var train = TestDataFactory.CreateTrainInForwardDirection(category, 1, startTime);
         timetable.Add(train);

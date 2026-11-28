@@ -191,7 +191,7 @@ public static class PlanExtensions
         /// (see <c>FitsWithinOperatingWindow</c>). A plain 00:00–23:59 window without the flag does not wrap,
         /// so a train spilling into the next day is rejected.
         /// </summary>
-        public bool IsWrappingMidnight => plan.Layout.Settings.General.RunsOverMidnight;
+        public bool IsWrappingMidnight => plan.Timetable.Settings.General.RunsOverMidnight;
 
         /// <summary>
         /// Gets whether <paramref name="train"/> fits within the plan's operating window: its whole span, from the
@@ -273,7 +273,7 @@ public static class PlanExtensions
         {
             if (start.Value < TimeSpan.Zero || start.Value >= TimeSpan.FromDays(1)) return false;
             if (plan.IsWrappingMidnight) return true;
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             if (general.AllowPlanTimeExtend)
             {
                 if (start.Value < general.StartTime) general.StartTime = start.Value;
@@ -361,7 +361,7 @@ public static class PlanExtensions
             var locations = path.Locations.ToList();
             if (locations.Count < 2) return null;
 
-            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var settings = plan.Timetable.Settings.TimeAndSpeed;
             var directionChanges = path.DirectionChanges.ToHashSet();
 
             var trainNumber = number ?? plan.Timetable.NextTrainNumber(category, IsDownward(path));
@@ -377,7 +377,7 @@ public static class PlanExtensions
                 var previous = i > 0 ? locations[i - 1] : null;
                 var next = i < locations.Count - 1 ? locations[i + 1] : null;
                 var stops = StandsAt(i);
-                if (location.PreferredTrack(previous, next, Preference(stops)) is not { } track) return null;
+                if (location.PreferredTrack(plan.Timetable, previous, next, Preference(stops)) is not { } track) return null;
 
                 Time arrival, departure;
                 bool isArrival, isDeparture;
@@ -509,7 +509,7 @@ public static class PlanExtensions
 
             // Neither a location before nor one after: the task comes from nowhere and goes nowhere, so the
             // track is chosen on the planner's own ranking alone.
-            if (location.PreferredTrack(null, null, TrackPreference.MainTrack) is not { } track) return null;
+            if (location.PreferredTrack(plan.Timetable, null, null, TrackPreference.MainTrack) is not { } track) return null;
 
             var taskNumber = number ?? plan.Timetable.NextShuntingTaskNumber(category);
             var train = new Train(plan.NextTrainId, category, taskNumber) { Sessions = Sessions.All };
@@ -1008,7 +1008,7 @@ public static class PlanExtensions
             Model.Validations.StopRules.ApplyStopRules(plan);
             if (previous is null || plan.StretchBetween(previous.OperationLocation, call.OperationLocation) is not { } stretch) return call;
 
-            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var settings = plan.Timetable.Settings.TimeAndSpeed;
             var arrival = previous.Departure.AddMinutes(train.ScheduledLegMinutes(stretch, settings, previous.IsStop, standsAtEnd: true));
             var departure = arrival.AddMinutes(plan.DwellMinutes(call.OperationLocation, false));
             if (!plan.OperatingWindowContains(train.DriverStartTime, departure)) return call;
@@ -1037,7 +1037,7 @@ public static class PlanExtensions
             Model.Validations.StopRules.ApplyStopRules(plan);
             if (next is null || plan.StretchBetween(call.OperationLocation, next.OperationLocation) is not { } stretch) return call;
 
-            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var settings = plan.Timetable.Settings.TimeAndSpeed;
             var departure = next.Arrival.AddMinutes(-train.ScheduledLegMinutes(stretch, settings, standsAtStart: true, next.IsStop));
             var arrival = departure.AddMinutes(-plan.DwellMinutes(call.OperationLocation, false));
             if (!plan.OperatingWindowContains(arrival, train.DriverEndTime)) return call;
@@ -1081,7 +1081,7 @@ public static class PlanExtensions
             var calls = train.CallsInRunOrder.ToArray();
             if (calls.Length < 2) return train;
 
-            var settings = plan.Layout.Settings.TimeAndSpeed;
+            var settings = plan.Timetable.Settings.TimeAndSpeed;
 
             // Resolve the stretch and its travel direction for each leg between consecutive calls.
             var legs = new (TrackStretch Stretch, bool Forward)[calls.Length - 1];
@@ -1169,7 +1169,7 @@ public static class PlanExtensions
         // train clearance at a manned station and, where the loco has to be run round to the other end of the
         // train, the loco runaround (see RequiredStopTimes). They are not added together.
         private int DwellMinutes(OperationLocation location, bool needsRunaround) =>
-            plan.Layout.Settings.TimeAndSpeed.RequiredStopMinutes(location, needsRunaround);
+            plan.Timetable.Settings.TimeAndSpeed.RequiredStopMinutes(location, plan.Timetable.PlanningOf(location).Timings, needsRunaround);
 
         // The single track stretch joining two locations, in either orientation; null when none exists.
         internal TrackStretch? StretchBetween(OperationLocation a, OperationLocation b) =>

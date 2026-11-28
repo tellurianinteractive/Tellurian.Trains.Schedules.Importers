@@ -23,9 +23,9 @@ public class DispatchDirectionTests
         var east = layout.Add(NewStation(3, East, "Stk"));
         layout.Add(new TrackStretch(1, west, middle, 10));
         layout.Add(new TrackStretch(2, middle, east, 10));
-        middle.SplitDispatchByDirection = split;
 
         var timetable = new Timetable("Test", layout);
+        timetable.EnsurePlanningOf(middle).SplitDispatchByDirection = split;
         var train = new Train(1, 1234);
         var start = Time.FromHourAndMinute(12, 00);
         train.Add(new StationCall(10, west["1"], start.AddMinutes(-60), start));
@@ -109,7 +109,6 @@ public class DispatchDirectionTests
         layout.Add(new TrackStretch(1, west, middle, 10));
         layout.Add(new TrackStretch(2, middle, east, 10));
         layout.Add(leadsAway ? new TrackStretch(3, middle, siding, 5) : new TrackStretch(3, siding, middle, 5));
-        middle.SplitDispatchByDirection = true;
         return middle;
     }
 
@@ -141,9 +140,11 @@ public class DispatchDirectionTests
         var middle = CreateStationWithSpur(leadsAway: true);
         var siding = middle.Layout!.OperationLocations.Single(l => l.Name == "Siding");
         siding.ControlledBy = middle;
-        siding.PhoneNumber = 42;
+        var timetable = new Timetable("Test", middle.Layout);
+        timetable.EnsurePlanningOf(middle).SplitDispatchByDirection = true;
+        timetable.EnsurePlanningOf(siding).PhoneNumber = 42;
 
-        var lists = DispatchList.CreateAll(middle, new Timetable("Test", middle.Layout).Trains, Settings);
+        var lists = DispatchList.CreateAll(middle, timetable.Trains, Settings, new Plan("Test", timetable));
 
         Assert.HasCount(2, lists);
         var east = lists.Single(l => l.Direction!.Contains(East));
@@ -156,7 +157,7 @@ public class DispatchDirectionTests
     {
         var (timetable, _) = CreateTimetable(3, split: true);
         var west = (Station)timetable.Layout.OperationLocations.Single(location => location.Name == West);
-        west.SplitDispatchByDirection = true;
+        timetable.EnsurePlanningOf(west).SplitDispatchByDirection = true;
 
         var lists = DispatchList.CreateAll(west, timetable.Trains, Settings);
 

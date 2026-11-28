@@ -1,4 +1,5 @@
 @namespace Tellurian.Trains.Schedules.Planning.Components.Reporting.Locations
+@inject ScheduleStateService ScheduleState
 
 @using System.Globalization
 @using Tellurian.Trains.Schedules.Model.Layouts
@@ -54,10 +55,10 @@
 
     @* Printed only where instructions apply and something is written. Where the kind of location no longer
        takes instructions, whatever was written before stays with it unprinted, as the editor hides it too. *@
-    @if (Location.HasInstructions && !string.IsNullOrWhiteSpace(Location.Instructions))
+    @if (Location.HasInstructions && !string.IsNullOrWhiteSpace(Timetable!.PlanningOf(Location).Instructions))
     {
         <h2>@Translator("LocationInstructions")</h2>
-        <div class="instructions-body">@((MarkupString)Markdig.Markdown.ToHtml(Location.Instructions))</div>
+        <div class="instructions-body">@((MarkupString)Markdig.Markdown.ToHtml(Timetable!.PlanningOf(Location).Instructions))</div>
     }
 
     <h2>@Translator("Tracks")</h2>
@@ -118,6 +119,8 @@
 </div>
 
 @code {
+    private Timetable? Timetable => ScheduleState.Timetable;
+
     /// <summary>The location the sheet is for.</summary>
     [Parameter, EditorRequired] public OperationLocation Location { get; set; } = default!;
 
@@ -147,7 +150,7 @@
             yield return ("Type", Translator(TypeKey(location)));
             yield return ("Country", Layout.CountryById(location.CountryId) is { } country ? Translator(country.ResourceKey) : "—");
             yield return ("Owner", Text(location.Owner));
-            yield return ("PhoneNumber", location.PhoneNumber?.ToString(Culture) ?? "—");
+            yield return ("PhoneNumber", Timetable!.PlanningOf(location).PhoneNumber?.ToString(Culture) ?? "—");
 
             if (location is Station station)
             {
@@ -162,8 +165,8 @@
             if (location is not SignalControlledLocation)
                 yield return ("HasPassengerExchange", YesNo(location.HasPassengerExchange));
             // Only while the meeting is worked with passenger tickets, which is what makes an interchange one.
-            if (location is Station interchange && Layout.Settings.General.UsePassengerTickets && location.CanBePassengerInterchange)
-                yield return ("IsPassengerInterchange", YesNo(interchange.IsPassengerInterchange));
+            if (location is Station && Timetable!.Settings.General.UsePassengerTickets && location.CanBePassengerInterchange)
+                yield return ("IsPassengerInterchange", YesNo(Timetable!.PlanningOf(location).IsPassengerInterchange));
             if (location is Station or IndustrialArea)
                 yield return ("HasCargoExchange", YesNo(location.HasCargoExchange));
 
@@ -183,21 +186,21 @@
                 if (key is { Name.Length: > 0 }) yield return ("LockKeyName", key.Name);
             }
 
-            yield return ("HideMeets", YesNo(location.HideMeets));
+            yield return ("HideMeets", YesNo(Timetable!.PlanningOf(location).HideMeets));
             if (location is not OtherLocation)
-                yield return ("HidePassings", YesNo(location.HidePassings));
+                yield return ("HidePassings", YesNo(Timetable!.PlanningOf(location).HidePassings));
 
             // The times in force here: the location's own where it has one, else the layout's.
-            var defaults = Layout.Settings.TimeAndSpeed.StationTimings;
-            yield return ("MinimumStopMinutes", Minutes(location.Timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes));
+            var defaults = Timetable!.Settings.TimeAndSpeed.StationTimings;
+            yield return ("MinimumStopMinutes", Minutes(Timetable!.PlanningOf(location).Timings.MinimumStopMinutes ?? defaults.MinimumStopMinutes));
             if (location.HasLocoRunaroundTime)
-                yield return ("LocoRunaroundRealMinutes", RealTimeUnit.Text(Translator, location.Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes, Culture));
+                yield return ("LocoRunaroundRealMinutes", RealTimeUnit.Text(Translator, Timetable!.PlanningOf(location).Timings.LocoRunaroundRealMinutes ?? defaults.LocoRunaroundRealMinutes, Culture));
             if (location.HasTrainClearanceTime)
-                yield return ("TrainClearanceRealMinutes", RealTimeUnit.Text(Translator, location.Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes, Culture));
+                yield return ("TrainClearanceRealMinutes", RealTimeUnit.Text(Translator, Timetable!.PlanningOf(location).Timings.TrainClearanceRealMinutes ?? defaults.TrainClearanceRealMinutes, Culture));
         }
     }
 
-    private bool HasTrackRoutes => Location.Tracks.Any(track => track.HasRoute);
+    private bool HasTrackRoutes => Location.Tracks.Any(track => Timetable!.RouteOf(track).IsGiven);
 
     private static string TypeKey(OperationLocation location) => location switch
     {
@@ -216,8 +219,8 @@
     // The way through the location a track is for, as the editor shows it: "Yb → Sti", one end alone as
     // "Yb →" or "→ Sti", and "↔" where it counts both ways round.
     private string RouteSummary(StationTrack track) =>
-        track.HasRoute
-            ? $"{Signature(track.PreviousLocationId)} {(track.AppliesInBothDirections ? "↔" : "→")} {Signature(track.NextLocationId)}".Trim()
+        Timetable!.RouteOf(track) is { IsGiven: true } route
+            ? $"{Signature(route.PreviousLocationId)} {(route.AppliesInBothDirections ? "↔" : "→")} {Signature(route.NextLocationId)}".Trim()
             : "";
 
     private string Signature(int? locationId) =>

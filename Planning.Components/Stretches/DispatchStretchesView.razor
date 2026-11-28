@@ -40,8 +40,9 @@
 
 @code {
     private Layout? Layout => ScheduleState.Layout;
+    private Timetable? Timetable => ScheduleState.Timetable;
     private IReadOnlyList<DispatchStretch> Dispatches =>
-        Layout is null ? [] : [.. Layout.DispatchStretches.OrderBy(d => d.From.Name).ThenBy(d => d.To.Name)];
+        Layout is null ? [] : [.. Timetable!.DispatchStretches.OrderBy(d => d.From.Name).ThenBy(d => d.To.Name)];
 
     protected override void OnInitialized() => ScheduleState.OnChanged += OnStateChanged;
 
@@ -50,7 +51,7 @@
     private void Regenerate()
     {
         if (Layout is null) return;
-        Layout.DispatchStretches = Layout.CreateDispatchStretches();
+        Timetable!.DispatchStretches = Layout.CreateDispatchStretches();
         ScheduleState.SaveAndNotify();
     }
 

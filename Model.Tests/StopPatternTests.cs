@@ -21,7 +21,7 @@ public class StopPatternTests
     private static Plan CreatePlan(TrainCategory category, params string[] stopSignatures)
     {
         var layout = new Layout { Id = 1, Name = "Test" };
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.TrainCategories.Add(category);
         var train = new Train(1, category, 100) { Sessions = Sessions.All };
         var time = Time.FromHourAndMinute(8, 0);

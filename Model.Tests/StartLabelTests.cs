@@ -8,7 +8,7 @@ public class StartLabelTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var forward = TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00));
         var back = TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00));
         timetable.Add(forward);
@@ -26,7 +26,7 @@ public class StartLabelTests
     {
         train.Category!.StartLabels = category;
         foreach (var call in train.Calls)
-            if (call.OperationLocation is Station s) s.StartLabels = station;
+            if (call.OperationLocation is Station s) train.Timetable.EnsurePlanningOf(s).StartLabels = station;
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ public class StartLabelTests
         void Trains(StartLabelPrinting category, StartLabelPrinting stationSetting)
         {
             forward.Category!.StartLabels = category;
-            station.StartLabels = stationSetting;
+            plan.Timetable.EnsurePlanningOf(station).StartLabels = stationSetting;
         }
     }
 

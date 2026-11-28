@@ -12,7 +12,7 @@ public class PlanMoveCloneTrainTests
     private static Plan PlanWithTrain(out Train train)
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        var plan = new Plan("Test", new Timetable("Test", layout));
+        var plan = new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
         var from = plan.Layout.OperationLocations.First(l => l.Signature == "M2");
         var to = plan.Layout.OperationLocations.First(l => l.Signature == "Hm");
         train = plan.Create(Passenger, from, to, Start)!;
@@ -23,8 +23,8 @@ public class PlanMoveCloneTrainTests
     private static Plan RoundTheClockPlanWithTrain(Time departure, out Train train)
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        var plan = new Plan("Test", new Timetable("Test", layout));
-        plan.Layout.Settings.General.RunsOverMidnight = true;
+        var plan = new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
+        plan.Timetable.Settings.General.RunsOverMidnight = true;
         var from = plan.Layout.OperationLocations.First(l => l.Signature == "M2");
         var to = plan.Layout.OperationLocations.First(l => l.Signature == "Hm");
         train = plan.Create(Passenger, from, to, departure)!;
@@ -63,7 +63,7 @@ public class PlanMoveCloneTrainTests
     public void MovingAnOrdinaryTrainBeforeTheStartOfTheDayIsStillRefused()
     {
         var plan = PlanWithTrain(out var train);
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
 
         Assert.IsNull(plan.Move(train, -(8 * 60 + 30)));
     }

@@ -58,13 +58,13 @@ else
                 .Where(vehicle => vehicle.IsWagonSet && vehicle.PrintWagonsetCard)
                 .OrderBy(vehicle => vehicle.Company?.Signature, StringComparer.CurrentCulture)
                 .ThenBy(vehicle => vehicle.Number)
-                .Select(vehicle => (vehicle, new ReportCulture(OperatorCulture(layout, vehicle))))
+                .Select(vehicle => (vehicle, new ReportCulture(OperatorCulture(ScheduleState.Timetable!, vehicle))))
         ];
     }
 
     // The language of the wagonset's company, else of the operators of the trains it works when they agree.
-    private static CultureInfo OperatorCulture(Layout layout, ScheduledObject vehicle) =>
-        layout.ReportCultureOf(
+    private static CultureInfo OperatorCulture(Timetable timetable, ScheduledObject vehicle) =>
+        timetable.ReportCultureOf(
             vehicle.Company,
             vehicle.ScheduleAssignments.SelectMany(a => a.Schedule?.Parts ?? []).Select(p => p.Train.EffectiveCompany),
             LanguageService.IsSupported);

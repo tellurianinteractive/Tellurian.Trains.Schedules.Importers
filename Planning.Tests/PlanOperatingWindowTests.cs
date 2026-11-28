@@ -12,7 +12,7 @@ public class PlanOperatingWindowTests
     private static Plan SimplePlan()
     {
         var layout = TestLayoutFactory.CreateSimpleLayout();
-        return new Plan("Test", new Timetable("Test", layout));
+        return new Plan("Test", TestLayoutFactory.NewTimetable("Test", layout));
     }
 
     private static OperationLocation Location(Plan plan, string signature) =>
@@ -23,9 +23,9 @@ public class PlanOperatingWindowTests
 
     private static void SetWindow(Plan plan, TimeSpan start, TimeSpan end, bool runsOverMidnight = false)
     {
-        plan.Layout.Settings.General.StartTime = start;
-        plan.Layout.Settings.General.EndTime = end;
-        plan.Layout.Settings.General.RunsOverMidnight = runsOverMidnight;
+        plan.Timetable.Settings.General.StartTime = start;
+        plan.Timetable.Settings.General.EndTime = end;
+        plan.Timetable.Settings.General.RunsOverMidnight = runsOverMidnight;
     }
 
     [TestMethod]
@@ -39,7 +39,7 @@ public class PlanOperatingWindowTests
         Assert.IsFalse(plan.IsWrappingMidnight);
 
         // The flag alone makes the window wrap.
-        plan.Layout.Settings.General.RunsOverMidnight = true;
+        plan.Timetable.Settings.General.RunsOverMidnight = true;
         Assert.IsTrue(plan.IsWrappingMidnight);
     }
 
@@ -114,13 +114,13 @@ public class PlanOperatingWindowTests
         // The train departs at 08:00 and runs for the better part of an hour, so a window ending at 08:00
         // would normally reject it.
         SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(8));
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
 
         var train = plan.Create(Passenger, Location(plan, "M2"), Location(plan, "Hm"), Start);
 
         Assert.IsNotNull(train);
         Assert.AreEqual(1, plan.Timetable.Trains.Count);
-        Assert.IsTrue(plan.Layout.Settings.General.EndTime >= train.DriverEndTime.Value,
+        Assert.IsTrue(plan.Timetable.Settings.General.EndTime >= train.DriverEndTime.Value,
             "EndTime should have been widened to cover the train.");
     }
 
@@ -130,14 +130,14 @@ public class PlanOperatingWindowTests
         var plan = SimplePlan();
         SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(20));
         var train = CreateTrain(plan);
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
 
         // Shift the start to 19:55, so the train necessarily finishes after 20:00.
         var minutes = 19 * 60 + 55 - (int)train.DriverStartTime.Value.TotalMinutes;
         var moved = plan.Move(train, minutes);
 
         Assert.IsNotNull(moved);
-        Assert.IsTrue(plan.Layout.Settings.General.EndTime >= train.DriverEndTime.Value,
+        Assert.IsTrue(plan.Timetable.Settings.General.EndTime >= train.DriverEndTime.Value,
             "EndTime should have been widened to cover the moved train.");
     }
 
@@ -147,7 +147,7 @@ public class PlanOperatingWindowTests
         var plan = SimplePlan();
         SetWindow(plan, TimeSpan.FromHours(6), TimeSpan.FromHours(20));
         var train = CreateTrain(plan);
-        plan.Layout.Settings.General.AllowPlanTimeExtend = true;
+        plan.Timetable.Settings.General.AllowPlanTimeExtend = true;
 
         // A shift past midnight would make the train start on the next calendar day, which stays
         // rejected even when AllowPlanTimeExtend is set.

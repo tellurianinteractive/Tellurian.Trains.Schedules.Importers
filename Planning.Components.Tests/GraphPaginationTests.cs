@@ -18,9 +18,9 @@ public class GraphPaginationTests
     private static GraphPageItem Item(int number, double crossMm) =>
         new(new TimetableStretch(number, number.ToString()), crossMm, 20);
 
-    private static LayoutSettings Settings()
+    private static PlanSettings Settings()
     {
-        var settings = new LayoutSettings();
+        var settings = new PlanSettings();
         settings.General.StartTime = Six;
         settings.General.EndTime = Twenty;
         return settings;
@@ -166,9 +166,10 @@ public class GraphPaginationTests
         layout.Add(stretch);
         var line = new TimetableStretch(1, "1");
         line.AddLast(stretch);
-        layout.Add(line);
 
-        var graph = new GraphSchedule(line, new Timetable("Test", layout), settings.ToPrintGraphSettings(longestSignatureLength: 5));
+        var timetable = new Timetable("Test", layout);
+        timetable.Add(line);
+        var graph = new GraphSchedule(line, timetable, settings.ToPrintGraphSettings(longestSignatureLength: 5));
 
         Assert.AreEqual(30.0, graph.CrossAxisLengthMm(), 0.001);
     }

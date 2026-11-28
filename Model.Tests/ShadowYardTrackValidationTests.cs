@@ -17,7 +17,7 @@ public class ShadowYardTrackValidationTests
     private static Plan CreatePlan(bool destinationIsShadow, bool conflictAtKode = false)
     {
         var layout = new Layout { Id = 1, Name = "Test" };
-        var timetable = new Timetable("Test", layout);
+        var timetable = TestDataFactory.NewTimetable("Test", layout);
         timetable.TrainCategories.Add(Freight);
         var kode = new Station(1, "Kode", "Kd");
         kode.Add(new StationTrack(1, "1"));

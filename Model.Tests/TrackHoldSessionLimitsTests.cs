@@ -15,10 +15,10 @@ public class TrackHoldSessionLimitsTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         var plan = Plan.Create("Test", timetable);
-        configure(plan.Layout.Settings.General);
+        configure(plan.Timetable.Settings.General);
         var train = plan.Timetable.Trains.Single();
         train.Sessions = Sessions.All;
         var schedule = plan.CreateSchedule();
@@ -92,14 +92,14 @@ public class TrackHoldAlternatingSchedulesTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 3, Time.FromHourAndMinute(14, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 4, Time.FromHourAndMinute(15, 00)));
         var plan = Plan.Create("Test", timetable);
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Train TrainNumber(int number) => plan.Timetable.Trains.Single(t => t.Number == number);
         TrainNumber(1).Sessions = TrainNumber(2).Sessions = MondayWednesdayFridaySunday;
         TrainNumber(3).Sessions = TrainNumber(4).Sessions = TuesdayThursdaySaturday;

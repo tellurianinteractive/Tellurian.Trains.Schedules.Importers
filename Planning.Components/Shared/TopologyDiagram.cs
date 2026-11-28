@@ -160,21 +160,22 @@ public sealed record TopologyDiagram(
     /// the track alone gets right. A timetable stretch shows only as the colour its track is drawn in: it
     /// is not numbered, the diagram being a picture of the railway rather than of the timetable.
     /// </summary>
-    /// <param name="layout">The layout to draw.</param>
+    /// <param name="timetable">The timetable whose layout is drawn, with its timetable stretches and saved positions.</param>
     /// <param name="withRoomToArrange">
     /// Whether to keep an empty row above and below the drawing. Pass <c>true</c> wherever the planner
     /// can drag a location, so there is visible space to move one into — above the topmost line most of
     /// all, where a diagram framed against its own content leaves nowhere to go. Off for the printed
     /// booklet, which is looked at rather than arranged and should not waste the paper.
     /// </param>
-    public static TopologyDiagram Build(Layout layout, bool withRoomToArrange = false)
+    public static TopologyDiagram Build(Timetable timetable, bool withRoomToArrange = false)
     {
-        layout = layout.ValueOrException(nameof(layout));
-        var track = GatherTrack(layout);
+        timetable = timetable.ValueOrException(nameof(timetable));
+        var layout = timetable.Layout;
+        var track = GatherTrack(timetable);
         if (track.Count == 0) return new TopologyDiagram(0.0, 0.0, LeftMargin, TopRow, [], []);
 
-        var placed = AutoArrange(layout, track);
-        foreach (var saved in layout.TopologyPositions.Where(p => placed.ContainsKey(p.LocationId)))
+        var placed = AutoArrange(timetable, track);
+        foreach (var saved in timetable.TopologyPositions.Where(p => placed.ContainsKey(p.LocationId)))
             placed[saved.LocationId] = (saved.X, saved.Y);
 
         var sections = track
@@ -215,8 +216,9 @@ public sealed record TopologyDiagram(
     // The layout's track, one entry per pair of locations joined by it, in the order the layout records
     // them. Copies of one piece should agree; where they do not, the longer distance and the wider
     // formation are kept, so track is never shown as shorter or narrower than the data claims.
-    private static List<Track> GatherTrack(Layout layout)
+    private static List<Track> GatherTrack(Timetable timetable)
     {
+        var layout = timetable.Layout;
         var track = new Dictionary<(int, int), Track>();
         var order = new List<Track>();
 
@@ -237,7 +239,7 @@ public sealed record TopologyDiagram(
 
         // A timetable stretch may name track the layout itself no longer lists; it is still track a train
         // runs over, so it is drawn rather than silently dropped.
-        foreach (var timetableStretch in layout.TimetableStretches.OrderBy(s => s.Id))
+        foreach (var timetableStretch in timetable.TimetableStretches.OrderBy(s => s.Id))
             foreach (var stretch in timetableStretch.Stretches.Where(s => !s.Start.Equals(s.End)))
             {
                 var piece = Piece(stretch);
@@ -252,13 +254,14 @@ public sealed record TopologyDiagram(
     // piece of track as a route of its own, so track no timetable stretch covers is placed too. A stretch
     // that does not continue from where the one before it ended starts a fresh route rather than being
     // walked as though the two were joined.
-    private static List<List<Step>> RoutesOf(Layout layout, List<Track> track)
+    private static List<List<Step>> RoutesOf(Timetable timetable, List<Track> track)
     {
+        var layout = timetable.Layout;
         var byPair = track.ToDictionary(t => Between(t.From, t.To));
         var routes = new List<List<Step>>();
         var covered = new HashSet<(int, int)>();
 
-        foreach (var stretch in layout.TimetableStretches
+        foreach (var stretch in timetable.TimetableStretches
             .Where(s => s.Stretches.Count > 0)
             .OrderByDescending(s => s.Stretches.Sum(t => t.Distance))
             .ThenBy(s => s.Id))
@@ -290,9 +293,10 @@ public sealed record TopologyDiagram(
     // time the first that reaches somewhere already placed, so the diagram grows outwards from the line
     // drawn first instead of starting again in mid-air. What a route reaches that is already placed
     // anchors it; each run of locations it reaches that is not goes on a row of its own.
-    private static Dictionary<int, (double X, double Y)> AutoArrange(Layout layout, List<Track> track)
+    private static Dictionary<int, (double X, double Y)> AutoArrange(Timetable timetable, List<Track> track)
     {
-        var pending = RoutesOf(layout, track);
+        var layout = timetable.Layout;
+        var pending = RoutesOf(timetable, track);
         var span = 0.0;
         foreach (var route in pending) span = Math.Max(span, route.Sum(step => step.Distance));
         var scale = span > 0.0 ? TargetSpan / span : 1.0;

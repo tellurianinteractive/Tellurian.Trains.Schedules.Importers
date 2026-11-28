@@ -29,7 +29,7 @@ else
 
         @if (_view == View.RollingStock)
         {
-            <RollingStockOwnersView Plan="plan" SessionSettings="layout.Settings.General.SessionSettings()" />
+            <RollingStockOwnersView Plan="plan" SessionSettings="plan.Timetable.Settings.General.SessionSettings()" />
         }
         else if (_view == View.OtherVehicles)
         {

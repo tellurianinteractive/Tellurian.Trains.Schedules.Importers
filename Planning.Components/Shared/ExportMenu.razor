@@ -104,7 +104,7 @@
 
     // One document per station, or per direction at a station divided by direction.
     private int DispatchFileCount => DispatchStations.Sum(station =>
-        station is { SplitDispatchByDirection: true, Layout: { } layout }
+        station.Layout is { } layout && ScheduleState.Timetable?.PlanningOf(station).SplitDispatchByDirection == true
             ? Math.Max(1, layout.DispatchDirectionsAt(station).Count)
             : 1);
 
@@ -189,7 +189,7 @@
         await BeginBusy("Sending");
         try
         {
-            var integration = ScheduleState.Layout?.Settings.Integration;
+            var integration = ScheduleState.Timetable?.Settings.Integration;
             var json = Exporter.ToJson(plan);
             var result = await Uploader.UploadJsonAsync(integration?.ModuleRegistryApiUrl, integration?.ModuleRegistryApiKey, json);
             _resultOk = result.Success;
@@ -220,7 +220,7 @@
         await BeginBusy("Saving");
         try
         {
-            var settings = ScheduleState.Layout?.Settings.General.SessionSettings()
+            var settings = ScheduleState.Timetable?.Settings.General.SessionSettings()
                 ?? SessionsSettings.UseSessions(14);
             // Each station's document in its own language, like its printed sheets; the list itself is
             // built in it too, since it writes the sessions' texts.
@@ -229,7 +229,7 @@
             foreach (var station in DispatchStations)
             {
                 var culture = ScheduleState.Layout is { } layout
-                    ? station.ReportCulture(layout, LanguageService.IsSupported)
+                    ? station.ReportCulture(ScheduleState.Timetable!, LanguageService.IsSupported)
                     : CultureInfo.CurrentUICulture;
                 using var scope = ReportCulture.Use(culture);
                 foreach (var list in DispatchList.CreateAll(station, timetable.Trains, settings, ScheduleState.Schedule))
@@ -241,7 +241,7 @@
 
             // Set in the layout's report font, like every other report — the recipient can still
             // restyle it, since these are named styles rather than direct formatting.
-            var font = ScheduleState.Layout?.Settings.General.ReportFontFamily;
+            var font = ScheduleState.Timetable?.Settings.General.ReportFontFamily;
             var single = lists.Count == 1;
             byte[] bytes;
             if (single)

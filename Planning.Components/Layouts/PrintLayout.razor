@@ -31,7 +31,7 @@
             : Translator("AppName");
 
     private string FontFamily =>
-        ReportFonts.CssFontFamily(ScheduleState.Layout?.Settings.General.ReportFontFamily);
+        ReportFonts.CssFontFamily(ScheduleState.Timetable?.Settings.General.ReportFontFamily);
 
     // The report restores the plan from storage in its own initialisation, which finishes after this
     // layout has first rendered. Without this the font would only be applied from the second render on

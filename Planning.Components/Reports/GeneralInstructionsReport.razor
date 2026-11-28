@@ -97,14 +97,14 @@ else
         if (Layout is not { } layout) { _booklets = []; return; }
 
         // Without language tags this is the default language alone: one booklet, as it always was.
-        var defaultLanguage = layout.DefaultLanguage;
+        var defaultLanguage = ScheduleState.Timetable!.DefaultLanguage;
         var languages = InstructionsLanguages.BookletLanguages(defaultLanguage, LanguageService.IsSupported, program, instructions);
-        _booklets = [.. languages.Select(language => BookletIn(layout, language, defaultLanguage, program, instructions))];
+        _booklets = [.. languages.Select(language => BookletIn(layout, ScheduleState.Timetable!, language, defaultLanguage, program, instructions))];
     }
 
-    private static Booklet BookletIn(LayoutModel layout, string language, string defaultLanguage, string? program, string? instructions)
+    private static Booklet BookletIn(LayoutModel layout, Timetable timetable, string language, string defaultLanguage, string? program, string? instructions)
     {
-        var culture = layout.ReportCultureIn(language);
+        var culture = timetable.ReportCultureIn(language);
         var text = InstructionsLanguages.Resolve(instructions, language, defaultLanguage);
 
         // The table goes where the author put it, and nowhere else: a booklet that printed it both in
@@ -116,7 +116,7 @@ else
         var pages = InstructionsPagination.BuildPages(
             text,
             shuntingYards: layout.ShuntingYards,
-            passengerInterchanges: layout.PassengerInterchanges);
+            passengerInterchanges: timetable.PassengerInterchanges);
         return new(
             new ReportCulture(culture), LanguageNameOf(language),
             InstructionsLanguages.Resolve(program, language, defaultLanguage),

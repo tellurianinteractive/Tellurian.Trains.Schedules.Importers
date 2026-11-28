@@ -1,29 +1,30 @@
 using System.Globalization;
 using Tellurian.Trains.Schedules.Model.Resources;
+using Tellurian.Trains.Schedules.Model.Timetables;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Provides extension methods for managing companies within a <see cref="Layout"/>.
+/// Provides extension methods for managing the companies of a <see cref="Timetable"/>.
 /// </summary>
-public static class LayoutCompanyExtensions
+public static class TimetableCompanyExtensions
 {
-    extension(Layout? layout)
+    extension(Timetable? timetable)
     {
         /// <summary>
-        /// Determines whether the layout contains the specified company.
+        /// Determines whether the timetable has the specified company.
         /// </summary>
         /// <param name="company">The company to look for.</param>
-        /// <returns><c>true</c> if the company exists in the layout; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the company exists in the timetable; otherwise, <c>false</c>.</returns>
         public bool HasCompany(Company company) =>
-            layout?.Companies.Any(c => c.Equals(company)) ?? false;
+            timetable?.Companies.Any(c => c.Equals(company)) ?? false;
 
         /// <summary>
-        /// Determines whether the layout contains a company with the specified signature.
+        /// Determines whether the timetable has a company with the specified signature.
         /// </summary>
         /// <param name="signature">The company signature to look for.</param>
         /// <returns><c>true</c> if a company with the signature exists; otherwise, <c>false</c>.</returns>
-        public bool HasCompany(string signature) => layout?.Companies.Any(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)) ?? false;
+        public bool HasCompany(string signature) => timetable?.Companies.Any(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)) ?? false;
 
         /// <summary>
         /// Finds a company by its signature. Several companies may share a signature (e.g. for different
@@ -32,23 +33,23 @@ public static class LayoutCompanyExtensions
         /// <param name="signature">The company signature to find.</param>
         /// <returns>A <see cref="Maybe{T}"/> containing the company if found.</returns>
         public Maybe<Company> Company(string signature) =>
-            new(layout?.Companies.OrderBy(c => c.Id).FirstOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
+            new(timetable?.Companies.OrderBy(c => c.Id).FirstOrDefault(c => c.Signature.Equals(signature, StringComparison.OrdinalIgnoreCase)),
                 $"Company with signature '{signature}' not found.");
 
         /// <summary>
-        /// Adds a company to the layout.
+        /// Adds a company to the timetable.
         /// </summary>
         /// <param name="company">The company to add.</param>
         /// <returns>The added company.</returns>
         public Company Add(Company company)
         {
-            layout = layout.ValueOrException(nameof(layout));
+            timetable = timetable.ValueOrException(nameof(timetable));
             company = company.ValueOrException(nameof(company));
-            if (!layout.HasCompany(company))
+            if (!timetable.HasCompany(company))
             {
-                company.Layout = layout;
-                company.LayoutId = layout.Id;
-                layout.Companies.Add(company);
+                company.Timetable = timetable;
+                company.TimetableId = timetable.Id;
+                timetable.Companies.Add(company);
             }
             return company;
         }
@@ -63,11 +64,6 @@ public static class LayoutCountryExtensions
     extension(Layout layout)
     {
         /// <summary>
-        /// Gets the default <see cref="Country"/> for the layout (if any)
-        /// </summary>
-        public Country? DefaultCountry =>
-            layout.CountryById(layout.Settings.Identity.DefaultCountryId);
-        /// <summary>
         /// Resolves a country by its <see cref="Country.Id"/>, preferring the layout's saved
         /// <see cref="Layout.Countries"/> and falling back to the static catalogue. Returns
         /// <c>null</c> when no country matches.
@@ -78,6 +74,18 @@ public static class LayoutCountryExtensions
                 ? layout.Countries.FirstOrDefault(c => c.Id == countryId) ?? Country.ById(countryId)
                 : null;
 
+    }
+}
+
+/// <summary>The countries a <see cref="Timetable"/> and its layout use.</summary>
+public static class TimetableCountryExtensions
+{
+    extension(Timetable timetable)
+    {
+        /// <summary>The default <see cref="Country"/> of the timetable, if any.</summary>
+        public Country? DefaultCountry =>
+            timetable.Layout.CountryById(timetable.Settings.Identity.DefaultCountryId);
+
         /// <summary>
         /// Ensures the countries the layout actually uses are present in <see cref="Layout.Countries"/>:
         /// the default country and any country referenced by a company, region or location. The catalogue is a
@@ -86,14 +94,15 @@ public static class LayoutCountryExtensions
         /// </summary>
         public bool EnsureCountries()
         {
+            var layout = timetable.Layout;
             var before = layout.Countries.Count;
             void AddIfMissing(int? id)
             {
                 if (id is int countryId && layout.Countries.All(c => c.Id != countryId) && Country.ById(countryId) is { } country)
                     layout.Countries.Add(country);
             }
-            AddIfMissing(layout.Settings.Identity.DefaultCountryId);
-            foreach (var company in layout.Companies) AddIfMissing(company.CountryId);
+            AddIfMissing(timetable.Settings.Identity.DefaultCountryId);
+            foreach (var company in timetable.Companies) AddIfMissing(company.CountryId);
             foreach (var region in layout.Regions) AddIfMissing(region.CountryId);
             foreach (var location in layout.OperationLocations) AddIfMissing(location.CountryId);
             return layout.Countries.Count != before;
@@ -344,26 +353,6 @@ public static class LayoutOperationLocationExtensions
         }
 
         /// <summary>
-        /// Clears every track route naming <paramref name="location"/> (see
-        /// <see cref="StationTrack.PreviousLocationId"/>), so no track is left reserved for trains to or
-        /// from somewhere the layout no longer has. Call it when a location is removed. Returns
-        /// <c>true</c> when a track was changed.
-        /// </summary>
-        /// <param name="location">The location being removed.</param>
-        public bool ForgetTrackRoutesTo(OperationLocation? location)
-        {
-            if (layout is null || location is null) return false;
-            var changed = false;
-            foreach (var track in layout.StationTracks())
-            {
-                if (track.PreviousLocationId == location.Id) { track.PreviousLocationId = null; changed = true; }
-                if (track.NextLocationId == location.Id) { track.NextLocationId = null; changed = true; }
-                if (!track.HasRoute) track.AppliesInBothDirections = false;
-            }
-            return changed;
-        }
-
-        /// <summary>
         /// Adds a station to the layout.
         /// </summary>
         /// <param name="station">The station to add.</param>
@@ -418,19 +407,19 @@ public static class LayoutOperationLocationExtensions
 }
 
 /// <summary>
-/// Provides extension methods for managing timetable stretches within a <see cref="Layout"/>.
+/// Provides extension methods for managing timetable stretches of a <see cref="Timetable"/>.
 /// </summary>
-public static class LayoutExtensions
+public static class TimetableStretchCatalogueExtensions
 {
-    extension(Layout? layout)
+    extension(Timetable? timetable)
     {
         /// <summary>
-        /// Determines whether the layout contains a timetable stretch with the specified number.
+        /// Determines whether the timetable has a timetable stretch with the specified number.
         /// </summary>
         /// <param name="number">The timetable stretch number to look for.</param>
         /// <returns><c>true</c> if a timetable stretch with the number exists; otherwise, <c>false</c>.</returns>
         public bool HasTimetableStretch(string number) =>
-                layout is not null && layout.TimetableStretches.Any(ts => ts.Number.Equals(number, StringComparison.OrdinalIgnoreCase));
+                timetable is not null && timetable.TimetableStretches.Any(ts => ts.Number.Equals(number, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Finds a timetable stretch by its number.
@@ -439,23 +428,24 @@ public static class LayoutExtensions
         /// <returns>A <see cref="Maybe{T}"/> containing the timetable stretch if found.</returns>
         public Maybe<TimetableStretch> TimetableStretch(string number)
         {
-            layout = layout.ValueOrException(nameof(layout));
-            return new Maybe<TimetableStretch>(layout.TimetableStretches.SingleOrDefault(ts => ts.Number.Equals(number, StringComparison.OrdinalIgnoreCase)));
+            timetable = timetable.ValueOrException(nameof(timetable));
+            return new Maybe<TimetableStretch>(timetable.TimetableStretches.SingleOrDefault(ts => ts.Number.Equals(number, StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>
-        /// Adds a timetable stretch to the layout.
+        /// Adds a timetable stretch to the timetable.
         /// </summary>
         /// <param name="timetableStretch">The timetable stretch to add.</param>
         /// <returns>The added timetable stretch.</returns>
         public TimetableStretch Add(TimetableStretch timetableStretch)
         {
-            layout = layout.ValueOrException(nameof(layout));
+            timetable = timetable.ValueOrException(nameof(timetable));
             timetableStretch = timetableStretch.ValueOrException(nameof(timetableStretch));
             ArgumentNullException.ThrowIfNull(timetableStretch);
-            if (!layout.TimetableStretches.Contains(timetableStretch))
+            timetableStretch.Timetable = timetable;
+            if (!timetable.TimetableStretches.Contains(timetableStretch))
             {
-                layout.TimetableStretches.Add(timetableStretch);
+                timetable.TimetableStretches.Add(timetableStretch);
             }
             return timetableStretch;
         }
@@ -685,14 +675,17 @@ public static class LayoutDispatchStretchExtensions
                     !location.Equals(station) && location.IsRemotelyDispatched && station.Equals(location.ControlledBy)),
             ];
         }
+    }
 
+    extension(Timetable timetable)
+    {
         /// <summary>
         /// The dispatchers <paramref name="station"/>'s dispatcher talks to: for every dispatch stretch
         /// from a location it dispatches (see <c>LocationsDispatchedBy</c>), the <c>Dispatcher</c> of the
         /// far end — the station to ring, and so the ones whose phone numbers belong on its dispatch list.
         /// </summary>
         /// <remarks>
-        /// Read from <see cref="Layout.DispatchStretches"/> and from nowhere else — never derived on the
+        /// Read from <see cref="Timetable.DispatchStretches"/> and from nowhere else — never derived on the
         /// fly. Those stretches are the planner's own answer to who talks to whom, and a station handed a
         /// list naming neighbours it has no dispatch stretch to would be told to ring the wrong people.
         /// A layout with none recorded yields none here; the planner generates them on the Stretches tab.
@@ -700,13 +693,12 @@ public static class LayoutDispatchStretchExtensions
         /// <param name="station">The station whose dispatch neighbours are wanted.</param>
         public IReadOnlyList<Station> DispatchNeighboursOf(Station station)
         {
-            layout = layout.ValueOrException(nameof(layout));
             if (station is null) return [];
-            var dispatched = layout.LocationsDispatchedBy(station);
+            var dispatched = timetable.Layout.LocationsDispatchedBy(station);
 
             return
             [
-                .. layout.DispatchStretches
+                .. timetable.DispatchStretches
                     .SelectMany(stretch =>
                         dispatched.Contains(stretch.From) ? [stretch.To] :
                         dispatched.Contains(stretch.To) ? [stretch.From] :
@@ -832,12 +824,9 @@ public static class LayoutOperationLocationConversionExtensions
             // Carry over the shared base state and re-home the tracks (StationCall.Station follows Track.Station).
             replacement.CountryId = existing.CountryId;
             replacement.Owner = existing.Owner;
-            replacement.HideMeets = existing.HideMeets;
-            replacement.HidePassings = existing.HidePassings;
             replacement.IsChangingTrainDirectionPossible = existing.IsChangingTrainDirectionPossible;
             replacement.LockKey = existing.LockKey;
             replacement.ControlledBy ??= existing.ControlledBy;
-            replacement.Timings = existing.Timings;
             replacement.Layout = existing.Layout;
             replacement.LayoutId = existing.LayoutId;
             replacement.Tracks = existing.Tracks;

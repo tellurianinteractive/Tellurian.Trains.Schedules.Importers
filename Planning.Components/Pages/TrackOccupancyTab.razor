@@ -231,8 +231,8 @@ else
 
     private void BuildBoard()
     {
-        _board = ScheduleState.Schedule is { } plan && ScheduleState.Layout is { } layout
-            ? TrackOccupancyBoard.Create(plan, layout.Settings.ToGraphSettings(), ValidationState.Errors, IsIncluded)
+        _board = ScheduleState.Schedule is { } plan && ScheduleState.Timetable is { } timetable
+            ? TrackOccupancyBoard.Create(plan, timetable.Settings.ToGraphSettings(), ValidationState.Errors, IsIncluded)
             : null;
     }
 

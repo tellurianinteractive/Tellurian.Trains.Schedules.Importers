@@ -229,9 +229,9 @@ else
     private Timetable? Timetable => ScheduleState.Timetable;
     private Layout? Layout => ScheduleState.Layout;
 
-    private bool UseDays => Layout?.Settings.General.UseDays ?? false;
-    private int MaxSessions => Layout?.Settings.General.MaxSessions ?? 14;
-    private DayOfWeek StartDay => Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+    private bool UseDays => Timetable?.Settings.General.UseDays ?? false;
+    private int MaxSessions => Timetable?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => Timetable?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private List<Train> Trains =>
         [.. (Timetable?.Trains ?? []).OrderBy(t => t.Number).ThenBy(t => t.Id)];
@@ -263,7 +263,7 @@ else
             .Order(StringComparer.CurrentCulture));
 
     private IEnumerable<Company> CompanyChoices =>
-        (Layout?.Companies ?? []).InChoiceOrder;
+        (Timetable?.Companies ?? []).InChoiceOrder;
 
     private IEnumerable<TrainCategory> CategoryChoices =>
         (Timetable?.TrainCategories ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture);
@@ -386,7 +386,7 @@ else
     // ---- Display helpers ------------------------------------------------------------------------
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
     private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);
@@ -411,7 +411,7 @@ else
 
     private void SetCompany(Train train, int? id)
     {
-        train.Company = id is null ? null : Layout!.Companies.FirstOrDefault(c => c.Id == id);
+        train.Company = id is null ? null : Timetable!.Companies.FirstOrDefault(c => c.Id == id);
         train.CompanyId = train.Company?.Id;
         Save();
     }
@@ -730,7 +730,7 @@ else
         if (SelectedLocation(train, offered, _nextChoice) is not { } location) return;
         var previous = train.CallsInRunOrder.LastOrDefault()?.OperationLocation;
         var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
-        if (location.PreferredTrack(previous, null, preference) is not { } track) return;
+        if (location.PreferredTrack(ScheduleState.Timetable!, previous, null, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Max(c => c.Departure) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
         if (Plan is { } plan) plan.AddLastCall(train, call); else train.AddLast(call);
@@ -745,7 +745,7 @@ else
         if (SelectedLocation(train, PreviousCallLocations(train), _previousChoice) is not { } location) return;
         var next = train.CallsInRunOrder.FirstOrDefault()?.OperationLocation;
         var preference = train.IsPassenger ? TrackPreference.Platform : TrackPreference.MainTrack;
-        if (location.PreferredTrack(null, next, preference) is not { } track) return;
+        if (location.PreferredTrack(ScheduleState.Timetable!, null, next, preference) is not { } track) return;
         var start = train.Calls.Count > 0 ? train.Calls.Min(c => c.Arrival) : Time.Zero;
         var call = new StationCall(NextCallId(), track, start, start);
         if (Plan is { } plan) plan.AddFirstCall(train, call); else train.AddFirst(call);

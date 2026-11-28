@@ -43,9 +43,9 @@ public class ShuntingTaskReportTests
         layout.Add(new TrackStretch(1, first, last, 10));
         var stretch = new TimetableStretch(1, "1");
         foreach (var ts in layout.TrackStretches) stretch.AddLast(ts);
-        layout.Add(stretch);
 
         var timetable = new Timetable("Test", layout);
+        timetable.Add(stretch);
 
         var train = new Train(1, 1234);
         train.Add(new StationCall(1, first["1"], Start.AddMinutes(-10), Start));
@@ -198,7 +198,7 @@ public class ShuntingTaskReportTests
     {
         var (timetable, task, _) = Arrange();
 
-        var graph = new GraphSchedule(timetable.Layout.TimetableStretches.First(), timetable);
+        var graph = new GraphSchedule(timetable.TimetableStretches.First(), timetable);
 
         Assert.DoesNotContain(task, graph.Trains);
         Assert.HasCount(1, graph.Trains, "The travelling train is still drawn.");

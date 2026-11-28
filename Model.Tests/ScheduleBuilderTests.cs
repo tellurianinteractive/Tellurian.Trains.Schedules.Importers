@@ -7,7 +7,7 @@ public class ScheduleBuilderTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P", ExcludeFromAutomaticScheduling = excludeCategory };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         // Forward 12:00→12:55 (G→Snu), return 13:00→13:55 (Snu→G): the return continues the forward run.
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
@@ -31,7 +31,7 @@ public class ScheduleBuilderTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00))); // G 12:00 → Snu 12:55
         timetable.Add(CreateReturnWithCallsAddedOutOfRunOrder(category));
         var plan = Plan.Create("Test", timetable);
@@ -199,7 +199,7 @@ public class ScheduleBuilderTests
         TestDataFactory.Init();
         var passenger = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
         var freight = new TrainCategory { Id = 2, Name = "G", Prefix = "G" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(passenger, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(freight, 2, Time.FromHourAndMinute(13, 00)));
         return Plan.Create("Test", timetable);

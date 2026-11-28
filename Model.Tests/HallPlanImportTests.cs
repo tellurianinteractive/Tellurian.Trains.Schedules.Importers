@@ -92,7 +92,7 @@ public class HallPlanImportTests
         Assert.AreEqual("FREMO H0", layout.StandardName);
         Assert.AreEqual(HallPlanId, layout.SourceId);
         Assert.AreEqual(1, layout.SourceRevision);
-        Assert.AreEqual(4, layout.Settings.Identity.ScaleId);
+        Assert.AreEqual(4, plan.Timetable.Settings.Identity.ScaleId);
     }
 
     [TestMethod]
@@ -103,7 +103,7 @@ public class HallPlanImportTests
         foreach (var stretch in plan.Layout.TrackStretches)
         {
             Assert.IsFalse(stretch.IsTimeEntered);
-            Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
+            Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Timetable.Settings.TimeAndSpeed), stretch.Time);
         }
         Assert.IsGreaterThan(plan.Layout.TrackStretches.First().Time, plan.Layout.TrackStretches.Last().Time, "the longer stretch takes longer");
     }
@@ -117,7 +117,7 @@ public class HallPlanImportTests
         Assert.AreEqual("Tellby–Ytterby", stretch.ToString());
         Assert.AreEqual(3.0, stretch.Distance, 0.0005, "1 m from Tellby's middle, 1 m of plain line, 1 m to Ytterby's middle");
         Assert.AreEqual(70, stretch.Speed, "the only module with a speed limit");
-        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
+        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Timetable.Settings.TimeAndSpeed), stretch.Time);
         Assert.HasCount(1, stretch.ModuleIds);
         Assert.IsFalse(stretch.IsDistanceEntered || stretch.IsSpeedEntered || stretch.IsTimeEntered);
     }
@@ -134,7 +134,7 @@ public class HallPlanImportTests
 
         Assert.AreEqual(4.0, stretch.Distance, 0.0005);
         Assert.AreEqual(50, stretch.Speed, "the planner's speed");
-        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Layout.Settings.TimeAndSpeed), stretch.Time);
+        Assert.AreEqual(TrackStretchTiming.RunningMinutes(stretch, plan.Timetable.Settings.TimeAndSpeed), stretch.Time);
     }
 
     [TestMethod]
@@ -149,7 +149,7 @@ public class HallPlanImportTests
         Assert.AreEqual(70, stretch.MeasuredSpeed);
         var leg = read.Layout.StretchLines.Single().Legs.Single();
         Assert.IsTrue(leg.Joins(stretch.StartId, stretch.EndId));
-        Assert.IsTrue(read.Layout.CanSuggestTimetableStretches);
+        Assert.IsTrue(read.Timetable.CanSuggestTimetableStretches);
     }
 
     [TestMethod]
@@ -187,7 +187,7 @@ public class HallPlanImportTests
 
         var norway = Country.ByCountryCode("NO")!;
         var sweden = Country.ByCountryCode("SE")!;
-        Assert.AreEqual(norway.Id, plan.Layout.Settings.Identity.DefaultCountryId);
+        Assert.AreEqual(norway.Id, plan.Timetable.Settings.Identity.DefaultCountryId);
         Assert.IsTrue(plan.Layout.Countries.Any(c => c.Id == norway.Id));
         Assert.IsTrue(plan.Layout.Countries.Any(c => c.Id == sweden.Id), "every country a location is in is in the catalogue");
     }
@@ -201,7 +201,7 @@ public class HallPlanImportTests
 
         var plan = PlanFactory.CreatePlan(drawn.ToLayout(), "da", "Ny plan");
 
-        Assert.AreEqual(Country.ByLanguage("da").Id, plan.Layout.Settings.Identity.DefaultCountryId);
+        Assert.AreEqual(Country.ByLanguage("da").Id, plan.Timetable.Settings.Identity.DefaultCountryId);
         Assert.AreEqual("Ny plan", plan.Name);
     }
 

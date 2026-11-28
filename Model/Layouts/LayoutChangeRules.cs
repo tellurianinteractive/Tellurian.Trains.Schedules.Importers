@@ -41,6 +41,7 @@ public static class LayoutChangeRules
                     break;
                 case LayoutChangeKind.KindChanged:
                     var changed = plan.Layout.ChangeOperationLocationType(change.Location!, change.SourceLocation!.Kind);
+                    plan.Timetable.ConformPlanningTo(changed);
                     LayoutUpdate.CopyWhatItIs(change.SourceLocation!, changed);
                     break;
                 case LayoutChangeKind.LocationRemoved:
@@ -74,7 +75,7 @@ public static class LayoutChangeRules
                 var previous = index > 0 ? calls[index - 1].OperationLocation : null;
                 var next = index < calls.Count - 1 ? calls[index + 1].OperationLocation : null;
                 var preference = call.Train.IsPassenger && call.IsStop ? TrackPreference.Platform : TrackPreference.MainTrack;
-                if (location.PreferredTrack(previous, next, preference) is { } to) moved.Add(new(call, to));
+                if (location.PreferredTrack(call.Train.Timetable, previous, next, preference) is { } to) moved.Add(new(call, to));
             }
         }
         finally
@@ -119,7 +120,7 @@ public static class LayoutChangeRules
         joined.MeasuredDistance = source.MeasuredDistance;
         joined.MeasuredSpeed = source.MeasuredSpeed;
         joined.TracksCount = source.TracksCount;
-        if (!joined.IsTimeEntered) joined.Time = TrackStretchTiming.RunningMinutes(joined, plan.Layout.Settings.TimeAndSpeed);
+        if (!joined.IsTimeEntered) joined.Time = TrackStretchTiming.RunningMinutes(joined, plan.Timetable.Settings.TimeAndSpeed);
     }
 
     // The trains that run the stretch from one end straight to the other pass the new location in between.
@@ -161,7 +162,7 @@ public static class LayoutChangeRules
         layout.OperationLocations.Add(location);
 
         var (first, second) = Halves(change, from, split.Distance);
-        var settings = layout.Settings.TimeAndSpeed;
+        var settings = plan.Timetable.Settings.TimeAndSpeed;
         var after = new TrackStretch(Free(layout.TrackStretches.Select(s => s.Id), 0), location, to, second, split.TracksCount, split.Speed, split.Time)
         {
             IsElectrified = split.IsElectrified,
@@ -191,9 +192,9 @@ public static class LayoutChangeRules
         layout.Add(after);
         layout.InsertIntoStretchLines(from, to, location);
 
-        foreach (var route in layout.TimetableStretches.Where(r => r.Stretches.Contains(split)))
+        foreach (var route in plan.Timetable.TimetableStretches.Where(r => r.Stretches.Contains(split)))
             route.Stretches = Rerouted(route, split, after, from);
-        foreach (var dispatch in layout.DispatchStretches.Where(d => d.Stretches.Contains(split)))
+        foreach (var dispatch in plan.Timetable.DispatchStretches.Where(d => d.Stretches.Contains(split)))
             dispatch.Stretches = Rerouted(dispatch.Stretches, split, after, from, dispatch.From);
 
         var callId = plan.Timetable.Trains.SelectMany(t => t.Calls).Select(c => c.Id).DefaultIfEmpty(0).Max();
@@ -203,7 +204,7 @@ public static class LayoutChangeRules
             {
                 var share = departing.OperationLocation.Equals(from) ? first / (first + second) : second / (first + second);
                 var passes = Interpolate(departing.Departure, arriving.Arrival, share);
-                if (location.PreferredTrack(departing.OperationLocation, arriving.OperationLocation, TrackPreference.MainTrack) is not { } track) continue;
+                if (location.PreferredTrack(plan.Timetable, departing.OperationLocation, arriving.OperationLocation, TrackPreference.MainTrack) is not { } track) continue;
                 var call = new StationCall(++callId, track, passes, passes) { IsArrival = false, IsDeparture = false };
                 train.AddAfter(call, departing);
             }

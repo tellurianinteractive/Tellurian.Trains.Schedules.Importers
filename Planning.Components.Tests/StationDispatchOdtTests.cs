@@ -194,8 +194,8 @@ public class StationDispatchOdtTests
         var layout = timetable.Layout;
         var origin = (Station)StationNamed(timetable, Origin);
         var middle = (Station)StationNamed(timetable, Middle);
-        origin.PhoneNumber = 15;
-        layout.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
+        timetable.EnsurePlanningOf(origin).PhoneNumber = 15;
+        timetable.DispatchStretches.Add(new DispatchStretch(1, origin, middle));
 
         var styles = StylesOf(ListAt(timetable, Middle));
 

@@ -60,7 +60,7 @@ public class TrainSortingTests
     [TestMethod]
     public void Stretch2_Upward_DiagnoseStretchCalls()
     {
-        var stretch = _plan.Timetable.Layout.TimetableStretches
+        var stretch = _plan.Timetable.TimetableStretches
             .Single(s => s.Number == "2");
         var totalDist = stretch.Stretches.Sum(s => s.Distance);
         var trains = _plan.Timetable.Trains;
@@ -126,7 +126,7 @@ public class TrainSortingTests
 
     private int[] SortedNumbers(string stretchNumber, TrainGraphDirection direction)
     {
-        var stretch = _plan.Timetable.Layout.TimetableStretches
+        var stretch = _plan.Timetable.TimetableStretches
             .Single(s => s.Number == stretchNumber);
         var segments = stretch.SortedTrainSegments(_plan.Timetable.Trains, direction);
         return [.. segments.Select(s => s.Train.Number)];

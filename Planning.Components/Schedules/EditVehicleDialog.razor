@@ -210,9 +210,9 @@
 
     private Plan? Plan => ScheduleState.Schedule;
 
-    private bool UseDays => ScheduleState.Layout?.Settings.General.UseDays ?? false;
-    private int MaxSessions => ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
-    private DayOfWeek StartDay => ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+    private bool UseDays => ScheduleState.Timetable?.Settings.General.UseDays ?? false;
+    private int MaxSessions => ScheduleState.Timetable?.Settings.General.MaxSessions ?? 14;
+    private DayOfWeek StartDay => ScheduleState.Timetable?.Settings.General.StartDay ?? DayOfWeek.Monday;
 
     private string _type = ScheduledObjectType.Locomotive.ToString();
     private string _externalId = "";
@@ -287,7 +287,7 @@
     }
 
     private IEnumerable<Company> Companies =>
-        (Plan?.Layout?.Companies ?? []).InChoiceOrder;
+        (Plan?.Timetable?.Companies ?? []).InChoiceOrder;
 
     private IEnumerable<Sessions> SessionsCatalogue =>
         ScheduleState.Timetable?.Sessions ?? [];
@@ -340,7 +340,7 @@
     {
         if (Plan is not { } plan || !CanSave || _number is not { } number) return;
         var type = Enum.TryParse<ScheduledObjectType>(_type, out var t) ? t : ScheduledObjectType.Locomotive;
-        var company = _companyId is int id ? plan.Layout.Companies.FirstOrDefault(c => c.Id == id) : null;
+        var company = _companyId is int id ? plan.Timetable.Companies.FirstOrDefault(c => c.Id == id) : null;
         plan.UpdateVehicle(Vehicle, type, _externalId, _class, number, company, _tractionType, EffectiveNumberOfUnits, _isReversibleTrain);
         Vehicle.Remark = string.IsNullOrWhiteSpace(_remark) ? null : _remark.Trim();
         Vehicle.Length = _length ?? 0;
@@ -368,7 +368,7 @@
     private Task Cancel() => OnClosed.InvokeAsync();
 
     private SessionsSettings SessionSettings =>
-        ScheduleState.Layout?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
+        ScheduleState.Timetable?.Settings.General.SessionSettings() ?? SessionsSettings.UseSessions(MaxSessions);
 
     // Rendered inside <option>, where markup cannot go, so this is the text form rather than circles.
     private string SessionsText(Sessions sessions) => sessions.ToText(SessionSettings);

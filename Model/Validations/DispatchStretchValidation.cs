@@ -44,7 +44,7 @@ internal static class DispatchStretchValidation
         internal IEnumerable<ValidationError> GetStretchConflicts(bool doubleTrackAsTwoSingleTracks = false)
         {
             var layout = timetable.Layout;
-            var dispatchStretches = layout.DispatchStretches.Where(d => d.Stretches.Count > 0).ToList();
+            var dispatchStretches = timetable.DispatchStretches.Where(d => d.Stretches.Count > 0).ToList();
             var covered = dispatchStretches.SelectMany(d => d.Stretches).ToHashSet();
             var result = new List<ValidationError>();
             result.AddRange(layout.TrackStretches.Where(s => !covered.Contains(s)).SelectMany(s => s.GetConflictingTrains()).Distinct());

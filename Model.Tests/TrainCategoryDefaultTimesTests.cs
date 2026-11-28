@@ -48,7 +48,7 @@ public class TrainCategoryDefaultTimesTests
     public void ReapplyingThePreparationTimeMovesTheOriginArrivalAndNothingElse()
     {
         var category = Category(1, preparation: 25, finishing: 10);
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var train = timetable.Add(TrainOf(category, 1, Time.FromHourAndMinute(12, 00), preparationMinutes: 5, finishingMinutes: 15));
 
         var changed = timetable.ApplyDefaultPreparationMinutes(category);
@@ -64,7 +64,7 @@ public class TrainCategoryDefaultTimesTests
     public void ReapplyingTheFinishingTimeMovesTheDestinationDepartureAndNothingElse()
     {
         var category = Category(1, preparation: 10, finishing: 30);
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var train = timetable.Add(TrainOf(category, 1, Time.FromHourAndMinute(12, 00), preparationMinutes: 5, finishingMinutes: 15));
 
         var changed = timetable.ApplyDefaultFinishingMinutes(category);
@@ -80,7 +80,7 @@ public class TrainCategoryDefaultTimesTests
     {
         var passenger = Category(1, preparation: 25, finishing: 10);
         var freight = Category(2, preparation: 45, finishing: 10);
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var passengerTrain = timetable.Add(TrainOf(passenger, 1, Time.FromHourAndMinute(12, 00), preparationMinutes: 5, finishingMinutes: 15));
         var freightTrain = timetable.Add(TrainOf(freight, 2, Time.FromHourAndMinute(14, 00), preparationMinutes: 5, finishingMinutes: 15));
 
@@ -95,7 +95,7 @@ public class TrainCategoryDefaultTimesTests
     public void ATrainAlreadyPreparedForThatLongIsNotCounted()
     {
         var category = Category(1, preparation: 25, finishing: 10);
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TrainOf(category, 1, Time.FromHourAndMinute(12, 00), preparationMinutes: 25, finishingMinutes: 15));
         timetable.Add(TrainOf(category, 2, Time.FromHourAndMinute(14, 00), preparationMinutes: 5, finishingMinutes: 15));
 
@@ -119,7 +119,7 @@ public class TrainCategoryDefaultTimesTests
     public void ReapplyingIsRepeatable()
     {
         var category = Category(1, preparation: 25, finishing: 30);
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         var train = timetable.Add(TrainOf(category, 1, Time.FromHourAndMinute(12, 00), preparationMinutes: 5, finishingMinutes: 15));
 
         timetable.ApplyDefaultPreparationMinutes(category);

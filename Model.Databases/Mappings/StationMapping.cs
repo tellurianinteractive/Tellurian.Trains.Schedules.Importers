@@ -28,12 +28,6 @@ internal static class StationMapping
                 entity.Ignore(e => e.RegionIds);
                 entity.Ignore(e => e.WrittenRegionIds);
 
-                // The staffing: a short list of posts, each a set of roles, read and written with the station.
-                entity.OwnsMany(e => e.StaffPosts, posts =>
-                {
-                    posts.ToJson();
-                    posts.Property(p => p.ExtensionData).HasJsonProperties();
-                });
             });
     }
 }

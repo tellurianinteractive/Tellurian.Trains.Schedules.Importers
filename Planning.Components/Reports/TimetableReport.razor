@@ -53,7 +53,7 @@ else
     private IReadOnlyList<TimetablePage> Pages { get; set; } = [];
 
     private ReportCulture? DefaultCulture =>
-        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+        ScheduleState.Timetable is { } timetable ? new(timetable.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,9 +64,9 @@ else
 
         using var scope = DefaultCulture is { } culture ? ReportCulture.Use(culture.Culture) : null;
         var trains = timetable.Trains;
-        var useDays = ScheduleState.Layout?.Settings.General.UseDays ?? false;
-        var maxSessions = ScheduleState.Layout?.Settings.General.MaxSessions ?? 14;
-        var startDay = ScheduleState.Layout?.Settings.General.StartDay ?? DayOfWeek.Monday;
+        var useDays = ScheduleState.Timetable?.Settings.General.UseDays ?? false;
+        var maxSessions = ScheduleState.Timetable?.Settings.General.MaxSessions ?? 14;
+        var startDay = ScheduleState.Timetable?.Settings.General.StartDay ?? DayOfWeek.Monday;
         // Stretch by stretch, both directions, in order: a stretch's Up and Down tables stay adjacent
         // so the paginator can pack them onto one page (a hard break only happens when the stretch changes).
         var tables = ScheduleState.TimetableStretches

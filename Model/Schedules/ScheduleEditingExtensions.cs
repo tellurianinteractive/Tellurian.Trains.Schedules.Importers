@@ -173,7 +173,7 @@ public static class ScheduleEditingExtensions
             if (origin.Parts.Count == 0)
                 return new Maybe<Schedule>("Cannot complement an empty schedule.");
 
-            var general = plan.Layout.Settings.General;
+            var general = plan.Timetable.Settings.General;
             var complementSessions = origin.EffectiveSessions.ComplementWithin(general.UseDays, general.MaxSessions);
             if (complementSessions.Numbers.Length == 0)
                 return new Maybe<Schedule>($"Schedule {origin.Number} already covers the whole operating period; nothing to complement.");

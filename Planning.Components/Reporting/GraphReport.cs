@@ -25,15 +25,15 @@ public sealed class GraphReport
     public const double MinimumStationSpacingMm = 5;
 
     private readonly Timetable? _timetable;
-    private readonly LayoutSettings _settings;
+    private readonly PlanSettings _settings;
     private readonly int _longestSignature;
     private IReadOnlyList<TrackHold> _trackHolds = [];
     private readonly Dictionary<double, GraphSettings> _byStationSpacing = [];
 
     /// <summary>A report with nothing to print, for when no plan is loaded.</summary>
-    public static GraphReport Empty { get; } = new(null, new LayoutSettings(), 1);
+    public static GraphReport Empty { get; } = new(null, new PlanSettings(), 1);
 
-    private GraphReport(Timetable? timetable, LayoutSettings settings, int longestSignature)
+    private GraphReport(Timetable? timetable, PlanSettings settings, int longestSignature)
     {
         _timetable = timetable;
         _settings = settings;
@@ -55,7 +55,7 @@ public sealed class GraphReport
     public bool Monochrome => _settings.GraphicTimetable.PrintMonochrome;
 
     /// <summary>Builds the report. Returns a report with no pages when there is nothing to print.</summary>
-    public static GraphReport Create(Timetable timetable, IReadOnlyList<TimetableStretch> stretches, LayoutSettings settings, GraphPageGeometry geometry, IReadOnlyList<TrackHold>? trackHolds = null)
+    public static GraphReport Create(Timetable timetable, IReadOnlyList<TimetableStretch> stretches, PlanSettings settings, GraphPageGeometry geometry, IReadOnlyList<TrackHold>? trackHolds = null)
     {
         ArgumentNullException.ThrowIfNull(timetable);
         ArgumentNullException.ThrowIfNull(stretches);

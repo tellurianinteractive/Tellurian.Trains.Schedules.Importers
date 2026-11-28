@@ -17,7 +17,7 @@ public class ScheduleTrackAlignmentTests
         TestDataFactory.Init();
         var stations = TestDataFactory.Stations.ToArray();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
 
         var forward = new Train(1, category, 1) { Category = category, Sessions = Sessions.All };
         _ = forward.Add(new StationCall(1, stations[0]["3"], Time.FromHourAndMinute(12, 00), Time.FromHourAndMinute(12, 00)));

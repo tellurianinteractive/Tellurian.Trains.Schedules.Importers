@@ -20,7 +20,7 @@ public sealed class TimetableTableStopFilterTests
 
     // Lysekil ── Göransberg ── Furudalen ── [Kristineberg] ── Munkeröd ── [Kyrkeby Östra] ── Devsjö
     //   ── Lekby ── Rotebro ── Malmö, where the two in brackets are signal controlled.
-    private TimetableStretch MainLine => _plan.Layout.TimetableStretches.Single(s => s.Number == "1");
+    private TimetableStretch MainLine => _plan.Timetable.TimetableStretches.Single(s => s.Number == "1");
 
     private OperationLocation Location(string signature) =>
         _plan.Layout.OperationLocations.First(l => l.Signature == signature);

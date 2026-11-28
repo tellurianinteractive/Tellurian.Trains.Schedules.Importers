@@ -110,9 +110,9 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         var plan = PlanFactory.CreatePlan("Operation locations", "en");
         var layout = plan.Timetable!.Layout;
         var munkerod = (Station)layout.Add(new Station(1, "Munkeröd", "Mkd") { IsManned = true, Owner = "Anna" });
-        munkerod.Timings.MinimumStopMinutes = 4;
+        plan.Timetable.EnsurePlanningOf(munkerod).Timings.MinimumStopMinutes = 4;
         munkerod.Add(layout.Regions.First());
-        munkerod.Instructions = "## Shunting\n\nThe goods shed is shunted from track 3.";
+        plan.Timetable.EnsurePlanningOf(munkerod).Instructions = "## Shunting\n\nThe goods shed is shunted from track 3.";
         var rubjerg = (Station)layout.Add(new Station(2, "Rubjerg", "Rbj") { IsManned = false });
         var bro = (SignalControlledLocation)layout.Add(new SignalControlledLocation(3, "Bro", "Bro"));
         bro.ControlledBy = munkerod;
@@ -120,7 +120,9 @@ public sealed class OperationLocationsReportUiTests : PlaywrightTestBase
         rubjerg.LockKey = new LockKey { Name = "Key R", HeldAt = munkerod };
 
         munkerod.Add(new StationTrack(11, "1") { DisplayOrder = 1, IsMain = true, PlatformLength = 120 });
-        munkerod.Add(new StationTrack(12, "2") { DisplayOrder = 2, PlatformLength = 80, PreviousLocationId = 3, NextLocationId = 2 });
+        var track2 = munkerod.Add(new StationTrack(12, "2") { DisplayOrder = 2, PlatformLength = 80 });
+        plan.Timetable.EnsureRouteOf(track2).PreviousLocationId = 3;
+        plan.Timetable.EnsureRouteOf(track2).NextLocationId = 2;
         munkerod.Add(new StationTrack(13, "3") { DisplayOrder = 3, IsScheduled = false, Usage = "Goods shed" });
         rubjerg.Add(new StationTrack(21, "1") { DisplayOrder = 1, IsMain = true });
         bro.Add(new StationTrack(31, "1") { DisplayOrder = 1, IsMain = true });

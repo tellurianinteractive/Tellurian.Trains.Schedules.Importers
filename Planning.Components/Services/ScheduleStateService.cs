@@ -80,7 +80,7 @@ public sealed class ScheduleStateService(BrowserStorageService storage, CrossWin
     public bool IsInitialized => _loaded;
 
     public IReadOnlyList<TimetableStretch> TimetableStretches =>
-        _schedule?.Timetable?.Layout?.TimetableStretches is { } stretches
+        _schedule?.Timetable?.TimetableStretches is { } stretches
             ? [.. stretches.OrderBy(NumericOrderKey).ThenBy(s => s.Number, StringComparer.OrdinalIgnoreCase)]
             : [];
 

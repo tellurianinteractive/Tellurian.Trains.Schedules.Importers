@@ -11,8 +11,8 @@ public static class LayoutUpdate
     /// Applies every <see cref="LayoutChangeHandling.Automatic"/> change of <paramref name="comparison"/> to its current
     /// layout, and takes the hall plan's identity, revision and modules. A stretch takes the newer distance and speed
     /// unless the planner has entered its own (<see cref="TrackStretch.IsDistanceEntered"/>,
-    /// <see cref="TrackStretch.IsSpeedEntered"/>), and then a running time worked out from them unless the planner has
-    /// entered the time (<see cref="TrackStretch.IsTimeEntered"/>).
+    /// <see cref="TrackStretch.IsSpeedEntered"/>). The running time is the planner's to work out again
+    /// (<c>plan.UpdateFromHallPlan</c>).
     /// </summary>
     /// <returns>The changes applied.</returns>
     public static IReadOnlyList<LayoutChange> ApplyAutomatic(LayoutComparison comparison)
@@ -38,7 +38,7 @@ public static class LayoutUpdate
                     change.Location!.Tracks.Add(track);
                     break;
                 case LayoutChangeKind.StretchChanged:
-                    Update(change.Stretch!, change.SourceStretch!, layout, comparison.Matched);
+                    Update(change.Stretch!, change.SourceStretch!, comparison.Matched);
                     break;
                 default:
                     continue;
@@ -92,7 +92,7 @@ public static class LayoutUpdate
         track.SpeedLimit = source.SpeedLimit;
     }
 
-    private static void Update(TrackStretch stretch, TrackStretch source, Layout layout, IReadOnlyDictionary<OperationLocation, OperationLocation> matched)
+    private static void Update(TrackStretch stretch, TrackStretch source, IReadOnlyDictionary<OperationLocation, OperationLocation> matched)
     {
         // The newer stretch may run the other way: its start is then the current stretch's end.
         var isTurned = !ReferenceEquals(matched[stretch.Start], source.Start);
@@ -102,18 +102,8 @@ public static class LayoutUpdate
         stretch.ModuleIds = isTurned ? [.. source.ModuleIds.Reverse()] : [.. source.ModuleIds];
         stretch.MeasuredDistance = source.MeasuredDistance;
         stretch.MeasuredSpeed = source.MeasuredSpeed;
-        var isChanged = false;
-        if (!stretch.IsDistanceEntered && Math.Abs(stretch.Distance - source.Distance) >= 0.0005)
-        {
-            stretch.Distance = source.Distance;
-            isChanged = true;
-        }
-        if (!stretch.IsSpeedEntered && stretch.Speed != source.Speed)
-        {
-            stretch.Speed = source.Speed;
-            isChanged = true;
-        }
-        if (isChanged && !stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
+        if (!stretch.IsDistanceEntered && Math.Abs(stretch.Distance - source.Distance) >= 0.0005) stretch.Distance = source.Distance;
+        if (!stretch.IsSpeedEntered && stretch.Speed != source.Speed) stretch.Speed = source.Speed;
     }
 
     /// <summary>

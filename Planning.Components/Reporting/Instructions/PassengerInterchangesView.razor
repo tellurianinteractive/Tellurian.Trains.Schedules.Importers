@@ -1,4 +1,5 @@
 @inject Translator Translator
+@inject ScheduleStateService ScheduleState
 
 @{ UseReportCulture(); }
 
@@ -23,11 +24,13 @@
 }
 
 @code {
+    private Timetable? Timetable => ScheduleState.Timetable;
+
     /// <summary>
     /// The layout whose passenger interchanges are listed. A layout not worked with passenger tickets
     /// has none, and prints nothing at all — the tag then costs the booklet nothing.
     /// </summary>
     [Parameter, EditorRequired] public Layout? Layout { get; set; }
 
-    private IReadOnlyList<Station> Interchanges => Layout?.PassengerInterchanges ?? [];
+    private IReadOnlyList<Station> Interchanges => Timetable?.PassengerInterchanges ?? [];
 }

@@ -42,7 +42,7 @@ else
     private IReadOnlyList<TicketData>? Items { get; set; }
 
     private ReportCulture? DefaultCulture =>
-        ScheduleState.Layout is { } layout ? new(layout.DefaultReportCulture) : null;
+        ScheduleState.Timetable is { } timetable ? new(timetable.DefaultReportCulture) : null;
 
     protected override async Task OnInitializedAsync()
     {

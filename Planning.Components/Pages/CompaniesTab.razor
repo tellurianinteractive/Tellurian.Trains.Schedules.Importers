@@ -193,8 +193,10 @@ else
     private static CultureInfo Culture => CultureInfo.CurrentCulture;
 
     private Layout? Layout => ScheduleState.Layout;
+
+    private Timetable? Timetable => ScheduleState.Timetable;
     private IQueryable<Company> Companies =>
-        (Layout?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture).AsQueryable();
+        (Timetable?.Companies ?? []).OrderBy(c => c.Name, StringComparer.CurrentCulture).AsQueryable();
 
     private Mode _mode = Mode.List;
     private bool _isNew;
@@ -213,7 +215,7 @@ else
         ValidationState.OnValidationChanged += OnStateChanged;
         // Make sure the countries this layout references are in its catalogue (older/imported layouts
         // may not have them yet); only persist when something was actually added.
-        if (Layout is { } layout && layout.EnsureCountries()) ScheduleState.SaveAndNotify();
+        if (ScheduleState.Timetable is { } timetable && timetable.EnsureCountries()) ScheduleState.SaveAndNotify();
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
@@ -242,7 +244,7 @@ else
 
     private void StartAdd()
     {
-        Editing = new Company(NextId(), "", "", Layout!.Settings.Identity.DefaultCountryId);
+        Editing = new Company(NextId(), "", "", Timetable!.Settings.Identity.DefaultCountryId);
         _isNew = true;
         _error = null;
         _mode = Mode.Edit;
@@ -289,7 +291,7 @@ else
     // Several companies may share a signature (e.g. one per period, each with its own logo), so only
     // a company with both the same name and the same signature counts as already in the layout.
     private bool HasSameCompany(Company company) =>
-        Layout!.Companies.Any(c => !ReferenceEquals(c, company)
+        Timetable!.Companies.Any(c => !ReferenceEquals(c, company)
             && c.Signature.Equals(company.Signature, StringComparison.OrdinalIgnoreCase)
             && c.Name.Trim().Equals(company.Name.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
@@ -297,7 +299,7 @@ else
     {
         if (_candidates is null) return;
         foreach (var candidate in _candidates.Where(_selected.Contains))
-            Layout!.Add(new Company(NextId(), candidate.Name, candidate.Signature, candidate.CountryId));
+            Timetable!.Add(new Company(NextId(), candidate.Name, candidate.Signature, candidate.CountryId));
         ScheduleState.SaveAndNotify();
         BackToList();
     }
@@ -386,7 +388,7 @@ else
             _error = Translator("CompanyNameAndSignatureInUse");
             return;
         }
-        Layout!.Add(Editing);
+        Timetable!.Add(Editing);
         ScheduleState.SaveAndNotify();
         BackToList();
     }
@@ -398,5 +400,5 @@ else
         _deleteTarget = null;
     }
 
-    private int NextId() => (Layout!.Companies.Count == 0 ? 0 : Layout.Companies.Max(c => c.Id)) + 1;
+    private int NextId() => (Timetable!.Companies.Count == 0 ? 0 : Timetable!.Companies.Max(c => c.Id)) + 1;
 }

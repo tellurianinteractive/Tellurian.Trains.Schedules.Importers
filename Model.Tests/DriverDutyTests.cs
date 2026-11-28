@@ -15,7 +15,7 @@ public class DriverDutyTests
     {
         TestDataFactory.Init();
         var category = new TrainCategory { Id = 1, Name = "P", Prefix = "P" };
-        var timetable = new Timetable("Test", TestDataFactory.Layout());
+        var timetable = TestDataFactory.NewTimetable("Test", TestDataFactory.Layout());
         timetable.Add(TestDataFactory.CreateTrainInForwardDirection(category, 1, Time.FromHourAndMinute(12, 00)));
         timetable.Add(TestDataFactory.CreateTrainInOppositeDirection(category, 2, Time.FromHourAndMinute(13, 00)));
         return Plan.Create("Test", timetable);
@@ -220,8 +220,8 @@ public class DriverDutyTests
         // As in a plan with a week of days: duty and train both have the session bits 1,3,...,13, of which
         // only 1-7 are days of the week. The mirrored copy of the week is no day of its own.
         var plan = CreatePlan();
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         var odd = Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13);
         Forward(plan).Sessions = odd;
         var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
@@ -239,8 +239,8 @@ public class DriverDutyTests
     public void DutyRunningOnADayItsTrainDoesNotNamesThatDay()
     {
         var plan = CreatePlan();
-        plan.Layout.Settings.General.UseDays = true;
-        plan.Layout.Settings.General.MaxSessions = 7;
+        plan.Timetable.Settings.General.UseDays = true;
+        plan.Timetable.Settings.General.MaxSessions = 7;
         Forward(plan).Sessions = Sessions.FromSessionNumbers(1, 3, 5, 7, 9, 11, 13);
         var part = AddLocoWorking(plan, Forward(plan).AsTrainPart, locoNumber: 1);
         var duty = plan.CreateDriverDuty();
