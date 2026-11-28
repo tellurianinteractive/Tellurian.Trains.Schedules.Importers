@@ -4,7 +4,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// A layout: its operation locations and the stretches between them, and what is decided for it as a whole. When it is
 /// made from a hall plan, it also has what the hall plan's drawings gave: the modules without their drawings, the order
 /// of the locations along each line, and on each stretch what was measured. The drawings themselves stay with the hall
-/// plan (<see cref="DrawnLayout"/>). Ids are numbers that are unique within the layout for their kind of thing.
+/// plan (<c>DrawnLayout</c>, in <c>Model.Drawings</c>). Ids are numbers that are unique within the layout for their kind of thing.
 /// </summary>
 public sealed class Layout : LayoutPart, IEquatable<Layout>
 {

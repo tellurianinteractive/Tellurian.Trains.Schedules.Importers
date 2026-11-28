@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Model.Drawings</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model.Drawings</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>The drawn model railway layout: modules with their drawings, end profiles, standards, catalogues, halls and hall plans, and the drawing file formats. What Module Draw makes and the Module Registry shows. A hall plan gives the operating layout (Tellurian.Trains.Schedules.Model.Layouts) with its track stretches worked out from the lines.</Description>
+    <PackageTags>model-trains layouts modules drawings FREMO</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Model.Files\Model.Files.csproj" />
+    <ProjectReference Include="..\Model.Geometry\Model.Geometry.csproj" />
+    <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

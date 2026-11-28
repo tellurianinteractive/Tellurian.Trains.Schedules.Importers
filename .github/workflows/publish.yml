@@ -122,6 +122,9 @@ jobs:
       - name: Test Model.Layouts
         run: dotnet test Model.Layouts.Tests/Model.Layouts.Tests.csproj --configuration Release --no-build --verbosity normal
 
+      - name: Test Model.Drawings
+        run: dotnet test Model.Drawings.Tests/Model.Drawings.Tests.csproj --configuration Release --no-build --verbosity normal
+
       - name: Test Importers.Drawing
         run: dotnet test Importers.Drawing.Tests/Importers.Drawing.Tests.csproj --configuration Release --no-build --verbosity normal
 
@@ -206,6 +209,10 @@ jobs:
           echo "## Published packages v${{ needs.build.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Model" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model.Files" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model.Geometry" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model.Layouts" >> $GITHUB_STEP_SUMMARY
+          echo "- Tellurian.Trains.Schedules.Model.Drawings" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Importers.Interfaces" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Importers.Services" >> $GITHUB_STEP_SUMMARY
           echo "- Tellurian.Trains.Schedules.Model.Databases" >> $GITHUB_STEP_SUMMARY

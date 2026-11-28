@@ -1,7 +1,7 @@
 using Tellurian.Trains.Schedules.Exporters.Interfaces;
 using Tellurian.Trains.Schedules.Model.Files;
 using Tellurian.Trains.Schedules.Model.Layouts;
-using Tellurian.Trains.Schedules.Model.Layouts.Halls;
+using Tellurian.Trains.Schedules.Model.Drawings.Halls;
 
 namespace Tellurian.Trains.Schedules.Exporters.Drawing;
 

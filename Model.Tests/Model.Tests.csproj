@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Model.Drawings\Model.Drawings.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- A plan document written by an earlier version, kept so that reading it stays a tested promise. -->

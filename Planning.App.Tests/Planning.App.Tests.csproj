@@ -11,6 +11,7 @@
   <ItemGroup>
     <!-- A test seeds the app's stored plan, which is written and read as the model's own JSON. -->
     <ProjectReference Include="..\Model\Model.csproj" />
+    <ProjectReference Include="..\Model.Drawings\Model.Drawings.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />

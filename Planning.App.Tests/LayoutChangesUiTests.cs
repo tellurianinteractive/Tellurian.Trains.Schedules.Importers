@@ -172,9 +172,9 @@ public sealed class LayoutChangesUiTests : PlaywrightTestBase
     {
         var file = new JsonObject
         {
-            ["format"] = Model.Layouts.HallPlanFile.Format,
-            ["kind"] = Model.Layouts.HallPlanFile.Kind,
-            ["schemaVersion"] = Model.Layouts.HallPlanFile.NewestSchemaVersion,
+            ["format"] = Model.Drawings.HallPlanFile.Format,
+            ["kind"] = Model.Drawings.HallPlanFile.Kind,
+            ["schemaVersion"] = Model.Drawings.HallPlanFile.NewestSchemaVersion,
             ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
         };
         return Encoding.UTF8.GetBytes(file.ToJsonString());

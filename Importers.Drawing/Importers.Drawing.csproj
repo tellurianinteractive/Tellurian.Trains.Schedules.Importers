@@ -17,7 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
-    <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />
+    <ProjectReference Include="..\Model.Drawings\Model.Drawings.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="True" PackagePath="\" />

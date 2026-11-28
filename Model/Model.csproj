@@ -20,6 +20,7 @@
     <PackageReference Include="Tellurian.Utilities" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Model.Files\Model.Files.csproj" />
     <ProjectReference Include="..\Model.Layouts\Model.Layouts.csproj" />
   </ItemGroup>
   <ItemGroup>

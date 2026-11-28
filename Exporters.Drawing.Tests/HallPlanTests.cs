@@ -4,10 +4,10 @@ using Tellurian.Trains.Schedules.Importers.Drawing;
 using Tellurian.Trains.Schedules.Model.Files;
 using Tellurian.Trains.Schedules.Model.Geometry;
 using Tellurian.Trains.Schedules.Model.Layouts;
-using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
-using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
-using Tellurian.Trains.Schedules.Model.Layouts.Halls;
-using Tellurian.Trains.Schedules.Model.Layouts.Modules;
+using Tellurian.Trains.Schedules.Model.Drawings;
+using Tellurian.Trains.Schedules.Model.Drawings.EndProfiles;
+using Tellurian.Trains.Schedules.Model.Drawings.Halls;
+using Tellurian.Trains.Schedules.Model.Drawings.Modules;
 
 namespace Tellurian.Trains.Schedules.Exporters.Drawing.Tests;
 

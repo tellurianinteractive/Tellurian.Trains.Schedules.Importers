@@ -1,6 +1,6 @@
 using Tellurian.Trains.Schedules.Exporters.Interfaces;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.Catalogues;
+using Tellurian.Trains.Schedules.Model.Drawings.Catalogues;
 
 namespace Tellurian.Trains.Schedules.Exporters.Drawing;
 

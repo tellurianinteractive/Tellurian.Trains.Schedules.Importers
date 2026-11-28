@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using Microsoft.Playwright;
 using Tellurian.Trains.Schedules.Model.Layouts;
-using Tellurian.Trains.Schedules.Model.Layouts.Drawings;
+using Tellurian.Trains.Schedules.Model.Drawings;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tellurian.Trains.Schedules.Planning.App.Tests;
@@ -104,9 +104,9 @@ public sealed class StretchesFromLinesUiTests : PlaywrightTestBase
     {
         var file = new JsonObject
         {
-            ["format"] = Model.Layouts.HallPlanFile.Format,
-            ["kind"] = Model.Layouts.HallPlanFile.Kind,
-            ["schemaVersion"] = Model.Layouts.HallPlanFile.NewestSchemaVersion,
+            ["format"] = Model.Drawings.HallPlanFile.Format,
+            ["kind"] = Model.Drawings.HallPlanFile.Kind,
+            ["schemaVersion"] = Model.Drawings.HallPlanFile.NewestSchemaVersion,
             ["content"] = new JsonObject { ["layout"] = layout.ToBlock() },
         };
         return Encoding.UTF8.GetBytes(file.ToJsonString());

@@ -5,7 +5,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// <summary>
 /// Joins the parts of a name, such as standard, scale and designation, without saying a word twice: standard
 /// "FREMO/H0-RE", scale "H0" and designation "FREMO H0 B96L" give "FREMO/H0-RE B96L". Every system names things alike
-/// with it: the display name of a <see cref="Module"/>, and Module Draw's title of an end profile.
+/// with it: the display name of a <c>Module</c>, and Module Draw's title of an end profile.
 /// </summary>
 public static class Wording
 {

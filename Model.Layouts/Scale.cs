@@ -2,7 +2,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// A model scale, e.g. "H0" at 1:87. A scale is a ratio only: the gauges belong to the standard
-/// (<see cref="ModuleStandard.Gauges"/>), so H0 and H0m are one scale (decision 11 of <c>CrossAppReview.md</c>).
+/// (<c>ModuleStandard.Gauges</c>), so H0 and H0m are one scale (decision 11 of <c>CrossAppReview.md</c>).
 /// </summary>
 public sealed class Scale : LayoutPart, IEquatable<Scale>
 {

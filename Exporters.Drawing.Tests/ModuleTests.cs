@@ -3,8 +3,8 @@ using Tellurian.Trains.Schedules.Exporters.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Drawing;
 using Tellurian.Trains.Schedules.Model.Files;
 using Tellurian.Trains.Schedules.Model.Layouts;
-using Tellurian.Trains.Schedules.Model.Layouts.Modules;
-using Tellurian.Trains.Schedules.Model.Layouts.Tracks;
+using Tellurian.Trains.Schedules.Model.Drawings.Modules;
+using Tellurian.Trains.Schedules.Model.Drawings.Tracks;
 
 namespace Tellurian.Trains.Schedules.Exporters.Drawing.Tests;
 

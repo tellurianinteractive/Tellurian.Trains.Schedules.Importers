@@ -1,6 +1,6 @@
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.Halls;
+using Tellurian.Trains.Schedules.Model.Drawings.Halls;
 
 namespace Tellurian.Trains.Schedules.Importers.Drawing;
 

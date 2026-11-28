@@ -58,7 +58,7 @@ public class HallPlanImportTests
 
     private static Module Drawn(Module module, double length)
     {
-        module.Drawing.MainPath = Model.Layouts.Drawings.PathDrawing.Polyline([new(0, 0), new(length, 0)]);
+        module.Drawing.MainPath = Model.Drawings.PathDrawing.Polyline([new(0, 0), new(length, 0)]);
         return module;
     }
 

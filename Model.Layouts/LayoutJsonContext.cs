@@ -19,23 +19,9 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
     UseStringEnumConverter = true,
     AllowOutOfOrderMetadataProperties = true,
-    IgnoreReadOnlyProperties = true,
-    Converters =
-    [
-        typeof(Drawings.PointJsonConverter),
-        typeof(Drawings.AngleJsonConverter),
-        typeof(Drawings.PoseJsonConverter),
-    ])]
+    IgnoreReadOnlyProperties = true)]
 [JsonSerializable(typeof(Layout))]
 [JsonSerializable(typeof(OperationLocation))]
-[JsonSerializable(typeof(ICollection<PlacedModule>))]
-[JsonSerializable(typeof(ICollection<Line>))]
-[JsonSerializable(typeof(ICollection<Joint>))]
-[JsonSerializable(typeof(ICollection<EndProfile>))]
-[JsonSerializable(typeof(ICollection<ModuleStandard>))]
-[JsonSerializable(typeof(ICollection<EndProfileCompatibilityOverride>))]
-[JsonSerializable(typeof(FitTolerances))]
-[JsonSerializable(typeof(ModuleStandard))]
 [JsonSerializable(typeof(LockKey))]
 [JsonSerializable(typeof(Dictionary<string, JsonElement>))]
 internal sealed partial class LayoutJsonContext : JsonSerializerContext;

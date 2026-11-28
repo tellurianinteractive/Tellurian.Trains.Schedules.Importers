@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Tellurian.Trains.Schedules.Model.Files</AssemblyName>
+    <RootNamespace>Tellurian.Trains.Schedules.Model.Files</RootNamespace>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>$(AssemblyName)</Title>
+    <Description>The envelope of the Tellurian Trains files and the chain of migrations that brings an older file up to date: format, kind and schema version around the content. Shared by plan files and drawing files. No dependencies.</Description>
+    <PackageTags>model-trains files migration</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

@@ -84,14 +84,14 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
 
     /// <summary>
     /// The distance in metres that the hall plan's drawings gave when the layout was read from it
-    /// (<see cref="LineStretch.Distance"/>), kept beside <see cref="Distance"/> so the planner can show both without
+    /// (<c>LineStretch.Distance</c>), kept beside <see cref="Distance"/> so the planner can show both without
     /// the drawings. Null for a stretch entered by hand, or one the drawings could not measure.
     /// </summary>
     public double? MeasuredDistance { get; set; }
 
     /// <summary>
     /// The speed in km/h that the modules of the hall plan gave when the layout was read from it
-    /// (<see cref="LineStretch.Speed"/>), kept beside <see cref="Speed"/>. Null for a stretch entered by hand, or one
+    /// (<c>LineStretch.Speed</c>), kept beside <see cref="Speed"/>. Null for a stretch entered by hand, or one
     /// where no module has a speed limit.
     /// </summary>
     public int? MeasuredSpeed { get; set; }
@@ -109,7 +109,7 @@ public sealed class TrackStretch : LayoutPart, IEquatable<TrackStretch>
 
     /// <summary>
     /// The speed was entered by the planner and is kept when the layout is updated from its hall plan; otherwise the
-    /// speed follows the modules of the stretch (<see cref="LineStretch.Speed"/>).
+    /// speed follows the modules of the stretch (<c>LineStretch.Speed</c>).
     /// </summary>
     public bool IsSpeedEntered { get; set; }
 

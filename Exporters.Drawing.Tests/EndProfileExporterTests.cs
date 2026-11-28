@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using Tellurian.Trains.Schedules.Exporters.Interfaces;
 using Tellurian.Trains.Schedules.Importers.Drawing;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
+using Tellurian.Trains.Schedules.Model.Drawings.EndProfiles;
 
 namespace Tellurian.Trains.Schedules.Exporters.Drawing.Tests;
 

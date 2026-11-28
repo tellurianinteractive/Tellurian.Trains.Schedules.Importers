@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
+using Tellurian.Trains.Schedules.Model.Drawings.EndProfiles;
 
 namespace Tellurian.Trains.Schedules.Importers.Drawing.Tests;
 

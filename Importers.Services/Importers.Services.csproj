@@ -25,6 +25,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Importers.Interfaces\Importers.Interfaces.csproj" />
 	  <ProjectReference Include="..\Model\Model.csproj" />
+	  <ProjectReference Include="..\Model.Drawings\Model.Drawings.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="CSV\TrainCategories.csv">

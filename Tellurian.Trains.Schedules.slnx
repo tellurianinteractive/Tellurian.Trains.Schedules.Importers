@@ -28,6 +28,9 @@
   <Project Path="Importers.Services/Importers.Services.csproj" Id="37e4aba3-c531-4dcf-8377-cbe70c1718d7" />
   <Project Path="Importers.Xpln.Tests/Importers.Xpln.Tests.csproj" />
   <Project Path="Importers.Xpln/Importers.Xpln.csproj" />
+  <Project Path="Model.Drawings.Tests/Model.Drawings.Tests.csproj" />
+  <Project Path="Model.Drawings/Model.Drawings.csproj" />
+  <Project Path="Model.Files/Model.Files.csproj" />
   <Project Path="Model.Geometry.Tests/Model.Geometry.Tests.csproj" />
   <Project Path="Model.Geometry/Model.Geometry.csproj" />
   <Project Path="Model.Layouts.Tests/Model.Layouts.Tests.csproj" />

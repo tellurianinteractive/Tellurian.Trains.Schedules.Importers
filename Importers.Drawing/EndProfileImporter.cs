@@ -1,6 +1,6 @@
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.EndProfiles;
+using Tellurian.Trains.Schedules.Model.Drawings.EndProfiles;
 
 namespace Tellurian.Trains.Schedules.Importers.Drawing;
 

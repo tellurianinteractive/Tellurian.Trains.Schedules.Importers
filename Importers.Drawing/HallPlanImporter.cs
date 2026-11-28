@@ -1,13 +1,13 @@
 using Tellurian.Trains.Schedules.Importers.Interfaces;
 using Tellurian.Trains.Schedules.Model.Files;
-using Tellurian.Trains.Schedules.Model.Layouts.Halls;
+using Tellurian.Trains.Schedules.Model.Drawings.Halls;
 
 namespace Tellurian.Trains.Schedules.Importers.Drawing;
 
 /// <summary>
 /// Reads Module Draw's hall plan files (<c>.hallplan.json</c>) of schema version 2: the hall plan with its hall and its
 /// layout, whose references are restored. Earlier hall plan files are refused; no released version of Module Draw made
-/// them. The planner reads only the layout of a hall plan file, with <see cref="Model.Layouts.HallPlanFile.ReadLayout"/>.
+/// them. The planner reads only the layout of a hall plan file, with <see cref="Model.Drawings.HallPlanFile.ReadLayout"/>.
 /// </summary>
 public sealed class HallPlanImporter : IImporter<HallPlan>
 {
