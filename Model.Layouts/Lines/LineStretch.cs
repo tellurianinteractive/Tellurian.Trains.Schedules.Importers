@@ -19,7 +19,7 @@ public sealed record LineStretch
     /// <summary>The exit of a module of <see cref="End"/> that the stretch arrives at.</summary>
     public required ExitReference EndExit { get; init; }
 
-    /// <summary>The <see cref="LayoutModule.Id"/> of the plain-line modules between, in order from the start.</summary>
+    /// <summary>The <see cref="PlacedModule.Id"/> of the plain-line modules between, in order from the start.</summary>
     public required IReadOnlyList<int> ModuleIds { get; init; }
 
     /// <summary>The fewest tracks at any joint of the stretch, by the end profiles; null when no end profile is known.</summary>

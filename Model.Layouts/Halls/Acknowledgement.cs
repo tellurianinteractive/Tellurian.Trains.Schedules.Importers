@@ -14,7 +14,7 @@ public sealed class Acknowledgement : LayoutPart
     /// <summary>The code of the kind of finding acknowledged (VA-11, VA-12, VA-13, VA-14).</summary>
     public required string FindingCode { get; set; }
 
-    /// <summary>The <see cref="LayoutModule.Id"/> of each module involved.</summary>
+    /// <summary>The <see cref="PlacedModule.Id"/> of each module involved.</summary>
     public List<int> ModuleIds { get; set; } = [];
 
     /// <summary>The state of the modules involved when it was acknowledged.</summary>

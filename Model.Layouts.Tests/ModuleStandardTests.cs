@@ -22,21 +22,21 @@ public class ModuleStandardTests
     [TestMethod]
     public void TheScaleOfALayoutIsThatOfItsPreferredStandard()
     {
-        Assert.AreEqual(87, new Layout { PreferredStandard = FremoH0 }.Scale!.Denominator);
-        Assert.IsNull(new Layout().Scale);
+        Assert.AreEqual(87, new DrawnLayout { PreferredStandard = FremoH0 }.Scale!.Denominator);
+        Assert.IsNull(new DrawnLayout().Scale);
     }
 
     [TestMethod]
     public void AStandardIsWrittenWithItsIdShortNameAndScale()
     {
-        var json = JsonSerializer.Serialize(new Layout { PreferredStandard = FremoH0 }, Options);
+        var json = new DrawnLayout { PreferredStandard = FremoH0 }.ToBlock().ToJsonString();
         using var document = JsonDocument.Parse(json);
         var standard = document.RootElement.GetProperty("preferredStandard");
         Assert.AreEqual("FREMO H0-RE", standard.GetProperty("shortName").GetString());
         Assert.AreEqual(FremoId, standard.GetProperty("id").GetGuid());
         Assert.AreEqual("H0", standard.GetProperty("scale").GetProperty("shortName").GetString());
         Assert.IsFalse(document.RootElement.TryGetProperty("scale", out _));
-        Assert.AreEqual(FremoH0, JsonSerializer.Deserialize<Layout>(json, Options)!.PreferredStandard);
+        Assert.AreEqual(FremoH0, DrawnLayout.FromBlock(System.Text.Json.Nodes.JsonNode.Parse(json)!.AsObject()).PreferredStandard);
     }
 
     [TestMethod]

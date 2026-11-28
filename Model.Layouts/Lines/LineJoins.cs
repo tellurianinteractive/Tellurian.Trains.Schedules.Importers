@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Which exit of a placed module is joined to which, as the lines of a <see cref="Layout"/> say: the line order,
+/// Which exit of a placed module is joined to which, as the lines of a <see cref="DrawnLayout"/> say: the line order,
 /// <see cref="LineEntry.IsTurned"/>, <see cref="LineEntry.ContinuesFrom"/>, <see cref="Line.StartAt"/> and
 /// <see cref="Line.EndAt"/>. References to modules or exits that don't exist, and exits joined twice, are reported and
 /// left out.
@@ -13,15 +13,15 @@ internal sealed class LineJoins
     private readonly Dictionary<ExitReference, LineJoin> _joins = [];
     private readonly LineProblemLog _log;
 
-    public LineJoins(Layout layout, LineProblemLog log)
+    public LineJoins(DrawnLayout layout, LineProblemLog log)
     {
         _log = log;
         Modules = layout.Modules.GroupBy(m => m.Id).ToDictionary(g => g.Key, g => g.First());
         foreach (var line in layout.Lines) AddJoins(line);
     }
 
-    /// <summary>The placed modules by their <see cref="LayoutModule.Id"/>.</summary>
-    public IReadOnlyDictionary<int, LayoutModule> Modules { get; }
+    /// <summary>The placed modules by their <see cref="PlacedModule.Id"/>.</summary>
+    public IReadOnlyDictionary<int, PlacedModule> Modules { get; }
 
     /// <summary>Every joint, once from each of its two exits.</summary>
     public IEnumerable<KeyValuePair<ExitReference, LineJoin>> All => _joins;
@@ -34,7 +34,7 @@ internal sealed class LineJoins
     public bool IsJoined(ExitReference exit) => _joins.ContainsKey(exit);
 
     /// <summary>The exits of the module's drawing; a module drawn without exits is taken to have one at each end.</summary>
-    public static IReadOnlyList<ExitPlace> ExitsOf(LayoutModule module)
+    public static IReadOnlyList<ExitPlace> ExitsOf(PlacedModule module)
     {
         var drawing = module.Module.Drawing;
         return drawing.Exits.Count == 0

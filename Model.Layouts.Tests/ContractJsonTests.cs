@@ -95,11 +95,9 @@ public class ContractJsonTests
     public void ALayoutWithItsModulesRoundTrips()
     {
         var tellby = new Station(1, "Tellby", "Tby") { IsManned = true };
-        var layout = new Layout
+        var drawn = new DrawnLayout
         {
-            SourceId = Guid.NewGuid(),
-            SourceRevision = 7,
-            OperationLocations = { tellby },
+            Layout = new Layout { SourceId = Guid.NewGuid(), SourceRevision = 7, OperationLocations = { tellby } },
             Modules =
             {
                 new()
@@ -111,20 +109,37 @@ public class ContractJsonTests
             },
         };
 
-        var json = JsonSerializer.Serialize(layout, Options);
-        var read = JsonSerializer.Deserialize<Layout>(json, Options)!;
-        read.RestoreReferences();
+        var block = drawn.ToBlock();
+        var read = DrawnLayout.FromBlock(block);
         var modules = read.Modules.ToList();
 
-        Assert.AreEqual(layout.SourceId, read.SourceId);
-        Assert.AreEqual(7, read.SourceRevision);
-        Assert.AreEqual(1, JsonNode.Parse(json)!["modules"]![0]!["module"]!["operationLocationId"]!.GetValue<int>(), "in a layout a module refers to its location by id");
+        Assert.AreEqual(drawn.Layout.SourceId, read.Layout.SourceId);
+        Assert.AreEqual(7, read.Layout.SourceRevision);
+        Assert.AreEqual(1, block["modules"]![0]!["module"]!["operationLocationId"]!.GetValue<int>(), "in a layout a module refers to its location by id");
         Assert.AreEqual("SF 0012 Tellby", modules[0].Module.DisplayName);
-        Assert.AreSame(read.OperationLocations.Single(), modules[0].Module.OperationLocation);
+        Assert.AreSame(read.Layout.OperationLocations.Single(), modules[0].Module.OperationLocation);
         Assert.IsTrue(((Station)modules[0].Module.OperationLocation!).IsManned);
         Assert.AreEqual("Box 1", modules[1].Module.PackageLabel);
         Assert.IsNull(modules[1].Module.OperationLocation);
         Assert.AreEqual("1", modules[1].Module.Tracks.Single().Designation, "a plain-line module keeps its own tracks");
+    }
+
+    [TestMethod]
+    public void TheOperatingLayoutKeepsTheModulesWithoutTheirDrawings()
+    {
+        var layout = new Layout
+        {
+            Modules = { new LayoutModule { Id = 1, SourceId = Guid.NewGuid(), Title = "SF 0012 Tellby", Owners = "Stefan", PackageLabel = "Box 1", OperationLocationId = 1 } },
+        };
+
+        var json = JsonSerializer.Serialize(layout, Options);
+        var read = JsonSerializer.Deserialize<Layout>(json, Options)!;
+
+        var module = read.Modules.Single();
+        Assert.AreEqual("SF 0012 Tellby", module.Title);
+        Assert.AreEqual(1, module.OperationLocationId);
+        Assert.AreEqual("Box 1", module.PackageLabel);
+        Assert.IsNull(JsonNode.Parse(json)!["modules"]![0]!["module"], "no drawing, no module of its own");
     }
 
     [TestMethod]

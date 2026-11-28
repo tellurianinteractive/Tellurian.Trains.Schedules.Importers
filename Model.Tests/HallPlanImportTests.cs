@@ -11,15 +11,14 @@ public class HallPlanImportTests
 {
     private static readonly Guid HallPlanId = Guid.Parse("30000000-0000-0000-0000-000000000003");
 
-    private static Layout HallPlanLayout(int revision = 1, double secondDistance = 15, bool withYtterbyTrack2 = true)
+    private static DrawnLayout HallPlanLayout(int revision = 1, double secondDistance = 15, bool withYtterbyTrack2 = true)
     {
-        var layout = new Layout
+        var drawn = new DrawnLayout
         {
-            Name = "Club meeting",
-            SourceId = HallPlanId,
-            SourceRevision = revision,
+            Layout = new Layout { Name = "Club meeting", SourceId = HallPlanId, SourceRevision = revision },
             PreferredStandard = new ModuleStandard { ShortName = "FREMO H0", Scale = new Scale { Id = 4, ShortName = "H0" } },
         };
+        var layout = drawn.Layout;
         var tellby = new Station(1, "Tellby", "Tby") { CountryCode = "NO", HasPassengerExchange = true, Layout = layout };
         tellby.Tracks.Add(new StationTrack(11, "1") { Station = tellby, IsMain = true });
         tellby.Tracks.Add(new StationTrack(12, "2") { Station = tellby });
@@ -33,12 +32,12 @@ public class HallPlanImportTests
         layout.OperationLocations.Add(stenungsund);
         layout.TrackStretches.Add(new TrackStretch(1, tellby, ytterby, 10) { Speed = 80, Layout = layout });
         layout.TrackStretches.Add(new TrackStretch(2, ytterby, stenungsund, secondDistance) { Speed = 80, Layout = layout });
-        layout.Modules.Add(new LayoutModule { Id = 1, Module = new Module { Name = "Tellby", OperationLocation = tellby, Tracks = tellby.Tracks } });
-        layout.Modules.Add(new LayoutModule { Id = 2, Module = new Module { Name = "Curve", Tracks = { new StationTrack(41, "1") } } });
-        layout.Lines.Add(new Line { Id = 1, Entries = [new() { ModuleId = 1 }, new() { ModuleId = 2, IsTurned = true }] });
-        layout.Joints.Add(new Joint { First = new(1, ExitSide.Right), Second = new(2, ExitSide.Right), NumberOfClamps = 4 });
-        layout.FitTolerances = new() { Joint = 1 };
-        return layout;
+        drawn.Modules.Add(new PlacedModule { Id = 1, Module = new Module { Name = "Tellby", OperationLocation = tellby, Tracks = tellby.Tracks } });
+        drawn.Modules.Add(new PlacedModule { Id = 2, Module = new Module { Name = "Curve", Tracks = { new StationTrack(41, "1") } } });
+        drawn.Lines.Add(new Line { Id = 1, Entries = [new() { ModuleId = 1 }, new() { ModuleId = 2, IsTurned = true }] });
+        drawn.Joints.Add(new Joint { First = new(1, ExitSide.Right), Second = new(2, ExitSide.Right), NumberOfClamps = 4 });
+        drawn.FitTolerances = new() { Joint = 1 };
+        return drawn;
     }
 
     private static readonly Guid LinedHallPlanId = Guid.Parse("30000000-0000-0000-0000-000000000004");
@@ -47,9 +46,9 @@ public class HallPlanImportTests
     /// A hall plan whose stretch is worked out from its line: Tellby, a plain-line module and Ytterby, the stations
     /// 2000 mm long, no stretches of its own.
     /// </summary>
-    private static Layout LinedHallPlan(int revision = 1, int speedLimit = 70, double plainLength = 1000)
+    private static DrawnLayout LinedHallPlan(int revision = 1, int speedLimit = 70, double plainLength = 1000)
     {
-        var layout = new Layout { Name = "Lined", SourceId = LinedHallPlanId, SourceRevision = revision };
+        var layout = new DrawnLayout { Layout = new Layout { Name = "Lined", SourceId = LinedHallPlanId, SourceRevision = revision } };
         var tellby = layout.Place(Drawn(new Module { Name = "Tellby", OperationLocation = new Station(0, "Tellby", "Tby") }, 2000));
         var plain = layout.Place(Drawn(new Module { Name = "Plain", SpeedLimit = speedLimit }, plainLength));
         var ytterby = layout.Place(Drawn(new Module { Name = "Ytterby", OperationLocation = new Station(0, "Ytterby", "Yb") }, 2000));
@@ -64,13 +63,13 @@ public class HallPlanImportTests
     }
 
     /// <summary>The layout as it comes out of a hall plan file: written as Module Draw does and read back.</summary>
-    private static Layout ReadFromFile(Layout layout)
+    private static Layout ReadFromFile(DrawnLayout layout)
     {
         var file = new JsonObject
         {
             ["format"] = HallPlanFile.Format,
             ["kind"] = HallPlanFile.Kind, ["schemaVersion"] = 2,
-            ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
+            ["content"] = new JsonObject { ["layout"] = layout.ToBlock() },
         };
         return HallPlanFile.ReadLayout(file.ToJsonString());
     }
@@ -87,8 +86,10 @@ public class HallPlanImportTests
         Assert.IsTrue(layout.OperationLocations.SelectMany(l => l.Tracks.Select(t => (l, t))).All(p => ReferenceEquals(p.t.Station, p.l)));
         Assert.HasCount(2, layout.TrackStretches);
         Assert.AreSame(layout.OperationLocations.First(), layout.TrackStretches.First().Start);
-        Assert.HasCount(2, layout.Modules);
-        Assert.AreSame(layout.OperationLocations.First().Tracks, layout.Modules.First().Module.Tracks);
+        CollectionAssert.AreEqual(new[] { "Tellby", "Curve" }, layout.Modules.Select(m => m.Title).ToArray());
+        Assert.AreEqual(layout.OperationLocations.First().Id, layout.Modules.First().OperationLocationId);
+        Assert.AreEqual("H0", layout.Scale!.ShortName);
+        Assert.AreEqual("FREMO H0", layout.StandardName);
         Assert.AreEqual(HallPlanId, layout.SourceId);
         Assert.AreEqual(1, layout.SourceRevision);
         Assert.AreEqual(4, layout.Settings.Identity.ScaleId);
@@ -97,7 +98,7 @@ public class HallPlanImportTests
     [TestMethod]
     public void EachStretchGetsARunningTimeFromItsDistanceAndSpeed()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "en");
 
         foreach (var stretch in plan.Layout.TrackStretches)
         {
@@ -182,7 +183,7 @@ public class HallPlanImportTests
     [TestMethod]
     public void TheDefaultCountryIsTheOneMostLocationsAreIn()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "sv");
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "sv");
 
         var norway = Country.ByCountryCode("NO")!;
         var sweden = Country.ByCountryCode("SE")!;
@@ -194,11 +195,11 @@ public class HallPlanImportTests
     [TestMethod]
     public void WithoutCountriesTheLanguageGivesTheDefaultCountryAndTheNameIsGiven()
     {
-        var hallPlan = HallPlanLayout();
-        hallPlan.Name = string.Empty;
-        foreach (var location in hallPlan.OperationLocations) location.CountryCode = null;
+        var drawn = HallPlanLayout();
+        drawn.Layout.Name = string.Empty;
+        foreach (var location in drawn.Layout.OperationLocations) location.CountryCode = null;
 
-        var plan = PlanFactory.CreatePlan(hallPlan, "da", "Ny plan");
+        var plan = PlanFactory.CreatePlan(drawn.ToLayout(), "da", "Ny plan");
 
         Assert.AreEqual(Country.ByLanguage("da").Id, plan.Layout.Settings.Identity.DefaultCountryId);
         Assert.AreEqual("Ny plan", plan.Name);
@@ -214,41 +215,41 @@ public class HallPlanImportTests
         PlanFingerprint.AssertSame(PlanFingerprint.Of(plan), PlanFingerprint.Of(read));
         Assert.AreEqual(HallPlanId, read.Layout.SourceId);
         Assert.HasCount(2, read.Layout.Modules);
-        Assert.AreSame(read.Layout.OperationLocations.First().Tracks, read.Layout.Modules.First().Module.Tracks);
+        Assert.AreEqual(read.Layout.OperationLocations.First().Id, read.Layout.Modules.First().OperationLocationId);
     }
 
     [TestMethod]
-    public void ANewPlanKeepsTheLinesAndJointsOfTheHallPlanThroughThePlanFile()
+    public void ThePlanFileHasNoDrawings()
     {
         var plan = PlanFactory.CreatePlan(ReadFromFile(HallPlanLayout()), "en");
 
-        var read = PlanFile.Read(PlanFile.Write(plan)).Layout;
+        var layout = JsonNode.Parse(PlanFile.Write(plan))!["plan"]!["timetable"]!["layout"]!.AsObject();
 
-        Assert.IsTrue(read.Lines.Single().Entries[1].IsTurned);
-        Assert.AreEqual(4, read.Joints.Single().NumberOfClamps);
-        Assert.AreEqual(1, read.EffectiveFitTolerances.Joint);
+        foreach (var drawn in new[] { "lines", "joints", "endProfiles", "standards", "overrides", "fitTolerances", "preferredStandard" })
+            Assert.IsFalse(layout.ContainsKey(drawn), drawn);
+        Assert.IsNull(layout["modules"]![0]!["module"], "a module without its drawing");
+        Assert.AreEqual("Tellby", layout["modules"]![0]!["title"]!.GetValue<string>());
+        Assert.AreEqual("H0", layout["scale"]!["shortName"]!.GetValue<string>());
     }
 
     [TestMethod]
-    public void ANewerRevisionTakesTheLinesAndJoints()
+    public void ANewerRevisionTakesTheModules()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "en");
         var newer = HallPlanLayout(revision: 2);
-        newer.Lines.Single().Entries[1].IsTurned = false;
-        newer.Joints.Clear();
+        newer.Modules.Last().Module.Name = "Bend";
 
         plan.UpdateFromHallPlan(ReadFromFile(newer));
 
-        Assert.IsFalse(plan.Layout.Lines.Single().Entries[1].IsTurned);
-        Assert.IsEmpty(plan.Layout.Joints);
+        CollectionAssert.AreEqual(new[] { "Tellby", "Bend" }, plan.Layout.Modules.Select(m => m.Title).ToArray());
     }
 
     [TestMethod]
     public void AnUnchangedHallPlanChangesNothing()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "en");
 
-        var update = plan.UpdateFromHallPlan(HallPlanLayout());
+        var update = plan.UpdateFromHallPlan(HallPlanLayout().ToLayout());
 
         Assert.IsTrue(update.IsUnchanged, string.Join("; ", update.Comparison.Changes.Select(c => $"{c.Kind} {c.Location?.Signature} {c.Track?.Designation} [{string.Join(',', c.Properties)}]")));
         Assert.IsEmpty(update.Applied);
@@ -257,7 +258,7 @@ public class HallPlanImportTests
     [TestMethod]
     public void ANewerRevisionTakesTheDistancesAndLeavesTheRestToConfirm()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "en");
         var stretch = plan.Layout.TrackStretches.Last();
         var timeBefore = stretch.Time;
 
@@ -275,8 +276,8 @@ public class HallPlanImportTests
     [TestMethod]
     public void AfterAConfirmedChangeComparingAgainLeavesOnlyWhatIsLeft()
     {
-        var plan = PlanFactory.CreatePlan(HallPlanLayout(), "en");
-        var newer = HallPlanLayout(revision: 2, withYtterbyTrack2: false);
+        var plan = PlanFactory.CreatePlan(HallPlanLayout().ToLayout(), "en");
+        var newer = HallPlanLayout(revision: 2, withYtterbyTrack2: false).ToLayout();
         var update = plan.UpdateFromHallPlan(newer);
 
         Assert.IsTrue(plan.ApplyChange(update.ToConfirm.Single()).IsAllowed);

@@ -1,7 +1,8 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Takes the layout of a hall plan (<see cref="HallPlanFile.ReadLayout"/>) into the planner: as the layout of a new plan
+/// Takes the layout of a hall plan (<see cref="HallPlanFile.ReadLayout"/>, <c>drawnLayout.ToLayout()</c>), with its track
+/// stretches worked out from its lines and what was measured, into the planner: as the layout of a new plan
 /// (<see cref="PlanFactory.CreatePlan(Layout, string)"/>), or as a newer revision of the hall plan an existing plan was
 /// made from (<c>plan.UpdateFromHallPlan(layout)</c>).
 /// </summary>
@@ -30,7 +31,6 @@ public static class HallPlanImport
         public HallPlanUpdate UpdateFromHallPlan(Layout hallPlan)
         {
             ArgumentNullException.ThrowIfNull(hallPlan);
-            WorkOutTrackStretches(hallPlan);
             var comparison = LayoutComparison.Compare(plan.Layout, hallPlan);
             var applied = LayoutUpdate.ApplyAutomatic(comparison);
             plan.Layout.EnsureCountries();
@@ -40,14 +40,12 @@ public static class HallPlanImport
 
     /// <summary>
     /// Moves what <paramref name="hallPlan"/> has into <paramref name="layout"/>, a new layout with the planner's
-    /// defaults: the locations with their tracks, the stretches worked out from its lines (or as they are, without lines)
-    /// with a running time worked out from distance and speed,
-    /// any timetable and dispatch stretches and companies, the modules with their lines and joints and the end profiles and
-    /// standards they need, and the hall plan's identity and scale.
+    /// defaults: the locations with their tracks, the stretches with a running time worked out from distance and speed,
+    /// any timetable and dispatch stretches and companies, the modules, the order of the locations along the lines, and
+    /// the hall plan's identity, scale and standard.
     /// </summary>
     internal static void TakeInto(Layout layout, Layout hallPlan)
     {
-        WorkOutTrackStretches(hallPlan);
         foreach (var location in hallPlan.OperationLocations) layout.Add(location);
         foreach (var stretch in hallPlan.TrackStretches)
         {
@@ -60,26 +58,13 @@ public static class HallPlanImport
         foreach (var stretch in hallPlan.DispatchStretches) layout.DispatchStretches.Add(stretch);
         foreach (var company in hallPlan.Companies) layout.Add(company);
         layout.StretchLines = [.. hallPlan.StretchLines.Select(l => l.Copy())];
-        layout.Modules = [.. hallPlan.Modules];
-        layout.TakeLinesFrom(hallPlan);
+        layout.Modules = [.. hallPlan.Modules.Select(m => m.Copy())];
         layout.SourceId = hallPlan.SourceId;
         layout.SourceRevision = hallPlan.SourceRevision;
-        layout.PreferredStandard = hallPlan.PreferredStandard;
-        if (Scale.Known(hallPlan.PreferredStandard?.Scale)?.Id is int scaleId) layout.Settings.Identity.ScaleId = scaleId;
+        layout.Scale = hallPlan.Scale;
+        layout.StandardName = hallPlan.StandardName;
+        if (Scale.Known(hallPlan.Scale)?.Id is int scaleId) layout.Settings.Identity.ScaleId = scaleId;
         layout.EnsureCountries();
-    }
-
-    /// <summary>
-    /// Works out the track stretches of <paramref name="hallPlan"/> from its lines, when it has any
-    /// (<c>layout.UpdateTrackStretchesFromLines()</c>, <c>ModelHarmonisation.md</c> decision 15): which modules, the sides,
-    /// the number of tracks, the distance and the speed. A stretch the hall plan already has keeps what was entered for
-    /// it. A hall plan without lines keeps its stretches as they are.
-    /// </summary>
-    /// <returns>What the lines gave, with the problems found; null when the hall plan has no lines.</returns>
-    public static LineStretchesResult? WorkOutTrackStretches(Layout hallPlan)
-    {
-        ArgumentNullException.ThrowIfNull(hallPlan);
-        return hallPlan.Lines.Count == 0 ? null : hallPlan.UpdateTrackStretchesFromLines();
     }
 
     /// <summary>The country most of the hall plan's locations are in, if any of them has one the planner knows.</summary>

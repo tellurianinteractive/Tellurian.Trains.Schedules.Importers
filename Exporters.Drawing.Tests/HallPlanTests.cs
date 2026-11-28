@@ -34,7 +34,7 @@ public sealed class HallPlanTests
     {
         var hall = new HallImporter().Import(TestFile("club-hall.v1.hall.json")).Item;
         var content = new ModuleImporter().Import(TestFile("station-3-sections.module.json")).Item;
-        var layout = new Layout { PreferredStandard = new ModuleStandard { Id = Guid.Parse("5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01"), ShortName = "FREMO/H0-RE" } };
+        var layout = new DrawnLayout { PreferredStandard = new ModuleStandard { Id = Guid.Parse("5b6f0c1e-2a41-4d8e-9c3a-0f1d2e3a4b01"), ShortName = "FREMO/H0-RE" } };
         layout.Include(layout.PreferredStandard);
         foreach (var profile in content.EndProfiles) layout.Include(profile);
         var tellby = layout.Place(content.Module);
@@ -95,10 +95,10 @@ public sealed class HallPlanTests
         var layout = read.Layout;
 
         Assert.HasCount(4, layout.Modules);
-        Assert.HasCount(2, layout.OperationLocations);
+        Assert.HasCount(2, layout.Layout.OperationLocations);
         var ytterby = layout.FindModule(3)!.Module;
-        Assert.AreSame(layout.OperationLocations.Single(l => l.Id == 2), ytterby.OperationLocation);
-        Assert.AreSame(layout, ytterby.OperationLocation!.Layout);
+        Assert.AreSame(layout.Layout.OperationLocations.Single(l => l.Id == 2), ytterby.OperationLocation);
+        Assert.AreSame(layout.Layout, ytterby.OperationLocation!.Layout);
         Assert.AreEqual("Ytterby", ytterby.Name);
         Assert.IsTrue(ytterby.HasDrawing);
         Assert.HasCount(2, layout.Lines);
@@ -120,17 +120,21 @@ public sealed class HallPlanTests
         plan.Revision = 4;
         var written = Exporter.Write(plan, ExportOptions.Default);
 
+        var drawn = HallPlanFile.ReadDrawnLayout(written);
         var layout = HallPlanFile.ReadLayout(written);
 
         Assert.AreEqual(plan.Id, layout.SourceId);
         Assert.AreEqual(4, layout.SourceRevision);
         Assert.AreEqual("Club meeting", layout.Name, "a layout without a name of its own has the hall plan's");
-        Assert.HasCount(2, layout.Lines);
-        Assert.AreSame(layout.OperationLocations.Single(l => l.Id == 2), layout.FindModule(3)!.Module.OperationLocation);
+        Assert.HasCount(2, drawn.Lines);
+        Assert.AreSame(drawn.Layout.OperationLocations.Single(l => l.Id == 2), drawn.FindModule(3)!.Module.OperationLocation);
+        Assert.HasCount(4, layout.Modules, "the planner's layout has the modules without their drawings");
+        Assert.AreEqual(2, layout.Modules.Single(m => m.Id == 3).OperationLocationId);
+        Assert.AreEqual("FREMO/H0-RE", layout.StandardName);
         var module = JsonNode.Parse(written)!["content"]!["layout"]!["modules"]![2]!["module"]!;
         Assert.AreEqual(2, (int)module["operationLocationId"]!, "in a layout a module refers to its location by id");
         Assert.IsNull(module["operationLocation"]);
-        Assert.IsNull(plan.Layout.SourceId, "the hall plan given is not changed");
+        Assert.IsNull(plan.Layout.Layout.SourceId, "the hall plan given is not changed");
     }
 
     [TestMethod]
@@ -141,7 +145,7 @@ public sealed class HallPlanTests
         var written = Read(Exporter.Write(plan, new ExportOptions(IsRevision: true, RevisedBy: "Stefan", Date: new DateOnly(2026, 11, 22))));
 
         Assert.AreEqual(1, written.Revision);
-        Assert.AreEqual(1, written.Layout.SourceRevision);
+        Assert.AreEqual(1, written.Layout.Layout.SourceRevision);
         Assert.AreEqual("Stefan", written.RevisionLog[0].Name);
         Assert.AreEqual(0, plan.Revision);
         Assert.IsEmpty(plan.RevisionLog);
@@ -187,7 +191,7 @@ public sealed class HallPlanTests
         Assert.IsTrue(plan.Anchors[0].IsLocked);
         Assert.AreNotEqual("Other hall", plan.Hall.Name);
         Assert.HasCount(2, plan.Acknowledgements[0].ModuleIds);
-        Assert.AreSame(copy.Layout, copy.Layout.FindModule(3)!.Module.OperationLocation!.Layout);
+        Assert.AreSame(copy.Layout.Layout, copy.Layout.FindModule(3)!.Module.OperationLocation!.Layout);
     }
 
     [TestMethod]

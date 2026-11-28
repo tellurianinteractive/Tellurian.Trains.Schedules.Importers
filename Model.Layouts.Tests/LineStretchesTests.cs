@@ -21,7 +21,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void AMainLineGivesAStretchBetweenEachPairOfNeighbouringLocations()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var (a, p1, p2, b, q, c) = (Place(layout, Station("Aby")), Place(layout, Plain("p1")), Place(layout, Plain("p2")), Place(layout, Station("Bby")), Place(layout, Plain("q")), Place(layout, Station("Cby")));
         layout.Add(new Line { Entries = [Entry(a), Entry(p1), Entry(p2), Entry(b), Entry(q), Entry(c)] });
 
@@ -43,7 +43,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void ATurnedLocationIsLeftFromItsOwnSide()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var (a, p, b) = (Place(layout, Station("Aby")), Place(layout, Plain("p")), Place(layout, Station("Bby")));
         layout.Add(new Line { Entries = [Entry(a, isTurned: true), Entry(p, isTurned: true), Entry(b, isTurned: true)] });
 
@@ -57,7 +57,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void PlainLineToAFreeEndIsReportedAndGivesNoStretch()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var (a, p1, p2) = (Place(layout, Station("Aby")), Place(layout, Plain("p1")), Place(layout, Plain("p2")));
         layout.Add(new Line { Entries = [Entry(a), Entry(p1), Entry(p2)] });
 
@@ -70,7 +70,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void TheTracksAreTheFewestAtAnyJointAndTheDistanceRunsAlongTheMainPathsFromCentreToCentre()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         layout.Include(DoubleTrack);
         var a = Place(layout, Drawn(Station("Aby"), 2000, DoubleTrack));
@@ -91,7 +91,7 @@ public sealed class LineStretchesTests
     [DataRow(null, null, null, null, DisplayName = "no limits, no speed")]
     public void TheSpeedIsTheModulesLimitsWeightedByTheirLengthsAlongTheStretch(int? atA, int? onP, int? atB, int? expected)
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         var a = Place(layout, Limited(Drawn(Station("Aby"), 2000, SingleTrack), atA));
         var p = Place(layout, Limited(Drawn(Plain("p"), 1000, SingleTrack), onP));
@@ -104,7 +104,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void WhereLengthsArentKnownTheLimitsCountEqually()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var p = Place(layout, Limited(Plain("p"), 80));
         var q = Place(layout, Limited(Plain("q"), 100));
@@ -117,7 +117,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void AnAddedTrackStretchGetsTheSpeedOfItsModules()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var p = Place(layout, Limited(Plain("p"), 70));
         var b = Place(layout, Station("Bby"));
@@ -125,13 +125,13 @@ public sealed class LineStretchesTests
 
         layout.UpdateTrackStretchesFromLines();
 
-        Assert.AreEqual(70, layout.TrackStretches.Single().Speed);
+        Assert.AreEqual(70, layout.Layout.TrackStretches.Single().Speed);
     }
 
     [TestMethod]
     public void ABranchStartsAtTheLocationItLeavesFrom()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var p = Place(layout, Plain("p"));
         var j = Place(layout, Drawn(Station("Jby"), 1000, SingleTrack, ExitSide.Up));
@@ -154,7 +154,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void AStretchFoundAgainstItsLineRunsWithTheLine()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Drawn(Station("Aby"), 1000, SingleTrack, ExitSide.Up));
         var x = Place(layout, Plain("x"));
         var b = Place(layout, Station("Bby"));
@@ -177,7 +177,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void TwoWaysBetweenTheSameLocationsGiveOneStretchAndAProblem()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         var a = Place(layout, Drawn(Station("Aby"), 1000, SingleTrack, ExitSide.Up));
         var x = Place(layout, Plain("x"));
@@ -195,7 +195,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void MissingModulesAndExitsAreReported()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var b = Place(layout, Station("Bby"));
         layout.Add(new Line { Entries = [Entry(a), new LineEntry { ModuleId = 99 }] });
@@ -210,7 +210,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void TheTrackStretchesAreUpdatedKeepingWhatThePlannerEntered()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         var a = Place(layout, Drawn(Station("Aby"), 2000, SingleTrack));
         var p = Place(layout, Drawn(Plain("p"), 1000, SingleTrack));
@@ -219,11 +219,11 @@ public sealed class LineStretchesTests
         var c = Place(layout, Drawn(Station("Cby"), 2000, SingleTrack));
         layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b), Entry(q), Entry(c)] });
         var entered = new TrackStretch(5, Location(c), Location(b), 12, 2) { IsDistanceEntered = true, IsTimeEntered = true, Time = 7, Speed = 80, IsSpeedEntered = true };
-        layout.TrackStretches.Add(entered);
+        layout.Layout.TrackStretches.Add(entered);
 
         layout.UpdateTrackStretchesFromLines();
 
-        Assert.HasCount(2, layout.TrackStretches);
+        Assert.HasCount(2, layout.Layout.TrackStretches);
         Assert.AreSame(Location(c), entered.Start, "keeps its direction");
         Assert.AreEqual(ExitSide.Left, entered.StartSide);
         Assert.AreEqual(ExitSide.Right, entered.EndSide);
@@ -231,7 +231,7 @@ public sealed class LineStretchesTests
         Assert.AreEqual(1, entered.TracksCount);
         Assert.AreEqual(12, entered.Distance, Precision);
         Assert.AreEqual(7, entered.Time);
-        var added = layout.TrackStretches.Single(s => s != entered);
+        var added = layout.Layout.TrackStretches.Single(s => s != entered);
         Assert.AreEqual(6, added.Id);
         Assert.IsFalse(added.HasSpeed, "no module has a speed limit");
         Assert.AreEqual(TrackStretchFacts.AssumedSpeed, added.LimitingSpeed);
@@ -244,13 +244,13 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void ASpeedNotEnteredFollowsTheModules()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var p = Place(layout, Limited(Plain("p"), 60));
         var b = Place(layout, Station("Bby"));
         layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
         var stretch = new TrackStretch(1, Location(a), Location(b), 10) { Speed = 80 };
-        layout.TrackStretches.Add(stretch);
+        layout.Layout.TrackStretches.Add(stretch);
 
         layout.UpdateTrackStretchesFromLines();
 
@@ -260,7 +260,7 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void EachLineKeepsTheOrderOfItsLocations()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var a = Place(layout, Station("Aby"));
         var p = Place(layout, Plain("p"));
         var b = Place(layout, Drawn(Station("Bby"), 1000, SingleTrack, ExitSide.Down));
@@ -273,7 +273,7 @@ public sealed class LineStretchesTests
 
         layout.UpdateTrackStretchesFromLines();
 
-        var lines = layout.StretchLines.ToList();
+        var lines = layout.Layout.StretchLines.ToList();
         Assert.HasCount(2, lines);
         Assert.AreEqual("Main", lines[0].Name);
         CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby" }, Legs(layout, lines[0]));
@@ -284,39 +284,39 @@ public sealed class LineStretchesTests
     [TestMethod]
     public void ALoopDividedAtAStationGivesTwoTimetableStretchesEndingThere()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var (a, p1, b, p2, c, p3, d, p4) = (Place(layout, Station("Aby")), Place(layout, Plain("p1")), Place(layout, Station("Bby")), Place(layout, Plain("p2")),
             Place(layout, Station("Cby")), Place(layout, Plain("p3")), Place(layout, Station("Dby")), Place(layout, Plain("p4")));
         layout.Add(new Line { Name = "Loop", Entries = [Entry(a), Entry(p1), Entry(b), Entry(p2), Entry(c), Entry(p3), Entry(d), Entry(p4)], EndAt = new(a.Id, ExitSide.Left) });
         layout.UpdateTrackStretchesFromLines();
-        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, layout.TrackStretches.Select(s => s.ToString()).ToArray(), "round the loop");
+        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, layout.Layout.TrackStretches.Select(s => s.ToString()).ToArray(), "round the loop");
 
         // The planner turns the second half, so both halves end at Cby.
-        foreach (var stretch in layout.TrackStretches.Where(s => s.ToString() is "Cby–Dby" or "Dby–Aby")) stretch.Reverse();
+        foreach (var stretch in layout.Layout.TrackStretches.Where(s => s.ToString() is "Cby–Dby" or "Dby–Aby")) stretch.Reverse();
         layout.UpdateTrackStretchesFromLines();
 
-        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Dby–Cby", "Aby–Dby" }, layout.TrackStretches.Select(s => s.ToString()).ToArray(), "the turned stretches keep their direction");
-        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, Legs(layout, layout.StretchLines.Single()), "the line keeps its own direction");
+        CollectionAssert.AreEquivalent(new[] { "Aby–Bby", "Bby–Cby", "Dby–Cby", "Aby–Dby" }, layout.Layout.TrackStretches.Select(s => s.ToString()).ToArray(), "the turned stretches keep their direction");
+        CollectionAssert.AreEqual(new[] { "Aby–Bby", "Bby–Cby", "Cby–Dby", "Dby–Aby" }, Legs(layout, layout.Layout.StretchLines.Single()), "the line keeps its own direction");
     }
 
     [TestMethod]
     public void AStretchKeepsWhatWasMeasured()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var (a, p, b) = (Place(layout, Station("Aby")), Place(layout, Limited(Plain("p"), 60)), Place(layout, Station("Bby")));
         layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
         layout.UpdateTrackStretchesFromLines();
-        var stretch = layout.TrackStretches.Single();
+        var stretch = layout.Layout.TrackStretches.Single();
         var found = layout.StretchesFromLines().Stretches.Single();
 
         Assert.AreEqual(found.Distance, stretch.MeasuredDistance);
         Assert.AreEqual(60, stretch.MeasuredSpeed);
     }
 
-    private static string[] Legs(Layout layout, StretchLine line) =>
-        [.. line.Legs.Select(l => $"{layout.OperationLocations.Single(o => o.Id == l.StartId).Name}–{layout.OperationLocations.Single(o => o.Id == l.EndId).Name}")];
+    private static string[] Legs(DrawnLayout layout, StretchLine line) =>
+        [.. line.Legs.Select(l => $"{layout.Layout.OperationLocations.Single(o => o.Id == l.StartId).Name}–{layout.Layout.OperationLocations.Single(o => o.Id == l.EndId).Name}")];
 
-    private static LayoutModule Place(Layout layout, Module module) => layout.Place(module);
+    private static PlacedModule Place(DrawnLayout layout, Module module) => layout.Place(module);
 
     private static Module Limited(Module module, int? speedLimit)
     {
@@ -324,9 +324,9 @@ public sealed class LineStretchesTests
         return module;
     }
 
-    private static OperationLocation Location(LayoutModule module) => module.Module.OperationLocation!;
+    private static OperationLocation Location(PlacedModule module) => module.Module.OperationLocation!;
 
-    private static LineEntry Entry(LayoutModule module, bool isTurned = false) => new() { ModuleId = module.Id, IsTurned = isTurned };
+    private static LineEntry Entry(PlacedModule module, bool isTurned = false) => new() { ModuleId = module.Id, IsTurned = isTurned };
 
     private static EndProfile Profile(string designation, params double[] offsets) => new()
     {

@@ -4,17 +4,17 @@ using Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// Walks the lines of a <see cref="Layout"/> from every location, through plain-line modules, to the next location
+/// Walks the lines of a <see cref="DrawnLayout"/> from every location, through plain-line modules, to the next location
 /// (<c>LayoutsLayerSurvey.md</c> 3.3, step 1), and finds the route along the drawn tracks of each stretch (step 2).
 /// </summary>
 internal sealed class LineWalker
 {
-    private readonly Layout _layout;
+    private readonly DrawnLayout _layout;
     private readonly LineProblemLog _log = new();
     private readonly LineJoins _joins;
     private readonly TrackGraph _tracks;
 
-    public LineWalker(Layout layout)
+    public LineWalker(DrawnLayout layout)
     {
         _layout = layout;
         _joins = new(layout, _log);
@@ -44,10 +44,10 @@ internal sealed class LineWalker
     }
 
     /// <summary>The exit the line continues from first and the one it comes in by last, so a stretch is found from its start.</summary>
-    private static IEnumerable<ExitPlace> OrderedExits(LayoutModule module, LineEntry entry) =>
+    private static IEnumerable<ExitPlace> OrderedExits(PlacedModule module, LineEntry entry) =>
         LineJoins.ExitsOf(module).OrderBy(p => p == entry.Exit ? 0 : p == entry.Entry ? 2 : 1);
 
-    private static OperationLocation? LocationOf(LayoutModule module) => module.Module.OperationLocation;
+    private static OperationLocation? LocationOf(PlacedModule module) => module.Module.OperationLocation;
 
     private LineStretch? WalkFrom(OperationLocation start, ExitReference from)
     {
@@ -134,13 +134,13 @@ internal sealed class LineWalker
     }
 
     /// <summary>A module's part of a stretch: the module, and its length along the stretch in millimetres, if known.</summary>
-    private sealed record Part(LayoutModule Module, double? Length);
+    private sealed record Part(PlacedModule Module, double? Length);
 
     /// <summary>
     /// The parts of the stretch along the main paths, in order: the start location's module from its centre to the exit,
     /// each plain-line module whole, and the end location's module from the exit to its centre.
     /// </summary>
-    private List<Part> MainPathParts(LineStretch stretch, LayoutModule startModule, LayoutModule endModule) =>
+    private List<Part> MainPathParts(LineStretch stretch, PlacedModule startModule, PlacedModule endModule) =>
     [
         new(startModule, FromCentre(stretch.Start, startModule, stretch.StartSide)),
         .. stretch.ModuleIds.Select(id => new Part(_joins.Modules[id], MainPathLength(_joins.Modules[id]))),
@@ -164,7 +164,7 @@ internal sealed class LineWalker
     }
 
     /// <summary>Millimetres along the main path from the location's centre to the exit on <paramref name="side"/>, if they can be told.</summary>
-    private double? FromCentre(OperationLocation location, LayoutModule module, ExitSide side)
+    private double? FromCentre(OperationLocation location, PlacedModule module, ExitSide side)
     {
         if (_joins.Modules.Values.Count(m => LocationOf(m)?.Id == location.Id) != 1) return null;
         if (MainPathLength(module) is not double length) return null;
@@ -177,5 +177,5 @@ internal sealed class LineWalker
         };
     }
 
-    private static double? MainPathLength(LayoutModule module) => module.Module.Drawing.MainPath?.ToPath().Length;
+    private static double? MainPathLength(PlacedModule module) => module.Module.Drawing.MainPath?.ToPath().Length;
 }

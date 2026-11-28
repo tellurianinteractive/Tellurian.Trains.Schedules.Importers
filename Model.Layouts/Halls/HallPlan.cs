@@ -1,19 +1,19 @@
-using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Tellurian.Trains.Schedules.Model.Layouts.Halls;
 
 /// <summary>
-/// A layout and where it stands in a hall (<c>LayoutsLayerSurvey.md</c> 2.8). The <see cref="Layout"/> is the product
-/// the planner takes: the modules, the lines that order them, the joints, and the end profiles, standards and overrides
-/// they need. The hall plan adds the hall, where each connected group stands in it (<see cref="Anchors"/>), and what only
-/// matters for setting up in that hall. Module poses are not stored: they follow from the anchors and the lines.
+/// A layout and where it stands in a hall (<c>LayoutsLayerSurvey.md</c> 2.8). The <see cref="Layout"/> is the drawn
+/// layout: the operating layout with the modules, the lines that order them, the joints, and the end profiles, standards
+/// and overrides they need; the planner takes the result of it (<c>hallPlan.ToLayout()</c>). The hall plan adds the
+/// hall, where each connected group stands in it (<see cref="Anchors"/>), and what only matters for setting up in that
+/// hall. Module poses are not stored: they follow from the anchors and the lines.
 /// </summary>
 /// <remarks>
 /// A document of its own, with a <see cref="Guid"/>, written in hall plan files. The layout is written there as
-/// <c>content.layout</c> with the layout's own JSON options (<see cref="LayoutSerialization"/>), so that what the planner
-/// reads from a hall plan file (<see cref="HallPlanFile.ReadLayout"/>) is what was written. When it is written, the
+/// <c>content.layout</c> with the layout's own JSON options (<see cref="DrawnLayout.ToBlock"/>), so that what the planner
+/// reads from a hall plan file (<see cref="HallPlanFile.ReadDrawnLayout"/>) is what was written. When it is written, the
 /// layout's <see cref="Layout.SourceId"/> and <see cref="Layout.SourceRevision"/> are this hall plan's id and revision.
 /// </remarks>
 public sealed class HallPlan : LayoutPart
@@ -32,11 +32,11 @@ public sealed class HallPlan : LayoutPart
     public required Hall Hall { get; set; }
 
     /// <summary>
-    /// The layout set up in the hall. Its <see cref="Layout.PreferredStandard"/> is the hall plan's primary standard,
-    /// which also tells the scale.
+    /// The layout set up in the hall, as drawn. Its <see cref="DrawnLayout.PreferredStandard"/> is the hall plan's
+    /// primary standard, which also tells the scale.
     /// </summary>
-    [JsonConverter(typeof(LayoutBlockJsonConverter))]
-    public required Layout Layout { get; set; }
+    [JsonConverter(typeof(DrawnLayoutJsonConverter))]
+    public required DrawnLayout Layout { get; set; }
 
     /// <summary>Where each connected group of the layout stands in the hall: one per main line (HP-5).</summary>
     public List<Anchor> Anchors { get; set; } = [];
@@ -102,7 +102,7 @@ public sealed class HallPlan : LayoutPart
     {
         var copy = (HallPlan)base.Copy();
         copy.Hall = Hall.Copy();
-        copy.Layout = LayoutBlockJsonConverter.Copy(Layout);
+        copy.Layout = Layout.Copy();
         copy.Anchors = [.. Anchors.Select(a => a.Copy())];
         copy.AcceptedStandards = [.. AcceptedStandards];
         copy.PreferredAddOns = [.. PreferredAddOns];
@@ -126,11 +126,11 @@ public sealed class HallPlan : LayoutPart
         var written = (HallPlan)MemberwiseClone();
         written.Revision = revision;
         written.RevisionLog = [.. revisionLog];
-        var layout = (Layout)Layout.Copy();
-        layout.SourceId = Id;
-        layout.SourceRevision = revision;
-        if (string.IsNullOrWhiteSpace(layout.Name)) layout.Name = Name;
-        written.Layout = layout;
+        var drawn = Layout.Copy();
+        drawn.Layout.SourceId = Id;
+        drawn.Layout.SourceRevision = revision;
+        if (string.IsNullOrWhiteSpace(drawn.Layout.Name)) drawn.Layout.Name = Name;
+        written.Layout = drawn;
         return written;
     }
 
@@ -144,35 +144,5 @@ public sealed class HallPlan : LayoutPart
         if (id <= 0 || items.Any(i => idOf(i) == id)) setId(item, items.Count == 0 ? 1 : Math.Max(0, items.Max(idOf)) + 1);
         items.Add(item);
         return item;
-    }
-}
-
-/// <summary>
-/// Writes and reads the <see cref="HallPlan.Layout"/> with the layout's own options and metadata
-/// (<see cref="LayoutJsonContext"/>), whatever options the hall plan around it has; after reading, the layout's
-/// references are restored. Public, so that another app's source-generated serialiser that writes a hall plan uses it.
-/// </summary>
-[EditorBrowsable(EditorBrowsableState.Never)]
-public sealed class LayoutBlockJsonConverter : JsonConverter<Layout>
-{
-    /// <inheritdoc/>
-    public override Layout? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        var layout = JsonSerializer.Deserialize(ref reader, LayoutJsonContext.Default.Layout);
-        layout?.RestoreReferences();
-        return layout;
-    }
-
-    /// <inheritdoc/>
-    public override void Write(Utf8JsonWriter writer, Layout value, JsonSerializerOptions options) =>
-        JsonSerializer.Serialize(writer, value, LayoutJsonContext.Default.Layout);
-
-    /// <summary>A copy of <paramref name="layout"/> through its JSON form, with its references restored.</summary>
-    internal static Layout Copy(Layout layout)
-    {
-        ArgumentNullException.ThrowIfNull(layout);
-        var copy = JsonSerializer.Deserialize(JsonSerializer.SerializeToUtf8Bytes(layout, LayoutJsonContext.Default.Layout), LayoutJsonContext.Default.Layout)!;
-        copy.RestoreReferences();
-        return copy;
     }
 }

@@ -11,7 +11,7 @@ public sealed class Anchor : LayoutPart
     /// <summary>The <see cref="Line.Id"/> of the main line whose group this places.</summary>
     public int LineId { get; set; }
 
-    /// <summary>The <see cref="LayoutModule.Id"/> of the module the group is placed by; by default the first one added.</summary>
+    /// <summary>The <see cref="PlacedModule.Id"/> of the module the group is placed by; by default the first one added.</summary>
     public int ModuleId { get; set; }
 
     /// <summary>The anchor module's local origin and X axis in hall coordinates, mm and degrees.</summary>

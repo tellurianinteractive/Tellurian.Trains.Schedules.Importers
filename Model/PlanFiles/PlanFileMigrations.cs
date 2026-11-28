@@ -10,7 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.PlanFiles;
 public static class PlanFileMigrations
 {
     /// <summary>Every step, in order: from version 0 to 1, from 1 to 2, and so on.</summary>
-    public static IReadOnlyList<FileMigration> All { get; } = [SchemaVersion1.Migration, SchemaVersion2.Migration, SchemaVersion3.Migration, SchemaVersion4.Migration, SchemaVersion5.Migration];
+    public static IReadOnlyList<FileMigration> All { get; } = [SchemaVersion1.Migration, SchemaVersion2.Migration, SchemaVersion3.Migration, SchemaVersion4.Migration, SchemaVersion5.Migration, SchemaVersion6.Migration];
 
     /// <summary>Brings <paramref name="content"/> from <paramref name="fromVersion"/> to <paramref name="toVersion"/> with <paramref name="migrations"/>.</summary>
     /// <exception cref="PlanFileException">A step is missing.</exception>

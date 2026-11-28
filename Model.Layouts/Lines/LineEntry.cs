@@ -10,7 +10,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 /// </summary>
 public sealed class LineEntry : LayoutPart
 {
-    /// <summary>The <see cref="LayoutModule.Id"/> of the module; a module is in at most one line, once (HP-7).</summary>
+    /// <summary>The <see cref="PlacedModule.Id"/> of the module; a module is in at most one line, once (HP-7).</summary>
     public int ModuleId { get; set; }
 
     /// <summary>The module is turned 180°: its right exit joins the previous module (HP-4).</summary>

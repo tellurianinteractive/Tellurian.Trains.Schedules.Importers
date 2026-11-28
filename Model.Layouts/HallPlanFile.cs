@@ -6,7 +6,7 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// Reads the layout of a hall plan file, <c>content.layout</c>: the modules, lines and joints, and the locations, tracks
-/// and stretches, which is what the planner takes from a hall plan. The whole hall plan (<see cref="Halls.HallPlan"/>)
+/// and stretches; the planner takes the result of it (<see cref="ReadLayout"/>). The whole hall plan (<see cref="Halls.HallPlan"/>)
 /// is read by <c>HallPlanImporter</c> and written by <c>HallPlanExporter</c>, which writes the layout in the form read
 /// here.
 /// </summary>
@@ -39,12 +39,20 @@ public static class HallPlanFile
     };
 
     /// <summary>
-    /// The layout of the hall plan file <paramref name="json"/>, with its references resolved
-    /// (<c>layout.RestoreReferences()</c>). A layout block written alone, without the file around it, is read
-    /// too.
+    /// The layout the planner takes from the hall plan file <paramref name="json"/>: its locations, tracks and stretches,
+    /// with the stretches worked out from the lines and what was measured, but no drawings
+    /// (<see cref="LineStretches.ToLayout"/>). A layout block written alone, without the file around it, is read too.
     /// </summary>
     /// <exception cref="InvalidDataException">The text is not a hall plan file, or the file has no layout block.</exception>
-    public static Layout ReadLayout(string json)
+    public static Layout ReadLayout(string json) => ReadDrawnLayout(json).ToLayout();
+
+    /// <summary>
+    /// The drawn layout of the hall plan file <paramref name="json"/>, with its references resolved: the operating
+    /// layout, and the modules, lines and joints it is made of. A layout block written alone, without the file around
+    /// it, is read too.
+    /// </summary>
+    /// <exception cref="InvalidDataException">The text is not a hall plan file, or the file has no layout block.</exception>
+    public static DrawnLayout ReadDrawnLayout(string json)
     {
         ArgumentNullException.ThrowIfNull(json);
         JsonNode? root;
@@ -60,9 +68,7 @@ public static class HallPlanFile
         OperationLocationJson.Normalise(block);
         try
         {
-            var layout = block.Deserialize(LayoutJsonContext.Default.Layout) ?? throw new InvalidDataException("The layout block is empty.");
-            layout.RestoreReferences();
-            return layout;
+            return DrawnLayout.FromBlock(block);
         }
         catch (JsonException ex)
         {

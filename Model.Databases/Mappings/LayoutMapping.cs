@@ -36,20 +36,13 @@ internal static class LayoutMapping
 
                 entity.Property(e => e.ExtensionData).HasJsonProperties();
 
-                // The hall plan's modules, lines, joints and standards, and the end profiles and overrides they need:
-                // what the layout was made from, read and written as a whole and never queried, so kept as JSON in the
-                // contract's own form (Layout.JsonSerializerOptions). A module refers to its location by id there;
-                // ReadPlanAsync restores it with layout.RestoreReferences().
-                // The order of the locations along each line, kept for suggesting timetable stretches: JSON too.
-                entity.Property(e => e.StretchLines).HasContractJson();
+                // What the hall plan the layout was made from gave it: the modules without their drawings, the order of
+                // the locations along each line, and the scale. Read and written as a whole and never queried, so kept as
+                // JSON in the contract's own form (Layout.JsonSerializerOptions).
                 entity.Property(e => e.Modules).HasContractJson();
-                entity.Property(e => e.PreferredStandard).HasContractJson();
-                entity.Property(e => e.Lines).HasContractJson();
-                entity.Property(e => e.Joints).HasContractJson();
-                entity.Property(e => e.EndProfiles).HasContractJson();
-                entity.Property(e => e.Standards).HasContractJson();
-                entity.Property(e => e.Overrides).HasContractJson();
-                entity.Property(e => e.FitTolerances).HasContractJson();
+                entity.Property(e => e.StretchLines).HasContractJson();
+                entity.Property(e => e.Scale).HasContractJson();
+                entity.Property(e => e.StandardName).HasMaxLength(100);
 
                 // The region catalogue belongs to the layout (1:N). Region has no Layout navigation,
                 // so the foreign key is a shadow property.

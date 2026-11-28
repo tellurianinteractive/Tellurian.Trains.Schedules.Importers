@@ -130,14 +130,14 @@ public sealed class HallPlanPlacementTests
 
     private static HallPlan Plan()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         layout.Include(DoubleTrack);
         var hall = new Hall { Id = Guid.NewGuid(), Name = "Hall", Outline = PathDrawing.Rectangle(20000, 10000, Transform.Identity) };
         return new HallPlan { Id = Guid.NewGuid(), Name = "Plan", Hall = hall, Layout = layout };
     }
 
-    private static LineEntry Entry(LayoutModule module, bool isTurned = false) => new() { ModuleId = module.Id, IsTurned = isTurned };
+    private static LineEntry Entry(PlacedModule module, bool isTurned = false) => new() { ModuleId = module.Id, IsTurned = isTurned };
 
     private static EndProfile Profile(string designation, params double[] offsets) => new()
     {
@@ -147,13 +147,13 @@ public sealed class HallPlanPlacementTests
         Tracks = [.. offsets.Select(o => new EndProfileTrack { Offset = o, Gauges = [16.5] })],
     };
 
-    private static LayoutModule Straight(HallPlan plan, string name, EndProfile? profile = null) =>
+    private static PlacedModule Straight(HallPlan plan, string name, EndProfile? profile = null) =>
         Module(plan, name, new PathBuilder(Pose.Origin).Straight(ModuleLength).Build(), profile ?? SingleTrack);
 
-    private static LayoutModule Curved(HallPlan plan, string name, double angle) =>
+    private static PlacedModule Curved(HallPlan plan, string name, double angle) =>
         Module(plan, name, new PathBuilder(Pose.Origin).Curve(Radius, angle).Build(), SingleTrack);
 
-    private static LayoutModule Module(HallPlan plan, string name, SegmentPath mainPath, EndProfile profile)
+    private static PlacedModule Module(HallPlan plan, string name, SegmentPath mainPath, EndProfile profile)
     {
         var reference = new CatalogueReference(profile.Id, profile.Designation);
         var module = new Module { Id = Guid.NewGuid(), Name = name };

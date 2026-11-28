@@ -48,10 +48,13 @@ public sealed class PlanRoundTripTests
         var layout = loaded.Layout;
         var tellby = layout.OperationLocations.Single(l => l.Signature == "Tby");
         var ytterby = (Station)layout.OperationLocations.Single(l => l.Signature == "Yb");
-        Assert.AreSame(tellby, layout.Modules.First().Module.OperationLocation, "a module's location is the layout's own");
-        Assert.AreSame(tellby.Tracks, layout.Modules.First().Module.Tracks, "a location module has its location's tracks");
-        Assert.AreEqual("1", layout.Modules.Last().Module.Tracks.Single().Designation, "a module without a location keeps its own tracks");
-        Assert.AreEqual("FREMO H0", layout.PreferredStandard?.ShortName);
+        Assert.AreEqual(tellby.Id, layout.Modules.First().OperationLocationId, "a module refers to the layout's own location");
+        Assert.AreEqual("Curve", layout.Modules.Last().Title);
+        Assert.AreEqual("FREMO H0", layout.StandardName);
+        Assert.AreEqual("H0", layout.Scale?.ShortName);
+        Assert.AreEqual(9.5, layout.TrackStretches.First().MeasuredDistance);
+        Assert.AreEqual(70, layout.TrackStretches.First().MeasuredSpeed);
+        Assert.IsTrue(layout.StretchLines.Single().Legs.Single().Joins(tellby.Id, ytterby.Id));
         Assert.AreSame(ytterby, tellby.LockKey?.HeldAt, "a lock key is held at the layout's own station");
         Assert.AreEqual("4711", tellby.ExternalReferences?["registry"].GetString());
         Assert.AreEqual("kept", tellby.ExtensionData?["fromAnotherSystem"].GetString());
@@ -68,7 +71,8 @@ public sealed class PlanRoundTripTests
             Name = "Club meeting",
             SourceId = Guid.Parse("8f0c6a8e-3b7e-4c1f-9d3a-2a9b8c7d6e5f"),
             SourceRevision = 3,
-            PreferredStandard = new ModuleStandard { ShortName = "FREMO H0", Scale = new Scale { Id = 4, ShortName = "H0" } },
+            StandardName = "FREMO H0",
+            Scale = new Scale { Id = 4, ShortName = "H0" },
         };
         var tellby = new Station(1, "Tellby", "Tby")
         {
@@ -86,9 +90,10 @@ public sealed class PlanRoundTripTests
         tellby.LockKey = new LockKey { Name = "A1", HeldAt = ytterby };
         layout.OperationLocations.Add(tellby);
         layout.OperationLocations.Add(ytterby);
-        layout.TrackStretches.Add(new TrackStretch(1, tellby, ytterby, 10) { Speed = 80, Layout = layout, ModuleIds = [1, 2] });
-        layout.Modules.Add(new LayoutModule { Id = 1, Module = new Module { Name = "Tellby", OperationLocation = tellby, Tracks = tellby.Tracks } });
-        layout.Modules.Add(new LayoutModule { Id = 2, Module = new Module { Name = "Curve", Tracks = { new StationTrack(41, "1") } } });
+        layout.TrackStretches.Add(new TrackStretch(1, tellby, ytterby, 10) { Speed = 80, Layout = layout, ModuleIds = [1, 2], MeasuredDistance = 9.5, MeasuredSpeed = 70 });
+        layout.Modules.Add(new LayoutModule { Id = 1, Title = "Tellby", OperationLocationId = tellby.Id });
+        layout.Modules.Add(new LayoutModule { Id = 2, Title = "Curve", PackageLabel = "Box 1" });
+        layout.StretchLines.Add(new StretchLine { Id = 1, Name = "Main", Legs = [new(tellby.Id, ytterby.Id)] });
         return layout;
     }
 

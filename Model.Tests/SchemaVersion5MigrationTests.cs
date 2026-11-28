@@ -44,8 +44,8 @@ public sealed class SchemaVersion5MigrationTests
     {
         var plan = PlanFile.Read(Version4Plan);
 
-        Assert.IsNull(plan.Layout.PreferredStandard!.Id);
-        Assert.IsNotNull(plan.Layout.PreferredStandard.ExternalReferences);
-        Assert.AreEqual(Guid.Parse(StandardGuid), plan.Layout.Modules.ElementAt(1).Module.Standard!.Id);
+        Assert.AreEqual("FREMO/H0-RE", plan.Layout.StandardName, "since version 6 the plan keeps the standard by name");
+        Assert.AreEqual(3, plan.Layout.Scale!.Id);
+        Assert.AreEqual("Curve", plan.Layout.Modules.ElementAt(1).Title);
     }
 }

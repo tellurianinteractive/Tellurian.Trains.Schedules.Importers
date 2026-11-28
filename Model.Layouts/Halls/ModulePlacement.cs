@@ -3,7 +3,7 @@ using Tellurian.Trains.Schedules.Model.Geometry;
 namespace Tellurian.Trains.Schedules.Model.Layouts.Halls;
 
 /// <summary>Where a module of a hall plan stands in the hall, worked out from its group's anchor along the lines (HP-5).</summary>
-/// <param name="ModuleId">The <see cref="LayoutModule.Id"/>.</param>
+/// <param name="ModuleId">The <see cref="PlacedModule.Id"/>.</param>
 /// <param name="Placement">From the module's coordinates to the hall's: rotated and moved, never mirrored.</param>
 public sealed record ModulePlacement(int ModuleId, Transform Placement)
 {

@@ -81,10 +81,5 @@ public static class LayoutSerialization
             if (stretch.To is null && stretch.ToId is int to && locations.GetValueOrDefault(to) is { } toLocation) stretch.To = toLocation;
             if (stretch.Stretches.Count == 0 && stretch.StretchIds is { Count: > 0 } ids) stretch.Stretches = [.. ids.Select(stretches.GetValueOrDefault).OfType<TrackStretch>()];
         }
-        foreach (var module in layout.Modules.Select(m => m.Module))
-        {
-            if (module.OperationLocation is not null || module.OperationLocationId is not int id || locations.GetValueOrDefault(id) is not { } location) continue;
-            module.OperationLocation = location;
-        }
     }
 }

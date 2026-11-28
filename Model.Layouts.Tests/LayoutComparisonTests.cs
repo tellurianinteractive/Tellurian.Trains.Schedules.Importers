@@ -203,15 +203,18 @@ public class LayoutComparisonTests
         var current = Line(10, "A", "B");
         var source = Line(10, "A", "B");
         source.SourceRevision = 3;
-        source.Modules.Add(new LayoutModule { Id = 1, Module = new Module { Name = "A", OperationLocation = At(source, "A"), Tracks = At(source, "A").Tracks } });
-        source.Modules.Add(new LayoutModule { Id = 2, Module = new Module { Name = "Curve", Tracks = { new StationTrack(50, "1") } } });
+        At(source, "A").Id = 77; // the newer layout's ids need not be the current one's
+        source.TrackStretches.Single().StartId = 77;
+        source.Modules.Add(new LayoutModule { Id = 1, Title = "A", OperationLocationId = 77 });
+        source.Modules.Add(new LayoutModule { Id = 2, Title = "Curve" });
+        source.StretchLines.Add(new StretchLine { Id = 1, Legs = [new(77, At(source, "B").Id)] });
 
         LayoutUpdate.ApplyAutomatic(LayoutComparison.Compare(current, source));
 
         Assert.AreEqual(3, current.SourceRevision);
-        var module = current.Modules.First().Module;
-        Assert.AreSame(At(current, "A"), module.OperationLocation);
-        Assert.AreSame(At(current, "A").Tracks, module.Tracks, "a location module has its location's tracks, one list");
-        Assert.AreEqual("Curve", current.Modules.Last().Module.Name);
+        Assert.AreEqual(At(current, "A").Id, current.Modules.First().OperationLocationId);
+        Assert.AreEqual("Curve", current.Modules.Last().Title);
+        Assert.IsNull(current.Modules.Last().OperationLocationId);
+        Assert.IsTrue(current.StretchLines.Single().Legs.Single().Joins(At(current, "A").Id, At(current, "B").Id), "the line refers to the current locations");
     }
 }

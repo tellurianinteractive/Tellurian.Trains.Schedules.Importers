@@ -33,14 +33,14 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void APlacedModuleGetsIdsOfTheLayoutsAndKeepsItsOwnTrackIdsAsSource()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var tellby = layout.Place(Station("Tellby"));
         var line = layout.Place(Plain("Line"));
         var ytterby = layout.Place(Station("Ytterby"));
 
         CollectionAssert.AreEqual(new[] { 1, 2, 3 }, layout.Modules.Select(m => m.Id).ToArray());
-        CollectionAssert.AreEqual(new[] { 1, 2 }, layout.OperationLocations.Select(l => l.Id).ToArray());
-        Assert.AreSame(layout, ytterby.Module.OperationLocation!.Layout);
+        CollectionAssert.AreEqual(new[] { 1, 2 }, layout.Layout.OperationLocations.Select(l => l.Id).ToArray());
+        Assert.AreSame(layout.Layout, ytterby.Module.OperationLocation!.Layout);
         Assert.AreEqual(2, ytterby.Module.OperationLocationId);
 
         var tracks = layout.Modules.SelectMany(m => m.Module.Tracks).ToList();
@@ -56,7 +56,7 @@ public sealed class LayoutLinesTests
     public void PlacingLeavesTheModuleAsItWas()
     {
         var module = Station("Tellby");
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Place(Station("Kode"));
 
         var placed = layout.Place(module);
@@ -72,12 +72,12 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void AModuleTakenFromAnotherLayoutKeepsTheIdOfItsDrawingAsSource()
     {
-        var first = new Layout();
+        var first = new DrawnLayout();
         first.Place(Station("Kode"));
         var moved = first.Place(Station("Tellby"));
         Assert.AreEqual(3, moved.Module.Tracks[0].Id);
 
-        var placed = new Layout().Place(moved.Module);
+        var placed = new DrawnLayout().Place(moved.Module);
 
         Assert.AreEqual(1, placed.Module.Tracks[0].Id);
         Assert.AreEqual(1, placed.Module.Tracks[0].SourceId);
@@ -86,7 +86,7 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void AGroupIsAMainLineWithTheBranchesThatStartFromIt()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var ids = Enumerable.Range(0, 6).Select(i => layout.Place(Plain($"M{i}")).Id).ToArray();
         var main = layout.Add(Line(ids[0], ids[1]));
         var other = layout.Add(Line(ids[4]));
@@ -107,7 +107,7 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void AModuleInTwoLinesIsFound()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var id = layout.Place(Plain("M")).Id;
         layout.Add(Line(id));
         layout.Add(Line(id));
@@ -128,7 +128,7 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void JointsAreFoundInEitherOrder()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var joint = new Joint { First = new(1, ExitSide.Right), Second = new(2, ExitSide.Left), NumberOfClamps = 3 };
         layout.Joints.Add(joint);
 
@@ -141,7 +141,7 @@ public sealed class LayoutLinesTests
     [TestMethod]
     public void EndProfilesAndStandardsAreIncludedOnce()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         var standard = new ModuleStandard { Id = Guid.NewGuid(), ShortName = "FREMO/H0-RE" };
 
         Assert.AreSame(standard, layout.Include(standard));
@@ -151,23 +151,6 @@ public sealed class LayoutLinesTests
         Assert.AreSame(standard, layout.Standards.Single());
         Assert.AreSame(standard, layout.FindStandard(standard.Id!.Value));
         Assert.AreSame(FitTolerances.Default, layout.EffectiveFitTolerances);
-    }
-
-    [TestMethod]
-    public void LinesAreTakenAsCopies()
-    {
-        var source = new Layout { FitTolerances = new() { Joint = 1 } };
-        source.Add(Line(1, 2));
-        source.Joints.Add(new Joint { First = new(1, ExitSide.Right), Second = new(2, ExitSide.Left) });
-        var layout = new Layout();
-
-        layout.TakeLinesFrom(source);
-
-        Assert.AreEqual(2, layout.Lines.Single().Entries.Count);
-        Assert.AreNotSame(source.Lines.Single(), layout.Lines.Single());
-        Assert.AreNotSame(source.Lines.Single().Entries[0], layout.Lines.Single().Entries[0]);
-        Assert.HasCount(1, layout.Joints);
-        Assert.AreEqual(1, layout.EffectiveFitTolerances.Joint);
     }
 
     internal static Line Line(params int[] moduleIds) => new() { Entries = [.. moduleIds.Select(id => new LineEntry { ModuleId = id })] };

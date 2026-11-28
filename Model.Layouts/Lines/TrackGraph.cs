@@ -5,7 +5,7 @@ using Tellurian.Trains.Schedules.Model.Layouts.Tracks;
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// The drawn tracks of a <see cref="Layout"/> as one graph (<c>LayoutsLayerSurvey.md</c> 3.2). An edge is one route of
+/// The drawn tracks of a <see cref="DrawnLayout"/> as one graph (<c>LayoutsLayerSurvey.md</c> 3.2). An edge is one route of
 /// one track element of a placed module; a node is a track end, where ends within a module meet. Across a joint, a track
 /// at offset <i>x</i> of one exit's end profile meets the track at −<i>x</i> of the other's, within
 /// <see cref="FitTolerances.Joint"/>. Everything is in each module's own coordinates: distances follow from the order of
@@ -26,7 +26,7 @@ internal sealed class TrackGraph
     /// <summary>Steps to find where a track crosses the centre's cross-section; a track along the main path needs one.</summary>
     private const int CentreSteps = 8;
 
-    private readonly Layout _layout;
+    private readonly DrawnLayout _layout;
     private readonly LineJoins _joins;
     private readonly LineProblemLog _log;
     private readonly List<Node> _nodes = [];
@@ -35,7 +35,7 @@ internal sealed class TrackGraph
     private readonly Dictionary<int, JointCrossing> _crossings = [];
     private readonly HashSet<int> _modulesWithTracks = [];
 
-    public TrackGraph(Layout layout, LineJoins joins, LineProblemLog log)
+    public TrackGraph(DrawnLayout layout, LineJoins joins, LineProblemLog log)
     {
         _layout = layout;
         _joins = joins;
@@ -50,7 +50,7 @@ internal sealed class TrackGraph
     /// Null, without a problem, when one of the modules has no track elements or a location's centre can't be told; null
     /// with a problem when the tracks are drawn but give no route.
     /// </summary>
-    public TrackRoute? Route(OperationLocation start, LayoutModule startModule, OperationLocation end, LayoutModule endModule, IReadOnlyList<int> between)
+    public TrackRoute? Route(OperationLocation start, PlacedModule startModule, OperationLocation end, PlacedModule endModule, IReadOnlyList<int> between)
     {
         HashSet<int> allowed = [startModule.Id, endModule.Id, .. between];
         if (!allowed.All(_modulesWithTracks.Contains)) return null;
@@ -90,7 +90,7 @@ internal sealed class TrackGraph
     /// <summary>A point on an edge, mm from its start, where a route starts or ends.</summary>
     private sealed record Candidate(int Edge, double At);
 
-    private void AddModule(LayoutModule module)
+    private void AddModule(PlacedModule module)
     {
         var drawing = module.Module.Drawing;
         if (drawing.TrackElements.Count == 0) return;
@@ -168,7 +168,7 @@ internal sealed class TrackGraph
     /// <see cref="OperationLocation.Centre"/> along the main path, or the middle. Null when the centre can't be told: the
     /// location spans more than one module, so its centre is not in one of them, or the module has no main path.
     /// </summary>
-    private List<Candidate>? CentreCandidates(OperationLocation location, LayoutModule module)
+    private List<Candidate>? CentreCandidates(OperationLocation location, PlacedModule module)
     {
         if (_joins.Modules.Values.Count(m => m.Module.OperationLocation?.Id == location.Id) != 1) return null;
         if (module.Module.Drawing.MainPath?.ToPath() is not { } main) return null;

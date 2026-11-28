@@ -117,8 +117,8 @@ public static class LayoutUpdate
     }
 
     /// <summary>
-    /// The hall plan's identity, revision, preferred standard, modules, lines, joints, end profiles, standards and overrides;
-    /// a module that is a location of the current layout refers to it.
+    /// The hall plan's identity, revision, scale and standard, its modules, and the order of the locations along its
+    /// lines; a module or a line that refers to a location of the newer layout refers to the current layout's.
     /// </summary>
     private static void TakeHallPlan(LayoutComparison comparison)
     {
@@ -128,18 +128,17 @@ public static class LayoutUpdate
         foreach (var (current, matched) in comparison.Matched) bySource[matched] = current;
         layout.SourceId = source.SourceId;
         layout.SourceRevision = source.SourceRevision;
-        layout.PreferredStandard = source.PreferredStandard;
+        layout.Scale = source.Scale;
+        layout.StandardName = source.StandardName;
+        var sourceLocations = source.OperationLocations.GroupBy(l => l.Id).ToDictionary(g => g.Key, g => g.First());
         layout.Modules = [.. source.Modules.Select(module =>
         {
             var copy = module.Copy();
-            if (module.Module.OperationLocation is { } location && bySource.TryGetValue(location, out var current))
-            {
-                copy.Module.OperationLocation = current;
-                copy.Module.Tracks = current.Tracks;
-            }
+            copy.OperationLocationId = module.OperationLocationId is int id && sourceLocations.GetValueOrDefault(id) is { } location && bySource.TryGetValue(location, out var current)
+                ? current.Id
+                : null;
             return copy;
         })];
-        layout.TakeLinesFrom(source);
         layout.StretchLines = [.. source.StretchLines.Select(line => Matched(line, bySource, source))];
     }
 

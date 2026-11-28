@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Playwright;
 using Tellurian.Trains.Schedules.Model.Layouts;
@@ -72,9 +71,9 @@ public sealed class StretchesFromLinesUiTests : PlaywrightTestBase
     /// Tellby – plain line – Ytterby – plain line – Kode, the stations 2000 mm long and the plain-line modules 1000 mm,
     /// one at 70 km/h and one at 100 km/h; no track stretches of its own.
     /// </summary>
-    private static Layout LinedHallPlan()
+    private static DrawnLayout LinedHallPlan()
     {
-        var layout = new Layout { Name = "Lined meeting", SourceId = HallPlanId, SourceRevision = 1 };
+        var layout = new DrawnLayout { Layout = new Layout { Name = "Lined meeting", SourceId = HallPlanId, SourceRevision = 1 } };
         var tellby = layout.Place(Drawn(Station("Tellby", "Tby"), 2000));
         var first = layout.Place(Drawn(new Module { Name = "First", SpeedLimit = 70 }, 1000));
         var ytterby = layout.Place(Drawn(Station("Ytterby", "Yb"), 2000));
@@ -101,14 +100,14 @@ public sealed class StretchesFromLinesUiTests : PlaywrightTestBase
         return module;
     }
 
-    private static byte[] HallPlanFile(Layout layout)
+    private static byte[] HallPlanFile(DrawnLayout layout)
     {
         var file = new JsonObject
         {
             ["format"] = Model.Layouts.HallPlanFile.Format,
             ["kind"] = Model.Layouts.HallPlanFile.Kind,
             ["schemaVersion"] = Model.Layouts.HallPlanFile.NewestSchemaVersion,
-            ["content"] = new JsonObject { ["layout"] = JsonNode.Parse(JsonSerializer.Serialize(layout, Layout.JsonSerializerOptions)) },
+            ["content"] = new JsonObject { ["layout"] = layout.ToBlock() },
         };
         return Encoding.UTF8.GetBytes(file.ToJsonString());
     }

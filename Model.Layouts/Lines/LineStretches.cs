@@ -1,23 +1,41 @@
 namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
-/// The stretches that follow from the lines of a <see cref="Layout"/> (<c>LayoutsLayerSurvey.md</c> 3.3 and 3.6,
-/// <c>ModelHarmonisation.md</c> decision 15). Track stretches are worked out automatically when a hall plan is read;
-/// timetable stretches are suggested by the planner from the <see cref="Layout.StretchLines"/> kept here.
+/// The stretches that follow from the lines of a <see cref="DrawnLayout"/> (<c>LayoutsLayerSurvey.md</c> 3.3 and 3.6,
+/// <c>ModelHarmonisation.md</c> decision 15), and the layout the planner takes from it (<c>ToLayout</c>). Track stretches
+/// are worked out automatically when a hall plan is read; timetable stretches are suggested by the planner from the
+/// <see cref="Layout.StretchLines"/> kept here.
 /// </summary>
 public static class LineStretches
 {
-    extension(Layout layout)
+    extension(DrawnLayout drawn)
     {
+        /// <summary>
+        /// The operating layout the planner takes from the drawn one (<c>ModelSurfaceAnalysis.md</c> 3.3): a copy of
+        /// <see cref="DrawnLayout.Layout"/> with its track stretches worked out from the lines when there are any
+        /// (<see cref="UpdateTrackStretchesFromLines"/>), the order of the locations along each line, the modules without
+        /// their drawings, and the scale and name of the preferred standard. The drawn layout is not changed.
+        /// </summary>
+        public Layout ToLayout()
+        {
+            var copy = drawn.Copy();
+            if (copy.Lines.Count > 0) copy.UpdateTrackStretchesFromLines();
+            var layout = copy.Layout;
+            layout.Modules = [.. copy.Modules.Select(Summary)];
+            layout.Scale = copy.PreferredStandard?.Scale;
+            layout.StandardName = copy.PreferredStandard?.ShortName;
+            return layout;
+        }
+
         /// <summary>
         /// The stretches between neighbouring locations that the lines give: which plain-line modules, the sides the
         /// locations are left from, the number of tracks, the shortest route along the drawn tracks, the measured distance and the speed.
         /// Each runs in the direction of its line. Nothing in the layout is changed.
         /// </summary>
-        public LineStretchesResult StretchesFromLines() => new LineWalker(layout).Walk();
+        public LineStretchesResult StretchesFromLines() => new LineWalker(drawn).Walk();
 
         /// <summary>
-        /// Brings <see cref="Layout.TrackStretches"/> in line with <see cref="StretchesFromLines"/>. A stretch between
+        /// Brings the layout's <see cref="Layout.TrackStretches"/> in line with <see cref="StretchesFromLines"/>. A stretch between
         /// the same two locations, in either direction, is updated and keeps its direction: its sides, modules and
         /// number of tracks always, its distance unless <see cref="TrackStretch.IsDistanceEntered"/>, and its time from
         /// distance and speed unless <see cref="TrackStretch.IsTimeEntered"/>. Others are added with the next free ids. The speed is the one worked out from the
@@ -30,7 +48,8 @@ public static class LineStretches
         /// <returns>What the lines gave, with the problems found.</returns>
         public LineStretchesResult UpdateTrackStretchesFromLines()
         {
-            var result = layout.StretchesFromLines();
+            var layout = drawn.Layout;
+            var result = drawn.StretchesFromLines();
             var nextId = Next(layout.TrackStretches.Select(s => s.Id));
             foreach (var found in result.Stretches)
             {
@@ -51,10 +70,13 @@ public static class LineStretches
                 if (!stretch.IsDistanceEntered && found.Distance is double distance) stretch.Distance = distance;
                 if (!stretch.IsTimeEntered) stretch.Time = TrackStretchTiming.RunningMinutes(stretch, layout.Settings.TimeAndSpeed);
             }
-            layout.StretchLines = [.. StretchLinesOf(layout, result.Stretches)];
+            layout.StretchLines = [.. StretchLinesOf(drawn, result.Stretches)];
             return result;
         }
+    }
 
+    extension(Layout layout)
+    {
         /// <summary>The track stretch between <paramref name="a"/> and <paramref name="b"/>, in either direction, if any.</summary>
         public TrackStretch? FindTrackStretch(OperationLocation a, OperationLocation b)
         {
@@ -66,16 +88,28 @@ public static class LineStretches
     }
 
     /// <summary>
-    /// The order of the locations along each line of <paramref name="layout"/>: the stretches the walk found on it, by
+    /// The order of the locations along each line of <paramref name="drawn"/>: the stretches the walk found on it, by
     /// where on the line they start, in the line's direction.
     /// </summary>
-    private static IEnumerable<StretchLine> StretchLinesOf(Layout layout, IReadOnlyList<LineStretch> found) =>
-        layout.Lines.Select(line => new StretchLine
+    private static IEnumerable<StretchLine> StretchLinesOf(DrawnLayout drawn, IReadOnlyList<LineStretch> found) =>
+        drawn.Lines.Select(line => new StretchLine
         {
             Id = line.Id,
             Name = line.Name,
             Legs = [.. found.Where(s => s.LineId == line.Id).OrderBy(s => s.Position).Select(s => new LineLeg(s.Start.Id, s.End.Id))],
         });
+
+    /// <summary>A module as the operating layout keeps it: without its drawing.</summary>
+    private static LayoutModule Summary(PlacedModule placed) => new()
+    {
+        Id = placed.Id,
+        SourceId = placed.Module.Id,
+        Title = placed.Module.Title,
+        Owners = placed.Module.ModuleOwners,
+        PackageLabel = placed.Module.PackageLabel,
+        OperationLocationId = placed.Module.OperationLocation?.Id,
+        ExternalReferences = placed.ExternalReferences is null ? null : new(placed.ExternalReferences),
+    };
 
     /// <summary>The next id after the highest of <paramref name="ids"/>, from 1.</summary>
     private static int Next(IEnumerable<int> ids) => Math.Max(0, ids.DefaultIfEmpty(0).Max()) + 1;

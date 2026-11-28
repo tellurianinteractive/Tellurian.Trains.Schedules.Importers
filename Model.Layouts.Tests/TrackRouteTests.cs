@@ -148,7 +148,7 @@ public sealed class TrackRouteTests
         var b = Straight(layout, Station("Bby"), 2000, SingleTrack);
         layout.Add(new Line { Entries = [Entry(a), Entry(p), Entry(b)] });
         layout.UpdateTrackStretchesFromLines();
-        var stretch = layout.TrackStretches.Single();
+        var stretch = layout.Layout.TrackStretches.Single();
         stretch.Distance = 12;
         stretch.IsDistanceEntered = true;
 
@@ -158,9 +158,9 @@ public sealed class TrackRouteTests
         Assert.AreEqual(3.0, stretch.MeasuredDistance!.Value, Precision);
     }
 
-    private static Layout Layout()
+    private static DrawnLayout Layout()
     {
-        var layout = new Layout();
+        var layout = new DrawnLayout();
         layout.Include(SingleTrack);
         layout.Include(DoubleTrack);
         return layout;
@@ -180,7 +180,7 @@ public sealed class TrackRouteTests
         return module;
     }
 
-    private static LineEntry Entry(LayoutModule module) => new() { ModuleId = module.Id };
+    private static LineEntry Entry(PlacedModule module) => new() { ModuleId = module.Id };
 
     private static EndProfile Profile(string designation, params double[] offsets) => new()
     {
@@ -194,7 +194,7 @@ public sealed class TrackRouteTests
     /// A straight module of <paramref name="length"/> along X with an exit at each end and a straight track for each
     /// track of <paramref name="profile"/>: at the right exit, offset <i>y</i> is at +<i>y</i>.
     /// </summary>
-    private static LayoutModule Straight(Layout layout, Module module, double length, EndProfile profile, double? trackLength = null)
+    private static PlacedModule Straight(DrawnLayout layout, Module module, double length, EndProfile profile, double? trackLength = null)
     {
         var path = new PathBuilder(Pose.Origin).Straight(length).Build();
         Exits(module, path, profile);
@@ -204,7 +204,7 @@ public sealed class TrackRouteTests
     }
 
     /// <summary>A double-track module curving left: the main path at <paramref name="radius"/>, the tracks <see cref="Gap"/> inside and outside.</summary>
-    private static LayoutModule Curved(Layout layout, Module module, double radius, double angle)
+    private static PlacedModule Curved(DrawnLayout layout, Module module, double radius, double angle)
     {
         var path = new PathBuilder(Pose.Origin).Curve(radius, angle).Build();
         Exits(module, path, DoubleTrack);
@@ -226,7 +226,7 @@ public sealed class TrackRouteTests
     /// a track runs on from the points to the right exit. Without it, the only way to the right exit is to reverse at the
     /// points onto the diverging route, which curves round and leads there.
     /// </summary>
-    private static LayoutModule WithTurnout(Layout layout, Module module, bool throughThePoints)
+    private static PlacedModule WithTurnout(DrawnLayout layout, Module module, bool throughThePoints)
     {
         const double length = 1000;
         const double points = 800;
@@ -259,7 +259,7 @@ public sealed class TrackRouteTests
         return layout.Place(module);
     }
 
-    private static LayoutModule Kinked(Layout layout, Module module)
+    private static PlacedModule Kinked(DrawnLayout layout, Module module)
     {
         const double length = 1000;
         var path = new PathBuilder(Pose.Origin).Straight(length).Build();
@@ -281,7 +281,7 @@ public sealed class TrackRouteTests
         module.Drawing.Exits.Add(new() { Label = "R", Direction = ExitSide.Right, EndProfile = reference, Pose = mainPath.EndPose });
     }
 
-    private static LayoutModule Placed(Layout layout, Module module)
+    private static PlacedModule Placed(DrawnLayout layout, Module module)
     {
         module.Drawing.NumberTrackElements();
         return layout.Place(module);

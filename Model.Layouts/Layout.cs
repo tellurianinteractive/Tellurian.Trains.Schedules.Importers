@@ -4,9 +4,9 @@ namespace Tellurian.Trains.Schedules.Model.Layouts;
 
 /// <summary>
 /// A layout: its operation locations and the stretches between them, and what is decided for it as a whole. When it is
-/// made in a hall plan, it also has the modules of the hall plan, also the plain-line ones, the lines that order them,
-/// the planner's joints, and the end profiles, standards and overrides that the modules need, so that it is complete
-/// without the hall. Ids are numbers that are unique within the layout for their kind of thing.
+/// made from a hall plan, it also has what the hall plan's drawings gave: the modules without their drawings, the order
+/// of the locations along each line, and on each stretch what was measured. The drawings themselves stay with the hall
+/// plan (<see cref="DrawnLayout"/>). Ids are numbers that are unique within the layout for their kind of thing.
 /// </summary>
 public sealed class Layout : LayoutPart, IEquatable<Layout>
 {
@@ -23,11 +23,6 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
         TopologyPositions = [];
         StretchLines = [];
         Modules = [];
-        Lines = [];
-        Joints = [];
-        EndProfiles = [];
-        Standards = [];
-        Overrides = [];
     }
 
     /// <summary>The identity of the layout.</summary>
@@ -75,41 +70,17 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
     /// <summary>The revision of the hall plan the layout was made in, so a reader can tell what it has loaded.</summary>
     public int SourceRevision { get; set; }
 
-    /// <summary>
-    /// The module standard that the hall plan is made for, which also tells its scale. Modules of another standard can
-    /// be part of the layout. Null when not stated.
-    /// </summary>
-    public ModuleStandard? PreferredStandard { get; set; }
+    /// <summary>The scale of the layout: that of the hall plan's preferred standard, when it was made in one. Null when not stated.</summary>
+    public Scale? Scale { get; set; }
+
+    /// <summary>The short name of the module standard the hall plan is made for; null when not stated.</summary>
+    public string? StandardName { get; set; }
 
     /// <summary>
-    /// Every module of the hall plan the layout was made in, also the plain-line ones; empty for a layout entered
-    /// from scratch.
+    /// Every module of the hall plan the layout was made in, also the plain-line ones, without their drawings; empty for
+    /// a layout entered from scratch.
     /// </summary>
     public ICollection<LayoutModule> Modules { get; set; }
-
-    /// <summary>
-    /// The lines that order the <see cref="Modules"/>, end to end (HP-3). A line without <see cref="Line.StartAt"/> is a
-    /// main line; it and the branches from it are one connected group. Empty for a layout entered from scratch.
-    /// </summary>
-    public ICollection<Line> Lines { get; set; }
-
-    /// <summary>The joints the planner has decided something for (HP-11); the other joints follow the rules.</summary>
-    public ICollection<Joint> Joints { get; set; }
-
-    /// <summary>Every end profile that the <see cref="Modules"/> use, each once.</summary>
-    public ICollection<EndProfile> EndProfiles { get; set; }
-
-    /// <summary>
-    /// The standards of the layout and of its modules, each once, with all their properties: rail-top height, fouling
-    /// distance, clearance. A module's own <see cref="Module.Standard"/> may name its standard only.
-    /// </summary>
-    public ICollection<ModuleStandard> Standards { get; set; }
-
-    /// <summary>The compatibility overrides that apply to pairs of the <see cref="EndProfiles"/>.</summary>
-    public ICollection<EndProfileCompatibilityOverride> Overrides { get; set; }
-
-    /// <summary>The tolerances that decide whether two module ends fit; null for <see cref="FitTolerances.Default"/>.</summary>
-    public FitTolerances? FitTolerances { get; set; }
 
     /// <inheritdoc/>
     public bool Equals(Layout? other) => other is not null && Id == other.Id;
@@ -122,14 +93,4 @@ public sealed class Layout : LayoutPart, IEquatable<Layout>
 
     /// <inheritdoc/>
     public override string ToString() => Name;
-}
-
-/// <summary>What follows from the properties of a <see cref="Layout"/>.</summary>
-public static class LayoutFacts
-{
-    extension(Layout layout)
-    {
-        /// <summary>The scale of the layout: that of its preferred standard. Null when not stated.</summary>
-        public Scale? Scale => layout.PreferredStandard?.Scale;
-    }
 }

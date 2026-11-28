@@ -77,7 +77,7 @@ public class Module : LayoutPart
         }
     }
 
-    /// <summary>Whether the module is placed in a layout, as a <see cref="LayoutModule"/>'s module; decides how it is written.</summary>
+    /// <summary>Whether the module is placed in a layout, as a <see cref="PlacedModule"/>'s module; decides how it is written.</summary>
     internal bool IsPlaced { get; set; }
 
     /// <summary>
