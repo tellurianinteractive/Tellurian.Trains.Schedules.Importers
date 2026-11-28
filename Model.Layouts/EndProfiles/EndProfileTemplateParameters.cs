@@ -18,7 +18,10 @@ public sealed record EndProfileTemplateParameters
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double PlateWidth { get; init; }
 
-    /// <summary>Y of the top edge of the plate; normally negative (below rail top).</summary>
+    /// <summary>The height from the track bed to rail top of every track; null for <see cref="TrackCrossSection.DefaultHeight"/>.</summary>
+    public double? TrackHeight { get; init; }
+
+    /// <summary>Y of the top edge of the plate; normally negative (below rail top), at minus the track height where the tracks are.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required double PlateTop { get; init; }
 

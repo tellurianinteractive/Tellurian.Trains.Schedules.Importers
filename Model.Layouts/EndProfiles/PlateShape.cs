@@ -126,6 +126,68 @@ public sealed record PlateShape : ExtensibleRecord
     public PlateShape? Moved(Vector offset) => TryCreate(Start + offset, Segments.Select(s => s.Moved(offset)), Bottom + offset.Y);
 
     /// <summary>
+    /// The Y of the upper edge at <paramref name="x"/>, the highest where the edge is vertical there; null outside the plate.
+    /// </summary>
+    public double? EdgeHeightAt(double x)
+    {
+        if (x < Left - Tolerance.Length || x > Right + Tolerance.Length) return null;
+        var points = PathDrawing.From(Edge).Tessellate().Points;
+        double? highest = null;
+        for (var i = 1; i < points.Count; i++)
+        {
+            Point a = points[i - 1], b = points[i];
+            if (x < Math.Min(a.X, b.X) - Tolerance.Length || x > Math.Max(a.X, b.X) + Tolerance.Length) continue;
+            var y = Math.Abs(b.X - a.X) < Tolerance.Length ? Math.Max(a.Y, b.Y) : a.Y + (b.Y - a.Y) * (x - a.X) / (b.X - a.X);
+            highest = highest is { } h ? Math.Max(h, y) : y;
+        }
+        return highest;
+    }
+
+    /// <summary>
+    /// Whether the upper edge is level at <paramref name="y"/> all the way from <paramref name="left"/> to
+    /// <paramref name="right"/>, inside the plate, e.g. under a track's underside.
+    /// </summary>
+    public bool IsLevel(double left, double right, double y, double tolerance)
+    {
+        if (left < Left - tolerance || right > Right + tolerance || right - left <= 2 * tolerance) return false;
+        bool At(double value) => Math.Abs(value - y) <= tolerance;
+        // Just inside the ends, so a step up or down right at an end isn't counted.
+        if (EdgeHeightAt(left + tolerance) is not { } atLeft || !At(atLeft) || EdgeHeightAt(right - tolerance) is not { } atRight || !At(atRight)) return false;
+        return PathDrawing.From(Edge).Tessellate().Points.Where(p => p.X > left + tolerance && p.X < right - tolerance).All(p => At(p.Y));
+    }
+
+    /// <summary>
+    /// The shape with the track bed at <paramref name="x"/> moved from Y <paramref name="fromY"/> to <paramref name="toY"/>,
+    /// e.g. under a track whose height changed: the whole level stretch of the upper edge the track rests on, its
+    /// vertices at <paramref name="fromY"/> on both sides of <paramref name="x"/>, moves; the segments next to it follow
+    /// its ends, and the rest of the edge stays. Null when the edge isn't level at <paramref name="fromY"/> there, when
+    /// the stretch has an arc or fillet, or when the shape would be invalid.
+    /// </summary>
+    public PlateShape? WithTrackBed(double x, double fromY, double toY, double tolerance)
+    {
+        var points = UpperEdge;
+        bool AtBed(Point p) => Math.Abs(p.Y - fromY) <= tolerance;
+        // The level segment under x: from the last vertex at or left of x to the next one right of it, both at the bed.
+        var right = -1;
+        for (var i = 1; i < points.Count; i++)
+            if (points[i - 1].X <= x + tolerance && points[i].X >= x - tolerance && AtBed(points[i - 1]) && AtBed(points[i])) { right = i; break; }
+        if (right < 0) return null;
+        var first = right - 1;
+        var last = right;
+        while (first > 0 && AtBed(points[first - 1])) first--;
+        while (last < points.Count - 1 && AtBed(points[last + 1])) last++;
+        // The segments that end at the stretch's vertices must be lines, so their ends can move.
+        for (var i = Math.Max(first, 1); i <= last; i++)
+            if (Segments[i - 1].Kind != PlateSegmentKind.Line) return null;
+        if (last < Segments.Count && Segments[last].Kind != PlateSegmentKind.Line) return null;
+        var shape = this;
+        for (var i = first; i <= last; i++)
+            if (shape?.WithVertex(i, new(points[i].X, toY)) is { } moved) shape = moved;
+            else return null;
+        return shape;
+    }
+
+    /// <summary>
     /// Vertex <paramref name="index"/> (0 the start, then each segment's end) moved to <paramref name="point"/>;
     /// a fillet's end is worked out, so it can't be moved. Null if the shape would be invalid.
     /// </summary>

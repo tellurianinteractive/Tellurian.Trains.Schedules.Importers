@@ -29,6 +29,23 @@ public sealed class EndProfileTrack : LayoutPart
         return Gauges.Any(g => other.Gauges.Any(o => Math.Abs(g - o) <= tolerance));
     }
 
+    /// <summary>
+    /// The height from the track bed to rail top, mm; null for the end profile's (<see cref="EndProfile.TrackHeight"/>).
+    /// Rail top stays at Y = 0 whatever the height.
+    /// </summary>
+    public double? Height { get; set; }
+
+    /// <summary>
+    /// The width of the track's underside, where it stands on the end plate: its sleepers, or its built-in ballast, mm.
+    /// The track is centred on it, so both rails have the same margin to its edges. Null for
+    /// <see cref="TrackCrossSection.SleeperLength"/> of the widest gauge.
+    /// </summary>
+    public double? BedWidth { get; set; }
+
+    /// <summary>The width of the track's underside: <see cref="BedWidth"/>, or else the sleeper length of its widest gauge.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double EffectiveBedWidth => BedWidth ?? TrackCrossSection.SleeperLength(WidestGauge);
+
     /// <summary>How the track is powered.</summary>
     public RailSystem RailSystem { get; set; }
 

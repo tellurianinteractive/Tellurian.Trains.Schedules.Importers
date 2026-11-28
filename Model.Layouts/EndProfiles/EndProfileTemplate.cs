@@ -32,6 +32,7 @@ public static class EndProfileTemplate
             Standards = [.. parameters.Standards],
             Outline = PathDrawing.Polyline([new(-half, bottom), new(half, bottom), new(half, top), new(-half, top)], isClosed: true),
             GroundLine = PathDrawing.Polyline([new(-half, top), new(half, top)]),
+            TrackHeight = parameters.TrackHeight,
             Tracks = [.. parameters.TrackOffsets.Select(offset => new EndProfileTrack { Offset = offset, Gauges = [parameters.Gauge], RailSystem = parameters.RailSystem })],
             ScrewHoles = [.. parameters.ScrewHoles
                 .Select(p => new Circle(p, parameters.ScrewHoleDiameter))

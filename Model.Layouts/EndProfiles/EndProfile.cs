@@ -55,6 +55,27 @@ public sealed class EndProfile : LayoutPart
     /// <summary>The tracks crossing the end, from left to right.</summary>
     public List<EndProfileTrack> Tracks { get; set; } = [];
 
+    /// <summary>
+    /// The height from the track bed (the top of the end plate under a track) to rail top of the tracks that state none
+    /// of their own (<see cref="EndProfileTrack.Height"/>), mm; null for <see cref="TrackCrossSection.DefaultHeight"/>.
+    /// Rail top stays at Y = 0 whatever the height.
+    /// </summary>
+    public double? TrackHeight { get; set; }
+
+    /// <summary>The height of the tracks that state none: <see cref="TrackHeight"/> or else <see cref="TrackCrossSection.DefaultHeight"/>.</summary>
+    [JsonIgnore]
+    public double DefaultTrackHeight => TrackHeight ?? TrackCrossSection.DefaultHeight;
+
+    /// <summary>The height of <paramref name="track"/>: its own, or else the profile's (<see cref="DefaultTrackHeight"/>).</summary>
+    public double TrackHeightOf(EndProfileTrack track)
+    {
+        ArgumentNullException.ThrowIfNull(track);
+        return track.Height ?? DefaultTrackHeight;
+    }
+
+    /// <summary>The area <paramref name="track"/> takes in end view, from its track bed to rail top.</summary>
+    public Geometry.BoundingBox TrackBounds(EndProfileTrack track) => TrackCrossSection.Bounds(track, TrackHeightOf(track));
+
     /// <summary>The screw holes that join two module ends.</summary>
     public List<Circle> ScrewHoles { get; set; } = [];
 
