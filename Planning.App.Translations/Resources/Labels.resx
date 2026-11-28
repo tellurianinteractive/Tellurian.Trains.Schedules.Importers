@@ -676,6 +676,12 @@
   <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
     <value>Divides the station's dispatch list into one list for each direction. A train is cleared in on the list of the direction it comes from and cleared out on the list of the direction it goes to, so a train running through appears on both. Each list shows only the neighbours, and their phone numbers, on its own side.</value>
   </data>
+  <data name="HasSignals" xml:space="preserve">
+    <value>Has signals?</value>
+  </data>
+  <data name="HasSignalsHelp" xml:space="preserve">
+    <value>Whether there are signals here, at least those controlling the entry and exit of trains. A signal-controlled location always has them; an other location never does.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Turntable?</value>
   </data>

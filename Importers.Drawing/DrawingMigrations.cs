@@ -99,15 +99,39 @@ public static class DrawingMigrations
         if (content is JsonObject file && file["measures"] is JsonArray) file.Remove("measures");
     }
 
+    /// <summary>
+    /// The module properties that version 3 no longer has (<c>ModelSurfaceAnalysis.md</c> 4.2): the gauges, which the end
+    /// profiles of the exits give, and the duck-under and end-of-line flags, which the drawing gives.
+    /// </summary>
+    private static readonly string[] ModuleVersion3Dropped = ["hasNormalGauge", "hasNarrowGauge", "isDuckunder", "isEndOfLine"];
+
+    /// <summary>Brings a module from schema version 2 to 3: what the drawing or its end profiles now give is no longer written.</summary>
+    public static void ModuleToVersion3(JsonNode? module)
+    {
+        if (module is not JsonObject properties) return;
+        foreach (var name in ModuleVersion3Dropped) properties.Remove(name);
+    }
+
+    /// <summary>Brings the content of a hall plan file from schema version 2 to 3: its modules as a module file's.</summary>
+    public static void HallPlanToVersion3(JsonNode? content)
+    {
+        if (content?["layout"]?["modules"] is not JsonArray modules) return;
+        foreach (var placed in modules.OfType<JsonObject>()) ModuleToVersion3(placed["module"]);
+    }
+
     private static IReadOnlyList<FileMigration> StepsOf(DrawingFileKind kind) => kind switch
     {
-        DrawingFileKind.Module => [new(1, content => { ModuleFileToVersion2(content); return content; })],
+        DrawingFileKind.Module =>
+        [
+            new(1, content => { ModuleFileToVersion2(content); return content; }),
+            new(2, content => { ModuleToVersion3((content as JsonObject)?["module"]); return content; }),
+        ],
         DrawingFileKind.EndProfile => [new(1, content => { EndProfileToVersion2(content); return content; })],
         DrawingFileKind.Catalogue => [new(1, content => { CatalogueToVersion2(content); return content; })],
         DrawingFileKind.Hall => [new(1, content => { HallToVersion2(content); return content; })],
         // No version of Module Draw has let anyone make a hall plan before the shape of version 2 (owner's decision
         // 2026-11-22): earlier hall plan files are refused as having no migration.
-        DrawingFileKind.HallPlan => [],
+        DrawingFileKind.HallPlan => [new(2, content => { HallPlanToVersion3(content); return content; })],
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown file kind."),
     };
 

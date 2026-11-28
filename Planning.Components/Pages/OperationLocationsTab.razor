@@ -228,6 +228,18 @@ else
                             <HelpLabel For="HasTurntable" />
                             <input type="checkbox" @bind="station.HasTurntable" @bind:after="OnEdited" />
                         </div>
+                        <div class="field">
+                            <HelpLabel For="HasSignals" />
+                            <input type="checkbox" @bind="station.HasSignals" @bind:after="OnEdited" />
+                        </div>
+                    }
+
+                    @if (Editing is IndustrialArea area)
+                    {
+                        <div class="field">
+                            <HelpLabel For="HasSignals" />
+                            <input type="checkbox" @bind="area.HasSignals" @bind:after="OnEdited" />
+                        </div>
                     }
 
                     @* Whether trains can cross here. Stated, since a junction has two tracks whether or not
@@ -588,6 +600,8 @@ else
                         }
                         <dt>@Translator("HasTurntable")</dt>
                         <dd>@YesNo(infoStation.HasTurntable)</dd>
+                        <dt>@Translator("HasSignals")</dt>
+                        <dd>@YesNo(infoStation.HasSignals)</dd>
                         @if (UsePassengerTickets)
                         {
                             <dt>@Translator("IsPassengerInterchange")</dt>

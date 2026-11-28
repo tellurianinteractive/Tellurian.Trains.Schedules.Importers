@@ -149,6 +149,11 @@ public static class OperationLocationRules
             target.LockKey = source.LockKey;
         }
         if (source is SignalControlledLocation { TrainsCanCross: true } && target is SignalControlledLocation crossing) crossing.TrainsCanCross = true;
+        if (source.HasSignals)
+        {
+            if (target is Station signalledStation) signalledStation.HasSignals = true;
+            if (target is IndustrialArea signalledArea) signalledArea.HasSignals = true;
+        }
         target.Tracks = source.Tracks;
         foreach (var track in target.Tracks) track.Station = target;
         return target;
@@ -170,6 +175,7 @@ public static class OperationLocationRules
 
         Add(location is Station { IsShadow: true }, after is Station { IsShadow: true }, nameof(Station.IsShadow));
         Add(location is Station { HasTurntable: true }, after is Station { HasTurntable: true }, nameof(Station.HasTurntable));
+        Add(location.HasSignals, after.HasSignals, nameof(Station.HasSignals));
         Add(location is Station { IsManned: true }, after is Station { IsManned: true }, nameof(Station.IsManned));
         Add(location.HasPassengerExchange, after.HasPassengerExchange, nameof(OperationLocation.HasPassengerExchange));
         Add(location.HasCargoExchange, after.HasCargoExchange, nameof(OperationLocation.HasCargoExchange));

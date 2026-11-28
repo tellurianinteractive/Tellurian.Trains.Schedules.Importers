@@ -1125,6 +1125,12 @@
   <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
     <value>Delar stationens tågklareringslista i en lista för varje riktning. Ett tåg klareras in på listan för den riktning det kommer från och klareras ut på listan för den riktning det ska till, så ett tåg som kör förbi syns på båda. Varje lista visar bara grannarna, och deras telefonnummer, på sin egen sida.</value>
   </data>
+  <data name="HasSignals" xml:space="preserve">
+    <value>Har signaler?</value>
+  </data>
+  <data name="HasSignalsHelp" xml:space="preserve">
+    <value>Om det finns signaler här, åtminstone de som styr tågens in- och utfart. En signalreglerad plats har dem alltid; en annan plats har dem aldrig.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Har vändskiva?</value>
   </data>

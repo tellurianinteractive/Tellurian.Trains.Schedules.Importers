@@ -20,4 +20,10 @@ public sealed class IndustrialArea : OperationLocation
 
     /// <summary>Always true: that is what an industrial area is for.</summary>
     public override bool HasCargoExchange { get => true; set { } }
+
+    /// <summary>
+    /// The industrial area has signals. Entered by the user until a drawing can tell it
+    /// (<c>ModelSurfaceAnalysis.md</c> 4.2.1).
+    /// </summary>
+    public bool HasSignals { get; set; }
 }

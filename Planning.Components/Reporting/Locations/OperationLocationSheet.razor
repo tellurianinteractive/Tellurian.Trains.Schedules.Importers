@@ -158,6 +158,8 @@
                 yield return ("IsShadow", YesNo(station.IsShadow));
                 yield return ("HasTurntable", YesNo(station.HasTurntable));
             }
+            if (location is Station or IndustrialArea)
+                yield return ("HasSignals", YesNo(location.HasSignals));
             if (location is SignalControlledLocation signalControlled)
                 yield return ("TrainsCanCross", YesNo(signalControlled.TrainsCanCross));
             if (location is Station or SignalControlledLocation)

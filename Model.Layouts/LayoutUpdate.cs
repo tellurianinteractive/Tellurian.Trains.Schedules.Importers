@@ -72,7 +72,10 @@ public static class LayoutUpdate
         {
             station.IsShadow = sourceStation.IsShadow;
             station.HasTurntable = sourceStation.HasTurntable;
+            station.HasSignals = sourceStation.HasSignals;
         }
+        if (location is IndustrialArea area && source is IndustrialArea sourceArea)
+            area.HasSignals = sourceArea.HasSignals;
         if (location is SignalControlledLocation signal && source is SignalControlledLocation sourceSignal)
             signal.TrainsCanCross = sourceSignal.TrainsCanCross;
     }

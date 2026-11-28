@@ -1125,6 +1125,12 @@
   <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
     <value>Deler stationens togekspeditionsliste i én liste for hver retning. Et tog ekspederes ind på listen for den retning, det kommer fra, og ud på listen for den retning, det skal til, så et tog, der kører forbi, står på begge. Hver liste viser kun naboerne, og deres telefonnumre, på sin egen side.</value>
   </data>
+  <data name="HasSignals" xml:space="preserve">
+    <value>Har signaler?</value>
+  </data>
+  <data name="HasSignalsHelp" xml:space="preserve">
+    <value>Om der er signaler her, i det mindste dem der styrer togenes ind- og udkørsel. Et signalstyret sted har dem altid; et andet sted har dem aldrig.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Har drejeskive?</value>
   </data>

@@ -162,21 +162,11 @@ public class Module : LayoutPart
     /// </summary>
     public int? SpeedLimit { get; set; }
 
-    /// <summary>The module has normal-gauge track. Always written, since it is true unless said otherwise.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public bool HasNormalGauge { get; set; } = true;
-
-    /// <summary>The module has narrow-gauge track.</summary>
-    public bool HasNarrowGauge { get; set; }
-
-    /// <summary>The operator passes under the module to reach the inside of the layout.</summary>
-    public bool IsDuckunder { get; set; }
-
-    /// <summary>The module is a turntable.</summary>
+    /// <summary>
+    /// The module is a turntable. Entered by the user until the drawing can tell it, which takes a turntable track
+    /// element (<c>ModelSurfaceAnalysis.md</c> 4.2.1).
+    /// </summary>
     public bool IsTurntable { get; set; }
-
-    /// <summary>The line ends on the module.</summary>
-    public bool IsEndOfLine { get; set; }
 
     /// <summary>
     /// The module turns an asymmetric end profile over (German <i>Endewender</i>, Registry flag): an asymmetric
@@ -185,7 +175,10 @@ public class Module : LayoutPart
     /// </summary>
     public bool IsEndProfileSwitcher { get; set; }
 
-    /// <summary>The module has a signal.</summary>
+    /// <summary>
+    /// The module has a signal. Entered by the user until the drawing can tell it, which takes signals placed on the
+    /// track paths (<c>ModelSurfaceAnalysis.md</c> 4.2.1).
+    /// </summary>
     public bool IsSignalModule { get; set; }
 
     /// <summary>The module can be shown on its own.</summary>
@@ -276,6 +269,15 @@ public static class ModuleExtensions
 
         /// <summary>The scale of the module: that of its standard. Null when not stated.</summary>
         public Scale? Scale => module.Standard?.Scale;
+
+        /// <summary>
+        /// The operator passes under the module to reach the inside of the layout: its drawing has duck-under areas
+        /// (<see cref="ModuleDrawings.HasDuckUnder"/>). Worked out, never entered (<c>ModelSurfaceAnalysis.md</c> 4.2.1).
+        /// </summary>
+        public bool IsDuckunder => module.Drawing.HasDuckUnder;
+
+        /// <summary>The line ends on the module: its drawing has one exit (<see cref="ModuleDrawings.IsEndOfLine"/>).</summary>
+        public bool IsEndOfLine => module.Drawing.IsEndOfLine;
 
         /// <summary>
         /// What the module is called, without its standard and scale: what is written on it and where its standard

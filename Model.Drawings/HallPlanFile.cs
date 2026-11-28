@@ -22,7 +22,7 @@ public static class HallPlanFile
     public const string LayoutProperty = "layout";
 
     /// <summary>The newest schema version of a hall plan file whose layout block this version reads.</summary>
-    public const int NewestSchemaVersion = 2;
+    public const int NewestSchemaVersion = 3;
 
     /// <summary>
     /// What a hall plan file is, for its envelope (<see cref="FileEnvelope"/>). Only the layout block is read here, so no

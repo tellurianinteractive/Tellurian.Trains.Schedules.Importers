@@ -25,10 +25,10 @@ public static class DrawingFileFormat
     public static int CurrentSchemaVersion(DrawingFileKind kind) => kind switch
     {
         DrawingFileKind.EndProfile => 2,
-        DrawingFileKind.Module => 2,
+        DrawingFileKind.Module => 3,
         DrawingFileKind.Catalogue => 2,
         DrawingFileKind.Hall => 2,
-        DrawingFileKind.HallPlan => 2,
+        DrawingFileKind.HallPlan => 3,
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown file kind."),
     };
 

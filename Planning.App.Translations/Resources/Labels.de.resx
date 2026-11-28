@@ -1125,6 +1125,12 @@
   <data name="SplitDispatchByDirectionHelp" xml:space="preserve">
     <value>Teilt die Zugmeldeliste der Station in eine Liste für jede Richtung. Ein Zug wird auf der Liste der Richtung, aus der er kommt, einfahrend gemeldet und auf der Liste der Richtung, in die er fährt, ausfahrend; ein durchfahrender Zug steht daher auf beiden. Jede Liste zeigt nur die Nachbarn und ihre Telefonnummern auf ihrer eigenen Seite.</value>
   </data>
+  <data name="HasSignals" xml:space="preserve">
+    <value>Hat Signale?</value>
+  </data>
+  <data name="HasSignalsHelp" xml:space="preserve">
+    <value>Ob es hier Signale gibt, mindestens die, die Ein- und Ausfahrt der Züge regeln. Eine signalgesteuerte Stelle hat sie immer, eine sonstige Stelle nie.</value>
+  </data>
   <data name="HasTurntable" xml:space="preserve">
     <value>Drehscheibe vorhanden?</value>
   </data>

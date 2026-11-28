@@ -26,6 +26,12 @@ public sealed class Station : OperationLocation
     public bool HasTurntable { get; set; }
 
     /// <summary>
+    /// The station has signals, at least those controlling the entry and exit of trains. Entered by the user until a
+    /// drawing can tell it (<c>ModelSurfaceAnalysis.md</c> 4.2.1).
+    /// </summary>
+    public bool HasSignals { get; set; }
+
+    /// <summary>
     /// The regions and countries represented by this station, mostly by a shadow station. Each is an entry of the
     /// layout's catalogue, <see cref="Layout.Regions"/>; a file keeps only <see cref="RegionIds"/> here.
     /// </summary>

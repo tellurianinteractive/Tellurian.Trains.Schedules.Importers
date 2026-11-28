@@ -258,7 +258,10 @@ public sealed class LayoutComparison
         {
             Check(station.IsShadow == sourceStation.IsShadow, nameof(Station.IsShadow));
             Check(station.HasTurntable == sourceStation.HasTurntable, nameof(Station.HasTurntable));
+            Check(station.HasSignals == sourceStation.HasSignals, nameof(Station.HasSignals));
         }
+        if (location is IndustrialArea area && source is IndustrialArea sourceArea)
+            Check(area.HasSignals == sourceArea.HasSignals, nameof(IndustrialArea.HasSignals));
         if (location is SignalControlledLocation signal && source is SignalControlledLocation sourceSignal)
             Check(signal.TrainsCanCross == sourceSignal.TrainsCanCross, nameof(SignalControlledLocation.TrainsCanCross));
         if (properties.Count > 0)
